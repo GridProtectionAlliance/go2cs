@@ -73,9 +73,9 @@ This will convert Go code to C#. You can then build and run both the Go and C# v
 
 ## Installation
 
-> There's no official release yet, but you can compile the code to produce a `go2cs` executable.
+> There's is an [experimental release](https://github.com/GridProtectionAlliance/go2cs/releases) available, however, for latest updates you can compile the source code to produce a `go2cs` executable.
 
-Copy the `go2cs.exe` into the `%GOBIN%` or `%GOPATH%\bin` path. This should compile as a standalone executable for your target platform with no external dependencies, see [publish profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Properties/PublishProfiles).
+Copy the `go2cs` executable into the `%GOBIN%` or `%GOPATH%\bin` path. The `go2cs` can compile as a standalone executable for your target platform with no external dependencies using Visual Studio, see [publish profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Properties/PublishProfiles).
 
 ## Usage
 
