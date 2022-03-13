@@ -27,6 +27,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace go2cs;
 
@@ -36,6 +37,9 @@ public partial class ScannerBase
 
     protected int IndentLevel;
     protected bool WroteLineFeed;
+
+    protected static readonly int NewLineLength = Environment.NewLine.Length;
+    protected static readonly Regex NewLineRegex = new("(?<!\r)\n", RegexOptions.Compiled);
 
     protected string Spacing(int offsetLevel = 0, int indentLevel = -1)
     {
@@ -235,7 +239,7 @@ public partial class ScannerBase
             }
             else
             {
-                hiddenText = new(Array.FindAll(hiddenText.ToCharArray(), c => c == '\r' || c == '\n'));
+                hiddenText = new(Array.FindAll(hiddenText.ToCharArray(), c => c is '\r' or '\n'));
 
                 if (hiddenText.Length > 0)
                     comments.Append(hiddenText);
@@ -260,7 +264,10 @@ public partial class ScannerBase
         if (hiddenText.Length > 0)
             WroteLineFeed = EndsWithLineFeed(hiddenText);
 
-        return hiddenText;
+        // Normalize line endings
+        return NewLineLength > 1 ?
+            NewLineRegex.Replace(hiddenText, Environment.NewLine) :
+            hiddenText.Replace("\r\n", Environment.NewLine);
     }
 
     protected (string, string) SplitEOLComment(string source)

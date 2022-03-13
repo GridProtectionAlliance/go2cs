@@ -246,6 +246,10 @@ public partial class Converter
                 else
                     AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
             }
+            else
+            {
+                m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), string.Empty);
+            }
 
             bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement, out bool isRedeclared);
             bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
