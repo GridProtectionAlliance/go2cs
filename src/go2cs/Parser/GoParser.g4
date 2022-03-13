@@ -4,6 +4,7 @@
  Copyright (c) 2019 Ivan Kochurkin, kvanttt@gmail.com, Positive Technologies
  Copyright (c) 2019 Dmitry Rassadin, flipparassa@gmail.com, Positive Technologies
  Copyright (c) 2021 Martin Mirchev, mirchevmartin2203@gmail.com
+ Copyright (c) 2022 J. Ritchie Carroll, ritchiecarroll@gmail.com
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,7 @@ options {
 sourceFile:
     packageClause eos (importDecl eos)* (topLevelDecl eos)* EOF;
 
+// JRC: Current go2cs uses topLevelDecl visitor for conversion work
 topLevelDecl:
     declaration | functionDecl | methodDecl;
 

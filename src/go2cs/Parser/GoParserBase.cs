@@ -35,6 +35,7 @@ public abstract class GoParserBase : Parser
 
         IToken ahead = tokenStream.Get(possibleIndexEosToken);
 
+        // JRC: This deviates from posted code that fixes eos detection issues
         if (ahead.Channel == Lexer.Hidden)
         {
             while (ahead.Channel == Lexer.Hidden)
