@@ -58,13 +58,13 @@ public partial class ScannerBase
             if (Path.IsPathRooted(PackageImport))
             {
                 // File converted was outside %GOPATH% and %GOROOT%
-                lastSlash = PackageImport.LastIndexOf('\\');
+                lastSlash = PackageImport.LastIndexOf(Path.DirectorySeparatorChar);
 
                 if (lastSlash > -1)
                     PackageImport = $"{PackageImport[(lastSlash + 1)..]}";
             }
 
-            PackageImport = $"{PackageImport.Replace('\\', '/')}";
+            PackageImport = $"{PackageImport.Replace(Path.DirectorySeparatorChar, '/')}";
 
             lastSlash = PackageImport.LastIndexOf('/');
             string package = SanitizedIdentifier(lastSlash > -1 ? PackageImport[(lastSlash + 1)..] : PackageImport);

@@ -36,7 +36,12 @@ namespace go2cs;
 public class Options
 {        
     public const string DefaultExcludeFiles = "$.^"; // Default to exclude none, never an end matched before begin on a single line
+
+#if Windows
     public const string DefaultTargetGoSrcPath = "%GOPATH%\\src\\go2cs";
+#else
+    public const string DefaultTargetGoSrcPath = "%GOPATH%/src/go2cs";
+#endif
 
     private readonly Regex m_excludeExpression;
 

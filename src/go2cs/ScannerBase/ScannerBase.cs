@@ -445,7 +445,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
             s_processedImports.Add(import);
 
-            string importPath = AddPathSuffix(import.Replace("/", "\\"));
+            string importPath = AddPathSuffix(import.Replace("/", Path.DirectorySeparatorChar.ToString()));
             string goRootImport = Path.Combine(GoRoot, importPath);
             string goPathImport = Path.Combine(GoPath, importPath);
             string targetPath = null;
@@ -582,7 +582,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
     {
         int lastSlash = targetImport.LastIndexOf('/');
         string packageName = lastSlash > -1 ? targetImport[(lastSlash + 1)..] : targetImport;
-        string importPath = $"{AddPathSuffix(targetImport.Replace("/", "\\"))}{packageName}.go";
+        string importPath = $"{AddPathSuffix(targetImport.Replace("/", Path.DirectorySeparatorChar.ToString()))}{packageName}.go";
         string go2csPath = Path.Combine(GoPath, "go2cs");
         string goRootImport = Path.Combine(GoRoot, importPath);
         string goPathImport = Path.Combine(go2csPath, importPath);
