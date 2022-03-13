@@ -239,10 +239,13 @@ public partial class Converter
             // forClause
             //     : simpleStmt? ';' expression? ';' simpleStmt?
 
-            if (Expressions.TryGetValue(forClause.expression(), out ExpressionInfo expression))
-                m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression.Text);
-            else
-                AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
+            if (forClause.expression() is not null)
+            {
+                if (Expressions.TryGetValue(forClause.expression(), out ExpressionInfo expression))
+                    m_targetFile.Replace(string.Format(ForExpressionMarker, m_forExpressionLevel), expression.Text);
+                else
+                    AddWarning(context, $"Failed to find expression in for statement: {context.GetText()}");
+            }
 
             bool hasInitStatement = ForHasInitStatement(forClause, out GoParser.SimpleStmtContext simpleInitStatement, out bool isRedeclared);
             bool hasPostStatement = ForHasPostStatement(forClause, out GoParser.SimpleStmtContext simplePostStatement);
