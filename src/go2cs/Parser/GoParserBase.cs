@@ -35,27 +35,34 @@ public abstract class GoParserBase : Parser
 
         IToken ahead = tokenStream.Get(possibleIndexEosToken);
 
-        while (ahead.Channel == Lexer.Hidden)
+        if (ahead.Channel == Lexer.Hidden)
         {
-            switch (ahead.Type)
+            while (ahead.Channel == Lexer.Hidden)
             {
-                case GoLexer.TERMINATOR:
-                    return true;
-                case GoLexer.WS:
-                    possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
-                    ahead = tokenStream.Get(possibleIndexEosToken);
-                    break;
-                case GoLexer.COMMENT:
-                case GoLexer.LINE_COMMENT:
+                switch (ahead.Type)
                 {
-                    if (ahead.Text.Contains('\r') || ahead.Text.Contains('\n'))
+                    case GoLexer.TERMINATOR:
                         return true;
+                    case GoLexer.WS:
+                        possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
+                        ahead = tokenStream.Get(possibleIndexEosToken);
+                        break;
+                    case GoLexer.COMMENT:
+                    case GoLexer.LINE_COMMENT:
+                    {
+                        if (ahead.Text.Contains('\r') || ahead.Text.Contains('\n'))
+                            return true;
 
-                    possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
-                    ahead = tokenStream.Get(possibleIndexEosToken);
-                    break;
+                        possibleIndexEosToken = CurrentToken.TokenIndex - ++offset;
+                        ahead = tokenStream.Get(possibleIndexEosToken);
+                        break;
+                    }
                 }
             }
+        }
+        else
+        { 
+            return noTerminatorBetween(1);
         }
 
         return false;
