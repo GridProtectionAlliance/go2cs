@@ -503,7 +503,13 @@ public abstract partial class ScannerBase : GoParserBaseListener
         else
             targetFilePath = options.TargetPath;
 
-        string targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath[rootTargetPath.Length..]));
+        string targetSubDirectory;
+
+        if (Path.IsPathRooted(targetFilePath) && targetFilePath.StartsWith(rootTargetPath, StringComparison.OrdinalIgnoreCase))
+            targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath[rootTargetPath.Length..]));
+        else
+            targetSubDirectory = RemovePathSuffix(RemovePathPrefix(targetFilePath));
+
         string sourceSubDirectory = sourceFilePath.StartsWith(rootSourcePath) ? RemovePathSuffix(RemovePathPrefix(sourceFilePath[rootSourcePath.Length..])) : string.Empty;
 
         if (!targetSubDirectory.Equals(sourceSubDirectory))
