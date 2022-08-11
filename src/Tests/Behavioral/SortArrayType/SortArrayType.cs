@@ -52,14 +52,15 @@ namespace go
 
         private static void Main()
         {
-            Person people = new slice<Person>(new Person[] { {Name:"Person1",Age:26,ShoeSize:8,}, {Name:"Person2",Age:21,ShoeSize:4,}, {Name:"Person3",Age:15,ShoeSize:9,}, {Name:"Person4",Age:45,ShoeSize:15,}, {Name:"Person5",Age:25,ShoeSize:8.5,} });
+            Person[] persons = new[] { new Person(Name:"Person1",Age: 26,ShoeSize: 8 ), new Person(Name: "Person2", Age: 21, ShoeSize: 4), new Person(Name:"Person3",Age: 15,ShoeSize: 9) };
+            var people = new slice<Person>(persons);
 
             fmt.Println(people);
 
-            sort.Sort(PeopleByShoeSize(people));
+            sort.Sort(new PeopleByShoeSize(people));
             fmt.Println(people);
 
-            sort.Sort(PeopleByAge(people));
+            sort.Sort(new PeopleByAge(people));
             fmt.Println(people);
         }
     }
