@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  @string.cs - Gbtc
+//  string.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -28,7 +28,6 @@
 // ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -36,57 +35,77 @@ using System.Text;
 
 namespace go;
 
+// This is an experiment with a stack allocated string type which should improve performance
+// of string operations by avoiding heap allocations. This works fine in stack oriented code
+// operations, but any time heap escape is needed, @string will need to be used. Added a
+// `str` function to `builtin` to do the conversion from @string to sstring, but this would
+// would require proper heap type parameter and heap escape detection during the conversion
+// process. This is a work in progress. See `EXPERIMENTAL` region which controls implicit
+// vs. explicit control of ReadOnlySpan<byte> conversions, compared to what is defined in
+// heap allocated `@string` implementation. When `EXPERIMENTAL` preprocessor directive is
+// defined, `sstring` can be made to take precedence for u8 string handling.
+
+// Go automatically allows heap escape, converting things from stack to heap as needed, but
+// this is not the case in .NET, here stack only types, e.g., `ref struct`, are very explicit
+// and compiler constrained.
+
+// Although this is only an experiment with strings, a similar approach may be possible for
+// a small subset of other types, see note below on restrictions.
+
+// --- Note ---
+// The key difference between struct and ref struct is that ref struct types are forced to be
+// stack only, i.e., they cannot be boxed and stored on the heap. In general this prevents
+// unnecessary allocations which speeds processing and removes GC burden. Keeping the type on
+// the stack is enforced by .NET compiler -- the type cannot escape to the heap. This means
+// types cannot be stored in the `object` type, be a field in a class or common struct,
+// cannot implement an interface, etc. In context of Go to C# conversions, in order to make
+// use of these types, stack to heap escapes which happen implicitly in Go will have to be
+// detected during the conversion process and managed explicitly in converted C# code. In
+// general all ref struct restrictions would apply to converted Go struct types which may
+// make "general" use very impractical, the key pain points specifically are:
+// * ref struct can't be the element type of an array:
+//      This means a slice, array or map of type would not be allowed
+// * ref struct can't be boxed to System.ValueType or System.Object:
+//      This means type cannot be stored in interface{} value, headaches.
+
 /// <summary>
-/// Represents a structure with heap allocated data that behaves like a Go string.
+/// Represents a stack only structure that behaves like a Go string.
 /// </summary>
-public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
+public readonly ref struct sstring // <- think about naming, stack<
 {
-    internal readonly byte[] m_value;
+    internal readonly ReadOnlySpan<byte> m_value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string() => m_value = Array.Empty<byte>();
+    public sstring() => m_value = ReadOnlySpan<byte>.Empty;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(byte[]? bytes)
-    {
-        if (bytes is null)
-        {
-            m_value = Array.Empty<byte>();
-        }
-        else
-        {
-            m_value = new byte[bytes.Length];
-            Array.Copy(bytes, m_value, bytes.Length);
-        }
-    }
+    public sstring(byte[]? bytes) => 
+        m_value = bytes is null ? ReadOnlySpan<byte>.Empty : new ReadOnlySpan<byte>(bytes);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(ReadOnlySpan<byte> bytes)
-    {
-        m_value = new byte[bytes.Length];
-        bytes.CopyTo(m_value);
-    }
+    public sstring(ReadOnlySpan<byte> bytes) => 
+        m_value = bytes;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(char[] value) : this(new string(value)) { }
+    public sstring(char[] value) : this(new string(value)) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
+    public sstring(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(in slice<byte> value) : this(value.ToArray()) { }
+    public sstring(in slice<byte> value) : this(value.ToArray()) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(in slice<char> value) : this(value.ToArray()) { }
+    public sstring(in slice<char> value) : this(value.ToArray()) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(in slice<rune> value) : this(value.ToArray()) { }
+    public sstring(in slice<rune> value) : this(value.ToArray()) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
+    public sstring(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(@string value) : this(value.m_value) { }
+    public sstring(sstring value) : this(value.m_value) { }
 
     public int Length
     {
@@ -109,13 +128,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     public byte this[nint index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get
-        {
-            if (index < 0 || index >= m_value.Length)
-                throw RuntimeErrorPanic.IndexOutOfRange(index, m_value.Length);
-
-            return m_value[index];
-        }
+        get => this[(int)index];
     }
 
     public byte this[ulong index]
@@ -138,12 +151,12 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         Encoding.UTF8.GetString(m_value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public bool Equals(@string other) =>
+    public bool Equals(sstring other) =>
         BytesAreEqual(m_value, other.m_value);
-    
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public int CompareTo(@string other) =>
-        StringComparer.Ordinal.Compare(ToString(), other);
+    public int CompareTo(sstring other) =>
+        StringComparer.Ordinal.Compare(ToString(), other.ToString());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj)
@@ -167,20 +180,22 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     public TypeCode GetTypeCode() => TypeCode.String;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string Clone() => new(this);
+    public sstring Clone() => new(this);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public IEnumerator<(nint, rune)> GetEnumerator()
+    public IEnumerator<(nint, rune)> GetEnumerator() => GetEnumerator(m_value.ToArray());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IEnumerator<(nint, rune)> GetEnumerator(byte[] value)
     {
-        if (m_value.Length == 0)
+        if (value.Length == 0)
             yield break;
 
         Decoder decoder = Encoding.UTF8.GetDecoder();
-        byte[] value = m_value;
         char[] rune = new char[1];
         int byteCount;
 
-        for (nint index = 0; index < value.LongLength; index += byteCount)
+        for (int index = 0; index < value.Length; index += byteCount)
         {
             byteCount = 1;
             bool completed = Decode(decoder, value, index, byteCount, rune);
@@ -199,7 +214,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe bool Decode(Decoder decoder, byte[] value, nint index, int byteCount, char[] rune)
+    private static unsafe bool Decode(Decoder decoder, byte[] value, int index, int byteCount, char[] rune)
     {
         bool completed;
 
@@ -212,164 +227,127 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         return completed;
     }
 
-    public static @string Default { 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get;
-    } = new("");
-
     #region [ Operators ]
 
-    // Enable implicit conversions between string and @string struct
+    // Enable implicit conversions between string and sstring struct
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(string value) => new(value);
+    public static implicit operator sstring(string value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator string(@string value) => value.ToString();
+    public static implicit operator sstring(@string value) => new(value.m_value);
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator string(sstring value) => value.ToString();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator @string(sstring value) => new(value.m_value);
+    
     #if EXPERIMENTAL
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator @string(ReadOnlySpan<byte> value) => new(value);
+    public static implicit operator sstring(ReadOnlySpan<byte> value) => new(value);
 
     #else
-    
+        
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(ReadOnlySpan<byte> value) => new(value);
-
+    public static explicit operator sstring(ReadOnlySpan<byte> value) => new(value);
+        
     #endif
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator sstring(slice<byte> value) => new(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator slice<byte>(sstring value) => new(value.m_value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator sstring(slice<rune> value) => new(value.ToArray());
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator slice<rune>(sstring value) =>  new(GetRuneEnumerator(value.ToString()).ToArray());
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(slice<byte> value) => new(value);
+    public static implicit operator sstring(slice<char> value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator slice<byte>(@string value) => new(value.m_value);
+    public static implicit operator slice<char>(sstring value) => new(value.ToString().ToCharArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(slice<rune> value) => new(value);
+    public static explicit operator byte[](sstring value) => value.m_value.ToArray();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator slice<rune>(@string value) =>  new(((IEnumerable<rune>)value).ToArray());
+    public static explicit operator ReadOnlySpan<byte>(sstring value) => value.m_value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(slice<char> value) => new(value);
+    public static implicit operator sstring(byte[] value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator slice<char>(@string value) => new(((IEnumerable<char>)value).ToArray());
+    public static implicit operator rune[](sstring value) => GetRuneEnumerator(value.ToString()).ToArray();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator byte[](@string value) => value.m_value;
+    public static implicit operator sstring(rune[] value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(byte[] value) => new(value);
+    public static explicit operator char[](sstring value) => value.ToString().ToCharArray();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator rune[](@string value) => ((IEnumerable<rune>)value).ToArray();
+    public static implicit operator sstring(char[] value) => new(value);
+
+    // Enable comparisons between nil and sstring struct
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool operator ==(sstring value, NilType _) => value.Equals(default);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(rune[] value) => new(value);
+    public static bool operator !=(sstring value, NilType nil) => !(value == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
+    public static bool operator ==(NilType nil, sstring value) => value == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(char[] value) => new(value);
+    public static bool operator !=(NilType nil, sstring value) => value != nil;
 
-    // Enable comparisons between nil and @string struct
+    // Enable sstring to sstring comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(@string value, NilType _) => value.Equals(Default);
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(@string value, NilType nil) => !(value == nil);
+    public static implicit operator sstring(NilType _) => new();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType nil, @string value) => value == nil;
+    public static bool operator ==(sstring a, sstring b) => a.Equals(b);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType nil, @string value) => value != nil;
-
-    // Enable @string to @string comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(NilType _) => Default;
+    public static bool operator !=(sstring a, sstring b) => !a.Equals(b);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(@string a, @string b) => a.Equals(b);
+    public static bool operator <(sstring a, sstring b) => string.CompareOrdinal(a, b) < 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(@string a, @string b) => !a.Equals(b);
+    public static bool operator <=(sstring a, sstring b) => string.CompareOrdinal(a, b) <= 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator <(@string a, @string b) => string.CompareOrdinal(a, b) < 0;
+    public static bool operator >(sstring a, sstring b) => string.CompareOrdinal(a, b) > 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator <=(@string a, @string b) => string.CompareOrdinal(a, b) <= 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator >(@string a, @string b) => string.CompareOrdinal(a, b) > 0;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
+    public static bool operator >=(sstring a, sstring b) => string.CompareOrdinal(a, b) >= 0;
 
     #endregion
 
     #region [ Interface Implementations ]
 
-    object ICloneable.Clone() => Clone();
-
-    int IReadOnlyCollection<byte>.Count => Length;
-
-    bool IConvertible.ToBoolean(IFormatProvider? provider) => ((IConvertible)ToString()).ToBoolean(provider);
-
-    char IConvertible.ToChar(IFormatProvider? provider) => ((IConvertible)ToString()).ToChar(provider);
-
-    sbyte IConvertible.ToSByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToSByte(provider);
-
-    byte IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToByte(provider);
-
-    short IConvertible.ToInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt16(provider);
-
-    ushort IConvertible.ToUInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt16(provider);
-
-    int IConvertible.ToInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt32(provider);
-
-    uint IConvertible.ToUInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt32(provider);
-
-    long IConvertible.ToInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt64(provider);
-
-    ulong IConvertible.ToUInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt64(provider);
-
-    float IConvertible.ToSingle(IFormatProvider? provider) => ((IConvertible)ToString()).ToSingle(provider);
-
-    double IConvertible.ToDouble(IFormatProvider? provider) => ((IConvertible)ToString()).ToDouble(provider);
-
-    decimal IConvertible.ToDecimal(IFormatProvider? provider) => ((IConvertible)ToString()).ToDecimal(provider);
-
-    DateTime IConvertible.ToDateTime(IFormatProvider? provider) => ((IConvertible)ToString()).ToDateTime(provider);
-
-    object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    IEnumerator IEnumerable.GetEnumerator() => m_value.GetEnumerator();
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
+    private static IEnumerable<byte> GetByteEnumerator(byte[] value)
     {
-        foreach (byte item in m_value)
+        foreach (byte item in value)
             yield return item;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
+    private static IEnumerable<rune> GetRuneEnumerator(string value)
     {
-        foreach (char item in ToString())
+        foreach (rune item in value)
             yield return item;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    IEnumerator<char> IEnumerable<char>.GetEnumerator() => ToString().GetEnumerator();
-
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe bool BytesAreEqual(byte[] data1, byte[] data2)
+    private static unsafe bool BytesAreEqual(in ReadOnlySpan<byte> data1, in ReadOnlySpan<byte> data2)
     {
         if (data1 == data2)
             return true;

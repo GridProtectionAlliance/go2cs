@@ -7,11 +7,11 @@ public static partial class main_package {
 public partial struct Buffer {
     public slice<byte> buf;
     public nint off;
-    public sbyte lastRead;
+    public int8 lastRead;
 }
 
-private static readonly sbyte opRead = -1;
-private static readonly sbyte opInvalid = 0;
+private static readonly int8 opRead = -1;
+private static readonly int8 opInvalid = 0;
 
 private static void Main() {
     ref nint a = ref heap(out ptr<nint> _addr_a);
@@ -29,19 +29,19 @@ private static void Main() {
     ppptr = addr(pptr); 
 
     /* take the value using pptr */
-    fmt.Printf("Value of a = %d\n", a);
+    fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n", EscapePrintValPtr(ptr).val);
-    fmt.Printf("Main-function updated value available at *ptr = %d\n", ptr.val);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
 
     a = 1900;
 
-    fmt.Printf("Value of a = %d\n", a);
+    fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n", EscapePrintValPtr(ptr).val);
-    fmt.Printf("Main-function updated value available at *ptr = %d\n", ptr.val);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
 }
@@ -70,18 +70,18 @@ public static ptr<Buffer> NewBuffer(slice<byte> buf) {
 public static void PrintValPtr(ptr<nint> _addr_ptr) {
     ref nint ptr = ref _addr_ptr.val;
 
-    fmt.Printf("Value available at *ptr = %d\n", ptr);
+    fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
     ptr++;
 }
 
 public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr) {
     ref nint ptr = ref _addr_ptr.val;
 
-    fmt.Printf("Value available at *ptr = %d\n", ptr);
+    fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
     ref nint i = ref heap(99, out ptr<nint> _addr_i);
     _addr_ptr = _addr_i;
     ptr = ref _addr_ptr.val;
-    fmt.Printf("Intra-function updated value available at *ptr = %d\n", ptr);
+    fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, ptr);
     PrintValPtr(_addr_ptr);
     return _addr_ptr!;
 }
@@ -89,13 +89,13 @@ public static ptr<nint> EscapePrintValPtr(ptr<nint> _addr_ptr) {
 public static void PrintValPtr2Ptr(ptr<ptr<nint>> _addr_pptr) {
     ref ptr<nint> pptr = ref _addr_pptr.val;
 
-    fmt.Printf("Value available at **pptr = %d\n", pptr.val);
+    fmt.Printf("Value available at **pptr = %d\n"u8, pptr.val);
 }
 
 public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<nint>>> _addr_ppptr) {
     ref ptr<ptr<nint>> ppptr = ref _addr_ppptr.val;
 
-    fmt.Printf("Value available at ***pptr = %d\n", ppptr.val.val);
+    fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.val.val);
 }
 
 } // end main_package

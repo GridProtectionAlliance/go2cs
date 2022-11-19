@@ -37,7 +37,7 @@ private static ptr<itab> getitab(ptr<interfacetype> _addr_inter, ptr<_type> _add
     ref _type typ = ref _addr_typ.val;
 
     if (len(inter.mhdr) == 0) {
-        throw("internal error - misuse of itab");
+        throw("internal error - misuse of itab"u8);
     }
     if (typ.tflag & tflagUncommon == 0) {
         if (canfail) {
@@ -126,7 +126,7 @@ private static void itabAdd(ptr<itab> _addr_m) {
     // Crash reliably, rather than only when we need to grow
     // the hash table.
     if (getg().m.mallocing != 0) {
-        throw("malloc deadlock");
+        throw("malloc deadlock"u8);
     }
     var t = itabTable;
     if (t.count >= 3 * (t.size / 4)) { // 75% load factor
@@ -143,7 +143,7 @@ private static void itabAdd(ptr<itab> _addr_m) {
         // and as a consequence wait until this copying is complete.
         iterate_itabs(t2.add);
         if (t2.count != t.count) {
-            throw("mismatched count during itab table copy");
+            throw("mismatched count during itab table copy"u8);
         }
         atomicstorep(@unsafe.Pointer(_addr_itabTable), @unsafe.Pointer(t2)); 
         // Adopt the new table as our own.
@@ -215,7 +215,7 @@ imethods:
         var name = inter.typ.nameOff(i.name);
         var iname = name.name();
         var ipkg = name.pkgPath();
-        if (ipkg == "") {
+        if (ipkg == ""u8) {
             ipkg = inter.pkgpath.name();
         }
         while (j < nt) {
@@ -223,7 +223,7 @@ imethods:
             var tname = typ.nameOff(t.name);
             if (typ.typeOff(t.mtyp) == itype && tname.name() == iname) {
                 var pkgPath = tname.pkgPath();
-                if (pkgPath == "") {
+                if (pkgPath == ""u8) {
                     pkgPath = typ.nameOff(x.pkgpath).name();
             j++;
                 }
@@ -248,7 +248,7 @@ imethods:
         return iname;
     }
     m.fun[0] = uintptr(fun0);
-    return "";
+    return ""u8;
 }
 
 private static void itabsinit() {
@@ -313,7 +313,7 @@ private partial struct uint64InterfacePtr { // : ulong
 private partial struct stringInterfacePtr { // : @string
 }
 private partial struct sliceInterfacePtr { // : slice<byte>
-}private static var uint16Eface = uint16InterfacePtr(0);private static var uint32Eface = uint32InterfacePtr(0);private static var uint64Eface = uint64InterfacePtr(0);private static var stringEface = stringInterfacePtr("");private static var sliceEface = sliceInterfacePtr(null);private static ptr<_type> uint16TypeefaceOf(_addr_uint16Eface)._type;private static ptr<_type> uint32TypeefaceOf(_addr_uint32Eface)._type;private static ptr<_type> uint64TypeefaceOf(_addr_uint64Eface)._type;private static ptr<_type> stringTypeefaceOf(_addr_stringEface)._type;private static ptr<_type> sliceTypeefaceOf(_addr_sliceEface)._type;
+}private static var uint16Eface = uint16InterfacePtr(0);private static var uint32Eface = uint32InterfacePtr(0);private static var uint64Eface = uint64InterfacePtr(0);private static var stringEface = stringInterfacePtr(""u8);private static var sliceEface = sliceInterfacePtr(null);private static ptr<_type> uint16TypeefaceOf(_addr_uint16Eface)._type;private static ptr<_type> uint32TypeefaceOf(_addr_uint32Eface)._type;private static ptr<_type> uint64TypeefaceOf(_addr_uint64Eface)._type;private static ptr<_type> stringTypeefaceOf(_addr_stringEface)._type;private static ptr<_type> sliceTypeefaceOf(_addr_sliceEface)._type;
 
 // The conv and assert functions below do very similar things.
 // The convXXX functions are guaranteed by the compiler to succeed.
@@ -395,7 +395,7 @@ private static unsafe.Pointer convT64(ulong val) {
 private static unsafe.Pointer convTstring(@string val) {
     unsafe.Pointer x = default;
 
-    if (val == "") {
+    if (val == ""u8) {
         x = @unsafe.Pointer(_addr_zeroVal[0]);
     }
     else
@@ -589,7 +589,7 @@ private static array<ulong> staticuint64s = new array<ulong>(new ulong[] { 0x00,
 // unreachable to a reference to this function, so it will throw if
 // ever called.
 private static void unreachableMethod() {
-    throw("unreachable method called. linker bug?");
+    throw("unreachable method called. linker bug?"u8);
 }
 
 } // end runtime_package

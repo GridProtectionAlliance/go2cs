@@ -56,7 +56,7 @@ public partial class Converter : ScannerBase
             throw new InvalidOperationException($"Failed to load metadata for \"{fileName}\" - file conversion canceled.");
 
         ImportAliases = Metadata.ImportAliases;
-        ImportMetadata = new(StringComparer.Ordinal);
+        ImportMetadata = new Dictionary<string, FolderMetadata>(StringComparer.Ordinal);
     }
 
     public override (bool, string) Scan(bool showParseTree)
@@ -132,7 +132,7 @@ public partial class Converter : ScannerBase
 
     static Converter()
     {
-        s_mainPackageFiles = new(StringComparer.OrdinalIgnoreCase);
+        s_mainPackageFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         s_packageInfo = new Dictionary<string, Dictionary<string, (string, HashSet<string>)>>(StringComparer.OrdinalIgnoreCase);
     }
 
@@ -276,7 +276,7 @@ public partial class Converter : ScannerBase
     {
         // Since the same package name may exist at multiple paths, we track details by path
         Dictionary<string, (string, HashSet<string>)> packageInfo = s_packageInfo.GetOrAdd(Path.GetDirectoryName(fileName), _ => new Dictionary<string, (string, HashSet<string>)>(StringComparer.Ordinal));
-        (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new(StringComparer.OrdinalIgnoreCase)));
+        (string, HashSet<string> fileNames) fileGroup = packageInfo.GetOrAdd(package, _ => (nameSpace, new HashSet<string>(StringComparer.OrdinalIgnoreCase)));
         fileGroup.fileNames.Add(fileName);
     }
 }

@@ -34,8 +34,8 @@ namespace go2cs.Templates
             #line default
             #line hidden
             this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Library</" +
-                    "OutputType>\r\n    <TargetFramework>net6.0</TargetFramework>\r\n    <RootNamespace>g" +
-                    "o</RootNamespace>\r\n    <AssemblyName>");
+                    "OutputType>\r\n    <TargetFrameworks>net7.0</TargetFrameworks>\r\n    <RootNamespace" +
+                    ">go</RootNamespace>\r\n    <AssemblyName>");
             
             #line 15 "D:\Projects\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));

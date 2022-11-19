@@ -24,7 +24,7 @@ namespace go
             // Value of the PeopleByAge struct
             private readonly slice<Person> m_value;
             
-            public Array Array => ((ISlice)m_value).Array;
+            public Array Source => ((ISlice)m_value).Source;
 
             public nint Low => ((ISlice)m_value).Low;
 

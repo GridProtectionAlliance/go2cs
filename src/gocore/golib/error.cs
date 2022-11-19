@@ -128,7 +128,7 @@ public class error<T> : error
         Type targetType = typeof(T);
         Type targetTypeByPtr = typeof(ptr<T>);
 
-        MethodInfo extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
+        MethodInfo? extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
         if (extensionMethod is not null)
             s_ErrorByPtr = extensionMethod.CreateStaticDelegate(typeof(ErrorByPtr)) as ErrorByPtr;
@@ -139,14 +139,14 @@ public class error<T> : error
             s_ErrorByVal = extensionMethod.CreateStaticDelegate(typeof(ErrorByVal)) as ErrorByVal;
 
         if (s_ErrorByPtr is null && s_ErrorByVal is null)
-            throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new("Error"));
+            throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new Exception("Error"));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static explicit operator error<T>(in ptr<T> target_ptr) => new error<T>(target_ptr);
+    public static explicit operator error<T>(in ptr<T> target_ptr) => new(target_ptr);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static explicit operator error<T>(in T target) => new error<T>(target);
+    public static explicit operator error<T>(in T target) => new(target);
 
     // Enable comparisons between nil and error<T> interface instance
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -164,7 +164,7 @@ public class error<T> : error
 
 public static class errorExtensions
 {
-    private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new ConcurrentDictionary<Type, MethodInfo>();
+    private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     public static T _<T>(this error target)

@@ -34,9 +34,9 @@ namespace go2cs.Templates
             #line default
             #line hidden
             this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Exe</Outp" +
-                    "utType>\r\n    <TargetFramework>net6.0</TargetFramework>\r\n    <PublishReadyToRun>t" +
-                    "rue</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <AssemblyNam" +
-                    "e>");
+                    "utType>\r\n    <TargetFrameworks>net7.0</TargetFrameworks>\r\n    <PublishReadyToRun" +
+                    ">true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <AssemblyN" +
+                    "ame>");
             
             #line 16 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));

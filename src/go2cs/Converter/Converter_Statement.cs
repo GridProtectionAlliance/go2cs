@@ -202,6 +202,7 @@ public partial class Converter
                     if (assignOP.Equals("<<=") || assignOP.Equals(">>="))
                     {
                         // TODO: Need expression evaluation - cast not needed for int expressions
+                        // FYI, .NET 11 supports other integral types for shift operator, test with nint
                         if (!int.TryParse(rightOperands[i].Text, out int _))
                             rightOperands[i].Text = $"(int)({rightOperands[i]})";
                     }

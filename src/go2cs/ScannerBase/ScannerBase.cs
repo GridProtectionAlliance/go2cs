@@ -215,10 +215,10 @@ public abstract partial class ScannerBase : GoParserBaseListener
 
         NewLineDelimeters = new[] { "\r\n", "\n" };
 
-        s_processedFiles = new(StringComparer.OrdinalIgnoreCase);
-        s_processedImports = new(StringComparer.OrdinalIgnoreCase);
-        ImportQueue = new(StringComparer.OrdinalIgnoreCase);
-        Imports = new();
+        s_processedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ImportQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        Imports = new List<string>();
     }
 
     public static int TotalProcessedFiles => s_processedFiles.Count - TotalSkippedFiles;
@@ -368,7 +368,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
         AntlrInputStream inputStream;
 
         using (StreamReader reader = File.OpenText(fileName))
-            inputStream = new(reader);
+            inputStream = new AntlrInputStream(reader);
 
         GoLexer lexer = new(inputStream);
         CommonTokenStream tokenStream = new(lexer);

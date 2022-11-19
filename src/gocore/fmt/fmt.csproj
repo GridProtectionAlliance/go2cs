@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0</TargetFrameworks>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>fmt_package</AssemblyName>
     <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
@@ -21,7 +21,7 @@
     <PackageIcon>go2cs.png</PackageIcon>
     <PackageTags>go2cs;Golang;go</PackageTags>
     <Nullable>enable</Nullable>
-    <NoWarn>660;661;1701;1702;IDE1006</NoWarn>
+    <NoWarn>660;661;1701;1702;IDE1006;CS8981</NoWarn>
     <Version>0.1.0</Version>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>

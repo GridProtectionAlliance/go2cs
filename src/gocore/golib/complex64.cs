@@ -51,9 +51,9 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
 
     public float Phase => (float)Math.Atan2(m_imaginary, m_real);
 
-    public static readonly complex64 Zero = new complex64(0.0F, 0.0F);
-    public static readonly complex64 One = new complex64(1.0F, 0.0F);
-    public static readonly complex64 ImaginaryOne = new complex64(0.0F, 1.0F);
+    public static readonly complex64 Zero = new(0.0F, 0.0F);
+    public static readonly complex64 One = new(1.0F, 0.0F);
+    public static readonly complex64 ImaginaryOne = new(0.0F, 1.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public complex64(float real, float imaginary) /* Constructor to create a complex number with rectangular co-ordinates  */
@@ -63,7 +63,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 FromPolarCoordinates(float magnitude, float phase) => new complex64(magnitude * (float)Math.Cos(phase), magnitude * (float)Math.Sin(phase));
+    public static complex64 FromPolarCoordinates(float magnitude, float phase) => new(magnitude * (float)Math.Cos(phase), magnitude * (float)Math.Sin(phase));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static complex64 Negate(complex64 value) => -value;
@@ -81,13 +81,13 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     public static complex64 Divide(complex64 dividend, complex64 divisor) => dividend / divisor;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 operator -(complex64 value) => new complex64(-value.m_real, -value.m_imaginary);
+    public static complex64 operator -(complex64 value) => new(-value.m_real, -value.m_imaginary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 operator +(complex64 left, complex64 right) => new complex64(left.m_real + right.m_real, left.m_imaginary + right.m_imaginary);
+    public static complex64 operator +(complex64 left, complex64 right) => new(left.m_real + right.m_real, left.m_imaginary + right.m_imaginary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 operator -(complex64 left, complex64 right) => new complex64(left.m_real - right.m_real, left.m_imaginary - right.m_imaginary);
+    public static complex64 operator -(complex64 left, complex64 right) => new(left.m_real - right.m_real, left.m_imaginary - right.m_imaginary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static complex64 operator *(complex64 left, complex64 right)
@@ -95,7 +95,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
         // Multiplication:  (a + bi)(c + di) = (ac -bd) + (bc + ad)i
         float result_Realpart = left.m_real * right.m_real - left.m_imaginary * right.m_imaginary;
         float result_Imaginarypart = left.m_imaginary * right.m_real + left.m_real * right.m_imaginary;
-        return new(result_Realpart, result_Imaginarypart);
+        return new complex64(result_Realpart, result_Imaginarypart);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -110,11 +110,11 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
         if (Math.Abs(d) < Math.Abs(c))
         {
             float doc = d / c;
-            return new((a + b * doc) / (c + d * doc), (b - a * doc) / (c + d * doc));
+            return new complex64((a + b * doc) / (c + d * doc), (b - a * doc) / (c + d * doc));
         }
 
         float cod = c / d;
-        return new((b + a * cod) / (d + c * cod), (-a + b * cod) / (d + c * cod));
+        return new complex64((b + a * cod) / (d + c * cod), (-a + b * cod) / (d + c * cod));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -145,7 +145,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 Conjugate(complex64 value) => new complex64(value.m_real, -value.m_imaginary);
+    public static complex64 Conjugate(complex64 value) => new(value.m_real, -value.m_imaginary);
 
     // Reciprocal of a Complex number : the reciprocal of x+i*y is 1/(x+i*y)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -160,57 +160,57 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj)
     {
-        if (obj is not complex64)
+        if (obj is not complex64 complex)
             return false;
 
-        return this == (complex64)obj;
+        return this == complex;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(complex64 value) => m_real.Equals(value.m_real) && m_imaginary.Equals(value.m_imaginary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(short value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(short value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(int value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(int value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(long value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(long value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(ushort value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(ushort value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(uint value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(uint value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(ulong value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(ulong value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(sbyte value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(sbyte value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(byte value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(byte value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex64(float value) => new complex64(value, 0.0F);
+    public static implicit operator complex64(float value) => new(value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator complex64(double value) => new complex64((float)value, 0.0F);
+    public static explicit operator complex64(double value) => new((float)value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator complex64(BigInteger value) => new complex64((float)value, 0.0F);
+    public static explicit operator complex64(BigInteger value) => new((float)value, 0.0F);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator complex64(decimal value) => new complex64((float)value, 0.0F);
+    public static explicit operator complex64(decimal value) => new((float)value, 0.0F);
 
     // Enable conversions between Complex and complex64 struct
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator complex64(complex128 value) => new complex64((float)value.Real, (float)value.Imaginary);
+    public static explicit operator complex64(complex128 value) => new((float)value.Real, (float)value.Imaginary);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator complex128(complex64 value) => new complex128(value.m_real, value.m_imaginary);
+    public static implicit operator complex128(complex64 value) => new(value.m_real, value.m_imaginary);
 
     // Enable comparisons between nil and complex64 struct
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -256,7 +256,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     {
         float a = value.m_real;
         float b = value.m_imaginary;
-        return new((float)Math.Sin(a) * (float)Math.Cosh(b), (float)Math.Cos(a) * (float)Math.Sinh(b));
+        return new complex64((float)Math.Sin(a) * (float)Math.Cosh(b), (float)Math.Cos(a) * (float)Math.Sinh(b));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -264,7 +264,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     {
         float a = value.m_real;
         float b = value.m_imaginary;
-        return new((float)Math.Sinh(a) * (float)Math.Cos(b), (float)Math.Cosh(a) * (float)Math.Sin(b));
+        return new complex64((float)Math.Sinh(a) * (float)Math.Cos(b), (float)Math.Cosh(a) * (float)Math.Sin(b));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -275,7 +275,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     {
         float a = value.m_real;
         float b = value.m_imaginary;
-        return new((float)Math.Cos(a) * (float)Math.Cosh(b), -((float)Math.Sin(a) * (float)Math.Sinh(b)));
+        return new complex64((float)Math.Cos(a) * (float)Math.Cosh(b), -((float)Math.Sin(a) * (float)Math.Sinh(b)));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -283,7 +283,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     {
         float a = value.m_real;
         float b = value.m_imaginary;
-        return new((float)Math.Cosh(a) * (float)Math.Cos(b), (float)Math.Sinh(a) * (float)Math.Sin(b));
+        return new complex64((float)Math.Cosh(a) * (float)Math.Cos(b), (float)Math.Sinh(a) * (float)Math.Sin(b));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -298,12 +298,12 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static complex64 Atan(complex64 value)
     {
-        complex64 Two = new complex64(2.0F, 0.0F);
+        complex64 Two = new(2.0F, 0.0F);
         return ImaginaryOne / Two * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static complex64 Log(complex64 value) => new complex64((float)Math.Log(Abs(value)), (float)Math.Atan2(value.m_imaginary, value.m_real));
+    public static complex64 Log(complex64 value) => new((float)Math.Log(Abs(value)), (float)Math.Atan2(value.m_imaginary, value.m_real));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static complex64 Log(complex64 value, float baseValue) => Log(value) / Log(baseValue);
@@ -317,7 +317,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
         float temp_factor = (float)Math.Exp(value.m_real);
         float result_re = temp_factor * (float)Math.Cos(value.m_imaginary);
         float result_im = temp_factor * (float)Math.Sin(value.m_imaginary);
-        return new(result_re, result_im);
+        return new complex64(result_re, result_im);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -343,7 +343,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
 
         float t = (float)Math.Pow(rho, c) * (float)Math.Pow(Math.E, -d * theta);
 
-        return new(t * (float)Math.Cos(newRho), t * (float)Math.Sin(newRho));
+        return new complex64(t * (float)Math.Cos(newRho), t * (float)Math.Sin(newRho));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -354,7 +354,7 @@ public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormatt
     {
         float result_re = factor * value.m_real;
         float result_im = factor * value.m_imaginary;
-        return new(result_re, result_im);
+        return new complex64(result_re, result_im);
     }
 
     TypeCode IConvertible.GetTypeCode() => m_real.GetTypeCode();

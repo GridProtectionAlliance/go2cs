@@ -50,8 +50,8 @@ public class PanicException : Exception
 public static class RuntimeErrorPanic
 {
     private const string NilPointerDereferenceMessage = "runtime error: invalid memory address or nil pointer dereference";
-    public static PanicException NilPointerDereference() => new PanicException(NilPointerDereferenceMessage);
+    public static PanicException NilPointerDereference() => new(NilPointerDereferenceMessage);
 
     private const string IndexOutOfRangeMessage = "runtime error: index out of range [{0}] with length {1}";
-    public static PanicException IndexOutOfRange(long index, long length) => new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
+    public static PanicException IndexOutOfRange(long index, long length) => new(string.Format(IndexOutOfRangeMessage, index, length));
 }

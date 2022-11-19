@@ -15,7 +15,7 @@ private static void Main() {
     } // Post for comment
 
     fmt.Println();
-    fmt.Println("i =", i);
+    fmt.Println("i ="u8, i);
     fmt.Println();
 
     for (i = 0; i < 10; i++) {
@@ -27,7 +27,7 @@ private static void Main() {
         fmt.Println();
     }
 
-    fmt.Println("i =", i);
+    fmt.Println("i ="u8, i);
     fmt.Println();
 
     {
@@ -53,7 +53,7 @@ private static void Main() {
     } //d
 
     fmt.Println();
-    fmt.Println("i =", i);
+    fmt.Println("i ="u8, i);
     fmt.Println();
 
     while (true) {
@@ -66,7 +66,7 @@ private static void Main() {
     }
 
     fmt.Println();
-    fmt.Println("i =", i);
+    fmt.Println("i ="u8, i);
 }
 
 private static void f(nint y) {

@@ -45,6 +45,9 @@ namespace BehavioralTests
             if (index > 0)
                 execPath = execPath.Substring(index + nameof(BehavioralTests).Length);
 
+            // For some reason, go2cs compiles into win-x64 folder even though target is AnyCPU - not sure why:
+            execPath = Path.Combine(execPath, "win-x64");
+
             go2cs = Path.GetFullPath($@"..\..\{RootPath}go2cs{execPath}\go2cs.exe");
 
             if (!File.Exists(go2cs))

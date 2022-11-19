@@ -55,7 +55,7 @@ public delegate object? Recover();
 public class GoFuncRoot
 {
     // Static thread local storage for captured panic exception shared between all GoFunc instances
-    protected static readonly ThreadLocal<PanicException> CapturedPanic = new ThreadLocal<PanicException>();
+    protected static readonly ThreadLocal<PanicException> CapturedPanic = new();
 }
 
 /// <summary>
@@ -106,12 +106,12 @@ public class GoFunc<T> : GoFuncRoot
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    protected void HandleDefer(Action deferredAction)
+    protected void HandleDefer(Action? deferredAction)
     {
         if (deferredAction is null)
             return;
 
-        Defers ??= new();
+        Defers ??= new Stack<Action>();
         Defers.Push(deferredAction);
     }
 

@@ -30,7 +30,7 @@ private static void Main()
     ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f)!, Animal.As(d)! }), out ptr<array<Animal>> _addr_zoo);
 
     Animal a = Animal.As(null)!;
-    fmt.Printf("%T\n", a);
+    fmt.Printf("%T\n"u8, a);
 
     {
         Animal a__prev1 = a;
@@ -38,17 +38,17 @@ private static void Main()
         foreach (var (_, __a) in zoo)
         {
             a = __a;
-            fmt.Println(a.Type(), "can", a.Swim());
+            fmt.Println(a.Type(), "can"u8, a.Swim());
         }
         a = a__prev1;
     }
 
-    fmt.Printf("%T\n", a);
+    fmt.Printf("%T\n"u8, a);
 
     ShowZoo(_addr_zoo); 
 
     // Post function comment
-    fmt.Printf("%T\n", a); 
+    fmt.Printf("%T\n"u8, a); 
 
     // vowels[ch] is true if ch is a vowel
     array<bool> vowels = new array<bool>(InitKeyedValues<bool>(128, ('a', true), ('e', true), ('i', true), ('o', true), ('u', true), ('y', true)));
@@ -64,7 +64,7 @@ public static void ShowZoo(ptr<array<Animal>> _addr_zoo)
     foreach (var (_, __a) in zoo)
     {
         a = __a;
-        fmt.Println(a.Type(), "can", a.Swim());
+        fmt.Println(a.Type(), "can"u8, a.Swim());
     }
 }
 
@@ -72,28 +72,28 @@ private static @string Type(this ptr<Frog> _addr_f)
 {
     ref Frog f = ref _addr_f.val;
 
-    return "Frog";
+    return "Frog"u8;
 }
 
 private static @string Swim(this ptr<Frog> _addr_f)
 {
     ref Frog f = ref _addr_f.val;
 
-    return "Kick";
+    return "Kick"u8;
 }
 
 private static @string Swim(this ptr<Dog> _addr_d)
 {
     ref Dog d = ref _addr_d.val;
 
-    return "Paddle";
+    return "Paddle"u8;
 }
 
 private static @string Type(this ptr<Dog> _addr_d)
 {
     ref Dog d = ref _addr_d.val;
 
-    return "Doggie";
+    return "Doggie"u8;
 }
 
 } // end main_package

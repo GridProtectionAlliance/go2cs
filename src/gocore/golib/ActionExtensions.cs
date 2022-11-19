@@ -63,18 +63,18 @@ public static class ActionExtensions
         Task.Delay(delay, cancellationToken)
             .ContinueWith(task => action(cancellationToken), cancellationToken)
             .ContinueWith(task =>
-                          {
-                              if (task.Exception is null)
-                                  return;
+             {
+                 if (task.Exception is null)
+                     return;
 
-                              if (exceptionAction is null)
-                                  throw task.Exception;
-
-                              exceptionAction(task.Exception);
-                          },
-                          cancellationToken,
-                          TaskContinuationOptions.OnlyOnFaulted,
-                          TaskScheduler.Default);
+                 if (exceptionAction is null)
+                     throw task.Exception;
+                 
+                 exceptionAction(task.Exception);
+             },
+             cancellationToken,
+             TaskContinuationOptions.OnlyOnFaulted,
+             TaskScheduler.Default);
 
     /// <summary>
     /// Execute an action on the thread pool after a specified number of milliseconds.
@@ -118,7 +118,7 @@ public static class ActionExtensions
         const int Cancelled = 2;
         const int Disposing = 3;
 
-        CancellationTokenSource tokenSource = new CancellationTokenSource();
+        CancellationTokenSource tokenSource = new();
         CancellationToken token = tokenSource.Token;
         int state = NotCancelled;
 

@@ -83,7 +83,7 @@ public partial class ScannerBase
                         variadicType.FullTypeName += "[]";
                     }
 
-                    parameters.Add(new()
+                    parameters.Add(new ParameterInfo
                     {
                         Name = identifier,
                         Type = variadicType,
@@ -92,7 +92,7 @@ public partial class ScannerBase
                 }
                 else
                 {
-                    parameters.Add(new()
+                    parameters.Add(new ParameterInfo
                     {
                         Name = identifier,
                         Type = typeInfo,
@@ -106,7 +106,7 @@ public partial class ScannerBase
             string identifier = $"_p{parameters.Count}";
 
             // Unnamed variadic parameter
-            parameters.Add(new()
+            parameters.Add(new ParameterInfo
             {
                 Name = identifier,
                 Type = ConvertByRefToBasicPointer(typeInfo),
@@ -118,7 +118,7 @@ public partial class ScannerBase
             string identifier = $"_p{parameters.Count}";
 
             // Unnamed parameter
-            parameters.Add(new()
+            parameters.Add(new ParameterInfo
             {
                 Name = identifier,
                 Type = typeInfo,

@@ -91,10 +91,10 @@ public partial class ScannerBase
 
             if (s_comparisionOperands.Contains(binaryOP))
             {
-                Expressions[context] = new()
+                Expressions[context] = new ExpressionInfo
                 {
                     Text = expression,
-                    Type = new()
+                    Type = new TypeInfo
                     {
                         Name = "bool",
                         TypeName = "bool",
@@ -107,7 +107,7 @@ public partial class ScannerBase
             else
             {
                 // TODO: If both operands are integer, expression should be treated as arbitrary-precision numbers until assigned to a variable
-                Expressions[context] = new()
+                Expressions[context] = new ExpressionInfo
                 {
                     Text = expression,
                     Type = leftOperandExpression.Type ?? TypeInfo.VarType
@@ -202,7 +202,7 @@ public partial class ScannerBase
                 if (unaryOP is not null)
                     unaryExpression = $"{unaryOP}{expression}";
 
-                UnaryExpressions[context] = new()
+                UnaryExpressions[context] = new ExpressionInfo
                 {
                     Text = unaryExpression,
                     Type = expressionType
@@ -239,7 +239,7 @@ public partial class ScannerBase
 
         if (Operands.TryGetValue(context.operand(), out ExpressionInfo operand))
         {
-            PrimaryExpressions[context] = new()
+            PrimaryExpressions[context] = new ExpressionInfo
             {
                 Text = operand.Text,
                 Type = operand.Type
@@ -265,7 +265,7 @@ public partial class ScannerBase
                     
                 if (typeInfo is PointerTypeInfo)
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"new ptr<{typeInfo.TypeName}>({expression})",
                         Type = typeInfo
@@ -289,7 +289,7 @@ public partial class ScannerBase
                         typeInfo = TypeInfo.ObjectType;
                     }
 
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"{functionName}({expression}).val",
                         Type = typeInfo
@@ -297,7 +297,7 @@ public partial class ScannerBase
                 }
                 else if (typeInfo.TypeClass == TypeClass.Struct)
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"{typeInfo.TypeName}_cast({expression})",
                         Type = typeInfo
@@ -305,7 +305,7 @@ public partial class ScannerBase
                 }
                 else
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"({typeInfo.TypeName}){expression}",
                         Type = typeInfo
@@ -329,7 +329,7 @@ public partial class ScannerBase
             if (primaryExpression is null || primaryExpression.Type.FullTypeName == "System.Object")
                 typeInfo = TypeInfo.VarType;
 
-            PrimaryExpressions[context] = new()
+            PrimaryExpressions[context] = new ExpressionInfo
             {
                 Text = selectionExpression,
                 Type = typeInfo ?? primaryExpression?.Type
@@ -342,7 +342,7 @@ public partial class ScannerBase
             // TODO: Will need to lookup IDENTIFIER type in metadata to determine type
             if (Expressions.TryGetValue(context.index().expression(), out ExpressionInfo expression))
             {
-                PrimaryExpressions[context] = new()
+                PrimaryExpressions[context] = new ExpressionInfo
                 {
                     Text = $"{primaryExpression}[{expression}]",
                     Type = primaryExpression.Type
@@ -363,7 +363,7 @@ public partial class ScannerBase
             if (sliceContext.children.Count == 3)
             {
                 // primaryExpr[:]
-                PrimaryExpressions[context] = new()
+                PrimaryExpressions[context] = new ExpressionInfo
                 {
                     Text = $"{primaryExpression}[..]",
                     Type = primaryExpression.Type
@@ -376,7 +376,7 @@ public partial class ScannerBase
                 // primaryExpr[low:] or primaryExpr[:high]
                 if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo expression))
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"{primaryExpression}[{(expressionIsLeft ? $"{(expression.Type?.TypeName == "int" ? string.Empty : "(int)")}{expression}..": $"..{(expression.Type?.TypeName == "int" ? string.Empty : "(int)")}{expression}")}]",
                         Type = primaryExpression.Type
@@ -394,7 +394,7 @@ public partial class ScannerBase
                     // primaryExpr[low:high]
                     if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo highExpression))
                     {
-                        PrimaryExpressions[context] = new()
+                        PrimaryExpressions[context] = new ExpressionInfo
                         {
                             Text = $"{primaryExpression}[{(lowExpression.Type?.TypeName == "int" ? string.Empty : "(int)")}{lowExpression}..{(highExpression.Type?.TypeName == "int" ? string.Empty : "(int)")}{highExpression}]",
                             Type = primaryExpression.Type
@@ -415,7 +415,7 @@ public partial class ScannerBase
                 // primaryExpr[:high:max]
                 if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo highExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo maxExpression))
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"{primaryExpression}.slice(-1, {highExpression}, {maxExpression})",
                         Type = primaryExpression.Type
@@ -431,7 +431,7 @@ public partial class ScannerBase
                 // primaryExpr[low:high:max]
                 if (Expressions.TryGetValue(sliceContext.expression(0), out ExpressionInfo lowExpression) && Expressions.TryGetValue(sliceContext.expression(1), out ExpressionInfo highExpression) && Expressions.TryGetValue(sliceContext.expression(2), out ExpressionInfo maxExpression))
                 {
-                    PrimaryExpressions[context] = new()
+                    PrimaryExpressions[context] = new ExpressionInfo
                     {
                         Text = $"{primaryExpression}.slice({lowExpression}, {highExpression}, {maxExpression})",
                         Type = primaryExpression.Type
@@ -450,7 +450,7 @@ public partial class ScannerBase
 
             if (Types.TryGetValue(context.typeAssertion().type_(), out TypeInfo typeInfo))
             {
-                PrimaryExpressions[context] = new()
+                PrimaryExpressions[context] = new ExpressionInfo
                 {
                     Text = $"{primaryExpression}._<{typeInfo.TypeName}>()",
                     Type = typeInfo
@@ -561,7 +561,7 @@ public partial class ScannerBase
                         TargetTypeInfo = argType
                     };
 
-                    PrimaryExpressions[context] = new() { Text = $"@new<{typeName}>()", Type = argType };
+                    PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeName}>()", Type = argType };
                 }
                 else
                 {
@@ -584,29 +584,29 @@ public partial class ScannerBase
                         };
                     }
 
-                    PrimaryExpressions[context] = new() { Text = $"@new<{typeInfo.Name}>({argumentList})", Type = argType };
+                    PrimaryExpressions[context] = new ExpressionInfo { Text = $"@new<{typeInfo.Name}>({argumentList})", Type = argType };
                 }
             }
             else if (primaryExpression.Text == "make" && typeInfo is not null)
             {
                 PrimaryExpressions[context] = typeInfo.TypeClass switch
                 {
-                    TypeClass.Slice => new()
+                    TypeClass.Slice => new ExpressionInfo
                     {
                         Text = $"make_slice<{RemoveSurrounding(typeInfo.TypeName, "slice<", ">")}>({argumentList})",
                         Type = primaryExpression.Type
                     },
-                    TypeClass.Map => new()
+                    TypeClass.Map => new ExpressionInfo
                     {
                         Text = $"make_map<{RemoveSurrounding(typeInfo.TypeName, "map<", ">")}>({argumentList})",
                         Type = primaryExpression.Type
                     },
-                    TypeClass.Channel => new()
+                    TypeClass.Channel => new ExpressionInfo
                     {
                         Text = $"make_channel<{RemoveSurrounding(typeInfo.TypeName, "channel<", ">")}>({argumentList})",
                         Type = primaryExpression.Type
                     },
-                    _ => new()
+                    _ => new ExpressionInfo
                     {
                         Text = $"{primaryExpression}<{typeInfo.TypeName}>({argumentList})",
                         Type = primaryExpression.Type
@@ -618,7 +618,7 @@ public partial class ScannerBase
                 if (typeInfo is not null)
                     argumentList = $"typeof({typeInfo.TypeName}){(string.IsNullOrEmpty(argumentList) ? string.Empty : $", {argumentList}")}";
 
-                PrimaryExpressions[context] = new()
+                PrimaryExpressions[context] = new ExpressionInfo
                 {
                     Text = $"{primaryExpression}({argumentList})",
                     Type = primaryExpression.Type
@@ -641,7 +641,7 @@ public partial class ScannerBase
 
         if (Expressions.TryGetValue(context.expression(), out ExpressionInfo expression))
         {
-            Operands[context] = new()
+            Operands[context] = new ExpressionInfo
             {
                 Text = $"({expression})",
                 Type = expression.Type
@@ -690,7 +690,7 @@ public partial class ScannerBase
             {
                 basicLiteral = endsWith_i ? $"i({value}F)" : $"{value}F";
 
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = "complex64",
                     TypeName = "complex64",
@@ -702,7 +702,7 @@ public partial class ScannerBase
             {
                 basicLiteral = endsWith_i ? $"i({value}D)" : $"{value}D";
 
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = "Complex",
                     TypeName = "Complex",
@@ -719,7 +719,7 @@ public partial class ScannerBase
             {
                 basicLiteral += "F";
 
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = "float",
                     TypeName = "float",
@@ -732,7 +732,7 @@ public partial class ScannerBase
             {
                 basicLiteral += "D";
 
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = "double",
                     TypeName = "double",
@@ -748,7 +748,7 @@ public partial class ScannerBase
 
             if (context.integer().RUNE_LIT() is not null)
             {
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = "char",
                     TypeName = "char",
@@ -764,7 +764,7 @@ public partial class ScannerBase
                     if (val > int.MaxValue)
                         basicLiteral = $"(nint){basicLiteral}L";
 
-                    typeInfo = new()
+                    typeInfo = new TypeInfo
                     {
                         Name = "nint",
                         TypeName = "nint",
@@ -778,7 +778,7 @@ public partial class ScannerBase
                     if (nuint.TryParse(basicLiteral, out nuint uval) && uval > uint.MaxValue)
                         basicLiteral = $"(nuint){basicLiteral}UL";
 
-                    typeInfo = new()
+                    typeInfo = new TypeInfo
                     {
                         Name = "nuint",
                         TypeName = "nuint",
@@ -793,7 +793,7 @@ public partial class ScannerBase
         {
             basicLiteral = ReplaceOctalBytes(context.RUNE_LIT().GetText());
 
-            typeInfo = new()
+            typeInfo = new TypeInfo
             {
                 Name = "char",
                 TypeName = "char",
@@ -804,9 +804,9 @@ public partial class ScannerBase
         }
         else if (context.string_() is not null)
         {
-            basicLiteral = ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()));
+            basicLiteral = $"{ToStringLiteral(ReplaceOctalBytes(context.string_().GetText()))}u8";
 
-            typeInfo = new()
+            typeInfo = new TypeInfo
             {
                 Name = "@string",
                 TypeName = "@string",
@@ -826,7 +826,7 @@ public partial class ScannerBase
             return;
         }
 
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = basicLiteral,
             Type = typeInfo
@@ -877,7 +877,7 @@ public partial class ScannerBase
         {
             // TODO: Need to properly handle in-line struct, see "src\Examples\Manual Tour of Go Conversions\moretypes\slice-literals"
             expressionText = $"/* TODO: Fix this in ScannerBase_Expression::ExitCompositeLit */ {context.GetText()}";
-            typeInfo = new()
+            typeInfo = new TypeInfo
             {
                 Name = literalType.GetText(),
                 TypeName = literalType.GetText(),
@@ -911,10 +911,10 @@ public partial class ScannerBase
                     TypeName = $"array<{typeName}>",
                     FullTypeName = $"go.array<{typeInfo.FullTypeName}>",
                     TargetTypeInfo = typeInfo,
-                    Length = new()
+                    Length = new ExpressionInfo
                     {
                         Text = arrayLength,
-                        Type = new()
+                        Type = new TypeInfo
                         {
                             Name = "nint",
                             TypeName = "nint",
@@ -948,10 +948,10 @@ public partial class ScannerBase
                 }
 
                 expressionText = hasKeyedElement ?
-                    $"new slice<{typeName}>(InitKeyedValues<{typeName}>({string.Join(", ", elements.Select(kvp => kvp.key is null ? kvp.element : $"({kvp.key}, {kvp.element})"))}))" :
-                    $"new slice<{typeName}>(new {typeName}[] {{ {string.Join(", ", elements.Select(kvp => kvp.element))} }})";
+                    $"InitKeyedValues<{typeName}>({string.Join(", ", elements.Select(kvp => kvp.key is null ? kvp.element : $"({kvp.key}, {kvp.element})"))}).slice()" :
+                    $"new {typeName}[] {{ {string.Join(", ", elements.Select(kvp => kvp.element))} }}.slice()";
 
-                typeInfo = new()
+                typeInfo = new TypeInfo
                 {
                     Name = typeName,
                     TypeName = typeName,
@@ -993,7 +993,7 @@ public partial class ScannerBase
             // TODO: Need to determine how to properly employ keyed elements here - guess is type aliases to array/slice/map would need to map back to original implementations
             expressionText = $"new {literalType.GetText()}({RemoveSurrounding(literalValue.GetText(), "{", "}")})";
                 
-            typeInfo = new()
+            typeInfo = new TypeInfo
             {
                 Name = literalType.GetText(),
                 TypeName = literalType.GetText(),
@@ -1007,7 +1007,7 @@ public partial class ScannerBase
             return;
         }
 
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = expressionText,
             Type = typeInfo
@@ -1037,10 +1037,10 @@ public partial class ScannerBase
         //     : 'func' function
 
         // This is a place-holder for base class - derived classes, e.g., Converter, have to properly handle function content
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = SanitizedIdentifier(context.GetText()),
-            Type = new()
+            Type = new TypeInfo
             {
                 Name = "Action",
                 TypeName = "Action",
@@ -1069,7 +1069,7 @@ public partial class ScannerBase
         //     | qualifiedIdent
 
         // TODO: var assignment is temporary, to resolve actual type, converter would override to load identifier metadata and recursively resolve identifier based components
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = context.GetText(),
             Type = TypeInfo.VarType
@@ -1108,7 +1108,7 @@ public partial class ScannerBase
         else
             receiver = context.GetText();
 
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = receiver,
             Type = TypeInfo.ObjectType

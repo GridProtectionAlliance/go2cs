@@ -126,7 +126,7 @@ public static partial class fmt_package
             Type targetType = typeof(T);
             Type targetTypeByRef = targetType.MakeByRefType();
 
-            MethodInfo extensionMethod = targetTypeByRef.GetExtensionMethod("String");
+            MethodInfo? extensionMethod = targetTypeByRef.GetExtensionMethod("String");
 
             if (extensionMethod is not null)
                 s_StringByRef = extensionMethod.CreateStaticDelegate(typeof(StringByRef)) as StringByRef;

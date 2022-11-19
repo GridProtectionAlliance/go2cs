@@ -93,7 +93,7 @@ using go;
             static <#=StructName#>()
             {
                 Type targetType = typeof(<#=StructName#>);
-                MethodInfo extensionMethod;<#
+                MethodInfo? extensionMethod;<#
 
                 foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
                 {

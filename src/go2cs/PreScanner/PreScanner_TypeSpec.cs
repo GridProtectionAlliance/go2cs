@@ -34,7 +34,7 @@ public partial class PreScanner
 
         if (m_interfaceMethods.TryGetValue(context.type_()?.typeLit()?.interfaceType(), out List<FunctionSignature> methods))
         {
-            m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new()
+            m_interfaces.Add(GetUniqueIdentifier(m_interfaces, identifier), new InterfaceInfo
             {
                 Name = identifier,
                 Methods = methods.ToArray()
@@ -42,7 +42,7 @@ public partial class PreScanner
         }
         else if (m_structFields.TryGetValue(context.type_()?.typeLit()?.structType(), out List<FieldInfo> fields))
         {
-            m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new()
+            m_structs.Add(GetUniqueIdentifier(m_structs, identifier), new StructInfo
             {
                 Name = identifier,
                 Fields = fields.ToArray()

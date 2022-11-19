@@ -34,7 +34,7 @@ namespace ConstraintTests
 
             public ISlice Append(object[] elems) => append(m_source, elems.Cast<T>().ToArray());
 
-            public Array Array => m_source.Array;
+            public Array Source => m_source.Source;
 
             public nint Low => m_source.Low;
 

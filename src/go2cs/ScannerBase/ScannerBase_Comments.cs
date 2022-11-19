@@ -51,7 +51,7 @@ public partial class ScannerBase
         if (indentLevel < 1)
             return string.Empty;
 
-        return new(' ', BaseSpacing * indentLevel);
+        return new string(' ', BaseSpacing * indentLevel);
     }
 
     protected bool LineTerminatorAhead(ParserRuleContext context, int tokenOffset = 0)
@@ -239,7 +239,7 @@ public partial class ScannerBase
             }
             else
             {
-                hiddenText = new(Array.FindAll(hiddenText.ToCharArray(), c => c is '\r' or '\n'));
+                hiddenText = new string(Array.FindAll(hiddenText.ToCharArray(), c => c is '\r' or '\n'));
 
                 if (hiddenText.Length > 0)
                     comments.Append(hiddenText);

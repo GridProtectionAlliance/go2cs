@@ -39,7 +39,7 @@ public partial class Converter
     private void PushBlock()
     {
         m_blocks.Push(m_targetFile);
-        m_targetFile = new();
+        m_targetFile = new StringBuilder();
     }
 
     private string PopBlock(bool appendToPrevious = true)
@@ -124,7 +124,7 @@ public partial class Converter
         if (!EndsWithLineFeed(m_targetFile.ToString()))
             m_targetFile.AppendLine();
         else
-            m_targetFile = new(RemoveLastDuplicateLineFeed(m_targetFile.ToString()));
+            m_targetFile = new StringBuilder(RemoveLastDuplicateLineFeed(m_targetFile.ToString()));
 
         m_targetFile.Append($"{Spacing()}}}");
 

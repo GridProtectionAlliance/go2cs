@@ -41,7 +41,7 @@ public static class builtin
         public static T Default = default!;
     }
 
-    private static readonly ThreadLocal<bool> s_fallthrough = new ThreadLocal<bool>();
+    private static readonly ThreadLocal<bool> s_fallthrough = new();
 
     /// <summary>
     /// Predeclared identifier representing the untyped integer ordinal number of the current
@@ -198,7 +198,7 @@ public static class builtin
     /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
     /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex64 complex(float32 realPart, float32 imaginaryPart) => new complex64(realPart, imaginaryPart);
+    public static complex64 complex(float32 realPart, float32 imaginaryPart) => new(realPart, imaginaryPart);
 
     /// <summary>
     /// Constructs a complex value from two floating-point values.
@@ -207,7 +207,7 @@ public static class builtin
     /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
     /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex128 complex(float64 realPart, float64 imaginaryPart) => new complex128(realPart, imaginaryPart);
+    public static complex128 complex(float64 realPart, float64 imaginaryPart) => new(realPart, imaginaryPart);
 
     /// <summary>
     /// Copies elements from a source slice into a destination slice.
@@ -227,13 +227,13 @@ public static class builtin
         if (src == nil)
             throw new InvalidOperationException("Source slice array reference is null.");
 
-        nint min = (nint)Min(dst.Length, src.Length);
+        nint min = Min(dst.Length, src.Length);
 
         if (min > 0)
         {
             if (typeof(T1).IsAssignableFrom(typeof(T2)))
             {
-                Array.Copy(src.Array, src.Low, dst.Array, dst.Low, min);
+                Array.Copy(src.m_array, src.Low, dst.m_array, dst.Low, min);
             }
             else
             {
@@ -362,6 +362,14 @@ public static class builtin
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
+    /// <param name="str">Target string.</param>
+    /// <returns>The length of the <paramref name="str"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static nint len(in ReadOnlySpan<byte> str) => str.Length;
+
+    /// <summary>
+    /// Gets the length of the <paramref name="str"/>.
+    /// </summary>
     /// <param name="str">Target string pointer.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
@@ -424,26 +432,34 @@ public static class builtin
     public static nint len<T>(in ptr<channel<T>> channel) => channel.val.Length;
 
     /// <summary>
+    /// Creates a new slice from the specified <paramref name="array"/>.
+    /// </summary>
+    /// <typeparam name="T">Array type.</typeparam>
+    /// <param name="array">Source array</param>
+    /// <returns>New slice of the specified <paramref name="array"/>.</returns>
+    public static slice<T> make_slice<T>(T[]? array) => new(array);
+
+    /// <summary>
     /// Allocates and initializes a slice object.
     /// </summary>
     /// <param name="size">Specifies the slice length.</param>
     /// <param name="capacity">Specified slice capacity; must be no smaller than the length.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<T> make_slice<T>(nint size, nint capacity = 0) => new slice<T>((int)size, (int)capacity);
+    public static slice<T> make_slice<T>(nint size, nint capacity = 0) => new((int)size, (int)capacity);
 
     /// <summary>
     /// Allocates and initializes a map object.
     /// </summary>
     // <param name="size">Specifies the number of map elements.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static map<TKey, TValue> make_map<TKey, TValue>(nint size = 0) where TKey : notnull => new map<TKey, TValue>((int)size);
+    public static map<TKey, TValue> make_map<TKey, TValue>(nint size = 0) where TKey : notnull => new((int)size);
 
     /// <summary>
     /// Allocates and initializes a channel object.
     /// </summary>
     /// <param name="size">Specifies the buffer capacity.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static channel<T> make_channel<T>(nint size = 1) => new channel<T>((int)size);
+    public static channel<T> make_channel<T>(nint size = 1) => new((int)size);
 
     /// <summary>
     /// Allocates and initializes a new object.
@@ -456,7 +472,7 @@ public static class builtin
     public static T make<T>(nint p1 = 0, nint p2 = -1) where T : new()
     {
         if (p1 == 0 && p2 == 0)
-            return new();
+            return new T();
 
         Type type = typeof(T);
 
@@ -484,7 +500,7 @@ public static class builtin
     /// <param name="target">Target value.</param>
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> addr<T>(in T target) => new ptr<T>(target);
+    public static ptr<T> addr<T>(in T target) => new(target);
 
     /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
@@ -532,7 +548,7 @@ public static class builtin
     /// </summary>
     /// <returns>Pointer to heap allocated zero value of provided type.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> @new<T>() where T : new() => new ptr<T>(new T());
+    public static ptr<T> @new<T>() where T : new() => new(new T());
 
     /// <summary>
     /// Creates a new reference for <typeparamref name="T"/>.
@@ -541,7 +557,7 @@ public static class builtin
     /// <param name="inputs">Constructor parameters.</param>
     /// <returns>New reference for <typeparamref name="T"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> @new<T>(params object[] inputs) => new ptr<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
+    public static ptr<T> @new<T>(params object[] inputs) => new((T)Activator.CreateInstance(typeof(T), inputs)!);
 
     /// <summary>
     /// Formats arguments in an implementation-specific way and writes the result to standard-error.
@@ -679,7 +695,7 @@ public static class builtin
     /// </summary>
     /// <param name="value">Value to evaluate.</param>
     /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
-    public static string GetGoTypeName(object value) => GetGoTypeName(value.GetType());
+    public static string GetGoTypeName(object? value) => GetGoTypeName(value?.GetType());
 
     /// <summary>
     /// Gets the common Go type name for the specified <paramref name="type"/>.
@@ -748,7 +764,7 @@ public static class builtin
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="length">Target array length.</param>
     /// <returns>Go <see cref="go.array{T}"/> with specified <paramref name="length"/>.</returns>
-    public static array<T> array<T>(nint length) => new array<T>(length);
+    public static array<T> array<T>(nint length) => new(length);
 
     /// <summary>
     /// Converts C# <paramref name="source"/> array to Go <see cref="go.array{T}"/>.
@@ -1119,7 +1135,47 @@ public static class builtin
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static @string @string(string value) => new @string(value);
+    public static @string @string(string value) => new(value);
+
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="@string"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static @string @string(ReadOnlySpan<byte> value) => new(value);
+
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="@string"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static @string @string(sstring value) => value;
+
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static sstring sstring(string value) => value;
+
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static sstring sstring(ReadOnlySpan<byte> value) => new(value);
+
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static sstring sstring(@string value) => value;
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="@string"/>.
@@ -1173,32 +1229,39 @@ public static class builtin
         }
 
         if (itemType == typeof(array<byte>) || itemType == typeof(byte[]))
-            return new((byte[])value);
+            return new @string((byte[])value);
 
         if (itemType == typeof(slice<byte>))
-            return new((slice<byte>)value);
+            return new @string((slice<byte>)value);
 
         if (itemType == typeof(array<byte>) || itemType == typeof(byte[]))
-            return new((byte[])value);
+            return new @string((byte[])value);
 
         if (itemType == typeof(slice<byte>))
-            return new((slice<byte>)value);
+            return new @string((slice<byte>)value);
 
         if (itemType == typeof(array<char>) || itemType == typeof(char[]))
-            return new((char[])value);
+            return new @string((char[])value);
 
         if (itemType == typeof(slice<char>))
-            return new((slice<char>)value);
+            return new @string((slice<char>)value);
 
         if (itemType == typeof(array<rune>) || itemType == typeof(rune[]))
-            return new((rune[])value);
+            return new @string((rune[])value);
 
         if (itemType == typeof(slice<rune>))
-            return new((slice<rune>)value);
+            return new @string((slice<rune>)value);
 
         // Handle custom value types
         return value.ToString()!;
     }
+    /// <summary>
+    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
+    /// </summary>
+    /// <param name="value">Value to convert.</param>
+    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static sstring sstring(object? value) => @string(value);
 
     // ** Helper Functions **
 
@@ -1283,7 +1346,28 @@ public static class builtin
     /// <param name="imaginary">Value to convert to imaginary.</param>
     /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex128 i(double imaginary) => new complex128(0.0D, imaginary);
+    public static complex128 i(double imaginary) => new(0.0D, imaginary);
+
+    #if EXPERIMENTAL
+
+    // When using stack allocated strings, you need a function to convert the stack string to a heap string
+    // any time you need to hold the string in a heap allocated object:
+
+    /// <summary>
+    /// Converts UTF8 byte array to heap allocated <see cref="@string"/>.
+    /// </summary>
+    /// <param name="value">UTF8 byte array.</param>
+    /// <returns>Heap allocated string.</returns>
+    public static @string str(ReadOnlySpan<byte> value) => (@string)value;
+    
+    /// <summary>
+    /// Converts stack allocated <see cref="sstring"/> to heap allocated <see cref="@string"/>.
+    /// </summary>
+    /// <param name="value">Stack allocated string.</param>
+    /// <returns>Heap allocated string.</returns>
+    public static @string str(sstring value) => value;
+
+    #endif
 
     /// <summary>
     /// Returns a Go type equivalent to the specified value.
@@ -1359,7 +1443,7 @@ public static class builtin
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] InitKeyedValues<T>(params object[] keyedValues) where T : struct
     {
-        List<T> values = new List<T>();
+        List<T> values = new();
 
         foreach (object keyedValue in keyedValues)
         {

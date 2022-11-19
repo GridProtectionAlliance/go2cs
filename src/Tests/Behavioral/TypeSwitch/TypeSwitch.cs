@@ -13,24 +13,24 @@ private static void Main() {
     Action<object> whatAmI = i => {
         switch (i.type()) {
             case bool t:
-                fmt.Println("I'm a bool");
+                fmt.Println("I'm a bool"u8);
                 break;
             case nint t:
-                fmt.Printf("I'm an int, specifically type %T\n", t);
+                fmt.Printf("I'm an int, specifically type %T\n"u8, t);
                 break;
-            case int t: /* Matches int literals */
-                fmt.Printf("I'm an int, specifically type %T\n", t);
+            case int32 t: /* Matches int literals */
+                fmt.Printf("I'm an int, specifically type %T\n"u8, t);
                 break;
-            case long t:
-                fmt.Printf("I'm an int, specifically type %T\n", t);
+            case int64 t:
+                fmt.Printf("I'm an int, specifically type %T\n"u8, t);
                 break;
-            case ulong t:
-                fmt.Printf("I'm an int, specifically type %T\n", t);
+            case uint64 t:
+                fmt.Printf("I'm an int, specifically type %T\n"u8, t);
                 break;
             default:
             {
                 var t = i.type();
-                fmt.Printf("Don't know type %T\n", t);
+                fmt.Printf("Don't know type %T\n"u8, t);
                 break;
             }
         }

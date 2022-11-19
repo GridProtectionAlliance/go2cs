@@ -141,10 +141,10 @@ public partial class Converter
         }
 
         // Update expression operand (managed in ScannerBase_Expression.cs)
-        Operands[operandContext] = new()
+        Operands[operandContext] = new ExpressionInfo
         {
             Text = lambdaExpression,
-            Type = new()
+            Type = new TypeInfo
             {
                 Name = parametersSignature,
                 TypeName = typeName,

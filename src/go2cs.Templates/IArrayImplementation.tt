@@ -2,6 +2,8 @@
 <#@ template debug="false" hostspecific="false" language="C#" inherits="TemplateBase" #>
 <#@ output extension=".cs" #>
 
+            public Array? Source => ((IArray)m_value).Source;
+
             public nint Length => ((IArray)m_value).Length;
 
             object? IArray.this[nint index]

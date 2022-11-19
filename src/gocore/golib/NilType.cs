@@ -41,7 +41,7 @@ public class NilType : IConvertible
     {
         return obj switch
         {
-            NilType _        => true,
+            NilType          => true,
             ISlice slice     => slice == Default,
             IArray array     => array == Default,
             IChannel channel => channel == Default,
@@ -55,71 +55,71 @@ public class NilType : IConvertible
 
     // IArray to nil comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(IArray array, NilType _) => array is null || array.Length == 0;
+    public static bool operator ==(IArray? array, NilType _) => array is null || array.Length == 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(IArray array, NilType nil) => !(array == nil);
+    public static bool operator !=(IArray? array, NilType nil) => !(array == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType nil, IArray array) => array == nil;
+    public static bool operator ==(NilType nil, IArray? array) => array == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType nil, IArray array) => array != nil;
+    public static bool operator !=(NilType nil, IArray? array) => array != nil;
 
     // ISlice to nil comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(ISlice slice, NilType _) => slice is null || slice.Length == 0 && slice.Capacity == 0 && slice.Array is null;
+    public static bool operator ==(ISlice? slice, NilType _) => slice is null || slice.Length == 0 && slice.Capacity == 0 && slice.Source is null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(ISlice slice, NilType nil) => !(slice == nil);
+    public static bool operator !=(ISlice? slice, NilType nil) => !(slice == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType nil, ISlice slice) => slice == nil;
+    public static bool operator ==(NilType nil, ISlice? slice) => slice == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType nil, ISlice slice) => slice != nil;
+    public static bool operator !=(NilType nil, ISlice? slice) => slice != nil;
 
     // IChannel to nil comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(IChannel channel, NilType _) => channel is null || channel.Length == 0 && channel.Capacity == 0;
+    public static bool operator ==(IChannel? channel, NilType _) => channel is null || channel.Length == 0 && channel.Capacity == 0;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(IChannel channel, NilType nil) => !(channel == nil);
+    public static bool operator !=(IChannel? channel, NilType nil) => !(channel == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType nil, IChannel channel) => channel == nil;
+    public static bool operator ==(NilType nil, IChannel? channel) => channel == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType nil, IChannel channel) => channel != nil;
+    public static bool operator !=(NilType nil, IChannel? channel) => channel != nil;
 
     // string to nil comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(string obj, NilType _) => string.IsNullOrEmpty(obj);
+    public static bool operator ==(string? obj, NilType _) => string.IsNullOrEmpty(obj);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(string obj, NilType _) => !string.IsNullOrEmpty(obj);
+    public static bool operator !=(string? obj, NilType _) => !string.IsNullOrEmpty(obj);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType _, string obj) => string.IsNullOrEmpty(obj);
+    public static bool operator ==(NilType _, string? obj) => string.IsNullOrEmpty(obj);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType _, string obj) => !string.IsNullOrEmpty(obj);
+    public static bool operator !=(NilType _, string? obj) => !string.IsNullOrEmpty(obj);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator string(NilType _) => ""; // In Go, string defaults to empty string, not null
 
     // object to nil comparisons
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(object obj, NilType _) => obj is null;
+    public static bool operator ==(object? obj, NilType _) => obj is null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(object obj, NilType _) => obj is not null;
+    public static bool operator !=(object? obj, NilType _) => obj is not null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType _, object obj) => obj is null;
+    public static bool operator ==(NilType _, object? obj) => obj is null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType _, object obj) => obj is not null;
+    public static bool operator !=(NilType _, object? obj) => obj is not null;
 
     TypeCode IConvertible.GetTypeCode() => TypeCode.DBNull;
 
@@ -159,7 +159,7 @@ public class NilType : IConvertible
 /// <summary>
 /// Represents the "nil" type.
 /// </summary>
-public class NilType<T> : NilType where T : class
+public class NilType<T> : NilType where T : class?
 {
     public override int GetHashCode() => 0;
 
@@ -168,14 +168,14 @@ public class NilType<T> : NilType where T : class
 
     // Enable comparisons between nil and class types (should be rare)
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(in T value, NilType<T> _) => value is null || (Activator.CreateInstance(value.GetType())?.Equals(value) ?? false);
+    public static bool operator ==(in T? value, NilType<T> _) => value is null || (Activator.CreateInstance(value.GetType())?.Equals(value) ?? false);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(in T value, NilType<T> nil) => !(value == nil);
+    public static bool operator !=(in T? value, NilType<T> nil) => !(value == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType<T> nil, in T value) => value == nil;
+    public static bool operator ==(NilType<T> nil, in T? value) => value == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType<T> nil, in T value) => value != nil;
+    public static bool operator !=(NilType<T> nil, in T? value) => value != nil;
 }

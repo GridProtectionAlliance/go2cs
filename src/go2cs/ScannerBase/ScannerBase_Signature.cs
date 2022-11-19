@@ -39,7 +39,7 @@ public partial class ScannerBase
 
     public override void EnterSignature(GoParser.SignatureContext context)
     {
-        Result = new(new[]
+        Result = new List<ParameterInfo>(new[]
         {
             new ParameterInfo
             {
@@ -53,7 +53,7 @@ public partial class ScannerBase
     public override void ExitSignature(GoParser.SignatureContext context)
     {
         Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
-        Signatures[context] = new()
+        Signatures[context] = new Signature
         {
             Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
             Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
@@ -69,7 +69,7 @@ public partial class ScannerBase
         {
             if (Types.TryGetValue(context.type_(), out TypeInfo typeInfo))
             {
-                Result = new(new[] { new ParameterInfo
+                Result = new List<ParameterInfo>(new[] { new ParameterInfo
                 {
                     Name = string.Empty,
                     Type = typeInfo,

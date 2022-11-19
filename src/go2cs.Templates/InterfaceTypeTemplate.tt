@@ -92,7 +92,7 @@ using go;
             {
                 Type targetType = typeof(T);
                 Type targetTypeByPtr = typeof(ptr<T>);
-                MethodInfo extensionMethod;<#
+                MethodInfo? extensionMethod;<#
                 
                 foreach (var decl in Functions)
                 {

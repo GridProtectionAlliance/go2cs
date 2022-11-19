@@ -45,7 +45,7 @@ public partial class PreScanner
             {
                 foreach (string identifier in identifiers)
                 {
-                    fields.Add(new()
+                    fields.Add(new FieldInfo
                     {
                         Name = SanitizedIdentifier(identifier),
                         Type = ConvertByRefToBasicPointer(typeInfo),
@@ -76,7 +76,7 @@ public partial class PreScanner
                         };
                     }
 
-                    fields.Add(new()
+                    fields.Add(new FieldInfo
                     {
                         Name = GetValidIdentifierName(typeInfo.TypeName),
                         Type = typeInfo,
@@ -93,7 +93,9 @@ public partial class PreScanner
 
     public override void EnterInterfaceType(GoParser.InterfaceTypeContext context)
     {
-        Result = new(new[] { new ParameterInfo
+        base.EnterInterfaceType(context);
+        
+        Result = new List<ParameterInfo>(new[] { new ParameterInfo
         {
             Name = string.Empty,
             Type = TypeInfo.VoidType,
@@ -105,20 +107,18 @@ public partial class PreScanner
     {
         List<FunctionSignature> methods = new();
 
-        for (int i = 0; i < context.methodSpec().Length; i++)
+        if (InterfaceTypes.TryGetValue(context, out ParseTreeValues<TypeInfo> types))
         {
-            GoParser.MethodSpecContext methodSpec = context.methodSpec(i);
-
-            string identifier = methodSpec.IDENTIFIER()?.GetText();
-
-            if (string.IsNullOrEmpty(identifier))
+            for (int i = 0; i < context.typeName().Length; i++)
             {
-                if (Types.TryGetValue(methodSpec, out TypeInfo typeInfo))
+                GoParser.TypeNameContext typeName = context.typeName(i);
+            
+                if (types.TryGetValue(typeName, out TypeInfo typeInfo))
                 {
-                    methods.Add(new()
+                    methods.Add(new FunctionSignature
                     {
                         Name = GetValidIdentifierName(typeInfo.TypeName),
-                        Signature = new()
+                        Signature = new Signature
                         {
                             Parameters = System.Array.Empty<ParameterInfo>(),
                             Result = new[]
@@ -131,27 +131,32 @@ public partial class PreScanner
                                 }
                             }
                         },
-                        Comments = CheckForCommentsRight(methodSpec),
+                        Comments = CheckForCommentsRight(typeName),
                         IsPromoted = true
                     });
                 }
             }
-            else
-            {
-                Parameters.TryGetValue(methodSpec.parameters(), out List<ParameterInfo> parameters);
+        }
 
-                methods.Add(new()
+        for (int i = 0; i < context.methodSpec().Length; i++)
+        {
+            GoParser.MethodSpecContext methodSpec = context.methodSpec(i);
+
+            string identifier = methodSpec.IDENTIFIER()?.GetText();
+
+            Parameters.TryGetValue(methodSpec.parameters(), out List<ParameterInfo> parameters);
+
+            methods.Add(new FunctionSignature
+            {
+                Name = identifier,
+                Signature = Signatures[context] = new Signature
                 {
-                    Name = identifier,
-                    Signature = Signatures[context] = new()
-                    {
-                        Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
-                        Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
-                    },
-                    Comments = CheckForCommentsRight(methodSpec),
-                    IsPromoted = false
-                });
-            }
+                    Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
+                    Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
+                },
+                Comments = CheckForCommentsRight(methodSpec),
+                IsPromoted = false
+            });
         }
 
         m_interfaceMethods[context] = methods;

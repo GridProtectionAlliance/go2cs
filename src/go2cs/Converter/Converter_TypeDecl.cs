@@ -335,7 +335,7 @@ public partial class Converter
             if (TryFindInheritedInterfaceInfo(interfaceName, out InterfaceInfo inheritedInferfaceInfo, out string shortTypeName, out string fullTypeName))
             {
                 inheritedTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
-                List<FunctionSignature> functions = fieldFunctions.GetOrAdd(field.Name, name => new());
+                List<FunctionSignature> functions = fieldFunctions.GetOrAdd(field.Name, name => new List<FunctionSignature>());
                 functions.AddRange(inheritedInferfaceInfo.GetLocalMethods());
                 RecurseInheritedInterfaces(context, identifier, inheritedInferfaceInfo, functions);
             }
@@ -424,7 +424,7 @@ public partial class Converter
             if (TryFindPromotedStructInfo(structName, out StructInfo promotedStructInfo, out string shortTypeName, out string fullTypeName))
             {
                 promotedStructTypeNames?.Add(useFullTypeName ? fullTypeName : shortTypeName);
-                List<FieldInfo> fields = promotedFields.GetOrAdd(field.Name, name => new());
+                List<FieldInfo> fields = promotedFields.GetOrAdd(field.Name, name => new List<FieldInfo>());
                 fields.AddRange(promotedStructInfo.GetLocalFields());                   
             }
             else

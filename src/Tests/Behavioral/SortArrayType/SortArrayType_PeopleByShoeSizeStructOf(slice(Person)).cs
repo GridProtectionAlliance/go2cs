@@ -24,7 +24,7 @@ namespace go
             // Value of the PeopleByShoeSize struct
             private readonly slice<Person> m_value;
             
-            public Array Array => ((ISlice)m_value).Array;
+            public Array? Source => ((IArray)m_value).Source;
 
             public nint Low => ((ISlice)m_value).Low;
 

@@ -73,16 +73,16 @@ public partial class PreScanner
             Signatures.TryGetValue(signatureContext, out signature);
         }
 
-        return new()
+        return new FunctionInfo
         {
-            Signature = new()
+            Signature = new FunctionSignature
             {
                 Name = identifer,
                 Signature = signature,
                 Comments = CheckForCommentsRight(signatureContext),
                 IsPromoted = false
             },
-            Variables = new(m_variables),
+            Variables = new Dictionary<string, VariableInfo>(m_variables),
             HasDefer = m_hasDefer,
             HasPanic = m_hasPanic,
             HasRecover = m_hasRecover
@@ -160,7 +160,7 @@ public partial class PreScanner
             // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
             bool redeclared = uniqueIdentifer.Contains("@@");
 
-            m_variables.Add(uniqueIdentifer, new()
+            m_variables.Add(uniqueIdentifer, new VariableInfo
             {
                 Name = identifier,
                 Type = typeInfo,
@@ -196,7 +196,7 @@ public partial class PreScanner
             // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
             bool redeclared = uniqueIdentifer.Contains("@@");
 
-            m_variables.Add(uniqueIdentifer, new()
+            m_variables.Add(uniqueIdentifer, new VariableInfo
             {
                 Name = identifier,
                 Type = expressions[i]?.Type ?? TypeInfo.VarType,
@@ -238,7 +238,7 @@ public partial class PreScanner
             // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
             bool redeclared = uniqueIdentifer.Contains("@@");
 
-            m_variables.Add(uniqueIdentifer, new()
+            m_variables.Add(uniqueIdentifer, new VariableInfo
             {
                 Name = identifier,
                 Type = expressionInfo?.Type ?? TypeInfo.VarType,
@@ -268,7 +268,7 @@ public partial class PreScanner
         // TODO: This is not enough to detect redeclaraion use cases where say only two for loops use the same variable
         bool redeclared = uniqueIdentifer.Contains("@@");
 
-        m_variables.Add(uniqueIdentifer, new()
+        m_variables.Add(uniqueIdentifer, new VariableInfo
         {
             Name = identifier,
             Type = expression?.Type ?? TypeInfo.VarType,

@@ -160,7 +160,7 @@ public class Options
         RootSourcePath = rootSourcePath ?? SourcePath ?? string.Empty;
         RootTargetPath = rootTargetPath ?? (string.IsNullOrWhiteSpace(TargetPath) && ConvertStandardLibrary ? TargetGoSrcPath : TargetPath) ?? string.Empty;
 
-        m_excludeExpression = new(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
+        m_excludeExpression = new Regex(ExcludeFiles, RegexOptions.Compiled | RegexOptions.Singleline);
     }
 
     public Regex GetExcludeExpression() => m_excludeExpression;

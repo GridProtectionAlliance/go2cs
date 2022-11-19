@@ -352,6 +352,6 @@ namespace go2cs
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static string ReplaceOctalBytes(string input) =>
-            s_findOctals.Replace(input, match => new(new[] { Convert.ToChar(Convert.ToUInt16(match.Value[1..], 8)) }));
+            s_findOctals.Replace(input, match => new string(new[] { Convert.ToChar(Convert.ToUInt16(match.Value[1..], 8)) }));
     }
 }

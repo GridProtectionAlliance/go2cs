@@ -130,16 +130,16 @@ public sealed class ptr<T>
 
     // Enable comparisons between nil and @ref<T> interface instance
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(ptr<T> value, NilType _) => value is null;
+    public static bool operator ==(ptr<T>? value, NilType _) => value is null;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(ptr<T> value, NilType nil) => !(value == nil);
+    public static bool operator !=(ptr<T>? value, NilType nil) => !(value == nil);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(NilType nil, ptr<T> value) => value == nil;
+    public static bool operator ==(NilType nil, ptr<T>? value) => value == nil;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(NilType nil, in ptr<T> value) => value != nil;
+    public static bool operator !=(NilType nil, in ptr<T>? value) => value != nil;
 
     private static readonly bool IsReferenceType = default(T) is null;
 }

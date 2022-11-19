@@ -267,8 +267,8 @@ if (!NamespacePrefix.Equals("go")) {
             #line default
             #line hidden
             this.Write("()\r\n            {\r\n                Type targetType = typeof(T);\r\n                " +
-                    "Type targetTypeByPtr = typeof(ptr<T>);\r\n                MethodInfo extensionMeth" +
-                    "od;");
+                    "Type targetTypeByPtr = typeof(ptr<T>);\r\n                MethodInfo? extensionMet" +
+                    "hod;");
             
             #line 95 "D:\Projects\go2cs\src\go2cs.Templates\InterfaceTypeTemplate.tt"
 

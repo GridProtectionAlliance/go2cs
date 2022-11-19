@@ -125,7 +125,7 @@ public static partial class io_package
             Type targetType = typeof(T);
             Type targetTypeByRef = targetType.MakeByRefType();
 
-            MethodInfo extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
+            MethodInfo? extensionMethod = targetTypeByRef.GetExtensionMethod("Read");
 
             if (extensionMethod is not null)
                 s_ReadByRef = extensionMethod.CreateStaticDelegate(typeof(ReadByRef)) as ReadByRef;

@@ -51,7 +51,7 @@ namespace go
             static Abser()
             {
                 Type targetType = typeof(T);
-                MethodInfo extensionMethod;
+                MethodInfo? extensionMethod;
 
                 extensionMethod = targetType.GetExtensionMethod("Abs");
 

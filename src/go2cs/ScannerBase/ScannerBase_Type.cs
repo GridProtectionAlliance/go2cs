@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using System.Collections.Generic;
+using Antlr4.Runtime.Tree;
 using go2cs.Metadata;
 using static go2cs.Common;
 
@@ -45,6 +47,10 @@ public partial class ScannerBase
     //  conversion (required)
     protected readonly ParseTreeValues<TypeInfo> Types = new();
 
+    protected readonly HashSet<IParseTree> Interfaces = new();
+
+    protected readonly ParseTreeValues<ParseTreeValues<TypeInfo>> InterfaceTypes = new();
+    
     public override void ExitType_(GoParser.Type_Context context)
     {
         TypeInfo typeInfo;
@@ -74,13 +80,26 @@ public partial class ScannerBase
         else if (Metadata?.Functions.TryGetValue($"{typeName}()", out _) ?? false)
             typeClass = TypeClass.Function;
 
-        Types[context.Parent] = new()
+        if (Interfaces.Contains(context.Parent))
         {
-            Name = type,
-            TypeName = ConvertToCSTypeName(type),
-            FullTypeName = typeName,
-            TypeClass = typeClass
-        };
+            InterfaceTypes.GetOrAdd(context.Parent, _ => new ParseTreeValues<TypeInfo>())[context] = new TypeInfo
+            {
+                Name = type,
+                TypeName = ConvertToCSTypeName(type),
+                FullTypeName = typeName,
+                TypeClass = typeClass
+            };
+        }
+        else
+        {
+            Types[context.Parent] = new TypeInfo
+            {
+                Name = type,
+                TypeName = ConvertToCSTypeName(type),
+                FullTypeName = typeName,
+                TypeClass = typeClass
+            };
+        }
     }
 
     public override void EnterTypeSpec(GoParser.TypeSpecContext context)
@@ -92,7 +111,7 @@ public partial class ScannerBase
 
         if (type.StartsWith("interface{"))
         {
-            Types[typeContext] = new()
+            Types[typeContext] = new TypeInfo
             {
                 Name = identifier,
                 TypeName = typeName,
@@ -102,7 +121,7 @@ public partial class ScannerBase
         }
         else if (type.StartsWith("struct{"))
         {
-            Types[typeContext] = new()
+            Types[typeContext] = new TypeInfo
             {
                 Name = identifier,
                 TypeName = typeName,
@@ -189,10 +208,10 @@ public partial class ScannerBase
 
         if (Expressions.TryGetValue(context.arrayLength().expression(), out ExpressionInfo expression))
         {
-            length = new()
+            length = new ExpressionInfo
             {
                 Text = expression.Text,
-                Type = new()
+                Type = new TypeInfo
                 {
                     TypeClass = TypeClass.Simple,
                     TypeName = "nint",
@@ -203,10 +222,10 @@ public partial class ScannerBase
         }
         else
         {
-            length = new()
+            length = new ExpressionInfo
             {
                 Text = "0",
-                Type = new()
+                Type = new TypeInfo
                 {
                     TypeClass = TypeClass.Simple,
                     TypeName = "nint",
@@ -261,7 +280,7 @@ public partial class ScannerBase
         if (typeInfo is null)
             typeInfo = TypeInfo.ObjectType;
 
-        Types[context.Parent.Parent] = new()
+        Types[context.Parent.Parent] = new TypeInfo
         {
             Name = typeInfo.Name,
             TypeName = $"slice<{typeInfo.TypeName}>",
@@ -275,16 +294,20 @@ public partial class ScannerBase
         // TODO: Update to reference proper channel type name when added
         Types.TryGetValue(context.elementType().type_(), out TypeInfo typeInfo);
 
-        if (typeInfo is null)
-            typeInfo = TypeInfo.ObjectType;
+        typeInfo ??= TypeInfo.ObjectType;
 
-        Types[context.Parent.Parent] = new()
+        Types[context.Parent.Parent] = new TypeInfo
         {
             Name = typeInfo.Name,
             TypeName = $"channel<{typeInfo.TypeName}>",
             FullTypeName = $"go.channel<{typeInfo.FullTypeName}>",
             TypeClass = TypeClass.Channel
         };
+    }
+
+    public override void EnterInterfaceType(GoParser.InterfaceTypeContext context)
+    {
+        Interfaces.Add(context);
     }
 
     //public override void ExitInterfaceType(GoParser.InterfaceTypeContext context)
@@ -361,7 +384,7 @@ public partial class ScannerBase
             fullTypeName = $"System.Func<{typeList}{resultSignature}>";
         }
 
-        Types[context.Parent.Parent] = new()
+        Types[context.Parent.Parent] = new TypeInfo
         {
             Name = context.GetText(),
             TypeName = typeName,
@@ -384,36 +407,37 @@ public partial class ScannerBase
     {
         switch (type)
         {
-            case "bool":
-                return "bool";
-            case "int8":
-                return "sbyte";
-            case "uint8":
-            case "byte":
-                return "byte";
-            case "int16":
-                return "short";
-            case "uint16":
-                return "ushort";
-            case "int32":
-            case "rune":
-                return "int";
-            case "uint32":
-                return "uint";
-            case "int64":
-                return "long";
+            // Native type names now mapped by global usings
+            //case "bool":
+            //    return "bool";
+            //case "int8":
+            //    return "sbyte";
+            //case "uint8":
+            //case "byte":
+            //    return "byte";
+            //case "int16":
+            //    return "short";
+            //case "uint16":
+            //    return "ushort";
+            //case "int32":
+            //case "rune":
+            //    return "int";
+            //case "uint32":
+            //    return "uint";
+            //case "int64":
+            //    return "long";
+            //case "uint64":
+            //    return "ulong";
+            //case "uint":
+            //    return "nuint";
+            //case "float32":
+            //    return "float";
+            //case "float64":
+            //    return "double";
+            //case "uintptr":
+            //    return "System.UIntPtr";
             case "int":
                 return "nint";
-            case "uint64":
-                return "ulong";
-            case "uint":
-                return "nuint";
-            case "float32":
-                return "float";
-            case "float64":
-                return "double";
-            case "uintptr":
-                return "System.UIntPtr";
             case "complex64":
                 return "go.complex64";
             case "complex128":

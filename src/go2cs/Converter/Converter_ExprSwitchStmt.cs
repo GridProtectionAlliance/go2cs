@@ -122,7 +122,7 @@ public partial class Converter
         if (context.exprSwitchCase().expressionList() is null)
         {
             // Handle default case
-            exprSwitchStatement.defaultCase = new()
+            exprSwitchStatement.defaultCase = new ExprCaseStatement
             {
                 leftComments = CheckForCommentsLeft(context.statementList(), 1)
             };
@@ -130,7 +130,7 @@ public partial class Converter
         else
         {
             // Handle new case
-            exprSwitchStatement.caseStatements.Add(context, new()
+            exprSwitchStatement.caseStatements.Add(context, new ExprCaseStatement
             {
                 leftComments = CheckForCommentsLeft(context.statementList(), 1)
             });

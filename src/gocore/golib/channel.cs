@@ -62,7 +62,7 @@ public static class channel
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Wait(CancellationToken token)
     {
-        SemaphoreSlim semaphore = new SemaphoreSlim(1, 1);
+        SemaphoreSlim semaphore = new(1, 1);
         bool tokenCanceled = false;
 
         try
@@ -111,11 +111,11 @@ public struct channel<T> : IChannel, IEnumerable<T>
         if (size < 1)
             throw new ArgumentOutOfRangeException(nameof(size));
 
-        m_canAddEvent = new(false);
-        m_canTakeEvent = new(false);
-        m_queue = new();
-        m_enumeratorTokenSource = new();
-        m_isClosed = new(false);
+        m_canAddEvent = new ManualResetEventSlim(false);
+        m_canTakeEvent = new ManualResetEventSlim(false);
+        m_queue = new ConcurrentQueue<T>();
+        m_enumeratorTokenSource = new CancellationTokenSource();
+        m_isClosed = new ptr<bool>(false);
 
         Capacity = size;
     }

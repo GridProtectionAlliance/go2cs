@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>net7.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName><#=AssemblyName#></AssemblyName>
     <Product>go2cs</Product>

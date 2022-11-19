@@ -73,7 +73,7 @@ public partial class Converter
             }
 
             // Implicitly dereference pointer parameter when dereference operator (*) is used
-            UnaryExpressions[context] = new()
+            UnaryExpressions[context] = new ExpressionInfo
             {
                 Text = derefPointerExpression,
                 Type = targetType

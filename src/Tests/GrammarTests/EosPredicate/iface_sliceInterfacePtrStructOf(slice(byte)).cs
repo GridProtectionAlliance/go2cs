@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2022 March 13 03:43:36 UTC
+//     Generated on 2022 November 19 00:35:49 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -24,7 +24,7 @@ namespace go
             // Value of the sliceInterfacePtr struct
             private readonly slice<byte> m_value;
             
-            public Array Array => ((ISlice)m_value).Array;
+            public Array Source => ((ISlice)m_value).Source;
 
             public nint Low => ((ISlice)m_value).Low;
 

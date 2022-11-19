@@ -37,7 +37,7 @@ namespace go
             Console.WriteLine(c);
 
             bool b = false;
-            @string s = "hello";
+            @string s = "hello"u8;
             //int i = 12;
             object eb = b;
             object ai = (int)12;
@@ -158,7 +158,7 @@ namespace go
             static MyCustomError()
             {
                 Type targetType = typeof(MyCustomError);
-                MethodInfo method;
+                MethodInfo? method;
 
                 // Any existing defined extensions will override interface reference calls
                 method = targetType.GetExtensionMethod("Abs");
@@ -353,19 +353,36 @@ namespace go
 
         private static void Main4()
         {
-            slice<slice<@string>> board = slice<slice<@string>>.From(new[]
+            // slice of slice board creation with array slice extension:
+            var board = new[]
             {
-                slice<@string>.From(new[] {"_", "_", "_"}),
-                slice<@string>.From(new[] {"_", "_", "_"}),
-                slice<@string>.From(new[] {"_", "_", "_"})
-            });
+                new @string[] {"_"u8, "_"u8, "_"u8}.slice(),
+                new @string[] {"_"u8, "_"u8, "_"u8}.slice(),
+                new @string[] {"_"u8, "_"u8, "_"u8}.slice()
+            }.slice();
+
+            // slice of slice board creation with make_slice function:
+            //var board = make_slice(new[]
+            //{
+            //    make_slice(new @string[] {"_"u8, "_"u8, "_"u8}), 
+            //    make_slice(new @string[] {"_"u8, "_"u8, "_"u8}),
+            //    make_slice(new @string[] {"_"u8, "_"u8, "_"u8})
+            //});
+
+            // slice of slice board creation standard / verbose:
+            //var board = new slice<slice<@string>>(new slice<@string>[]
+            //{
+            //    new slice<@string>(new @string[] {"_"u8, "_"u8, "_"u8}),
+            //    new slice<@string>(new @string[] {"_"u8, "_"u8, "_"u8}),
+            //    new slice<@string>(new @string[] {"_"u8, "_"u8, "_"u8})
+            //});
 
             // The players take turns.
-            board[0][0] = "X";
-            board[2][2] = "O";
-            board[1][2] = "X";
-            board[1][0] = "O";
-            board[0][2] = "X";
+            board[0][0] = "X"u8;
+            board[2][2] = "O"u8;
+            board[1][2] = "X"u8;
+            board[1][0] = "O"u8;
+            board[0][2] = "X"u8;
 
             for (var i = 0; i < len(board); i++)
             {

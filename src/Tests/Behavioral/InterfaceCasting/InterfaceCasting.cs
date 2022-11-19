@@ -9,7 +9,7 @@ public partial struct MyError {
 }
 
 public static @string Error(this MyError err) {
-    return fmt.Sprintf("error: %s", err.description);
+    return fmt.Sprintf("error: %s"u8, err.description);
 }
 
 // error is an interface - MyError is cast to error interface upon return
@@ -22,7 +22,7 @@ private static void Main() {
 
     err = error.As(new MyError("bar"))!;
 
-    fmt.Printf("%v %v\n", f(), err); // error: foo
+    fmt.Printf("%v %v\n"u8, f(), err); // error: foo
 }
 
 } // end main_package

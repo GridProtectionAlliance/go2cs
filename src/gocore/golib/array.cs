@@ -29,11 +29,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace go;
 
 public interface IArray : IEnumerable, ICloneable
 {
+    Array? Source {get; }
+    
     nint Length { get; }
 
     object? this[nint index] { get; set; }
@@ -42,7 +45,10 @@ public interface IArray : IEnumerable, ICloneable
 [Serializable]
 public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<array<T>>, IEquatable<IArray>
 {
-    private readonly T[] m_array;
+    internal readonly T[] m_array;
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public array() => m_array = Array.Empty<T>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public array(int length) => m_array = new T[length];
@@ -56,6 +62,20 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public array(T[]? array) => m_array = array ?? Array.Empty<T>();
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public array(Span<T> source) => m_array = source.ToArray();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public array(ReadOnlySpan<T> source) => m_array = source.ToArray();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public array(Memory<T> source) => m_array = source.ToArray();
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public array(ReadOnlyMemory<T> source) => m_array = source.ToArray();
+
+    public Array Source => m_array;
+    
     public nint Length
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -84,16 +104,16 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     public slice<T> this[Range range]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => new slice<T>(m_array, range.GetOffsetAndLength(m_array.Length));
+        get => new(m_array, range.GetOffsetAndLength(m_array.Length));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Slice(int start, int length) =>
-        new slice<T>(m_array, start, start + length);
+        new(m_array, start, start + length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Slice(nint start, nint length) =>
-        new slice<T>(m_array, start, start + length);
+        new(m_array, start, start + length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int IndexOf(in T item)
@@ -109,7 +129,7 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     public void CopyTo(T[] array, int arrayIndex) => m_array.CopyTo(array, arrayIndex);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public array<T> Clone() => new array<T>(m_array.Clone() as T[]);
+    public array<T> Clone() => new(m_array.Clone() as T[]);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<(nint, T)> GetEnumerator()
@@ -146,11 +166,23 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(array<T> other) => m_array.Equals(other.m_array);
 
-#region [ Operators ]
+    #region [ Operators ]
 
     // Enable implicit conversions between array<T> and T[]
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator array<T>(T[] value) => new array<T>(value);
+    public static implicit operator array<T>(T[] value) => new(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator array<T>(Span<T> value) => new(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator array<T>(ReadOnlySpan<T> value) => new(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator array<T>(Memory<T> value) => new(value);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static implicit operator array<T>(ReadOnlyMemory<T> value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator T[](array<T> value) => value.m_array;
@@ -191,9 +223,9 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator array<T>(NilType _) => default;
 
-#endregion
+    #endregion
 
-#region [ Interface Implementations ]
+    #region [ Interface Implementations ]
 
     object ICloneable.Clone() => m_array.Clone();
 
@@ -241,5 +273,5 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
 
     IEnumerator IEnumerable.GetEnumerator() => m_array.GetEnumerator();
 
-#endregion
+    #endregion
 }

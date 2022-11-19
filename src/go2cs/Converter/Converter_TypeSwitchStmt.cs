@@ -66,7 +66,7 @@ public partial class Converter
         m_targetFile.Append($"{Spacing()}switch ({string.Format(TypeSwitchExpressionMarker, m_typeSwitchExpressionLevel)}){(Options.UseAnsiBraceStyle ? $"{Environment.NewLine}{Spacing()}" : " ")}{{");
         IndentLevel++;
 
-        m_typeSwitchDefaultCase.Push(new());
+        m_typeSwitchDefaultCase.Push(new StringBuilder());
     }
 
     public override void EnterTypeCaseClause(GoParser.TypeCaseClauseContext context)
@@ -144,7 +144,7 @@ public partial class Converter
 
                         // Also add native int for C# literal matching
                         if (typeName.Equals("nint", StringComparison.Ordinal))
-                            caseTypeExpressions.Append($"{Environment.NewLine}{caseBlock}{Environment.NewLine}{Spacing()}case int {identifier}: /* Matches int literals */");
+                            caseTypeExpressions.Append($"{Environment.NewLine}{caseBlock}{Environment.NewLine}{Spacing()}case int32 {identifier}: /* Matches int literals */");
                     }
                     else
                     {

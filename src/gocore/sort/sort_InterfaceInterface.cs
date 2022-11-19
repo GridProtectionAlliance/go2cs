@@ -26,7 +26,7 @@ public static partial class sort_package
     //[GeneratedCode("go2cs", "0.1.0.0")]
     //public partial interface Interface
     //{
-    //#if NET5_0
+    //#if NET5_0_OR_GREATER
     //    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     //    public static Interface As<T>(in T target) => 
     //        (Interface<T>)target!;
@@ -137,7 +137,7 @@ public static partial class sort_package
         {
             Type targetType = typeof(T);
             Type targetTypeByPtr = typeof(ptr<T>);
-            MethodInfo extensionMethod;
+            MethodInfo? extensionMethod;
 
             extensionMethod = targetTypeByPtr.GetExtensionMethod("Len");
 

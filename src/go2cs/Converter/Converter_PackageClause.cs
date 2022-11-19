@@ -107,7 +107,7 @@ public partial class Converter
         }
 
         m_namespaceHeaderLegacy = namespaceHeader.ToString();
-        m_namespaceFooterLegacy = new('}', PackageNamespaces.Length);
+        m_namespaceFooterLegacy = new string('}', PackageNamespaces.Length);
 
         if (Options.WriteLegacyCompatibleCode)
         {
@@ -116,7 +116,7 @@ public partial class Converter
         }
         else
         {
-            namespaceHeader = new("namespace ");
+            namespaceHeader = new StringBuilder("namespace ");
 
             for (int i = 0; i < PackageNamespaces.Length; i++)
             {

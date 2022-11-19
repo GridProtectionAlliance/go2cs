@@ -7,19 +7,19 @@ public static partial class main_package {
 private static void Main() {
     ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> _addr_a);
 
-    a[0] = "Hello";
-    a[1] = "World";
+    a[0] = "Hello"u8;
+    a[1] = "World"u8;
 
     test(a);
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
-    a[0] = "Hello";
+    a[0] = "Hello"u8;
     test2(_addr_a);
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
-    a[0] = "Hello";
+    a[0] = "Hello"u8;
     test3(a[..]);
     fmt.Println(a[0], a[1]);
     fmt.Println();
@@ -34,7 +34,7 @@ private static void test(array<@string> a) {
  
     // Update to array will be local
     fmt.Println(a[0], a[1]);
-    a[0] = "Goodbye";
+    a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);
 }
 
@@ -42,13 +42,13 @@ private static void test2(ptr<array<@string>> _addr_a) {
     ref array<@string> a = ref _addr_a.val;
 
     fmt.Println(a[0], a[1]);
-    a[0] = "Goodbye";
+    a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);
 }
 
 private static void test3(slice<@string> a) {
     fmt.Println(a[0], a[1]);
-    a[0] = "Goodbye";
+    a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);
 }
 

@@ -119,7 +119,7 @@ public static class TypeExtensions
     {
         static IEnumerable<MethodInfo> getExtensionMethods(Type type)
         {
-            // With addition of Golang generics, type.IsGenericType is now allowable
+            // TODO: With addition of Golang generics, type.IsGenericType is now allowable
             if (!type.IsSealed || type.IsNested) /* || type.IsGenericType */
                 return Array.Empty<MethodInfo>();
 
@@ -258,11 +258,11 @@ public static class TypeExtensions
     /// <param name="methodName">Name of extension method to find.</param>
     /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static MethodInfo GetExtensionMethod(this Type targetType, string methodName)
+    public static MethodInfo? GetExtensionMethod(this Type targetType, string methodName)
     {
         // Note that match by function name alone is sufficient as Go does not currently support function overloading by adjusting signature:
         // https://golang.org/doc/faq#overloading
-        return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).OrderBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType)).FirstOrDefault()!;
+        return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).MinBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType));
     }
 
     /// <summary>
@@ -306,7 +306,7 @@ public static class TypeExtensions
     /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
     /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Delegate? CreateStaticDelegate(this MethodInfo methodInfo, Type delegateType, out bool isByRef)
+    public static Delegate? CreateStaticDelegate(this MethodInfo methodInfo, Type? delegateType, out bool isByRef)
     {
         Func<Type[], Type> getMethodType;
         List<Type> types = methodInfo.GetParameters().Select(paramInfo => paramInfo.ParameterType).ToList();
