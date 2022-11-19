@@ -7,7 +7,9 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 ## News
 
-* Project has been updated to use .NET 6.0 / C# 10
+* Project has been updated to use .NET 7.0 / C# 11
+
+* String literals are encoded uing UTF-8 (C# `u8` string suffix) which uses `ReadOnlySpan<byte>` ref struct. This should make Go strings faster since strings do not have to be converted to UTF8 from UTF16. Also added an experimental [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/sstring.cs) which is a ref struct implementation of a Go string.
 
 * Code conversions now better match original Go code styling
 
