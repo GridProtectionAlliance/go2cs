@@ -35,11 +35,10 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '7.0'
-        include-prerelease: True
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: ${{ matrix.language }}
 
