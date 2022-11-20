@@ -39,7 +39,7 @@ private static void Main() {
     whatAmI(1);
     whatAmI(int64(2));
     whatAmI(uint64(2));
-    whatAmI("hey");
+    whatAmI("hey"u8);
 }
 
 } // end main_package

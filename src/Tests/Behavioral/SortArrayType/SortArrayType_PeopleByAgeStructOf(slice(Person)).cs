@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2021 January 09 07:27:34 UTC
+//     Generated on 2022 November 20 18:37:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -18,14 +18,16 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct PeopleByAge : ISlice
         {
             // Value of the PeopleByAge struct
             private readonly slice<Person> m_value;
             
-            public Array Source => ((ISlice)m_value).Source;
-
+            public Person[] Source => m_value;
+            
+            public ISlice<Person> Append(Person[] elems) => m_value.Append(elems);
+            
             public nint Low => ((ISlice)m_value).Low;
 
             public nint High => ((ISlice)m_value).High;
@@ -35,6 +37,8 @@ namespace go
             public nint Available => ((ISlice)m_value).Available;
 
             public nint Length => ((IArray)m_value).Length;
+
+            Array IArray.Source => ((IArray)m_value).Source!;
 
             object? IArray.this[nint index]
             {

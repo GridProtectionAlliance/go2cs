@@ -86,6 +86,9 @@ namespace BehavioralTests
         [TestMethod]
         public void CheckPointerToPointerResult() => CheckProjectAgainstTarget("PointerToPointer");
 
+        //[TestMethod]
+        //public void DEBUGCheckSortArrayTypeResult() => CheckProjectAgainstTarget("SortArrayType");
+
         private void CheckProjectAgainstTarget(string targetProject, bool testLegacyTarget = true)
         {
             string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");

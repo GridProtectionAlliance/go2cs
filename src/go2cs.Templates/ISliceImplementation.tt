@@ -2,8 +2,10 @@
 <#@ template debug="false" hostspecific="false" language="C#" inherits="TemplateBase" #>
 <#@ output extension=".cs" #>
 
-            public Array? Source => ((IArray)m_value).Source;
-
+            public <#=TypeName#>[] Source => m_value;
+            
+            public ISlice<<#=TypeName#>> Append(<#=TypeName#>[] elems) => m_value.Append(elems);
+            
             public nint Low => ((ISlice)m_value).Low;
 
             public nint High => ((ISlice)m_value).High;
@@ -13,6 +15,8 @@
             public nint Available => ((ISlice)m_value).Available;
 
             public nint Length => ((IArray)m_value).Length;
+
+            Array IArray.Source => ((IArray)m_value).Source!;
 
             object? IArray.this[nint index]
             {

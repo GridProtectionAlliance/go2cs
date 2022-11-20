@@ -48,8 +48,13 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
+public interface ISlice<T> : ISlice
+{
+    ISlice<T> Append(params T[] elems);
+}
+
 [Serializable]
-public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -104,7 +109,7 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(array<T> array) : this((T[])array) { }
     
-    public Array Source
+    public T[] Source
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_array;
@@ -261,6 +266,9 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public slice<T> Append(T[] elems) => Append(this, elems);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Clone() => m_array.slice();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -369,7 +377,11 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
 
     object ICloneable.Clone() => MemberwiseClone();
 
-    ISlice ISlice.Append(object[] elems) => Append(this, elems.Cast<T>().ToArray());
+    ISlice ISlice.Append(object[] elems) => Append(elems.Cast<T>().ToArray());
+
+    ISlice<T> ISlice<T>.Append(params T[] elems) => Append(elems);
+
+    Array IArray.Source => m_array;
 
     object? IArray.this[nint index]
     {
@@ -468,6 +480,7 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
 
     #endregion
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> From<TSource>(TSource[]? array)
     {
         if (array is null)
@@ -484,6 +497,7 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
         return baseTypeArray;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> Append(in slice<T> slice, params T[] elems)
     {
         T[] newArray;
@@ -510,6 +524,7 @@ public readonly struct slice<T> : ISlice, IList<T>, IReadOnlyList<T>, IEnumerabl
         return new slice<T>(newArray, slice.Low, slice.High + elems.Length);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static nint CalculateNewCapacity(in slice<T> slice, int neededCapacity)
     {
         nint capacity = slice.Capacity;
@@ -550,10 +565,12 @@ public static class SliceExtensions
     //      s = s[3:5]   => s = s.slice(3, 5);
     //      s = s[:4]    => s = s.slice(high:4)
     //      s = s[1:3:5] => s = s.slice(1, 3, 5) // Full slice expression
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this in slice<T> slice, nint low = -1, nint high = -1, nint max = -1) => 
         slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
 
     // slice of an array helper function
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this T[] array, nint low = -1, nint high = -1, nint max = -1)
     {
         if (low == -1)
@@ -578,10 +595,12 @@ public static class SliceExtensions
         return new slice<T>(array, low, high);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this array<T> array, nint low = -1, nint high = -1, nint max = -1) =>
         array.m_array.slice(low, high, max);
 
     // slice of a string helper function
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<byte> slice(this @string source, nint low = -1, nint high = -1, nint max = -1) =>
         source.m_value.slice(low, high, max);
 }

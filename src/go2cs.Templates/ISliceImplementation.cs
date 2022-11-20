@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class ISliceImplementation : TemplateBase
     {
@@ -26,14 +26,34 @@ namespace go2cs.Templates
         public override string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 1 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
  // This template creates an inherited type, e.g., type MyFloat float64 in a <PackageName>_<StructName>StructOf(<GoTypeName>).cs file 
             
             #line default
             #line hidden
-            this.Write(@"
-            public Array? Source => ((IArray)m_value).Source;
-
+            this.Write("\r\n            public ");
+            
+            #line 5 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write("[] Source => m_value;\r\n            \r\n            public ISlice<");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write("> Append(");
+            
+            #line 7 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write(@"[] elems) => m_value.Append(elems);
+            
             public nint Low => ((ISlice)m_value).Low;
 
             public nint High => ((ISlice)m_value).High;
@@ -44,6 +64,8 @@ namespace go2cs.Templates
 
             public nint Length => ((IArray)m_value).Length;
 
+            Array IArray.Source => ((IArray)m_value).Source!;
+
             object? IArray.this[nint index]
             {
                 get => ((IArray)m_value)[index];
@@ -52,7 +74,7 @@ namespace go2cs.Templates
             
             public ref ");
             
-            #line 23 "D:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 27 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
@@ -72,7 +94,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 34 "D:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+        #line 38 "C:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
 
 // Template Parameters
 public string TypeName;

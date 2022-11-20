@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
+    #line 1 "C:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class IArrayImplementation : TemplateBase
     {
@@ -26,13 +26,21 @@ namespace go2cs.Templates
         public override string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
+            #line 1 "C:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
  // This template creates an inherited type, e.g., type MyFloat float64 in a <PackageName>_<StructName>StructOf(<GoTypeName>).cs file 
             
             #line default
             #line hidden
-            this.Write(@"
-            public Array? Source => ((IArray)m_value).Source;
+            this.Write("\r\n            public ");
+            
+            #line 5 "C:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write(@"[] Source => m_value;
+            
+            Array IArray.Source => ((IArray)m_value).Source!;
 
             public nint Length => ((IArray)m_value).Length;
 
@@ -44,7 +52,7 @@ namespace go2cs.Templates
 
             public ref ");
             
-            #line 15 "D:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
+            #line 17 "C:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
@@ -62,7 +70,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 24 "D:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
+        #line 26 "C:\Projects\go2cs\src\go2cs.Templates\IArrayImplementation.tt"
 
 // Template Parameters
 public string TypeName;

@@ -291,15 +291,27 @@ public partial class Converter
                 AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
                 m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier}");
-                
+
+                string typeName = typeInfo.TypeName;
+
+                if (typeName.StartsWith("slice", StringComparison.Ordinal))
+                    typeName = $" : ISlice{typeName[5..]}";                
+                else if (typeName.StartsWith("array", StringComparison.Ordinal))
+                    typeName = $" : IArray{typeName[5..]}";                
+                else
+                    typeName = $" // : {typeName}";
+
                 if (Options.UseAnsiBraceStyle)
                 {
-                    m_targetFile.AppendLine($" // : {typeInfo.TypeName}");
+                    m_targetFile.AppendLine(typeName);
                     m_targetFile.AppendLine($"{Spacing()}{{");
                 }
                 else
                 {
-                    m_targetFile.AppendLine($" {{ // : {typeInfo.TypeName}");
+                    if (typeName.StartsWith(" //"))
+                        m_targetFile.AppendLine($" {{{typeName}");
+                    else
+                        m_targetFile.AppendLine($"{typeName} {{");
                 }
 
                 m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");

@@ -35,15 +35,22 @@ namespace go;
 
 public interface IArray : IEnumerable, ICloneable
 {
-    Array? Source {get; }
+    Array? Source { get; }
     
     nint Length { get; }
 
     object? this[nint index] { get; set; }
 }
 
+public interface IArray<T> : IArray
+{
+    new T[] Source { get; }
+    
+    new ref T this[nint index] { get; }
+}
+
 [Serializable]
-public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<array<T>>, IEquatable<IArray>
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<array<T>>, IEquatable<IArray>
 {
     internal readonly T[] m_array;
 
@@ -74,7 +81,7 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public array(ReadOnlyMemory<T> source) => m_array = source.ToArray();
 
-    public Array Source => m_array;
+    public T[] Source => m_array;
     
     public nint Length
     {
@@ -228,6 +235,8 @@ public readonly struct array<T> : IArray, IList<T>, IReadOnlyList<T>, IEnumerabl
     #region [ Interface Implementations ]
 
     object ICloneable.Clone() => m_array.Clone();
+
+    Array IArray.Source => m_array;
 
     object? IArray.this[nint index]
     {

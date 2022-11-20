@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2021 January 09 07:27:34 UTC
+//     Generated on 2022 November 20 18:37:03 UTC
 // </auto-generated>
 //---------------------------------------------------------
 using System;
@@ -22,7 +22,7 @@ namespace go
 {
     public static partial class main_package
     {
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public partial struct Person
         {
             // Constructors
@@ -55,9 +55,16 @@ namespace go
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Person(NilType nil) => default(Person);
+
+            public override string ToString() => string.Concat("{", string.Join(" ", new[]
+            {
+                Name.ToString(),
+                Age.ToString(),
+                ShoeSize.ToString(),
+            }), "}");
         }
 
-        [GeneratedCode("go2cs", "0.1.0.0")]
+        [GeneratedCode("go2cs", "0.1.2.0")]
         public static Person Person_cast(dynamic value)
         {
             return new Person(value.Name, value.Age, value.ShoeSize);
