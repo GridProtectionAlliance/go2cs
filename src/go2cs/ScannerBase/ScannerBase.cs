@@ -28,6 +28,7 @@ using Antlr4.Runtime.Tree;
 using Dahomey.Json;
 using Dahomey.Json.Serialization.Conventions;
 using go2cs.Metadata;
+using Gemstone.Console;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -193,7 +194,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
     {
         IsPosix = Path.DirectorySeparatorChar == '/';
 
-        GoRoot = Environment.GetEnvironmentVariable("GOROOT");
+        GoRoot = GetGoEnv("GOROOT");
 
         if (string.IsNullOrWhiteSpace(GoRoot))
             GoRoot = Path.GetFullPath($"{Path.DirectorySeparatorChar}Go");
@@ -203,7 +204,7 @@ public abstract partial class ScannerBase : GoParserBaseListener
         if (!Directory.Exists(GoRoot))
             throw new InvalidOperationException($"Unable to resolve GOROOT src directory: \"{GoRoot}\". Validate that Go is properly installed.");
 
-        GoPath = Environment.GetEnvironmentVariable("GOPATH");
+        GoPath = GetGoEnv("GOPATH");
 
         if (string.IsNullOrWhiteSpace(GoPath))
             GoPath = Environment.ExpandEnvironmentVariables(IsPosix ? "$HOME/go" : "%USERPROFILE%\\go");
@@ -219,6 +220,36 @@ public abstract partial class ScannerBase : GoParserBaseListener
         s_processedImports = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         ImportQueue = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         Imports = new List<string>();
+    }
+
+    private static string GetGoEnv(string var)
+    {
+        string result = Environment.GetEnvironmentVariable(var);
+
+        if (!string.IsNullOrWhiteSpace(result))
+            return result;
+        
+        CommandResponse response = Command.Execute("go", $"env -json {var}");
+
+        if (response.ExitCode != 0)
+        {
+            Console.Error.WriteLine($"Unable to resolve Go environment variable \"{var}\". Validate that Go is properly installed.");
+            return null;
+        }
+
+        JsonDocument.Parse(response.StandardOutput).RootElement.TryGetProperty(var, out JsonElement value);
+        result = value.GetString();
+
+        try
+        {
+            Environment.SetEnvironmentVariable(var, result);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Unable to set Go environment variable \"{var}\" to \"{result}\": {ex.Message}");
+        }
+
+        return result;
     }
 
     public static int TotalProcessedFiles => s_processedFiles.Count - TotalSkippedFiles;
