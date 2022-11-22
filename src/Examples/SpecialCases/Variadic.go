@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+    "fmt"
+)
 
 // Here's a function that will take an arbitrary number
 // of `int`s as arguments.

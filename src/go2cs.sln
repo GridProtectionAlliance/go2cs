@@ -90,6 +90,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericTests", "Tests\Gener
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrammarTests", "Tests\GrammarTests\GrammarTests\GrammarTests.csproj", "{D0DB5C35-CE9D-49F5-99B6-D31A187DEEA0}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASTTests", "Tests\ASTTests\ASTTests.csproj", "{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -216,6 +218,10 @@ Global
 		{D0DB5C35-CE9D-49F5-99B6-D31A187DEEA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D0DB5C35-CE9D-49F5-99B6-D31A187DEEA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D0DB5C35-CE9D-49F5-99B6-D31A187DEEA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -254,6 +260,7 @@ Global
 		{CAD9D6C9-3393-48CC-A4F8-4C0DF1F53D93} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 		{FAADAA70-3DE3-411F-A679-39D1757B84D9} = {6F09E8D8-D54E-46B1-875C-987A40094FF5}
 		{D0DB5C35-CE9D-49F5-99B6-D31A187DEEA0} = {65A671E4-4025-48B4-8FD0-9C57FECA553A}
+		{3914E6ED-7859-4C5E-8A2B-1D8C4A934F0A} = {6F09E8D8-D54E-46B1-875C-987A40094FF5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

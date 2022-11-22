@@ -16,13 +16,28 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
+using go2cs.AST;
 
 namespace go
 {
     public static unsafe partial class main_package
     {
+
+        public record Node(string NodeType, int RefId);
+
+        public record PositionNode(string NodeType, int RefId, string Filename, int Offset, int Line, int Column) : Node(NodeType, RefId);
+
+        public static void JsonTest()
+        {
+            const string RootPath = @"..\..\..\..\..";
+            using FileStream stream = File.OpenRead($@"{RootPath}\Tests\solitaire.json");
+            var file = JsonSerializer.Deserialize<FileNode>(stream);
+        }
+
         private static ref int Test()
         {
             ref int c = ref addr(12).val;
@@ -32,6 +47,9 @@ namespace go
 
         private static void Main()
         {
+
+            JsonTest();
+
             ref int c = ref Test();
 
             Console.WriteLine(c);

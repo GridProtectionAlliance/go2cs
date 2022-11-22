@@ -1,0 +1,144 @@
+{
+  "NodeType": "File",
+  "RefId": 1,
+  "Doc": null,
+  "Package": {
+    "NodeType": "Position",
+    "RefId": 2,
+    "Filename": "testdata/gobuild1.input",
+    "Offset": 0,
+    "Line": 1,
+    "Column": 1
+  },
+  "Name": {
+    "NodeType": "Ident",
+    "RefId": 3,
+    "NamePos": {
+      "NodeType": "Position",
+      "RefId": 4,
+      "Filename": "testdata/gobuild1.input",
+      "Offset": 8,
+      "Line": 1,
+      "Column": 9
+    },
+    "Name": "p"
+  },
+  "Decls": [
+    {
+      "NodeType": "FuncDecl",
+      "RefId": 5,
+      "Recv": null,
+      "Name": {
+        "NodeType": "Ident",
+        "RefId": 6,
+        "NamePos": {
+          "NodeType": "Position",
+          "RefId": 7,
+          "Filename": "testdata/gobuild1.input",
+          "Offset": 30,
+          "Line": 5,
+          "Column": 6
+        },
+        "Name": "f"
+      },
+      "Type": {
+        "NodeType": "FuncType",
+        "RefId": 8,
+        "Func": {
+          "NodeType": "Position",
+          "RefId": 9,
+          "Filename": "testdata/gobuild1.input",
+          "Offset": 25,
+          "Line": 5,
+          "Column": 1
+        },
+        "TypeParams": null,
+        "Params": {
+          "NodeType": "FieldList",
+          "RefId": 10,
+          "Opening": {
+            "NodeType": "Position",
+            "RefId": 11,
+            "Filename": "testdata/gobuild1.input",
+            "Offset": 31,
+            "Line": 5,
+            "Column": 7
+          },
+          "List": null,
+          "Closing": {
+            "NodeType": "Position",
+            "RefId": 12,
+            "Filename": "testdata/gobuild1.input",
+            "Offset": 32,
+            "Line": 5,
+            "Column": 8
+          }
+        },
+        "Results": null
+      },
+      "Body": null
+    }
+  ],
+  "Imports": null,
+  "Unresolved": null,
+  "Comments": [
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 13,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 14,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 15,
+            "Filename": "testdata/gobuild1.input",
+            "Offset": 11,
+            "Line": 3,
+            "Column": 1
+          },
+          "Text": "//go:build x"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 16,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 17,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 18,
+            "Filename": "testdata/gobuild1.input",
+            "Offset": 35,
+            "Line": 7,
+            "Column": 1
+          },
+          "Text": "// +build y"
+        }
+      ]
+    }
+  ],
+  "FileSet": {
+    "Base": 49,
+    "Files": [
+      {
+        "Name": "testdata/gobuild1.input",
+        "Base": 1,
+        "Size": 47,
+        "Lines": [
+          0,
+          10,
+          11,
+          24,
+          25,
+          34,
+          35
+        ],
+        "Infos": null
+      }
+    ]
+  }
+}

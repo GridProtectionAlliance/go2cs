@@ -1,0 +1,5426 @@
+{
+  "NodeType": "File",
+  "RefId": 1,
+  "Doc": null,
+  "Package": {
+    "NodeType": "Position",
+    "RefId": 2,
+    "Filename": "testdata/go2numbers.input",
+    "Offset": 0,
+    "Line": 1,
+    "Column": 1
+  },
+  "Name": {
+    "NodeType": "Ident",
+    "RefId": 3,
+    "NamePos": {
+      "NodeType": "Position",
+      "RefId": 4,
+      "Filename": "testdata/go2numbers.input",
+      "Offset": 8,
+      "Line": 1,
+      "Column": 9
+    },
+    "Name": "p"
+  },
+  "Decls": [
+    {
+      "NodeType": "GenDecl",
+      "RefId": 5,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 6,
+        "Filename": "testdata/go2numbers.input",
+        "Offset": 11,
+        "Line": 3,
+        "Column": 1
+      },
+      "Tok": "const",
+      "Lparen": {
+        "NodeType": "Position",
+        "RefId": 7,
+        "Filename": "testdata/go2numbers.input",
+        "Offset": 17,
+        "Line": 3,
+        "Column": 7
+      },
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 8,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 9,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 10,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 11,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 20,
+                  "Line": 4,
+                  "Column": 2
+                },
+                "Text": "// 0-octals"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 12,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 13,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 33,
+                "Line": 5,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 14,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 15,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 37,
+                "Line": 5,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 16,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 17,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 18,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 40,
+                "Line": 6,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 19,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 20,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 44,
+                "Line": 6,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 21,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 22,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 23,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 50,
+                "Line": 7,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 24,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 25,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 54,
+                "Line": 7,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0123456"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 26,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 27,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 28,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 64,
+                "Line": 9,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 29,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 30,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 68,
+                "Line": 9,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0_123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 31,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 32,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 33,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 75,
+                "Line": 10,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 34,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 35,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 79,
+                "Line": 10,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0123_456"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 36,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 37,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 38,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 39,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 90,
+                  "Line": 12,
+                  "Column": 2
+                },
+                "Text": "// decimals"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 40,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 41,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 103,
+                "Line": 13,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 42,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 43,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 107,
+                "Line": 13,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 44,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 45,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 46,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 110,
+                "Line": 14,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 47,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 48,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 114,
+                "Line": 14,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 49,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 50,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 51,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 120,
+                "Line": 15,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 52,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 53,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 124,
+                "Line": 15,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "1234567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 54,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 55,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 56,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 134,
+                "Line": 17,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 57,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 58,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 138,
+                "Line": 17,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "1_234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 59,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 60,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 61,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 145,
+                "Line": 18,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 62,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 63,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 149,
+                "Line": 18,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "1_234_567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 64,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 65,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 66,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 67,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 161,
+                  "Line": 20,
+                  "Column": 2
+                },
+                "Text": "// hexadecimals"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 68,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 69,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 178,
+                "Line": 21,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 70,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 71,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 182,
+                "Line": 21,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0x0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 72,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 73,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 74,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 187,
+                "Line": 22,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 75,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 76,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 191,
+                "Line": 22,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0x1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 77,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 78,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 79,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 199,
+                "Line": 23,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 80,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 81,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 203,
+                "Line": 23,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0xcafef00d"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 82,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 83,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 84,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 216,
+                "Line": 25,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 85,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 86,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 220,
+                "Line": 25,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0X0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 87,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 88,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 89,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 225,
+                "Line": 26,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 90,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 91,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 229,
+                "Line": 26,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0X1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 92,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 93,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 94,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 237,
+                "Line": 27,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 95,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 96,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 241,
+                "Line": 27,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0XCAFEf00d"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 97,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 98,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 99,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 254,
+                "Line": 29,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 100,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 101,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 258,
+                "Line": 29,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0X_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 102,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 103,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 104,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 264,
+                "Line": 30,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 105,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 106,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 268,
+                "Line": 30,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0X_1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 107,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 108,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 109,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 277,
+                "Line": 31,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 110,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 111,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 281,
+                "Line": 31,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0X_CAFE_f00d"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 112,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 113,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 114,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 115,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 296,
+                  "Line": 33,
+                  "Column": 2
+                },
+                "Text": "// octals"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 116,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 117,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 307,
+                "Line": 34,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 118,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 119,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 311,
+                "Line": 34,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 120,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 121,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 122,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 316,
+                "Line": 35,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 123,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 124,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 320,
+                "Line": 35,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 125,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 126,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 127,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 328,
+                "Line": 36,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 128,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 129,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 332,
+                "Line": 36,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o01234567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 130,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 131,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 132,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 345,
+                "Line": 38,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 133,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 134,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 349,
+                "Line": 38,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 135,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 136,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 137,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 354,
+                "Line": 39,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 138,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 139,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 358,
+                "Line": 39,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 140,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 141,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 142,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 366,
+                "Line": 40,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 143,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 144,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 370,
+                "Line": 40,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O01234567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 145,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 146,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 147,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 383,
+                "Line": 42,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 148,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 149,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 387,
+                "Line": 42,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 150,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 151,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 152,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 393,
+                "Line": 43,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 153,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 154,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 397,
+                "Line": 43,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o_1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 155,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 156,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 157,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 406,
+                "Line": 44,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 158,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 159,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 410,
+                "Line": 44,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0o0123_4567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 160,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 161,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 162,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 424,
+                "Line": 46,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 163,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 164,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 428,
+                "Line": 46,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 165,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 166,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 167,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 434,
+                "Line": 47,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 168,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 169,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 438,
+                "Line": 47,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O_1234"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 170,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 171,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 172,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 447,
+                "Line": 48,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 173,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 174,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 451,
+                "Line": 48,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0O0123_4567"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 175,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 176,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 177,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 178,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 465,
+                  "Line": 50,
+                  "Column": 2
+                },
+                "Text": "// binaries"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 179,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 180,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 478,
+                "Line": 51,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 181,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 182,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 482,
+                "Line": 51,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 183,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 184,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 185,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 487,
+                "Line": 52,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 186,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 187,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 491,
+                "Line": 52,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b1011"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 188,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 189,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 190,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 499,
+                "Line": 53,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 191,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 192,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 503,
+                "Line": 53,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b00101101"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 193,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 194,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 195,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 516,
+                "Line": 55,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 196,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 197,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 520,
+                "Line": 55,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0B0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 198,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 199,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 200,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 525,
+                "Line": 56,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 201,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 202,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 529,
+                "Line": 56,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0B1011"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 203,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 204,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 205,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 537,
+                "Line": 57,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 206,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 207,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 541,
+                "Line": 57,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0B00101101"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 208,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 209,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 210,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 554,
+                "Line": 59,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 211,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 212,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 558,
+                "Line": 59,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 213,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 214,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 215,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 564,
+                "Line": 60,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 216,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 217,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 568,
+                "Line": 60,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b10_11"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 218,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 219,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 220,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 577,
+                "Line": 61,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 221,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 222,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 581,
+                "Line": 61,
+                "Column": 6
+              },
+              "Kind": "INT",
+              "Value": "0b_0010_1101"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 223,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 224,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 225,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 226,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 596,
+                  "Line": 63,
+                  "Column": 2
+                },
+                "Text": "// decimal floats"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 227,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 228,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 615,
+                "Line": 64,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 229,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 230,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 619,
+                "Line": 64,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0."
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 231,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 232,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 233,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 623,
+                "Line": 65,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 234,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 235,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 627,
+                "Line": 65,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123."
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 236,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 237,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 238,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 633,
+                "Line": 66,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 239,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 240,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 637,
+                "Line": 66,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123."
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 241,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 242,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 243,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 645,
+                "Line": 68,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 244,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 245,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 649,
+                "Line": 68,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 246,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 247,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 248,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 653,
+                "Line": 69,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 249,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 250,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 657,
+                "Line": 69,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 251,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 252,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 253,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 663,
+                "Line": 70,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 254,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 255,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 667,
+                "Line": 70,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 256,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 257,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 258,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 675,
+                "Line": 72,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 259,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 260,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 679,
+                "Line": 72,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0e0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 261,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 262,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 263,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 684,
+                "Line": 73,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 264,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 265,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 688,
+                "Line": 73,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123e+0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 266,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 267,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 268,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 696,
+                "Line": 74,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 269,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 270,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 700,
+                "Line": 74,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123E-1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 271,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 272,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 273,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 710,
+                "Line": 76,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 274,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 275,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 714,
+                "Line": 76,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0e-0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 276,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 277,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 278,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 720,
+                "Line": 77,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 279,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 280,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 724,
+                "Line": 77,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123E+0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 281,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 282,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 283,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 732,
+                "Line": 78,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 284,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 285,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 736,
+                "Line": 78,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123E123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 286,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 287,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 288,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 747,
+                "Line": 80,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 289,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 290,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 751,
+                "Line": 80,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0.e+1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 291,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 292,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 293,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 758,
+                "Line": 81,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 294,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 295,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 762,
+                "Line": 81,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123.E-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 296,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 297,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 298,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 772,
+                "Line": 82,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 299,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 300,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 776,
+                "Line": 82,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123.e123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 301,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 302,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 303,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 788,
+                "Line": 84,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 304,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 305,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 792,
+                "Line": 84,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0e-1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 306,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 307,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 308,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 799,
+                "Line": 85,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 309,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 310,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 803,
+                "Line": 85,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".123E+10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 311,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 312,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 313,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 813,
+                "Line": 86,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 314,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 315,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 817,
+                "Line": 86,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0123E123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 316,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 317,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 318,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 829,
+                "Line": 88,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 319,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 320,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 833,
+                "Line": 88,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0.0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 321,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 322,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 323,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 838,
+                "Line": 89,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 324,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 325,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 842,
+                "Line": 89,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123.123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 326,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 327,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 328,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 851,
+                "Line": 90,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 329,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 330,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 855,
+                "Line": 90,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123.0123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 331,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 332,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 333,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 867,
+                "Line": 92,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 334,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 335,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 871,
+                "Line": 92,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0.0e1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 336,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 337,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 338,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 878,
+                "Line": 93,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 339,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 340,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 882,
+                "Line": 93,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123.123E-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 341,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 342,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 343,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 895,
+                "Line": 94,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 344,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 345,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 899,
+                "Line": 94,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123.0123e+456"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 346,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 347,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 348,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 916,
+                "Line": 96,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 349,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 350,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 920,
+                "Line": 96,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "1_2_3."
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 351,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 352,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 353,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 928,
+                "Line": 97,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 354,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 355,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 932,
+                "Line": 97,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0_123."
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 356,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 357,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 358,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 941,
+                "Line": 99,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 359,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 360,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 945,
+                "Line": 99,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0_0e0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 361,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 362,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 363,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 952,
+                "Line": 100,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 364,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 365,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 956,
+                "Line": 100,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "1_2_3e0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 366,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 367,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 368,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 965,
+                "Line": 101,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 369,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 370,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 969,
+                "Line": 101,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0_123e0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 371,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 372,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 373,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 979,
+                "Line": 103,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 374,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 375,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 983,
+                "Line": 103,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0e-0_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 376,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 377,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 378,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 991,
+                "Line": 104,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 379,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 380,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 995,
+                "Line": 104,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "1_2_3E+0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 381,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 382,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 383,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1005,
+                "Line": 105,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 384,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 385,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1009,
+                "Line": 105,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123E1_2_3"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 386,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 387,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 388,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1022,
+                "Line": 107,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 389,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 390,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1026,
+                "Line": 107,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0.e+1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 391,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 392,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 393,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1033,
+                "Line": 108,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 394,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 395,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1037,
+                "Line": 108,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "123.E-1_0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 396,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 397,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 398,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1048,
+                "Line": 109,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 399,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 400,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1052,
+                "Line": 109,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "01_23.e123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 401,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 402,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 403,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1065,
+                "Line": 111,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 404,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 405,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1069,
+                "Line": 111,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0e-1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 406,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 407,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 408,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1076,
+                "Line": 112,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 409,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 410,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1080,
+                "Line": 112,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".123E+10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 411,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 412,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 413,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1090,
+                "Line": 113,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 414,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 415,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1094,
+                "Line": 113,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": ".0123E123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 416,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 417,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 418,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1106,
+                "Line": 115,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 419,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 420,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1110,
+                "Line": 115,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "1_2_3.123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 421,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 422,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 423,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1121,
+                "Line": 116,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 424,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 425,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1125,
+                "Line": 116,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0123.01_23"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 426,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 427,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 428,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 429,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 1138,
+                  "Line": 118,
+                  "Column": 2
+                },
+                "Text": "// hexadecimal floats"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 430,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 431,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1161,
+                "Line": 119,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 432,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 433,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1165,
+                "Line": 119,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x0.p+0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 434,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 435,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 436,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1174,
+                "Line": 120,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 437,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 438,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1178,
+                "Line": 120,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0Xdeadcafe.p-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 439,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 440,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 441,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1195,
+                "Line": 121,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 442,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 443,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1199,
+                "Line": 121,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x1234.P123"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 444,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 445,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 446,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1213,
+                "Line": 123,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 447,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 448,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1217,
+                "Line": 123,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x.1p-0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 449,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 450,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 451,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1226,
+                "Line": 124,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 452,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 453,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1230,
+                "Line": 124,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0X.deadcafep2"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 454,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 455,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 456,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1245,
+                "Line": 125,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 457,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 458,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1249,
+                "Line": 125,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x.1234P+10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 459,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 460,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 461,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1263,
+                "Line": 127,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 462,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 463,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1267,
+                "Line": 127,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x0p0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 464,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 465,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 466,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1274,
+                "Line": 128,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 467,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 468,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1278,
+                "Line": 128,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0Xdeadcafep+1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 469,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 470,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 471,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1293,
+                "Line": 129,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 472,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 473,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1297,
+                "Line": 129,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x1234P-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 474,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 475,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 476,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1310,
+                "Line": 131,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 477,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 478,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1314,
+                "Line": 131,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x0.0p0"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 479,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 480,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 481,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1323,
+                "Line": 132,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 482,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 483,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1327,
+                "Line": 132,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0Xdead.cafep+1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 484,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 485,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 486,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1343,
+                "Line": 133,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 487,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 488,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1347,
+                "Line": 133,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x12.34P-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 489,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 490,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 491,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1361,
+                "Line": 135,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 492,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 493,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1365,
+                "Line": 135,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0Xdead_cafep+1"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 494,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 495,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 496,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1381,
+                "Line": 136,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 497,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 498,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1385,
+                "Line": 136,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x_1234P-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 499,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 500,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 501,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1399,
+                "Line": 138,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 502,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 503,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1403,
+                "Line": 138,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0X_dead_cafe.p-10"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 504,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 505,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 506,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1422,
+                "Line": 139,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 507,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 508,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1426,
+                "Line": 139,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0x12_34.P1_2_3"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 509,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 510,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 511,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1442,
+                "Line": 140,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 512,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 513,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1446,
+                "Line": 140,
+                "Column": 6
+              },
+              "Kind": "FLOAT",
+              "Value": "0X1_2_3_4.P-1_2_3"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 514,
+          "Doc": {
+            "NodeType": "CommentGroup",
+            "RefId": 515,
+            "List": [
+              {
+                "NodeType": "Comment",
+                "RefId": 516,
+                "Slash": {
+                  "NodeType": "Position",
+                  "RefId": 517,
+                  "Filename": "testdata/go2numbers.input",
+                  "Offset": 1466,
+                  "Line": 142,
+                  "Column": 2
+                },
+                "Text": "// imaginaries"
+              }
+            ]
+          },
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 518,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 519,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1482,
+                "Line": 143,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 520,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 521,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1486,
+                "Line": 143,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 522,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 523,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 524,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1490,
+                "Line": 144,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 525,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 526,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1494,
+                "Line": 144,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "00i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 527,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 528,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 529,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1499,
+                "Line": 145,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 530,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 531,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1503,
+                "Line": 145,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "08i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 532,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 533,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 534,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1508,
+                "Line": 146,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 535,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 536,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1512,
+                "Line": 146,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0000000000i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 537,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 538,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 539,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1525,
+                "Line": 147,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 540,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 541,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1529,
+                "Line": 147,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 542,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 543,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 544,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1536,
+                "Line": 148,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 545,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 546,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1540,
+                "Line": 148,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0000000123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 547,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 548,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 549,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1553,
+                "Line": 149,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 550,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 551,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1557,
+                "Line": 149,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0000056789i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 552,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 553,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 554,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1570,
+                "Line": 150,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 555,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 556,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1574,
+                "Line": 150,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "1234i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 557,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 558,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 559,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1581,
+                "Line": 151,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 560,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 561,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1585,
+                "Line": 151,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "1234567i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 562,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 563,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 564,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1596,
+                "Line": 153,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 565,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 566,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1600,
+                "Line": 153,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 567,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 568,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 569,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1604,
+                "Line": 154,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 570,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 571,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1608,
+                "Line": 154,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 572,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 573,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 574,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1614,
+                "Line": 155,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 575,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 576,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1618,
+                "Line": 155,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_8i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 577,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 578,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 579,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1624,
+                "Line": 156,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 580,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 581,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1628,
+                "Line": 156,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_000_000_000i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 582,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 583,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 584,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1644,
+                "Line": 157,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 585,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 586,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1648,
+                "Line": 157,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 587,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 588,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 589,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1656,
+                "Line": 158,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 590,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 591,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1660,
+                "Line": 158,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_000_000_123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 592,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 593,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 594,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1676,
+                "Line": 159,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 595,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 596,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1680,
+                "Line": 159,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0_000_056_789i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 597,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 598,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 599,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1696,
+                "Line": 160,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 600,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 601,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1700,
+                "Line": 160,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "1_234i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 602,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 603,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 604,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1708,
+                "Line": 161,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 605,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 606,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1712,
+                "Line": 161,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "1_234_567i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 607,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 608,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 609,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1725,
+                "Line": 163,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 610,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 611,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1729,
+                "Line": 163,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0.i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 612,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 613,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 614,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1734,
+                "Line": 164,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 615,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 616,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1738,
+                "Line": 164,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "123.i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 617,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 618,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 619,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1745,
+                "Line": 165,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 620,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 621,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1749,
+                "Line": 165,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0123.i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 622,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 623,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 624,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1757,
+                "Line": 166,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 625,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 626,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1761,
+                "Line": 166,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "000123.i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 627,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 628,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 629,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1772,
+                "Line": 168,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 630,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 631,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1776,
+                "Line": 168,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0e0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 632,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 633,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 634,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1782,
+                "Line": 169,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 635,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 636,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1786,
+                "Line": 169,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "123e0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 637,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 638,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 639,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1794,
+                "Line": 170,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 640,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 641,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1798,
+                "Line": 170,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0123E0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 642,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 643,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 644,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1807,
+                "Line": 171,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 645,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 646,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1811,
+                "Line": 171,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "000123E0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 647,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 648,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 649,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1823,
+                "Line": 173,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 650,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 651,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1827,
+                "Line": 173,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0.e+1i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 652,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 653,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 654,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1835,
+                "Line": 174,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 655,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 656,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1839,
+                "Line": 174,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "123.E-1_0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 657,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 658,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 659,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1851,
+                "Line": 175,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 660,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 661,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1855,
+                "Line": 175,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "01_23.e123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 662,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 663,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 664,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1868,
+                "Line": 176,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 665,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 666,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1872,
+                "Line": 176,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "00_01_23.e123i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 667,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 668,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 669,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1889,
+                "Line": 178,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 670,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 671,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1893,
+                "Line": 178,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0b1010i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 672,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 673,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 674,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1902,
+                "Line": 179,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 675,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 676,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1906,
+                "Line": 179,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0B1010i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 677,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 678,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 679,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1915,
+                "Line": 180,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 680,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 681,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1919,
+                "Line": 180,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0o660i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 682,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 683,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 684,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1927,
+                "Line": 181,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 685,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 686,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1931,
+                "Line": 181,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0O660i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 687,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 688,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 689,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1939,
+                "Line": 182,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 690,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 691,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1943,
+                "Line": 182,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0xabcDEFi"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 692,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 693,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 694,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1954,
+                "Line": 183,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 695,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 696,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1958,
+                "Line": 183,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0XabcDEFi"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 697,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 698,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 699,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1969,
+                "Line": 184,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 700,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 701,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1973,
+                "Line": 184,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0xabcDEFP0i"
+            }
+          ]
+        },
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 702,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 703,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 704,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1986,
+                "Line": 185,
+                "Column": 2
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "BasicLit",
+              "RefId": 705,
+              "ValuePos": {
+                "NodeType": "Position",
+                "RefId": 706,
+                "Filename": "testdata/go2numbers.input",
+                "Offset": 1990,
+                "Line": 185,
+                "Column": 6
+              },
+              "Kind": "IMAG",
+              "Value": "0XabcDEFp0i"
+            }
+          ]
+        }
+      ],
+      "Rparen": {
+        "NodeType": "Position",
+        "RefId": 707,
+        "Filename": "testdata/go2numbers.input",
+        "Offset": 2002,
+        "Line": 186,
+        "Column": 1
+      }
+    }
+  ],
+  "Imports": null,
+  "Unresolved": null,
+  "Comments": [
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 9,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 10,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 11,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 20,
+            "Line": 4,
+            "Column": 2
+          },
+          "Text": "// 0-octals"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 37,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 38,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 39,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 90,
+            "Line": 12,
+            "Column": 2
+          },
+          "Text": "// decimals"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 65,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 66,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 67,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 161,
+            "Line": 20,
+            "Column": 2
+          },
+          "Text": "// hexadecimals"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 113,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 114,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 115,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 296,
+            "Line": 33,
+            "Column": 2
+          },
+          "Text": "// octals"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 176,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 177,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 178,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 465,
+            "Line": 50,
+            "Column": 2
+          },
+          "Text": "// binaries"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 224,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 225,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 226,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 596,
+            "Line": 63,
+            "Column": 2
+          },
+          "Text": "// decimal floats"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 427,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 428,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 429,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 1138,
+            "Line": 118,
+            "Column": 2
+          },
+          "Text": "// hexadecimal floats"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 515,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 516,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 517,
+            "Filename": "testdata/go2numbers.input",
+            "Offset": 1466,
+            "Line": 142,
+            "Column": 2
+          },
+          "Text": "// imaginaries"
+        }
+      ]
+    }
+  ],
+  "FileSet": {
+    "Base": 2006,
+    "Files": [
+      {
+        "Name": "testdata/go2numbers.input",
+        "Base": 1,
+        "Size": 2004,
+        "Lines": [
+          0,
+          10,
+          11,
+          19,
+          32,
+          39,
+          49,
+          62,
+          63,
+          74,
+          88,
+          89,
+          102,
+          109,
+          119,
+          132,
+          133,
+          144,
+          159,
+          160,
+          177,
+          186,
+          198,
+          214,
+          215,
+          224,
+          236,
+          252,
+          253,
+          263,
+          276,
+          294,
+          295,
+          306,
+          315,
+          327,
+          343,
+          344,
+          353,
+          365,
+          381,
+          382,
+          392,
+          405,
+          422,
+          423,
+          433,
+          446,
+          463,
+          464,
+          477,
+          486,
+          498,
+          514,
+          515,
+          524,
+          536,
+          552,
+          553,
+          563,
+          576,
+          594,
+          595,
+          614,
+          622,
+          632,
+          643,
+          644,
+          652,
+          662,
+          673,
+          674,
+          683,
+          695,
+          708,
+          709,
+          719,
+          731,
+          745,
+          746,
+          757,
+          771,
+          786,
+          787,
+          798,
+          812,
+          827,
+          828,
+          837,
+          850,
+          865,
+          866,
+          877,
+          894,
+          914,
+          915,
+          927,
+          939,
+          940,
+          951,
+          964,
+          977,
+          978,
+          990,
+          1004,
+          1020,
+          1021,
+          1032,
+          1047,
+          1063,
+          1064,
+          1075,
+          1089,
+          1104,
+          1105,
+          1120,
+          1136,
+          1137,
+          1160,
+          1173,
+          1194,
+          1211,
+          1212,
+          1225,
+          1244,
+          1261,
+          1262,
+          1273,
+          1292,
+          1308,
+          1309,
+          1322,
+          1342,
+          1359,
+          1360,
+          1380,
+          1397,
+          1398,
+          1421,
+          1441,
+          1464,
+          1465,
+          1481,
+          1489,
+          1498,
+          1507,
+          1524,
+          1535,
+          1552,
+          1569,
+          1580,
+          1594,
+          1595,
+          1603,
+          1613,
+          1623,
+          1643,
+          1655,
+          1675,
+          1695,
+          1707,
+          1723,
+          1724,
+          1733,
+          1744,
+          1756,
+          1770,
+          1771,
+          1781,
+          1793,
+          1806,
+          1821,
+          1822,
+          1834,
+          1850,
+          1867,
+          1887,
+          1888,
+          1901,
+          1914,
+          1926,
+          1938,
+          1953,
+          1968,
+          1985,
+          2002
+        ],
+        "Infos": null
+      }
+    ]
+  }
+}

@@ -26,6 +26,7 @@
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
+    <ProjectReference Include="..\..\go2cs.Common\go2cs.Common.csproj" />
 
     <ProjectReference Include="..\..\gocore\golib\golib.csproj" />
   </ItemGroup>

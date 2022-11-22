@@ -1,0 +1,5051 @@
+{
+  "NodeType": "File",
+  "RefId": 1,
+  "Doc": {
+    "NodeType": "CommentGroup",
+    "RefId": 2,
+    "List": [
+      {
+        "NodeType": "Comment",
+        "RefId": 3,
+        "Slash": {
+          "NodeType": "Position",
+          "RefId": 4,
+          "Filename": "testdata/comments2.input",
+          "Offset": 160,
+          "Line": 5,
+          "Column": 1
+        },
+        "Text": "// This is a package for testing comment placement by go/printer."
+      },
+      {
+        "NodeType": "Comment",
+        "RefId": 5,
+        "Slash": {
+          "NodeType": "Position",
+          "RefId": 6,
+          "Filename": "testdata/comments2.input",
+          "Offset": 226,
+          "Line": 6,
+          "Column": 1
+        },
+        "Text": "//"
+      }
+    ]
+  },
+  "Package": {
+    "NodeType": "Position",
+    "RefId": 7,
+    "Filename": "testdata/comments2.input",
+    "Offset": 229,
+    "Line": 7,
+    "Column": 1
+  },
+  "Name": {
+    "NodeType": "Ident",
+    "RefId": 8,
+    "NamePos": {
+      "NodeType": "Position",
+      "RefId": 9,
+      "Filename": "testdata/comments2.input",
+      "Offset": 237,
+      "Line": 7,
+      "Column": 9
+    },
+    "Name": "main"
+  },
+  "Decls": [
+    {
+      "NodeType": "FuncDecl",
+      "RefId": 10,
+      "Recv": null,
+      "Name": {
+        "NodeType": "Ident",
+        "RefId": 11,
+        "NamePos": {
+          "NodeType": "Position",
+          "RefId": 12,
+          "Filename": "testdata/comments2.input",
+          "Offset": 403,
+          "Line": 29,
+          "Column": 6
+        },
+        "Name": "f"
+      },
+      "Type": {
+        "NodeType": "FuncType",
+        "RefId": 13,
+        "Func": {
+          "NodeType": "Position",
+          "RefId": 14,
+          "Filename": "testdata/comments2.input",
+          "Offset": 398,
+          "Line": 29,
+          "Column": 1
+        },
+        "TypeParams": null,
+        "Params": {
+          "NodeType": "FieldList",
+          "RefId": 15,
+          "Opening": {
+            "NodeType": "Position",
+            "RefId": 16,
+            "Filename": "testdata/comments2.input",
+            "Offset": 404,
+            "Line": 29,
+            "Column": 7
+          },
+          "List": null,
+          "Closing": {
+            "NodeType": "Position",
+            "RefId": 17,
+            "Filename": "testdata/comments2.input",
+            "Offset": 405,
+            "Line": 29,
+            "Column": 8
+          }
+        },
+        "Results": null
+      },
+      "Body": {
+        "NodeType": "BlockStmt",
+        "RefId": 18,
+        "Lbrace": {
+          "NodeType": "Position",
+          "RefId": 19,
+          "Filename": "testdata/comments2.input",
+          "Offset": 407,
+          "Line": 29,
+          "Column": 10
+        },
+        "List": null,
+        "Rbrace": {
+          "NodeType": "Position",
+          "RefId": 20,
+          "Filename": "testdata/comments2.input",
+          "Offset": 497,
+          "Line": 48,
+          "Column": 1
+        }
+      }
+    },
+    {
+      "NodeType": "FuncDecl",
+      "RefId": 21,
+      "Recv": null,
+      "Name": {
+        "NodeType": "Ident",
+        "RefId": 22,
+        "NamePos": {
+          "NodeType": "Position",
+          "RefId": 23,
+          "Filename": "testdata/comments2.input",
+          "Offset": 505,
+          "Line": 50,
+          "Column": 6
+        },
+        "Name": "g"
+      },
+      "Type": {
+        "NodeType": "FuncType",
+        "RefId": 24,
+        "Func": {
+          "NodeType": "Position",
+          "RefId": 25,
+          "Filename": "testdata/comments2.input",
+          "Offset": 500,
+          "Line": 50,
+          "Column": 1
+        },
+        "TypeParams": null,
+        "Params": {
+          "NodeType": "FieldList",
+          "RefId": 26,
+          "Opening": {
+            "NodeType": "Position",
+            "RefId": 27,
+            "Filename": "testdata/comments2.input",
+            "Offset": 506,
+            "Line": 50,
+            "Column": 7
+          },
+          "List": null,
+          "Closing": {
+            "NodeType": "Position",
+            "RefId": 28,
+            "Filename": "testdata/comments2.input",
+            "Offset": 507,
+            "Line": 50,
+            "Column": 8
+          }
+        },
+        "Results": null
+      },
+      "Body": {
+        "NodeType": "BlockStmt",
+        "RefId": 29,
+        "Lbrace": {
+          "NodeType": "Position",
+          "RefId": 30,
+          "Filename": "testdata/comments2.input",
+          "Offset": 509,
+          "Line": 50,
+          "Column": 10
+        },
+        "List": null,
+        "Rbrace": {
+          "NodeType": "Position",
+          "RefId": 31,
+          "Filename": "testdata/comments2.input",
+          "Offset": 599,
+          "Line": 69,
+          "Column": 1
+        }
+      }
+    },
+    {
+      "NodeType": "FuncDecl",
+      "RefId": 32,
+      "Doc": {
+        "NodeType": "CommentGroup",
+        "RefId": 33,
+        "List": [
+          {
+            "NodeType": "Comment",
+            "RefId": 34,
+            "Slash": {
+              "NodeType": "Position",
+              "RefId": 35,
+              "Filename": "testdata/comments2.input",
+              "Offset": 602,
+              "Line": 71,
+              "Column": 1
+            },
+            "Text": "// Test case taken literally from issue 1835."
+          }
+        ]
+      },
+      "Recv": null,
+      "Name": {
+        "NodeType": "Ident",
+        "RefId": 36,
+        "NamePos": {
+          "NodeType": "Position",
+          "RefId": 37,
+          "Filename": "testdata/comments2.input",
+          "Offset": 653,
+          "Line": 72,
+          "Column": 6
+        },
+        "Name": "main"
+      },
+      "Type": {
+        "NodeType": "FuncType",
+        "RefId": 38,
+        "Func": {
+          "NodeType": "Position",
+          "RefId": 39,
+          "Filename": "testdata/comments2.input",
+          "Offset": 648,
+          "Line": 72,
+          "Column": 1
+        },
+        "TypeParams": null,
+        "Params": {
+          "NodeType": "FieldList",
+          "RefId": 40,
+          "Opening": {
+            "NodeType": "Position",
+            "RefId": 41,
+            "Filename": "testdata/comments2.input",
+            "Offset": 657,
+            "Line": 72,
+            "Column": 10
+          },
+          "List": null,
+          "Closing": {
+            "NodeType": "Position",
+            "RefId": 42,
+            "Filename": "testdata/comments2.input",
+            "Offset": 658,
+            "Line": 72,
+            "Column": 11
+          }
+        },
+        "Results": null
+      },
+      "Body": {
+        "NodeType": "BlockStmt",
+        "RefId": 43,
+        "Lbrace": {
+          "NodeType": "Position",
+          "RefId": 44,
+          "Filename": "testdata/comments2.input",
+          "Offset": 660,
+          "Line": 72,
+          "Column": 13
+        },
+        "List": [
+          {
+            "NodeType": "ForStmt",
+            "RefId": 45,
+            "For": {
+              "NodeType": "Position",
+              "RefId": 46,
+              "Filename": "testdata/comments2.input",
+              "Offset": 691,
+              "Line": 76,
+              "Column": 4
+            },
+            "Init": {
+              "NodeType": "AssignStmt",
+              "RefId": 47,
+              "Lhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 48,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 49,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 695,
+                    "Line": 76,
+                    "Column": 8
+                  },
+                  "Name": "i"
+                }
+              ],
+              "TokPos": {
+                "NodeType": "Position",
+                "RefId": 50,
+                "Filename": "testdata/comments2.input",
+                "Offset": 697,
+                "Line": 76,
+                "Column": 10
+              },
+              "Tok": ":=",
+              "Rhs": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 51,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 52,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 700,
+                    "Line": 76,
+                    "Column": 13
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ]
+            },
+            "Cond": {
+              "NodeType": "BinaryExpr",
+              "RefId": 53,
+              "X": {
+                "NodeType": "Ident",
+                "RefId": 54,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 55,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 703,
+                  "Line": 76,
+                  "Column": 16
+                },
+                "Name": "i"
+              },
+              "OpPos": {
+                "NodeType": "Position",
+                "RefId": 56,
+                "Filename": "testdata/comments2.input",
+                "Offset": 705,
+                "Line": 76,
+                "Column": 18
+              },
+              "Op": "\u003c",
+              "Y": {
+                "NodeType": "BasicLit",
+                "RefId": 57,
+                "ValuePos": {
+                  "NodeType": "Position",
+                  "RefId": 58,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 707,
+                  "Line": 76,
+                  "Column": 20
+                },
+                "Kind": "INT",
+                "Value": "5"
+              }
+            },
+            "Post": {
+              "NodeType": "IncDecStmt",
+              "RefId": 59,
+              "X": {
+                "NodeType": "Ident",
+                "RefId": 60,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 61,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 710,
+                  "Line": 76,
+                  "Column": 23
+                },
+                "Name": "i"
+              },
+              "TokPos": {
+                "NodeType": "Position",
+                "RefId": 62,
+                "Filename": "testdata/comments2.input",
+                "Offset": 711,
+                "Line": 76,
+                "Column": 24
+              },
+              "Tok": "++"
+            },
+            "Body": {
+              "NodeType": "BlockStmt",
+              "RefId": 63,
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 64,
+                "Filename": "testdata/comments2.input",
+                "Offset": 714,
+                "Line": 76,
+                "Column": 27
+              },
+              "List": [
+                {
+                  "NodeType": "ExprStmt",
+                  "RefId": 65,
+                  "X": {
+                    "NodeType": "CallExpr",
+                    "RefId": 66,
+                    "Fun": {
+                      "NodeType": "Ident",
+                      "RefId": 67,
+                      "NamePos": {
+                        "NodeType": "Position",
+                        "RefId": 68,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 722,
+                        "Line": 77,
+                        "Column": 7
+                      },
+                      "Name": "println"
+                    },
+                    "Lparen": {
+                      "NodeType": "Position",
+                      "RefId": 69,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 729,
+                      "Line": 77,
+                      "Column": 14
+                    },
+                    "Args": [
+                      {
+                        "NodeType": "BasicLit",
+                        "RefId": 70,
+                        "ValuePos": {
+                          "NodeType": "Position",
+                          "RefId": 71,
+                          "Filename": "testdata/comments2.input",
+                          "Offset": 730,
+                          "Line": 77,
+                          "Column": 15
+                        },
+                        "Kind": "STRING",
+                        "Value": "\"test\""
+                      }
+                    ],
+                    "Rparen": {
+                      "NodeType": "Position",
+                      "RefId": 72,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 736,
+                      "Line": 77,
+                      "Column": 21
+                    }
+                  }
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 73,
+                "Filename": "testdata/comments2.input",
+                "Offset": 741,
+                "Line": 78,
+                "Column": 4
+              }
+            }
+          }
+        ],
+        "Rbrace": {
+          "NodeType": "Position",
+          "RefId": 74,
+          "Filename": "testdata/comments2.input",
+          "Offset": 743,
+          "Line": 79,
+          "Column": 1
+        }
+      }
+    },
+    {
+      "NodeType": "FuncDecl",
+      "RefId": 75,
+      "Recv": null,
+      "Name": {
+        "NodeType": "Ident",
+        "RefId": 76,
+        "NamePos": {
+          "NodeType": "Position",
+          "RefId": 77,
+          "Filename": "testdata/comments2.input",
+          "Offset": 751,
+          "Line": 81,
+          "Column": 6
+        },
+        "Name": "issue5623"
+      },
+      "Type": {
+        "NodeType": "FuncType",
+        "RefId": 78,
+        "Func": {
+          "NodeType": "Position",
+          "RefId": 79,
+          "Filename": "testdata/comments2.input",
+          "Offset": 746,
+          "Line": 81,
+          "Column": 1
+        },
+        "TypeParams": null,
+        "Params": {
+          "NodeType": "FieldList",
+          "RefId": 80,
+          "Opening": {
+            "NodeType": "Position",
+            "RefId": 81,
+            "Filename": "testdata/comments2.input",
+            "Offset": 760,
+            "Line": 81,
+            "Column": 15
+          },
+          "List": null,
+          "Closing": {
+            "NodeType": "Position",
+            "RefId": 82,
+            "Filename": "testdata/comments2.input",
+            "Offset": 761,
+            "Line": 81,
+            "Column": 16
+          }
+        },
+        "Results": null
+      },
+      "Body": {
+        "NodeType": "BlockStmt",
+        "RefId": 83,
+        "Lbrace": {
+          "NodeType": "Position",
+          "RefId": 84,
+          "Filename": "testdata/comments2.input",
+          "Offset": 763,
+          "Line": 81,
+          "Column": 18
+        },
+        "List": [
+          {
+            "NodeType": "LabeledStmt",
+            "RefId": 85,
+            "Label": {
+              "NodeType": "Ident",
+              "RefId": 86,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 87,
+                "Filename": "testdata/comments2.input",
+                "Offset": 765,
+                "Line": 82,
+                "Column": 1
+              },
+              "Name": "L"
+            },
+            "Colon": {
+              "NodeType": "Position",
+              "RefId": 88,
+              "Filename": "testdata/comments2.input",
+              "Offset": 766,
+              "Line": 82,
+              "Column": 2
+            },
+            "Stmt": {
+              "NodeType": "AssignStmt",
+              "RefId": 89,
+              "Lhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 90,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 91,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 771,
+                    "Line": 83,
+                    "Column": 4
+                  },
+                  "Name": "_"
+                }
+              ],
+              "TokPos": {
+                "NodeType": "Position",
+                "RefId": 92,
+                "Filename": "testdata/comments2.input",
+                "Offset": 773,
+                "Line": 83,
+                "Column": 6
+              },
+              "Tok": "=",
+              "Rhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 93,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 94,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 775,
+                    "Line": 83,
+                    "Column": 8
+                  },
+                  "Name": "yyyyyyyyyyyyyyyy"
+                }
+              ]
+            }
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 95,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 96,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 97,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 826,
+                  "Line": 84,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 98,
+              "Filename": "testdata/comments2.input",
+              "Offset": 828,
+              "Line": 84,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 99,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 100,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 830,
+                  "Line": 84,
+                  "Column": 8
+                },
+                "Name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              }
+            ]
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 101,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 102,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 103,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 877,
+                  "Line": 86,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 104,
+              "Filename": "testdata/comments2.input",
+              "Offset": 879,
+              "Line": 86,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 105,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 106,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 881,
+                  "Line": 86,
+                  "Column": 8
+                },
+                "Name": "yyyyyyyyyyyyyyyy"
+              }
+            ]
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 107,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 108,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 109,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 935,
+                  "Line": 87,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 110,
+              "Filename": "testdata/comments2.input",
+              "Offset": 937,
+              "Line": 87,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 111,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 112,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 939,
+                  "Line": 87,
+                  "Column": 8
+                },
+                "Name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              }
+            ]
+          },
+          {
+            "NodeType": "LabeledStmt",
+            "RefId": 113,
+            "Label": {
+              "NodeType": "Ident",
+              "RefId": 114,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 115,
+                "Filename": "testdata/comments2.input",
+                "Offset": 980,
+                "Line": 89,
+                "Column": 1
+              },
+              "Name": "LLLLLLL"
+            },
+            "Colon": {
+              "NodeType": "Position",
+              "RefId": 116,
+              "Filename": "testdata/comments2.input",
+              "Offset": 987,
+              "Line": 89,
+              "Column": 8
+            },
+            "Stmt": {
+              "NodeType": "AssignStmt",
+              "RefId": 117,
+              "Lhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 118,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 119,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 992,
+                    "Line": 90,
+                    "Column": 4
+                  },
+                  "Name": "_"
+                }
+              ],
+              "TokPos": {
+                "NodeType": "Position",
+                "RefId": 120,
+                "Filename": "testdata/comments2.input",
+                "Offset": 994,
+                "Line": 90,
+                "Column": 6
+              },
+              "Tok": "=",
+              "Rhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 121,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 122,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 996,
+                    "Line": 90,
+                    "Column": 8
+                  },
+                  "Name": "yyyyyyyyyyyyyyyy"
+                }
+              ]
+            }
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 123,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 124,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 125,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1047,
+                  "Line": 91,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 126,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1049,
+              "Line": 91,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 127,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 128,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1051,
+                  "Line": 91,
+                  "Column": 8
+                },
+                "Name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              }
+            ]
+          },
+          {
+            "NodeType": "LabeledStmt",
+            "RefId": 129,
+            "Label": {
+              "NodeType": "Ident",
+              "RefId": 130,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 131,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1092,
+                "Line": 93,
+                "Column": 1
+              },
+              "Name": "LL"
+            },
+            "Colon": {
+              "NodeType": "Position",
+              "RefId": 132,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1094,
+              "Line": 93,
+              "Column": 3
+            },
+            "Stmt": {
+              "NodeType": "LabeledStmt",
+              "RefId": 133,
+              "Label": {
+                "NodeType": "Ident",
+                "RefId": 134,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 135,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1096,
+                  "Line": 94,
+                  "Column": 1
+                },
+                "Name": "LLLLL"
+              },
+              "Colon": {
+                "NodeType": "Position",
+                "RefId": 136,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1101,
+                "Line": 94,
+                "Column": 6
+              },
+              "Stmt": {
+                "NodeType": "AssignStmt",
+                "RefId": 137,
+                "Lhs": [
+                  {
+                    "NodeType": "Ident",
+                    "RefId": 138,
+                    "NamePos": {
+                      "NodeType": "Position",
+                      "RefId": 139,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1106,
+                      "Line": 95,
+                      "Column": 4
+                    },
+                    "Name": "_"
+                  }
+                ],
+                "TokPos": {
+                  "NodeType": "Position",
+                  "RefId": 140,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1108,
+                  "Line": 95,
+                  "Column": 6
+                },
+                "Tok": "=",
+                "Rhs": [
+                  {
+                    "NodeType": "Ident",
+                    "RefId": 141,
+                    "NamePos": {
+                      "NodeType": "Position",
+                      "RefId": 142,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1110,
+                      "Line": 95,
+                      "Column": 8
+                    },
+                    "Name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 143,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 144,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 145,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1156,
+                  "Line": 96,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 146,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1158,
+              "Line": 96,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 147,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 148,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1160,
+                  "Line": 96,
+                  "Column": 8
+                },
+                "Name": "yyyyyyyyyyyyyyyy"
+              }
+            ]
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 149,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 150,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 151,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1215,
+                  "Line": 98,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 152,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1217,
+              "Line": 98,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 153,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 154,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1219,
+                  "Line": 98,
+                  "Column": 8
+                },
+                "Name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              }
+            ]
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 155,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 156,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 157,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1262,
+                  "Line": 99,
+                  "Column": 4
+                },
+                "Name": "_"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 158,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1264,
+              "Line": 99,
+              "Column": 6
+            },
+            "Tok": "=",
+            "Rhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 159,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 160,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1266,
+                  "Line": 99,
+                  "Column": 8
+                },
+                "Name": "yyyyyyyyyyyyyyyy"
+              }
+            ]
+          },
+          {
+            "NodeType": "LabeledStmt",
+            "RefId": 161,
+            "Label": {
+              "NodeType": "Ident",
+              "RefId": 162,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 163,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1339,
+                "Line": 102,
+                "Column": 1
+              },
+              "Name": "label"
+            },
+            "Colon": {
+              "NodeType": "Position",
+              "RefId": 164,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1344,
+              "Line": 102,
+              "Column": 6
+            },
+            "Stmt": {
+              "NodeType": "AssignStmt",
+              "RefId": 165,
+              "Lhs": [
+                {
+                  "NodeType": "Ident",
+                  "RefId": 166,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 167,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1349,
+                    "Line": 103,
+                    "Column": 4
+                  },
+                  "Name": "mask"
+                }
+              ],
+              "TokPos": {
+                "NodeType": "Position",
+                "RefId": 168,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1354,
+                "Line": 103,
+                "Column": 9
+              },
+              "Tok": ":=",
+              "Rhs": [
+                {
+                  "NodeType": "BinaryExpr",
+                  "RefId": 169,
+                  "X": {
+                    "NodeType": "BinaryExpr",
+                    "RefId": 170,
+                    "X": {
+                      "NodeType": "CallExpr",
+                      "RefId": 171,
+                      "Fun": {
+                        "NodeType": "Ident",
+                        "RefId": 172,
+                        "NamePos": {
+                          "NodeType": "Position",
+                          "RefId": 173,
+                          "Filename": "testdata/comments2.input",
+                          "Offset": 1357,
+                          "Line": 103,
+                          "Column": 12
+                        },
+                        "Name": "uint64"
+                      },
+                      "Lparen": {
+                        "NodeType": "Position",
+                        "RefId": 174,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1363,
+                        "Line": 103,
+                        "Column": 18
+                      },
+                      "Args": [
+                        {
+                          "NodeType": "BasicLit",
+                          "RefId": 175,
+                          "ValuePos": {
+                            "NodeType": "Position",
+                            "RefId": 176,
+                            "Filename": "testdata/comments2.input",
+                            "Offset": 1364,
+                            "Line": 103,
+                            "Column": 19
+                          },
+                          "Kind": "INT",
+                          "Value": "1"
+                        }
+                      ],
+                      "Rparen": {
+                        "NodeType": "Position",
+                        "RefId": 177,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1365,
+                        "Line": 103,
+                        "Column": 20
+                      }
+                    },
+                    "OpPos": {
+                      "NodeType": "Position",
+                      "RefId": 178,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1366,
+                      "Line": 103,
+                      "Column": 21
+                    },
+                    "Op": "\u003c\u003c",
+                    "Y": {
+                      "NodeType": "Ident",
+                      "RefId": 179,
+                      "NamePos": {
+                        "NodeType": "Position",
+                        "RefId": 180,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1368,
+                        "Line": 103,
+                        "Column": 23
+                      },
+                      "Name": "c"
+                    }
+                  },
+                  "OpPos": {
+                    "NodeType": "Position",
+                    "RefId": 181,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1370,
+                    "Line": 103,
+                    "Column": 25
+                  },
+                  "Op": "-",
+                  "Y": {
+                    "NodeType": "BasicLit",
+                    "RefId": 182,
+                    "ValuePos": {
+                      "NodeType": "Position",
+                      "RefId": 183,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1372,
+                      "Line": 103,
+                      "Column": 27
+                    },
+                    "Kind": "INT",
+                    "Value": "1"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "NodeType": "AssignStmt",
+            "RefId": 184,
+            "Lhs": [
+              {
+                "NodeType": "Ident",
+                "RefId": 185,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 186,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1396,
+                  "Line": 104,
+                  "Column": 4
+                },
+                "Name": "used"
+              }
+            ],
+            "TokPos": {
+              "NodeType": "Position",
+              "RefId": 187,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1401,
+              "Line": 104,
+              "Column": 9
+            },
+            "Tok": ":=",
+            "Rhs": [
+              {
+                "NodeType": "CallExpr",
+                "RefId": 188,
+                "Fun": {
+                  "NodeType": "SelectorExpr",
+                  "RefId": 189,
+                  "X": {
+                    "NodeType": "Ident",
+                    "RefId": 190,
+                    "NamePos": {
+                      "NodeType": "Position",
+                      "RefId": 191,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1404,
+                      "Line": 104,
+                      "Column": 12
+                    },
+                    "Name": "atomic"
+                  },
+                  "Sel": {
+                    "NodeType": "Ident",
+                    "RefId": 192,
+                    "NamePos": {
+                      "NodeType": "Position",
+                      "RefId": 193,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1411,
+                      "Line": 104,
+                      "Column": 19
+                    },
+                    "Name": "LoadUint64"
+                  }
+                },
+                "Lparen": {
+                  "NodeType": "Position",
+                  "RefId": 194,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1421,
+                  "Line": 104,
+                  "Column": 29
+                },
+                "Args": [
+                  {
+                    "NodeType": "UnaryExpr",
+                    "RefId": 195,
+                    "OpPos": {
+                      "NodeType": "Position",
+                      "RefId": 196,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1422,
+                      "Line": 104,
+                      "Column": 30
+                    },
+                    "Op": "\u0026",
+                    "X": {
+                      "NodeType": "SelectorExpr",
+                      "RefId": 197,
+                      "X": {
+                        "NodeType": "Ident",
+                        "RefId": 198,
+                        "NamePos": {
+                          "NodeType": "Position",
+                          "RefId": 199,
+                          "Filename": "testdata/comments2.input",
+                          "Offset": 1423,
+                          "Line": 104,
+                          "Column": 31
+                        },
+                        "Name": "h"
+                      },
+                      "Sel": {
+                        "NodeType": "Ident",
+                        "RefId": 200,
+                        "NamePos": {
+                          "NodeType": "Position",
+                          "RefId": 201,
+                          "Filename": "testdata/comments2.input",
+                          "Offset": 1425,
+                          "Line": 104,
+                          "Column": 33
+                        },
+                        "Name": "used"
+                      }
+                    }
+                  }
+                ],
+                "Rparen": {
+                  "NodeType": "Position",
+                  "RefId": 202,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1429,
+                  "Line": 104,
+                  "Column": 37
+                }
+              }
+            ]
+          }
+        ],
+        "Rbrace": {
+          "NodeType": "Position",
+          "RefId": 203,
+          "Filename": "testdata/comments2.input",
+          "Offset": 1454,
+          "Line": 105,
+          "Column": 1
+        }
+      }
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 204,
+      "Doc": {
+        "NodeType": "CommentGroup",
+        "RefId": 205,
+        "List": [
+          {
+            "NodeType": "Comment",
+            "RefId": 206,
+            "Slash": {
+              "NodeType": "Position",
+              "RefId": 207,
+              "Filename": "testdata/comments2.input",
+              "Offset": 1457,
+              "Line": 107,
+              "Column": 1
+            },
+            "Text": "// Test cases for issue 18782"
+          }
+        ]
+      },
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 208,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1487,
+        "Line": 108,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 209,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 210,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 211,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1491,
+                "Line": 108,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 212,
+              "Type": {
+                "NodeType": "ArrayType",
+                "RefId": 213,
+                "Lbrack": {
+                  "NodeType": "Position",
+                  "RefId": 214,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1495,
+                  "Line": 108,
+                  "Column": 9
+                },
+                "Len": null,
+                "Elt": {
+                  "NodeType": "ArrayType",
+                  "RefId": 215,
+                  "Lbrack": {
+                    "NodeType": "Position",
+                    "RefId": 216,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1497,
+                    "Line": 108,
+                    "Column": 11
+                  },
+                  "Len": null,
+                  "Elt": {
+                    "NodeType": "Ident",
+                    "RefId": 217,
+                    "NamePos": {
+                      "NodeType": "Position",
+                      "RefId": 218,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 1499,
+                      "Line": 108,
+                      "Column": 13
+                    },
+                    "Name": "int"
+                  }
+                }
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 219,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1502,
+                "Line": 108,
+                "Column": 16
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 220,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 221,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1544,
+                    "Line": 110,
+                    "Column": 12
+                  },
+                  "Elts": [
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 222,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 223,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1545,
+                        "Line": 110,
+                        "Column": 13
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 224,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 225,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1548,
+                        "Line": 110,
+                        "Column": 16
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 226,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 227,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1551,
+                        "Line": 110,
+                        "Column": 19
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 228,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 229,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1554,
+                        "Line": 110,
+                        "Column": 22
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 230,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 231,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1557,
+                        "Line": 110,
+                        "Column": 25
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    }
+                  ],
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 232,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1558,
+                    "Line": 110,
+                    "Column": 26
+                  },
+                  "Incomplete": false
+                },
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 233,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 234,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1572,
+                    "Line": 111,
+                    "Column": 12
+                  },
+                  "Elts": [
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 235,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 236,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1573,
+                        "Line": 111,
+                        "Column": 13
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 237,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 238,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1576,
+                        "Line": 111,
+                        "Column": 16
+                      },
+                      "Kind": "INT",
+                      "Value": "5"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 239,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 240,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1579,
+                        "Line": 111,
+                        "Column": 19
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 241,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 242,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1582,
+                        "Line": 111,
+                        "Column": 22
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 243,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 244,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1585,
+                        "Line": 111,
+                        "Column": 25
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    }
+                  ],
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 245,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1586,
+                    "Line": 111,
+                    "Column": 26
+                  },
+                  "Incomplete": false
+                },
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 246,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 247,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1600,
+                    "Line": 112,
+                    "Column": 12
+                  },
+                  "Elts": [
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 248,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 249,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1601,
+                        "Line": 112,
+                        "Column": 13
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 250,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 251,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1604,
+                        "Line": 112,
+                        "Column": 16
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 252,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 253,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1607,
+                        "Line": 112,
+                        "Column": 19
+                      },
+                      "Kind": "INT",
+                      "Value": "5"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 254,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 255,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1610,
+                        "Line": 112,
+                        "Column": 22
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 256,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 257,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1613,
+                        "Line": 112,
+                        "Column": 25
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    }
+                  ],
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 258,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1614,
+                    "Line": 112,
+                    "Column": 26
+                  },
+                  "Incomplete": false
+                },
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 259,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 260,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1628,
+                    "Line": 113,
+                    "Column": 12
+                  },
+                  "Elts": [
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 261,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 262,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1629,
+                        "Line": 113,
+                        "Column": 13
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 263,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 264,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1632,
+                        "Line": 113,
+                        "Column": 16
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 265,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 266,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1635,
+                        "Line": 113,
+                        "Column": 19
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 267,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 268,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1638,
+                        "Line": 113,
+                        "Column": 22
+                      },
+                      "Kind": "INT",
+                      "Value": "5"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 269,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 270,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1641,
+                        "Line": 113,
+                        "Column": 25
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    }
+                  ],
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 271,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1642,
+                    "Line": 113,
+                    "Column": 26
+                  },
+                  "Incomplete": false
+                },
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 272,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 273,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1656,
+                    "Line": 114,
+                    "Column": 12
+                  },
+                  "Elts": [
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 274,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 275,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1657,
+                        "Line": 114,
+                        "Column": 13
+                      },
+                      "Kind": "INT",
+                      "Value": "0"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 276,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 277,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1660,
+                        "Line": 114,
+                        "Column": 16
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 278,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 279,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1663,
+                        "Line": 114,
+                        "Column": 19
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 280,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 281,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1666,
+                        "Line": 114,
+                        "Column": 22
+                      },
+                      "Kind": "INT",
+                      "Value": "4"
+                    },
+                    {
+                      "NodeType": "BasicLit",
+                      "RefId": 282,
+                      "ValuePos": {
+                        "NodeType": "Position",
+                        "RefId": 283,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 1669,
+                        "Line": 114,
+                        "Column": 25
+                      },
+                      "Kind": "INT",
+                      "Value": "5"
+                    }
+                  ],
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 284,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1670,
+                    "Line": 114,
+                    "Column": 26
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 285,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1673,
+                "Line": 115,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 286,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 287,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1676,
+        "Line": 117,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 288,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 289,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 290,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1680,
+                "Line": 117,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 291,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 292,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 293,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1684,
+                  "Line": 117,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 294,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1685,
+                "Line": 117,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 295,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 296,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1695,
+                    "Line": 117,
+                    "Column": 20
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 297,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1698,
+                "Line": 118,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 298,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 299,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1701,
+        "Line": 120,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 300,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 301,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 302,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1705,
+                "Line": 120,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 303,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 304,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 305,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1709,
+                  "Line": 120,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 306,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1710,
+                "Line": 120,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 307,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 308,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1728,
+                    "Line": 120,
+                    "Column": 28
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 309,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1731,
+                "Line": 121,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 310,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 311,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1734,
+        "Line": 123,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 312,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 313,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 314,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1738,
+                "Line": 123,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 315,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 316,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 317,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1742,
+                  "Line": 123,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 318,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1743,
+                "Line": 123,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 319,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 320,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1772,
+                    "Line": 124,
+                    "Column": 12
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 321,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1775,
+                "Line": 125,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 322,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 323,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1778,
+        "Line": 127,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 324,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 325,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 326,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1782,
+                "Line": 127,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 327,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 328,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 329,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1786,
+                  "Line": 127,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 330,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1787,
+                "Line": 127,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 331,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 332,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1827,
+                    "Line": 129,
+                    "Column": 12
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 333,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1830,
+                "Line": 130,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 334,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 335,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1833,
+        "Line": 132,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 336,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 337,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 338,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1837,
+                "Line": 132,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 339,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 340,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 341,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1841,
+                  "Line": 132,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 342,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1842,
+                "Line": 132,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "BasicLit",
+                  "RefId": 343,
+                  "ValuePos": {
+                    "NodeType": "Position",
+                    "RefId": 344,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1866,
+                    "Line": 134,
+                    "Column": 12
+                  },
+                  "Kind": "INT",
+                  "Value": "0"
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 345,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1869,
+                "Line": 135,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 346,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 347,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1872,
+        "Line": 137,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 348,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 349,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 350,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1876,
+                "Line": 137,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 351,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 352,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 353,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1880,
+                  "Line": 137,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 354,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1881,
+                "Line": 137,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 355,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 356,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1891,
+                    "Line": 137,
+                    "Column": 20
+                  },
+                  "Elts": null,
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 357,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1892,
+                    "Line": 137,
+                    "Column": 21
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 358,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1895,
+                "Line": 138,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 359,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 360,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1898,
+        "Line": 140,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 361,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 362,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 363,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1902,
+                "Line": 140,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 364,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 365,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 366,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1906,
+                  "Line": 140,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 367,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1907,
+                "Line": 140,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 368,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 369,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1925,
+                    "Line": 140,
+                    "Column": 28
+                  },
+                  "Elts": null,
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 370,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1926,
+                    "Line": 140,
+                    "Column": 29
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 371,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1929,
+                "Line": 141,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 372,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 373,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1932,
+        "Line": 143,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 374,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 375,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 376,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1936,
+                "Line": 143,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 377,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 378,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 379,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1940,
+                  "Line": 143,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 380,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1941,
+                "Line": 143,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 381,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 382,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1970,
+                    "Line": 144,
+                    "Column": 12
+                  },
+                  "Elts": null,
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 383,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 1971,
+                    "Line": 144,
+                    "Column": 13
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 384,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1974,
+                "Line": 145,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 385,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 386,
+        "Filename": "testdata/comments2.input",
+        "Offset": 1977,
+        "Line": 147,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 387,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 388,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 389,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1981,
+                "Line": 147,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 390,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 391,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 392,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 1985,
+                  "Line": 147,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 393,
+                "Filename": "testdata/comments2.input",
+                "Offset": 1986,
+                "Line": 147,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 394,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 395,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 2026,
+                    "Line": 149,
+                    "Column": 12
+                  },
+                  "Elts": null,
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 396,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 2027,
+                    "Line": 149,
+                    "Column": 13
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 397,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2030,
+                "Line": 150,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 398,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 399,
+        "Filename": "testdata/comments2.input",
+        "Offset": 2033,
+        "Line": 152,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 400,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 401,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 402,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2037,
+                "Line": 152,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 403,
+              "Type": {
+                "NodeType": "Ident",
+                "RefId": 404,
+                "NamePos": {
+                  "NodeType": "Position",
+                  "RefId": 405,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 2041,
+                  "Line": 152,
+                  "Column": 9
+                },
+                "Name": "T"
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 406,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2042,
+                "Line": 152,
+                "Column": 10
+              },
+              "Elts": [
+                {
+                  "NodeType": "CompositeLit",
+                  "RefId": 407,
+                  "Type": null,
+                  "Lbrace": {
+                    "NodeType": "Position",
+                    "RefId": 408,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 2066,
+                    "Line": 154,
+                    "Column": 12
+                  },
+                  "Elts": null,
+                  "Rbrace": {
+                    "NodeType": "Position",
+                    "RefId": 409,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 2067,
+                    "Line": 154,
+                    "Column": 13
+                  },
+                  "Incomplete": false
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 410,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2070,
+                "Line": 155,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 411,
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 412,
+        "Filename": "testdata/comments2.input",
+        "Offset": 2073,
+        "Line": 157,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 413,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 414,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 415,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2077,
+                "Line": 157,
+                "Column": 5
+              },
+              "Name": "_"
+            }
+          ],
+          "Type": null,
+          "Values": [
+            {
+              "NodeType": "CompositeLit",
+              "RefId": 416,
+              "Type": {
+                "NodeType": "ArrayType",
+                "RefId": 417,
+                "Lbrack": {
+                  "NodeType": "Position",
+                  "RefId": 418,
+                  "Filename": "testdata/comments2.input",
+                  "Offset": 2081,
+                  "Line": 157,
+                  "Column": 9
+                },
+                "Len": null,
+                "Elt": {
+                  "NodeType": "Ident",
+                  "RefId": 419,
+                  "NamePos": {
+                    "NodeType": "Position",
+                    "RefId": 420,
+                    "Filename": "testdata/comments2.input",
+                    "Offset": 2083,
+                    "Line": 157,
+                    "Column": 11
+                  },
+                  "Name": "T"
+                }
+              },
+              "Lbrace": {
+                "NodeType": "Position",
+                "RefId": 421,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2084,
+                "Line": 157,
+                "Column": 12
+              },
+              "Elts": [
+                {
+                  "NodeType": "FuncLit",
+                  "RefId": 422,
+                  "Type": {
+                    "NodeType": "FuncType",
+                    "RefId": 423,
+                    "Func": {
+                      "NodeType": "Position",
+                      "RefId": 424,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 2089,
+                      "Line": 158,
+                      "Column": 4
+                    },
+                    "TypeParams": null,
+                    "Params": {
+                      "NodeType": "FieldList",
+                      "RefId": 425,
+                      "Opening": {
+                        "NodeType": "Position",
+                        "RefId": 426,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 2093,
+                        "Line": 158,
+                        "Column": 8
+                      },
+                      "List": null,
+                      "Closing": {
+                        "NodeType": "Position",
+                        "RefId": 427,
+                        "Filename": "testdata/comments2.input",
+                        "Offset": 2094,
+                        "Line": 158,
+                        "Column": 9
+                      }
+                    },
+                    "Results": null
+                  },
+                  "Body": {
+                    "NodeType": "BlockStmt",
+                    "RefId": 428,
+                    "Lbrace": {
+                      "NodeType": "Position",
+                      "RefId": 429,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 2096,
+                      "Line": 158,
+                      "Column": 11
+                    },
+                    "List": [
+                      {
+                        "NodeType": "DeclStmt",
+                        "RefId": 430,
+                        "Decl": {
+                          "NodeType": "GenDecl",
+                          "RefId": 431,
+                          "TokPos": {
+                            "NodeType": "Position",
+                            "RefId": 432,
+                            "Filename": "testdata/comments2.input",
+                            "Offset": 2104,
+                            "Line": 159,
+                            "Column": 7
+                          },
+                          "Tok": "var",
+                          "Specs": [
+                            {
+                              "NodeType": "ValueSpec",
+                              "RefId": 433,
+                              "Names": [
+                                {
+                                  "NodeType": "Ident",
+                                  "RefId": 434,
+                                  "NamePos": {
+                                    "NodeType": "Position",
+                                    "RefId": 435,
+                                    "Filename": "testdata/comments2.input",
+                                    "Offset": 2108,
+                                    "Line": 159,
+                                    "Column": 11
+                                  },
+                                  "Name": "_"
+                                }
+                              ],
+                              "Type": null,
+                              "Values": [
+                                {
+                                  "NodeType": "CompositeLit",
+                                  "RefId": 436,
+                                  "Type": {
+                                    "NodeType": "ArrayType",
+                                    "RefId": 437,
+                                    "Lbrack": {
+                                      "NodeType": "Position",
+                                      "RefId": 438,
+                                      "Filename": "testdata/comments2.input",
+                                      "Offset": 2112,
+                                      "Line": 159,
+                                      "Column": 15
+                                    },
+                                    "Len": null,
+                                    "Elt": {
+                                      "NodeType": "ArrayType",
+                                      "RefId": 439,
+                                      "Lbrack": {
+                                        "NodeType": "Position",
+                                        "RefId": 440,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2114,
+                                        "Line": 159,
+                                        "Column": 17
+                                      },
+                                      "Len": null,
+                                      "Elt": {
+                                        "NodeType": "Ident",
+                                        "RefId": 441,
+                                        "NamePos": {
+                                          "NodeType": "Position",
+                                          "RefId": 442,
+                                          "Filename": "testdata/comments2.input",
+                                          "Offset": 2116,
+                                          "Line": 159,
+                                          "Column": 19
+                                        },
+                                        "Name": "int"
+                                      }
+                                    }
+                                  },
+                                  "Lbrace": {
+                                    "NodeType": "Position",
+                                    "RefId": 443,
+                                    "Filename": "testdata/comments2.input",
+                                    "Offset": 2119,
+                                    "Line": 159,
+                                    "Column": 22
+                                  },
+                                  "Elts": [
+                                    {
+                                      "NodeType": "CompositeLit",
+                                      "RefId": 444,
+                                      "Type": null,
+                                      "Lbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 445,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2173,
+                                        "Line": 161,
+                                        "Column": 18
+                                      },
+                                      "Elts": [
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 446,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 447,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2174,
+                                            "Line": 161,
+                                            "Column": 19
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 448,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 449,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2177,
+                                            "Line": 161,
+                                            "Column": 22
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 450,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 451,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2180,
+                                            "Line": 161,
+                                            "Column": 25
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 452,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 453,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2183,
+                                            "Line": 161,
+                                            "Column": 28
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 454,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 455,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2186,
+                                            "Line": 161,
+                                            "Column": 31
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        }
+                                      ],
+                                      "Rbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 456,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2187,
+                                        "Line": 161,
+                                        "Column": 32
+                                      },
+                                      "Incomplete": false
+                                    },
+                                    {
+                                      "NodeType": "CompositeLit",
+                                      "RefId": 457,
+                                      "Type": null,
+                                      "Lbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 458,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2207,
+                                        "Line": 162,
+                                        "Column": 18
+                                      },
+                                      "Elts": [
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 459,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 460,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2208,
+                                            "Line": 162,
+                                            "Column": 19
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 461,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 462,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2211,
+                                            "Line": 162,
+                                            "Column": 22
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "5"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 463,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 464,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2214,
+                                            "Line": 162,
+                                            "Column": 25
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 465,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 466,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2217,
+                                            "Line": 162,
+                                            "Column": 28
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 467,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 468,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2220,
+                                            "Line": 162,
+                                            "Column": 31
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        }
+                                      ],
+                                      "Rbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 469,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2221,
+                                        "Line": 162,
+                                        "Column": 32
+                                      },
+                                      "Incomplete": false
+                                    },
+                                    {
+                                      "NodeType": "CompositeLit",
+                                      "RefId": 470,
+                                      "Type": null,
+                                      "Lbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 471,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2241,
+                                        "Line": 163,
+                                        "Column": 18
+                                      },
+                                      "Elts": [
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 472,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 473,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2242,
+                                            "Line": 163,
+                                            "Column": 19
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 474,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 475,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2245,
+                                            "Line": 163,
+                                            "Column": 22
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 476,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 477,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2248,
+                                            "Line": 163,
+                                            "Column": 25
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "5"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 478,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 479,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2251,
+                                            "Line": 163,
+                                            "Column": 28
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 480,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 481,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2254,
+                                            "Line": 163,
+                                            "Column": 31
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        }
+                                      ],
+                                      "Rbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 482,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2255,
+                                        "Line": 163,
+                                        "Column": 32
+                                      },
+                                      "Incomplete": false
+                                    },
+                                    {
+                                      "NodeType": "CompositeLit",
+                                      "RefId": 483,
+                                      "Type": null,
+                                      "Lbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 484,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2275,
+                                        "Line": 164,
+                                        "Column": 18
+                                      },
+                                      "Elts": [
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 485,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 486,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2276,
+                                            "Line": 164,
+                                            "Column": 19
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 487,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 488,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2279,
+                                            "Line": 164,
+                                            "Column": 22
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 489,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 490,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2282,
+                                            "Line": 164,
+                                            "Column": 25
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 491,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 492,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2285,
+                                            "Line": 164,
+                                            "Column": 28
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "5"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 493,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 494,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2288,
+                                            "Line": 164,
+                                            "Column": 31
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        }
+                                      ],
+                                      "Rbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 495,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2289,
+                                        "Line": 164,
+                                        "Column": 32
+                                      },
+                                      "Incomplete": false
+                                    },
+                                    {
+                                      "NodeType": "CompositeLit",
+                                      "RefId": 496,
+                                      "Type": null,
+                                      "Lbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 497,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2309,
+                                        "Line": 165,
+                                        "Column": 18
+                                      },
+                                      "Elts": [
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 498,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 499,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2310,
+                                            "Line": 165,
+                                            "Column": 19
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "0"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 500,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 501,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2313,
+                                            "Line": 165,
+                                            "Column": 22
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 502,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 503,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2316,
+                                            "Line": 165,
+                                            "Column": 25
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 504,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 505,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2319,
+                                            "Line": 165,
+                                            "Column": 28
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "4"
+                                        },
+                                        {
+                                          "NodeType": "BasicLit",
+                                          "RefId": 506,
+                                          "ValuePos": {
+                                            "NodeType": "Position",
+                                            "RefId": 507,
+                                            "Filename": "testdata/comments2.input",
+                                            "Offset": 2322,
+                                            "Line": 165,
+                                            "Column": 31
+                                          },
+                                          "Kind": "INT",
+                                          "Value": "5"
+                                        }
+                                      ],
+                                      "Rbrace": {
+                                        "NodeType": "Position",
+                                        "RefId": 508,
+                                        "Filename": "testdata/comments2.input",
+                                        "Offset": 2323,
+                                        "Line": 165,
+                                        "Column": 32
+                                      },
+                                      "Incomplete": false
+                                    }
+                                  ],
+                                  "Rbrace": {
+                                    "NodeType": "Position",
+                                    "RefId": 509,
+                                    "Filename": "testdata/comments2.input",
+                                    "Offset": 2332,
+                                    "Line": 166,
+                                    "Column": 7
+                                  },
+                                  "Incomplete": false
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "Rbrace": {
+                      "NodeType": "Position",
+                      "RefId": 510,
+                      "Filename": "testdata/comments2.input",
+                      "Offset": 2337,
+                      "Line": 167,
+                      "Column": 4
+                    }
+                  }
+                }
+              ],
+              "Rbrace": {
+                "NodeType": "Position",
+                "RefId": 511,
+                "Filename": "testdata/comments2.input",
+                "Offset": 2340,
+                "Line": 168,
+                "Column": 1
+              },
+              "Incomplete": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "Imports": null,
+  "Unresolved": null,
+  "Comments": [
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 512,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 513,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 514,
+            "Filename": "testdata/comments2.input",
+            "Offset": 0,
+            "Line": 1,
+            "Column": 1
+          },
+          "Text": "// Copyright 2012 The Go Authors. All rights reserved."
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 515,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 516,
+            "Filename": "testdata/comments2.input",
+            "Offset": 55,
+            "Line": 2,
+            "Column": 1
+          },
+          "Text": "// Use of this source code is governed by a BSD-style"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 517,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 518,
+            "Filename": "testdata/comments2.input",
+            "Offset": 109,
+            "Line": 3,
+            "Column": 1
+          },
+          "Text": "// license that can be found in the LICENSE file."
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 2,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 3,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 4,
+            "Filename": "testdata/comments2.input",
+            "Offset": 160,
+            "Line": 5,
+            "Column": 1
+          },
+          "Text": "// This is a package for testing comment placement by go/printer."
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 5,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 6,
+            "Filename": "testdata/comments2.input",
+            "Offset": 226,
+            "Line": 6,
+            "Column": 1
+          },
+          "Text": "//"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 519,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 520,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 521,
+            "Filename": "testdata/comments2.input",
+            "Offset": 243,
+            "Line": 9,
+            "Column": 1
+          },
+          "Text": "// Test cases for idempotent comment formatting (was issue 1835)."
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 522,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 523,
+            "Filename": "testdata/comments2.input",
+            "Offset": 309,
+            "Line": 10,
+            "Column": 1
+          },
+          "Text": "/*\nc1a\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 524,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 525,
+            "Filename": "testdata/comments2.input",
+            "Offset": 319,
+            "Line": 13,
+            "Column": 1
+          },
+          "Text": "/*\n   c1b\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 526,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 527,
+            "Filename": "testdata/comments2.input",
+            "Offset": 332,
+            "Line": 16,
+            "Column": 1
+          },
+          "Text": "/* foo\nc1c\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 528,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 529,
+            "Filename": "testdata/comments2.input",
+            "Offset": 346,
+            "Line": 19,
+            "Column": 1
+          },
+          "Text": "/* foo\n   c1d\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 530,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 531,
+            "Filename": "testdata/comments2.input",
+            "Offset": 363,
+            "Line": 22,
+            "Column": 1
+          },
+          "Text": "/*\nc1e\nfoo */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 532,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 533,
+            "Filename": "testdata/comments2.input",
+            "Offset": 377,
+            "Line": 25,
+            "Column": 1
+          },
+          "Text": "/*\n   c1f\n   foo */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 534,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 535,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 536,
+            "Filename": "testdata/comments2.input",
+            "Offset": 409,
+            "Line": 30,
+            "Column": 1
+          },
+          "Text": "/*\nc2a\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 537,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 538,
+            "Filename": "testdata/comments2.input",
+            "Offset": 419,
+            "Line": 33,
+            "Column": 1
+          },
+          "Text": "/*\n   c2b\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 539,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 540,
+            "Filename": "testdata/comments2.input",
+            "Offset": 432,
+            "Line": 36,
+            "Column": 1
+          },
+          "Text": "/* foo\nc2c\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 541,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 542,
+            "Filename": "testdata/comments2.input",
+            "Offset": 446,
+            "Line": 39,
+            "Column": 1
+          },
+          "Text": "/* foo\n   c2d\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 543,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 544,
+            "Filename": "testdata/comments2.input",
+            "Offset": 463,
+            "Line": 42,
+            "Column": 1
+          },
+          "Text": "/*\nc2e\nfoo */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 545,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 546,
+            "Filename": "testdata/comments2.input",
+            "Offset": 477,
+            "Line": 45,
+            "Column": 1
+          },
+          "Text": "/*\n   c2f\n   foo */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 547,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 548,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 549,
+            "Filename": "testdata/comments2.input",
+            "Offset": 511,
+            "Line": 51,
+            "Column": 1
+          },
+          "Text": "/*\nc3a\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 550,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 551,
+            "Filename": "testdata/comments2.input",
+            "Offset": 521,
+            "Line": 54,
+            "Column": 1
+          },
+          "Text": "/*\n   c3b\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 552,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 553,
+            "Filename": "testdata/comments2.input",
+            "Offset": 534,
+            "Line": 57,
+            "Column": 1
+          },
+          "Text": "/* foo\nc3c\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 554,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 555,
+            "Filename": "testdata/comments2.input",
+            "Offset": 548,
+            "Line": 60,
+            "Column": 1
+          },
+          "Text": "/* foo\n   c3d\n*/"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 556,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 557,
+            "Filename": "testdata/comments2.input",
+            "Offset": 565,
+            "Line": 63,
+            "Column": 1
+          },
+          "Text": "/*\nc3e\nfoo */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 558,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 559,
+            "Filename": "testdata/comments2.input",
+            "Offset": 579,
+            "Line": 66,
+            "Column": 1
+          },
+          "Text": "/*\n   c3f\n   foo */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 33,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 34,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 35,
+            "Filename": "testdata/comments2.input",
+            "Offset": 602,
+            "Line": 71,
+            "Column": 1
+          },
+          "Text": "// Test case taken literally from issue 1835."
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 560,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 561,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 562,
+            "Filename": "testdata/comments2.input",
+            "Offset": 662,
+            "Line": 73,
+            "Column": 1
+          },
+          "Text": "/*\nprints test 5 times\n*/"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 563,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 564,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 565,
+            "Filename": "testdata/comments2.input",
+            "Offset": 792,
+            "Line": 83,
+            "Column": 25
+          },
+          "Text": "// comment - should be aligned"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 566,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 567,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 568,
+            "Filename": "testdata/comments2.input",
+            "Offset": 859,
+            "Line": 84,
+            "Column": 37
+          },
+          "Text": "/* comment */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 569,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 570,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 571,
+            "Filename": "testdata/comments2.input",
+            "Offset": 898,
+            "Line": 86,
+            "Column": 25
+          },
+          "Text": "/* comment - should be aligned */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 572,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 573,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 574,
+            "Filename": "testdata/comments2.input",
+            "Offset": 968,
+            "Line": 87,
+            "Column": 37
+          },
+          "Text": "// comment"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 575,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 576,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 577,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1013,
+            "Line": 90,
+            "Column": 25
+          },
+          "Text": "// comment - should be aligned"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 578,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 579,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 580,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1080,
+            "Line": 91,
+            "Column": 37
+          },
+          "Text": "// comment"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 581,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 582,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 583,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1139,
+            "Line": 95,
+            "Column": 37
+          },
+          "Text": "/* comment */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 584,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 585,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 586,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1177,
+            "Line": 96,
+            "Column": 25
+          },
+          "Text": "/* comment - should be aligned */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 587,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 588,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 589,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1248,
+            "Line": 98,
+            "Column": 37
+          },
+          "Text": "// comment"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 590,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 591,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 592,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1283,
+            "Line": 99,
+            "Column": 25
+          },
+          "Text": "// comment - should be aligned"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 593,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 594,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 595,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1315,
+            "Line": 101,
+            "Column": 1
+          },
+          "Text": "// test case from issue"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 596,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 597,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 598,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1374,
+            "Line": 103,
+            "Column": 29
+          },
+          "Text": "// Allocation mask"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 599,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 600,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 601,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1431,
+            "Line": 104,
+            "Column": 39
+          },
+          "Text": "// Current allocations"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 205,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 206,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 207,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1457,
+            "Line": 107,
+            "Column": 1
+          },
+          "Text": "// Test cases for issue 18782"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 602,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 603,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 604,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1507,
+            "Line": 109,
+            "Column": 4
+          },
+          "Text": "/*       a, b, c, d, e */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 605,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 606,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1536,
+            "Line": 110,
+            "Column": 4
+          },
+          "Text": "/* a */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 607,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 608,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 609,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1564,
+            "Line": 111,
+            "Column": 4
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 610,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 611,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 612,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1592,
+            "Line": 112,
+            "Column": 4
+          },
+          "Text": "/* c */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 613,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 614,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 615,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1620,
+            "Line": 113,
+            "Column": 4
+          },
+          "Text": "/* d */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 616,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 617,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 618,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1648,
+            "Line": 114,
+            "Column": 4
+          },
+          "Text": "/* e */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 619,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 620,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 621,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1687,
+            "Line": 117,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 622,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 623,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 624,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1712,
+            "Line": 120,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 625,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 626,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1720,
+            "Line": 120,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 627,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 628,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 629,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1745,
+            "Line": 123,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 630,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 631,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1753,
+            "Line": 123,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 632,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 633,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 634,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1764,
+            "Line": 124,
+            "Column": 4
+          },
+          "Text": "/* c */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 635,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 636,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 637,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1789,
+            "Line": 127,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 638,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 639,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1797,
+            "Line": 127,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 640,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 641,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 642,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1808,
+            "Line": 128,
+            "Column": 4
+          },
+          "Text": "/* c */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 643,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 644,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1819,
+            "Line": 129,
+            "Column": 4
+          },
+          "Text": "/* d */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 645,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 646,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 647,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1847,
+            "Line": 133,
+            "Column": 4
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 648,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 649,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1858,
+            "Line": 134,
+            "Column": 4
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 650,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 651,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 652,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1883,
+            "Line": 137,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 653,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 654,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 655,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1909,
+            "Line": 140,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 656,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 657,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1917,
+            "Line": 140,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 658,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 659,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 660,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1943,
+            "Line": 143,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 661,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 662,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1951,
+            "Line": 143,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 663,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 664,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 665,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1962,
+            "Line": 144,
+            "Column": 4
+          },
+          "Text": "/* c */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 666,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 667,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 668,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1988,
+            "Line": 147,
+            "Column": 12
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 669,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 670,
+            "Filename": "testdata/comments2.input",
+            "Offset": 1996,
+            "Line": 147,
+            "Column": 20
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 671,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 672,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 673,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2007,
+            "Line": 148,
+            "Column": 4
+          },
+          "Text": "/* c */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 674,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 675,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2018,
+            "Line": 149,
+            "Column": 4
+          },
+          "Text": "/* d */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 676,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 677,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 678,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2047,
+            "Line": 153,
+            "Column": 4
+          },
+          "Text": "/* a */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 679,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 680,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2058,
+            "Line": 154,
+            "Column": 4
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 681,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 682,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 683,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2130,
+            "Line": 160,
+            "Column": 10
+          },
+          "Text": "/*       a, b, c, d, e */"
+        },
+        {
+          "NodeType": "Comment",
+          "RefId": 684,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 685,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2165,
+            "Line": 161,
+            "Column": 10
+          },
+          "Text": "/* a */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 686,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 687,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 688,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2199,
+            "Line": 162,
+            "Column": 10
+          },
+          "Text": "/* b */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 689,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 690,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 691,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2233,
+            "Line": 163,
+            "Column": 10
+          },
+          "Text": "/* c */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 692,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 693,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 694,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2267,
+            "Line": 164,
+            "Column": 10
+          },
+          "Text": "/* d */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 695,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 696,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 697,
+            "Filename": "testdata/comments2.input",
+            "Offset": 2301,
+            "Line": 165,
+            "Column": 10
+          },
+          "Text": "/* e */"
+        }
+      ]
+    }
+  ],
+  "FileSet": {
+    "Base": 2344,
+    "Files": [
+      {
+        "Name": "testdata/comments2.input",
+        "Base": 1,
+        "Size": 2342,
+        "Lines": [
+          0,
+          55,
+          109,
+          159,
+          160,
+          226,
+          229,
+          242,
+          243,
+          309,
+          312,
+          316,
+          319,
+          322,
+          329,
+          332,
+          339,
+          343,
+          346,
+          353,
+          360,
+          363,
+          366,
+          370,
+          377,
+          380,
+          387,
+          397,
+          398,
+          409,
+          412,
+          416,
+          419,
+          422,
+          429,
+          432,
+          439,
+          443,
+          446,
+          453,
+          460,
+          463,
+          466,
+          470,
+          477,
+          480,
+          487,
+          497,
+          499,
+          500,
+          511,
+          514,
+          518,
+          521,
+          524,
+          531,
+          534,
+          541,
+          545,
+          548,
+          555,
+          562,
+          565,
+          568,
+          572,
+          579,
+          582,
+          589,
+          599,
+          601,
+          602,
+          648,
+          662,
+          665,
+          685,
+          688,
+          716,
+          738,
+          743,
+          745,
+          746,
+          765,
+          768,
+          823,
+          873,
+          874,
+          932,
+          979,
+          980,
+          989,
+          1044,
+          1091,
+          1092,
+          1096,
+          1103,
+          1153,
+          1211,
+          1212,
+          1259,
+          1314,
+          1315,
+          1339,
+          1346,
+          1393,
+          1454,
+          1456,
+          1457,
+          1487,
+          1504,
+          1533,
+          1561,
+          1589,
+          1617,
+          1645,
+          1673,
+          1675,
+          1676,
+          1698,
+          1700,
+          1701,
+          1731,
+          1733,
+          1734,
+          1761,
+          1775,
+          1777,
+          1778,
+          1805,
+          1816,
+          1830,
+          1832,
+          1833,
+          1844,
+          1855,
+          1869,
+          1871,
+          1872,
+          1895,
+          1897,
+          1898,
+          1929,
+          1931,
+          1932,
+          1959,
+          1974,
+          1976,
+          1977,
+          2004,
+          2015,
+          2030,
+          2032,
+          2033,
+          2044,
+          2055,
+          2070,
+          2072,
+          2073,
+          2086,
+          2098,
+          2121,
+          2156,
+          2190,
+          2224,
+          2258,
+          2292,
+          2326,
+          2334,
+          2340
+        ],
+        "Infos": null
+      }
+    ]
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "NodeType": "File",
+  "RefId": 1,
+  "Doc": null,
+  "Package": {
+    "NodeType": "Position",
+    "RefId": 2,
+    "Filename": "testdata/doc.input",
+    "Offset": 0,
+    "Line": 1,
+    "Column": 1
+  },
+  "Name": {
+    "NodeType": "Ident",
+    "RefId": 3,
+    "NamePos": {
+      "NodeType": "Position",
+      "RefId": 4,
+      "Filename": "testdata/doc.input",
+      "Offset": 8,
+      "Line": 1,
+      "Column": 9
+    },
+    "Name": "p"
+  },
+  "Decls": [
+    {
+      "NodeType": "GenDecl",
+      "RefId": 5,
+      "Doc": {
+        "NodeType": "CommentGroup",
+        "RefId": 6,
+        "List": [
+          {
+            "NodeType": "Comment",
+            "RefId": 7,
+            "Slash": {
+              "NodeType": "Position",
+              "RefId": 8,
+              "Filename": "testdata/doc.input",
+              "Offset": 11,
+              "Line": 3,
+              "Column": 1
+            },
+            "Text": "/*\nDoc comment.\n  - List1.\n\n  - List2.\n*/"
+          }
+        ]
+      },
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 9,
+        "Filename": "testdata/doc.input",
+        "Offset": 53,
+        "Line": 9,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 10,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 11,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 12,
+                "Filename": "testdata/doc.input",
+                "Offset": 57,
+                "Line": 9,
+                "Column": 5
+              },
+              "Name": "X"
+            }
+          ],
+          "Type": {
+            "NodeType": "Ident",
+            "RefId": 13,
+            "NamePos": {
+              "NodeType": "Position",
+              "RefId": 14,
+              "Filename": "testdata/doc.input",
+              "Offset": 59,
+              "Line": 9,
+              "Column": 7
+            },
+            "Name": "int"
+          },
+          "Values": null
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 15,
+      "Doc": {
+        "NodeType": "CommentGroup",
+        "RefId": 16,
+        "List": [
+          {
+            "NodeType": "Comment",
+            "RefId": 17,
+            "Slash": {
+              "NodeType": "Position",
+              "RefId": 18,
+              "Filename": "testdata/doc.input",
+              "Offset": 64,
+              "Line": 11,
+              "Column": 1
+            },
+            "Text": "/* erroneous doc comment */"
+          }
+        ]
+      },
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 19,
+        "Filename": "testdata/doc.input",
+        "Offset": 92,
+        "Line": 12,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 20,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 21,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 22,
+                "Filename": "testdata/doc.input",
+                "Offset": 96,
+                "Line": 12,
+                "Column": 5
+              },
+              "Name": "Y"
+            }
+          ],
+          "Type": {
+            "NodeType": "Ident",
+            "RefId": 23,
+            "NamePos": {
+              "NodeType": "Position",
+              "RefId": 24,
+              "Filename": "testdata/doc.input",
+              "Offset": 98,
+              "Line": 12,
+              "Column": 7
+            },
+            "Name": "int"
+          },
+          "Values": null
+        }
+      ]
+    },
+    {
+      "NodeType": "GenDecl",
+      "RefId": 25,
+      "Doc": {
+        "NodeType": "CommentGroup",
+        "RefId": 26,
+        "List": [
+          {
+            "NodeType": "Comment",
+            "RefId": 27,
+            "Slash": {
+              "NodeType": "Position",
+              "RefId": 28,
+              "Filename": "testdata/doc.input",
+              "Offset": 103,
+              "Line": 14,
+              "Column": 1
+            },
+            "Text": "/*\n * Another erroneous\n * doc comment.\n */"
+          }
+        ]
+      },
+      "TokPos": {
+        "NodeType": "Position",
+        "RefId": 29,
+        "Filename": "testdata/doc.input",
+        "Offset": 147,
+        "Line": 18,
+        "Column": 1
+      },
+      "Tok": "var",
+      "Specs": [
+        {
+          "NodeType": "ValueSpec",
+          "RefId": 30,
+          "Names": [
+            {
+              "NodeType": "Ident",
+              "RefId": 31,
+              "NamePos": {
+                "NodeType": "Position",
+                "RefId": 32,
+                "Filename": "testdata/doc.input",
+                "Offset": 151,
+                "Line": 18,
+                "Column": 5
+              },
+              "Name": "Z"
+            }
+          ],
+          "Type": {
+            "NodeType": "Ident",
+            "RefId": 33,
+            "NamePos": {
+              "NodeType": "Position",
+              "RefId": 34,
+              "Filename": "testdata/doc.input",
+              "Offset": 153,
+              "Line": 18,
+              "Column": 7
+            },
+            "Name": "int"
+          },
+          "Values": null
+        }
+      ]
+    }
+  ],
+  "Imports": null,
+  "Unresolved": null,
+  "Comments": [
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 6,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 7,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 8,
+            "Filename": "testdata/doc.input",
+            "Offset": 11,
+            "Line": 3,
+            "Column": 1
+          },
+          "Text": "/*\nDoc comment.\n  - List1.\n\n  - List2.\n*/"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 16,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 17,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 18,
+            "Filename": "testdata/doc.input",
+            "Offset": 64,
+            "Line": 11,
+            "Column": 1
+          },
+          "Text": "/* erroneous doc comment */"
+        }
+      ]
+    },
+    {
+      "NodeType": "CommentGroup",
+      "RefId": 26,
+      "List": [
+        {
+          "NodeType": "Comment",
+          "RefId": 27,
+          "Slash": {
+            "NodeType": "Position",
+            "RefId": 28,
+            "Filename": "testdata/doc.input",
+            "Offset": 103,
+            "Line": 14,
+            "Column": 1
+          },
+          "Text": "/*\n * Another erroneous\n * doc comment.\n */"
+        }
+      ]
+    }
+  ],
+  "FileSet": {
+    "Base": 161,
+    "Files": [
+      {
+        "Name": "testdata/doc.input",
+        "Base": 1,
+        "Size": 159,
+        "Lines": [
+          0,
+          10,
+          11,
+          14,
+          27,
+          38,
+          39,
+          50,
+          53,
+          63,
+          64,
+          92,
+          102,
+          103,
+          106,
+          127,
+          143,
+          147,
+          157,
+          158
+        ],
+        "Infos": null
+      }
+    ]
+  }
+}
