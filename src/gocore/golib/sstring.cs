@@ -255,7 +255,7 @@ public readonly ref struct sstring // <- think about naming, stack<
     #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator sstring(slice<byte> value) => new(value);
+    public static implicit operator sstring(slice<byte> value) => new(value.ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<byte>(sstring value) => new(value.m_value);
@@ -267,7 +267,7 @@ public readonly ref struct sstring // <- think about naming, stack<
     public static implicit operator slice<rune>(sstring value) =>  new(GetRuneEnumerator(value.ToString()).ToArray());
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator sstring(slice<char> value) => new(value);
+    public static implicit operator sstring(slice<char> value) => new(value.ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<char>(sstring value) => new(value.ToString().ToCharArray());
