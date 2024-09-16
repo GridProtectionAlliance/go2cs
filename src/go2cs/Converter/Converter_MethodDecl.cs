@@ -69,7 +69,7 @@ public partial class Converter
         string receiverParametersSignature = method.GenerateReceiverParametersSignature();
         string parametersSignature = signature.GenerateParametersSignature();
         string resultSignature = signature.GenerateResultSignature();
-        ParameterInfo[] receiverParameters = method.ReceiverParameters ?? Array.Empty<ParameterInfo>();
+        ParameterInfo[] receiverParameters = method.ReceiverParameters ?? [];
 
         if (signature.Parameters.Length == 0)
             parametersSignature = $"({receiverParametersSignature})";

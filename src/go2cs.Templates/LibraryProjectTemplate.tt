@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName><#=AssemblyName#></AssemblyName>
     <Product>go2cs</Product>
@@ -57,12 +57,12 @@
             importPath = value;
             string package;
 
-            if (importPath.Contains('/'))
+            if (importPath.Contains("/"))
             {
                 string[] parts = importPath.Split('/');
                 package = parts[^1];
                 parts[0] = $"go2cs.{parts[0]}";
-                importPath = string.Join('/', parts);
+                importPath = string.Join("/", parts);
             }
             else
             {
@@ -70,7 +70,7 @@
                 importPath = $"go2cs/{importPath}";
             }
 
-            importPath = $"$(GOPATH)\\src\\{importPath.Replace('/', '\\')}\\$(OutDir){package}_package.dll";#>
+            importPath = $"$(GOPATH)\\src\\{importPath.Replace("/", "\\")}\\$(OutDir){package}_package.dll";#>
 
     <Reference Include="<#=package#>">
       <HintPath><#=importPath#></HintPath>

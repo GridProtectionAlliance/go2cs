@@ -22,6 +22,7 @@
 //******************************************************************************************************
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Global
+// ReSharper disable InconsistentNaming
 
 using System;
 using System.Collections.Generic;
@@ -358,7 +359,7 @@ public static class TypeExtensions
     }
 
     /// <summary>
-    /// Create a interface handler for <typeparamref name="T"/> interface from
+    /// Create an interface handler for <typeparamref name="T"/> interface from
     /// an object-based target.
     /// </summary>
     /// <param name="handlerType">Generic handler type.</param>

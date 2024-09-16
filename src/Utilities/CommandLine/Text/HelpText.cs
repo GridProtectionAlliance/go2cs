@@ -295,7 +295,7 @@ namespace CommandLine.Text
                 return AutoBuild(parserResult, current => DefaultParsingErrorsHandler(parserResult, current), e => e, maxDisplayWidth: maxDisplayWidth);
 
             var err = errors.OfType<HelpVerbRequestedError>().Single();
-            var pr = new NotParsed<object>(TypeInfo.Create(err.Type), Enumerable.Empty<Error>());
+            var pr = new NotParsed<object>(TypeInfo.Create(err.Type), []);
             return err.Matched
                 ? AutoBuild(pr, current => DefaultParsingErrorsHandler(pr, current), e => e, maxDisplayWidth: maxDisplayWidth)
                 : AutoBuild(parserResult, current => DefaultParsingErrorsHandler(parserResult, current), e => e, true, maxDisplayWidth);

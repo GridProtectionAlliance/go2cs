@@ -133,7 +133,7 @@ namespace CommandLine.Core
 
             var preprocessorErrors = arguments.Any()
                 ? arguments.Preprocess(PreprocessorGuards.Lookup(nameComparer))
-                : Enumerable.Empty<Error>();
+                : [];
 
             var result = arguments.Any()
                 ? preprocessorErrors.Any()

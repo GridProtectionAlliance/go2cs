@@ -49,7 +49,7 @@ namespace CommandLine.Text
         /// <param name="helpText">Example description.</param>
         /// <param name="sample">A sample instance.</param>
         public Example(string helpText, object sample)
-            : this(helpText, Enumerable.Empty<UnParserSettings>(), sample)
+            : this(helpText, [], sample)
         {
         }
 

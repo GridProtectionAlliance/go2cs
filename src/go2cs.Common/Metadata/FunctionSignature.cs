@@ -55,7 +55,7 @@ namespace go2cs.Metadata
         public static string Generate(string functionName, IEnumerable<string> parameterTypeNames = null)
         {
             if (parameterTypeNames is null)
-                parameterTypeNames = Enumerable.Empty<string>();
+                parameterTypeNames = [];
 
             return $"{functionName}({string.Join(", ", parameterTypeNames)})";
         }

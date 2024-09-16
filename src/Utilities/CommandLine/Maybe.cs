@@ -391,7 +391,7 @@ namespace CommandLine.CSharpx
             {
                 return Enumerable.Empty<T>().Concat(new[] { value });
             }
-            return Enumerable.Empty<T>();
+            return [];
         }
     }
 }

@@ -186,7 +186,7 @@ namespace CommandLine.ErrorHandling
         /// </summary>
         public static Result<TSuccess, TMessage> Succeed<TSuccess, TMessage>(TSuccess value)
         {
-            return new Ok<TSuccess, TMessage>(value, Enumerable.Empty<TMessage>());
+            return new Ok<TSuccess, TMessage>(value, []);
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace CommandLine.ErrorHandling
             try
             {
                 return new Ok<TSuccess, Exception>(
-                        func(), Enumerable.Empty<Exception>());
+                        func(), []);
             }
             catch (Exception ex)
             {
@@ -236,7 +236,7 @@ namespace CommandLine.ErrorHandling
 #endif
         public static Result<TSuccess, TMessage> Ok<TSuccess, TMessage>(TSuccess value)
         {
-            return new Ok<TSuccess, TMessage>(value, Enumerable.Empty<TMessage>());
+            return new Ok<TSuccess, TMessage>(value, []);
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace CommandLine.ErrorHandling
 #endif
         public static Result<TSuccess, TMessage> Pass<TSuccess, TMessage>(TSuccess value)
         {
-            return new Ok<TSuccess, TMessage>(value, Enumerable.Empty<TMessage>());
+            return new Ok<TSuccess, TMessage>(value, []);
         }
 
         /// <summary>

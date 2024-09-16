@@ -42,7 +42,7 @@ namespace CommandLine.Core
                         from o in options
                         select new MutuallyExclusiveSetError(o.FromOptionSpecification(), o.SetName);
                 }
-                return Enumerable.Empty<Error>();
+                return [];
             };
         }
 
@@ -111,7 +111,7 @@ namespace CommandLine.Core
                             from s in options
                             select new SequenceOutOfRangeError(s.Specification.FromSpecification());
                     }
-                    return Enumerable.Empty<Error>();
+                    return [];
                 };
         }
 

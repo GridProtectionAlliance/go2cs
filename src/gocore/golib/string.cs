@@ -39,31 +39,31 @@ namespace go;
 /// <summary>
 /// Represents a structure with heap allocated data that behaves like a Go string.
 /// </summary>
-public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
+public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<uint8>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
 {
-    internal readonly byte[] m_value;
+    internal readonly uint8[] m_value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string() => m_value = Array.Empty<byte>();
+    public @string() => m_value = [];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(byte[]? bytes)
+    public @string(uint8[]? bytes)
     {
         if (bytes is null)
         {
-            m_value = Array.Empty<byte>();
+            m_value = [];
         }
         else
         {
-            m_value = new byte[bytes.Length];
+            m_value = new uint8[bytes.Length];
             Array.Copy(bytes, m_value, bytes.Length);
         }
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(ReadOnlySpan<byte> bytes)
+    public @string(ReadOnlySpan<uint8> bytes)
     {
-        m_value = new byte[bytes.Length];
+        m_value = new uint8[bytes.Length];
         bytes.CopyTo(m_value);
     }
 
@@ -74,7 +74,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     public @string(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public @string(in slice<byte> value) : this(value.ToArray()) { }
+    public @string(in slice<uint8> value) : this(value.ToArray()) { }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(in slice<char> value) : this(value.ToArray()) { }
@@ -94,7 +94,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         get => m_value.Length;
     }
 
-    public byte this[int index]
+    public uint8 this[int index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -106,7 +106,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    public byte this[nint index]
+    public uint8 this[nint index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
@@ -118,7 +118,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    public byte this[ulong index]
+    public uint8 this[ulong index]
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this[(nint)index];
@@ -126,11 +126,11 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public slice<byte> Slice(int start, int length) =>
+    public slice<uint8> Slice(int start, int length) =>
         new(m_value, start, start + length);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public slice<byte> Slice(nint start, nint length) =>
+    public slice<uint8> Slice(nint start, nint length) =>
         new(m_value, (int)start, (int)(start + length));
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -176,7 +176,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
             yield break;
 
         Decoder decoder = Encoding.UTF8.GetDecoder();
-        byte[] value = m_value;
+        uint8[] value = m_value;
         char[] rune = new char[1];
         int byteCount;
 
@@ -199,11 +199,11 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe bool Decode(Decoder decoder, byte[] value, nint index, int byteCount, char[] rune)
+    private static unsafe bool Decode(Decoder decoder, uint8[] value, nint index, int byteCount, char[] rune)
     {
         bool completed;
 
-        fixed (byte* bytes = &value[index])
+        fixed (uint8* bytes = &value[index])
         fixed (char* chars = rune)
         {
             decoder.Convert(bytes, byteCount, chars, 1, true, out _, out _, out completed);
@@ -234,15 +234,15 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     #else
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(ReadOnlySpan<byte> value) => new(value);
+    public static implicit operator @string(ReadOnlySpan<uint8> value) => new(value);
 
     #endif
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(slice<byte> value) => new(value);
+    public static implicit operator @string(slice<uint8> value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator slice<byte>(@string value) => new(value.m_value);
+    public static implicit operator slice<uint8>(@string value) => new(value.m_value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(slice<rune> value) => new(value);
@@ -257,10 +257,10 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     public static implicit operator slice<char>(@string value) => new(((IEnumerable<char>)value).ToArray());
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static explicit operator byte[](@string value) => value.m_value;
+    public static explicit operator uint8[](@string value) => value.m_value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator @string(byte[] value) => new(value);
+    public static implicit operator @string(uint8[] value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator rune[](@string value) => ((IEnumerable<rune>)value).ToArray();
@@ -315,7 +315,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     object ICloneable.Clone() => Clone();
 
-    int IReadOnlyCollection<byte>.Count => Length;
+    int IReadOnlyCollection<uint8>.Count => Length;
 
     bool IConvertible.ToBoolean(IFormatProvider? provider) => ((IConvertible)ToString()).ToBoolean(provider);
 
@@ -323,7 +323,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     sbyte IConvertible.ToSByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToSByte(provider);
 
-    byte IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToByte(provider);
+    uint8 IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToByte(provider);
 
     short IConvertible.ToInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt16(provider);
 
@@ -351,9 +351,9 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     IEnumerator IEnumerable.GetEnumerator() => m_value.GetEnumerator();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
+    IEnumerator<uint8> IEnumerable<uint8>.GetEnumerator()
     {
-        foreach (byte item in m_value)
+        foreach (uint8 item in m_value)
             yield return item;
     }
 
@@ -369,7 +369,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static unsafe bool BytesAreEqual(byte[] data1, byte[] data2)
+    private static unsafe bool BytesAreEqual(uint8[] data1, uint8[] data2)
     {
         if (data1 == data2)
             return true;
@@ -380,7 +380,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         if (data1.Length == 0)
             return true;
 
-        fixed (byte* bytes1 = data1, bytes2 = data2)
+        fixed (uint8* bytes1 = data1, bytes2 = data2)
         {
             int len = data1.Length;
             int rem = len % (sizeof(long) * 16);

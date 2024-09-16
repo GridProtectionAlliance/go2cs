@@ -18,7 +18,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
+    #line 1 "C:\Projects\gpa\go2cs\src\go2cs.Templates\TemplateBase.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class TemplateBase : TemplateBaseBase
     {
@@ -31,14 +31,14 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 9 "D:\Projects\go2cs\src\go2cs.Templates\TemplateBase.tt"
+        #line 9 "C:\Projects\gpa\go2cs\src\go2cs.Templates\TemplateBase.tt"
 
 /*
   It's important to note that these templates are designed for use at runtime, as a result
   the project file should be set to use the file preprocessor for each T4 template, e.g.:
       <Generator>TextTemplatingFilePreprocessor</Generator>
 */
-public string Version => Common.EntryAssembly.GetName().Version.ToString();
+public string Version => "0.1.0"; //Common.EntryAssembly.GetName().Version.ToString();
 
 public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
 
@@ -70,7 +70,7 @@ public string GeneratedTime => $"{DateTime.UtcNow:yyyy MMMM dd HH:mm:ss} UTC";
         /// <summary>
         /// The string builder that generation-time code is using to assemble generated output
         /// </summary>
-        protected System.Text.StringBuilder GenerationEnvironment
+        public System.Text.StringBuilder GenerationEnvironment
         {
             get
             {

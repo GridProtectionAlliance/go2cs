@@ -29,7 +29,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace go;
 
@@ -55,7 +54,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEnumer
     internal readonly T[] m_array;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public array() => m_array = Array.Empty<T>();
+    public array() => m_array = [];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public array(int length) => m_array = new T[length];
@@ -67,7 +66,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEnumer
     public array(ulong length) => m_array = new T[length];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public array(T[]? array) => m_array = array ?? Array.Empty<T>();
+    public array(T[]? array) => m_array = array ?? [];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public array(Span<T> source) => m_array = source.ToArray();

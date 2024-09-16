@@ -1,15 +1,14 @@
 using static go.main_package;
 
-namespace go
-{
+namespace go;
+
 using fmt = fmt_package;
 using sort = sort_package;
 using static builtin;
 
 public static partial class main_package {
 
-public partial struct Person
-{
+public partial struct Person {
     public @string Name;
     public nint Age;
     public float ShoeSize;
@@ -92,4 +91,3 @@ private static void Main()
 }
 
 } // end main_package
-}

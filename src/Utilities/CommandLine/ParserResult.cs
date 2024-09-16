@@ -29,7 +29,7 @@ namespace CommandLine
 
         public static TypeInfo Create(Type current)
         {
-            return new TypeInfo(current, Enumerable.Empty<Type>());
+            return new TypeInfo(current, []);
         }
 
         public static TypeInfo Create(Type current, IEnumerable<Type> choices)

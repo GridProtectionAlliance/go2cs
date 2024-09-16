@@ -206,7 +206,7 @@ namespace CommandLine
         {
             return ignoreUnknownArguments
                 ? Enumerable.Empty<ErrorType>().Concat(ErrorType.UnknownOptionError)
-                : Enumerable.Empty<ErrorType>();
+                : [];
         }
 
         private void Dispose(bool disposing)

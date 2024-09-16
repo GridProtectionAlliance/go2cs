@@ -18,8 +18,8 @@ namespace CommandLine.Core
                 (f, s) =>
                         f.IsName() && s.IsValue()
                             ? typeLookup(f.Text).MapValueOrDefault(info =>
-                                    info.TargetType == TargetType.Scalar ? new[] { f, s } : Array.Empty<Token>(), Array.Empty<Token>())
-                                    : Array.Empty<Token>())
+                                    info.TargetType == TargetType.Scalar ? new[] { f, s } : [], [])
+                                    : [])
                    from t in tseq
                    select t;
         }

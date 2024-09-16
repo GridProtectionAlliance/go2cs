@@ -23,7 +23,7 @@ namespace CommandLine.Core
                             ? errors
                             : arguments.Preprocess(preprocessorLookup.TailNoFail());
                     },
-                Enumerable.Empty<Error>());
+                []);
         }
     }
 }

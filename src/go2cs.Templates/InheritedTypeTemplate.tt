@@ -100,7 +100,7 @@ public string InterfaceImplementation
             case TypeClass.Slice:
                 return new ISliceImplementation { TypeName = Common.RemoveSurrounding(TypeName, "slice<", ">") }.TransformText();
             case TypeClass.Map:
-                string[] mapType = Common.RemoveSurrounding(TypeName, "map<", ">").Split(",");
+                string[] mapType = Common.RemoveSurrounding(TypeName, "map<", ">").Split(',');
                 return new IMapImplementation { KeyName = mapType[0].Trim(), TypeName = mapType[1].Trim() }.TransformText();
             case TypeClass.Channel:
                 return "";

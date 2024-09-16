@@ -55,8 +55,8 @@ public partial class ScannerBase
         Parameters.TryGetValue(context.parameters(), out List<ParameterInfo> parameters);
         Signatures[context] = new Signature
         {
-            Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
-            Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
+            Parameters = parameters?.ToArray() ?? [],
+            Result = Result?.ToArray() ?? []
         };
     }
 

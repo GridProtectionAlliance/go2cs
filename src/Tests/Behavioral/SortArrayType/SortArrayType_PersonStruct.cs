@@ -26,11 +26,8 @@ namespace go
         public partial struct Person
         {
             // Constructors
-            public Person(NilType _)
+            public Person(NilType _) : this(default, default, default)
             {
-                this.Name = default;
-                this.Age = default;
-                this.ShoeSize = default;
             }
 
             public Person(@string Name = default, nint Age = default, float ShoeSize = default)

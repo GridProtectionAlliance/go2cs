@@ -120,7 +120,7 @@ public partial class PreScanner
                         Name = GetValidIdentifierName(typeInfo.TypeName),
                         Signature = new Signature
                         {
-                            Parameters = System.Array.Empty<ParameterInfo>(),
+                            Parameters = [],
                             Result = new[]
                             {
                                 new ParameterInfo
@@ -151,8 +151,8 @@ public partial class PreScanner
                 Name = identifier,
                 Signature = Signatures[context] = new Signature
                 {
-                    Parameters = parameters?.ToArray() ?? System.Array.Empty<ParameterInfo>(),
-                    Result = Result?.ToArray() ?? System.Array.Empty<ParameterInfo>()
+                    Parameters = parameters?.ToArray() ?? [],
+                    Result = Result?.ToArray() ?? []
                 },
                 Comments = CheckForCommentsRight(methodSpec),
                 IsPromoted = false

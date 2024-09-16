@@ -17,7 +17,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+    #line 1 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class MainProjectTemplate : TemplateBase
     {
@@ -28,24 +28,24 @@ namespace go2cs.Templates
         public override string TransformText()
         {
             
-            #line 1 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 1 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
  // This template creates a <AssemblyName>.csproj file 
             
             #line default
             #line hidden
             this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Exe</Outp" +
-                    "utType>\r\n    <TargetFrameworks>net7.0</TargetFrameworks>\r\n    <PublishReadyToRun" +
+                    "utType>\r\n    <TargetFrameworks>net8.0</TargetFrameworks>\r\n    <PublishReadyToRun" +
                     ">true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <AssemblyN" +
                     "ame>");
             
-            #line 16 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 16 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(AssemblyName));
             
             #line default
             #line hidden
             this.Write("</AssemblyName>\r\n    <Product>go2cs</Product>\r\n    <Copyright>Copyright © ");
             
-            #line 18 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 18 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(DateTime.Now.ToString("yyyy")));
             
             #line default
@@ -84,7 +84,7 @@ namespace go2cs.Templates
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>");
             
-            #line 50 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 50 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
 
     if (Imports is not null)
@@ -97,12 +97,12 @@ namespace go2cs.Templates
             importPath = value;
             string package;
 
-            if (importPath.Contains('/'))
+            if (importPath.Contains("/"))
             {
                 string[] parts = importPath.Split('/');
                 package = parts[^1];
                 parts[0] = $"go2cs.{parts[0]}";
-                importPath = string.Join('/', parts);
+                importPath = string.Join("/", parts);
             }
             else
             {
@@ -110,27 +110,27 @@ namespace go2cs.Templates
                 importPath = $"go2cs/{importPath}";
             }
 
-            importPath = $"$(GOPATH)\\src\\{importPath.Replace('/', '\\')}\\$(OutDir){package}_package.dll";
+            importPath = $"$(GOPATH)\\src\\{importPath.Replace("/", "\\")}\\$(OutDir){package}_package.dll";
             
             #line default
             #line hidden
             this.Write("\r\n    <Reference Include=\"");
             
-            #line 77 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 77 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(package));
             
             #line default
             #line hidden
             this.Write("\">\r\n      <HintPath>");
             
-            #line 78 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 78 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(importPath));
             
             #line default
             #line hidden
             this.Write("</HintPath>\r\n    </Reference>");
             
-            #line 79 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+            #line 79 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
         }
     }
@@ -143,7 +143,7 @@ namespace go2cs.Templates
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 88 "D:\Projects\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
+        #line 88 "C:\Projects\gpa\go2cs\src\go2cs.Templates\MainProjectTemplate.tt"
 
 // Template Parameters
 public string AssemblyName;  // File name without extension

@@ -47,7 +47,7 @@ namespace CommandLine.Core
         public static OptionSpecification NewSwitch(string shortName, string longName, bool required, string helpText, string metaValue, bool hidden = false)
         {
             return new OptionSpecification(shortName, longName, required, string.Empty, Maybe.Nothing<int>(), Maybe.Nothing<int>(),
-                '\0', Maybe.Nothing<object>(), helpText, metaValue, Enumerable.Empty<string>(), typeof(bool), TargetType.Switch, hidden);
+                '\0', Maybe.Nothing<object>(), helpText, metaValue, [], typeof(bool), TargetType.Switch, hidden);
         }
 
         public string ShortName

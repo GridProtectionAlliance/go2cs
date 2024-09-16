@@ -63,7 +63,7 @@ public partial class Converter
                 if (!Identifiers.TryGetValue(identifierList, out identifiers))
                 {
                     AddWarning(shortVarDecl, $"Failed to find identifier lists for short var declaration statements: {shortVarDecl.GetText()}");
-                    identifiers = Array.Empty<string>();
+                    identifiers = [];
                 }
             }
 

@@ -20,7 +20,7 @@ namespace CommandLine.Infrastructure
                 var ok = (Ok<TSuccess, TMessage>)result;
                 return ok.Messages;
             }
-            return Enumerable.Empty<TMessage>();
+            return [];
         }
 
         public static Maybe<TSuccess> ToMaybe<TSuccess, TMessage>(this Result<TSuccess, TMessage> result)

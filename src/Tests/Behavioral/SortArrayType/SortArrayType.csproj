@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net7.0</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>SortArrayType</AssemblyName>
@@ -11,15 +11,19 @@
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>$(GOPATH)\src\go2cs\go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">
     <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="SortArrayType_PersonStruct.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
@@ -37,15 +41,24 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
-    <Reference Include="golib">
+    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" Condition="'$(Configuration)'=='Debug'" />
+    <Reference Include="golib" Condition="'$(Configuration)'!='Debug'">
       <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
     </Reference>
-    <Reference Include="fmt">
+
+    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" Condition="'$(Configuration)'=='Debug'" />
+    <Reference Include="fmt" Condition="'$(Configuration)'!='Debug'">
       <HintPath>$(GOPATH)\src\go2cs\fmt\$(OutDir)fmt_package.dll</HintPath>
     </Reference>
-    <Reference Include="sort">
+    
+    <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" Condition="'$(Configuration)'=='Debug'" />
+    <Reference Include="sort" Condition="'$(Configuration)'!='Debug'">
       <HintPath>$(GOPATH)\src\go2cs\sort\$(OutDir)sort_package.dll</HintPath>
     </Reference>
+    </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

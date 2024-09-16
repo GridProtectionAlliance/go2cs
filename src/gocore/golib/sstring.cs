@@ -76,11 +76,11 @@ public readonly ref struct sstring // <- think about naming, stack<
     internal readonly ReadOnlySpan<byte> m_value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public sstring() => m_value = ReadOnlySpan<byte>.Empty;
+    public sstring() => m_value = [];
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(byte[]? bytes) => 
-        m_value = bytes is null ? ReadOnlySpan<byte>.Empty : new ReadOnlySpan<byte>(bytes);
+        m_value = bytes is null ? [] : new ReadOnlySpan<byte>(bytes);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(ReadOnlySpan<byte> bytes) => 
@@ -255,7 +255,7 @@ public readonly ref struct sstring // <- think about naming, stack<
     #endif
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator sstring(slice<byte> value) => new(value.ToArray());
+    public static implicit operator sstring(in slice<byte> value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<byte>(sstring value) => new(value.m_value);
@@ -267,7 +267,7 @@ public readonly ref struct sstring // <- think about naming, stack<
     public static implicit operator slice<rune>(sstring value) =>  new(GetRuneEnumerator(value.ToString()).ToArray());
     
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator sstring(slice<char> value) => new(value.ToArray());
+    public static implicit operator sstring(in slice<char> value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<char>(sstring value) => new(value.ToString().ToCharArray());

@@ -62,7 +62,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public slice()
     {
-        m_array = Array.Empty<T>();
+        m_array = [];
         m_low = m_length = 0;
     }
     
