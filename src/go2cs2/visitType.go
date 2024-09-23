@@ -5,7 +5,7 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) visitType(n ast.Expr, name string, comment *ast.CommentGroup) {
+func (v *Visitor) visitType(n ast.Expr, name string, doc *ast.CommentGroup, comment *ast.CommentGroup) {
 	switch x := n.(type) {
 	case *ast.ArrayType:
 		v.enterArrayType(x, name, comment)
@@ -25,7 +25,7 @@ func (v *Visitor) visitType(n ast.Expr, name string, comment *ast.CommentGroup) 
 	case *ast.StarExpr:
 		//v.visitStarExpr(x, n)
 	case *ast.StructType:
-		v.enterStructType(x, name)
+		v.enterStructType(x, name, doc)
 		v.exitStructType(x)
 	default:
 		panic(fmt.Sprintf("unexpected ast.TypeSpec Type: %#v", x))

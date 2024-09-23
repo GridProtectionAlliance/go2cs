@@ -8,8 +8,6 @@ import (
 
 // Handles array and slice types
 func (v *Visitor) enterArrayType(x *ast.ArrayType, name string, comment *ast.CommentGroup) {
-	println("Entering ArrayType" + name)
-
 	goTypeName := x.Elt.(*ast.Ident).Name
 	csTypeName := convertToCSTypeName(goTypeName)
 	typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
@@ -31,5 +29,4 @@ func (v *Visitor) enterArrayType(x *ast.ArrayType, name string, comment *ast.Com
 }
 
 func (v *Visitor) exitArrayType(x *ast.ArrayType) {
-	println("Exiting ArrayType")
 }

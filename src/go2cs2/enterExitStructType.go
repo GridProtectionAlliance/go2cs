@@ -6,10 +6,10 @@ import (
 	"strconv"
 )
 
-func (v *Visitor) enterStructType(x *ast.StructType, name string) {
-	println("Entering StructType " + name)
-
+func (v *Visitor) enterStructType(x *ast.StructType, name string, doc *ast.CommentGroup) {
 	v.targetFile.WriteString(v.newline)
+	v.writeDoc(doc, x.Pos())
+
 	v.writeOutputLn("[GoType(\"struct\")]")
 	v.writeOutputLn("%s partial struct %s {", getAccess(name), getSanitizedIdentifier(name))
 	v.indentLevel++
@@ -22,8 +22,7 @@ func (v *Visitor) enterStructType(x *ast.StructType, name string) {
 		v.writeDoc(field.Doc, field.Pos())
 
 		if field.Tag != nil {
-			v.addRequiredUsing("System.ComponentModel")
-			v.writeOutputLn("[Description(%s)]", getStringLiteral(field.Tag))
+			v.writeOutputLn("[GoTag(%s)]", getStringLiteral(field.Tag))
 		}
 
 		goTypeName := field.Type.(*ast.Ident).Name
@@ -40,5 +39,4 @@ func (v *Visitor) enterStructType(x *ast.StructType, name string) {
 }
 
 func (v *Visitor) exitStructType(x *ast.StructType) {
-	println("Exiting StructType")
 }

@@ -17,16 +17,28 @@ const (
     _, D                      // 1, 100
     // E211 is a constant
     E211, F                   // 2, 200
+    // Giant constant
+    Giant = 1 << 100          // Wow
+    Giant2 = 1 << 200         // Wow2
+    // String constant
+    String = "Hello"          // Hello
+    String2 = "World"         // World
+    // Float constant
+    Float = 3.14              // 3.14
+    float2 = 3.14e100         // 3.14e100
+    // Giant float constant
+    giantFloat = 1e309        // 1e309
 )
 
 var (
     // A2 is a variable
 	A2, B2 = 1, "42"          // 1, "42"
-	C21 = dynamicFn()         // 3
+	C21 = dynamicFn1()        // 3
     // D21 is a variable
-	D21, E2 bool             // false, false
+	D21, E2 bool              // false, false
 )
-func dynamicFn() int { return 4 }
+
+func dynamicFn1() int { return 4 }
 
 // Person is a type representing a person
 // with a name, age, and shoe size

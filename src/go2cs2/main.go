@@ -61,8 +61,6 @@ type Visitor struct {
 const RootNamespace = "go"
 const ClassSuffix = "_package"
 const AddressPrefix = "_addr_"
-const UsingsMarker = ">>MARKER:USINGS<<"
-const UnsafeMarker = ">>MARKER:UNSAFE<<"
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
@@ -74,9 +72,33 @@ var keywords = NewHashSet[string]([]string{
 	"sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof",
 	"uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
 	"__argslist", "__makeref", "__reftype", "__refvalue",
-	// The following keywords are reserved by go2cs, if they are encountered in Go code they should be escaped
+	// The following C# type names are reserved by go2cs as they may be used during code conversion
+	"GoType", "GoUntyped", "GoTag",
+	// The following symbols are reserved by go2cs as they are publically defined in "golib"
 	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType",
 })
+
+/*
+   Current expected C# global project aliases:
+
+   <Using Include="go.builtin" Static="True" />
+   <Using Include="System.Byte" Alias="uint8" />
+   <Using Include="System.UInt16" Alias="uint16" />
+   <Using Include="System.UInt32" Alias="uint32" />
+   <Using Include="System.UInt64" Alias="uint64" />
+   <Using Include="System.SByte" Alias="int8" />
+   <Using Include="System.Int16" Alias="int16" />
+   <Using Include="System.Int32" Alias="int32" />
+   <Using Include="System.Int64" Alias="int64" />
+   <Using Include="System.Single" Alias="float32" />
+   <Using Include="System.Double" Alias="float64" />
+   <Using Include="System.Numerics.Complex" Alias="complex128" />
+   <Using Include="System.Int32" Alias="rune" />
+   <Using Include="System.UIntPtr" Alias="uintptr" />
+   <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+   <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
+
+*/
 
 func main() {
 	if len(os.Args) < 2 {
@@ -114,7 +136,6 @@ func main() {
 		Types: make(map[ast.Expr]types.TypeAndValue),
 		Defs:  make(map[*ast.Ident]types.Object),
 		Uses:  make(map[*ast.Ident]types.Object),
-		//Selections: make(map[*ast.SelectorExpr]*types.Selection),
 	}
 
 	pkg, err := conf.Check(".", fset, []*ast.File{file}, info)
@@ -168,9 +189,13 @@ func main() {
 	outputFile.WriteString(visitor.targetFile.String())
 }
 
+func (v *Visitor) indent(indentLevel int) string {
+	return strings.Repeat(" ", v.options.indentSpaces*indentLevel)
+}
+
 func (v *Visitor) writeString(builder *strings.Builder, format string, a ...interface{}) {
 	if v.indentLevel > 0 {
-		builder.WriteString(strings.Repeat(" ", v.options.indentSpaces*v.indentLevel))
+		builder.WriteString(v.indent(v.indentLevel))
 	}
 
 	builder.WriteString(fmt.Sprintf(format, a...))
@@ -196,6 +221,7 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 			}
 
 			comment, found := v.standAloneComments[pos]
+
 			if !found {
 				continue
 			}
@@ -216,10 +242,8 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 				targetLine := v.file.Line(lastCommentPos)
 				nodeLine := v.file.Line(docPos)
 
-				lineBreaks := int(nodeLine-targetLine) - 1
-
-				if lineBreaks > 0 {
-					builder.WriteString(strings.Repeat(v.newline, lineBreaks))
+				if int(nodeLine-targetLine)-1 > 0 {
+					builder.WriteString(v.newline)
 				}
 			}
 
@@ -326,6 +350,8 @@ func convertToCSFullTypeName(typeName string) string {
 	switch typeName {
 	case "int":
 		return "nint"
+	case "float":
+		return "float64"
 	case "complex64":
 		return "go.complex64"
 	case "string":

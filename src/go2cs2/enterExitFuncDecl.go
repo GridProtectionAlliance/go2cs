@@ -12,8 +12,6 @@ const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
 
 func (v *Visitor) enterFuncDecl(x *ast.FuncDecl) {
-	println("Entering FuncDecl \"" + x.Name.Name + "\"")
-
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(x.Doc, x.Pos())
 
@@ -177,8 +175,6 @@ func (v *Visitor) exitFuncDecl(x *ast.FuncDecl) {
 	}
 
 	v.inFunction = false
-
-	println("Exiting FuncDecl \"" + x.Name.Name + "\"")
 }
 
 func getParameters(signature *types.Signature) *types.Tuple {

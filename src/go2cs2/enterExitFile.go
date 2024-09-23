@@ -7,6 +7,9 @@ import (
 	"strings"
 )
 
+const UsingsMarker = ">>MARKER:USINGS<<"
+const UnsafeMarker = ">>MARKER:UNSAFE<<"
+
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	if node != nil {
 		if commentGroup, ok := node.(*ast.CommentGroup); ok {
@@ -44,7 +47,6 @@ func (v *Visitor) enterFile(x *ast.File) {
 
 	v.writeOutputLn(UsingsMarker)
 	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, x.Name.Name, ClassSuffix)
-	v.targetFile.WriteString(v.newline)
 
 	for _, decl := range x.Decls {
 		v.visitDecl(decl)
