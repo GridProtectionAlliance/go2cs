@@ -24,7 +24,6 @@
 using System;
 using System.Collections;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace go;
@@ -37,7 +36,6 @@ public static partial class fmt_package
 
     private static readonly Regex s_formatExpr = FormatExpr();
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static @string ToString(object arg)
     {
         Stringer? stringer = arg as Stringer ?? Stringer.As(arg);
@@ -56,7 +54,6 @@ public static partial class fmt_package
         return arg?.ToString() ?? "<nil>";
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Print(params object[] args) =>
         Console.Write(string.Join(" ", args.Select(ToString)));
 
@@ -64,7 +61,6 @@ public static partial class fmt_package
     /// Formats arguments in an implementation-specific way and writes the result to console along with a new line.
     /// </summary>
     /// <param name="args">Arguments to display.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Println(params object[] args)
     {
         if (args.Length == 1 && args[0] is not @string && args[0] is not string && args[0] is IEnumerable array)
@@ -76,11 +72,9 @@ public static partial class fmt_package
         Console.WriteLine(string.Join(" ", args.Select(ToString)));
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Printf(@string format, params object[] args) =>
         Console.Write(Sprintf(format, args));
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string Sprintf(@string format, params object[] args)
     {
         (format, args) = ConvertFormat(format, args);
@@ -116,43 +110,33 @@ public static partial class fmt_package
         return (format, args);
     }
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Print(ReadOnlySpan<byte> arg) =>
         Console.Write(((sstring)arg).ToString());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2) =>
         Console.Write($"{(sstring)arg1} {(sstring)arg2}");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3) =>
         Console.Write($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3}");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3, ReadOnlySpan<byte> arg4) =>
         Console.Write($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3} {(sstring)arg4}");
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Println(ReadOnlySpan<byte> arg) => 
         Console.WriteLine((sstring)arg);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2) =>
         Console.WriteLine($"{(sstring)arg1} {(sstring)arg2}");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3) =>
         Console.WriteLine($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3}");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3, ReadOnlySpan<byte> arg4) =>
         Console.WriteLine($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3} {(sstring)arg4}");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void Printf(ReadOnlySpan<byte> format, params object[] args) =>
         Printf((@string)format, args);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string Sprintf(ReadOnlySpan<byte> format, params object[] args) =>
         Sprintf((@string)format, args);
 }

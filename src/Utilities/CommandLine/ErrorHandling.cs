@@ -6,9 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 #if !ERRH_BUILTIN_TYPES
-using CommandLine.CSharpx;
 #endif
 
 namespace CommandLine.ErrorHandling
@@ -232,7 +230,6 @@ namespace CommandLine.ErrorHandling
         /// Wraps a value in a Success.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Ok<TSuccess, TMessage>(TSuccess value)
         {
@@ -243,7 +240,6 @@ namespace CommandLine.ErrorHandling
         /// Wraps a value in a Success.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Pass<TSuccess, TMessage>(TSuccess value)
         {
@@ -254,7 +250,6 @@ namespace CommandLine.ErrorHandling
         /// Wraps a value in a Success and adds a message.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Warn<TSuccess, TMessage>(TMessage message, TSuccess value)
         {
@@ -265,7 +260,6 @@ namespace CommandLine.ErrorHandling
         /// Wraps a message in a Failure.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Fail<TSuccess, TMessage>(TMessage message)
         {
@@ -276,7 +270,6 @@ namespace CommandLine.ErrorHandling
         /// Returns true if the result was not successful.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static bool Failed<TSuccess, TMessage>(Result<TSuccess, TMessage> result)
         {
@@ -287,7 +280,6 @@ namespace CommandLine.ErrorHandling
         /// Takes a Result and maps it with successFunc if it is a Success otherwise it maps it with failureFunc.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static TResult Either<TSuccess, TMessage, TResult>(
             Func<TSuccess, IEnumerable<TMessage>, TResult> successFunc,
@@ -308,7 +300,6 @@ namespace CommandLine.ErrorHandling
         /// Otherwise the function throws an exception with Failure message of the result.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static TSuccess ReturnOrFail<TSuccess, TMessage>(Result<TSuccess, TMessage> result)
         {
@@ -326,7 +317,6 @@ namespace CommandLine.ErrorHandling
         /// Appends the given messages with the messages in the given result.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> MergeMessages<TSuccess, TMessage>(
             IEnumerable<TMessage> messages,
@@ -348,7 +338,6 @@ namespace CommandLine.ErrorHandling
         /// Otherwise the exisiting failure is propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Bind<TValue, TSuccess, TMessage>(
             Func<TValue, Result<TSuccess, TMessage>> func,
@@ -367,7 +356,6 @@ namespace CommandLine.ErrorHandling
         /// Flattens a nested result given the Failure types are equal.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Flatten<TSuccess, TMessage>(
             Result<Result<TSuccess, TMessage>, TMessage> result)
@@ -380,7 +368,6 @@ namespace CommandLine.ErrorHandling
         /// Otherwise the exisiting error messages are propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Apply<TValue, TSuccess, TMessage>(
             Result<Func<TValue, TSuccess>, TMessage> wrappedFunction,
@@ -414,7 +401,6 @@ namespace CommandLine.ErrorHandling
         /// Lifts a function into a Result container and applies it on the given result.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess, TMessage> Lift<TValue, TSuccess, TMessage>(
             Func<TValue, TSuccess> func,
@@ -427,7 +413,6 @@ namespace CommandLine.ErrorHandling
         /// Promote a function to a monad/applicative, scanning the monadic/applicative arguments from left to right.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TSuccess1, TMessage1> Lift2<TSuccess, TMessage, TSuccess1, TMessage1>(
             Func<TSuccess, Func<TMessage, TSuccess1>> func,
@@ -442,7 +427,6 @@ namespace CommandLine.ErrorHandling
         /// If the sequence contains an error the error will be propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<IEnumerable<TSuccess>, TMessage> Collect<TSuccess, TMessage>(
             IEnumerable<Result<TSuccess, TMessage>> xs)
@@ -491,7 +475,6 @@ namespace CommandLine.ErrorHandling
         /// Allows pattern matching on Results.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static void Match<TSuccess, TMessage>(this Result<TSuccess, TMessage> result,
             Action<TSuccess, IEnumerable<TMessage>> ifSuccess,
@@ -511,7 +494,6 @@ namespace CommandLine.ErrorHandling
         /// Allows pattern matching on Results.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static TResult Either<TSuccess, TMessage, TResult>(this Result<TSuccess, TMessage> result,
             Func<TSuccess, IEnumerable<TMessage>, TResult> ifSuccess,
@@ -530,7 +512,6 @@ namespace CommandLine.ErrorHandling
         /// Lifts a Func into a Result and applies it on the given result.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TResult, TMessage> Map<TSuccess, TMessage, TResult>(this Result<TSuccess, TMessage> result,
             Func<TSuccess, TResult> func)
@@ -543,7 +524,6 @@ namespace CommandLine.ErrorHandling
         /// If the sequence contains an error the error will be propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<IEnumerable<TSuccess>, TMessage> Collect<TSuccess, TMessage>(
             this IEnumerable<Result<TSuccess, TMessage>> values)
@@ -556,7 +536,6 @@ namespace CommandLine.ErrorHandling
         /// If the sequence contains an error the error will be propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<IEnumerable<TSuccess>, TMessage> Flatten<TSuccess, TMessage>(this Result<IEnumerable<Result<TSuccess, TMessage>>, TMessage> result)
         {
@@ -582,7 +561,6 @@ namespace CommandLine.ErrorHandling
         /// Otherwise the exisiting failure is propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TResult, TMessage> SelectMany<TSuccess, TMessage, TResult>(this Result<TSuccess, TMessage> result,
             Func<TSuccess, Result<TResult, TMessage>> func)
@@ -596,7 +574,6 @@ namespace CommandLine.ErrorHandling
         /// Otherwise the exisiting failure is propagated.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TResult, TMessage> SelectMany<TSuccess, TMessage, TValue, TResult>(
             this Result<TSuccess, TMessage> result,
@@ -617,7 +594,6 @@ namespace CommandLine.ErrorHandling
         /// Lifts a Func into a Result and applies it on the given result.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static Result<TResult, TMessage> Select<TSuccess, TMessage, TResult>(this Result<TSuccess, TMessage> result,
             Func<TSuccess, TResult> func)
@@ -629,7 +605,6 @@ namespace CommandLine.ErrorHandling
         /// Returns the error messages or fails if the result was a success.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static IEnumerable<TMessage> FailedWith<TSuccess, TMessage>(this Result<TSuccess, TMessage> result)
         {
@@ -649,7 +624,6 @@ namespace CommandLine.ErrorHandling
         /// Returns the result or fails if the result was an error.
         /// </summary>
 #if !ERRH_DISABLE_INLINE_METHODS
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public static TSuccess SucceededWith<TSuccess, TMessage>(this Result<TSuccess, TMessage> result)
         {

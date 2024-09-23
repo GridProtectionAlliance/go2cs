@@ -11,6 +11,7 @@
 //     Generated on <#=GeneratedTime#>
 // </auto-generated>
 //---------------------------------------------------------
+<#=NamespaceHeader#>
 using System;
 using System.CodeDom.Compiler;
 using System.Collections;
@@ -21,47 +22,39 @@ using go;
 
 #nullable enable
 
-<#=NamespaceHeader#>
-    public static partial class <#=PackageName#>_package
+public static partial class <#=PackageName#>_package
+{
+    [<#=GeneratedCodeAttribute#>]
+    <#=Scope#> partial struct <#=StructName#><#=ImplementedInterface#>
     {
-        [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> partial struct <#=StructName#><#=ImplementedInterface#>
-        {
-            // Value of the <#=StructName#> struct
-            private readonly <#=TypeName#> m_value;
-            <#=InterfaceImplementation#>
-            public <#=StructName#>(<#=TypeName#> value) => m_value = value;
+        // Value of the <#=StructName#> struct
+        private readonly <#=TypeName#> m_value;
+        <#=InterfaceImplementation#>
+        public <#=StructName#>(<#=TypeName#> value) => m_value = value;
 
-            // Enable implicit conversions between <#=TypeName#> and <#=StructName#> struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator <#=StructName#>(<#=TypeName#> value) => new <#=StructName#>(value);
+        // Enable implicit conversions between <#=TypeName#> and <#=StructName#> struct
+        public static implicit operator <#=StructName#>(<#=TypeName#> value) => new <#=StructName#>(value);
             
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator <#=TypeName#>(<#=StructName#> value) => value.m_value;
+        public static implicit operator <#=TypeName#>(<#=StructName#> value) => value.m_value;
             
-            // Enable comparisons between nil and <#=StructName#> struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
+        // Enable comparisons between nil and <#=StructName#> struct
+        public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
+        public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
+        public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+        public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
-        }
+        public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
     }
+}
 <#=NamespaceFooter#>
 <#+
 // Template Parameters
 public string NamespacePrefix;
 public string NamespaceHeader;
-public string NamespaceFooter;
+public string NamespaceFooter = "";
 public string PackageName;
 public string StructName;
 public string Scope;
@@ -78,7 +71,7 @@ public string ImplementedInterface
             case TypeClass.Array:
                 return " : IArray";
             case TypeClass.Slice:
-                return " : ISlice";
+                return $" : ISlice<{TypeInfo.Name}>";
             case TypeClass.Map:
                 return " : IMap";
             case TypeClass.Channel:

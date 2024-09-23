@@ -2,39 +2,38 @@
 <#@ template debug="false" hostspecific="false" language="C#" inherits="TemplateBase" #>
 <#@ output extension=".cs" #>
 
-            public <#=TypeName#>[] Source => m_value;
+        public <#=TypeName#>[] Source => m_value;
             
-            public ISlice<<#=TypeName#>> Append(<#=TypeName#>[] elems) => m_value.Append(elems);
+        public ISlice<<#=TypeName#>> Append(<#=TypeName#>[] elems) => m_value.Append(elems);
             
-            public nint Low => ((ISlice)m_value).Low;
+        public nint Low => ((ISlice)m_value).Low;
 
-            public nint High => ((ISlice)m_value).High;
+        public nint High => ((ISlice)m_value).High;
 
-            public nint Capacity => ((ISlice)m_value).Capacity;
+        public nint Capacity => ((ISlice)m_value).Capacity;
 
-            public nint Available => ((ISlice)m_value).Available;
+        public nint Available => ((ISlice)m_value).Available;
 
-            public nint Length => ((IArray)m_value).Length;
+        public nint Length => ((IArray)m_value).Length;
 
-            Array IArray.Source => ((IArray)m_value).Source!;
+        Array IArray.Source => ((IArray)m_value).Source!;
 
-            object? IArray.this[nint index]
-            {
-                get => ((IArray)m_value)[index];
-                set => ((IArray)m_value)[index] = value;
-            }
+        object? IArray.this[nint index]
+        {
+            get => ((IArray)m_value)[index];
+            set => ((IArray)m_value)[index] = value;
+        }
             
-            public ref <#=TypeName#> this[nint index]
-            {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
-                get => ref m_value[index];
-            }
+        public ref <#=TypeName#> this[nint index]
+        {
+            get => ref m_value[index];
+        }
             
-            public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+        public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
 
-            public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+        public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
 
-            public object Clone() => ((ICloneable)m_value).Clone();
+        public object Clone() => ((ICloneable)m_value).Clone();
 <#+
 // Template Parameters
 public string TypeName;

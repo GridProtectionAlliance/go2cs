@@ -46,19 +46,14 @@ namespace go
             }
 
             // Enable comparisons between nil and Person struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Person value, NilType nil) => value.Equals(default(Person));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Person value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Person value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Person value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Person(NilType nil) => default(Person);
         }
 

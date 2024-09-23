@@ -35,19 +35,14 @@ namespace go
             }
 
             // Enable comparisons between nil and T2 struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(T2 value, NilType nil) => value.Equals(default(T2));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(T2 value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, T2 value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, T2 value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator T2(NilType nil) => default(T2);
         }
 

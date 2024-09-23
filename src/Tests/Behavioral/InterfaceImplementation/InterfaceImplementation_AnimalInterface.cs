@@ -145,16 +145,12 @@ namespace go
             public static explicit operator Animal<T>(in T target) => new Animal<T>(target);
 
             // Enable comparisons between nil and Animal<T> interface instance
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Animal<T> value, NilType nil) => Activator.CreateInstance<Animal<T>>().Equals(value);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Animal<T> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Animal<T> value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Animal<T> value) => value != nil;
         }
     }

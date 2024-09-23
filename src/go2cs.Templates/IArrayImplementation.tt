@@ -16,7 +16,6 @@
 
             public ref <#=TypeName#> this[nint index]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => ref m_value[index];
             }
 

@@ -1,4 +1,4 @@
-﻿using System.Runtime.CompilerServices;
+﻿
 
 // ReSharper disable once CheckNamespace
 namespace System;
@@ -7,7 +7,6 @@ internal readonly struct Index : IEquatable<Index>
 {
     private readonly int m_value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public Index(int value, bool fromEnd = false)
     {
         if (value < 0)
@@ -28,7 +27,6 @@ internal readonly struct Index : IEquatable<Index>
 
     public static Index End => new Index(~0);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Index FromStart(int value)
     {
         if (value < 0)
@@ -37,7 +35,6 @@ internal readonly struct Index : IEquatable<Index>
         return new Index(value);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Index FromEnd(int value)
     {
         if (value < 0)
@@ -50,7 +47,6 @@ internal readonly struct Index : IEquatable<Index>
 
     public bool IsFromEnd => m_value < 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int GetOffset(int length)
     {
         int offset = m_value;

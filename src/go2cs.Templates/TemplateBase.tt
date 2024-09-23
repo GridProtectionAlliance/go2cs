@@ -12,7 +12,7 @@
   the project file should be set to use the file preprocessor for each T4 template, e.g.:
       <Generator>TextTemplatingFilePreprocessor</Generator>
 */
-public string Version => "0.1.0"; //Common.EntryAssembly.GetName().Version.ToString();
+public string Version => Common.EntryAssembly?.GetName().Version.ToString() ?? "0.0.1";
 
 public string GeneratedCodeAttribute => $"GeneratedCode(\"go2cs\", \"{Version}\")";
 

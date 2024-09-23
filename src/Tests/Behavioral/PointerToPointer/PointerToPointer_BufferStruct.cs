@@ -39,19 +39,14 @@ namespace go
             }
 
             // Enable comparisons between nil and Buffer struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Buffer value, NilType nil) => value.Equals(default(Buffer));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Buffer value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Buffer value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Buffer value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Buffer(NilType nil) => default(Buffer);
         }
 

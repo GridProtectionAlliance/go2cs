@@ -37,19 +37,14 @@ namespace go
             }
 
             // Enable comparisons between nil and Dog struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Dog value, NilType nil) => value.Equals(default(Dog));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Dog value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Dog value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Dog value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Dog(NilType nil) => default(Dog);
         }
 

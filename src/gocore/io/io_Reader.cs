@@ -149,16 +149,12 @@ public static partial class io_package
         public static explicit operator Reader<T>(in T target) => new Reader<T>(target);
 
         // Enable comparisons between nil and Reader<T> interface instance
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Reader<T> value, NilType _) => Activator.CreateInstance<Reader<T>>().Equals(value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Reader<T> value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, Reader<T> value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, Reader<T> value) => value != nil;
     }
 }

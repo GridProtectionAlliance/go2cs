@@ -72,16 +72,12 @@ namespace go
             public static explicit operator Abser<T>(T target) => new Abser<T>(target);
 
             // Enable comparisons between nil and Abser<T> interface instance
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Abser<T> value, NilType nil) => Activator.CreateInstance<Abser<T>>().Equals(value);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Abser<T> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Abser<T> value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Abser<T> value) => value != nil;
         }
 
@@ -101,17 +97,13 @@ namespace go
     //public partial class NilType
     //{
     //    // Enable comparisons between nil and Abser interface
-    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //    public static bool operator ==(go.main_package.Abser value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
+    //    //    public static bool operator ==(go.main_package.Abser value, NilType nil) => (object)value == null || Activator.CreateInstance(value.GetType()).Equals(value);
 
-    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //    public static bool operator !=(go.main_package.Abser value, NilType nil) => !(value == nil);
+    //    //    public static bool operator !=(go.main_package.Abser value, NilType nil) => !(value == nil);
 
-    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //    public static bool operator ==(NilType nil, go.main_package.Abser value) => value == nil;
+    //    //    public static bool operator ==(NilType nil, go.main_package.Abser value) => value == nil;
 
-    //    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    //    public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
+    //    //    public static bool operator !=(NilType nil, go.main_package.Abser value) => value != nil;
     //}
 
     public static class main_AbserExtensions

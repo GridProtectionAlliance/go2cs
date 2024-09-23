@@ -47,11 +47,9 @@ public static class TypeExtensions
 
         public TypePrecedenceComparer(Type targetType) => m_targetType = targetType;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override int Compare(Type? x, Type? y) => 
             Comparer<int>.Default.Compare(RelationDistance(x), RelationDistance(y));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int RelationDistance(Type? type)
         {
             if (type is null)
@@ -75,7 +73,6 @@ public static class TypeExtensions
             return distance;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsDirectEquivalent(Type type)
         {
             if (m_targetType.IsInterface)
@@ -152,7 +149,6 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="ptr"></param>
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string PrintPointer<T>(this ptr<T> ptr) => ptr.val.PrintPointer();
 
     /// <summary>
@@ -160,7 +156,6 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="instance"></param>
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static unsafe string PrintPointer(this object? instance)
     {
         if (instance is null)
@@ -190,7 +185,6 @@ public static class TypeExtensions
     /// <c>true</c> if <paramref name="targetType"/> implements specified <paramref name="interfaceType"/>;
     /// otherwise, <c>false</c>.
     /// </returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool ImplementsInterface(this Type? targetType, Type interfaceType)
     {
         if (!interfaceType.IsInterface)
@@ -215,7 +209,6 @@ public static class TypeExtensions
     /// Type of the extension target, i.e., type of the first parameter; otherwise, <c>void</c>
     /// if <paramref name="methodInfo"/> is <c>null</c> or defines no parameters.
     /// </returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Type GetExtensionTargetType(this MethodInfo methodInfo)
     {
         ParameterInfo[] parameters = methodInfo.GetParameters();
@@ -227,7 +220,6 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>
     /// <returns>Enumeration of reflected method metadata of <paramref name="targetType"/> extension methods.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static IEnumerable<MethodInfo> GetExtensionMethods(this Type targetType)
     {
         // TODO: Since Go restricts receiver functions (extensions in C#) to the same package, a lookup per package (namespace in C#) will be optimal here
@@ -258,7 +250,6 @@ public static class TypeExtensions
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>
     /// <param name="methodName">Name of extension method to find.</param>
     /// <returns>Method metadata of extension method, <paramref name="methodName"/>, for <paramref name="targetType"/> if found; otherwise, <c>null</c>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MethodInfo? GetExtensionMethod(this Type targetType, string methodName)
     {
         // Note that match by function name alone is sufficient as Go does not currently support function overloading by adjusting signature:
@@ -272,7 +263,6 @@ public static class TypeExtensions
     /// <param name="methodInfo">Method metadata of extension method.</param>
     /// <param name="delegateType">Specific delegate type to apply; otherwise, defaults to an auto-derived Func or Action delegate.</param>
     /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Delegate? CreateStaticDelegate(this MethodInfo methodInfo, Type? delegateType = null)
     {
         if (delegateType is null)
@@ -306,7 +296,6 @@ public static class TypeExtensions
     /// <param name="delegateType">Specific delegate type to apply; set to <c>null</c> to use an auto-derived Func or Action delegate.</param>
     /// <param name="isByRef">Determines if extension target is accessed by reference.</param>
     /// <returns>Callable delegate referencing extension method in <paramref name="methodInfo"/> or <c>null</c> if specified delegate signature does not match.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Delegate? CreateStaticDelegate(this MethodInfo methodInfo, Type? delegateType, out bool isByRef)
     {
         Func<Type[], Type> getMethodType;
@@ -348,7 +337,6 @@ public static class TypeExtensions
     /// <param name="genericType">Generic type to search.</param>
     /// <param name="targetType">Target type of generic type.</param>
     /// <returns>Explicit conversion operator, if found; otherwise <c>null</c>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static MethodInfo GetExplicitGenericConversionOperator(this Type genericType, Type targetType)
     {
         Type genericOfType = genericType.MakeGenericType(targetType);
@@ -366,7 +354,6 @@ public static class TypeExtensions
     /// <param name="target">Target value for interface handler.</param>
     /// <returns>Interface handler for <typeparamref name="T"/> interface</returns>
     /// <typeparam name="T">Target interface.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T? CreateInterfaceHandler<T>(this Type handlerType, object? target) where T : class
     {
         if (target is null)
@@ -456,7 +443,6 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="typeCode"><see cref="TypeCode"/> value to check.</param>
     /// <returns><c>true</c> if <paramref name="typeCode"/> is a numeric type; otherwise, <c>false</c>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool IsNumericType(this TypeCode typeCode)
     {
         return typeCode switch
@@ -477,7 +463,6 @@ public static class TypeExtensions
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static bool IsConversionOperator(MethodInfo method, Type genericOfType, Type targetType)
     {
         ParameterInfo[] parameters = method.GetParameters();

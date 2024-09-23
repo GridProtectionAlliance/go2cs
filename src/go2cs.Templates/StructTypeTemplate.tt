@@ -17,196 +17,191 @@
 //     Generated on <#=GeneratedTime#>
 // </auto-generated>
 //---------------------------------------------------------
+<#=NamespaceHeader#>
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-<#=string.Join(Environment.NewLine, UsingStatements)#>
+<#=string.Join("\r\n", UsingStatements)#>
 <#if (!NamespacePrefix.Equals("go")) {#>
 using go;
 <#}#>
 
 #nullable enable
 
-<#=NamespaceHeader#>
-    public static partial class <#=PackageName#>_package
+public static partial class <#=PackageName#>_package
+{
+    [<#=GeneratedCodeAttribute#>]<#
+    foreach (string promotedStruct in PromotedStructs)
     {
-        [<#=GeneratedCodeAttribute#>]<#
-        foreach (string promotedStruct in PromotedStructs)
+        if (!string.IsNullOrEmpty(promotedStruct))
         {
-            if (!string.IsNullOrEmpty(promotedStruct))
+    #>
+
+    [PromotedStruct(typeof(<#=promotedStruct#>))]<#
+        }
+    }#>
+
+    <#=Scope#> partial struct <#=StructName#>
+    {<#
+        foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
+        {
+            foreach (var decl in kvp.Value)
             {
+                #><#=new StructFuncDeclTemplate
+                {
+                    PromotedField = kvp.Key,
+                    FunctionName = decl.Name,
+                    Scope = "public",
+                    ParameterSignature = decl.Signature.GenerateParametersSignature(),
+                    ParameterNames = GetParameterNames(decl),
+                    ParameterTypes = GetParameterTypeNames(decl),
+                    ResultType = decl.Signature.GenerateResultSignature()
+                }
+                .TransformText()#><#
+            }
+        }
+
+        foreach (KeyValuePair<string, List<FieldInfo>> kvp in PromotedFields)
+        {
+
+            FieldInfo promotedStruct = GetPromotedStruct(kvp.Key);
+            bool isPointer = promotedStruct?.Type is PointerTypeInfo;
         #>
 
-        [PromotedStruct(typeof(<#=promotedStruct#>))]<#
-            }
-        }#>
+        // <#=kvp.Key#> structure promotion - sourced from <#=isPointer ? "pointer" : "value copy"#>
+        private readonly ptr<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
 
-        <#=Scope#> partial struct <#=StructName#>
-        {<#
+        private ref <#=kvp.Key#> <#=kvp.Key#>_<#=isPointer ? "ptr" : "val"#> => ref m_<#=kvp.Key#>Ref.Value;
+<#
+
+            foreach (var decl in kvp.Value)
+            {
+            #>
+
+        public ref <#=decl.Type.TypeName#> <#=decl.Name#> => ref m_<#=kvp.Key#>Ref.Value.<#=decl.Name#>;
+<#
+            }
+        }
+            
+        if (PromotedFunctions.Count > 0)
+        {
+        #>
+            
+        [DebuggerStepperBoundary]
+        static <#=StructName#>()
+        {
+            Type targetType = typeof(<#=StructName#>);
+            MethodInfo? extensionMethod;<#
+
             foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
             {
                 foreach (var decl in kvp.Value)
                 {
-                    #><#=new StructFuncDeclTemplate
+                    #><#=new StructFuncInitTemplate
                     {
-                        PromotedField = kvp.Key,
-                        FunctionName = decl.Name,
-                        Scope = "public",
-                        ParameterSignature = decl.Signature.GenerateParametersSignature(),
-                        ParameterNames = GetParameterNames(decl),
-                        ParameterTypes = GetParameterTypeNames(decl),
-                        ResultType = decl.Signature.GenerateResultSignature()
+                        FunctionName = decl.Name
                     }
                     .TransformText()#><#
                 }
-            }
-
-            foreach (KeyValuePair<string, List<FieldInfo>> kvp in PromotedFields)
-            {
-
-                FieldInfo promotedStruct = GetPromotedStruct(kvp.Key);
-                bool isPointer = promotedStruct?.Type is PointerTypeInfo;
-            #>
-
-            // <#=kvp.Key#> structure promotion - sourced from <#=isPointer ? "pointer" : "value copy"#>
-            private readonly ptr<<#=kvp.Key#>> m_<#=kvp.Key#>Ref;
-
-            private ref <#=kvp.Key#> <#=kvp.Key#>_<#=isPointer ? "ptr" : "val"#> => ref m_<#=kvp.Key#>Ref.Value;
-<#
-
-                foreach (var decl in kvp.Value)
-                {
-                #>
-
-            public ref <#=decl.Type.TypeName#> <#=decl.Name#> => ref m_<#=kvp.Key#>Ref.Value.<#=decl.Name#>;
-<#
-                }
-            }
-            
-            if (PromotedFunctions.Count > 0)
-            {
-            #>
-            
-            [DebuggerStepperBoundary]
-            static <#=StructName#>()
-            {
-                Type targetType = typeof(<#=StructName#>);
-                MethodInfo? extensionMethod;<#
-
-                foreach (KeyValuePair<string, List<FunctionSignature>> kvp in PromotedFunctions)
-                {
-                    foreach (var decl in kvp.Value)
-                    {
-                        #><#=new StructFuncInitTemplate
-                        {
-                            FunctionName = decl.Name
-                        }
-                        .TransformText()#><#
-                    }
-                }#>
-
-            }
-<#
-            
             }#>
 
-            // Constructors
-            public <#=StructName#>(NilType _)
-            {<#
-            foreach (var decl in StructFields)
-            {
-                if (PromotedStructs.Contains(decl.Type.TypeName))
-                {
-                    // Promoted struct #>
-
-                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(new <#=decl.Type.TypeName#>(nil));<#
-                }
-                else
-                {
-                    // Promoted interface or normal struct field #>
-
-                this.<#=decl.Name#> = default;<#
-                }
-            }#>
-
-            }<# 
-            
-            if (StructFields.Length > 0)
-            {#>
-
-
-            public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))#>)
-            {<#
-            foreach (var decl in StructFields)
-            {
-                if (PromotedStructs.Contains(decl.Type.TypeName))
-                {
-                    // Promoted struct #>
-
-                this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(<#=decl.Type is PointerTypeInfo ? "ref " : ""#><#=decl.Name#>);<#
-                }
-                else
-                {
-                    // Promoted interface or normal struct field #>
-
-                this.<#=decl.Name#> = <#=decl.Name#>;<#
-                }
-            }#>
-
-            }
-<#
-            }#>
-
-            // Enable comparisons between nil and <#=StructName#> struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
-
-            public override string ToString() => string.Concat("{", string.Join(" ", new[]
-            {<#
-            foreach (var decl in StructFields)
-            {
-                if (PromotedStructs.Contains(decl.Type.TypeName))
-                {
-                    // Promoted struct #>
-
-                m_<#=decl.Name#>Ref.ToString(),<#
-                }
-                else
-                {
-                    // Promoted interface or normal struct field #>
-
-                <#=decl.Name#>.ToString(),<#
-                }
-            }#>
-
-            }), "}");
         }
+<#
+            
+        }#>
 
-        [<#=GeneratedCodeAttribute#>]
-        <#=Scope#> static <#=StructName#> <#=StructName#>_cast(dynamic value)
+        // Constructors
+        public <#=StructName#>(NilType _)
+        {<#
+        foreach (var decl in StructFields)
         {
-            return new <#=StructName#>(<#=GetConstructorParameterNames()#>);
+            if (PromotedStructs.Contains(decl.Type.TypeName))
+            {
+                // Promoted struct #>
+
+            this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(new <#=decl.Type.TypeName#>(nil));<#
+            }
+            else
+            {
+                // Promoted interface or normal struct field #>
+
+            this.<#=decl.Name#> = default;<#
+            }
+        }#>
+
+        }<# 
+            
+        if (StructFields.Length > 0)
+        {#>
+
+
+        public <#=StructName#>(<#=string.Join(", ", StructFields.Select(field => $"{(field.Type is PointerTypeInfo ? "ref " : "")}{field.Type.TypeName} {field.Name} = default"))#>)
+        {<#
+        foreach (var decl in StructFields)
+        {
+            if (PromotedStructs.Contains(decl.Type.TypeName))
+            {
+                // Promoted struct #>
+
+            this.m_<#=decl.Name#>Ref = new ptr<<#=decl.Type.TypeName#>>(<#=decl.Type is PointerTypeInfo ? "ref " : ""#><#=decl.Name#>);<#
+            }
+            else
+            {
+                // Promoted interface or normal struct field #>
+
+            this.<#=decl.Name#> = <#=decl.Name#>;<#
+            }
+        }#>
+
         }
+<#
+        }#>
+
+        // Enable comparisons between nil and <#=StructName#> struct
+        public static bool operator ==(<#=StructName#> value, NilType nil) => value.Equals(default(<#=StructName#>));
+
+        public static bool operator !=(<#=StructName#> value, NilType nil) => !(value == nil);
+
+        public static bool operator ==(NilType nil, <#=StructName#> value) => value == nil;
+
+        public static bool operator !=(NilType nil, <#=StructName#> value) => value != nil;
+
+        public static implicit operator <#=StructName#>(NilType nil) => default(<#=StructName#>);
+
+        public override string ToString() => string.Concat("{", string.Join(" ", new[]
+        {<#
+        foreach (var decl in StructFields)
+        {
+            if (PromotedStructs.Contains(decl.Type.TypeName))
+            {
+                // Promoted struct #>
+
+            m_<#=decl.Name#>Ref.ToString(),<#
+            }
+            else
+            {
+                // Promoted interface or normal struct field #>
+
+            <#=decl.Name#>.ToString(),<#
+            }
+        }#>
+
+        }), "}");
     }
+
+    [<#=GeneratedCodeAttribute#>]
+    <#=Scope#> static <#=StructName#> <#=StructName#>_cast(dynamic value)
+    {
+        return new <#=StructName#>(<#=GetConstructorParameterNames()#>);
+    }
+}
 <#=NamespaceFooter#><#+
 // Template Parameters
 public string NamespacePrefix;
 public string NamespaceHeader;
-public string NamespaceFooter;
+public string NamespaceFooter = "";
 public string PackageName;
 public string StructName;
 public string Scope;

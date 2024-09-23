@@ -56,10 +56,8 @@ namespace go2cs.Templates
             #line hidden
             this.Write(@" key]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => m_value[key];
             
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 set => m_value[key] = value;
             }
 

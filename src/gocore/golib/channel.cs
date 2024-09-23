@@ -31,7 +31,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace go;
@@ -59,7 +58,6 @@ public interface IChannel : IEnumerable
 
 public static class channel
 {
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool Wait(CancellationToken token)
     {
         SemaphoreSlim semaphore = new(1, 1);
@@ -105,7 +103,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// Value greater than one will create a buffered channel; otherwise,
     /// an unbuffered channel will be created.
     /// </param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public channel(nint size)
     {
         if (size < 1)
@@ -125,7 +122,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </summary>
     public nint Capacity
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get;
     }
 
@@ -134,41 +130,34 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </summary>
     public nint Length
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_queue?.Count ?? 0;
     }
 
     public bool IsUnbuffered
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => Capacity == 1;
     }
 
     public bool IsClosed
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_isClosed.val;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private set => m_isClosed.val = value;
     }
 
     public bool SendIsReady
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_queue is not null && m_queue.Count != Capacity;
     }
 
     public bool ReceiveIsReady
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_queue is not null && !m_queue.IsEmpty;
     }
 
     /// <summary>
     /// Closes the channel.
     /// </summary>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Close()
     {
         if (IsClosed)
@@ -190,7 +179,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TrySend(in T value) => TrySend(value, CancellationToken.None);
 
     /// <summary>
@@ -205,7 +193,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TrySend(in T value, CancellationToken cancellationToken)
     {
         AssertChannelIsOpenForSend();
@@ -228,7 +215,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// For a buffered channel, method will block the current thread
     /// if channel is full.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Send(in T value) => Send(value, CancellationToken.None);
 
     /// <summary>
@@ -240,7 +226,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// For a buffered channel, method will block the current thread
     /// if channel is full.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Send(in T value, CancellationToken cancellationToken)
     {
         // TODO: Need to think about how Go handles deadlock checks
@@ -278,7 +263,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryReceive(out T value) =>
         TryReceive(out value, CancellationToken.None);
 
@@ -294,7 +278,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryReceive(out T value, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -319,7 +302,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// If the channel is empty, method will block the current thread until a value is sent to the channel.
     /// </remarks>
     /// <returns>Value received.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Receive() => Receive(CancellationToken.None);
 
     /// <summary>
@@ -330,7 +312,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// If the channel is empty, method will block the current thread until a value is sent to the channel.
     /// </remarks>
     /// <returns>Value received.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T Receive(CancellationToken cancellationToken)
     {
         // Per spec, receiving from a nil channel blocks forever
@@ -403,7 +384,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<T> GetEnumerator(CancellationToken cancellationToken)
     {
         // Per spec, receiving from a nil channel blocks forever
@@ -446,20 +426,16 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// Returns an enumerator that iterates through the collection.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<T> GetEnumerator() => GetEnumerator(m_enumeratorTokenSource.Token);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void AssertChannelIsOpenForSend()
     {
         if (IsClosed)
             throw new PanicException("send on closed channel");
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private void AssertChannelIsOpenForReceive()
     {
         if (IsClosed)

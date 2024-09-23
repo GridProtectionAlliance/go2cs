@@ -23,8 +23,6 @@
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedParameter.Local
 
-using System.Runtime.CompilerServices;
-
 namespace go;
 
 /// <summary>
@@ -53,25 +51,19 @@ public sealed class ptr<T>
 {
     private T m_val;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ptr(in T value) => m_val = value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ptr(NilType _) : this(default(T)!) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ptr() : this(default(T)!) { }
 
     public ref T val
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref m_val;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"&{m_val?.ToString() ?? "nil"}";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool Equals(ptr<T>? other)
     {
         if (other is null)
@@ -95,11 +87,9 @@ public sealed class ptr<T>
         return m_val!.Equals(other.m_val);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj) => obj is ptr<T> other && Equals(other);
 
     // ReSharper disable once NonReadonlyMemberInGetHashCode
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetHashCode() => m_val?.GetHashCode() ?? 0;
 
     // WISH: Would be super cool if this operator supported "ref" return, like:
@@ -117,7 +107,6 @@ public sealed class ptr<T>
     //     *vp = 999; // or
     //     ref vp = 999;
     // As it stands, this operator just returns a copy of the structure value:
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T operator ~(ptr<T> value) => value.m_val;
 
     // I posted a suggestion for at least the "ref" operator:
@@ -129,16 +118,12 @@ public sealed class ptr<T>
     // issues, see header comments for the ptr<T> "experimental" implementation
 
     // Enable comparisons between nil and @ref<T> interface instance
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(ptr<T>? value, NilType _) => value is null;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(ptr<T>? value, NilType nil) => !(value == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, ptr<T>? value) => value == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, in ptr<T>? value) => value != nil;
 
     private static readonly bool IsReferenceType = default(T) is null;

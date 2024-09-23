@@ -116,16 +116,12 @@ namespace go
             public static explicit operator I<T>(in T target) => new I<T>(target);
 
             // Enable comparisons between nil and I<T> interface instance
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(I<T> value, NilType nil) => Activator.CreateInstance<I<T>>().Equals(value);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(I<T> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, I<T> value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, I<T> value) => value != nil;
         }
     }

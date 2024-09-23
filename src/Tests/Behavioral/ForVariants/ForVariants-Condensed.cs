@@ -1,9 +1,7 @@
 namespace go {
 
 //import (
-    using fmt = fmt_package;
 //)
-using static builtin;
 
 [package] partial class main_package1 {
     

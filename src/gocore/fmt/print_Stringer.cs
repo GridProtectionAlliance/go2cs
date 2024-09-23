@@ -150,16 +150,12 @@ public static partial class fmt_package
         public static explicit operator Stringer<T>(in T target) => new Stringer<T>(target);
 
         // Enable comparisons between nil and Stringer<T> interface instance
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Stringer<T> value, NilType _) => Activator.CreateInstance<Stringer<T>>().Equals(value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Stringer<T> value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, Stringer<T> value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, Stringer<T> value) => value != nil;
     }
 }

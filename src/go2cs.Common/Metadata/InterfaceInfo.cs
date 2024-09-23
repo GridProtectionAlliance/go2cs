@@ -47,35 +47,34 @@ namespace go2cs.Metadata
             string.Join(", ", GetInheritedInterfaceNames());
 
         // Built-in error interface is a special case, this is currently the only built-in interface
-        public static InterfaceInfo error() =>
-            new()
+        public static InterfaceInfo error() => new()
+        {
+            Name = "error",
+            Methods = new[]
             {
-                Name = "error",
-                Methods = new[]
+                new FunctionSignature
                 {
-                    new FunctionSignature
+                    Name = "Error",
+                    Signature = new()
                     {
-                        Name = "Error",
-                        Signature = new()
+                        Parameters = [],
+                        Result = new[]
                         {
-                            Parameters = [],
-                            Result = new[]
+                            new ParameterInfo
                             {
-                                new ParameterInfo
+                                Name = string.Empty,
+                                Type = new()
                                 {
-                                    Name = string.Empty,
-                                    Type = new()
-                                    {
-                                        Name = "string",
-                                        TypeName = "@string",
-                                        FullTypeName = "go.@string",
-                                        TypeClass = TypeClass.Simple
-                                    }
+                                    Name = "string",
+                                    TypeName = "@string",
+                                    FullTypeName = "go.@string",
+                                    TypeClass = TypeClass.Simple
                                 }
                             }
                         }
                     }
                 }
-            };
+            }
+        };
     }
 }

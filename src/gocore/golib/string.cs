@@ -31,7 +31,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace go;
@@ -43,10 +42,8 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 {
     internal readonly uint8[] m_value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string() => m_value = [];
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(uint8[]? bytes)
     {
         if (bytes is null)
@@ -60,43 +57,33 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(ReadOnlySpan<uint8> bytes)
     {
         m_value = new uint8[bytes.Length];
         bytes.CopyTo(m_value);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(char[] value) : this(new string(value)) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(in slice<uint8> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(in slice<char> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(in slice<rune> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string(@string value) : this(value.m_value) { }
 
     public int Length
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_value.Length;
     }
 
     public uint8 this[int index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_value.Length)
@@ -108,7 +95,6 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public uint8 this[nint index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_value.Length)
@@ -120,32 +106,25 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public uint8 this[ulong index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this[(nint)index];
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<uint8> Slice(int start, int length) =>
         new(m_value, start, start + length);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<uint8> Slice(nint start, nint length) =>
         new(m_value, (int)start, (int)(start + length));
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() =>
         Encoding.UTF8.GetString(m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(@string other) =>
         BytesAreEqual(m_value, other.m_value);
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int CompareTo(@string other) =>
         StringComparer.Ordinal.Compare(ToString(), other);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj)
     {
         return obj switch
@@ -157,19 +136,14 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetHashCode() => ToString().GetHashCode();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ToString(IFormatProvider? provider) => ToString().ToString(provider);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TypeCode GetTypeCode() => TypeCode.String;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public @string Clone() => new(this);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
         if (m_value.Length == 0)
@@ -198,7 +172,6 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe bool Decode(Decoder decoder, uint8[] value, nint index, int byteCount, char[] rune)
     {
         bool completed;
@@ -213,100 +186,72 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     }
 
     public static @string Default { 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get;
     } = new("");
 
     #region [ Operators ]
 
     // Enable implicit conversions between string and @string struct
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(string value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator string(@string value) => value.ToString();
 
     #if EXPERIMENTAL
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator @string(ReadOnlySpan<byte> value) => new(value);
 
     #else
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(ReadOnlySpan<uint8> value) => new(value);
 
     #endif
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(slice<uint8> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<uint8>(@string value) => new(value.m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(slice<rune> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<rune>(@string value) =>  new(((IEnumerable<rune>)value).ToArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(slice<char> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<char>(@string value) => new(((IEnumerable<char>)value).ToArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator uint8[](@string value) => value.m_value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(uint8[] value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator rune[](@string value) => ((IEnumerable<rune>)value).ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(rune[] value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(char[] value) => new(value);
 
     // Enable comparisons between nil and @string struct
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(@string value, NilType _) => value.Equals(Default);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(@string value, NilType nil) => !(value == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, @string value) => value == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, @string value) => value != nil;
 
     // Enable @string to @string comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(NilType _) => Default;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(@string a, @string b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(@string a, @string b) => !a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator <(@string a, @string b) => string.CompareOrdinal(a, b) < 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator <=(@string a, @string b) => string.CompareOrdinal(a, b) <= 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >(@string a, @string b) => string.CompareOrdinal(a, b) > 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
 
     #endregion
@@ -347,28 +292,23 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator IEnumerable.GetEnumerator() => m_value.GetEnumerator();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator<uint8> IEnumerable<uint8>.GetEnumerator()
     {
         foreach (uint8 item in m_value)
             yield return item;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
     {
         foreach (char item in ToString())
             yield return item;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     IEnumerator<char> IEnumerable<char>.GetEnumerator() => ToString().GetEnumerator();
 
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe bool BytesAreEqual(uint8[] data1, uint8[] data2)
     {
         if (data1 == data2)

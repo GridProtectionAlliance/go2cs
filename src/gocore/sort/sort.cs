@@ -30,7 +30,8 @@ public static partial class sort_package
     // A type, typically a collection, that satisfies sort.Interface can be
     // sorted by the routines in this package. The methods require that the
     // elements of the collection be enumerated by an integer index.
-    public /*partial*/ interface Interface
+    [GoType("interface")]
+    public interface Interface
     {
         nint Len();
         // Less reports whether the element with
@@ -318,7 +319,6 @@ public static partial class sort_package
     }
 
     // TODO: For every public method that accesses an interface type, build a wrapper function that handles interface type conversion
-    [MethodImpl(MethodImplOptions.AggressiveInlining)/*, DebuggerNonUserCode*/]
     public static void Sort<TInterface>(TInterface data) where TInterface : struct => Sort(new Interface<TInterface>(data));
 
     // maxDepth returns a threshold at which quicksort should switch
@@ -343,12 +343,14 @@ public static partial class sort_package
     // lessSwap is a pair of Less and Swap function for use with the
     // auto-generated func-optimized variant of sort.go in
     // zfuncversion.go.
+    [GoType("struct")]
     private partial struct lessSwap
     {
         public Func<nint, nint, bool> Less;
         public Action<nint, nint> Swap;
     }
 
+    [GoType("struct")]
     private partial struct reverse : Interface
     {
         public Interface Interface;

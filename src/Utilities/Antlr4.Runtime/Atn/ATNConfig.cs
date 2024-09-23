@@ -3,12 +3,8 @@
  * can be found in the LICENSE.txt file in the project root.
  */
 using System;
-using System.Collections.Generic;
 using System.Text;
-using Antlr4.Runtime;
-using Antlr4.Runtime.Atn;
 using Antlr4.Runtime.Misc;
-using Antlr4.Runtime.Sharpen;
 
 namespace Antlr4.Runtime.Atn
 {

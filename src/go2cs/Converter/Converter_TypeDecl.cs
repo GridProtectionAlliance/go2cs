@@ -137,8 +137,9 @@ public partial class Converter
         else if (Metadata.Structs.TryGetValue(originalIdentifier, out StructInfo structInfo))
         {
             // Handle struct type declaration
-            string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
+            //string ancillaryStructFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}Struct")}.cs");
 
+            // TODO: Moved promoted struct handling to Roslyn code generator "TypeGenerator.cs"
             Dictionary<string, List<FunctionSignature>> promotedFunctions = new(StringComparer.Ordinal);
             HashSet<string> inheritedTypeNames = new(StringComparer.Ordinal);
 
@@ -149,27 +150,27 @@ public partial class Converter
 
             SearchPromotedStructFields(context, originalIdentifier, structInfo, inheritedTypeNames, promotedFields, promotedStructs);
 
-            using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
-            {
-                writer.Write(new StructTypeTemplate
-                {
-                    NamespacePrefix = PackageNamespace,
-                    NamespaceHeader = m_namespaceHeaderLegacy,
-                    NamespaceFooter = m_namespaceFooterLegacy,
-                    PackageName = Package,
-                    StructName = identifier,
-                    Scope = scope,
-                    StructFields = structInfo.Fields,
-                    PromotedStructs = promotedStructs,
-                    PromotedFunctions = promotedFunctions,
-                    PromotedFields = promotedFields,
-                    UsingStatements = m_usingStatements
-                }
-                .TransformText());
-            }
+            //using (StreamWriter writer = File.CreateText(ancillaryStructFileName))
+            //{
+            //    writer.Write(new StructTypeTemplate
+            //    {
+            //        NamespacePrefix = PackageNamespace,
+            //        NamespaceHeader = m_namespaceHeaderLegacy,
+            //        NamespaceFooter = m_namespaceFooterLegacy,
+            //        PackageName = Package,
+            //        StructName = identifier,
+            //        Scope = scope,
+            //        StructFields = structInfo.Fields,
+            //        PromotedStructs = promotedStructs,
+            //        PromotedFunctions = promotedFunctions,
+            //        PromotedFields = promotedFields,
+            //        UsingStatements = m_usingStatements
+            //    }
+            //    .TransformText());
+            //}
 
-            // Track file name associated with package
-            AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
+            //// Track file name associated with package
+            //AddFileToPackage(Package, ancillaryStructFileName, PackageNamespace);
 
             List<FieldInfo> fields = new();
 
@@ -190,6 +191,7 @@ public partial class Converter
                 }
             }
 
+            m_targetFile.AppendLine($"{Spacing()}[type(\"struct\")]");
             m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier}{GetInheritedTypeList(inheritedTypeNames)}");
 
             if (Options.UseAnsiBraceStyle)
@@ -269,52 +271,54 @@ public partial class Converter
             else
             {
                 // Handle named type declaration, e.g., "type MyFloat float64"
-                string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)})")}.cs");
+                //string ancillaryInheritedTypeFileName = Path.Combine(TargetFilePath, $"{GetValidPathName($"{target}_{identifier}StructOf({RemoveInvalidCharacters(typeInfo.TypeName)})")}.cs");
 
                 // TODO: The following works OK for a primitive type re-definition, but new templates will be needed for other inherited types, e.g., Map / Pointer / Array etc.
-                using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
-                {
-                    writer.Write(new InheritedTypeTemplate
-                    {
-                        NamespacePrefix = PackageNamespace,
-                        NamespaceHeader = m_namespaceHeaderLegacy,
-                        NamespaceFooter = m_namespaceFooterLegacy,
-                        PackageName = Package,
-                        StructName = identifier,
-                        Scope = scope,
-                        TypeInfo = typeInfo
-                    }
-                    .TransformText());
-                }
+                //using (StreamWriter writer = File.CreateText(ancillaryInheritedTypeFileName))
+                //{
+                //    writer.Write(new InheritedTypeTemplate
+                //    {
+                //        NamespacePrefix = PackageNamespace,
+                //        NamespaceHeader = m_namespaceHeaderLegacy,
+                //        NamespaceFooter = m_namespaceFooterLegacy,
+                //        PackageName = Package,
+                //        StructName = identifier,
+                //        Scope = scope,
+                //        TypeInfo = typeInfo
+                //    }
+                //    .TransformText());
+                //}
 
-                // Track file name associated with package
-                AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
+                //// Track file name associated with package
+                //AddFileToPackage(Package, ancillaryInheritedTypeFileName, PackageNamespace);
 
-                m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier}");
+                string typeName = typeInfo.TypeName[5..];
 
-                string typeName = typeInfo.TypeName;
+                // TODO: Fix type specification for non-slice types
+                m_targetFile.AppendLine($"{Spacing()}[type(\"[]{typeName}\")]");
+                m_targetFile.Append($"{Spacing()}{scope} partial struct {identifier} {{}}{CheckForCommentsRight(context)}");
 
-                if (typeName.StartsWith("slice", StringComparison.Ordinal))
-                    typeName = $" : ISlice{typeName[5..]}";                
-                else if (typeName.StartsWith("array", StringComparison.Ordinal))
-                    typeName = $" : IArray{typeName[5..]}";                
-                else
-                    typeName = $" // : {typeName}";
+                //if (typeName.StartsWith("slice", StringComparison.Ordinal))
+                //    typeName = $" : ISlice{typeName[5..]}";
+                //else if (typeName.StartsWith("array", StringComparison.Ordinal))
+                //    typeName = $" : IArray{typeName[5..]}";
+                //else
+                //    typeName = $" // : {typeName}";
 
-                if (Options.UseAnsiBraceStyle)
-                {
-                    m_targetFile.AppendLine(typeName);
-                    m_targetFile.AppendLine($"{Spacing()}{{");
-                }
-                else
-                {
-                    if (typeName.StartsWith(" //"))
-                        m_targetFile.AppendLine($" {{{typeName}");
-                    else
-                        m_targetFile.AppendLine($"{typeName} {{");
-                }
+                //if (Options.UseAnsiBraceStyle)
+                //{
+                //    m_targetFile.AppendLine(typeName);
+                //    m_targetFile.AppendLine($"{Spacing()}{{");
+                //}
+                //else
+                //{
+                //    if (typeName.StartsWith(" //"))
+                //        m_targetFile.AppendLine($" {{{typeName}");
+                //    else
+                //        m_targetFile.AppendLine($"{typeName} {{");
+                //}
 
-                m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
+                //m_targetFile.Append($"{Spacing()}}}{CheckForCommentsRight(context)}");
             }
         }
 

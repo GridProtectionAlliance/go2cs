@@ -186,16 +186,12 @@ public static partial class sort_package
         public static explicit operator Interface<T>(in T target) => new Interface<T>(target);
 
         // Enable comparisons between nil and Interface<T> interface instance
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Interface<T> value, NilType nil) => Activator.CreateInstance<Interface<T>>().Equals(value);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Interface<T> value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, Interface<T> value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, Interface<T> value) => value != nil;
     }
 }

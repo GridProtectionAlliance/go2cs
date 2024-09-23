@@ -35,19 +35,14 @@ namespace go
             }
 
             // Enable comparisons between nil and MyError struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(MyError value, NilType nil) => value.Equals(default(MyError));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(MyError value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, MyError value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, MyError value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator MyError(NilType nil) => default(MyError);
         }
 

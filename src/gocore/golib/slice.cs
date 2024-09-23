@@ -31,7 +31,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace go;
 
@@ -66,7 +65,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_low = m_length = 0;
     }
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(T[]? array)
     {
         m_array = array ?? throw new ArgumentNullException(nameof(array), "slice array reference is null.");
@@ -74,7 +72,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = array.Length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(Span<T> source)
     {
         m_array = source.ToArray();
@@ -82,7 +79,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = m_array.Length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(ReadOnlySpan<T> source)
     {
         m_array = source.ToArray();
@@ -90,7 +86,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = m_array.Length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(Memory<T> source)
     {
         m_array = source.ToArray();
@@ -98,7 +93,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = m_array.Length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(ReadOnlyMemory<T> source)
     {
         m_array = source.ToArray();
@@ -106,16 +100,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = m_array.Length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(array<T> array) : this((T[])array) { }
     
     public T[] Source
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_array;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(T[]? array, (int, int) offsetAndLength)
     {
         (int low, int length) = offsetAndLength;
@@ -132,7 +123,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
         if (array is null)
@@ -154,10 +144,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         m_length = length;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(array<T> array, nint low = 0, nint high = -1) : this((T[])array, low, high) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice(nint length, nint capacity = -1, nint low = 0)
     {
         if (length < 0)
@@ -176,32 +164,27 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public nint Low
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_low;
     }
 
     public nint High
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_low + m_length;
     }
 
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public nint Length
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_length;
     }
 
     public nint Capacity
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_array.Length - m_low;
     }
 
     public nint Available
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_array.Length - m_length;
     }
 
@@ -209,7 +192,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
     public ref T this[int index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -221,7 +203,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public ref T this[nint index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_length)
@@ -233,31 +214,25 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public ref T this[ulong index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => ref this[(nint)index];
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Slice(int start, int length) => 
         m_array.slice(start, start + length, Capacity);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public nint IndexOf(in T item)
     {
         int index = Array.IndexOf(m_array, item, (int)m_low, (int)m_length);
         return index >= 0 ? index - m_low : -1;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Contains(in T item) => 
         Array.IndexOf(m_array, item, (int)m_low, (int)m_length) >= 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void CopyTo(T[] array, int arrayIndex) => 
         Array.Copy(m_array, m_low, array, arrayIndex, m_length);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public T[] ToArray()
     {
         T[] array = new T[Length];
@@ -265,13 +240,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         return array;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Append(T[] elems) => Append(this, elems);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<T> Clone() => m_array.slice();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<(nint, T)> GetEnumerator()
     {
         SliceEnumerator enumerator = new(this);
@@ -284,7 +256,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
     // Returns an enumerator for just index enumeration
     public IEnumerable<nint> Range
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             for (nint i = Low; i < High; i++)
@@ -292,83 +263,59 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetHashCode() => m_array.GetHashCode() ^ (int)m_low ^ (int)m_length;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj) => Equals(obj as ISlice);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(ISlice? other) => other?.Source == m_array && other.Low == m_low && other.Length == m_length;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
 
     #region [ Operators ]
 
     // Enable implicit conversions between slice<T> and T[]
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(T[] value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(Span<T> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(ReadOnlySpan<T> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(Memory<T> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(ReadOnlyMemory<T> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator T[](slice<T> value) => value.ToArray();
 
     // Enable implicit conversions between slice<T> and array<T>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(array<T> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator array<T>(slice<T> value) => new(value.ToArray());
 
     // slice<T> to slice<T> comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(slice<T> a, slice<T> b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(slice<T> a, slice<T> b) => !(a == b);
 
     // slice<T> to ISlice comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(ISlice? a, slice<T> b) => a?.Equals(b) ?? false;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(ISlice? a, slice<T> b) => !(a == b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(slice<T> a, ISlice? b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(slice<T> a, ISlice? b) => !(a == b);
 
     // slice<T> to nil comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(slice<T> slice, NilType _) => slice.Length == 0 && slice.Capacity == 0;
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(slice<T> slice, NilType nil) => !(slice == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, slice<T> slice) => slice == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, slice<T> slice) => slice != nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<T>(NilType _) => default;
 
     #endregion
@@ -480,7 +427,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     #endregion
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> From<TSource>(TSource[]? array)
     {
         if (array is null)
@@ -497,7 +443,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         return baseTypeArray;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> Append(in slice<T> slice, params T[] elems)
     {
         T[] newArray;
@@ -524,7 +469,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         return new slice<T>(newArray, slice.Low, slice.High + elems.Length);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static nint CalculateNewCapacity(in slice<T> slice, int neededCapacity)
     {
         nint capacity = slice.Capacity;
@@ -565,12 +509,10 @@ public static class SliceExtensions
     //      s = s[3:5]   => s = s.slice(3, 5);
     //      s = s[:4]    => s = s.slice(high:4)
     //      s = s[1:3:5] => s = s.slice(1, 3, 5) // Full slice expression
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this in slice<T> slice, nint low = -1, nint high = -1, nint max = -1) => 
         slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
 
     // slice of an array helper function
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this T[] array, nint low = -1, nint high = -1, nint max = -1)
     {
         if (low == -1)
@@ -595,12 +537,10 @@ public static class SliceExtensions
         return new slice<T>(array, low, high);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<T> slice<T>(this array<T> array, nint low = -1, nint high = -1, nint max = -1) =>
         array.m_array.slice(low, high, max);
 
     // slice of a string helper function
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static slice<byte> slice(this @string source, nint low = -1, nint high = -1, nint max = -1) =>
         source.m_value.slice(low, high, max);
 }

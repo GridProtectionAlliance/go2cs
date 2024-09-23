@@ -1279,7 +1279,6 @@ public static class builtin
     /// <param name="length">Number of bytes to copy.</param>
     /// <typeparam name="TSource">Source type.</typeparam>
     /// <typeparam name="TDest">Destination type.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CastCopy<TSource, TDest>(this TSource[] source, nint sourceIndex, TDest[] dest, nint destinationIndex, Func<TSource, TDest> cast, nint length)
     {
         for (nint i = 0; i < length; i++)
@@ -1298,7 +1297,6 @@ public static class builtin
     /// <param name="length">Number of bytes to copy, defaults to <paramref name="source"/> array length.</param>
     /// <typeparam name="TSource">Source type.</typeparam>
     /// <typeparam name="TDest">Destination type.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void CastCopy<TSource, TDest>(this TSource[] source, TDest[] dest, Func<TSource, TDest> cast, nint length = -1)
     {
         if (length == -1)
@@ -1315,7 +1313,6 @@ public static class builtin
     /// <param name="cast">Cast function.</param>
     /// <typeparam name="TSource">Source type.</typeparam>
     /// <typeparam name="TDest">Destination type.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static TDest[] CastCopy<TSource, TDest>(this TSource[] source, Func<TSource, TDest> cast)
     {
         TDest[] dest = new TDest[source.Length];
@@ -1374,7 +1371,6 @@ public static class builtin
     /// </summary>
     /// <param name="value">An object that implements the <see cref="IConvertible" /> interface.</param>
     /// <returns>A Go type whose value is equivalent to <paramref name="value"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static object ConvertToType<T>(in T? value) where T : IConvertible
     {
         if (value is null)
@@ -1405,7 +1401,6 @@ public static class builtin
     /// <param name="keyedValues">Keyed values.</param>
     /// <returns>Array from keyed value initializer.</returns>
     /// <typeparam name="T">Type of values.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] InitKeyedValues<T>(nint length, params object[] keyedValues) where T : struct
     {
         T[] values = new T[length];
@@ -1440,7 +1435,6 @@ public static class builtin
     /// <param name="keyedValues">Keyed values.</param>
     /// <returns>Array from keyed value initializer.</returns>
     /// <typeparam name="T">Type of values.</typeparam>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T[] InitKeyedValues<T>(params object[] keyedValues) where T : struct
     {
         List<T> values = new();

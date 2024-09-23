@@ -15,11 +15,26 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" />
-    <ProjectReference Include="..\go2cs.Templates\go2cs.Templates.csproj">
-      <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
-      <Private>True</Private>
-    </ProjectReference>
+    <!-- These are dependencies required by go2cs.Common / go2cs.Templates: -->
+    <PackageReference Include="Dahomey.Json" Version="1.10.1" GeneratePathProperty="true" PrivateAssets="all" />
+    <PackageReference Include="System.CodeDom" Version="4.6.0" GeneratePathProperty="true" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\go2cs.Common\go2cs.Common.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\go2cs.Templates\go2cs.Templates.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
+  </PropertyGroup>
+
+  <Target Name="GetDependencyTargetPaths">
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)\go2cs.Common\bin\$(Configuration)\netstandard2.0\go2cs.Common.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(SolutionDir)\go2cs.Templates\bin\$(Configuration)\netstandard2.0\go2cs.Templates.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGDahomey_Json)\lib\netstandard2.0\Dahomey.Json.dll" IncludeRuntimeDependency="false" />
+      <TargetPathWithTargetPlatformMoniker Include="$(PKGSystem_CodeDom)\lib\netstandard2.0\System.CodeDom.dll" IncludeRuntimeDependency="false" />
+    </ItemGroup>
+  </Target>
 </Project>

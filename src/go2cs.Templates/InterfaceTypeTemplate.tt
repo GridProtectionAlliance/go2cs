@@ -19,7 +19,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-<#=string.Join(Environment.NewLine, UsingStatements)#>
+<#=string.Join("\r\n", UsingStatements)#>
 <#if (!NamespacePrefix.Equals("go")) {#>
 using go;
 <#}#>
@@ -113,16 +113,12 @@ using go;
             public static explicit operator <#=InterfaceName#><T>(in T target) => new <#=InterfaceName#><T>(target);
 
             // Enable comparisons between nil and <#=InterfaceName#><T> interface instance
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(<#=InterfaceName#><T> value, NilType nil) => Activator.CreateInstance<<#=InterfaceName#><T>>().Equals(value);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(<#=InterfaceName#><T> value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, <#=InterfaceName#><T> value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, <#=InterfaceName#><T> value) => value != nil;
         }
     }

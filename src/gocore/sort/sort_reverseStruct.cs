@@ -123,19 +123,14 @@ public static partial class sort_package
         }
 
         // Enable comparisons between nil and reverse struct
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(reverse value, NilType nil) => value.Equals(default(reverse));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(reverse value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, reverse value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, reverse value) => value != nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator reverse(NilType nil) => default(reverse);
     }
 

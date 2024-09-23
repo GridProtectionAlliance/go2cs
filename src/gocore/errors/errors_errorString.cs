@@ -21,37 +21,28 @@
 //
 //******************************************************************************************************
 
-using System.Runtime.CompilerServices;
-
 namespace go;
 
 public static partial class errors_package
 {
     private partial struct errorString
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public errorString(@string s = default)
         {
             this.s = s;
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public override string ToString() => $"{{{s}}}";
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator errorString(@string value) => new errorString(value);
 
         // Person to nil comparisons
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(errorString obj, NilType _) => obj.Equals(default(errorString));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(errorString obj, NilType nil) => !(obj == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, errorString obj) => obj == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, errorString obj) => obj != nil;
     }
 }

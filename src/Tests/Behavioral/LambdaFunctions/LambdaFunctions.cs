@@ -1,8 +1,5 @@
 namespace go;
 
-using fmt = fmt_package;
-using System;
-
 public static partial class main_package {
 
 public delegate @string Stringy();

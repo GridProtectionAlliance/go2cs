@@ -1,6 +1,6 @@
 ﻿// Proxy implementations of System.Range and System.Index for .NET Standard 2.0
 
-using System.Runtime.CompilerServices;
+
 
 // ReSharper disable once CheckNamespace
 namespace System;
@@ -43,7 +43,6 @@ internal readonly struct Range(Index start, Index end) : IEquatable<Range>
 
     public static Range All => new(Index.Start, Index.End);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public (int Offset, int Length) GetOffsetAndLength(int length)
     {
         int start;

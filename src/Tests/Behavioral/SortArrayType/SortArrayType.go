@@ -1,15 +1,43 @@
+// Pre-package Comments
+
+// Package Comments
 package main
 
-import "fmt"
-import "sort"
+// Pre-comment
+import "fmt"  // EOL comment
+import "sort" // EOL comment
 
+/* Post comment */
+// Post comment 2
+// Post comment 3
+
+const (
+    // A1 is a constant
+    A1, B = iota, iota * 100  // 0, 0
+    _, D                      // 1, 100
+    // E211 is a constant
+    E211, F                   // 2, 200
+)
+
+var (
+    // A2 is a variable
+	A2, B2 = 1, "42"          // 1, "42"
+	C21 = dynamicFn()         // 3
+    // D21 is a variable
+	D21, E2 bool             // false, false
+)
+func dynamicFn() int { return 4 }
+
+// Person is a type representing a person
+// with a name, age, and shoe size
 type Person struct {
-    Name string
-    Age int
-    ShoeSize float32
+    Name string      // Name of the person
+    Age int `Tag`    // Age of the person
+    ShoeSize float32 // Shoe size of the person
 }
+// Another one
 
-type PeopleByShoeSize []Person
+type PeopleByShoeSize []Person // Person slice for shoe size sorting
 
 type PeopleByAge []Person
 
@@ -73,3 +101,5 @@ func main() {
     sort.Sort(PeopleByAge(people))
     fmt.Println(people)
 }
+
+// Post code comments

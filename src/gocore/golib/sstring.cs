@@ -30,7 +30,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace go;
@@ -75,47 +74,35 @@ public readonly ref struct sstring // <- think about naming, stack<
 {
     internal readonly ReadOnlySpan<byte> m_value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring() => m_value = [];
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(byte[]? bytes) => 
         m_value = bytes is null ? [] : new ReadOnlySpan<byte>(bytes);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(ReadOnlySpan<byte> bytes) => 
         m_value = bytes;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(char[] value) : this(new string(value)) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(in slice<byte> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(in slice<char> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(in slice<rune> value) : this(value.ToArray()) { }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring(sstring value) : this(value.m_value) { }
 
     public int Length
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_value.Length;
     }
 
     public byte this[int index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get
         {
             if (index < 0 || index >= m_value.Length)
@@ -127,38 +114,30 @@ public readonly ref struct sstring // <- think about naming, stack<
 
     public byte this[nint index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this[(int)index];
     }
 
     public byte this[ulong index]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => this[(nint)index];
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<byte> Slice(int start, int length) =>
         new(m_value, start, start + length);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public slice<byte> Slice(nint start, nint length) =>
         new(m_value, (int)start, (int)(start + length));
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() =>
         Encoding.UTF8.GetString(m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(sstring other) =>
         BytesAreEqual(m_value, other.m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public int CompareTo(sstring other) =>
         StringComparer.Ordinal.Compare(ToString(), other.ToString());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj)
     {
         return obj switch
@@ -170,22 +149,16 @@ public readonly ref struct sstring // <- think about naming, stack<
         };
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetHashCode() => ToString().GetHashCode();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public string ToString(IFormatProvider? provider) => ToString().ToString(provider);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public TypeCode GetTypeCode() => TypeCode.String;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public sstring Clone() => new(this);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public IEnumerator<(nint, rune)> GetEnumerator() => GetEnumerator(m_value.ToArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IEnumerator<(nint, rune)> GetEnumerator(byte[] value)
     {
         if (value.Length == 0)
@@ -213,7 +186,6 @@ public readonly ref struct sstring // <- think about naming, stack<
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe bool Decode(Decoder decoder, byte[] value, int index, int byteCount, char[] rune)
     {
         bool completed;
@@ -230,123 +202,90 @@ public readonly ref struct sstring // <- think about naming, stack<
     #region [ Operators ]
 
     // Enable implicit conversions between string and sstring struct
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(string value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(@string value) => new(value.m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator string(sstring value) => value.ToString();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator @string(sstring value) => new(value.m_value);
     
     #if EXPERIMENTAL
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(ReadOnlySpan<byte> value) => new(value);
 
     #else
         
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator sstring(ReadOnlySpan<byte> value) => new(value);
         
     #endif
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(in slice<byte> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<byte>(sstring value) => new(value.m_value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(slice<rune> value) => new(value.ToArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<rune>(sstring value) =>  new(GetRuneEnumerator(value.ToString()).ToArray());
     
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(in slice<char> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator slice<char>(sstring value) => new(value.ToString().ToCharArray());
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator byte[](sstring value) => value.m_value.ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator ReadOnlySpan<byte>(sstring value) => value.m_value;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(byte[] value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator rune[](sstring value) => GetRuneEnumerator(value.ToString()).ToArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(rune[] value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static explicit operator char[](sstring value) => value.ToString().ToCharArray();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(char[] value) => new(value);
 
     // Enable comparisons between nil and sstring struct
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(sstring value, NilType _) => value.Equals(default);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(sstring value, NilType nil) => !(value == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, sstring value) => value == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, sstring value) => value != nil;
 
     // Enable sstring to sstring comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator sstring(NilType _) => new();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(sstring a, sstring b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(sstring a, sstring b) => !a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator <(sstring a, sstring b) => string.CompareOrdinal(a, b) < 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator <=(sstring a, sstring b) => string.CompareOrdinal(a, b) <= 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >(sstring a, sstring b) => string.CompareOrdinal(a, b) > 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator >=(sstring a, sstring b) => string.CompareOrdinal(a, b) >= 0;
 
     #endregion
 
     #region [ Interface Implementations ]
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IEnumerable<byte> GetByteEnumerator(byte[] value)
     {
         foreach (byte item in value)
             yield return item;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static IEnumerable<rune> GetRuneEnumerator(string value)
     {
         foreach (rune item in value)
             yield return item;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static unsafe bool BytesAreEqual(in ReadOnlySpan<byte> data1, in ReadOnlySpan<byte> data2)
     {
         if (data1 == data2)

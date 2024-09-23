@@ -37,13 +37,13 @@ public sealed class AttributeFinder<TDeclarationSyntax>(string attributeFullName
 
     public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
     {
-        if (DeclarationHasAttributes(context.Node))
-            TargetAttributes.Add(GetSemanticTargetForGeneration(context));
-    }
+        if (context.Node is not TDeclarationSyntax { AttributeLists.Count: > 0 })
+            return;
 
-    private static bool DeclarationHasAttributes(SyntaxNode node)
-    {
-        return node is TDeclarationSyntax { AttributeLists.Count: > 0 };
+        (TDeclarationSyntax, List<AttributeSyntax> attributes) semanticTarget = GetSemanticTargetForGeneration(context);
+
+        if (semanticTarget.attributes.Count > 0)
+            TargetAttributes.Add(semanticTarget);
     }
 
     private (TDeclarationSyntax, List<AttributeSyntax>) GetSemanticTargetForGeneration(GeneratorSyntaxContext context)
@@ -63,75 +63,5 @@ public sealed class AttributeFinder<TDeclarationSyntax>(string attributeFullName
         }
 
         return (targetSyntax, attributes);
-    }
-}
-
-public static class AttributeSyntaxExtensions
-{
-    public static string[] GetArgumentValues(this AttributeSyntax attribute)
-    {
-        SeparatedSyntaxList<AttributeArgumentSyntax> arguments = attribute.ArgumentList?.Arguments ?? default;
-        return arguments.Select(argument => argument.Expression.NormalizeWhitespace().ToFullString()).ToArray();
-    }
-}
-
-public static class StructDeclarationSyntaxExtensions
-{
-    public static List<(string typeName, string fieldName)> GetStructFields(this StructDeclarationSyntax structDeclaration, GeneratorExecutionContext context)
-    {
-        // Obtain the SemanticModel from the context
-        SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
-
-        List<(string typeName, string fieldName)> fields = [];
-
-        foreach (FieldDeclarationSyntax? fieldDeclaration in structDeclaration.Members.OfType<FieldDeclarationSyntax>())
-        {
-            TypeSyntax variableTypeSyntax = fieldDeclaration.Declaration.Type;
-
-            TypeInfo typeInfo = semanticModel.GetTypeInfo(variableTypeSyntax);
-            ITypeSymbol? typeSymbol = typeInfo.Type;
-
-            if (typeSymbol == null)
-                continue; // Type couldn't be resolved
-
-            string fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
-
-            foreach (VariableDeclaratorSyntax variableDeclarator in fieldDeclaration.Declaration.Variables)
-            {
-                string fieldName = variableDeclarator.Identifier.Text;
-                fields.Add((fullyQualifiedTypeName, fieldName));
-            }
-        }
-
-        return fields;
-    }
-}
-
-public static class SyntaxNodeExtensions
-{
-    public static string GetNamespaceName(this SyntaxNode syntaxNode)
-    {
-        BaseNamespaceDeclarationSyntax[] namespaceDeclarations = syntaxNode.Ancestors()
-            .OfType<BaseNamespaceDeclarationSyntax>()
-            .ToArray();
-
-        if (!namespaceDeclarations.Any())
-            return string.Empty;
-
-        // Build the full namespace by joining nested namespaces
-        string namespaceName = string.Join(".", namespaceDeclarations
-            .Select(ns => ns.Name.ToString())
-            .Reverse());
-
-        return namespaceName;
-    }
-
-    public static string GetParentClassName(this SyntaxNode syntaxNode)
-    {
-        ClassDeclarationSyntax? classDeclaration = syntaxNode.Ancestors()
-            .OfType<ClassDeclarationSyntax>()
-            .FirstOrDefault();
-
-        return classDeclaration?.Identifier.Text ?? string.Empty;
     }
 }

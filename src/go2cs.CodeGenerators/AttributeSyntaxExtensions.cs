@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  typeAttribute.cs - Gbtc
+//  AttributeSyntaxExtensions.cs - Gbtc
 //
 //  Copyright © 2024, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,21 +16,22 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  09/15/2024 - J. Ritchie Carroll
+//  09/16/2024 - J.Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
-// ReSharper disable InconsistentNaming
 
-using System;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace go;
+namespace go2cs.CodeGenerators;
 
-/// <summary>
-/// Represents a type definition attribute.
-/// </summary>
-/// <param name="definition">Type definition string.</param>
-public class typeAttribute(string definition) : Attribute
+public static class AttributeSyntaxExtensions
 {
-    public string Definition { get; } = definition;
+    public static string[] GetArgumentValues(this AttributeSyntax attribute)
+    {
+        SeparatedSyntaxList<AttributeArgumentSyntax> arguments = attribute.ArgumentList?.Arguments ?? default;
+        return arguments.Select(argument => argument.Expression.NormalizeWhitespace().ToFullString()).ToArray();
+    }
 }

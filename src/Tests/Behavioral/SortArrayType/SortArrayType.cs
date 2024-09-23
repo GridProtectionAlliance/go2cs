@@ -1,104 +1,91 @@
+// Pre-package Comments
+
+// Package Comments
 namespace go;
 
-using fmt = fmt_package;
-using sort = sort_package;
-using static builtin;
+// Pre-comment
+using fmt = fmt_package;  // EOL comment
+using sort = sort_package; // EOL comment
+using System.ComponentModel;
 
 public static partial class main_package {
 
-    [type("struct")]
-    public partial struct Person
-    {
-        public @string Name;
-        public nint Age;
-        public float32 ShoeSize; 
-    }
 
-    [type("[]Person")]
-    public partial struct PeopleByShoeSize : ISlice<Person>
-    {
-    }
+/* Post comment */
+// Post comment 2
+// Post comment 3
 
-    public partial struct PeopleByAge : ISlice<Person>
-    {
-    }
 
-    public static nint Len(this PeopleByShoeSize p)
-    {
-        return len(p);
-    }
+// A1 is a constant
+public const nint A1 = 0;                  // 0, 0
+public const nint B = 0;
 
-    public static void Swap(this PeopleByShoeSize p, nint i, nint j)
-    {
-        (p[i], p[j]) = (p[j], p[i]);
-    }
+public const nint _ = 1;                   // 1, 100
+public const nint D = 100;
 
-    public static bool Less(this PeopleByShoeSize p, nint i, nint j)
-    {
-        return (p[i].ShoeSize < p[j].ShoeSize);
-    }
+// E211 is a constant
+public const nint E211 = 2;                // 2, 200
+public const nint F = 200;
 
-    public static nint Len(this PeopleByAge p)
-    {
-        return len(p);
-    }
+// A2 is a variable
+public static nint A2 = 1;                 // 1, "42"
+public static @string B2 = "42";
 
-    public static void Swap(this PeopleByAge p, nint i, nint j)
-    {
-        (p[i], p[j]) = (p[j], p[i]);
-    }
+public static nint C21 = dynamicFn();      // 3
 
-    public static bool Less(this PeopleByAge p, nint i, nint j)
-    {
-        return (p[i].Age < p[j].Age);
-    }
+// D21 is a variable
+public static bool D21;                    // false, false
+public static bool E2;
 
-    private static void Main()
-    {
-        var people = new Person[] { 
-            //new(
-            //    Name: "Person1"u8, 
-            //    Age: 26, 
-            //    ShoeSize: 8
-            //),
-            //new(
-            //    Name: "Person2"u8,
-            //    Age: 21,
-            //    ShoeSize: 4
-            //),
-            //new(
-            //    Name: "Person3"u8,
-            //    Age: 15,
-            //    ShoeSize: 9
-            //),
-            //new(
-            //    Name: "Person4"u8,
-            //    Age: 45,
-            //    ShoeSize: 15
-            //),
-            //new(
-            //    Name: "Person5"u8,
-            //    Age: 25,
-            //    ShoeSize: 8.50F
-            //)
-        }.slice();
+private static nint dynamicFn() {
 
-        var test = new Person[]
-        {
-            new() { Name = "Person1"u8, Age = 26, ShoeSize = 8 },
-            new() { Name = "Person2"u8, Age = 21, ShoeSize = 4 },
-            new() { Name = "Person3"u8, Age = 15, ShoeSize = 9 },
-            new() { Name = "Person4"u8, Age = 45, ShoeSize = 15 },
-            new() { Name = "Person5"u8, Age = 25, ShoeSize = 8.50F }
-        };
+}
+// Person is a type representing a person
+// with a name, age, and shoe size
 
-        fmt.Println(people);
+[GoType("struct")]
+public partial struct Person {
+    public @string Name;     // Name of the person
+    [Description(@"Tag")]
+    public nint Age;         // Age of the person
+    public float32 ShoeSize; // Shoe size of the person
+}
+// Another one
 
-        sort.Sort(new PeopleByShoeSize(people));
-        fmt.Println(people);
+[GoType("[]Person")]
+public partial struct PeopleByShoeSize {} // Person slice for shoe size sorting
 
-        sort.Sort(new PeopleByAge(people));
-        fmt.Println(people);
-    }
+[GoType("[]Person")]
+public partial struct PeopleByAge {}
+
+public static nint Len(this PeopleByShoeSize p) {
+
+}
+
+public static void Swap(this PeopleByShoeSize p, nint i, nint j) {
+
+}
+
+public static bool Less(this PeopleByShoeSize p, nint i, nint j) {
+
+}
+
+public static nint Len(this PeopleByAge p) {
+
+}
+
+public static void Swap(this PeopleByAge p, nint i, nint j) {
+
+}
+
+public static bool Less(this PeopleByAge p, nint i, nint j) {
+
+}
+
+private static void Main() {
+
+}
+
+// Post code comments
 
 } // end main_package

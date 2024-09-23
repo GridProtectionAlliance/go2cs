@@ -34,19 +34,14 @@ public static partial class sort_package
         }
 
         // Enable comparisons between nil and lessSwap struct
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(lessSwap value, NilType nil) => value.Equals(default(lessSwap));
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(lessSwap value, NilType nil) => !(value == nil);
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(NilType nil, lessSwap value) => value == nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(NilType nil, lessSwap value) => value != nil;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static implicit operator lessSwap(NilType nil) => default(lessSwap);
     }
 

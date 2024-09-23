@@ -12,16 +12,13 @@
 
             public <#=TypeName#> this[<#=KeyName#> key]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => m_value[key];
             
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 set => m_value[key] = value;
             }
 
             public (<#=TypeName#>, bool) this[<#=KeyName#> key, bool _]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => m_value.TryGetValue(key, out <#=TypeName#> value) ? (value!, true) : (default!, false);
             }
 <#+

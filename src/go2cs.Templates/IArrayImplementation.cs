@@ -59,7 +59,6 @@ namespace go2cs.Templates
             #line hidden
             this.Write(@" this[nint index]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => ref m_value[index];
             }
 

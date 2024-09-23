@@ -37,19 +37,14 @@ namespace go
             }
 
             // Enable comparisons between nil and Frog struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(Frog value, NilType nil) => value.Equals(default(Frog));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(Frog value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, Frog value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, Frog value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator Frog(NilType nil) => default(Frog);
         }
 

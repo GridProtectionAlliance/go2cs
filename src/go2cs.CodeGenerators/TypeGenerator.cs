@@ -41,7 +41,7 @@ namespace go2cs.CodeGenerators;
 public class TypeGenerator : ISourceGenerator
 {
     private const string Namespace = "go";
-    private const string AttributeName = $"{Namespace}.typeAttribute";
+    private const string AttributeName = $"{Namespace}.GoTypeAttribute";
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -50,33 +50,30 @@ public class TypeGenerator : ISourceGenerator
             Debugger.Launch();
     #endif
 
-        // Find specified attribute type on class declarations
-        context.RegisterForSyntaxNotifications(() => new AttributeFinder<StructDeclarationSyntax>(AttributeName));
+        // Register to find "GoTypeAttribute" on type declarations
+        context.RegisterForSyntaxNotifications(() => new AttributeFinder<BaseTypeDeclarationSyntax>(AttributeName));
     }
 
     public void Execute(GeneratorExecutionContext context)
     {
-        if (context.SyntaxContextReceiver is not AttributeFinder<StructDeclarationSyntax> { HasAttributes: true } attributeFinder)
+        if (context.SyntaxContextReceiver is not AttributeFinder<BaseTypeDeclarationSyntax> { HasAttributes: true } attributeFinder)
             return;
-
-        foreach ((StructDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
+            
+        foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
             string packageNamespace = targetSyntax.GetNamespaceName();
-            string namespaceHeader = $"namespace {packageNamespace}\r\n{{\r\n";
-            string namespaceFooter = $"\r\n}}\r\n";
+            string namespaceHeader = $"namespace {packageNamespace};\r\n";
             string packageClassName = targetSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
 
-            CompilationUnitSyntax root = (CompilationUnitSyntax)targetSyntax.SyntaxTree.GetRoot();
-
-            IEnumerable<string> usingStatements = targetSyntax.SyntaxTree
-                .GetRoot() // Get the root node of the syntax tree
-                .DescendantNodesAndSelf() // Include the root node itself in the traversal
-                .OfType<CompilationUnitSyntax>() // Get the CompilationUnitSyntax (root of the file)
-                .SelectMany(cu => cu.Usings) // Select all using directives at the root level
-                .Select(u => u.GetText().ToString().Trim()); // Get the text of each using directive
+            string[] usingStatements = targetSyntax.SyntaxTree
+                .GetRoot()
+                .DescendantNodes()
+                .OfType<UsingDirectiveSyntax>()
+                .Select(directive => directive.GetText().ToString().Trim())
+                .ToArray();
 
             foreach (AttributeSyntax attribute in attributes)
             {
@@ -87,35 +84,97 @@ public class TypeGenerator : ISourceGenerator
                     continue;
 
                 // Get the attribute's first constructor argument value, type definition
-                string typeDefinition = arguments[0][1..^1];
+                string typeDefinition = arguments[0][1..^1].Trim();
 
-                string generatedSource;
+                string generatedSource = string.Empty;
 
-                if (typeDefinition.Equals("struct"))
+                if (targetSyntax is StructDeclarationSyntax structDeclaration)
                 {
-                    generatedSource = new StructTypeTemplate
+                    if (typeDefinition.Equals("struct"))
                     {
-                        NamespacePrefix = packageNamespace,
-                        NamespaceHeader = namespaceHeader,
-                        NamespaceFooter = namespaceFooter,
-                        PackageName = packageName,
-                        StructName = identifier,
-                        Scope = scope,
-                        StructFields = GetStructFields(targetSyntax, context),
-                        PromotedStructs = [], // TODO: Fix this
-                        PromotedFunctions = [], // TODO: Fix this
-                        PromotedFields = [], // TODO: Fix this
-                        UsingStatements = usingStatements
-                    }.TransformText();
+                        generatedSource = new StructTypeTemplate
+                        {
+                            NamespacePrefix = packageNamespace,
+                            NamespaceHeader = namespaceHeader,
+                            PackageName = packageName,
+                            StructName = identifier,
+                            Scope = scope,
+                            StructFields = GetStructFields(structDeclaration, context),
+                            PromotedStructs = [], // TODO: Fix this
+                            PromotedFunctions = [], // TODO: Fix this
+                            PromotedFields = [], // TODO: Fix this
+                            UsingStatements = usingStatements
+                        }
+                        .TransformText();
 
+                    }
+                    else if (typeDefinition.StartsWith("map["))
+                    {
+                        string[] mapTypes = typeDefinition[4..^1].Split(',');
+
+                        string keyTypeName = mapTypes[0].Trim();
+                        string valueTypeName = mapTypes[1].Trim();
+
+                        string fullKeyTypeName = ConvertToFullCSTypeName(keyTypeName);
+                        string fullValueTypeName = ConvertToFullCSTypeName(valueTypeName);
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            NamespacePrefix = packageNamespace,
+                            NamespaceHeader = namespaceHeader,
+                            PackageName = packageName,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeInfo = new TypeInfo // TODO: Fix this
+                            {
+                                Name = valueTypeName,
+                                TypeName = $"map<{keyTypeName}, {valueTypeName}>",
+                                FullTypeName = $"go.map<{fullKeyTypeName}, {fullValueTypeName}>",
+                                TypeClass = TypeClass.Map
+                            }
+                        }
+                        .TransformText();
+                    }
+                    else if (typeDefinition.StartsWith("[]"))
+                    {
+                        string typeName = typeDefinition[2..];
+                        string fullTypeName = ConvertToFullCSTypeName(typeName);
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            NamespacePrefix = packageNamespace,
+                            NamespaceHeader = namespaceHeader,
+                            PackageName = packageName,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeInfo = new TypeInfo // TODO: Fix this
+                            {
+                                Name = typeName,
+                                TypeName = $"slice<{typeName}>",
+                                FullTypeName = $"go.slice<{fullTypeName}>",
+                                TypeClass = TypeClass.Slice
+                            }
+                        }
+                        .TransformText();
+                    }
                 }
-                else if (typeDefinition.StartsWith("[]"))
+                else if (targetSyntax is InterfaceDeclarationSyntax interfaceDeclaration)
                 {
-                    generatedSource = string.Empty;
-                }
-                else
-                {
-                    generatedSource = string.Empty;
+                    if (typeDefinition.Equals("interface"))
+                    {
+                        //generatedSource = new InterfaceTypeTemplate
+                        //{
+                        //    NamespacePrefix = packageNamespace,
+                        //    NamespaceHeader = namespaceHeader,
+                        //    PackageName = packageName,
+                        //    InterfaceName = identifier,
+                        //    Scope = scope,
+                        //    Interface = default!, // TODO: Fix this
+                        //    Functions = [], // TODO: Fix this
+                        //    UsingStatements = usingStatements
+                        //}
+                        //.TransformText();
+                    }
                 }
 
                 // Add the source code to the compilation
@@ -137,10 +196,7 @@ public class TypeGenerator : ISourceGenerator
                 Name = fieldName,
                 Type = new TypeInfo
                 {
-                    Name = typeName,
-                    TypeName = typeName,
-                    FullTypeName = typeName,
-                    TypeClass = TypeClass.Simple
+                    Name = typeName, TypeName = typeName, FullTypeName = typeName, TypeClass = TypeClass.Simple
                 },
                 Description = string.Empty,
                 Comments = string.Empty,
@@ -149,5 +205,23 @@ public class TypeGenerator : ISourceGenerator
         }
 
         return fieldInfos.ToArray();
+    }
+
+    private string ConvertToCSTypeName(string type)
+    {
+        string primitiveType = ConvertToFullCSTypeName(type);
+        return primitiveType.StartsWith("go.") ? primitiveType[3..] : primitiveType;
+    }
+
+    private string ConvertToFullCSTypeName(string type)
+    {
+        return type switch
+        {
+            "int" => "nint",
+            "complex64" => "go.complex64",
+            "complex128" => "System.Numerics.Complex128",
+            "string" => "go.@string",
+            _ => $"{type}"
+        };
     }
 }

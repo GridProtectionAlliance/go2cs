@@ -149,16 +149,12 @@ public class error<T> : error
     public static explicit operator error<T>(in T target) => new(target);
 
     // Enable comparisons between nil and error<T> interface instance
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(error<T> value, NilType _) => Activator.CreateInstance<error<T>>().Equals(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(error<T> value, NilType nil) => !(value == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, error<T> value) => value == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, error<T> value) => value != nil;
 }
 

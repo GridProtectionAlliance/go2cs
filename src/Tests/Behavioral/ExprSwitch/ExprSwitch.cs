@@ -3,9 +3,6 @@
 
 namespace go;
 
-using fmt = fmt_package;
-using time = time_package;
-
 public static partial class main_package {
 
 private static nint x = 1;

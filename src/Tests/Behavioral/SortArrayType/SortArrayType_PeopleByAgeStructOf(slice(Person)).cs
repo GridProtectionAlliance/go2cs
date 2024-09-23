@@ -48,7 +48,6 @@ namespace go
             
             public ref Person this[nint index]
             {
-                [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => ref m_value[index];
             }
             
@@ -61,26 +60,19 @@ namespace go
             public PeopleByAge(slice<Person> value) => m_value = value;
 
             // Enable implicit conversions between slice<Person> and PeopleByAge struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator PeopleByAge(slice<Person> value) => new PeopleByAge(value);
             
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator slice<Person>(PeopleByAge value) => value.m_value;
             
             // Enable comparisons between nil and PeopleByAge struct
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(PeopleByAge value, NilType nil) => value.Equals(default(PeopleByAge));
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(PeopleByAge value, NilType nil) => !(value == nil);
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(NilType nil, PeopleByAge value) => value == nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static bool operator !=(NilType nil, PeopleByAge value) => value != nil;
 
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public static implicit operator PeopleByAge(NilType nil) => default(PeopleByAge);
         }
     }

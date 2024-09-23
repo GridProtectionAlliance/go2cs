@@ -28,7 +28,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace go;
 
@@ -43,13 +42,10 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 {
     private readonly Dictionary<TKey, TValue> m_map;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public map() => m_map = new Dictionary<TKey, TValue>();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public map(int size) => m_map = new Dictionary<TKey, TValue>(size);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public map(IEnumerable<KeyValuePair<TKey, TValue>> map)
     {
     #if NET5_0_OR_GREATER
@@ -61,35 +57,27 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     public int Count
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_map.Count;
     }
 
     public TValue this[TKey key]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_map.TryGetValue(key, out TValue? value) ? value : default!;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         set => m_map[key] = value;
     }
 
     public (TValue, bool) this[TKey key, bool _]
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         get => m_map.TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Add(TKey key, TValue value) => m_map.Add(key, value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Remove(TKey key) => m_map.Remove(key);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void Clear() => m_map.Clear();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool TryGetValue(TKey key, out TValue value)
     {
         if (m_map is not null)
@@ -99,64 +87,46 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         return false;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool ContainsKey(TKey key) => m_map.ContainsKey(key);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public bool Equals(map<TKey, TValue> other) => m_map.Equals(other.m_map);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override bool Equals(object? obj) => obj is map<TKey, TValue> other && Equals(other);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override string ToString() => $"map[{(m_map is null ? "nil" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public override int GetHashCode() => m_map.GetHashCode();
 
     #region [ Operators ]
 
     // Enable implicit conversions between map<TKey, TValue> and IDictionary<T>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator map<TKey, TValue>(Dictionary<TKey, TValue> value) => new(value);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Dictionary<TKey, TValue>(map<TKey, TValue> value) => value.m_map;
 
     // map<TKey, TValue> to map<TKey, TValue> comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(map<TKey, TValue> a, map<TKey, TValue> b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(map<TKey, TValue> a, map<TKey, TValue> b) => !(a == b);
 
     // map<T> to IMap comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(IMap a, map<TKey, TValue> b) => b.Equals(a);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(IMap a, map<TKey, TValue> b) => !(a == b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(map<TKey, TValue> a, IMap b) => a.Equals(b);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(map<TKey, TValue> a, IMap b) => !(a == b);
 
     // map<T> to nil comparisons
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(map<TKey, TValue> map, NilType _) => map.Count == 0;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(map<TKey, TValue> map, NilType nil) => !(map == nil);
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator ==(NilType nil, map<TKey, TValue> map) => map == nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static bool operator !=(NilType nil, map<TKey, TValue> map) => map != nil;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator map<TKey, TValue>(NilType _) => default;
 
     #endregion
