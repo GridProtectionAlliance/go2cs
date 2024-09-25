@@ -5,51 +5,51 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) visitStmt(n ast.Stmt) {
-	switch x := n.(type) {
+func (v *Visitor) visitStmt(stmt ast.Stmt) {
+	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
-		//v.visitAssignStmt(x, n)
+		v.visitAssignStmt(stmtType)
 	case *ast.BlockStmt:
-		//v.visitBlockStmt(x, n)
+		v.visitBlockStmt(stmtType)
 	case *ast.BranchStmt:
-		//v.visitBranchStmt(x, n)
+		v.visitBranchStmt(stmtType)
 	case *ast.CaseClause:
-		//v.visitCaseClause(x, n)
+		v.visitCaseClause(stmtType)
 	case *ast.CommClause:
-		//v.visitCommClause(x, n)
+		v.visitCommClause(stmtType)
 	case *ast.DeclStmt:
-		//v.visitDeclStmt(x, n)
+		v.visitDeclStmt(stmtType)
 	case *ast.DeferStmt:
-		//v.visitDeferStmt(x, n)
+		v.visitDeferStmt(stmtType)
 	case *ast.EmptyStmt:
-		//v.visitEmptyStmt(x, n)
+		v.visitEmptyStmt(stmtType)
 	case *ast.ExprStmt:
-		//v.visitExprStmt(x, n)
+		v.visitExprStmt(stmtType)
 	case *ast.ForStmt:
-		//v.visitForStmt(x, n)
+		v.visitForStmt(stmtType)
 	case *ast.GoStmt:
-		//v.visitGoStmt(x, n)
+		v.visitGoStmt(stmtType)
 	case *ast.IfStmt:
-		//v.visitIfStmt(x, n)
+		v.visitIfStmt(stmtType)
 	case *ast.IncDecStmt:
-		//v.visitIncDecStmt(x, n)
+		v.visitIncDecStmt(stmtType)
 	case *ast.LabeledStmt:
-		//v.visitLabeledStmt(x, n)
+		v.visitLabeledStmt(stmtType)
 	case *ast.RangeStmt:
-		//v.visitRangeStmt(x, n)
+		v.visitRangeStmt(stmtType)
 	case *ast.ReturnStmt:
-		//v.visitReturnStmt(x, n)
+		v.visitReturnStmt(stmtType)
 	case *ast.SelectStmt:
-		//v.visitSelectStmt(x, n)
+		v.visitSelectStmt(stmtType)
 	case *ast.SendStmt:
-		//v.visitSendStmt(x, n)
+		v.visitSendStmt(stmtType)
 	case *ast.SwitchStmt:
-		//v.visitSwitchStmt(x, n)
+		v.visitSwitchStmt(stmtType)
 	case *ast.TypeSwitchStmt:
-		//v.visitTypeSwitchStmt(x, n)
+		v.visitTypeSwitchStmt(stmtType)
 	case *ast.BadStmt:
-		println(fmt.Sprintf("WARNING: BadStmt encountered: %#v", x))
+		println(fmt.Sprintf("WARNING: BadStmt encountered: %#v", stmtType))
 	default:
-		panic(fmt.Sprintf("unexpected ast.Stmt: %#v", x))
+		panic(fmt.Sprintf("Unexpected Stmt type: %#v", stmtType))
 	}
 }

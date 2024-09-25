@@ -31,7 +31,15 @@ namespace go;
 /// <summary>
 /// Represents a numeric type for the set of all complex numbers with float32 real and imaginary parts.
 /// </summary>
-public readonly struct complex64 : IConvertible, IEquatable<complex64>, IFormattable
+public readonly struct complex64
+    : IConvertible, 
+      IEquatable<complex64>, 
+      IFormattable
+// TODO: Implement new numeric interfaces / validate against System.Numerics.Complex:
+/*, 
+INumberBase<complex64>,
+ISignedNumber<complex64>,
+IUtf8SpanFormattable*/
 {
     // complex64 implementation derived from .NET Complex source:
     //      https://github.com/Microsoft/referencesource/blob/master/System.Numerics/System/Numerics/Complex.cs

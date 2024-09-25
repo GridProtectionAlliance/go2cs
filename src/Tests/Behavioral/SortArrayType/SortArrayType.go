@@ -25,9 +25,9 @@ const (
     String2 = "World"         // World
     // Float constant
     Float = 3.14              // 3.14
-    float2 = 3.14e100         // 3.14e100
+    Float2 = 3.14e100         // 3.14e100
     // Giant float constant
-    giantFloat = 1e309        // 1e309
+    GiantFloat = 1e309        // 1e309
 )
 
 var (
@@ -38,7 +38,15 @@ var (
 	D21, E2 bool              // false, false
 )
 
-func dynamicFn1() int { return 4 }
+func dynamicFn1() int { 
+    return 4
+}
+
+// NodeR is an interface
+type NodeR interface {
+	Pos() int       // Pos is a method
+	End12() int     // End12 is a method
+}
 
 // Person is a type representing a person
 // with a name, age, and shoe size

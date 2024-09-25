@@ -1338,6 +1338,14 @@ public static class builtin
     }
 
     /// <summary>
+    /// Converts value to a complex64 imaginary number.
+    /// </summary>
+    /// <param name="imaginary">Value to convert to imaginary.</param>
+    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
+    public static complex64 i(float imaginary) => new(0.0F, imaginary);
+
+    /// <summary>
     /// Converts value to a complex128 imaginary number.
     /// </summary>
     /// <param name="imaginary">Value to convert to imaginary.</param>

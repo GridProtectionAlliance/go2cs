@@ -6,15 +6,16 @@ import (
 	"strconv"
 )
 
-func (v *Visitor) enterStructType(x *ast.StructType, name string, doc *ast.CommentGroup) {
+// Handles struct types in the context of a TypeSpec
+func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *ast.CommentGroup) {
 	v.targetFile.WriteString(v.newline)
-	v.writeDoc(doc, x.Pos())
+	v.writeDoc(doc, structType.Pos())
 
 	v.writeOutputLn("[GoType(\"struct\")]")
 	v.writeOutputLn("%s partial struct %s {", getAccess(name), getSanitizedIdentifier(name))
 	v.indentLevel++
 
-	for _, field := range x.Fields.List {
+	for _, field := range structType.Fields.List {
 		if len(field.Names) != 1 {
 			println("WARNING: Expected one name per StructType field, found " + strconv.Itoa(len(field.Names)))
 		}
@@ -22,7 +23,10 @@ func (v *Visitor) enterStructType(x *ast.StructType, name string, doc *ast.Comme
 		v.writeDoc(field.Doc, field.Pos())
 
 		if field.Tag != nil {
-			v.writeOutputLn("[GoTag(%s)]", getStringLiteral(field.Tag))
+			v.writeOutput("[GoTag(")
+			v.targetFile.WriteString(v.convBasicLit(field.Tag))
+			v.targetFile.WriteString(")]")
+			v.targetFile.WriteString(v.newline)
 		}
 
 		goTypeName := field.Type.(*ast.Ident).Name
@@ -36,7 +40,4 @@ func (v *Visitor) enterStructType(x *ast.StructType, name string, doc *ast.Comme
 
 	v.indentLevel--
 	v.writeOutputLn("}")
-}
-
-func (v *Visitor) exitStructType(x *ast.StructType) {
 }

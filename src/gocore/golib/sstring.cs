@@ -38,7 +38,7 @@ namespace go;
 // of string operations by avoiding heap allocations. This works fine in stack oriented code
 // operations, but any time heap escape is needed, @string will need to be used. Added a
 // `str` function to `builtin` to do the conversion from @string to sstring, but this would
-// would require proper heap type parameter and heap escape detection during the conversion
+// require proper heap type parameter and heap escape detection during the conversion
 // process. This is a work in progress. See `EXPERIMENTAL` region which controls implicit
 // vs. explicit control of ReadOnlySpan<byte> conversions, compared to what is defined in
 // heap allocated `@string` implementation. When `EXPERIMENTAL` preprocessor directive is
@@ -186,6 +186,7 @@ public readonly ref struct sstring // <- think about naming, stack<
         }
     }
 
+    // TODO: Pass fixed pointers to this function, fixing only once per enumeration
     private static unsafe bool Decode(Decoder decoder, byte[] value, int index, int byteCount, char[] rune)
     {
         bool completed;

@@ -5,17 +5,15 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) visitDecl(n ast.Decl) {
-	switch x := n.(type) {
+func (v *Visitor) visitDecl(decl ast.Decl) {
+	switch declType := decl.(type) {
 	case *ast.GenDecl:
-		v.enterGenDecl(x)
-		v.exitGenDecl(x)
+		v.visitGenDecl(declType)
 	case *ast.FuncDecl:
-		v.enterFuncDecl(x)
-		v.exitFuncDecl(x)
+		v.visitFuncDecl(declType)
 	case *ast.BadDecl:
-		println(fmt.Sprintf("WARNING: BadDecl encountered: %#v", x))
+		println(fmt.Sprintf("WARNING: BadDecl encountered: %#v", declType))
 	default:
-		panic(fmt.Sprintf("unexpected ast.Decl: %#v", x))
+		panic(fmt.Sprintf("Unexpected Decl type: %#v", declType))
 	}
 }

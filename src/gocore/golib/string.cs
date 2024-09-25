@@ -172,6 +172,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
+    // TODO: Pass fixed pointers to this function, fixing only once per enumeration
     private static unsafe bool Decode(Decoder decoder, uint8[] value, nint index, int byteCount, char[] rune)
     {
         bool completed;

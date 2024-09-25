@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/importer"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"go/types"
 	"log"
@@ -183,8 +184,7 @@ func main() {
 		blockOuterSuffixInjection: Stack[string]{},
 	}
 
-	visitor.enterFile(file)
-	visitor.exitFile(file)
+	visitor.visitFile(file)
 
 	outputFile.WriteString(visitor.targetFile.String())
 }
@@ -331,6 +331,47 @@ func (v *Visitor) addRequiredUsing(usingName string) {
 	v.requiredUsings.Add(usingName)
 }
 
+func (v *Visitor) getPrintedNode(node ast.Node) string {
+	result := &strings.Builder{}
+	printer.Fprint(result, v.fset, node)
+	return result.String()
+}
+
+func (v *Visitor) getStringLiteral(str string) string {
+	// Convert Go raw string literal to C# raw string literal
+	if strings.HasPrefix(str, "`") {
+		// Remove backticks from the start and end of the string
+		str = strings.Trim(str, "`")
+
+		// C# raw string literals are enclosed in triple (or more) quotes
+		prefix := `"""`
+		suffix := `"""`
+
+		// Keep adding quotes until the source string does not contain the
+		// prefix to create a unique C# raw string literal token
+		for while := strings.Contains(str, prefix); while; {
+			prefix += `"`
+			suffix += `"`
+			while = strings.Contains(str, prefix)
+		}
+
+		// Handle multiline C# raw string literals
+		if strings.Contains(str, "\n") {
+			if !strings.HasPrefix(str, "\n") {
+				prefix += v.newline
+			}
+
+			if !strings.HasSuffix(str[:len(str)-1], "\n") {
+				suffix = v.newline + suffix
+			}
+		}
+
+		return prefix + str + suffix
+	}
+
+	return str
+}
+
 func convertToCSTypeName(typeName string) string {
 	fullTypeName := convertToCSFullTypeName(typeName)
 
@@ -389,19 +430,4 @@ func getSanitizedIdentifier(identifier string) string {
 	}
 
 	return identifier
-}
-
-func getStringLiteral(decl *ast.BasicLit) string {
-	if decl.Kind != token.STRING {
-		return ""
-	}
-
-	name := decl.Value
-
-	if []rune(name)[0] != '`' {
-		return name
-	}
-
-	// Trim the back-ticks from the string literal
-	return "@\"" + strings.Trim(decl.Value, "`") + "\""
 }

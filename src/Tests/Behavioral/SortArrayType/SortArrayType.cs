@@ -37,12 +37,12 @@ public static readonly @string String = "Hello";          // Hello
 public static readonly @string String2 = "World";         // World
 
 // Float constant
-public const float64 Float = 3.14;          // 3.14
+public const float64 Float = 3.14;           // 3.14
 
-private const float64 float2 = 3.14e+100;   // 3.14e100
+public const float64 Float2 = 3.14e+100;     // 3.14e100
 
 // Giant float constant
-private static readonly GoUntyped giantFloat = /* 1e309 */      // 1e309
+public static readonly GoUntyped GiantFloat = /* 1e309 */       // 1e309
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
 // A2 is a variable
@@ -56,15 +56,19 @@ public static bool D21;                     // false, false
 public static bool E2;
 
 private static nint dynamicFn1() {
-
+    return 4;
 }
+/* interface {
+	Pos() int	// Pos is a method
+	End12() int	// End12 is a method
+} */
 
 // Person is a type representing a person
 // with a name, age, and shoe size
 [GoType("struct")]
 public partial struct Person {
     public @string Name;     // Name of the person
-    [GoTag(@"Tag")]
+    [GoTag("""Tag""")]
     public nint Age;         // Age of the person
     public float32 ShoeSize; // Shoe size of the person
 }
@@ -77,30 +81,63 @@ public partial struct PeopleByAge {}
 
 // Another one
 public static nint Len(this PeopleByShoeSize p) {
-
+    return len(p);
 }
 
 public static void Swap(this PeopleByShoeSize p, nint i, nint j) {
+    /* p[i], p[j] = p[j], p[i] */
 
 }
 
 public static bool Less(this PeopleByShoeSize p, nint i, nint j) {
-
+    return (p[i].ShoeSize < p[j].ShoeSize);
 }
 
 public static nint Len(this PeopleByAge p) {
-
+    return len(p);
 }
 
 public static void Swap(this PeopleByAge p, nint i, nint j) {
+    /* p[i], p[j] = p[j], p[i] */
 
 }
 
 public static bool Less(this PeopleByAge p, nint i, nint j) {
-
+    return (p[i].Age < p[j].Age);
 }
 
 private static void Main() {
+    /* people := []Person{
+	{
+		Name:		"Person1",
+		Age:		26,
+		ShoeSize:	8,
+	},
+	{
+		Name:		"Person2",
+		Age:		21,
+		ShoeSize:	4,
+	},
+	{
+		Name:		"Person3",
+		Age:		15,
+		ShoeSize:	9,
+	},
+	{
+		Name:		"Person4",
+		Age:		45,
+		ShoeSize:	15,
+	},
+	{
+		Name:		"Person5",
+		Age:		25,
+		ShoeSize:	8.5,
+	}} */
+    /* fmt.Println(people) */
+    /* sort.Sort(PeopleByShoeSize(people)) */
+    /* fmt.Println(people) */
+    /* sort.Sort(PeopleByAge(people)) */
+    /* fmt.Println(people) */
 
 }
 

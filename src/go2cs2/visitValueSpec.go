@@ -4,21 +4,18 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
-	"go/printer"
 	"go/token"
 	"go/types"
-	"math"
 	"strconv"
-	"strings"
 )
 
-func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
+func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 	v.targetFile.WriteString(v.newline)
-	v.writeDoc(x.Doc, x.End())
+	v.writeDoc(valueSpec.Doc, valueSpec.End())
 
 	if tok == token.VAR {
-		for i, name := range x.Names {
-			if len(x.Values) <= i {
+		for i, name := range valueSpec.Names {
+			if len(valueSpec.Values) <= i {
 				def := v.info.Defs[name]
 
 				if def != nil {
@@ -29,13 +26,13 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 
 					v.writeOutput(fmt.Sprintf("%s static %s %s;", access, csTypeName, name.Name))
 
-					v.writeComment(x.Comment, name.End()+typeLenDeviation-token.Pos(len(csTypeName)))
+					v.writeComment(valueSpec.Comment, name.End()+typeLenDeviation-token.Pos(len(csTypeName)))
 					v.targetFile.WriteString(v.newline)
 				}
 				continue
 			}
 
-			tv := v.info.Types[x.Values[i]]
+			tv := v.info.Types[valueSpec.Values[i]]
 
 			if tv.Value == nil {
 				def := v.info.Defs[name]
@@ -45,14 +42,8 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 					access := getAccess(name.Name)
 					typeLenDeviation := token.Pos(len(csTypeName) - len(access))
 
-					// HACK: Will likely be necessary to walk expression tree here instead of using printer package
-					varDecl := &strings.Builder{}
-					varDecl.WriteString(fmt.Sprintf("%s static %s %s = ", access, csTypeName, name.Name))
-					printer.Fprint(varDecl, v.fset, x.Values[i])
-					varDecl.WriteString(";")
-					v.writeOutput(varDecl.String())
-
-					v.writeComment(x.Comment, x.Values[i].End()-typeLenDeviation)
+					v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, name.Name, v.convExpr(valueSpec.Values[i])))
+					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
 					v.targetFile.WriteString(v.newline)
 				}
 				continue
@@ -65,11 +56,11 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 
 			v.writeOutput("%s static %s %s = %s;", access, csTypeName, name.Name, tv.Value.ExactString())
 
-			v.writeComment(x.Comment, name.End()+typeLenDeviation)
+			v.writeComment(valueSpec.Comment, name.End()+typeLenDeviation)
 			v.targetFile.WriteString(v.newline)
 		}
 	} else if tok == token.CONST {
-		for i, name := range x.Names {
+		for i, name := range valueSpec.Names {
 			c := v.info.ObjectOf(name).(*types.Const)
 			goTypeName := getTypeName(c.Type())
 			csTypeName := convertToCSTypeName(goTypeName)
@@ -86,13 +77,13 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 				constVal = c.Val().ExactString()
 			}
 
-			if len(x.Values) >= i+1 {
-				tokEnd = x.Values[i].End()
+			if len(valueSpec.Values) >= i+1 {
+				tokEnd = valueSpec.Values[i].End()
 
-				if ident, ok := x.Values[i].(*ast.Ident); ok {
+				if ident, ok := valueSpec.Values[i].(*ast.Ident); ok {
 					srcVal = ident.Name
-				} else if lit, ok := x.Values[i].(*ast.BasicLit); ok {
-					srcVal = lit.Value
+				} else if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok {
+					srcVal = v.convBasicLit(lit)
 				}
 
 				typeLenDeviation += token.Pos(len(constVal) - len(srcVal) - 5)
@@ -105,12 +96,12 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 			writeUntypedConst := func() {
 				v.writeOutput("%s static readonly GoUntyped %s = /* ", access, name.Name)
 
-				if len(x.Values) >= i+1 {
-					printer.Fprint(v.targetFile, v.fset, x.Values[i])
+				if len(valueSpec.Values) >= i+1 {
+					v.targetFile.WriteString(v.getPrintedNode(valueSpec.Values[i]))
 				}
 
 				v.targetFile.WriteString(" */")
-				v.writeComment(x.Comment, tokEnd+token.Pos(len(access)-5))
+				v.writeComment(valueSpec.Comment, tokEnd+token.Pos(len(access)-5))
 				v.targetFile.WriteString(v.newline)
 
 				v.writeOutput("%sGoUntyped.Parse(\"%s\");", v.indent(v.indentLevel+1), constVal)
@@ -119,14 +110,14 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 
 			if c.Val().Kind() == constant.Int {
 				// Check if const integer value will exceed int64 limits
-				if val, err := strconv.Atoi(constVal); err != nil || val > math.MaxInt64 {
+				if _, err := strconv.ParseInt(constVal, 0, 64); err != nil {
 					writeUntypedConst()
 				}
 			}
 
 			if c.Val().Kind() == constant.Float {
 				// Check if const float value will exceed float64 limits
-				if val, err := strconv.ParseFloat(constVal, 64); err != nil || val > math.MaxFloat64 {
+				if _, err := strconv.ParseFloat(constVal, 64); err != nil {
 					constVal = c.Val().ExactString()
 					writeUntypedConst()
 				}
@@ -134,20 +125,18 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 
 			if c.Val().Kind() == constant.String {
 				v.writeOutput("%s static readonly @string %s = %s;", access, name.Name, constVal)
-				v.writeComment(x.Comment, tokEnd+typeLenDeviation-1)
+				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
 				constHandled = true
 			}
 
 			if !constHandled {
-				println(constVal + " : " + srcVal + " / " + csTypeName + " @ " + strconv.Itoa(int(tokEnd)))
-
 				if srcVal == "iota" {
 					constVal = "iota"
 					typeLenDeviation += 1
 				}
 
 				v.writeOutput("%s const %s %s = %s;", access, csTypeName, name.Name, constVal)
-				v.writeComment(x.Comment, tokEnd+typeLenDeviation+2)
+				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+2)
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -155,7 +144,4 @@ func (v *Visitor) enterValueSpec(x *ast.ValueSpec, tok token.Token) {
 	} else {
 		println(fmt.Sprintf("Unexpected ValueSpec token type: %s", tok))
 	}
-}
-
-func (v *Visitor) exitValueSpec(x *ast.ValueSpec) {
 }

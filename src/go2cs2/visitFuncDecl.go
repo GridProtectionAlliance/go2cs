@@ -11,15 +11,15 @@ const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
 
-func (v *Visitor) enterFuncDecl(x *ast.FuncDecl) {
+func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.targetFile.WriteString(v.newline)
-	v.writeDoc(x.Doc, x.Pos())
+	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
 	v.inFunction = true
-	goFunctionName := x.Name.Name
+	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedIdentifier(goFunctionName)
 
-	v.currentFunction = v.info.ObjectOf(x.Name).(*types.Func)
+	v.currentFunction = v.info.ObjectOf(funcDecl.Name).(*types.Func)
 
 	if v.currentFunction == nil {
 		panic("Failed to find function \"" + goFunctionName + "\" in the type info")
@@ -27,7 +27,7 @@ func (v *Visitor) enterFuncDecl(x *ast.FuncDecl) {
 
 	signature := v.currentFunction.Signature()
 
-	if x.Recv == nil {
+	if funcDecl.Recv == nil {
 		// Handle Go "main" function as a special case, in C# this should be capitalized "Main"
 		if csFunctionName == "main" {
 			csFunctionName = "Main"
@@ -40,16 +40,11 @@ func (v *Visitor) enterFuncDecl(x *ast.FuncDecl) {
 
 	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
 
-	if x.Body != nil {
-		v.enterBlockStmt(x.Body)
-		v.exitBlockStmt(x.Body)
+	if funcDecl.Body != nil {
+		v.visitBlockStmt(funcDecl.Body)
 	}
-}
 
-func (v *Visitor) exitFuncDecl(x *ast.FuncDecl) {
-	goFunctionName := x.Name.Name
-	signatureOnly := x.Body == nil
-	signature := v.currentFunction.Signature()
+	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasPanic || v.hasRecover
 	parameterSignature := generateParametersSignature(signature)
 	blockPrefix := ""
@@ -108,7 +103,7 @@ func (v *Visitor) exitFuncDecl(x *ast.FuncDecl) {
 			for i := 0; i < parameters.Len(); i++ {
 				param := parameters.At(i)
 
-				if i == 0 && x.Recv != nil {
+				if i == 0 && funcDecl.Recv != nil {
 					updatedSignature.WriteString("this ")
 				}
 

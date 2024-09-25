@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) enterBlockStmt(x *ast.BlockStmt) {
+func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 	v.pushBlock()
 
 	if v.blockOuterPrefixInjection.Len() > 0 {
@@ -18,19 +18,15 @@ func (v *Visitor) enterBlockStmt(x *ast.BlockStmt) {
 		v.targetFile.WriteString(v.blockInnerPrefixInjection.Pop())
 	}
 
-	v.targetFile.WriteString(v.newline)
 	v.firstStatementIsReturn = false
 	v.indentLevel++
 
-	for _, stmt := range x.List {
+	for _, stmt := range blockStmt.List {
 		v.visitStmt(stmt)
 	}
-}
 
-func (v *Visitor) exitBlockStmt(x *ast.BlockStmt) {
 	v.indentLevel--
-
-	statementList := x.List
+	statementList := blockStmt.List
 
 	// Check if the first statement is a return statement
 	if len(statementList) > 0 {
@@ -47,6 +43,7 @@ func (v *Visitor) exitBlockStmt(x *ast.BlockStmt) {
 	// else
 	// 	m_targetFile = new StringBuilder(RemoveLastDuplicateLineFeed(m_targetFile.ToString()));
 
+	v.targetFile.WriteString(v.newline)
 	v.writeOutputLn("}")
 
 	if v.blockOuterSuffixInjection.Len() > 0 {
