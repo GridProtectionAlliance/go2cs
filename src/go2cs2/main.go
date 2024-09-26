@@ -207,6 +207,8 @@ func (v *Visitor) writeStringLn(builder *strings.Builder, format string, a ...in
 }
 
 func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup, targetPos token.Pos) {
+	wroteStandAloneComment := false
+
 	// Handle standalone comments that may precede the target position
 	if targetPos != token.NoPos {
 		if v.file == nil {
@@ -231,6 +233,7 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 
 			delete(v.standAloneComments, pos)
 			handledPos = append(handledPos, pos)
+			wroteStandAloneComment = true
 		}
 
 		if len(handledPos) > 0 {
@@ -264,6 +267,10 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 	}
 
 	if doc == nil {
+		if wroteStandAloneComment {
+			builder.WriteString(v.newline)
+		}
+
 		return
 	}
 
@@ -343,30 +350,42 @@ func (v *Visitor) getStringLiteral(str string) string {
 		// Remove backticks from the start and end of the string
 		str = strings.Trim(str, "`")
 
-		// C# raw string literals are enclosed in triple (or more) quotes
-		prefix := `"""`
-		suffix := `"""`
+		// See if raw string literal is required
+		if strings.Contains(str, "\"") || strings.Contains(str, "\n") {
+			// C# raw string literals are enclosed in triple (or more) quotes
+			prefix := `"""`
+			suffix := `"""`
 
-		// Keep adding quotes until the source string does not contain the
-		// prefix to create a unique C# raw string literal token
-		for while := strings.Contains(str, prefix); while; {
-			prefix += `"`
-			suffix += `"`
-			while = strings.Contains(str, prefix)
-		}
-
-		// Handle multiline C# raw string literals
-		if strings.Contains(str, "\n") {
-			if !strings.HasPrefix(str, "\n") {
-				prefix += v.newline
+			// Keep adding quotes until the source string does not contain the
+			// prefix to create a unique C# raw string literal token
+			for while := strings.Contains(str, prefix); while; {
+				prefix += `"`
+				suffix += `"`
+				while = strings.Contains(str, prefix)
 			}
 
-			if !strings.HasSuffix(str[:len(str)-1], "\n") {
-				suffix = v.newline + suffix
+			// Handle multiline C# raw string literals
+			if strings.Contains(str, "\n") {
+				if !strings.HasPrefix(str, "\n") {
+					prefix += v.newline
+				}
+
+				if !strings.HasSuffix(str[:len(str)-1], "\n") {
+					// Get index of last newline
+					lastNewline := strings.LastIndex(str, "\n")
+
+					// Check if any characters beyond the last newline are just spaces
+					if strings.TrimSpace(str[lastNewline:]) != "" {
+						suffix = v.newline + suffix
+					}
+				}
 			}
+
+			return prefix + str + suffix
 		}
 
-		return prefix + str + suffix
+		// Use C# verbatim string literal for more simple raw strings
+		return fmt.Sprintf("@\"%s\"", str)
 	}
 
 	return str
@@ -425,7 +444,7 @@ func getAccess(name string) string {
 }
 
 func getSanitizedIdentifier(identifier string) string {
-	if keywords.Contains(identifier) {
+	if keywords.Contains(identifier) || strings.HasPrefix(identifier, AddressPrefix) || strings.HasSuffix(identifier, ClassSuffix) {
 		return "@" + identifier
 	}
 
