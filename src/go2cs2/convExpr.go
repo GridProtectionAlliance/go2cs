@@ -10,7 +10,7 @@ func (v *Visitor) convExpr(expr ast.Expr) string {
 	case *ast.ArrayType:
 		return v.convArrayType(exprType)
 	case *ast.BasicLit:
-		return v.convBasicLit(exprType)
+		return v.convBasicLit(exprType, true)
 	case *ast.BinaryExpr:
 		return v.convBinaryExpr(exprType)
 	case *ast.CallExpr:
@@ -53,9 +53,8 @@ func (v *Visitor) convExpr(expr ast.Expr) string {
 		return v.convUnaryExpr(exprType)
 	case *ast.BadExpr:
 		println(fmt.Sprintf("WARNING: BadExpr encountered: %#v", exprType))
+		return ""
 	default:
 		panic(fmt.Sprintf("Unexpected Expr type: %#v", exprType))
 	}
-
-	return ""
 }

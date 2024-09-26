@@ -14,23 +14,27 @@ var octalCharRegex *regexp.Regexp
 
 func getOctalCharRegex() *regexp.Regexp {
 	if octalCharRegex == nil {
-		octalCharRegex = regexp.MustCompile(`\\0([oO])?[0-7]+`)
+		octalCharRegex = regexp.MustCompile(`\\[0-7][0-7][0-7]`)
 	}
 
 	return octalCharRegex
 }
 
 func replaceOctalChars(value string) string {
-	octalChars := getOctalCharRegex().FindAllString(value, -1)
+	octals := getOctalCharRegex().FindAllString(value, -1)
 
-	if len(octalChars) > 0 {
-		for _, octalChar := range octalChars {
-			decimal, err := strconv.ParseInt(octalChar[2:], 8, 64)
+	if len(octals) > 0 {
+		for _, octal := range octals {
+			decimal, err := strconv.ParseInt(octal[1:], 8, 64)
 
-			if err != nil {
-				value = strings.Replace(value, octalChar, "\\u"+strconv.FormatInt(decimal, 16), 1)
+			if err == nil {
+				if decimal <= math.MaxUint16 {
+					value = strings.Replace(value, octal, fmt.Sprintf("\\u%04x", decimal), 1)
+				} else {
+					value = strings.Replace(value, octal, fmt.Sprintf("\\U%08x", decimal), 1)
+				}
 			} else {
-				println(fmt.Sprintf("WARNING: Failed to parse octal literal: %s", octalChar))
+				println(fmt.Sprintf("WARNING: Failed to parse octal literal \\%s: %s", octal, err))
 			}
 		}
 	}
@@ -38,7 +42,7 @@ func replaceOctalChars(value string) string {
 	return value
 }
 
-func (v *Visitor) convBasicLit(basicLit *ast.BasicLit) string {
+func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, useU8Strings bool) string {
 	result := &strings.Builder{}
 	value := basicLit.Value
 
@@ -105,6 +109,10 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit) string {
 		result.WriteString(replaceOctalChars(value))
 	case token.STRING:
 		result.WriteString(v.getStringLiteral(replaceOctalChars(value)))
+
+		if useU8Strings {
+			result.WriteString("u8")
+		}
 	}
 
 	return result.String()
