@@ -150,19 +150,19 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
             yield break;
 
         Decoder decoder = Encoding.UTF8.GetDecoder();
-        uint8[] value = m_value;
-        char[] rune = new char[1];
+        ReadOnlySpan<uint8> value = m_value;
+        Span<char> rune = new char[1];
         int byteCount;
 
-        for (nint index = 0; index < value.LongLength; index += byteCount)
+        for (int index = 0; index < value.Length; index += byteCount)
         {
             byteCount = 1;
-            bool completed = Decode(decoder, value, index, byteCount, rune);
+            bool completed = Decode(decoder, value.Slice(index, byteCount), rune);
 
             if (!completed)
             {
                 byteCount = 2;
-                completed = Decode(decoder, value, index, byteCount, rune);
+                completed = Decode(decoder, value.Slice(index, byteCount), rune);
             }
 
             if (completed)
@@ -172,17 +172,9 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    // TODO: Pass fixed pointers to this function, fixing only once per enumeration
-    private static unsafe bool Decode(Decoder decoder, uint8[] value, nint index, int byteCount, char[] rune)
+    private static bool Decode(Decoder decoder, ReadOnlySpan<uint8> value, Span<char> rune)
     {
-        bool completed;
-
-        fixed (uint8* bytes = &value[index])
-        fixed (char* chars = rune)
-        {
-            decoder.Convert(bytes, byteCount, chars, 1, true, out _, out _, out completed);
-        }
-
+        decoder.Convert(value, rune, true, out _, out _, out bool completed);
         return completed;
     }
 
