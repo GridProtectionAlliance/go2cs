@@ -13,47 +13,83 @@ public static partial class main_package {
 // Post comment 2
 // Post comment 3
 
+private const float32 w = 1;     // Other
+
+public const nint @_addr_X = 1;  // One
+
+public const nint Y = 2;         // Two
+
+public const nint Z = 3;         // Three
+
 // A1 is a constant
-public const nint A1 = iota;                // 0, 0
+public const nint A1 = iota;              // 0, 0
 public const nint B = 0;
 
-public const nint _ = 1;                    // 1, 100
+public const nint _ = 1;                  // 1, 100
 public const nint D = 100;
 
 // E211 is a constant
-public const nint E211 = 2;                 // 2, 200
+public const nint E211 = 2;               // 2, 200
 public const nint F = 200;
 
 // Giant constant
-public static readonly GoUntyped Giant = /* 1 << 100 */         // Wow
+public static readonly GoUntyped Giant = /* 1 << 100 */             // Wow
     GoUntyped.Parse("1267650600228229401496703205376");
 
-public static readonly GoUntyped Giant2 = /* 1 << 200 */        // Wow2
+public static readonly GoUntyped Giant2 = /* 1 << 200 */            // Wow2
     GoUntyped.Parse("1606938044258990275541962092341162602522202993782792835301376");
 
 // String constant
-public static readonly @string String = "Hello";          // Hello
+public static readonly @string String = "Hello"u8;    // Hello
 
-public static readonly @string String2 = "World";         // World
+public static readonly @string String2 = "World"u8;   // World
+
+public static readonly @string String3 = "世界 \u0053\u004a3"u8; // Extra
 
 // Float constant
-public const float64 Float = 3.14;           // 3.14
+public const float64 Float = 3.14;        // 3.14
 
-public const float64 Float2 = 3.14e+100;     // 3.14e100
+public const float64 Float2 = 3.14e+100;  // 3.14e100
 
 // Giant float constant
-public static readonly GoUntyped GiantFloat = /* 1e309 */       // 1e309
+public static readonly GoUntyped GiantFloat = /* 1e309 */           // 1e309
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 
-// A2 is a variable
-public static nint A2 = 1;                  // 1, "42"
-public static @string B2 = "42";
+// MultiLine constant (spaces EOL)
+public static readonly @string MultiLine = """
+        Line1 /123
+        Line2 ""Yo""
+        Line3
+        """u8;
 
-public static nint C21 = dynamicFn1();      // 3
+// MultiLine2 constant (no spaces EOL)
+public static readonly @string MultiLine2 = """"
+        Line1 /123
+        Line2 """Yo"""
+        Line3
+""""u8;
+
+// MultiLine3 constant (no newline at start)
+public static readonly @string MultiLine3 = """
+Line1
+        Line2
+        "Yo"
+        Line3
+"""u8;
+
+// A2 is a variable
+public static nint A2 = 1;                // 1, "42"
+public static @string B2 = "42"u8;
+
+public static nint C21 = dynamicFn1();    // 3
 
 // D21 is a variable
-public static bool D21;                     // false, false
+public static bool D21;                   // false, false
 public static bool E2;
+
+public static bool @Ta_package = false;   // special ID
+
+private static bool otherID = true;       // other ID
 
 private static nint dynamicFn1() {
     return 4;
@@ -68,7 +104,7 @@ private static nint dynamicFn1() {
 [GoType("struct")]
 public partial struct Person {
     public @string Name;     // Name of the person
-    [GoTag("""Tag""")]
+    [GoTag(@"Tag")]
     public nint Age;         // Age of the person
     public float32 ShoeSize; // Shoe size of the person
 }
@@ -80,6 +116,7 @@ public partial struct PeopleByShoeSize {} // Person slice for shoe size sorting
 public partial struct PeopleByAge {}
 
 // Another one
+
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);
 }
@@ -107,6 +144,8 @@ public static bool Less(this PeopleByAge p, nint i, nint j) {
 }
 
 private static void Main() {
+    /* x := "Hello, 世界 \123\1123" */
+    /* fmt.Println(x) */
     /* people := []Person{
 	{
 		Name:		"Person1",
@@ -142,5 +181,6 @@ private static void Main() {
 }
 
 // Post code comments
+
 
 } // end main_package

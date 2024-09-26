@@ -12,30 +12,56 @@ import "sort" // EOL comment
 // Post comment 3
 
 const (
+    w float32 = 1.0      // Other
+    _addr_X = 1          // One
+    Y = 2                // Two
+    Z = 3                // Three
+)
+
+const (
     // A1 is a constant
-    A1, B = iota, iota * 100  // 0, 0
-    _, D                      // 1, 100
+    A1, B = iota, iota * 100      // 0, 0
+    _, D                          // 1, 100
     // E211 is a constant
-    E211, F                   // 2, 200
+    E211, F                       // 2, 200
     // Giant constant
-    Giant = 1 << 100          // Wow
-    Giant2 = 1 << 200         // Wow2
+    Giant = 1 << 100              // Wow
+    Giant2 = 1 << 200             // Wow2
     // String constant
-    String = "Hello"          // Hello
-    String2 = "World"         // World
+    String = "Hello"              // Hello
+    String2 = "World"             // World
+    String3 = "世界 \123\1123"     // Extra
     // Float constant
-    Float = 3.14              // 3.14
-    Float2 = 3.14e100         // 3.14e100
+    Float = 3.14                  // 3.14
+    Float2 = 3.14e100             // 3.14e100
     // Giant float constant
-    GiantFloat = 1e309        // 1e309
+    GiantFloat = 1e309            // 1e309
+    // MultiLine constant (spaces EOL)
+    MultiLine = `
+        Line1 /123
+        Line2 ""Yo""
+        Line3
+        `
+    // MultiLine2 constant (no spaces EOL)
+    MultiLine2 = `
+        Line1 /123
+        Line2 """Yo"""
+        Line3`
+    // MultiLine3 constant (no newline at start)
+    MultiLine3 = `Line1
+        Line2
+        "Yo"
+        Line3`
 )
 
 var (
     // A2 is a variable
-	A2, B2 = 1, "42"          // 1, "42"
-	C21 = dynamicFn1()        // 3
+	A2, B2 = 1, "42"                 // 1, "42"
+	C21 = dynamicFn1()               // 3
     // D21 is a variable
-	D21, E2 bool              // false, false
+	D21, E2 bool                     // false, false
+    Ta_package = false               // special ID
+    otherID = true                   // other ID
 )
 
 func dynamicFn1() int { 
@@ -86,6 +112,9 @@ func (p PeopleByAge) Less(i, j int) bool {
 }
 
 func main() {
+    x := "Hello, 世界 \123\1123"
+    fmt.Println(x)
+
     people := []Person {
     {
         Name: "Person1",
