@@ -103,9 +103,9 @@ private static nint dynamicFn1() {
 // NodeR is an interface
 [GoType("interface")]
 public partial interface NodeR {
-    public nint Pos();                // Pos is a method
-    public nint End12();              // End12 is a method
-    public @string Name(nint offset); // Sub-name
+    public nint Pos();                  // Pos is a method
+    public nint End12();                // End12 is a method
+    public @string Name(nint offset);   // Sub-name
 }
 
 // Person is a type representing a person

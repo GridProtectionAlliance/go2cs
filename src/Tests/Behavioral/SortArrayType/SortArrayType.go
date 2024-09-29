@@ -70,9 +70,9 @@ func dynamicFn1() int {
 
 // NodeR is an interface
 type NodeR interface {
-	Pos() int                 // Pos is a method
-	End12() int               // End12 is a method
-    Name(offset int) string   // Sub-name
+	Pos() int                   // Pos is a method
+	End12() int                 // End12 is a method
+    Name(offset int) string     // Sub-name
 }
 
 // Person is a type representing a person
