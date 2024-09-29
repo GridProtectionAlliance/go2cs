@@ -16,7 +16,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.Ident:
 		v.targetFile.WriteString(v.convIdent(typeSpecType))
 	case *ast.InterfaceType:
-		v.visitInterfaceType(typeSpecType)
+		v.visitInterfaceType(typeSpecType, typeSpec.Name.Name, doc)
 	case *ast.MapType:
 		v.visitMapType(typeSpecType)
 	case *ast.ParenExpr:

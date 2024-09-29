@@ -46,7 +46,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasPanic || v.hasRecover
-	parameterSignature := generateParametersSignature(signature)
+	parameterSignature := generateParametersSignature(signature, true)
 	blockPrefix := ""
 
 	if !signatureOnly {
@@ -62,7 +62,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 		}
 
-		parameters := getParameters(signature)
+		parameters := getParameters(signature, true)
 
 		for i := 0; i < parameters.Len(); i++ {
 			param := parameters.At(i)
@@ -172,12 +172,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = false
 }
 
-func getParameters(signature *types.Signature) *types.Tuple {
+func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
 	var parameters *types.Tuple
 
-	if signature.Recv() == nil {
-		parameters = signature.Params()
-	} else {
+	if addRecv && signature.Recv() != nil {
 		// Concatenate receiver parameter with the rest of the parameters
 		parameterVars := make([]*types.Var, 0, 1+signature.Params().Len())
 		parameterVars = append(parameterVars, signature.Recv())
@@ -185,13 +183,15 @@ func getParameters(signature *types.Signature) *types.Tuple {
 			parameterVars = append(parameterVars, signature.Params().At(i))
 		}
 		parameters = types.NewTuple(parameterVars...)
+	} else {
+		parameters = signature.Params()
 	}
 
 	return parameters
 }
 
-func generateParametersSignature(signature *types.Signature) string {
-	parameters := getParameters(signature)
+func generateParametersSignature(signature *types.Signature, addRecv bool) string {
+	parameters := getParameters(signature, addRecv)
 
 	if parameters == nil {
 		return ""
@@ -202,7 +202,7 @@ func generateParametersSignature(signature *types.Signature) string {
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
 
-		if i == 0 && signature.Recv() != nil {
+		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")
 		}
 
@@ -248,4 +248,52 @@ func generateResultSignature(signature *types.Signature) string {
 	result.WriteString(")")
 
 	return result.String()
+}
+
+func getSourceParameterSignatureLen(signature *types.Signature) int {
+	parameters := signature.Params()
+
+	if parameters == nil {
+		return 0
+	}
+
+	if parameters.Len() == 1 {
+		return len(getTypeName(parameters.At(0).Type()))
+	}
+
+	result := 0
+
+	for i := 0; i < parameters.Len(); i++ {
+		if i > 0 {
+			result += 2
+		}
+
+		result += len(getTypeName(parameters.At(i).Type()))
+	}
+
+	return result
+}
+
+func getSourceResultSignatureLen(signature *types.Signature) int {
+	results := signature.Results()
+
+	if results == nil {
+		return 0
+	}
+
+	if results.Len() == 1 {
+		return len(getTypeName(results.At(0).Type()))
+	}
+
+	result := 2
+
+	for i := 0; i < results.Len(); i++ {
+		if i > 0 {
+			result += 2
+		}
+
+		result += len(getTypeName(results.At(i).Type()))
+	}
+
+	return result
 }

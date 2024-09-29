@@ -95,9 +95,18 @@ private static nint dynamicFn1() {
     return 4;
 }
 /* interface {
-	Pos() int	// Pos is a method
-	End12() int	// End12 is a method
+	Pos() int		// Pos is a method
+	End12() int		// End12 is a method
+	Name(offset int) string	// Sub-name
 } */
+
+// NodeR is an interface
+[GoType("interface")]
+public partial interface NodeR {
+    public nint Pos();                // Pos is a method
+    public nint End12();              // End12 is a method
+    public @string Name(nint offset); // Sub-name
+}
 
 // Person is a type representing a person
 // with a name, age, and shoe size
