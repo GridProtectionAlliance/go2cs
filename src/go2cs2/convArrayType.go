@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType) string {
-	return "/* " + v.getPrintedNode(arrayType) + " */"
+	return v.convExpr(arrayType.Elt) + "[]"
 }

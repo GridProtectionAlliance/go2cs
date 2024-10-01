@@ -108,7 +108,13 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, useU8Strings bool) string
 	case token.CHAR:
 		result.WriteString(replaceOctalChars(value))
 	case token.STRING:
-		result.WriteString(v.getStringLiteral(replaceOctalChars(value)))
+		strVal, isRawStr := v.getStringLiteral(value)
+
+		if !isRawStr {
+			strVal = replaceOctalChars(strVal)
+		}
+
+		result.WriteString(strVal)
 
 		if useU8Strings {
 			result.WriteString("u8")

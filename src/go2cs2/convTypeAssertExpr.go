@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string {
-	return "/* " + v.getPrintedNode(typeAssertExpr) + " */"
+	return "/* convTypeAssertExpr: " + v.getPrintedNode(typeAssertExpr) + " */"
 }

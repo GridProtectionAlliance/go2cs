@@ -9,10 +9,7 @@ using sort = sort_package; // EOL comment
 
 public static partial class main_package {
 
-/* Post comment */
-// Post comment 2
-// Post comment 3
-
+/* Post comment */// Post comment 2// Post comment 3
 private const float32 w = 1;     // Other
 
 public const nint @_addr_X = 1;  // One
@@ -91,14 +88,8 @@ public static bool @Ta_package = false;   // special ID
 
 private static bool otherID = true;       // other ID
 
-private static nint dynamicFn1() {
-    return 4;
+private static nint dynamicFn1() {    return 4;
 }
-/* interface {
-	Pos() int		// Pos is a method
-	End12() int		// End12 is a method
-	Name(offset int) string	// Sub-name
-} */
 
 // NodeR is an interface
 [GoType("interface")]
@@ -125,71 +116,73 @@ public partial struct PeopleByShoeSize {} // Person slice for shoe size sorting
 public partial struct PeopleByAge {}
 
 // Another one
-
-public static nint Len(this PeopleByShoeSize p) {
-    return len(p);
+public static nint Len(this PeopleByShoeSize p) {    return len(p);
 }
 
 public static void Swap(this PeopleByShoeSize p, nint i, nint j) {
-    /* p[i], p[j] = p[j], p[i] */
-
+    (p[i], p[j]) = (p[j], p[i]);
 }
 
-public static bool Less(this PeopleByShoeSize p, nint i, nint j) {
-    return (p[i].ShoeSize < p[j].ShoeSize);
+public static bool Less(this PeopleByShoeSize p, nint i, nint j) {    return (p[i].ShoeSize < p[j].ShoeSize);
 }
 
-public static nint Len(this PeopleByAge p) {
-    return len(p);
+public static nint Len(this PeopleByAge p) {    return len(p);
 }
 
 public static void Swap(this PeopleByAge p, nint i, nint j) {
-    /* p[i], p[j] = p[j], p[i] */
-
+    (p[i], p[j]) = (p[j], p[i]);
 }
 
-public static bool Less(this PeopleByAge p, nint i, nint j) {
-    return (p[i].Age < p[j].Age);
+public static bool Less(this PeopleByAge p, nint i, nint j) {    return (p[i].Age < p[j].Age);
 }
 
 private static void Main() {
-    /* x := "Hello, 世界 \123\1123" */
-    /* fmt.Println(x) */
-    /* people := []Person{
-	{
-		Name:		"Person1",
-		Age:		26,
-		ShoeSize:	8,
-	},
-	{
-		Name:		"Person2",
-		Age:		21,
-		ShoeSize:	4,
-	},
-	{
-		Name:		"Person3",
-		Age:		15,
-		ShoeSize:	9,
-	},
-	{
-		Name:		"Person4",
-		Age:		45,
-		ShoeSize:	15,
-	},
-	{
-		Name:		"Person5",
-		Age:		25,
-		ShoeSize:	8.5,
-	}} */
-    /* fmt.Println(people) */
-    /* sort.Sort(PeopleByShoeSize(people)) */
-    /* fmt.Println(people) */
-    /* sort.Sort(PeopleByAge(people)) */
-    /* fmt.Println(people) */
+    // Hello World SJ3
+    var x = "Hello, 世界 \u0053\u004a3"u8;
+    fmt.Println(x);
 
+    // Where am I?
+    // Person slice
+    var people = new Person[] { // EOL Comment
+        new(
+            Name: "Person1"u8, // Name
+            Age: 26, // Age
+            ShoeSize: 8 // ShoeSize
+        ), // Between types comment
+        new(
+            Name: "Person2"u8,
+            Age: 21,
+            ShoeSize: 4
+        ),
+        new(
+            Name: "Person3"u8, // Person 3
+            Age: 15,
+            ShoeSize: 9
+        ),
+        new(
+            Name: "Person4"u8,
+            Age: 45, // Person 4 age
+            ShoeSize: 15
+        ),
+        new(
+            Name: "Person5"u8,
+            Age: 25,
+            ShoeSize: 8.5F
+        )
+    }.slice();
+
+    // End of type comment
+    // Test
+    fmt.Println(people);
+
+    sort.Sort(new PeopleByShoeSize(people));
+    fmt.Println(people);
+
+
+    sort.Sort(new PeopleByAge(people));
+    fmt.Println(people);
 }
 
 // Post code comments
-
 
 } // end main_package

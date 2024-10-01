@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convMapType(mapType *ast.MapType) string {
-	return "/* " + v.getPrintedNode(mapType) + " */"
+	return "/* convMapType: " + v.getPrintedNode(mapType) + " */"
 }

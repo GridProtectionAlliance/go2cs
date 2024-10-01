@@ -12,7 +12,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 		v.targetFile.WriteString(v.blockOuterPrefixInjection.Pop())
 	}
 
-	v.writeOutputLn(" {")
+	v.writeOutput(" {")
 
 	if v.blockInnerPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockInnerPrefixInjection.Pop())
@@ -21,8 +21,36 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 	v.firstStatementIsReturn = false
 	v.indentLevel++
 
+	var lastStmt ast.Stmt
+	prefix := v.newline + v.indent(v.indentLevel)
+
+	if len(blockStmt.List) > 0 {
+		v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
+	}
+
 	for _, stmt := range blockStmt.List {
+		if lastStmt != nil {
+
+			currentLine := v.file.Line(stmt.Pos())
+			lastLine := v.file.Line(lastStmt.End())
+
+			comments := &strings.Builder{}
+
+			if wrote, lines := v.writeStandAloneCommentString(comments, stmt.Pos(), nil, prefix); wrote {
+				lastLine -= lines - 1
+			}
+
+			if currentLine-lastLine > 1 {
+				v.targetFile.WriteString(strings.Repeat(v.newline, currentLine-lastLine-1))
+			}
+
+			if comments.Len() > 0 {
+				v.targetFile.WriteString(comments.String())
+			}
+		}
+
 		v.visitStmt(stmt)
+		lastStmt = stmt
 	}
 
 	v.indentLevel--
@@ -37,11 +65,6 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 	if v.blockInnerSuffixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockInnerSuffixInjection.Pop())
 	}
-
-	// if (!EndsWithLineFeed(m_targetFile.ToString()))
-	// 	m_targetFile.AppendLine();
-	// else
-	// 	m_targetFile = new StringBuilder(RemoveLastDuplicateLineFeed(m_targetFile.ToString()));
 
 	v.targetFile.WriteString(v.newline)
 	v.writeOutputLn("}")

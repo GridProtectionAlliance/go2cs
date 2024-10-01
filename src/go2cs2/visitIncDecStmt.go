@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(incDecStmt) + " */")
+	v.writeOutputLn("/* visitIncDecStmt: " + v.getPrintedNode(incDecStmt) + " */")
 }

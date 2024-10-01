@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(rangeStmt) + " */")
+	v.writeOutputLn("/* visitRangeStmt: " + v.getPrintedNode(rangeStmt) + " */")
 }

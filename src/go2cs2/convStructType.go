@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convStructType(structType *ast.StructType) string {
-	return "/* " + v.getPrintedNode(structType) + " */"
+	return "/* convStructType: " + v.getPrintedNode(structType) + " */"
 }

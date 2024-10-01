@@ -6,5 +6,5 @@ import (
 
 // Handles channel types in context of a TypeSpec
 func (v *Visitor) visitChanType(chanType *ast.ChanType) {
-	v.writeOutputLn("/* %s */", v.getPrintedNode(chanType))
+	v.writeOutputLn("/* visitChanType: %s */", v.getPrintedNode(chanType))
 }

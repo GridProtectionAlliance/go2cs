@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitBranchStmt(branchStmt *ast.BranchStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(branchStmt) + " */")
+	v.writeOutputLn("/* visitBranchStmt: " + v.getPrintedNode(branchStmt) + " */")
 }

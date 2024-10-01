@@ -6,5 +6,5 @@ import (
 
 // Handles function types in context of a TypeSpec
 func (v *Visitor) visitFuncType(funcType *ast.FuncType) {
-	v.writeOutputLn("/* %s */", v.getPrintedNode(funcType))
+	v.writeOutputLn("/* visitFuncType: %s */", v.getPrintedNode(funcType))
 }

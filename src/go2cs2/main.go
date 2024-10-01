@@ -193,6 +193,12 @@ func (v *Visitor) indent(indentLevel int) string {
 	return strings.Repeat(" ", v.options.indentSpaces*indentLevel)
 }
 
+func (v *Visitor) isLineFeedBetween(prevEndPos, currPos token.Pos) bool {
+	prevLine := v.fset.Position(prevEndPos).Line
+	currLine := v.fset.Position(currPos).Line
+	return currLine > prevLine
+}
+
 func (v *Visitor) writeString(builder *strings.Builder, format string, a ...interface{}) {
 	if v.indentLevel > 0 {
 		builder.WriteString(v.indent(v.indentLevel))
@@ -206,8 +212,9 @@ func (v *Visitor) writeStringLn(builder *strings.Builder, format string, a ...in
 	builder.WriteString(v.newline)
 }
 
-func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup, targetPos token.Pos) {
+func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetPos token.Pos, doc *ast.CommentGroup, prefix string) (bool, int) {
 	wroteStandAloneComment := false
+	lines := 0
 
 	// Handle standalone comments that may precede the target position
 	if targetPos != token.NoPos {
@@ -228,8 +235,13 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 				continue
 			}
 
+			builder.WriteString(prefix)
 			builder.WriteString(comment)
-			builder.WriteString(v.newline)
+			lines += strings.Count(comment, "\n")
+
+			if doc != nil {
+				builder.WriteString(v.newline)
+			}
 
 			delete(v.standAloneComments, pos)
 			handledPos = append(handledPos, pos)
@@ -265,6 +277,12 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 			}
 		}
 	}
+
+	return wroteStandAloneComment, lines
+}
+
+func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup, targetPos token.Pos) {
+	wroteStandAloneComment, _ := v.writeStandAloneCommentString(builder, targetPos, doc, "")
 
 	if doc == nil {
 		if wroteStandAloneComment {
@@ -344,7 +362,7 @@ func (v *Visitor) getPrintedNode(node ast.Node) string {
 	return result.String()
 }
 
-func (v *Visitor) getStringLiteral(str string) string {
+func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 	// Convert Go raw string literal to C# raw string literal
 	if strings.HasPrefix(str, "`") {
 		// Remove backticks from the start and end of the string
@@ -381,14 +399,14 @@ func (v *Visitor) getStringLiteral(str string) string {
 				}
 			}
 
-			return prefix + str + suffix
+			return prefix + str + suffix, true
 		}
 
 		// Use C# verbatim string literal for more simple raw strings
-		return fmt.Sprintf("@\"%s\"", str)
+		return fmt.Sprintf("@\"%s\"", str), true
 	}
 
-	return str
+	return str, false
 }
 
 func convertToCSTypeName(typeName string) string {

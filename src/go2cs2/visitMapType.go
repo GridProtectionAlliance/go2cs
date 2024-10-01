@@ -6,5 +6,5 @@ import (
 
 // Handles map types in context of a TypeSpec
 func (v *Visitor) visitMapType(mapType *ast.MapType) {
-	v.writeOutputLn("/* %s */", v.getPrintedNode(mapType))
+	v.writeOutputLn("/* visitMapType: %s */", v.getPrintedNode(mapType))
 }

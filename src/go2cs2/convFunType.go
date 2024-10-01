@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convFuncType(funcType *ast.FuncType) string {
-	return "/* " + v.getPrintedNode(funcType) + " */"
+	return "/* convFuncType: " + v.getPrintedNode(funcType) + " */"
 }

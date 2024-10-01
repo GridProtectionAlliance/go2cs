@@ -80,7 +80,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
 					constVal = v.convBasicLit(lit, true)
 				} else {
-					constVal = v.getStringLiteral(c.Val().ExactString())
+					constVal, _ = v.getStringLiteral(c.Val().ExactString())
 				}
 			} else if c.Val().Kind() == constant.Float {
 				constVal = c.Val().String()

@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(typeSwitchStmt) + " */")
+	v.writeOutputLn("/* visitTypeSwitchStmt: " + v.getPrintedNode(typeSwitchStmt) + " */")
 }

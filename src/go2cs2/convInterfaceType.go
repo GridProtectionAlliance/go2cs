@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convInterfaceType(interfaceType *ast.InterfaceType) string {
-	return "/* " + v.getPrintedNode(interfaceType) + " */"
+	return "/* convInterfaceType: " + v.getPrintedNode(interfaceType) + " */"
 }

@@ -10,8 +10,6 @@ import (
 
 // Handles map types in context of a TypeSpec
 func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name string, doc *ast.CommentGroup) {
-	v.writeOutputLn("/* %s */", v.getPrintedNode(interfaceType))
-
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(doc, interfaceType.Pos())
 

@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(ifStmt) + " */")
+	v.writeOutputLn("/* visitIfStmt: " + v.getPrintedNode(ifStmt) + " */")
 }

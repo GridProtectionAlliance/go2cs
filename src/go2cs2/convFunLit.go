@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
-	return "/* " + v.getPrintedNode(funcLit) + " */"
+	return "/* convFuncLit: " + v.getPrintedNode(funcLit) + " */"
 }

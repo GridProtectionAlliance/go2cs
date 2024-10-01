@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convFieldList(fieldList *ast.FieldList) string {
-	return "/* " + v.getPrintedNode(fieldList) + " */"
+	return "/* convFieldList: " + v.getPrintedNode(fieldList) + " */"
 }

@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) visitCaseClause(caseClause *ast.CaseClause) {
-	v.writeOutputLn("/* " + v.getPrintedNode(caseClause) + " */")
+	v.writeOutputLn("/* visitCaseClause: " + v.getPrintedNode(caseClause) + " */")
 }

@@ -113,41 +113,45 @@ func (p PeopleByAge) Less(i, j int) bool {
 }
 
 func main() {
+    // Hello World SJ3
     x := "Hello, 世界 \123\1123"
-    fmt.Println(x)
+    fmt.Println(x) // Where am I?
 
-    people := []Person {
+    // Person slice
+    people := []Person { // EOL Comment
     {
-        Name: "Person1",
-        Age: 26,
-        ShoeSize: 8,
-    },
+        Name: "Person1",    // Name
+        Age: 26,            // Age
+        ShoeSize: 8,        // ShoeSize
+    }, // Between types comment
     {
         Name: "Person2",
         Age: 21,
         ShoeSize: 4,
     },
     {
-        Name: "Person3",
+        Name: "Person3",  // Person 3
         Age: 15,
         ShoeSize: 9,
     },
     {
         Name: "Person4",
-        Age: 45,
+        Age: 45,          // Person 4 age
         ShoeSize: 15,
     },
     {
         Name: "Person5",
         Age: 25,
         ShoeSize: 8.5,
-    }}
+    }} // End of type comment
 
+    // Test
     fmt.Println(people)
     
     sort.Sort(PeopleByShoeSize(people))
     fmt.Println(people)
-    
+
+
     sort.Sort(PeopleByAge(people))
     fmt.Println(people)
 }
