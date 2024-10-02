@@ -12,6 +12,7 @@ import (
 	"os"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	. "go2cs/hashset"
 	. "go2cs/stack"
@@ -57,11 +58,12 @@ type Visitor struct {
 	blockOuterPrefixInjection Stack[string]
 	blockOuterSuffixInjection Stack[string]
 	firstStatementIsReturn    bool
+	identEscapesHeap          map[*ast.Ident]bool
 }
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "_addr_"
+const AddressPrefix = "ꝸ"
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
@@ -182,6 +184,7 @@ func main() {
 		blockInnerSuffixInjection: Stack[string]{},
 		blockOuterPrefixInjection: Stack[string]{},
 		blockOuterSuffixInjection: Stack[string]{},
+		identEscapesHeap:          map[*ast.Ident]bool{},
 	}
 
 	visitor.visitFile(file)
@@ -409,20 +412,77 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 	return str, false
 }
 
+func getSanitizedIdentifier(identifier string) string {
+	if keywords.Contains(identifier) || strings.HasPrefix(identifier, AddressPrefix) || strings.HasSuffix(identifier, ClassSuffix) {
+		return "@" + identifier
+	}
+
+	return identifier
+}
+
+func getAccess(name string) string {
+	// If name starts with a lowercase letter, scope is "private"
+	ch, _ := utf8.DecodeRuneInString(name)
+
+	if unicode.IsLower(ch) {
+		return "private"
+	}
+
+	// Otherwise, scope is "public"
+	return "public"
+}
+
+func getTypeName(t types.Type) string {
+	if named, ok := t.(*types.Named); ok {
+		return named.Obj().Name()
+	}
+
+	return t.String()
+}
+
+func getCSTypeName(t types.Type) string {
+	return convertToCSTypeName(getTypeName(t))
+}
+
 func convertToCSTypeName(typeName string) string {
 	fullTypeName := convertToCSFullTypeName(typeName)
 
 	// If full type name starts with root namespace, remove it
 	if strings.HasPrefix(fullTypeName, RootNamespace+".") {
-		return fullTypeName[3:]
+		return fullTypeName[len(RootNamespace)+1:]
 	}
 
 	return fullTypeName
 }
 
 func convertToCSFullTypeName(typeName string) string {
-	if strings.HasPrefix(typeName, "untyped ") {
-		typeName = typeName[8:]
+	typeName = strings.TrimPrefix(typeName, "untyped ")
+
+	if strings.HasPrefix(typeName, "[]") {
+		return fmt.Sprintf("go.slice<%s>", convertToCSTypeName(typeName[2:]))
+	}
+
+	// Handle array types
+	if strings.HasPrefix(typeName, "[") {
+		return fmt.Sprintf("go.array<%s>", convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:]))
+	}
+
+	if strings.HasPrefix(typeName, "map[") {
+		keyValue := strings.Split(typeName[4:len(typeName)-1], "]")
+		return fmt.Sprintf("go.map<%s, %s>", convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
+	}
+
+	if strings.HasPrefix(typeName, "chan ") {
+		return fmt.Sprintf("go.chan<%s>", convertToCSTypeName(typeName[5:]))
+	}
+
+	if strings.HasPrefix(typeName, "func(") {
+		return fmt.Sprintf("Func<%s>", convertToCSTypeName(typeName[5:len(typeName)-1]))
+	}
+
+	// Handle pointer types
+	if strings.HasPrefix(typeName, "*") {
+		return fmt.Sprintf("go.ptr<%s>", convertToCSTypeName(typeName[1:]))
 	}
 
 	switch typeName {
@@ -439,32 +499,171 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 }
 
-func getTypeName(t types.Type) string {
-	if named, ok := t.(*types.Named); ok {
-		return named.Obj().Name()
+func (v *Visitor) convertToHeapTypeDecl(typeName string, ident *ast.Ident) string {
+	escapesHeap := v.identEscapesHeap[ident]
+
+	if !escapesHeap || isInherentlyHeapAllocatedType(v.info.TypeOf(ident)) {
+		return ""
 	}
 
-	return t.String()
-}
+	csIDName := getSanitizedIdentifier(ident.Name)
 
-func getCSTypeName(t types.Type) string {
-	return convertToCSTypeName(getTypeName(t))
-}
+	// Handle array types
+	if strings.HasPrefix(typeName, "[") {
+		arrayLen := strings.Split(typeName[1:], "]")[0]
 
-func getAccess(name string) string {
-	// If name starts with a lowercase letter, scope is "private"
-	if unicode.IsLower([]rune(name)[0]) {
-		return "private"
+		// Get array element type
+		arrayType := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
+
+		return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
 	}
 
-	// Otherwise, scope is "public"
-	return "public"
+	csTypeName := convertToCSTypeName(typeName)
+	return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
 }
 
-func getSanitizedIdentifier(identifier string) string {
-	if keywords.Contains(identifier) || strings.HasPrefix(identifier, AddressPrefix) || strings.HasSuffix(identifier, ClassSuffix) {
-		return "@" + identifier
+func isInherentlyHeapAllocatedType(typ types.Type) bool {
+	switch typ.Underlying().(type) {
+	case *types.Map, *types.Slice, *types.Chan, *types.Interface, *types.Signature:
+		// Maps, slices, channels, interfaces, and functions are reference types
+		return true
+	default:
+		return false
+	}
+}
+
+func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
+	// If analysis has already been performed, return
+	if _, found := v.identEscapesHeap[ident]; found {
+		return
 	}
 
-	return identifier
+	identObj := v.info.ObjectOf(ident)
+
+	if identObj == nil {
+		return // Could not find the object of ident
+	}
+
+	// Check if the type is inherently heap allocated
+	if isInherentlyHeapAllocatedType(identObj.Type()) {
+		v.identEscapesHeap[ident] = true
+		return
+	}
+
+	escapes := false
+
+	// Helper function to check if identObj occurs within an expression
+	containsIdent := func(node ast.Node) bool {
+		found := false
+
+		ast.Inspect(node, func(n ast.Node) bool {
+			if found {
+				return false // Stop if already found
+			}
+
+			if id, ok := n.(*ast.Ident); ok {
+				obj := v.info.ObjectOf(id)
+
+				if obj == identObj {
+					found = true
+					return false
+				}
+			}
+
+			return true
+		})
+
+		return found
+	}
+
+	// Visitor function to traverse the AST
+	inspectFunc := func(node ast.Node) bool {
+		if escapes {
+			return false // Stop traversal if escape is found
+		}
+
+		switch n := node.(type) {
+		case *ast.UnaryExpr:
+			// Check if ident is used in an address-of operation
+			if n.Op == token.AND {
+				if containsIdent(n.X) {
+					// The address of the ident is taken
+					escapes = true
+					return false
+				}
+			}
+		case *ast.CallExpr:
+			// Check if ident is passed as an argument
+			for i, arg := range n.Args {
+				if containsIdent(arg) {
+					// Get the function type
+					funType := v.info.TypeOf(n.Fun)
+
+					sig, ok := funType.Underlying().(*types.Signature)
+
+					if !ok {
+						continue
+					}
+
+					var paramType types.Type
+
+					if sig.Variadic() && i >= sig.Params().Len()-1 {
+						// Variadic parameters
+						paramType = sig.Params().At(sig.Params().Len() - 1).Type()
+
+						if sliceType, ok := paramType.(*types.Slice); ok {
+							paramType = sliceType.Elem()
+						}
+					} else if i < sig.Params().Len() {
+						paramType = sig.Params().At(i).Type()
+					} else {
+						continue
+					}
+
+					// Check if paramType is a pointer type
+					if _, ok := paramType.Underlying().(*types.Pointer); ok {
+						// Passed as a pointer; may cause escape
+						escapes = true
+						return false
+					}
+
+					// We do not currently consider interface types as causing an escape since
+					// in C# value types are boxed as needed making value basically read-only,
+					// thus matching Go semantics
+				}
+			}
+		case *ast.FuncLit:
+			// Check if ident is used inside a closure
+			closureContainsIdent := false
+
+			ast.Inspect(n.Body, func(n ast.Node) bool {
+				if closureContainsIdent {
+					return false
+				}
+
+				if id, ok := n.(*ast.Ident); ok {
+					obj := v.info.ObjectOf(id)
+
+					if obj == identObj {
+						closureContainsIdent = true
+						return false
+					}
+				}
+
+				return true
+			})
+
+			if closureContainsIdent {
+				// For now, we assume that variables captured by closures might escape
+				escapes = true
+				return false
+			}
+		}
+
+		return true // Continue traversing
+	}
+
+	ast.Inspect(parentBlock, inspectFunc)
+
+	v.identEscapesHeap[ident] = escapes
 }

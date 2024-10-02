@@ -8,7 +8,7 @@ import (
 func (v *Visitor) visitDecl(decl ast.Decl) {
 	switch declType := decl.(type) {
 	case *ast.GenDecl:
-		v.visitGenDecl(declType)
+		v.visitGenDecl(declType, nil)
 	case *ast.FuncDecl:
 		v.visitFuncDecl(declType)
 	case *ast.BadDecl:

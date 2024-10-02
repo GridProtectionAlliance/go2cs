@@ -69,12 +69,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// For any array parameters, Go copies the array by value
 			if _, ok := param.Type().(*types.Array); ok {
-				v.writeStringLn(arrayClones, fmt.Sprintf("%s = %s.Clone();", param.Name(), param.Name()))
+				v.writeString(arrayClones, fmt.Sprintf("%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), param.Name(), param.Name()))
 			}
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
 			if pointerType, ok := param.Type().(*types.Pointer); ok {
-				v.writeStringLn(implicitPointers, fmt.Sprintf("ref %s %s = ref %s%s.val;", pointerType.Elem().String(), param.Name(), AddressPrefix, param.Name()))
+				v.writeString(implicitPointers, fmt.Sprintf("%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name()))
 			}
 		}
 

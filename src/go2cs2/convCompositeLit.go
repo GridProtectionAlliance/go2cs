@@ -38,7 +38,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 	}
 
-	result.WriteString(fmt.Sprintf("new %s {", v.convExpr(compositeLit.Type)))
+	result.WriteString(fmt.Sprintf("new %s { ", v.convExpr(compositeLit.Type)))
 
 	lbraceSuffix := ""
 

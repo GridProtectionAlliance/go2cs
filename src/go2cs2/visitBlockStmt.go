@@ -49,7 +49,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 			}
 		}
 
-		v.visitStmt(stmt)
+		v.visitStmt(stmt, blockStmt)
 		lastStmt = stmt
 	}
 

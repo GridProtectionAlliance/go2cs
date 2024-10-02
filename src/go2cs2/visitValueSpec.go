@@ -9,26 +9,42 @@ import (
 	"strconv"
 )
 
-func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
+func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, parentBlock *ast.BlockStmt) {
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(valueSpec.Doc, valueSpec.End())
 
 	if tok == token.VAR {
-		for i, name := range valueSpec.Names {
-			goIDName := name.Name
+		for i, ident := range valueSpec.Names {
+			// Perform escape analysis to determine if the variable needs heap allocation
+			v.performEscapeAnalysis(ident, parentBlock)
+
+			goIDName := ident.Name
 			csIDName := getSanitizedIdentifier(goIDName)
 
 			if len(valueSpec.Values) <= i {
-				def := v.info.Defs[name]
+				def := v.info.Defs[ident]
 
 				if def != nil {
 					goTypeName := getTypeName(def.Type())
 					csTypeName := convertToCSTypeName(goTypeName)
-					access := getAccess(goIDName)
-					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(access) + len(goIDName) + 6 + (len(csIDName) - len(goIDName)))
 
-					v.writeOutput(fmt.Sprintf("%s static %s %s;", access, csTypeName, csIDName))
-					v.writeComment(valueSpec.Comment, name.End()+typeLenDeviation-token.Pos(len(csTypeName)))
+					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
+
+					if v.inFunction {
+						headTypeDecl := v.convertToHeapTypeDecl(goTypeName, ident)
+
+						if len(headTypeDecl) > 0 {
+							v.writeOutput(headTypeDecl)
+						} else {
+							v.writeOutput(fmt.Sprintf("%s %s;", csTypeName, csIDName))
+						}
+					} else {
+						access := getAccess(goIDName)
+						typeLenDeviation += token.Pos(len(access) + 6)
+						v.writeOutput(fmt.Sprintf("%s static %s %s;", access, csTypeName, csIDName))
+					}
+
+					v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation-token.Pos(len(csTypeName)))
 					v.targetFile.WriteString(v.newline)
 				}
 				continue
@@ -37,14 +53,26 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			tv := v.info.Types[valueSpec.Values[i]]
 
 			if tv.Value == nil {
-				def := v.info.Defs[name]
+				def := v.info.Defs[ident]
 
 				if def != nil {
 					csTypeName := getCSTypeName(def.Type())
-					access := getAccess(goIDName)
-					typeLenDeviation := token.Pos(len(csTypeName) - len(access) - 9 + (len(csIDName) - len(goIDName)))
+					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
-					v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i])))
+					if v.inFunction {
+						headTypeDecl := v.convertToHeapTypeDecl(getTypeName(def.Type()), ident)
+
+						if len(headTypeDecl) > 0 {
+							v.writeOutput(headTypeDecl)
+						} else {
+							v.writeOutput(fmt.Sprintf("%s %s;", csTypeName, csIDName))
+						}
+					} else {
+						access := getAccess(goIDName)
+						typeLenDeviation -= token.Pos(len(access) + 9)
+						v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i])))
+					}
+
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
 					v.targetFile.WriteString(v.newline)
 				}
@@ -52,21 +80,33 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			}
 
 			csTypeName := convertToCSTypeName(getTypeName(tv.Type))
-			access := getAccess(goIDName)
 			goValue := tv.Value.ExactString()
 			csValue := v.convExpr(valueSpec.Values[i])
-			typeLenDeviation := token.Pos(len(access) + len(csTypeName) + len(csValue) + 4 + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
+			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
 
-			v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, csValue)
-			v.writeComment(valueSpec.Comment, name.End()+typeLenDeviation)
+			if v.inFunction {
+				headTypeDecl := v.convertToHeapTypeDecl(getTypeName(tv.Type), ident)
+
+				if len(headTypeDecl) > 0 {
+					v.writeOutput(headTypeDecl)
+				} else {
+					v.writeOutput("%s %s;", csTypeName, csIDName)
+				}
+			} else {
+				access := getAccess(goIDName)
+				typeLenDeviation += token.Pos(len(access) + 4)
+				v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, csValue)
+			}
+
+			v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation)
 			v.targetFile.WriteString(v.newline)
 		}
 	} else if tok == token.CONST {
-		for i, name := range valueSpec.Names {
-			goIDName := name.Name
+		for i, ident := range valueSpec.Names {
+			goIDName := ident.Name
 			csIDName := getSanitizedIdentifier(goIDName)
 
-			c := v.info.ObjectOf(name).(*types.Const)
+			c := v.info.ObjectOf(ident).(*types.Const)
 			goTypeName := getTypeName(c.Type())
 			csTypeName := convertToCSTypeName(goTypeName)
 			access := getAccess(goIDName)
@@ -99,13 +139,17 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 				typeLenDeviation += token.Pos(len(constVal) - len(srcVal) - 4)
 			} else {
-				tokEnd = name.End()
+				tokEnd = ident.End()
 			}
 
 			constHandled := false
 
 			writeUntypedConst := func() {
-				v.writeOutput("%s static readonly GoUntyped %s = /* ", access, csIDName)
+				if v.inFunction {
+					v.writeOutput("GoUntyped %s = /* ", csIDName)
+				} else {
+					v.writeOutput("%s static readonly GoUntyped %s = /* ", access, csIDName)
+				}
 
 				if len(valueSpec.Values) >= i+1 {
 					v.targetFile.WriteString(v.getPrintedNode(valueSpec.Values[i]))
@@ -135,7 +179,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			}
 
 			if c.Val().Kind() == constant.String {
-				v.writeOutput("%s static readonly @string %s = %s;", access, csIDName, constVal)
+				if v.inFunction {
+					v.writeOutput("@string %s = %s;", csIDName, constVal)
+				} else {
+					v.writeOutput("%s static readonly @string %s = %s;", access, csIDName, constVal)
+				}
+
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation-1)
 				constHandled = true
 			}
@@ -145,7 +194,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 					constVal = "iota"
 				}
 
-				v.writeOutput("%s const %s %s = %s;", access, csTypeName, csIDName, constVal)
+				if v.inFunction {
+					v.writeOutput("const %s %s = %s;", csTypeName, csIDName, constVal)
+				} else {
+					v.writeOutput("%s const %s %s = %s;", access, csTypeName, csIDName, constVal)
+				}
+
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+1)
 			}
 

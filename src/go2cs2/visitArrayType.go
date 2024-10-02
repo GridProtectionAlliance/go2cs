@@ -8,22 +8,28 @@ import (
 
 // Handles array and slice types in context of a TypeSpec
 func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment *ast.CommentGroup) {
-	goTypeName := arrayType.Elt.(*ast.Ident).Name
-	csTypeName := convertToCSTypeName(goTypeName)
-	typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
+	ident, ok := arrayType.Elt.(*ast.Ident)
 
-	v.targetFile.WriteString(v.newline)
+	if ok {
+		goTypeName := ident.Name
+		csTypeName := convertToCSTypeName(goTypeName)
+		typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
 
-	if arrayType.Len == nil {
-		// Handle slice type
-		v.writeOutputLn(fmt.Sprintf("[GoType(\"[]%s\")]", csTypeName))
+		v.targetFile.WriteString(v.newline)
+
+		if arrayType.Len == nil {
+			// Handle slice type
+			v.writeOutputLn(fmt.Sprintf("[GoType(\"[]%s\")]", csTypeName))
+		} else {
+			// Handle array type
+			arrayLen := v.convExpr(arrayType.Len)
+			v.writeOutputLn(fmt.Sprintf("[GoType(\"[%s]%s\")]", arrayLen, csTypeName))
+		}
+
+		v.writeOutput("public partial struct %s {}", getSanitizedIdentifier(name))
+		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
+		v.targetFile.WriteString(v.newline)
 	} else {
-		// Handle array type
-		arrayLen := v.convExpr(arrayType.Len)
-		v.writeOutputLn(fmt.Sprintf("[GoType(\"[%s]%s\")]", arrayLen, csTypeName))
+		v.writeOutputLn("// %s", v.getPrintedNode(arrayType))
 	}
-
-	v.writeOutput("public partial struct %s {}", getSanitizedIdentifier(name))
-	v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
-	v.targetFile.WriteString(v.newline)
 }

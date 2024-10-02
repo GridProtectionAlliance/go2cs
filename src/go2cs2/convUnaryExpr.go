@@ -2,8 +2,13 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 )
 
-func (v *Visitor) convUnaryExpr(arrayType *ast.UnaryExpr) string {
-	return arrayType.Op.String() + v.convExpr(arrayType.X)
+func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
+	if unaryExpr.Op == token.AND {
+		return AddressPrefix + v.convExpr(unaryExpr.X)
+	}
+
+	return unaryExpr.Op.String() + v.convExpr(unaryExpr.X)
 }

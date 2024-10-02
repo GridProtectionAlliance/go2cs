@@ -11,7 +11,8 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "args": [
-                "H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go"
+                //"H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go"
+                "H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go"
             ]
         }
     ]

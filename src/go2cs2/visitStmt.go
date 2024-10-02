@@ -5,10 +5,10 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) visitStmt(stmt ast.Stmt) {
+func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
-		v.visitAssignStmt(stmtType)
+		v.visitAssignStmt(stmtType, parentBlock)
 	case *ast.BlockStmt:
 		v.visitBlockStmt(stmtType)
 	case *ast.BranchStmt:
@@ -18,7 +18,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt) {
 	case *ast.CommClause:
 		v.visitCommClause(stmtType)
 	case *ast.DeclStmt:
-		v.visitDeclStmt(stmtType)
+		v.visitDeclStmt(stmtType, parentBlock)
 	case *ast.DeferStmt:
 		v.visitDeferStmt(stmtType)
 	case *ast.EmptyStmt:

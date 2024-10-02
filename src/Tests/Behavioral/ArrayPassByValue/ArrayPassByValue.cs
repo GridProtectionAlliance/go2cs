@@ -1,9 +1,12 @@
 namespace go;
 
+using fmt = fmt_package;
+
 public static partial class main_package {
 
 private static void Main() {
-    ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> _addr_a);
+    ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> ꝸa);
+
 
     a[0] = "Hello"u8;
     a[1] = "World"u8;
@@ -13,7 +16,7 @@ private static void Main() {
     fmt.Println();
 
     a[0] = "Hello"u8;
-    test2(_addr_a);
+    test2(ꝸa);
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
@@ -22,22 +25,22 @@ private static void Main() {
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
-    array<nint> primes = new array<nint>(new nint[] { 2, 3, 5, 7, 11, 13 });
+    var primes = new nint[] { 2, 3, 5, 7, 11, 13 };
     fmt.Println(primes);
 }
 
 // Arrays are passed by value (a full copy)
 private static void test(array<@string> a) {
     a = a.Clone();
- 
+
     // Update to array will be local
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);
 }
 
-private static void test2(ptr<array<@string>> _addr_a) {
-    ref array<@string> a = ref _addr_a.val;
+private static void test2(ptr<array<@string>> ꝸa) {
+    ref array<@string> a = ref ꝸa.val;
 
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;

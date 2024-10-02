@@ -36,13 +36,15 @@
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
 
-    <Reference Include="golib">
-      <HintPath>$(GOPATH)\src\go2cs\golib\$(OutDir)golib.dll</HintPath>
-    </Reference>
-    <Reference Include="fmt">
-      <HintPath>$(GOPATH)\src\go2cs\fmt\$(OutDir)fmt_package.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

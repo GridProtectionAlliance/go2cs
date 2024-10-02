@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType) string {
-	return v.convExpr(arrayType.Elt) + "[]"
+	return convertToCSTypeName(v.convExpr(arrayType.Elt)) + "[]"
 }
