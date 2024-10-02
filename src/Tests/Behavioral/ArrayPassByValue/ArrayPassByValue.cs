@@ -5,7 +5,7 @@ using fmt = fmt_package;
 public static partial class main_package {
 
 private static void Main() {
-    ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> ꝸa);
+    ref array<@string> a = ref heap(new array<@string>(2), out ptr<array<@string>> Ꮡa);
 
 
     a[0] = "Hello"u8;
@@ -16,7 +16,7 @@ private static void Main() {
     fmt.Println();
 
     a[0] = "Hello"u8;
-    test2(ꝸa);
+    test2(Ꮡa);
     fmt.Println(a[0], a[1]);
     fmt.Println();
 
@@ -39,8 +39,8 @@ private static void test(array<@string> a) {
     fmt.Println(a[0], a[1]);
 }
 
-private static void test2(ptr<array<@string>> ꝸa) {
-    ref array<@string> a = ref ꝸa.val;
+private static void test2(ptr<array<@string>> Ꮡa) {
+    ref array<@string> a = ref Ꮡa.val;
 
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;

@@ -11,7 +11,6 @@
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>$(GOPATH)\src\go2cs\go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
