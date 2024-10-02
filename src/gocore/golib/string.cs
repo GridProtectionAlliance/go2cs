@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 
 namespace go;
@@ -150,19 +151,19 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
             yield break;
 
         Decoder decoder = Encoding.UTF8.GetDecoder();
-        ReadOnlySpan<uint8> value = m_value;
-        Span<char> rune = new char[1];
+        uint8[] value = m_value;
+        char[] rune = new char[1];
         int byteCount;
 
-        for (int index = 0; index < value.Length; index += byteCount)
+        for (nint index = 0; index < value.LongLength; index += byteCount)
         {
             byteCount = 1;
-            bool completed = Decode(decoder, value.Slice(index, byteCount), rune);
+            bool completed = Decode(decoder, value, index, byteCount, rune);
 
             if (!completed)
             {
                 byteCount = 2;
-                completed = Decode(decoder, value.Slice(index, byteCount), rune);
+                completed = Decode(decoder, value, index, byteCount, rune);
             }
 
             if (completed)
@@ -172,9 +173,16 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    private static bool Decode(Decoder decoder, ReadOnlySpan<uint8> value, Span<char> rune)
+    private static unsafe bool Decode(Decoder decoder, uint8[] value, nint index, int byteCount, char[] rune)
     {
-        decoder.Convert(value, rune, true, out _, out _, out bool completed);
+        bool completed;
+
+        fixed (uint8* bytes = &value[index])
+        fixed (char* chars = rune)
+        {
+            decoder.Convert(bytes, byteCount, chars, 1, true, out _, out _, out completed);
+        }
+
         return completed;
     }
 
