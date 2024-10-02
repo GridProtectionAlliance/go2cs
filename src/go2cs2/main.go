@@ -63,7 +63,7 @@ type Visitor struct {
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "ꝸ"
+const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ᥍Ზ
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
