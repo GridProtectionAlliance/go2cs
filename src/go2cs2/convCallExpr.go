@@ -20,5 +20,25 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 		}
 	}
 
-	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun), v.convExprList(callExpr.Args, callExpr.Lparen))
+	// C# U8 stack strings cannot be used as arguments to functions that take interface parameters
+	context := &CallExprContext{u8StringArgOK: make(map[int]bool)}
+
+	// Check if any parameters of callExpr.Fun are interface types
+	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
+		for i := 0; i < funType.Params().Len(); i++ {
+			var paramType types.Type
+
+			context.u8StringArgOK[i] = true
+
+			if paramType, ok = getParameterType(funType, i); !ok {
+				continue
+			}
+
+			if _, ok := paramType.Underlying().(*types.Interface); ok {
+				context.u8StringArgOK[i] = false
+			}
+		}
+	}
+
+	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, nil), v.convExprList(callExpr.Args, callExpr.Lparen, context))
 }

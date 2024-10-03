@@ -48,6 +48,8 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.writeOutputLn(UsingsMarker)
 	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, ClassSuffix)
 
+	v.performGlobalVariableAnalysis(file.Decls)
+
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
 	}

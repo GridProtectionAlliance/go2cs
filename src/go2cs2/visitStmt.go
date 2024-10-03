@@ -10,11 +10,12 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	case *ast.AssignStmt:
 		v.visitAssignStmt(stmtType, parentBlock)
 	case *ast.BlockStmt:
-		v.visitBlockStmt(stmtType)
+		v.visitBlockStmt(stmtType, true)
 	case *ast.BranchStmt:
 		v.visitBranchStmt(stmtType)
-	case *ast.CaseClause:
-		v.visitCaseClause(stmtType)
+	// CaseClause visited in visitSwitchStmt
+	// case *ast.CaseClause:
+	// 	v.visitCaseClause(stmtType)
 	case *ast.CommClause:
 		v.visitCommClause(stmtType)
 	case *ast.DeclStmt:
@@ -44,7 +45,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	case *ast.SendStmt:
 		v.visitSendStmt(stmtType)
 	case *ast.SwitchStmt:
-		v.visitSwitchStmt(stmtType)
+		v.visitSwitchStmt(stmtType, parentBlock)
 	case *ast.TypeSwitchStmt:
 		v.visitTypeSwitchStmt(stmtType)
 	case *ast.BadStmt:

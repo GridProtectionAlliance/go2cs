@@ -18,7 +18,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			// Perform escape analysis to determine if the variable needs heap allocation
 			v.performEscapeAnalysis(ident, parentBlock)
 
-			goIDName := ident.Name
+			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)
 
 			if len(valueSpec.Values) <= i {
@@ -31,7 +31,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(goTypeName, ident)
+						headTypeDecl := v.convertToHeapTypeDecl(ident)
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
@@ -60,7 +60,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(getTypeName(def.Type()), ident)
+						headTypeDecl := v.convertToHeapTypeDecl(ident)
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
@@ -70,7 +70,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation -= token.Pos(len(access) + 9)
-						v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i])))
+						v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil)))
 					}
 
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
@@ -81,11 +81,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 
 			csTypeName := convertToCSTypeName(getTypeName(tv.Type))
 			goValue := tv.Value.ExactString()
-			csValue := v.convExpr(valueSpec.Values[i])
+			csValue := v.convExpr(valueSpec.Values[i], nil)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
 
 			if v.inFunction {
-				headTypeDecl := v.convertToHeapTypeDecl(getTypeName(tv.Type), ident)
+				headTypeDecl := v.convertToHeapTypeDecl(ident)
 
 				if len(headTypeDecl) > 0 {
 					v.writeOutput(headTypeDecl)
@@ -103,7 +103,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 		}
 	} else if tok == token.CONST {
 		for i, ident := range valueSpec.Names {
-			goIDName := ident.Name
+			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)
 
 			c := v.info.ObjectOf(ident).(*types.Const)

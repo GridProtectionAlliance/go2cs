@@ -1,9 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 )
 
 func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string {
-	return "/* convTypeAssertExpr: " + v.getPrintedNode(typeAssertExpr) + " */"
+	if typeAssertExpr.Type == nil {
+		return fmt.Sprintf("%s.type()", v.convExpr(typeAssertExpr.X, nil))
+	}
+
+	return fmt.Sprintf("%s._<%s>()", v.convExpr(typeAssertExpr.X, nil), v.convExpr(typeAssertExpr.Type, nil))
 }

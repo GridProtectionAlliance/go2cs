@@ -6,5 +6,5 @@ import (
 )
 
 func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr) string {
-	return fmt.Sprintf("%s: %s", v.convExpr(keyValueExpr.Key), v.convExpr(keyValueExpr.Value))
+	return fmt.Sprintf("%s: %s", v.convExpr(keyValueExpr.Key, nil), v.convExpr(keyValueExpr.Value, nil))
 }

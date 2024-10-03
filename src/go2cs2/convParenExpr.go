@@ -6,5 +6,5 @@ import (
 )
 
 func (v *Visitor) convParenExpr(parenExpr *ast.ParenExpr) string {
-	return fmt.Sprintf("(%s)", v.convExpr(parenExpr.X))
+	return fmt.Sprintf("(%s)", v.convExpr(parenExpr.X, nil))
 }

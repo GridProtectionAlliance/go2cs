@@ -5,27 +5,34 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
+func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool) {
 	v.pushBlock()
 
 	if v.blockOuterPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockOuterPrefixInjection.Pop())
 	}
 
-	v.writeOutput(" {")
+	v.targetFile.WriteString(" {")
 
 	if v.blockInnerPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockInnerPrefixInjection.Pop())
 	}
 
 	v.firstStatementIsReturn = false
-	v.indentLevel++
+
+	if indentStmts {
+		v.indentLevel++
+	}
 
 	var lastStmt ast.Stmt
 	prefix := v.newline + v.indent(v.indentLevel)
 
 	if len(blockStmt.List) > 0 {
-		v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
+		_, lines := v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
+
+		if lines == 0 {
+			v.targetFile.WriteString(v.newline)
+		}
 	}
 
 	for _, stmt := range blockStmt.List {
@@ -53,7 +60,10 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt) {
 		lastStmt = stmt
 	}
 
-	v.indentLevel--
+	if indentStmts {
+		v.indentLevel--
+	}
+
 	statementList := blockStmt.List
 
 	// Check if the first statement is a return statement

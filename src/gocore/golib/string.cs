@@ -255,6 +255,16 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
 
+    public static @string operator +(@string a, @string b)
+    {
+        Span<uint8> bytes = new uint8[a.m_value.Length + b.m_value.Length];
+
+        a.m_value.CopyTo(bytes);
+        b.m_value.CopyTo(bytes[a.m_value.Length..]);
+
+        return new @string(bytes);
+    }
+
     #endregion
 
     #region [ Interface Implementations ]

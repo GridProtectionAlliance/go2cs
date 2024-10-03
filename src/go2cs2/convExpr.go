@@ -5,11 +5,26 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) convExpr(expr ast.Expr) string {
+type ExprContext interface {
+}
+
+type CallExprContext struct {
+	u8StringArgOK map[int]bool
+}
+
+type BasicLitContext struct {
+	u8StringOK bool
+}
+
+func (v *Visitor) convExpr(expr ast.Expr, context ExprContext) string {
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
 		return v.convArrayType(exprType)
 	case *ast.BasicLit:
+		if context, ok := context.(*BasicLitContext); ok {
+			return v.convBasicLit(exprType, context.u8StringOK)
+		}
+
 		return v.convBasicLit(exprType, true)
 	case *ast.BinaryExpr:
 		return v.convBinaryExpr(exprType)

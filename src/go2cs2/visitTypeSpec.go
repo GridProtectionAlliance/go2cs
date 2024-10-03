@@ -6,9 +6,11 @@ import (
 )
 
 func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
+	name := v.getIdentName(typeSpec.Name)
+
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
-		v.visitArrayType(typeSpecType, typeSpec.Name.Name, typeSpec.Comment)
+		v.visitArrayType(typeSpecType, name, typeSpec.Comment)
 	case *ast.ChanType:
 		v.visitChanType(typeSpecType)
 	case *ast.FuncType:
@@ -16,7 +18,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.Ident:
 		v.targetFile.WriteString(v.convIdent(typeSpecType))
 	case *ast.InterfaceType:
-		v.visitInterfaceType(typeSpecType, typeSpec.Name.Name, doc)
+		v.visitInterfaceType(typeSpecType, name, doc)
 	case *ast.MapType:
 		v.visitMapType(typeSpecType)
 	case *ast.ParenExpr:
@@ -26,7 +28,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType))
 	case *ast.StructType:
-		v.visitStructType(typeSpecType, typeSpec.Name.Name, doc)
+		v.visitStructType(typeSpecType, name, doc)
 	default:
 		panic(fmt.Sprintf("Unexpected TypeSpec type: %#v", typeSpecType))
 	}

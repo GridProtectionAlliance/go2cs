@@ -22,7 +22,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 			v.writeOutputLn(fmt.Sprintf("[GoType(\"[]%s\")]", csTypeName))
 		} else {
 			// Handle array type
-			arrayLen := v.convExpr(arrayType.Len)
+			arrayLen := v.convExpr(arrayType.Len, nil)
 			v.writeOutputLn(fmt.Sprintf("[GoType(\"[%s]%s\")]", arrayLen, csTypeName))
 		}
 

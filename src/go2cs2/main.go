@@ -9,6 +9,7 @@ import (
 	"go/token"
 	"go/types"
 	"log"
+	"maps"
 	"os"
 	"strings"
 	"unicode"
@@ -37,6 +38,8 @@ type Visitor struct {
 	indentLevel        int
 	usesUnsafeCode     bool
 	options            Options
+	globalIdentNames   map[*ast.Ident]string // Maps identifiers to adjusted names
+	globalScope        map[string]*types.Var // Stack of variable scopes
 
 	// ImportSpec variables
 	currentImportPath string
@@ -59,11 +62,19 @@ type Visitor struct {
 	blockOuterSuffixInjection Stack[string]
 	firstStatementIsReturn    bool
 	identEscapesHeap          map[*ast.Ident]bool
+	identNames                map[*ast.Ident]string   // Maps identifiers to adjusted names
+	isReassigned              map[*ast.Ident]bool     // Maps identifiers to reassignment status
+	scopeStack                []map[string]*types.Var // Stack of variable scopes
+
+	// SwitchStmt variables
+	switchIndentLevel int
+	caseFallthrough   bool
 }
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ᥍Ზ
+const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ᥍ Ზ
+const ShadowVarMarker = "ꞥ"
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
@@ -215,6 +226,8 @@ func (v *Visitor) writeStringLn(builder *strings.Builder, format string, a ...in
 	builder.WriteString(v.newline)
 }
 
+// TODO: Come back to this later, you could spend a lot of time here - there is an ongoing effort to improve AST for
+// parsing free floating comments: https://github.com/golang/go/issues/20744 - plus a DST package as a fallback
 func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetPos token.Pos, doc *ast.CommentGroup, prefix string) (bool, int) {
 	wroteStandAloneComment := false
 	lines := 0
@@ -494,31 +507,36 @@ func convertToCSFullTypeName(typeName string) string {
 		return "go.complex64"
 	case "string":
 		return "go.@string"
+	case "interface{}":
+		return "object"
 	default:
 		return typeName
 	}
 }
 
-func (v *Visitor) convertToHeapTypeDecl(typeName string, ident *ast.Ident) string {
+func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
 	escapesHeap := v.identEscapesHeap[ident]
 
-	if !escapesHeap || isInherentlyHeapAllocatedType(v.info.TypeOf(ident)) {
+	identType := v.info.TypeOf(ident)
+
+	if !escapesHeap || isInherentlyHeapAllocatedType(identType) {
 		return ""
 	}
 
-	csIDName := getSanitizedIdentifier(ident.Name)
+	goTypeName := getTypeName(identType)
+	csIDName := getSanitizedIdentifier(v.getIdentName(ident))
 
 	// Handle array types
-	if strings.HasPrefix(typeName, "[") {
-		arrayLen := strings.Split(typeName[1:], "]")[0]
+	if strings.HasPrefix(goTypeName, "[") {
+		arrayLen := strings.Split(goTypeName[1:], "]")[0]
 
 		// Get array element type
-		arrayType := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
+		arrayType := convertToCSTypeName(goTypeName[strings.Index(goTypeName, "]")+1:])
 
 		return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
 	}
 
-	csTypeName := convertToCSTypeName(typeName)
+	csTypeName := convertToCSTypeName(goTypeName)
 	return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
 }
 
@@ -532,7 +550,31 @@ func isInherentlyHeapAllocatedType(typ types.Type) bool {
 	}
 }
 
+func getParameterType(sig *types.Signature, i int) (types.Type, bool) {
+	var paramType types.Type
+	params := sig.Params()
+
+	// Check variadic parameter type
+	if sig.Variadic() && i >= params.Len()-1 {
+		paramType = params.At(params.Len() - 1).Type()
+
+		if sliceType, ok := paramType.(*types.Slice); ok {
+			paramType = sliceType.Elem()
+		}
+	} else if i < params.Len() {
+		paramType = params.At(i).Type()
+	} else {
+		return nil, false
+	}
+
+	return paramType, true
+}
+
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
+	if parentBlock == nil {
+		return
+	}
+
 	// If analysis has already been performed, return
 	if _, found := v.identEscapesHeap[ident]; found {
 		return
@@ -607,16 +649,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 
 					var paramType types.Type
 
-					if sig.Variadic() && i >= sig.Params().Len()-1 {
-						// Variadic parameters
-						paramType = sig.Params().At(sig.Params().Len() - 1).Type()
-
-						if sliceType, ok := paramType.(*types.Slice); ok {
-							paramType = sliceType.Elem()
-						}
-					} else if i < sig.Params().Len() {
-						paramType = sig.Params().At(i).Type()
-					} else {
+					if paramType, ok = getParameterType(sig, i); !ok {
 						continue
 					}
 
@@ -666,4 +699,324 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	ast.Inspect(parentBlock, inspectFunc)
 
 	v.identEscapesHeap[ident] = escapes
+}
+
+// Perform variable analysis on the global ValueSpec declarations
+func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
+	v.globalIdentNames = make(map[*ast.Ident]string)
+	v.globalScope = map[string]*types.Var{}
+
+	for _, decl := range decls {
+		switch genDecl := decl.(type) {
+		case *ast.GenDecl:
+			for _, spec := range genDecl.Specs {
+				switch spec := spec.(type) {
+				case *ast.ValueSpec:
+					for _, ident := range spec.Names {
+						varName := ident.Name
+						obj := v.info.Defs[ident]
+
+						if obj == nil {
+							continue
+						}
+
+						v.globalIdentNames[ident] = varName
+						v.globalScope[varName] = obj.(*types.Var)
+					}
+				}
+			}
+		}
+	}
+}
+
+// Perform variable analysis on the function block
+func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *types.Signature) {
+	v.identNames = make(map[*ast.Ident]string)
+	v.isReassigned = make(map[*ast.Ident]bool)
+	v.scopeStack = []map[string]*types.Var{{}}
+
+	var varNames = make(map[*types.Var]string) // Map from types.Var to adjusted names
+	var nameCounts = make(map[string]int)      // Counts for generating unique names
+
+	// Initialize local variables names from globals
+	for ident, varName := range v.globalIdentNames {
+		obj := v.info.Defs[ident]
+		varNames[obj.(*types.Var)] = varName
+	}
+
+	// Copy global ident names to local ident names
+	maps.Copy(v.identNames, v.globalIdentNames)
+
+	// Initialize local scope stack with global scope
+	scope := make(map[string]*types.Var)
+	maps.Copy(scope, v.globalScope)
+	v.scopeStack = append(v.scopeStack, scope)
+
+	// Check if a variable is declared in any scope
+	isDeclared := func(varName string) bool {
+		for i := len(v.scopeStack) - 1; i >= 0; i-- {
+			scope := v.scopeStack[i]
+			if _, exists := scope[varName]; exists {
+				return true
+			}
+		}
+		return false
+	}
+
+	// Declare a new variable in the current scope
+	declareVar := func(varName string, varObj *types.Var) {
+		scope := v.scopeStack[len(v.scopeStack)-1]
+		scope[varName] = varObj
+	}
+
+	// Look up a variable in the scope stack
+	lookupVar := func(varName string) *types.Var {
+		for i := len(v.scopeStack) - 1; i >= 0; i-- {
+			scope := v.scopeStack[i]
+			if varObj, exists := scope[varName]; exists {
+				return varObj
+			}
+		}
+		return nil
+	}
+
+	getShadowedVarName := func(varName string) string {
+		return fmt.Sprintf("%s%s%d", varName, ShadowVarMarker, nameCounts[varName])
+	}
+
+	var visitNode func(n ast.Node)
+	initialBlock := true
+
+	visitNode = func(n ast.Node) {
+		switch node := n.(type) {
+		case *ast.BlockStmt:
+			// Enter a new scope
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+
+			if initialBlock {
+				initialBlock = false
+
+				// Add all function parameters to the current scope
+				parameters := getParameters(signature, false)
+
+				for i := 0; i < parameters.Len(); i++ {
+					param := parameters.At(i)
+					name := param.Name()
+					varNames[param] = name
+
+					// Get identifier for the parameter
+					ident := funcDecl.Type.Params.List[i].Names[0]
+					v.identNames[ident] = name
+					v.isReassigned[ident] = false
+
+					declareVar(param.Name(), param)
+				}
+
+				// Add receiver parameter to the current scope
+				if signature.Recv() != nil {
+					recv := signature.Recv()
+					recvName := recv.Name()
+					varNames[recv] = recvName
+
+					// Get identifier for the receiver
+					ident := funcDecl.Recv.List[0].Names[0]
+					v.identNames[ident] = recvName
+					v.isReassigned[ident] = false
+
+					declareVar(recvName, recv)
+				}
+
+				// Since C# does not include result parameter names, e.g., those
+				// in a value tuple, as accessible variables names in a function,
+				// we do not include them in the scope stack
+
+				// Add named result parameters to the current scope
+				// results := signature.Results()
+
+				// for i := 0; i < results.Len(); i++ {
+				// 	result := results.At(i)
+				// 	name := result.Name()
+
+				// 	if len(name) == 0 {
+				// 		continue
+				// 	}
+
+				// 	varNames[result] = name
+
+				// 	// Get identifier for the result
+				// 	ident := funcDecl.Type.Results.List[i].Names[0]
+				// 	v.identNames[ident] = name
+				// 	v.isReassigned[ident] = false
+
+				// 	declareVar(result.Name(), result)
+				// }
+			}
+
+			for _, stmt := range node.List {
+				visitNode(stmt)
+			}
+
+			// Exit the current scope
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+		case *ast.AssignStmt:
+			if node.Tok == token.DEFINE {
+				// Short variable declaration ':='
+				for _, lhs := range node.Lhs {
+					ident, ok := lhs.(*ast.Ident)
+
+					if !ok {
+						continue
+					}
+
+					varName := ident.Name
+					obj := v.info.Defs[ident]
+
+					if obj == nil {
+						// Variable exists; it's a reassignment
+						obj = v.info.Uses[ident]
+						v.isReassigned[ident] = true
+
+						varObj := lookupVar(varName)
+						adjustedName := varNames[varObj]
+						v.identNames[ident] = adjustedName
+					} else {
+						// New variable declaration
+						varObj := obj.(*types.Var)
+						var adjustedName string
+
+						if isDeclared(varName) {
+							// Variable shadowing
+							nameCounts[varName]++
+							adjustedName = getShadowedVarName(varName)
+						} else {
+							adjustedName = varName
+							nameCounts[varName] = 0
+						}
+
+						varNames[varObj] = adjustedName
+						v.identNames[ident] = adjustedName
+						v.isReassigned[ident] = false
+
+						declareVar(varName, varObj)
+					}
+				}
+			} else {
+				// Regular assignment '='
+				for _, lhs := range node.Lhs {
+					ident, ok := lhs.(*ast.Ident)
+
+					if !ok {
+						continue
+					}
+
+					varName := ident.Name
+					varObj := lookupVar(varName)
+					adjustedName := varNames[varObj]
+
+					v.identNames[ident] = adjustedName
+					v.isReassigned[ident] = true
+				}
+			}
+
+			// Visit RHS expressions
+			for _, rhs := range node.Rhs {
+				visitNode(rhs)
+			}
+		case *ast.ValueSpec:
+			// Variable declaration using 'var'
+			for _, ident := range node.Names {
+				varName := ident.Name
+				obj := v.info.Defs[ident]
+
+				if obj == nil {
+					continue
+				}
+
+				varObj := obj.(*types.Var)
+				var adjustedName string
+
+				if isDeclared(varName) {
+					// Variable shadowing
+					nameCounts[varName]++
+					adjustedName = getShadowedVarName(varName)
+				} else {
+					adjustedName = varName
+					nameCounts[varName] = 0
+				}
+
+				varNames[varObj] = adjustedName
+				v.identNames[ident] = adjustedName
+				v.isReassigned[ident] = false
+
+				declareVar(varName, varObj)
+			}
+
+			// Visit values
+			for _, value := range node.Values {
+				visitNode(value)
+			}
+		case *ast.Ident:
+			if obj := v.info.Uses[node]; obj != nil {
+				if varObj, ok := obj.(*types.Var); ok {
+					adjustedName := varNames[varObj]
+					v.identNames[node] = adjustedName
+				}
+			}
+		case *ast.IfStmt:
+			// Visit Init statement
+			if node.Init != nil {
+				visitNode(node.Init)
+			}
+
+			// Visit Cond
+			visitNode(node.Cond)
+
+			// Visit Body
+			visitNode(node.Body)
+
+			// Visit Else
+			if node.Else != nil {
+				visitNode(node.Else)
+			}
+		default:
+			// Visit child nodes
+			ast.Inspect(n, func(child ast.Node) bool {
+				if child == nil {
+					return false
+				}
+
+				if child != n {
+					visitNode(child)
+					return false
+				}
+
+				return true
+			})
+		}
+	}
+
+	// Start traversal
+	visitNode(funcDecl.Body)
+}
+
+// Get the adjusted identifier name, considering shadowing
+func (v *Visitor) getIdentName(ident *ast.Ident) string {
+	if v.identNames != nil {
+		if name, ok := v.identNames[ident]; ok {
+			return name
+		}
+	}
+
+	if v.globalIdentNames != nil {
+		if name, ok := v.globalIdentNames[ident]; ok {
+			return name
+		}
+	}
+
+	return ident.Name
+}
+
+// Determine if the identifier represents a reassignment
+func (v *Visitor) isReassignment(ident *ast.Ident) bool {
+	return v.isReassigned[ident]
 }

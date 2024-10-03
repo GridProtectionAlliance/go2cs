@@ -2,8 +2,15 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 )
 
 func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt) {
-	v.writeOutputLn("/* visitIncDecStmt: " + v.getPrintedNode(incDecStmt) + " */")
+	ident := v.convExpr(incDecStmt.X, nil)
+
+	if incDecStmt.Tok == token.INC {
+		v.writeOutputLn("%s++;", ident)
+	} else {
+		v.writeOutputLn("%s--;", ident)
+	}
 }

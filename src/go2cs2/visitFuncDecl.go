@@ -12,10 +12,8 @@ const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
 
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
-	v.targetFile.WriteString(v.newline)
-	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
-
 	v.inFunction = true
+
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedIdentifier(goFunctionName)
 
@@ -26,6 +24,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	signature := v.currentFunction.Signature()
+
+	// Analyze function variables for reassignments and redeclarations (variable shadows)
+	v.performVariableAnalysis(funcDecl, signature)
+
+	v.targetFile.WriteString(v.newline)
+	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
 	if funcDecl.Recv == nil {
 		// Handle Go "main" function as a special case, in C# this should be capitalized "Main"
@@ -41,7 +45,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
 
 	if funcDecl.Body != nil {
-		v.visitBlockStmt(funcDecl.Body)
+		v.visitBlockStmt(funcDecl.Body, true)
 	}
 
 	signatureOnly := funcDecl.Body == nil

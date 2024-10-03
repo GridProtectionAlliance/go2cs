@@ -9,5 +9,5 @@ func (v *Visitor) convIdent(ident *ast.Ident) string {
 		return "null"
 	}
 
-	return ident.Name
+	return v.getIdentName(ident)
 }

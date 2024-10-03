@@ -6,8 +6,14 @@ import (
 	"strings"
 )
 
-func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos) string {
+func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, exprContext ExprContext) string {
 	result := &strings.Builder{}
+
+	var callExprContext *CallExprContext
+
+	if context, ok := exprContext.(*CallExprContext); ok {
+		callExprContext = context
+	}
 
 	for i, expr := range exprs {
 		exprOnNewLine := false
@@ -28,7 +34,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos) string {
 			result.WriteRune(' ')
 		}
 
-		result.WriteString(v.convExpr(expr))
+		var context ExprContext
+
+		// If in a call expression, check if the argument allows u8 strings
+		if callExprContext != nil {
+			context = &BasicLitContext{u8StringOK: callExprContext.u8StringArgOK[i]}
+		}
+
+		result.WriteString(v.convExpr(expr, context))
 
 		if exprOnNewLine {
 			v.indentLevel--

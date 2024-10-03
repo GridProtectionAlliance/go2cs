@@ -17,7 +17,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 			rparenSuffix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 		}
 
-		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace)))
+		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil)))
 		v.writeStandAloneCommentString(result, compositeLit.Rbrace, nil, " ")
 		result.WriteString(fmt.Sprintf("%s)", rparenSuffix))
 
@@ -38,7 +38,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 	}
 
-	result.WriteString(fmt.Sprintf("new %s { ", v.convExpr(compositeLit.Type)))
+	result.WriteString(fmt.Sprintf("new %s { ", v.convExpr(compositeLit.Type, nil)))
 
 	lbraceSuffix := ""
 
@@ -46,7 +46,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	}
 
-	result.WriteString(fmt.Sprintf("%s%s%s}%s", lbraceSuffix, v.convExprList(compositeLit.Elts, compositeLit.Lbrace), rbracePrefix, sliceSuffix))
+	result.WriteString(fmt.Sprintf("%s%s%s}%s", lbraceSuffix, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil), rbracePrefix, sliceSuffix))
 
 	return result.String()
 }

@@ -6,9 +6,9 @@ import (
 )
 
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr) string {
-	leftOperand := v.convExpr(binaryExpr.X)
+	leftOperand := v.convExpr(binaryExpr.X, nil)
 	binaryOp := binaryExpr.Op.String()
-	rightOperand := v.convExpr(binaryExpr.Y)
+	rightOperand := v.convExpr(binaryExpr.Y, nil)
 
 	if binaryOp == "<<" || binaryOp == ">>" {
 		rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)

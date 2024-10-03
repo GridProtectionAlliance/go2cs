@@ -19,7 +19,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				v.targetFile.WriteString(", ")
 			}
 
-			v.targetFile.WriteString(v.convExpr(expr))
+			v.targetFile.WriteString(v.convExpr(expr, nil))
 		}
 
 		if len(returnStmt.Results) > 1 {

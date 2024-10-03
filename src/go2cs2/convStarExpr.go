@@ -6,5 +6,5 @@ import (
 
 func (v *Visitor) convStarExpr(ident *ast.StarExpr) string {
 	// TODO: Could be pointer deref or pointer type declaration
-	return v.convExpr(ident.X) + ".val"
+	return v.convExpr(ident.X, nil) + ".val"
 }
