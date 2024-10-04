@@ -453,6 +453,20 @@ func getTypeName(t types.Type) string {
 	return t.String()
 }
 
+func getIdentifier(node ast.Node) *ast.Ident {
+	var ident *ast.Ident
+
+	if indexExpr, ok := node.(*ast.IndexExpr); ok {
+		if identExpr, ok := indexExpr.X.(*ast.Ident); ok {
+			ident = identExpr
+		}
+	} else if identExpr, ok := node.(*ast.Ident); ok {
+		ident = identExpr
+	}
+
+	return ident
+}
+
 func getCSTypeName(t types.Type) string {
 	return convertToCSTypeName(getTypeName(t))
 }

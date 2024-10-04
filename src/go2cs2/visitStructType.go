@@ -29,9 +29,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 			v.targetFile.WriteString(v.newline)
 		}
 
-		ident, ok := field.Type.(*ast.Ident)
-
-		if ok {
+		if ident := getIdentifier(field.Type); ident != nil {
 			goTypeName := ident.Name
 			csTypeName := convertToCSTypeName(goTypeName)
 			typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))

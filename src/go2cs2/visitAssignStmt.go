@@ -21,7 +21,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 
 	// Count the number of reassigned and declared variables
 	for _, lhs := range assignStmt.Lhs {
-		if ident, ok := lhs.(*ast.Ident); ok {
+		ident := getIdentifier(lhs)
+
+		if ident != nil {
 			if v.isReassignment(ident) {
 				reassignedCount++
 			} else {
@@ -89,7 +91,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 				result.WriteString(v.indent(v.indentLevel))
 			}
 
-			if ident, ok := lhs.(*ast.Ident); ok {
+			ident := getIdentifier(lhs)
+
+			if ident == nil {
+				// Handle other types of LHS expressions
+				result.WriteString("// " + v.getPrintedNode(lhs))
+			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(" = ")
@@ -111,8 +118,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 					result.WriteString(v.convExpr(rhs, nil))
 					result.WriteString(";")
 				}
-			} else {
-				result.WriteString("// " + v.getPrintedNode(lhs))
 			}
 		}
 	}

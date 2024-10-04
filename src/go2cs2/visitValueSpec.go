@@ -131,7 +131,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			if valueSpec.Type == nil && len(valueSpec.Values) >= i+1 {
 				tokEnd = valueSpec.Values[i].End()
 
-				if ident, ok := valueSpec.Values[i].(*ast.Ident); ok {
+				if ident := getIdentifier(valueSpec.Values[i]); ident != nil {
 					srcVal = ident.Name
 				} else if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok {
 					srcVal = lit.Value

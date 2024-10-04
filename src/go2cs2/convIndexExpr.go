@@ -5,6 +5,6 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) convIndexExpr(ident *ast.IndexExpr) string {
-	return fmt.Sprintf("%s[%s]", v.convExpr(ident.X, nil), v.convExpr(ident.Index, nil))
+func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr) string {
+	return fmt.Sprintf("%s[%s]", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
 }

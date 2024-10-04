@@ -8,9 +8,7 @@ import (
 
 // Handles array and slice types in context of a TypeSpec
 func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment *ast.CommentGroup) {
-	ident, ok := arrayType.Elt.(*ast.Ident)
-
-	if ok {
+	if ident := getIdentifier(arrayType.Elt); ident != nil {
 		goTypeName := ident.Name
 		csTypeName := convertToCSTypeName(goTypeName)
 		typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))

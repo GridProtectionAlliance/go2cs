@@ -228,9 +228,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			if node.Tok == token.DEFINE {
 				// Short variable declaration ':='
 				for _, lhs := range node.Lhs {
-					ident, ok := lhs.(*ast.Ident)
+					ident := getIdentifier(lhs)
 
-					if !ok {
+					if ident == nil {
 						continue
 					}
 
@@ -277,9 +277,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			} else {
 				// Regular assignment '='
 				for _, lhs := range node.Lhs {
-					ident, ok := lhs.(*ast.Ident)
+					ident := getIdentifier(lhs)
 
-					if !ok {
+					if ident == nil {
 						continue
 					}
 
@@ -344,8 +344,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		case *ast.Ident:
 			if obj := v.info.Uses[node]; obj != nil {
 				if varObj, ok := obj.(*types.Var); ok {
-					adjustedName := varNames[varObj]
-					v.identNames[node] = adjustedName
+					if adjustedName, ok := varNames[varObj]; ok {
+						v.identNames[node] = adjustedName
+					}
 				}
 			}
 
@@ -447,9 +448,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			if node.Tok == token.DEFINE {
 				// Short variable declaration ':='
 				for _, lhs := range lhsList {
-					ident, ok := lhs.(*ast.Ident)
+					ident := getIdentifier(lhs)
 
-					if !ok {
+					if ident == nil {
 						continue
 					}
 
@@ -495,9 +496,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			} else {
 				// Regular assignment '='
 				for _, lhs := range lhsList {
-					ident, ok := lhs.(*ast.Ident)
+					ident := getIdentifier(lhs)
 
-					if !ok {
+					if ident == nil {
 						continue
 					}
 

@@ -45,7 +45,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 				return false // Stop if already found
 			}
 
-			if id, ok := n.(*ast.Ident); ok {
+			if id := getIdentifier(n); id != nil {
 				obj := v.info.ObjectOf(id)
 
 				if obj == identObj {
@@ -118,7 +118,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 					return false
 				}
 
-				if id, ok := n.(*ast.Ident); ok {
+				if id := getIdentifier(n); id != nil {
 					obj := v.info.ObjectOf(id)
 
 					if obj == identObj {

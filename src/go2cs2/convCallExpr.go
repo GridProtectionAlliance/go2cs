@@ -9,7 +9,7 @@ import (
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	constructType := ""
 
-	if funName, ok := callExpr.Fun.(*ast.Ident); ok {
+	if funName := getIdentifier(callExpr.Fun); funName != nil {
 		funcInfo := v.info.ObjectOf(funName)
 
 		if funcInfo != nil {

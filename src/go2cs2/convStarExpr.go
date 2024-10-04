@@ -4,7 +4,7 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) convStarExpr(ident *ast.StarExpr) string {
+func (v *Visitor) convStarExpr(starExpr *ast.StarExpr) string {
 	// TODO: Could be pointer deref or pointer type declaration
-	return v.convExpr(ident.X, nil) + ".val"
+	return v.convExpr(starExpr.X, nil) + ".val"
 }
