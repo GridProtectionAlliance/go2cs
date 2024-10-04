@@ -21,10 +21,15 @@ private static @string getStr2(object test1, @string test2) {
     return test1._<string>() + test2;
 }
 
+private static @string getStr3(@string format, params object[] a) {
+    return fmt.Sprintf(format, a);
+}
+
 private static void Main() {
 
     fmt.Println(getStr("test"u8));
     fmt.Println(getStr2("hello, ", "world"u8));
+    fmt.Println(getStr3("hello, %s"u8, "world"));
 
     // Here's a basic `switch`.
 

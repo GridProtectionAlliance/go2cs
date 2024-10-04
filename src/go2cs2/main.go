@@ -152,6 +152,7 @@ func main() {
 	}
 
 	pkg, err := conf.Check(".", fset, []*ast.File{file}, info)
+
 	if err != nil {
 		log.Fatalf("Failed to parse types from input source file \"%s\": %s\n", inputFileName, err)
 	}

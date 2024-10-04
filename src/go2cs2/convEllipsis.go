@@ -1,10 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 )
 
-func (v *Visitor) convEllipsis(chanType *ast.Ellipsis) string {
-	return fmt.Sprintf("params %s", v.convExpr(chanType.Elt, nil))
+func (v *Visitor) convEllipsis(ellipsis *ast.Ellipsis) string {
+	return "/* convEllipsis: " + v.getPrintedNode(ellipsis) + " */"
 }

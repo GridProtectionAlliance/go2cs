@@ -218,9 +218,18 @@ func generateParametersSignature(signature *types.Signature, addRecv bool) strin
 
 		if i == parameters.Len()-1 && signature.Variadic() {
 			result.WriteString("params ")
+
+			// If parameter is a slice, convert it to an array
+			if sliceType, ok := param.Type().(*types.Slice); ok {
+				result.WriteString(getCSTypeName(sliceType.Elem()))
+				result.WriteString("[]")
+			} else {
+				result.WriteString("object[]")
+			}
+		} else {
+			result.WriteString(getCSTypeName(param.Type()))
 		}
 
-		result.WriteString(getCSTypeName(param.Type()))
 		result.WriteString(" ")
 		result.WriteString(param.Name())
 	}

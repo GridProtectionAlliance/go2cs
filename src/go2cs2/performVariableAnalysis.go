@@ -8,6 +8,12 @@ import (
 	"maps"
 )
 
+// These variable analysis functions are used to analyze variable declarations and assignments
+// in the Go source code. The analysis is performed on global variables and on a per-function
+// basis. The goal is to identify reassignments and shadowed variables so these can be handled
+// correctly during the conversion process since C# does not allow redeclarations or shadowing
+// of variables with the same name.
+
 // Perform variable analysis on the global ValueSpec declarations
 func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
 	v.globalIdentNames = make(map[*ast.Ident]string)

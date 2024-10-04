@@ -21,10 +21,15 @@ func getStr2(test1 interface{}, test2 string) string {
     return test1.(string) + test2
 }
 
+func getStr3(format string, a ...interface{}) string {
+	return fmt.Sprintf(format, a...)
+}
+
 func main() {
 
     fmt.Println(getStr("test"))    
     fmt.Println(getStr2("hello, ", "world"))
+    fmt.Println(getStr3("hello, %s", "world"))
 
 	// Here's a basic `switch`.
 	i := 2

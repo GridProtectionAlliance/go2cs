@@ -6,6 +6,12 @@ import (
 	"go/types"
 )
 
+// The escape analysis function is used to determine if a variable escapes the current
+// scope and thus needs to be heap allocated. This is important for C# code generation
+// since Go allows variables to escape the current scope automatically, adding them to
+// the heap, behind the scenes. C# does not have this feature, so we need to manually
+// determine if a variable needs to be heap allocated.
+
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
 	if parentBlock == nil {
 		return
@@ -70,6 +76,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 					return false
 				}
 			}
+
 		case *ast.CallExpr:
 			// Check if ident is passed as an argument
 			for i, arg := range n.Args {
@@ -101,6 +108,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 					// thus matching Go semantics
 				}
 			}
+
 		case *ast.FuncLit:
 			// Check if ident is used inside a closure
 			closureContainsIdent := false
