@@ -25,15 +25,15 @@ package stack
 
 // Stack represents a stack data structure
 type Stack[T any] struct {
-	Items []T
+	items []T
 }
 
 func NewStack[T any](items ...T) *Stack[T] {
-	return &Stack[T]{Items: items}
+	return &Stack[T]{items: items}
 }
 
 func (s *Stack[T]) Len() int {
-	return len(s.Items)
+	return len(s.items)
 }
 
 func (s *Stack[T]) IsEmpty() bool {
@@ -43,7 +43,7 @@ func (s *Stack[T]) IsEmpty() bool {
 // Push adds an item to the to the top of the stack
 func (s *Stack[T]) Push(item T) {
 	// For simplicity in implementation, the bottom is the first element
-	s.Items = append(s.Items, item)
+	s.items = append(s.items, item)
 }
 
 // Pop removes and returns the item from the top of the stack
@@ -64,9 +64,9 @@ func (s *Stack[T]) TryPop() (T, bool) {
 		return zero, false
 	}
 
-	index := len(s.Items) - 1
-	item := s.Items[index]
-	s.Items = s.Items[:index]
+	index := len(s.items) - 1
+	item := s.items[index]
+	s.items = s.items[:index]
 
 	return item, true
 }
@@ -78,5 +78,5 @@ func (s *Stack[T]) Peek() (T, bool) {
 		return zero, false
 	}
 
-	return s.Items[len(s.Items)-1], true
+	return s.items[len(s.items)-1], true
 }

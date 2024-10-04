@@ -27,6 +27,7 @@ private static void Main() {
     fmt.Println(getStr2("hello, ", "world"u8));
 
     // Here's a basic `switch`.
+
     var i = 2;
     fmt.Print("Write ", i, " as ");
     switch (i) {
@@ -50,6 +51,19 @@ private static void Main() {
         break;
     }
 
+
+
+    var xꞥ1 = 5;
+    fmt.Println(xꞥ1);
+ {
+
+
+        var xꞥ2 = 6;
+        fmt.Println(xꞥ2);
+    }
+
+
+    fmt.Println(xꞥ1);
 
 
 
@@ -76,6 +90,7 @@ private static void Main() {
     // `switch` without an expression is an alternate way
     // to express if/else logic. Here we also show how the
     // `case` expressions can be non-constants.
+
     var t = time.Now();
 
 
@@ -86,6 +101,7 @@ private static void Main() {
 
     // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
     {
+
 
         var iꞥ1 = 1;
     }

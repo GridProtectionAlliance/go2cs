@@ -48,7 +48,6 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 
 	v.switchIndentLevel++
 
-	// TODO: Handle variable redeclaration in switch statement init statement
 	if switchStmt.Init != nil {
 		// Any declared variable will be scoped to switch statement, so create a sub-block for it
 		v.targetFile.WriteString(v.newline)
@@ -100,22 +99,6 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 	} else {
 		// Most common scenario where expression switch becomes "if / else if / else" statements
 	}
-
-	// for i, caseClause := range caseClauses {
-
-	// }
-
-	// v.writeOutput("switch (")
-
-	// if switchStmt.Tag == nil {
-	// 	v.targetFile.WriteString("true")
-	// } else {
-	// 	v.targetFile.WriteString(v.convExpr(switchStmt.Tag))
-	// }
-
-	// v.targetFile.WriteString(")")
-
-	//v.visitBlockStmt(switchStmt.Body, true)
 
 	// Close any locally scoped declared variable sub-block
 	if switchStmt.Init != nil {

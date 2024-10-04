@@ -44,6 +44,16 @@ func main() {
 		fmt.Println("unknown")
 	}
 
+    x := 5
+    fmt.Println(x)
+
+    {
+        x := 6
+        fmt.Println(x)
+    }
+
+    fmt.Println(x)
+
 	// You can use commas to separate multiple expressions
 	// in the same `case` statement. We use the optional
 	// `default` case in this example as well.

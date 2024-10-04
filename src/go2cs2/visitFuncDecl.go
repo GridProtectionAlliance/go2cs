@@ -183,9 +183,11 @@ func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
 		// Concatenate receiver parameter with the rest of the parameters
 		parameterVars := make([]*types.Var, 0, 1+signature.Params().Len())
 		parameterVars = append(parameterVars, signature.Recv())
+
 		for i := 0; i < signature.Params().Len(); i++ {
 			parameterVars = append(parameterVars, signature.Params().At(i))
 		}
+
 		parameters = types.NewTuple(parameterVars...)
 	} else {
 		parameters = signature.Params()

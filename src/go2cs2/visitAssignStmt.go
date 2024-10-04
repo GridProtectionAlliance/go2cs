@@ -35,6 +35,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 		}
 	}
 
+	v.targetFile.WriteString(v.newline)
+
 	if lhsLen == reassignedCount || lhsLen == declaredCount {
 		// Handle LHS
 		if declaredCount > 0 {
