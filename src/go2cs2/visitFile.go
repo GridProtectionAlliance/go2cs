@@ -48,6 +48,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.writeOutputLn(UsingsMarker)
 	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, ClassSuffix)
 
+	// TODO: Move processing of global variables to pre-visit operations
 	v.performGlobalVariableAnalysis(file.Decls)
 
 	for _, decl := range file.Decls {

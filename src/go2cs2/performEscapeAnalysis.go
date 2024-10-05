@@ -10,8 +10,13 @@ import (
 // scope and thus needs to be heap allocated. This is important for C# code generation
 // since Go allows variables to escape the current scope automatically, adding them to
 // the heap, behind the scenes. C# does not have this feature, so we need to manually
-// determine if a variable needs to be heap allocated.
+// determine if a variable needs to be heap allocated. The map that is created as a
+// result of this analysis is called `identEscapesHeap`.
 
+// Implementation of the escape analysis is currently very basic and only covers cases
+// within a single function considering options where a variable "may" escape. It does
+// not consider cases where a variable is passed to another function and may not need
+// to be heap allocated and could be handled by using C# ref structure operations.
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
 	if parentBlock == nil {
 		return
@@ -71,7 +76,10 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 			// Check if ident is used in an address-of operation
 			if n.Op == token.AND {
 				if containsIdent(n.X) {
-					// The address of the ident is taken
+					// The address of the ident is taken, simple response
+					// is to just assume it escapes. Future iterations
+					// may be able to provide more nuance and use C# ref
+					// structure operations to avoid heap allocation
 					escapes = true
 					return false
 				}

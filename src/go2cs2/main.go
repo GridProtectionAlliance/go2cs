@@ -114,6 +114,7 @@ var keywords = NewHashSet[string]([]string{
 */
 
 func main() {
+	// TODO: Add option to process an entire package (all files in a directory)
 	if len(os.Args) < 2 {
 		log.Fatalln("Usage: go run main.go <input.go> [output.cs]")
 	}
@@ -133,7 +134,13 @@ func main() {
 	}
 
 	fset := token.NewFileSet()
+
+	files := []*ast.File{}
+
+	// TODO: Handle option to parse all files in the package (dir)
 	file, err := parser.ParseFile(fset, inputFileName, nil, parser.ParseComments|parser.SkipObjectResolution)
+
+	files = append(files, file)
 
 	if err != nil {
 		log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFileName, err)
@@ -151,7 +158,7 @@ func main() {
 		Uses:  make(map[*ast.Ident]types.Object),
 	}
 
-	pkg, err := conf.Check(".", fset, []*ast.File{file}, info)
+	pkg, err := conf.Check(".", fset, files, info)
 
 	if err != nil {
 		log.Fatalf("Failed to parse types from input source file \"%s\": %s\n", inputFileName, err)
@@ -197,6 +204,12 @@ func main() {
 		blockOuterSuffixInjection: Stack[string]{},
 		identEscapesHeap:          map[*ast.Ident]bool{},
 	}
+
+	// TODO: To consider a package as a whole, all files in the package should
+	// be parsed and processed. Since global variables could be defined in any
+	// file in the package, we need to process `performGlobalVariableAnalysis`
+	// for all files in the package before further processing files with the
+	// `visitFile` function.
 
 	visitor.visitFile(file)
 
@@ -426,7 +439,10 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 }
 
 func getSanitizedIdentifier(identifier string) string {
-	if keywords.Contains(identifier) || strings.HasPrefix(identifier, AddressPrefix) || strings.HasSuffix(identifier, ClassSuffix) {
+	if keywords.Contains(identifier) ||
+		strings.HasPrefix(identifier, AddressPrefix) ||
+		strings.HasSuffix(identifier, ClassSuffix) ||
+		strings.Contains(identifier, ShadowVarMarker) {
 		return "@" + identifier
 	}
 
