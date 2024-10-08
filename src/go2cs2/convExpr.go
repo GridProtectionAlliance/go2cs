@@ -21,7 +21,7 @@ func (v *Visitor) convExpr(expr ast.Expr, context ExprContext) string {
 	case *ast.ArrayType:
 		return v.convArrayType(exprType)
 	case *ast.BasicLit:
-		if context, ok := context.(*BasicLitContext); ok {
+		if context, ok := context.(*BasicLitContext); ok && context != nil {
 			return v.convBasicLit(exprType, context.u8StringOK)
 		}
 

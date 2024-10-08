@@ -112,6 +112,10 @@ func (p PeopleByAge) Less(i, j int) bool {
     return (p[i].Age < p[j].Age)
 }
 
+func Testing() (a int, p string) {
+    return 1, "Hello"
+}
+
 func main() {
     // Hello World SJ3
     x := "Hello, 世界 \123\1123"

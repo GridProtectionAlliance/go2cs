@@ -145,11 +145,16 @@ public static bool Less(this PeopleByAge p, nint i, nint j) {
     return (p[i].Age < p[j].Age);
 }
 
+public static (nint, @string) Testing() {nint a = default;@string p = default;
+
+    return (1, "Hello");
+}
+
 private static void Main() {
     // Hello World SJ3
 
 
-    var x = "Hello, 世界 \u0053\u004a3"u8;
+    @string x = "Hello, 世界 \u0053\u004a3"u8;
     fmt.Println(x);
 
     // Where am I?

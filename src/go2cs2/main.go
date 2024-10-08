@@ -461,6 +461,16 @@ func getAccess(name string) string {
 	return "public"
 }
 
+func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
+	exprType := v.info.TypeOf(expr)
+
+	if underlying {
+		exprType = exprType.Underlying()
+	}
+
+	return getTypeName(exprType)
+}
+
 func getTypeName(t types.Type) string {
 	if named, ok := t.(*types.Named); ok {
 		return named.Obj().Name()

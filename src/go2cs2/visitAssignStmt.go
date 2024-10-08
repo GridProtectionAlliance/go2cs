@@ -19,8 +19,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 	reassignedCount := 0
 	declaredCount := 0
 
+	// Check for string types in LHS, u8 spans are not supported in tuple types
+	lhsTypeIsString := make([]bool, lhsLen)
+	anyTypeIsString := false
+
 	// Count the number of reassigned and declared variables
-	for _, lhs := range assignStmt.Lhs {
+	for i, lhs := range assignStmt.Lhs {
 		ident := getIdentifier(lhs)
 
 		if ident != nil {
@@ -34,12 +38,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 					declaredCount++
 				}
 			}
+
+			lhsTypeIsString[i] = v.getTypeName(ident, true) == "string"
+
+			if !anyTypeIsString && lhsTypeIsString[i] {
+				anyTypeIsString = true
+			}
 		}
 	}
 
 	v.targetFile.WriteString(v.newline)
 
-	if lhsLen == reassignedCount || lhsLen == declaredCount {
+	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString {
 		// Handle LHS
 		if declaredCount > 0 {
 			result.WriteString("var ")
@@ -81,7 +91,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 
 		result.WriteString(";")
 	} else {
-		// Some variables are declared and some are reassigned
+		// Some variables are declared and some are reassigned, or one of the types is a string
 		for i := 0; i < lhsLen; i++ {
 			lhs := assignStmt.Lhs[i]
 			rhs := assignStmt.Rhs[i]
@@ -94,7 +104,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 			ident := getIdentifier(lhs)
 
 			if ident == nil {
-				// Handle other types of LHS expressions
+				// Handle unexpected types of LHS expressions
 				result.WriteString("// " + v.getPrintedNode(lhs))
 			} else {
 				if v.isReassignment(ident) {
@@ -102,7 +112,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 					result.WriteString(" = ")
 					result.WriteString(v.convExpr(rhs, nil))
 					result.WriteString(";")
+				} else if lhsTypeIsString[i] {
+					// Handle string variables
+					result.WriteString("@string ")
+					result.WriteString(v.convExpr(lhs, nil))
+					result.WriteString(" = ")
+					result.WriteString(v.convExpr(rhs, nil))
+					result.WriteString(";")
 				} else {
+					// Check if the variable needs to be allocated on the heap
 					heapTypeDecl := v.convertToHeapTypeDecl(ident)
 
 					if len(heapTypeDecl) > 0 {
