@@ -12,8 +12,8 @@ import (
 // in the Go source code. The analysis is performed on global variables and on a per-function
 // basis. The goal is to identify reassignments and shadowed variables so these can be handled
 // correctly during the conversion process since C# does not allow redeclarations or shadowing
-// of variables with the same name. The two derivative functions that use the results of this
-// analysis are `getIdentName` and `isReassignment`.
+// of variables with the same name, at least within the same function. Two derivative functions
+// use the results of this analysis: `getIdentName` and `isReassignment`.
 
 // Perform variable analysis on the global ValueSpec declarations
 func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
@@ -29,7 +29,7 @@ func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
 					for _, ident := range spec.Names {
 						varName := ident.Name
 
-						if len(varName) == 0 || varName == "_" {
+						if isDiscardedVar(varName) {
 							continue
 						}
 
@@ -46,7 +46,7 @@ func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
 							continue
 						}
 
-						v.globalIdentNames[ident] = varName
+						v.globalIdentNames[ident] = getSanitizedIdentifier(varName)
 						v.globalScope[varName] = varObj
 					}
 				}
@@ -81,8 +81,16 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	}
 
 	// Check if a variable is declared in outer scopes (excluding the current scope)
-	isDeclaredInOuterScopes := func(varName string) bool {
-		for i := len(v.scopeStack) - 2; i >= 0; i-- {
+	isDeclaredInOuterScopes := func(varName string, includeGlobal bool) bool {
+		var minScope int
+
+		if includeGlobal {
+			minScope = 0
+		} else {
+			minScope = 1
+		}
+
+		for i := len(v.scopeStack) - 2; i >= minScope; i-- {
 			scope := v.scopeStack[i]
 
 			if _, exists := scope[varName]; exists {
@@ -91,12 +99,6 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		}
 
 		return false
-	}
-
-	// Declare a new variable in the current scope
-	declareVar := func(varName string, varObj *types.Var) {
-		scope := v.scopeStack[len(v.scopeStack)-1]
-		scope[varName] = varObj
 	}
 
 	// Look up a variable in the scope stack
@@ -110,6 +112,39 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		}
 
 		return nil
+	}
+
+	getShadowedVarName := func(varName string) string {
+		return fmt.Sprintf("%s%s%d", varName, ShadowVarMarker, nameCounts[varName])
+	}
+
+	// Declare a new variable in the current scope
+	declareVar := func(varName string, varObj *types.Var, ident *ast.Ident) {
+		var adjustedName string
+
+		if isDeclaredInOuterScopes(varName, false) {
+			// Variable shadowing
+			nameCounts[varName]++
+			adjustedName = getShadowedVarName(varName)
+		} else {
+			adjustedName = varName
+			nameCounts[varName] = 0
+		}
+
+		varNames[varObj] = adjustedName
+		v.identNames[ident] = getSanitizedIdentifier(adjustedName)
+		v.isReassigned[ident] = false
+
+		scope := v.scopeStack[len(v.scopeStack)-1]
+		scope[varName] = varObj
+	}
+
+	reassignVar := func(varName string, ident *ast.Ident) {
+		varObj := lookupVar(varName)
+		adjustedName := varNames[varObj]
+
+		v.identNames[ident] = getSanitizedIdentifier(adjustedName)
+		v.isReassigned[ident] = true
 	}
 
 	addFunctionParams := func(funcDecl *ast.FuncDecl, signature *types.Signature) {
@@ -128,17 +163,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					for _, ident := range names {
 						name := ident.Name
 
-						if len(name) == 0 || name == "_" {
+						if isDiscardedVar(name) {
 							paramIndex++
 							continue
 						}
 
 						param := parameters.At(paramIndex)
-						varNames[param] = name
-						v.identNames[ident] = name
-						v.isReassigned[ident] = false
-
-						declareVar(name, param)
+						declareVar(name, param, ident)
 						paramIndex++
 					}
 				}
@@ -155,12 +186,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				recv := signature.Recv()
 				recvName := ident.Name
 
-				if len(recvName) > 0 && recvName != "_" {
-					varNames[recv] = recvName
-					v.identNames[ident] = recvName
-					v.isReassigned[ident] = false
-
-					declareVar(recvName, recv)
+				if !isDiscardedVar(recvName) {
+					declareVar(recvName, recv, ident)
 				}
 			}
 		}
@@ -180,26 +207,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					for _, ident := range names {
 						name := ident.Name
 
-						if len(name) == 0 || name == "_" {
+						if isDiscardedVar(name) {
 							resultIndex++
 							continue
 						}
 
 						result := results.At(resultIndex)
-						varNames[result] = name
-						v.identNames[ident] = name
-						v.isReassigned[ident] = false
-
-						declareVar(name, result)
+						declareVar(name, result, ident)
 						resultIndex++
 					}
 				}
 			}
 		}
-	}
-
-	getShadowedVarName := func(varName string) string {
-		return fmt.Sprintf("%s%s%d", varName, ShadowVarMarker, nameCounts[varName])
 	}
 
 	var visitNode func(n ast.Node)
@@ -237,17 +256,12 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 					varName := ident.Name
 
-					if len(varName) == 0 || varName == "_" {
+					if isDiscardedVar(varName) {
 						continue
 					}
 
 					if isDeclaredInCurrentScope(varName) {
-						// Variable exists; it's a reassignment
-						v.isReassigned[ident] = true
-
-						varObj := lookupVar(varName)
-						adjustedName := varNames[varObj]
-						v.identNames[ident] = adjustedName
+						reassignVar(varName, ident)
 					} else {
 						// New variable declaration
 						obj := v.info.Defs[ident]
@@ -257,22 +271,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						}
 
 						varObj := obj.(*types.Var)
-						var adjustedName string
-
-						if isDeclaredInOuterScopes(varName) {
-							// Variable shadowing
-							nameCounts[varName]++
-							adjustedName = getShadowedVarName(varName)
-						} else {
-							adjustedName = varName
-							nameCounts[varName] = 0
-						}
-
-						varNames[varObj] = adjustedName
-						v.identNames[ident] = adjustedName
-						v.isReassigned[ident] = false
-
-						declareVar(varName, varObj)
+						declareVar(varName, varObj, ident)
 					}
 				}
 			} else {
@@ -286,15 +285,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 					varName := ident.Name
 
-					if len(varName) == 0 || varName == "_" {
+					if isDiscardedVar(varName) {
 						continue
 					}
 
-					varObj := lookupVar(varName)
-					adjustedName := varNames[varObj]
-
-					v.identNames[ident] = adjustedName
-					v.isReassigned[ident] = true
+					reassignVar(varName, ident)
 				}
 			}
 
@@ -308,7 +303,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			for _, ident := range node.Names {
 				varName := ident.Name
 
-				if len(varName) == 0 || varName == "_" {
+				if isDiscardedVar(varName) {
 					continue
 				}
 
@@ -319,22 +314,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				}
 
 				varObj := obj.(*types.Var)
-				var adjustedName string
-
-				if isDeclaredInOuterScopes(varName) {
-					// Variable shadowing
-					nameCounts[varName]++
-					adjustedName = getShadowedVarName(varName)
-				} else {
-					adjustedName = varName
-					nameCounts[varName] = 0
-				}
-
-				varNames[varObj] = adjustedName
-				v.identNames[ident] = adjustedName
-				v.isReassigned[ident] = false
-
-				declareVar(varName, varObj)
+				declareVar(varName, varObj, ident)
 			}
 
 			// Visit values
@@ -346,7 +326,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			if obj := v.info.Uses[node]; obj != nil {
 				if varObj, ok := obj.(*types.Var); ok {
 					if adjustedName, ok := varNames[varObj]; ok {
-						v.identNames[node] = adjustedName
+						v.identNames[node] = getSanitizedIdentifier(adjustedName)
 					}
 				}
 			}
@@ -457,16 +437,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 					varName := ident.Name
 
-					if len(varName) == 0 || varName == "_" {
+					if isDiscardedVar(varName) {
 						continue
 					}
 
 					if isDeclaredInCurrentScope(varName) {
 						// Variable exists in current scope; it's a reassignment
-						v.isReassigned[ident] = true
-						varObj := lookupVar(varName)
-						adjustedName := varNames[varObj]
-						v.identNames[ident] = adjustedName
+						reassignVar(varName, ident)
 					} else {
 						// New variable declaration
 						obj := v.info.Defs[ident]
@@ -476,22 +453,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						}
 
 						varObj := obj.(*types.Var)
-						var adjustedName string
-
-						if isDeclaredInOuterScopes(varName) {
-							// Variable shadowing
-							nameCounts[varName]++
-							adjustedName = getShadowedVarName(varName)
-						} else {
-							adjustedName = varName
-							nameCounts[varName] = 0
-						}
-
-						varNames[varObj] = adjustedName
-						v.identNames[ident] = adjustedName
-						v.isReassigned[ident] = false
-
-						declareVar(varName, varObj)
+						declareVar(varName, varObj, ident)
 					}
 				}
 			} else {
@@ -505,14 +467,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 					varName := ident.Name
 
-					if len(varName) == 0 || varName == "_" {
+					if isDiscardedVar(varName) {
 						continue
 					}
 
-					varObj := lookupVar(varName)
-					adjustedName := varNames[varObj]
-					v.identNames[ident] = adjustedName
-					v.isReassigned[ident] = true
+					reassignVar(varName, ident)
 				}
 			}
 

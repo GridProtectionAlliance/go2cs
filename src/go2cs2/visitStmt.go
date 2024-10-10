@@ -10,7 +10,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	case *ast.AssignStmt:
 		v.visitAssignStmt(stmtType, parentBlock)
 	case *ast.BlockStmt:
-		v.visitBlockStmt(stmtType, true)
+		v.visitBlockStmt(stmtType, true, true)
 	case *ast.BranchStmt:
 		v.visitBranchStmt(stmtType)
 	// CaseClause visited in visitSwitchStmt

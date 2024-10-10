@@ -19,7 +19,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 	reassignedCount := 0
 	declaredCount := 0
 
-	// Check for string types in LHS, u8 spans are not supported in tuple types
+	// Check for string types in LHS, u8 readonly spans are not supported in value tuple
 	lhsTypeIsString := make([]bool, lhsLen)
 	anyTypeIsString := false
 
@@ -47,12 +47,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 		}
 	}
 
-	v.targetFile.WriteString(v.newline)
-
 	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString {
 		// Handle LHS
 		if declaredCount > 0 {
-			result.WriteString("var ")
+			if declaredCount > 1 || v.options.preferVarDecl {
+				result.WriteString("var ")
+			} else {
+				ident := getIdentifier(assignStmt.Lhs[0])
+				lhsType := convertToCSTypeName(v.getTypeName(ident, false))
+				result.WriteString(lhsType)
+				result.WriteRune(' ')
+			}
 		}
 
 		if lhsLen > 1 {
@@ -128,7 +133,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 						result.WriteString(v.newline)
 						result.WriteString(v.indent(v.indentLevel))
 					} else {
-						result.WriteString("var ")
+						if v.options.preferVarDecl {
+							result.WriteString("var ")
+						} else {
+							lhsType := convertToCSTypeName(v.getTypeName(ident, false))
+							result.WriteString(lhsType)
+							result.WriteRune(' ')
+						}
 					}
 
 					result.WriteString(v.convExpr(lhs, nil))

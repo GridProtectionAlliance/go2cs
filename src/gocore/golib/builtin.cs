@@ -29,6 +29,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using static System.Math;
 
@@ -36,6 +37,12 @@ namespace go;
 
 public static class builtin
 {
+    [ModuleInitializer]
+    internal static void InitializeGoLib()
+    {
+        Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
+    }
+
     private static class Zero<T>
     {
         public static T Default = default!;
@@ -1222,7 +1229,7 @@ public static class builtin
         {
             char charValue = '\uFFFD';
 
-            if (intValue is >= char.MinValue and <= char.MaxValue)
+            if (intValue <= char.MaxValue)
                 charValue = (char)intValue;
 
             return new string(charValue, 1);

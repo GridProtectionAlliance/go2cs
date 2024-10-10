@@ -5,14 +5,20 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool) {
+func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool, startOnNewline bool) {
 	v.pushBlock()
 
 	if v.blockOuterPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockOuterPrefixInjection.Pop())
 	}
 
-	v.targetFile.WriteString(" {")
+	if startOnNewline {
+		v.targetFile.WriteString(v.newline)
+		v.targetFile.WriteString(v.indent(v.indentLevel))
+		v.targetFile.WriteString("{")
+	} else {
+		v.targetFile.WriteString(" {")
+	}
 
 	if v.blockInnerPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockInnerPrefixInjection.Pop())
@@ -28,11 +34,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool) {
 	prefix := v.newline + v.indent(v.indentLevel)
 
 	if len(blockStmt.List) > 0 {
-		_, lines := v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
-
-		if lines == 0 {
-			v.targetFile.WriteString(v.newline)
-		}
+		v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
 	}
 
 	for _, stmt := range blockStmt.List {
@@ -42,12 +44,13 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool) {
 			lastLine := v.file.Line(lastStmt.End())
 
 			comments := &strings.Builder{}
+			var wrote bool
 
 			if wrote, lines := v.writeStandAloneCommentString(comments, stmt.Pos(), nil, prefix); wrote {
 				lastLine -= lines - 1
 			}
 
-			if currentLine-lastLine > 1 {
+			if wrote && currentLine-lastLine > 1 {
 				v.targetFile.WriteString(strings.Repeat(v.newline, currentLine-lastLine-1))
 			}
 

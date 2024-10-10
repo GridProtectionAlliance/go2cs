@@ -20,6 +20,7 @@ import (
 
 type Options struct {
 	indentSpaces    int
+	preferVarDecl   bool
 	parseCgoTargets bool
 	showParseTree   bool
 }
@@ -129,6 +130,7 @@ func main() {
 	// TODO: Load options from command line arguments
 	options := Options{
 		indentSpaces:    4,
+		preferVarDecl:   true,
 		parseCgoTargets: false,
 		showParseTree:   true,
 	}
@@ -216,171 +218,6 @@ func main() {
 	outputFile.WriteString(visitor.targetFile.String())
 }
 
-func (v *Visitor) indent(indentLevel int) string {
-	return strings.Repeat(" ", v.options.indentSpaces*indentLevel)
-}
-
-func (v *Visitor) isLineFeedBetween(prevEndPos, currPos token.Pos) bool {
-	prevLine := v.fset.Position(prevEndPos).Line
-	currLine := v.fset.Position(currPos).Line
-	return currLine > prevLine
-}
-
-func (v *Visitor) writeString(builder *strings.Builder, format string, a ...interface{}) {
-	if v.indentLevel > 0 {
-		builder.WriteString(v.indent(v.indentLevel))
-	}
-
-	builder.WriteString(fmt.Sprintf(format, a...))
-}
-
-func (v *Visitor) writeStringLn(builder *strings.Builder, format string, a ...interface{}) {
-	v.writeString(builder, format, a...)
-	builder.WriteString(v.newline)
-}
-
-// TODO: Come back to this later, you could spend a lot of time here - there is an ongoing effort to improve AST for
-// parsing free floating comments: https://github.com/golang/go/issues/20744 - plus a DST package as a fallback
-func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetPos token.Pos, doc *ast.CommentGroup, prefix string) (bool, int) {
-	wroteStandAloneComment := false
-	lines := 0
-
-	// Handle standalone comments that may precede the target position
-	if targetPos != token.NoPos {
-		if v.file == nil {
-			v.file = v.fset.File(targetPos)
-		}
-
-		handledPos := []token.Pos{}
-
-		for _, pos := range v.sortedCommentPos {
-			if pos > targetPos {
-				break
-			}
-
-			comment, found := v.standAloneComments[pos]
-
-			if !found {
-				continue
-			}
-
-			builder.WriteString(prefix)
-			builder.WriteString(comment)
-			lines += strings.Count(comment, "\n")
-
-			if doc != nil {
-				builder.WriteString(v.newline)
-			}
-
-			delete(v.standAloneComments, pos)
-			handledPos = append(handledPos, pos)
-			wroteStandAloneComment = true
-		}
-
-		if len(handledPos) > 0 {
-			lastCommentPos := handledPos[len(handledPos)-1]
-
-			// Add line breaks if there is a gap between the last comment and the target position
-			if lastCommentPos > token.NoPos && doc != nil {
-				docPos := doc.Pos()
-				targetLine := v.file.Line(lastCommentPos)
-				nodeLine := v.file.Line(docPos)
-
-				if int(nodeLine-targetLine)-1 > 0 {
-					builder.WriteString(v.newline)
-				}
-			}
-
-			removePos := func(slice []token.Pos, pos token.Pos) []token.Pos {
-				for i, v := range slice {
-					if v == pos {
-						return append(slice[:i], slice[i+1:]...)
-					}
-				}
-				return slice
-			}
-
-			// Remove handled positions from sorted list
-			for _, pos := range handledPos {
-				v.sortedCommentPos = removePos(v.sortedCommentPos, pos)
-			}
-		}
-	}
-
-	return wroteStandAloneComment, lines
-}
-
-func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup, targetPos token.Pos) {
-	wroteStandAloneComment, _ := v.writeStandAloneCommentString(builder, targetPos, doc, "")
-
-	if doc == nil {
-		if wroteStandAloneComment {
-			builder.WriteString(v.newline)
-		}
-
-		return
-	}
-
-	// Handle doc comments
-	v.writeString(builder, "") // Write indent
-	v.writeCommentString(builder, doc, token.NoPos)
-	builder.WriteString(v.newline)
-}
-
-func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.CommentGroup, targetPos token.Pos) {
-	if comment == nil {
-		return
-	}
-
-	if !v.processedComments.Add(comment.Pos()) {
-		return
-	}
-
-	for index, comment := range comment.List {
-		if index > 0 {
-			builder.WriteString(v.newline)
-		}
-
-		if targetPos > token.NoPos {
-			padding := int(comment.Slash - targetPos)
-
-			if padding < 1 {
-				padding = 1
-			}
-
-			builder.WriteString(strings.Repeat(" ", padding))
-		}
-
-		builder.WriteString(comment.Text)
-	}
-}
-
-func (v *Visitor) replaceMarkerString(builder *strings.Builder, marker string, replacement string) {
-	builderString := strings.ReplaceAll(builder.String(), marker, replacement)
-	builder.Reset()
-	builder.WriteString(builderString)
-}
-
-func (v *Visitor) writeOutput(format string, a ...interface{}) {
-	v.writeString(v.targetFile, format, a...)
-}
-
-func (v *Visitor) writeOutputLn(format string, a ...interface{}) {
-	v.writeStringLn(v.targetFile, format, a...)
-}
-
-func (v *Visitor) writeDoc(doc *ast.CommentGroup, targetPos token.Pos) {
-	v.writeDocString(v.targetFile, doc, targetPos)
-}
-
-func (v *Visitor) writeComment(comment *ast.CommentGroup, targetPos token.Pos) {
-	v.writeCommentString(v.targetFile, comment, targetPos)
-}
-
-func (v *Visitor) replaceMarker(marker string, replacement string) {
-	v.replaceMarkerString(v.targetFile, marker, replacement)
-}
-
 func (v *Visitor) addRequiredUsing(usingName string) {
 	v.requiredUsings.Add(usingName)
 }
@@ -397,8 +234,8 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 		// Remove backticks from the start and end of the string
 		str = strings.Trim(str, "`")
 
-		// See if raw string literal is required
-		if strings.Contains(str, "\"") || strings.Contains(str, "\n") {
+		// See if raw string literal is required (contains newline)
+		if strings.Contains(str, "\n") {
 			// C# raw string literals are enclosed in triple (or more) quotes
 			prefix := `"""`
 			suffix := `"""`
@@ -411,20 +248,19 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 				while = strings.Contains(str, prefix)
 			}
 
-			// Handle multiline C# raw string literals
-			if strings.Contains(str, "\n") {
-				if !strings.HasPrefix(str, "\n") {
-					prefix += v.newline
-				}
+			// Ensure multiline C# raw string literals starts with newline
+			if !strings.HasPrefix(str, "\n") {
+				prefix += v.newline
+			}
 
-				if !strings.HasSuffix(str[:len(str)-1], "\n") {
-					// Get index of last newline
-					lastNewline := strings.LastIndex(str, "\n")
+			// Ensure multiline C# raw string literals ends with newline
+			if !strings.HasSuffix(str[:len(str)-1], "\n") {
+				// Get index of last newline
+				lastNewline := strings.LastIndex(str, "\n")
 
-					// Check if any characters beyond the last newline are just spaces
-					if strings.TrimSpace(str[lastNewline:]) != "" {
-						suffix = v.newline + suffix
-					}
+				// Check if any characters beyond the last newline are not whitespace
+				if strings.TrimSpace(str[lastNewline:]) != "" {
+					suffix = v.newline + suffix
 				}
 			}
 
@@ -432,7 +268,7 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 		}
 
 		// Use C# verbatim string literal for more simple raw strings
-		return fmt.Sprintf("@\"%s\"", str), true
+		return fmt.Sprintf("@\"%s\"", strings.ReplaceAll(str, "\"", "\"\"")), true
 	}
 
 	return str, false
@@ -444,6 +280,11 @@ func getSanitizedIdentifier(identifier string) string {
 		strings.HasSuffix(identifier, ClassSuffix) ||
 		strings.Contains(identifier, ShadowVarMarker) {
 		return "@" + identifier
+	}
+
+	// Handle special exceptions
+	if identifier == "Main" {
+		return "_Main_"
 	}
 
 	return identifier
@@ -459,6 +300,10 @@ func getAccess(name string) string {
 
 	// Otherwise, scope is "public"
 	return "public"
+}
+
+func isDiscardedVar(varName string) bool {
+	return len(varName) == 0 || varName == "_"
 }
 
 func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
@@ -572,10 +417,19 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
 		// Get array element type
 		arrayType := convertToCSTypeName(goTypeName[strings.Index(goTypeName, "]")+1:])
 
+		if v.options.preferVarDecl {
+			return fmt.Sprintf("ref var %s = ref heap(new array<%s>(%s), out var %s%s);", csIDName, arrayType, arrayLen, AddressPrefix, csIDName)
+		}
+
 		return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
 	}
 
 	csTypeName := convertToCSTypeName(goTypeName)
+
+	if v.options.preferVarDecl {
+		return fmt.Sprintf("ref var %s = ref heap(new %s(), out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
+	}
+
 	return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
 }
 
@@ -607,6 +461,16 @@ func getParameterType(sig *types.Signature, i int) (types.Type, bool) {
 	}
 
 	return paramType, true
+}
+
+func (v *Visitor) getVarIdent(varType *types.Var) *ast.Ident {
+	for ident, obj := range v.info.Defs {
+		if obj == varType {
+			return ident
+		}
+	}
+
+	return nil
 }
 
 // Get the adjusted identifier name, considering shadowing

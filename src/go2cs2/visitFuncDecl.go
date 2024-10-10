@@ -45,7 +45,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
 
 	if funcDecl.Body != nil {
-		v.visitBlockStmt(funcDecl.Body, true)
+		v.visitBlockStmt(funcDecl.Body, true, false)
 	}
 
 	signatureOnly := funcDecl.Body == nil
@@ -58,11 +58,34 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		arrayClones := &strings.Builder{}
 		implicitPointers := &strings.Builder{}
 
-		for i := 0; i < signature.Results().Len(); i++ {
-			param := signature.Results().At(i)
+		if funcDecl.Type.Results != nil && len(funcDecl.Type.Results.List) > 0 {
+			resultParams := signature.Results()
+			paramIndex := 0
 
-			if param.Name() != "" {
-				v.writeString(resultParameters, fmt.Sprintf("%s %s = default;", getCSTypeName(param.Type()), param.Name()))
+			for _, field := range funcDecl.Type.Results.List {
+				names := field.Names
+
+				if len(names) == 0 {
+					// Anonymous parameter (no name)
+					paramIndex++
+				} else {
+					for _, ident := range names {
+						name := ident.Name
+
+						if isDiscardedVar(name) {
+							paramIndex++
+							continue
+						}
+
+						param := resultParams.At(paramIndex)
+						paramName := v.getIdentName(ident)
+
+						resultParameters.WriteString(v.newline)
+						v.writeString(resultParameters, fmt.Sprintf("%s%s %s = default;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName))
+
+						paramIndex++
+					}
+				}
 			}
 		}
 
@@ -78,7 +101,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
 			if pointerType, ok := param.Type().(*types.Pointer); ok {
-				v.writeString(implicitPointers, fmt.Sprintf("%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name()))
+				if v.options.preferVarDecl {
+					v.writeString(implicitPointers, fmt.Sprintf("%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), param.Name(), AddressPrefix, param.Name()))
+				} else {
+					v.writeString(implicitPointers, fmt.Sprintf("%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name()))
+				}
 			}
 		}
 
@@ -244,11 +271,21 @@ func generateResultSignature(signature *types.Signature) string {
 		return "void"
 	}
 
-	if results.Len() == 1 {
-		return getCSTypeName(results.At(0).Type())
-	}
-
 	result := strings.Builder{}
+
+	if results.Len() == 1 {
+		param := results.At(0)
+
+		result.WriteString(getCSTypeName(param.Type()))
+
+		if param.Name() != "" {
+			result.WriteString(" /*")
+			result.WriteString(param.Name())
+			result.WriteString("*/")
+		}
+
+		return result.String()
+	}
 
 	result.WriteString("(")
 
@@ -257,7 +294,14 @@ func generateResultSignature(signature *types.Signature) string {
 			result.WriteString(", ")
 		}
 
-		result.WriteString(getCSTypeName(results.At(i).Type()))
+		param := results.At(i)
+
+		result.WriteString(getCSTypeName(param.Type()))
+
+		if param.Name() != "" {
+			result.WriteString(" ")
+			result.WriteString(param.Name())
+		}
 	}
 
 	result.WriteString(")")
