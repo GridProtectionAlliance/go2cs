@@ -284,6 +284,8 @@ func getSanitizedIdentifier(identifier string) string {
 
 	// Handle special exceptions
 	if identifier == "Main" {
+		// This can be improved on by only escaping if it is a function
+		// name and verifying that escaped name is unique
 		return "_Main_"
 	}
 

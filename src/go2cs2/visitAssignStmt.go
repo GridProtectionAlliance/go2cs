@@ -23,6 +23,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 	lhsTypeIsString := make([]bool, lhsLen)
 	anyTypeIsString := false
 
+	// Ensure that the correct type is used for integer, we do this since int and uint in
+	// converted Go code target nint or nuint to match original Go code behavior and a "var"
+	// based assignment to an integer type could result in a very subtle type mismatch
+	lhsTypeIsInt := make([]bool, lhsLen)
+	anyTypeIsInt := false
+
 	// Count the number of reassigned and declared variables
 	for i, lhs := range assignStmt.Lhs {
 		ident := getIdentifier(lhs)
@@ -39,15 +45,23 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 				}
 			}
 
-			lhsTypeIsString[i] = v.getTypeName(ident, true) == "string"
+			typeName := v.getTypeName(ident, true)
+
+			lhsTypeIsString[i] = typeName == "string"
 
 			if !anyTypeIsString && lhsTypeIsString[i] {
 				anyTypeIsString = true
 			}
+
+			lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+
+			if !anyTypeIsInt && lhsTypeIsInt[i] {
+				anyTypeIsInt = true
+			}
 		}
 	}
 
-	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString {
+	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
 		// Handle LHS
 		if declaredCount > 0 {
 			if declaredCount > 1 || v.options.preferVarDecl {
@@ -96,7 +110,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 
 		result.WriteString(";")
 	} else {
-		// Some variables are declared and some are reassigned, or one of the types is a string
+		// Some variables are declared and some are reassigned, or one of the types is a string or integer
 		for i := 0; i < lhsLen; i++ {
 			lhs := assignStmt.Lhs[i]
 			rhs := assignStmt.Rhs[i]
@@ -133,7 +147,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 						result.WriteString(v.newline)
 						result.WriteString(v.indent(v.indentLevel))
 					} else {
-						if v.options.preferVarDecl {
+						if v.options.preferVarDecl && !lhsTypeIsInt[i] {
 							result.WriteString("var ")
 						} else {
 							lhsType := convertToCSTypeName(v.getTypeName(ident, false))
