@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -92,7 +91,7 @@ public static class builtin
         {
             if (!s_fallthrough.Value)
                 return false;
-                
+
             s_fallthrough.Value = false;
             return true;
         }
@@ -118,8 +117,10 @@ public static class builtin
     /// slice = append(slice, anotherSlice...)
     /// </code>
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<T> append<T>(in slice<T> slice, params T[] elems) => go.slice<T>.Append(slice, elems);
+    public static slice<T> append<T>(in slice<T> slice, params T[] elems)
+    {
+        return go.slice<T>.Append(slice, elems);
+    }
 
     /// <summary>
     /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
@@ -137,66 +138,82 @@ public static class builtin
     /// slice = append(slice, anotherSlice...)
     /// </code>
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<T> append<T>(ISlice slice, params T[] elems) => (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
+    public static slice<T> append<T>(ISlice slice, params T[] elems)
+    {
+        return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="array"/> (same as len(array)).
     /// </summary>
     /// <param name="array">Target array pointer.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap<T>(in array<T> array) => array.Length;
+    public static nint cap<T>(in array<T> array)
+    {
+        return array.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="array"/> (same as len(array)).
     /// </summary>
     /// <param name="array">Target array pointer.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap(IArray array) => array.Length;
+    public static nint cap(IArray array)
+    {
+        return array.Length;
+    }
 
     /// <summary>
     /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>
     /// <returns>The capacity of the <paramref name="slice"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap<T>(in slice<T> slice) => slice.Capacity;
+    public static nint cap<T>(in slice<T> slice)
+    {
+        return slice.Capacity;
+    }
 
     /// <summary>
     /// Gets the maximum length the <paramref name="slice"/> can reach when resliced.
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>
     /// <returns>The capacity of the <paramref name="slice"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap(ISlice slice) => slice.Capacity;
+    public static nint cap(ISlice slice)
+    {
+        return slice.Capacity;
+    }
 
     /// <summary>
     /// Gets the maximum capacity of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel pointer.</param>
     /// <returns>The capacity of the <paramref name="channel"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap<T>(in channel<T> channel) => channel.Capacity;
+    public static nint cap<T>(in channel<T> channel)
+    {
+        return channel.Capacity;
+    }
 
     /// <summary>
     /// Gets the maximum capacity of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel pointer.</param>
     /// <returns>The capacity of the <paramref name="channel"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint cap(IChannel channel) => channel.Capacity;
+    public static nint cap(IChannel channel)
+    {
+        return channel.Capacity;
+    }
 
     /// <summary>
     /// Closes the channel.
     /// </summary>
     /// <param name="channel">Target channel pointer.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    // An "in" parameter works here because the close method operates on channel structure's
-    // private class-based member references, not on value types
-    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
-    public static void close<T>(in channel<T> channel) => channel.Close();
+    public static void close<T>(in channel<T> channel)
+    {
+        // An "in" parameter works here because the close method operates on channel structure's
+        // private class-based member references, not on value types
+        // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
+        channel.Close();
+    }
 
     /// <summary>
     /// Constructs a complex value from two floating-point values.
@@ -204,8 +221,10 @@ public static class builtin
     /// <param name="realPart">Real-part of complex value.</param>
     /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
     /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex64 complex(float32 realPart, float32 imaginaryPart) => new(realPart, imaginaryPart);
+    public static complex64 complex(float32 realPart, float32 imaginaryPart)
+    {
+        return new complex64(realPart, imaginaryPart);
+    }
 
     /// <summary>
     /// Constructs a complex value from two floating-point values.
@@ -213,8 +232,10 @@ public static class builtin
     /// <param name="realPart">Real-part of complex value.</param>
     /// <param name="imaginaryPart">Imaginary-part of complex value.</param>
     /// <returns>New complex value from specified <paramref name="realPart"/> and <paramref name="imaginaryPart"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex128 complex(float64 realPart, float64 imaginaryPart) => new(realPart, imaginaryPart);
+    public static complex128 complex(float64 realPart, float64 imaginaryPart)
+    {
+        return new complex128(realPart, imaginaryPart);
+    }
 
     /// <summary>
     /// Copies elements from a source slice into a destination slice.
@@ -225,7 +246,6 @@ public static class builtin
     /// <returns>
     /// The number of elements copied, which will be the minimum of len(src) and len(dst).
     /// </returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static nint copy<T1, T2>(in slice<T1> dst, in slice<T2> src)
     {
         if (dst == nil)
@@ -264,7 +284,6 @@ public static class builtin
     /// <remarks>
     /// As a special case, it also will copy bytes from a string to a slice of bytes.
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static nint copy(in slice<byte> dst, in @string src)
     {
         slice<byte> bytes = src;
@@ -276,167 +295,210 @@ public static class builtin
     /// </summary>
     /// <param name="map">Target map.</param>
     /// <param name="key">Key to remove.</param>
-    public static void delete<TKey, TValue>(map<TKey, TValue> map, TKey key) where TKey : notnull => map.Remove(key);
+    public static void delete<TKey, TValue>(map<TKey, TValue> map, TKey key) where TKey : notnull
+    {
+        map.Remove(key);
+    }
 
     /// <summary>
     /// Gets the imaginary part of the complex number <paramref name="c"/>.
     /// </summary>
     /// <param name="c">Complex number.</param>
     /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float imag(complex64 c) => c.Imaginary;
+    public static float imag(complex64 c)
+    {
+        return c.Imaginary;
+    }
 
     /// <summary>
     /// Gets the imaginary part of the complex number <paramref name="c"/>.
     /// </summary>
     /// <param name="c">Complex number.</param>
     /// <returns>Imaginary part of the complex number <paramref name="c"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static double imag(complex128 c) => c.Imaginary;
+    public static double imag(complex128 c)
+    {
+        return c.Imaginary;
+    }
 
     /// <summary>
     /// Gets the real part of the complex number <paramref name="c"/>.
     /// </summary>
     /// <param name="c">Complex number.</param>
     /// <returns>Real part of the complex number <paramref name="c"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float real(complex64 c) => c.Real;
+    public static float real(complex64 c)
+    {
+        return c.Real;
+    }
 
     /// <summary>
     /// Gets the real part of the complex number <paramref name="c"/>.
     /// </summary>
     /// <param name="c">Complex number.</param>
     /// <returns>Real part of the complex number <paramref name="c"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static double real(complex128 c) => c.Real;
+    public static double real(complex128 c)
+    {
+        return c.Real;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="array"/>.
     /// </summary>
     /// <param name="array">Target array.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in array<T> array) => array.Length;
+    public static nint len<T>(in array<T> array)
+    {
+        return array.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="array"/>.
     /// </summary>
     /// <param name="array">Target array.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(IArray array) => array.Length;
+    public static nint len(IArray array)
+    {
+        return array.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="array"/>.
     /// </summary>
     /// <param name="array">Target array pointer.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in ptr<array<T>> array) => array.val.Length;
+    public static nint len<T>(in ptr<array<T>> array)
+    {
+        return array.val.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="slice"/>.
     /// </summary>
     /// <param name="slice">Target slice.</param>
     /// <returns>The length of the <paramref name="slice"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in slice<T> slice) => slice.Length;
+    public static nint len<T>(in slice<T> slice)
+    {
+        return slice.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="slice"/>.
     /// </summary>
     /// <param name="slice">Target slice.</param>
     /// <returns>The length of the <paramref name="slice"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(ISlice slice) => slice.Length;
+    public static nint len(ISlice slice)
+    {
+        return slice.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="slice"/>.
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>
     /// <returns>The length of the <paramref name="slice"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in ptr<slice<T>> slice) => slice.val.Length;
+    public static nint len<T>(in ptr<slice<T>> slice)
+    {
+        return slice.val.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
     /// <param name="str">Target string.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(in @string str) => str.Length;
+    public static nint len(in @string str)
+    {
+        return str.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
     /// <param name="str">Target string.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(in ReadOnlySpan<byte> str) => str.Length;
+    public static nint len(in ReadOnlySpan<byte> str)
+    {
+        return str.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
     /// <param name="str">Target string pointer.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(in ptr<@string> str) => str.val.Length;
+    public static nint len(in ptr<@string> str)
+    {
+        return str.val.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
     /// <param name="str">Target channel pointer.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(string str) => str.Length;
+    public static nint len(string str)
+    {
+        return str.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="map"/>.
     /// </summary>
     /// <param name="map">Target map.</param>
     /// <returns>The length of the <paramref name="map"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<TKey, TValue>(in map<TKey, TValue> map) where TKey : notnull => map.Count;
+    public static nint len<TKey, TValue>(in map<TKey, TValue> map) where TKey : notnull
+    {
+        return map.Count;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="map"/>.
     /// </summary>
     /// <param name="map">Target map.</param>
     /// <returns>The length of the <paramref name="map"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(IMap map) => map.Length;
+    public static nint len(IMap map)
+    {
+        return map.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="map"/>.
     /// </summary>
     /// <param name="map">Target map pointer.</param>
     /// <returns>The length of the <paramref name="map"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<TKey, TValue>(in ptr<map<TKey, TValue>> map) where TKey : notnull => map.val.Count;
+    public static nint len<TKey, TValue>(in ptr<map<TKey, TValue>> map) where TKey : notnull
+    {
+        return map.val.Count;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel.</param>
     /// <returns>The length of the <paramref name="channel"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in channel<T> channel) => channel.Length;
+    public static nint len<T>(in channel<T> channel)
+    {
+        return channel.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel.</param>
     /// <returns>The length of the <paramref name="channel"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len(IChannel channel) => channel.Length;
+    public static nint len(IChannel channel)
+    {
+        return channel.Length;
+    }
 
     /// <summary>
     /// Gets the length of the <paramref name="channel"/>.
     /// </summary>
     /// <param name="channel">Target channel pointer.</param>
     /// <returns>The length of the <paramref name="channel"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint len<T>(in ptr<channel<T>> channel) => channel.val.Length;
+    public static nint len<T>(in ptr<channel<T>> channel)
+    {
+        return channel.val.Length;
+    }
 
     /// <summary>
     /// Creates a new slice from the specified <paramref name="array"/>.
@@ -444,29 +506,38 @@ public static class builtin
     /// <typeparam name="T">Array type.</typeparam>
     /// <param name="array">Source array</param>
     /// <returns>New slice of the specified <paramref name="array"/>.</returns>
-    public static slice<T> make_slice<T>(T[]? array) => new(array);
+    public static slice<T> make_slice<T>(T[]? array)
+    {
+        return new slice<T>(array);
+    }
 
     /// <summary>
     /// Allocates and initializes a slice object.
     /// </summary>
     /// <param name="size">Specifies the slice length.</param>
     /// <param name="capacity">Specified slice capacity; must be no smaller than the length.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<T> make_slice<T>(nint size, nint capacity = 0) => new((int)size, (int)capacity);
+    public static slice<T> make_slice<T>(nint size, nint capacity = 0)
+    {
+        return new slice<T>((int)size, (int)capacity);
+    }
 
     /// <summary>
     /// Allocates and initializes a map object.
     /// </summary>
     // <param name="size">Specifies the number of map elements.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static map<TKey, TValue> make_map<TKey, TValue>(nint size = 0) where TKey : notnull => new((int)size);
+    public static map<TKey, TValue> make_map<TKey, TValue>(nint size = 0) where TKey : notnull
+    {
+        return new map<TKey, TValue>((int)size);
+    }
 
     /// <summary>
     /// Allocates and initializes a channel object.
     /// </summary>
     /// <param name="size">Specifies the buffer capacity.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static channel<T> make_channel<T>(nint size = 1) => new((int)size);
+    public static channel<T> make_channel<T>(nint size = 1)
+    {
+        return new channel<T>((int)size);
+    }
 
     /// <summary>
     /// Allocates and initializes a new object.
@@ -475,7 +546,6 @@ public static class builtin
     /// <param name="p2">Capacity parameter,</param>
     /// <typeparam name="T">Type of object.</typeparam>
     /// <returns>New object.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static T make<T>(nint p1 = 0, nint p2 = -1) where T : new()
     {
         if (p1 == 0 && p2 == 0)
@@ -497,8 +567,10 @@ public static class builtin
     /// </summary>
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <returns>Reference to a zero value instance of type <typeparamref name="T"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ref T zero<T>() => ref Zero<T>.Default;
+    public static ref T zero<T>()
+    {
+        return ref Zero<T>.Default;
+    }
 
     /// <summary>
     /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
@@ -506,8 +578,10 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="target">Target value.</param>
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> addr<T>(in T target) => new(target);
+    public static ptr<T> addr<T>(in T target)
+    {
+        return new ptr<T>(target);
+    }
 
     /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.
@@ -522,10 +596,9 @@ public static class builtin
     ///     ref var v = ref heap(out ptr&lt;Vertex&gt; v_ptr);
     /// </code>
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static ref T heap<T>(out ptr<T> pointer)
     {
-        pointer = addr(default(T)!);
+        pointer = addr<T>(default!);
         return ref pointer.val;
     }
 
@@ -543,7 +616,6 @@ public static class builtin
     ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var v_ptr);
     /// </code>
     /// </remarks>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static ref T heap<T>(in T target, out ptr<T> pointer)
     {
         pointer = addr(target);
@@ -554,8 +626,10 @@ public static class builtin
     /// Creates a heap allocated pointer reference to a new zero value instance of type.
     /// </summary>
     /// <returns>Pointer to heap allocated zero value of provided type.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> @new<T>() where T : new() => new(new T());
+    public static ptr<T> @new<T>() where T : new()
+    {
+        return new ptr<T>(new T());
+    }
 
     /// <summary>
     /// Creates a new reference for <typeparamref name="T"/>.
@@ -563,36 +637,43 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="inputs">Constructor parameters.</param>
     /// <returns>New reference for <typeparamref name="T"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ptr<T> @new<T>(params object[] inputs) => new((T)Activator.CreateInstance(typeof(T), inputs)!);
+    public static ptr<T> @new<T>(params object[] inputs)
+    {
+        return new ptr<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
+    }
 
     /// <summary>
     /// Formats arguments in an implementation-specific way and writes the result to standard-error.
     /// </summary>
     /// <param name="args">Arguments to display.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static void print(params object[] args) => Console.Error.Write(string.Join(" ", args.Select(arg => arg.ToString())));
+    public static void print(params object[] args)
+    {
+        Console.Error.Write(string.Join(" ", args.Select(arg => arg.ToString())));
+    }
 
     /// <summary>
     /// Formats arguments in an implementation-specific way and writes the result to standard-error along with a new line.
     /// </summary>
     /// <param name="args">Arguments to display.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static void println(params object[] args) => Console.Error.WriteLine(string.Join(" ", args.Select(arg => arg.ToString())));
+    public static void println(params object[] args)
+    {
+        Console.Error.WriteLine(string.Join(" ", args.Select(arg => arg.ToString())));
+    }
 
     /// <summary>
     /// Execute Go routine.
     /// </summary>
     /// <param name="action">Routine to execute.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
-    public static void go_(Action action) => ThreadPool.QueueUserWorkItem(_ => action());
+    public static void go_(Action action)
+    {
+        ThreadPool.QueueUserWorkItem(_ => action());
+    }
 
     /// <summary>
     /// Exits application with a fatal error.
     /// </summary>
     /// <param name="message">Fatal error message.</param>
     /// <param name="code">Application exit code.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary, DebuggerNonUserCode]
     public static void fatal(string message, nint code = 1)
     {
         if (!string.IsNullOrEmpty(message))
@@ -612,7 +693,10 @@ public static class builtin
     /// <typeparam name="T">Array type.</typeparam>
     /// <param name="source">Source array.</param>
     /// <returns>Enumerable of indexes.</returns>
-    public static IEnumerable<nint> range<T>(in array<T> source) => source.Range;
+    public static IEnumerable<nint> range<T>(in array<T> source)
+    {
+        return source.Range;
+    }
 
     /// <summary>
     /// Enumerates indexes and values of <see cref="go.array{T}"/> <paramref name="source"/>.
@@ -621,7 +705,10 @@ public static class builtin
     /// <param name="source">Source array.</param>
     /// <param name="_">Overload marker, set to <see cref="WithVal"/>.</param>
     /// <returns>Enumerable of indexes and values.</returns>
-    public static IEnumerable<(nint, T)> range<T>(in array<T> source, bool _) => source;
+    public static IEnumerable<(nint, T)> range<T>(in array<T> source, bool _)
+    {
+        return source;
+    }
 
     /// <summary>
     /// Enumerates indexes of <see cref="go.slice{T}"/> <paramref name="source"/>.
@@ -629,7 +716,10 @@ public static class builtin
     /// <typeparam name="T">Slice type.</typeparam>
     /// <param name="source">Source slice.</param>
     /// <returns>Enumerable of indexes.</returns>
-    public static IEnumerable<nint> range<T>(in slice<T> source) => source.Range;
+    public static IEnumerable<nint> range<T>(in slice<T> source)
+    {
+        return source.Range;
+    }
 
     /// <summary>
     /// Enumerates indexes and values of <see cref="go.slice{T}"/> <paramref name="source"/>.
@@ -638,7 +728,10 @@ public static class builtin
     /// <param name="source">Source slice.</param>
     /// <param name="_">Overload marker, set to <see cref="WithVal"/>.</param>
     /// <returns>Enumerable of indexes and values.</returns>
-    public static IEnumerable<(nint, T)> range<T>(in slice<T> source, bool _) => source;
+    public static IEnumerable<(nint, T)> range<T>(in slice<T> source, bool _)
+    {
+        return source;
+    }
 
     // ** Type Assertion Functions **
 
@@ -648,7 +741,6 @@ public static class builtin
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
     /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */, DebuggerNonUserCode]
     public static T _<T>(this object target)
     {
         try
@@ -668,7 +760,6 @@ public static class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_"><see cref="WithOK"/> placeholder parameter used to overload return type.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */, DebuggerNonUserCode]
     public static (T, bool) _<T>(this object target, bool _)
     {
         try
@@ -686,14 +777,13 @@ public static class builtin
     /// </summary>
     /// <param name="target">Target value.</param>
     /// <returns>Common Go type for given <paramref name="target"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */, DebuggerNonUserCode]
     public static object type(this object target)
     {
         // Infer common go type as needed
         return target switch
         {
             string str => new @string(str),
-            _          => target
+            _ => target
         };
     }
 
@@ -702,7 +792,10 @@ public static class builtin
     /// </summary>
     /// <param name="value">Value to evaluate.</param>
     /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
-    public static string GetGoTypeName(object? value) => GetGoTypeName(value?.GetType());
+    public static string GetGoTypeName(object? value)
+    {
+        return GetGoTypeName(value?.GetType());
+    }
 
     /// <summary>
     /// Gets the common Go type name for the specified <paramref name="type"/>.
@@ -744,13 +837,13 @@ public static class builtin
                 return "float64";
             default:
             {
-                string typeName = type.FullName?? type.Name;
+                string typeName = type.FullName ?? type.Name;
 
                 return typeName switch
                 {
                     "System.Numerics.Complex" => "complex128",
-                    "go.complex64"            => "complex64",
-                    _                         => type == typeof(object) ? "interface {}" : typeName
+                    "go.complex64" => "complex64",
+                    _ => type == typeof(object) ? "interface {}" : typeName
                 };
             }
         }
@@ -761,7 +854,10 @@ public static class builtin
     /// </summary>
     /// <typeparam name="T">Target type.</typeparam>
     /// <returns>Common Go type name for the specified type <typeparamref name="T"/>.</returns>
-    public static string GetGoTypeName<T>() => GetGoTypeName(typeof(T));
+    public static string GetGoTypeName<T>()
+    {
+        return GetGoTypeName(typeof(T));
+    }
 
     // ** Conversion Functions **
 
@@ -771,7 +867,10 @@ public static class builtin
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="length">Target array length.</param>
     /// <returns>Go <see cref="go.array{T}"/> with specified <paramref name="length"/>.</returns>
-    public static array<T> array<T>(nint length) => new(length);
+    public static array<T> array<T>(nint length)
+    {
+        return new array<T>(length);
+    }
 
     /// <summary>
     /// Converts C# <paramref name="source"/> array to Go <see cref="go.array{T}"/>.
@@ -779,8 +878,10 @@ public static class builtin
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="source">C# source array.</param>
     /// <returns>Go <see cref="go.array{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static array<T> array<T>(T[] source) => source;
+    public static array<T> array<T>(T[] source)
+    {
+        return source;
+    }
 
     /// <summary>
     /// Converts C# <paramref name="source"/> array to Go <see cref="slice{T}"/>.
@@ -788,254 +889,316 @@ public static class builtin
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="source">C# source array.</param>
     /// <returns>Go <see cref="slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<T> slice<T>(T[] source) => source;
+    public static slice<T> slice<T>(T[] source)
+    {
+        return source;
+    }
 
     /// <summary>
     /// Converts C# <paramref name="source"/> string array to Go <see cref="slice{@string}"/>.
     /// </summary>
     /// <param name="source">C# source array.</param>
     /// <returns>Go <see cref="slice{@string}"/> wrapper for C# <paramref name="source"/> string array.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static slice<@string> slice(IReadOnlyCollection<string> source) => @string(source);
+    public static slice<@string> slice(IReadOnlyCollection<string> source)
+    {
+        return @string(source);
+    }
 
     /// <summary>
     /// Converts C# <see cref="string"/> array into Go <see cref="go.@string"/> array.
     /// </summary>
     /// <param name="source">C# <see cref="string"/> array</param>
     /// <returns>Go <see cref="go.@string"/> array from C# <see cref="string"/> array <paramref name="source"/>.</returns>
-    public static @string[] @string(IReadOnlyCollection<string> source) => source.Select(value => new @string(value)).ToArray();
+    public static @string[] @string(IReadOnlyCollection<string> source)
+    {
+        return source.Select(value => new @string(value)).ToArray();
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="byte"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="byte"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static byte @byte(byte value) => value;
+    public static byte @byte(byte value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="byte"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="byte"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static byte @byte(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+    public static byte @byte(object value)
+    {
+        return (byte)Convert.ChangeType(value, TypeCode.Byte);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a rune.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a rune.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static rune rune(int32 value) => value;
+    public static rune rune(int32 value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a rune.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a rune.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static rune rune(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+    public static rune rune(object value)
+    {
+        return (int)Convert.ChangeType(value, TypeCode.Int32);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint8.
+    /// Converts <paramref name="value"/> to an uint8.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint8.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint8 uint8(byte value) => value;
+    /// <returns><paramref name="value"/> converted to an uint8.</returns>
+    public static uint8 uint8(byte value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint8.
+    /// Converts <paramref name="value"/> to an uint8.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint8.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint8 uint8(object value) => (byte)Convert.ChangeType(value, TypeCode.Byte);
+    /// <returns><paramref name="value"/> converted to an uint8.</returns>
+    public static uint8 uint8(object value)
+    {
+        return (byte)Convert.ChangeType(value, TypeCode.Byte);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint16.
+    /// Converts <paramref name="value"/> to an uint16.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint16.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint16 uint16(ushort value) => value;
+    /// <returns><paramref name="value"/> converted to an uint16.</returns>
+    public static uint16 uint16(ushort value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint16.
+    /// Converts <paramref name="value"/> to an uint16.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint16.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint16 uint16(object value) => (ushort)Convert.ChangeType(value, TypeCode.UInt16);
+    /// <returns><paramref name="value"/> converted to an uint16.</returns>
+    public static uint16 uint16(object value)
+    {
+        return (ushort)Convert.ChangeType(value, TypeCode.UInt16);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint32.
+    /// Converts <paramref name="value"/> to an uint32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint32 uint32(uint value) => value;
+    /// <returns><paramref name="value"/> converted to an uint32.</returns>
+    public static uint32 uint32(uint value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint32.
+    /// Converts <paramref name="value"/> to an uint32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint32 uint32(object value) => (uint)Convert.ChangeType(value, TypeCode.UInt32);
+    /// <returns><paramref name="value"/> converted to an uint32.</returns>
+    public static uint32 uint32(object value)
+    {
+        return (uint)Convert.ChangeType(value, TypeCode.UInt32);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint64.
+    /// Converts <paramref name="value"/> to an uint64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint64 uint64(ulong value) => value;
+    /// <returns><paramref name="value"/> converted to an uint64.</returns>
+    public static uint64 uint64(ulong value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint64.
+    /// Converts <paramref name="value"/> to an uint64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uint64 uint64(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    /// <returns><paramref name="value"/> converted to an uint64.</returns>
+    public static uint64 uint64(object value)
+    {
+        return (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int8.
+    /// Converts <paramref name="value"/> to an int8.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int8.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int8 int8(sbyte value) => value;
+    /// <returns><paramref name="value"/> converted to an int8.</returns>
+    public static int8 int8(sbyte value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int8.
+    /// Converts <paramref name="value"/> to an int8.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int8.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int8 int8(object value) => (sbyte)Convert.ChangeType(value, TypeCode.SByte);
+    /// <returns><paramref name="value"/> converted to an int8.</returns>
+    public static int8 int8(object value)
+    {
+        return (sbyte)Convert.ChangeType(value, TypeCode.SByte);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int16.
+    /// Converts <paramref name="value"/> to an int16.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int16.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int16 int16(short value) => value;
+    /// <returns><paramref name="value"/> converted to an int16.</returns>
+    public static int16 int16(short value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int16.
+    /// Converts <paramref name="value"/> to an int16.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int16.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int16 int16(object value) => (short)Convert.ChangeType(value, TypeCode.Int16);
+    /// <returns><paramref name="value"/> converted to an int16.</returns>
+    public static int16 int16(object value)
+    {
+        return (short)Convert.ChangeType(value, TypeCode.Int16);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int32.
+    /// Converts <paramref name="value"/> to an int32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int32 int32(int value) => value;
+    /// <returns><paramref name="value"/> converted to an int32.</returns>
+    public static int32 int32(int value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int32.
+    /// Converts <paramref name="value"/> to an int32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int32 int32(nint value) => (int32)value;
+    /// <returns><paramref name="value"/> converted to an int32.</returns>
+    public static int32 int32(nint value)
+    {
+        return (int32)value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int32.
+    /// Converts <paramref name="value"/> to an int32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int32 int32(long value) => (int32)value;
+    /// <returns><paramref name="value"/> converted to an int32.</returns>
+    public static int32 int32(long value)
+    {
+        return (int32)value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int32.
+    /// Converts <paramref name="value"/> to an int32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int32 int32(object value) => (int)Convert.ChangeType(value, TypeCode.Int32);
+    /// <returns><paramref name="value"/> converted to an int32.</returns>
+    public static int32 int32(object value)
+    {
+        return (int)Convert.ChangeType(value, TypeCode.Int32);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int64.
+    /// Converts <paramref name="value"/> to an int64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int64 int64(int value) => value;
+    /// <returns><paramref name="value"/> converted to an int64.</returns>
+    public static int64 int64(int value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int64.
+    /// Converts <paramref name="value"/> to an int64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int64 int64(nint value) => value;
+    /// <returns><paramref name="value"/> converted to an int64.</returns>
+    public static int64 int64(nint value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int64.
+    /// Converts <paramref name="value"/> to an int64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int64 int64(long value) => value;
+    /// <returns><paramref name="value"/> converted to an int64.</returns>
+    public static int64 int64(long value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int64.
+    /// Converts <paramref name="value"/> to an int64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static int64 int64(object value) => (int64)Convert.ChangeType(value, TypeCode.Int64);
+    /// <returns><paramref name="value"/> converted to an int64.</returns>
+    public static int64 int64(object value)
+    {
+        return (int64)Convert.ChangeType(value, TypeCode.Int64);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a float32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a float32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float32 float32(float value) => value;
+    public static float32 float32(float value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a float32.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a float32.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float32 float32(object value) => (float)Convert.ChangeType(value, TypeCode.Single);
+    public static float32 float32(object value)
+    {
+        return (float)Convert.ChangeType(value, TypeCode.Single);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a float64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a float64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float64 float64(double value) => value;
+    public static float64 float64(double value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a float64.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a float64.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static float64 float64(object value) => (double)Convert.ChangeType(value, TypeCode.Double);
+    public static float64 float64(object value)
+    {
+        return (double)Convert.ChangeType(value, TypeCode.Double);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="go.complex64"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="go.complex64"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static complex64 complex64(object value)
     {
         if (value is complex128 dcomplex)
@@ -1052,15 +1215,16 @@ public static class builtin
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a complex128.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex128 complex128(Complex value) => value;
+    public static complex128 complex128(Complex value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a complex128.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a complex128.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static complex128 complex128(object value)
     {
         if (value is complex64 fcomplex)
@@ -1073,123 +1237,150 @@ public static class builtin
     }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint.
+    /// Converts <paramref name="value"/> to an uint.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ulong @uint(uint value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    /// <returns><paramref name="value"/> converted to an uint.</returns>
+    public static ulong @uint(uint value)
+    {
+        return (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint.
+    /// Converts <paramref name="value"/> to an uint.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ulong @uint(ulong value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    /// <returns><paramref name="value"/> converted to an uint.</returns>
+    public static ulong @uint(ulong value)
+    {
+        return (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uint.
+    /// Converts <paramref name="value"/> to an uint.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uint.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static ulong @uint(object value) => (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    /// <returns><paramref name="value"/> converted to an uint.</returns>
+    public static ulong @uint(object value)
+    {
+        return (ulong)Convert.ChangeType(value, TypeCode.UInt64);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int.
+    /// Converts <paramref name="value"/> to an int.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint @int(int value) => value;
+    /// <returns><paramref name="value"/> converted to an int.</returns>
+    public static nint @int(int value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int.
+    /// Converts <paramref name="value"/> to an int.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint @int(nint value) => value;
+    /// <returns><paramref name="value"/> converted to an int.</returns>
+    public static nint @int(nint value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a int.
+    /// Converts <paramref name="value"/> to an int.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a int.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static nint @int(object value) => (nint)Convert.ChangeType(value, TypeCode.Int64);
+    /// <returns><paramref name="value"/> converted to an int.</returns>
+    public static nint @int(object value)
+    {
+        return (nint)Convert.ChangeType(value, TypeCode.Int64);
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uintptr.
+    /// Converts <paramref name="value"/> to an uintptr.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uintptr.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uintptr uintptr(UIntPtr value) => value;
+    /// <returns><paramref name="value"/> converted to an uintptr.</returns>
+    public static uintptr uintptr(UIntPtr value)
+    {
+        return value;
+    }
 
     /// <summary>
-    /// Converts <paramref name="value"/> to a uintptr.
+    /// Converts <paramref name="value"/> to an uintptr.
     /// </summary>
     /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a uintptr.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static uintptr uintptr(object value) => (UIntPtr)Convert.ChangeType(value, TypeCode.UInt64);
+    /// <returns><paramref name="value"/> converted to an uintptr.</returns>
+    public static uintptr uintptr(object value)
+    {
+        return (UIntPtr)Convert.ChangeType(value, TypeCode.UInt64);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="@string"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static @string @string(string value) => new(value);
+    public static @string @string(string value)
+    {
+        return new @string(value);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="@string"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static @string @string(ReadOnlySpan<byte> value) => new(value);
+    public static @string @string(ReadOnlySpan<byte> value)
+    {
+        return new @string(value);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="@string"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static @string @string(sstring value) => value;
+    public static @string @string(sstring value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static sstring sstring(string value) => value;
+    public static sstring sstring(string value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static sstring sstring(ReadOnlySpan<byte> value) => new(value);
+    public static sstring sstring(ReadOnlySpan<byte> value)
+    {
+        return new sstring(value);
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static sstring sstring(@string value) => value;
+    public static sstring sstring(@string value)
+    {
+        return value;
+    }
 
     /// <summary>
     /// Converts <paramref name="value"/> to a <see cref="@string"/>.
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static @string @string(object? value)
     {
         // Only reference types can be null, therefore "" is its default value
@@ -1267,8 +1458,10 @@ public static class builtin
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static sstring sstring(object? value) => @string(value);
+    public static sstring sstring(object? value)
+    {
+        return @string(value);
+    }
 
     // ** Helper Functions **
 
@@ -1332,13 +1525,12 @@ public static class builtin
     /// </summary>
     /// <param name="literal">Literal imaginary value with "i" suffix.</param>
     /// <returns>New complex number with parsed <paramref name="literal"/> as imaginary part and a zero value real part.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
     public static complex128 i(string literal)
     {
         if (!literal.EndsWith("i"))
             throw new InvalidCastException($"Token \"{literal}\" is not an imaginary literal.");
 
-        if (double.TryParse(literal.Substring(0, literal.Length - 1), out double imaginary))
+        if (double.TryParse(literal[..^1], out double imaginary))
             return i(imaginary);
 
         throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
@@ -1349,18 +1541,22 @@ public static class builtin
     /// </summary>
     /// <param name="imaginary">Value to convert to imaginary.</param>
     /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex64 i(float imaginary) => new(0.0F, imaginary);
+    public static complex64 i(float imaginary)
+    {
+        return new complex64(0.0F, imaginary);
+    }
 
     /// <summary>
     /// Converts value to a complex128 imaginary number.
     /// </summary>
     /// <param name="imaginary">Value to convert to imaginary.</param>
     /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    [MethodImpl(MethodImplOptions.AggressiveInlining) /* , DebuggerStepperBoundary */]
-    public static complex128 i(double imaginary) => new(0.0D, imaginary);
+    public static complex128 i(double imaginary)
+    {
+        return new complex128(0.0D, imaginary);
+    }
 
-    #if EXPERIMENTAL
+#if EXPERIMENTAL
 
     // When using stack allocated strings, you need a function to convert the stack string to a heap string
     // any time you need to hold the string in a heap allocated object:
@@ -1379,7 +1575,7 @@ public static class builtin
     /// <returns>Heap allocated string.</returns>
     public static @string str(sstring value) => value;
 
-    #endif
+#endif
 
     /// <summary>
     /// Returns a Go type equivalent to the specified value.
@@ -1394,18 +1590,18 @@ public static class builtin
         return value.GetTypeCode() switch
         {
             TypeCode.Boolean => value.ToBoolean(null),
-            TypeCode.Char    => (rune)value.ToChar(null),
-            TypeCode.SByte   => value.ToSByte(null),
-            TypeCode.Byte    => value.ToByte(null),
-            TypeCode.Int16   => value.ToInt16(null),
-            TypeCode.UInt16  => value.ToUInt16(null),
-            TypeCode.Int32   => value.ToInt32(null),
-            TypeCode.UInt32  => value.ToUInt32(null),
-            TypeCode.Int64   => value.ToInt64(null),
-            TypeCode.UInt64  => value.ToUInt64(null),
-            TypeCode.Single  => value.ToSingle(null),
-            TypeCode.Double  => value.ToDouble(null),
-            _                => (@string)value.ToString(null)
+            TypeCode.Char => (rune)value.ToChar(null),
+            TypeCode.SByte => value.ToSByte(null),
+            TypeCode.Byte => value.ToByte(null),
+            TypeCode.Int16 => value.ToInt16(null),
+            TypeCode.UInt16 => value.ToUInt16(null),
+            TypeCode.Int32 => value.ToInt32(null),
+            TypeCode.UInt32 => value.ToUInt32(null),
+            TypeCode.Int64 => value.ToInt64(null),
+            TypeCode.UInt64 => value.ToUInt64(null),
+            TypeCode.Single => value.ToSingle(null),
+            TypeCode.Double => value.ToDouble(null),
+            _ => (@string)value.ToString(null)
         };
     }
 
@@ -1429,15 +1625,15 @@ public static class builtin
 
                     break;
                 case (var index, T indexValue):
-                {
-                    if (index is not null)
                     {
-                        if (index.TryCastAsInteger(out ulong key))
-                            values[key] = indexValue;
-                    }
+                        if (index is not null)
+                        {
+                            if (index.TryCastAsInteger(out ulong key))
+                                values[key] = indexValue;
+                        }
 
-                    break;
-                }
+                        break;
+                    }
             }
         }
 
@@ -1452,7 +1648,7 @@ public static class builtin
     /// <typeparam name="T">Type of values.</typeparam>
     public static T[] InitKeyedValues<T>(params object[] keyedValues) where T : struct
     {
-        List<T> values = new();
+        List<T> values = [];
 
         foreach (object keyedValue in keyedValues)
         {
@@ -1463,20 +1659,20 @@ public static class builtin
 
                     break;
                 case (var index, T indexValue):
-                {
-                    if (index is not null)
                     {
-                        if (index.TryCastAsInteger(out ulong key))
+                        if (index is not null)
                         {
-                            for (ulong i = (ulong)values.Count; i < key; i++)
-                                values.Add(default);
+                            if (index.TryCastAsInteger(out ulong key))
+                            {
+                                for (ulong i = (ulong)values.Count; i < key; i++)
+                                    values.Add(default);
 
-                            values.Add(indexValue);
+                                values.Add(indexValue);
+                            }
                         }
-                    }
 
-                    break;
-                }
+                        break;
+                    }
             }
         }
 
@@ -1489,33 +1685,41 @@ public static class builtin
     /// Executes a Go function with no return value.
     /// </summary>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func(GoFunc<object>.GoAction action) => new GoFunc<object>(action).Execute();
+    public static void func(GoFunc<object>.GoAction action)
+    {
+        new GoFunc<object>(action).Execute();
+    }
 
     /// <summary>
     /// Executes a Go function with a return value.
     /// </summary>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<T>(GoFunc<T>.GoFunction function) => new GoFunc<T>(function).Execute();
+    public static T func<T>(GoFunc<T>.GoFunction function)
+    {
+        return new GoFunc<T>(function).Execute();
+    }
 
     /// <summary>
     /// Executes a Go function with 1 reference parameter and no return value.
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1>(ref TRef1 ref1, GoFunc<TRef1, object>.GoRefAction action) => new GoFunc<TRef1, object>(action).Execute(ref ref1);
+    public static void func<TRef1>(ref TRef1 ref1, GoFunc<TRef1, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, object>(action).Execute(ref ref1);
+    }
 
     /// <summary>
     /// Executes a Go function with 1 reference parameter and a return value.
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function) => new GoFunc<TRef1, T>(function).Execute(ref ref1);
+    public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, T>(function).Execute(ref ref1);
+    }
 
-#region [ func<TRef1, TRef2, ... TRef16> Implementations ]
+    #region [ func<TRef1, TRef2, ... TRef16> Implementations ]
 
     /*  The following code was generated using the "GenGoFuncRefInstances" utility: */
 
@@ -1525,8 +1729,10 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, object>(action).Execute(ref ref1, ref ref2);
+    public static void func<TRef1, TRef2>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, object>(action).Execute(ref ref1, ref ref2);
+    }
 
     /// <summary>
     /// Executes a Go function with 2 reference parameters and a return value.
@@ -1534,8 +1740,10 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, T>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, T>(function).Execute(ref ref1, ref ref2);
+    public static T func<TRef1, TRef2, T>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, T>(function).Execute(ref ref1, ref ref2);
+    }
 
     /// <summary>
     /// Executes a Go function with 3 reference parameters and no return value.
@@ -1544,8 +1752,10 @@ public static class builtin
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, object>(action).Execute(ref ref1, ref ref2, ref ref3);
+    public static void func<TRef1, TRef2, TRef3>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, object>(action).Execute(ref ref1, ref ref2, ref ref3);
+    }
 
     /// <summary>
     /// Executes a Go function with 3 reference parameters and a return value.
@@ -1554,8 +1764,10 @@ public static class builtin
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, T>(function).Execute(ref ref1, ref ref2, ref ref3);
+    public static T func<TRef1, TRef2, TRef3, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, T>(function).Execute(ref ref1, ref ref2, ref ref3);
+    }
 
     /// <summary>
     /// Executes a Go function with 4 reference parameters and no return value.
@@ -1565,8 +1777,10 @@ public static class builtin
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
+    public static void func<TRef1, TRef2, TRef3, TRef4>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
+    }
 
     /// <summary>
     /// Executes a Go function with 4 reference parameters and a return value.
@@ -1576,8 +1790,10 @@ public static class builtin
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
+    public static T func<TRef1, TRef2, TRef3, TRef4, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
+    }
 
     /// <summary>
     /// Executes a Go function with 5 reference parameters and no return value.
@@ -1588,8 +1804,11 @@ public static class builtin
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4,
+            ref ref5);
+    }
 
     /// <summary>
     /// Executes a Go function with 5 reference parameters and a return value.
@@ -1600,8 +1819,11 @@ public static class builtin
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>(function).Execute(ref ref1, ref ref2, ref ref3,
+            ref ref4, ref ref5);
+    }
 
     /// <summary>
     /// Executes a Go function with 6 reference parameters and no return value.
@@ -1613,8 +1835,11 @@ public static class builtin
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>(action).Execute(ref ref1, ref ref2, ref ref3,
+            ref ref4, ref ref5, ref ref6);
+    }
 
     /// <summary>
     /// Executes a Go function with 6 reference parameters and a return value.
@@ -1626,8 +1851,11 @@ public static class builtin
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(function).Execute(ref ref1, ref ref2, ref ref3,
+            ref ref4, ref ref5, ref ref6);
+    }
 
     /// <summary>
     /// Executes a Go function with 7 reference parameters and no return value.
@@ -1640,8 +1868,11 @@ public static class builtin
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>(action).Execute(ref ref1, ref ref2,
+            ref ref3, ref ref4, ref ref5, ref ref6, ref ref7);
+    }
 
     /// <summary>
     /// Executes a Go function with 7 reference parameters and a return value.
@@ -1654,8 +1885,11 @@ public static class builtin
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(function).Execute(ref ref1, ref ref2,
+            ref ref3, ref ref4, ref ref5, ref ref6, ref ref7);
+    }
 
     /// <summary>
     /// Executes a Go function with 8 reference parameters and no return value.
@@ -1669,8 +1903,11 @@ public static class builtin
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>(action).Execute(ref ref1, ref ref2,
+            ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8);
+    }
 
     /// <summary>
     /// Executes a Go function with 8 reference parameters and a return value.
@@ -1684,8 +1921,11 @@ public static class builtin
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(function).Execute(ref ref1,
+            ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8);
+    }
 
     /// <summary>
     /// Executes a Go function with 9 reference parameters and no return value.
@@ -1700,8 +1940,11 @@ public static class builtin
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>(action).Execute(ref ref1,
+            ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9);
+    }
 
     /// <summary>
     /// Executes a Go function with 9 reference parameters and a return value.
@@ -1716,8 +1959,11 @@ public static class builtin
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(function).Execute(ref ref1,
+            ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9);
+    }
 
     /// <summary>
     /// Executes a Go function with 10 reference parameters and no return value.
@@ -1733,8 +1979,11 @@ public static class builtin
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>(action).Execute(
+            ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10);
+    }
 
     /// <summary>
     /// Executes a Go function with 10 reference parameters and a return value.
@@ -1750,8 +1999,11 @@ public static class builtin
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(function).Execute(
+            ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10);
+    }
 
     /// <summary>
     /// Executes a Go function with 11 reference parameters and no return value.
@@ -1768,8 +2020,12 @@ public static class builtin
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>(action)
+            .Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9,
+                ref ref10, ref ref11);
+    }
 
     /// <summary>
     /// Executes a Go function with 11 reference parameters and a return value.
@@ -1786,8 +2042,12 @@ public static class builtin
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>.GoRefFunction function)
+    {
+        return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(function)
+            .Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9,
+                ref ref10, ref ref11);
+    }
 
     /// <summary>
     /// Executes a Go function with 12 reference parameters and no return value.
@@ -1805,8 +2065,12 @@ public static class builtin
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>(
+            action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9,
+            ref ref10, ref ref11, ref ref12);
+    }
 
     /// <summary>
     /// Executes a Go function with 12 reference parameters and a return value.
@@ -1824,8 +2088,13 @@ public static class builtin
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>.GoRefFunction function)
+    {
+        return
+            new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>(
+                function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8,
+                ref ref9, ref ref10, ref ref11, ref ref12);
+    }
 
     /// <summary>
     /// Executes a Go function with 13 reference parameters and no return value.
@@ -1844,8 +2113,12 @@ public static class builtin
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
+            object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8,
+            ref ref9, ref ref10, ref ref11, ref ref12, ref ref13);
+    }
 
     /// <summary>
     /// Executes a Go function with 13 reference parameters and a return value.
@@ -1864,8 +2137,13 @@ public static class builtin
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>.GoRefFunction function)
+    {
+        return
+            new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
+                T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8,
+                ref ref9, ref ref10, ref ref11, ref ref12, ref ref13);
+    }
 
     /// <summary>
     /// Executes a Go function with 14 reference parameters and no return value.
@@ -1885,8 +2163,12 @@ public static class builtin
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
+            , object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8,
+            ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14);
+    }
 
     /// <summary>
     /// Executes a Go function with 14 reference parameters and a return value.
@@ -1906,8 +2188,13 @@ public static class builtin
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>.GoRefFunction function)
+    {
+        return
+            new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
+                TRef14, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7,
+                ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14);
+    }
 
     /// <summary>
     /// Executes a Go function with 15 reference parameters and no return value.
@@ -1928,8 +2215,12 @@ public static class builtin
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
+            , TRef15, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7,
+            ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15);
+    }
 
     /// <summary>
     /// Executes a Go function with 15 reference parameters and a return value.
@@ -1950,8 +2241,13 @@ public static class builtin
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>.GoRefFunction function)
+    {
+        return
+            new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
+                TRef14, TRef15, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6,
+                ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15);
+    }
 
     /// <summary>
     /// Executes a Go function with 16 reference parameters and no return value.
@@ -1973,8 +2269,12 @@ public static class builtin
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="ref16">Reference parameter 16.</param>
     /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, object>.GoRefAction action) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
+    public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, object>.GoRefAction action)
+    {
+        new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
+            , TRef15, TRef16, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6,
+            ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
+    }
 
     /// <summary>
     /// Executes a Go function with 16 reference parameters and a return value.
@@ -1996,8 +2296,14 @@ public static class builtin
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="ref16">Reference parameter 16.</param>
     /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function) => new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16);
+    public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function)
+    {
+        return
+            new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
+                TRef14, TRef15, TRef16, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6,
+                ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15,
+                ref ref16);
+    }
 
-#endregion
+    #endregion
 }

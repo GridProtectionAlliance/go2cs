@@ -74,13 +74,20 @@ public readonly ref struct sstring // <- think about naming, stack<
 {
     internal readonly ReadOnlySpan<byte> m_value;
 
-    public sstring() => m_value = [];
+    public sstring()
+    {
+        m_value = [];
+    }
 
-    public sstring(byte[]? bytes) => 
+    public sstring(byte[]? bytes)
+    {
         m_value = bytes is null ? [] : new ReadOnlySpan<byte>(bytes);
+    }
 
-    public sstring(ReadOnlySpan<byte> bytes) => 
+    public sstring(ReadOnlySpan<byte> bytes)
+    {
         m_value = bytes;
+    }
 
     public sstring(char[] value) : this(new string(value)) { }
 
@@ -92,13 +99,19 @@ public readonly ref struct sstring // <- think about naming, stack<
 
     public sstring(in slice<rune> value) : this(value.ToArray()) { }
 
-    public sstring(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
+    public sstring(string? value)
+    {
+        m_value = Encoding.UTF8.GetBytes(value ?? "");
+    }
 
     public sstring(sstring value) : this(value.m_value) { }
 
     public int Length
     {
-        get => m_value.Length;
+        get
+        {
+            return m_value.Length;
+        }
     }
 
     public byte this[int index]
@@ -114,29 +127,45 @@ public readonly ref struct sstring // <- think about naming, stack<
 
     public byte this[nint index]
     {
-        get => this[(int)index];
+        get
+        {
+            return this[(int)index];
+        }
     }
 
     public byte this[ulong index]
     {
-        get => this[(nint)index];
+        get
+        {
+            return this[(nint)index];
+        }
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    public slice<byte> Slice(int start, int length) =>
-        new(m_value, start, start + length);
+    public slice<byte> Slice(int start, int length)
+    {
+        return new slice<byte>(m_value, start, start + length);
+    }
 
-    public slice<byte> Slice(nint start, nint length) =>
-        new(m_value, (int)start, (int)(start + length));
+    public slice<byte> Slice(nint start, nint length)
+    {
+        return new slice<byte>(m_value, (int)start, (int)(start + length));
+    }
 
-    public override string ToString() =>
-        Encoding.UTF8.GetString(m_value);
+    public override string ToString()
+    {
+        return Encoding.UTF8.GetString(m_value);
+    }
 
-    public bool Equals(sstring other) =>
-        BytesAreEqual(m_value, other.m_value);
+    public bool Equals(sstring other)
+    {
+        return BytesAreEqual(m_value, other.m_value);
+    }
 
-    public int CompareTo(sstring other) =>
-        StringComparer.Ordinal.Compare(ToString(), other.ToString());
+    public int CompareTo(sstring other)
+    {
+        return StringComparer.Ordinal.Compare(ToString(), other.ToString());
+    }
 
     public override bool Equals(object? obj)
     {
@@ -149,15 +178,30 @@ public readonly ref struct sstring // <- think about naming, stack<
         };
     }
 
-    public override int GetHashCode() => ToString().GetHashCode();
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
+    }
 
-    public string ToString(IFormatProvider? provider) => ToString().ToString(provider);
+    public string ToString(IFormatProvider? provider)
+    {
+        return ToString().ToString(provider);
+    }
 
-    public TypeCode GetTypeCode() => TypeCode.String;
+    public TypeCode GetTypeCode()
+    {
+        return TypeCode.String;
+    }
 
-    public sstring Clone() => new(this);
+    public sstring Clone()
+    {
+        return new sstring(this);
+    }
 
-    public IEnumerator<(nint, rune)> GetEnumerator() => GetEnumerator(m_value.ToArray());
+    public IEnumerator<(nint, rune)> GetEnumerator()
+    {
+        return GetEnumerator(m_value.ToArray());
+    }
 
     private static IEnumerator<(nint, rune)> GetEnumerator(byte[] value)
     {
@@ -203,73 +247,160 @@ public readonly ref struct sstring // <- think about naming, stack<
     #region [ Operators ]
 
     // Enable implicit conversions between string and sstring struct
-    public static implicit operator sstring(string value) => new(value);
+    public static implicit operator sstring(string value)
+    {
+        return new sstring(value);
+    }
 
-    public static implicit operator sstring(@string value) => new(value.m_value);
+    public static implicit operator sstring(@string value)
+    {
+        return new sstring(value.m_value);
+    }
 
-    public static implicit operator string(sstring value) => value.ToString();
+    public static implicit operator string(sstring value)
+    {
+        return value.ToString();
+    }
 
-    public static implicit operator @string(sstring value) => new(value.m_value);
-    
-    #if EXPERIMENTAL
+    public static implicit operator @string(sstring value)
+    {
+        return new @string(value.m_value);
+    }
+
+#if EXPERIMENTAL
 
     public static implicit operator sstring(ReadOnlySpan<byte> value) => new(value);
 
     #else
         
-    public static explicit operator sstring(ReadOnlySpan<byte> value) => new(value);
-        
-    #endif
+    public static explicit operator sstring(ReadOnlySpan<byte> value)
+    {
+        return new sstring(value);
+    }
 
-    public static implicit operator sstring(in slice<byte> value) => new(value);
+#endif
 
-    public static implicit operator slice<byte>(sstring value) => new(value.m_value);
+    public static implicit operator sstring(in slice<byte> value)
+    {
+        return new sstring(value);
+    }
 
-    public static implicit operator sstring(slice<rune> value) => new(value.ToArray());
+    public static implicit operator slice<byte>(sstring value)
+    {
+        return new slice<byte>(value.m_value);
+    }
 
-    public static implicit operator slice<rune>(sstring value) =>  new(GetRuneEnumerator(value.ToString()).ToArray());
-    
-    public static implicit operator sstring(in slice<char> value) => new(value);
+    public static implicit operator sstring(slice<rune> value)
+    {
+        return new sstring(value.ToArray());
+    }
 
-    public static implicit operator slice<char>(sstring value) => new(value.ToString().ToCharArray());
+    public static implicit operator slice<rune>(sstring value)
+    {
+        return new slice<rune>(GetRuneEnumerator(value.ToString()).ToArray());
+    }
 
-    public static explicit operator byte[](sstring value) => value.m_value.ToArray();
+    public static implicit operator sstring(in slice<char> value)
+    {
+        return new sstring(value);
+    }
 
-    public static explicit operator ReadOnlySpan<byte>(sstring value) => value.m_value;
+    public static implicit operator slice<char>(sstring value)
+    {
+        return new slice<char>(value.ToString().ToCharArray());
+    }
 
-    public static implicit operator sstring(byte[] value) => new(value);
+    public static explicit operator byte[](sstring value)
+    {
+        return value.m_value.ToArray();
+    }
 
-    public static implicit operator rune[](sstring value) => GetRuneEnumerator(value.ToString()).ToArray();
+    public static explicit operator ReadOnlySpan<byte>(sstring value)
+    {
+        return value.m_value;
+    }
 
-    public static implicit operator sstring(rune[] value) => new(value);
+    public static implicit operator sstring(byte[] value)
+    {
+        return new sstring(value);
+    }
 
-    public static explicit operator char[](sstring value) => value.ToString().ToCharArray();
+    public static implicit operator rune[](sstring value)
+    {
+        return GetRuneEnumerator(value.ToString()).ToArray();
+    }
 
-    public static implicit operator sstring(char[] value) => new(value);
+    public static implicit operator sstring(rune[] value)
+    {
+        return new sstring(value);
+    }
+
+    public static explicit operator char[](sstring value)
+    {
+        return value.ToString().ToCharArray();
+    }
+
+    public static implicit operator sstring(char[] value)
+    {
+        return new sstring(value);
+    }
 
     // Enable comparisons between nil and sstring struct
-    public static bool operator ==(sstring value, NilType _) => value.Equals(default);
+    public static bool operator ==(sstring value, NilType _)
+    {
+        return value.Equals(default);
+    }
 
-    public static bool operator !=(sstring value, NilType nil) => !(value == nil);
+    public static bool operator !=(sstring value, NilType nil)
+    {
+        return !(value == nil);
+    }
 
-    public static bool operator ==(NilType nil, sstring value) => value == nil;
+    public static bool operator ==(NilType nil, sstring value)
+    {
+        return value == nil;
+    }
 
-    public static bool operator !=(NilType nil, sstring value) => value != nil;
+    public static bool operator !=(NilType nil, sstring value)
+    {
+        return value != nil;
+    }
 
     // Enable sstring to sstring comparisons
-    public static implicit operator sstring(NilType _) => new();
+    public static implicit operator sstring(NilType _)
+    {
+        return new sstring();
+    }
 
-    public static bool operator ==(sstring a, sstring b) => a.Equals(b);
+    public static bool operator ==(sstring a, sstring b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(sstring a, sstring b) => !a.Equals(b);
+    public static bool operator !=(sstring a, sstring b)
+    {
+        return !a.Equals(b);
+    }
 
-    public static bool operator <(sstring a, sstring b) => string.CompareOrdinal(a, b) < 0;
+    public static bool operator <(sstring a, sstring b)
+    {
+        return string.CompareOrdinal(a, b) < 0;
+    }
 
-    public static bool operator <=(sstring a, sstring b) => string.CompareOrdinal(a, b) <= 0;
+    public static bool operator <=(sstring a, sstring b)
+    {
+        return string.CompareOrdinal(a, b) <= 0;
+    }
 
-    public static bool operator >(sstring a, sstring b) => string.CompareOrdinal(a, b) > 0;
+    public static bool operator >(sstring a, sstring b)
+    {
+        return string.CompareOrdinal(a, b) > 0;
+    }
 
-    public static bool operator >=(sstring a, sstring b) => string.CompareOrdinal(a, b) >= 0;
+    public static bool operator >=(sstring a, sstring b)
+    {
+        return string.CompareOrdinal(a, b) >= 0;
+    }
 
     #endregion
 

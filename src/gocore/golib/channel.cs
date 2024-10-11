@@ -130,29 +130,47 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </summary>
     public nint Length
     {
-        get => m_queue?.Count ?? 0;
+        get
+        {
+            return m_queue?.Count ?? 0;
+        }
     }
 
     public bool IsUnbuffered
     {
-        get => Capacity == 1;
+        get
+        {
+            return Capacity == 1;
+        }
     }
 
     public bool IsClosed
     {
-        get => m_isClosed.val;
+        get
+        {
+            return m_isClosed.val;
+        }
 
-        private set => m_isClosed.val = value;
+        private set
+        {
+            m_isClosed.val = value;
+        }
     }
 
     public bool SendIsReady
     {
-        get => m_queue is not null && m_queue.Count != Capacity;
+        get
+        {
+            return m_queue is not null && m_queue.Count != Capacity;
+        }
     }
 
     public bool ReceiveIsReady
     {
-        get => m_queue is not null && !m_queue.IsEmpty;
+        get
+        {
+            return m_queue is not null && !m_queue.IsEmpty;
+        }
     }
 
     /// <summary>
@@ -179,7 +197,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    public bool TrySend(in T value) => TrySend(value, CancellationToken.None);
+    public bool TrySend(in T value)
+    {
+        return TrySend(value, CancellationToken.None);
+    }
 
     /// <summary>
     /// Attempt to send an item to channel.
@@ -215,7 +236,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// For a buffered channel, method will block the current thread
     /// if channel is full.
     /// </remarks>
-    public void Send(in T value) => Send(value, CancellationToken.None);
+    public void Send(in T value)
+    {
+        Send(value, CancellationToken.None);
+    }
 
     /// <summary>
     /// Sends an item to channel. 
@@ -250,7 +274,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
         m_canTakeEvent.Set();
     }
 
-    void IChannel.Send(object value) => Send((T)value);
+    void IChannel.Send(object value)
+    {
+        Send((T)value);
+    }
 
     /// <summary>
     /// Attempts to remove an item from channel.
@@ -263,8 +290,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <remarks>
     /// This method will not block.
     /// </remarks>
-    public bool TryReceive(out T value) =>
-        TryReceive(out value, CancellationToken.None);
+    public bool TryReceive(out T value)
+    {
+        return TryReceive(out value, CancellationToken.None);
+    }
 
     /// <summary>
     /// Attempts to remove an item from channel.
@@ -302,7 +331,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// If the channel is empty, method will block the current thread until a value is sent to the channel.
     /// </remarks>
     /// <returns>Value received.</returns>
-    public T Receive() => Receive(CancellationToken.None);
+    public T Receive()
+    {
+        return Receive(CancellationToken.None);
+    }
 
     /// <summary>
     /// Removes an item from channel.
@@ -363,9 +395,15 @@ public struct channel<T> : IChannel, IEnumerable<T>
         return false;
     }
 
-    object IChannel.Receive() => Receive()!;
+    object IChannel.Receive()
+    {
+        return Receive()!;
+    }
 
-    bool IChannel.Sent(object value) => Sent((T)value);
+    bool IChannel.Sent(object value)
+    {
+        return Sent((T)value);
+    }
 
     bool IChannel.Received(out object value)
     {
@@ -426,9 +464,15 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// Returns an enumerator that iterates through the collection.
     /// </summary>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
-    public IEnumerator<T> GetEnumerator() => GetEnumerator(m_enumeratorTokenSource.Token);
+    public IEnumerator<T> GetEnumerator()
+    {
+        return GetEnumerator(m_enumeratorTokenSource.Token);
+    }
 
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
 
     private void AssertChannelIsOpenForSend()
     {

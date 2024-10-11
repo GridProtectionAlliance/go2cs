@@ -33,7 +33,10 @@ public class NilType : IConvertible
 {
     public static NilType Default = null!;
 
-    public override int GetHashCode() => 0;
+    public override int GetHashCode()
+    {
+        return 0;
+    }
 
     public override bool Equals(object? obj)
     {
@@ -49,88 +52,206 @@ public class NilType : IConvertible
         };
     }
 
-    public override string ToString() => "nil";
+    public override string ToString()
+    {
+        return "nil";
+    }
 
     // IArray to nil comparisons
-    public static bool operator ==(IArray? array, NilType _) => array is null || array.Length == 0;
+    public static bool operator ==(IArray? array, NilType _)
+    {
+        return array is null || array.Length == 0;
+    }
 
-    public static bool operator !=(IArray? array, NilType nil) => !(array == nil);
+    public static bool operator !=(IArray? array, NilType nil)
+    {
+        return !(array == nil);
+    }
 
-    public static bool operator ==(NilType nil, IArray? array) => array == nil;
+    public static bool operator ==(NilType nil, IArray? array)
+    {
+        return array == nil;
+    }
 
-    public static bool operator !=(NilType nil, IArray? array) => array != nil;
+    public static bool operator !=(NilType nil, IArray? array)
+    {
+        return array != nil;
+    }
 
     // ISlice to nil comparisons
-    public static bool operator ==(ISlice? slice, NilType _) => slice is null or { Length: 0, Capacity: 0, Source: null };
+    public static bool operator ==(ISlice? slice, NilType _)
+    {
+        return slice is null or { Length: 0, Capacity: 0, Source: null };
+    }
 
-    public static bool operator !=(ISlice? slice, NilType nil) => !(slice == nil);
+    public static bool operator !=(ISlice? slice, NilType nil)
+    {
+        return !(slice == nil);
+    }
 
-    public static bool operator ==(NilType nil, ISlice? slice) => slice == nil;
+    public static bool operator ==(NilType nil, ISlice? slice)
+    {
+        return slice == nil;
+    }
 
-    public static bool operator !=(NilType nil, ISlice? slice) => slice != nil;
+    public static bool operator !=(NilType nil, ISlice? slice)
+    {
+        return slice != nil;
+    }
 
     // IChannel to nil comparisons
-    public static bool operator ==(IChannel? channel, NilType _) => channel is null or { Length: 0, Capacity: 0 };
+    public static bool operator ==(IChannel? channel, NilType _)
+    {
+        return channel is null or { Length: 0, Capacity: 0 };
+    }
 
-    public static bool operator !=(IChannel? channel, NilType nil) => !(channel == nil);
+    public static bool operator !=(IChannel? channel, NilType nil)
+    {
+        return !(channel == nil);
+    }
 
-    public static bool operator ==(NilType nil, IChannel? channel) => channel == nil;
+    public static bool operator ==(NilType nil, IChannel? channel)
+    {
+        return channel == nil;
+    }
 
-    public static bool operator !=(NilType nil, IChannel? channel) => channel != nil;
+    public static bool operator !=(NilType nil, IChannel? channel)
+    {
+        return channel != nil;
+    }
 
     // string to nil comparisons
-    public static bool operator ==(string? obj, NilType _) => string.IsNullOrEmpty(obj);
+    public static bool operator ==(string? obj, NilType _)
+    {
+        return string.IsNullOrEmpty(obj);
+    }
 
-    public static bool operator !=(string? obj, NilType _) => !string.IsNullOrEmpty(obj);
+    public static bool operator !=(string? obj, NilType _)
+    {
+        return !string.IsNullOrEmpty(obj);
+    }
 
-    public static bool operator ==(NilType _, string? obj) => string.IsNullOrEmpty(obj);
+    public static bool operator ==(NilType _, string? obj)
+    {
+        return string.IsNullOrEmpty(obj);
+    }
 
-    public static bool operator !=(NilType _, string? obj) => !string.IsNullOrEmpty(obj);
+    public static bool operator !=(NilType _, string? obj)
+    {
+        return !string.IsNullOrEmpty(obj);
+    }
 
-    public static implicit operator string(NilType _) => ""; // In Go, string defaults to empty string, not null
+    public static implicit operator string(NilType _)
+    {
+        return "";
+        // In Go, string defaults to empty string, not null
+    }
 
     // object to nil comparisons
-    public static bool operator ==(object? obj, NilType _) => obj is null;
+    public static bool operator ==(object? obj, NilType _)
+    {
+        return obj is null;
+    }
 
-    public static bool operator !=(object? obj, NilType _) => obj is not null;
+    public static bool operator !=(object? obj, NilType _)
+    {
+        return obj is not null;
+    }
 
-    public static bool operator ==(NilType _, object? obj) => obj is null;
+    public static bool operator ==(NilType _, object? obj)
+    {
+        return obj is null;
+    }
 
-    public static bool operator !=(NilType _, object? obj) => obj is not null;
+    public static bool operator !=(NilType _, object? obj)
+    {
+        return obj is not null;
+    }
 
-    TypeCode IConvertible.GetTypeCode() => TypeCode.DBNull;
+    TypeCode IConvertible.GetTypeCode()
+    {
+        return TypeCode.DBNull;
+    }
 
-    bool IConvertible.ToBoolean(IFormatProvider? provider) => default;
+    bool IConvertible.ToBoolean(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    byte IConvertible.ToByte(IFormatProvider? provider) => default;
+    byte IConvertible.ToByte(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    char IConvertible.ToChar(IFormatProvider? provider) => default;
+    char IConvertible.ToChar(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    DateTime IConvertible.ToDateTime(IFormatProvider? provider) => default;
+    DateTime IConvertible.ToDateTime(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    decimal IConvertible.ToDecimal(IFormatProvider? provider) => default;
+    decimal IConvertible.ToDecimal(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    double IConvertible.ToDouble(IFormatProvider? provider) => default;
+    double IConvertible.ToDouble(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    short IConvertible.ToInt16(IFormatProvider? provider) => default;
+    short IConvertible.ToInt16(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    int IConvertible.ToInt32(IFormatProvider? provider) => default;
+    int IConvertible.ToInt32(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    long IConvertible.ToInt64(IFormatProvider? provider) => default;
+    long IConvertible.ToInt64(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    sbyte IConvertible.ToSByte(IFormatProvider? provider) => default;
+    sbyte IConvertible.ToSByte(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    float IConvertible.ToSingle(IFormatProvider? provider) => default;
+    float IConvertible.ToSingle(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    string IConvertible.ToString(IFormatProvider? provider) => "";
+    string IConvertible.ToString(IFormatProvider? provider)
+    {
+        return "";
+    }
 
-    object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => Default;
+    object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
+    {
+        return Default;
+    }
 
-    ushort IConvertible.ToUInt16(IFormatProvider? provider) => default;
+    ushort IConvertible.ToUInt16(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    uint IConvertible.ToUInt32(IFormatProvider? provider) => default;
+    uint IConvertible.ToUInt32(IFormatProvider? provider)
+    {
+        return default;
+    }
 
-    ulong IConvertible.ToUInt64(IFormatProvider? provider) => default;
+    ulong IConvertible.ToUInt64(IFormatProvider? provider)
+    {
+        return default;
+    }
 }
 
 /// <summary>
@@ -138,16 +259,34 @@ public class NilType : IConvertible
 /// </summary>
 public class NilType<T> : NilType where T : class?
 {
-    public override int GetHashCode() => 0;
+    public override int GetHashCode()
+    {
+        return 0;
+    }
 
-    public override bool Equals(object? obj) => base.Equals(obj);
+    public override bool Equals(object? obj)
+    {
+        return base.Equals(obj);
+    }
 
     // Enable comparisons between nil and class types (should be rare)
-    public static bool operator ==(in T? value, NilType<T> _) => value is null || (Activator.CreateInstance(value.GetType())?.Equals(value) ?? false);
+    public static bool operator ==(in T? value, NilType<T> _)
+    {
+        return value is null || (Activator.CreateInstance(value.GetType())?.Equals(value) ?? false);
+    }
 
-    public static bool operator !=(in T? value, NilType<T> nil) => !(value == nil);
+    public static bool operator !=(in T? value, NilType<T> nil)
+    {
+        return !(value == nil);
+    }
 
-    public static bool operator ==(NilType<T> nil, in T? value) => value == nil;
+    public static bool operator ==(NilType<T> nil, in T? value)
+    {
+        return value == nil;
+    }
 
-    public static bool operator !=(NilType<T> nil, in T? value) => value != nil;
+    public static bool operator !=(NilType<T> nil, in T? value)
+    {
+        return value != nil;
+    }
 }

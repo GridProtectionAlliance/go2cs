@@ -70,18 +70,24 @@ public class GoFunc<T> : GoFuncRoot
 
     private readonly GoFunction? m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    protected GoFunc() => m_function = null;
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoAction action) => m_function = (defer, panic, recover) =>
+    protected GoFunc()
     {
-        action(defer, panic, recover);
-        return default!;
-    };
+        m_function = null;
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoFunction function) => m_function = function;
+    public GoFunc(GoAction action)
+    {
+        m_function = (defer, panic, recover) =>
+        {
+            action(defer, panic, recover);
+            return default!;
+        };
+    }
+
+    public GoFunc(GoFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute()
@@ -105,7 +111,6 @@ public class GoFunc<T> : GoFuncRoot
         return result!;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     protected void HandleDefer(Action? deferredAction)
     {
         if (deferredAction is null)
@@ -115,10 +120,11 @@ public class GoFunc<T> : GoFuncRoot
         Defers.Push(deferredAction);
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    protected void HandlePanic(object state) => throw new PanicException(state);
+    protected void HandlePanic(object state)
+    {
+        throw new PanicException(state);
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     protected object? HandleRecover()
     {
         object? result = CapturedPanic.Value?.State;
@@ -126,7 +132,6 @@ public class GoFunc<T> : GoFuncRoot
         return result;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     protected void HandleFinally()
     {
         if (Defers is not null)
@@ -150,15 +155,19 @@ public sealed class GoFunc<TRef1, T> : GoFunc<T>
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1)
@@ -196,15 +205,19 @@ public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2)
@@ -238,15 +251,19 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3)
@@ -280,15 +297,20 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Panic panic,
+            Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4)
@@ -322,15 +344,20 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer,
+            Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5)
@@ -364,15 +391,20 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6)
@@ -406,15 +438,20 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7)
@@ -448,15 +485,21 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer, panic,
+                recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8)
@@ -490,15 +533,21 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, defer,
+                panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9)
@@ -532,15 +581,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Panic panic,
+            Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10)
@@ -574,15 +630,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer,
+            Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11)
@@ -616,15 +679,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
+            Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, ref ref12, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12)
@@ -658,15 +728,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
+            ref TRef13 ref13, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, ref ref12, ref ref13, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13)
@@ -700,15 +777,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
+            ref TRef13 ref13, ref TRef14 ref14, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, ref ref12, ref ref13, ref ref14, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14)
@@ -742,15 +826,22 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
+            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Panic panic, Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15)
@@ -784,15 +875,23 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     private readonly GoRefFunction m_function;
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefAction action) => m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Panic panic, Recover recover) =>
+    public GoFunc(GoRefAction action)
     {
-        action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, panic, recover);
-        return default!;
-    };
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
+            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Panic panic,
+            Recover recover) =>
+        {
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
+                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, panic, recover);
+            return default!;
+        };
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public GoFunc(GoRefFunction function) => m_function = function;
+    public GoFunc(GoRefFunction function)
+    {
+        m_function = function;
+    }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerStepperBoundary]
     public T Execute(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16)

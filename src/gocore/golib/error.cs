@@ -43,17 +43,20 @@ public interface error : IFormattable
     /// </summary>
     @string Error();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static error As<T>(in T target) =>
-        (error<T>)target!;
+    public static error As<T>(in T target)
+    {
+        return (error<T>)target!;
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static error As<T>(ptr<T> target_ptr) =>
-        (error<T>)target_ptr;
+    public static error As<T>(ptr<T> target_ptr)
+    {
+        return (error<T>)target_ptr;
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static error? As(object target) =>
-        typeof(error<>).CreateInterfaceHandler<error>(target);
+    public static error? As(object target)
+    {
+        return typeof(error<>).CreateInterfaceHandler<error>(target);
+    }
 }
 
 public class error<T> : error
@@ -73,7 +76,10 @@ public class error<T> : error
         }
     }
 
-    public error(in T target) => m_target = target;
+    public error(in T target)
+    {
+        m_target = target;
+    }
 
     public error(ptr<T> target_ptr)
     {
@@ -142,27 +148,42 @@ public class error<T> : error
             throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new Exception("Error"));
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static explicit operator error<T>(in ptr<T> target_ptr) => new(target_ptr);
+    public static explicit operator error<T>(in ptr<T> target_ptr)
+    {
+        return new error<T>(target_ptr);
+    }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-    public static explicit operator error<T>(in T target) => new(target);
+    public static explicit operator error<T>(in T target)
+    {
+        return new error<T>(target);
+    }
 
     // Enable comparisons between nil and error<T> interface instance
-    public static bool operator ==(error<T> value, NilType _) => Activator.CreateInstance<error<T>>().Equals(value);
+    public static bool operator ==(error<T> value, NilType _)
+    {
+        return Activator.CreateInstance<error<T>>().Equals(value);
+    }
 
-    public static bool operator !=(error<T> value, NilType nil) => !(value == nil);
+    public static bool operator !=(error<T> value, NilType nil)
+    {
+        return !(value == nil);
+    }
 
-    public static bool operator ==(NilType nil, error<T> value) => value == nil;
+    public static bool operator ==(NilType nil, error<T> value)
+    {
+        return value == nil;
+    }
 
-    public static bool operator !=(NilType nil, error<T> value) => value != nil;
+    public static bool operator !=(NilType nil, error<T> value)
+    {
+        return value != nil;
+    }
 }
 
 public static class errorExtensions
 {
     private static readonly ConcurrentDictionary<Type, MethodInfo> s_conversionOperators = new();
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     public static T _<T>(this error target)
     {
         try
@@ -175,7 +196,6 @@ public static class errorExtensions
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     public static bool _<T>(this error target, out T result)
     {
         try
@@ -190,7 +210,6 @@ public static class errorExtensions
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     public static object? _(this error target, Type type)
     {
         try
@@ -200,7 +219,7 @@ public static class errorExtensions
             if (conversionOperator is null)
                 throw new PanicException($"interface conversion: failed to create converter for {GetGoTypeName(target.GetType())} to {GetGoTypeName(type)}");
 
-            dynamic? result = conversionOperator.Invoke(null, new object[] { target });
+            dynamic? result = conversionOperator.Invoke(null, [target]);
             return result?.Target;
         }
         catch (NotImplementedException ex)
@@ -209,7 +228,6 @@ public static class errorExtensions
         }
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
     public static bool _(this error target, Type type, out object? result)
     {
         try

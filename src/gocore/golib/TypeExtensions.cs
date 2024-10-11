@@ -45,10 +45,15 @@ public static class TypeExtensions
     {
         private readonly Type m_targetType;
 
-        public TypePrecedenceComparer(Type targetType) => m_targetType = targetType;
+        public TypePrecedenceComparer(Type targetType)
+        {
+            m_targetType = targetType;
+        }
 
-        public override int Compare(Type? x, Type? y) => 
-            Comparer<int>.Default.Compare(RelationDistance(x), RelationDistance(y));
+        public override int Compare(Type? x, Type? y)
+        {
+            return Comparer<int>.Default.Compare(RelationDistance(x), RelationDistance(y));
+        }
 
         private int RelationDistance(Type? type)
         {
@@ -149,7 +154,10 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="ptr"></param>
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
-    public static string PrintPointer<T>(this ptr<T> ptr) => ptr.val.PrintPointer();
+    public static string PrintPointer<T>(this ptr<T> ptr)
+    {
+        return ptr.val.PrintPointer();
+    }
 
     /// <summary>
     /// Gets an object's pointer value, for display purposes, in hexadecimal format.
@@ -423,16 +431,20 @@ public static class TypeExtensions
     /// <param name="value">Value to try to cast.</param>
     /// <param name="integer">Casted value.</param>
     /// <returns><c>true</c> if cast succeeded; otherwise, <c>false</c>.</returns>
-    public static bool TryCastAsInteger<T>(this T value, out ulong integer) where T : unmanaged, IConvertible => 
-        ((object)value).TryCastAsInteger(out integer);
+    public static bool TryCastAsInteger<T>(this T value, out ulong integer) where T : unmanaged, IConvertible
+    {
+        return ((object)value).TryCastAsInteger(out integer);
+    }
 
     /// <summary>
     /// Determines if <see cref="IConvertible"/> <paramref name="value"/> is a numeric type.
     /// </summary>
     /// <param name="value">Value to check.</param>
     /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; othwerwise, <c>false</c>.</returns>
-    public static bool IsNumeric(this IConvertible? value) => 
-        value is not null && IsNumericType(value.GetTypeCode());
+    public static bool IsNumeric(this IConvertible? value)
+    {
+        return value is not null && IsNumericType(value.GetTypeCode());
+    }
 
     /// <summary>
     /// Determines if <paramref name="typeCode"/> is a numeric type, i.e., one of:

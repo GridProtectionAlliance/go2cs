@@ -8,6 +8,8 @@ func main() {
 	a[0] = "Hello"
 	a[1] = "World"
 
+	p := &a[0]
+
 	test(a)
 	fmt.Println(a[0], a[1])
 	fmt.Println()
@@ -26,7 +28,7 @@ func main() {
 	fmt.Println(primes)
 
 	fmt.Println(a[0])
-	stest(&a[0])
+	stest(p)
 	fmt.Println(a[0])
 }
 

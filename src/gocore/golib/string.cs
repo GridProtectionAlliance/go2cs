@@ -43,7 +43,10 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 {
     internal readonly uint8[] m_value;
 
-    public @string() => m_value = [];
+    public @string()
+    {
+        m_value = [];
+    }
 
     public @string(uint8[]? bytes)
     {
@@ -74,13 +77,19 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public @string(in slice<rune> value) : this(value.ToArray()) { }
 
-    public @string(string? value) => m_value = Encoding.UTF8.GetBytes(value ?? "");
+    public @string(string? value)
+    {
+        m_value = Encoding.UTF8.GetBytes(value ?? "");
+    }
 
     public @string(@string value) : this(value.m_value) { }
 
     public int Length
     {
-        get => m_value.Length;
+        get
+        {
+            return m_value.Length;
+        }
     }
 
     public uint8 this[int index]
@@ -107,24 +116,37 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public uint8 this[ulong index]
     {
-        get => this[(nint)index];
+        get
+        {
+            return this[(nint)index];
+        }
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    public slice<uint8> Slice(int start, int length) =>
-        new(m_value, start, start + length);
+    public slice<uint8> Slice(int start, int length)
+    {
+        return new slice<uint8>(m_value, start, start + length);
+    }
 
-    public slice<uint8> Slice(nint start, nint length) =>
-        new(m_value, (int)start, (int)(start + length));
+    public slice<uint8> Slice(nint start, nint length)
+    {
+        return new slice<uint8>(m_value, (int)start, (int)(start + length));
+    }
 
-    public override string ToString() =>
-        Encoding.UTF8.GetString(m_value);
+    public override string ToString()
+    {
+        return Encoding.UTF8.GetString(m_value);
+    }
 
-    public bool Equals(@string other) =>
-        BytesAreEqual(m_value, other.m_value);
-    
-    public int CompareTo(@string other) =>
-        StringComparer.Ordinal.Compare(ToString(), other);
+    public bool Equals(@string other)
+    {
+        return BytesAreEqual(m_value, other.m_value);
+    }
+
+    public int CompareTo(@string other)
+    {
+        return StringComparer.Ordinal.Compare(ToString(), other);
+    }
 
     public override bool Equals(object? obj)
     {
@@ -137,13 +159,25 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         };
     }
 
-    public override int GetHashCode() => ToString().GetHashCode();
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
+    }
 
-    public string ToString(IFormatProvider? provider) => ToString().ToString(provider);
+    public string ToString(IFormatProvider? provider)
+    {
+        return ToString().ToString(provider);
+    }
 
-    public TypeCode GetTypeCode() => TypeCode.String;
+    public TypeCode GetTypeCode()
+    {
+        return TypeCode.String;
+    }
 
-    public @string Clone() => new(this);
+    public @string Clone()
+    {
+        return new @string(this);
+    }
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
@@ -193,67 +227,145 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     #region [ Operators ]
 
     // Enable implicit conversions between string and @string struct
-    public static implicit operator @string(string value) => new(value);
+    public static implicit operator @string(string value)
+    {
+        return new @string(value);
+    }
 
-    public static implicit operator string(@string value) => value.ToString();
+    public static implicit operator string(@string value)
+    {
+        return value.ToString();
+    }
 
-    #if EXPERIMENTAL
+#if EXPERIMENTAL
 
     public static explicit operator @string(ReadOnlySpan<byte> value) => new(value);
 
     #else
     
-    public static implicit operator @string(ReadOnlySpan<uint8> value) => new(value);
+    public static implicit operator @string(ReadOnlySpan<uint8> value)
+    {
+        return new @string(value);
+    }
 
-    #endif
+#endif
     
-    public static implicit operator @string(slice<uint8> value) => new(value);
+    public static implicit operator @string(slice<uint8> value)
+    {
+        return new @string(value);
+    }
 
-    public static implicit operator slice<uint8>(@string value) => new(value.m_value);
+    public static implicit operator slice<uint8>(@string value)
+    {
+        return new slice<uint8>(value.m_value);
+    }
 
-    public static implicit operator @string(slice<rune> value) => new(value);
+    public static implicit operator @string(slice<rune> value)
+    {
+        return new @string(value);
+    }
 
-    public static implicit operator slice<rune>(@string value) =>  new(((IEnumerable<rune>)value).ToArray());
+    public static implicit operator slice<rune>(@string value)
+    {
+        return new slice<rune>(((IEnumerable<rune>)value).ToArray());
+    }
 
-    public static implicit operator @string(slice<char> value) => new(value);
+    public static implicit operator @string(slice<char> value)
+    {
+        return new @string(value);
+    }
 
-    public static implicit operator slice<char>(@string value) => new(((IEnumerable<char>)value).ToArray());
+    public static implicit operator slice<char>(@string value)
+    {
+        return new slice<char>(((IEnumerable<char>)value).ToArray());
+    }
 
-    public static explicit operator uint8[](@string value) => value.m_value;
+    public static explicit operator uint8[](@string value)
+    {
+        return value.m_value;
+    }
 
-    public static implicit operator @string(uint8[] value) => new(value);
+    public static implicit operator @string(uint8[] value)
+    {
+        return new @string(value);
+    }
 
-    public static implicit operator rune[](@string value) => ((IEnumerable<rune>)value).ToArray();
+    public static implicit operator rune[](@string value)
+    {
+        return ((IEnumerable<rune>)value).ToArray();
+    }
 
-    public static implicit operator @string(rune[] value) => new(value);
+    public static implicit operator @string(rune[] value)
+    {
+        return new @string(value);
+    }
 
-    public static explicit operator char[](@string value) => ((IEnumerable<char>)value).ToArray();
+    public static explicit operator char[](@string value)
+    {
+        return ((IEnumerable<char>)value).ToArray();
+    }
 
-    public static implicit operator @string(char[] value) => new(value);
+    public static implicit operator @string(char[] value)
+    {
+        return new @string(value);
+    }
 
     // Enable comparisons between nil and @string struct
-    public static bool operator ==(@string value, NilType _) => value.Equals(Default);
+    public static bool operator ==(@string value, NilType _)
+    {
+        return value.Equals(Default);
+    }
 
-    public static bool operator !=(@string value, NilType nil) => !(value == nil);
+    public static bool operator !=(@string value, NilType nil)
+    {
+        return !(value == nil);
+    }
 
-    public static bool operator ==(NilType nil, @string value) => value == nil;
+    public static bool operator ==(NilType nil, @string value)
+    {
+        return value == nil;
+    }
 
-    public static bool operator !=(NilType nil, @string value) => value != nil;
+    public static bool operator !=(NilType nil, @string value)
+    {
+        return value != nil;
+    }
 
     // Enable @string to @string comparisons
-    public static implicit operator @string(NilType _) => Default;
+    public static implicit operator @string(NilType _)
+    {
+        return Default;
+    }
 
-    public static bool operator ==(@string a, @string b) => a.Equals(b);
+    public static bool operator ==(@string a, @string b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(@string a, @string b) => !a.Equals(b);
+    public static bool operator !=(@string a, @string b)
+    {
+        return !a.Equals(b);
+    }
 
-    public static bool operator <(@string a, @string b) => string.CompareOrdinal(a, b) < 0;
+    public static bool operator <(@string a, @string b)
+    {
+        return string.CompareOrdinal(a, b) < 0;
+    }
 
-    public static bool operator <=(@string a, @string b) => string.CompareOrdinal(a, b) <= 0;
+    public static bool operator <=(@string a, @string b)
+    {
+        return string.CompareOrdinal(a, b) <= 0;
+    }
 
-    public static bool operator >(@string a, @string b) => string.CompareOrdinal(a, b) > 0;
+    public static bool operator >(@string a, @string b)
+    {
+        return string.CompareOrdinal(a, b) > 0;
+    }
 
-    public static bool operator >=(@string a, @string b) => string.CompareOrdinal(a, b) >= 0;
+    public static bool operator >=(@string a, @string b)
+    {
+        return string.CompareOrdinal(a, b) >= 0;
+    }
 
     public static @string operator +(@string a, @string b)
     {
@@ -269,41 +381,98 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     #region [ Interface Implementations ]
 
-    object ICloneable.Clone() => Clone();
+    object ICloneable.Clone()
+    {
+        return Clone();
+    }
 
-    int IReadOnlyCollection<uint8>.Count => Length;
+    int IReadOnlyCollection<uint8>.Count
+    {
+        get
+        {
+            return Length;
+        }
+    }
 
-    bool IConvertible.ToBoolean(IFormatProvider? provider) => ((IConvertible)ToString()).ToBoolean(provider);
+    bool IConvertible.ToBoolean(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToBoolean(provider);
+    }
 
-    char IConvertible.ToChar(IFormatProvider? provider) => ((IConvertible)ToString()).ToChar(provider);
+    char IConvertible.ToChar(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToChar(provider);
+    }
 
-    sbyte IConvertible.ToSByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToSByte(provider);
+    sbyte IConvertible.ToSByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToSByte(provider);
+    }
 
-    uint8 IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)ToString()).ToByte(provider);
+    uint8 IConvertible.ToByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToByte(provider);
+    }
 
-    short IConvertible.ToInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt16(provider);
+    short IConvertible.ToInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt16(provider);
+    }
 
-    ushort IConvertible.ToUInt16(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt16(provider);
+    ushort IConvertible.ToUInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt16(provider);
+    }
 
-    int IConvertible.ToInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt32(provider);
+    int IConvertible.ToInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt32(provider);
+    }
 
-    uint IConvertible.ToUInt32(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt32(provider);
+    uint IConvertible.ToUInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt32(provider);
+    }
 
-    long IConvertible.ToInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToInt64(provider);
+    long IConvertible.ToInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt64(provider);
+    }
 
-    ulong IConvertible.ToUInt64(IFormatProvider? provider) => ((IConvertible)ToString()).ToUInt64(provider);
+    ulong IConvertible.ToUInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt64(provider);
+    }
 
-    float IConvertible.ToSingle(IFormatProvider? provider) => ((IConvertible)ToString()).ToSingle(provider);
+    float IConvertible.ToSingle(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToSingle(provider);
+    }
 
-    double IConvertible.ToDouble(IFormatProvider? provider) => ((IConvertible)ToString()).ToDouble(provider);
+    double IConvertible.ToDouble(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDouble(provider);
+    }
 
-    decimal IConvertible.ToDecimal(IFormatProvider? provider) => ((IConvertible)ToString()).ToDecimal(provider);
+    decimal IConvertible.ToDecimal(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDecimal(provider);
+    }
 
-    DateTime IConvertible.ToDateTime(IFormatProvider? provider) => ((IConvertible)ToString()).ToDateTime(provider);
+    DateTime IConvertible.ToDateTime(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDateTime(provider);
+    }
 
-    object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((IConvertible)ToString()).ToType(conversionType, provider);
+    object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToType(conversionType, provider);
+    }
 
-    IEnumerator IEnumerable.GetEnumerator() => m_value.GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return m_value.GetEnumerator();
+    }
 
     IEnumerator<uint8> IEnumerable<uint8>.GetEnumerator()
     {
@@ -317,7 +486,10 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
             yield return item;
     }
 
-    IEnumerator<char> IEnumerable<char>.GetEnumerator() => ToString().GetEnumerator();
+    IEnumerator<char> IEnumerable<char>.GetEnumerator()
+    {
+        return ToString().GetEnumerator();
+    }
 
 
     private static unsafe bool BytesAreEqual(uint8[] data1, uint8[] data2)

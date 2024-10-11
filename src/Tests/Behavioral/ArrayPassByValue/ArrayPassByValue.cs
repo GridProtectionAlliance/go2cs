@@ -9,6 +9,7 @@ private static void Main() {
 
     a[0] = "Hello"u8;
     a[1] = "World"u8;
+    var p = Ꮡa.of<@string>(0);
     test(a);
     fmt.Println(a[0], a[1]);
     fmt.Println();
@@ -23,14 +24,14 @@ private static void Main() {
     var primes = new nint[] { 2, 3, 5, 7, 11, 13 };
     fmt.Println(primes);
     fmt.Println(a[0]);
-    stest(Ꮡa[0]);
+    stest(p);
     fmt.Println(a[0]);
 }
 
 private static void stest(ptr<@string> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
-    // *p
+    p = "hello"u8;
 }
 
 // Arrays are passed by value (a full copy)

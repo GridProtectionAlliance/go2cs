@@ -140,7 +140,7 @@ File usage: go run main.go [options] <input.go> [output.cs]
 
 Options:
   -indent <int>      Number of spaces for indentation (default 4)
-  -var               Prefer variable declarations (default true)
+  -var               Prefer "var" declarations (default true)
   -cgo               Parse cgo targets (default false)
   -tree              Show parse tree (default true)
 

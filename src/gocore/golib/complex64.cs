@@ -50,13 +50,37 @@ IUtf8SpanFormattable*/
 
     private const float LOG_10_INV = 0.43429448190325F;
 
-    public float Real => m_real;
+    public float Real
+    {
+        get
+        {
+            return m_real;
+        }
+    }
 
-    public float Imaginary => m_imaginary;
+    public float Imaginary
+    {
+        get
+        {
+            return m_imaginary;
+        }
+    }
 
-    public float Magnitude => Abs(this);
+    public float Magnitude
+    {
+        get
+        {
+            return Abs(this);
+        }
+    }
 
-    public float Phase => (float)Math.Atan2(m_imaginary, m_real);
+    public float Phase
+    {
+        get
+        {
+            return (float)Math.Atan2(m_imaginary, m_real);
+        }
+    }
 
     public static readonly complex64 Zero = new(0.0F, 0.0F);
     public static readonly complex64 One = new(1.0F, 0.0F);
@@ -68,23 +92,50 @@ IUtf8SpanFormattable*/
         m_imaginary = imaginary;
     }
 
-    public static complex64 FromPolarCoordinates(float magnitude, float phase) => new(magnitude * (float)Math.Cos(phase), magnitude * (float)Math.Sin(phase));
+    public static complex64 FromPolarCoordinates(float magnitude, float phase)
+    {
+        return new complex64(magnitude * (float)Math.Cos(phase), magnitude * (float)Math.Sin(phase));
+    }
 
-    public static complex64 Negate(complex64 value) => -value;
+    public static complex64 Negate(complex64 value)
+    {
+        return -value;
+    }
 
-    public static complex64 Add(complex64 left, complex64 right) => left + right;
+    public static complex64 Add(complex64 left, complex64 right)
+    {
+        return left + right;
+    }
 
-    public static complex64 Subtract(complex64 left, complex64 right) => left - right;
+    public static complex64 Subtract(complex64 left, complex64 right)
+    {
+        return left - right;
+    }
 
-    public static complex64 Multiply(complex64 left, complex64 right) => left * right;
+    public static complex64 Multiply(complex64 left, complex64 right)
+    {
+        return left * right;
+    }
 
-    public static complex64 Divide(complex64 dividend, complex64 divisor) => dividend / divisor;
+    public static complex64 Divide(complex64 dividend, complex64 divisor)
+    {
+        return dividend / divisor;
+    }
 
-    public static complex64 operator -(complex64 value) => new(-value.m_real, -value.m_imaginary);
+    public static complex64 operator -(complex64 value)
+    {
+        return new complex64(-value.m_real, -value.m_imaginary);
+    }
 
-    public static complex64 operator +(complex64 left, complex64 right) => new(left.m_real + right.m_real, left.m_imaginary + right.m_imaginary);
+    public static complex64 operator +(complex64 left, complex64 right)
+    {
+        return new complex64(left.m_real + right.m_real, left.m_imaginary + right.m_imaginary);
+    }
 
-    public static complex64 operator -(complex64 left, complex64 right) => new(left.m_real - right.m_real, left.m_imaginary - right.m_imaginary);
+    public static complex64 operator -(complex64 left, complex64 right)
+    {
+        return new complex64(left.m_real - right.m_real, left.m_imaginary - right.m_imaginary);
+    }
 
     public static complex64 operator *(complex64 left, complex64 right)
     {
@@ -138,14 +189,26 @@ IUtf8SpanFormattable*/
         return d * (float)Math.Sqrt(1.0 + r * r);
     }
 
-    public static complex64 Conjugate(complex64 value) => new(value.m_real, -value.m_imaginary);
+    public static complex64 Conjugate(complex64 value)
+    {
+        return new complex64(value.m_real, -value.m_imaginary);
+    }
 
     // Reciprocal of a Complex number : the reciprocal of x+i*y is 1/(x+i*y)
-    public static complex64 Reciprocal(complex64 value) => value.m_real == 0 && value.m_imaginary == 0 ? Zero : One / value;
+    public static complex64 Reciprocal(complex64 value)
+    {
+        return value.m_real == 0 && value.m_imaginary == 0 ? Zero : One / value;
+    }
 
-    public static bool operator ==(complex64 left, complex64 right) => left.m_real == right.m_real && left.m_imaginary == right.m_imaginary;
+    public static bool operator ==(complex64 left, complex64 right)
+    {
+        return left.m_real == right.m_real && left.m_imaginary == right.m_imaginary;
+    }
 
-    public static bool operator !=(complex64 left, complex64 right) => left.m_real != right.m_real || left.m_imaginary != right.m_imaginary;
+    public static bool operator !=(complex64 left, complex64 right)
+    {
+        return left.m_real != right.m_real || left.m_imaginary != right.m_imaginary;
+    }
 
     public override bool Equals(object? obj)
     {
@@ -155,55 +218,130 @@ IUtf8SpanFormattable*/
         return this == complex;
     }
 
-    public bool Equals(complex64 value) => m_real.Equals(value.m_real) && m_imaginary.Equals(value.m_imaginary);
+    public bool Equals(complex64 value)
+    {
+        return m_real.Equals(value.m_real) && m_imaginary.Equals(value.m_imaginary);
+    }
 
-    public static implicit operator complex64(short value) => new(value, 0.0F);
+    public static implicit operator complex64(short value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(int value) => new(value, 0.0F);
+    public static implicit operator complex64(int value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(long value) => new(value, 0.0F);
+    public static implicit operator complex64(long value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(ushort value) => new(value, 0.0F);
+    public static implicit operator complex64(ushort value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(uint value) => new(value, 0.0F);
+    public static implicit operator complex64(uint value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(ulong value) => new(value, 0.0F);
+    public static implicit operator complex64(ulong value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(sbyte value) => new(value, 0.0F);
+    public static implicit operator complex64(sbyte value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(byte value) => new(value, 0.0F);
+    public static implicit operator complex64(byte value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static implicit operator complex64(float value) => new(value, 0.0F);
+    public static implicit operator complex64(float value)
+    {
+        return new complex64(value, 0.0F);
+    }
 
-    public static explicit operator complex64(double value) => new((float)value, 0.0F);
+    public static explicit operator complex64(double value)
+    {
+        return new complex64((float)value, 0.0F);
+    }
 
-    public static explicit operator complex64(BigInteger value) => new((float)value, 0.0F);
+    public static explicit operator complex64(BigInteger value)
+    {
+        return new complex64((float)value, 0.0F);
+    }
 
-    public static explicit operator complex64(decimal value) => new((float)value, 0.0F);
+    public static explicit operator complex64(decimal value)
+    {
+        return new complex64((float)value, 0.0F);
+    }
 
     // Enable conversions between Complex and complex64 struct
-    public static explicit operator complex64(complex128 value) => new((float)value.Real, (float)value.Imaginary);
+    public static explicit operator complex64(complex128 value)
+    {
+        return new complex64((float)value.Real, (float)value.Imaginary);
+    }
 
-    public static implicit operator complex128(complex64 value) => new(value.m_real, value.m_imaginary);
+    public static implicit operator complex128(complex64 value)
+    {
+        return new complex128(value.m_real, value.m_imaginary);
+    }
 
     // Enable comparisons between nil and complex64 struct
-    public static bool operator ==(complex64 value, NilType _) => value.Equals(default);
+    public static bool operator ==(complex64 value, NilType _)
+    {
+        return value.Equals(default);
+    }
 
-    public static bool operator !=(complex64 value, NilType nil) => !(value == nil);
+    public static bool operator !=(complex64 value, NilType nil)
+    {
+        return !(value == nil);
+    }
 
-    public static bool operator ==(NilType nil, complex64 value) => value == nil;
+    public static bool operator ==(NilType nil, complex64 value)
+    {
+        return value == nil;
+    }
 
-    public static bool operator !=(NilType nil, complex64 value) => value != nil;
+    public static bool operator !=(NilType nil, complex64 value)
+    {
+        return value != nil;
+    }
 
-    public static implicit operator complex64(NilType _) => default;
+    public static implicit operator complex64(NilType _)
+    {
+        return default;
+    }
 
-    public override string ToString() => string.Format(CultureInfo.CurrentCulture, "({0}, {1})", m_real, m_imaginary);
+    public override string ToString()
+    {
+        return string.Format(CultureInfo.CurrentCulture, "({0}, {1})", m_real, m_imaginary);
+    }
 
-    public string ToString(string format) => string.Format(CultureInfo.CurrentCulture, "({0}, {1})", m_real.ToString(format, CultureInfo.CurrentCulture), m_imaginary.ToString(format, CultureInfo.CurrentCulture));
+    public string ToString(string format)
+    {
+        return string.Format(CultureInfo.CurrentCulture, "({0}, {1})",
+            m_real.ToString(format, CultureInfo.CurrentCulture),
+            m_imaginary.ToString(format, CultureInfo.CurrentCulture));
+    }
 
-    public string ToString(string? format, IFormatProvider? provider) => string.Format(provider, "({0}, {1})", m_real.ToString(format, provider), m_imaginary.ToString(format, provider));
+    public string ToString(string? format, IFormatProvider? provider)
+    {
+        return string.Format(provider, "({0}, {1})", m_real.ToString(format, provider),
+            m_imaginary.ToString(format, provider));
+    }
 
-    public string ToString(IFormatProvider? provider) => string.Format(provider, "({0}, {1})", m_real, m_imaginary);
+    public string ToString(IFormatProvider? provider)
+    {
+        return string.Format(provider, "({0}, {1})", m_real, m_imaginary);
+    }
 
     public override int GetHashCode()
     {
@@ -229,7 +367,10 @@ IUtf8SpanFormattable*/
         return new complex64((float)Math.Sinh(a) * (float)Math.Cos(b), (float)Math.Cosh(a) * (float)Math.Sin(b));
     }
 
-    public static complex64 Asin(complex64 value) => -ImaginaryOne * Log(ImaginaryOne * value + Sqrt(One - value * value));
+    public static complex64 Asin(complex64 value)
+    {
+        return -ImaginaryOne * Log(ImaginaryOne * value + Sqrt(One - value * value));
+    }
 
     public static complex64 Cos(complex64 value)
     {
@@ -245,11 +386,20 @@ IUtf8SpanFormattable*/
         return new complex64((float)Math.Cosh(a) * (float)Math.Cos(b), (float)Math.Sinh(a) * (float)Math.Sin(b));
     }
 
-    public static complex64 Acos(complex64 value) => -ImaginaryOne * Log(value + ImaginaryOne * Sqrt(One - value * value));
+    public static complex64 Acos(complex64 value)
+    {
+        return -ImaginaryOne * Log(value + ImaginaryOne * Sqrt(One - value * value));
+    }
 
-    public static complex64 Tan(complex64 value) => Sin(value) / Cos(value);
+    public static complex64 Tan(complex64 value)
+    {
+        return Sin(value) / Cos(value);
+    }
 
-    public static complex64 Tanh(complex64 value) => Sinh(value) / Cosh(value);
+    public static complex64 Tanh(complex64 value)
+    {
+        return Sinh(value) / Cosh(value);
+    }
 
     public static complex64 Atan(complex64 value)
     {
@@ -257,11 +407,20 @@ IUtf8SpanFormattable*/
         return ImaginaryOne / Two * (Log(One - ImaginaryOne * value) - Log(One + ImaginaryOne * value));
     }
 
-    public static complex64 Log(complex64 value) => new((float)Math.Log(Abs(value)), (float)Math.Atan2(value.m_imaginary, value.m_real));
+    public static complex64 Log(complex64 value)
+    {
+        return new complex64((float)Math.Log(Abs(value)), (float)Math.Atan2(value.m_imaginary, value.m_real));
+    }
 
-    public static complex64 Log(complex64 value, float baseValue) => Log(value) / Log(baseValue);
+    public static complex64 Log(complex64 value, float baseValue)
+    {
+        return Log(value) / Log(baseValue);
+    }
 
-    public static complex64 Log10(complex64 value) => Scale(Log(value), LOG_10_INV);
+    public static complex64 Log10(complex64 value)
+    {
+        return Scale(Log(value), LOG_10_INV);
+    }
 
     public static complex64 Exp(complex64 value)
     {
@@ -271,7 +430,10 @@ IUtf8SpanFormattable*/
         return new complex64(result_re, result_im);
     }
 
-    public static complex64 Sqrt(complex64 value) => FromPolarCoordinates((float)Math.Sqrt(value.Magnitude), value.Phase / 2.0F);
+    public static complex64 Sqrt(complex64 value)
+    {
+        return FromPolarCoordinates((float)Math.Sqrt(value.Magnitude), value.Phase / 2.0F);
+    }
 
     public static complex64 Pow(complex64 value, complex64 power)
     {
@@ -295,7 +457,10 @@ IUtf8SpanFormattable*/
         return new complex64(t * (float)Math.Cos(newRho), t * (float)Math.Sin(newRho));
     }
 
-    public static complex64 Pow(complex64 value, float power) => Pow(value, new complex64(power, 0));
+    public static complex64 Pow(complex64 value, float power)
+    {
+        return Pow(value, new complex64(power, 0));
+    }
 
     private static complex64 Scale(complex64 value, float factor)
     {
@@ -304,35 +469,83 @@ IUtf8SpanFormattable*/
         return new complex64(result_re, result_im);
     }
 
-    TypeCode IConvertible.GetTypeCode() => m_real.GetTypeCode();
+    TypeCode IConvertible.GetTypeCode()
+    {
+        return m_real.GetTypeCode();
+    }
 
-    bool IConvertible.ToBoolean(IFormatProvider? provider) => ((IConvertible)m_real).ToBoolean(provider);
+    bool IConvertible.ToBoolean(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToBoolean(provider);
+    }
 
-    char IConvertible.ToChar(IFormatProvider? provider) => ((IConvertible)m_real).ToChar(provider);
+    char IConvertible.ToChar(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToChar(provider);
+    }
 
-    sbyte IConvertible.ToSByte(IFormatProvider? provider) => ((IConvertible)m_real).ToSByte(provider);
+    sbyte IConvertible.ToSByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToSByte(provider);
+    }
 
-    byte IConvertible.ToByte(IFormatProvider? provider) => ((IConvertible)m_real).ToByte(provider);
+    byte IConvertible.ToByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToByte(provider);
+    }
 
-    short IConvertible.ToInt16(IFormatProvider? provider) => ((IConvertible)m_real).ToInt16(provider);
+    short IConvertible.ToInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToInt16(provider);
+    }
 
-    ushort IConvertible.ToUInt16(IFormatProvider? provider) => ((IConvertible)m_real).ToUInt16(provider);
+    ushort IConvertible.ToUInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToUInt16(provider);
+    }
 
-    int IConvertible.ToInt32(IFormatProvider? provider) => ((IConvertible)m_real).ToInt32(provider);
+    int IConvertible.ToInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToInt32(provider);
+    }
 
-    uint IConvertible.ToUInt32(IFormatProvider? provider) => ((IConvertible)m_real).ToUInt32(provider);
+    uint IConvertible.ToUInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToUInt32(provider);
+    }
 
-    long IConvertible.ToInt64(IFormatProvider? provider) => ((IConvertible)m_real).ToInt64(provider);
+    long IConvertible.ToInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToInt64(provider);
+    }
 
-    ulong IConvertible.ToUInt64(IFormatProvider? provider) => ((IConvertible)m_real).ToUInt64(provider);
+    ulong IConvertible.ToUInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToUInt64(provider);
+    }
 
-    float IConvertible.ToSingle(IFormatProvider? provider) => ((IConvertible)m_real).ToSingle(provider);
+    float IConvertible.ToSingle(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToSingle(provider);
+    }
 
-    double IConvertible.ToDouble(IFormatProvider? provider) => ((IConvertible)m_real).ToDouble(provider);
+    double IConvertible.ToDouble(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToDouble(provider);
+    }
 
-    decimal IConvertible.ToDecimal(IFormatProvider? provider) => ((IConvertible)m_real).ToDecimal(provider);
+    decimal IConvertible.ToDecimal(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToDecimal(provider);
+    }
 
-    DateTime IConvertible.ToDateTime(IFormatProvider? provider) => ((IConvertible)m_real).ToDateTime(provider);
+    DateTime IConvertible.ToDateTime(IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToDateTime(provider);
+    }
 
-    object IConvertible.ToType(Type conversionType, IFormatProvider? provider) => ((IConvertible)m_real).ToType(conversionType, provider);
+    object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
+    {
+        return ((IConvertible)m_real).ToType(conversionType, provider);
+    }
 }

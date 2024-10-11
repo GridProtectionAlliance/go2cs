@@ -104,7 +104,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
     
     public T[] Source
     {
-        get => m_array;
+        get
+        {
+            return m_array;
+        }
     }
 
     public slice(T[]? array, (int, int) offsetAndLength)
@@ -164,28 +167,43 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public nint Low
     {
-        get => m_low;
+        get
+        {
+            return m_low;
+        }
     }
 
     public nint High
     {
-        get => m_low + m_length;
+        get
+        {
+            return m_low + m_length;
+        }
     }
 
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public nint Length
     {
-        get => m_length;
+        get
+        {
+            return m_length;
+        }
     }
 
     public nint Capacity
     {
-        get => m_array.Length - m_low;
+        get
+        {
+            return m_array.Length - m_low;
+        }
     }
 
     public nint Available
     {
-        get => m_array.Length - m_length;
+        get
+        {
+            return m_array.Length - m_length;
+        }
     }
 
     // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
@@ -214,12 +232,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
 
     public ref T this[ulong index]
     {
-        get => ref this[(nint)index];
+        get
+        {
+            return ref this[(nint)index];
+        }
     }
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
-    public slice<T> Slice(int start, int length) => 
-        m_array.slice(start, start + length, Capacity);
+    public slice<T> Slice(int start, int length)
+    {
+        return m_array.slice(start, start + length, Capacity);
+    }
 
     public nint IndexOf(in T item)
     {
@@ -227,11 +250,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         return index >= 0 ? index - m_low : -1;
     }
 
-    public bool Contains(in T item) => 
-        Array.IndexOf(m_array, item, (int)m_low, (int)m_length) >= 0;
+    public bool Contains(in T item)
+    {
+        return Array.IndexOf(m_array, item, (int)m_low, (int)m_length) >= 0;
+    }
 
-    public void CopyTo(T[] array, int arrayIndex) => 
+    public void CopyTo(T[] array, int arrayIndex)
+    {
         Array.Copy(m_array, m_low, array, arrayIndex, m_length);
+    }
 
     public T[] ToArray()
     {
@@ -240,9 +267,15 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         return array;
     }
 
-    public slice<T> Append(T[] elems) => Append(this, elems);
+    public slice<T> Append(T[] elems)
+    {
+        return Append(this, elems);
+    }
 
-    public slice<T> Clone() => m_array.slice();
+    public slice<T> Clone()
+    {
+        return m_array.slice();
+    }
 
     public IEnumerator<(nint, T)> GetEnumerator()
     {
@@ -263,82 +296,178 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         }
     }
 
-    public override string ToString() => $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
+    public override string ToString()
+    {
+        return $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
+    }
 
-    public override int GetHashCode() => m_array.GetHashCode() ^ (int)m_low ^ (int)m_length;
+    public override int GetHashCode()
+    {
+        return m_array.GetHashCode() ^ (int)m_low ^ (int)m_length;
+    }
 
-    public override bool Equals(object? obj) => Equals(obj as ISlice);
+    public override bool Equals(object? obj)
+    {
+        return Equals(obj as ISlice);
+    }
 
-    public bool Equals(ISlice? other) => other?.Source == m_array && other.Low == m_low && other.Length == m_length;
+    public bool Equals(ISlice? other)
+    {
+        return other?.Source == m_array && other.Low == m_low && other.Length == m_length;
+    }
 
-    public bool Equals(slice<T> other) => other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
+    public bool Equals(slice<T> other)
+    {
+        return other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
+    }
 
     #region [ Operators ]
 
     // Enable implicit conversions between slice<T> and T[]
-    public static implicit operator slice<T>(T[] value) => new(value);
+    public static implicit operator slice<T>(T[] value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator slice<T>(Span<T> value) => new(value);
+    public static implicit operator slice<T>(Span<T> value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator slice<T>(ReadOnlySpan<T> value) => new(value);
+    public static implicit operator slice<T>(ReadOnlySpan<T> value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator slice<T>(Memory<T> value) => new(value);
+    public static implicit operator slice<T>(Memory<T> value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator slice<T>(ReadOnlyMemory<T> value) => new(value);
+    public static implicit operator slice<T>(ReadOnlyMemory<T> value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator T[](slice<T> value) => value.ToArray();
+    public static implicit operator T[](slice<T> value)
+    {
+        return value.ToArray();
+    }
 
     // Enable implicit conversions between slice<T> and array<T>
-    public static implicit operator slice<T>(array<T> value) => new(value);
+    public static implicit operator slice<T>(array<T> value)
+    {
+        return new slice<T>(value);
+    }
 
-    public static implicit operator array<T>(slice<T> value) => new(value.ToArray());
+    public static implicit operator array<T>(slice<T> value)
+    {
+        return new array<T>(value.ToArray());
+    }
 
     // slice<T> to slice<T> comparisons
-    public static bool operator ==(slice<T> a, slice<T> b) => a.Equals(b);
+    public static bool operator ==(slice<T> a, slice<T> b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(slice<T> a, slice<T> b) => !(a == b);
+    public static bool operator !=(slice<T> a, slice<T> b)
+    {
+        return !(a == b);
+    }
 
     // slice<T> to ISlice comparisons
-    public static bool operator ==(ISlice? a, slice<T> b) => a?.Equals(b) ?? false;
+    public static bool operator ==(ISlice? a, slice<T> b)
+    {
+        return a?.Equals(b) ?? false;
+    }
 
-    public static bool operator !=(ISlice? a, slice<T> b) => !(a == b);
+    public static bool operator !=(ISlice? a, slice<T> b)
+    {
+        return !(a == b);
+    }
 
-    public static bool operator ==(slice<T> a, ISlice? b) => a.Equals(b);
+    public static bool operator ==(slice<T> a, ISlice? b)
+    {
+        return a.Equals(b);
+    }
 
-    public static bool operator !=(slice<T> a, ISlice? b) => !(a == b);
+    public static bool operator !=(slice<T> a, ISlice? b)
+    {
+        return !(a == b);
+    }
 
     // slice<T> to nil comparisons
-    public static bool operator ==(slice<T> slice, NilType _) => slice.Length == 0 && slice.Capacity == 0;
-    
-    public static bool operator !=(slice<T> slice, NilType nil) => !(slice == nil);
+    public static bool operator ==(slice<T> slice, NilType _)
+    {
+        return slice.Length == 0 && slice.Capacity == 0;
+    }
 
-    public static bool operator ==(NilType nil, slice<T> slice) => slice == nil;
+    public static bool operator !=(slice<T> slice, NilType nil)
+    {
+        return !(slice == nil);
+    }
 
-    public static bool operator !=(NilType nil, slice<T> slice) => slice != nil;
+    public static bool operator ==(NilType nil, slice<T> slice)
+    {
+        return slice == nil;
+    }
 
-    public static implicit operator slice<T>(NilType _) => default;
+    public static bool operator !=(NilType nil, slice<T> slice)
+    {
+        return slice != nil;
+    }
+
+    public static implicit operator slice<T>(NilType _)
+    {
+        return default;
+    }
 
     #endregion
 
     #region [ Interface Implementations ]
 
-    object ICloneable.Clone() => MemberwiseClone();
+    object ICloneable.Clone()
+    {
+        return MemberwiseClone();
+    }
 
-    ISlice ISlice.Append(object[] elems) => Append(elems.Cast<T>().ToArray());
+    ISlice ISlice.Append(object[] elems)
+    {
+        return Append(elems.Cast<T>().ToArray());
+    }
 
-    ISlice<T> ISlice<T>.Append(params T[] elems) => Append(elems);
+    ISlice<T> ISlice<T>.Append(params T[] elems)
+    {
+        return Append(elems);
+    }
 
-    Array IArray.Source => m_array;
+    Array IArray.Source
+    {
+        get
+        {
+            return m_array;
+        }
+    }
 
     object? IArray.this[nint index]
     {
-        get => this[index];
-        set => this[index] = (T)value!;
+        get
+        {
+            return this[index];
+        }
+        set
+        {
+            this[index] = (T)value!;
+        }
     }
 
     T IList<T>.this[int index]
     {
-        get => this[index];
+        get
+        {
+            return this[index];
+        }
         set
         {
             if (index < 0 || index >= m_length)
@@ -348,31 +477,82 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
         }
     }
 
-    int IList<T>.IndexOf(T item) => (int)IndexOf(item);
+    int IList<T>.IndexOf(T item)
+    {
+        return (int)IndexOf(item);
+    }
 
-    void IList<T>.Insert(int index, T item) => throw new NotSupportedException();
+    void IList<T>.Insert(int index, T item)
+    {
+        throw new NotSupportedException();
+    }
 
-    void IList<T>.RemoveAt(int index) => throw new NotSupportedException();
+    void IList<T>.RemoveAt(int index)
+    {
+        throw new NotSupportedException();
+    }
 
-    int IReadOnlyCollection<T>.Count => (int)m_length;
+    int IReadOnlyCollection<T>.Count
+    {
+        get
+        {
+            return (int)m_length;
+        }
+    }
 
-    T IReadOnlyList<T>.this[int index] => this[m_low + index];
+    T IReadOnlyList<T>.this[int index]
+    {
+        get
+        {
+            return this[m_low + index];
+        }
+    }
 
-    bool ICollection<T>.IsReadOnly => false;
+    bool ICollection<T>.IsReadOnly
+    {
+        get
+        {
+            return false;
+        }
+    }
 
-    int ICollection<T>.Count => (int)m_length;
+    int ICollection<T>.Count
+    {
+        get
+        {
+            return (int)m_length;
+        }
+    }
 
-    void ICollection<T>.Add(T item) => throw new NotSupportedException();
+    void ICollection<T>.Add(T item)
+    {
+        throw new NotSupportedException();
+    }
 
-    bool ICollection<T>.Contains(T item) => Contains(item);
+    bool ICollection<T>.Contains(T item)
+    {
+        return Contains(item);
+    }
 
-    void ICollection<T>.Clear() => throw new NotSupportedException();
+    void ICollection<T>.Clear()
+    {
+        throw new NotSupportedException();
+    }
 
-    bool ICollection<T>.Remove(T item) => throw new NotSupportedException();
+    bool ICollection<T>.Remove(T item)
+    {
+        throw new NotSupportedException();
+    }
 
-    IEnumerator<T> IEnumerable<T>.GetEnumerator() => new SliceEnumerator(this);
+    IEnumerator<T> IEnumerable<T>.GetEnumerator()
+    {
+        return new SliceEnumerator(this);
+    }
 
-    IEnumerator IEnumerable.GetEnumerator() => new SliceEnumerator(this);
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return new SliceEnumerator(this);
+    }
 
     [Serializable]
     private sealed class SliceEnumerator : IEnumerator<T>
@@ -416,9 +596,18 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumer
             }
         }
 
-        object? IEnumerator.Current => Current;
+        object? IEnumerator.Current
+        {
+            get
+            {
+                return Current;
+            }
+        }
 
-        void IEnumerator.Reset() => m_current = m_start - 1;
+        void IEnumerator.Reset()
+        {
+            m_current = m_start - 1;
+        }
 
         public void Dispose()
         {
@@ -509,8 +698,10 @@ public static class SliceExtensions
     //      s = s[3:5]   => s = s.slice(3, 5);
     //      s = s[:4]    => s = s.slice(high:4)
     //      s = s[1:3:5] => s = s.slice(1, 3, 5) // Full slice expression
-    public static slice<T> slice<T>(this in slice<T> slice, nint low = -1, nint high = -1, nint max = -1) => 
-        slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
+    public static slice<T> slice<T>(this in slice<T> slice, nint low = -1, nint high = -1, nint max = -1)
+    {
+        return slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
+    }
 
     // slice of an array helper function
     public static slice<T> slice<T>(this T[] array, nint low = -1, nint high = -1, nint max = -1)
@@ -537,10 +728,14 @@ public static class SliceExtensions
         return new slice<T>(array, low, high);
     }
 
-    public static slice<T> slice<T>(this array<T> array, nint low = -1, nint high = -1, nint max = -1) =>
-        array.m_array.slice(low, high, max);
+    public static slice<T> slice<T>(this array<T> array, nint low = -1, nint high = -1, nint max = -1)
+    {
+        return array.m_array.slice(low, high, max);
+    }
 
     // slice of a string helper function
-    public static slice<byte> slice(this @string source, nint low = -1, nint high = -1, nint max = -1) =>
-        source.m_value.slice(low, high, max);
+    public static slice<byte> slice(this @string source, nint low = -1, nint high = -1, nint max = -1)
+    {
+        return source.m_value.slice(low, high, max);
+    }
 }
