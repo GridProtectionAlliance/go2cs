@@ -124,10 +124,10 @@ var keywords = NewHashSet[string]([]string{
 */
 
 func main() {
-	// Define command line flags for options
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	commandLine.SetOutput(io.Discard)
 
+	// Define command line flags for options
 	indentSpaces := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDecl := commandLine.Bool("var", true, "Prefer \"var\" declarations")
 	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
@@ -142,19 +142,20 @@ func main() {
 		}
 
 		fmt.Fprintln(os.Stderr, `
-File usage: go run main.go [options] <input.go> [output.cs]
- Dir usage: go run main.go [options] <input_dir> [output_dir]
+File usage: go2cs [options] <input.go> [output.cs]
+ Dir usage: go2cs [options] <input_dir> [output_dir]
  
  Options:`)
 
+		commandLine.SetOutput(nil)
 		commandLine.PrintDefaults()
 
 		fmt.Fprintln(os.Stderr, `
 Examples:
-  go run main.go -indent 2 -var=false example.go conv/example.cs
-  go run main.go example.go
-  go run main.go -cgo=true input_dir output_dir
-  go run main.go package_dir
+  go2cs -indent 2 -var=false example.go conv/example.cs
+  go2cs example.go
+  go2cs -cgo=true input_dir output_dir
+  go2cs package_dir
  `)
 		os.Exit(1)
 	}
