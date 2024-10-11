@@ -125,31 +125,31 @@ var keywords = NewHashSet[string]([]string{
 func main() {
 	// Define command line flags for options
 	indentSpaces := flag.Int("indent", 4, "Number of spaces for indentation")
-	preferVarDecl := flag.Bool("var", true, "Prefer variable declarations")
+	preferVarDecl := flag.Bool("var", true, "Prefer \"var\" declarations")
 	parseCgoTargets := flag.Bool("cgo", false, "Parse cgo targets")
-	showParseTree := flag.Bool("tree", true, "Show parse tree")
+	showParseTree := flag.Bool("tree", false, "Show parse tree")
 
 	flag.Parse()
 
 	inputFilePath := strings.TrimSpace(flag.Arg(0))
 
 	if inputFilePath == "" {
-		log.Fatalln(`
+		fmt.Fprintln(os.Stderr, `
 File usage: go run main.go [options] <input.go> [output.cs]
  Dir usage: go run main.go [options] <input_dir> [output_dir]
+ 
+ Options:`)
 
-Options:
-  -indent <int>      Number of spaces for indentation (default 4)
-  -var               Prefer "var" declarations (default true)
-  -cgo               Parse cgo targets (default false)
-  -tree              Show parse tree (default true)
+		flag.PrintDefaults()
 
+		fmt.Fprintln(os.Stderr, `
 Examples:
   go run main.go -indent 2 -var=false example.go conv/example.cs
   go run main.go example.go
   go run main.go -cgo=true input_dir output_dir
   go run main.go package_dir
  `)
+		os.Exit(1)
 	}
 
 	options := Options{
@@ -543,8 +543,8 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
 
 func isInherentlyHeapAllocatedType(typ types.Type) bool {
 	switch typ.Underlying().(type) {
-	case *types.Map, *types.Slice, *types.Chan, *types.Interface, *types.Signature:
-		// Maps, slices, channels, interfaces, and functions are reference types
+	case *types.Map, *types.Slice, *types.Chan, *types.Interface, *types.Signature, *types.Pointer:
+		// Maps, slices, channels, interfaces, functions and pointers are reference types
 		return true
 	default:
 		return false
