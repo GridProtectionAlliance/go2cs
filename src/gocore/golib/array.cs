@@ -38,6 +38,11 @@ public interface IArray : IEnumerable, ICloneable
     nint Length { get; }
 
     object? this[nint index] { get; set; }
+
+    bool IndexIsValid(nint index)
+    {
+        return index >= 0 && index < Length;
+    }
 }
 
 public interface IArray<T> : IArray

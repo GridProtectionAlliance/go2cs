@@ -1,7 +1,6 @@
 // Pre-package Comments
 
 // Package Comments
-
 namespace go;
 
 // Pre-comment
@@ -152,18 +151,18 @@ public static (nint E2, @string p) Testing() {
 
     fmt.Println(E2);
     E2 = 1;
-    var B2 = 2;
+    nint B2 = 2;
     fmt.Println(E2, B2);
     p = "Hello"u8;
     {
-        var E2ꞥ1 = 99;
-        var B2ꞥ1 = 199;
+        nint E2ꞥ1 = 99;
+        nint B2ꞥ1 = 199;
         fmt.Println(E2ꞥ1, B2ꞥ1);
     }
 
     {
         E2 = 100;
-        var B2ꞥ2 = 200;
+        nint B2ꞥ2 = 200;
         fmt.Println(E2, B2ꞥ2);
     }
 

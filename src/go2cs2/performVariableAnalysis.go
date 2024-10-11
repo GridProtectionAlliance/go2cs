@@ -129,7 +129,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		}
 
 		varNames[varObj] = adjustedName
-		v.identNames[ident] = getSanitizedIdentifier(adjustedName)
+		v.identNames[ident] = adjustedName
 		v.isReassigned[ident] = false
 
 		scope := v.scopeStack[len(v.scopeStack)-1]
@@ -323,7 +323,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			if obj := v.info.Uses[node]; obj != nil {
 				if varObj, ok := obj.(*types.Var); ok {
 					if adjustedName, ok := varNames[varObj]; ok {
-						v.identNames[node] = getSanitizedIdentifier(adjustedName)
+						v.identNames[node] = adjustedName
 					}
 				}
 			}

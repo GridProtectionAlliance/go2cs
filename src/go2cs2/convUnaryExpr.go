@@ -8,12 +8,14 @@ import (
 )
 
 func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
+	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
-		// Check if the expression is an address of an indexed array or slice
+		// Check if the unary expression is an address of an indexed array or slice
 		if indexExpr, ok := unaryExpr.X.(*ast.IndexExpr); ok {
 			typeName := v.getTypeName(indexExpr.X, true)
 
 			if strings.HasPrefix(typeName, "[") {
+				// For an indexed reference into an array or slice, we use the "ptr.at<T>(index)" syntax
 				csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
 				return fmt.Sprintf("%s.at<%s>(%s)", AddressPrefix+v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
 			}

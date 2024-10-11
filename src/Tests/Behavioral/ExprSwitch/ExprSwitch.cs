@@ -8,8 +8,8 @@ public static partial class main_package {
 
 private static nint x = 1;
 
-private static nint getNext() {
-    x++;
+private static nint getNext() {    x++;
+
     return x;
 }
 
@@ -26,14 +26,11 @@ private static @string getStr3(@string format, params object[] a) {
 }
 
 private static void Main() {
-
     fmt.Println(getStr("test"u8));
     fmt.Println(getStr2("hello, ", "world"u8));
     fmt.Println(getStr3("hello, %s"u8, "world"));
-
     // Here's a basic `switch`.
-
-    var i = 2;
+    nint i = 2;
     fmt.Print("Write ", i, " as ");
     switch (i) {
     case 1:
@@ -42,8 +39,8 @@ private static void Main() {
     case 2:
         fmt.Println("two");
         break;
-    case 3: {
-
+    case 3:
+        {
             fmt.Println("three");
         }
 
@@ -56,22 +53,14 @@ private static void Main() {
         break;
     }
 
-
-
-    var xꞥ1 = 5;
-    fmt.Println(xꞥ1);
- {
-
-
-        var xꞥ2 = 6;
-        fmt.Println(xꞥ2);
+    nint x = 5;
+    fmt.Println(x);
+    {
+        nint xꞥ1 = 6;
+        fmt.Println(xꞥ1);
     }
 
-
-    fmt.Println(xꞥ1);
-
-
-
+    fmt.Println(x);
     // You can use commas to separate multiple expressions
     // in the same `case` statement. We use the optional
     // `default` case in this example as well.
@@ -88,29 +77,21 @@ private static void Main() {
         break;
     }
 
-
-
-
     // Case Mon comment
     // `switch` without an expression is an alternate way
     // to express if/else logic. Here we also show how the
     // `case` expressions can be non-constants.
-
     var t = time.Now();
-
 
     // Before noon
     // After noon
     // "i" before should be saved
     fmt.Printf("i before = %d\n"u8, i);
-
     // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
     {
 
-
-        var iꞥ1 = 1;
+        nint iꞥ1 = 1;
     }
-
 
     // "i" after should be restored
     fmt.Printf("i after = %d\n"u8, i);

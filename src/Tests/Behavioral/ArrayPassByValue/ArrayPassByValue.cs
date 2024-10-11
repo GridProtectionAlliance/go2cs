@@ -31,7 +31,7 @@ private static void Main() {
 private static void stest(ptr<@string> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
-    // *p
+    p = "hello"u8;
 }
 
 // Arrays are passed by value (a full copy)

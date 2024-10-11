@@ -389,6 +389,10 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 }
 
 func getSanitizedIdentifier(identifier string) string {
+	if strings.HasPrefix(identifier, "@") {
+		return identifier // Already sanitized
+	}
+
 	if keywords.Contains(identifier) ||
 		strings.HasPrefix(identifier, AddressPrefix) ||
 		strings.HasSuffix(identifier, ClassSuffix) ||
@@ -447,6 +451,8 @@ func getIdentifier(node ast.Node) *ast.Ident {
 		if identExpr, ok := indexExpr.X.(*ast.Ident); ok {
 			ident = identExpr
 		}
+	} else if starExpr, ok := node.(*ast.StarExpr); ok {
+		ident = getIdentifier(starExpr.X)
 	} else if identExpr, ok := node.(*ast.Ident); ok {
 		ident = identExpr
 	}

@@ -27,7 +27,6 @@ using System;
 
 namespace go;
 
-
 /// <summary>
 /// Represents a heap allocated reference to an instance of type <typeparamref name="T"/>.
 /// </summary>
@@ -52,7 +51,7 @@ namespace go;
 /// </remarks>
 public class ptr<T>
 {
-    private readonly (object, int)? m_srcIndex;
+    private readonly (IArray, int)? m_arrayRefIndex;
     private T m_val;
 
     /// <summary>
@@ -64,10 +63,10 @@ public class ptr<T>
         m_val = value;
     }
 
-    // Creates a new indexed reference to an existing heap allocated reference.
-    internal ptr(object src, int index)
+    // Create a new indexed reference into an existing heap allocated array
+    internal ptr(IArray arrayRef, int index)
     {
-        m_srcIndex = (src, index);
+        m_arrayRefIndex = (arrayRef, index);
     }
 
     /// <summary>
@@ -89,23 +88,20 @@ public class ptr<T>
     {
         get
         {
-            if (m_srcIndex is null)
+            if (m_arrayRefIndex is null)
                 return ref m_val;
 
-            (object src, int index) = m_srcIndex.Value;
+            (IArray arrayRef, int index) = m_arrayRefIndex.Value;
 
-            if (src is ptr<array<T>> array)
-                return ref array.val[index];
-
-            if (src is ptr<slice<T>> slice)
-                return ref slice.val[index];
+            if (arrayRef is IArray<T> array)
+                return ref array[index];
 
             throw new InvalidOperationException("Cannot get reference to value, source is not a valid array or slice pointer.");
         }
     }
 
     /// <summary>
-    /// Gets a pointer to element at the specified index for a <see cref="array{T}"/> or <see cref="slice{T}"/> types.
+    /// Gets a pointer to element at the specified index for <see cref="array{T}"/> or <see cref="slice{T}"/> types.
     /// </summary>
     /// <typeparam name="Telem">Element type of array or slice.</typeparam>
     /// <param name="index">Index of element to get pointer for.</param>
@@ -113,8 +109,13 @@ public class ptr<T>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
     public ptr<Telem> at<Telem>(int index)
     {
-        if (m_val is array<Telem> or slice<Telem>)
-            return new ptr<Telem>(this, index);
+        if (m_val is IArray<Telem> array)
+        {
+            if (!array.IndexIsValid(index))
+                throw new IndexOutOfRangeException("Index is out of range for array or slice.");
+
+            return new ptr<Telem>(array, index);
+        }
 
         throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
     }
