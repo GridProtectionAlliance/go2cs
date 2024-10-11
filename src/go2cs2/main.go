@@ -9,6 +9,7 @@ import (
 	"go/printer"
 	"go/token"
 	"go/types"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -124,23 +125,29 @@ var keywords = NewHashSet[string]([]string{
 
 func main() {
 	// Define command line flags for options
-	indentSpaces := flag.Int("indent", 4, "Number of spaces for indentation")
-	preferVarDecl := flag.Bool("var", true, "Prefer \"var\" declarations")
-	parseCgoTargets := flag.Bool("cgo", false, "Parse cgo targets")
-	showParseTree := flag.Bool("tree", false, "Show parse tree")
+	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
+	commandLine.SetOutput(io.Discard)
 
-	flag.Parse()
+	indentSpaces := commandLine.Int("indent", 4, "Number of spaces for indentation")
+	preferVarDecl := commandLine.Bool("var", true, "Prefer \"var\" declarations")
+	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
+	showParseTree := commandLine.Bool("tree", false, "Show parse tree")
 
-	inputFilePath := strings.TrimSpace(flag.Arg(0))
+	err := commandLine.Parse(os.Args[1:])
+	inputFilePath := strings.TrimSpace(commandLine.Arg(0))
 
-	if inputFilePath == "" {
+	if err != nil || inputFilePath == "" {
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		}
+
 		fmt.Fprintln(os.Stderr, `
 File usage: go run main.go [options] <input.go> [output.cs]
  Dir usage: go run main.go [options] <input_dir> [output_dir]
  
  Options:`)
 
-		flag.PrintDefaults()
+		commandLine.PrintDefaults()
 
 		fmt.Fprintln(os.Stderr, `
 Examples:
@@ -233,9 +240,9 @@ Examples:
 
 	outputFilePath := ""
 
-	if flag.NArg() > 1 {
+	if commandLine.NArg() > 1 {
 		// If the user has provided a second argument, we will use it as the output directory or file
-		outputFilePath = strings.TrimSpace(flag.Arg(1))
+		outputFilePath = strings.TrimSpace(commandLine.Arg(1))
 	}
 
 	globalIdentNames := make(map[*ast.Ident]string)
