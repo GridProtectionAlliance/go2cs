@@ -124,7 +124,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 
 			if ident == nil {
 				// Handle unexpected types of LHS expressions
-				result.WriteString("// " + v.getPrintedNode(lhs))
+				println("WARNING: Undetected AssignStmt Lhs identifier for: " + v.getPrintedNode(lhs))
+				result.WriteString("// undetected identifier in 'visitAssignStmt':" + v.getPrintedNode(lhs))
 			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))
