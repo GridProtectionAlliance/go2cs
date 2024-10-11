@@ -9,7 +9,7 @@ private static void Main() {
 
     a[0] = "Hello"u8;
     a[1] = "World"u8;
-    var p = Ꮡa.of<@string>(0);
+    var p = Ꮡa.at<@string>(0);
     test(a);
     fmt.Println(a[0], a[1]);
     fmt.Println();
@@ -31,7 +31,7 @@ private static void Main() {
 private static void stest(ptr<@string> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
-    p = "hello"u8;
+    // *p
 }
 
 // Arrays are passed by value (a full copy)

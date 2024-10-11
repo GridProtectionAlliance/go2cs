@@ -105,18 +105,18 @@ public class ptr<T>
     }
 
     /// <summary>
-    /// Gets a pointer to address of element at the specified index for a <see cref="array{T}"/> or <see cref="slice{T}"/> types.
+    /// Gets a pointer to element at the specified index for a <see cref="array{T}"/> or <see cref="slice{T}"/> types.
     /// </summary>
     /// <typeparam name="Telem">Element type of array or slice.</typeparam>
     /// <param name="index">Index of element to get pointer for.</param>
     /// <returns>Pointer to element at specified index.</returns>
-    /// <exception cref="InvalidOperationException">Cannot get pointer to address of element at index, type is not an array or slice.</exception>
-    public ptr<Telem> of<Telem>(int index)
+    /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
+    public ptr<Telem> at<Telem>(int index)
     {
         if (m_val is array<Telem> or slice<Telem>)
             return new ptr<Telem>(this, index);
 
-        throw new InvalidOperationException("Cannot get pointer to address of element at index, type is not an array or slice.");
+        throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
     }
 
     /// <inheritdoc />
