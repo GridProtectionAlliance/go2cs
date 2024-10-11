@@ -20,14 +20,17 @@ private static void Main() {
     test3(a[..]);
     fmt.Println(a[0], a[1]);
     fmt.Println();
-    nint x = 2;
     var primes = new nint[] { 2, 3, 5, 7, 11, 13 };
-    fmt.Println(primes, x);
-    _Main_();
+    fmt.Println(primes);
+    fmt.Println(a[0]);
+    stest(Ꮡa[0]);
+    fmt.Println(a[0]);
 }
 
-public static void _Main_() {
-    fmt.Println("Main2!");
+private static void stest(ptr<@string> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+    // *p
 }
 
 // Arrays are passed by value (a full copy)

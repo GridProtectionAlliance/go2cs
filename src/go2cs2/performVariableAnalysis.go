@@ -16,10 +16,7 @@ import (
 // use the results of this analysis: `getIdentName` and `isReassignment`.
 
 // Perform variable analysis on the global ValueSpec declarations
-func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
-	v.globalIdentNames = make(map[*ast.Ident]string)
-	v.globalScope = map[string]*types.Var{}
-
+func performGlobalVariableAnalysis(decls []ast.Decl, info *types.Info, globalIdentNames map[*ast.Ident]string, globalScope map[string]*types.Var) {
 	for _, decl := range decls {
 		switch genDecl := decl.(type) {
 		case *ast.GenDecl:
@@ -33,7 +30,7 @@ func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
 							continue
 						}
 
-						obj := v.info.Defs[ident]
+						obj := info.Defs[ident]
 
 						if obj == nil {
 							continue
@@ -46,8 +43,8 @@ func (v *Visitor) performGlobalVariableAnalysis(decls []ast.Decl) {
 							continue
 						}
 
-						v.globalIdentNames[ident] = getSanitizedIdentifier(varName)
-						v.globalScope[varName] = varObj
+						globalIdentNames[ident] = getSanitizedIdentifier(varName)
+						globalScope[varName] = varObj
 					}
 				}
 			}

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/importer"
@@ -10,7 +11,9 @@ import (
 	"go/types"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
+	"sync"
 	"unicode"
 	"unicode/utf8"
 
@@ -23,6 +26,11 @@ type Options struct {
 	preferVarDecl   bool
 	parseCgoTargets bool
 	showParseTree   bool
+}
+
+type FileEntry struct {
+	file     *ast.File
+	filePath string
 }
 
 type Visitor struct {
@@ -115,41 +123,88 @@ var keywords = NewHashSet[string]([]string{
 */
 
 func main() {
-	// TODO: Add option to process an entire package (all files in a directory)
-	if len(os.Args) < 2 {
-		log.Fatalln("Usage: go run main.go <input.go> [output.cs]")
+	// Define command line flags for options
+	indentSpaces := flag.Int("indent", 4, "Number of spaces for indentation")
+	preferVarDecl := flag.Bool("var", true, "Prefer variable declarations")
+	parseCgoTargets := flag.Bool("cgo", false, "Parse cgo targets")
+	showParseTree := flag.Bool("tree", true, "Show parse tree")
+
+	flag.Parse()
+
+	inputFilePath := strings.TrimSpace(flag.Arg(0))
+
+	if inputFilePath == "" {
+		log.Fatalln(`
+File usage: go run main.go [options] <input.go> [output.cs]
+ Dir usage: go run main.go [options] <input_dir> [output_dir]
+
+Options:
+  -indent <int>      Number of spaces for indentation (default 4)
+  -var               Prefer variable declarations (default true)
+  -cgo               Parse cgo targets (default false)
+  -tree              Show parse tree (default true)
+
+Examples:
+  go run main.go -indent 2 -var=false example.go conv/example.cs
+  go run main.go example.go
+  go run main.go -cgo=true input_dir output_dir
+  go run main.go package_dir
+ `)
 	}
 
-	inputFileName := strings.TrimSpace(os.Args[1])
-
-	// Check if the file has a ".go" extension
-	if len(inputFileName) < 3 || inputFileName[len(inputFileName)-3:] != ".go" {
-		log.Fatalln("Invalid file extension for input source file: please provide a .go file as first argument")
-	}
-
-	// TODO: Load options from command line arguments
 	options := Options{
-		indentSpaces:    4,
-		preferVarDecl:   true,
-		parseCgoTargets: false,
-		showParseTree:   true,
+		indentSpaces:    *indentSpaces,
+		preferVarDecl:   *preferVarDecl,
+		parseCgoTargets: *parseCgoTargets,
+		showParseTree:   *showParseTree,
 	}
 
 	fset := token.NewFileSet()
+	files := []FileEntry{}
 
-	files := []*ast.File{}
-
-	// TODO: Handle option to parse all files in the package (dir)
-	file, err := parser.ParseFile(fset, inputFileName, nil, parser.ParseComments|parser.SkipObjectResolution)
-
-	files = append(files, file)
+	// Check if the input is a file or a directory
+	fileInfo, err := os.Stat(inputFilePath)
 
 	if err != nil {
-		log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFileName, err)
+		log.Fatalf("Failed to access input file path \"%s\": %s\n", inputFilePath, err)
 	}
 
-	if options.showParseTree {
-		ast.Fprint(os.Stdout, fset, file, nil)
+	if fileInfo.IsDir() {
+		// If the input is a directory, parse all .go files in the directory
+		err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return err
+			}
+
+			if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
+				file, err := parser.ParseFile(fset, path, nil, parser.ParseComments|parser.SkipObjectResolution)
+
+				if err != nil {
+					return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
+				}
+
+				files = append(files, FileEntry{file, path})
+			}
+
+			return nil
+		})
+
+		if err != nil {
+			log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
+		}
+	} else {
+		// If the input is a single file, parse it
+		if !strings.HasSuffix(inputFilePath, ".go") {
+			log.Fatalln("Invalid file extension for input source file: please provide a .go file as first argument")
+		}
+
+		file, err := parser.ParseFile(fset, inputFilePath, nil, parser.ParseComments|parser.SkipObjectResolution)
+
+		if err != nil {
+			log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)
+		}
+
+		files = append(files, FileEntry{file, inputFilePath})
 	}
 
 	conf := types.Config{Importer: importer.Default()}
@@ -160,62 +215,113 @@ func main() {
 		Uses:  make(map[*ast.Ident]types.Object),
 	}
 
-	pkg, err := conf.Check(".", fset, files, info)
+	extractFiles := func(files []FileEntry) []*ast.File {
+		result := make([]*ast.File, len(files))
+
+		for i, fileEntry := range files {
+			result[i] = fileEntry.file
+		}
+
+		return result
+	}
+
+	pkg, err := conf.Check(".", fset, extractFiles(files), info)
 
 	if err != nil {
-		log.Fatalf("Failed to parse types from input source file \"%s\": %s\n", inputFileName, err)
+		log.Fatalf("Failed to parse types from input source files: %s\n", err)
 	}
 
-	var outputFileName string
+	outputFilePath := ""
 
-	if len(os.Args) > 2 {
-		// If the user has provided a second argument, we will use it as the output file
-		outputFileName = strings.TrimSpace(os.Args[2])
-	} else {
-		// Otherwise, output file will replace ".go" with ".cs"
-		outputFileName = inputFileName[:len(inputFileName)-3] + ".cs"
+	if flag.NArg() > 1 {
+		// If the user has provided a second argument, we will use it as the output directory or file
+		outputFilePath = strings.TrimSpace(flag.Arg(1))
 	}
 
+	globalIdentNames := make(map[*ast.Ident]string)
+	globalScope := map[string]*types.Var{}
+
+	// Pre-process all global variables in package
+	for _, fileEntry := range files {
+		performGlobalVariableAnalysis(fileEntry.file.Decls, info, globalIdentNames, globalScope)
+
+		if options.showParseTree {
+			ast.Fprint(os.Stdout, fset, fileEntry.file, nil)
+		}
+	}
+
+	var concurrentTasks sync.WaitGroup
+
+	for _, fileEntry := range files {
+		concurrentTasks.Add(1)
+
+		go func(fileEntry FileEntry) {
+			defer concurrentTasks.Done()
+
+			visitor := &Visitor{
+				fset:               fset,
+				pkg:                pkg,
+				info:               info,
+				targetFile:         &strings.Builder{},
+				packageImports:     &strings.Builder{},
+				requiredUsings:     HashSet[string]{},
+				importQueue:        HashSet[string]{},
+				standAloneComments: map[token.Pos]string{},
+				sortedCommentPos:   []token.Pos{},
+				processedComments:  HashSet[token.Pos]{},
+				newline:            "\r\n",
+				options:            options,
+				globalIdentNames:   globalIdentNames,
+				globalScope:        globalScope,
+
+				// BlockStmt variable initializations
+				blocks:                    Stack[*strings.Builder]{},
+				blockInnerPrefixInjection: Stack[string]{},
+				blockInnerSuffixInjection: Stack[string]{},
+				blockOuterPrefixInjection: Stack[string]{},
+				blockOuterSuffixInjection: Stack[string]{},
+				identEscapesHeap:          map[*ast.Ident]bool{},
+			}
+
+			visitor.visitFile(fileEntry.file)
+
+			var outputFileName string
+
+			if outputFilePath != "" {
+				if fileInfo.IsDir() {
+					outputFileName = filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
+				} else {
+					outputFileName = outputFilePath
+				}
+			} else {
+				outputFileName = strings.TrimSuffix(fileEntry.filePath, ".go") + ".cs"
+			}
+
+			if err := visitor.writeOutputFile(outputFileName); err != nil {
+				log.Printf("%s\n", err)
+			}
+		}(fileEntry)
+	}
+
+	concurrentTasks.Wait()
+}
+
+func (v *Visitor) writeOutputFile(outputFileName string) error {
 	outputFile, err := os.Create(outputFileName)
 
 	if err != nil {
-		log.Fatalf("Failed to create output source file \"%s\": %s\n", outputFileName, err)
+		return fmt.Errorf("failed to create output source file \"%s\": %s", outputFileName, err)
 	}
 
 	defer outputFile.Close()
 
-	visitor := &Visitor{
-		fset:               fset,
-		pkg:                pkg,
-		info:               info,
-		targetFile:         &strings.Builder{},
-		packageImports:     &strings.Builder{},
-		requiredUsings:     HashSet[string]{},
-		importQueue:        HashSet[string]{},
-		standAloneComments: map[token.Pos]string{},
-		sortedCommentPos:   []token.Pos{},
-		processedComments:  HashSet[token.Pos]{},
-		newline:            "\r\n",
-		options:            options,
+	_, err = outputFile.WriteString(v.targetFile.String())
 
-		// BlockStmt variable initializations
-		blocks:                    Stack[*strings.Builder]{},
-		blockInnerPrefixInjection: Stack[string]{},
-		blockInnerSuffixInjection: Stack[string]{},
-		blockOuterPrefixInjection: Stack[string]{},
-		blockOuterSuffixInjection: Stack[string]{},
-		identEscapesHeap:          map[*ast.Ident]bool{},
+	if err != nil {
+		return fmt.Errorf("failed to write to output source file \"%s\": %s", outputFileName, err)
 	}
 
-	// TODO: To consider a package as a whole, all files in the package should
-	// be parsed and processed. Since global variables could be defined in any
-	// file in the package, we need to process `performGlobalVariableAnalysis`
-	// for all files in the package before further processing files with the
-	// `visitFile` function.
-
-	visitor.visitFile(file)
-
-	outputFile.WriteString(visitor.targetFile.String())
+	return nil
 }
 
 func (v *Visitor) addRequiredUsing(usingName string) {
