@@ -17,7 +17,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
 			if strings.HasPrefix(typeName, "[") {
 				// For an indexed reference into an array or slice, we use the "ptr.at<T>(index)" syntax
 				csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
-				return fmt.Sprintf("%s.at<%s>(%s)", AddressPrefix+v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
+				return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
 			}
 		}
 
