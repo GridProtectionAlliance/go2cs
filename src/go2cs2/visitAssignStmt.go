@@ -19,6 +19,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 	reassignedCount := 0
 	declaredCount := 0
 
+	// Check for interface types in LHS as RHS will need to be casted to the interface type
+	lhsTypeIsInterface := make([]bool, lhsLen)
+
 	// Check for string types in LHS, u8 readonly spans are not supported in value tuple
 	lhsTypeIsString := make([]bool, lhsLen)
 	anyTypeIsString := false
@@ -44,6 +47,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 					declaredCount++
 				}
 			}
+
+			lhsTypeIsInterface[i] = v.isInterface(ident)
 
 			typeName := v.getTypeName(ident, true)
 
@@ -101,7 +106,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 			if i > 0 {
 				result.WriteString(", ")
 			}
-			result.WriteString(v.convExpr(rhs, nil))
+
+			rhsExpr := v.convExpr(rhs, nil)
+
+			if lhsTypeIsInterface[i] {
+				result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+			} else {
+				result.WriteString(rhsExpr)
+			}
 		}
 
 		if rhsLen > 1 {
@@ -130,7 +142,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(" = ")
-					result.WriteString(v.convExpr(rhs, nil))
+
+					rhsExpr := v.convExpr(rhs, nil)
+
+					if lhsTypeIsInterface[i] {
+						result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+					} else {
+						result.WriteString(rhsExpr)
+					}
+
 					result.WriteString(";")
 				} else if lhsTypeIsString[i] {
 					// Handle string variables
@@ -159,7 +179,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(" = ")
-					result.WriteString(v.convExpr(rhs, nil))
+
+					rhsExpr := v.convExpr(rhs, nil)
+
+					if lhsTypeIsInterface[i] {
+						result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+					} else {
+						result.WriteString(rhsExpr)
+					}
+
 					result.WriteString(";")
 				}
 			}

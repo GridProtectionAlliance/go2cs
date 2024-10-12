@@ -21,7 +21,7 @@ private static void Main() {
     test3(a[..]);
     fmt.Println(a[0], a[1]);
     fmt.Println();
-    var primes = new nint[] { 2, 3, 5, 7, 11, 13 };
+    var primes = new nint[] {2, 3, 5, 7, 11, 13 };
     fmt.Println(primes);
     fmt.Println(a[0]);
     stest(p);

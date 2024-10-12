@@ -434,22 +434,54 @@ func isComparisonOperator(op string) bool {
 	}
 }
 
-func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
-	exprType := v.info.TypeOf(expr)
+func (v *Visitor) isInterface(ident *ast.Ident) bool {
+	obj := v.info.ObjectOf(ident)
 
-	if underlying {
-		exprType = exprType.Underlying()
+	if obj == nil {
+		return false
 	}
 
-	return getTypeName(exprType)
+	return isInterface(obj.Type())
 }
 
-func getTypeName(t types.Type) string {
-	if named, ok := t.(*types.Named); ok {
-		return named.Obj().Name()
+func isInterface(t types.Type) bool {
+	exprType := t.Underlying()
+
+	_, isInterface := exprType.(*types.Interface)
+
+	return isInterface
+}
+
+func paramsAreInterfaces(paramTypes *types.Tuple) []bool {
+	if paramTypes == nil {
+		return nil
 	}
 
-	return t.String()
+	paramIsInterface := make([]bool, paramTypes.Len())
+
+	for i := 0; i < paramTypes.Len(); i++ {
+		param := paramTypes.At(i)
+		paramIsInterface[i] = isInterface(param.Type())
+	}
+
+	return paramIsInterface
+}
+
+func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr string) string {
+	return convertToInterfaceType(v.getType(interfaceExpr, false), targetExpr)
+}
+
+func convertToInterfaceType(interfaceType types.Type, targetExpr string) string {
+	result := &strings.Builder{}
+
+	// Convert to interface type using Go converted interface ".As" method,
+	// this handles duck typed Go interface implementations
+	result.WriteString(convertToCSTypeName(getTypeName(interfaceType)))
+	result.WriteString(".As(")
+	result.WriteString(targetExpr)
+	result.WriteRune(')')
+
+	return result.String()
 }
 
 func getIdentifier(node ast.Node) *ast.Ident {
@@ -466,6 +498,32 @@ func getIdentifier(node ast.Node) *ast.Ident {
 	}
 
 	return ident
+}
+
+func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
+	exprType := v.info.TypeOf(expr)
+
+	if exprType == nil {
+		return nil
+	}
+
+	if underlying {
+		return exprType.Underlying()
+	}
+
+	return exprType
+}
+
+func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
+	return getTypeName(v.getType(expr, underlying))
+}
+
+func getTypeName(t types.Type) string {
+	if named, ok := t.(*types.Named); ok {
+		return named.Obj().Name()
+	}
+
+	return t.String()
 }
 
 func getCSTypeName(t types.Type) string {
@@ -516,6 +574,10 @@ func convertToCSFullTypeName(typeName string) string {
 	switch typeName {
 	case "int":
 		return "nint"
+	case "uint":
+		return "nuint"
+	case "bool":
+		return "bool"
 	case "float":
 		return "float64"
 	case "complex64":
@@ -525,7 +587,7 @@ func convertToCSFullTypeName(typeName string) string {
 	case "interface{}":
 		return "object"
 	default:
-		return typeName
+		return getSanitizedIdentifier(typeName)
 	}
 }
 

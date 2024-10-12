@@ -81,6 +81,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						paramName := v.getIdentName(ident)
 
 						resultParameters.WriteString(v.newline)
+
 						v.writeString(resultParameters, fmt.Sprintf("%s%s %s = default;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName))
 
 						paramIndex++

@@ -45,12 +45,12 @@ public interface error : IFormattable
 
     public static error As<T>(in T target)
     {
-        return (error<T>)target!;
+        return new error<T>(target!);
     }
 
     public static error As<T>(ptr<T> target_ptr)
     {
-        return (error<T>)target_ptr;
+        return new error<T>(target_ptr);
     }
 
     public static error? As(object target)

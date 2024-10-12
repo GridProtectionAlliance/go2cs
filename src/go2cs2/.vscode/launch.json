@@ -13,9 +13,10 @@
             "args": [
                 //"-var=false",
                 "-tree",
-                //"H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
-                //"H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
-                "H:\\Projects\\go2cs\\src\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
+                //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
+                //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
+                //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
+                "..\\Tests\\Behavioral\\InterfaceCasting\\InterfaceCasting.go",
             ]
         }
     ]

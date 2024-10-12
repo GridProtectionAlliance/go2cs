@@ -10,11 +10,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	v.writeOutput("return")
 
 	var context *BasicLitContext
+	signature := v.currentFunction.Signature()
 
 	if returnStmt.Results == nil {
 		// Check if result signature has named return values
 		if v.currentFunction != nil {
-			signature := v.currentFunction.Signature()
 
 			results := &strings.Builder{}
 
@@ -57,12 +57,22 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 			context = &BasicLitContext{u8StringOK: false}
 		}
 
+		resultParams := signature.Results()
+		resultParamIsInterface := paramsAreInterfaces(resultParams)
+
 		for i, expr := range returnStmt.Results {
 			if i > 0 {
 				v.targetFile.WriteString(", ")
 			}
 
-			v.targetFile.WriteString(v.convExpr(expr, context))
+			resultExpr := v.convExpr(expr, context)
+
+			if resultParamIsInterface[i] {
+				resultParamType := resultParams.At(i).Type()
+				v.targetFile.WriteString(convertToInterfaceType(resultParamType, resultExpr))
+			} else {
+				v.targetFile.WriteString(resultExpr)
+			}
 		}
 
 		if len(returnStmt.Results) > 1 {

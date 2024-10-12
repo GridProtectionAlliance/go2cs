@@ -177,7 +177,7 @@ private static void Main() {
     fmt.Println(x);
     // Where am I?
     // Person slice
-    var people = new Person[] {  // EOL Comment
+    var people = new Person[] { // EOL Comment
         new(
             Name: "Person1"u8, // Name
             Age: 26, // Age
