@@ -8,9 +8,9 @@ public static partial class main_package {
 
 private static nint x = 1;
 
-private static nint getNext() {    x++;
-
-    return x;
+private static int32 getNext() {
+    x++;
+    return int32(x);
 }
 
 private static @string getStr(@string test) {
@@ -45,8 +45,8 @@ private static void Main() {
         }
 
         break;
-    case 4:
-        fmt.Println("four");
+    case 4 or 5 or 6:
+        fmt.Println("four, five or siz");
         break;
     default:
         fmt.Println("unknown");
@@ -56,8 +56,8 @@ private static void Main() {
     nint x = 5;
     fmt.Println(x);
     {
-        nint xꞥ1 = 6;
-        fmt.Println(xꞥ1);
+        nint xɅ1 = 6;
+        fmt.Println(xɅ1);
     }
 
     fmt.Println(x);
@@ -65,8 +65,7 @@ private static void Main() {
     // in the same `case` statement. We use the optional
     // `default` case in this example as well.
     switch (time.Now().Weekday()) {
-    case time.Saturday:
-    case time.Sunday:
+    case time.Saturday or time.Sunday:
         fmt.Println("It's the weekend");
         break;
     case time.Monday:
@@ -82,19 +81,105 @@ private static void Main() {
     // to express if/else logic. Here we also show how the
     // `case` expressions can be non-constants.
     var t = time.Now();
+    {
+        switch (ᐧ) {
+        case ᐧ when t.Hour() is < 12:
+            fmt.Println("It's before noon");
+            break;
+        default:
+            fmt.Println("It's after noon");
+            break;
+        }
+    }
 
     // Before noon
     // After noon
+    // Here is a more complex switch
+    nint hour = 1;
+    nint hour1 = time.Now().Hour();
+    {
+        nint hourɅ1 = time.Now().Hour();
+        switch (ᐧ) {
+        case ᐧ when hourɅ1 is 1 or < 12 or 2:
+            fmt.Println("Good morning!");
+            break;
+        case ᐧ when (hourɅ1 == 1) || (hourɅ1 < 12) || (hourɅ1 == 2 || hour1 == 4):
+            fmt.Println("Good morning (opt 2)!");
+            break;
+        case ᐧ when hourɅ1 is < 17:
+            fmt.Println("Good afternoon!");
+            break;
+        case ᐧ when hourɅ1 is 0:
+            fmt.Println("Midnight!");
+            break;
+        case ᐧ when hourɅ1 == 0 && hour1 == 1:
+            fmt.Println("Midnight (opt 2)!");
+            break;
+        default:
+            fmt.Println("Good evening!");
+            break;
+        }
+    }
+
+    // missing expression means "true"
+    fmt.Println(hour);
+    var c = '\r';
+    switch (c) {
+    case ' ' or '\t' or '\n' or '\f' or '\r':
+        fmt.Println("whitespace");
+        break;
+    }
+
     // "i" before should be saved
     fmt.Printf("i before = %d\n"u8, i);
     // Here is a switch with simple statement and a redeclared identifier plus a fallthrough
     {
-
-        nint iꞥ1 = 1;
+        nint iɅ1 = 1;
+        var exprꞥ1 = getNext();
+        var matchꞥ1 = false;
+        if (exprꞥ1 is -1) { matchꞥ1 = true;
+            fmt.Println("negative");
+        }
+        if (exprꞥ1 is 0) { matchꞥ1 = true;
+            fmt.Println("zero");
+        }
+        if (exprꞥ1 is 1 or 2) { matchꞥ1 = true;
+            fmt.Println("one or two");
+            fallthrough = true;
+        }
+        if (fallthrough || exprꞥ1 is 3) { matchꞥ1 = true;
+            fmt.Printf("three, but x=%d and i now = %d\n"u8, x, iɅ1);
+            fallthrough = true;
+        }
+        if (fallthrough || !matchꞥ1) { /* default: */
+            fmt.Println("plus, always a default here because of fallthrough");
+        }
     }
 
     // "i" after should be restored
     fmt.Printf("i after = %d\n"u8, i);
+    {
+        var next = getNext();
+        var matchꞥ2 = false;
+        if (next is <= -1) { matchꞥ2 = true;
+            fmt.Println("negative");
+        }
+        if (next is 0) { matchꞥ2 = true;
+            fmt.Println("zero");
+        }
+        if (next is 1 or 2) { matchꞥ2 = true;
+            fmt.Println("one or two");
+            fallthrough = true;
+        }
+        if (fallthrough || next >= 3 && next < 100) { matchꞥ2 = true;
+            fmt.Printf("three or greater < 100: %d\n"u8, x);
+            fallthrough = true;
+        }
+        if (fallthrough || !matchꞥ2) { /* default: */
+            fmt.Println("plus, always a default here because of fallthrough");
+        }
+    }
+
 }
 
 } // end main_package

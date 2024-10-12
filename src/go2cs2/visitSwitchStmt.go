@@ -8,12 +8,12 @@ import (
 
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.BlockStmt) {
 	var caseClauses []*ast.CaseClause
-	var caseClauseFallthroughs []bool
+	var caseClauseFallsthrough []bool
 
 	for _, stmt := range switchStmt.Body.List {
 		if caseClause, ok := stmt.(*ast.CaseClause); ok {
 			caseClauses = append(caseClauses, caseClause)
-			caseClauseFallthroughs = append(caseClauseFallthroughs, false)
+			caseClauseFallsthrough = append(caseClauseFallsthrough, false)
 		} else {
 			println(fmt.Sprintf("WARNING: unexpected Stmt type (non CaseClause) encountered in SwitchStmt: %T", stmt))
 		}
@@ -40,27 +40,122 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 			for _, stmt := range caseClause.Body {
 				if branchStmt, ok := stmt.(*ast.BranchStmt); ok && branchStmt.Tok == token.FALLTHROUGH {
 					hasFallthroughs = true
-					caseClauseFallthroughs[i] = true
+					caseClauseFallsthrough[i] = true
 				}
 			}
 		}
 	}
 
-	v.switchIndentLevel++
+	hasSwitchInit := switchStmt.Init != nil || hasFallthroughs || !allConst || switchStmt.Tag == nil
 
-	if switchStmt.Init != nil {
+	if hasSwitchInit {
 		// Any declared variable will be scoped to switch statement, so create a sub-block for it
 		v.targetFile.WriteString(v.newline)
-		v.writeOutputLn("{")
+		v.writeOutput("{")
 		v.indentLevel++
 
-		v.visitStmt(switchStmt.Init, parentBlock)
+		if switchStmt.Init != nil {
+			v.visitStmt(switchStmt.Init, parentBlock)
+		}
 	}
 
 	v.targetFile.WriteString(v.newline)
 
 	if hasFallthroughs {
-		// Most complex scenario with standalone if's, fallthrough tests and goto case break-outs
+		// Most complex scenario with standalone if's, and fallthrough
+		exprVarName := v.getTempVarName("expr")
+		matchVarName := v.getTempVarName("match")
+
+		if switchStmt.Tag != nil {
+			if v.options.preferVarDecl {
+				v.writeOutput("var ")
+			} else {
+				exprType := convertToCSTypeName(v.getTypeName(switchStmt.Tag, false))
+				v.targetFile.WriteString(exprType)
+				v.targetFile.WriteRune(' ')
+			}
+
+			v.targetFile.WriteString(exprVarName)
+			v.targetFile.WriteString(" = ")
+			v.targetFile.WriteString(v.convExpr(switchStmt.Tag, nil))
+			v.targetFile.WriteString(";" + v.newline)
+		}
+
+		if v.options.preferVarDecl {
+			v.writeOutput("var ")
+		} else {
+			v.writeOutput("bool ")
+		}
+
+		v.targetFile.WriteString(matchVarName)
+		v.targetFile.WriteString(" = false;" + v.newline)
+
+		// Write "if" statements for each case clause
+		for i, caseClause := range caseClauses {
+			v.writeOutput("if (")
+
+			if i > 0 && caseClauseFallsthrough[i-1] {
+				v.targetFile.WriteString("fallthrough || ")
+			}
+
+			if caseClause.List == nil {
+				// Handle default case
+				v.targetFile.WriteString(fmt.Sprintf("!%s) { /* default: */", matchVarName))
+			} else {
+				caseClauseCount := len(caseClause.List)
+				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause)
+
+				for i, expr := range caseClause.List {
+					if i == 0 {
+						if switchStmt.Tag != nil {
+							v.targetFile.WriteString(exprVarName)
+							v.targetFile.WriteString(" is ")
+						}
+					} else {
+						if usePattenMatch || switchStmt.Tag != nil {
+							v.targetFile.WriteString(" or ")
+						} else {
+							v.targetFile.WriteString(" || ")
+						}
+					}
+
+					var context *PatternMatchExprContext
+
+					if usePattenMatch {
+						context = &PatternMatchExprContext{declareIsExpr: i == 0}
+					} else if caseClauseCount > 1 && switchStmt.Tag == nil {
+						v.targetFile.WriteString("(")
+					}
+
+					v.targetFile.WriteString(v.convExpr(expr, context))
+
+					if !usePattenMatch && caseClauseCount > 1 && switchStmt.Tag == nil {
+						v.targetFile.WriteString(")")
+					}
+
+					if i == caseClauseCount-1 {
+						v.targetFile.WriteString(") { ")
+						v.targetFile.WriteString(matchVarName)
+						v.targetFile.WriteString(" = true;")
+					}
+				}
+			}
+
+			v.indentLevel++
+
+			for _, stmt := range caseClause.Body {
+				v.visitStmt(stmt, parentBlock)
+			}
+
+			v.targetFile.WriteString(v.newline)
+
+			if caseClauseFallsthrough[i] {
+				v.writeOutputLn("fallthrough = true;")
+			}
+
+			v.indentLevel--
+			v.writeOutputLn("}")
+		}
 	} else if allConst && switchStmt.Tag != nil {
 		// Most simple scenario when all case values are constant, a common C# switch will suffice
 		v.writeOutput("switch (")
@@ -73,13 +168,17 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 				v.writeOutput("default:")
 			} else {
 				for i, expr := range caseClause.List {
-					if i > 0 {
-						v.targetFile.WriteString(v.newline)
+					if i == 0 {
+						v.writeOutput("case ")
+					} else {
+						v.targetFile.WriteString(" or ")
 					}
 
-					v.writeOutput("case ")
 					v.targetFile.WriteString(v.convExpr(expr, nil))
-					v.targetFile.WriteString(":")
+
+					if i == len(caseClause.List)-1 {
+						v.targetFile.WriteString(":")
+					}
 				}
 			}
 
@@ -97,14 +196,102 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 
 		v.writeOutputLn("}")
 	} else {
-		// Most common scenario where expression switch becomes "if / else if / else" statements
-	}
+		// Most common scenario with expression switches
+		v.writeOutput("switch (%s) {%s", ExprSwitchMarker, v.newline)
 
-	// Close any locally scoped declared variable sub-block
-	if switchStmt.Init != nil {
-		v.indentLevel--
+		for _, caseClause := range caseClauses {
+			if caseClause.List == nil {
+				v.writeOutput("default:")
+			} else {
+				// Use pattern match when all case list expressions are
+				// use comparison operators and the same target
+				caseClauseCount := len(caseClause.List)
+				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause)
+
+				for i, expr := range caseClause.List {
+					if i == 0 {
+						v.writeOutput("case %s when ", ExprSwitchMarker)
+					} else {
+						if usePattenMatch {
+							v.targetFile.WriteString(" or ")
+						} else {
+							v.targetFile.WriteString(" || ")
+						}
+					}
+
+					var context *PatternMatchExprContext
+
+					if usePattenMatch {
+						context = &PatternMatchExprContext{declareIsExpr: i == 0}
+					} else if caseClauseCount > 1 {
+						v.targetFile.WriteString("(")
+					}
+
+					v.targetFile.WriteString(v.convExpr(expr, context))
+
+					if !usePattenMatch && caseClauseCount > 1 {
+						v.targetFile.WriteString(")")
+					}
+
+					if i == caseClauseCount-1 {
+						v.targetFile.WriteString(":")
+					}
+				}
+			}
+
+			v.indentLevel++
+
+			for _, stmt := range caseClause.Body {
+				v.visitStmt(stmt, parentBlock)
+			}
+
+			v.targetFile.WriteString(v.newline)
+			v.writeOutputLn("break;")
+
+			v.indentLevel--
+		}
+
 		v.writeOutputLn("}")
 	}
 
-	v.switchIndentLevel--
+	// Close any locally scoped declared variable sub-block
+	if hasSwitchInit {
+		v.indentLevel--
+		v.writeOutputLn("}")
+	}
+}
+
+func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseClause) bool {
+	usePattenMatch := true
+
+	if caseClauseCount > 0 {
+		var firstExpr string
+
+		for i, expr := range caseClause.List {
+			// Check if expression uses comparison operators
+			binaryExpr, ok := expr.(*ast.BinaryExpr)
+
+			if !ok {
+				usePattenMatch = false
+				break
+			}
+
+			if !isComparisonOperator(binaryExpr.Op.String()) {
+				usePattenMatch = false
+				break
+			}
+
+			// Check if all expression targets are the same
+			if i == 0 {
+				firstExpr = v.convExpr(binaryExpr.X, nil)
+			} else if firstExpr != v.convExpr(binaryExpr.X, nil) {
+				usePattenMatch = false
+				break
+			}
+		}
+	} else {
+		usePattenMatch = false
+	}
+
+	return usePattenMatch
 }

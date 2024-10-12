@@ -155,15 +155,15 @@ public static (nint E2, @string p) Testing() {
     fmt.Println(E2, B2);
     p = "Hello"u8;
     {
-        nint E2ꞥ1 = 99;
-        nint B2ꞥ1 = 199;
-        fmt.Println(E2ꞥ1, B2ꞥ1);
+        nint E2Ʌ1 = 99;
+        nint B2Ʌ1 = 199;
+        fmt.Println(E2Ʌ1, B2Ʌ1);
     }
 
     {
         E2 = 100;
-        nint B2ꞥ2 = 200;
-        fmt.Println(E2, B2ꞥ2);
+        nint B2Ʌ2 = 200;
+        fmt.Println(E2, B2Ʌ2);
     }
 
     fmt.Println(E2, B2);

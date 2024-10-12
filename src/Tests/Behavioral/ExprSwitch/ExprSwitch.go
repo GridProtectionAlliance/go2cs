@@ -3,22 +3,24 @@
 
 package main
 
-import "fmt"
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 var x = 1
 
-func getNext() int {
-    x++
-	return x
+func getNext() int32 {
+	x++
+	return int32(x)
 }
 
 func getStr(test string) string {
-    return "string" + test
+	return "string" + test
 }
 
 func getStr2(test1 interface{}, test2 string) string {
-    return test1.(string) + test2
+	return test1.(string) + test2
 }
 
 func getStr3(format string, a ...interface{}) string {
@@ -27,9 +29,9 @@ func getStr3(format string, a ...interface{}) string {
 
 func main() {
 
-    fmt.Println(getStr("test"))    
-    fmt.Println(getStr2("hello, ", "world"))
-    fmt.Println(getStr3("hello, %s", "world"))
+	fmt.Println(getStr("test"))
+	fmt.Println(getStr2("hello, ", "world"))
+	fmt.Println(getStr3("hello, %s", "world"))
 
 	// Here's a basic `switch`.
 	i := 2
@@ -43,21 +45,21 @@ func main() {
 		{
 			fmt.Println("three")
 		}
-	case 4:
-		fmt.Println("four")
+	case 4, 5, 6:
+		fmt.Println("four, five or siz")
 	default:
 		fmt.Println("unknown")
 	}
 
-    x := 5
-    fmt.Println(x)
+	x := 5
+	fmt.Println(x)
 
-    {
-        x := 6
-        fmt.Println(x)
-    }
+	{
+		x := 6
+		fmt.Println(x)
+	}
 
-    fmt.Println(x)
+	fmt.Println(x)
 
 	// You can use commas to separate multiple expressions
 	// in the same `case` statement. We use the optional
@@ -82,6 +84,34 @@ func main() {
 		fmt.Println("It's after noon")
 	}
 
+	// Here is a more complex switch
+	hour := 1
+	hour1 := time.Now().Hour()
+
+	switch hour := time.Now().Hour(); { // missing expression means "true"
+	case hour == 1, hour < 12, hour == 2:
+		fmt.Println("Good morning!")
+	case hour == 1, hour < 12, hour == 2 || hour1 == 4:
+		fmt.Println("Good morning (opt 2)!")
+	case hour < 17:
+		fmt.Println("Good afternoon!")
+	case hour == 0:
+		fmt.Println("Midnight!")
+	case hour == 0 && hour1 == 1:
+		fmt.Println("Midnight (opt 2)!")
+	default:
+		fmt.Println("Good evening!")
+	}
+
+	fmt.Println(hour)
+
+	c := '\r'
+
+	switch c {
+	case ' ', '\t', '\n', '\f', '\r':
+		fmt.Println("whitespace")
+	}
+
 	// "i" before should be saved
 	fmt.Printf("i before = %d\n", i)
 
@@ -103,4 +133,19 @@ func main() {
 
 	// "i" after should be restored
 	fmt.Printf("i after = %d\n", i)
+
+	switch next := getNext(); {
+	case next <= -1:
+		fmt.Println("negative")
+	case next == 0:
+		fmt.Println("zero")
+	case next == 1, next == 2:
+		fmt.Println("one or two")
+		fallthrough
+	case next >= 3 && next < 100:
+		fmt.Printf("three or greater < 100: %d\n", x)
+		fallthrough
+	default:
+		fmt.Println("plus, always a default here because of fallthrough")
+	}
 }

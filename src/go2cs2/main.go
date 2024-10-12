@@ -62,6 +62,7 @@ type Visitor struct {
 	hasDefer        bool
 	hasPanic        bool
 	hasRecover      bool
+	tempVarCount    map[string]int
 
 	// BlockStmt variables
 	blocks                    Stack[*strings.Builder]
@@ -74,16 +75,14 @@ type Visitor struct {
 	identNames                map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned              map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	scopeStack                []map[string]*types.Var // Stack of local variable scopes
-
-	// SwitchStmt variables
-	switchIndentLevel int
-	caseFallthrough   bool
 }
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ᥍ Ზ
-const ShadowVarMarker = "ꞥ"
+const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ꞥ
+const ShadowVarMarker = "Ʌ"
+const TempVarMarker = "ꞥ"
+const ExprSwitchMarker = "ᐧ"
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
@@ -98,7 +97,7 @@ var keywords = NewHashSet[string]([]string{
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
 	"GoType", "GoUntyped", "GoTag",
 	// The following symbols are reserved by go2cs as they are publically defined in "golib"
-	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType",
+	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", "__",
 })
 
 /*
@@ -424,6 +423,15 @@ func getAccess(name string) string {
 
 func isDiscardedVar(varName string) bool {
 	return len(varName) == 0 || varName == "_"
+}
+
+func isComparisonOperator(op string) bool {
+	switch op {
+	case "==", "!=", "<", "<=", ">", ">=":
+		return true
+	default:
+		return false
+	}
 }
 
 func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {

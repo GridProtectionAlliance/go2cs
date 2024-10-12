@@ -16,6 +16,11 @@ type BasicLitContext struct {
 	u8StringOK bool
 }
 
+// Handles pattern match expressions, e.g.: "x is 1 or > 3"
+type PatternMatchExprContext struct {
+	declareIsExpr bool
+}
+
 func (v *Visitor) convExpr(expr ast.Expr, context ExprContext) string {
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
@@ -27,7 +32,11 @@ func (v *Visitor) convExpr(expr ast.Expr, context ExprContext) string {
 
 		return v.convBasicLit(exprType, true)
 	case *ast.BinaryExpr:
-		return v.convBinaryExpr(exprType)
+		if context, ok := context.(*PatternMatchExprContext); ok && context != nil {
+			return v.convBinaryExpr(exprType, context)
+		}
+
+		return v.convBinaryExpr(exprType, nil)
 	case *ast.CallExpr:
 		return v.convCallExpr(exprType)
 	case *ast.ChanType:

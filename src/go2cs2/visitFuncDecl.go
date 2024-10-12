@@ -308,3 +308,15 @@ func generateResultSignature(signature *types.Signature) string {
 
 	return result.String()
 }
+
+func (v *Visitor) getTempVarName(varPrefix string) string {
+	if v.tempVarCount == nil {
+		v.tempVarCount = make(map[string]int)
+	}
+
+	count := v.tempVarCount[varPrefix]
+	count++
+	v.tempVarCount[varPrefix] = count
+
+	return fmt.Sprintf("%s%s%d", varPrefix, TempVarMarker, count)
+}
