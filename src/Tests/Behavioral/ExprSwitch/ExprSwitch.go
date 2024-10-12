@@ -137,10 +137,40 @@ func main() {
 	switch next := getNext(); {
 	case next <= -1:
 		fmt.Println("negative")
-	case next == 0:
+
+        switch getNext() {
+        case 1, 2:
+            fmt.Println("sub0 one or two")
+        case 3:
+            fmt.Println("sub0 three")
+            fallthrough
+        default:
+            fmt.Println("sub0 default")
+        }
+    case next == 0:
 		fmt.Println("zero")
+
+        switch next := getNext(); {
+        case next == 1, next <= 2:
+            fmt.Println("sub1 one or two")
+        case next == 3:
+            fmt.Println("sub1 three")
+            fallthrough
+        default:
+            fmt.Println("sub1 default")
+        }
 	case next == 1, next == 2:
 		fmt.Println("one or two")
+
+        switch next {
+        case 1, 2:
+            fmt.Println("sub2 one or two")
+        case 3:
+            fmt.Println("sub2 three")
+        default:
+            fmt.Println("sub2 default")
+        }
+
 		fallthrough
 	case next >= 3 && next < 100:
 		fmt.Printf("three or greater < 100: %d\n", x)

@@ -163,12 +163,54 @@ private static void Main() {
         var matchꞥ2 = false;
         if (next is <= -1) { matchꞥ2 = true;
             fmt.Println("negative");
+            {
+                var exprꞥ3 = getNext();
+                var matchꞥ3 = false;
+                if (exprꞥ3 is 1 or 2) { matchꞥ3 = true;
+                    fmt.Println("sub0 one or two");
+                }
+                if (exprꞥ3 is 3) { matchꞥ3 = true;
+                    fmt.Println("sub0 three");
+                    fallthrough = true;
+                }
+                if (fallthrough || !matchꞥ3) { /* default: */
+                    fmt.Println("sub0 default");
+                }
+            }
+
         }
         if (next is 0) { matchꞥ2 = true;
             fmt.Println("zero");
+            {
+                var nextɅ1 = getNext();
+                var matchꞥ4 = false;
+                if (nextɅ1 is 1 or <= 2) { matchꞥ4 = true;
+                    fmt.Println("sub1 one or two");
+                }
+                if (nextɅ1 is 3) { matchꞥ4 = true;
+                    fmt.Println("sub1 three");
+                    fallthrough = true;
+                }
+                if (fallthrough || !matchꞥ4) { /* default: */
+                    fmt.Println("sub1 default");
+                }
+            }
+
         }
         if (next is 1 or 2) { matchꞥ2 = true;
             fmt.Println("one or two");
+            switch (next) {
+            case 1 or 2:
+                fmt.Println("sub2 one or two");
+                break;
+            case 3:
+                fmt.Println("sub2 three");
+                break;
+            default:
+                fmt.Println("sub2 default");
+                break;
+            }
+
             fallthrough = true;
         }
         if (fallthrough || next >= 3 && next < 100) { matchꞥ2 = true;

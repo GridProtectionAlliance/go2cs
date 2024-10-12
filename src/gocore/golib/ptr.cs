@@ -67,6 +67,7 @@ public class ptr<T>
     internal ptr(IArray arrayRef, int index)
     {
         m_arrayRefIndex = (arrayRef, index);
+        m_val = default!;
     }
 
     /// <summary>
@@ -107,17 +108,16 @@ public class ptr<T>
     /// <param name="index">Index of element to get pointer for.</param>
     /// <returns>Pointer to element at specified index.</returns>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
+    /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
     public ptr<Telem> at<Telem>(int index)
     {
-        if (m_val is IArray<Telem> array)
-        {
-            if (!array.IndexIsValid(index))
-                throw new IndexOutOfRangeException("Index is out of range for array or slice.");
+        if (m_val is not IArray<Telem> array)
+            throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
+        
+        if (!array.IndexIsValid(index))
+            throw new IndexOutOfRangeException("Index is out of range for array or slice.");
 
-            return new ptr<Telem>(array, index);
-        }
-
-        throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
+        return new ptr<Telem>(array, index);
     }
 
     /// <inheritdoc />
@@ -206,7 +206,7 @@ public class ptr<T>
         return value == nil;
     }
 
-    public static bool operator !=(NilType nil, in ptr<T>? value)
+    public static bool operator !=(NilType nil, ptr<T>? value)
     {
         return value != nil;
     }

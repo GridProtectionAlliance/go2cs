@@ -41,7 +41,7 @@ public interface IArray : IEnumerable, ICloneable
 
     bool IndexIsValid(nint index)
     {
-        return index >= 0 && index < Length;
+        return index > -1 && index < Length;
     }
 }
 

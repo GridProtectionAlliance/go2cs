@@ -57,10 +57,13 @@ public static class builtin
     public const nint iota = 0;
 
     /// <summary>
-    /// Defines a constant used to represent an untyped integer value.
-    /// Commonly used for expression-based switch target / case values.
+    /// Defines a constant used to represent an always true state.
     /// </summary>
-    public const int ᐧ = 0;
+    /// <remarks>
+    /// Common use is for expression-based switch values where focus is
+    /// on <c>when</c> conditions and not the value itself.
+    /// </remarks>
+    public const bool ᐧ = true;
 
     /// <summary>
     /// Defines a constant to return a tuple that includes a boolean success indicator.
