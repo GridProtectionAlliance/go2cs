@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"strings"
 )
 
 const ForVarInitMarker = ">>MARKER:FOR_VAR_INIT<<"
 
-func (v *Visitor) visitForStmt(forStmt *ast.ForStmt) {
+func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) {
 	v.targetFile.WriteString(v.newline)
 
 	// Handle while-style for loops
@@ -21,7 +22,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt) {
 		}
 
 		v.targetFile.WriteString(") ")
-		v.visitBlockStmt(forStmt.Body, DefaultFormattingContext())
+		v.visitBlockStmt(forStmt.Body, DefaultBlockStmtContext())
 		return
 	}
 
@@ -86,5 +87,12 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt) {
 
 	v.targetFile.WriteString(") ")
 
-	v.visitBlockStmt(forStmt.Body, DefaultFormattingContext())
+	blockContext := DefaultBlockStmtContext()
+
+	if len(target.label) > 0 {
+		blockContext.innerSuffix = fmt.Sprintf("%s%s%s_continue:;", v.newline, v.newline, target.label)
+		blockContext.outerSuffix = fmt.Sprintf("%s_break:;", target.label)
+	}
+
+	v.visitBlockStmt(forStmt.Body, blockContext)
 }

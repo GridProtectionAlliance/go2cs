@@ -34,6 +34,7 @@ private static void Main() {
 
     fmt.Println("i =", i);
     fmt.Println();
+@out:
     ref var iɅ1 = ref heap(new nint(), out var ᏑiɅ1);
     for (iɅ1 = 0; iɅ1 < 5; iɅ1++) 
     {
@@ -44,12 +45,20 @@ private static void Main() {
         for (iɅ2 = 12; iɅ2 < 15; iɅ2++) 
         {
             f(ᏑiɅ2);
+            goto @out_break;
         }
 
         //c
-        fmt.Println();
-    }
+        if (iɅ1 > 13) 
+        {
+            goto @out_continue;
+        }
 
+        fmt.Println();
+
+@out_continue:;
+    }
+@out_break:;
     //d
     fmt.Println();
     fmt.Println("i =", i);
@@ -57,9 +66,11 @@ private static void Main() {
     while (true) 
     {
         i++;
-        f(Ꮡi);        /* visitIfStmt: if i > 12 {
-	break
-} */
+        f(Ꮡi);
+        if (i > 12) 
+        {
+            break;
+        }
 
     }
 

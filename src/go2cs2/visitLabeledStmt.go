@@ -5,5 +5,13 @@ import (
 )
 
 func (v *Visitor) visitLabeledStmt(labeledStmt *ast.LabeledStmt) {
-	v.writeOutputLn("/* " + v.getPrintedNode(labeledStmt) + " */")
+	v.targetFile.WriteString(v.newline)
+
+	labelName := getSanitizedIdentifier(labeledStmt.Label.Name)
+
+	v.targetFile.WriteString(labelName + ":")
+
+	target := LabeledStmtContext{label: labelName}
+
+	v.visitStmt(labeledStmt.Stmt, []StmtContext{target})
 }

@@ -44,6 +44,42 @@ func (c FormattingContext) getDefault() StmtContext {
 	return DefaultFormattingContext()
 }
 
+type BlockStmtContext struct {
+	format      FormattingContext
+	innerPrefix string
+	innerSuffix string
+	outerPrefix string
+	outerSuffix string
+}
+
+func DefaultBlockStmtContext() BlockStmtContext {
+	return BlockStmtContext{
+		format:      DefaultFormattingContext(),
+		innerPrefix: "",
+		innerSuffix: "",
+		outerPrefix: "",
+		outerSuffix: "",
+	}
+}
+
+func (c BlockStmtContext) getDefault() StmtContext {
+	return DefaultBlockStmtContext()
+}
+
+type LabeledStmtContext struct {
+	label string
+}
+
+func DefaultLabeledStmtContext() LabeledStmtContext {
+	return LabeledStmtContext{
+		label: "",
+	}
+}
+
+func (c LabeledStmtContext) getDefault() StmtContext {
+	return DefaultLabeledStmtContext()
+}
+
 func getStmtContext[TContext StmtContext](contexts []StmtContext) TContext {
 	var zeroValue TContext
 
@@ -69,8 +105,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitAssignStmt(stmtType, source, format)
 	case *ast.BlockStmt:
-		format := getStmtContext[FormattingContext](contexts)
-		v.visitBlockStmt(stmtType, format)
+		context := getStmtContext[BlockStmtContext](contexts)
+		v.visitBlockStmt(stmtType, context)
 	case *ast.BranchStmt:
 		v.visitBranchStmt(stmtType)
 	case *ast.CommClause:
@@ -85,11 +121,13 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.ExprStmt:
 		v.visitExprStmt(stmtType)
 	case *ast.ForStmt:
-		v.visitForStmt(stmtType)
+		target := getStmtContext[LabeledStmtContext](contexts)
+		v.visitForStmt(stmtType, target)
 	case *ast.GoStmt:
 		v.visitGoStmt(stmtType)
 	case *ast.IfStmt:
-		v.visitIfStmt(stmtType)
+		source := getStmtContext[ParentBlockContext](contexts)
+		v.visitIfStmt(stmtType, source)
 	case *ast.IncDecStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitIncDecStmt(stmtType, format)

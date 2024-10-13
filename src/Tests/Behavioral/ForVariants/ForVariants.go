@@ -31,13 +31,20 @@ func main() {
 	fmt.Println("i =", i)
 	fmt.Println()
 
+out:
 	for i := 0; i < 5; i++ {
 		// a
 		f(&i) // b
 
 		for i := 12; i < 15; i++ {
 			f(&i)
+			break out
 		} //c
+
+		if i > 13 {
+			continue out
+		}
+
 		fmt.Println()
 	} //d
 

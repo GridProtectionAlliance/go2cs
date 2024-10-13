@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, format FormattingContext) {
+func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtContext) {
 	v.pushBlock()
 
-	if v.blockOuterPrefixInjection.Len() > 0 {
-		v.targetFile.WriteString(v.blockOuterPrefixInjection.Pop())
+	if len(context.outerPrefix) > 0 {
+		v.targetFile.WriteString(context.outerPrefix)
 	}
 
-	if format.useNewLine {
+	if context.format.useNewLine {
 		v.targetFile.WriteString(v.newline)
 		v.targetFile.WriteString(v.indent(v.indentLevel))
 		v.targetFile.WriteString("{")
@@ -20,13 +20,13 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, format FormattingCont
 		v.targetFile.WriteString(" {")
 	}
 
-	if v.blockInnerPrefixInjection.Len() > 0 {
-		v.targetFile.WriteString(v.blockInnerPrefixInjection.Pop())
+	if len(context.innerPrefix) > 0 {
+		v.targetFile.WriteString(context.innerPrefix)
 	}
 
 	v.firstStatementIsReturn = false
 
-	if format.useIndent {
+	if context.format.useIndent {
 		v.indentLevel++
 	}
 
@@ -67,7 +67,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, format FormattingCont
 		lastStmt = stmt
 	}
 
-	if format.useIndent {
+	if context.format.useIndent {
 		v.indentLevel--
 	}
 
@@ -79,15 +79,15 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, format FormattingCont
 		v.firstStatementIsReturn = ok
 	}
 
-	if v.blockInnerSuffixInjection.Len() > 0 {
-		v.targetFile.WriteString(v.blockInnerSuffixInjection.Pop())
+	if len(context.innerSuffix) > 0 {
+		v.targetFile.WriteString(context.innerSuffix)
 	}
 
 	v.targetFile.WriteString(v.newline)
 	v.writeOutputLn("}")
 
-	if v.blockOuterSuffixInjection.Len() > 0 {
-		v.targetFile.WriteString(v.blockOuterSuffixInjection.Pop())
+	if len(context.outerSuffix) > 0 {
+		v.targetFile.WriteString(context.outerSuffix)
 	}
 
 	// if (!m_firstTopLevelDeclaration && IndentLevel > 2)
@@ -116,20 +116,4 @@ func (v *Visitor) popBlockAppend(appendToPrevious bool) string {
 	v.targetFile = lastTarget
 
 	return block
-}
-
-func (v *Visitor) pushInnerBlockPrefix(prefix string) {
-	v.blockInnerPrefixInjection.Push(prefix)
-}
-
-func (v *Visitor) pushInnerBlockSuffix(suffix string) {
-	v.blockInnerSuffixInjection.Push(suffix)
-}
-
-func (v *Visitor) pushOuterBlockPrefix(prefix string) {
-	v.blockOuterPrefixInjection.Push(prefix)
-}
-
-func (v *Visitor) pushOuterBlockSuffix(suffix string) {
-	v.blockOuterSuffixInjection.Push(suffix)
 }

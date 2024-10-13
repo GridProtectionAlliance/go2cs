@@ -65,16 +65,12 @@ type Visitor struct {
 	tempVarCount    map[string]int
 
 	// BlockStmt variables
-	blocks                    Stack[*strings.Builder]
-	blockInnerPrefixInjection Stack[string]
-	blockInnerSuffixInjection Stack[string]
-	blockOuterPrefixInjection Stack[string]
-	blockOuterSuffixInjection Stack[string]
-	firstStatementIsReturn    bool
-	identEscapesHeap          map[*ast.Ident]bool
-	identNames                map[*ast.Ident]string   // Local identifiers to adjusted names map
-	isReassigned              map[*ast.Ident]bool     // Local identifiers to reassignment status map
-	scopeStack                []map[string]*types.Var // Stack of local variable scopes
+	blocks                 Stack[*strings.Builder]
+	firstStatementIsReturn bool
+	identEscapesHeap       map[*ast.Ident]bool
+	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
+	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
+	scopeStack             []map[string]*types.Var // Stack of local variable scopes
 }
 
 const RootNamespace = "go"
@@ -280,14 +276,8 @@ Examples:
 				options:            options,
 				globalIdentNames:   globalIdentNames,
 				globalScope:        globalScope,
-
-				// BlockStmt variable initializations
-				blocks:                    Stack[*strings.Builder]{},
-				blockInnerPrefixInjection: Stack[string]{},
-				blockInnerSuffixInjection: Stack[string]{},
-				blockOuterPrefixInjection: Stack[string]{},
-				blockOuterSuffixInjection: Stack[string]{},
-				identEscapesHeap:          map[*ast.Ident]bool{},
+				blocks:             Stack[*strings.Builder]{},
+				identEscapesHeap:   map[*ast.Ident]bool{},
 			}
 
 			visitor.visitFile(fileEntry.file)

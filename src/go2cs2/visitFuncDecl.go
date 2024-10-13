@@ -40,14 +40,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
-	v.pushInnerBlockPrefix(fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName))
+
+	blockContext := DefaultBlockStmtContext()
+	blockContext.innerPrefix = fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
 
 	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
 
 	if funcDecl.Body != nil {
-		format := DefaultFormattingContext()
-		format.useNewLine = false
-		v.visitBlockStmt(funcDecl.Body, format)
+		blockContext.format.useNewLine = false
+		v.visitBlockStmt(funcDecl.Body, blockContext)
 	}
 
 	signatureOnly := funcDecl.Body == nil
