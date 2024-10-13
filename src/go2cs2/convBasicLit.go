@@ -42,7 +42,7 @@ func replaceOctalChars(value string) string {
 	return value
 }
 
-func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, u8StringOK bool) string {
+func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) string {
 	result := &strings.Builder{}
 	value := basicLit.Value
 
@@ -116,7 +116,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, u8StringOK bool) string {
 
 		result.WriteString(strVal)
 
-		if u8StringOK {
+		if context.u8StringOK {
 			result.WriteString("u8")
 		}
 	}

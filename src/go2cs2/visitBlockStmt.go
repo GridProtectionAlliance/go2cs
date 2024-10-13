@@ -5,14 +5,14 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool, startOnNewline bool) {
+func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, format FormattingContext) {
 	v.pushBlock()
 
 	if v.blockOuterPrefixInjection.Len() > 0 {
 		v.targetFile.WriteString(v.blockOuterPrefixInjection.Pop())
 	}
 
-	if startOnNewline {
+	if format.useNewLine {
 		v.targetFile.WriteString(v.newline)
 		v.targetFile.WriteString(v.indent(v.indentLevel))
 		v.targetFile.WriteString("{")
@@ -26,7 +26,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool, sta
 
 	v.firstStatementIsReturn = false
 
-	if indentStmts {
+	if format.useIndent {
 		v.indentLevel++
 	}
 
@@ -59,11 +59,15 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, indentStmts bool, sta
 			}
 		}
 
-		v.visitStmt(stmt, blockStmt)
+		source := ParentBlockContext{parentBlock: blockStmt}
+		contexts := []StmtContext{source}
+
+		v.visitStmt(stmt, contexts)
+
 		lastStmt = stmt
 	}
 
-	if indentStmts {
+	if format.useIndent {
 		v.indentLevel--
 	}
 

@@ -21,7 +21,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	}
 
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
-	context := &CallExprContext{u8StringArgOK: make(map[int]bool)}
+	context := DefaultCallExprContext()
 
 	// Check if any parameters of callExpr.Fun are interface types
 	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
@@ -40,5 +40,5 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 		}
 	}
 
-	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, context))
+	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, &context))
 }

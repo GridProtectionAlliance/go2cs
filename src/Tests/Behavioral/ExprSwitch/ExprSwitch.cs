@@ -18,7 +18,7 @@ private static @string getStr(@string test) {
 }
 
 private static @string getStr2(object test1, @string test2) {
-    return test1._<string>() + test2;
+    return test1._<@string>() + test2;
 }
 
 private static @string getStr3(@string format, params object[] a) {

@@ -3,20 +3,81 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 )
 
-func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
+type StmtContext interface {
+	getDefault() StmtContext
+}
+
+type ParentBlockContext struct {
+	parentBlock *ast.BlockStmt
+}
+
+func DefaultParentBlockContext() ParentBlockContext {
+	return ParentBlockContext{
+		parentBlock: nil,
+	}
+}
+
+func (c ParentBlockContext) getDefault() StmtContext {
+	return DefaultParentBlockContext()
+}
+
+type FormattingContext struct {
+	useNewLine         bool
+	includeSemiColon   bool
+	useIndent          bool
+	heapTypeDeclTarget *strings.Builder
+}
+
+func DefaultFormattingContext() FormattingContext {
+	return FormattingContext{
+		useNewLine:         true,
+		includeSemiColon:   true,
+		useIndent:          true,
+		heapTypeDeclTarget: nil,
+	}
+}
+
+func (c FormattingContext) getDefault() StmtContext {
+	return DefaultFormattingContext()
+}
+
+func getStmtContext[TContext StmtContext](contexts []StmtContext) TContext {
+	var zeroValue TContext
+
+	if len(contexts) == 0 {
+		return zeroValue.getDefault().(TContext)
+	}
+
+	for _, context := range contexts {
+		if context != nil {
+			if targetContext, ok := context.(TContext); ok {
+				return targetContext
+			}
+		}
+	}
+
+	return zeroValue.getDefault().(TContext)
+}
+
+func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
-		v.visitAssignStmt(stmtType, parentBlock)
+		source := getStmtContext[ParentBlockContext](contexts)
+		format := getStmtContext[FormattingContext](contexts)
+		v.visitAssignStmt(stmtType, source, format)
 	case *ast.BlockStmt:
-		v.visitBlockStmt(stmtType, true, true)
+		format := getStmtContext[FormattingContext](contexts)
+		v.visitBlockStmt(stmtType, format)
 	case *ast.BranchStmt:
 		v.visitBranchStmt(stmtType)
 	case *ast.CommClause:
 		v.visitCommClause(stmtType)
 	case *ast.DeclStmt:
-		v.visitDeclStmt(stmtType, parentBlock)
+		source := getStmtContext[ParentBlockContext](contexts)
+		v.visitDeclStmt(stmtType, source)
 	case *ast.DeferStmt:
 		v.visitDeferStmt(stmtType)
 	case *ast.EmptyStmt:
@@ -30,7 +91,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	case *ast.IfStmt:
 		v.visitIfStmt(stmtType)
 	case *ast.IncDecStmt:
-		v.visitIncDecStmt(stmtType)
+		format := getStmtContext[FormattingContext](contexts)
+		v.visitIncDecStmt(stmtType, format)
 	case *ast.LabeledStmt:
 		v.visitLabeledStmt(stmtType)
 	case *ast.RangeStmt:
@@ -40,9 +102,11 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, parentBlock *ast.BlockStmt) {
 	case *ast.SelectStmt:
 		v.visitSelectStmt(stmtType)
 	case *ast.SendStmt:
-		v.visitSendStmt(stmtType)
+		format := getStmtContext[FormattingContext](contexts)
+		v.visitSendStmt(stmtType, format)
 	case *ast.SwitchStmt:
-		v.visitSwitchStmt(stmtType, parentBlock)
+		source := getStmtContext[ParentBlockContext](contexts)
+		v.visitSwitchStmt(stmtType, source)
 	case *ast.TypeSwitchStmt:
 		v.visitTypeSwitchStmt(stmtType)
 	case *ast.BadStmt:

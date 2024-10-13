@@ -10,7 +10,7 @@ func main() {
 
 	for i < 10 {
 		// Inner comment
-		f(i) // Call function
+		f(&i) // Call function
 		// Increment i
 		i++ // Post i comment
 	} // Post for comment
@@ -20,10 +20,10 @@ func main() {
 	fmt.Println()
 
 	for i = 0; i < 10; i++ {
-		f(i)
+		f(&i)
 
 		for j := 0; j < 3; j++ {
-			f(i + j)
+			fmt.Println(i + j)
 		}
 		fmt.Println()
 	}
@@ -33,10 +33,10 @@ func main() {
 
 	for i := 0; i < 5; i++ {
 		// a
-		f(i) // b
+		f(&i) // b
 
 		for i := 12; i < 15; i++ {
-			f(i)
+			f(&i)
 		} //c
 		fmt.Println()
 	} //d
@@ -47,7 +47,7 @@ func main() {
 
 	for {
 		i++
-		f(i)
+		f(&i)
 
 		if i > 12 {
 			break
@@ -58,6 +58,6 @@ func main() {
 	fmt.Println("i =", i)
 }
 
-func f(y int) {
-	fmt.Print(y)
+func f(y *int) {
+	fmt.Print(*y)
 }

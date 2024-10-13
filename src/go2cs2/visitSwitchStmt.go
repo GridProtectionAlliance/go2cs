@@ -6,7 +6,7 @@ import (
 	"go/token"
 )
 
-func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.BlockStmt) {
+func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlockContext) {
 	var caseClauses []*ast.CaseClause
 	var caseClauseFallsthrough []bool
 
@@ -55,7 +55,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 		v.indentLevel++
 
 		if switchStmt.Init != nil {
-			v.visitStmt(switchStmt.Init, parentBlock)
+			v.visitStmt(switchStmt.Init, []StmtContext{source})
 		}
 	}
 
@@ -119,15 +119,16 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 						}
 					}
 
-					var context *PatternMatchExprContext
+					context := DefaultPatternMatchExprContext()
 
 					if usePattenMatch {
-						context = &PatternMatchExprContext{declareIsExpr: i == 0}
+						context.usePattenMatch = true
+						context.declareIsExpr = i == 0
 					} else if caseClauseCount > 1 && switchStmt.Tag == nil {
 						v.targetFile.WriteString("(")
 					}
 
-					v.targetFile.WriteString(v.convExpr(expr, context))
+					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
 
 					if !usePattenMatch && caseClauseCount > 1 && switchStmt.Tag == nil {
 						v.targetFile.WriteString(")")
@@ -144,7 +145,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, parentBlock)
+				v.visitStmt(stmt, []StmtContext{source})
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -185,7 +186,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, parentBlock)
+				v.visitStmt(stmt, []StmtContext{source})
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -219,15 +220,16 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 						}
 					}
 
-					var context *PatternMatchExprContext
+					context := DefaultPatternMatchExprContext()
 
 					if usePattenMatch {
-						context = &PatternMatchExprContext{declareIsExpr: i == 0}
+						context.usePattenMatch = true
+						context.declareIsExpr = i == 0
 					} else if caseClauseCount > 1 {
 						v.targetFile.WriteString("(")
 					}
 
-					v.targetFile.WriteString(v.convExpr(expr, context))
+					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
 
 					if !usePattenMatch && caseClauseCount > 1 {
 						v.targetFile.WriteString(")")
@@ -242,7 +244,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, parentBlock *ast.B
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, parentBlock)
+				v.visitStmt(stmt, []StmtContext{source})
 			}
 
 			v.targetFile.WriteString(v.newline)

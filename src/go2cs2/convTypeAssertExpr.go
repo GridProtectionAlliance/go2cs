@@ -10,5 +10,5 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 		return fmt.Sprintf("%s.type()", v.convExpr(typeAssertExpr.X, nil))
 	}
 
-	return fmt.Sprintf("%s._<%s>()", v.convExpr(typeAssertExpr.X, nil), v.convExpr(typeAssertExpr.Type, nil))
+	return fmt.Sprintf("%s._<%s>()", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, nil)))
 }

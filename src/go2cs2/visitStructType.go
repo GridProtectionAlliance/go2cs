@@ -24,7 +24,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 
 		if field.Tag != nil {
 			v.writeOutput("[GoTag(")
-			v.targetFile.WriteString(v.convBasicLit(field.Tag, false))
+			v.targetFile.WriteString(v.convBasicLit(field.Tag, BasicLitContext{u8StringOK: false}))
 			v.targetFile.WriteString(")]")
 			v.targetFile.WriteString(v.newline)
 		}

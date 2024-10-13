@@ -5,12 +5,12 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context *PatternMatchExprContext) string {
+func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
 	leftOperand := v.convExpr(binaryExpr.X, nil)
 	binaryOp := binaryExpr.Op.String()
 	rightOperand := v.convExpr(binaryExpr.Y, nil)
 
-	if context == nil {
+	if !context.usePattenMatch {
 		if binaryOp == "<<" || binaryOp == ">>" {
 			rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)
 		}

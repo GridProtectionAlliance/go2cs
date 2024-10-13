@@ -9,7 +9,6 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	v.targetFile.WriteString(v.newline)
 	v.writeOutput("return")
 
-	var context *BasicLitContext
 	signature := v.currentFunction.Signature()
 
 	if returnStmt.Results == nil {
@@ -29,9 +28,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					ident := v.getVarIdent(param)
 
 					if ident != nil {
-						results.WriteString(v.getIdentName(ident))
+						results.WriteString(getSanitizedIdentifier(v.getIdentName(ident)))
 					} else {
-						results.WriteString(param.Name())
+						results.WriteString(getSanitizedIdentifier(param.Name()))
 					}
 				}
 			}
@@ -50,11 +49,13 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	} else {
 		v.targetFile.WriteRune(' ')
 
+		context := DefaultBasicLitContext()
+
 		if len(returnStmt.Results) > 1 {
 			v.targetFile.WriteRune('(')
 
 			// u8 readonly spans are not supported in value tuple
-			context = &BasicLitContext{u8StringOK: false}
+			context.u8StringOK = false
 		}
 
 		resultParams := signature.Results()
@@ -65,7 +66,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				v.targetFile.WriteString(", ")
 			}
 
-			resultExpr := v.convExpr(expr, context)
+			resultExpr := v.convExpr(expr, []ExprContext{context})
 
 			if resultParamIsInterface[i] {
 				resultParamType := resultParams.At(i).Type()

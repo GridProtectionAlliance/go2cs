@@ -118,7 +118,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 
 			if c.Val().Kind() == constant.String && len(valueSpec.Values) >= i+1 {
 				if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.STRING {
-					constVal = v.convBasicLit(lit, true)
+					constVal = v.convBasicLit(lit, DefaultBasicLitContext())
 				} else {
 					constVal, _ = v.getStringLiteral(c.Val().ExactString())
 				}

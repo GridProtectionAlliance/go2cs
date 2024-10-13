@@ -1,18 +1,29 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 )
 
-func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt) {
+func (v *Visitor) visitIncDecStmt(incDecStmt *ast.IncDecStmt, format FormattingContext) {
 	ident := v.convExpr(incDecStmt.X, nil)
 
-	v.targetFile.WriteString(v.newline)
+	if format.useNewLine {
+		v.targetFile.WriteString(v.newline)
+	}
+
+	if format.useIndent {
+		v.writeOutput("")
+	}
 
 	if incDecStmt.Tok == token.INC {
-		v.writeOutput("%s++;", ident)
+		v.targetFile.WriteString(fmt.Sprintf("%s++", ident))
 	} else {
-		v.writeOutput("%s--;", ident)
+		v.targetFile.WriteString(fmt.Sprintf("%s--", ident))
+	}
+
+	if format.includeSemiColon {
+		v.targetFile.WriteRune(';')
 	}
 }

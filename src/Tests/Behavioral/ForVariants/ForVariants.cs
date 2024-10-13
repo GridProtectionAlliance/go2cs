@@ -1,73 +1,75 @@
 namespace go;
 
+using fmt = fmt_package;
+
 public static partial class main_package {
 
 private static void Main() {
-    nint i = 0;
-
-    while (i < 10) { 
+    ref var i = ref heap(new nint(), out var Ꮡi);
+    i = 0;
+    while (i < 10) 
+    {
         // Inner comment
-        f(i); // Call function
+        f(Ꮡi);
+        // Call function
         // Increment i
-        i++; // Post i comment
-    } // Post for comment
+        i++;
+    }
 
+    // Post i comment
+    // Post for comment
     fmt.Println();
-    fmt.Println("i ="u8, i);
+    fmt.Println("i =", i);
     fmt.Println();
-
-    for (i = 0; i < 10; i++) {
-        f(i);
-
-        for (nint j = 0; j < 3; j++) {
-            f(i + j);
+    for (i = 0; i < 10; i++) 
+    {
+        f(Ꮡi);
+        for (nint j = 0; j < 3; j++) 
+        {
+            fmt.Println(i + j);
         }
+
         fmt.Println();
     }
 
-    fmt.Println("i ="u8, i);
+    fmt.Println("i =", i);
     fmt.Println();
-
+    ref var iɅ1 = ref heap(new nint(), out var ᏑiɅ1);
+    for (iɅ1 = 0; iɅ1 < 5; iɅ1++) 
     {
-        nint i__prev1 = i;
-
-        for (i = 0; i < 5; i++) { 
-            // a
-            f(i); // b
-
-            {
-                nint i__prev2 = i;
-
-                for (i = 12; i < 15; i++) {
-                    f(i);
-                }
-
-                i = i__prev2;
-            } //c
-            fmt.Println();
+        // a
+        f(ᏑiɅ1);
+        // b
+        ref var iɅ2 = ref heap(new nint(), out var ᏑiɅ2);
+        for (iɅ2 = 12; iɅ2 < 15; iɅ2++) 
+        {
+            f(ᏑiɅ2);
         }
 
-        i = i__prev1;
-    } //d
+        //c
+        fmt.Println();
+    }
 
+    //d
     fmt.Println();
-    fmt.Println("i ="u8, i);
+    fmt.Println("i =", i);
     fmt.Println();
-
-    while (true) {
+    while (true) 
+    {
         i++;
-        f(i);
+        f(Ꮡi);        /* visitIfStmt: if i > 12 {
+	break
+} */
 
-        if (i > 12) {
-            break;
-        }
     }
 
     fmt.Println();
-    fmt.Println("i ="u8, i);
+    fmt.Println("i =", i);
 }
 
-private static void f(nint y) {
+private static void f(ptr<nint> Ꮡy) {
+    ref var y = ref Ꮡy.val;
+
     fmt.Print(y);
 }
 

@@ -45,7 +45,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
 
 	if funcDecl.Body != nil {
-		v.visitBlockStmt(funcDecl.Body, true, false)
+		format := DefaultFormattingContext()
+		format.useNewLine = false
+		v.visitBlockStmt(funcDecl.Body, format)
 	}
 
 	signatureOnly := funcDecl.Body == nil
@@ -78,7 +80,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						}
 
 						param := resultParams.At(paramIndex)
-						paramName := v.getIdentName(ident)
+						paramName := getSanitizedIdentifier(v.getIdentName(ident))
 
 						resultParameters.WriteString(v.newline)
 

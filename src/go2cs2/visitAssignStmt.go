@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.BlockStmt) {
+func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlockContext, format FormattingContext) {
 	result := &strings.Builder{}
 	lhsLen := len(assignStmt.Lhs)
 	rhsLen := len(assignStmt.Rhs)
@@ -16,6 +16,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 		return
 	}
 
+	parentBlock := source.parentBlock
 	reassignedCount := 0
 	declaredCount := 0
 
@@ -27,8 +28,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 	anyTypeIsString := false
 
 	// Ensure that the correct type is used for integer, we do this since int and uint in
-	// converted Go code target nint or nuint to match original Go code behavior and a "var"
-	// based assignment to an integer type could result in a very subtle type mismatch
+	// converted Go code target C# nint or nuint to match original Go code behavior and a
+	// "var" based assignment to an int type could result in a very subtle type mismatch
 	lhsTypeIsInt := make([]bool, lhsLen)
 	anyTypeIsInt := false
 
@@ -120,7 +121,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 			result.WriteString(")")
 		}
 
-		result.WriteString(";")
+		if format.includeSemiColon {
+			result.WriteString(";")
+		}
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
 		for i := 0; i < lhsLen; i++ {
@@ -128,8 +131,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 			rhs := assignStmt.Rhs[i]
 
 			if i > 0 {
-				result.WriteString(v.newline)
-				result.WriteString(v.indent(v.indentLevel))
+				if format.useNewLine {
+					result.WriteString(v.newline)
+				}
+
+				if format.useIndent {
+					result.WriteString(v.indent(v.indentLevel))
+				}
 			}
 
 			ident := getIdentifier(lhs)
@@ -164,9 +172,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 					heapTypeDecl := v.convertToHeapTypeDecl(ident)
 
 					if len(heapTypeDecl) > 0 {
-						result.WriteString(heapTypeDecl)
-						result.WriteString(v.newline)
-						result.WriteString(v.indent(v.indentLevel))
+						if format.heapTypeDeclTarget == nil {
+							result.WriteString(heapTypeDecl)
+							result.WriteString(v.newline)
+							result.WriteString(v.indent(v.indentLevel))
+						} else {
+							format.heapTypeDeclTarget.WriteString(heapTypeDecl)
+						}
 					} else {
 						if v.options.preferVarDecl && !lhsTypeIsInt[i] {
 							result.WriteString("var ")
@@ -188,12 +200,21 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, parentBlock *ast.B
 						result.WriteString(rhsExpr)
 					}
 
-					result.WriteString(";")
+					if format.includeSemiColon || i < lhsLen-1 {
+						result.WriteString(";")
+					}
 				}
 			}
 		}
 	}
 
-	v.targetFile.WriteString(v.newline)
-	v.writeOutput(result.String())
+	if format.useNewLine {
+		v.targetFile.WriteString(v.newline)
+	}
+
+	if format.useIndent {
+		v.targetFile.WriteString(v.indent(v.indentLevel))
+	}
+
+	v.targetFile.WriteString(result.String())
 }

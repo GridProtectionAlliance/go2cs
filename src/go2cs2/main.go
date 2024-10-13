@@ -600,7 +600,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
 	}
 
 	goTypeName := getTypeName(identType)
-	csIDName := getSanitizedIdentifier(v.getIdentName(ident))
+	csIDName := v.getIdentName(ident)
 
 	// Handle array types
 	if strings.HasPrefix(goTypeName, "[") {
