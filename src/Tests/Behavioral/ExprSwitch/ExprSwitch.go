@@ -27,6 +27,11 @@ func getStr3(format string, a ...interface{}) string {
 	return fmt.Sprintf(format, a...)
 }
 
+func Foo(n int) int {
+	fmt.Println(n)
+	return n
+}
+
 func main() {
 
 	fmt.Println(getStr("test"))
@@ -177,5 +182,13 @@ func main() {
 		fallthrough
 	default:
 		fmt.Println("plus, always a default here because of fallthrough")
+	}
+
+    switch Foo(2) {
+	case Foo(1), Foo(2), Foo(3):
+		fmt.Println("First case")
+		fallthrough
+	case Foo(4):
+		fmt.Println("Second case")
 	}
 }

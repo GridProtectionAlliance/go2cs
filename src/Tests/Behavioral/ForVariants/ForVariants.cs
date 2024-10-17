@@ -9,15 +9,10 @@ private static void Main() {
     i = 0;
     while (i < 10) 
     {
-        // Inner comment
         f(Ꮡi);
-        // Call function
-        // Increment i
         i++;
     }
 
-    // Post i comment
-    // Post for comment
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();
@@ -38,9 +33,7 @@ private static void Main() {
     ref var iɅ1 = ref heap(new nint(), out var ᏑiɅ1);
     for (iɅ1 = 0; iɅ1 < 5; iɅ1++) 
     {
-        // a
         f(ᏑiɅ1);
-        // b
         ref var iɅ2 = ref heap(new nint(), out var ᏑiɅ2);
         for (iɅ2 = 12; iɅ2 < 15; iɅ2++) 
         {
@@ -48,7 +41,6 @@ private static void Main() {
             goto @out_break;
         }
 
-        //c
         if (iɅ1 > 13) 
         {
             goto @out_continue;
@@ -59,7 +51,6 @@ private static void Main() {
 @out_continue:;
     }
 @out_break:;
-    //d
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();

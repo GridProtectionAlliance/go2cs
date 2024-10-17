@@ -754,6 +754,9 @@ public static class builtin
     {
         try
         {
+            if (target is string str && typeof(T) == typeof(@string))
+                return (T)(object)(new @string(str));
+
             return (T)target;
         }
         catch (InvalidCastException ex)

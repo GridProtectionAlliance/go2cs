@@ -49,17 +49,13 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 		}
 	}
 
-	hasSwitchInit := switchStmt.Init != nil || hasFallthroughs || !allConst && switchStmt.Tag != nil
-
-	if hasSwitchInit {
+	if switchStmt.Init != nil {
 		// Any declared variable will be scoped to switch statement, so create a sub-block for it
 		v.targetFile.WriteString(v.newline)
 		v.writeOutput("{")
 		v.indentLevel++
 
-		if switchStmt.Init != nil {
-			v.visitStmt(switchStmt.Init, []StmtContext{source})
-		}
+		v.visitStmt(switchStmt.Init, []StmtContext{source})
 	}
 
 	v.targetFile.WriteString(v.newline)
@@ -270,7 +266,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 	}
 
 	// Close any locally scoped declared variable sub-block
-	if hasSwitchInit {
+	if switchStmt.Init != nil {
 		v.indentLevel--
 		v.writeOutputLn("}")
 	}

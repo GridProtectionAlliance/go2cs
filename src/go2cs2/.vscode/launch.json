@@ -15,9 +15,9 @@
                 "-tree",
                 //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
-                //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
+                "..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
                 //"..\\Tests\\Behavioral\\InterfaceCasting\\InterfaceCasting.go",
-                "..\\Tests\\Behavioral\\ForVariants\\ForVariants.go",
+                //"..\\Tests\\Behavioral\\ForVariants\\ForVariants.go",
             ]
         }
     ]
