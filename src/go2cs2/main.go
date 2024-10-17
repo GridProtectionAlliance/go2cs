@@ -25,6 +25,7 @@ import (
 type Options struct {
 	indentSpaces    int
 	preferVarDecl   bool
+	includeComments bool
 	parseCgoTargets bool
 	showParseTree   bool
 }
@@ -125,6 +126,7 @@ func main() {
 	// Define command line flags for options
 	indentSpaces := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDecl := commandLine.Bool("var", true, "Prefer \"var\" declarations")
+	includeComments := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
 	showParseTree := commandLine.Bool("tree", false, "Show parse tree")
 
@@ -158,6 +160,7 @@ Examples:
 	options := Options{
 		indentSpaces:    *indentSpaces,
 		preferVarDecl:   *preferVarDecl,
+		includeComments: *includeComments,
 		parseCgoTargets: *parseCgoTargets,
 		showParseTree:   *showParseTree,
 	}
@@ -172,6 +175,14 @@ Examples:
 		log.Fatalf("Failed to access input file path \"%s\": %s\n", inputFilePath, err)
 	}
 
+	var parseMode parser.Mode
+
+	if options.includeComments {
+		parseMode = parser.ParseComments | parser.SkipObjectResolution
+	} else {
+		parseMode = parser.SkipObjectResolution
+	}
+
 	if fileInfo.IsDir() {
 		// If the input is a directory, parse all .go files in the directory
 		err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
@@ -180,7 +191,7 @@ Examples:
 			}
 
 			if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
-				file, err := parser.ParseFile(fset, path, nil, parser.ParseComments|parser.SkipObjectResolution)
+				file, err := parser.ParseFile(fset, path, nil, parseMode)
 
 				if err != nil {
 					return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
@@ -201,7 +212,7 @@ Examples:
 			log.Fatalln("Invalid file extension for input source file: please provide a .go file as first argument")
 		}
 
-		file, err := parser.ParseFile(fset, inputFilePath, nil, parser.ParseComments|parser.SkipObjectResolution)
+		file, err := parser.ParseFile(fset, inputFilePath, nil, parseMode)
 
 		if err != nil {
 			log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)

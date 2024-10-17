@@ -36,6 +36,10 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 	wroteStandAloneComment := false
 	lines := 0
 
+	if !v.options.includeComments {
+		return wroteStandAloneComment, lines
+	}
+
 	// Handle standalone comments that may precede the target position
 	if targetPos != token.NoPos {
 		if v.file == nil {
@@ -102,6 +106,10 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 }
 
 func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup, targetPos token.Pos) {
+	if !v.options.includeComments {
+		return
+	}
+
 	wroteStandAloneComment, _ := v.writeStandAloneCommentString(builder, targetPos, doc, "")
 
 	if doc == nil {
@@ -119,7 +127,7 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 }
 
 func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.CommentGroup, targetPos token.Pos) {
-	if comment == nil {
+	if comment == nil || !v.options.includeComments {
 		return
 	}
 

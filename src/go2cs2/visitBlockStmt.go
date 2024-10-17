@@ -33,29 +33,34 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	var lastStmt ast.Stmt
 	prefix := v.newline + v.indent(v.indentLevel)
 
-	if len(blockStmt.List) > 0 {
+	if len(blockStmt.List) > 0 && v.options.includeComments {
 		v.writeStandAloneCommentString(v.targetFile, blockStmt.List[0].Pos(), nil, prefix)
 	}
 
 	for _, stmt := range blockStmt.List {
-		if lastStmt != nil {
+		if v.options.includeComments {
+			if lastStmt != nil {
+				if v.file == nil {
+					v.file = v.fset.File(stmt.Pos())
+				}
 
-			currentLine := v.file.Line(stmt.Pos())
-			lastLine := v.file.Line(lastStmt.End())
+				currentLine := v.file.Line(stmt.Pos())
+				lastLine := v.file.Line(lastStmt.End())
 
-			comments := &strings.Builder{}
-			var wrote bool
+				comments := &strings.Builder{}
+				var wrote bool
 
-			if wrote, lines := v.writeStandAloneCommentString(comments, stmt.Pos(), nil, prefix); wrote {
-				lastLine -= lines - 1
-			}
+				if wrote, lines := v.writeStandAloneCommentString(comments, stmt.Pos(), nil, prefix); wrote {
+					lastLine -= lines - 1
+				}
 
-			if wrote && currentLine-lastLine > 1 {
-				v.targetFile.WriteString(strings.Repeat(v.newline, currentLine-lastLine-1))
-			}
+				if wrote && currentLine-lastLine > 1 {
+					v.targetFile.WriteString(strings.Repeat(v.newline, currentLine-lastLine-1))
+				}
 
-			if comments.Len() > 0 {
-				v.targetFile.WriteString(comments.String())
+				if comments.Len() > 0 {
+					v.targetFile.WriteString(comments.String())
+				}
 			}
 		}
 

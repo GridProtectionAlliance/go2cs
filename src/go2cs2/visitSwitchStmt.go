@@ -29,7 +29,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 
 		// Check if all case clauses are constant values
 		for _, expr := range caseClause.List {
-			if !v.info.Types[expr].IsValue() {
+			// Check if the expression is a function call or a non-value type
+			_, isCallExpr := expr.(*ast.CallExpr)
+
+			if !v.info.Types[expr].IsValue() || isCallExpr {
 				allConst = false
 				break
 			}
@@ -46,7 +49,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 		}
 	}
 
-	hasSwitchInit := switchStmt.Init != nil || hasFallthroughs || !allConst || switchStmt.Tag == nil
+	hasSwitchInit := switchStmt.Init != nil || hasFallthroughs || !allConst && switchStmt.Tag != nil
 
 	if hasSwitchInit {
 		// Any declared variable will be scoped to switch statement, so create a sub-block for it
@@ -61,7 +64,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 
 	v.targetFile.WriteString(v.newline)
 
-	if hasFallthroughs {
+	if hasFallthroughs || (!allConst && switchStmt.Tag != nil) {
 		// Most complex scenario with standalone if's, and fallthrough
 		exprVarName := v.getTempVarName("expr")
 		matchVarName := v.getTempVarName("match")
@@ -109,13 +112,23 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 					if i == 0 {
 						if switchStmt.Tag != nil {
 							v.targetFile.WriteString(exprVarName)
-							v.targetFile.WriteString(" is ")
+
+							if usePattenMatch {
+								v.targetFile.WriteString(" is ")
+							} else {
+								v.targetFile.WriteString(" == ")
+							}
 						}
 					} else {
-						if usePattenMatch || switchStmt.Tag != nil {
+						if usePattenMatch {
 							v.targetFile.WriteString(" or ")
 						} else {
 							v.targetFile.WriteString(" || ")
+
+							if switchStmt.Tag != nil {
+								v.targetFile.WriteString(exprVarName)
+								v.targetFile.WriteString(" == ")
+							}
 						}
 					}
 
