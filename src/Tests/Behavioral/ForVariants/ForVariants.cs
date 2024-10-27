@@ -38,19 +38,19 @@ private static void Main() {
         for (iɅ2 = 12; iɅ2 < 15; iɅ2++) 
         {
             f(ᏑiɅ2);
-            goto @out_break;
+            goto break_out;
         }
 
         if (iɅ1 > 13) 
         {
-            goto @out_continue;
+            goto continue_out;
         }
 
         fmt.Println();
 
-@out_continue:;
+continue_out:;
     }
-@out_break:;
+break_out:;
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();
