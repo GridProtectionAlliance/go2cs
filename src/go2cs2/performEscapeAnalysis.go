@@ -17,6 +17,10 @@ import (
 // within a single function considering options where a variable "may" escape. It does
 // not consider cases where a variable is passed to another function and may not need
 // to be heap allocated and could be handled by using C# ref structure operations.
+
+// Future implementations could consider functions that (a) are within the same package
+// and (b) have private scope, that could look ahead for parameter uses that could use
+// a C# ref structure instead of using a heap allocation with a ptr<T>.
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
 	if parentBlock == nil {
 		return

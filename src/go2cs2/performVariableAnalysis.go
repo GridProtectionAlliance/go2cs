@@ -12,8 +12,8 @@ import (
 // in the Go source code. The analysis is performed on global variables and on a per-function
 // basis. The goal is to identify reassignments and shadowed variables so these can be handled
 // correctly during the conversion process since C# does not allow redeclarations or shadowing
-// of variables with the same name, at least within the same function. Two derivative functions
-// use the results of this analysis: `getIdentName` and `isReassignment`.
+// of variables with the same name, at least within the same function scope. Two derivative
+// functions use the results of this analysis: `getIdentName` and `isReassignment`.
 
 // Perform variable analysis on the global ValueSpec declarations
 func performGlobalVariableAnalysis(decls []ast.Decl, info *types.Info, globalIdentNames map[*ast.Ident]string, globalScope map[string]*types.Var) {
