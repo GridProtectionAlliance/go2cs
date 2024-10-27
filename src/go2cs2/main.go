@@ -76,8 +76,8 @@ type Visitor struct {
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "Ꮡ" // Ꮡ ꝸ Ʌ ꞥ
-const ShadowVarMarker = "Ʌ"
+const AddressPrefix = "Ꮡ"   // Ꮡ ꝸ ꞥ
+const ShadowVarMarker = "Δ" // Δ Ʌ
 const TempVarMarker = "ꞥ"
 const ExprSwitchMarker = "ᐧ"
 
@@ -94,7 +94,7 @@ var keywords = NewHashSet[string]([]string{
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
 	"GoType", "GoUntyped", "GoTag",
 	// The following symbols are reserved by go2cs as they are publically defined in "golib"
-	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", "__",
+	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", ExprSwitchMarker,
 })
 
 /*
