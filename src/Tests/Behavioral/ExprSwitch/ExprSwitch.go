@@ -190,5 +190,7 @@ func main() {
 		fallthrough
 	case Foo(4):
 		fmt.Println("Second case")
+    default:
+        fmt.Println("Default case")
 	}
 }

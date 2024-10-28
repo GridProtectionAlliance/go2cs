@@ -78,7 +78,7 @@ const RootNamespace = "go"
 const ClassSuffix = "_package"
 const AddressPrefix = "Ꮡ"   // Ꮡ ꝸ ꞥ
 const ShadowVarMarker = "Δ" // Δ Ʌ
-const TempVarMarker = "ꞥ"
+const TempVarMarker = "Ʌ"   // Ʌ ꞥ
 const ExprSwitchMarker = "ᐧ"
 
 var keywords = NewHashSet[string]([]string{
@@ -388,6 +388,12 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 	return str, false
 }
 
+func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
+	_, isCallExpr := expr.(*ast.CallExpr)
+
+	return v.info.Types[expr].IsValue() && !isCallExpr
+}
+
 func getSanitizedIdentifier(identifier string) string {
 	if strings.HasPrefix(identifier, "@") {
 		return identifier // Already sanitized
@@ -426,9 +432,18 @@ func isDiscardedVar(varName string) bool {
 	return len(varName) == 0 || varName == "_"
 }
 
-func isComparisonOperator(op string) bool {
+func isLogicalOperator(op token.Token) bool {
 	switch op {
-	case "==", "!=", "<", "<=", ">", ">=":
+	case token.LAND, token.LOR:
+		return true
+	default:
+		return false
+	}
+}
+
+func isComparisonOperator(op token.Token) bool {
+	switch op {
+	case token.EQL, token.NEQ, token.LSS, token.LEQ, token.GTR, token.GEQ:
 		return true
 	default:
 		return false

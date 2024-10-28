@@ -8,12 +8,12 @@ import (
 
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlockContext) {
 	var caseClauses []*ast.CaseClause
-	var caseClauseFallsthrough []bool
+	var caseHasFallthroughStmt []bool
 
 	for _, stmt := range switchStmt.Body.List {
 		if caseClause, ok := stmt.(*ast.CaseClause); ok {
 			caseClauses = append(caseClauses, caseClause)
-			caseClauseFallsthrough = append(caseClauseFallsthrough, false)
+			caseHasFallthroughStmt = append(caseHasFallthroughStmt, false)
 		} else {
 			println(fmt.Sprintf("WARNING: unexpected Stmt type (non CaseClause) encountered in SwitchStmt: %T", stmt))
 		}
@@ -21,18 +21,20 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 
 	allConst := true
 	hasFallthroughs := false
+	defaultCaseFallsThrough := false
 
 	for i, caseClause := range caseClauses {
 		if caseClause.List == nil {
+			if i > 0 && caseHasFallthroughStmt[i-1] {
+				defaultCaseFallsThrough = true
+			}
 			continue
 		}
 
 		// Check if all case clauses are constant values
 		for _, expr := range caseClause.List {
 			// Check if the expression is a function call or a non-value type
-			_, isCallExpr := expr.(*ast.CallExpr)
-
-			if !v.info.Types[expr].IsValue() || isCallExpr {
+			if !v.isNonCallValue(expr) {
 				allConst = false
 				break
 			}
@@ -43,7 +45,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			for _, stmt := range caseClause.Body {
 				if branchStmt, ok := stmt.(*ast.BranchStmt); ok && branchStmt.Tok == token.FALLTHROUGH {
 					hasFallthroughs = true
-					caseClauseFallsthrough[i] = true
+					caseHasFallthroughStmt[i] = true
 				}
 			}
 		}
@@ -63,7 +65,12 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 	if hasFallthroughs || (!allConst && switchStmt.Tag != nil) {
 		// Most complex scenario with standalone if's, and fallthrough
 		exprVarName := v.getTempVarName("expr")
-		matchVarName := v.getTempVarName("match")
+
+		var matchVarName string
+
+		if hasFallthroughs {
+			matchVarName = v.getTempVarName("match")
+		}
 
 		if switchStmt.Tag != nil {
 			if v.options.preferVarDecl {
@@ -80,29 +87,55 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			v.targetFile.WriteString(";" + v.newline)
 		}
 
-		if v.options.preferVarDecl {
-			v.writeOutput("var ")
-		} else {
-			v.writeOutput("bool ")
-		}
+		if hasFallthroughs {
+			if v.options.preferVarDecl {
+				v.writeOutput("var ")
+			} else {
+				v.writeOutput("bool ")
+			}
 
-		v.targetFile.WriteString(matchVarName)
-		v.targetFile.WriteString(" = false;" + v.newline)
+			v.targetFile.WriteString(matchVarName)
+			v.targetFile.WriteString(" = false;" + v.newline)
+		}
 
 		// Write "if" statements for each case clause
 		for i, caseClause := range caseClauses {
-			v.writeOutput("if (")
+			v.writeOutput("")
 
-			if i > 0 && caseClauseFallsthrough[i-1] {
-				v.targetFile.WriteString("fallthrough || ")
+			caseFallsThrough := false
+
+			// Case falls through if the previous case clause has a fallthrough statement
+			if i > 0 && caseHasFallthroughStmt[i-1] {
+				caseFallsThrough = true
 			}
 
+			nextClauseIsDefault := i < len(caseClauses)-1 && (i == len(caseClauses)-2 || caseClauses[i+1].List == nil)
+
+			if i > 0 && !caseFallsThrough {
+				v.targetFile.WriteString("else ")
+			}
+
+			// Handle default case
 			if caseClause.List == nil {
-				// Handle default case
-				v.targetFile.WriteString(fmt.Sprintf("!%s) { /* default: */", matchVarName))
+				if caseFallsThrough {
+					v.targetFile.WriteString(fmt.Sprintf("if (fallthrough || !%s) { /* default: */", matchVarName))
+				} else {
+					v.targetFile.WriteString("{ /* default: */")
+				}
 			} else {
 				caseClauseCount := len(caseClause.List)
-				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause)
+
+				v.targetFile.WriteString("if (")
+
+				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
+
+				if caseFallsThrough {
+					v.targetFile.WriteString(fmt.Sprintf("fallthrough || !%s && ", matchVarName))
+
+					if caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil {
+						v.targetFile.WriteRune('(')
+					}
+				}
 
 				for i, expr := range caseClause.List {
 					if i == 0 {
@@ -144,9 +177,21 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 					}
 
 					if i == caseClauseCount-1 {
-						v.targetFile.WriteString(") { ")
-						v.targetFile.WriteString(matchVarName)
-						v.targetFile.WriteString(" = true;")
+						if hasFallthroughs {
+							if caseFallsThrough && caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil {
+								v.targetFile.WriteRune(')')
+							}
+
+							v.targetFile.WriteString(") {")
+
+							if !nextClauseIsDefault || defaultCaseFallsThrough {
+								v.targetFile.WriteRune(' ')
+								v.targetFile.WriteString(matchVarName)
+								v.targetFile.WriteString(" = true;")
+							}
+						} else {
+							v.targetFile.WriteString(") {")
+						}
 					}
 				}
 			}
@@ -159,7 +204,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 
 			v.targetFile.WriteString(v.newline)
 
-			if caseClauseFallsthrough[i] {
+			if caseHasFallthroughStmt[i] {
 				v.writeOutputLn("fallthrough = true;")
 			}
 
@@ -216,7 +261,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 				// Use pattern match when all case list expressions are
 				// use comparison operators and the same target
 				caseClauseCount := len(caseClause.List)
-				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause)
+				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
 
 				for i, expr := range caseClause.List {
 					if i == 0 {
@@ -272,8 +317,20 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 	}
 }
 
-func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseClause) bool {
+func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseClause, inferExprTarget bool) bool {
 	usePattenMatch := true
+
+	if inferExprTarget {
+		// Verify that all expressions are non-call values
+		for _, expr := range caseClause.List {
+			if !v.isNonCallValue(expr) {
+				usePattenMatch = false
+				break
+			}
+		}
+
+		return usePattenMatch
+	}
 
 	if caseClauseCount > 0 {
 		var firstExpr string
@@ -287,12 +344,18 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 				break
 			}
 
-			if !isComparisonOperator(binaryExpr.Op.String()) {
+			if !isComparisonOperator(binaryExpr.Op) {
 				usePattenMatch = false
 				break
 			}
 
-			// Check if all expression targets are the same
+			// Make sure no rhs expression targets are call expressions
+			if !v.isNonCallValue(binaryExpr.Y) {
+				usePattenMatch = false
+				break
+			}
+
+			// Check if all lhs expression targets are the same
 			if i == 0 {
 				firstExpr = v.convExpr(binaryExpr.X, nil)
 			} else if firstExpr != v.convExpr(binaryExpr.X, nil) {
