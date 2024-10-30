@@ -24,8 +24,64 @@
 // ReSharper disable UnusedParameter.Local
 
 using System;
+using System.Diagnostics;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace go;
+
+// Delegate that returns a ref to a field value within a struct ptr reference
+public delegate ref TElem FieldRef<TElem>(object obj);
+
+/// <summary>
+/// Helper class for creating a <see cref="FieldRef{TElem}"/> delegate for a struct field.
+/// </summary>
+public static class FieldRef
+{
+    /// <summary>
+    /// Creates a <see cref="FieldRef{TElem}"/> delegate for a struct field.
+    /// </summary>
+    /// <param name="fieldName">Field name.</param>
+    /// <returns> A <see cref="FieldRef{TElem}"/> delegate for a struct field. </returns>
+    /// <typeparam name="T">Type of struct.</typeparam>
+    /// <typeparam name="TElem">Type of field.</typeparam>
+    /// <exception cref="InvalidOperationException">
+    /// Field <paramref name="fieldName"/> not found in type <typeparamref name="T"/>.
+    /// </exception>
+    public static FieldRef<TElem> Create<T, TElem>(string fieldName) where T : struct
+    {
+        // Get the Type of ptr<T>
+        Type ptrType = typeof(ptr<>).MakeGenericType(typeof(T));
+
+        // Get the FieldInfo for m_val in ptr<T>
+        FieldInfo ptrValField = ptrType.GetField("m_val", BindingFlags.Instance | BindingFlags.NonPublic)
+                               ?? throw new InvalidOperationException($"Field 'm_val' not found in type {ptrType.FullName}");
+
+        // Get the FieldInfo for fieldName in struct T referenced by ptr<T>
+        FieldInfo structField = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                             ?? throw new InvalidOperationException($"Field '{fieldName}' not found in type {typeof(T).FullName}");
+
+        // Create a dynamic method that matches the delegate signature
+        DynamicMethod method = new(
+            name: $"ref_{fieldName}",
+            returnType: typeof(TElem).MakeByRefType(),
+            parameterTypes: new Type[] { typeof(object) },
+            m: typeof(FieldRef).Module, // Use the module where this code is running
+            skipVisibility: true);
+
+        ILGenerator il = method.GetILGenerator();
+
+        // Emit IL code to load the field address
+        il.Emit(OpCodes.Ldarg_0);               // Load the object argument
+        il.Emit(OpCodes.Castclass, ptrType);    // Cast to ptr<T>
+        il.Emit(OpCodes.Ldflda, ptrValField);   // Load address of m_val field (type &T)
+        il.Emit(OpCodes.Ldflda, structField);   // Load address of field inside struct (T: type &TElem)
+        il.Emit(OpCodes.Ret);                   // Return
+
+        // Create the delegate
+        return (FieldRef<TElem>)method.CreateDelegate(typeof(FieldRef<TElem>));
+    }
+}
 
 /// <summary>
 /// Represents a heap allocated reference to an instance of type <typeparamref name="T"/>.
@@ -51,7 +107,8 @@ namespace go;
 /// </remarks>
 public class ptr<T>
 {
-    private readonly (IArray, int)? m_arrayRefIndex;
+    private readonly (object, FieldRef<T>)? m_structFieldRef;
+    private readonly (IArray, int)? m_arrayIndexRef;
     private T m_val;
 
     /// <summary>
@@ -63,10 +120,16 @@ public class ptr<T>
         m_val = value;
     }
 
-    // Create a new indexed reference into an existing heap allocated array
-    internal ptr(IArray arrayRef, int index)
+    internal ptr(object source, FieldRef<T> fieldRef)
     {
-        m_arrayRefIndex = (arrayRef, index);
+        m_structFieldRef = (source, fieldRef);
+        m_val = default!;
+    }
+
+    // Create a new indexed reference into an existing heap allocated array
+    internal ptr(IArray array, int index)
+    {
+        m_arrayIndexRef = (array, index);
         m_val = default!;
     }
 
@@ -89,15 +152,21 @@ public class ptr<T>
     {
         get
         {
-            if (m_arrayRefIndex is null)
+            if (m_structFieldRef is null && m_arrayIndexRef is null)
                 return ref m_val;
 
-            (IArray arrayRef, int index) = m_arrayRefIndex.Value;
+            if (m_structFieldRef is not null)
+            {
+                (object source, FieldRef<T> fieldRef) = m_structFieldRef!.Value;
+                return ref fieldRef(source);
+            }
 
-            if (arrayRef is IArray<T> array)
-                return ref array[index];
+            (IArray array, int index) = m_arrayIndexRef!.Value;
 
-            throw new InvalidOperationException("Cannot get reference to value, source is not a valid array or slice pointer.");
+            if (array is IArray<T> typedArray)
+                return ref typedArray[index];
+
+            throw new InvalidOperationException("Cannot get reference to value, source is not a valid struct field, array or slice reference.");
         }
     }
 
@@ -118,6 +187,17 @@ public class ptr<T>
             throw new IndexOutOfRangeException("Index is out of range for array or slice.");
 
         return new ptr<Telem>(array, index);
+    }
+
+    /// <summary>
+    /// Gets a pointer to the field of a struct.
+    /// </summary>
+    /// <typeparam name="TElem">Type of field.</typeparam>
+    /// <param name="fieldRef">Struct field reference delegate.</param>
+    /// <returns>Pointer to field of struct.</returns>
+    public ptr<TElem> of<TElem>(FieldRef<TElem> fieldRef)
+    {
+        return new ptr<TElem>(this, fieldRef);
     }
 
     /// <inheritdoc />

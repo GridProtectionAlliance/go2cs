@@ -24,6 +24,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs.CodeGenerators;
@@ -39,6 +40,9 @@ public static class StructDeclarationSyntaxExtensions
 
         foreach (FieldDeclarationSyntax? fieldDeclaration in structDeclaration.Members.OfType<FieldDeclarationSyntax>())
         {
+            if (fieldDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword))
+                continue;
+
             TypeSyntax variableTypeSyntax = fieldDeclaration.Declaration.Type;
 
             TypeInfo typeInfo = semanticModel.GetTypeInfo(variableTypeSyntax);

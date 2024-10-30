@@ -185,6 +185,10 @@ func main() {
 
 	sort.Sort(PeopleByAge(people))
 	fmt.Println(people)
+
+    x = `
+        SELECT *
+        FROM ` + "`Role`"
 }
 
 // Post code comments

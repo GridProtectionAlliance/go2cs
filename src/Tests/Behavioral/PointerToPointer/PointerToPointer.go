@@ -44,6 +44,10 @@ func main() {
 	fmt.Printf("Main-function updated value available at *ptr = %d\n", *ptr)
 	PrintValPtr2Ptr(pptr)
 	PrintValPtr2Ptr2Ptr(ppptr)
+
+	b := Buffer{}
+	PrintValPtr(&b.off)
+	PrintValPtr(&b.off)
 }
 
 func (b *Buffer) Read(p []byte) (n int, err error) {
@@ -53,7 +57,7 @@ func (b *Buffer) Read(p []byte) (n int, err error) {
 		b.lastRead = opRead
 	}
 
-    (&Buffer{buf: p}).Read(p)
+	(&Buffer{buf: p}).Read(p)
 
 	return n, nil
 }
