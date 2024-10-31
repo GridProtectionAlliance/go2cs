@@ -539,7 +539,7 @@ func getTypeName(t types.Type) string {
 		return named.Obj().Name()
 	}
 
-	return t.String()
+	return strings.ReplaceAll(t.String(), "..", "")
 }
 
 func getCSTypeName(t types.Type) string {
@@ -594,6 +594,8 @@ func convertToCSFullTypeName(typeName string) string {
 		return "nuint"
 	case "bool":
 		return "bool"
+	case "byte":
+		return "byte"
 	case "float":
 		return "float64"
 	case "complex64":

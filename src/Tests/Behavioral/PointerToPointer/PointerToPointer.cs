@@ -13,8 +13,6 @@ public partial struct Buffer {
     public slice<byte> buf;
     public nint off;
     public int8 lastRead;
-
-    public static readonly FieldRef<nint> Ꮡoff = FieldRef.Create<Buffer, nint>("off");
 }
 
 private const int8 opRead = -1;
@@ -36,24 +34,18 @@ private static void Main() {
     ppptr = addr(pptr);
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr));
-    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
     a = 1900;
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr));
-    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
     ref var b = ref heap(new Buffer(), out var Ꮡb);
-    b = new Buffer();
-
-    ref var x = ref b.off;
-
-    //FieldRef<nint> add_off = FieldRef.Create<Buffer, nint>("off");
-
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 }

@@ -37,7 +37,27 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 	for i, lhs := range assignStmt.Lhs {
 		ident := getIdentifier(lhs)
 
-		if ident != nil {
+		if ident == nil {
+			// Check if lhs is a struct member
+			if selectorExpr, ok := lhs.(*ast.SelectorExpr); ok {
+				ident = getIdentifier(selectorExpr.Sel)
+				lhsTypeIsInterface[i] = v.isInterface(ident)
+
+				typeName := v.getTypeName(ident, true)
+
+				lhsTypeIsString[i] = typeName == "string"
+
+				if !anyTypeIsString && lhsTypeIsString[i] {
+					anyTypeIsString = true
+				}
+
+				lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+
+				if !anyTypeIsInt && lhsTypeIsInt[i] {
+					anyTypeIsInt = true
+				}
+			}
+		} else {
 			if v.isReassignment(ident) {
 				reassignedCount++
 			} else {
@@ -143,9 +163,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			ident := getIdentifier(lhs)
 
 			if ident == nil {
-				// Handle unexpected types of LHS expressions
-				println("WARNING: Undetected AssignStmt Lhs identifier for: " + v.getPrintedNode(lhs))
-				result.WriteString("// undetected identifier in 'visitAssignStmt':" + v.getPrintedNode(lhs))
+				result.WriteString(v.convExpr(lhs, nil))
+				result.WriteString(" = ")
+
+				rhsExpr := v.convExpr(rhs, nil)
+
+				if lhsTypeIsInterface[i] {
+					result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+				} else {
+					result.WriteString(rhsExpr)
+				}
+
+				result.WriteString(";")
 			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))

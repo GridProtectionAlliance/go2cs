@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strings"
 )
 
@@ -19,6 +20,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
 				csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
 				return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
 			}
+		}
+
+		// Check if unary target is a pointer to a pointer
+		if _, ok := v.getType(unaryExpr.X, true).(*types.Pointer); ok {
+			return fmt.Sprintf("addr(%s)", v.convExpr(unaryExpr.X, nil))
+		}
+
+		// Check if unary target is not a variable or a field
+		if _, ok := unaryExpr.X.(*ast.Ident); !ok {
+			return fmt.Sprintf("addr(%s)", v.convExpr(unaryExpr.X, nil))
 		}
 
 		return AddressPrefix + v.convExpr(unaryExpr.X, nil)

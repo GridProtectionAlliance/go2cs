@@ -158,6 +158,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				}
 
 				updatedSignature.WriteString(param.Name())
+
 			}
 
 			parameterSignature = updatedSignature.String()
