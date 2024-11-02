@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
 	"strings"
 )
 
@@ -109,6 +110,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				result.WriteString(", ")
 			}
 
+			ident := getIdentifier(assignStmt.Lhs[i])
+
+			if !v.isPointer(ident) || v.identIsParameter(ident) {
+				// If rhs is a address of expression, we need to convert identifier to its pointer variable
+				if unaryExpr, ok := assignStmt.Rhs[i].(*ast.UnaryExpr); ok {
+					if unaryExpr.Op == token.AND {
+						result.WriteString(AddressPrefix)
+					}
+				}
+			}
+
 			result.WriteString(v.convExpr(lhs, nil))
 		}
 
@@ -198,7 +210,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					result.WriteString(";")
 				} else {
 					// Check if the variable needs to be allocated on the heap
-					heapTypeDecl := v.convertToHeapTypeDecl(ident)
+					heapTypeDecl := v.convertToHeapTypeDecl(ident, false)
 
 					if len(heapTypeDecl) > 0 {
 						if format.heapTypeDeclTarget == nil {

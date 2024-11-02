@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Security.Principal;
-
 namespace go;
 
 using fmt = fmt_package;
@@ -45,7 +41,8 @@ private static void Main() {
     fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
-    ref var b = ref heap(new Buffer(), out var Ꮡb);
+    ref var b = ref heap<Buffer>(out var Ꮡb);
+    b = new Buffer();
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 }
@@ -83,7 +80,7 @@ public static ptr<nint> EscapePrintValPtr(ptr<nint> Ꮡptr) {
     ref var ptr = ref Ꮡptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
-    ref var i = ref heap(new nint(), out var Ꮡi);
+    ref var i = ref heap<nint>(out var Ꮡi);
     i = 99;
     Ꮡptr = Ꮡi;
     fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, ptr);

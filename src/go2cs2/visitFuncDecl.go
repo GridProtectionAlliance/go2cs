@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
+
+	. "go2cs/hashset"
 )
 
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
@@ -27,6 +29,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	// Analyze function variables for reassignments and redeclarations (variable shadows)
 	v.performVariableAnalysis(funcDecl, signature)
+
+	// Collect parameter names from the function declaration
+	if v.paramNames == nil {
+		v.paramNames = HashSet[string]{}
+	} else {
+		v.paramNames.Clear()
+	}
+
+	for _, param := range funcDecl.Type.Params.List {
+		for _, name := range param.Names {
+			v.paramNames.Add(name.Name)
+		}
+	}
 
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
@@ -206,6 +221,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	v.inFunction = false
+}
+
+// identIsParameter checks if the given identifier is a parameter in the current function.
+func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
+	if v.paramNames == nil {
+		return false
+	}
+
+	// Check if the identifier's name is in the parameter names hash set
+	return v.paramNames.Contains(ident.Name)
 }
 
 func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {

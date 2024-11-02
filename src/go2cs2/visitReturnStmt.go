@@ -14,7 +14,6 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	if returnStmt.Results == nil {
 		// Check if result signature has named return values
 		if v.currentFunction != nil {
-
 			results := &strings.Builder{}
 
 			for i := 0; i < signature.Results().Len(); i++ {
@@ -36,6 +35,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 			}
 
 			v.targetFile.WriteRune(' ')
+
 			if results.Len() > 0 {
 				if signature.Results().Len() > 1 {
 					v.targetFile.WriteString("(")
@@ -60,6 +60,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 		resultParams := signature.Results()
 		resultParamIsInterface := paramsAreInterfaces(resultParams)
+		resultParamIsPointer := paramsArePointers(resultParams)
 
 		for i, expr := range returnStmt.Results {
 			if i > 0 {
@@ -72,6 +73,14 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				resultParamType := resultParams.At(i).Type()
 				v.targetFile.WriteString(convertToInterfaceType(resultParamType, resultExpr))
 			} else {
+				if resultParamIsPointer[i] {
+					ident := getIdentifier(expr)
+
+					if ident != nil && v.identIsParameter(ident) {
+						v.targetFile.WriteString(AddressPrefix)
+					}
+				}
+
 				v.targetFile.WriteString(resultExpr)
 			}
 		}

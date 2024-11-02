@@ -60,6 +60,7 @@ type Visitor struct {
 	// FuncDecl variables
 	inFunction      bool
 	currentFunction *types.Func
+	paramNames      HashSet[string]
 	hasDefer        bool
 	hasPanic        bool
 	hasRecover      bool
@@ -468,6 +469,24 @@ func isInterface(t types.Type) bool {
 	return isInterface
 }
 
+func (v *Visitor) isPointer(ident *ast.Ident) bool {
+	obj := v.info.ObjectOf(ident)
+
+	if obj == nil {
+		return false
+	}
+
+	return isPointer(obj.Type())
+}
+
+func isPointer(t types.Type) bool {
+	exprType := t.Underlying()
+
+	_, isPointer := exprType.(*types.Pointer)
+
+	return isPointer
+}
+
 func paramsAreInterfaces(paramTypes *types.Tuple) []bool {
 	if paramTypes == nil {
 		return nil
@@ -481,6 +500,21 @@ func paramsAreInterfaces(paramTypes *types.Tuple) []bool {
 	}
 
 	return paramIsInterface
+}
+
+func paramsArePointers(paramTypes *types.Tuple) []bool {
+	if paramTypes == nil {
+		return nil
+	}
+
+	paramIsPointer := make([]bool, paramTypes.Len())
+
+	for i := 0; i < paramTypes.Len(); i++ {
+		param := paramTypes.At(i)
+		paramIsPointer[i] = isPointer(param.Type())
+	}
+
+	return paramIsPointer
 }
 
 func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr string) string {
@@ -609,7 +643,7 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 }
 
-func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
+func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string {
 	escapesHeap := v.identEscapesHeap[ident]
 	identType := v.info.TypeOf(ident)
 
@@ -628,19 +662,35 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident) string {
 		arrayType := convertToCSTypeName(goTypeName[strings.Index(goTypeName, "]")+1:])
 
 		if v.options.preferVarDecl {
-			return fmt.Sprintf("ref var %s = ref heap(new array<%s>(%s), out var %s%s);", csIDName, arrayType, arrayLen, AddressPrefix, csIDName)
+			if createNew {
+				return fmt.Sprintf("ref var %s = ref heap(new array<%s>(%s), out var %s%s);", csIDName, arrayType, arrayLen, AddressPrefix, csIDName)
+			}
+
+			return fmt.Sprintf("ref var %s = ref heap<array<%s>>(out var %s%s);", csIDName, arrayType, AddressPrefix, csIDName)
 		}
 
-		return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
+		if createNew {
+			return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
+		}
+
+		return fmt.Sprintf("ref array<%s> %s = ref heap<array<%s>>(out %s%s);", arrayType, csIDName, arrayType, AddressPrefix, csIDName)
 	}
 
 	csTypeName := convertToCSTypeName(goTypeName)
 
 	if v.options.preferVarDecl {
-		return fmt.Sprintf("ref var %s = ref heap(new %s(), out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
+		if createNew {
+			return fmt.Sprintf("ref var %s = ref heap(new %s(), out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
+		}
+
+		return fmt.Sprintf("ref var %s = ref heap<%s>(out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
 	}
 
-	return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
+	if createNew {
+		return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
+	}
+
+	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
 }
 
 func isInherentlyHeapAllocatedType(typ types.Type) bool {

@@ -2,18 +2,22 @@ package main
 
 import (
 	"go/ast"
-	"go/types"
 )
 
 func (v *Visitor) convStarExpr(starExpr *ast.StarExpr) string {
-	// TODO: Could be pointer deref or pointer type declaration
+	ident := getIdentifier(starExpr.X)
 
-	// Check if the star expression is a pointer to pointer dereference
-	if _, ok := v.getType(starExpr.X, true).(*types.Pointer); ok {
-		if _, ok := starExpr.X.(*ast.StarExpr); ok {
-			return v.convExpr(starExpr.X, nil) + ".val"
+	if ident != nil && v.identIsParameter(ident) {
+		// Check if the star expression is a pointer to pointer dereference
+		if v.isPointer(ident) {
+			if _, ok := starExpr.X.(*ast.StarExpr); ok {
+				return v.convExpr(starExpr.X, nil) + ".val"
+			}
 		}
+
+		// Prefer to use local reference instead of dereferencing a pointer
+		return v.convExpr(starExpr.X, nil)
 	}
 
-	return v.convExpr(starExpr.X, nil)
+	return v.convExpr(starExpr.X, nil) + ".val"
 }

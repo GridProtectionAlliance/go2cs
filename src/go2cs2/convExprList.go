@@ -28,15 +28,19 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			result.WriteRune(' ')
 		}
 
-		exprContext := DefaultBasicLitContext()
+		basicLitContext := DefaultBasicLitContext()
+		identContext := DefaultIdentContext()
 
-		// Check if call context allows u8 strings, such as arguments
+		// Check for call context, such as arguments allows u8 strings or is a pointer type
 		if callContext != nil {
 			// Index out of bounds default to false here, so variadic params are handled correctly
-			exprContext.u8StringOK = callContext.u8StringArgOK[i]
+			basicLitContext.u8StringOK = callContext.u8StringArgOK[i]
+
+			// Check if the argument is a pointer type
+			identContext.typeIsPointer = callContext.argTypeIsPtr[i]
 		}
 
-		contexts := []ExprContext{exprContext, callContext}
+		contexts := []ExprContext{basicLitContext, identContext, callContext}
 
 		result.WriteString(v.convExpr(expr, contexts))
 

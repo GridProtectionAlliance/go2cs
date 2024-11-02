@@ -29,17 +29,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 			v.targetFile.WriteString(v.newline)
 		}
 
-		if ident := getIdentifier(field.Type); ident != nil {
-			goTypeName := ident.Name
-			csTypeName := convertToCSTypeName(goTypeName)
-			typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
+		fieldType := v.getType(field.Type, false)
+		goTypeName := getCSTypeName(fieldType)
+		csTypeName := convertToCSTypeName(goTypeName)
+		typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
 
-			v.writeOutput("public %s %s;", csTypeName, getSanitizedIdentifier(field.Names[0].Name))
-			v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
-			v.targetFile.WriteString(v.newline)
-		} else {
-			v.writeOutputLn("// %s", v.getPrintedNode(field))
-		}
+		v.writeOutput("public %s %s;", csTypeName, getSanitizedIdentifier(field.Names[0].Name))
+		v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
+		v.targetFile.WriteString(v.newline)
 	}
 
 	v.indentLevel--

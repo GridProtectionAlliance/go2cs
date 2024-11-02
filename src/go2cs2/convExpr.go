@@ -11,11 +11,13 @@ type ExprContext interface {
 
 type CallExprContext struct {
 	u8StringArgOK map[int]bool
+	argTypeIsPtr  map[int]bool
 }
 
 func DefaultCallExprContext() CallExprContext {
 	return CallExprContext{
 		u8StringArgOK: make(map[int]bool),
+		argTypeIsPtr:  make(map[int]bool),
 	}
 }
 
@@ -35,6 +37,20 @@ func DefaultBasicLitContext() BasicLitContext {
 
 func (c BasicLitContext) getDefault() StmtContext {
 	return DefaultBasicLitContext()
+}
+
+type IdentContext struct {
+	typeIsPointer bool
+}
+
+func DefaultIdentContext() IdentContext {
+	return IdentContext{
+		typeIsPointer: false,
+	}
+}
+
+func (c IdentContext) getDefault() StmtContext {
+	return DefaultIdentContext()
 }
 
 // Handles pattern match expressions, e.g.: "x is 1 or > 3"
@@ -95,7 +111,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.FuncType:
 		return v.convFuncType(exprType)
 	case *ast.Ident:
-		return v.convIdent(exprType)
+		context := getExprContext[IdentContext](contexts)
+		return v.convIdent(exprType, context)
 	case *ast.IndexExpr:
 		return v.convIndexExpr(exprType)
 	case *ast.IndexListExpr:

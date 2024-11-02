@@ -23,7 +23,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
 	context := DefaultCallExprContext()
 
-	// Check if any parameters of callExpr.Fun are interface types
+	// Check if any parameters of callExpr.Fun are interface or pointer types
 	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
 		for i := 0; i < funType.Params().Len(); i++ {
 			var paramType types.Type
@@ -34,8 +34,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 				continue
 			}
 
-			if _, ok := paramType.Underlying().(*types.Interface); ok {
+			if isInterface(paramType) {
 				context.u8StringArgOK[i] = false
+			} else if isPointer(paramType) {
+				ident := getIdentifier(callExpr.Args[i])
+
+				if !v.isPointer(ident) || v.identIsParameter(ident) {
+					context.argTypeIsPtr[i] = true
+				}
 			}
 		}
 	}

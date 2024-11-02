@@ -31,7 +31,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(ident)
+						headTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
@@ -60,7 +60,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(ident)
+						headTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
@@ -85,7 +85,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
 
 			if v.inFunction {
-				headTypeDecl := v.convertToHeapTypeDecl(ident)
+				headTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 				if len(headTypeDecl) > 0 {
 					v.writeOutput(headTypeDecl)
