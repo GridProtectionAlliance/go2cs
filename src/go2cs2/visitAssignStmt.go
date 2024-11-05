@@ -88,6 +88,37 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		}
 	}
 
+	// Map Go tokens to C# string equivalents
+	var operator string
+
+	switch assignStmt.Tok {
+	case token.ADD_ASSIGN:
+		operator = " += "
+	case token.SUB_ASSIGN:
+		operator = " -= "
+	case token.MUL_ASSIGN:
+		operator = " *= "
+	case token.QUO_ASSIGN:
+		operator = " /= "
+	case token.REM_ASSIGN:
+		operator = " %= "
+	case token.AND_ASSIGN:
+		operator = " &= "
+	case token.OR_ASSIGN:
+		operator = " |= "
+	case token.XOR_ASSIGN:
+		operator = " ^= "
+	case token.SHL_ASSIGN:
+		operator = " <<= "
+	case token.SHR_ASSIGN:
+		operator = " >>= "
+	case token.AND_NOT_ASSIGN:
+		// C# doesn't have a direct AND NOT equivalent, so expand `&^=` to `&= ~`
+		operator = " &= ~"
+	default:
+		operator = " = "
+	}
+
 	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
 		// Handle LHS
 		if declaredCount > 0 {
@@ -128,7 +159,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			result.WriteString(")")
 		}
 
-		result.WriteString(" = ")
+		result.WriteString(operator)
 
 		// Handle RHS
 		if rhsLen > 1 {
@@ -176,7 +207,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 
 			if ident == nil {
 				result.WriteString(v.convExpr(lhs, nil))
-				result.WriteString(" = ")
+				result.WriteString(operator)
 
 				rhsExpr := v.convExpr(rhs, nil)
 
@@ -190,7 +221,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))
-					result.WriteString(" = ")
+					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, nil)
 
@@ -205,7 +236,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					// Handle string variables
 					result.WriteString("@string ")
 					result.WriteString(v.convExpr(lhs, nil))
-					result.WriteString(" = ")
+					result.WriteString(operator)
 					result.WriteString(v.convExpr(rhs, nil))
 					result.WriteString(";")
 				} else {
@@ -231,7 +262,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					}
 
 					result.WriteString(v.convExpr(lhs, nil))
-					result.WriteString(" = ")
+					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, nil)
 

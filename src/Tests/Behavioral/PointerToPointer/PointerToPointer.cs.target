@@ -53,7 +53,7 @@ public static (nint n, error err) Read(this ptr<Buffer> Ꮡb, slice<byte> p) {
 
     ref var b = ref Ꮡb.val;
     b.lastRead = opInvalid;
-    b.off = n;
+    b.off += n;
     if (n > 0) 
     {
         b.lastRead = opRead;
