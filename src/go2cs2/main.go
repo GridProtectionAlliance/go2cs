@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -15,6 +16,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -98,27 +100,8 @@ var keywords = NewHashSet[string]([]string{
 	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", ExprSwitchMarker,
 })
 
-/*
-   Current expected C# global project aliases:
-
-   <Using Include="go.builtin" Static="True" />
-   <Using Include="System.Byte" Alias="uint8" />
-   <Using Include="System.UInt16" Alias="uint16" />
-   <Using Include="System.UInt32" Alias="uint32" />
-   <Using Include="System.UInt64" Alias="uint64" />
-   <Using Include="System.SByte" Alias="int8" />
-   <Using Include="System.Int16" Alias="int16" />
-   <Using Include="System.Int32" Alias="int32" />
-   <Using Include="System.Int64" Alias="int64" />
-   <Using Include="System.Single" Alias="float32" />
-   <Using Include="System.Double" Alias="float64" />
-   <Using Include="System.Numerics.Complex" Alias="complex128" />
-   <Using Include="System.Int32" Alias="rune" />
-   <Using Include="System.UIntPtr" Alias="uintptr" />
-   <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
-   <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
-
-*/
+//go:embed go2cs.ico
+var iconFileBytes []byte
 
 func main() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
@@ -185,27 +168,32 @@ Examples:
 	}
 
 	if fileInfo.IsDir() {
-		// If the input is a directory, parse all .go files in the directory
-		err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
-
-			if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
-				file, err := parser.ParseFile(fset, path, nil, parseMode)
-
+		// If the input is a directory, write project files (if needed)
+		if err := writeProjectFiles(filepath.Base(inputFilePath), inputFilePath); err != nil {
+			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", inputFilePath, err)
+		} else {
+			// Parse all .go files in the directory
+			err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
-					return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
+					return err
 				}
 
-				files = append(files, FileEntry{file, path})
+				if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
+					file, err := parser.ParseFile(fset, path, nil, parseMode)
+
+					if err != nil {
+						return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
+					}
+
+					files = append(files, FileEntry{file, path})
+				}
+
+				return nil
+			})
+
+			if err != nil {
+				log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
 			}
-
-			return nil
-		})
-
-		if err != nil {
-			log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
 		}
 	} else {
 		// If the input is a single file, parse it
@@ -313,6 +301,128 @@ Examples:
 	}
 
 	concurrentTasks.Wait()
+}
+
+func writeProjectFiles(projectName string, projectPath string) error {
+	// Make sure project path ends with a directory separator
+	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
+
+	iconFileName := projectPath + "go2cs.ico"
+
+	// Check if icon file needs to be written
+	if needToWriteFile(iconFileName, iconFileBytes) {
+		iconFile, err := os.Create(iconFileName)
+
+		if err != nil {
+			return fmt.Errorf("failed to create icon file \"%s\": %s", iconFileName, err)
+		}
+
+		defer iconFile.Close()
+
+		_, err = iconFile.Write(iconFileBytes)
+
+		if err != nil {
+			return fmt.Errorf("failed to write to icon file \"%s\": %s", iconFileName, err)
+		}
+	}
+
+	// Generate project file contents
+	projectFileContents := fmt.Sprintf(`<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>%s</AssemblyName>
+    <Product>go2cs</Product>
+    <Copyright>Copyright © %d</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;IDE1006</NoWarn>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.UIntPtr" Alias="uintptr" />
+
+    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>`, projectName, time.Now().Year())
+
+	projectFileName := projectPath + projectName + ".csproj"
+
+	// Check if project file needs to be written
+	if needToWriteFile(projectFileName, []byte(projectFileContents)) {
+		projectFile, err := os.Create(projectFileName)
+
+		if err != nil {
+			return fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
+		}
+
+		_, err = projectFile.WriteString(projectFileContents)
+
+		if err != nil {
+			return fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
+		}
+
+		defer projectFile.Close()
+	}
+
+	return nil
+}
+
+func needToWriteFile(fileName string, fileBytes []byte) bool {
+	writeFile := false
+
+	// Check if file does not exist
+	if _, err := os.Stat(fileName); err != nil {
+		writeFile = true
+	} else {
+		// Check if file sizes or contents are different
+		existingFileBytes, err := os.ReadFile(fileName)
+
+		if err != nil {
+			writeFile = true
+		} else if len(existingFileBytes) != len(fileBytes) {
+			writeFile = true
+		} else {
+			for i := 0; i < len(fileBytes); i++ {
+				if fileBytes[i] != existingFileBytes[i] {
+					writeFile = true
+					break
+				}
+			}
+		}
+	}
+
+	return writeFile
 }
 
 func (v *Visitor) writeOutputFile(outputFileName string) error {
