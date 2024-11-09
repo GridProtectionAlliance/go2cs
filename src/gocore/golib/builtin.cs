@@ -374,6 +374,16 @@ public static class builtin
     /// </summary>
     /// <param name="array">Target array.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
+    public static nint len<T>(T[] array)
+    {
+        return array.Length;
+    }
+
+    /// <summary>
+    /// Gets the length of the <paramref name="array"/>.
+    /// </summary>
+    /// <param name="array">Target array.</param>
+    /// <returns>The length of the <paramref name="array"/>.</returns>
     public static nint len(IArray array)
     {
         return array.Length;
@@ -573,10 +583,13 @@ public static class builtin
         Type type = typeof(T);
 
         if (type == typeof(slice<>))
-            return (T)Activator.CreateInstance(type, p1, p2, 0)!;
+            return (T)(object)new slice<T>(p1, p2, 0)!;
 
         if (type == typeof(channel<>) && p1 == 0)
+        {
             p1 = 1;
+            return (T)(object)new channel<T>((int)p1)!;
+        }
 
         return (T)Activator.CreateInstance(type, p1)!;
     }

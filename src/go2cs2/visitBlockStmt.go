@@ -64,10 +64,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 			}
 		}
 
-		source := ParentBlockContext{parentBlock: blockStmt}
-		contexts := []StmtContext{source}
-
-		v.visitStmt(stmt, contexts)
+		v.visitStmt(stmt, []StmtContext{ParentBlockContext{parentBlock: blockStmt}})
 
 		lastStmt = stmt
 	}
@@ -89,7 +86,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	}
 
 	v.targetFile.WriteString(v.newline)
-	v.writeOutputLn("}")
+	v.writeOutput("}")
 
 	if len(context.outerSuffix) > 0 {
 		v.targetFile.WriteString(context.outerSuffix)

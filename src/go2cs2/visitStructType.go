@@ -3,7 +3,6 @@ package main
 import (
 	"go/ast"
 	"go/token"
-	"strconv"
 )
 
 // Handles struct types in the context of a TypeSpec
@@ -16,10 +15,6 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 	v.indentLevel++
 
 	for _, field := range structType.Fields.List {
-		if len(field.Names) != 1 {
-			println("WARNING: Expected one name per StructType field, found " + strconv.Itoa(len(field.Names)))
-		}
-
 		v.writeDoc(field.Doc, field.Pos())
 
 		if field.Tag != nil {
@@ -34,9 +29,11 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 		csTypeName := convertToCSTypeName(goTypeName)
 		typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
 
-		v.writeOutput("public %s %s;", csTypeName, getSanitizedIdentifier(field.Names[0].Name))
-		v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
-		v.targetFile.WriteString(v.newline)
+		for _, ident := range field.Names {
+			v.writeOutput("public %s %s;", csTypeName, getSanitizedIdentifier(ident.Name))
+			v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
+			v.targetFile.WriteString(v.newline)
+		}
 	}
 
 	v.indentLevel--

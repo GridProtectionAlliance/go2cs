@@ -10,7 +10,6 @@ import (
 )
 
 func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, parentBlock *ast.BlockStmt) {
-	v.targetFile.WriteString(v.newline)
 	v.writeDoc(valueSpec.Doc, valueSpec.End())
 
 	if tok == token.VAR {
@@ -25,6 +24,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 				def := v.info.Defs[ident]
 
 				if def != nil {
+					v.targetFile.WriteString(v.newline)
+
 					goTypeName := getTypeName(def.Type())
 					csTypeName := convertToCSTypeName(goTypeName)
 
@@ -36,7 +37,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
 						} else {
-							v.writeOutput(fmt.Sprintf("%s %s;", csTypeName, csIDName))
+							v.writeOutput(fmt.Sprintf("%s %s = default;", csTypeName, csIDName))
 						}
 					} else {
 						access := getAccess(goIDName)
@@ -45,7 +46,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					}
 
 					v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation-token.Pos(len(csTypeName)))
-					v.targetFile.WriteString(v.newline)
 				}
 				continue
 			}
@@ -56,6 +56,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 				def := v.info.Defs[ident]
 
 				if def != nil {
+					v.targetFile.WriteString(v.newline)
+
 					csTypeName := getCSTypeName(def.Type())
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
@@ -75,10 +77,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					}
 
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
-					v.targetFile.WriteString(v.newline)
 				}
 				continue
 			}
+
+			v.targetFile.WriteString(v.newline)
 
 			csTypeName := convertToCSTypeName(getTypeName(tv.Type))
 			goValue := tv.Value.ExactString()
@@ -100,7 +103,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			}
 
 			v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation)
-			v.targetFile.WriteString(v.newline)
 		}
 	} else if tok == token.CONST {
 		for i, ident := range valueSpec.Names {
@@ -146,6 +148,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			constHandled := false
 
 			writeUntypedConst := func() {
+				v.targetFile.WriteString(v.newline)
+
 				if v.inFunction {
 					v.writeOutput("GoUntyped %s = /* ", csIDName)
 				} else {
@@ -180,6 +184,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			}
 
 			if c.Val().Kind() == constant.String {
+				v.targetFile.WriteString(v.newline)
+
 				if v.inFunction {
 					v.writeOutput("@string %s = %s;", csIDName, constVal)
 				} else {
@@ -191,6 +197,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 			}
 
 			if !constHandled {
+				v.targetFile.WriteString(v.newline)
+
 				if srcVal == "iota" {
 					constVal = "iota"
 				}
@@ -203,8 +211,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+1)
 			}
-
-			v.targetFile.WriteString(v.newline)
 		}
 	} else {
 		println(fmt.Sprintf("Unexpected ValueSpec token type: %s", tok))

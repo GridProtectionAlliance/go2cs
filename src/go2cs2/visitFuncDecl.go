@@ -209,9 +209,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.replaceMarker(fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName), blockPrefix)
 
 	if useFuncExecutionContext {
-		v.writeOutput(");")
+		v.writeOutputLn(");")
 	} else if signatureOnly {
 		v.writeOutput(";")
+	} else {
+		v.targetFile.WriteString(v.newline)
 	}
 
 	v.inFunction = false

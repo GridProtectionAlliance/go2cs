@@ -28,8 +28,12 @@ func (v *Visitor) getSignature(funcType *ast.FuncType) *types.Signature {
 			}
 		}
 
-		for _, paramName := range param.Names {
-			params = append(params, types.NewVar(token.NoPos, nil, paramName.Name, paramType))
+		if len(param.Names) == 0 {
+			params = append(params, types.NewVar(token.NoPos, nil, "_", paramType))
+		} else {
+			for _, paramName := range param.Names {
+				params = append(params, types.NewVar(token.NoPos, nil, paramName.Name, paramType))
+			}
 		}
 	}
 

@@ -55,7 +55,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		rbraceChar = "}"
 	}
 
-	result.WriteString(fmt.Sprintf("new %s%s%s", convertToCSTypeName(v.convExpr(compositeLit.Type, nil)), lbracePrefix, lbraceChar))
+	contexts := []ExprContext{ArrayTypeContext{compositeInitializer: true}}
+	result.WriteString(fmt.Sprintf("new %s%s%s", convertToCSTypeName(v.convExpr(compositeLit.Type, contexts)), lbracePrefix, lbraceChar))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")

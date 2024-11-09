@@ -14,8 +14,6 @@ const (
 	gamesPerSeries = 10  // The number of games per series to simulate
 )
 
-var totalGames int
-
 // A score includes scores accumulated in previous turns for each player,
 // as well as the points scored by the current player in this turn.
 type score struct {
@@ -75,13 +73,6 @@ func play(strategy0, strategy1 strategy) int {
 func roundRobin(strategies []strategy) ([]int, int) {
 	wins := make([]int, len(strategies))
 	for i := 0; i < len(strategies); i++ {
-        defer func() { 
-            if r := recover(); r != nil {
-                fmt.Println("Recovered in roundRobin", r)
-            }
-            
-            totalGames++ 
-        }()
 		for j := i + 1; j < len(strategies); j++ {
 			for k := 0; k < gamesPerSeries; k++ {
 				winner := play(strategies[i], strategies[j])
@@ -124,7 +115,7 @@ func main() {
 	wins, games := roundRobin(strategies)
 
 	for k := range strategies {
-		fmt.Printf("Total ganes=%d, Wins, losses staying at k =% 4d: %s\n",
-		 totalGames, k+1, ratioString(wins[k], games-wins[k]))
+		fmt.Printf("Wins, losses staying at k =% 4d: %s\n",
+			k+1, ratioString(wins[k], games-wins[k]))
 	}
 }

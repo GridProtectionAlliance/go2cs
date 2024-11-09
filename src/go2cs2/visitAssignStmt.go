@@ -3,19 +3,18 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strings"
 )
 
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlockContext, format FormattingContext) {
 	result := &strings.Builder{}
-	lhsLen := len(assignStmt.Lhs)
-	rhsLen := len(assignStmt.Rhs)
 
-	if lhsLen != rhsLen {
-		println("WARNING: AssignStmt Lhs and Rhs lengths do not match")
-		v.writeOutputLn("/* visitAssignStmt mismatch: " + v.getPrintedNode(assignStmt) + " */")
-		return
-	}
+	lhsExprs := assignStmt.Lhs
+	rhsExprs := assignStmt.Rhs
+
+	lhsLen := len(lhsExprs)
+	rhsLen := len(rhsExprs)
 
 	parentBlock := source.parentBlock
 	reassignedCount := 0
@@ -34,8 +33,25 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 	lhsTypeIsInt := make([]bool, lhsLen)
 	anyTypeIsInt := false
 
+	// Check if rhs is a call with a tuple result
+	var tupleTarget bool
+
+	if rhsLen == 1 {
+		if callExpr, ok := rhsExprs[0].(*ast.CallExpr); ok {
+			funType := v.info.TypeOf(callExpr.Fun)
+
+			if signature, ok := funType.(*types.Signature); ok {
+				results := signature.Results()
+
+				if results != nil {
+					tupleTarget = results.Len() > 1
+				}
+			}
+		}
+	}
+
 	// Count the number of reassigned and declared variables
-	for i, lhs := range assignStmt.Lhs {
+	for i, lhs := range lhsExprs {
 		ident := getIdentifier(lhs)
 
 		if ident == nil {
@@ -44,18 +60,38 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				ident = getIdentifier(selectorExpr.Sel)
 				lhsTypeIsInterface[i] = v.isInterface(ident)
 
-				typeName := v.getTypeName(ident, true)
+				var rhs ast.Expr
 
-				lhsTypeIsString[i] = typeName == "string"
-
-				if !anyTypeIsString && lhsTypeIsString[i] {
-					anyTypeIsString = true
+				// Check if rhs is a basic literal
+				if i < rhsLen {
+					rhs = rhsExprs[i]
+				} else {
+					rhs = rhsExprs[rhsLen-1]
 				}
 
-				lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+				// Check if rhs result is a tuple
+				if callExpr, ok := rhs.(*ast.CallExpr); ok {
+					resultType := v.info.TypeOf(callExpr.Fun)
 
-				if !anyTypeIsInt && lhsTypeIsInt[i] {
-					anyTypeIsInt = true
+					if resultType != nil {
+						_, tupleTarget = resultType.(*types.Tuple)
+					}
+				}
+
+				if _, ok := rhs.(*ast.BasicLit); ok {
+					typeName := v.getTypeName(ident, true)
+
+					lhsTypeIsString[i] = typeName == "string"
+
+					if !anyTypeIsString && lhsTypeIsString[i] {
+						anyTypeIsString = true
+					}
+
+					lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+
+					if !anyTypeIsInt && lhsTypeIsInt[i] {
+						anyTypeIsInt = true
+					}
 				}
 			}
 		} else {
@@ -72,18 +108,29 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 
 			lhsTypeIsInterface[i] = v.isInterface(ident)
 
-			typeName := v.getTypeName(ident, true)
+			var rhs ast.Expr
 
-			lhsTypeIsString[i] = typeName == "string"
-
-			if !anyTypeIsString && lhsTypeIsString[i] {
-				anyTypeIsString = true
+			// Check if rhs is a basic literal
+			if i < rhsLen {
+				rhs = rhsExprs[i]
+			} else {
+				rhs = rhsExprs[rhsLen-1]
 			}
 
-			lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+			if _, ok := rhs.(*ast.BasicLit); ok {
+				typeName := v.getTypeName(ident, true)
 
-			if !anyTypeIsInt && lhsTypeIsInt[i] {
-				anyTypeIsInt = true
+				lhsTypeIsString[i] = typeName == "string"
+
+				if !anyTypeIsString && lhsTypeIsString[i] {
+					anyTypeIsString = true
+				}
+
+				lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
+
+				if !anyTypeIsInt && lhsTypeIsInt[i] {
+					anyTypeIsInt = true
+				}
 			}
 		}
 	}
@@ -119,13 +166,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		operator = " = "
 	}
 
-	if lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
+	if tupleTarget || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
 		// Handle LHS
 		if declaredCount > 0 {
 			if declaredCount > 1 || v.options.preferVarDecl {
 				result.WriteString("var ")
 			} else {
-				ident := getIdentifier(assignStmt.Lhs[0])
+				ident := getIdentifier(lhsExprs[0])
 				lhsType := convertToCSTypeName(v.getTypeName(ident, false))
 				result.WriteString(lhsType)
 				result.WriteRune(' ')
@@ -136,16 +183,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			result.WriteRune('(')
 		}
 
-		for i, lhs := range assignStmt.Lhs {
+		for i, lhs := range lhsExprs {
 			if i > 0 {
 				result.WriteString(", ")
 			}
 
-			ident := getIdentifier(assignStmt.Lhs[i])
+			ident := getIdentifier(lhsExprs[i])
 
-			if !v.isPointer(ident) || v.identIsParameter(ident) {
+			if (!v.isPointer(ident) || v.identIsParameter(ident)) && i < rhsLen {
 				// If rhs is a address of expression, we need to convert identifier to its pointer variable
-				if unaryExpr, ok := assignStmt.Rhs[i].(*ast.UnaryExpr); ok {
+				if unaryExpr, ok := rhsExprs[i].(*ast.UnaryExpr); ok {
 					if unaryExpr.Op == token.AND {
 						result.WriteString(AddressPrefix)
 					}
@@ -166,7 +213,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			result.WriteRune('(')
 		}
 
-		for i, rhs := range assignStmt.Rhs {
+		for i, rhs := range rhsExprs {
 			if i > 0 {
 				result.WriteString(", ")
 			}
@@ -174,7 +221,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			rhsExpr := v.convExpr(rhs, nil)
 
 			if lhsTypeIsInterface[i] {
-				result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhsExpr))
 			} else {
 				result.WriteString(rhsExpr)
 			}
@@ -190,8 +237,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
 		for i := 0; i < lhsLen; i++ {
-			lhs := assignStmt.Lhs[i]
-			rhs := assignStmt.Rhs[i]
+			lhs := lhsExprs[i]
+
+			var rhs ast.Expr
+
+			if i < rhsLen {
+				rhs = rhsExprs[i]
+			} else {
+				rhs = rhsExprs[rhsLen-1]
+			}
 
 			if i > 0 {
 				if format.useNewLine {
@@ -212,7 +266,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				rhsExpr := v.convExpr(rhs, nil)
 
 				if lhsTypeIsInterface[i] {
-					result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+					result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
 				} else {
 					result.WriteString(rhsExpr)
 				}
@@ -226,7 +280,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					rhsExpr := v.convExpr(rhs, nil)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}
@@ -267,7 +321,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					rhsExpr := v.convExpr(rhs, nil)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(assignStmt.Lhs[i], rhsExpr))
+						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}

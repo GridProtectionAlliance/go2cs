@@ -49,6 +49,7 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
 
 	if ifStmt.Init != nil {
 		v.indentLevel--
+		v.targetFile.WriteString(v.newline)
 		v.writeOutput("}")
 	}
 }

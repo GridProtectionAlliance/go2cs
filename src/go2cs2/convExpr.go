@@ -39,6 +39,20 @@ func (c BasicLitContext) getDefault() StmtContext {
 	return DefaultBasicLitContext()
 }
 
+type ArrayTypeContext struct {
+	compositeInitializer bool
+}
+
+func DefaultArrayTypeContext() ArrayTypeContext {
+	return ArrayTypeContext{
+		compositeInitializer: false,
+	}
+}
+
+func (c ArrayTypeContext) getDefault() StmtContext {
+	return DefaultArrayTypeContext()
+}
+
 type IdentContext struct {
 	typeIsPointer bool
 }
@@ -91,7 +105,8 @@ func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
-		return v.convArrayType(exprType)
+		context := getExprContext[ArrayTypeContext](contexts)
+		return v.convArrayType(exprType, context)
 	case *ast.BasicLit:
 		context := getExprContext[BasicLitContext](contexts)
 		return v.convBasicLit(exprType, context)
