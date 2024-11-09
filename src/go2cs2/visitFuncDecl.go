@@ -67,7 +67,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	signatureOnly := funcDecl.Body == nil
-	useFuncExecutionContext := v.hasDefer || v.hasPanic || v.hasRecover
+	useFuncExecutionContext := v.hasDefer || v.hasRecover
 	parameterSignature := generateParametersSignature(signature, true)
 	blockPrefix := ""
 
@@ -166,7 +166,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				}
 
 				updatedSignature.WriteString(getCSTypeName(param.Type()))
-				updatedSignature.WriteString(" ")
+				updatedSignature.WriteRune(' ')
 
 				if _, ok := param.Type().(*types.Pointer); ok {
 					updatedSignature.WriteString(AddressPrefix)
@@ -186,18 +186,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	var funcExecutionContext string
 
 	if useFuncExecutionContext {
-		var deferParam, panicParam, recoverParam string
+		var deferParam, recoverParam string
 
 		if v.hasDefer {
 			deferParam = "defer"
 		} else {
 			deferParam = "_"
-		}
-
-		if v.hasPanic {
-			panicParam = "panic"
-		} else {
-			panicParam = "_"
 		}
 
 		if v.hasRecover {
@@ -206,7 +200,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			recoverParam = "_"
 		}
 
-		funcExecutionContext = fmt.Sprintf(" => func((%s, %s, %s) =>", deferParam, panicParam, recoverParam)
+		funcExecutionContext = fmt.Sprintf(" => func((%s, %s) =>", deferParam, recoverParam)
 	} else {
 		funcExecutionContext = ""
 	}
@@ -287,7 +281,7 @@ func generateParametersSignature(signature *types.Signature, addRecv bool) strin
 			result.WriteString(getCSTypeName(param.Type()))
 		}
 
-		result.WriteString(" ")
+		result.WriteRune(' ')
 		result.WriteString(param.Name())
 	}
 
@@ -317,7 +311,7 @@ func generateResultSignature(signature *types.Signature) string {
 		return result.String()
 	}
 
-	result.WriteString("(")
+	result.WriteRune('(')
 
 	for i := 0; i < results.Len(); i++ {
 		if i > 0 {
@@ -329,12 +323,12 @@ func generateResultSignature(signature *types.Signature) string {
 		result.WriteString(getCSTypeName(param.Type()))
 
 		if param.Name() != "" {
-			result.WriteString(" ")
+			result.WriteRune(' ')
 			result.WriteString(param.Name())
 		}
 	}
 
-	result.WriteString(")")
+	result.WriteRune(')')
 
 	return result.String()
 }

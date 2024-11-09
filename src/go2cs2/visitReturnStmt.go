@@ -38,9 +38,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 			if results.Len() > 0 {
 				if signature.Results().Len() > 1 {
-					v.targetFile.WriteString("(")
+					v.targetFile.WriteRune('(')
 					v.targetFile.WriteString(results.String())
-					v.targetFile.WriteString(")")
+					v.targetFile.WriteRune(')')
 				} else {
 					v.targetFile.WriteString(results.String())
 				}
@@ -69,11 +69,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 			resultExpr := v.convExpr(expr, []ExprContext{context})
 
-			if resultParamIsInterface[i] {
+			if resultParamIsInterface != nil && resultParamIsInterface[i] {
 				resultParamType := resultParams.At(i).Type()
 				v.targetFile.WriteString(convertToInterfaceType(resultParamType, resultExpr))
 			} else {
-				if resultParamIsPointer[i] {
+				if resultParamIsPointer != nil && resultParamIsPointer[i] {
 					ident := getIdentifier(expr)
 
 					if ident != nil && v.identIsParameter(ident) {

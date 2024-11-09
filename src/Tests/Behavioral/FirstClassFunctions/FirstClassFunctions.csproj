@@ -5,7 +5,7 @@
     <TargetFrameworks>net8.0</TargetFrameworks>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>LambdaFunctions</AssemblyName>
+    <AssemblyName>FirstClassFunctions</AssemblyName>
     <Product>go2cs</Product>
     <Copyright>Copyright © 2024</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
@@ -37,8 +37,10 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
+	<!-- TODO: Add references to required projects -->
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
   </ItemGroup>
 
   <ItemGroup>

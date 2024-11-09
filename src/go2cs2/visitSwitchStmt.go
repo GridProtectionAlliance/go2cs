@@ -167,13 +167,13 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 						context.usePattenMatch = true
 						context.declareIsExpr = i == 0
 					} else if caseClauseCount > 1 && switchStmt.Tag == nil {
-						v.targetFile.WriteString("(")
+						v.targetFile.WriteRune('(')
 					}
 
 					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
 
 					if !usePattenMatch && caseClauseCount > 1 && switchStmt.Tag == nil {
-						v.targetFile.WriteString(")")
+						v.targetFile.WriteRune(')')
 					}
 
 					if i == caseClauseCount-1 {
@@ -232,7 +232,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 					v.targetFile.WriteString(v.convExpr(expr, nil))
 
 					if i == len(caseClause.List)-1 {
-						v.targetFile.WriteString(":")
+						v.targetFile.WriteRune(':')
 					}
 				}
 			}
@@ -280,17 +280,17 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 						context.usePattenMatch = true
 						context.declareIsExpr = i == 0
 					} else if caseClauseCount > 1 {
-						v.targetFile.WriteString("(")
+						v.targetFile.WriteRune('(')
 					}
 
 					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
 
 					if !usePattenMatch && caseClauseCount > 1 {
-						v.targetFile.WriteString(")")
+						v.targetFile.WriteRune(')')
 					}
 
 					if i == caseClauseCount-1 {
-						v.targetFile.WriteString(":")
+						v.targetFile.WriteRune(':')
 					}
 				}
 			}

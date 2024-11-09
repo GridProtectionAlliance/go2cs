@@ -108,8 +108,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convEllipsis(exprType)
 	case *ast.FuncLit:
 		return v.convFuncLit(exprType)
-	case *ast.FuncType:
-		return v.convFuncType(exprType)
+	// case *ast.FuncType:
+	// 	return v.convFuncType(exprType)
 	case *ast.Ident:
 		context := getExprContext[IdentContext](contexts)
 		return v.convIdent(exprType, context)

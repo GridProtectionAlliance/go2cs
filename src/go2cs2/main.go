@@ -64,7 +64,6 @@ type Visitor struct {
 	currentFunction *types.Func
 	paramNames      HashSet[string]
 	hasDefer        bool
-	hasPanic        bool
 	hasRecover      bool
 	tempVarCount    map[string]int
 
@@ -326,6 +325,8 @@ func writeProjectFiles(projectName string, projectPath string) error {
 		}
 	}
 
+	// TODO: Need to know which projects to reference based on package imports
+
 	// Generate project file contents
 	projectFileContents := fmt.Sprintf(`<Project Sdk="Microsoft.NET.Sdk">
 
@@ -366,8 +367,10 @@ func writeProjectFiles(projectName string, projectPath string) error {
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
+	<!-- TODO: Add references to required projects -->
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -572,9 +575,16 @@ func (v *Visitor) isInterface(ident *ast.Ident) bool {
 }
 
 func isInterface(t types.Type) bool {
+	// Check if current type is empty interface
+	_, isInterface := t.(*types.Interface)
+
+	if isInterface {
+		return false // No need to cast to empty interface
+	}
+
 	exprType := t.Underlying()
 
-	_, isInterface := exprType.(*types.Interface)
+	_, isInterface = exprType.(*types.Interface)
 
 	return isInterface
 }

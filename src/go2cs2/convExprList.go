@@ -15,7 +15,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if i == 0 && prevEndPos.IsValid() {
 			exprOnNewLine = v.isLineFeedBetween(prevEndPos, expr.Pos())
 		} else {
-			result.WriteString(",")
+			result.WriteRune(',')
 			exprOnNewLine = v.isLineFeedBetween(exprs[i-1].End(), expr.Pos())
 			v.writeStandAloneCommentString(result, expr.Pos(), nil, " ")
 		}

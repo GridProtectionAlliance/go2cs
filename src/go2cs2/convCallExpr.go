@@ -7,17 +7,15 @@ import (
 )
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
+	// Handle make call as a special case
+	if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "make" {
+
+	}
+
 	constructType := ""
 
-	if funName := getIdentifier(callExpr.Fun); funName != nil {
-		funcInfo := v.info.ObjectOf(funName)
-
-		if funcInfo != nil {
-			// TODO: Most types in C# require a "new" keyword to instantiate. Check for other types that require this.
-			if _, ok := funcInfo.Type().(*types.Named); ok {
-				constructType = "new "
-			}
-		}
+	if v.isConstructorCall(callExpr) {
+		constructType = "new "
 	}
 
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
@@ -47,4 +45,37 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	}
 
 	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, &context))
+}
+
+func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
+	// Get the object associated with the function being called
+	var obj types.Object
+
+	switch funExpr := callExpr.Fun.(type) {
+	case *ast.Ident:
+		obj = v.info.ObjectOf(funExpr)
+	case *ast.SelectorExpr:
+		obj = v.info.ObjectOf(funExpr.Sel)
+	default:
+		return false
+	}
+
+	if obj == nil {
+		return false
+	}
+
+	// Determine if the object is a type name
+	switch obj.(type) {
+	case *types.TypeName:
+		// The function being called is a type (constructor call)
+		return true
+	case *types.Builtin:
+		// Built-in functions like len, cap, etc.
+		return false
+	case *types.Func, *types.Var:
+		// Regular functions or variables of function type
+		return false
+	default:
+		return false
+	}
 }

@@ -15,7 +15,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 	if context.format.useNewLine {
 		v.targetFile.WriteString(v.newline)
 		v.targetFile.WriteString(v.indent(v.indentLevel))
-		v.targetFile.WriteString("{")
+		v.targetFile.WriteRune('{')
 	} else {
 		v.targetFile.WriteString(" {")
 	}

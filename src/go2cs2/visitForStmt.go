@@ -21,8 +21,10 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			v.targetFile.WriteString(v.convExpr(forStmt.Cond, nil))
 		}
 
-		v.targetFile.WriteString(") ")
-		v.visitBlockStmt(forStmt.Body, DefaultBlockStmtContext())
+		v.targetFile.WriteRune(')')
+		context := DefaultBlockStmtContext()
+		context.format.useNewLine = false
+		v.visitBlockStmt(forStmt.Body, context)
 		return
 	}
 
@@ -85,9 +87,10 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 		v.visitStmt(forStmt.Post, contexts)
 	}
 
-	v.targetFile.WriteString(") ")
+	v.targetFile.WriteRune(')')
 
 	blockContext := DefaultBlockStmtContext()
+	blockContext.format.useNewLine = false
 
 	if len(target.label) > 0 {
 		blockContext.innerSuffix = fmt.Sprintf("%s%s%s:;", v.newline, v.newline, getContinueLabelName(target.label))

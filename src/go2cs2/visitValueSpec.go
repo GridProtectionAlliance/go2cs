@@ -63,9 +63,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 						headTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 						if len(headTypeDecl) > 0 {
-							v.writeOutput(headTypeDecl)
+							v.writeOutputLn(headTypeDecl)
+							v.writeOutput(fmt.Sprintf("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil)))
 						} else {
-							v.writeOutput(fmt.Sprintf("%s %s;", csTypeName, csIDName))
+							v.writeOutput(fmt.Sprintf("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil)))
 						}
 					} else {
 						access := getAccess(goIDName)

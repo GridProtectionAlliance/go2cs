@@ -20,10 +20,25 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())
 
-	// TODO: Update to handle alias / static options
-	csUsing := fmt.Sprintf("using %s = %s%s;", importPath, importPath, ClassSuffix)
+	if importSpec.Name != nil {
+		alias := importSpec.Name.Name
 
-	v.packageImports.WriteString(csUsing)
+		if alias == "." {
+			v.packageImports.WriteString(fmt.Sprintf("using static %s%s;", importPath, ClassSuffix))
+		} else {
+			v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", alias, importPath, ClassSuffix))
+		}
+	} else {
+		// Get package name from the import path, last name after last "."
+		importName := importPath
+		lastDotIndex := strings.LastIndex(importPath, ".")
+
+		if lastDotIndex != -1 {
+			importName = importPath[lastDotIndex+1:]
+		}
+
+		v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", importName, importPath, ClassSuffix))
+	}
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())
 	v.packageImports.WriteString(v.newline)

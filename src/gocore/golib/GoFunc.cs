@@ -38,12 +38,6 @@ namespace go;
 public delegate void Defer(Action deferredAction);
 
 /// <summary>
-/// Delegate for the Go "panic" function.
-/// </summary>
-/// <param name="state">Panic state.</param>
-public delegate void Panic(object state);
-
-/// <summary>
 /// Delegate for the Go "recover" function.
 /// </summary>
 /// <returns>Recovered panic state, if any.</returns>
@@ -59,12 +53,12 @@ public class GoFuncRoot
 }
 
 /// <summary>
-/// Represents a Go function execution context for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context for handling "defer" and "recover" keywords.
 /// </summary>
 public class GoFunc<T> : GoFuncRoot
 {
-    public delegate void GoAction(Defer? defer, Panic? panic, Recover? recover);
-    public delegate T GoFunction(Defer? defer, Panic? panic, Recover? recover);
+    public delegate void GoAction(Defer defer, Recover recover);
+    public delegate T GoFunction(Defer defer, Recover recover);
 
     protected Stack<Action>? Defers;
 
@@ -77,9 +71,9 @@ public class GoFunc<T> : GoFuncRoot
 
     public GoFunc(GoAction action)
     {
-        m_function = (defer, panic, recover) =>
+        m_function = (defer, recover) =>
         {
-            action(defer, panic, recover);
+            action(defer, recover);
             return default!;
         };
     }
@@ -97,7 +91,7 @@ public class GoFunc<T> : GoFuncRoot
         try
         {
             if (m_function is not null)
-                result = m_function(HandleDefer, HandlePanic, HandleRecover);
+                result = m_function(HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -118,11 +112,6 @@ public class GoFunc<T> : GoFuncRoot
 
         Defers ??= new Stack<Action>();
         Defers.Push(deferredAction);
-    }
-
-    protected void HandlePanic(object state)
-    {
-        throw new PanicException(state);
     }
 
     protected object? HandleRecover()
@@ -150,16 +139,16 @@ public class GoFunc<T> : GoFuncRoot
 /// </summary>
 public sealed class GoFunc<TRef1, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, Defer defer, Panic panic, Recover recover) =>
+        m_function = (ref TRef1 ref1, Defer defer, Recover recover) =>
         {
-            action(ref ref1, defer, panic, recover);
+            action(ref ref1, defer, recover);
             return default!;
         };
     }
@@ -176,7 +165,7 @@ public sealed class GoFunc<TRef1, T> : GoFunc<T>
 
         try
         {
-            result = m_function(ref ref1, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -200,16 +189,16 @@ public sealed class GoFunc<TRef1, T> : GoFunc<T>
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, Defer defer, Panic panic, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, defer, panic, recover);
+            action(ref ref1, ref ref2, defer, recover);
             return default!;
         };
     }
@@ -226,7 +215,7 @@ public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 
         try
         {
-            result = m_function(ref ref1, ref ref2, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -246,16 +235,16 @@ public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Panic panic, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, defer, panic, recover);
+            action(ref ref1, ref ref2, ref ref3, defer, recover);
             return default!;
         };
     }
@@ -272,7 +261,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -292,17 +281,17 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Panic panic,
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer,
             Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, defer, panic, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, defer, recover);
             return default!;
         };
     }
@@ -319,7 +308,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -339,17 +328,16 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer,
-            Panic panic, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, defer, panic, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, defer, recover);
             return default!;
         };
     }
@@ -366,7 +354,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -386,17 +374,17 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            Defer defer, Panic panic, Recover recover) =>
+            Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, defer, panic, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, defer, recover);
             return default!;
         };
     }
@@ -413,7 +401,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -433,17 +421,17 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, Defer defer, Panic panic, Recover recover) =>
+            ref TRef7 ref7, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, defer, panic, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, defer, recover);
             return default!;
         };
     }
@@ -460,7 +448,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -480,17 +468,17 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, Defer defer, Panic panic, Recover recover) =>
+            ref TRef7 ref7, ref TRef8 ref8, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer, panic,
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer,
                 recover);
             return default!;
         };
@@ -508,7 +496,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -528,18 +516,17 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Panic panic, Recover recover) =>
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, defer,
-                panic, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, defer, recover);
             return default!;
         };
     }
@@ -556,7 +543,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -576,19 +563,19 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Panic panic,
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer,
             Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                defer, panic, recover);
+                defer, recover);
             return default!;
         };
     }
@@ -605,7 +592,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -625,19 +612,18 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
     public GoFunc(GoRefAction action)
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer,
-            Panic panic, Recover recover) =>
+            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, defer, panic, recover);
+                ref ref11, defer, recover);
             return default!;
         };
     }
@@ -654,7 +640,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -674,8 +660,8 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
@@ -683,10 +669,10 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
             ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            Defer defer, Panic panic, Recover recover) =>
+            Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, defer, panic, recover);
+                ref ref11, ref ref12, defer, recover);
             return default!;
         };
     }
@@ -703,7 +689,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -723,8 +709,8 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
@@ -732,10 +718,10 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
             ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, Defer defer, Panic panic, Recover recover) =>
+            ref TRef13 ref13, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, defer, panic, recover);
+                ref ref11, ref ref12, ref ref13, defer, recover);
             return default!;
         };
     }
@@ -752,7 +738,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -772,8 +758,8 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
@@ -781,10 +767,10 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
             ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, Defer defer, Panic panic, Recover recover) =>
+            ref TRef13 ref13, ref TRef14 ref14, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, defer, panic, recover);
+                ref ref11, ref ref12, ref ref13, ref ref14, defer, recover);
             return default!;
         };
     }
@@ -801,7 +787,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -821,8 +807,8 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
@@ -830,10 +816,10 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
             ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Panic panic, Recover recover) =>
+            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, panic, recover);
+                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, recover);
             return default!;
         };
     }
@@ -850,7 +836,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {
@@ -870,8 +856,8 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T> : GoFunc<T>
 {
-    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Panic panic, Recover recover);
-    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Panic panic, Recover recover);
+    public delegate void GoRefAction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Recover recover);
+    public delegate T GoRefFunction(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Recover recover);
 
     private readonly GoRefFunction m_function;
 
@@ -879,11 +865,11 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
     {
         m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
             ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Panic panic,
+            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer,
             Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, panic, recover);
+                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, recover);
             return default!;
         };
     }
@@ -900,7 +886,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
         try
         {
-            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, HandleDefer, HandlePanic, HandleRecover);
+            result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, HandleDefer, HandleRecover);
         }
         catch (PanicException ex)
         {

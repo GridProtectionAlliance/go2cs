@@ -20,7 +20,9 @@
                 //"..\\Tests\\Behavioral\\InterfaceCasting\\InterfaceCasting.go",
                 //"..\\Tests\\Behavioral\\ForVariants\\ForVariants.go",
                 //"..\\Tests\\Behavioral\\IfStatements\\IfStatements.go",
-                "..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
+                //"..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
+                //"..\\Tests\\Behavioral\\LambdaFunctions",
+                "..\\Tests\\Behavioral\\FirstClassFunctions",
             ]
         }
     ]

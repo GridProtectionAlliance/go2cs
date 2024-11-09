@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"strings"
 )
 
 func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
@@ -15,22 +16,32 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
 		v.indentLevel++
 
 		v.visitStmt(ifStmt.Init, []StmtContext{source})
-		v.targetFile.WriteString(" ")
+		v.targetFile.WriteRune(' ')
 	}
+
+	context := DefaultBlockStmtContext()
+	context.format.useNewLine = false
 
 	v.targetFile.WriteString("if (")
 	v.targetFile.WriteString(v.convExpr(ifStmt.Cond, nil))
-	v.targetFile.WriteString(") ")
+	v.targetFile.WriteRune(')')
 
-	v.visitBlockStmt(ifStmt.Body, DefaultBlockStmtContext())
+	v.pushBlock()
+	v.visitBlockStmt(ifStmt.Body, context)
+	body := v.popBlockAppend(false)
 
-	if ifStmt.Else != nil {
-		v.writeOutput(" else ")
+	if ifStmt.Else == nil {
+		v.targetFile.WriteString(body)
+	} else {
+		v.targetFile.WriteString(strings.TrimSpace(body))
+		v.targetFile.WriteString(" else")
+
 		switch elseStmt := ifStmt.Else.(type) {
 		case *ast.IfStmt:
+			v.targetFile.WriteRune(' ')
 			v.visitIfStmt(elseStmt, source)
 		case *ast.BlockStmt:
-			v.visitBlockStmt(elseStmt, DefaultBlockStmtContext())
+			v.visitBlockStmt(elseStmt, context)
 		default:
 			panic("Unexpected Else type: " + v.getPrintedNode(elseStmt))
 		}

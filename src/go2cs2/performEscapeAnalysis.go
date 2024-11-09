@@ -7,8 +7,8 @@ import (
 )
 
 // The escape analysis function is used to determine if a variable escapes the current
-// scope and thus needs to be heap allocated. This is important for C# code generation
-// since Go allows variables to escape the current scope automatically, adding them to
+// stack and thus needs to be heap allocated. This is important for C# code generation
+// since Go allows variables to escape the current stack automatically, adding them to
 // the heap, behind the scenes. C# does not have this feature, so we need to manually
 // determine if a variable needs to be heap allocated. The map that is created as a
 // result of this analysis is called `identEscapesHeap`.

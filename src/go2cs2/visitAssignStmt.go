@@ -133,7 +133,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		}
 
 		if lhsLen > 1 {
-			result.WriteString("(")
+			result.WriteRune('(')
 		}
 
 		for i, lhs := range assignStmt.Lhs {
@@ -156,14 +156,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		}
 
 		if lhsLen > 1 {
-			result.WriteString(")")
+			result.WriteRune(')')
 		}
 
 		result.WriteString(operator)
 
 		// Handle RHS
 		if rhsLen > 1 {
-			result.WriteString("(")
+			result.WriteRune('(')
 		}
 
 		for i, rhs := range assignStmt.Rhs {
@@ -181,11 +181,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		}
 
 		if rhsLen > 1 {
-			result.WriteString(")")
+			result.WriteRune(')')
 		}
 
 		if format.includeSemiColon {
-			result.WriteString(";")
+			result.WriteRune(';')
 		}
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
@@ -217,7 +217,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					result.WriteString(rhsExpr)
 				}
 
-				result.WriteString(";")
+				result.WriteRune(';')
 			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, nil))
@@ -231,14 +231,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 						result.WriteString(rhsExpr)
 					}
 
-					result.WriteString(";")
+					result.WriteRune(';')
 				} else if lhsTypeIsString[i] {
 					// Handle string variables
 					result.WriteString("@string ")
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(operator)
 					result.WriteString(v.convExpr(rhs, nil))
-					result.WriteString(";")
+					result.WriteRune(';')
 				} else {
 					// Check if the variable needs to be allocated on the heap
 					heapTypeDecl := v.convertToHeapTypeDecl(ident, false)
@@ -273,7 +273,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					}
 
 					if format.includeSemiColon || i < lhsLen-1 {
-						result.WriteString(";")
+						result.WriteRune(';')
 					}
 				}
 			}

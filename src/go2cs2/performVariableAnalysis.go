@@ -57,6 +57,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	v.identNames = make(map[*ast.Ident]string)
 	v.isReassigned = make(map[*ast.Ident]bool)
 	v.scopeStack = []map[string]*types.Var{v.globalScope}
+	v.hasDefer = false
+	v.hasRecover = false
 
 	var varNames = make(map[*types.Var]string) // Map from types.Var to adjusted names
 	var nameCounts = make(map[string]int)      // Counts for generating unique names
@@ -505,6 +507,32 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			// Exit the current scope
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		// Check for defer and recover calls
+		case *ast.DeferStmt:
+			v.hasDefer = true
+
+			// Visit the function call
+			visitNode(node.Call)
+
+		case *ast.CallExpr:
+			if fun, ok := node.Fun.(*ast.Ident); ok {
+				if fun.Name == "recover" {
+					obj := v.info.Uses[fun]
+
+					if obj != nil && obj.Parent() == types.Universe {
+						v.hasRecover = true
+					}
+				}
+			}
+
+			// Visit function
+			visitNode(node.Fun)
+
+			// Visit call arguments
+			for _, arg := range node.Args {
+				visitNode(arg)
+			}
 
 		default:
 			// Visit child nodes

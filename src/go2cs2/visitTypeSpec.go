@@ -14,7 +14,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ChanType:
 		v.visitChanType(typeSpecType)
 	case *ast.FuncType:
-		v.visitFuncType(typeSpecType)
+		v.visitFuncType(typeSpecType, name)
 	case *ast.Ident:
 		v.targetFile.WriteString(v.convIdent(typeSpecType, DefaultIdentContext()))
 	case *ast.InterfaceType:
