@@ -59,7 +59,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		}
 
 		resultParams := signature.Results()
-		resultParamIsInterface := paramsAreInterfaces(resultParams)
+		resultParamIsInterface := paramsAreInterfaces(resultParams, true)
 		resultParamIsPointer := paramsArePointers(resultParams)
 
 		for i, expr := range returnStmt.Results {

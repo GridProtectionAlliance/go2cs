@@ -93,8 +93,8 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 	blockContext.format.useNewLine = false
 
 	if len(target.label) > 0 {
-		blockContext.innerSuffix = fmt.Sprintf("%s%s%s:;", v.newline, v.newline, getContinueLabelName(target.label))
-		blockContext.outerSuffix = fmt.Sprintf("%s:;", getBreakLabelName(target.label))
+		blockContext.innerSuffix = fmt.Sprintf("%s%s:;", v.newline, getContinueLabelName(target.label))
+		blockContext.outerSuffix = fmt.Sprintf("%s%s:;", v.newline, getBreakLabelName(target.label))
 	}
 
 	v.visitBlockStmt(forStmt.Body, blockContext)

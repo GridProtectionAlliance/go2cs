@@ -24,10 +24,8 @@ private static Stringy returnsAFunction() {
 private static void Main() {
     takesAFunction(foo);
     Stringy f = returnsAFunction();
-
     f();
     Stringy baz = () => "anonymous stringy\n"u8;
-
     fmt.Printf(baz());
 }
 

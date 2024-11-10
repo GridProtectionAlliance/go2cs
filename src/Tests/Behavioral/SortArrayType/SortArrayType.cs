@@ -6,72 +6,49 @@ using sort = sort_package;
 public static partial class main_package {
 
 private const float32 w = 1;
-
 public const nint _addr_X = 1;
-
 public const nint Y = 2;
-
 public const nint Z = 3;
-
 public const nint A1 = iota;
 public const nint B = 0;
-
 public const nint _ = 1;
 public const nint D = 100;
-
 public const nint E211 = 2;
 public const nint F = 200;
-
 public static readonly GoUntyped Giant = /* 1 << 100 */
     GoUntyped.Parse("1267650600228229401496703205376");
-
 public static readonly GoUntyped Giant2 = /* 1 << 200 */
     GoUntyped.Parse("1606938044258990275541962092341162602522202993782792835301376");
-
 public static readonly @string String = "Hello"u8;
-
 public static readonly @string String2 = "World"u8;
-
 public static readonly @string String3 = "世界 \u0053\u004a3"u8;
-
 public const float64 Float = 3.14;
-
 public const float64 Float2 = 3.14e+100;
-
 public static readonly GoUntyped GiantFloat = /* 1e309 */
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
-
 public static readonly @string MultiLine = """
         Line1 /123
         Line2 ""Yo""
         Line3
         """u8;
-
 public static readonly @string MultiLine2 = """"
         Line1 /123
         Line2 """Yo"""
         Line3
 """"u8;
-
 public static readonly @string MultiLine3 = """
 Line1
         Line2
         "Yo"
         Line3
 """u8;
-
 public static nint A2 = 1;
 public static @string B2 = "42"u8;
-
 public static nint C21 = dynamicFn1();
-
 public static bool D21;
 public static bool E2;
-
 public static bool @Ta_package = false;
-
 private static bool otherID = true;
-
 private static nint dynamicFn1() {
     return 4;
 }
@@ -138,13 +115,11 @@ public static (nint E2, @string p) Testing() {
         nint B2Δ1 = 199;
         fmt.Println(E2Δ1, B2Δ1);
     }
-
     {
         E2 = 100;
         nint B2Δ2 = 200;
         fmt.Println(E2, B2Δ2);
     }
-
     fmt.Println(E2, B2);
     return (E2, p);
 }
@@ -181,9 +156,9 @@ private static void Main() {
         )
     }.slice();
     fmt.Println(people);
-    sort.Sort(new PeopleByShoeSize(people));
+    sort.Sort((PeopleByShoeSize)(people));
     fmt.Println(people);
-    sort.Sort(new PeopleByAge(people));
+    sort.Sort((PeopleByAge)(people));
     fmt.Println(people);
     x = """
         SELECT *

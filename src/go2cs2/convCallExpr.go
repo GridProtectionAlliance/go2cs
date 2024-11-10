@@ -31,7 +31,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 				continue
 			}
 
-			if isInterface(paramType) {
+			if result, _ := isInterface(paramType); result {
 				context.u8StringArgOK[i] = false
 			} else if isPointer(paramType) {
 				ident := getIdentifier(callExpr.Args[i])

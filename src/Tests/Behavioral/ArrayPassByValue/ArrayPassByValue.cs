@@ -6,7 +6,6 @@ public static partial class main_package {
 
 private static void Main() {
     ref var a = ref heap(new array<@string>(2), out var Ꮡa);
-
     a[0] = "Hello"u8;
     a[1] = "World"u8;
     var p = Ꮡa.at<@string>(0);
@@ -34,11 +33,9 @@ private static void stest(ptr<@string> Ꮡp) {
     p = "hello"u8;
 }
 
-// Arrays are passed by value (a full copy)
 private static void test(array<@string> a) {
     a = a.Clone();
 
-    // Update to array will be local
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);

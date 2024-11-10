@@ -13,7 +13,7 @@
             "args": [
                 //"-var=false",
                 "-tree",
-                //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
+                "..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitchMicro.go",
@@ -22,7 +22,7 @@
                 //"..\\Tests\\Behavioral\\IfStatements\\IfStatements.go",
                 //"..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
-                "..\\Tests\\Behavioral\\FirstClassFunctions",
+                //"..\\Tests\\Behavioral\\FirstClassFunctions",
             ]
         }
     ]

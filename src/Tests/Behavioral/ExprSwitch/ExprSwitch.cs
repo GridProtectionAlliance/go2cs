@@ -6,10 +6,9 @@ using time = time_package;
 public static partial class main_package {
 
 private static nint x = 1;
-
 private static int32 getNext() {
     x++;
-    return int32(x);
+    return (int32)(x);
 }
 
 private static @string getStr(@string test) {
@@ -46,7 +45,6 @@ private static void Main() {
         {
             fmt.Println("three");
         }
-
         break;
     case 4 or 5 or 6:
         fmt.Println("four, five or siz");
@@ -62,7 +60,6 @@ private static void Main() {
         nint xΔ1 = 6;
         fmt.Println(xΔ1);
     }
-
     fmt.Println(x);
     switch (time.Now().Weekday()) {
     case time.Saturday or time.Sunday:

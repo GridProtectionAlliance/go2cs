@@ -30,7 +30,7 @@ using System.Reflection.Emit;
 namespace go;
 
 /// <summary>
-/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ptr{T}"/>> reference.
+/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ptr{T}"/> reference.
 /// </summary>
 /// <typeparam name="TElem">Field type.</typeparam>
 /// <param name="structPtr"><see cref="ptr{T}"/> heap reference of struct.</param>
@@ -277,7 +277,7 @@ public class ptr<T>
     // However, going down the fully unmanaged path creates a cascading set of
     // issues, see header comments for the ptr<T> "experimental" implementation
 
-    // Enable comparisons between nil and @ref<T> interface instance
+    // Enable comparisons between nil and ptr<T> instance
     public static bool operator ==(ptr<T>? value, NilType _)
     {
         return value is null;

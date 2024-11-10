@@ -58,40 +58,21 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			// Check if lhs is a struct member
 			if selectorExpr, ok := lhs.(*ast.SelectorExpr); ok {
 				ident = getIdentifier(selectorExpr.Sel)
-				lhsTypeIsInterface[i] = v.isInterface(ident)
 
-				var rhs ast.Expr
+				isInterface, isEmpty := v.isInterface(ident)
+				lhsTypeIsInterface[i] = isInterface && !isEmpty
+				typeName := v.getTypeName(ident, true)
 
-				// Check if rhs is a basic literal
-				if i < rhsLen {
-					rhs = rhsExprs[i]
-				} else {
-					rhs = rhsExprs[rhsLen-1]
+				lhsTypeIsString[i] = typeName == "string"
+
+				if !anyTypeIsString && lhsTypeIsString[i] {
+					anyTypeIsString = true
 				}
 
-				// Check if rhs result is a tuple
-				if callExpr, ok := rhs.(*ast.CallExpr); ok {
-					resultType := v.info.TypeOf(callExpr.Fun)
+				lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
 
-					if resultType != nil {
-						_, tupleTarget = resultType.(*types.Tuple)
-					}
-				}
-
-				if _, ok := rhs.(*ast.BasicLit); ok {
-					typeName := v.getTypeName(ident, true)
-
-					lhsTypeIsString[i] = typeName == "string"
-
-					if !anyTypeIsString && lhsTypeIsString[i] {
-						anyTypeIsString = true
-					}
-
-					lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
-
-					if !anyTypeIsInt && lhsTypeIsInt[i] {
-						anyTypeIsInt = true
-					}
+				if !anyTypeIsInt && lhsTypeIsInt[i] {
+					anyTypeIsInt = true
 				}
 			}
 		} else {
@@ -106,31 +87,20 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				}
 			}
 
-			lhsTypeIsInterface[i] = v.isInterface(ident)
+			isInterface, isEmpty := v.isInterface(ident)
+			lhsTypeIsInterface[i] = isInterface && !isEmpty
+			typeName := v.getTypeName(ident, true)
 
-			var rhs ast.Expr
+			lhsTypeIsString[i] = typeName == "string"
 
-			// Check if rhs is a basic literal
-			if i < rhsLen {
-				rhs = rhsExprs[i]
-			} else {
-				rhs = rhsExprs[rhsLen-1]
+			if !anyTypeIsString && lhsTypeIsString[i] {
+				anyTypeIsString = true
 			}
 
-			if _, ok := rhs.(*ast.BasicLit); ok {
-				typeName := v.getTypeName(ident, true)
+			lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
 
-				lhsTypeIsString[i] = typeName == "string"
-
-				if !anyTypeIsString && lhsTypeIsString[i] {
-					anyTypeIsString = true
-				}
-
-				lhsTypeIsInt[i] = typeName == "int" || typeName == "uint"
-
-				if !anyTypeIsInt && lhsTypeIsInt[i] {
-					anyTypeIsInt = true
-				}
+			if !anyTypeIsInt && lhsTypeIsInt[i] {
+				anyTypeIsInt = true
 			}
 		}
 	}

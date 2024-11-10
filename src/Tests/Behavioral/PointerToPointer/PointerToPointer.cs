@@ -12,18 +12,12 @@ public partial struct Buffer {
 }
 
 private const int8 opRead = -1;
-
 private const int8 opInvalid = 0;
-
 private static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
-
-    ptr<nint> ptr;
-
-    ptr<ptr<nint>> pptr;
-
-    ptr<ptr<ptr<nint>>> ppptr;
-
+    ptr<nint> ptr = default;
+    ptr<ptr<nint>> pptr = default;
+    ptr<ptr<ptr<nint>>> ppptr = default;
     a = 3000;
     ptr = Ꮡa;
     pptr = addr(ptr);
@@ -54,11 +48,9 @@ public static (nint n, error err) Read(this ptr<Buffer> Ꮡb, slice<byte> p) {
     ref var b = ref Ꮡb.val;
     b.lastRead = opInvalid;
     b.off += n;
-    if (n > 0) 
-    {
+    if (n > 0) {
         b.lastRead = opRead;
     }
-
     (addr(new Buffer(buf: p))).Read(p);
     return (n, error.As(null));
 }

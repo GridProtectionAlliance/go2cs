@@ -564,29 +564,25 @@ func isComparisonOperator(op token.Token) bool {
 	}
 }
 
-func (v *Visitor) isInterface(ident *ast.Ident) bool {
+func (v *Visitor) isInterface(ident *ast.Ident) (result bool, empty bool) {
 	obj := v.info.ObjectOf(ident)
 
 	if obj == nil {
-		return false
+		return false, false
 	}
 
 	return isInterface(obj.Type())
 }
 
-func isInterface(t types.Type) bool {
-	// Check if current type is empty interface
-	_, isInterface := t.(*types.Interface)
-
-	if isInterface {
-		return false // No need to cast to empty interface
-	}
-
+func isInterface(t types.Type) (result bool, empty bool) {
 	exprType := t.Underlying()
 
-	_, isInterface = exprType.(*types.Interface)
+	if interfaceType, ok := exprType.(*types.Interface); ok {
+		// Empty interface has zero methods
+		return true, interfaceType.NumMethods() == 0
+	}
 
-	return isInterface
+	return false, false
 }
 
 func (v *Visitor) isPointer(ident *ast.Ident) bool {
@@ -607,7 +603,7 @@ func isPointer(t types.Type) bool {
 	return isPointer
 }
 
-func paramsAreInterfaces(paramTypes *types.Tuple) []bool {
+func paramsAreInterfaces(paramTypes *types.Tuple, andNotEmptyInterface bool) []bool {
 	if paramTypes == nil {
 		return nil
 	}
@@ -616,7 +612,14 @@ func paramsAreInterfaces(paramTypes *types.Tuple) []bool {
 
 	for i := 0; i < paramTypes.Len(); i++ {
 		param := paramTypes.At(i)
-		paramIsInterface[i] = isInterface(param.Type())
+		paramType := param.Type()
+		isInterface, isEmpty := isInterface(paramType)
+
+		if andNotEmptyInterface {
+			paramIsInterface[i] = isInterface && !isEmpty
+		} else {
+			paramIsInterface[i] = isInterface
+		}
 	}
 
 	return paramIsInterface

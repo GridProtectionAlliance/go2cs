@@ -17,7 +17,7 @@ private partial struct score {
 private delegate (score result, bool turnIsOver) action(score current);
 
 private static (score, bool) roll(score s) {
-    var outcome = rand.Intn(6) + 1;
+    nint outcome = rand.Intn(6) + 1;
     if (outcome == 1) {
         return (new score(s.opponent, s.player, 0), true);
     }
@@ -43,7 +43,7 @@ private static nint play(strategy strategy0, strategy strategy1) {
     var strategies = new strategy[] {strategy0, strategy1 }.slice();
     score s = default;
     bool turnIsOver = default;
-    var currentPlayer = rand.Intn(2);
+    nint currentPlayer = rand.Intn(2);
     while (s.player + s.thisTurn < win) {
         var action = strategies[currentPlayer](s);
         (s, turnIsOver) = action(s);
@@ -57,9 +57,9 @@ private static nint play(strategy strategy0, strategy strategy1) {
 private static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
     var wins = new slice<nint>(len(strategies));
     for (nint i = 0; i < len(strategies); i++) {
-        for (var j = i + 1; j < len(strategies); j++) {
+        for (nint j = i + 1; j < len(strategies); j++) {
             for (nint k = 0; k < gamesPerSeries; k++) {
-                var winner = play(strategies[i], strategies[j]);
+                nint winner = play(strategies[i], strategies[j]);
                 if (winner == 0){
                     wins[i]++;
                 } else {
@@ -68,7 +68,7 @@ private static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
             }
         }
     }
-    var gamesPerStrategy = gamesPerSeries * (len(strategies) - 1);
+    nint gamesPerStrategy = gamesPerSeries * (len(strategies) - 1);
     return (wins, gamesPerStrategy);
 }
 
