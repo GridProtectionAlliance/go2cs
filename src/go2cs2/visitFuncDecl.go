@@ -17,7 +17,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = true
 
 	goFunctionName := funcDecl.Name.Name
-	csFunctionName := getSanitizedIdentifier(goFunctionName)
+	csFunctionName := getSanitizedFunctionName(goFunctionName)
 
 	v.currentFunction = v.info.ObjectOf(funcDecl.Name).(*types.Func)
 

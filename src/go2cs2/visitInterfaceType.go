@@ -25,7 +25,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 		v.writeDoc(method.Doc, method.Pos())
 
 		goMethodName := method.Names[0].Name
-		csMethodName := getSanitizedIdentifier(goMethodName)
+		csMethodName := getSanitizedFunctionName(goMethodName)
 		typeLenDeviation := token.Pos(len(csMethodName) - len(goMethodName))
 
 		methodType := v.info.ObjectOf(method.Names[0]).(*types.Func)

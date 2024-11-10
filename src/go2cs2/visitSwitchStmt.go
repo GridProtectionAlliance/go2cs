@@ -252,7 +252,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 		v.writeOutputLn("}")
 	} else {
 		// Most common scenario with expression switches
-		v.writeOutput("switch (%s) {%s", ExprSwitchMarker, v.newline)
+		v.writeOutput("switch (%s) {%s", TrueMarker, v.newline)
 
 		for _, caseClause := range caseClauses {
 			if caseClause.List == nil {
@@ -265,7 +265,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 
 				for i, expr := range caseClause.List {
 					if i == 0 {
-						v.writeOutput("case %s when ", ExprSwitchMarker)
+						v.writeOutput("case %s when ", TrueMarker)
 					} else {
 						if usePattenMatch {
 							v.targetFile.WriteString(" or ")

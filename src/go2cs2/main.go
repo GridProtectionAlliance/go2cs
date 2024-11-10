@@ -81,7 +81,7 @@ const ClassSuffix = "_package"
 const AddressPrefix = "Ꮡ"   // Ꮡ ꝸ ꞥ
 const ShadowVarMarker = "Δ" // Δ Ʌ
 const TempVarMarker = "Ʌ"   // Ʌ ꞥ
-const ExprSwitchMarker = "ᐧ"
+const TrueMarker = "ᐧ"
 
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
@@ -96,7 +96,7 @@ var keywords = NewHashSet[string]([]string{
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
 	"GoType", "GoUntyped", "GoTag",
 	// The following symbols are reserved by go2cs as they are publically defined in "golib"
-	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", ExprSwitchMarker,
+	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", TrueMarker,
 })
 
 //go:embed go2cs.ico
@@ -520,14 +520,20 @@ func getSanitizedIdentifier(identifier string) string {
 		return "@" + identifier
 	}
 
+	return identifier
+}
+
+func getSanitizedFunctionName(funcName string) string {
+	funcName = getSanitizedIdentifier(funcName)
+
 	// Handle special exceptions
-	if identifier == "Main" {
-		// This can be improved on by only escaping if it is a function
-		// name and verifying that escaped name is unique
-		return "_Main_"
+	if funcName == "Main" {
+		// C# "Main" method name is reserved, so we need to
+		// shadow it if Go code has a function named "Main"
+		return ShadowVarMarker + "Main"
 	}
 
-	return identifier
+	return funcName
 }
 
 func getAccess(name string) string {
@@ -718,21 +724,21 @@ func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "untyped ")
 
 	if strings.HasPrefix(typeName, "[]") {
-		return fmt.Sprintf("go.slice<%s>", convertToCSTypeName(typeName[2:]))
+		return fmt.Sprintf("%s.slice<%s>", RootNamespace, convertToCSTypeName(typeName[2:]))
 	}
 
 	// Handle array types
 	if strings.HasPrefix(typeName, "[") {
-		return fmt.Sprintf("go.array<%s>", convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:]))
+		return fmt.Sprintf("%s.array<%s>", RootNamespace, convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:]))
 	}
 
 	if strings.HasPrefix(typeName, "map[") {
 		keyValue := strings.Split(typeName[4:len(typeName)-1], "]")
-		return fmt.Sprintf("go.map<%s, %s>", convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
+		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
 	}
 
 	if strings.HasPrefix(typeName, "chan ") {
-		return fmt.Sprintf("go.chan<%s>", convertToCSTypeName(typeName[5:]))
+		return fmt.Sprintf("%s.chan<%s>", RootNamespace, convertToCSTypeName(typeName[5:]))
 	}
 
 	if strings.HasPrefix(typeName, "func(") {
@@ -741,7 +747,7 @@ func convertToCSFullTypeName(typeName string) string {
 
 	// Handle pointer types
 	if strings.HasPrefix(typeName, "*") {
-		return fmt.Sprintf("go.ptr<%s>", convertToCSTypeName(typeName[1:]))
+		return fmt.Sprintf("%s.ptr<%s>", RootNamespace, convertToCSTypeName(typeName[1:]))
 	}
 
 	switch typeName {
@@ -756,9 +762,9 @@ func convertToCSFullTypeName(typeName string) string {
 	case "float":
 		return "float64"
 	case "complex64":
-		return "go.complex64"
+		return RootNamespace + ".complex64"
 	case "string":
-		return "go.@string"
+		return RootNamespace + ".@string"
 	case "interface{}":
 		return "object"
 	default:

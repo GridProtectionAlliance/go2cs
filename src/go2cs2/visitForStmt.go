@@ -16,7 +16,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 		v.writeOutput("while (")
 
 		if forStmt.Cond == nil {
-			v.targetFile.WriteString("true")
+			v.targetFile.WriteString(TrueMarker)
 		} else {
 			v.targetFile.WriteString(v.convExpr(forStmt.Cond, nil))
 		}
@@ -72,7 +72,8 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 	v.targetFile.WriteString("; ")
 
 	if forStmt.Cond == nil {
-		v.targetFile.WriteString("true")
+		v.targetFile.WriteString(TrueMarker)
+		v.targetFile.WriteRune(' ')
 	} else {
 		v.targetFile.WriteString(v.convExpr(forStmt.Cond, nil))
 	}

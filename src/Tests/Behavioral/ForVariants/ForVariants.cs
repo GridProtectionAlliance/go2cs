@@ -42,7 +42,7 @@ break_out:;
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();
-    while (true) {
+    while (ᐧ) {
         i++;
         f(Ꮡi);
         if (i > 12) {
