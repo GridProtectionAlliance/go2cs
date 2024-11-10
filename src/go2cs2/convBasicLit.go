@@ -98,12 +98,12 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			} else {
 				result.WriteString(value)
 			}
-		}
-
-		if endsWith_i {
-			result.WriteString(fmt.Sprintf("i(%sD)", value))
 		} else {
-			result.WriteString(value)
+			if endsWith_i {
+				result.WriteString(fmt.Sprintf("i(%sD)", value))
+			} else {
+				result.WriteString(value)
+			}
 		}
 	case token.CHAR:
 		result.WriteString(replaceOctalChars(value))
