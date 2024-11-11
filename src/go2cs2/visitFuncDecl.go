@@ -15,6 +15,8 @@ const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
 
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = true
+	v.capturedVarCount = nil
+	v.tempVarCount = nil
 
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
@@ -59,7 +61,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
 
-	v.writeOutput(fmt.Sprintf("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker))
+	v.writeOutput("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = false
@@ -100,7 +102,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 						resultParameters.WriteString(v.newline)
 
-						v.writeString(resultParameters, fmt.Sprintf("%s%s %s = default;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName))
+						v.writeString(resultParameters, "%s%s %s = default;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName)
 
 						paramIndex++
 					}
@@ -115,15 +117,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// For any array parameters, Go copies the array by value
 			if _, ok := param.Type().(*types.Array); ok {
-				v.writeString(arrayClones, fmt.Sprintf("%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), param.Name(), param.Name()))
+				v.writeString(arrayClones, "%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), param.Name(), param.Name())
 			}
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
 			if pointerType, ok := param.Type().(*types.Pointer); ok {
 				if v.options.preferVarDecl {
-					v.writeString(implicitPointers, fmt.Sprintf("%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), param.Name(), AddressPrefix, param.Name()))
+					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), param.Name(), AddressPrefix, param.Name())
 				} else {
-					v.writeString(implicitPointers, fmt.Sprintf("%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name()))
+					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name())
 				}
 			}
 		}
@@ -333,6 +335,18 @@ func generateResultSignature(signature *types.Signature) string {
 	result.WriteRune(')')
 
 	return result.String()
+}
+
+func (v *Visitor) getCapturedVarName(varPrefix string) string {
+	if v.capturedVarCount == nil {
+		v.capturedVarCount = make(map[string]int)
+	}
+
+	count := v.capturedVarCount[varPrefix]
+	count++
+	v.capturedVarCount[varPrefix] = count
+
+	return fmt.Sprintf("%s%s%d", varPrefix, CapturedVarMarker, count)
 }
 
 func (v *Visitor) getTempVarName(varPrefix string) string {

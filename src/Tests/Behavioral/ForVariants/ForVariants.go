@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 func main() {
@@ -17,7 +18,6 @@ func main() {
 
 	fmt.Println()
 	fmt.Println("i =", i)
-	fmt.Println()
 
 	for i = 0; i < 10; i++ {
 		f(&i)
@@ -52,8 +52,13 @@ out:
 	fmt.Println("i =", i)
 	fmt.Println()
 
+	x := 99
+	fmt.Println("i before thread and", i, "x before thread", x)
+	go fmt.Println("i from thread and", i, "x from thread", x)
+
 	for {
 		i++
+		x++
 		f(&i)
 
 		if i > 12 {
@@ -63,6 +68,12 @@ out:
 
 	fmt.Println()
 	fmt.Println("i =", i)
+	fmt.Println("x = ", x)
+	
+	// Wait for go routines to complete
+	time.Sleep(1)
+
+	fmt.Println("i after thread and", i, "x after thread", x)
 }
 
 func f(y *int) {

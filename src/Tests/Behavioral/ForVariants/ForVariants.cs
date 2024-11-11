@@ -1,6 +1,9 @@
+using System.Threading;
+
 namespace go;
 
 using fmt = fmt_package;
+//using time = time_package;
 
 public static partial class main_package {
 
@@ -13,7 +16,6 @@ private static void Main() {
     }
     fmt.Println();
     fmt.Println("i =", i);
-    fmt.Println();
     for (i = 0; i < 10; i++) {
         f(Ꮡi);
         for (nint j = 0; j < 3; j++) {
@@ -42,8 +44,14 @@ break_out:;
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();
+    nint x = 99;
+    fmt.Println("i before thread and", i, "x before thread", x);
+    nint iʗ1 = i;
+    nint xʗ1 = x;
+    goǃ(_ => fmt.Println("i from thread and", iʗ1, "x from thread", xʗ1));
     while (ᐧ) {
         i++;
+        x++;
         f(Ꮡi);
         if (i > 12) {
             break;
@@ -51,6 +59,9 @@ break_out:;
     }
     fmt.Println();
     fmt.Println("i =", i);
+    fmt.Println("x = ", x);
+    Thread.Sleep(1);
+    fmt.Println("i after thread and", i, "x after thread", x);
 }
 
 private static void f(ptr<nint> Ꮡy) {

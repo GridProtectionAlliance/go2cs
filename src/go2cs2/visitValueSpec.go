@@ -37,12 +37,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 						if len(headTypeDecl) > 0 {
 							v.writeOutput(headTypeDecl)
 						} else {
-							v.writeOutput(fmt.Sprintf("%s %s = default;", csTypeName, csIDName))
+							v.writeOutput("%s %s = default;", csTypeName, csIDName)
 						}
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation += token.Pos(len(access) + 6)
-						v.writeOutput(fmt.Sprintf("%s static %s %s;", access, csTypeName, csIDName))
+						v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
 					}
 
 					v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation-token.Pos(len(csTypeName)))
@@ -66,14 +66,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutputLn(headTypeDecl)
-							v.writeOutput(fmt.Sprintf("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil)))
+							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
 						} else {
-							v.writeOutput(fmt.Sprintf("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil)))
+							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
 						}
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation -= token.Pos(len(access) + 9)
-						v.writeOutput(fmt.Sprintf("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil)))
+						v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
 					}
 
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)

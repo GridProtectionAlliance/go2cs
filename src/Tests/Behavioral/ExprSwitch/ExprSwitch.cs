@@ -120,23 +120,23 @@ private static void Main() {
     fmt.Printf("i before = %d\n"u8, i);
     {
         nint iΔ1 = 1;
-        var exprɅ1 = getNext();
-        var matchɅ1 = false;
-        if (exprɅ1 is -1) { matchɅ1 = true;
+        var exprᴛ1 = getNext();
+        var matchᴛ1 = false;
+        if (exprᴛ1 is -1) { matchᴛ1 = true;
             fmt.Println("negative");
         }
-        else if (exprɅ1 is 0) { matchɅ1 = true;
+        else if (exprᴛ1 is 0) { matchᴛ1 = true;
             fmt.Println("zero");
         }
-        else if (exprɅ1 is 1 or 2) { matchɅ1 = true;
+        else if (exprᴛ1 is 1 or 2) { matchᴛ1 = true;
             fmt.Println("one or two");
             fallthrough = true;
         }
-        if (fallthrough || !matchɅ1 && exprɅ1 is 3) { matchɅ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
             fmt.Printf("three, but x=%d and i now = %d\n"u8, x, iΔ1);
             fallthrough = true;
         }
-        if (fallthrough || !matchɅ1) { /* default: */
+        if (fallthrough || !matchᴛ1) { /* default: */
             fmt.Println("plus, always a default here because of fallthrough");
         }
     }
@@ -144,42 +144,42 @@ private static void Main() {
     fmt.Printf("i after = %d\n"u8, i);
     {
         var next = getNext();
-        var matchɅ2 = false;
-        if (next is <= -1) { matchɅ2 = true;
+        var matchᴛ2 = false;
+        if (next is <= -1) { matchᴛ2 = true;
             fmt.Println("negative");
-            var exprɅ3 = getNext();
-            var matchɅ3 = false;
-            if (exprɅ3 is 1 or 2) { matchɅ3 = true;
+            var exprᴛ3 = getNext();
+            var matchᴛ3 = false;
+            if (exprᴛ3 is 1 or 2) { matchᴛ3 = true;
                 fmt.Println("sub0 one or two");
             }
-            else if (exprɅ3 is 3) { matchɅ3 = true;
+            else if (exprᴛ3 is 3) { matchᴛ3 = true;
                 fmt.Println("sub0 three");
                 fallthrough = true;
             }
-            if (fallthrough || !matchɅ3) { /* default: */
+            if (fallthrough || !matchᴛ3) { /* default: */
                 fmt.Println("sub0 default");
             }
 
         }
-        else if (next is 0) { matchɅ2 = true;
+        else if (next is 0) { matchᴛ2 = true;
             fmt.Println("zero");
             {
                 var nextΔ1 = getNext();
-                var matchɅ4 = false;
-                if (nextΔ1 is 1 or <= 2) { matchɅ4 = true;
+                var matchᴛ4 = false;
+                if (nextΔ1 is 1 or <= 2) { matchᴛ4 = true;
                     fmt.Println("sub1 one or two");
                 }
-                else if (nextΔ1 is 3) { matchɅ4 = true;
+                else if (nextΔ1 is 3) { matchᴛ4 = true;
                     fmt.Println("sub1 three");
                     fallthrough = true;
                 }
-                if (fallthrough || !matchɅ4) { /* default: */
+                if (fallthrough || !matchᴛ4) { /* default: */
                     fmt.Println("sub1 default");
                 }
             }
 
         }
-        else if (next is 1 or 2) { matchɅ2 = true;
+        else if (next is 1 or 2) { matchᴛ2 = true;
             fmt.Println("one or two");
             switch (next) {
             case 1 or 2:
@@ -195,22 +195,22 @@ private static void Main() {
 
             fallthrough = true;
         }
-        if (fallthrough || !matchɅ2 && (next >= 3 && next < 100)) { matchɅ2 = true;
+        if (fallthrough || !matchᴛ2 && (next >= 3 && next < 100)) { matchᴛ2 = true;
             fmt.Printf("three or greater < 100: %d\n"u8, x);
             fallthrough = true;
         }
-        if (fallthrough || !matchɅ2) { /* default: */
+        if (fallthrough || !matchᴛ2) { /* default: */
             fmt.Println("plus, always a default here because of fallthrough");
         }
     }
 
-    var exprɅ5 = Foo(2);
-    var matchɅ5 = false;
-    if (exprɅ5 == Foo(1) || exprɅ5 == Foo(2) || exprɅ5 == Foo(3)) { matchɅ5 = true;
+    var exprᴛ5 = Foo(2);
+    var matchᴛ5 = false;
+    if (exprᴛ5 == Foo(1) || exprᴛ5 == Foo(2) || exprᴛ5 == Foo(3)) { matchᴛ5 = true;
         fmt.Println("First case");
         fallthrough = true;
     }
-    if (fallthrough || !matchɅ5 && exprɅ5 == Foo(4)) {
+    if (fallthrough || !matchᴛ5 && exprᴛ5 == Foo(4)) {
         fmt.Println("Second case");
     }
     else { /* default: */

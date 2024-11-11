@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -41,7 +40,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 		typeLenDeviation += token.Pos(len(parameterSignature) - getSourceParameterSignatureLen(signature))
 		typeLenDeviation += token.Pos(len(resultSignature) - getSourceResultSignatureLen(signature))
 
-		v.writeOutput(fmt.Sprintf("%s %s %s(%s);", getAccess(goMethodName), resultSignature, csMethodName, parameterSignature))
+		v.writeOutput("%s %s %s(%s);", getAccess(goMethodName), resultSignature, csMethodName, parameterSignature)
 		v.writeComment(method.Comment, method.Type.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	}

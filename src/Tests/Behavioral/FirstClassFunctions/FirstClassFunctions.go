@@ -114,7 +114,8 @@ func main() {
 	}
 	wins, games := roundRobin(strategies)
 
-	for k := range strategies {
+    var k int
+	for k = range strategies {
 		fmt.Printf("Wins, losses staying at k =% 4d: %s\n",
 			k+1, ratioString(wins[k], games-wins[k]))
 	}

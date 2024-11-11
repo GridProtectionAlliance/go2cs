@@ -30,6 +30,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		}
 	}
 
+	// TODO: Handle assign vs define - check for heap allocations on define
+
 	if len(keyExpr) == 0 {
 		v.writeOutput("foreach (var %s in %s)", valExpr, rangeExpr)
 	} else {

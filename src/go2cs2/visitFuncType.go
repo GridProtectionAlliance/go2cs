@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 )
 
@@ -10,5 +9,5 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, name string) {
 	var resultsSignature, parameterSignature string
 	resultsSignature, parameterSignature = v.convFuncType(funcType)
 	v.targetFile.WriteString(v.newline)
-	v.writeOutputLn(fmt.Sprintf("%s delegate %s %s(%s);", getAccess(name), resultsSignature, name, parameterSignature))
+	v.writeOutputLn("%s delegate %s %s(%s);", getAccess(name), resultsSignature, name, parameterSignature)
 }

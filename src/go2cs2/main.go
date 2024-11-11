@@ -60,12 +60,13 @@ type Visitor struct {
 	requiredUsings    HashSet[string]
 
 	// FuncDecl variables
-	inFunction      bool
-	currentFunction *types.Func
-	paramNames      HashSet[string]
-	hasDefer        bool
-	hasRecover      bool
-	tempVarCount    map[string]int
+	inFunction       bool
+	currentFunction  *types.Func
+	paramNames       HashSet[string]
+	hasDefer         bool
+	hasRecover       bool
+	capturedVarCount map[string]int
+	tempVarCount     map[string]int
 
 	// BlockStmt variables
 	blocks                 Stack[*strings.Builder]
@@ -78,11 +79,20 @@ type Visitor struct {
 
 const RootNamespace = "go"
 const ClassSuffix = "_package"
-const AddressPrefix = "Ꮡ"   // Ꮡ ꝸ ꞥ
-const ShadowVarMarker = "Δ" // Δ Ʌ
-const TempVarMarker = "Ʌ"   // Ʌ ꞥ
-const TrueMarker = "ᐧ"
 
+// Using extended unicode characters to help avoid conflicts with Go identifiers. Even if
+// some Go identifiers include these characters, the `getSanitizedIdentifier` function
+// ensures uniqueness in converted code. Note that some character variants may be better
+// suited to different fonts or display environments. Defaults have been chosen based on
+// best appearance with the Visual Studio default code font "Cascadia Mono":
+
+const AddressPrefix = "Ꮡ"     // Variants: Ꮡ ꝸ
+const ShadowVarMarker = "Δ"   // Variants: Δ Ʌ ꞥ
+const CapturedVarMarker = "ʗ" // Variants: ʗ ɔ ᴄ
+const TempVarMarker = "ᴛ"     // Variants: ᴛ Ŧ ᵀ
+const TrueMarker = "ᐧ"        // Variants: ᐧ true
+
+// TODO: Consider adding removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
 	"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
@@ -94,9 +104,8 @@ var keywords = NewHashSet[string]([]string{
 	"uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
 	"__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag",
-	// The following symbols are reserved by go2cs as they are publically defined in "golib"
-	"WithOK", "WithErr", "WithVal", "InitKeyedValues", "GetGoTypeName", "CastCopy", "ConvertToType", TrueMarker,
+	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "InitKeyedValues",
+	"GetGoTypeName", "CastCopy", "ConvertToType", TrueMarker,
 })
 
 //go:embed go2cs.ico
@@ -516,7 +525,9 @@ func getSanitizedIdentifier(identifier string) string {
 	if keywords.Contains(identifier) ||
 		strings.HasPrefix(identifier, AddressPrefix) ||
 		strings.HasSuffix(identifier, ClassSuffix) ||
-		strings.Contains(identifier, ShadowVarMarker) {
+		strings.Contains(identifier, ShadowVarMarker) ||
+		strings.Contains(identifier, CapturedVarMarker) ||
+		strings.Contains(identifier, TempVarMarker) {
 		return "@" + identifier
 	}
 

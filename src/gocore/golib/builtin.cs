@@ -696,7 +696,22 @@ public static class builtin
     /// Execute Go routine.
     /// </summary>
     /// <param name="action">Routine to execute.</param>
-    public static void go_(Action action)
+    // The following is basically "go!". We use the unicode bang-type character
+    // as a valid C# identifier symbol, where the standard "!" is not. This is
+    // to disambiguate the method name from the namespace.
+    public static void goǃ(WaitCallback action)
+    {
+        ThreadPool.QueueUserWorkItem(action);
+    }
+
+    /// <summary>
+    /// Execute Go routine.
+    /// </summary>
+    /// <param name="action">Routine to execute.</param>
+    // The following is basically "go!". We use the unicode bang-type character
+    // as a valid C# identifier symbol, where the standard "!" is not. This is
+    // to disambiguate the method name from the namespace.
+    public static void goǃ(Action action)
     {
         ThreadPool.QueueUserWorkItem(_ => action());
     }

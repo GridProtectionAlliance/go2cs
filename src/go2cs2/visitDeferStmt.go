@@ -11,8 +11,12 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 	callExpr := v.convCallExpr(deferStmt.Call)
 
-	// C# defer implementation expects a delegate
-	callExpr = strings.TrimSuffix(callExpr, "()")
+	// C# defer implementation expects an Action delegate
+	if strings.HasSuffix(callExpr, "()") {
+		callExpr = strings.TrimSuffix(callExpr, "()")
+	} else {
+		callExpr = "() => " + callExpr
+	}
 
 	v.targetFile.WriteString(callExpr)
 	v.targetFile.WriteString(");")

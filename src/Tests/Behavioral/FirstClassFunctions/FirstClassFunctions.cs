@@ -90,14 +90,16 @@ private static @string ratioString(params nint[] vals) {
 
 private static void Main() {
     var strategies = new slice<strategy>(win);
-    for (var k = 0; k < len(strategies); k++) {
-        strategies[k] = stayAtK(k + 1);
+    nint k = default;
+    for (var kΔ1 = 0; kΔ1 < len(strategies); kΔ1++) {
+        strategies[k] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
     for (var k = 0; k < len(strategies); k++) {
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
     }
+
 }
 
 } // end main_package

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"go/ast"
 	"go/token"
 )
@@ -17,11 +16,11 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 
 		if arrayType.Len == nil {
 			// Handle slice type
-			v.writeOutputLn(fmt.Sprintf("[GoType(\"[]%s\")]", csTypeName))
+			v.writeOutputLn("[GoType(\"[]%s\")]", csTypeName)
 		} else {
 			// Handle array type
 			arrayLen := v.convExpr(arrayType.Len, nil)
-			v.writeOutputLn(fmt.Sprintf("[GoType(\"[%s]%s\")]", arrayLen, csTypeName))
+			v.writeOutputLn("[GoType(\"[%s]%s\")]", arrayLen, csTypeName)
 		}
 
 		v.writeOutput("public partial struct %s {}", getSanitizedIdentifier(name))

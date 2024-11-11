@@ -116,8 +116,6 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		v.visitDeclStmt(stmtType, source)
 	case *ast.DeferStmt:
 		v.visitDeferStmt(stmtType)
-	case *ast.EmptyStmt:
-		v.visitEmptyStmt(stmtType)
 	case *ast.ExprStmt:
 		v.visitExprStmt(stmtType)
 	case *ast.ForStmt:
@@ -149,6 +147,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		v.visitTypeSwitchStmt(stmtType)
 	case *ast.BadStmt:
 		println(fmt.Sprintf("WARNING: BadStmt encountered: %#v", stmtType))
+	case *ast.EmptyStmt:
+		// Nothing to do
 	default:
 		panic(fmt.Sprintf("Unexpected Stmt type: %#v", stmtType))
 	}
