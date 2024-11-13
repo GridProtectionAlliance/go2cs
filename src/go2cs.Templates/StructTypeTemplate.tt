@@ -111,13 +111,12 @@ public static partial class <#=PackageName#>_package
 <#            
         }#>
 
-        // Field References <#
+        // Field References
+<#
         foreach (var decl in StructFields)
         {
             // Promoted interface or normal struct field #>
-
-        private static FieldRefFunc<<#=decl.Type.TypeName#>>? s_Ꮡ<#=decl.Name#>;
-        public static FieldRefFunc<<#=decl.Type.TypeName#>> Ꮡ<#=decl.Name#> => s_Ꮡ<#=decl.Name#> ??= FieldRef<<#=StructName#>>.Create<<#=decl.Type.TypeName#>>(nameof(<#=decl.Name#>));
+        public static ref <#=decl.Type.TypeName#> Ꮡ<#=decl.Name#>(ref <#=StructName#> instance) => ref instance.<#=decl.Name#>;
 <# 
         }#>
 

@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable StaticMemberInGenericType
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedParameter.Local
 
@@ -36,6 +37,15 @@ namespace go;
 /// <param name="structPtr"><see cref="ptr{T}"/> heap reference of struct.</param>
 /// <returns>A <c>ref</c> to the field value within the struct <see cref="ptr{T}"/> reference.</returns>
 public delegate ref TElem FieldRefFunc<TElem>(object structPtr);
+
+/// <summary>
+/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ptr{T}"/> reference.
+/// </summary>
+/// <typeparam name="T">Struct type.</typeparam>
+/// <typeparam name="TElem">Field type.</typeparam>
+/// <param name="structRef">Reference to struct.</param>
+/// <returns>A <c>ref</c> to the field value within the struct <see cref="ptr{T}"/> reference.</returns>
+public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
 
 /// <summary>
 /// Helper class for creating a <see cref="FieldRefFunc{TElem}"/> delegate for a struct field.
@@ -78,12 +88,12 @@ public static class FieldRef<T> where T : struct
         // Create the delegate
         return (FieldRefFunc<TElem>)method.CreateDelegate(typeof(FieldRefFunc<TElem>));
     }
-    
+
     // Type of ptr<T>
     private static readonly Type s_ptrType = typeof(ptr<T>);
 
     // FieldInfo for m_val in ptr<T>
-    private static readonly FieldInfo s_ptrValField = s_ptrType.GetField(nameof(ptr<T>.m_val), BindingFlags.Instance | BindingFlags.NonPublic)!;
+    private static readonly FieldInfo s_ptrValField = s_ptrType.GetField("m_val", BindingFlags.Instance | BindingFlags.NonPublic)!;
 }
 
 /// <summary>
@@ -112,7 +122,7 @@ public class ptr<T>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
-    internal T m_val;
+    private T m_val;
 
     /// <summary>
     /// Creates a new heap allocated reference to an instance of type <typeparamref name="T"/>.
@@ -186,6 +196,23 @@ public class ptr<T>
     public ptr<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
         return new ptr<TElem>(this, fieldRefFunc);
+    }
+
+    /// <summary>
+    /// Gets a pointer to the field of a struct.
+    /// </summary>
+    /// <typeparam name="TElem">Type of field.</typeparam>
+    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
+    /// <returns>Pointer to field of struct.</returns>
+    public ptr<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
+    {
+        return new ptr<TElem>(this, getFieldRef);
+
+        ref TElem getFieldRef(object structPtr)
+        {
+            ptr<T> ptr = (ptr<T>)structPtr;
+            return ref fieldRefFunc(ref ptr.m_val);
+        }
     }
 
     /// <summary>
