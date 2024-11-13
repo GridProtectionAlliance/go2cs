@@ -10,7 +10,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
     <AssemblyName><#=AssemblyName#></AssemblyName>

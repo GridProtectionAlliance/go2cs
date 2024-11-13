@@ -34,7 +34,7 @@ namespace go2cs.Templates
             #line default
             #line hidden
             this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Library</" +
-                    "OutputType>\r\n    <TargetFrameworks>net8.0</TargetFrameworks>\r\n    <RootNamespace" +
+                    "OutputType>\r\n    <TargetFrameworks>net9.0</TargetFrameworks>\r\n    <RootNamespace" +
                     ">go</RootNamespace>\r\n    <AssemblyName>");
             
             #line 15 "C:\Projects\gpa\go2cs\src\go2cs.Templates\LibraryProjectTemplate.tt"

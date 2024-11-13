@@ -34,7 +34,7 @@ namespace go2cs.Templates
             #line default
             #line hidden
             this.Write("<Project Sdk=\"Microsoft.NET.Sdk\">\r\n\r\n  <PropertyGroup>\r\n    <OutputType>Exe</Outp" +
-                    "utType>\r\n    <TargetFrameworks>net8.0</TargetFrameworks>\r\n    <PublishReadyToRun" +
+                    "utType>\r\n    <TargetFrameworks>net9.0</TargetFrameworks>\r\n    <PublishReadyToRun" +
                     ">true</PublishReadyToRun>\r\n    <RootNamespace>go</RootNamespace>\r\n    <AssemblyN" +
                     "ame>");
             
