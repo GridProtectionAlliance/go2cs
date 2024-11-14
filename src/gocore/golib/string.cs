@@ -59,7 +59,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
 
     public @string(char[] value) : this(new string(value)) { }
 
-    public @string(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
+    public @string(rune[] value) : this(new string(value.Select(rune => (char)rune).ToArray())) { }
 
     public @string(in slice<byte> value) : this(value.ToArray()) { }
 
@@ -98,10 +98,7 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
         }
     }
 
-    public byte this[ulong index]
-    {
-        get => this[(nint)index];
-    }
+    public byte this[ulong index] => this[(nint)index];
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
     public slice<byte> Slice(int start, int length)

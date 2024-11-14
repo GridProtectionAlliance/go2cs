@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace go;
@@ -53,15 +54,17 @@ namespace go;
 // a small subset of other types, see note below on restrictions.
 
 // --- Note ---
-// The key difference between struct and ref struct is that ref struct types are forced to be
-// stack only, i.e., they cannot be boxed and stored on the heap. In general this prevents
+// The key difference between struct and ref struct is that ref struct types are forced to
+// be stack only, i.e., they cannot be boxed and stored on the heap. In general this prevents
 // unnecessary allocations which speeds processing and removes GC burden. Keeping the type on
 // the stack is enforced by .NET compiler -- the type cannot escape to the heap. This means
-// types cannot be stored in the `object` type, be a field in a class or common struct,
-// cannot implement an interface, etc. In context of Go to C# conversions, in order to make
-// use of these types, stack to heap escapes which happen implicitly in Go will have to be
-// detected during the conversion process and managed explicitly in converted C# code. In
-// general all ref struct restrictions would apply to converted Go struct types which may
+// types cannot be stored in the `object` type, be a field in a class or common struct, etc.
+// In context of Go to C# conversions, in order to make use of these types, stack to heap
+// escapes which happen implicitly in Go will have to be detected during the conversion
+// process and managed explicitly in converted C# code. New Go based go2cs converter already
+// detects heap escapes, so it can be more easily modified to handle types like this one.
+//
+// In general all ref struct restrictions would apply to converted Go struct types which may
 // make "general" use very impractical, the key pain points specifically are:
 // * ref struct can't be the element type of an array:
 //      This means a slice, array or map of type would not be allowed
@@ -71,7 +74,7 @@ namespace go;
 /// <summary>
 /// Represents a stack only structure that behaves like a Go string.
 /// </summary>
-public readonly ref struct sstring
+public readonly ref struct sstring : IConvertible, IEquatable<sstring>, IComparable<sstring>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
 {
     internal readonly ReadOnlySpan<byte> m_value;
 
@@ -82,7 +85,7 @@ public readonly ref struct sstring
 
     public sstring(byte[]? bytes)
     {
-        m_value = bytes is null ? [] : new ReadOnlySpan<byte>(bytes);
+        m_value = bytes ?? [];
     }
 
     public sstring(ReadOnlySpan<byte> bytes)
@@ -92,7 +95,7 @@ public readonly ref struct sstring
 
     public sstring(char[] value) : this(new string(value)) { }
 
-    public sstring(rune[] value) : this(new string(value.Select(item => (char)item).ToArray())) { }
+    public sstring(rune[] value) : this(new string(value.Select(rune => (char)rune).ToArray())) { }
 
     public sstring(in slice<byte> value) : this(value.ToArray()) { }
 
@@ -107,13 +110,7 @@ public readonly ref struct sstring
 
     public sstring(sstring value) : this(value.m_value) { }
 
-    public int Length
-    {
-        get
-        {
-            return m_value.Length;
-        }
-    }
+    public int Length => m_value.Length;
 
     public byte this[int index]
     {
@@ -126,21 +123,9 @@ public readonly ref struct sstring
         }
     }
 
-    public byte this[nint index]
-    {
-        get
-        {
-            return this[(int)index];
-        }
-    }
+    public byte this[nint index] => this[(int)index];
 
-    public byte this[ulong index]
-    {
-        get
-        {
-            return this[(nint)index];
-        }
-    }
+    public byte this[ulong index] => this[(int)index];
 
     // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
     public slice<byte> Slice(int start, int length)
@@ -201,10 +186,7 @@ public readonly ref struct sstring
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
-        char[] runes = DecodeRunes();
-
-        for (int i = 0; i < runes.Length; i++)
-            yield return (i, runes[i]);
+        return GetEnumerator(DecodeRunes());
     }
 
     private char[] DecodeRunes()
@@ -250,7 +232,7 @@ public readonly ref struct sstring
 
     public static implicit operator sstring(ReadOnlySpan<byte> value) => new(value);
 
-    #else
+#else
         
     public static explicit operator sstring(ReadOnlySpan<byte> value)
     {
@@ -276,7 +258,7 @@ public readonly ref struct sstring
 
     public static implicit operator slice<rune>(sstring value)
     {
-        return new slice<rune>(GetRuneEnumerator(value.ToString()).ToArray());
+        return new slice<rune>(value.ToString().Select(ch => (rune)ch).ToArray());
     }
 
     public static implicit operator sstring(in slice<char> value)
@@ -306,7 +288,7 @@ public readonly ref struct sstring
 
     public static implicit operator rune[](sstring value)
     {
-        return GetRuneEnumerator(value.ToString()).ToArray();
+        return value.ToString().Select(ch => (rune)ch).ToArray();
     }
 
     public static implicit operator sstring(rune[] value)
@@ -385,16 +367,124 @@ public readonly ref struct sstring
 
     #region [ Interface Implementations ]
 
-    private static IEnumerable<byte> GetByteEnumerator(byte[] value)
+    private static IEnumerator<(nint, rune)> GetEnumerator(char[] runes)
     {
-        foreach (byte item in value)
-            yield return item;
+        for (int i = 0; i < runes.Length; i++)
+            yield return (i, runes[i]);
     }
 
-    private static IEnumerable<rune> GetRuneEnumerator(string value)
+    private static IEnumerator<rune> GetEnumerator(string value)
     {
         foreach (rune item in value)
             yield return item;
+    }
+
+    private static IEnumerator<byte> GetEnumerator(byte[] bytes)
+    {
+        foreach (byte item in bytes)
+            yield return item;
+    }
+
+    object ICloneable.Clone()
+    {
+        return (@string)Clone();
+    }
+
+    int IReadOnlyCollection<byte>.Count => Length;
+
+    bool IConvertible.ToBoolean(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToBoolean(provider);
+    }
+
+    char IConvertible.ToChar(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToChar(provider);
+    }
+
+    sbyte IConvertible.ToSByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToSByte(provider);
+    }
+
+    byte IConvertible.ToByte(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToByte(provider);
+    }
+
+    short IConvertible.ToInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt16(provider);
+    }
+
+    ushort IConvertible.ToUInt16(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt16(provider);
+    }
+
+    int IConvertible.ToInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt32(provider);
+    }
+
+    uint IConvertible.ToUInt32(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt32(provider);
+    }
+
+    long IConvertible.ToInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToInt64(provider);
+    }
+
+    ulong IConvertible.ToUInt64(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToUInt64(provider);
+    }
+
+    float IConvertible.ToSingle(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToSingle(provider);
+    }
+
+    double IConvertible.ToDouble(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDouble(provider);
+    }
+
+    decimal IConvertible.ToDecimal(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDecimal(provider);
+    }
+
+    DateTime IConvertible.ToDateTime(IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToDateTime(provider);
+    }
+
+    object IConvertible.ToType(Type conversionType, IFormatProvider? provider)
+    {
+        return ((IConvertible)ToString()).ToType(conversionType, provider);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator(m_value.ToArray());
+    }
+
+    IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
+    {
+        return GetEnumerator(m_value.ToArray());
+    }
+
+    IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
+    {
+        return GetEnumerator(ToString());
+    }
+
+    IEnumerator<char> IEnumerable<char>.GetEnumerator()
+    {
+        return ToString().GetEnumerator();
     }
 
     private static unsafe bool BytesAreEqual(in ReadOnlySpan<byte> data1, in ReadOnlySpan<byte> data2)
