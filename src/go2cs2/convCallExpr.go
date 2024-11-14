@@ -47,7 +47,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "make" {
 		typeParam := v.info.TypeOf(callExpr.Args[0])
 		typeName := v.convExpr(callExpr.Args[0], nil)
-		remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, &context)
+		remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, context)
 
 		if typeParam != nil {
 			if _, ok := typeParam.(*types.Slice); ok {
@@ -62,7 +62,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 		return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 	}
 
-	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, &context))
+	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, context))
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

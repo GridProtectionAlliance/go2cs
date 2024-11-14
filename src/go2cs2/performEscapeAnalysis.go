@@ -21,6 +21,8 @@ import (
 // Future implementations could consider functions that (a) are within the same package
 // and (b) have private scope, that could look ahead for parameter uses that could use
 // a C# ref structure instead of using a heap allocation with a ptr<T>.
+
+// Perform escape analysis on the given identifier within the specified block
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {
 	if parentBlock == nil {
 		return

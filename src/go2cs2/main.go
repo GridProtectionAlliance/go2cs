@@ -341,7 +341,7 @@ func writeProjectFiles(projectName string, projectPath string) error {
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>%s</AssemblyName>
@@ -871,6 +871,10 @@ func (v *Visitor) getVarIdent(varType *types.Var) *ast.Ident {
 	}
 
 	return nil
+}
+
+func (v *Visitor) getExprType(expr ast.Expr) types.Type {
+	return v.info.TypeOf(expr)
 }
 
 // Get the adjusted identifier name, considering shadowing

@@ -188,7 +188,29 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				result.WriteString(", ")
 			}
 
-			rhsExpr := v.convExpr(rhs, nil)
+			var contexts []ExprContext
+
+			if _, ok := rhs.(*ast.CompositeLit); ok {
+				var lhs ast.Expr
+
+				if i < lhsLen {
+					lhs = lhsExprs[i]
+				} else {
+					lhs = lhsExprs[lhsLen-1]
+				}
+
+				ident := getIdentifier(lhs)
+
+				if ident != nil {
+					// Track the name of the variable on the LHS for composite literals,
+					// this is needed for sparse array initializations
+					context := DefaultKeyValueContext()
+					context.ident = ident.Name
+					contexts = []ExprContext{context}
+				}
+			}
+
+			rhsExpr := v.convExpr(rhs, contexts)
 
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhsExpr))
@@ -227,13 +249,24 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				}
 			}
 
+			var contexts []ExprContext
 			ident := getIdentifier(lhs)
+
+			if _, ok := rhs.(*ast.CompositeLit); ok {
+				if ident != nil {
+					// Track the name of the variable on the LHS for composite literals,
+					// this is needed for sparse array initializations
+					context := DefaultKeyValueContext()
+					context.ident = ident.Name
+					contexts = []ExprContext{context}
+				}
+			}
 
 			if ident == nil {
 				result.WriteString(v.convExpr(lhs, nil))
 				result.WriteString(operator)
 
-				rhsExpr := v.convExpr(rhs, nil)
+				rhsExpr := v.convExpr(rhs, contexts)
 
 				if lhsTypeIsInterface[i] {
 					result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
@@ -247,7 +280,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, nil)
+					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
@@ -261,7 +294,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					result.WriteString("@string ")
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(operator)
-					result.WriteString(v.convExpr(rhs, nil))
+					result.WriteString(v.convExpr(rhs, contexts))
 					result.WriteRune(';')
 				} else {
 					// Check if the variable needs to be allocated on the heap
@@ -288,7 +321,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					result.WriteString(v.convExpr(lhs, nil))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, nil)
+					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))

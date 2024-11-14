@@ -22,7 +22,8 @@
                 //"..\\Tests\\Behavioral\\IfStatements\\IfStatements.go",
                 //"..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
-                "..\\Tests\\Behavioral\\FirstClassFunctions",
+                //"..\\Tests\\Behavioral\\FirstClassFunctions",
+                "..\\Tests\\Behavioral\\RangeStatements",
             ]
         }
     ]

@@ -100,6 +100,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstClassFunctions", "Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "math", "gocore\math\math.csproj", "{4F7B7DCD-C13E-417F-B930-BDEC3541604D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RangeStatements", "Tests\Behavioral\RangeStatements\RangeStatements.csproj", "{63F33680-54ED-4317-85FF-05A0E9C0D513}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -246,6 +248,10 @@ Global
 		{4F7B7DCD-C13E-417F-B930-BDEC3541604D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F7B7DCD-C13E-417F-B930-BDEC3541604D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F7B7DCD-C13E-417F-B930-BDEC3541604D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F33680-54ED-4317-85FF-05A0E9C0D513}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F33680-54ED-4317-85FF-05A0E9C0D513}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F33680-54ED-4317-85FF-05A0E9C0D513}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F33680-54ED-4317-85FF-05A0E9C0D513}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -289,6 +295,7 @@ Global
 		{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{ACA466A0-4D34-409B-BF97-D04E3A4CA2D9} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{4F7B7DCD-C13E-417F-B930-BDEC3541604D} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
+		{63F33680-54ED-4317-85FF-05A0E9C0D513} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

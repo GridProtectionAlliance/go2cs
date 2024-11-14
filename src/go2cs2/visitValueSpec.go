@@ -32,10 +32,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(ident, true)
+						heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
-						if len(headTypeDecl) > 0 {
-							v.writeOutput(headTypeDecl)
+						if len(heapTypeDecl) > 0 {
+							v.writeOutput(heapTypeDecl)
 						} else {
 							v.writeOutput("%s %s = default;", csTypeName, csIDName)
 						}

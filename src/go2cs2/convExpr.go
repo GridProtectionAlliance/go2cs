@@ -5,19 +5,33 @@ import (
 	"go/ast"
 )
 
+type KeyValueSource int
+
+const (
+	StructSource KeyValueSource = iota
+	MapSource
+	ArraySource
+)
+
 type ExprContext interface {
 	getDefault() StmtContext
 }
 
 type CallExprContext struct {
-	u8StringArgOK map[int]bool
-	argTypeIsPtr  map[int]bool
+	u8StringArgOK  map[int]bool
+	argTypeIsPtr   map[int]bool
+	keyValueSource KeyValueSource
+	keyValueIdent  string
+	forceMultiLine bool
 }
 
-func DefaultCallExprContext() CallExprContext {
-	return CallExprContext{
-		u8StringArgOK: make(map[int]bool),
-		argTypeIsPtr:  make(map[int]bool),
+func DefaultCallExprContext() *CallExprContext {
+	return &CallExprContext{
+		u8StringArgOK:  make(map[int]bool),
+		argTypeIsPtr:   make(map[int]bool),
+		keyValueSource: StructSource,
+		keyValueIdent:  "",
+		forceMultiLine: false,
 	}
 }
 
@@ -41,11 +55,13 @@ func (c BasicLitContext) getDefault() StmtContext {
 
 type ArrayTypeContext struct {
 	compositeInitializer bool
+	maxLength            int
 }
 
 func DefaultArrayTypeContext() ArrayTypeContext {
 	return ArrayTypeContext{
 		compositeInitializer: false,
+		maxLength:            0,
 	}
 }
 
@@ -65,6 +81,22 @@ func DefaultIdentContext() IdentContext {
 
 func (c IdentContext) getDefault() StmtContext {
 	return DefaultIdentContext()
+}
+
+type KeyValueContext struct {
+	source KeyValueSource
+	ident  string
+}
+
+func DefaultKeyValueContext() KeyValueContext {
+	return KeyValueContext{
+		source: StructSource,
+		ident:  "",
+	}
+}
+
+func (c KeyValueContext) getDefault() StmtContext {
+	return DefaultKeyValueContext()
 }
 
 // Handles pattern match expressions, e.g.: "x is 1 or > 3"
@@ -118,7 +150,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.ChanType:
 		return v.convChanType(exprType)
 	case *ast.CompositeLit:
-		return v.convCompositeLit(exprType)
+		context := getExprContext[KeyValueContext](contexts)
+		return v.convCompositeLit(exprType, context)
 	case *ast.Ellipsis:
 		return v.convEllipsis(exprType)
 	case *ast.FuncLit:
@@ -135,7 +168,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.InterfaceType:
 		return v.convInterfaceType(exprType)
 	case *ast.KeyValueExpr:
-		return v.convKeyValueExpr(exprType)
+		context := getExprContext[KeyValueContext](contexts)
+		return v.convKeyValueExpr(exprType, context)
 	case *ast.MapType:
 		return v.convMapType(exprType)
 	case *ast.ParenExpr:

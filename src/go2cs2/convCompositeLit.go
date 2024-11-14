@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
+	"strconv"
 	"strings"
 )
 
-func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
+func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyValueContext) string {
 	result := &strings.Builder{}
 
 	if compositeLit.Type == nil {
@@ -23,16 +25,27 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		return result.String()
 	}
 
+	exprType := v.getExprType(compositeLit.Type)
+	callContext := DefaultCallExprContext()
+	callContext.keyValueIdent = context.ident
 	isArrayType := false
-	sliceSuffix := ""
+	isSliceType := false
+	isMapType := false
+	compositeSuffix := ""
 
-	// TODO: Handle map type construction
-	if arrayType, ok := compositeLit.Type.(*ast.ArrayType); ok {
+	if _, ok := exprType.(*types.Array); ok {
 		isArrayType = true
+		callContext.keyValueSource = ArraySource
+	}
 
-		if arrayType.Len == nil {
-			sliceSuffix = ".slice()"
-		}
+	if _, isSliceType = exprType.(*types.Slice); isSliceType {
+		isArrayType = true
+		callContext.keyValueSource = ArraySource
+		compositeSuffix = ".slice()"
+	}
+
+	if _, isMapType = exprType.(*types.Map); isMapType {
+		callContext.keyValueSource = MapSource
 	}
 
 	lbracePrefix := ""
@@ -55,14 +68,69 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit) string {
 		rbraceChar = "}"
 	}
 
-	contexts := []ExprContext{ArrayTypeContext{compositeInitializer: true}}
+	if isMapType {
+		lbraceChar = ""
+		rbraceChar = ""
+	}
+
+	arrayTypeContext := DefaultArrayTypeContext()
+	arrayTypeContext.compositeInitializer = true
+
+	// Check if first element is a key value pair expression
+	if callContext.keyValueSource == ArraySource && len(compositeLit.Elts) > 0 {
+		// Check for indexed specifiers representing sparse array/slice initialization
+		if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
+			// Find maximum value of key in composite literals
+			maxKeyValue := 0
+
+			for _, elt := range compositeLit.Elts {
+				if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
+					if basicLit, ok := keyValue.Key.(*ast.BasicLit); ok {
+						if keyValue, err := strconv.ParseInt(basicLit.Value, 0, 64); err == nil {
+							if int(keyValue) > maxKeyValue {
+								maxKeyValue = int(keyValue)
+							}
+						} else {
+							// If key is not a constant, then it is not a sparse array
+							maxKeyValue = 0
+							break
+						}
+					}
+				}
+			}
+
+			if maxKeyValue > 0 {
+				arrayTypeContext.maxLength = maxKeyValue + 1
+				callContext.forceMultiLine = true
+
+				if isSliceType {
+					arrayTypeContext.compositeInitializer = false
+					compositeSuffix = ""
+					lbracePrefix = fmt.Sprintf("(%d)", arrayTypeContext.maxLength)
+				} else {
+					lbracePrefix = ""
+				}
+
+				lbraceChar = ";"
+
+				rbracePrefix = ""
+				rbraceChar = ""
+			}
+		}
+	}
+
+	contexts := []ExprContext{arrayTypeContext}
 	result.WriteString(fmt.Sprintf("new %s%s%s", convertToCSTypeName(v.convExpr(compositeLit.Type, contexts)), lbracePrefix, lbraceChar))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	}
 
-	result.WriteString(fmt.Sprintf("%s%s%s%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil), rbracePrefix, rbraceChar, sliceSuffix))
+	if isMapType {
+		result.WriteString(fmt.Sprintf("{ %s }", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext)))
+	} else {
+		result.WriteString(fmt.Sprintf("%s%s%s%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, rbraceChar, compositeSuffix))
+	}
 
 	return result.String()
 }
