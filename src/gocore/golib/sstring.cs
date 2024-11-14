@@ -28,6 +28,7 @@
 // ReSharper disable BuiltInTypeReferenceStyle
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -70,7 +71,7 @@ namespace go;
 /// <summary>
 /// Represents a stack only structure that behaves like a Go string.
 /// </summary>
-public readonly ref struct sstring // <- think about naming, stack<
+public readonly ref struct sstring
 {
     internal readonly ReadOnlySpan<byte> m_value;
 
@@ -200,48 +201,26 @@ public readonly ref struct sstring // <- think about naming, stack<
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
-        return GetEnumerator(m_value.ToArray());
+        char[] runes = DecodeRunes();
+
+        for (int i = 0; i < runes.Length; i++)
+            yield return (i, runes[i]);
     }
 
-    private static IEnumerator<(nint, rune)> GetEnumerator(byte[] value)
+    private char[] DecodeRunes()
     {
-        if (value.Length == 0)
-            yield break;
+        if (m_value.Length == 0)
+            return [];
 
         Decoder decoder = Encoding.UTF8.GetDecoder();
-        char[] rune = new char[1];
-        int byteCount;
+        Span<char> chars = new char[m_value.Length];
 
-        for (int index = 0; index < value.Length; index += byteCount)
-        {
-            byteCount = 1;
-            bool completed = Decode(decoder, value, index, byteCount, rune);
+        decoder.Convert(m_value, chars, true, out _, out int used, out bool completed);
 
-            if (!completed)
-            {
-                byteCount = 2;
-                completed = Decode(decoder, value, index, byteCount, rune);
-            }
+        if (!completed)
+            chars[used++] = '\uFFFD';
 
-            if (completed)
-                yield return (index, rune[0]);
-            else
-                yield return (index, '\uFFFD');
-        }
-    }
-
-    // TODO: Pass fixed pointers to this function, fixing only once per enumeration
-    private static unsafe bool Decode(Decoder decoder, byte[] value, int index, int byteCount, char[] rune)
-    {
-        bool completed;
-
-        fixed (byte* bytes = &value[index])
-        fixed (char* chars = rune)
-        {
-            decoder.Convert(bytes, byteCount, chars, 1, true, out _, out _, out completed);
-        }
-
-        return completed;
+        return chars[..used].ToArray();
     }
 
     #region [ Operators ]
