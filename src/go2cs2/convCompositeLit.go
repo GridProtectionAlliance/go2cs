@@ -53,7 +53,6 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	if isArrayType {
 		lbracePrefix = " "
-		rbracePrefix = " "
 	}
 
 	if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].Pos(), compositeLit.Rbrace) {
@@ -101,20 +100,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 			if maxKeyValue > 0 {
 				arrayTypeContext.maxLength = maxKeyValue + 1
-				callContext.forceMultiLine = true
 
 				if isSliceType {
+					// Slice type with sparse array initialization can be initialized like a map
+					callContext.keyValueSource = MapSource
 					arrayTypeContext.compositeInitializer = false
 					compositeSuffix = ""
 					lbracePrefix = fmt.Sprintf("(%d)", arrayTypeContext.maxLength)
+					lbraceChar = "{ "
+					rbracePrefix = " "
 				} else {
+					callContext.forceMultiLine = true
 					lbracePrefix = ""
+					lbraceChar = ";"
+					rbracePrefix = ""
+					rbraceChar = ""
 				}
-
-				lbraceChar = ";"
-
-				rbracePrefix = ""
-				rbraceChar = ""
 			}
 		}
 	}

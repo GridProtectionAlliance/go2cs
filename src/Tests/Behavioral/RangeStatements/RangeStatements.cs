@@ -5,7 +5,7 @@ using fmt = fmt_package;
 public static partial class main_package {
 
 private static void Main() {
-    var nums = new nint[] {2, 3, 4 }.slice();
+    var nums = new nint[] {2, 3, 4}.slice();
     nint sum = 0;
     nint i = default;
     nint num = default;
@@ -88,9 +88,7 @@ private static void Main() {
 
         fmt.Println(iΔ4, vΔ1);
     }
-    var slice = new slice<nint>(5);
-    slice[2] = 42;
-    slice[4] = 100;
+    var slice = new slice<nint>(5){ [2] = 42, [4] = 100 };
     for (var iΔ5 = 0; iΔ5 < len(slice); iΔ5++) {
         var vΔ2 = slice[iΔ5];
 
