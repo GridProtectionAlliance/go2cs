@@ -41,7 +41,7 @@ private static void Main() {
     foreach (var (k1, _) in kvs) {
         fmt.Println("key:", k1);
     }
-    foreach (var (v1, _) in kvs) {
+    foreach (var (_, v1) in kvs) {
         fmt.Println("value:", v1);
     }
     @string k = default;

@@ -58,7 +58,7 @@ func main() {
 	}
 
 	// `range` can also iterate over just the keys of a map.
-	for v1 := range kvs {
+	for _, v1 := range kvs {
 		fmt.Println("value:", v1)
 	}
 
