@@ -20,7 +20,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		untypedStr = kind == types.UntypedString
 	}
 
-	var valExpr, keyExpr string
+	var valExpr, valType, keyExpr, keyType string
 	var assignVars bool
 
 	// key/value in a slice or array: index/value
@@ -61,6 +61,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 					v.writeOutput(heapTypeDecl)
 					v.targetFile.WriteString(v.newline)
 					wroteHeapTypeDecl = true
+				} else if !v.options.preferVarDecl {
+					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 			}
 		}
@@ -75,6 +77,8 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 					v.writeOutput(heapTypeDecl)
 					v.targetFile.WriteString(v.newline)
 					wroteHeapTypeDecl = true
+				} else if !v.options.preferVarDecl {
+					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 			}
 		}
@@ -84,33 +88,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		}
 	}
 
-	if isMap {
-		if assignVars {
-			var innerPrefix, tempKeyExpr, tempValExpr string
+	var varInit string
 
-			if keyExpr == "_" {
-				tempKeyExpr = "_"
-			} else {
-				tempKeyExpr = v.getTempVarName("k")
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
-			}
+	if v.options.preferVarDecl && !(keyExpr == "_" && valExpr == "_") {
+		varInit = "var "
+	}
 
-			if valExpr == "_" {
-				tempValExpr = "_"
-			} else {
-				tempValExpr = v.getTempVarName("v")
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
-			}
-
-			v.writeOutput("foreach (var (%s, %s) in %s)", tempKeyExpr, tempValExpr, rangeExpr)
-
-			if innerPrefix != "" {
-				context.innerPrefix = innerPrefix + v.newline
-			}
-		} else {
-			v.writeOutput("foreach (var (%s, %s) in %s)", keyExpr, valExpr, rangeExpr)
-		}
-	} else if isStr {
+	if isStr {
 		if untypedStr {
 			rangeExpr = fmt.Sprintf("@string(%s)", rangeExpr)
 		}
@@ -122,6 +106,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempKeyExpr = "_"
 			} else {
 				tempKeyExpr = v.getTempVarName("i")
+
+				if !v.options.preferVarDecl {
+					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+				}
+
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
 			}
 
@@ -129,41 +118,93 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempValExpr = "_"
 			} else {
 				tempValExpr = v.getTempVarName("r")
-				innerPrefix += fmt.Sprintf("%s%s%s = %s[%s];", v.newline, v.indent(v.indentLevel+1), valExpr, rangeExpr, tempKeyExpr)
+
+				if !v.options.preferVarDecl {
+					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
 			}
 
-			v.writeOutput("foreach (var (%s, %s) in %s)", tempKeyExpr, tempValExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline
 			}
 		} else {
-			v.writeOutput("foreach (var (%s, %s) in %s)", keyExpr, valExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
 		}
 	} else {
-		if keyExpr == "_" && !assignVars {
-			v.writeOutput("foreach (var %s in %s)", valExpr, rangeExpr)
-		} else {
-			if assignVars {
-				if keyExpr == "_" {
-					keyExpr = v.getTempVarName("i")
-					v.writeOutput("for (var %s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
-				} else {
-					v.writeOutput("for (%s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
-				}
+		if assignVars {
+			var innerPrefix, tempKeyExpr, tempValExpr string
 
-				if valExpr != "_" {
-					context.innerPrefix = fmt.Sprintf("%s%s%s = %s[%s];%s", v.newline, v.indent(v.indentLevel+1), valExpr, rangeExpr, keyExpr, v.newline)
-				}
+			if keyExpr == "_" {
+				tempKeyExpr = "_"
 			} else {
-				v.writeOutput("for (var %s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
+				var keyName string
 
-				if valExpr != "_" {
-					context.innerPrefix = fmt.Sprintf("%s%svar %s = %s[%s];%s", v.newline, v.indent(v.indentLevel+1), valExpr, rangeExpr, keyExpr, v.newline)
+				if isMap {
+					keyName = "k"
+				} else {
+					keyName = "i"
 				}
+
+				tempKeyExpr = v.getTempVarName(keyName)
+
+				if !v.options.preferVarDecl {
+					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
 			}
+
+			if valExpr == "_" {
+				tempValExpr = "_"
+			} else {
+				tempValExpr = v.getTempVarName("v")
+
+				if !v.options.preferVarDecl {
+					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+				}
+
+				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
+			}
+
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr)
+
+			if innerPrefix != "" {
+				context.innerPrefix = innerPrefix + v.newline
+			}
+		} else {
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
 		}
 	}
+
+	// Option to use for loop instead of foreach
+	//  else {
+	// 	if keyExpr == "_" && !assignVars {
+	// 		v.writeOutput("foreach (var %s in %s)", valExpr, rangeExpr)
+	// 	} else {
+	// 		if assignVars {
+	// 			if keyExpr == "_" {
+	// 				keyExpr = v.getTempVarName("i")
+	// 				v.writeOutput("for (var %s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
+	// 			} else {
+	// 				v.writeOutput("for (%s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
+	// 			}
+
+	// 			if valExpr != "_" {
+	// 				context.innerPrefix = fmt.Sprintf("%s%s%s = %s[%s];%s", v.newline, v.indent(v.indentLevel+1), valExpr, rangeExpr, keyExpr, v.newline)
+	// 			}
+	// 		} else {
+	// 			v.writeOutput("for (var %s = 0; %s < len(%s); %s++)", keyExpr, keyExpr, rangeExpr, keyExpr)
+
+	// 			if valExpr != "_" {
+	// 				context.innerPrefix = fmt.Sprintf("%s%svar %s = %s[%s];%s", v.newline, v.indent(v.indentLevel+1), valExpr, rangeExpr, keyExpr, v.newline)
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 	v.visitBlockStmt(rangeStmt.Body, context)
 }

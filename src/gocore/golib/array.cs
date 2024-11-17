@@ -45,7 +45,7 @@ public interface IArray : IEnumerable, ICloneable
     }
 }
 
-public interface IArray<T> : IArray
+public interface IArray<T> : IArray, IEnumerable<(nint, T)>
 {
     new T[] Source { get; }
     
@@ -53,7 +53,7 @@ public interface IArray<T> : IArray
 }
 
 [Serializable]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<array<T>>, IEquatable<IArray>
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<array<T>>, IEquatable<IArray>
 {
     internal readonly T[] m_array;
 

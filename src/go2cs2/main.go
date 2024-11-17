@@ -744,7 +744,7 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	if strings.HasPrefix(typeName, "map[") {
-		keyValue := strings.Split(typeName[4:len(typeName)-1], "]")
+		keyValue := strings.Split(typeName[4:], "]")
 		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
 	}
 

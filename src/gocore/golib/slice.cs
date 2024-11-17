@@ -47,13 +47,13 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
-public interface ISlice<T> : ISlice
+public interface ISlice<T> : ISlice, IEnumerable<(nint, T)>
 {
     ISlice<T> Append(params T[] elems);
 }
 
 [Serializable]
-public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEnumerable<(nint, T)>, IEquatable<slice<T>>, IEquatable<ISlice>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<slice<T>>, IEquatable<ISlice>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;

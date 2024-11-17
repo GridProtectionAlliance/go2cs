@@ -128,4 +128,17 @@ func main() {
 		fmt.Println(i, v)
 	}
 
+    /* Uncomment to test out of order shadowing
+    var v1 int
+	
+    for i1, v1 = range slice {
+		fmt.Println(i1, v1)
+	}
+    */
+
+    var v2 int
+	
+    for i1, v2 = range slice {
+		fmt.Println(i1, v2)
+	}
 }
