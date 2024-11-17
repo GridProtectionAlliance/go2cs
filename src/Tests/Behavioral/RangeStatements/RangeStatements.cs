@@ -94,6 +94,10 @@ private static void Main() {
 
         fmt.Println(i1, v2);
     }
+    var farr = new float32[/*3*/]{1.1F, 2.2F, 3.3F}.array();
+    foreach (var (iΔ6, vΔ3) in farr) {
+        fmt.Println(iΔ6, vΔ3);
+    }
 }
 
 } // end main_package

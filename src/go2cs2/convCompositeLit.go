@@ -26,50 +26,32 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	}
 
 	exprType := v.getExprType(compositeLit.Type)
+	arrayTypeContext := DefaultArrayTypeContext()
 	callContext := DefaultCallExprContext()
 	callContext.keyValueIdent = context.ident
-	isArrayType := false
-	isSliceType := false
-	isMapType := false
 	compositeSuffix := ""
 
 	if _, ok := exprType.(*types.Array); ok {
-		isArrayType = true
 		callContext.keyValueSource = ArraySource
+		arrayTypeContext.compositeInitializer = true
+		compositeSuffix = ".array()"
 	}
 
-	if _, isSliceType = exprType.(*types.Slice); isSliceType {
-		isArrayType = true
+	if _, ok := exprType.(*types.Slice); ok {
 		callContext.keyValueSource = ArraySource
+		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".slice()"
 	}
 
-	if _, isMapType = exprType.(*types.Map); isMapType {
+	if _, ok := exprType.(*types.Map); ok {
 		callContext.keyValueSource = MapSource
 	}
 
-	lbracePrefix := ""
-	rbracePrefix := ""
+	var lbracePrefix, rbracePrefix string
 
 	if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].Pos(), compositeLit.Rbrace) {
 		rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 	}
-
-	lbraceChar := "("
-	rbraceChar := ")"
-
-	if isArrayType {
-		lbraceChar = "{"
-		rbraceChar = "}"
-	}
-
-	if isMapType {
-		lbraceChar = ""
-		rbraceChar = ""
-	}
-
-	arrayTypeContext := DefaultArrayTypeContext()
-	arrayTypeContext.compositeInitializer = isArrayType
 
 	// Check if first element is a key value pair expression
 	if callContext.keyValueSource == ArraySource && len(compositeLit.Elts) > 0 {
@@ -104,25 +86,20 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		}
 	}
 
-	contexts := []ExprContext{arrayTypeContext}
-
 	var newSpace string
 
 	if v.options.preferVarDecl || arrayTypeContext.compositeInitializer {
 		newSpace = " "
 	}
 
-	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, convertToCSTypeName(v.convExpr(compositeLit.Type, contexts)), lbracePrefix, lbraceChar))
+	contexts := []ExprContext{arrayTypeContext}
+	result.WriteString(fmt.Sprintf("new%s%s%s{", newSpace, convertToCSTypeName(v.convExpr(compositeLit.Type, contexts)), lbracePrefix))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	}
 
-	if isMapType {
-		result.WriteString(fmt.Sprintf("{%s}", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext)))
-	} else {
-		result.WriteString(fmt.Sprintf("%s%s%s%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, rbraceChar, compositeSuffix))
-	}
+	result.WriteString(fmt.Sprintf("%s%s}%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, compositeSuffix))
 
 	return result.String()
 }

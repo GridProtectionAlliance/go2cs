@@ -7,8 +7,14 @@ import (
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeContext) string {
 	if context.compositeInitializer {
-		// Use basic array type for composite literal initialization
-		return convertToCSTypeName(v.convExpr(arrayType.Elt, nil)) + "[]"
+		var arraySize string
+
+		if arrayType.Len != nil {
+			arraySize = "/*" + v.convExpr(arrayType.Len, nil) + "*/"
+		}
+
+		// Use basic array type for composite literal initialization of slice or array
+		return fmt.Sprintf("%s[%s]", convertToCSTypeName(v.convExpr(arrayType.Elt, nil)), arraySize)
 	}
 
 	var suffix string

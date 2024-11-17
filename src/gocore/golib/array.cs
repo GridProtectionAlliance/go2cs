@@ -439,3 +439,12 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     #endregion
 }
+
+public static class ArrayExtensions
+{
+    // array initializer
+    public static array<T> array<T>(this T[] array)
+    {
+        return new array<T>(array);
+    }
+}

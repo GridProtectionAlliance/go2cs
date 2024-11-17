@@ -141,4 +141,10 @@ func main() {
     for i1, v2 = range slice {
 		fmt.Println(i1, v2)
 	}
+
+    farr := [3]float32{1.1, 2.2, 3.3}
+
+    for i, v := range farr {
+        fmt.Println(i, v)
+    }
 }
