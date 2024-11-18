@@ -168,6 +168,19 @@ func main() {
             fmt.Println(i, j)
         }
     }
+
+    for x := 0; x < 10; x++ {
+        for x := 0; x < 5; x++ {
+            for x := 0; x < 3; x++ {
+                for x := 0; x < 2; x++ {
+                    fmt.Println(x)
+                }
+                fmt.Println(x)
+            }
+            fmt.Println(x)
+        }
+        fmt.Println(x)
+    }
 }
 
 func calculate(x int) {

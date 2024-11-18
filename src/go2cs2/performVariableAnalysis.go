@@ -387,8 +387,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// Check if we're in any tracked statement that requires shadowing
 			for _, tracker := range registry.trackers {
 				if tracker.processing {
-					needsShadowing = true
-					break
+					// Only shadow if the variable is already declared in an outer scope
+					if isDeclaredInOuterScopes(varName, true) {
+						needsShadowing = true
+						break
+					}
 				}
 			}
 

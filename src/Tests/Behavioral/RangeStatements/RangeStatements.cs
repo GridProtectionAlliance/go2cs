@@ -116,6 +116,18 @@ private static void Main() {
             fmt.Println(iΔ7, j);
         }
     }
+    for (nint x = 0; x < 10; x++) {
+        for (nint xΔ1 = 0; xΔ1 < 5; xΔ1++) {
+            for (nint xΔ2 = 0; xΔ2 < 3; xΔ2++) {
+                for (nint xΔ3 = 0; xΔ3 < 2; xΔ3++) {
+                    fmt.Println(xΔ3);
+                }
+                fmt.Println(xΔ2);
+            }
+            fmt.Println(xΔ1);
+        }
+        fmt.Println(x);
+    }
 }
 
 private static void calculate(nint x) {
