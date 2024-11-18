@@ -524,10 +524,7 @@ func getSanitizedIdentifier(identifier string) string {
 
 	if keywords.Contains(identifier) ||
 		strings.HasPrefix(identifier, AddressPrefix) ||
-		strings.HasSuffix(identifier, ClassSuffix) ||
-		strings.Contains(identifier, ShadowVarMarker) ||
-		strings.Contains(identifier, CapturedVarMarker) ||
-		strings.Contains(identifier, TempVarMarker) {
+		strings.HasSuffix(identifier, ClassSuffix) {
 		return "@" + identifier
 	}
 

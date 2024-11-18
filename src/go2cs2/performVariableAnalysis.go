@@ -7,6 +7,18 @@ import (
 	"go/types"
 )
 
+type TrackerType string
+
+const (
+	RangeTracker      TrackerType = "range"
+	ForTracker        TrackerType = "for"
+	FuncTracker       TrackerType = "func"
+	IfTracker         TrackerType = "if"
+	SwitchTracker     TrackerType = "switch"
+	TypeSwitchTracker TrackerType = "typeswitch"
+	SelectTracker     TrackerType = "select"
+)
+
 // These variable analysis functions are used to analyze variable declarations and assignments
 // in the Go source code. The analysis is performed on global variables and on a per-function
 // basis. The goal is to identify reassignments and shadowed variables so these can be handled
@@ -51,6 +63,130 @@ func performGlobalVariableAnalysis(decls []ast.Decl, info *types.Info, globalIde
 	}
 }
 
+// trackerRegistry manages all our nested trackers
+type trackerRegistry struct {
+	trackers map[TrackerType]*nestedVarTracker
+}
+
+func newTrackerRegistry() *trackerRegistry {
+	reg := &trackerRegistry{
+		trackers: make(map[TrackerType]*nestedVarTracker),
+	}
+	// Initialize all tracker types
+	for _, t := range []TrackerType{
+		RangeTracker, ForTracker, FuncTracker,
+		IfTracker, SwitchTracker, TypeSwitchTracker, SelectTracker,
+	} {
+		reg.trackers[t] = newNestedVarTracker(string(t))
+	}
+	return reg
+}
+
+func (r *trackerRegistry) get(t TrackerType) *nestedVarTracker {
+	return r.trackers[t]
+}
+
+// nestedVarTracker handles tracking of variables across nested scopes
+type nestedVarTracker struct {
+	stmtType   string                            // type of statement being tracked
+	level      int                               // current nesting level
+	vars       map[int]map[*ast.Ident]*types.Var // vars at each nesting level
+	processing bool                              // flag for when processing vars in this tracker
+}
+
+func newNestedVarTracker(stmtType string) *nestedVarTracker {
+	return &nestedVarTracker{
+		stmtType: stmtType,
+		vars:     make(map[int]map[*ast.Ident]*types.Var),
+	}
+}
+
+func (t *nestedVarTracker) enter() {
+	t.level++
+	t.vars[t.level] = make(map[*ast.Ident]*types.Var)
+}
+
+func (t *nestedVarTracker) exit() {
+	delete(t.vars, t.level)
+	t.level--
+}
+
+func (t *nestedVarTracker) isTrackedAtOtherLevel(ident *ast.Ident) bool {
+	for level := 1; level < t.level; level++ {
+		if _, exists := t.vars[level][ident]; exists {
+			return true
+		}
+	}
+	return false
+}
+
+func (t *nestedVarTracker) track(ident *ast.Ident, varObj *types.Var) {
+	t.vars[t.level][ident] = varObj
+}
+
+// varProcessor handles variable declaration and assignment processing
+type varProcessor struct {
+	tracker            *nestedVarTracker
+	functionLevelDecls map[string]*types.Var
+	declaredPos        map[*types.Var]token.Pos
+	info               *types.Info
+	declareVar         func(string, *types.Var, *ast.Ident)
+	reassignVar        func(string, *ast.Ident)
+}
+
+func newVarProcessor(
+	tracker *nestedVarTracker,
+	functionLevelDecls map[string]*types.Var,
+	declaredPos map[*types.Var]token.Pos,
+	info *types.Info,
+	declareVar func(string, *types.Var, *ast.Ident),
+	reassignVar func(string, *ast.Ident),
+) *varProcessor {
+	return &varProcessor{
+		tracker:            tracker,
+		functionLevelDecls: functionLevelDecls,
+		declaredPos:        declaredPos,
+		info:               info,
+		declareVar:         declareVar,
+		reassignVar:        reassignVar,
+	}
+}
+
+func (p *varProcessor) processIdent(ident *ast.Ident, isDefine bool) {
+	if ident == nil || isDiscardedVar(ident.Name) {
+		return
+	}
+
+	if isDefine {
+		if obj := p.info.Defs[ident]; obj != nil {
+			if varObj, ok := obj.(*types.Var); ok {
+				p.declareVar(ident.Name, varObj, ident)
+				p.tracker.track(ident, varObj)
+			}
+		}
+	} else {
+		if obj := p.info.Uses[ident]; obj != nil {
+			if varObj, ok := obj.(*types.Var); ok {
+				if !p.tracker.isTrackedAtOtherLevel(ident) {
+					p.functionLevelDecls[ident.Name] = varObj
+					p.declaredPos[varObj] = ident.Pos()
+				}
+				p.tracker.track(ident, varObj)
+				p.reassignVar(ident.Name, ident)
+			}
+		}
+	}
+}
+
+func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
+	isDefine := stmt.Tok == token.DEFINE
+	for _, expr := range stmt.Lhs {
+		if ident, ok := expr.(*ast.Ident); ok {
+			p.processIdent(ident, isDefine)
+		}
+	}
+}
+
 // Perform variable analysis on the specified function block, handling shadowing and scope
 func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *types.Signature) {
 	v.identNames = make(map[*ast.Ident]string)
@@ -64,6 +200,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	var varNames = make(map[*types.Var]string)       // Map from types.Var to adjusted names
 	var nameCounts = make(map[string]int)            // Counts for generating unique names
 	var declaredPos = make(map[*types.Var]token.Pos) // Track declaration positions
+
+	// Initialize tracker registry for different statement types
+	registry := newTrackerRegistry()
 
 	// Initialize local variables names from globals
 	for varName, obj := range v.globalScope {
@@ -95,6 +234,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						for _, ident := range valueSpec.Names {
 							if obj := v.info.Defs[ident]; obj != nil {
 								if varObj, ok := obj.(*types.Var); ok {
+									// For declarations, always record the original position
 									functionLevelDecls[ident.Name] = varObj
 									declaredPos[varObj] = ident.Pos()
 								}
@@ -113,8 +253,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						if ident, ok := expr.(*ast.Ident); ok {
 							if obj := v.info.Defs[ident]; obj != nil {
 								if varObj, ok := obj.(*types.Var); ok {
-									functionLevelDecls[ident.Name] = varObj
-									declaredPos[varObj] = ident.Pos()
+									// Only add if not already declared
+									if _, exists := functionLevelDecls[ident.Name]; !exists {
+										functionLevelDecls[ident.Name] = varObj
+										declaredPos[varObj] = ident.Pos()
+									}
 								}
 							}
 						}
@@ -123,14 +266,12 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 		case *ast.RangeStmt:
-			// Only process range variables if they're using = (not :=)
-			// and at function level
 			if isFunctionLevelNode(n, funcDecl.Body) && n.Tok == token.ASSIGN {
-				// For assignments (=), these are function-level variables
+				// Handle Key
 				if key, ok := n.Key.(*ast.Ident); ok {
 					if obj := v.info.Uses[key]; obj != nil {
 						if varObj, ok := obj.(*types.Var); ok {
-							// Only add if it's a pre-existing variable
+							// Only add if not already declared
 							if _, exists := functionLevelDecls[key.Name]; !exists {
 								functionLevelDecls[key.Name] = varObj
 								declaredPos[varObj] = key.Pos()
@@ -138,10 +279,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						}
 					}
 				}
+				// Handle Value
 				if value, ok := n.Value.(*ast.Ident); ok && value != nil {
 					if obj := v.info.Uses[value]; obj != nil {
 						if varObj, ok := obj.(*types.Var); ok {
-							// Only add if it's a pre-existing variable
+							// Only add if not already declared
 							if _, exists := functionLevelDecls[value.Name]; !exists {
 								functionLevelDecls[value.Name] = varObj
 								declaredPos[varObj] = value.Pos()
@@ -150,19 +292,19 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					}
 				}
 			}
-			// Note: We don't collect range variables when Tok == token.DEFINE
-			// as these are block-scoped and will be handled during the main traversal
 
 		case *ast.ForStmt:
-			// Only process the init statement if it's at function level
 			if isFunctionLevelNode(n, funcDecl.Body) {
 				if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
 					for _, expr := range init.Lhs {
 						if ident, ok := expr.(*ast.Ident); ok {
 							if obj := v.info.Defs[ident]; obj != nil {
 								if varObj, ok := obj.(*types.Var); ok {
-									functionLevelDecls[ident.Name] = varObj
-									declaredPos[varObj] = ident.Pos()
+									// Only add if not already declared
+									if _, exists := functionLevelDecls[ident.Name]; !exists {
+										functionLevelDecls[ident.Name] = varObj
+										declaredPos[varObj] = ident.Pos()
+									}
 								}
 							}
 						}
@@ -171,15 +313,17 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 		case *ast.TypeSwitchStmt:
-			// Only process the assign statement if it's at function level
 			if isFunctionLevelNode(n, funcDecl.Body) {
 				if assign, ok := n.Assign.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
 					for _, expr := range assign.Lhs {
 						if ident, ok := expr.(*ast.Ident); ok {
 							if obj := v.info.Defs[ident]; obj != nil {
 								if varObj, ok := obj.(*types.Var); ok {
-									functionLevelDecls[ident.Name] = varObj
-									declaredPos[varObj] = ident.Pos()
+									// Only add if not already declared
+									if _, exists := functionLevelDecls[ident.Name]; !exists {
+										functionLevelDecls[ident.Name] = varObj
+										declaredPos[varObj] = ident.Pos()
+									}
 								}
 							}
 						}
@@ -228,67 +372,38 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		return nil
 	}
 
-	getShadowedVarName := func(varName string, varObj *types.Var) string {
+	getShadowedVarName := func(varName string) string {
 		nameCounts[varName]++
 		return fmt.Sprintf("%s%s%d", varName, ShadowVarMarker, nameCounts[varName])
 	}
 
-	// Track if we're currently processing a range statement's variables
-	inRangeVars := false
-
-	// Helper to check if an identifier is a range loop variable
-	isRangeLoopVariable := func(ident *ast.Ident) bool {
-		// Check if we're currently processing range variables
-		if inRangeVars {
-			return true
-		}
-
-		// Alternative approach: check if the identifier is defined in a range statement
-		// by walking up its parent nodes
-		var isRange bool
-
-		ast.Inspect(funcDecl, func(n ast.Node) bool {
-			if n == nil {
-				return false
-			}
-
-			if rs, ok := n.(*ast.RangeStmt); ok {
-				// Check if this ident is the Key or Value of this range statement
-				if key, ok := rs.Key.(*ast.Ident); ok && key == ident {
-					isRange = true
-					return false
-				}
-				if rs.Value != nil {
-					if value, ok := rs.Value.(*ast.Ident); ok && value == ident {
-						isRange = true
-						return false
-					}
-				}
-			}
-			return true
-		})
-
-		return isRange
-	}
-
+	// Declare variable, checking if an identifier needs shadowing
 	declareVar := func(varName string, varObj *types.Var, ident *ast.Ident) {
 		var adjustedName string
 
-		// Check if this is shadowing a function-level declaration that appears anywhere
 		if funcLevelVar, exists := functionLevelDecls[varName]; exists {
-			// For range variables with := we always want to shadow the outer variable
-			// regardless of where it's declared
-			if isRangeLoopVariable(ident) {
-				adjustedName = getShadowedVarName(varName, varObj)
-			} else if declaredPos[funcLevelVar] > ident.Pos() {
-				// For non-range variables, maintain the original position-based logic
-				adjustedName = getShadowedVarName(varName, varObj)
+			needsShadowing := false
+
+			// Check if we're in any tracked statement that requires shadowing
+			for _, tracker := range registry.trackers {
+				if tracker.processing {
+					needsShadowing = true
+					break
+				}
+			}
+
+			// If not in a tracked statement, fall back to position-based logic
+			if !needsShadowing {
+				needsShadowing = declaredPos[funcLevelVar] > ident.Pos()
+			}
+
+			if needsShadowing {
+				adjustedName = getShadowedVarName(varName)
 			} else {
 				adjustedName = varName
 			}
 		} else if isDeclaredInOuterScopes(varName, false) {
-			// Normal shadowing of an outer scope variable
-			adjustedName = getShadowedVarName(varName, varObj)
+			adjustedName = getShadowedVarName(varName)
 		} else {
 			adjustedName = varName
 			nameCounts[varName] = 0
@@ -499,6 +614,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		case *ast.FuncLit:
 			// Enter a new scope for the function literal
 			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(FuncTracker)
+			tracker.enter()
+			tracker.processing = true
 
 			// Get funcDecl for the function literal
 			funcDecl := &ast.FuncDecl{Type: node.Type}
@@ -509,136 +627,226 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// Add function parameters (including receiver and results) to the current scope
 			addFunctionParams(funcDecl, signature)
 
+			tracker.processing = false
+
 			// Visit the function body
 			visitNode(node.Body)
 
 			// Exit the function literal scope
+			tracker.exit()
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
 
 		case *ast.IfStmt:
-			// Enter a new scope if there's an Init statement
-			if node.Init != nil {
-				v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
-				visitNode(node.Init)
-			}
-
-			// Visit Cond
-			visitNode(node.Cond)
-
-			// Visit Body
-			visitNode(node.Body)
-
-			// Visit Else
-			if node.Else != nil {
-				visitNode(node.Else)
-			}
-
-			// Exit the scope if it was created
-			if node.Init != nil {
-				v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-			}
-
-		case *ast.SwitchStmt:
-			// Enter a new scope if there's an Init statement
-			if node.Init != nil {
-				v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
-				visitNode(node.Init)
-			}
-
-			// Visit Tag
-			visitNode(node.Tag)
-
-			// Visit Body
-			visitNode(node.Body)
-
-			// Exit the scope if it was created
-			if node.Init != nil {
-				v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-			}
-
-		case *ast.TypeSwitchStmt:
-			// Enter a new scope for the type switch statement
 			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(IfTracker)
+			tracker.enter()
+			tracker.processing = true
 
-			// Visit Init if present
 			if node.Init != nil {
-				visitNode(node.Init)
-			}
+				processor := newVarProcessor(
+					tracker,
+					functionLevelDecls,
+					declaredPos,
+					v.info,
+					declareVar,
+					reassignVar,
+				)
 
-			// Visit Assign
-			if node.Assign != nil {
-				visitNode(node.Assign)
-			}
-
-			// Visit Body
-			visitNode(node.Body)
-
-			// Exit the current scope
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-
-		case *ast.RangeStmt:
-			// Enter a new scope for the range statement
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
-
-			// Set flag before processing range variables
-			inRangeVars = true
-
-			// Handle range variables
-			if node.Key != nil {
-				if key, ok := node.Key.(*ast.Ident); ok {
-					if obj := v.info.Defs[key]; obj != nil {
-						if varObj, ok := obj.(*types.Var); ok {
-							declareVar(key.Name, varObj, key)
-						}
-					}
+				switch init := node.Init.(type) {
+				case *ast.AssignStmt:
+					processor.processAssignStmt(init)
 				}
 			}
 
-			if node.Value != nil {
-				if value, ok := node.Value.(*ast.Ident); ok {
-					if obj := v.info.Defs[value]; obj != nil {
-						if varObj, ok := obj.(*types.Var); ok {
-							declareVar(value.Name, varObj, value)
-						}
-					}
-				}
-			}
+			tracker.processing = false
 
-			// Reset flag after processing range variables
-			inRangeVars = false
-
-			// Visit the range expression
-			visitNode(node.X)
-
-			// Visit the loop body
-			visitNode(node.Body)
-
-			// Exit the current scope
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-
-		case *ast.ForStmt:
-			// Enter a new scope for the loop
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
-
-			// Visit the Init statement (may declare new variables)
-			if node.Init != nil {
-				visitNode(node.Init)
-			}
-
-			// Visit the Condition expression
+			// Visit condition
 			if node.Cond != nil {
 				visitNode(node.Cond)
 			}
 
-			// Visit the Post statement
+			// Visit body
+			visitNode(node.Body)
+
+			// Visit else
+			if node.Else != nil {
+				visitNode(node.Else)
+			}
+
+			tracker.exit()
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		case *ast.SwitchStmt:
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(SwitchTracker)
+			tracker.enter()
+			tracker.processing = true
+
+			if node.Init != nil {
+				processor := newVarProcessor(
+					tracker,
+					functionLevelDecls,
+					declaredPos,
+					v.info,
+					declareVar,
+					reassignVar,
+				)
+
+				switch init := node.Init.(type) {
+				case *ast.AssignStmt:
+					processor.processAssignStmt(init)
+				}
+			}
+
+			tracker.processing = false
+
+			// Visit tag and body
+			if node.Tag != nil {
+				visitNode(node.Tag)
+			}
+
+			visitNode(node.Body)
+
+			tracker.exit()
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		case *ast.TypeSwitchStmt:
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(TypeSwitchTracker)
+			tracker.enter()
+			tracker.processing = true
+
+			if node.Init != nil {
+				processor := newVarProcessor(
+					tracker,
+					functionLevelDecls,
+					declaredPos,
+					v.info,
+					declareVar,
+					reassignVar,
+				)
+
+				switch init := node.Init.(type) {
+				case *ast.AssignStmt:
+					processor.processAssignStmt(init)
+				}
+			}
+
+			// Handle assign statement (type switch specific)
+			if assign, ok := node.Assign.(*ast.AssignStmt); ok {
+				processor := newVarProcessor(
+					tracker,
+					functionLevelDecls,
+					declaredPos,
+					v.info,
+					declareVar,
+					reassignVar,
+				)
+				processor.processAssignStmt(assign)
+			}
+
+			tracker.processing = false
+
+			visitNode(node.Body)
+
+			tracker.exit()
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		case *ast.RangeStmt:
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(RangeTracker)
+			tracker.enter()
+			tracker.processing = true
+
+			processor := newVarProcessor(
+				tracker,
+				functionLevelDecls,
+				declaredPos,
+				v.info,
+				declareVar,
+				reassignVar,
+			)
+
+			if node.Key != nil {
+				processor.processIdent(getIdentifier(node.Key), node.Tok == token.DEFINE)
+			}
+			if node.Value != nil {
+				processor.processIdent(getIdentifier(node.Value), node.Tok == token.DEFINE)
+			}
+
+			tracker.processing = false
+
+			visitNode(node.X)
+			visitNode(node.Body)
+
+			tracker.exit()
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		case *ast.ForStmt:
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(ForTracker)
+			tracker.enter()
+			tracker.processing = true
+
+			processor := newVarProcessor(
+				tracker,
+				functionLevelDecls,
+				declaredPos,
+				v.info,
+				declareVar,
+				reassignVar,
+			)
+
+			if node.Init != nil {
+				if init, ok := node.Init.(*ast.AssignStmt); ok {
+					processor.processAssignStmt(init)
+				}
+			}
+
+			tracker.processing = false
+
+			if node.Cond != nil {
+				visitNode(node.Cond)
+			}
 			if node.Post != nil {
 				visitNode(node.Post)
 			}
-
-			// Visit the loop body
 			visitNode(node.Body)
 
-			// Exit the current scope
+			tracker.exit()
+			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+		case *ast.SelectStmt:
+			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			tracker := registry.get(SelectTracker)
+			tracker.enter()
+
+			// Process each case's statements
+			for _, s := range node.Body.List {
+				if commClause, ok := s.(*ast.CommClause); ok {
+					// Handle communication statement assignments
+					if comm, ok := commClause.Comm.(*ast.AssignStmt); ok {
+						tracker.processing = true
+						processor := newVarProcessor(
+							tracker,
+							functionLevelDecls,
+							declaredPos,
+							v.info,
+							declareVar,
+							reassignVar,
+						)
+						processor.processAssignStmt(comm)
+						tracker.processing = false
+					}
+
+					// Visit the case body
+					for _, stmt := range commClause.Body {
+						visitNode(stmt)
+					}
+				}
+			}
+
+			tracker.exit()
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
 
 		// Check for defer and recover calls

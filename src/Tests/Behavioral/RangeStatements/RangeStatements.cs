@@ -35,14 +35,14 @@ private static void Main() {
     }
     fmt.Println("Total:", total);
     var kvs = new map<@string, @string>{["a"u8] = "apple"u8, ["b"u8] = "banana"u8};
-    foreach (var (k1, v1) in kvs) {
-        fmt.Printf("%s -> %s\n"u8, k1, v1);
+    foreach (var (kΔ1, vΔ1) in kvs) {
+        fmt.Printf("%s -> %s\n"u8, kΔ1, vΔ1);
     }
-    foreach (var (k1, _) in kvs) {
-        fmt.Println("key:", k1);
+    foreach (var (kΔ2, _) in kvs) {
+        fmt.Println("key:", kΔ2);
     }
-    foreach (var (_, v1) in kvs) {
-        fmt.Println("value:", v1);
+    foreach (var (vΔ2, _) in kvs) {
+        fmt.Println("value:", vΔ2);
     }
     @string k = default;
     @string v = default;
@@ -51,6 +51,18 @@ private static void Main() {
         v = vᴛ2;
 
         fmt.Printf("%s2 -> %s\n"u8, k, v);
+        foreach (var (kΔ3, vΔ3) in kvs) {
+            fmt.Printf("%s -> %s\n"u8, kΔ3, vΔ3);
+        }
+        @string strΔ1 = "sub-test"u8;
+        nint i1Δ1 = default;
+        rune c1Δ1 = default;
+        foreach (var (iᴛ2, rᴛ1) in strΔ1) {
+            i1Δ1 = iᴛ2;
+            c1Δ1 = rᴛ1;
+
+            fmt.Println(i1Δ1, c1Δ1);
+        }
     }
     foreach (var (kᴛ2, _) in kvs) {
         k = kᴛ2;
@@ -73,30 +85,45 @@ private static void Main() {
     @string str = "test"u8;
     nint i1 = default;
     rune c1 = default;
-    foreach (var (iᴛ2, rᴛ1) in str) {
-        i1 = iᴛ2;
-        c1 = rᴛ1;
+    foreach (var (iᴛ3, rᴛ2) in str) {
+        i1 = iᴛ3;
+        c1 = rᴛ2;
 
         fmt.Println(i1, c1);
     }
     var arr = new array<nint>(5){[2] = 42, [4] = 100};
-    foreach (var (iΔ4, vΔ1) in arr) {
-        fmt.Println(iΔ4, vΔ1);
+    foreach (var (iΔ4, vΔ4) in arr) {
+        fmt.Println(iΔ4, vΔ4);
     }
     var slice = new slice<nint>(5){[2] = 42, [4] = 100};
-    foreach (var (iΔ5, vΔ2) in slice) {
-        fmt.Println(iΔ5, vΔ2);
+    foreach (var (iΔ5, vΔ5) in slice) {
+        fmt.Println(iΔ5, vΔ5);
     }
-    nint v2 = default;
-    foreach (var (iᴛ3, vᴛ4) in slice) {
-        i1 = iᴛ3;
-        v2 = vᴛ4;
+    nint v1 = default;
+    foreach (var (iᴛ4, vᴛ4) in slice) {
+        i1 = iᴛ4;
+        v1 = vᴛ4;
 
-        fmt.Println(i1, v2);
+        fmt.Println(i1, v1);
     }
     var farr = new float32[/*3*/]{1.1F, 2.2F, 3.3F}.array();
-    foreach (var (iΔ6, vΔ3) in farr) {
-        fmt.Println(iΔ6, vΔ3);
+    foreach (var (iΔ6, vΔ6) in farr) {
+        fmt.Println(iΔ6, vΔ6);
+    }
+    for (nint iΔ7 = 0; iΔ7 < 10; iΔ7++) {
+        nint j = default;
+        for (j = 0; j < 5; j++) {
+            fmt.Println(iΔ7, j);
+        }
+    }
+}
+
+private static void calculate(nint x) {
+    nint y = x * 2;
+    {
+        nint xΔ1 = y - 1; if (xΔ1 > 0) {
+            fmt.Println(xΔ1);
+        }
     }
 }
 

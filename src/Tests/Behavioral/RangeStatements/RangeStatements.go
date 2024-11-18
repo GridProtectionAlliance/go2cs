@@ -47,6 +47,7 @@ func main() {
 	fmt.Println("Total:", total)
 
 	// `range` on map iterates over key/value pairs.
+    /*
 	kvs := map[string]string{"a": "apple", "b": "banana"}
 	for k1, v1 := range kvs {
 		fmt.Printf("%s -> %s\n", k1, v1)
@@ -61,26 +62,38 @@ func main() {
 	for _, v1 := range kvs {
 		fmt.Println("value:", v1)
 	}
+    */
 
-	/* Uncomment to test out of order shadowing
-	    kvs := map[string]string{"a": "apple", "b": "banana"}
-		for k, v := range kvs {
-			fmt.Printf("%s -> %s\n", k, v)
-		}
+	kvs := map[string]string{"a": "apple", "b": "banana"}
+	for k, v := range kvs {
+		fmt.Printf("%s -> %s\n", k, v)
+	}
 
-		for k := range kvs {
-			fmt.Println("key:", k)
-		}
+	for k := range kvs {
+		fmt.Println("key:", k)
+	}
 
-		for v := range kvs {
-			fmt.Println("value:", v)
-		}
-	*/
+	for v := range kvs {
+		fmt.Println("value:", v)
+	}
 
 	var k, v string
 
 	for k, v = range kvs {
 		fmt.Printf("%s2 -> %s\n", k, v)
+
+        for k, v := range kvs {
+		    fmt.Printf("%s -> %s\n", k, v)
+	    }
+
+        str := "sub-test"
+	    
+        var i1 int
+	    var c1 rune
+        
+        for i1, c1 = range str {
+		    fmt.Println(i1, c1)
+	    }
 	}
 
 	for k, _ = range kvs {
@@ -95,6 +108,7 @@ func main() {
 	for range kvs {
 		total++
 	}
+
 	fmt.Println("Total:", total)
 
 	// `range` on strings iterates over Unicode code
@@ -128,23 +142,37 @@ func main() {
 		fmt.Println(i, v)
 	}
 
-    /* Uncomment to test out of order shadowing
     var v1 int
 	
     for i1, v1 = range slice {
 		fmt.Println(i1, v1)
 	}
-    */
 
+    /*
     var v2 int
 	
     for i1, v2 = range slice {
 		fmt.Println(i1, v2)
 	}
+    */
 
     farr := [3]float32{1.1, 2.2, 3.3}
 
     for i, v := range farr {
         fmt.Println(i, v)
+    }
+
+    for i := 0; i < 10; i++ {
+        var j int
+        for j = 0; j < 5; j++ {
+            fmt.Println(i, j)
+        }
+    }
+}
+
+func calculate(x int) {
+    var y = x * 2
+    if x := y - 1; x > 0 {
+        fmt.Println(x)
     }
 }
