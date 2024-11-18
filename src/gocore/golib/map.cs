@@ -194,36 +194,18 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     #region [ Interface Implementations ]
 
-    nint IMap.Length
-    {
-        get
-        {
-            return Count;
-        }
-    }
+    nint IMap.Length => Count;
 
     object? IMap.this[object key]
     {
-        get
-        {
-            return this[(TKey)key];
-        }
-        set
-        {
-            this[(TKey)key] = (TValue)value!;
-        }
+        get => this[(TKey)key];
+        set => this[(TKey)key] = (TValue)value!;
     }
 
     TValue IDictionary<TKey, TValue>.this[TKey key]
     {
-        get
-        {
-            return this[key];
-        }
-        set
-        {
-            this[key] = value;
-        }
+        get => this[key];
+        set => this[key] = value;
     }
 
     void IDictionary.Add(object key, object? value)
@@ -246,62 +228,26 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         return ((IDictionary)m_map)?.GetEnumerator()!;
     }
 
-    bool IDictionary.IsFixedSize
-    {
-        get
-        {
-            return ((IDictionary)m_map)?.IsFixedSize ?? false;
-        }
-    }
+    bool IDictionary.IsFixedSize => ((IDictionary)m_map)?.IsFixedSize ?? false;
 
-    bool IDictionary.IsReadOnly
-    {
-        get
-        {
-            return ((IDictionary)m_map)?.IsReadOnly ?? false;
-        }
-    }
+    bool IDictionary.IsReadOnly => ((IDictionary)m_map)?.IsReadOnly ?? false;
 
     object? IDictionary.this[object key]
     {
-        get
-        {
-            return this[(TKey)key];
-        }
-        set
-        {
-            this[(TKey)key] = (TValue)value!;
-        }
+        get => this[(TKey)key];
+        set => this[(TKey)key] = (TValue)value!;
     }
 
-    ICollection<TValue> IDictionary<TKey, TValue>.Values
-    {
-        get
-        {
-            return m_map.Values;
-        }
-    }
+    ICollection<TValue> IDictionary<TKey, TValue>.Values => m_map.Values;
 
-    ICollection<TKey> IDictionary<TKey, TValue>.Keys
-    {
-        get
-        {
-            return m_map.Keys;
-        }
-    }
+    ICollection<TKey> IDictionary<TKey, TValue>.Keys => m_map.Keys;
 
     bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> item)
     {
         return ((ICollection<KeyValuePair<TKey, TValue>>)m_map)?.Remove(item) ?? false;
     }
 
-    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
-    {
-        get
-        {
-            return ((ICollection<KeyValuePair<TKey, TValue>>)m_map)?.IsReadOnly ?? false;
-        }
-    }
+    bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => ((ICollection<KeyValuePair<TKey, TValue>>)m_map)?.IsReadOnly ?? false;
 
     void ICollection<KeyValuePair<TKey, TValue>>.Add(KeyValuePair<TKey, TValue> item)
     {
@@ -323,37 +269,13 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         ((ICollection<KeyValuePair<TKey, TValue>>)m_map)?.CopyTo(array, arrayIndex);
     }
 
-    ICollection IDictionary.Keys
-    {
-        get
-        {
-            return ((IDictionary)m_map)?.Keys!;
-        }
-    }
+    ICollection IDictionary.Keys => ((IDictionary)m_map)?.Keys!;
 
-    ICollection IDictionary.Values
-    {
-        get
-        {
-            return ((IDictionary)m_map)?.Values!;
-        }
-    }
+    ICollection IDictionary.Values => ((IDictionary)m_map)?.Values!;
 
-    bool ICollection.IsSynchronized
-    {
-        get
-        {
-            return ((ICollection)m_map)?.IsSynchronized ?? false;
-        }
-    }
+    bool ICollection.IsSynchronized => ((ICollection)m_map)?.IsSynchronized ?? false;
 
-    object ICollection.SyncRoot
-    {
-        get
-        {
-            return ((ICollection)m_map)?.SyncRoot ?? this;
-        }
-    }
+    object ICollection.SyncRoot => ((ICollection)m_map)?.SyncRoot ?? this;
 
     void ICollection.CopyTo(Array array, int index)
     {
