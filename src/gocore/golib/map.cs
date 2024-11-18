@@ -54,40 +54,20 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     public map(IEnumerable<KeyValuePair<TKey, TValue>> map)
     {
-    #if NET5_0_OR_GREATER
         m_map = new Dictionary<TKey, TValue>(map);
-    #else
-        m_map = map.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-    #endif
     }
 
-    public int Count
-    {
-        get
-        {
-            return m_map.Count;
-        }
-    }
+    public int Count => m_map.Count;
 
     public TValue this[TKey key]
     {
-        get
-        {
-            return m_map.TryGetValue(key, out TValue? value) ? value : default!;
-        }
-
-        set
-        {
-            m_map[key] = value;
-        }
+        get => m_map.TryGetValue(key, out TValue? value) ? value : default!;
+        set => m_map[key] = value;
     }
 
     public (TValue, bool) this[TKey key, bool _]
     {
-        get
-        {
-            return m_map.TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
-        }
+        get => m_map.TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
     }
 
     public void Add(TKey key, TValue value)
@@ -131,8 +111,7 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     public override string ToString()
     {
-        return
-            $"map[{(m_map is null ? "nil" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
+        return $"map[{(m_map is null ? "nil" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
     }
 
     public override int GetHashCode()
