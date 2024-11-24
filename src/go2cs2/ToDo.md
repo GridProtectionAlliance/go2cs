@@ -7,7 +7,7 @@
 01) ~~Fix out of order shadowing, when higher scope variable is declared later but prior variable should have been shadowed~~
 02) Add captured lambda variables to temporary variables before lambda call and use temp variabes in lambda (Go always copied) - make sure array is full copy
 03) ~~Fix range implementation to account for define / assign~~
-04) Check implementation of standalone `convEllipsis` visitor - add test code for when is it encountered - or remove
+04) ~~Check implementation of standalone `convEllipsis` visitor - add test code for when is it encountered - or remove~~
 05) Check implementation of standalone `convFieldList` visitor - add test code for when is it encountered - or remove
 06) Check implementation of standalone `convInterfaceType` visitor - add test code for when is it encountered - or remove
 07) Check implementation of standalone `convStructType` visitor - add test code for when is it encountered - or remove
@@ -18,6 +18,7 @@
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
 13) Complete interface inheritance (will need C# GoType code converter work)
 14) Complete channel implementation (`visitChanType` / `visitCommClause`)
+15) Handle generics conversion
 
 xx) Setup reference code packages / path options for Go modules
     1) Assume code builds in Go / toolchain executed, i.e., local source exists

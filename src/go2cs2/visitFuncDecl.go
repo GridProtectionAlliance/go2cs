@@ -128,6 +128,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), param.Name(), AddressPrefix, param.Name())
 				}
 			}
+
+			// Check if parameter is variadic, in this case parameter is a C# params array that needs to be converted to a Go slice<T>
+			if i == parameters.Len()-1 && signature.Variadic() {
+				if v.options.preferVarDecl {
+					v.writeString(resultParameters, "%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), param.Name(), getVariadicParamName(param.Name()))
+				} else {
+					v.writeString(resultParameters, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getCSTypeName(param.Type().(*types.Slice).Elem()), param.Name(), getVariadicParamName(param.Name()))
+				}
+			}
 		}
 
 		if resultParameters.Len() > 0 {
@@ -285,8 +294,10 @@ func generateParametersSignature(signature *types.Signature, addRecv bool) strin
 			result.WriteString(getCSTypeName(param.Type()))
 		}
 
+		// Variadic parameters are passed as C# param arrays, so we use a temporary
+		// parameter name that will be later converted to a Go slice<T>
 		result.WriteRune(' ')
-		result.WriteString(param.Name())
+		result.WriteString(getVariadicParamName(param.Name()))
 	}
 
 	return result.String()
@@ -335,6 +346,10 @@ func generateResultSignature(signature *types.Signature) string {
 	result.WriteRune(')')
 
 	return result.String()
+}
+
+func getVariadicParamName(paramName string) string {
+	return fmt.Sprintf("%s%sp", paramName, CapturedVarMarker)
 }
 
 func (v *Visitor) getCapturedVarName(varPrefix string) string {

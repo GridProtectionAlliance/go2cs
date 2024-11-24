@@ -18,20 +18,22 @@ type ExprContext interface {
 }
 
 type CallExprContext struct {
-	u8StringArgOK  map[int]bool
-	argTypeIsPtr   map[int]bool
-	keyValueSource KeyValueSource
-	keyValueIdent  string
-	forceMultiLine bool
+	u8StringArgOK     map[int]bool
+	argTypeIsPtr      map[int]bool
+	hasSpreadOperator bool
+	keyValueSource    KeyValueSource
+	keyValueIdent     string
+	forceMultiLine    bool
 }
 
 func DefaultCallExprContext() *CallExprContext {
 	return &CallExprContext{
-		u8StringArgOK:  make(map[int]bool),
-		argTypeIsPtr:   make(map[int]bool),
-		keyValueSource: StructSource,
-		keyValueIdent:  "",
-		forceMultiLine: false,
+		u8StringArgOK:     make(map[int]bool),
+		argTypeIsPtr:      make(map[int]bool),
+		hasSpreadOperator: false,
+		keyValueSource:    StructSource,
+		keyValueIdent:     "",
+		forceMultiLine:    false,
 	}
 }
 
@@ -152,8 +154,6 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.CompositeLit:
 		context := getExprContext[KeyValueContext](contexts)
 		return v.convCompositeLit(exprType, context)
-	case *ast.Ellipsis:
-		return v.convEllipsis(exprType)
 	case *ast.FuncLit:
 		return v.convFuncLit(exprType)
 	// case *ast.FuncType:

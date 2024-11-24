@@ -20,6 +20,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
 	context := DefaultCallExprContext()
 
+	// Check if the call is using the spread operator "..."
+	if callExpr.Ellipsis.IsValid() {
+		context.hasSpreadOperator = true
+	}
+
 	// Check if any parameters of callExpr.Fun are interface or pointer types
 	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
 		for i := 0; i < funType.Params().Len(); i++ {

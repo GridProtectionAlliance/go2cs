@@ -11,11 +11,13 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 	keyValueContext := DefaultKeyValueContext()
 	forceMultiLine := false
+	hasSpreadOperator := false
 
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
 		keyValueContext.ident = callContext.keyValueIdent
 		forceMultiLine = callContext.forceMultiLine
+		hasSpreadOperator = callContext.hasSpreadOperator
 	}
 
 	for i, expr := range exprs {
@@ -57,6 +59,12 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
 		result.WriteString(v.convExpr(expr, contexts))
+
+		// If the last expression has a spread operator, convert it to a ToArray() call,
+		// this way elements or source are passed as arguments instead of a slice/array
+		if hasSpreadOperator && i == len(exprs)-1 {
+			result.WriteString(".ToArray()")
+		}
 
 		if exprOnNewLine {
 			v.indentLevel--

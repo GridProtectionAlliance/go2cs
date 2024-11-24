@@ -23,7 +23,8 @@
                 //"..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
-                "..\\Tests\\Behavioral\\RangeStatements",
+                //"..\\Tests\\Behavioral\\RangeStatements",
+                "..\\Tests\\Behavioral\\SpreadOperator",
             ]
         }
     ]
