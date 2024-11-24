@@ -102,29 +102,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice(array<T> array) : this((T[])array) { }
     
-    public T[] Source
-    {
-        get
-        {
-            return m_array;
-        }
-    }
-
-    public slice(T[]? array, (int, int) offsetAndLength)
-    {
-        (int low, int length) = offsetAndLength;
-
-        if (low < 0)
-            throw new ArgumentOutOfRangeException(nameof(offsetAndLength), "Offset value is less than zero.");
-
-        m_array = array ?? throw new ArgumentNullException(nameof(array), "slice array reference is null.");
-
-        if (array.Length - low < length)
-            throw new ArgumentException($"Offset {nameof(low)} and {nameof(length)} represent a range outside bounds of the array reference.");
-
-        m_low = low;
-        m_length = length;
-    }
+    public T[] Source => m_array;
 
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
@@ -165,46 +143,16 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_length = length;
     }
 
-    public nint Low
-    {
-        get
-        {
-            return m_low;
-        }
-    }
+    public nint Low => m_low;
 
-    public nint High
-    {
-        get
-        {
-            return m_low + m_length;
-        }
-    }
+    public nint High => m_low + m_length;
 
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
-    public nint Length
-    {
-        get
-        {
-            return m_length;
-        }
-    }
+    public nint Length => m_length;
 
-    public nint Capacity
-    {
-        get
-        {
-            return m_array.Length - m_low;
-        }
-    }
+    public nint Capacity => m_array.Length - m_low;
 
-    public nint Available
-    {
-        get
-        {
-            return m_array.Length - m_length;
-        }
-    }
+    public nint Available => m_array.Length - m_length;
 
     // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
@@ -230,15 +178,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         }
     }
 
-    public ref T this[ulong index]
-    {
-        get
-        {
-            return ref this[(nint)index];
-        }
-    }
+    public ref T this[ulong index] => ref this[(nint)index];
 
-    // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
+    public slice<T> this[Range range] => m_array.slice(range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length), Capacity);
+
     public slice<T> Slice(int start, int length)
     {
         return m_array.slice(start, start + length, Capacity);

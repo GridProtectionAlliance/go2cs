@@ -102,27 +102,19 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
     }
 
-    public T[] Source
-    {
-        get
-        {
-            return m_array;
-        }
-    }
+    public T[] Source => m_array;
 
-    public nint Length
-    {
-        get
-        {
-            return m_array.Length;
-        }
-    }
+    public nint Length => m_array.Length;
 
     // Returning by-ref value allows array to be a struct instead of a class and still allow read and write
+    // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
     public ref T this[int index]
     {
         get
         {
+            if (index < 0 || index >= m_array.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, m_array.Length);
+
             return ref m_array[index];
         }
     }
@@ -131,32 +123,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         get
         {
+            if (index < 0 || index >= m_array.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, m_array.Length);
+
             return ref m_array[index];
         }
     }
 
-    public ref T this[ulong index]
-    {
-        get
-        {
-            return ref this[(nint)index];
-        }
-    }
+    public ref T this[ulong index] => ref this[(nint)index];
 
-    public slice<T> this[Range range]
-    {
-        get
-        {
-            return new slice<T>(m_array, range.GetOffsetAndLength(m_array.Length));
-        }
-    }
+    public slice<T> this[Range range] => new(m_array, range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length));
 
     public slice<T> Slice(int start, int length)
-    {
-        return new slice<T>(m_array, start, start + length);
-    }
-
-    public slice<T> Slice(nint start, nint length)
     {
         return new slice<T>(m_array, start, start + length);
     }
