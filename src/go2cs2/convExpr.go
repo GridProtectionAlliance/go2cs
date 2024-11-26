@@ -72,12 +72,14 @@ func (c ArrayTypeContext) getDefault() StmtContext {
 }
 
 type IdentContext struct {
-	typeIsPointer bool
+	isPointer bool
+	isType    bool
 }
 
 func DefaultIdentContext() IdentContext {
 	return IdentContext{
-		typeIsPointer: false,
+		isPointer: false,
+		isType:    false,
 	}
 }
 

@@ -71,13 +71,13 @@ func PrintValPtr(ptr *int) {
 	*ptr++
 }
 
-func EscapePrintValPtr(ptr *int) *int {
-	fmt.Printf("Value available at *ptr = %d\n", *ptr)
+func EscapePrintValPtr(out *int) *int {
+	fmt.Printf("Value available at *ptr = %d\n", *out)
 	i := 99
-	ptr = &i
-	fmt.Printf("Intra-function updated value available at *ptr = %d\n", *ptr)
-	PrintValPtr(ptr)
-	return ptr
+	out = &i
+	fmt.Printf("Intra-function updated value available at *ptr = %d\n", *out)
+	PrintValPtr(out)
+	return out
 }
 
 func PrintValPtr2Ptr(pptr **int) {

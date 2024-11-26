@@ -159,17 +159,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			}
 
 			ident := getIdentifier(lhsExprs[i])
+			context := DefaultIdentContext()
 
 			if (!v.isPointer(ident) || v.identIsParameter(ident)) && i < rhsLen {
 				// If rhs is a address of expression, we need to convert identifier to its pointer variable
 				if unaryExpr, ok := rhsExprs[i].(*ast.UnaryExpr); ok {
 					if unaryExpr.Op == token.AND {
-						result.WriteString(AddressPrefix)
+						context.isPointer = true
 					}
 				}
 			}
 
-			result.WriteString(v.convExpr(lhs, nil))
+			result.WriteString(v.convExpr(lhs, []ExprContext{context}))
 		}
 
 		if lhsLen > 1 {

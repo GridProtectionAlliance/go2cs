@@ -68,16 +68,16 @@ public static void PrintValPtr(ptr<nint> Ꮡptr) {
     ptr++;
 }
 
-public static ptr<nint> EscapePrintValPtr(ptr<nint> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+public static ptr<nint> EscapePrintValPtr(ptr<nint> Ꮡout) {
+    ref var @out = ref Ꮡout.val;
 
-    fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
+    fmt.Printf("Value available at *ptr = %d\n"u8, @out);
     ref var i = ref heap<nint>(out var Ꮡi);
     i = 99;
-    Ꮡptr = Ꮡi;
-    fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, ptr);
-    PrintValPtr(Ꮡptr);
-    return Ꮡptr;
+    Ꮡout = Ꮡi;
+    fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, @out);
+    PrintValPtr(Ꮡout);
+    return Ꮡout;
 }
 
 public static void PrintValPtr2Ptr(ptr<ptr<nint>> Ꮡpptr) {

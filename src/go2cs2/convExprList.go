@@ -7,6 +7,10 @@ import (
 )
 
 func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callContext *CallExprContext) string {
+	if len(exprs) == 0 {
+		return ""
+	}
+
 	result := &strings.Builder{}
 
 	keyValueContext := DefaultKeyValueContext()
@@ -53,15 +57,15 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			basicLitContext.u8StringOK = callContext.u8StringArgOK[i]
 
 			// Check if the argument is a pointer type
-			identContext.typeIsPointer = callContext.argTypeIsPtr[i]
+			identContext.isPointer = callContext.argTypeIsPtr[i]
 		}
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
 		result.WriteString(v.convExpr(expr, contexts))
 
-		// If the last expression has a spread operator, convert it to a ToArray() call,
-		// this way elements or source are passed as arguments instead of a slice/array
+		// If the last expression has a spread operator, convert it to a `ToArray()` call,
+		// this way elements of source are passed as arguments instead of a slice or array
 		if hasSpreadOperator && i == len(exprs)-1 {
 			result.WriteString(".ToArray()")
 		}

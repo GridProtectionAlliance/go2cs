@@ -31,6 +31,11 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	callContext.keyValueIdent = context.ident
 	compositeSuffix := ""
 
+	var lbracePrefix, rbracePrefix string
+
+	lbrace := "{"
+	rbrace := "}"
+
 	if _, ok := exprType.(*types.Array); ok {
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
@@ -47,7 +52,12 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		callContext.keyValueSource = MapSource
 	}
 
-	var lbracePrefix, rbracePrefix string
+	if named, ok := exprType.(*types.Named); ok {
+		if _, ok := named.Underlying().(*types.Struct); ok {
+			lbrace = "("
+			rbrace = ")"
+		}
+	}
 
 	if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].Pos(), compositeLit.Rbrace) {
 		rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
@@ -92,14 +102,17 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		newSpace = " "
 	}
 
-	contexts := []ExprContext{arrayTypeContext}
-	result.WriteString(fmt.Sprintf("new%s%s%s{", newSpace, convertToCSTypeName(v.convExpr(compositeLit.Type, contexts)), lbracePrefix))
+	identContext := DefaultIdentContext()
+	identContext.isType = true
+	contexts := []ExprContext{arrayTypeContext, identContext}
+
+	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, v.convExpr(compositeLit.Type, contexts), lbracePrefix, lbrace))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	}
 
-	result.WriteString(fmt.Sprintf("%s%s}%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, compositeSuffix))
+	result.WriteString(fmt.Sprintf("%s%s%s%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, rbrace, compositeSuffix))
 
 	return result.String()
 }

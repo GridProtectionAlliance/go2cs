@@ -78,6 +78,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 					if ident != nil && v.identIsParameter(ident) {
 						v.targetFile.WriteString(AddressPrefix)
+						resultExpr = strings.TrimPrefix(resultExpr, "@")
 					}
 				}
 

@@ -8,7 +8,7 @@ import (
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	if ok, typeName := v.isTypeConversion(callExpr); ok {
-		return fmt.Sprintf("(%s)(%s)", typeName, v.convExpr(callExpr.Args[0], nil))
+		return fmt.Sprintf("(%s)(%s)", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], nil))
 	}
 
 	constructType := ""
@@ -48,26 +48,53 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 		}
 	}
 
-	// Handle make call as a special case
-	if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == "make" {
-		typeParam := v.info.TypeOf(callExpr.Args[0])
-		typeName := v.convExpr(callExpr.Args[0], nil)
-		remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, context)
+	if ident, ok := callExpr.Fun.(*ast.Ident); ok {
+		// Handle make call as a special case
+		if ident.Name == "make" {
+			typeExpr := callExpr.Args[0]
+			typeParam := v.info.TypeOf(typeExpr)
 
-		if typeParam != nil {
-			if _, ok := typeParam.(*types.Slice); ok {
-				return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
-			} else if _, ok := typeParam.(*types.Map); ok {
-				return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
-			} else if _, ok := typeParam.(*types.Chan); ok {
-				return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+			var typeName string
+
+			if ident := getIdentifier(typeExpr); ident != nil {
+				typeName = convertToCSTypeName(ident.Name)
+			} else {
+				typeName = v.getPrintedNode(typeExpr)
+				println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `make` type argument %s", typeName))
+				typeName = fmt.Sprintf("/* %s */", typeName)
 			}
+
+			remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, context)
+
+			if typeParam != nil {
+				if _, ok := typeParam.(*types.Slice); ok {
+					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+				} else if _, ok := typeParam.(*types.Map); ok {
+					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+				} else if _, ok := typeParam.(*types.Chan); ok {
+					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+				}
+			}
+
+			return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 		}
 
-		return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
+		// Handle new call as a special case
+		if ident.Name == "new" {
+			typeExpr := callExpr.Args[0]
+
+			if ident := getIdentifier(typeExpr); ident != nil {
+				return v.convertToHeapTypeDecl(ident, true)
+			}
+
+			typeName := v.getPrintedNode(typeExpr)
+			println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `new` type argument %s", typeName))
+			typeName = fmt.Sprintf("/* %s */", typeName)
+			return fmt.Sprintf("@new<%s>()", typeName)
+		}
 	}
 
-	return fmt.Sprintf("%s%s(%s)", constructType, getSanitizedIdentifier(v.convExpr(callExpr.Fun, nil)), v.convExprList(callExpr.Args, callExpr.Lparen, context))
+	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, nil), v.convExprList(callExpr.Args, callExpr.Lparen, context))
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

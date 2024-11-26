@@ -2,6 +2,7 @@ package main
 
 import (
 	"go/ast"
+	"strings"
 )
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
@@ -9,9 +10,13 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		return "null"
 	}
 
-	if context.typeIsPointer {
-		return AddressPrefix + v.getIdentName(ident)
+	if context.isPointer {
+		return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@")
 	}
 
-	return v.getIdentName(ident)
+	if context.isType {
+		return convertToCSTypeName(v.getIdentName(ident))
+	}
+
+	return getSanitizedIdentifier(v.getIdentName(ident))
 }
