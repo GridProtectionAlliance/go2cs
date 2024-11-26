@@ -34,7 +34,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		// Remove CommentGroup instances that exist as AST nodes from standalone comments map
 		ast.Walk(v, file)
 
-		for pos, _ := range v.standAloneComments {
+		for pos := range v.standAloneComments {
 			v.sortedCommentPos = append(v.sortedCommentPos, pos)
 		}
 

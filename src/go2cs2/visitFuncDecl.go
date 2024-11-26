@@ -180,7 +180,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						typeName := getCSTypeName(sliceType.Elem())
 
 						updatedSignature.WriteString(ElipsisOperator + typeName)
-						v.requiredUsings.Add(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
+						v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
 					} else {
 						updatedSignature.WriteString("object[]")
 					}
@@ -303,7 +303,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				typeName := getCSTypeName(sliceType.Elem())
 
 				result.WriteString(ElipsisOperator + typeName)
-				v.requiredUsings.Add(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
+				v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
 			} else {
 				result.WriteString("object[]")
 			}

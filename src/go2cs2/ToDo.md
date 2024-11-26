@@ -8,7 +8,7 @@
 02) Add captured lambda variables to temporary variables before lambda call and use temp variabes in lambda (Go always copied) - make sure array is full copy
 03) ~~Fix range implementation to account for define / assign~~
 04) ~~Check implementation of standalone `convEllipsis` visitor - add test code for when is it encountered - or remove~~
-05) Check implementation of standalone `convFieldList` visitor - add test code for when is it encountered - or remove
+05) ~~Check implementation of standalone `convFieldList` visitor - add test code for when is it encountered - or remove~~
 06) Check implementation of standalone `convInterfaceType` visitor - add test code for when is it encountered - or remove
 07) Check implementation of standalone `convStructType` visitor - add test code for when is it encountered - or remove
 08) Complete map type implementation (`visitMapType`)
