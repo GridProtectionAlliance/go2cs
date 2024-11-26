@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 )
@@ -27,6 +28,8 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	} else {
-		v.writeOutputLn("// %s", v.getPrintedNode(arrayType))
+		typeName := v.getPrintedNode(arrayType.Elt)
+		println(fmt.Sprintf("WARNING: @visitArrayType - Failed to resolve `ast.ArrayType` element %s", typeName))
+		v.writeOutputLn("// [...]%s", typeName)
 	}
 }

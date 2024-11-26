@@ -11,6 +11,6 @@ func (v *Visitor) visitDeclStmt(declStmt *ast.DeclStmt, source ParentBlockContex
 	case *ast.GenDecl:
 		v.visitGenDecl(decl, parentBlock)
 	default:
-		panic("Unexpected Decl type: " + v.getPrintedNode(decl))
+		panic("@visitDeclStmt - Unexpected `ast.DeclStmt` type: " + v.getPrintedNode(decl))
 	}
 }

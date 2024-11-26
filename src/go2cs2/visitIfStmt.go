@@ -43,7 +43,7 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
 		case *ast.BlockStmt:
 			v.visitBlockStmt(elseStmt, context)
 		default:
-			panic("Unexpected Else type: " + v.getPrintedNode(elseStmt))
+			panic("@visitIfStmt - Unexpected `ast.IfStmt` else type: " + v.getPrintedNode(elseStmt))
 		}
 	}
 
