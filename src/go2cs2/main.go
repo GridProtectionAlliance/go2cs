@@ -336,6 +336,8 @@ func writeProjectFiles(projectName string, projectPath string) error {
 
 	// TODO: Need to know which projects to reference based on package imports
 
+	// TODO: Change source to a template file referenced as a command line parameter
+
 	// Generate project file contents
 	projectFileContents := fmt.Sprintf(`<Project Sdk="Microsoft.NET.Sdk">
 
@@ -354,6 +356,7 @@ func writeProjectFiles(projectName string, projectPath string) error {
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006</NoWarn>
     <Version>0.1.0</Version>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">
