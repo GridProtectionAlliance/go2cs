@@ -64,10 +64,10 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		result.WriteString(v.convExpr(expr, contexts))
 
-		// If the last expression has a spread operator, convert it to a `ToArray()` call,
-		// this way elements of source are passed as arguments instead of a slice or array
+		// If the last expression has a spread operator, use elipsis property as source
+		// this way elements are passed as arguments instead of a slice or array
 		if hasSpreadOperator && i == len(exprs)-1 {
-			result.WriteString(".ToArray()")
+			result.WriteString("." + ElipsisOperator)
 		}
 
 		if exprOnNewLine {

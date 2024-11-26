@@ -35,7 +35,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 
 		signature := methodType.Signature()
 		resultSignature := generateResultSignature(signature)
-		parameterSignature := generateParametersSignature(signature, false)
+		parameterSignature := v.generateParametersSignature(signature, false)
 
 		typeLenDeviation += token.Pos(len(parameterSignature) - getSourceParameterSignatureLen(signature))
 		typeLenDeviation += token.Pos(len(resultSignature) - getSourceResultSignatureLen(signature))

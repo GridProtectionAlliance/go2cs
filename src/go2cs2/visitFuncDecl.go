@@ -70,7 +70,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasRecover
-	parameterSignature := generateParametersSignature(signature, true)
+	parameterSignature := v.generateParametersSignature(signature, true)
 	blockPrefix := ""
 
 	if !signatureOnly {
@@ -174,16 +174,31 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				if i == parameters.Len()-1 && signature.Variadic() {
 					updatedSignature.WriteString("params ")
-				}
 
-				updatedSignature.WriteString(getCSTypeName(param.Type()))
-				updatedSignature.WriteRune(' ')
+					// If parameter is a slice, convert it to a Span
+					if sliceType, ok := param.Type().(*types.Slice); ok {
+						typeName := getCSTypeName(sliceType.Elem())
 
-				if _, ok := param.Type().(*types.Pointer); ok {
-					updatedSignature.WriteString(AddressPrefix)
-					updatedSignature.WriteString(param.Name())
+						updatedSignature.WriteString(ElipsisOperator + typeName)
+						v.requiredUsings.Add(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
+					} else {
+						updatedSignature.WriteString("object[]")
+					}
+
+					// Variadic parameters are passed as C# param arrays, so we use a temporary
+					// parameter name that will be later converted to a Go slice<T>
+					updatedSignature.WriteRune(' ')
+					updatedSignature.WriteString(getVariadicParamName(param))
 				} else {
-					updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+					updatedSignature.WriteString(getCSTypeName(param.Type()))
+					updatedSignature.WriteRune(' ')
+
+					if _, ok := param.Type().(*types.Pointer); ok {
+						updatedSignature.WriteString(AddressPrefix)
+						updatedSignature.WriteString(param.Name())
+					} else {
+						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+					}
 				}
 			}
 
@@ -260,7 +275,7 @@ func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
 	return parameters
 }
 
-func generateParametersSignature(signature *types.Signature, addRecv bool) string {
+func (v *Visitor) generateParametersSignature(signature *types.Signature, addRecv bool) string {
 	parameters := getParameters(signature, addRecv)
 
 	if parameters == nil {
@@ -283,10 +298,12 @@ func generateParametersSignature(signature *types.Signature, addRecv bool) strin
 		if i == parameters.Len()-1 && signature.Variadic() {
 			result.WriteString("params ")
 
-			// If parameter is a slice, convert it to an array
+			// If parameter is a slice, convert it to a Span
 			if sliceType, ok := param.Type().(*types.Slice); ok {
-				result.WriteString(getCSTypeName(sliceType.Elem()))
-				result.WriteString("[]")
+				typeName := getCSTypeName(sliceType.Elem())
+
+				result.WriteString(ElipsisOperator + typeName)
+				v.requiredUsings.Add(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
 			} else {
 				result.WriteString("object[]")
 			}

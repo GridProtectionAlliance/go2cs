@@ -104,6 +104,8 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] Source => m_array;
 
+    public Span<T> ꓸꓸꓸ => new(m_array);
+
     public nint Length => m_array.Length;
 
     // Returning by-ref value allows array to be a struct instead of a class and still allow read and write
@@ -305,32 +307,17 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         return m_array.Clone();
     }
 
-    Array IArray.Source
-    {
-        get
-        {
-            return m_array;
-        }
-    }
+    Array IArray.Source => m_array;
 
     object? IArray.this[nint index]
     {
-        get
-        {
-            return this[index];
-        }
-        set
-        {
-            this[index] = (T)value!;
-        }
+        get => this[index];
+        set => this[index] = (T)value!;
     }
 
     T IList<T>.this[int index]
     {
-        get
-        {
-            return this[index];
-        }
+        get => this[index];
         set
         {
             if (index < 0 || index >= Length)
@@ -355,37 +342,13 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         throw new NotSupportedException();
     }
 
-    int IReadOnlyCollection<T>.Count
-    {
-        get
-        {
-            return (int)Length;
-        }
-    }
+    int IReadOnlyCollection<T>.Count => (int)Length;
 
-    T IReadOnlyList<T>.this[int index]
-    {
-        get
-        {
-            return this[index];
-        }
-    }
+    T IReadOnlyList<T>.this[int index] => this[index];
 
-    bool ICollection<T>.IsReadOnly
-    {
-        get
-        {
-            return false;
-        }
-    }
+    bool ICollection<T>.IsReadOnly => false;
 
-    int ICollection<T>.Count
-    {
-        get
-        {
-            return (int)Length;
-        }
-    }
+    int ICollection<T>.Count => (int)Length;
 
     void ICollection<T>.Add(T item)
     {

@@ -91,6 +91,7 @@ const ShadowVarMarker = "Δ"   // Variants: Δ Ʌ ꞥ
 const CapturedVarMarker = "ʗ" // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "ᴛ"     // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "ᐧ"        // Variants: ᐧ true
+const ElipsisOperator = "ꓸꓸꓸ"
 
 // TODO: Consider adding removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{

@@ -113,6 +113,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     
     public T[] Source => m_array;
 
+    public Span<T> ꓸꓸꓸ => new(m_array, (int)m_low, (int)m_length);
+
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
         if (array is null)
@@ -347,7 +349,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // slice<T> to nil comparisons
     public static bool operator ==(slice<T> slice, NilType _)
     {
-        return slice.Length == 0 && slice.Capacity == 0;
+        return slice is { Length: 0, Capacity: 0 };
     }
 
     public static bool operator !=(slice<T> slice, NilType nil)
@@ -389,32 +391,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return Append(elems);
     }
 
-    Array IArray.Source
-    {
-        get
-        {
-            return m_array;
-        }
-    }
+    Array IArray.Source => m_array;
 
     object? IArray.this[nint index]
     {
-        get
-        {
-            return this[index];
-        }
-        set
-        {
-            this[index] = (T)value!;
-        }
+        get => this[index];
+        set => this[index] = (T)value!;
     }
 
     T IList<T>.this[int index]
     {
-        get
-        {
-            return this[index];
-        }
+        get => this[index];
         set
         {
             if (index < 0 || index >= m_length)
@@ -439,37 +426,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         throw new NotSupportedException();
     }
 
-    int IReadOnlyCollection<T>.Count
-    {
-        get
-        {
-            return (int)m_length;
-        }
-    }
+    int IReadOnlyCollection<T>.Count => (int)m_length;
 
-    T IReadOnlyList<T>.this[int index]
-    {
-        get
-        {
-            return this[m_low + index];
-        }
-    }
+    T IReadOnlyList<T>.this[int index] => this[m_low + index];
 
-    bool ICollection<T>.IsReadOnly
-    {
-        get
-        {
-            return false;
-        }
-    }
+    bool ICollection<T>.IsReadOnly => false;
 
-    int ICollection<T>.Count
-    {
-        get
-        {
-            return (int)m_length;
-        }
-    }
+    int ICollection<T>.Count => (int)m_length;
 
     void ICollection<T>.Add(T item)
     {
@@ -543,13 +506,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             }
         }
 
-        object? IEnumerator.Current
-        {
-            get
-            {
-                return Current;
-            }
-        }
+        object? IEnumerator.Current => Current;
 
         void IEnumerator.Reset()
         {
