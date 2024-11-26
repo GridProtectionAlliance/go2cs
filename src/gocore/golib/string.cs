@@ -32,6 +32,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace go;
 
@@ -99,8 +100,9 @@ public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<
     }
 
     public byte this[ulong index] => this[(nint)index];
+    
+    public slice<byte> this[Range range] => new(m_value, range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length));
 
-    // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
     public slice<byte> Slice(int start, int length)
     {
         return new slice<byte>(m_value, start, start + length);

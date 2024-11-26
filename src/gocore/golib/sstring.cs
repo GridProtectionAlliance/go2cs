@@ -127,7 +127,8 @@ public readonly ref struct sstring : IConvertible, IEquatable<sstring>, ICompara
 
     public byte this[ulong index] => this[(int)index];
 
-    // Allows for implicit range support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-range-support
+    public slice<byte> this[Range range] => new(m_value.ToArray(), range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length));
+
     public slice<byte> Slice(int start, int length)
     {
         return new slice<byte>(m_value, start, start + length);
