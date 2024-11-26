@@ -155,6 +155,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array.CopyTo(array, arrayIndex);
     }
 
+    public T[] ToArray()
+    {
+        T[] array = new T[Length];
+        CopyTo(array, 0);
+        return array;
+    }
+
+    public Span<T> ToSpan()
+    {
+        return new Span<T>(m_array);
+    }
+
     public array<T> Clone()
     {
         return new array<T>(m_array.Clone() as T[]);
@@ -166,16 +178,6 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         foreach (T item in m_array)
             yield return (index++, item);
-    }
-
-    // Returns an enumerator for just index enumeration
-    public IEnumerable<nint> Range
-    {
-        get
-        {
-            for (nint i = 0; i < m_array.Length; i++)
-                yield return i;
-        }
     }
 
     public override string ToString()
@@ -420,9 +422,21 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
 public static class ArrayExtensions
 {
-    // array initializer
+    // array initializer from C# array
     public static array<T> array<T>(this T[] array)
     {
         return new array<T>(array);
+    }
+
+    // array initializer from Span
+    public static array<T> array<T>(this Span<T> source)
+    {
+        return new array<T>(source);
+    }
+
+    // array initializer from an enumerable
+    public static array<T> array<T>(this IEnumerable<T> source)
+    {
+        return new array<T>(source.ToArray());
     }
 }

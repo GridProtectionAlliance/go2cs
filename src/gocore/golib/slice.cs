@@ -52,6 +52,15 @@ public interface ISlice<T> : ISlice, IEnumerable<(nint, T)>
     ISlice<T> Append(params T[] elems);
 }
 
+// A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents
+// struct from being boxed and/or stored on the heap. The issue with that is that the struct is not allowed to
+// be stored in a field of another non-ref struct or an array, or boxed. This is a problem for slices since they
+// are often stored in arrays or other structures in Go code. The ref struct option is not used for the standard
+// slice here for this reason. In order to make use of a ref struct option, stack-to-heap escape analysis would
+// need to determine if the struct is stored in a field of another struct or array, or boxed, and then disallow
+// the ref struct option. The Go based go2cs converter already detects heap escapes, so this could be a viable
+// option in the future, at least for slices that are private and used with internal package functions only.
+
 [Serializable]
 public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<slice<T>>, IEquatable<ISlice>
 {
@@ -210,6 +219,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return array;
     }
 
+    public Span<T> ToSpan()
+    {
+        return new Span<T>(m_array, (int)m_low, (int)m_length);
+    }
+
     public slice<T> Append(T[] elems)
     {
         return Append(this, elems);
@@ -227,16 +241,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         while (enumerator.MoveNext())
             yield return (index++, enumerator.Current);
-    }
-
-    // Returns an enumerator for just index enumeration
-    public IEnumerable<nint> Range
-    {
-        get
-        {
-            for (nint i = Low; i < High; i++)
-                yield return i;
-        }
     }
 
     public override string ToString()
@@ -646,7 +650,7 @@ public static class SliceExtensions
         return slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
     }
 
-    // slice of an array helper function
+    // slice of a C# array helper function
     public static slice<T> slice<T>(this T[] array, nint low = -1, nint high = -1, nint max = -1)
     {
         if (low == -1)
@@ -671,12 +675,25 @@ public static class SliceExtensions
         return new slice<T>(array, low, high);
     }
 
+    // slice from a Span helper function
+    public static slice<T> slice<T>(this Span<T> source, nint low = -1, nint high = -1, nint max = -1)
+    {
+        return source.ToArray().slice(low, high, max);
+    }
+
+    // slice of an enumerable helper function
+    public static slice<T> slice<T>(this IEnumerable<T> source, nint low = -1, nint high = -1, nint max = -1)
+    {
+        return source.ToArray().slice(low, high, max);
+    }
+
+    // slice of a Go array helper function
     public static slice<T> slice<T>(this array<T> array, nint low = -1, nint high = -1, nint max = -1)
     {
         return array.m_array.slice(low, high, max);
     }
 
-    // slice of a string helper function
+    // slice of a Go string helper function
     public static slice<byte> slice(this @string source, nint low = -1, nint high = -1, nint max = -1)
     {
         return source.m_value.slice(low, high, max);

@@ -60,7 +60,7 @@ public static class time_package
 
         public ChannelTimer(long ticks, bool continuous)
         {
-            m_notify = make_channel<Time>();
+            m_notify = new channel<Time>();
             m_delay = (int)(ticks / TimeSpan.TicksPerMillisecond);
 
             m_pulse = () =>

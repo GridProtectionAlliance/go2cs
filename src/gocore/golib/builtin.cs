@@ -530,45 +530,6 @@ public static class builtin
     }
 
     /// <summary>
-    /// Creates a new slice from the specified <paramref name="array"/>.
-    /// </summary>
-    /// <typeparam name="T">Array type.</typeparam>
-    /// <param name="array">Source array</param>
-    /// <returns>New slice of the specified <paramref name="array"/>.</returns>
-    public static slice<T> make_slice<T>(T[]? array)
-    {
-        return new slice<T>(array);
-    }
-
-    /// <summary>
-    /// Allocates and initializes a slice object.
-    /// </summary>
-    /// <param name="size">Specifies the slice length.</param>
-    /// <param name="capacity">Specified slice capacity; must be no smaller than the length.</param>
-    public static slice<T> make_slice<T>(nint size, nint capacity = 0)
-    {
-        return new slice<T>((int)size, (int)capacity);
-    }
-
-    /// <summary>
-    /// Allocates and initializes a map object.
-    /// </summary>
-    // <param name="size">Specifies the number of map elements.</param>
-    public static map<TKey, TValue> make_map<TKey, TValue>(nint size = 0) where TKey : notnull
-    {
-        return new map<TKey, TValue>((int)size);
-    }
-
-    /// <summary>
-    /// Allocates and initializes a channel object.
-    /// </summary>
-    /// <param name="size">Specifies the buffer capacity.</param>
-    public static channel<T> make_channel<T>(nint size = 1)
-    {
-        return new channel<T>((int)size);
-    }
-
-    /// <summary>
     /// Allocates and initializes a new object.
     /// </summary>
     /// <param name="p1">Size parameter.</param>
@@ -734,52 +695,6 @@ public static class builtin
     #endif
     }
 
-    /// <summary>
-    /// Enumerates indexes of <see cref="go.array{T}"/> <paramref name="source"/>.
-    /// </summary>
-    /// <typeparam name="T">Array type.</typeparam>
-    /// <param name="source">Source array.</param>
-    /// <returns>Enumerable of indexes.</returns>
-    public static IEnumerable<nint> range<T>(in array<T> source)
-    {
-        return source.Range;
-    }
-
-    /// <summary>
-    /// Enumerates indexes and values of <see cref="go.array{T}"/> <paramref name="source"/>.
-    /// </summary>
-    /// <typeparam name="T">Array type.</typeparam>
-    /// <param name="source">Source array.</param>
-    /// <param name="_">Overload marker, set to <see cref="WithVal"/>.</param>
-    /// <returns>Enumerable of indexes and values.</returns>
-    public static IEnumerable<(nint, T)> range<T>(in array<T> source, bool _)
-    {
-        return source;
-    }
-
-    /// <summary>
-    /// Enumerates indexes of <see cref="go.slice{T}"/> <paramref name="source"/>.
-    /// </summary>
-    /// <typeparam name="T">Slice type.</typeparam>
-    /// <param name="source">Source slice.</param>
-    /// <returns>Enumerable of indexes.</returns>
-    public static IEnumerable<nint> range<T>(in slice<T> source)
-    {
-        return source.Range;
-    }
-
-    /// <summary>
-    /// Enumerates indexes and values of <see cref="go.slice{T}"/> <paramref name="source"/>.
-    /// </summary>
-    /// <typeparam name="T">Slice type.</typeparam>
-    /// <param name="source">Source slice.</param>
-    /// <param name="_">Overload marker, set to <see cref="WithVal"/>.</param>
-    /// <returns>Enumerable of indexes and values.</returns>
-    public static IEnumerable<(nint, T)> range<T>(in slice<T> source, bool _)
-    {
-        return source;
-    }
-
     // ** Type Assertion Functions **
 
     /// <summary>
@@ -857,45 +772,34 @@ public static class builtin
         if (type is null)
             return "nil";
 
-        switch (Type.GetTypeCode(type))
+        return Type.GetTypeCode(type) switch
         {
-            case TypeCode.String:
-                return "string";
-            case TypeCode.Char:
-                return "rune";
-            case TypeCode.Boolean:
-                return "bool";
-            case TypeCode.SByte:
-                return "int8";
-            case TypeCode.Int16:
-                return "int16";
-            case TypeCode.Int32:
-                return "int32";
-            case TypeCode.Int64:
-                return "int64";
-            case TypeCode.Byte:
-                return "byte";
-            case TypeCode.UInt16:
-                return "uint16";
-            case TypeCode.UInt32:
-                return "uint32";
-            case TypeCode.UInt64:
-                return "uint64";
-            case TypeCode.Single:
-                return "float32";
-            case TypeCode.Double:
-                return "float64";
-            default:
-            {
-                string typeName = type.FullName ?? type.Name;
+            TypeCode.String => "string",
+            TypeCode.Char => "rune",
+            TypeCode.Boolean => "bool",
+            TypeCode.SByte => "int8",
+            TypeCode.Int16 => "int16",
+            TypeCode.Int32 => "int32",
+            TypeCode.Int64 => "int64",
+            TypeCode.Byte => "byte",
+            TypeCode.UInt16 => "uint16",
+            TypeCode.UInt32 => "uint32",
+            TypeCode.UInt64 => "uint64",
+            TypeCode.Single => "float32",
+            TypeCode.Double => "float64",
+            _ => handleDefault()
+        };
 
-                return typeName switch
-                {
-                    "System.Numerics.Complex" => "complex128",
-                    "go.complex64" => "complex64",
-                    _ => type == typeof(object) ? "interface {}" : typeName
-                };
-            }
+        string handleDefault()
+        {
+            string typeName = type.FullName ?? type.Name;
+
+            return typeName switch
+            {
+                "System.Numerics.Complex" => "complex128",
+                "go.complex64" => "complex64",
+                _ => type == typeof(object) ? "interface {}" : typeName
+            };
         }
     }
 
@@ -1653,80 +1557,6 @@ public static class builtin
             TypeCode.Double => value.ToDouble(null),
             _ => (@string)value.ToString(null)
         };
-    }
-
-    /// <summary>
-    /// Converts keyed value initializer into an array.
-    /// </summary>
-    /// <param name="length">Length of target array.</param>
-    /// <param name="keyedValues">Keyed values.</param>
-    /// <returns>Array from keyed value initializer.</returns>
-    /// <typeparam name="T">Type of values.</typeparam>
-    public static T[] InitKeyedValues<T>(nint length, params object[] keyedValues) where T : struct
-    {
-        T[] values = new T[length];
-
-        foreach (object keyedValue in keyedValues)
-        {
-            switch (keyedValue)
-            {
-                case T value:
-                    values[values.Length] = value;
-
-                    break;
-                case (var index, T indexValue):
-                    {
-                        if (index is not null)
-                        {
-                            if (index.TryCastAsInteger(out ulong key))
-                                values[key] = indexValue;
-                        }
-
-                        break;
-                    }
-            }
-        }
-
-        return values;
-    }
-
-    /// <summary>
-    /// Converts keyed value initializer into an array.
-    /// </summary>
-    /// <param name="keyedValues">Keyed values.</param>
-    /// <returns>Array from keyed value initializer.</returns>
-    /// <typeparam name="T">Type of values.</typeparam>
-    public static T[] InitKeyedValues<T>(params object[] keyedValues) where T : struct
-    {
-        List<T> values = [];
-
-        foreach (object keyedValue in keyedValues)
-        {
-            switch (keyedValue)
-            {
-                case T value:
-                    values.Add(value);
-
-                    break;
-                case (var index, T indexValue):
-                    {
-                        if (index is not null)
-                        {
-                            if (index.TryCastAsInteger(out ulong key))
-                            {
-                                for (ulong i = (ulong)values.Count; i < key; i++)
-                                    values.Add(default);
-
-                                values.Add(indexValue);
-                            }
-                        }
-
-                        break;
-                    }
-            }
-        }
-
-        return values.ToArray();
     }
 
     // ** Go Function Execution Context Handlers **/
