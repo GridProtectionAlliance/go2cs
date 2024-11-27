@@ -78,20 +78,19 @@ type Visitor struct {
 }
 
 const RootNamespace = "go"
-const ClassSuffix = "_package"
+const PackageSuffix = "_package"
 
-// Using extended unicode characters to help avoid conflicts with Go identifiers. Even if
-// some Go identifiers include these characters, the `getSanitizedIdentifier` function
-// ensures uniqueness in converted code. Note that some character variants may be better
-// suited to different fonts or display environments. Defaults have been chosen based on
-// best appearance with the Visual Studio default code font "Cascadia Mono":
+// Extended unicode characters are being used to help avoid conflicts with Go identifiers
+// for intermediate and temporary variables. Some character variants will be better suited
+// to different fonts or display environments. Defaults have been chosen based on best
+// appearance with the Visual Studio default code font "Cascadia Mono":
 
-const AddressPrefix = "Ꮡ"     // Variants: Ꮡ ꝸ
-const ShadowVarMarker = "Δ"   // Variants: Δ Ʌ ꞥ
-const CapturedVarMarker = "ʗ" // Variants: ʗ ɔ ᴄ
-const TempVarMarker = "ᴛ"     // Variants: ᴛ Ŧ ᵀ
-const TrueMarker = "ᐧ"        // Variants: ᐧ true
-const ElipsisOperator = "ꓸꓸꓸ"
+const AddressPrefix = "\u13D1"               // Variants: Ꮡ ꝸ
+const ShadowVarMarker = "\u0394"             // Variants: Δ Ʌ ꞥ
+const CapturedVarMarker = "\u0297"           // Variants: ʗ ɔ ᴄ
+const TempVarMarker = "\u1D1B"               // Variants: ᴛ Ŧ ᵀ
+const TrueMarker = "\u1427"                  // Variants: ᐧ true
+const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 
 // TODO: Consider adding removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{
@@ -105,9 +104,12 @@ var keywords = NewHashSet[string]([]string{
 	"uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
 	"__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "InitKeyedValues",
-	"GetGoTypeName", "CastCopy", "ConvertToType", TrueMarker,
+	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "GetGoTypeName", "CastCopy",
+	"ConvertToType", TrueMarker,
 })
+
+//go:embed csproj-template.xml
+var csprojTemplate []byte
 
 //go:embed go2cs.ico
 var iconFileBytes []byte
@@ -122,6 +124,7 @@ func main() {
 	includeComments := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
 	showParseTree := commandLine.Bool("tree", false, "Show parse tree")
+	csprojFile := commandLine.String("csproj", "", "Path to custom .csproj template file")
 
 	err := commandLine.Parse(os.Args[1:])
 	inputFilePath := strings.TrimSpace(commandLine.Arg(0))
@@ -156,6 +159,16 @@ Examples:
 		includeComments: *includeComments,
 		parseCgoTargets: *parseCgoTargets,
 		showParseTree:   *showParseTree,
+	}
+
+	// Load custom .csproj template if specified
+	if *csprojFile != "" {
+		var err error
+		csprojTemplate, err = os.ReadFile(*csprojFile)
+
+		if err != nil {
+			log.Fatalf("Failed to read custom .csproj template file \"%s\": %s\n", *csprojFile, err)
+		}
 	}
 
 	fset := token.NewFileSet()
@@ -337,60 +350,8 @@ func writeProjectFiles(projectName string, projectPath string) error {
 
 	// TODO: Need to know which projects to reference based on package imports
 
-	// TODO: Change source to a template file referenced as a command line parameter
-
 	// Generate project file contents
-	projectFileContents := fmt.Sprintf(`<Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0</TargetFrameworks>
-    <PublishReadyToRun>true</PublishReadyToRun>
-    <RootNamespace>go</RootNamespace>
-    <AssemblyName>%s</AssemblyName>
-    <Product>go2cs</Product>
-    <Copyright>Copyright © %d</Copyright>
-    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <ApplicationIcon>go2cs.ico</ApplicationIcon>
-    <Nullable>enable</Nullable>
-    <NoWarn>660;661;IDE1006</NoWarn>
-    <Version>0.1.0</Version>
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(OutDir)'==''">
-    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Using Include="go.builtin" Static="True" />
-    <Using Include="System.Byte" Alias="uint8" />
-    <Using Include="System.UInt16" Alias="uint16" />
-    <Using Include="System.UInt32" Alias="uint32" />
-    <Using Include="System.UInt64" Alias="uint64" />
-    <Using Include="System.SByte" Alias="int8" />
-    <Using Include="System.Int16" Alias="int16" />
-    <Using Include="System.Int32" Alias="int32" />
-    <Using Include="System.Int64" Alias="int64" />
-    <Using Include="System.Single" Alias="float32" />
-    <Using Include="System.Double" Alias="float64" />
-    <Using Include="System.Numerics.Complex" Alias="complex128" />
-    <Using Include="System.Int32" Alias="rune" />
-    <Using Include="System.UIntPtr" Alias="uintptr" />
-
-	<!-- TODO: Add references to required projects -->
-    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
-    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
-    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-  </ItemGroup>
-
-</Project>`, projectName, time.Now().Year())
+	projectFileContents := fmt.Sprintf(string(csprojTemplate), projectName, time.Now().Year())
 
 	projectFileName := projectPath + projectName + ".csproj"
 
@@ -528,7 +489,7 @@ func getSanitizedIdentifier(identifier string) string {
 
 	if keywords.Contains(identifier) ||
 		strings.HasPrefix(identifier, AddressPrefix) ||
-		strings.HasSuffix(identifier, ClassSuffix) {
+		strings.HasSuffix(identifier, PackageSuffix) {
 		return "@" + identifier
 	}
 
