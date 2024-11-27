@@ -24,9 +24,9 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 		alias := importSpec.Name.Name
 
 		if alias == "." {
-			v.packageImports.WriteString(fmt.Sprintf("using static %s%s;", importPath, ClassSuffix))
+			v.packageImports.WriteString(fmt.Sprintf("using static %s%s;", importPath, PackageSuffix))
 		} else {
-			v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", alias, importPath, ClassSuffix))
+			v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", alias, importPath, PackageSuffix))
 		}
 	} else {
 		// Get package name from the import path, last name after last "."
@@ -37,7 +37,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 			importName = importPath[lastDotIndex+1:]
 		}
 
-		v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", importName, importPath, ClassSuffix))
+		v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", importName, importPath, PackageSuffix))
 	}
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())

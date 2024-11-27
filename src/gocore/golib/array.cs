@@ -34,26 +34,30 @@ namespace go;
 public interface IArray : IEnumerable, ICloneable
 {
     Array? Source { get; }
-    
+
     nint Length { get; }
 
     object? this[nint index] { get; set; }
 
-    bool IndexIsValid(nint index)
+    public bool IndexIsValid(nint index)
     {
         return index > -1 && index < Length;
     }
 }
 
-public interface IArray<T> : IArray, IEnumerable<(nint, T)>
+public interface IArray<T> : IArray, IEnumerable<(nint, T)>, comparable<IArray<T>>
 {
     new T[] Source { get; }
     
     new ref T this[nint index] { get; }
+
+    Span<T> ꓸꓸꓸ { get; }
+
+    Span<T> ToSpan();
 }
 
 [Serializable]
-public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<array<T>>, IEquatable<IArray>
+public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquatable<IArray>
 {
     internal readonly T[] m_array;
 
@@ -104,7 +108,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] Source => m_array;
 
-    public Span<T> ꓸꓸꓸ => new(m_array);
+    public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
 
     public nint Length => m_array.Length;
 
@@ -159,9 +163,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] ToArray()
     {
-        T[] array = new T[Length];
-        CopyTo(array, 0);
-        return array;
+        return ToSpan().ToArray();
     }
 
     public Span<T> ToSpan()
@@ -194,17 +196,34 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public override bool Equals(object? obj)
     {
-        return Equals(obj as IArray);
+        return obj switch
+        {
+            slice<T> slice => Equals(slice),
+            array<T> array => Equals(array),
+            ISlice<T> slice => Equals(slice),
+            IArray<T> array => Equals(array),
+            ISlice slice => Equals(slice),
+            IArray array => Equals(array),
+            _ => false
+        };
     }
 
     public bool Equals(IArray? other)
     {
-        return m_array.Equals(other as T[]);
+        IStructuralEquatable equatable = m_array;
+        return equatable.Equals(other?.Source , EqualityComparer<object[]>.Default);
+    }
+
+    public bool Equals(IArray<T>? other)
+    {
+        IStructuralEquatable equatable = m_array;
+        return equatable.Equals(other?.Source, EqualityComparer<T[]>.Default);
     }
 
     public bool Equals(array<T> other)
     {
-        return m_array.Equals(other.m_array);
+        IStructuralEquatable equatable = m_array;
+        return equatable.Equals(other.m_array, EqualityComparer<T[]>.Default);
     }
 
     #region [ Operators ]

@@ -54,6 +54,13 @@ namespace ConstraintTests
             }         
          */
 
+        public interface Ordered<T> : IComparable<Ordered<T>>
+        {
+            static bool operator <(Ordered<T> a, Ordered<T> b) => a.CompareTo(b) < 0;
+
+            static bool operator >(Ordered<T> a, Ordered<T> b) => a.CompareTo(b) > 0;
+        }
+
         public partial struct orderedSlice<T> { /* : slice<T> where T : Ordered */ }
 
         public static nint Len<T>(this orderedSlice<T> s) where T : IComparable<T> => s.Length;
@@ -68,7 +75,7 @@ namespace ConstraintTests
             orderedSlice<T> orderedSlice = new orderedSlice<T>(s);
             sort.Sort(orderedSlice);
 
-            foreach (object value in orderedSlice.Array)
+            foreach (object value in orderedSlice.Source)
                 Console.Write($"{value},");
 
             Console.WriteLine();

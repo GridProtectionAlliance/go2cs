@@ -47,7 +47,7 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
-public interface ISlice<T> : ISlice, IEnumerable<(nint, T)>
+public interface ISlice<T> : IArray<T>, ISlice, comparable<ISlice<T>>
 {
     ISlice<T> Append(params T[] elems);
 }
@@ -62,7 +62,7 @@ public interface ISlice<T> : ISlice, IEnumerable<(nint, T)>
 // option in the future, at least for slices that are private and used with internal package functions only.
 
 [Serializable]
-public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<slice<T>>, IEquatable<ISlice>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -110,10 +110,6 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     public slice(array<T> array) : this((T[])array) { }
-    
-    public T[] Source => m_array;
-
-    public Span<T> ꓸꓸꓸ => new(m_array, (int)m_low, (int)m_length);
 
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
@@ -153,6 +149,10 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_low = low;
         m_length = length;
     }
+
+    public T[] Source => ToSpan().ToArray();
+
+    public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
 
     public nint Low => m_low;
 
@@ -216,9 +216,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public T[] ToArray()
     {
-        T[] array = new T[Length];
-        CopyTo(array, 0);
-        return array;
+        return Source;
     }
 
     public Span<T> ToSpan()
@@ -257,17 +255,46 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public override bool Equals(object? obj)
     {
-        return Equals(obj as ISlice);
+        return obj switch
+        {
+            slice<T> slice => Equals(slice),
+            array<T> array => Equals(array),
+            ISlice<T> slice => Equals(slice),
+            IArray<T> array => Equals(array),
+            ISlice slice => Equals(slice),
+            IArray array => Equals(array),
+            _ => false
+        };
     }
 
     public bool Equals(ISlice? other)
     {
-        return other?.Source == m_array && other.Low == m_low && other.Length == m_length;
+        IStructuralEquatable equatable = Source;
+        return equatable.Equals(other?.Source, EqualityComparer<object[]>.Default);
+    }
+
+    public bool Equals(ISlice<T>? other)
+    {
+        IStructuralEquatable equatable = Source;
+        return equatable.Equals(other?.Source, EqualityComparer<T[]>.Default);
     }
 
     public bool Equals(slice<T> other)
     {
-        return other.m_array == m_array && other.m_low == m_low && other.m_length == m_length;
+        IStructuralEquatable equatable = Source;
+        return equatable.Equals(other.Source, EqualityComparer<T[]>.Default);
+    }
+
+    public bool Equals(IArray? other)
+    {
+        IStructuralEquatable equatable = Source;
+        return equatable.Equals(other?.Source, EqualityComparer<object[]>.Default);
+    }
+
+    public bool Equals(IArray<T>? other)
+    {
+        IStructuralEquatable equatable = Source;
+        return equatable.Equals(other?.Source, EqualityComparer<T[]>.Default);
     }
 
     #region [ Operators ]
@@ -391,7 +418,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         return Append(elems);
     }
 
-    Array IArray.Source => m_array;
+    Array IArray.Source => Source;
 
     object? IArray.this[nint index]
     {

@@ -49,7 +49,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.targetFile.WriteString(v.newline)
 
 	v.writeOutputLn(UsingsMarker)
-	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, ClassSuffix)
+	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, PackageSuffix)
 
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
@@ -68,7 +68,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		v.targetFile.WriteString(v.newline)
 	}
 
-	v.writeOutputLn("} // end %s%s", file.Name.Name, ClassSuffix)
+	v.writeOutputLn("} // end %s%s", file.Name.Name, PackageSuffix)
 
 	targetFile := v.targetFile.String()
 
