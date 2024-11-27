@@ -14,7 +14,7 @@
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006;CS8981</NoWarn>
-    <Version>0.1.0</Version>
+    <Version>0.1.4</Version>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
