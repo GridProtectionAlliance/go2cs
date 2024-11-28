@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"embed"
 	_ "embed"
 	"flag"
 	"fmt"
@@ -13,6 +15,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -79,6 +82,7 @@ type Visitor struct {
 
 const RootNamespace = "go"
 const PackageSuffix = "_package"
+const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
 
 // Extended unicode characters are being used to help avoid conflicts with Go identifiers
 // for intermediate and temporary variables. Some character variants will be better suited
@@ -113,6 +117,9 @@ var csprojTemplate []byte
 
 //go:embed go2cs.ico
 var iconFileBytes []byte
+
+//go:embed profiles/*
+var publishProfiles embed.FS
 
 func main() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
@@ -189,10 +196,21 @@ Examples:
 		parseMode = parser.SkipObjectResolution
 	}
 
+	outputFilePath := ""
+
+	// If the user has provided a second argument, we will use it as the output directory or file
+	if commandLine.NArg() > 1 {
+		outputFilePath = strings.TrimSpace(commandLine.Arg(1))
+	} else {
+		outputFilePath = inputFilePath
+	}
+
+	var projectFileName string
+
 	if fileInfo.IsDir() {
 		// If the input is a directory, write project files (if needed)
-		if err := writeProjectFiles(filepath.Base(inputFilePath), inputFilePath); err != nil {
-			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", inputFilePath, err)
+		if projectFileName, err = writeProjectFiles(filepath.Base(inputFilePath), outputFilePath); err != nil {
+			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", outputFilePath, err)
 		} else {
 			// Parse all .go files in the directory
 			err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
@@ -256,11 +274,35 @@ Examples:
 		log.Fatalf("Failed to parse types from input source files: %s\n", err)
 	}
 
-	outputFilePath := ""
+	// Once we have the package details, we can determine the assembly output type
+	outputType := getAssemblyOutputType(pkg)
 
-	if commandLine.NArg() > 1 {
-		// If the user has provided a second argument, we will use it as the output directory or file
-		outputFilePath = strings.TrimSpace(commandLine.Arg(1))
+	// Update project file with correct output type
+	if len(projectFileName) > 0 {
+		projectContents, err := os.ReadFile(projectFileName)
+
+		if err != nil {
+			log.Fatalf("Failed to read project file %q: %s", projectFileName, err)
+		}
+
+		// Replace the output type marker with the actual output type
+		newContents := []byte(strings.ReplaceAll(string(projectContents), OutputTypeMarker, outputType))
+
+		// Rewrite project file atomically
+		err = os.WriteFile(projectFileName, newContents, 0644)
+
+		if err != nil {
+			log.Fatalf("Failed to write project file %q: %s", projectFileName, err)
+		}
+
+		// For executable projects, write OS-specific publish profiles
+		if outputType == "Exe" {
+			err = writePublishProfiles(outputFilePath)
+
+			if err != nil {
+				log.Fatalf("Failed to write publish profiles for project \"%s\": %s\n", outputFilePath, err)
+			}
+		}
 	}
 
 	globalIdentNames := make(map[*ast.Ident]string)
@@ -306,14 +348,10 @@ Examples:
 
 			var outputFileName string
 
-			if outputFilePath != "" {
-				if fileInfo.IsDir() {
-					outputFileName = filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
-				} else {
-					outputFileName = outputFilePath
-				}
+			if fileInfo.IsDir() {
+				outputFileName = filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
 			} else {
-				outputFileName = strings.TrimSuffix(fileEntry.filePath, ".go") + ".cs"
+				outputFileName = strings.TrimSuffix(outputFilePath, ".go") + ".cs"
 			}
 
 			if err := visitor.writeOutputFile(outputFileName); err != nil {
@@ -325,7 +363,7 @@ Examples:
 	concurrentTasks.Wait()
 }
 
-func writeProjectFiles(projectName string, projectPath string) error {
+func writeProjectFiles(projectName string, projectPath string) (string, error) {
 	// Make sure project path ends with a directory separator
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
 
@@ -336,7 +374,7 @@ func writeProjectFiles(projectName string, projectPath string) error {
 		iconFile, err := os.Create(iconFileName)
 
 		if err != nil {
-			return fmt.Errorf("failed to create icon file \"%s\": %s", iconFileName, err)
+			return "", fmt.Errorf("failed to create icon file \"%s\": %s", iconFileName, err)
 		}
 
 		defer iconFile.Close()
@@ -344,14 +382,17 @@ func writeProjectFiles(projectName string, projectPath string) error {
 		_, err = iconFile.Write(iconFileBytes)
 
 		if err != nil {
-			return fmt.Errorf("failed to write to icon file \"%s\": %s", iconFileName, err)
+			return "", fmt.Errorf("failed to write to icon file \"%s\": %s", iconFileName, err)
 		}
 	}
 
 	// TODO: Need to know which projects to reference based on package imports
 
 	// Generate project file contents
-	projectFileContents := fmt.Sprintf(string(csprojTemplate), projectName, time.Now().Year())
+	projectFileContents := fmt.Sprintf(string(csprojTemplate),
+		OutputTypeMarker,
+		projectName,
+		time.Now().Year())
 
 	projectFileName := projectPath + projectName + ".csproj"
 
@@ -360,46 +401,77 @@ func writeProjectFiles(projectName string, projectPath string) error {
 		projectFile, err := os.Create(projectFileName)
 
 		if err != nil {
-			return fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
+			return "", fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
 		}
 
 		_, err = projectFile.WriteString(projectFileContents)
 
 		if err != nil {
-			return fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
+			return "", fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
 		}
 
 		defer projectFile.Close()
+	}
+
+	return projectFileName, nil
+}
+
+func writePublishProfiles(projectPath string) error {
+	// Make sure "Properties/PublishProfiles" directory exists
+	publishProfilesDir := filepath.Join(projectPath, "Properties", "PublishProfiles")
+
+	if err := os.MkdirAll(publishProfilesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory \"%s\": %s", publishProfilesDir, err)
+	}
+
+	// Get list of publish profiles
+	profiles, err := publishProfiles.ReadDir("profiles")
+
+	if err != nil {
+		return fmt.Errorf("failed to read publish profiles: %s", err)
+	}
+
+	// Write each publish profile file
+	for _, profile := range profiles {
+		profileBytes, err := publishProfiles.ReadFile(path.Join("profiles", profile.Name()))
+
+		if err != nil {
+			return fmt.Errorf("failed to read publish profile \"%s\": %s", profile.Name(), err)
+		}
+
+		profileFileName := filepath.Join(publishProfilesDir, profile.Name())
+
+		// Check if profile file already exists - user may change default parameters, so we don't overwrite
+		if _, err := os.Stat(profileFileName); err == nil {
+			continue
+		}
+
+		profileFile, err := os.Create(profileFileName)
+
+		if err != nil {
+			return fmt.Errorf("failed to create publish profile \"%s\": %s", profileFileName, err)
+		}
+
+		defer profileFile.Close()
+
+		_, err = profileFile.Write(profileBytes)
+
+		if err != nil {
+			return fmt.Errorf("failed to write to publish profile \"%s\": %s", profileFileName, err)
+		}
 	}
 
 	return nil
 }
 
 func needToWriteFile(fileName string, fileBytes []byte) bool {
-	writeFile := false
+	existingFileBytes, err := os.ReadFile(fileName)
 
-	// Check if file does not exist
-	if _, err := os.Stat(fileName); err != nil {
-		writeFile = true
-	} else {
-		// Check if file sizes or contents are different
-		existingFileBytes, err := os.ReadFile(fileName)
-
-		if err != nil {
-			writeFile = true
-		} else if len(existingFileBytes) != len(fileBytes) {
-			writeFile = true
-		} else {
-			for i := 0; i < len(fileBytes); i++ {
-				if fileBytes[i] != existingFileBytes[i] {
-					writeFile = true
-					break
-				}
-			}
-		}
+	if err != nil {
+		return true
 	}
 
-	return writeFile
+	return !bytes.Equal(existingFileBytes, fileBytes)
 }
 
 func (v *Visitor) writeOutputFile(outputFileName string) error {
@@ -418,6 +490,46 @@ func (v *Visitor) writeOutputFile(outputFileName string) error {
 	}
 
 	return nil
+}
+
+func getAssemblyOutputType(pkg *types.Package) string {
+	if hasMainFunction(pkg) {
+		return "Exe"
+	}
+
+	return "Library"
+}
+
+func hasMainFunction(pkg *types.Package) bool {
+	// First check if this is a main package
+	if pkg.Name() != "main" {
+		return false
+	}
+
+	// Look through all objects in the package scope
+	scope := pkg.Scope()
+	mainObj := scope.Lookup("main")
+
+	if mainObj == nil {
+		return false
+	}
+
+	// Check if it's a function
+	mainFunc, ok := mainObj.(*types.Func)
+
+	if !ok {
+		return false
+	}
+
+	// Get the function's type
+	funcType, ok := mainFunc.Type().(*types.Signature)
+
+	if !ok {
+		return false
+	}
+
+	// main function should have no parameters and no return values
+	return funcType.Params().Len() == 0 && funcType.Results().Len() == 0
 }
 
 func (v *Visitor) addRequiredUsing(usingName string) {

@@ -12,7 +12,7 @@
             "program": "${fileDirname}",
             "args": [
                 //"-var=false",
-                "-tree",
+                //"-tree",
                 //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
@@ -20,7 +20,7 @@
                 //"..\\Tests\\Behavioral\\InterfaceCasting\\InterfaceCasting.go",
                 //"..\\Tests\\Behavioral\\ForVariants\\ForVariants.go",
                 //"..\\Tests\\Behavioral\\IfStatements\\IfStatements.go",
-                //"..\\Tests\\Behavioral\\PointerToPointer\\PointerToPointer.go",
+                //"..\\Tests\\Behavioral\\PointerToPointer",
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
                 //"..\\Tests\\Behavioral\\RangeStatements",

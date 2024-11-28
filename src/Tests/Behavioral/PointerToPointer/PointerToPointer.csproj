@@ -7,13 +7,17 @@
     <RootNamespace>go</RootNamespace>
     <AssemblyName>PointerToPointer</AssemblyName>
     <Product>go2cs</Product>
-    <Copyright>Copyright © 2022</Copyright>
+    <Copyright>Copyright © 2024</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
-    <NoWarn>660;661;IDE1006</NoWarn>
-    <Version>0.1.0</Version>
+    <NoWarn>660;661;IDE1006;CS8981</NoWarn>
+    <Version>0.1.4</Version>
+    <LangVersion>latest</LangVersion>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">
@@ -38,12 +42,14 @@
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
 
+	  <!-- TODO: Add references to required projects -->
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

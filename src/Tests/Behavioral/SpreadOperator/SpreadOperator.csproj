@@ -14,8 +14,10 @@
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006;CS8981</NoWarn>
-    <Version>0.1.0</Version>
+    <Version>0.1.4</Version>
     <LangVersion>latest</LangVersion>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(OutDir)'==''">
@@ -37,6 +39,8 @@
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
 
 	  <!-- TODO: Add references to required projects -->
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
@@ -45,7 +49,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>
