@@ -24,7 +24,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ParenExpr:
 		v.targetFile.WriteString(v.convParenExpr(typeSpecType))
 	case *ast.SelectorExpr:
-		v.targetFile.WriteString(v.convSelectorExpr(typeSpecType))
+		v.targetFile.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType))
 	case *ast.StructType:

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 type KeyValueSource int
@@ -69,6 +70,26 @@ func DefaultArrayTypeContext() ArrayTypeContext {
 
 func (c ArrayTypeContext) getDefault() StmtContext {
 	return DefaultArrayTypeContext()
+}
+
+type LambdaContext struct {
+	isAssignment bool
+	isCallExpr   bool
+	parentIdent  *ast.Ident
+	originalType types.Type
+}
+
+func DefaultLambdaContext() LambdaContext {
+	return LambdaContext{
+		isAssignment: false,
+		isCallExpr:   false,
+		parentIdent:  nil,
+		originalType: nil,
+	}
+}
+
+func (c LambdaContext) getDefault() StmtContext {
+	return DefaultLambdaContext()
 }
 
 type IdentContext struct {
@@ -139,6 +160,8 @@ func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 }
 
 func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
+	v.preAnalyzeLambdas(expr, getExprContext[LambdaContext](contexts))
+
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
 		context := getExprContext[ArrayTypeContext](contexts)
@@ -177,7 +200,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.ParenExpr:
 		return v.convParenExpr(exprType)
 	case *ast.SelectorExpr:
-		return v.convSelectorExpr(exprType)
+		context := getExprContext[LambdaContext](contexts)
+		return v.convSelectorExpr(exprType, context)
 	case *ast.SliceExpr:
 		return v.convSliceExpr(exprType)
 	case *ast.StarExpr:

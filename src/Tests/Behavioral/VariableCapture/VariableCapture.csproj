@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net9.0</TargetFrameworks>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>VariableCapture</AssemblyName>
+    <Product>go2cs</Product>
+    <Copyright>Copyright © 2024</Copyright>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <NoWarn>660;661;IDE1006;CS8981</NoWarn>
+    <Version>0.1.4</Version>
+    <LangVersion>latest</LangVersion>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.UIntPtr" Alias="uintptr" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
+
+	  <!-- TODO: Add references to required projects -->
+    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+</Project>

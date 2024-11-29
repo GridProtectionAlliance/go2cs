@@ -371,18 +371,6 @@ func getVariadicParamName(param *types.Var) string {
 	return fmt.Sprintf("%s%sp", getSanitizedIdentifier(param.Name()), CapturedVarMarker)
 }
 
-func (v *Visitor) getCapturedVarName(varPrefix string) string {
-	if v.capturedVarCount == nil {
-		v.capturedVarCount = make(map[string]int)
-	}
-
-	count := v.capturedVarCount[varPrefix]
-	count++
-	v.capturedVarCount[varPrefix] = count
-
-	return fmt.Sprintf("%s%s%d", varPrefix, CapturedVarMarker, count)
-}
-
 func (v *Visitor) getTempVarName(varPrefix string) string {
 	if v.tempVarCount == nil {
 		v.tempVarCount = make(map[string]int)

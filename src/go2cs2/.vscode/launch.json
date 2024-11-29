@@ -24,7 +24,8 @@
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
                 //"..\\Tests\\Behavioral\\RangeStatements",
-                "..\\Tests\\Behavioral\\SpreadOperator",
+                //"..\\Tests\\Behavioral\\SpreadOperator",
+                "..\\Tests\\Behavioral\\VariableCapture",
             ]
         }
     ]

@@ -40,6 +40,10 @@ func (s *Stack[T]) IsEmpty() bool {
 	return s.Len() == 0
 }
 
+func (s *Stack[T]) At(index int) T {
+	return s.items[index]
+}
+
 // Push adds an item to the to the top of the stack
 func (s *Stack[T]) Push(item T) {
 	// For simplicity in implementation, the bottom is the first element

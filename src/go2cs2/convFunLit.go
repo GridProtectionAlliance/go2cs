@@ -6,6 +6,9 @@ import (
 )
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
+	lambdaContext := DefaultLambdaContext()
+	v.performLambdaAnalysis(funcLit, &lambdaContext)
+
 	var parameterSignature string
 
 	// For C#, lambda return type is inferred and not explicitly declared

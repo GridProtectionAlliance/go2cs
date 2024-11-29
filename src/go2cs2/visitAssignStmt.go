@@ -185,29 +185,39 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		}
 
 		for i, rhs := range rhsExprs {
+			var lhs ast.Expr
+
+			if i < lhsLen {
+				lhs = lhsExprs[i]
+			} else {
+				lhs = lhsExprs[lhsLen-1]
+			}
+
+			ident := getIdentifier(lhs)
+
+			lambdaContext := DefaultLambdaContext()
+			lambdaContext.isAssignment = true
+
+			if ident != nil {
+				lambdaContext.parentIdent = getIdentifier(lhs)
+			}
+
+			v.performLambdaAnalysis(rhs, &lambdaContext)
+
 			if i > 0 {
 				result.WriteString(", ")
 			}
 
-			var contexts []ExprContext
+			contexts := []ExprContext{lambdaContext}
 
 			if _, ok := rhs.(*ast.CompositeLit); ok {
-				var lhs ast.Expr
-
-				if i < lhsLen {
-					lhs = lhsExprs[i]
-				} else {
-					lhs = lhsExprs[lhsLen-1]
-				}
-
-				ident := getIdentifier(lhs)
 
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
 					// this is needed for sparse array initializations
-					context := DefaultKeyValueContext()
-					context.ident = ident.Name
-					contexts = []ExprContext{context}
+					keyValueContext := DefaultKeyValueContext()
+					keyValueContext.ident = ident.Name
+					contexts = append(contexts, keyValueContext)
 				}
 			}
 
@@ -240,6 +250,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				rhs = rhsExprs[rhsLen-1]
 			}
 
+			lambdaContext := DefaultLambdaContext()
+			lambdaContext.isAssignment = true
+			lambdaContext.parentIdent = getIdentifier(lhs)
+
+			v.performLambdaAnalysis(rhs, &lambdaContext)
+
 			if i > 0 {
 				if format.useNewLine {
 					result.WriteString(v.newline)
@@ -250,16 +266,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				}
 			}
 
-			var contexts []ExprContext
+			contexts := []ExprContext{lambdaContext}
 			ident := getIdentifier(lhs)
 
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
 					// this is needed for sparse array initializations
-					context := DefaultKeyValueContext()
-					context.ident = ident.Name
-					contexts = []ExprContext{context}
+					keyValueContext := DefaultKeyValueContext()
+					keyValueContext.ident = ident.Name
+					contexts = append(contexts, keyValueContext)
 				}
 			}
 
