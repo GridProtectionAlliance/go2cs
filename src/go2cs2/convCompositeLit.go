@@ -98,8 +98,10 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	var newSpace string
 
-	if v.options.preferVarDecl || arrayTypeContext.compositeInitializer {
+	if callContext.keyValueSource == StructSource || arrayTypeContext.compositeInitializer {
 		newSpace = " "
+	} else {
+		newSpace = ""
 	}
 
 	identContext := DefaultIdentContext()

@@ -40,11 +40,26 @@ type FileEntry struct {
 	filePath string
 }
 
-type captureInfo struct {
-	copyIdent    *ast.Ident // The new copied identifier
-	origIdent    *ast.Ident // The original identifier being captured
-	used         bool       // Whether this capture has been used yet
-	originalType types.Type // The original type of the captured variable
+// CapturedVarInfo tracks information about captured variables
+type CapturedVarInfo struct {
+	origIdent *ast.Ident // Original identifier
+	copyIdent *ast.Ident // Temporary copy identifier
+	varType   types.Type // Type of the variable
+	used      bool       // Whether the capture has been used
+}
+
+// LambdaCapture handles analysis and tracking of captured variables
+type LambdaCapture struct {
+	capturedVars    map[*ast.Ident]*CapturedVarInfo // Map of original idents to their capture info
+	pendingCaptures map[string]*CapturedVarInfo     // Variables that need declarations before lambda
+
+	// Analysis phase tracking
+	analysisInLambda bool     // Currently analyzing a lambda
+	currentLambda    ast.Node // Current lambda being analyzed
+
+	// Conversion phase tracking
+	conversionInLambda bool     // Currently converting a lambda
+	currentConversion  ast.Node // Current node being converted
 }
 
 type Visitor struct {
@@ -85,14 +100,7 @@ type Visitor struct {
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	scopeStack             []map[string]*types.Var // Stack of local variable scopes
-
-	// Lambda capture tracking
-	inLambda        bool                             // Track if we're processing inside a lambda
-	capturedVars    map[*ast.Ident]*ast.Ident        // Original ident -> Copy ident mapping
-	needsCopy       map[*ast.Ident]bool              // Tracks which variables need copying
-	pendingCaptures map[string]*captureInfo          // Maps copy var names to their initialization expressions
-	lambdaStack     Stack[map[*ast.Ident]*ast.Ident] // Stack of capture mappings for nested lambdas
-	lambdaContext   Stack[*LambdaContext]            // Stack of lambda context information
+	lambdaCapture          *LambdaCapture          // Lambda capture tracking
 }
 
 const RootNamespace = "go"
@@ -357,10 +365,6 @@ Examples:
 				globalScope:        globalScope,
 				blocks:             Stack[*strings.Builder]{},
 				identEscapesHeap:   map[*ast.Ident]bool{},
-				capturedVars:       map[*ast.Ident]*ast.Ident{},
-				needsCopy:          map[*ast.Ident]bool{},
-				lambdaStack:        Stack[map[*ast.Ident]*ast.Ident]{},
-				pendingCaptures:    map[string]*captureInfo{},
 			}
 
 			visitor.visitFile(fileEntry.file)
@@ -845,8 +849,12 @@ func convertToCSFullTypeName(typeName string) string {
 		return fmt.Sprintf("%s.chan<%s>", RootNamespace, convertToCSTypeName(typeName[5:]))
 	}
 
+	if typeName == "func()" {
+		return "System.Action"
+	}
+
 	if strings.HasPrefix(typeName, "func(") {
-		return fmt.Sprintf("Func<%s>", convertToCSTypeName(typeName[5:len(typeName)-1]))
+		return fmt.Sprintf("System.Func<%s>", convertToCSTypeName(typeName[5:len(typeName)-1]))
 	}
 
 	// Handle pointer types
@@ -972,15 +980,11 @@ func (v *Visitor) getExprType(expr ast.Expr) types.Type {
 
 // Get the adjusted identifier name, considering captures and shadowing
 func (v *Visitor) getIdentName(ident *ast.Ident) string {
-	// Check if we're in a lambda and this is a captured variable
-	if v.inLambda {
-		// Look through the lambda stack from top to bottom
-		for i := v.lambdaStack.Len() - 1; i >= 0; i-- {
-			if captures := v.lambdaStack.At(i); captures != nil {
-				if copyIdent, ok := captures[ident]; ok {
-					return copyIdent.Name
-				}
-			}
+	// Check if we're converting a lambda and need to use a captured variable
+	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
+		if captureInfo, ok := v.lambdaCapture.capturedVars[ident]; ok {
+			captureInfo.used = true
+			return captureInfo.copyIdent.Name
 		}
 	}
 

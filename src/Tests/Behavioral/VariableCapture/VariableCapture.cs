@@ -15,8 +15,9 @@ private static void printName(this data d) {
 
 private static void Main() {
     var d = new data(name: "James"u8);
+    
     var dʗ1 = d;
-    var f1 = () => d.printName();
+    var f1 = () => dʗ1.printName();
     f1();
     d.name = "Gretchen"u8;
     f1();

@@ -198,20 +198,24 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			lambdaContext := DefaultLambdaContext()
 			lambdaContext.isAssignment = true
 
-			if ident != nil {
-				lambdaContext.parentIdent = getIdentifier(lhs)
-			}
-
-			v.performLambdaAnalysis(rhs, &lambdaContext)
-
 			if i > 0 {
 				result.WriteString(", ")
 			}
 
 			contexts := []ExprContext{lambdaContext}
 
-			if _, ok := rhs.(*ast.CompositeLit); ok {
+			if selectorExpr, ok := rhs.(*ast.SelectorExpr); ok {
+				if v.isMethodValue(selectorExpr, false) {
+					v.enterLambdaConversion(selectorExpr)
+					defer v.exitLambdaConversion()
 
+					if decls := v.generateCaptureDeclarations(); decls != "" {
+						result.WriteString(decls)
+					}
+				}
+			}
+
+			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {
 					// Track the name of the variable on the LHS for composite literals,
 					// this is needed for sparse array initializations
@@ -252,9 +256,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 
 			lambdaContext := DefaultLambdaContext()
 			lambdaContext.isAssignment = true
-			lambdaContext.parentIdent = getIdentifier(lhs)
-
-			v.performLambdaAnalysis(rhs, &lambdaContext)
 
 			if i > 0 {
 				if format.useNewLine {
@@ -268,6 +269,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 
 			contexts := []ExprContext{lambdaContext}
 			ident := getIdentifier(lhs)
+
+			if selectorExpr, ok := rhs.(*ast.SelectorExpr); ok {
+				if v.isMethodValue(selectorExpr, false) {
+					v.enterLambdaConversion(selectorExpr)
+					defer v.exitLambdaConversion()
+
+					if decls := v.generateCaptureDeclarations(); decls != "" {
+						result.WriteString(decls)
+					}
+				}
+			}
 
 			if _, ok := rhs.(*ast.CompositeLit); ok {
 				if ident != nil {

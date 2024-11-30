@@ -5,6 +5,8 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"sort"
+	"strings"
 )
 
 type TrackerType string
@@ -187,6 +189,24 @@ func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
 	}
 }
 
+func newLambdaCapture() *LambdaCapture {
+	return &LambdaCapture{
+		capturedVars:    make(map[*ast.Ident]*CapturedVarInfo),
+		pendingCaptures: make(map[string]*CapturedVarInfo),
+	}
+}
+
+// Helper functions to manage conversion phase lambda context
+func (v *Visitor) enterLambdaConversion(node ast.Node) {
+	v.lambdaCapture.conversionInLambda = true
+	v.lambdaCapture.currentConversion = node
+}
+
+func (v *Visitor) exitLambdaConversion() {
+	v.lambdaCapture.conversionInLambda = false
+	v.lambdaCapture.currentConversion = nil
+}
+
 // Perform variable analysis on the specified function block, handling shadowing and scope
 func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *types.Signature) {
 	v.identNames = make(map[*ast.Ident]string)
@@ -194,6 +214,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	v.scopeStack = []map[string]*types.Var{v.globalScope}
 	v.hasDefer = false
 	v.hasRecover = false
+
+	// Initialize lambda capture tracking
+	v.lambdaCapture = newLambdaCapture()
 
 	// Track all function-level declarations for proper shadowing
 	functionLevelDecls := make(map[string]*types.Var)
@@ -621,6 +644,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			tracker.enter()
 			tracker.processing = true
 
+			// Enter lambda capture analysis context
+			v.lambdaCapture.analysisInLambda = true
+			v.lambdaCapture.currentLambda = node
+
 			// Get funcDecl for the function literal
 			funcDecl := &ast.FuncDecl{Type: node.Type}
 
@@ -630,10 +657,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// Add function parameters (including receiver and results) to the current scope
 			addFunctionParams(funcDecl, signature)
 
+			// First pass: analyze the function body for captured variables
+			ast.Inspect(node.Body, func(n ast.Node) bool {
+				if id, ok := n.(*ast.Ident); ok {
+					v.processPotentialCapture(id)
+				}
+				return true
+			})
+
 			tracker.processing = false
 
-			// Visit the function body
+			// Visit the function body (will handle both shadowing and nested captures)
 			visitNode(node.Body)
+
+			// Exit lambda capture analysis context
+			v.lambdaCapture.analysisInLambda = false
+			v.lambdaCapture.currentLambda = nil
 
 			// Exit the function literal scope
 			tracker.exit()
@@ -878,6 +917,19 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				visitNode(arg)
 			}
 
+		case *ast.SelectorExpr:
+			if v.requiresLambdaConversion(node) {
+				v.lambdaCapture.analysisInLambda = true
+				v.lambdaCapture.currentLambda = node
+
+				// Process the receiver for method values
+				if id, ok := node.X.(*ast.Ident); ok {
+					v.processPotentialCapture(id)
+				}
+
+				v.lambdaCapture.analysisInLambda = false
+				v.lambdaCapture.currentLambda = nil
+			}
 		default:
 			// Visit child nodes
 			ast.Inspect(n, func(child ast.Node) bool {
@@ -900,4 +952,189 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Start traversal
 	visitNode(funcDecl.Body)
+}
+
+func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
+	if !v.lambdaCapture.analysisInLambda || isDiscardedVar(ident.Name) {
+		return
+	}
+
+	// Get the variable object
+	obj := v.info.Uses[ident]
+	if obj == nil {
+		return
+	}
+
+	varObj, ok := obj.(*types.Var)
+	if !ok {
+		return
+	}
+
+	// Check if the variable needs to be captured
+	if !v.shouldCapture(varObj, ident) {
+		return
+	}
+
+	// Get the type of the variable
+	varType := varObj.Type()
+	if !v.capturedLambdaVarRequiresCopy(varType) {
+		return
+	}
+
+	// Create capture info if not already captured
+	if _, exists := v.lambdaCapture.capturedVars[ident]; !exists {
+		copyIdent := &ast.Ident{
+			Name: v.getCapturedVarName(ident.Name),
+			Obj:  ident.Obj,
+		}
+
+		info := &CapturedVarInfo{
+			origIdent: ident,
+			copyIdent: copyIdent,
+			varType:   varType,
+		}
+
+		v.lambdaCapture.capturedVars[ident] = info
+		v.lambdaCapture.pendingCaptures[ident.Name] = info
+	}
+}
+
+// Helper to determine if an expression requires lambda conversion
+func (v *Visitor) requiresLambdaConversion(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.FuncLit:
+		return true
+
+	case *ast.SelectorExpr:
+		return v.isMethodValue(e, false)
+
+	case *ast.Ident:
+		// Check if identifier refers to a function value
+		if obj := v.info.ObjectOf(e); obj != nil {
+			_, isFunc := obj.(*types.Func)
+			return isFunc
+		}
+
+	case *ast.CallExpr:
+		// Check if this is a function call that returns a function
+		if typ := v.info.TypeOf(e); typ != nil {
+			_, isFunc := typ.Underlying().(*types.Signature)
+			return isFunc
+		}
+	}
+	return false
+}
+
+func (v *Visitor) isMethodValue(sel *ast.SelectorExpr, isCallExpr bool) bool {
+	if sel.Sel == nil {
+		return false
+	}
+
+	obj := v.info.ObjectOf(sel.Sel)
+	if obj == nil {
+		return false
+	}
+
+	_, isFunc := obj.(*types.Func)
+	if !isFunc {
+		return false
+	}
+
+	// Not a method value if it's being called
+	return !isCallExpr
+}
+
+// Determine if a type needs to be copied when captured
+func (v *Visitor) capturedLambdaVarRequiresCopy(t types.Type) bool {
+	switch typ := t.Underlying().(type) {
+	case *types.Array, *types.Struct:
+		return true
+	case *types.Named:
+		return v.capturedLambdaVarRequiresCopy(typ.Underlying())
+	}
+
+	return false
+}
+
+func (v *Visitor) getCapturedVarName(varPrefix string) string {
+	if v.capturedVarCount == nil {
+		v.capturedVarCount = make(map[string]int)
+	}
+
+	count := v.capturedVarCount[varPrefix]
+	count++
+	v.capturedVarCount[varPrefix] = count
+
+	return fmt.Sprintf("%s%s%d", varPrefix, CapturedVarMarker, count)
+}
+
+// Generate declarations for pending captures - written out before lambda expression
+func (v *Visitor) generateCaptureDeclarations() string {
+	if v.lambdaCapture == nil {
+		return ""
+	}
+
+	pendingCaptures := v.lambdaCapture.pendingCaptures
+
+	if len(pendingCaptures) == 0 {
+		return ""
+	}
+
+	var decls strings.Builder
+
+	// Sort names for consistent output
+	names := make([]string, 0, len(pendingCaptures))
+
+	for name, info := range pendingCaptures {
+		if !info.used {
+			names = append(names, name)
+		}
+	}
+
+	sort.Strings(names)
+
+	// Generate declarations
+	for _, name := range names {
+		info := pendingCaptures[name]
+		decls.WriteString(v.newline)
+		decls.WriteString(v.indent(v.indentLevel))
+
+		if v.options.preferVarDecl {
+			decls.WriteString("var ")
+		} else {
+			decls.WriteString(getCSTypeName(info.varType))
+			decls.WriteRune(' ')
+		}
+
+		decls.WriteString(info.copyIdent.Name)
+		decls.WriteString(" = ")
+		decls.WriteString(info.origIdent.Name)
+		decls.WriteString(";")
+		info.used = true
+	}
+
+	decls.WriteString(v.newline)
+	decls.WriteString(v.indent(v.indentLevel))
+
+	return decls.String()
+}
+
+// Determine if a variable should be captured
+func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
+	// Don't capture variables declared inside the lambda
+	if v.info.Defs[ident] != nil {
+		return false
+	}
+
+	// Only capture variables that are declared outside but used inside the lambda
+	var declaredOutside bool
+
+	for _, scope := range v.scopeStack {
+		if scope[ident.Name] == varObj {
+			declaredOutside = true
+			break
+		}
+	}
+
+	return declaredOutside
 }

@@ -6,12 +6,11 @@ import (
 )
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
-	if v.isMethodValue(selectorExpr, context.isCallExpr) {
-		v.performLambdaAnalysis(selectorExpr, &context)
+	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
+		v.enterLambdaConversion(selectorExpr)
+		defer v.exitLambdaConversion()
 
-		if context.isAssignment {
-			return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
-		}
+		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
 	}
 
 	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))

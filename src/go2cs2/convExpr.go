@@ -74,14 +74,12 @@ func (c ArrayTypeContext) getDefault() StmtContext {
 type LambdaContext struct {
 	isAssignment bool
 	isCallExpr   bool
-	parentIdent  *ast.Ident
 }
 
 func DefaultLambdaContext() LambdaContext {
 	return LambdaContext{
 		isAssignment: false,
 		isCallExpr:   false,
-		parentIdent:  nil,
 	}
 }
 
@@ -157,8 +155,6 @@ func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 }
 
 func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
-	v.preAnalyzeLambdas(expr, getExprContext[LambdaContext](contexts))
-
 	switch exprType := expr.(type) {
 	case *ast.ArrayType:
 		context := getExprContext[ArrayTypeContext](contexts)

@@ -6,8 +6,14 @@ import (
 )
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
-	lambdaContext := DefaultLambdaContext()
-	v.performLambdaAnalysis(funcLit, &lambdaContext)
+	v.enterLambdaConversion(funcLit)
+	defer v.exitLambdaConversion()
+
+	result := strings.Builder{}
+
+	if decls := v.generateCaptureDeclarations(); decls != "" {
+		result.WriteString(decls)
+	}
 
 	var parameterSignature string
 
@@ -43,5 +49,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
 		body = strings.TrimSpace(body)
 	}
 
-	return "(" + parameterSignature + ") => " + body
+	result.WriteString("(" + parameterSignature + ") => " + body)
+
+	return result.String()
 }

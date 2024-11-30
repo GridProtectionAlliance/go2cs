@@ -99,13 +99,6 @@ func getStmtContext[TContext StmtContext](contexts []StmtContext) TContext {
 }
 
 func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
-	v.preAnalyzeLambdas(stmt, DefaultLambdaContext())
-
-	// Generate declarations first
-	if decls := v.generateCaptureDeclarations(); decls != "" {
-		v.targetFile.WriteString(decls)
-	}
-
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
 		source := getStmtContext[ParentBlockContext](contexts)
