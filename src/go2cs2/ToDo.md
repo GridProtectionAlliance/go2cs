@@ -5,7 +5,7 @@
 ## For "go2cs2" transpiler:
 
 01) ~~Fix out of order shadowing, when higher scope variable is declared later but prior variable should have been shadowed~~
-02) Add captured lambda variables to temporary variables before lambda call and use temp variabes in lambda (Go always copied) - make sure array is full copy
+02) ~~Add captured lambda variables to temporary variables before lambda call and use temp variabes in lambda (Go always copied) - make sure array is full copy~~
 03) ~~Fix range implementation to account for define / assign~~
 04) ~~Check implementation of standalone `convEllipsis` visitor - add test code for when is it encountered - or remove~~
 05) ~~Check implementation of standalone `convFieldList` visitor - add test code for when is it encountered - or remove~~

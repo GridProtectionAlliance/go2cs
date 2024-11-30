@@ -61,10 +61,9 @@ func (v *Visitor) createCapture(ident *ast.Ident, captureMap map[*ast.Ident]*ast
 	captureMap[ident] = copyIdent
 
 	v.pendingCaptures[copyName] = &captureInfo{
-		copyIdent:    copyIdent,
-		origIdent:    context.parentIdent, // Use parent ident here
-		used:         false,
-		originalType: context.originalType,
+		copyIdent: copyIdent,
+		origIdent: context.parentIdent, // Use parent ident here
+		used:      false,
 	}
 }
 
@@ -81,12 +80,10 @@ func (v *Visitor) preAnalyzeLambdas(node ast.Node, context LambdaContext) {
 		for i, rhs := range n.Rhs {
 			if v.requiresLambdaConversion(rhs) {
 				ctx := context
+				ctx.isAssignment = true
 				if i < len(n.Lhs) {
 					if ident, ok := n.Lhs[i].(*ast.Ident); ok {
 						ctx.parentIdent = ident
-						if typ := v.info.TypeOf(ident); typ != nil {
-							ctx.originalType = typ
-						}
 					}
 				}
 				v.performLambdaAnalysis(rhs, &ctx)
@@ -137,11 +134,8 @@ func (v *Visitor) capturedLambdaVarRequiresCopy(t types.Type) bool {
 		return true
 	case *types.Named:
 		return v.capturedLambdaVarRequiresCopy(typ.Underlying())
-	case *types.Interface:
-		// Check if interface could contain struct/array
-		// This is conservative - might want to refine based on known interface types
-		return true
 	}
+
 	return false
 }
 

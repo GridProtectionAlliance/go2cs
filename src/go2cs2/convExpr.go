@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"go/ast"
-	"go/types"
 )
 
 type KeyValueSource int
@@ -76,7 +75,6 @@ type LambdaContext struct {
 	isAssignment bool
 	isCallExpr   bool
 	parentIdent  *ast.Ident
-	originalType types.Type
 }
 
 func DefaultLambdaContext() LambdaContext {
@@ -84,7 +82,6 @@ func DefaultLambdaContext() LambdaContext {
 		isAssignment: false,
 		isCallExpr:   false,
 		parentIdent:  nil,
-		originalType: nil,
 	}
 }
 
