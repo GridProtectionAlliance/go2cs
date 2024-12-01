@@ -122,18 +122,21 @@ const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 // TODO: Consider adding removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
-	"abstract", "as", "base", "bool", "break", "byte", "case", "catch", "char", "checked", "class", "const",
-	"continue", "decimal", "default", "delegate", "do", "double", "else", "enum", "event", "explicit", "extern",
-	"false", "finally", "fixed", "float", "for", "foreach", "goto", "if", "implicit", "in", "int", "interface",
-	"internal", "is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override",
-	"params", "private", "protected", "public", "readonly", "ref", "return", "sbyte", "sealed", "short",
-	"sizeof", "stackalloc", "static", "string", "struct", "switch", "this", "throw", "true", "try", "typeof",
-	"uint", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
-	"__argslist", "__makeref", "__reftype", "__refvalue",
+	"abstract", "as", "base", "bool", "catch", "char", "checked", "class", "const", "decimal",
+	"delegate", "do", "double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach",
+	"implicit", "in", "interface", "internal", "is", "lock", "namespace", "new", "null", "object",
+	"operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref",
+	"sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch",
+	"this", "throw", "try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void",
+	"volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "GetGoTypeName", "CastCopy",
-	"ConvertToType", TrueMarker,
+	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "GetGoTypeName",
+	"CastCopy", "ConvertToType", TrueMarker,
 })
+
+// These C# keywords overlap with Go keywords, so they do not need detection
+// "break", "byte", "case", "const", "continue", "default", "else", "false", "float",
+// "for", "goto", "if", "int", "long", "return", "true", "var", "uint", "ulong",
 
 //go:embed csproj-template.xml
 var csprojTemplate []byte
@@ -854,7 +857,14 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	if strings.HasPrefix(typeName, "func(") {
-		return fmt.Sprintf("System.Func<%s>", convertToCSTypeName(typeName[5:len(typeName)-1]))
+		types := extractTypes(typeName[5 : len(typeName)-1])
+		csTypeNames := make([]string, len(types))
+
+		for i, typeName := range types {
+			csTypeNames[i] = convertToCSTypeName(typeName)
+		}
+
+		return fmt.Sprintf("System.Action<%s>", strings.Join(csTypeNames, ", "))
 	}
 
 	// Handle pointer types
@@ -882,6 +892,45 @@ func convertToCSFullTypeName(typeName string) string {
 	default:
 		return getSanitizedIdentifier(typeName)
 	}
+}
+
+func extractTypes(signature string) []string {
+	// Remove any whitespace at the ends
+	signature = strings.TrimSpace(signature)
+
+	// Handle empty signature
+	if signature == "" {
+		return []string{}
+	}
+
+	// Split the signature into individual parameter declarations
+	params := strings.Split(signature, ",")
+	types := make([]string, 0, len(params))
+
+	for _, param := range params {
+		// Trim whitespace
+		param = strings.TrimSpace(param)
+
+		// Find the first space or end of string
+		var typeStart int
+		for i, char := range param {
+			if unicode.IsSpace(char) {
+				typeStart = i
+				break
+			}
+		}
+
+		// If no space found, the entire param is a type (e.g., "string")
+		if typeStart == 0 {
+			types = append(types, param)
+		} else {
+			// Extract everything after the space
+			paramType := strings.TrimSpace(param[typeStart:])
+			types = append(types, paramType)
+		}
+	}
+
+	return types
 }
 
 func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string {

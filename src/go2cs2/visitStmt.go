@@ -144,7 +144,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		source := getStmtContext[ParentBlockContext](contexts)
 		v.visitSwitchStmt(stmtType, source)
 	case *ast.TypeSwitchStmt:
-		v.visitTypeSwitchStmt(stmtType)
+		source := getStmtContext[ParentBlockContext](contexts)
+		v.visitTypeSwitchStmt(stmtType, source)
 	case *ast.BadStmt:
 		println(fmt.Sprintf("WARNING: BadStmt encountered: %#v", stmtType))
 	case *ast.EmptyStmt:

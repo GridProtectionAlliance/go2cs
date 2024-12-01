@@ -12,7 +12,7 @@
 06) Check implementation of standalone `convInterfaceType` visitor - add test code for when is it encountered - or remove
 07) Check implementation of standalone `convStructType` visitor - add test code for when is it encountered - or remove
 08) Complete map type implementation (`visitMapType`)
-09) Complete type switch implementation (`visitTypeSwitchStmt`) -- see `visitSwitchStmt`
+09) ~~Complete type switch implementation (`visitTypeSwitchStmt`) -- see `visitSwitchStmt`~~
 10) Complete select statement implementation (`visitSelectStmt`)
 11) Complete send statement implementation (`visitSendStmt`)
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
