@@ -16,6 +16,7 @@
     <NoWarn>660;661;IDE1006;CS8981</NoWarn>
     <Version>0.1.4</Version>
     <LangVersion>latest</LangVersion>
+    <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>

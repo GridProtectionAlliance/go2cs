@@ -127,5 +127,4 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, source
 		v.targetFile.WriteString(v.newline)
 		v.writeOutput("}")
 	}
-
 }
