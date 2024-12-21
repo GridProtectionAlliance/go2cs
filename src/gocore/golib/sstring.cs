@@ -31,7 +31,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Text;
 
 namespace go;
@@ -74,7 +73,11 @@ namespace go;
 /// <summary>
 /// Represents a stack only structure that behaves like a Go string.
 /// </summary>
+#if NET9_0_OR_GREATER
 public readonly ref struct sstring : IConvertible, IEquatable<sstring>, IComparable<sstring>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
+#else
+public readonly ref struct sstring
+#endif
 {
     internal readonly ReadOnlySpan<byte> m_value;
 
@@ -386,6 +389,8 @@ public readonly ref struct sstring : IConvertible, IEquatable<sstring>, ICompara
             yield return item;
     }
 
+#if NET9_0_OR_GREATER
+
     object ICloneable.Clone()
     {
         return (@string)Clone();
@@ -487,6 +492,8 @@ public readonly ref struct sstring : IConvertible, IEquatable<sstring>, ICompara
     {
         return ToString().GetEnumerator();
     }
+
+#endif
 
     private static unsafe bool BytesAreEqual(in ReadOnlySpan<byte> data1, in ReadOnlySpan<byte> data2)
     {
