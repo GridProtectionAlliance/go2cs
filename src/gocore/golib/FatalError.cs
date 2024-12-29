@@ -1,7 +1,7 @@
 ﻿//******************************************************************************************************
-//  PanicException.cs - Gbtc
+//  FatalError.cs - Gbtc
 //
-//  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2024, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,23 +16,20 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  05/07/2018 - J. Ritchie Carroll
+//  12/27/2024 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
-using System.Diagnostics;
-
 namespace go;
 
 /// <summary>
-/// Represents an exception for the "panic" keyword.
+/// Represents common fatal error messages reported in Go environment.
 /// </summary>
-[DebuggerNonUserCode]
-public class PanicException(object? state, Exception? innerException = null) : 
-    Exception(state?.ToString() ?? "nil", innerException)
+public static class FatalError
 {
-    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public object? State { get; } = state;
+    public static string DeadLock()
+    {
+        return "fatal error: all goroutines are asleep - deadlock!";
+    }
 }

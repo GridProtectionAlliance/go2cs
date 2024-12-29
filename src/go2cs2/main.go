@@ -28,11 +28,12 @@ import (
 )
 
 type Options struct {
-	indentSpaces    int
-	preferVarDecl   bool
-	includeComments bool
-	parseCgoTargets bool
-	showParseTree   bool
+	indentSpaces        int
+	preferVarDecl       bool
+	useChannelOperators bool
+	includeComments     bool
+	parseCgoTargets     bool
+	showParseTree       bool
 }
 
 type FileEntry struct {
@@ -96,6 +97,7 @@ type Visitor struct {
 	// BlockStmt variables
 	blocks                 Stack[*strings.Builder]
 	firstStatementIsReturn bool
+	lastStatementWasReturn bool
 	identEscapesHeap       map[*ast.Ident]bool
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
@@ -118,6 +120,8 @@ const CapturedVarMarker = "\u0297"           // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"               // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "\u1427"                  // Variants: ᐧ true
 const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
+const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `ch <- val`
+const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 
 // TODO: Consider adding removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{
@@ -130,8 +134,8 @@ var keywords = NewHashSet[string]([]string{
 	"this", "throw", "try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void",
 	"volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag", "go\u01C3", "WithOK", "WithErr", "WithVal", "GetGoTypeName",
-	"CastCopy", "ConvertToType", TrueMarker,
+	"GoType", "GoUntyped", "GoTag", "go\u01C3", "OK", "ERR", "VAL", "GetGoTypeName",
+	"CastCopy", "ConvertToType", "WhenAny", TrueMarker,
 })
 
 // These C# keywords overlap with Go keywords, so they do not need detection
@@ -154,6 +158,7 @@ func main() {
 	// Define command line flags for options
 	indentSpaces := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDecl := commandLine.Bool("var", true, "Prefer \"var\" declarations")
+	useChannelOperators := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
 	includeComments := commandLine.Bool("comments", false, "Include comments in output")
 	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
 	showParseTree := commandLine.Bool("tree", false, "Show parse tree")
@@ -187,11 +192,12 @@ Examples:
 	}
 
 	options := Options{
-		indentSpaces:    *indentSpaces,
-		preferVarDecl:   *preferVarDecl,
-		includeComments: *includeComments,
-		parseCgoTargets: *parseCgoTargets,
-		showParseTree:   *showParseTree,
+		indentSpaces:        *indentSpaces,
+		preferVarDecl:       *preferVarDecl,
+		useChannelOperators: *useChannelOperators,
+		includeComments:     *includeComments,
+		parseCgoTargets:     *parseCgoTargets,
+		showParseTree:       *showParseTree,
 	}
 
 	// Load custom .csproj template if specified
@@ -785,6 +791,8 @@ func getIdentifier(node ast.Node) *ast.Ident {
 		ident = getIdentifier(starExpr.X)
 	} else if identExpr, ok := node.(*ast.Ident); ok {
 		ident = identExpr
+	} else if chanExpr, ok := node.(*ast.ChanType); ok {
+		ident = getIdentifier(chanExpr.Value)
 	}
 
 	return ident
@@ -849,7 +857,7 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	if strings.HasPrefix(typeName, "chan ") {
-		return fmt.Sprintf("%s.chan<%s>", RootNamespace, convertToCSTypeName(typeName[5:]))
+		return fmt.Sprintf("%s.channel<%s>", RootNamespace, convertToCSTypeName(typeName[5:]))
 	}
 
 	if typeName == "func()" {

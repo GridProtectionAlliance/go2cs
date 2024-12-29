@@ -244,7 +244,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			}
 
 			v.targetFile.WriteString(v.newline)
-			v.writeOutputLn("break;")
+
+			if !v.lastStatementWasReturn {
+				v.writeOutputLn("break;")
+			}
 
 			v.indentLevel--
 		}
@@ -302,7 +305,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			}
 
 			v.targetFile.WriteString(v.newline)
-			v.writeOutputLn("break;")
+
+			if !v.lastStatementWasReturn {
+				v.writeOutputLn("break;")
+			}
 
 			v.indentLevel--
 		}

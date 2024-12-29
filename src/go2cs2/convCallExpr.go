@@ -68,11 +68,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 
 			if typeParam != nil {
 				if _, ok := typeParam.(*types.Slice); ok {
-					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+					if v.options.preferVarDecl {
+						return fmt.Sprintf("new slice<%s>(%s)", typeName, remainingArgs)
+					}
+
+					return fmt.Sprintf("new(%s)", remainingArgs)
 				} else if _, ok := typeParam.(*types.Map); ok {
-					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+					if v.options.preferVarDecl {
+						return fmt.Sprintf("new map<%s, %s>", typeName, remainingArgs)
+					}
+
+					return fmt.Sprintf("new(%s)", remainingArgs)
 				} else if _, ok := typeParam.(*types.Chan); ok {
-					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+					if len(remainingArgs) == 0 {
+						remainingArgs = "1"
+					}
+
+					if v.options.preferVarDecl {
+						return fmt.Sprintf("new channel<%s>(%s)", typeName, remainingArgs)
+					}
+
+					return fmt.Sprintf("new(%s)", remainingArgs)
 				}
 			}
 

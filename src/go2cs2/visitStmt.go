@@ -99,6 +99,8 @@ func getStmtContext[TContext StmtContext](contexts []StmtContext) TContext {
 }
 
 func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
+	v.lastStatementWasReturn = false
+
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
 		source := getStmtContext[ParentBlockContext](contexts)
@@ -135,8 +137,10 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		v.visitRangeStmt(stmtType)
 	case *ast.ReturnStmt:
 		v.visitReturnStmt(stmtType)
+		v.lastStatementWasReturn = true
 	case *ast.SelectStmt:
-		v.visitSelectStmt(stmtType)
+		source := getStmtContext[ParentBlockContext](contexts)
+		v.visitSelectStmt(stmtType, source)
 	case *ast.SendStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitSendStmt(stmtType, format)

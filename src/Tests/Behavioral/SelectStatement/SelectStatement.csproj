@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>%s</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFrameworks>net9.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>%s</AssemblyName>
+    <AssemblyName>SelectStatement</AssemblyName>
     <Product>go2cs</Product>
-    <Copyright>Copyright © %d</Copyright>
+    <Copyright>Copyright © 2024</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

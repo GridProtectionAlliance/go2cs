@@ -68,17 +68,17 @@ public static class builtin
     /// <summary>
     /// Defines a constant to return a tuple that includes a boolean success indicator.
     /// </summary>
-    public const bool WithOK = false;
+    public const bool OK = false;
 
     /// <summary>
     /// Defines a constant to return a tuple that includes an error indicator.
     /// </summary>
-    public const bool WithErr = false;
+    public const bool ERR = false;
 
     /// <summary>
     /// Defines a constant to return a tuple that includes a value.
     /// </summary>
-    public const bool WithVal = false;
+    public const bool VAL = false;
 
     /// <summary>
     /// nil is a predeclared identifier representing the zero value for a pointer, channel,
@@ -205,7 +205,7 @@ public static class builtin
     /// <summary>
     /// Gets the maximum capacity of the <paramref name="channel"/>.
     /// </summary>
-    /// <param name="channel">Target channel pointer.</param>
+    /// <param name="channel">Target channel.</param>
     /// <returns>The capacity of the <paramref name="channel"/>.</returns>
     public static nint cap<T>(in channel<T> channel)
     {
@@ -215,7 +215,7 @@ public static class builtin
     /// <summary>
     /// Gets the maximum capacity of the <paramref name="channel"/>.
     /// </summary>
-    /// <param name="channel">Target channel pointer.</param>
+    /// <param name="channel">Target channel.</param>
     /// <returns>The capacity of the <paramref name="channel"/>.</returns>
     public static nint cap(IChannel channel)
     {
@@ -225,13 +225,69 @@ public static class builtin
     /// <summary>
     /// Closes the channel.
     /// </summary>
-    /// <param name="channel">Target channel pointer.</param>
+    /// <param name="channel">Target channel.</param>
     public static void close<T>(in channel<T> channel)
     {
         // An "in" parameter works here because the close method operates on channel structure's
         // private class-based member references, not on value types
         // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable
         channel.Close();
+    }
+
+    /// <summary>
+    /// Removes an item from channel.
+    /// </summary>
+    /// <param name="channel">Target channel.</param>
+    /// <returns>Received value.</returns>
+    /// <remarks>
+    /// <para>
+    /// If the channel is empty, method will block the current thread until a value is sent to the channel.
+    /// </para>
+    /// <para>
+    /// Defines a Go style channel <see cref="channel{T}.Receive()"/>> operation.
+    /// </para>
+    /// </remarks>
+    public static T ᐸꟷ<T>(channel<T> channel)
+    {
+        return channel.Receive();
+    }
+
+    /// <summary>
+    /// Removes an item from channel.
+    /// </summary>
+    /// <param name="channel">Target channel.</param>
+    /// <param name="_">Overload discriminator for different return type.</param>
+    /// <returns>
+    /// Received value and boolean result reporting whether the communication succeeded which is
+    /// <c>true</c> if the value received was delivered by a successful send operation ; otherwise,
+    /// <c>false</c> if a zero value generated because the channel is closed and empty.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// If the channel is empty, method will block the current thread until a value is sent to the channel.
+    /// </para>
+    /// <para>
+    /// Defines a Go style channel <see cref="channel{T}.Receive()"/>> operation.
+    /// </para>
+    /// </remarks>
+    public static (T val, bool ok) ᐸꟷ<T>(channel<T> channel, bool _)
+    {
+        return channel.IsClosed ? 
+            (zero<T>(), false) : 
+            (channel.Receive(), true);
+    }
+
+    /// <summary>
+    /// Waits for any of the specified <paramref name="handles"/> to be set.
+    /// </summary>
+    /// <param name="handles">Handles to wait for.</param>
+    /// <returns>Index of the handle that satisfied the wait condition.</returns>
+    public static int WhenAny(params WaitHandle[] handles)
+    {
+        if (handles.Length == 0)
+            fatal(FatalError.DeadLock());
+
+        return WaitHandle.WaitAny(handles);
     }
 
     /// <summary>
@@ -462,7 +518,7 @@ public static class builtin
     /// <summary>
     /// Gets the length of the <paramref name="str"/>.
     /// </summary>
-    /// <param name="str">Target channel pointer.</param>
+    /// <param name="str">Target channel.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
     public static nint len(string str)
     {
@@ -522,7 +578,7 @@ public static class builtin
     /// <summary>
     /// Gets the length of the <paramref name="channel"/>.
     /// </summary>
-    /// <param name="channel">Target channel pointer.</param>
+    /// <param name="channel">Target channel.</param>
     /// <returns>The length of the <paramref name="channel"/>.</returns>
     public static nint len<T>(in ptr<channel<T>> channel)
     {
@@ -538,21 +594,13 @@ public static class builtin
     /// <returns>New object.</returns>
     public static T make<T>(nint p1 = 0, nint p2 = -1) where T : new()
     {
-        if (p1 == 0 && p2 == 0)
+        if (p1 == 0 && p2 == -1)
             return new T();
 
-        Type type = typeof(T);
+        if (p2 != -1)
+            return (T)Activator.CreateInstance(typeof(T), p1, p2)!;
 
-        if (type == typeof(slice<>))
-            return (T)(object)new slice<T>(p1, p2, 0)!;
-
-        if (type == typeof(channel<>) && p1 == 0)
-        {
-            p1 = 1;
-            return (T)(object)new channel<T>((int)p1)!;
-        }
-
-        return (T)Activator.CreateInstance(type, p1)!;
+        return (T)Activator.CreateInstance(typeof(T), p1)!;
     }
 
     /// <summary>
@@ -690,8 +738,8 @@ public static class builtin
     #if DEBUG
         throw new InvalidOperationException($"{message} [{code}]");
     #else
-            Console.Error.WriteLine(message);
-            Environment.Exit((int)code);
+        Console.Error.WriteLine(message);
+        Environment.Exit((int)code);
     #endif
     }
 
@@ -723,7 +771,7 @@ public static class builtin
     /// </summary>
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
-    /// <param name="_"><see cref="WithOK"/> placeholder parameter used to overload return type.</param>
+    /// <param name="_"><see cref="OK"/> placeholder parameter used to overload return type.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
     public static (T, bool) _<T>(this object target, bool _)
     {

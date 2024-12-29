@@ -13,11 +13,17 @@
 07) Check implementation of standalone `convStructType` visitor - add test code for when is it encountered - or remove
 08) Complete map type implementation (`visitMapType`)
 09) ~~Complete type switch implementation (`visitTypeSwitchStmt`) -- see `visitSwitchStmt`~~
-10) Complete select statement implementation (`visitSelectStmt`)
-11) Complete send statement implementation (`visitSendStmt`)
+10) ~~Complete select statement implementation (`visitSelectStmt`)~~ Handle edge cases
+  a) Handle `case i3, ok := (<-c3):  // same as: i3, ok := <-c`
+  b) Handle `case a[f()] = <-c4: // same as: case t := <-c4 { a[f()] = t }`
+  c) Handle multi-valued assignment form of (with OK to test for closed channel).
+  d) Test `nil` channel which is never ready for communication
+  e) Handle channels with specified direction (send or receive)
+11) ~~Complete send statement implementation (`visitSendStmt`)~~
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
 13) Complete interface inheritance (will need C# GoType code converter work)
-14) Complete channel implementation (`visitChanType` / `visitCommClause`)
+14) ~~Complete channel implementation (`visitChanType` / `visitCommClause`)~~
+  a) Suspected complete through existing paths - add test code for when is it encountered - or remove
 15) Handle generics conversion
 
 xx) Setup reference code packages / path options for Go modules

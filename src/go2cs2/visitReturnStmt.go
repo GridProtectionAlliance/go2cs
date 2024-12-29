@@ -34,9 +34,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				}
 			}
 
-			v.targetFile.WriteRune(' ')
-
 			if results.Len() > 0 {
+				v.targetFile.WriteRune(' ')
+
 				if signature.Results().Len() > 1 {
 					v.targetFile.WriteRune('(')
 					v.targetFile.WriteString(results.String())

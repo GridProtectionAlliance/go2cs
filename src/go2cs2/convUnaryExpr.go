@@ -43,5 +43,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
 		return AddressPrefix + v.convExpr(unaryExpr.X, nil)
 	}
 
+	if unaryExpr.Op == token.ARROW {
+		// Check if the unary expression is channel receive operation
+		if _, ok := v.getType(unaryExpr.X, true).(*types.Chan); ok {
+			if v.options.useChannelOperators {
+				return fmt.Sprintf("%s(%s)", ChannelLeftOp, v.convExpr(unaryExpr.X, nil))
+			}
+
+			return fmt.Sprintf("%s.Receive()", v.convExpr(unaryExpr.X, nil))
+		}
+	}
+
 	return unaryExpr.Op.String() + v.convExpr(unaryExpr.X, nil)
 }

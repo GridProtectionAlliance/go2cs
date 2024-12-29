@@ -26,6 +26,7 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable StaticMemberInGenericType
 
 using System;
 using System.Collections;
@@ -89,12 +90,15 @@ public struct channel<T> : IChannel, IEnumerable<T>
 {
     private readonly ManualResetEventSlim m_canAddEvent;
     private readonly ManualResetEventSlim m_canTakeEvent;
+    private readonly ManualResetEventSlim m_selectSendEvent;
     private readonly ConcurrentQueue<T> m_queue;
     private readonly CancellationTokenSource m_enumeratorTokenSource;
 
     // Following value type is heap allocated so read-only or struct copy calls can still update
     // original value, e.g., allowing "builtin.close" method without requiring a "ref" parameter.
     private readonly ptr<bool> m_isClosed;
+
+    private static readonly WaitHandle s_signaled = new ManualResetEventSlim(true).WaitHandle;
 
     /// <summary>
     /// Creates a new channel.
@@ -110,68 +114,51 @@ public struct channel<T> : IChannel, IEnumerable<T>
 
         m_canAddEvent = new ManualResetEventSlim(false);
         m_canTakeEvent = new ManualResetEventSlim(false);
+        m_selectSendEvent = new ManualResetEventSlim(false);
         m_queue = new ConcurrentQueue<T>();
         m_enumeratorTokenSource = new CancellationTokenSource();
         m_isClosed = new ptr<bool>(false);
-
         Capacity = size;
     }
 
     /// <summary>
     /// Gets the capacity of the channel.
     /// </summary>
-    public nint Capacity
-    {
-        get;
-    }
+    public nint Capacity { get; }
 
     /// <summary>
     /// Gets the count of items in the channel.
     /// </summary>
-    public nint Length
-    {
-        get
-        {
-            return m_queue?.Count ?? 0;
-        }
-    }
+    public nint Length => IsUnbuffered ? 0 : m_queue?.Count ?? 0;
 
-    public bool IsUnbuffered
-    {
-        get
-        {
-            return Capacity == 1;
-        }
-    }
+    /// <summary>
+    /// Gets a flag that determines if the channel is unbuffered.
+    /// </summary>
+    public bool IsUnbuffered => Capacity == 1;
 
+    /// <summary>
+    /// Gets a flag that determines if the channel is closed.
+    /// </summary>
     public bool IsClosed
     {
-        get
-        {
-            return m_isClosed.val;
-        }
-
-        private set
-        {
-            m_isClosed.val = value;
-        }
+        get => m_isClosed.val;
+        private set => m_isClosed.val = value;
     }
 
-    public bool SendIsReady
-    {
-        get
-        {
-            return m_queue is not null && m_queue.Count != Capacity;
-        }
-    }
+    /// <summary>
+    /// Gets a flag that determines if the channel is ready to send.
+    /// </summary>
+    public bool SendIsReady => m_queue is not null && m_queue.Count < Capacity;
 
-    public bool ReceiveIsReady
-    {
-        get
-        {
-            return m_queue is not null && !m_queue.IsEmpty;
-        }
-    }
+    /// <summary>
+    /// Gets a flag that determines if the channel is ready to receive.
+    /// </summary>
+    public bool ReceiveIsReady => m_queue is not null && !m_queue.IsEmpty;
+
+    /// <summary>
+    /// Gets the wait handle that is set when data is being received from the channel.
+    /// </summary>
+    public WaitHandle Receiving => m_canTakeEvent.WaitHandle;
 
     /// <summary>
     /// Closes the channel.
@@ -239,6 +226,42 @@ public struct channel<T> : IChannel, IEnumerable<T>
     public void Send(in T value)
     {
         Send(value, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Queues an item to channel for sending during select operation returning
+    /// a wait handle that is set when the send operation is complete.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <returns>Wait handle for queued send operation.</returns>
+    public WaitHandle Sending(in T value)
+    {
+        if (TrySend(value))
+            return s_signaled;
+
+        m_selectSendEvent.Reset();
+        ThreadPool.QueueUserWorkItem(ProcessSendQueue, value);
+        return m_selectSendEvent.WaitHandle;
+    }
+
+    private void ProcessSendQueue(object? state)
+    {
+        Send((T)state!, m_enumeratorTokenSource.Token);
+        m_selectSendEvent.Set();
+    }
+
+    /// <summary>
+    /// Queues an item to channel for sending during select operation returning
+    /// a wait handle that is set when the send operation is complete.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <returns>Wait handle for queued send operation.</returns>
+    /// <remarks>
+    /// Defines a Go style channel Send operation.
+    /// </remarks>
+    public WaitHandle ᐸꟷ(in T value)
+    {
+        return Sending(value);
     }
 
     /// <summary>
@@ -368,6 +391,11 @@ public struct channel<T> : IChannel, IEnumerable<T>
         }
     }
 
+    /// <summary>
+    /// Attempts to send a value to the channel.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
     public bool Sent(in T value)
     {
         if (SendIsReady)
@@ -380,6 +408,11 @@ public struct channel<T> : IChannel, IEnumerable<T>
         return false;
     }
 
+    /// <summary>
+    /// Attempts to receive a value from the channel.
+    /// </summary>
+    /// <param name="value">Output parameter for received value.</param>
+    /// <returns><c>true</c> if a value was received; otherwise, <c>false</c>.</returns>
     public bool Received(out T value)
     {
         if (ReceiveIsReady)
@@ -393,6 +426,26 @@ public struct channel<T> : IChannel, IEnumerable<T>
 
         value = default!;
         return false;
+    }
+
+    /// <summary>
+    /// Attempts to receive a value from the channel.
+    /// </summary>
+    /// <param name="value">Output parameter for received value.</param>
+    /// <returns><c>true</c> if a value was received; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// <para>
+    /// For a buffered channel, method will block the current thread
+    /// if channel is full.
+    /// </para>
+    /// <para>
+    /// Defines a Go style channel Receive operation.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="ᐸꟷ{T}(channel{T})"/>.
+    public bool ꟷᐳ(out T value)
+    {
+        return Received(out value);
     }
 
     object IChannel.Receive()
@@ -484,5 +537,14 @@ public struct channel<T> : IChannel, IEnumerable<T>
     {
         if (IsClosed)
             throw new PanicException("receive on closed channel");
+    }
+
+    // Stylistic support for channel send operation: "ch <- 12" becomes "ch <<= 12"
+    // This option is not used by default since it incurs an unnecessary assignment
+    // since "ch <<= 12" is equivalent to "ch = ch << 12"
+    public static channel<T> operator <<(channel<T> source, T value)
+    {
+        source.Send(value);
+        return source;
     }
 }

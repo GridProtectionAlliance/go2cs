@@ -12,6 +12,7 @@
             "program": "${fileDirname}",
             "args": [
                 //"-var=false",
+                //"-uco=false",
                 //"-tree",
                 //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
@@ -26,7 +27,8 @@
                 //"..\\Tests\\Behavioral\\RangeStatements",
                 //"..\\Tests\\Behavioral\\SpreadOperator",
                 //"..\\Tests\\Behavioral\\VariableCapture",
-                "..\\Tests\\Behavioral\\TypeSwitch",
+                //"..\\Tests\\Behavioral\\TypeSwitch",
+                "..\\Tests\\Behavioral\\SelectStatement",
             ]
         }
     ]
