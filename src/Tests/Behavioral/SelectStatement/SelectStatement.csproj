@@ -14,8 +14,6 @@
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
     <ApplicationIcon>go2cs.ico</ApplicationIcon>
-    <InvariantGlobalization>true</InvariantGlobalization>
-    <NeutralLanguage>en-US</NeutralLanguage>
     <Nullable>enable</Nullable>
     <NoWarn>660;661;IDE1006;CS8981</NoWarn>
     <LangVersion>latest</LangVersion>
@@ -38,7 +36,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageId>go.$(AssemblyName)</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageDescription>$(AssemblyName) -- C# project converted from Go source</PackageDescription>
+    <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
     <PackageIcon>go2cs.png</PackageIcon>
     <PackageTags>$(AssemblyName);go2cs;Golang;go</PackageTags>

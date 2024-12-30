@@ -24,7 +24,7 @@ private static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     while (ᐧ) {
-        switch (WhenAny(f.ᐸꟷ(x, ꟷ), quit.Receiving)) {
+        switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(quit, ꓸꓸꓸ))) {
         case 0:
             (x, y) = (y, x + y);
             break;
@@ -49,12 +49,12 @@ private static void Main() {
     var ch2 = new channel<nint>(1);
     goǃ(_ => g1(ch1));
     goǃ(_ => g2(ch2));
-    switch (WhenAny(ch1.Receiving, ch2.Receiving)) {
+    switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ))) {
     case 0 when ch1.ꟷᐳ(out var v1):
         fmt.Println("Got: ", v1);
         break;
-    case 1 when ch2.ꟷᐳ(out var v2):
-        fmt.Println("Got: ", v2);
+    case 1 when ch2.ꟷᐳ(out var v1):
+        fmt.Println("Got: ", v1);
         break;
     }
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();

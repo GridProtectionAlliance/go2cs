@@ -57,6 +57,12 @@ public static class builtin
     public const nint iota = 0;
 
     /// <summary>
+    /// nil is a predeclared identifier representing the zero value for a pointer, channel,
+    /// func, interface, map, or slice type.
+    /// </summary>
+    public static readonly NilType nil = NilType.Default;
+
+    /// <summary>
     /// Defines a constant used to represent an always true state.
     /// </summary>
     /// <remarks>
@@ -69,13 +75,23 @@ public static class builtin
     /// Defines a constant used as a discriminator for accessing overloads with
     /// different return types.
     /// </summary>
+    /// <remarks>
+    /// Often used with functions that return a value and a boolean success or error state
+    /// as a tuple.
+    /// </remarks>
     public const bool ꟷ = false;
 
     /// <summary>
-    /// nil is a predeclared identifier representing the zero value for a pointer, channel,
-    /// func, interface, map, or slice type.
+    /// Defines a constant used as a discriminator for accessing overloads with
+    /// different return types.
     /// </summary>
-    public static readonly NilType nil = NilType.Default;
+    /// <remarks>
+    /// Often used with functions that have an operation that will be continued, e.g.:
+    /// <c>switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(quit, ꓸꓸꓸ)))</c>
+    /// The above channel operations return a wait handle that is triggered when the
+    /// operation is complete.
+    /// </remarks>
+    public static readonly NilType ꓸꓸꓸ = nil;
 
     /// <summary>
     /// Instructs a switch case extension call to transfer control to the first
@@ -244,10 +260,24 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets a wait handle that is set when data is ready to be received from the channel.
+    /// </summary>
+    /// <param name="channel">Target channel.</param>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
+    /// <returns>Wait handle for queued send operation.</returns>
+    /// <remarks>
+    /// Defines a Go style channel Receive operation.
+    /// </remarks>
+    public static WaitHandle ᐸꟷ<T>(channel<T> channel, NilType _)
+    {
+        return channel.Receiving;
+    }
+
+    /// <summary>
     /// Removes an item from channel.
     /// </summary>
     /// <param name="channel">Target channel.</param>
-    /// <param name="_">Overload discriminator for different return type.</param>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>
     /// Received value and boolean result reporting whether the communication succeeded which is
     /// <c>true</c> if the value received was delivered by a successful send operation ; otherwise,
@@ -273,7 +303,7 @@ public static class builtin
     /// </summary>
     /// <param name="handles">Handles to wait for.</param>
     /// <returns>Index of the handle that satisfied the wait condition.</returns>
-    public static int WhenAny(params WaitHandle[] handles)
+    public static int select(params WaitHandle[] handles)
     {
         if (handles.Length == 0)
             fatal(FatalError.DeadLock());
@@ -762,7 +792,7 @@ public static class builtin
     /// </summary>
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
-    /// <param name="_"><see cref="OK"/> placeholder parameter used to overload return type.</param>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
     public static (T, bool) _<T>(this object target, bool _)
     {

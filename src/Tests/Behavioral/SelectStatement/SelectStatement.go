@@ -34,7 +34,7 @@ func fibonacci(f, quit chan int) {
 }
 
 func sendOnly(s chan<- string) {
-    s <- "output"
+	s <- "output"
 }
 
 func main() {
@@ -55,8 +55,8 @@ func main() {
 	select {
 	case v1 := <-ch1:
 		fmt.Println("Got: ", v1)
-	case v2 := <-ch2:
-		fmt.Println("Got: ", v2)
+	case v1 := <-ch2:
+		fmt.Println("Got: ", v1)
 		//default:
 		//    fmt.Println("Default")
 	}
@@ -81,10 +81,10 @@ func main() {
 	}()
 	fibonacci(f, quit)
 
-    mychanl := make(chan string)
- 
-    // function converts bidirectional channel to send only channel
-    go sendOnly(mychanl)
- 
-    fmt.Println(<-mychanl)
+	mychanl := make(chan string)
+
+	// function converts bidirectional channel to send only channel
+	go sendOnly(mychanl)
+
+	fmt.Println(<-mychanl)
 }

@@ -245,16 +245,17 @@ public struct channel<T> : IChannel, IEnumerable<T>
     }
 
     /// <summary>
-    /// Queues an item to channel for sending during select operation returning
-    /// a wait handle that is set when the send operation is complete.
+    /// Gets a wait handle that is set when the send operation is complete.
     /// </summary>
     /// <param name="value">Value to send.</param>
-    /// <returns>Wait handle for queued send operation.</returns>
+    /// <returns>Wait handle for send operation.</returns>
     public WaitHandle Sending(in T value)
     {
+        // If channel is ready, send immediately on current thread
         if (TrySend(value))
             return s_signaled;
 
+        // Otherwise, queue send operation for processing on separate thread
         m_selectSendEvent.Reset();
         ThreadPool.QueueUserWorkItem(ProcessSendQueue, value);
         return m_selectSendEvent.WaitHandle;
@@ -267,16 +268,15 @@ public struct channel<T> : IChannel, IEnumerable<T>
     }
 
     /// <summary>
-    /// Queues an item to channel for sending during select operation returning
-    /// a wait handle that is set when the send operation is complete.
+    /// Gets a wait handle that is set when the send operation is complete.
     /// </summary>
     /// <param name="value">Value to send.</param>
-    /// <param name="_">Overload discriminator for different return type.</param>
-    /// <returns>Wait handle for queued send operation.</returns>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
+    /// <returns>Wait handle for send operation.</returns>
     /// <remarks>
     /// Defines a Go style channel Send operation.
     /// </remarks>
-    public WaitHandle ᐸꟷ(in T value, bool _)
+    public WaitHandle ᐸꟷ(in T value, NilType _)
     {
         return Sending(value);
     }
@@ -292,9 +292,9 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </remarks>
     public void Send(in T value, CancellationToken cancellationToken)
     {
-        // TODO: Need to think about how Go handles deadlock checks
+        // TODO: Verify behavior of Go deadlock handling
         //if (IsUnbuffered && m_waitingReceivers <= 0)
-        //    fatal("all goroutines are asleep - deadlock!", 2);
+        //    fatal(FatalError.DeadLock());
 
         // Per spec, sending to a nil channel blocks forever
         if (m_queue is null && channel.Wait(cancellationToken))
@@ -415,14 +415,12 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
     public bool Sent(in T value)
     {
-        if (SendIsReady)
-        {
-            m_queue.Enqueue(value);
-            m_canTakeEvent.Set();
-            return true;
-        }
+        if (!SendIsReady)
+            return false;
 
-        return false;
+        m_queue.Enqueue(value);
+        m_canTakeEvent.Set();
+        return true;
     }
 
     /// <summary>

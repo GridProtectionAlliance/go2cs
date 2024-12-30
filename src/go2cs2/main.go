@@ -131,17 +131,17 @@ var keywords = NewHashSet[string]([]string{
 	"delegate", "do", "double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach",
 	"implicit", "in", "interface", "internal", "is", "lock", "namespace", "new", "null", "object",
 	"operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref",
-	"sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "switch",
-	"this", "throw", "try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void",
-	"volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
+	"sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "this", "throw",
+	"try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
+	"__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
 	"GoType", "GoUntyped", "GoTag", "go\u01C3", "OK", "ERR", "VAL", "GetGoTypeName",
 	"CastCopy", "ConvertToType", "WhenAny", TrueMarker,
 })
 
 // These C# keywords overlap with Go keywords, so they do not need detection
-// "break", "byte", "case", "const", "continue", "default", "else", "false", "float",
-// "for", "goto", "if", "int", "long", "return", "true", "var", "uint", "ulong",
+// "break", "byte", "case", "const", "continue", "default", "else", "false", "float", "for",
+// "goto", "if", "int", "long", "return", "select", "switch", "true", "var", "uint", "ulong"
 
 //go:embed csproj-template.xml
 var csprojTemplate []byte

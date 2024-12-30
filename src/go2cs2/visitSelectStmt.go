@@ -37,7 +37,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 	if hasDefault {
 		v.targetFile.WriteString(TrueMarker)
 	} else {
-		v.targetFile.WriteString("WhenAny(")
+		v.targetFile.WriteString("select(")
 
 		for i, comClause := range comClauses {
 			if i > 0 {
@@ -53,8 +53,18 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 
 					if unaryExpr, ok := rhs.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {
-							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
-							v.targetFile.WriteString(".Receiving")
+
+							if v.options.useChannelOperators {
+								v.targetFile.WriteString(ChannelLeftOp)
+								v.targetFile.WriteRune('(')
+								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+								v.targetFile.WriteString(", ")
+								v.targetFile.WriteString(ElipsisOperator)
+								v.targetFile.WriteRune(')')
+							} else {
+								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+								v.targetFile.WriteString(".Receiving")
+							}
 							handled = true
 						}
 					}
@@ -74,7 +84,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 
 				if v.options.useChannelOperators {
 					v.targetFile.WriteString(", ")
-					v.targetFile.WriteString(OverloadDiscriminator)
+					v.targetFile.WriteString(ElipsisOperator)
 				}
 
 				v.targetFile.WriteRune(')')
@@ -82,8 +92,17 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 			} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
 				if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 					if unaryExpr.Op == token.ARROW {
-						v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
-						v.targetFile.WriteString(".Receiving")
+						if v.options.useChannelOperators {
+							v.targetFile.WriteString(ChannelLeftOp)
+							v.targetFile.WriteRune('(')
+							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteString(", ")
+							v.targetFile.WriteString(ElipsisOperator)
+							v.targetFile.WriteRune(')')
+						} else {
+							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteString(".Receiving")
+						}
 						handled = true
 					}
 				}
