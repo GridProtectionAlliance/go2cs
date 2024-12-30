@@ -149,6 +149,9 @@ var csprojTemplate []byte
 //go:embed go2cs.ico
 var iconFileBytes []byte
 
+//go:embed go2cs.png
+var pngFileBytes []byte
+
 //go:embed profiles/*
 var publishProfiles embed.FS
 
@@ -336,6 +339,15 @@ Examples:
 				log.Fatalf("Failed to write publish profiles for project \"%s\": %s\n", outputFilePath, err)
 			}
 		}
+
+		// For library projects, write package files, like icon
+		if outputType == "Library" {
+			err = writePackageFiles(outputFilePath)
+
+			if err != nil {
+				log.Fatalf("Failed to write package files for project \"%s\": %s\n", outputFilePath, err)
+			}
+		}
 	}
 
 	globalIdentNames := make(map[*ast.Ident]string)
@@ -447,6 +459,32 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 	}
 
 	return projectFileName, nil
+}
+
+func writePackageFiles(projectPath string) error {
+	// Make sure project path ends with a directory separator
+	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
+
+	pngFileName := projectPath + "go2cs.png"
+
+	// Check if icon file needs to be written
+	if needToWriteFile(pngFileName, pngFileBytes) {
+		iconFile, err := os.Create(pngFileName)
+
+		if err != nil {
+			return fmt.Errorf("failed to create package icon file \"%s\": %s", pngFileName, err)
+		}
+
+		defer iconFile.Close()
+
+		_, err = iconFile.Write(pngFileBytes)
+
+		if err != nil {
+			return fmt.Errorf("failed to write to package icon file \"%s\": %s", pngFileName, err)
+		}
+	}
+
+	return nil
 }
 
 func writePublishProfiles(projectPath string) error {
