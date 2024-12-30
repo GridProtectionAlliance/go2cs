@@ -18,7 +18,7 @@
   b) Handle `case a[f()] = <-c4: // same as: case t := <-c4 { a[f()] = t }`
   c) Handle multi-valued assignment form of (with OK to test for closed channel).
   d) Test `nil` channel which is never ready for communication
-  e) Handle channels with specified direction (send or receive)
+  e) ~~Handle channels with specified direction (send or receive)~~
 11) ~~Complete send statement implementation (`visitSendStmt`)~~
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
 13) Complete interface inheritance (will need C# GoType code converter work)

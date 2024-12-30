@@ -24,15 +24,19 @@ private static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     while (ᐧ) {
-        switch (WhenAny(f.ᐸꟷ(x), quit.Receiving)) {
+        switch (WhenAny(f.ᐸꟷ(x, ꟷ), quit.Receiving)) {
         case 0:
             (x, y) = (y, x + y);
             break;
-        case 1 when ᐸꟷ(quit, OK).ok:
+        case 1 when ᐸꟷ(quit, ꟷ).ok:
             fmt.Println("quit");
             return;
         }
     }
+}
+
+private static void sendOnly(channel/*<-*/<@string> s) {
+    s.ᐸꟷ("output"u8);
 }
 
 private static void Main() {
@@ -71,6 +75,9 @@ private static void Main() {
         quit.ᐸꟷ(0);
     });
     fibonacci(f, quit);
+    var mychanl = new channel<@string>(1);
+    goǃ(_ => sendOnly(mychanl));
+    fmt.Println(ᐸꟷ(mychanl));
 }
 
 } // end main_package

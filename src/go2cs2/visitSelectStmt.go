@@ -71,6 +71,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 
 				v.targetFile.WriteRune('(')
 				v.targetFile.WriteString(v.convExpr(sendStmt.Value, nil))
+
+				if v.options.useChannelOperators {
+					v.targetFile.WriteString(", ")
+					v.targetFile.WriteString(OverloadDiscriminator)
+				}
+
 				v.targetFile.WriteRune(')')
 				handled = true
 			} else if exprStmt, ok := comClause.Comm.(*ast.ExprStmt); ok {
@@ -149,7 +155,9 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 								v.targetFile.WriteString(ChannelLeftOp)
 								v.targetFile.WriteRune('(')
 								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
-								v.targetFile.WriteString(", OK).ok")
+								v.targetFile.WriteString(", ")
+								v.targetFile.WriteString(OverloadDiscriminator)
+								v.targetFile.WriteString(").ok")
 							} else {
 								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
 								v.targetFile.WriteString(".Received(out _)")

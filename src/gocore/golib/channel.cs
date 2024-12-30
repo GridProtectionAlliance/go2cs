@@ -220,10 +220,26 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </summary>
     /// <param name="value">Value to send.</param>
     /// <remarks>
-    /// For a buffered channel, method will block the current thread
-    /// if channel is full.
+    /// For a buffered channel, method will block the current thread if channel is full.
     /// </remarks>
     public void Send(in T value)
+    {
+        Send(value, CancellationToken.None);
+    }
+
+    /// <summary>
+    /// Sends an item to channel. 
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <remarks>
+    /// <para>
+    /// For a buffered channel, method will block the current thread if channel is full.
+    /// </para>
+    /// <para>
+    /// Defines a Go style channel Send operation.
+    /// </para>
+    /// </remarks>
+    public void ᐸꟷ(in T value)
     {
         Send(value, CancellationToken.None);
     }
@@ -255,11 +271,12 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// a wait handle that is set when the send operation is complete.
     /// </summary>
     /// <param name="value">Value to send.</param>
+    /// <param name="_">Overload discriminator for different return type.</param>
     /// <returns>Wait handle for queued send operation.</returns>
     /// <remarks>
     /// Defines a Go style channel Send operation.
     /// </remarks>
-    public WaitHandle ᐸꟷ(in T value)
+    public WaitHandle ᐸꟷ(in T value, bool _)
     {
         return Sending(value);
     }

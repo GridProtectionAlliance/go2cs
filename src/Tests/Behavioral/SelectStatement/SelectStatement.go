@@ -33,6 +33,10 @@ func fibonacci(f, quit chan int) {
 	}
 }
 
+func sendOnly(s chan<- string) {
+    s <- "output"
+}
+
 func main() {
 	ch := make(chan int, 2)
 
@@ -76,4 +80,11 @@ func main() {
 		quit <- 0
 	}()
 	fibonacci(f, quit)
+
+    mychanl := make(chan string)
+ 
+    // function converts bidirectional channel to send only channel
+    go sendOnly(mychanl)
+ 
+    fmt.Println(<-mychanl)
 }

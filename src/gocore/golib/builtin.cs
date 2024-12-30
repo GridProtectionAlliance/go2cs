@@ -66,19 +66,10 @@ public static class builtin
     public const bool ᐧ = true;
 
     /// <summary>
-    /// Defines a constant to return a tuple that includes a boolean success indicator.
+    /// Defines a constant used as a discriminator for accessing overloads with
+    /// different return types.
     /// </summary>
-    public const bool OK = false;
-
-    /// <summary>
-    /// Defines a constant to return a tuple that includes an error indicator.
-    /// </summary>
-    public const bool ERR = false;
-
-    /// <summary>
-    /// Defines a constant to return a tuple that includes a value.
-    /// </summary>
-    public const bool VAL = false;
+    public const bool ꟷ = false;
 
     /// <summary>
     /// nil is a predeclared identifier representing the zero value for a pointer, channel,

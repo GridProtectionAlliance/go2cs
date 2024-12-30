@@ -119,6 +119,7 @@ const ShadowVarMarker = "\u0394"             // Variants: Δ Ʌ ꞥ
 const CapturedVarMarker = "\u0297"           // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"               // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "\u1427"                  // Variants: ᐧ true
+const OverloadDiscriminator = "\uA7F7"       // Variants: ꟷ false
 const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
@@ -860,6 +861,13 @@ func convertToCSFullTypeName(typeName string) string {
 		return fmt.Sprintf("%s.channel<%s>", RootNamespace, convertToCSTypeName(typeName[5:]))
 	}
 
+	if strings.HasPrefix(typeName, "chan<- ") {
+		return fmt.Sprintf("%s.channel/*<-*/<%s>", RootNamespace, convertToCSTypeName(typeName[7:]))
+	}
+
+	if strings.HasPrefix(typeName, "<-chan ") {
+		return fmt.Sprintf("%s./*<-*/channel<%s>", RootNamespace, convertToCSTypeName(typeName[7:]))
+	}
 	if typeName == "func()" {
 		return "System.Action"
 	}
