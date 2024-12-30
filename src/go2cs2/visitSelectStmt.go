@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"strconv"
@@ -48,7 +49,9 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 
 			// Check if CommClause.Comm is an AssignStmt
 			if assignStmt, ok := comClause.Comm.(*ast.AssignStmt); ok {
-				if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
+				lhsCount := len(assignStmt.Lhs)
+
+				if (lhsCount == 1 || lhsCount == 2) && len(assignStmt.Rhs) == 1 {
 					rhs := assignStmt.Rhs[0]
 
 					if unaryExpr, ok := rhs.(*ast.UnaryExpr); ok {
@@ -68,6 +71,10 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 							handled = true
 						}
 					}
+				} else {
+					assignment := v.getPrintedNode(assignStmt)
+					println(fmt.Sprintf("WARNING: @visitSelectStmt - Failed to resolve expected `AssignStmt` arguments: %s", assignment))
+					v.targetFile.WriteString(fmt.Sprintf("/* %s */", assignment))
 				}
 			} else if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok {
 				v.targetFile.WriteString(v.convExpr(sendStmt.Chan, nil))
@@ -134,7 +141,9 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 			if comClause.Comm != nil {
 				// Check if CommClause.Comm is an AssignStmt
 				if assignStmt, ok := comClause.Comm.(*ast.AssignStmt); ok {
-					if len(assignStmt.Lhs) == 1 && len(assignStmt.Rhs) == 1 {
+					lhsCount := len(assignStmt.Lhs)
+
+					if (lhsCount == 1 || lhsCount == 2) && len(assignStmt.Rhs) == 1 {
 						lhs := assignStmt.Lhs[0]
 						rhs := assignStmt.Rhs[0]
 
@@ -152,15 +161,32 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 
 								v.targetFile.WriteString("(out ")
 
-								if v.options.preferVarDecl {
-									v.targetFile.WriteString("var ")
-								} else {
-									exprType := convertToCSTypeName(v.getTypeName(lhs, false))
-									v.targetFile.WriteString(exprType)
-									v.targetFile.WriteRune(' ')
+								if assignStmt.Tok == token.DEFINE {
+									if v.options.preferVarDecl {
+										v.targetFile.WriteString("var ")
+									} else {
+										exprType := convertToCSTypeName(v.getTypeName(lhs, false))
+										v.targetFile.WriteString(exprType)
+										v.targetFile.WriteRune(' ')
+									}
 								}
 
 								v.targetFile.WriteString(v.convExpr(lhs, nil))
+
+								if lhsCount == 2 {
+									v.targetFile.WriteString(", out ")
+
+									if assignStmt.Tok == token.DEFINE {
+										if v.options.preferVarDecl {
+											v.targetFile.WriteString("var ")
+										} else {
+											v.targetFile.WriteString("bool ")
+										}
+									}
+
+									v.targetFile.WriteString(v.convExpr(assignStmt.Lhs[1], nil))
+								}
+
 								v.targetFile.WriteRune(')')
 							}
 						}

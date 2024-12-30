@@ -444,23 +444,57 @@ public struct channel<T> : IChannel, IEnumerable<T>
     }
 
     /// <summary>
+    /// Attempts to receive a value from the channel and boolean flag indicating if
+    /// the channel is not closed.
+    /// </summary>
+    /// <param name="value">Output parameter for received value.</param>
+    /// <param name="ok">Boolean flag indicating if the channel is not closed.</param>
+    /// <returns>
+    /// <c>true</c> if a value was received and channel was not closed;
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    public bool Received(out T value, out bool ok)
+    {
+        ok = !IsClosed;
+
+        if (ok)
+            return Received(out value);
+
+        value = zero<T>();
+        return false;
+    }
+
+    /// <summary>
     /// Attempts to receive a value from the channel.
     /// </summary>
     /// <param name="value">Output parameter for received value.</param>
     /// <returns><c>true</c> if a value was received; otherwise, <c>false</c>.</returns>
     /// <remarks>
-    /// <para>
-    /// For a buffered channel, method will block the current thread
-    /// if channel is full.
-    /// </para>
-    /// <para>
     /// Defines a Go style channel Receive operation.
-    /// </para>
     /// </remarks>
     /// <seealso cref="ᐸꟷ{T}(channel{T})"/>.
     public bool ꟷᐳ(out T value)
     {
         return Received(out value);
+    }
+
+    /// <summary>
+    /// Attempts to receive a value from the channel and boolean flag indicating if
+    /// the channel is not closed.
+    /// </summary>
+    /// <param name="value">Output parameter for received value.</param>
+    /// <param name="ok">Boolean flag indicating if the channel is not closed.</param>
+    /// <returns>
+    /// <c>true</c> if a value was received and channel was not closed;
+    /// otherwise, <c>false</c>.
+    /// </returns>
+    /// <remarks>
+    /// Defines a Go style channel Receive operation.
+    /// </remarks>
+    /// <seealso cref="ᐸꟷ{T}(channel{T})"/>.
+    public bool ꟷᐳ(out T value, out bool ok)
+    {
+        return Received(out value, out ok);
     }
 
     object IChannel.Receive()
