@@ -34,7 +34,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 	anyTypeIsInt := false
 
 	// Check if rhs is a call with a tuple result
-	var tupleTarget bool
+	var tupleResult bool
 
 	if rhsLen == 1 {
 		if callExpr, ok := rhsExprs[0].(*ast.CallExpr); ok {
@@ -44,8 +44,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				results := signature.Results()
 
 				if results != nil {
-					tupleTarget = results.Len() > 1
+					tupleResult = results.Len() > 1
 				}
+			}
+		} else if unaryExpr, ok := rhsExprs[0].(*ast.UnaryExpr); ok {
+			if unaryExpr.Op == token.ARROW {
+				tupleResult = lhsLen > 1
 			}
 		}
 	}
@@ -136,7 +140,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 		operator = " = "
 	}
 
-	if tupleTarget || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
+	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
 		// Handle LHS
 		if declaredCount > 0 {
 			if declaredCount > 1 || v.options.preferVarDecl {
@@ -223,6 +227,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					keyValueContext.ident = ident.Name
 					contexts = append(contexts, keyValueContext)
 				}
+			}
+
+			if tupleResult {
+				tupleResultContext := DefaultTupleResultContext()
+				tupleResultContext.isTupleResult = tupleResult
+				contexts = append(contexts, tupleResultContext)
 			}
 
 			rhsExpr := v.convExpr(rhs, contexts)

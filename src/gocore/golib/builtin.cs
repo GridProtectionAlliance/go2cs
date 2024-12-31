@@ -260,20 +260,6 @@ public static class builtin
     }
 
     /// <summary>
-    /// Gets a wait handle that is set when data is ready to be received from the channel.
-    /// </summary>
-    /// <param name="channel">Target channel.</param>
-    /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
-    /// <returns>Wait handle for queued send operation.</returns>
-    /// <remarks>
-    /// Defines a Go style channel Receive operation.
-    /// </remarks>
-    public static WaitHandle ᐸꟷ<T>(channel<T> channel, NilType _)
-    {
-        return channel.Receiving;
-    }
-
-    /// <summary>
     /// Removes an item from channel.
     /// </summary>
     /// <param name="channel">Target channel.</param>
@@ -293,9 +279,21 @@ public static class builtin
     /// </remarks>
     public static (T val, bool ok) ᐸꟷ<T>(channel<T> channel, bool _)
     {
-        return channel.IsClosed ? 
-            (zero<T>(), false) : 
-            (channel.Receive(), true);
+        return channel.Receive(_);
+    }
+
+    /// <summary>
+    /// Gets a wait handle that is set when data is ready to be received from the channel.
+    /// </summary>
+    /// <param name="channel">Target channel.</param>
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
+    /// <returns>Wait handle that is set when data is ready to be received from the channel.</returns>
+    /// <remarks>
+    /// Defines a Go style channel <see cref="channel{T}.Receiving"/> wait handle.
+    /// </remarks>
+    public static WaitHandle ᐸꟷ<T>(channel<T> channel, NilType _)
+    {
+        return channel.Receiving;
     }
 
     /// <summary>

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
+func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context TupleResultContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
 		// Check if the unary expression is an address of a structure field
@@ -46,11 +46,21 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr) string {
 	if unaryExpr.Op == token.ARROW {
 		// Check if the unary expression is channel receive operation
 		if _, ok := v.getType(unaryExpr.X, true).(*types.Chan); ok {
+			var tupleResult string
+
 			if v.options.useChannelOperators {
-				return fmt.Sprintf("%s(%s)", ChannelLeftOp, v.convExpr(unaryExpr.X, nil))
+				if context.isTupleResult {
+					tupleResult = ", " + OverloadDiscriminator
+				}
+
+				return fmt.Sprintf("%s(%s%s)", ChannelLeftOp, v.convExpr(unaryExpr.X, nil), tupleResult)
 			}
 
-			return fmt.Sprintf("%s.Receive()", v.convExpr(unaryExpr.X, nil))
+			if context.isTupleResult {
+				tupleResult = OverloadDiscriminator
+			}
+
+			return fmt.Sprintf("%s.Receive(%s)", v.convExpr(unaryExpr.X, nil), tupleResult)
 		}
 	}
 

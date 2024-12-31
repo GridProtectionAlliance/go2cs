@@ -48,17 +48,23 @@ func main() {
 
 	ch1 := make(chan int)
 	ch2 := make(chan int)
+	ch3 := make(chan int)
 
 	go g1(ch1)
 	go g2(ch2)
+	go g1(ch3)
 
-	select {
-	case v1 := <-ch1:
-		fmt.Println("Got: ", v1)
-	case v1 := <-ch2:
-		fmt.Println("Got: ", v1)
-		//default:
-		//    fmt.Println("Default")
+	for i := 0; i < 3; i++ {
+		select {
+		case v1 := <-ch1:
+			fmt.Println("Got: ", v1)
+		case v1 := <-ch2:
+			fmt.Println("Got: ", v1)
+		case v1, ok := <-ch3:
+			fmt.Println("OK: ", ok, " -- got: ", v1)
+			//default:
+			//    fmt.Println("Default")
+		}
 	}
 
 	s := []int{7, 2, 8, -9, 4, 0}
@@ -86,5 +92,6 @@ func main() {
 	// function converts bidirectional channel to send only channel
 	go sendOnly(mychanl)
 
-	fmt.Println(<-mychanl)
+	result, ok := <-mychanl
+	fmt.Println(result, ok)
 }

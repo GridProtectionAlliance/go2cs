@@ -274,7 +274,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꓸꓸꓸ"/>.</param>
     /// <returns>Wait handle for send operation.</returns>
     /// <remarks>
-    /// Defines a Go style channel Send operation.
+    /// Defines a Go style channel <see cref="Sending"/>> wait handle.
     /// </remarks>
     public WaitHandle ᐸꟷ(in T value, NilType _)
     {
@@ -317,6 +317,21 @@ public struct channel<T> : IChannel, IEnumerable<T>
     void IChannel.Send(object value)
     {
         Send((T)value);
+    }
+
+    /// <summary>
+    /// Attempts to send a value to the channel.
+    /// </summary>
+    /// <param name="value">Value to send.</param>
+    /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
+    public bool Sent(in T value)
+    {
+        if (!SendIsReady)
+            return false;
+
+        m_queue.Enqueue(value);
+        m_canTakeEvent.Set();
+        return true;
     }
 
     /// <summary>
@@ -409,18 +424,27 @@ public struct channel<T> : IChannel, IEnumerable<T>
     }
 
     /// <summary>
-    /// Attempts to send a value to the channel.
+    /// Removes an item from channel.
     /// </summary>
-    /// <param name="value">Value to send.</param>
-    /// <returns><c>true</c> if a value was sent; otherwise, <c>false</c>.</returns>
-    public bool Sent(in T value)
+    /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
+    /// <returns>
+    /// Received value and boolean result reporting whether the communication succeeded which is
+    /// <c>true</c> if the value received was delivered by a successful send operation ; otherwise,
+    /// <c>false</c> if a zero value generated because the channel is closed and empty.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// If the channel is empty, method will block the current thread until a value is sent to the channel.
+    /// </para>
+    /// <para>
+    /// Defines a Go style channel <see cref="channel{T}.Receive()"/>> operation.
+    /// </para>
+    /// </remarks>
+    public (T val, bool ok) Receive(bool _)
     {
-        if (!SendIsReady)
-            return false;
-
-        m_queue.Enqueue(value);
-        m_canTakeEvent.Set();
-        return true;
+        return IsClosed ?
+            (zero<T>(), false) :
+            (Receive(), true);
     }
 
     /// <summary>
@@ -435,6 +459,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
             if (m_queue.TryDequeue(out value!))
             {
                 m_canAddEvent.Set();
+                m_canTakeEvent.Reset();
                 return true;
             }
         }

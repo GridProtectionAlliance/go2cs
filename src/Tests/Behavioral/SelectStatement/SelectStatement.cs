@@ -28,7 +28,7 @@ private static void fibonacci(channel<nint> f, channel<nint> quit) {
         case 0:
             (x, y) = (y, x + y);
             break;
-        case 1 when ᐸꟷ(quit, ꟷ).ok:
+        case 1 when quit.ꟷᐳ(out _):
             fmt.Println("quit");
             return;
         }
@@ -47,15 +47,22 @@ private static void Main() {
     fmt.Println(ᐸꟷ(ch));
     var ch1 = new channel<nint>(1);
     var ch2 = new channel<nint>(1);
+    var ch3 = new channel<nint>(1);
     goǃ(_ => g1(ch1));
     goǃ(_ => g2(ch2));
-    switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ))) {
-    case 0 when ch1.ꟷᐳ(out var v1):
-        fmt.Println("Got: ", v1);
-        break;
-    case 1 when ch2.ꟷᐳ(out var v1):
-        fmt.Println("Got: ", v1);
-        break;
+    goǃ(_ => g1(ch3));
+    for (nint i = 0; i < 3; i++) {
+        switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ))) {
+        case 0 when ch1.ꟷᐳ(out var v1):
+            fmt.Println("Got: ", v1);
+            break;
+        case 1 when ch2.ꟷᐳ(out var v1):
+            fmt.Println("Got: ", v1);
+            break;
+        case 2 when ch3.ꟷᐳ(out var v1, out var okΔ1):
+            fmt.Println("OK: ", okΔ1, " -- got: ", v1);
+            break;
+        }
     }
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
     var c = new channel<nint>(1);
@@ -77,7 +84,8 @@ private static void Main() {
     fibonacci(f, quit);
     var mychanl = new channel<@string>(1);
     goǃ(_ => sendOnly(mychanl));
-    fmt.Println(ᐸꟷ(mychanl));
+    var (result, ok) = ᐸꟷ(mychanl, ꟷ);
+    fmt.Println(result, ok);
 }
 
 } // end main_package

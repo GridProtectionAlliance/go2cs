@@ -195,18 +195,16 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 					if unaryExpr, ok := exprStmt.X.(*ast.UnaryExpr); ok {
 						if unaryExpr.Op == token.ARROW {
 							v.targetFile.WriteString(" when ")
+							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
+							v.targetFile.WriteRune('.')
 
 							if v.options.useChannelOperators {
-								v.targetFile.WriteString(ChannelLeftOp)
-								v.targetFile.WriteRune('(')
-								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
-								v.targetFile.WriteString(", ")
-								v.targetFile.WriteString(OverloadDiscriminator)
-								v.targetFile.WriteString(").ok")
+								v.targetFile.WriteString(ChannelRightOp)
 							} else {
-								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
-								v.targetFile.WriteString(".Received(out _)")
+								v.targetFile.WriteString("Received")
 							}
+
+							v.targetFile.WriteString("(out _)")
 						}
 					}
 				}
