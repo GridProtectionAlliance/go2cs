@@ -4,6 +4,9 @@ using fmt = fmt_package;
 
 public static partial class main_package {
 
+[GoType("[]nint")]
+public partial struct IntSlice {}
+
 private static void g1(channel<nint> ch) {
     ch.ᐸꟷ(12);
 }
@@ -37,6 +40,45 @@ private static void fibonacci(channel<nint> f, channel<nint> quit) {
 
 private static void sendOnly(channel/*<-*/<@string> s) {
     s.ᐸꟷ("output"u8);
+}
+
+public static Action<Func<nint, bool>> All(this IntSlice s) {
+    return (Func<nint, bool> yield) => {
+        foreach (var (_, v) in s) {
+            if (!yield(v)) {
+                return;
+            }
+        }
+    };
+}
+
+private static void generate(channel/*<-*/<nint> ch) {
+    for (nint i = 2; i < 100; i++) {
+        ch.ᐸꟷ(i);
+    }
+}
+
+private static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
+    foreach (var i in src) {
+        if (i % prime != 0) {
+            dst.ᐸꟷ(i);
+        }
+    }
+}
+
+private static void sieve() {
+    var ch = new channel<nint>(1);
+    goǃ(_ => generate(ch));
+    while (ᐧ) {
+        nint prime = ᐸꟷ(ch);
+        fmt.Print(prime, "\n");
+        var ch1 = new channel<nint>(1);
+        goǃ(_ => filter(ch, ch1, prime));
+        ch = ch1;
+        if (prime > 95) {
+            break;
+        }
+    }
 }
 
 private static void Main() {
@@ -86,6 +128,10 @@ private static void Main() {
     goǃ(_ => sendOnly(mychanl));
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);
+    foreach (var v in range(((IntSlice)(s)).All())) {
+        fmt.Println(v);
+    }
+    //sieve();
 }
 
 } // end main_package

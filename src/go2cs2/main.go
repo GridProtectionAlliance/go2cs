@@ -906,19 +906,63 @@ func convertToCSFullTypeName(typeName string) string {
 	if strings.HasPrefix(typeName, "<-chan ") {
 		return fmt.Sprintf("%s./*<-*/channel<%s>", RootNamespace, convertToCSTypeName(typeName[7:]))
 	}
+
 	if typeName == "func()" {
-		return "System.Action"
+		return "Action"
 	}
 
 	if strings.HasPrefix(typeName, "func(") {
-		types := extractTypes(typeName[5 : len(typeName)-1])
-		csTypeNames := make([]string, len(types))
+		// Find the matching closing parenthesis for the parameter list
+		depth := 0
+		closingParenIndex := -1
 
-		for i, typeName := range types {
-			csTypeNames[i] = convertToCSTypeName(typeName)
+		for i := 5; i < len(typeName); i++ {
+			if typeName[i] == '(' {
+				depth++
+			} else if typeName[i] == ')' {
+				depth--
+				if depth == -1 {
+					closingParenIndex = i
+					break
+				}
+			}
 		}
 
-		return fmt.Sprintf("System.Action<%s>", strings.Join(csTypeNames, ", "))
+		if closingParenIndex == -1 {
+			return "Action" // Malformed input (unexpected)
+		}
+
+		// Extract parameter types, handling nested functions
+		paramString := typeName[5:closingParenIndex]
+		paramTypes := extractTypes(paramString)
+
+		// Convert parameter types to C#
+		csTypeNames := make([]string, len(paramTypes))
+
+		for i, pType := range paramTypes {
+			csTypeNames[i] = convertToCSTypeName(pType)
+		}
+
+		// Check for return type after the closing parenthesis
+		remainingType := strings.TrimSpace(typeName[closingParenIndex+1:])
+
+		if len(remainingType) > 0 {
+			// Has explicit return type
+			csReturnType := convertToCSTypeName(remainingType)
+
+			if len(csTypeNames) > 0 {
+				return fmt.Sprintf("Func<%s, %s>", strings.Join(csTypeNames, ", "), csReturnType)
+			}
+
+			return fmt.Sprintf("Func<%s>", csReturnType)
+		}
+
+		// No return type, use Action
+		if len(csTypeNames) > 0 {
+			return fmt.Sprintf("Action<%s>", strings.Join(csTypeNames, ", "))
+		}
+
+		return "Action"
 	}
 
 	// Handle pointer types
@@ -967,6 +1011,7 @@ func extractTypes(signature string) []string {
 
 		// Find the first space or end of string
 		var typeStart int
+
 		for i, char := range param {
 			if unicode.IsSpace(char) {
 				typeStart = i
@@ -979,7 +1024,7 @@ func extractTypes(signature string) []string {
 			types = append(types, param)
 		} else {
 			// Extract everything after the space
-			paramType := strings.TrimSpace(param[typeStart:])
+			paramType := convertToCSTypeName(strings.TrimSpace(param[typeStart:]))
 			types = append(types, paramType)
 		}
 	}

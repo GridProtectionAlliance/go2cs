@@ -61,6 +61,7 @@
   <!-- Define Go type aliases -->
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />
     <Using Include="System.UInt32" Alias="uint32" />

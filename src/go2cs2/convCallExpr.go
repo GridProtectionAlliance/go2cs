@@ -8,7 +8,7 @@ import (
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 	if ok, typeName := v.isTypeConversion(callExpr); ok {
-		return fmt.Sprintf("(%s)(%s)", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], nil))
+		return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], nil))
 	}
 
 	constructType := ""

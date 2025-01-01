@@ -28,10 +28,38 @@
         {
             get => ref m_value[index];
         }
-            
-        public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+        
+        public Span<nint> ꓸꓸꓸ => ToSpan();
 
-        public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+        public Span<nint> ToSpan()
+        {
+            return m_value.ToSpan();
+        }
+        
+        public ISlice? Append(object[] elems)
+        {
+            return ((ISlice)m_value).Append(elems);
+        }
+
+        public IEnumerator<(nint, <#=TypeName#>)> GetEnumerator()
+        {
+            return m_value.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)m_value).GetEnumerator();
+        }
+        
+        public bool Equals(IArray<<#=TypeName#>>? other)
+        {
+            return m_value.Equals(other);
+        }
+       
+        public bool Equals(ISlice<<#=TypeName#>>? other)
+        {
+           return m_value.Equals(other);
+        }
 
         public object Clone() => ((ICloneable)m_value).Clone();
 <#+

@@ -310,6 +310,41 @@ public static class builtin
     }
 
     /// <summary>
+    /// Enumerates over a range of integers.
+    /// </summary>
+    /// <param name="n">Number of integers to enumerate.</param>
+    /// <returns>Enumerable range of integers.</returns>
+    public static IEnumerable<int> range(nint n)
+    {
+        return Enumerable.Range(0, (int)n);
+    }
+
+    /// <summary>
+    /// Enumerates over a yield function.
+    /// </summary>
+    /// <param name="enumerator">Yield function.</param>
+    /// <returns>Enumerable range of values.</returns>
+    public static IEnumerable<object> range(Action<Func<bool>> enumerator)
+    {
+        return range<object>(e =>
+        {
+            bool yielder(object _) => e(default!);
+            enumerator(() => yielder(default!));
+        });
+    }
+
+    /// <summary>
+    /// Enumerates over a yield function.
+    /// </summary>
+    /// <typeparam name="T">Type of enumeration.</typeparam>
+    /// <param name="enumerator">Yield function.</param>
+    /// <returns>Enumerable range of values.</returns>
+    public static IEnumerable<T> range<T>(Action<Func<T, bool>> enumerator)
+    {
+        return new YieldFunctionEnumerable<T>(enumerator);
+    }
+
+    /// <summary>
     /// Constructs a complex value from two floating-point values.
     /// </summary>
     /// <param name="realPart">Real-part of complex value.</param>

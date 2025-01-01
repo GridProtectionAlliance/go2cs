@@ -11,13 +11,54 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 	v.targetFile.WriteString(v.newline)
 
 	rangeExpr := v.convExpr(rangeStmt.X, nil)
-	_, isMap := v.getExprType(rangeStmt.X).(*types.Map)
-	var isStr, untypedStr bool
+	rangeType := v.getExprType(rangeStmt.X)
 
-	if basicType, ok := v.getExprType(rangeStmt.X).(*types.Basic); ok {
-		kind := basicType.Kind()
-		isStr = kind == types.String || kind == types.UntypedString
-		untypedStr = kind == types.UntypedString
+	// Get the underlying type if it's a named type
+	if named, ok := rangeType.(*types.Named); ok {
+		rangeType = named.Underlying()
+	}
+
+	var isSlice, isArray, isMap, isChan, isStr, untypedStr, isInt, untypedInt bool
+	yieldFunc := -1
+
+	// Slice type is expected to be most common, so this is checked first
+	_, isSlice = rangeType.(*types.Slice)
+
+	if !isSlice {
+		_, isArray = rangeType.(*types.Array)
+	}
+
+	if !isSlice && !isArray {
+		_, isMap = rangeType.(*types.Map)
+
+		if !isMap {
+			_, isChan = rangeType.(*types.Chan)
+		}
+
+		if !isMap && !isChan {
+			yieldFunc = isYieldFunc(rangeType)
+		}
+
+		if !isMap && !isChan && yieldFunc == -1 {
+			if basicType, ok := rangeType.(*types.Basic); ok {
+				kind := basicType.Kind()
+
+				isInt = kind == types.Int || kind == types.UntypedInt
+				untypedInt = kind == types.UntypedInt
+
+				if !isInt {
+					isStr = kind == types.String || kind == types.UntypedString
+					untypedStr = kind == types.UntypedString
+				}
+			}
+		}
+	}
+
+	if !isSlice && !isArray && !isMap && !isChan && yieldFunc == -1 && !isInt && !isStr {
+		rangeVal := v.getPrintedNode(rangeStmt)
+		println(fmt.Sprintf("WARNING: @visitRangeStmt - unexpected `ast.RangeStmt` expression %s", rangeVal))
+		v.writeOutput("/* %s */", rangeVal)
+		return
 	}
 
 	var valExpr, valType, keyExpr, keyType string
@@ -26,6 +67,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 	// key/value in a slice or array: index/value
 	// key/value in a map: key/value
 	// key/value in a string: index/rune
+	// channel: element only
+	// int: value only
+	// func(func() bool): yield only
+	// func(func(V) bool): yield with value
+	// func(func(K, V) bool): yield with key/value
 
 	context := DefaultBlockStmtContext()
 	context.format.useNewLine = false
@@ -43,7 +89,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		valExpr = v.convExpr(rangeStmt.Value, nil)
 	}
 
-	if valExpr == "" {
+	if valExpr == "" && !(isChan || isInt || yieldFunc == 0 || yieldFunc == 1) {
 		valExpr = "_"
 	}
 
@@ -67,7 +113,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 			}
 		}
 
-		if valExpr != "_" {
+		if len(valExpr) > 0 && valExpr != "_" {
 			// Get ident for value expression and check for heap allocation
 			if ident, ok := rangeStmt.Value.(*ast.Ident); ok {
 				v.performEscapeAnalysis(ident, rangeStmt.Body)
@@ -90,7 +136,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 
 	var varInit string
 
-	if v.options.preferVarDecl && !(keyExpr == "_" && valExpr == "_") {
+	if v.options.preferVarDecl && !(keyExpr == "_" && (len(valExpr) == 0 || valExpr == "_")) {
 		varInit = "var "
 	}
 
@@ -134,7 +180,40 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		} else {
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
 		}
+	} else if isChan {
+		if v.options.preferVarDecl {
+			keyType = "var "
+		}
+
+		v.writeOutput("foreach (%s%s in %s)", keyType, keyExpr, rangeExpr)
+	} else if isInt {
+		if untypedInt {
+			rangeExpr = fmt.Sprintf("@int(%s)", rangeExpr)
+		}
+
+		if v.options.preferVarDecl {
+			keyType = "var "
+		}
+
+		v.writeOutput("foreach (%s%s in range(%s))", keyType, keyExpr, rangeExpr)
+	} else if yieldFunc > -1 {
+		if yieldFunc == 0 {
+			if v.options.preferVarDecl {
+				keyType = "var "
+			}
+
+			v.writeOutput("foreach (object %s in range(%s))", keyExpr, rangeExpr)
+		} else if yieldFunc == 1 {
+			if v.options.preferVarDecl {
+				keyType = "var "
+			}
+
+			v.writeOutput("foreach (%s%s in range(%s))", keyType, keyExpr, rangeExpr)
+		} else {
+			v.writeOutput("foreach (%s(%s%s, %s%s) in range(%s))", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
+		}
 	} else {
+		// Handle slice, array, and map types
 		if assignVars {
 			var innerPrefix, tempKeyExpr, tempValExpr string
 
@@ -207,4 +286,44 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 	// }
 
 	v.visitBlockStmt(rangeStmt.Body, context)
+}
+
+func isYieldFunc(t types.Type) int {
+	// First check if it's a function type
+	sig, ok := t.(*types.Signature)
+
+	if !ok {
+		return -1
+	}
+
+	// Check if it has exactly one parameter
+	params := sig.Params()
+
+	if params.Len() != 1 {
+		return -1
+	}
+
+	// Get the parameter type which should be a function
+	paramType := params.At(0).Type()
+	funcType, ok := paramType.(*types.Signature)
+
+	if !ok {
+		return -1
+	}
+
+	// Check if return type is bool
+	results := funcType.Results()
+
+	if results.Len() != 1 || !types.Identical(results.At(0).Type(), types.Typ[types.Bool]) {
+		return -1
+	}
+
+	// Now check the parameters of the inner function
+	innerParams := funcType.Params()
+
+	if innerParams.Len() < 3 {
+		return innerParams.Len()
+	}
+
+	return -1
 }

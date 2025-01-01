@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+type IntSlice []int
+
 func g1(ch chan int) {
 	ch <- 12
 }
@@ -35,6 +37,51 @@ func fibonacci(f, quit chan int) {
 
 func sendOnly(s chan<- string) {
 	s <- "output"
+}
+
+// All is an iterator over the elements of s.
+func (s IntSlice) All() func(yield func(int) bool) {
+    return func(yield func(int) bool) {
+        for _, v := range s {
+            if !yield(v) {
+                return
+            }
+        }
+    }
+}
+
+// Send the sequence 2, 3, 4, … to channel 'ch'.
+func generate(ch chan<- int) {
+	for i := 2; i < 100; i++ {
+		ch <- i // Send 'i' to channel 'ch'.
+	}
+}
+
+// Copy the values from channel 'src' to channel 'dst',
+// removing those divisible by 'prime'.
+func filter(src <-chan int, dst chan<- int, prime int) {
+	for i := range src { // Loop over values received from 'src'.
+		if i%prime != 0 {
+			dst <- i // Send 'i' to channel 'dst'.
+		}
+	}
+}
+
+// The prime sieve: Daisy-chain filter processes together.
+func sieve() {
+	ch := make(chan int) // Create a new channel.
+	go generate(ch)      // Start generate() as a subprocess.
+	for {
+		prime := <-ch
+		fmt.Print(prime, "\n")
+		ch1 := make(chan int)
+		go filter(ch, ch1, prime)
+		ch = ch1
+
+		if prime > 95 {
+			break
+		}
+	}
 }
 
 func main() {
@@ -94,4 +141,10 @@ func main() {
 
 	result, ok := <-mychanl
 	fmt.Println(result, ok)
+
+    for v := range IntSlice(s).All() {
+        fmt.Println(v)
+    }
+
+	sieve()
 }

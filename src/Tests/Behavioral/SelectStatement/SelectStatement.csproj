@@ -9,7 +9,7 @@
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
     <AssemblyTitle>$(Description)</AssemblyTitle>
-    <Copyright>Copyright © 2024</Copyright>
+    <Copyright>Copyright © 2025</Copyright>
     <Authors>$(Product) Authors</Authors>
     <Company>Grid Protection Alliance</Company>
     <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
@@ -61,6 +61,7 @@
   <!-- Define Go type aliases -->
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />
     <Using Include="System.UInt32" Alias="uint32" />

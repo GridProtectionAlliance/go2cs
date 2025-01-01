@@ -15,7 +15,7 @@ namespace go2cs.Templates
     /// Class to produce the template output
     /// </summary>
     
-    #line 1 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+    #line 1 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.VisualStudio.TextTemplating", "17.0.0.0")]
     public partial class ISliceImplementation : TemplateBase
     {
@@ -26,28 +26,28 @@ namespace go2cs.Templates
         public override string TransformText()
         {
             
-            #line 1 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 1 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
  // This template creates an inherited type, e.g., type MyFloat float64 in a <PackageName>_<StructName>StructOf(<GoTypeName>).cs file 
             
             #line default
             #line hidden
             this.Write("\r\n        public ");
             
-            #line 5 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 5 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write("[] Source => m_value;\r\n            \r\n        public ISlice<");
             
-            #line 7 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 7 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
             #line hidden
             this.Write("> Append(");
             
-            #line 7 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 7 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
@@ -74,7 +74,7 @@ namespace go2cs.Templates
             
         public ref ");
             
-            #line 27 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            #line 27 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
             
             #line default
@@ -83,17 +83,57 @@ namespace go2cs.Templates
         {
             get => ref m_value[index];
         }
+        
+        public Span<nint> ꓸꓸꓸ => ToSpan();
+
+        public Span<nint> ToSpan()
+        {
+            return m_value.ToSpan();
+        }
+        
+        public ISlice? Append(object[] elems)
+        {
+            return ((ISlice)m_value).Append(elems);
+        }
+
+        public IEnumerator<(nint, ");
             
-        public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
+            #line 44 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write(@")> GetEnumerator()
+        {
+            return m_value.GetEnumerator();
+        }
 
-        public IEnumerator GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
-
-        public object Clone() => ((ICloneable)m_value).Clone();
-");
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return ((IEnumerable)m_value).GetEnumerator();
+        }
+        
+        public bool Equals(IArray<");
+            
+            #line 54 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write(">? other)\r\n        {\r\n            return m_value.Equals(other);\r\n        }\r\n     " +
+                    "  \r\n        public bool Equals(ISlice<");
+            
+            #line 59 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(TypeName));
+            
+            #line default
+            #line hidden
+            this.Write(">? other)\r\n        {\r\n           return m_value.Equals(other);\r\n        }\r\n\r\n    " +
+                    "    public object Clone() => ((ICloneable)m_value).Clone();\r\n");
             return this.GenerationEnvironment.ToString();
         }
         
-        #line 37 "H:\Projects\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
+        #line 65 "C:\Projects\gpa\go2cs\src\go2cs.Templates\ISliceImplementation.tt"
 
 // Template Parameters
 public string TypeName;
