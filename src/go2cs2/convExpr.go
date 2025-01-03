@@ -183,7 +183,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		context := getExprContext[PatternMatchExprContext](contexts)
 		return v.convBinaryExpr(exprType, context)
 	case *ast.CallExpr:
-		return v.convCallExpr(exprType)
+		context := getExprContext[LambdaContext](contexts)
+		return v.convCallExpr(exprType, context)
 	case *ast.ChanType:
 		return v.convChanType(exprType)
 	case *ast.CompositeLit:

@@ -134,9 +134,9 @@ private static void Main() {
     var quitʗ1 = quit;
     goǃ(() => {
         for (nint i = 0; i < 10; i++) {
-            fmt.Println(ᐸꟷ(f));
+            fmt.Println(ᐸꟷ(fʗ1));
         }
-        quit.ᐸꟷ(0);
+        quitʗ1.ᐸꟷ(0);
     });
     fibonacci(f, quit);
     var mychanl = new channel<@string>(1);

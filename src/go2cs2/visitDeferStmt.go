@@ -9,7 +9,8 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	v.targetFile.WriteString(v.newline)
 	v.writeOutput("defer(")
 
-	callExpr := v.convCallExpr(deferStmt.Call)
+	// TODO: Setup to match GoStmt operations
+	callExpr := v.convCallExpr(deferStmt.Call, DefaultLambdaContext())
 
 	// C# defer implementation expects an Action delegate
 	if strings.HasSuffix(callExpr, "()") {

@@ -10,14 +10,39 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	v.enterLambdaConversion(goStmt)
 	defer v.exitLambdaConversion()
 
-	// Prepare captures specific to this go statement
-	v.prepareStmtCaptures(goStmt)
+	lambdaContext := DefaultLambdaContext()
+
+	// If we have a function literal, only prepare captures there, not on the GoStmt
+	if funcLit, ok := goStmt.Call.Fun.(*ast.FuncLit); ok {
+		if captures, exists := v.lambdaCapture.stmtCaptures[goStmt]; exists {
+			v.lambdaCapture.stmtCaptures[funcLit] = captures
+
+			// Delete captures from GoStmt to avoid double processing
+			delete(v.lambdaCapture.stmtCaptures, goStmt)
+			lambdaContext.deferredDecls = &strings.Builder{}
+
+		}
+	} else {
+		v.prepareStmtCaptures(goStmt)
+	}
 
 	result := strings.Builder{}
+	wroteDecls := false
 
-	if decls := v.generateCaptureDeclarations(); decls != "" {
+	callExpr := strings.TrimSpace(v.convCallExpr(goStmt.Call, lambdaContext))
+
+	if lambdaContext.deferredDecls != nil && lambdaContext.deferredDecls.Len() > 0 {
+		result.WriteString(lambdaContext.deferredDecls.String())
+		result.WriteString(v.indent(v.indentLevel))
+		wroteDecls = true
+	}
+
+	if decls := v.generateCaptureDeclarations(); strings.TrimSpace(decls) != "" {
 		result.WriteString(decls)
-	} else {
+		wroteDecls = true
+	}
+
+	if !wroteDecls {
 		result.WriteString(v.newline)
 		result.WriteString(v.indent(v.indentLevel))
 	}
@@ -26,8 +51,6 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	// as a valid C# identifier symbol, where the standard "!" is not. This is
 	// to disambiguate the method name from the namespace when calling function.
 	result.WriteString("go\u01C3(")
-
-	callExpr := strings.TrimSpace(v.convCallExpr(goStmt.Call))
 
 	// C# `go` method implementation expects an Action or WaitCallback delegate
 	if strings.HasSuffix(callExpr, "()") {

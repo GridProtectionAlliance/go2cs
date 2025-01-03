@@ -6,9 +6,9 @@ import (
 	"go/types"
 )
 
-func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
+func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
 	if ok, typeName := v.isTypeConversion(callExpr); ok {
-		return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], nil))
+		return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], []ExprContext{context}))
 	}
 
 	constructType := ""
@@ -113,6 +113,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 
 	lambdaContext := DefaultLambdaContext()
 	lambdaContext.isCallExpr = true
+	lambdaContext.deferredDecls = context.deferredDecls
 
 	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, []ExprContext{lambdaContext}), v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
 }
