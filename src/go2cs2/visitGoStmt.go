@@ -6,16 +6,30 @@ import (
 )
 
 func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
-	v.targetFile.WriteString(v.newline)
+	// Analyze captures specifically for this go statement
+	v.enterLambdaConversion(goStmt)
+	defer v.exitLambdaConversion()
+
+	// Prepare captures specific to this go statement
+	v.prepareStmtCaptures(goStmt)
+
+	result := strings.Builder{}
+
+	if decls := v.generateCaptureDeclarations(); decls != "" {
+		result.WriteString(decls)
+	} else {
+		result.WriteString(v.newline)
+		result.WriteString(v.indent(v.indentLevel))
+	}
 
 	// The following is basically "go!". We use the unicode bang-type character
 	// as a valid C# identifier symbol, where the standard "!" is not. This is
 	// to disambiguate the method name from the namespace when calling function.
-	v.writeOutput("go\u01C3(")
+	result.WriteString("go\u01C3(")
 
-	callExpr := v.convCallExpr(goStmt.Call)
+	callExpr := strings.TrimSpace(v.convCallExpr(goStmt.Call))
 
-	// C# go implementation expects an Action or WaitCallback delegate
+	// C# `go` method implementation expects an Action or WaitCallback delegate
 	if strings.HasSuffix(callExpr, "()") {
 		// Call Action delegate overload
 		callExpr = strings.TrimSuffix(callExpr, "()")
@@ -24,6 +38,8 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		callExpr = "_ => " + callExpr
 	}
 
-	v.targetFile.WriteString(callExpr)
-	v.targetFile.WriteString(");")
+	result.WriteString(callExpr)
+	result.WriteString(");")
+
+	v.targetFile.WriteString(result.String())
 }

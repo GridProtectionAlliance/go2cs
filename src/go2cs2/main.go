@@ -51,12 +51,16 @@ type CapturedVarInfo struct {
 
 // LambdaCapture handles analysis and tracking of captured variables
 type LambdaCapture struct {
-	capturedVars    map[*ast.Ident]*CapturedVarInfo // Map of original idents to their capture info
-	pendingCaptures map[string]*CapturedVarInfo     // Variables that need declarations before lambda
+	capturedVars    map[*ast.Ident]*CapturedVarInfo  // Map of original idents to their capture info
+	stmtCaptures    map[ast.Node]map[*ast.Ident]bool // Track which vars are captured by which stmt
+	pendingCaptures map[string]*CapturedVarInfo      // Variables that need declarations before lambda
+
+	currentLambdaVars map[string]string // Original var name to capture name tracking within current lambda
 
 	// Analysis phase tracking
-	analysisInLambda bool     // Currently analyzing a lambda
-	currentLambda    ast.Node // Current lambda being analyzed
+	analysisInLambda  bool     // Currently analyzing a lambda
+	currentLambda     ast.Node // Current lambda being analyzed
+	detectingCaptures bool
 
 	// Conversion phase tracking
 	conversionInLambda bool     // Currently converting a lambda
@@ -1128,10 +1132,20 @@ func (v *Visitor) getExprType(expr ast.Expr) types.Type {
 
 // Get the adjusted identifier name, considering captures and shadowing
 func (v *Visitor) getIdentName(ident *ast.Ident) string {
-	// Check if we're converting a lambda and need to use a captured variable
+	// Check if we're in a lambda conversion
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
+		// First check if we already have a mapping for this variable in this lambda
+		if captureName, ok := v.lambdaCapture.currentLambdaVars[ident.Name]; ok {
+			return captureName
+		}
+
+		// Then check if it needs to be captured
 		if captureInfo, ok := v.lambdaCapture.capturedVars[ident]; ok {
 			captureInfo.used = true
+
+			// Store the mapping for this lambda
+			v.lambdaCapture.currentLambdaVars[ident.Name] = captureInfo.copyIdent.Name
+
 			return captureInfo.copyIdent.Name
 		}
 	}

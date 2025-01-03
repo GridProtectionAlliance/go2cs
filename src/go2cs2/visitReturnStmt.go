@@ -5,9 +5,15 @@ import (
 	"strings"
 )
 
+const DeferredDeclsMarker = ">>MARKER:DEFERRED_DECLS<<"
+
 func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
-	v.targetFile.WriteString(v.newline)
-	v.writeOutput("return")
+	result := strings.Builder{}
+	deferredDecls := strings.Builder{}
+
+	result.WriteString(DeferredDeclsMarker)
+	result.WriteString(v.indent(v.indentLevel))
+	result.WriteString("return")
 
 	signature := v.currentFunction.Signature()
 
@@ -35,28 +41,30 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 			}
 
 			if results.Len() > 0 {
-				v.targetFile.WriteRune(' ')
+				result.WriteRune(' ')
 
 				if signature.Results().Len() > 1 {
-					v.targetFile.WriteRune('(')
-					v.targetFile.WriteString(results.String())
-					v.targetFile.WriteRune(')')
+					result.WriteRune('(')
+					result.WriteString(results.String())
+					result.WriteRune(')')
 				} else {
-					v.targetFile.WriteString(results.String())
+					result.WriteString(results.String())
 				}
 			}
 		}
 	} else {
-		v.targetFile.WriteRune(' ')
+		result.WriteRune(' ')
 
-		context := DefaultBasicLitContext()
+		basicLitContext := DefaultBasicLitContext()
 
 		if len(returnStmt.Results) > 1 {
-			v.targetFile.WriteRune('(')
+			result.WriteRune('(')
 
 			// u8 readonly spans are not supported in value tuple
-			context.u8StringOK = false
+			basicLitContext.u8StringOK = false
 		}
+
+		lambdaContext := DefaultLambdaContext()
 
 		resultParams := signature.Results()
 		resultParamIsInterface := paramsAreInterfaces(resultParams, true)
@@ -64,32 +72,44 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 		for i, expr := range returnStmt.Results {
 			if i > 0 {
-				v.targetFile.WriteString(", ")
+				result.WriteString(", ")
 			}
 
-			resultExpr := v.convExpr(expr, []ExprContext{context})
+			lambdaContext.deferredDecls = &strings.Builder{}
+
+			resultExpr := v.convExpr(expr, []ExprContext{basicLitContext, lambdaContext})
+
+			if lambdaContext.deferredDecls.Len() > 0 {
+				deferredDecls.WriteString(lambdaContext.deferredDecls.String())
+			}
 
 			if resultParamIsInterface != nil && resultParamIsInterface[i] {
 				resultParamType := resultParams.At(i).Type()
-				v.targetFile.WriteString(convertToInterfaceType(resultParamType, resultExpr))
+				result.WriteString(convertToInterfaceType(resultParamType, resultExpr))
 			} else {
 				if resultParamIsPointer != nil && resultParamIsPointer[i] {
 					ident := getIdentifier(expr)
 
 					if ident != nil && v.identIsParameter(ident) {
-						v.targetFile.WriteString(AddressPrefix)
+						result.WriteString(AddressPrefix)
 						resultExpr = strings.TrimPrefix(resultExpr, "@")
 					}
 				}
 
-				v.targetFile.WriteString(resultExpr)
+				result.WriteString(resultExpr)
 			}
 		}
 
 		if len(returnStmt.Results) > 1 {
-			v.targetFile.WriteRune(')')
+			result.WriteRune(')')
 		}
 	}
 
-	v.targetFile.WriteRune(';')
+	result.WriteRune(';')
+
+	if deferredDecls.Len() == 0 {
+		deferredDecls.WriteString(v.newline)
+	}
+
+	v.targetFile.WriteString(strings.ReplaceAll(result.String(), DeferredDeclsMarker, deferredDecls.String()))
 }

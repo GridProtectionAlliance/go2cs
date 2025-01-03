@@ -92,6 +92,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr) string {
 				}
 			}
 
+			println(fmt.Sprintf("INFO: @convCallExpr - call to generic `make` method is sub-optimal, consider adding custom make case for %s", typeName))
 			return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 		}
 

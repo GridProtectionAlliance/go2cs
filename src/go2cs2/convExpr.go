@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 )
 
 type KeyValueSource int
@@ -72,14 +73,16 @@ func (c ArrayTypeContext) getDefault() StmtContext {
 }
 
 type LambdaContext struct {
-	isAssignment bool
-	isCallExpr   bool
+	isAssignment  bool
+	isCallExpr    bool
+	deferredDecls *strings.Builder
 }
 
 func DefaultLambdaContext() LambdaContext {
 	return LambdaContext{
-		isAssignment: false,
-		isCallExpr:   false,
+		isAssignment:  false,
+		isCallExpr:    false,
+		deferredDecls: nil,
 	}
 }
 
@@ -187,7 +190,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		context := getExprContext[KeyValueContext](contexts)
 		return v.convCompositeLit(exprType, context)
 	case *ast.FuncLit:
-		return v.convFuncLit(exprType)
+		context := getExprContext[LambdaContext](contexts)
+		return v.convFuncLit(exprType, context)
 	// case *ast.FuncType:
 	// 	return v.convFuncType(exprType)
 	case *ast.Ident:

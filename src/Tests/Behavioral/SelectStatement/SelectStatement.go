@@ -52,7 +52,7 @@ func (s IntSlice) All() func(yield func(int) bool) {
 
 // Send the sequence 2, 3, 4, … to channel 'ch'.
 func generate(ch chan<- int) {
-	for i := 2; i < 100; i++ {
+	for i := 2; ; i++ {
 		ch <- i // Send 'i' to channel 'ch'.
 	}
 }
@@ -78,7 +78,7 @@ func sieve() {
 		go filter(ch, ch1, prime)
 		ch = ch1
 
-		if prime > 95 {
+		if prime > 40 {
 			break
 		}
 	}
@@ -123,7 +123,6 @@ func main() {
 	x, y := <-c, <-c // receive from c
 	z := <-c
 	fmt.Println(x, y, x+y, z)
-
 	f := make(chan int)
 	quit := make(chan int)
 	go func() {
@@ -141,10 +140,8 @@ func main() {
 
 	result, ok := <-mychanl
 	fmt.Println(result, ok)
-
     for v := range IntSlice(s).All() {
         fmt.Println(v)
     }
-
 	sieve()
 }

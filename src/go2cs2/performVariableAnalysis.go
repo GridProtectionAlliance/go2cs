@@ -191,8 +191,11 @@ func (p *varProcessor) processAssignStmt(stmt *ast.AssignStmt) {
 
 func newLambdaCapture() *LambdaCapture {
 	return &LambdaCapture{
-		capturedVars:    make(map[*ast.Ident]*CapturedVarInfo),
-		pendingCaptures: make(map[string]*CapturedVarInfo),
+		capturedVars:      make(map[*ast.Ident]*CapturedVarInfo),
+		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
+		pendingCaptures:   make(map[string]*CapturedVarInfo),
+		currentLambdaVars: make(map[string]string),
+		detectingCaptures: true,
 	}
 }
 
@@ -200,11 +203,13 @@ func newLambdaCapture() *LambdaCapture {
 func (v *Visitor) enterLambdaConversion(node ast.Node) {
 	v.lambdaCapture.conversionInLambda = true
 	v.lambdaCapture.currentConversion = node
+	v.lambdaCapture.currentLambdaVars = make(map[string]string)
 }
 
 func (v *Visitor) exitLambdaConversion() {
 	v.lambdaCapture.conversionInLambda = false
 	v.lambdaCapture.currentConversion = nil
+	v.lambdaCapture.currentLambdaVars = nil
 }
 
 // Perform variable analysis on the specified function block, handling shadowing and scope
@@ -215,8 +220,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	v.hasDefer = false
 	v.hasRecover = false
 
-	// Initialize lambda capture tracking
+	// Reset all capture-related state at the start of each function
 	v.lambdaCapture = newLambdaCapture()
+	v.capturedVarCount = make(map[string]int)
 
 	// Track all function-level declarations for proper shadowing
 	functionLevelDecls := make(map[string]*types.Var)
@@ -678,6 +684,44 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			tracker.exit()
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
 
+		case *ast.GoStmt:
+			// Enter capture analysis context for goroutine
+			v.lambdaCapture.analysisInLambda = true
+			v.lambdaCapture.currentLambda = node
+
+			// Create capture set for this statement
+			v.lambdaCapture.stmtCaptures[node] = make(map[*ast.Ident]bool)
+
+			// Process function expression
+			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
+				if id, ok := n.(*ast.Ident); ok {
+					v.processPotentialCapture(id)
+					// If it was captured, associate it with this statement
+					if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+						v.lambdaCapture.stmtCaptures[node][id] = true
+					}
+				}
+				return true
+			})
+
+			// Process arguments
+			for _, arg := range node.Call.Args {
+				ast.Inspect(arg, func(n ast.Node) bool {
+					if id, ok := n.(*ast.Ident); ok {
+						v.processPotentialCapture(id)
+						// If it was captured, associate it with this statement
+						if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+							v.lambdaCapture.stmtCaptures[node][id] = true
+						}
+					}
+					return true
+				})
+			}
+
+			// Exit capture analysis context
+			v.lambdaCapture.analysisInLambda = false
+			v.lambdaCapture.currentLambda = nil
+
 		case *ast.IfStmt:
 			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
 			tracker := registry.get(IfTracker)
@@ -959,44 +1003,41 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
-	// Get the variable object
+	// Skip if we've already recorded this capture
+	if v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] != nil {
+		if _, exists := v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda][ident]; exists {
+			return
+		}
+	}
+
 	obj := v.info.Uses[ident]
+
 	if obj == nil {
 		return
 	}
 
 	varObj, ok := obj.(*types.Var)
+
 	if !ok {
 		return
 	}
 
-	// Check if the variable needs to be captured
 	if !v.shouldCapture(varObj, ident) {
 		return
 	}
 
-	// Get the type of the variable
 	varType := varObj.Type()
+
 	if !v.capturedLambdaVarRequiresCopy(varType) {
 		return
 	}
 
-	// Create capture info if not already captured
-	if _, exists := v.lambdaCapture.capturedVars[ident]; !exists {
-		copyIdent := &ast.Ident{
-			Name: v.getCapturedVarName(ident.Name),
-			Obj:  ident.Obj,
-		}
-
-		info := &CapturedVarInfo{
-			origIdent: ident,
-			copyIdent: copyIdent,
-			varType:   varType,
-		}
-
-		v.lambdaCapture.capturedVars[ident] = info
-		v.lambdaCapture.pendingCaptures[ident.Name] = info
+	// Just record that this needs to be captured, don't generate names yet
+	if v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] == nil {
+		v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] = make(map[*ast.Ident]bool)
 	}
+
+	v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda][ident] = true
 }
 
 // Helper to determine if an expression requires lambda conversion
@@ -1047,12 +1088,19 @@ func (v *Visitor) isMethodValue(sel *ast.SelectorExpr, isCallExpr bool) bool {
 // Determine if a type needs to be copied when captured
 func (v *Visitor) capturedLambdaVarRequiresCopy(t types.Type) bool {
 	switch typ := t.Underlying().(type) {
-	case *types.Array, *types.Struct:
+	case *types.Array:
+		return true
+	case *types.Struct:
+		return true
+	case *types.Chan:
+		return true
+	case *types.Slice:
+		return true
+	case *types.Map:
 		return true
 	case *types.Named:
 		return v.capturedLambdaVarRequiresCopy(typ.Underlying())
 	}
-
 	return false
 }
 
@@ -1061,11 +1109,66 @@ func (v *Visitor) getCapturedVarName(varPrefix string) string {
 		v.capturedVarCount = make(map[string]int)
 	}
 
+	// Get counter specific to this variable prefix
 	count := v.capturedVarCount[varPrefix]
-	count++
-	v.capturedVarCount[varPrefix] = count
 
+	// Only increment during name generation phase
+	if !v.lambdaCapture.detectingCaptures {
+		count++
+		v.capturedVarCount[varPrefix] = count
+	}
+
+	// Return the capture name using the variable-specific counter
 	return fmt.Sprintf("%s%s%d", varPrefix, CapturedVarMarker, count)
+}
+
+func (v *Visitor) prepareStmtCaptures(stmt ast.Node) {
+	if captures, ok := v.lambdaCapture.stmtCaptures[stmt]; ok {
+		v.lambdaCapture.detectingCaptures = false
+
+		// Use a map to ensure unique variables
+		uniqueVars := make(map[string]*ast.Ident)
+
+		for ident := range captures {
+			// Only keep one instance of each variable name
+			uniqueVars[ident.Name] = ident
+		}
+
+		// Create sorted list from unique variables
+		idents := make([]*ast.Ident, 0, len(uniqueVars))
+
+		for _, ident := range uniqueVars {
+			idents = append(idents, ident)
+		}
+
+		sort.Slice(idents, func(i, j int) bool {
+			return idents[i].Name < idents[j].Name
+		})
+
+		// Process unique captures in a consistent order
+		for _, ident := range idents {
+			captureName := v.getCapturedVarName(ident.Name)
+
+			copyIdent := &ast.Ident{
+				Name: captureName,
+				Obj:  ident.Obj,
+			}
+
+			info := &CapturedVarInfo{
+				origIdent: ident,
+				copyIdent: copyIdent,
+				varType:   v.info.TypeOf(ident),
+			}
+
+			v.lambdaCapture.pendingCaptures[ident.Name] = info
+			v.lambdaCapture.currentLambdaVars[ident.Name] = captureName
+		}
+	}
+}
+
+func (v *Visitor) resetPendingCaptures() {
+	// Don't reset capturedVars as it maintains the naming sequence
+	v.lambdaCapture.pendingCaptures = make(map[string]*CapturedVarInfo)
 }
 
 // Generate declarations for pending captures - written out before lambda expression

@@ -5,14 +5,20 @@ import (
 	"strings"
 )
 
-func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
+func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
 	v.enterLambdaConversion(funcLit)
 	defer v.exitLambdaConversion()
+
+	v.prepareStmtCaptures(funcLit)
 
 	result := strings.Builder{}
 
 	if decls := v.generateCaptureDeclarations(); decls != "" {
-		result.WriteString(decls)
+		if context.deferredDecls == nil {
+			result.WriteString(decls)
+		} else {
+			context.deferredDecls.WriteString(strings.TrimRight(decls, " "))
+		}
 	}
 
 	var parameterSignature string
@@ -20,11 +26,11 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit) string {
 	// For C#, lambda return type is inferred and not explicitly declared
 	_, parameterSignature = v.convFuncType(funcLit.Type)
 
-	context := DefaultBlockStmtContext()
-	context.format.useNewLine = false
+	blockStatementContext := DefaultBlockStmtContext()
+	blockStatementContext.format.useNewLine = false
 
 	v.pushBlock()
-	v.visitBlockStmt(funcLit.Body, context)
+	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
 
 	if v.firstStatementIsReturn {
