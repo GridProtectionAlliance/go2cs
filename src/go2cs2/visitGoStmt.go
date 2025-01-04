@@ -54,11 +54,9 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 
 	// C# `go` method implementation expects an Action or WaitCallback delegate
 	if strings.HasSuffix(callExpr, "()") {
-		// Call Action delegate overload
-		callExpr = strings.TrimSuffix(callExpr, "()")
+		callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
 	} else {
-		// Call WaitCallback delegate overload
-		callExpr = "_ => " + callExpr
+		callExpr = "_ => " + callExpr // WaitCallback delegate
 	}
 
 	result.WriteString(callExpr)

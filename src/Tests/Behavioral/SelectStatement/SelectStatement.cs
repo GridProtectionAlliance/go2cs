@@ -144,7 +144,7 @@ private static void Main() {
     goǃ(_ => sendOnly(mychanlʗ1));
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);
-    foreach (var v in range(((IntSlice)(s)).All())) {
+    foreach (var v in range(((IntSlice)s).All())) {
         fmt.Println(v);
     }
     sieve();

@@ -722,6 +722,47 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			v.lambdaCapture.analysisInLambda = false
 			v.lambdaCapture.currentLambda = nil
 
+		// Check for defer and recover calls
+		case *ast.DeferStmt:
+			v.hasDefer = true
+
+			// Enter capture analysis context for goroutine
+			v.lambdaCapture.analysisInLambda = true
+			v.lambdaCapture.currentLambda = node
+
+			// Create capture set for this statement
+			v.lambdaCapture.stmtCaptures[node] = make(map[*ast.Ident]bool)
+
+			// Process function expression
+			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
+				if id, ok := n.(*ast.Ident); ok {
+					v.processPotentialCapture(id)
+					// If it was captured, associate it with this statement
+					if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+						v.lambdaCapture.stmtCaptures[node][id] = true
+					}
+				}
+				return true
+			})
+
+			// Process arguments
+			for _, arg := range node.Call.Args {
+				ast.Inspect(arg, func(n ast.Node) bool {
+					if id, ok := n.(*ast.Ident); ok {
+						v.processPotentialCapture(id)
+						// If it was captured, associate it with this statement
+						if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+							v.lambdaCapture.stmtCaptures[node][id] = true
+						}
+					}
+					return true
+				})
+			}
+
+			// Exit capture analysis context
+			v.lambdaCapture.analysisInLambda = false
+			v.lambdaCapture.currentLambda = nil
+
 		case *ast.IfStmt:
 			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
 			tracker := registry.get(IfTracker)
@@ -934,13 +975,6 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			tracker.exit()
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-
-		// Check for defer and recover calls
-		case *ast.DeferStmt:
-			v.hasDefer = true
-
-			// Visit the function call
-			visitNode(node.Call)
 
 		case *ast.CallExpr:
 			if fun, ok := node.Fun.(*ast.Ident); ok {
