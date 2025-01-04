@@ -8,7 +8,15 @@ import (
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
 	if ok, typeName := v.isTypeConversion(callExpr); ok {
-		return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), v.convExpr(callExpr.Args[0], []ExprContext{context}))
+		arg := callExpr.Args[0]
+		expr := v.convExpr(arg, nil)
+
+		// Determine if we need parentheses around the expression
+		if v.needsParentheses(arg) {
+			return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), expr)
+		}
+
+		return fmt.Sprintf("((%s)%s)", getSanitizedIdentifier(typeName), expr)
 	}
 
 	constructType := ""
@@ -154,6 +162,35 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 
 	// Check if the argument type is convertible to the target type
 	return types.ConvertibleTo(argType, targetType), typeName.Name()
+}
+
+func (v *Visitor) needsParentheses(expr ast.Expr) bool {
+	switch expr.(type) {
+	case *ast.Ident:
+		return false
+	case *ast.CallExpr:
+		return false
+	case *ast.SelectorExpr:
+		return false
+	case *ast.BasicLit:
+		return false
+	case *ast.CompositeLit:
+		return false
+	case *ast.ParenExpr:
+		return false
+	case *ast.UnaryExpr:
+		// Unary expressions like -x or !x need parentheses
+		return true
+	case *ast.BinaryExpr:
+		// Binary expressions like x + y need parentheses
+		return true
+	case *ast.IndexExpr:
+		// Array/slice indexing like arr[i] doesn't need parentheses
+		return false
+	default:
+		// For any other expression types, err on the side of caution
+		return true
+	}
 }
 
 func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
