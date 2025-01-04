@@ -21,13 +21,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
 
-	v.currentFunction = v.info.ObjectOf(funcDecl.Name).(*types.Func)
+	v.currentFuncDecl = funcDecl
+	v.currentFuncType = v.info.ObjectOf(funcDecl.Name).(*types.Func)
 
-	if v.currentFunction == nil {
+	if v.currentFuncType == nil {
 		panic("Failed to find function \"" + goFunctionName + "\" in the type info")
 	}
 
-	signature := v.currentFunction.Signature()
+	signature := v.currentFuncType.Signature()
 
 	// Analyze function variables for reassignments and redeclarations (variable shadows)
 	v.performVariableAnalysis(funcDecl, signature)

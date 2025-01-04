@@ -91,7 +91,8 @@ type Visitor struct {
 
 	// FuncDecl variables
 	inFunction       bool
-	currentFunction  *types.Func
+	currentFuncDecl  *ast.FuncDecl
+	currentFuncType  *types.Func
 	paramNames       HashSet[string]
 	hasDefer         bool
 	hasRecover       bool

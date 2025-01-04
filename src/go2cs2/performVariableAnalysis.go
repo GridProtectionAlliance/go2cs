@@ -1200,11 +1200,6 @@ func (v *Visitor) prepareStmtCaptures(stmt ast.Node) {
 	}
 }
 
-func (v *Visitor) resetPendingCaptures() {
-	// Don't reset capturedVars as it maintains the naming sequence
-	v.lambdaCapture.pendingCaptures = make(map[string]*CapturedVarInfo)
-}
-
 // Generate declarations for pending captures - written out before lambda expression
 func (v *Visitor) generateCaptureDeclarations() string {
 	if v.lambdaCapture == nil {

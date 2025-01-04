@@ -15,11 +15,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	result.WriteString(v.indent(v.indentLevel))
 	result.WriteString("return")
 
-	signature := v.currentFunction.Signature()
+	signature := v.currentFuncType.Signature()
 
 	if returnStmt.Results == nil {
 		// Check if result signature has named return values
-		if v.currentFunction != nil {
+		if v.currentFuncType != nil {
 			results := &strings.Builder{}
 
 			for i := 0; i < signature.Results().Len(); i++ {

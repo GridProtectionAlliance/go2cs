@@ -4,7 +4,7 @@
 //     file may cause incorrect behavior and will be lost
 //     if the code is regenerated.
 //
-//     Generated on 2025 January 04 00:40:46 UTC
+//     Generated on 2025 January 04 08:30:09 UTC
 // </auto-generated>
 //---------------------------------------------------------
 namespace go;
