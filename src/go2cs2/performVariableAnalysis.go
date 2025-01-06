@@ -410,7 +410,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	declareVar := func(varName string, varObj *types.Var, ident *ast.Ident) {
 		var adjustedName string
 
-		if funcLevelVar, exists := functionLevelDecls[varName]; exists {
+		// First check if this variable name conflicts with a function name
+		if v.isFunctionNameInScope(varName) {
+			adjustedName = getShadowedVarName(varName)
+		} else if funcLevelVar, exists := functionLevelDecls[varName]; exists {
 			needsShadowing := false
 
 			// Check if we're in any tracked statement that requires shadowing
@@ -1269,4 +1272,20 @@ func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
 	}
 
 	return declaredOutside
+}
+
+// Check if a name conflicts with any function in scope
+func (v *Visitor) isFunctionNameInScope(name string) bool {
+	// Check package scope for the name
+	obj := v.pkg.Scope().Lookup(name)
+	if obj == nil {
+		return false
+	}
+
+	// Check if it's a function and is from our package
+	if funcObj, ok := obj.(*types.Func); ok {
+		return funcObj.Pkg() == v.pkg
+	}
+
+	return false
 }
