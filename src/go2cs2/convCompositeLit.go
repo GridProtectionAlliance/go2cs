@@ -98,7 +98,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	var newSpace string
 
-	if callContext.keyValueSource == StructSource || arrayTypeContext.compositeInitializer {
+	if callContext.keyValueSource == ArraySource || callContext.keyValueSource == MapSource || callContext.keyValueSource == StructSource || arrayTypeContext.compositeInitializer {
 		newSpace = " "
 	} else {
 		newSpace = ""
