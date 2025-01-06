@@ -1314,10 +1314,80 @@ func (v *Visitor) isFunctionNameInScope(name string) bool {
 		return false
 	}
 
-	// Check if it's a function and is from our package
-	if funcObj, ok := obj.(*types.Func); ok {
-		return funcObj.Pkg() == v.pkg
+	// Only proceed if it's a function from our package
+	funcObj, ok := obj.(*types.Func)
+	if !ok || funcObj.Pkg() != v.pkg {
+		return false
 	}
 
-	return false
+	// Now we need to analyze the current function's scope to see if:
+	// 1. The function is used before any variable declaration with the same name
+	// 2. The function is used as a value (delegate) rather than called
+	if v.currentFuncDecl == nil {
+		return false // Not in a function scope
+	}
+
+	var foundUsageBeforeDecl bool
+	var foundDelegateUsage bool
+	var varDeclPos token.Pos
+
+	// Find variable declaration position
+	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
+		switch node := n.(type) {
+		case *ast.ValueSpec:
+			for _, ident := range node.Names {
+				if ident.Name == name {
+					varDeclPos = ident.Pos()
+					return false
+				}
+			}
+		case *ast.AssignStmt:
+			if node.Tok == token.DEFINE {
+				for _, expr := range node.Lhs {
+					if ident, ok := expr.(*ast.Ident); ok && ident.Name == name {
+						varDeclPos = ident.Pos()
+						return false
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	// Track parent node during traversal
+	var parent ast.Node
+
+	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
+		if n == nil {
+			return true
+		}
+
+		switch node := n.(type) {
+		case *ast.CallExpr:
+			// Save as parent for checking identifiers
+			parent = node
+		case *ast.Ident:
+			if node.Name == name {
+				// Check if this identifier refers to our function
+				if obj, ok := v.info.Uses[node].(*types.Func); ok && obj == funcObj {
+					// Check if it's part of a call expression
+					if callExpr, ok := parent.(*ast.CallExpr); ok {
+						// Only consider it a conflict if the call is before the variable declaration
+						if varDeclPos == token.NoPos || callExpr.Pos() < varDeclPos {
+							foundUsageBeforeDecl = true
+						}
+					} else {
+						// Used as a value rather than called
+						foundDelegateUsage = true
+					}
+				}
+			}
+		default:
+			// Save as parent for next iteration
+			parent = node
+		}
+		return true
+	})
+
+	return foundUsageBeforeDecl || foundDelegateUsage
 }

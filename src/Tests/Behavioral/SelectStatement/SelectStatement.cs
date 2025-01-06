@@ -16,11 +16,11 @@ private static void g2(channel<nint> ch) {
 }
 
 private static void sum(slice<nint> s, channel<nint> c) {
-    nint sumΔ1 = 0;
+    nint sum = 0;
     foreach (var (_, v) in s) {
-        sumΔ1 += v;
+        sum += v;
     }
-    c.ᐸꟷ(sumΔ1);
+    c.ᐸꟷ(sum);
 }
 
 private static void fibonacci(channel<nint> f, channel<nint> quit) {
