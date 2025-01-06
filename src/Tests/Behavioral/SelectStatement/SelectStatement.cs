@@ -16,11 +16,11 @@ private static void g2(channel<nint> ch) {
 }
 
 private static void sum(slice<nint> s, channel<nint> c) {
-    nint sum = 0;
+    nint sumΔ1 = 0;
     foreach (var (_, v) in s) {
-        sum += v;
+        sumΔ1 += v;
     }
-    c.ᐸꟷ(sum);
+    c.ᐸꟷ(sumΔ1);
 }
 
 private static void fibonacci(channel<nint> f, channel<nint> quit) {
@@ -85,23 +85,31 @@ private static void sieve() {
     }
 }
 
+private static nint f() {
+    return 0;
+}
+
 private static void Main() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);
     fmt.Println(ᐸꟷ(ch));
     fmt.Println(ᐸꟷ(ch));
+    var a = new slice<nint>(2);
     var ch1 = new channel<nint>(1);
     var ch2 = new channel<nint>(1);
     var ch3 = new channel<nint>(1);
+    var ch4 = new channel<nint>(1);
     var ch1ʗ1 = ch1;
     goǃ(_ => g1(ch1ʗ1));
     var ch2ʗ1 = ch2;
     goǃ(_ => g2(ch2ʗ1));
     var ch3ʗ1 = ch3;
     goǃ(_ => g1(ch3ʗ1));
-    for (nint i = 0; i < 3; i++) {
-        switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ))) {
+    var ch4ʗ1 = ch4;
+    goǃ(_ => g2(ch4ʗ1));
+    for (nint i = 0; i < 4; i++) {
+        switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
         case 0 when ch1.ꟷᐳ(out var v1):
             fmt.Println("Got: ", v1);
             break;
@@ -110,6 +118,9 @@ private static void Main() {
             break;
         case 2 when ch3.ꟷᐳ(out var v1, out var okΔ1):
             fmt.Println("OK: ", okΔ1, " -- got: ", v1);
+            break;
+        case 3 when ch4.ꟷᐳ(out a[f()]):
+            fmt.Println("Got: ", a[f()]);
             break;
         }
     }
@@ -128,9 +139,9 @@ private static void Main() {
     nint y = ᐸꟷ(c);
     nint z = ᐸꟷ(c);
     fmt.Println(x, y, x + y, z);
-    var f = new channel<nint>(1);
+    var fΔ1 = new channel<nint>(1);
     var quit = new channel<nint>(1);
-    var fʗ1 = f;
+    var fʗ1 = fΔ1;
     var quitʗ1 = quit;
     goǃ(() => {
         for (nint i = 0; i < 10; i++) {
@@ -138,7 +149,7 @@ private static void Main() {
         }
         quitʗ1.ᐸꟷ(0);
     });
-    fibonacci(f, quit);
+    fibonacci(fΔ1, quit);
     var mychanl = new channel<@string>(1);
     var mychanlʗ1 = mychanl;
     goǃ(_ => sendOnly(mychanlʗ1));

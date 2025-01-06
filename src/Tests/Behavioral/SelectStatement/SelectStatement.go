@@ -41,13 +41,13 @@ func sendOnly(s chan<- string) {
 
 // All is an iterator over the elements of s.
 func (s IntSlice) All() func(yield func(int) bool) {
-    return func(yield func(int) bool) {
-        for _, v := range s {
-            if !yield(v) {
-                return
-            }
-        }
-    }
+	return func(yield func(int) bool) {
+		for _, v := range s {
+			if !yield(v) {
+				return
+			}
+		}
+	}
 }
 
 // Send the sequence 2, 3, 4, … to channel 'ch'.
@@ -84,6 +84,10 @@ func sieve() {
 	}
 }
 
+func f() int {
+	return 0
+}
+
 func main() {
 	ch := make(chan int, 2)
 
@@ -93,15 +97,18 @@ func main() {
 	fmt.Println(<-ch)
 	fmt.Println(<-ch)
 
+	a := make([]int, 2)
 	ch1 := make(chan int)
 	ch2 := make(chan int)
 	ch3 := make(chan int)
+	ch4 := make(chan int)
 
 	go g1(ch1)
 	go g2(ch2)
 	go g1(ch3)
+	go g2(ch4)
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 4; i++ {
 		select {
 		case v1 := <-ch1:
 			fmt.Println("Got: ", v1)
@@ -109,6 +116,8 @@ func main() {
 			fmt.Println("Got: ", v1)
 		case v1, ok := <-ch3:
 			fmt.Println("OK: ", ok, " -- got: ", v1)
+		case a[f()] = <-ch4:
+			fmt.Println("Got: ", a[f()])
 			//default:
 			//    fmt.Println("Default")
 		}
@@ -140,8 +149,8 @@ func main() {
 
 	result, ok := <-mychanl
 	fmt.Println(result, ok)
-    for v := range IntSlice(s).All() {
-        fmt.Println(v)
-    }
+	for v := range IntSlice(s).All() {
+		fmt.Println(v)
+	}
 	sieve()
 }

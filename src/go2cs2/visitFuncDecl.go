@@ -24,6 +24,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.currentFuncDecl = funcDecl
 	v.currentFuncType = v.info.ObjectOf(funcDecl.Name).(*types.Func)
 
+	v.varNames = make(map[*types.Var]string)
+
 	if v.currentFuncType == nil {
 		panic("Failed to find function \"" + goFunctionName + "\" in the type info")
 	}

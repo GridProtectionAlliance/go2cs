@@ -226,7 +226,6 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Track all function-level declarations for proper shadowing
 	functionLevelDecls := make(map[string]*types.Var)
-	var varNames = make(map[*types.Var]string)       // Map from types.Var to adjusted names
 	var nameCounts = make(map[string]int)            // Counts for generating unique names
 	var declaredPos = make(map[*types.Var]token.Pos) // Track declaration positions
 
@@ -235,7 +234,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Initialize local variables names from globals
 	for varName, obj := range v.globalScope {
-		varNames[obj] = varName
+		v.varNames[obj] = varName
 	}
 
 	// Helper function to determine if a node is directly in the function body
@@ -444,7 +443,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			nameCounts[varName] = 0
 		}
 
-		varNames[varObj] = adjustedName
+		v.varNames[varObj] = adjustedName
 		v.identNames[ident] = adjustedName
 		v.isReassigned[ident] = false
 
@@ -457,7 +456,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		if varObj == nil {
 			return
 		}
-		adjustedName := varNames[varObj]
+		adjustedName := v.varNames[varObj]
 		v.identNames[ident] = getSanitizedIdentifier(adjustedName)
 		v.isReassigned[ident] = true
 	}
@@ -640,7 +639,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		case *ast.Ident:
 			if obj := v.info.Uses[node]; obj != nil {
 				if varObj, ok := obj.(*types.Var); ok {
-					if adjustedName, ok := varNames[varObj]; ok {
+					if adjustedName, ok := v.varNames[varObj]; ok {
 						v.identNames[node] = adjustedName
 					}
 				}
@@ -1217,7 +1216,7 @@ func (v *Visitor) generateCaptureDeclarations() string {
 
 	var decls strings.Builder
 
-	// Sort names for consistent output
+	// Sort captured names for consistent output
 	names := make([]string, 0, len(pendingCaptures))
 
 	for name, info := range pendingCaptures {
@@ -1228,12 +1227,19 @@ func (v *Visitor) generateCaptureDeclarations() string {
 
 	sort.Strings(names)
 
-	// Generate declarations
+	wasInLambda := false
+
+	if v.lambdaCapture != nil {
+		wasInLambda = v.lambdaCapture.conversionInLambda
+	}
+
 	for _, name := range names {
 		info := pendingCaptures[name]
+
 		decls.WriteString(v.newline)
 		decls.WriteString(v.indent(v.indentLevel))
 
+		// "var" vs. explicit type
 		if v.options.preferVarDecl {
 			decls.WriteString("var ")
 		} else {
@@ -1241,16 +1247,42 @@ func (v *Visitor) generateCaptureDeclarations() string {
 			decls.WriteRune(' ')
 		}
 
+		// The left-hand side is the new capture name, e.g. "fʗ1"
 		decls.WriteString(info.copyIdent.Name)
 		decls.WriteString(" = ")
-		decls.WriteString(info.origIdent.Name)
+
+		// Temporarily turn off in-lambda logic so we don't map back to fʗ1
+		if v.lambdaCapture != nil {
+			v.lambdaCapture.conversionInLambda = false
+		}
+
+		// Lookup the *types.Var for the original ident:
+		obj := v.info.Uses[info.origIdent]
+
+		// Fallback to original .Name if anything is missing
+		outerName := info.origIdent.Name
+
+		// If it’s a Var, see if we have a final overshadowed name in varNames
+		if varObj, ok := obj.(*types.Var); ok {
+			if shadowedName, found := v.varNames[varObj]; found {
+				outerName = shadowedName
+			}
+		}
+
+		// Restore old lambda state
+		if v.lambdaCapture != nil {
+			v.lambdaCapture.conversionInLambda = wasInLambda
+		}
+
+		// Now print e.g. "fʗ1 = fΔ1;"
+		decls.WriteString(outerName)
 		decls.WriteString(";")
+
 		info.used = true
 	}
 
 	decls.WriteString(v.newline)
 	decls.WriteString(v.indent(v.indentLevel))
-
 	return decls.String()
 }
 

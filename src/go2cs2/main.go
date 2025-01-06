@@ -94,6 +94,7 @@ type Visitor struct {
 	currentFuncDecl  *ast.FuncDecl
 	currentFuncType  *types.Func
 	paramNames       HashSet[string]
+	varNames         map[*types.Var]string
 	hasDefer         bool
 	hasRecover       bool
 	capturedVarCount map[string]int
