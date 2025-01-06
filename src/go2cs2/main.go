@@ -827,17 +827,26 @@ func convertToInterfaceType(interfaceType types.Type, targetExpr string) string 
 func getIdentifier(node ast.Node) *ast.Ident {
 	var ident *ast.Ident
 
-	if indexExpr, ok := node.(*ast.IndexExpr); ok {
-		if identExpr, ok := indexExpr.X.(*ast.Ident); ok {
-			ident = identExpr
-		}
+	if identExpr, ok := node.(*ast.Ident); ok {
+		ident = identExpr
+	} else if indexExpr, ok := node.(*ast.IndexExpr); ok {
+		return getIdentifier(indexExpr.X)
 	} else if starExpr, ok := node.(*ast.StarExpr); ok {
 		ident = getIdentifier(starExpr.X)
-	} else if identExpr, ok := node.(*ast.Ident); ok {
-		ident = identExpr
 	} else if chanExpr, ok := node.(*ast.ChanType); ok {
 		ident = getIdentifier(chanExpr.Value)
+	} else if arrayExpr, ok := node.(*ast.ArrayType); ok {
+		ident = getIdentifier(arrayExpr.Elt)
 	}
+
+	// TODO: Other types expected to have an identifier
+	/*
+		else if mapExpr, ok := node.(*ast.MapType); ok {
+			ident = getIdentifier(mapExpr.Value)
+		} else if funcExpr, ok := node.(*ast.FuncType); ok {
+			ident = getIdentifier(funcExpr.Results)
+		}
+	*/
 
 	return ident
 }
