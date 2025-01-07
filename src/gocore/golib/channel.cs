@@ -59,14 +59,17 @@ public interface IChannel : IEnumerable
 
 public static class channel
 {
-    public static bool Wait(CancellationToken token)
+    public const int DeadLockDetectionTimeout = 200;
+
+    public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout)
     {
-        SemaphoreSlim semaphore = new(1, 1);
+        SemaphoreSlim semaphore = new(0, 1);
         bool tokenCanceled = false;
+        bool result = true;
 
         try
         {
-            semaphore.Wait(token);
+            result = semaphore.Wait(timeout, token);
         }
         catch (OperationCanceledException)
         {
@@ -78,7 +81,8 @@ public static class channel
                 semaphore.Release();
         }
 
-        return true;
+        // Will return false if semaphore was not acquired, i.e., timeout occurred
+        return result;
     }
 }
 
@@ -99,6 +103,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
     private readonly ptr<bool> m_isClosed;
 
     private static readonly WaitHandle s_signaled = new ManualResetEventSlim(true).WaitHandle;
+    private static readonly WaitHandle s_unsignaled = new ManualResetEventSlim(false).WaitHandle;
 
     /// <summary>
     /// Creates a new channel.
@@ -158,7 +163,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <summary>
     /// Gets the wait handle that is set when data is being received from the channel.
     /// </summary>
-    public WaitHandle Receiving => m_canTakeEvent.WaitHandle;
+    public WaitHandle Receiving => m_isClosed is not null && IsClosed ? s_signaled : m_canTakeEvent?.WaitHandle ?? s_unsignaled;
 
     /// <summary>
     /// Closes the channel.
@@ -251,6 +256,10 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <returns>Wait handle for send operation.</returns>
     public WaitHandle Sending(in T value)
     {
+        // Select send on a nil channel will return immediately
+        if (m_queue is null)
+            return s_unsignaled;
+
         // If channel is ready, send immediately on current thread
         if (TrySend(value))
             return s_signaled;
@@ -292,13 +301,14 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </remarks>
     public void Send(in T value, CancellationToken cancellationToken)
     {
-        // TODO: Verify behavior of Go deadlock handling
-        //if (IsUnbuffered && m_waitingReceivers <= 0)
-        //    fatal(FatalError.DeadLock());
+        // Sending to a nil channel blocks forever
+        if (m_queue is null)
+        {
+            if (channel.Wait(cancellationToken))
+                return;
 
-        // Per spec, sending to a nil channel blocks forever
-        if (m_queue is null && channel.Wait(cancellationToken))
-            return;
+            fatal(FatalError.DeadLock());
+        }
 
         while (!SendIsReady)
         {
@@ -401,9 +411,14 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <returns>Value received.</returns>
     public T Receive(CancellationToken cancellationToken)
     {
-        // Per spec, receiving from a nil channel blocks forever
-        if (m_queue is null && channel.Wait(cancellationToken))
-            return default!;
+        // Receiving from a nil channel blocks forever
+        if (m_queue is null)
+        {
+            if (channel.Wait(cancellationToken))
+                return default!;
+
+            fatal(FatalError.DeadLock());
+        }
 
         while (true)
         {
@@ -417,7 +432,11 @@ public struct channel<T> : IChannel, IEnumerable<T>
             }
 
             if (m_queue.IsEmpty)
-                AssertChannelIsOpenForReceive();
+            {
+                // Receiving on a closed channel with no data will return a zero value
+                if (IsClosed)
+                    return default!;
+            }
 
             m_canTakeEvent.Wait(cancellationToken);
         }
@@ -465,7 +484,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
         }
 
         value = default!;
-        return false;
+        return true;
     }
 
     /// <summary>
@@ -486,7 +505,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
             return Received(out value);
 
         value = zero<T>();
-        return false;
+        return true;
     }
 
     /// <summary>
@@ -551,14 +570,19 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// <returns>An enumerator that can be used to iterate through the collection.</returns>
     public IEnumerator<T> GetEnumerator(CancellationToken cancellationToken)
     {
-        // Per spec, receiving from a nil channel blocks forever
-        if (m_queue is null && channel.Wait(cancellationToken))
-            yield break;
+        // Receiving from a nil channel blocks forever
+        if (m_queue is null)
+        {
+            if (channel.Wait(cancellationToken))
+                yield break;
+
+            fatal(FatalError.DeadLock());
+        }
 
         while (!IsClosed)
         {
             T value = default!;
-            bool assigned;
+            bool assigned = false;
 
             try
             {
@@ -605,12 +629,6 @@ public struct channel<T> : IChannel, IEnumerable<T>
     {
         if (IsClosed)
             throw new PanicException("send on closed channel");
-    }
-
-    private void AssertChannelIsOpenForReceive()
-    {
-        if (IsClosed)
-            throw new PanicException("receive on closed channel");
     }
 
     // Stylistic support for channel send operation: "ch <- 12" becomes "ch <<= 12"

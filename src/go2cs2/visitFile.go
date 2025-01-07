@@ -48,7 +48,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.writeOutputLn("namespace %s;", RootNamespace)
 	v.targetFile.WriteString(v.newline)
 
-	v.writeOutputLn(UsingsMarker)
+	v.writeOutput(UsingsMarker)
 	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, PackageSuffix)
 
 	for _, decl := range file.Decls {
@@ -74,6 +74,10 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	for requiredUsing := range v.requiredUsings {
 		v.packageImports.WriteString(fmt.Sprintf("using %s;%s", requiredUsing, v.newline))
+	}
+
+	if v.packageImports.Len() > 0 {
+		v.packageImports.WriteString(v.newline)
 	}
 
 	targetFile = strings.ReplaceAll(targetFile, UsingsMarker, v.packageImports.String())

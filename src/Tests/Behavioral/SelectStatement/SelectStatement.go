@@ -123,6 +123,22 @@ func main() {
 		}
 	}
 
+	ch1 = nil
+	close(ch2)
+
+	select {
+	case ch1 <- 1:
+		fmt.Println("unexpected send to nil channel")
+	case v1 := <-ch1:
+		fmt.Println("unexpected received from nil channel: ", v1)
+	case v1 := <-ch2:
+		fmt.Println("closed channel 2 selected immediately: ", v1)
+	case v1, ok := <-ch3:
+		fmt.Println("unexpected: OK: ", ok, " -- got: ", v1)
+	case a[f()] = <-ch4:
+		fmt.Println("unexpected: ", a[f()])
+	}
+
 	s := []int{7, 2, 8, -9, 4, 0}
 
 	c := make(chan int)

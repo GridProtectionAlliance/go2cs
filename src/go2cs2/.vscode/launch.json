@@ -29,6 +29,10 @@
                 //"..\\Tests\\Behavioral\\VariableCapture",
                 //"..\\Tests\\Behavioral\\TypeSwitch",
                 "..\\Tests\\Behavioral\\SelectStatement",
+                //"..\\Tests\\Behavioral\\ChannelReceiveFromClosed",
+                //"..\\Tests\\Behavioral\\ChannelReceiveFromNil",
+                //"..\\Tests\\Behavioral\\ChannelSendToClosed",
+                //"..\\Tests\\Behavioral\\ChannelSendToNil",
             ]
         }
     ]

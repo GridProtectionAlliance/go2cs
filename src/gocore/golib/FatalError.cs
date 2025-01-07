@@ -30,6 +30,6 @@ public static class FatalError
 {
     public static string DeadLock()
     {
-        return "fatal error: all goroutines are asleep - deadlock!";
+        return "all goroutines are asleep - deadlock!";
     }
 }

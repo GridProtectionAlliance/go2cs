@@ -208,14 +208,19 @@ namespace ChannelTests
         }
 
         [TestMethod]
-        public void Receive_FromEmptyChanAfterClosed_ShouldThrow()
+        public void Receive_FromEmptyChanAfterClosed_ShouldReturnZero()
         {
             channel<int> sut = new channel<int>(2);
+            sut.Send(1);
+            sut.Send(2);
             sut.Close();
             Exception exception = null;
+            int result;
             try
             {
-                sut.Receive();
+                Assert.AreEqual(1, sut.Receive());
+                Assert.AreEqual(2, sut.Receive());
+                Assert.AreEqual(default(int), sut.Receive());
             }
             catch (Exception ex)
             {
@@ -224,7 +229,7 @@ namespace ChannelTests
 
             Assert.AreEqual(0, sut.Length);
             Assert.IsTrue(sut.IsClosed);
-            Assert.IsInstanceOfType(exception, typeof (PanicException));
+            Assert.IsNull(exception);
         }
 
         [TestMethod]
@@ -295,7 +300,8 @@ namespace ChannelTests
 
             producer.Wait();
             sut.Close();
-            consumer.Wait(m_awaitTimeout);
+            //consumer.Wait(m_awaitTimeout);
+            consumer.Wait();
 
             Assert.AreEqual(3, items.Count);
             Assert.IsTrue(called);

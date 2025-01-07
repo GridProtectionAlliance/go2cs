@@ -124,6 +124,25 @@ private static void Main() {
             break;
         }
     }
+    ch1 = default;
+    close(ch2);
+    switch (select(ch1.ᐸꟷ(1, ꓸꓸꓸ), ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
+    case 0:
+        fmt.Println("unexpected send to nil channel");
+        break;
+    case 1 when ch1.ꟷᐳ(out var v1):
+        fmt.Println("unexpected received from nil channel: ", v1);
+        break;
+    case 2 when ch2.ꟷᐳ(out var v1):
+        fmt.Println("closed channel 2 selected immediately: ", v1);
+        break;
+    case 3 when ch3.ꟷᐳ(out var v1, out var okΔ2):
+        fmt.Println("unexpected: OK: ", okΔ2, " -- got: ", v1);
+        break;
+    case 4 when ch4.ꟷᐳ(out a[f()]):
+        fmt.Println("unexpected: ", a[f()]);
+        break;
+    }
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
     var c = new channel<nint>(1);
     var cʗ1 = c;

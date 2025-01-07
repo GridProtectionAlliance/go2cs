@@ -39,7 +39,17 @@ public static class builtin
     [ModuleInitializer]
     internal static void InitializeGoLib()
     {
+        AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
         Console.OutputEncoding = Console.InputEncoding = Encoding.UTF8;
+        return;
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            Exception? ex = e.ExceptionObject as Exception;
+            Console.WriteLine($"{(ex is PanicException ? "panic: " : "")}{ex?.Message ?? $"unhandled exception: {e.ExceptionObject}"}");
+            Environment.Exit(0);
+        }
     }
 
     private static class Zero<T>
@@ -328,6 +338,7 @@ public static class builtin
     {
         return range<object>(e =>
         {
+            // ReSharper disable once UnusedParameter.Local
             bool yielder(object _) => e(default!);
             enumerator(() => yielder(default!));
         });
@@ -1369,7 +1380,7 @@ public static class builtin
     /// <returns><paramref name="value"/> converted to an uintptr.</returns>
     public static uintptr uintptr(object value)
     {
-        return (UIntPtr)Convert.ChangeType(value, TypeCode.UInt64);
+        return (uintptr)Convert.ChangeType(value, TypeCode.UInt64);
     }
 
     /// <summary>

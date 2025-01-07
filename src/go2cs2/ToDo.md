@@ -15,9 +15,9 @@
 09) ~~Complete type switch implementation (`visitTypeSwitchStmt`) -- see `visitSwitchStmt`~~
 10) ~~Complete select statement implementation (`visitSelectStmt`)~~ Handle edge cases
   a) ~~Handle `case i3, ok := (<-c3):  // same as: i3, ok := <-c`~~
-  b) Handle `case a[f()] = <-c4: // same as: case t := <-c4 { a[f()] = t }`
+  b) ~~Handle `case a[f()] = <-c4: // same as: case t := <-c4 { a[f()] = t }`~~
   c) ~~Handle multi-valued assignment form of (with OK to test for closed channel).~~
-  d) Test `nil` channel which is never ready for communication
+  d) ~~Test `nil` channel which is never ready for communication~~
   e) ~~Handle channels with specified direction (send or receive)~~
 11) ~~Complete send statement implementation (`visitSendStmt`)~~
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
