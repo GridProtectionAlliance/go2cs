@@ -1,0 +1,103 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>73ae8a92-be9f-40d1-9fed-863ca2ce071c</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>go2cs_src</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convArrayType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convBasicLit.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convBinaryExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convCallExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convChanType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convCompositeLit.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convExprList.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convFunLit.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convFunType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convIdent.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexListExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convInterfaceType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convKeyValueExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convMapType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convParenExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convSelectorExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convSliceExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convStarExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convStructType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convTypeAssertExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convUnaryExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\go.mod" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\hashset\HashSet.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\hashset\HashSet_test.tt" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\performEscapeAnalysis.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\performVariableAnalysis.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-x64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\osx-arm64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\osx-x64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-arm.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-arm64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-x64.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-x86.pubxml" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_386.syso" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_amd64.syso" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\stack\Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\ToDo.md" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitArrayType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitAssignStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitBlockStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitBranchStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitChanType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitCommClause.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitDecl.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitDeclStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitDeferStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitExprStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitFile.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitForStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitFuncDecl.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitFuncType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitGenDecl.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitGoStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitIfStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitImportSpec.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitIncDecStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitInterfaceType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitLabeledStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitMapType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitRangeStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitReturnStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitSelectStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitSendStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitStructType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitSwitchStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitTypeSpec.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitTypeSwitchStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitValueSpec.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\writeOperations.go" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\csproj-template.xml" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\go2cs.ico" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\go2cs.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_128.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_16.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_192.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_24.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_256.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_32.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_48.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_64.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_96.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\winres.json" />
+  </ItemGroup>
+</Project>

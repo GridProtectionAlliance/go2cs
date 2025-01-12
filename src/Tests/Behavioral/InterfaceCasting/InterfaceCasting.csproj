@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
     <PublishReadyToRun>true</PublishReadyToRun>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>InterfaceCasting</AssemblyName>
@@ -20,12 +20,15 @@
     <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="InterfaceCasting_MyErrorStruct.cs" />
-  </ItemGroup>
+  <!-- Expose output of source generators as local files -->
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="InterfaceCasting.metadata" />
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <ProjectReference Include="..\..\..\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,10 +51,6 @@
 
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\go2cs.CodeGenerators\go2cs.CodeGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
 </Project>

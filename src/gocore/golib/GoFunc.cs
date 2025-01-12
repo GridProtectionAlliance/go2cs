@@ -135,7 +135,7 @@ public class GoFunc<T> : GoFuncRoot
 }
 
 /// <summary>
-/// Represents a Go function execution context with 1 reference parameter for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 1 reference parameter for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, T> : GoFunc<T>
 {
@@ -185,7 +185,7 @@ public sealed class GoFunc<TRef1, T> : GoFunc<T>
 /*  The following code was generated using the "GenGoFuncRefInstances" utility: */
 
 /// <summary>
-/// Represents a Go function execution context with 2 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 2 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 {
@@ -231,7 +231,7 @@ public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
 }
 
 /// <summary>
-/// Represents a Go function execution context with 3 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 3 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 {
@@ -277,7 +277,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
 }
 
 /// <summary>
-/// Represents a Go function execution context with 4 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 4 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 {
@@ -288,8 +288,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer,
-            Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, defer, recover);
             return default!;
@@ -324,7 +323,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
 }
 
 /// <summary>
-/// Represents a Go function execution context with 5 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 5 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 {
@@ -370,7 +369,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
 }
 
 /// <summary>
-/// Represents a Go function execution context with 6 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 6 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc<T>
 {
@@ -381,8 +380,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, defer, recover);
             return default!;
@@ -417,7 +415,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
 }
 
 /// <summary>
-/// Represents a Go function execution context with 7 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 7 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> : GoFunc<T>
 {
@@ -428,8 +426,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, defer, recover);
             return default!;
@@ -464,7 +461,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
 }
 
 /// <summary>
-/// Represents a Go function execution context with 8 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 8 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T> : GoFunc<T>
 {
@@ -475,11 +472,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer,
-                recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, defer, recover);
             return default!;
         };
     }
@@ -512,7 +507,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 9 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 9 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T> : GoFunc<T>
 {
@@ -523,8 +518,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, Defer defer, Recover recover) =>
         {
             action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, defer, recover);
             return default!;
@@ -559,7 +553,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 10 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 10 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T> : GoFunc<T>
 {
@@ -570,12 +564,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer,
-            Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, defer, recover);
             return default!;
         };
     }
@@ -608,7 +599,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 11 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 11 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T> : GoFunc<T>
 {
@@ -619,11 +610,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, defer, recover);
             return default!;
         };
     }
@@ -656,7 +645,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 12 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 12 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T> : GoFunc<T>
 {
@@ -667,12 +656,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, defer, recover);
             return default!;
         };
     }
@@ -705,7 +691,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 13 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 13 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T> : GoFunc<T>
 {
@@ -716,12 +702,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, defer, recover);
             return default!;
         };
     }
@@ -754,7 +737,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 14 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 14 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T> : GoFunc<T>
 {
@@ -765,12 +748,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, defer, recover);
             return default!;
         };
     }
@@ -803,7 +783,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 15 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 15 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T> : GoFunc<T>
 {
@@ -814,12 +794,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, defer, recover);
             return default!;
         };
     }
@@ -852,7 +829,7 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 }
 
 /// <summary>
-/// Represents a Go function execution context with 16 reference parameters for handling "defer", "panic", and "recover" keywords.
+/// Represents a Go function execution context with 16 reference parameters for handling "defer" and "recover" keywords.
 /// </summary>
 public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T> : GoFunc<T>
 {
@@ -863,13 +840,9 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
 
     public GoFunc(GoRefAction action)
     {
-        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6,
-            ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12,
-            ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer,
-            Recover recover) =>
+        m_function = (ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, Defer defer, Recover recover) =>
         {
-            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10,
-                ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, recover);
+            action(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, defer, recover);
             return default!;
         };
     }

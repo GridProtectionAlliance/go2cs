@@ -47,17 +47,21 @@ internal class YieldFunctionEnumerable<T>(Action<Func<T, bool>> enumerator) : IE
 
                 try
                 {
+                    // 'enumerator' is user a function that enumerates over source values. The function
+                    // is provided with a delegate that is called by the user while enumerating in order
+                    // to yield values. The implementation of this yielding delegate is provided here:
                     enumerator(value =>
                     {
                         if (token.IsCancellationRequested)
                             return false;
 
+                        // Store provided user value in the .NET enumerator's 'Current' property
                         Current = value;
                         m_hasValue = true;
 
                         try
                         {
-                            // Signal consumer that value producer yielded a value
+                            // Signal consumer that producer yielded a value
                             m_yielded.Set();
 
                             // Wait for consumer to process the value
@@ -100,8 +104,9 @@ internal class YieldFunctionEnumerable<T>(Action<Func<T, bool>> enumerator) : IE
             if (m_started)
                 m_processed.Set();
 
+            // Wait for producer to yield next value
             m_started = true;
-            m_yielded.Wait();
+            m_yielded.Wait(m_cancellationTokenSource.Token);
             m_yielded.Reset();
 
             return m_hasValue && !m_completed;

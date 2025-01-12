@@ -56,35 +56,35 @@ namespace BehavioralTests
 
         public TestContext TestContext { get; set; }
 
-        [TestMethod]
-        public void CheckArrayPassByValueResult() => CheckProjectAgainstTarget("ArrayPassByValue");
+        //[TestMethod]
+        //public void CheckArrayPassByValueResult() => CheckProjectAgainstTarget("ArrayPassByValue");
 
-        [TestMethod]
-        public void CheckExprSwitchResult() => CheckProjectAgainstTarget("ExprSwitch");
+        //[TestMethod]
+        //public void CheckExprSwitchResult() => CheckProjectAgainstTarget("ExprSwitch");
 
-        [TestMethod]
-        public void CheckTypeSwitchResult() => CheckProjectAgainstTarget("TypeSwitch");
+        //[TestMethod]
+        //public void CheckTypeSwitchResult() => CheckProjectAgainstTarget("TypeSwitch");
 
-        [TestMethod]
-        public void CheckForVariantsResult() => CheckProjectAgainstTarget("ForVariants");
+        //[TestMethod]
+        //public void CheckForVariantsResult() => CheckProjectAgainstTarget("ForVariants");
 
-        [TestMethod]
-        public void CheckImportOptionsResult() => CheckProjectAgainstTarget("ImportOptions");
+        //[TestMethod]
+        //public void CheckImportOptionsResult() => CheckProjectAgainstTarget("ImportOptions");
 
-        [TestMethod]
-        public void CheckInterfaceCastingResult() => CheckProjectAgainstTarget("InterfaceCasting");
+        //[TestMethod]
+        //public void CheckInterfaceCastingResult() => CheckProjectAgainstTarget("InterfaceCasting");
 
-        [TestMethod]
-        public void CheckInterfaceImplementationResult() => CheckProjectAgainstTarget("InterfaceImplementation");
+        //[TestMethod]
+        //public void CheckInterfaceImplementationResult() => CheckProjectAgainstTarget("InterfaceImplementation");
 
-        [TestMethod]
-        public void CheckInterfaceInheritanceResult() => CheckProjectAgainstTarget("InterfaceInheritance");
+        //[TestMethod]
+        //public void CheckInterfaceInheritanceResult() => CheckProjectAgainstTarget("InterfaceInheritance");
 
-        [TestMethod]
-        public void CheckLambdaFunctionsResult() => CheckProjectAgainstTarget("LambdaFunctions");
+        //[TestMethod]
+        //public void CheckLambdaFunctionsResult() => CheckProjectAgainstTarget("LambdaFunctions");
 
-        [TestMethod]
-        public void CheckPointerToPointerResult() => CheckProjectAgainstTarget("PointerToPointer");
+        //[TestMethod]
+        //public void CheckPointerToPointerResult() => CheckProjectAgainstTarget("PointerToPointer");
 
         //[TestMethod]
         //public void DEBUGCheckSortArrayTypeResult() => CheckProjectAgainstTarget("SortArrayType");

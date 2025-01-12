@@ -2,13 +2,14 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
+using ꓸꓸꓸobject = System.Span<object>;
 
 public static partial class main_package {
 
 private static nint x = 1;
 private static int32 getNext() {
     x++;
-    return (int32)(x);
+    return ((int32)x);
 }
 
 private static @string getStr(@string test) {
@@ -19,8 +20,10 @@ private static @string getStr2(object test1, @string test2) {
     return test1._<@string>() + test2;
 }
 
-private static @string getStr3(@string format, params object[] a) {
-    return fmt.Sprintf(format, a);
+private static @string getStr3(@string format, params ꓸꓸꓸobject aʗp) {
+    var a = aʗp.slice();
+
+    return fmt.Sprintf(format, a.ꓸꓸꓸ);
 }
 
 public static nint Foo(nint n) {
@@ -57,8 +60,8 @@ private static void Main() {
     nint x = 5;
     fmt.Println(x);
     {
-        nint xΔ1 = 6;
-        fmt.Println(xΔ1);
+        nint x = 6;
+        fmt.Println(x);
     }
     fmt.Println(x);
     switch (time.Now().Weekday()) {
@@ -75,7 +78,7 @@ private static void Main() {
 
     var t = time.Now();
     switch (ᐧ) {
-    case ᐧ when t.Hour() is < 12:
+    case {} when t.Hour() is < 12:
         fmt.Println("It's before noon");
         break;
     default:
@@ -88,19 +91,19 @@ private static void Main() {
     {
         nint hourΔ1 = time.Now().Hour();
         switch (ᐧ) {
-        case ᐧ when hourΔ1 is 1 or < 12 or 2:
+        case {} when hourΔ1 is 1 or < 12 or 2:
             fmt.Println("Good morning!");
             break;
-        case ᐧ when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4):
+        case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4):
             fmt.Println("Good morning (opt 2)!");
             break;
-        case ᐧ when hourΔ1 is < 17:
+        case {} when hourΔ1 is < 17:
             fmt.Println("Good afternoon!");
             break;
-        case ᐧ when hourΔ1 is 0:
+        case {} when hourΔ1 is 0:
             fmt.Println("Midnight!");
             break;
-        case ᐧ when hourΔ1 == 0 && hour1 == 1:
+        case {} when hourΔ1 == 0 && hour1 == 1:
             fmt.Println("Midnight (opt 2)!");
             break;
         default:

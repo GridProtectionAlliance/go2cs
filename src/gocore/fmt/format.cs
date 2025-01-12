@@ -25,6 +25,7 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
+using ꓸꓸꓸobject = System.Span<object>;
 
 namespace go;
 
@@ -79,6 +80,12 @@ public static partial class fmt_package
     {
         (format, args) = ConvertFormat(format, args);
         return string.Format(format, args.Select(arg => (object)ToString(arg)).ToArray());
+    }
+
+    public static string Sprintf(string format, params ꓸꓸꓸobject args)
+    {
+        (format, object[] args2) = ConvertFormat(format, args.ToArray());
+        return string.Format(format, args2.Select(arg => (object)ToString(arg)).ToArray());
     }
 
     private static (string, object[]) ConvertFormat(string format, object[] args)

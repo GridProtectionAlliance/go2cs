@@ -339,8 +339,8 @@ public static class builtin
         return range<object>(e =>
         {
             // ReSharper disable once UnusedParameter.Local
-            bool yielder(object _) => e(default!);
-            enumerator(() => yielder(default!));
+            bool yielder(object _) => e(null!);
+            enumerator(() => yielder(null!));
         });
     }
 
@@ -1677,7 +1677,7 @@ public static class builtin
     /// <summary>
     /// Executes a Go function with no return value.
     /// </summary>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func(GoFunc<object>.GoAction action)
     {
         new GoFunc<object>(action).Execute();
@@ -1686,7 +1686,7 @@ public static class builtin
     /// <summary>
     /// Executes a Go function with a return value.
     /// </summary>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<T>(GoFunc<T>.GoFunction function)
     {
         return new GoFunc<T>(function).Execute();
@@ -1696,7 +1696,7 @@ public static class builtin
     /// Executes a Go function with 1 reference parameter and no return value.
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1>(ref TRef1 ref1, GoFunc<TRef1, object>.GoRefAction action)
     {
         new GoFunc<TRef1, object>(action).Execute(ref ref1);
@@ -1706,7 +1706,7 @@ public static class builtin
     /// Executes a Go function with 1 reference parameter and a return value.
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, T>(ref TRef1 ref1, GoFunc<TRef1, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, T>(function).Execute(ref ref1);
@@ -1721,7 +1721,7 @@ public static class builtin
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, object>(action).Execute(ref ref1, ref ref2);
@@ -1732,7 +1732,7 @@ public static class builtin
     /// </summary>
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, T>(ref TRef1 ref1, ref TRef2 ref2, GoFunc<TRef1, TRef2, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, T>(function).Execute(ref ref1, ref ref2);
@@ -1744,7 +1744,7 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, object>(action).Execute(ref ref1, ref ref2, ref ref3);
@@ -1756,7 +1756,7 @@ public static class builtin
     /// <param name="ref1">Reference parameter 1.</param>
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, GoFunc<TRef1, TRef2, TRef3, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, T>(function).Execute(ref ref1, ref ref2, ref ref3);
@@ -1769,7 +1769,7 @@ public static class builtin
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
@@ -1782,7 +1782,7 @@ public static class builtin
     /// <param name="ref2">Reference parameter 2.</param>
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, GoFunc<TRef1, TRef2, TRef3, TRef4, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, T>(function).Execute(ref ref1, ref ref2, ref ref3, ref ref4);
@@ -1796,7 +1796,7 @@ public static class builtin
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, object>(action).Execute(ref ref1, ref ref2, ref ref3, ref ref4,
@@ -1811,7 +1811,7 @@ public static class builtin
     /// <param name="ref3">Reference parameter 3.</param>
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T>(function).Execute(ref ref1, ref ref2, ref ref3,
@@ -1827,7 +1827,7 @@ public static class builtin
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, object>(action).Execute(ref ref1, ref ref2, ref ref3,
@@ -1843,7 +1843,7 @@ public static class builtin
     /// <param name="ref4">Reference parameter 4.</param>
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T>(function).Execute(ref ref1, ref ref2, ref ref3,
@@ -1860,7 +1860,7 @@ public static class builtin
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, object>(action).Execute(ref ref1, ref ref2,
@@ -1877,7 +1877,7 @@ public static class builtin
     /// <param name="ref5">Reference parameter 5.</param>
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T>(function).Execute(ref ref1, ref ref2,
@@ -1895,7 +1895,7 @@ public static class builtin
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, object>(action).Execute(ref ref1, ref ref2,
@@ -1913,7 +1913,7 @@ public static class builtin
     /// <param name="ref6">Reference parameter 6.</param>
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, T>(function).Execute(ref ref1,
@@ -1932,7 +1932,7 @@ public static class builtin
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, object>(action).Execute(ref ref1,
@@ -1951,7 +1951,7 @@ public static class builtin
     /// <param name="ref7">Reference parameter 7.</param>
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, T>(function).Execute(ref ref1,
@@ -1971,7 +1971,7 @@ public static class builtin
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, object>(action).Execute(
@@ -1991,7 +1991,7 @@ public static class builtin
     /// <param name="ref8">Reference parameter 8.</param>
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, T>(function).Execute(
@@ -2012,7 +2012,7 @@ public static class builtin
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, object>(action)
@@ -2034,7 +2034,7 @@ public static class builtin
     /// <param name="ref9">Reference parameter 9.</param>
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>.GoRefFunction function)
     {
         return new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, T>(function)
@@ -2057,7 +2057,7 @@ public static class builtin
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, object>(
@@ -2080,7 +2080,7 @@ public static class builtin
     /// <param name="ref10">Reference parameter 10.</param>
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, T>.GoRefFunction function)
     {
         return
@@ -2105,7 +2105,7 @@ public static class builtin
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13,
@@ -2129,7 +2129,7 @@ public static class builtin
     /// <param name="ref11">Reference parameter 11.</param>
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, T>.GoRefFunction function)
     {
         return
@@ -2155,7 +2155,7 @@ public static class builtin
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
@@ -2180,7 +2180,7 @@ public static class builtin
     /// <param name="ref12">Reference parameter 12.</param>
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, T>.GoRefFunction function)
     {
         return
@@ -2207,7 +2207,7 @@ public static class builtin
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
@@ -2233,7 +2233,7 @@ public static class builtin
     /// <param name="ref13">Reference parameter 13.</param>
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, T>.GoRefFunction function)
     {
         return
@@ -2261,7 +2261,7 @@ public static class builtin
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="ref16">Reference parameter 16.</param>
-    /// <param name="action">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="action">Go function to execute called with defer and recover function references.</param>
     public static void func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, object>.GoRefAction action)
     {
         new GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14
@@ -2288,7 +2288,7 @@ public static class builtin
     /// <param name="ref14">Reference parameter 14.</param>
     /// <param name="ref15">Reference parameter 15.</param>
     /// <param name="ref16">Reference parameter 16.</param>
-    /// <param name="function">Go function to execute called with defer, panic and recover function references.</param>
+    /// <param name="function">Go function to execute called with defer and recover function references.</param>
     public static T func<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>(ref TRef1 ref1, ref TRef2 ref2, ref TRef3 ref3, ref TRef4 ref4, ref TRef5 ref5, ref TRef6 ref6, ref TRef7 ref7, ref TRef8 ref8, ref TRef9 ref9, ref TRef10 ref10, ref TRef11 ref11, ref TRef12 ref12, ref TRef13 ref13, ref TRef14 ref14, ref TRef15 ref15, ref TRef16 ref16, GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef8, TRef9, TRef10, TRef11, TRef12, TRef13, TRef14, TRef15, TRef16, T>.GoRefFunction function)
     {
         return

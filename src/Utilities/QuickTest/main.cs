@@ -255,7 +255,7 @@ namespace go
         }
         #pragma warning restore CS0649
 
-        private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Panic panic, Recover recover) =>
+        private static void clearFlags(ref this fmt _this) => func(ref _this, (ref fmt f, Defer defer, Recover recover) =>
         {
             f.fmtFlags = new fmtFlags();
         });
@@ -293,11 +293,11 @@ namespace go
             complex128 vi1 = new complex128(0.0D, 0.0D);
 
             // 12 * 1.5 + 1i * iota / 3 + 2i
-            for (int iota = 0; iota < 2; iota++)
-            {
-                complex128 result = 12 * 1.5 + i(1) * iota / 3 + i(2);
-                Console.WriteLine(result);
-            }
+            //for (int iota = 0; iota < 2; iota++)
+            //{
+            //    complex128 result = 12 * 1.5 + i(1) * iota / 3 + i(2);
+            //    Console.WriteLine(result);
+            //}
 
             //Complex t1 = new Complex(12 * 1.5, 1 * 1 / 3 + 2);
             Abser ab;
@@ -444,7 +444,7 @@ namespace go
             //Console.WriteLine("Returned normally from f.");
         }
 
-        private static void f() => func((defer, panic, recover) =>
+        private static void f() => func((defer, recover) =>
         {
             defer(handleError);
 
@@ -453,7 +453,7 @@ namespace go
             Console.WriteLine("Returned normally from g.");
         });
 
-        private static void g(int i) => func((defer, panic, recover) =>
+        private static void g(int i) => func((defer, recover) =>
         {
             if (i > 3)
             {
@@ -466,7 +466,7 @@ namespace go
             g(i + 1);
         });
 
-        private static void handleError() => func((defer, panic, recover) =>
+        private static void handleError() => func((defer, recover) =>
         {
             var r = recover();
 
