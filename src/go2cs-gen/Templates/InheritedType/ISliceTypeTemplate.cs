@@ -6,7 +6,6 @@ internal static class ISliceTypeTemplate
 {
     public static string Generate(string typeName) =>
         $$"""
-        
                 public {{typeName}}[] Source => m_value;
                     
                 public ISlice<{{typeName}}> Append({{typeName}}[] elems) => m_value.Append(elems);

@@ -36,6 +36,7 @@ internal class InheritedTypeTemplate : TemplateBase
             {
                 // Value of the {{StructName}} struct
                 private readonly {{TypeName}} m_value;
+                
                 {{InterfaceImplementation}}
                 
                 public {{StructName}}({{TypeName}} value) => m_value = value;

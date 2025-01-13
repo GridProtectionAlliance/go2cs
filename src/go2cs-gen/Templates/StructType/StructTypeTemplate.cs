@@ -38,7 +38,7 @@ internal class StructTypeTemplate : TemplateBase
                 public override string ToString() => string.Concat("{", string.Join(" ",
                 [
                     {{string.Join(", ", StructFields.Select(item => $"{item.fieldName}.ToString()"))}}
-                ]));
+                ]), "}");
             }
         """
     ;
