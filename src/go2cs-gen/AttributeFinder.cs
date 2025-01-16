@@ -29,17 +29,11 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-public sealed class AttributeFinder<TDeclarationSyntax>(string attributeFullName) : ISyntaxContextReceiver where TDeclarationSyntax : BaseTypeDeclarationSyntax
+public sealed class AttributeFinder<TDeclarationSyntax>(string attributeFullName) : ISyntaxContextReceiver where TDeclarationSyntax : MemberDeclarationSyntax
 {
     public List<(TDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes)> TargetAttributes = [];
 
-    public bool HasAttributes
-    {
-        get
-        {
-            return TargetAttributes.Count > 0;
-        }
-    }
+    public bool HasAttributes => TargetAttributes.Count > 0;
 
     public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
     {
@@ -64,7 +58,7 @@ public sealed class AttributeFinder<TDeclarationSyntax>(string attributeFullName
 
             INamedTypeSymbol attributeContainingTypeSymbol = attributeSymbol.ContainingType;
 
-            if (string.Equals(attributeFullName, attributeContainingTypeSymbol.ToDisplayString(), StringComparison.Ordinal))
+            if (string.Equals(attributeFullName, attributeContainingTypeSymbol.OriginalDefinition.ToDisplayString(), StringComparison.Ordinal))
                 attributes.Add(attributeSyntax);
         }
 

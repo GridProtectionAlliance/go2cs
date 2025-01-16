@@ -1531,7 +1531,8 @@ public static class builtin
     }
 
     // ** Helper Functions **
-
+    
+    /*
     /// <summary>
     /// Copies length elements from <paramref name="source"/> array, starting at <paramref name="sourceIndex"/>,
     /// to <paramref name="dest"/> array, starting at <paramref name="destinationIndex"/> where each element is
@@ -1602,6 +1603,7 @@ public static class builtin
 
         throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
     }
+    */
 
     /// <summary>
     /// Converts value to a complex64 imaginary number.

@@ -12,8 +12,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(doc, interfaceType.Pos())
 
-	v.writeOutputLn("[GoType(\"interface\")]")
-	v.writeOutputLn("%s partial interface %s {", getAccess(name), getSanitizedIdentifier(name))
+	v.writeOutputLn("[GoType] partial interface %s {", getSanitizedIdentifier(name))
 	v.indentLevel++
 
 	for _, method := range interfaceType.Methods.List {

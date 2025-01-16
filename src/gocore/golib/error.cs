@@ -36,7 +36,7 @@ namespace go;
 /// The built-in error interface type is the conventional interface for representing an
 /// error condition, with the nil value representing no error.
 /// </summary>
-public interface error : IFormattable
+public interface error // : IFormattable
 {
     /// <summary>
     /// Get string that represents an error.

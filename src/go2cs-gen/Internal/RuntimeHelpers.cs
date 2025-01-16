@@ -5,12 +5,12 @@ internal static class RuntimeHelpers
 {
     public static T[] GetSubArray<T>(T[] array, Range range)
     {
-        if (array == null)
+        if (array is null)
             throw new ArgumentNullException(nameof(array));
 
         (int offset, int length) = range.GetOffsetAndLength(array.Length);
 
-        if (default(T) != null || typeof(T[]) == array.GetType())
+        if (default(T) is not null || typeof(T[]) == array.GetType())
         {
             if (length == 0)
                 return [];

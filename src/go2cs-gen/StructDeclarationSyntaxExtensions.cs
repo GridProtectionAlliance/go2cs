@@ -44,14 +44,9 @@ public static class StructDeclarationSyntaxExtensions
                 continue;
 
             TypeSyntax variableTypeSyntax = fieldDeclaration.Declaration.Type;
-
             TypeInfo typeInfo = semanticModel.GetTypeInfo(variableTypeSyntax);
             ITypeSymbol? typeSymbol = typeInfo.Type;
-
-            if (typeSymbol == null)
-                continue; // Type couldn't be resolved
-
-            string fullyQualifiedTypeName = typeSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+            string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
             foreach (VariableDeclaratorSyntax variableDeclarator in fieldDeclaration.Declaration.Variables)
             {

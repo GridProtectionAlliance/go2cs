@@ -440,7 +440,7 @@ public static class TypeExtensions
     /// Determines if <see cref="IConvertible"/> <paramref name="value"/> is a numeric type.
     /// </summary>
     /// <param name="value">Value to check.</param>
-    /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; othwerwise, <c>false</c>.</returns>
+    /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; otherwise, <c>false</c>.</returns>
     public static bool IsNumeric(this IConvertible? value)
     {
         return value is not null && IsNumericType(value.GetTypeCode());

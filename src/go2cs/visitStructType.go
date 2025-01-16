@@ -10,8 +10,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(doc, structType.Pos())
 
-	v.writeOutputLn("[GoType(\"struct\")]")
-	v.writeOutputLn("%s partial struct %s {", getAccess(name), getSanitizedIdentifier(name))
+	v.writeOutputLn("[GoType] partial struct %s {", getSanitizedIdentifier(name))
 	v.indentLevel++
 
 	for _, field := range structType.Fields.List {

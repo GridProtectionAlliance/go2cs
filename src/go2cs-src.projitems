@@ -100,4 +100,7 @@
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_96.png" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\winres.json" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)go2cs\package_info-template.cs" />
+  </ItemGroup>
 </Project>

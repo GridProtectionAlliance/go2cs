@@ -9,6 +9,7 @@ import (
 	. "go2cs/hashset"
 )
 
+const FunctionReceiverMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
@@ -58,13 +59,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
+	functionReceiverMarker := fmt.Sprintf(FunctionReceiverMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
+	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
 
 	blockContext := DefaultBlockStmtContext()
-	blockContext.innerPrefix = fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
+	blockContext.innerPrefix = functionBlockPrefixMarker
 
-	v.writeOutput("%s static %s %s(%s)%s", getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
+	v.writeOutput("%s%s static %s %s(%s)%s", functionReceiverMarker, getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = false
@@ -125,6 +128,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
 			if pointerType, ok := param.Type().(*types.Pointer); ok {
+				if i == 0 && funcDecl.Recv != nil {
+					// Skip receiver parameter
+					continue
+				}
+
 				if v.options.preferVarDecl {
 					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name())
 				} else {
@@ -169,6 +177,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				if i == 0 && funcDecl.Recv != nil {
 					updatedSignature.WriteString("this ")
+					updatedSignature.WriteString(getRefParamTypeName(param.Type()))
+					updatedSignature.WriteRune(' ')
+					updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+					continue
 				}
 
 				if i > 0 {
@@ -210,7 +222,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	// Replace function markers
-	v.replaceMarker(fmt.Sprintf(FunctionParametersMarker, goFunctionName), parameterSignature)
+	v.replaceMarker(functionParametersMarker, parameterSignature)
+
+	if strings.HasPrefix(parameterSignature, "this ref ") {
+		v.replaceMarker(functionReceiverMarker, "[GoRecv] ")
+	} else {
+		v.replaceMarker(functionReceiverMarker, "")
+	}
 
 	var funcExecutionContext string
 
@@ -234,8 +252,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		funcExecutionContext = ""
 	}
 
-	v.replaceMarker(fmt.Sprintf(FunctionExecContextMarker, goFunctionName), funcExecutionContext)
-	v.replaceMarker(fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName), blockPrefix)
+	v.replaceMarker(functionExecContextMarker, funcExecutionContext)
+	v.replaceMarker(functionBlockPrefixMarker, blockPrefix)
 
 	if useFuncExecutionContext {
 		v.writeOutputLn(");")
@@ -292,6 +310,10 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")
+			result.WriteString(getRefParamTypeName(param.Type()))
+			result.WriteRune(' ')
+			result.WriteString(getSanitizedIdentifier(param.Name()))
+			continue
 		}
 
 		if i > 0 {

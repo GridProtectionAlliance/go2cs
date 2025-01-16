@@ -3,10 +3,12 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"log"
 	"sort"
 	"strings"
 )
 
+const TypeAliasMarker = ">>MARKER:TYPEALIASES<<"
 const UsingsMarker = ">>MARKER:USINGS<<"
 const UnsafeMarker = ">>MARKER:UNSAFE<<"
 
@@ -45,11 +47,25 @@ func (v *Visitor) visitFile(file *ast.File) {
 		v.writeDoc(file.Doc, file.Package)
 	}
 
+	// Derive package name
+	packageLock.Lock()
+
+	if len(packageName) == 0 {
+		packageName = file.Name.Name
+	} else {
+		if packageName != file.Name.Name {
+			log.Fatalf("Multiple package names encountered: %s and %s", packageName, file.Name.Name)
+		}
+	}
+
+	packageLock.Unlock()
+
+	v.writeOutput(TypeAliasMarker)
 	v.writeOutputLn("namespace %s;", RootNamespace)
 	v.targetFile.WriteString(v.newline)
 
 	v.writeOutput(UsingsMarker)
-	v.writeOutputLn("public static %spartial class %s%s {", UnsafeMarker, file.Name.Name, PackageSuffix)
+	v.writeOutputLn("%spartial class %s%s {", UnsafeMarker, packageName, PackageSuffix)
 
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
@@ -68,7 +84,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		v.targetFile.WriteString(v.newline)
 	}
 
-	v.writeOutputLn("} // end %s%s", file.Name.Name, PackageSuffix)
+	v.writeOutputLn("} // end %s%s", packageName, PackageSuffix)
 
 	targetFile := v.targetFile.String()
 
@@ -86,6 +102,13 @@ func (v *Visitor) visitFile(file *ast.File) {
 		targetFile = strings.ReplaceAll(targetFile, UnsafeMarker, "unsafe ")
 	} else {
 		targetFile = strings.ReplaceAll(targetFile, UnsafeMarker, "")
+	}
+
+	if v.typeAliasDeclarations.Len() > 0 {
+		v.typeAliasDeclarations.WriteString(v.newline)
+		targetFile = strings.ReplaceAll(targetFile, TypeAliasMarker, v.typeAliasDeclarations.String())
+	} else {
+		targetFile = strings.ReplaceAll(targetFile, TypeAliasMarker, "")
 	}
 
 	v.targetFile.Reset()

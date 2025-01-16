@@ -29,6 +29,7 @@ namespace go;
 /// <summary>
 /// Represents a Go type definition attribute.
 /// </summary>
+/// <param name="definition">Type definition string, if applicable.</param>
 /// <remarks>
 /// This attribute is used to auto-generate backend C# type code needed to emulate
 /// behaviour for a Go type definition. See the <c>TypeGenerator</c> in the go2cs
@@ -36,10 +37,10 @@ namespace go;
 /// </remarks>
 /// <param name="definition">Type definition string.</param>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Interface)]
-public class GoTypeAttribute(string definition) : Attribute
+public class GoTypeAttribute(string definition = "") : Attribute
 {
     /// <summary>
     /// Gets the type definition string.
     /// </summary>
-    public string Definition { get; } = definition;
+    public string Definition => definition;
 }

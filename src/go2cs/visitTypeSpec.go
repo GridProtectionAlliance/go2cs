@@ -8,6 +8,22 @@ import (
 func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	name := v.getIdentName(typeSpec.Name)
 
+	// Handle type alias
+	if typeSpec.Assign.IsValid() {
+		typeName := convertToCSFullTypeName(v.convExpr(typeSpec.Type, nil))
+
+		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s%s", name, typeName, v.newline))
+
+		// Add exported type aliases to package info
+		if getAccess(name) == "public" {
+			packageLock.Lock()
+			exportedTypeAliases[name] = typeName
+			packageLock.Unlock()
+		}
+
+		return
+	}
+
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
 		v.visitArrayType(typeSpecType, name, typeSpec.Comment)

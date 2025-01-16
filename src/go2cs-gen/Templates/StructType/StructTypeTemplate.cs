@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 
 namespace go2cs.Templates.StructType;
@@ -10,7 +9,6 @@ internal class StructTypeTemplate : TemplateBase
 {
     // Template Parameters
     public required string StructName;
-    public required StructDeclarationSyntax StructDeclaration;
     public required List<(string typeName, string fieldName)> StructFields;
 
     public override string TemplateBody =>
@@ -37,12 +35,10 @@ internal class StructTypeTemplate : TemplateBase
 
                 public override string ToString() => string.Concat("{", string.Join(" ",
                 [
-                    {{string.Join(", ", StructFields.Select(item => $"{item.fieldName}.ToString()"))}}
+                    {{(StructFields.Count > 0 ? string.Join(", ", StructFields.Select(item => $"{item.fieldName}.ToString()")) : "\"\"")}}
                 ]), "}");
             }
-        """
-    ;
-
+        """;
 
     private string FieldReferences
     {
@@ -57,6 +53,9 @@ internal class StructTypeTemplate : TemplateBase
 
                 result.Append($"public static ref {typeName} Ꮡ{fieldName}(ref {StructName} instance) => ref instance.{fieldName};");
             }
+
+            if (result.Length == 0)
+                result.Append($"// -- {StructName} has no defined fields");
 
             return result.ToString();
         }

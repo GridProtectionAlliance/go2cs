@@ -17,6 +17,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -84,10 +85,11 @@ type Visitor struct {
 	globalScope        map[string]*types.Var // Global variable scope
 
 	// ImportSpec variables
-	currentImportPath string
-	packageImports    *strings.Builder
-	importQueue       HashSet[string]
-	requiredUsings    HashSet[string]
+	currentImportPath     string
+	packageImports        *strings.Builder
+	importQueue           HashSet[string]
+	requiredUsings        HashSet[string]
+	typeAliasDeclarations *strings.Builder
 
 	// FuncDecl variables
 	inFunction       bool
@@ -114,10 +116,11 @@ type Visitor struct {
 const RootNamespace = "go"
 const PackageSuffix = "_package"
 const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
+const PackageInfoFileName = "package_info.cs"
 
-// Extended unicode characters are being used to help avoid conflicts with Go identifiers
+// Extended Unicode characters are being used to help avoid conflicts with Go identifiers
 // for intermediate and temporary variables. Some character variants will be better suited
-// to different fonts or display environments. Defaults have been chosen based on best
+// to different fonts or display environments. Defaults have been chosen based on better
 // appearance with the Visual Studio default code font "Cascadia Mono":
 
 const AddressPrefix = "\u13D1"               // Variants: Ꮡ ꝸ
@@ -127,10 +130,11 @@ const TempVarMarker = "\u1D1B"               // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "\u1427"                  // Variants: ᐧ true
 const OverloadDiscriminator = "\uA7F7"       // Variants: ꟷ false
 const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
+const TypeAliasDot = "\uA4F8"                // Variants: ꓸ
 const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 
-// TODO: Consider adding removing items that are also reserved by Go to reduce search space
+// TODO: Consider removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet[string]([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped
 	"abstract", "as", "base", "bool", "catch", "char", "checked", "class", "const", "decimal",
@@ -141,8 +145,7 @@ var keywords = NewHashSet[string]([]string{
 	"try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
 	"__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag", "go\u01C3", "OK", "ERR", "VAL", "GetGoTypeName",
-	"CastCopy", "ConvertToType", "WhenAny", TrueMarker,
+	"GoType", "GoUntyped", "GoTag", "GoTypeAlias", "GoImplement", "go\u01C3", "ConvertToType",
 })
 
 // These C# keywords overlap with Go keywords, so they do not need detection
@@ -152,6 +155,9 @@ var keywords = NewHashSet[string]([]string{
 //go:embed csproj-template.xml
 var csprojTemplate []byte
 
+//go:embed package_info-template.cs
+var packageInfoTemplate []byte
+
 //go:embed go2cs.ico
 var iconFileBytes []byte
 
@@ -160,6 +166,12 @@ var pngFileBytes []byte
 
 //go:embed profiles/*
 var publishProfiles embed.FS
+
+// Define package level variables
+var packageName string
+var exportedTypeAliases = map[string]string{}
+var interfaceImplementations = map[string]HashSet[string]{}
+var packageLock = sync.Mutex{}
 
 func main() {
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
@@ -377,22 +389,23 @@ Examples:
 			defer concurrentTasks.Done()
 
 			visitor := &Visitor{
-				fset:               fset,
-				pkg:                pkg,
-				info:               info,
-				targetFile:         &strings.Builder{},
-				packageImports:     &strings.Builder{},
-				requiredUsings:     HashSet[string]{},
-				importQueue:        HashSet[string]{},
-				standAloneComments: map[token.Pos]string{},
-				sortedCommentPos:   []token.Pos{},
-				processedComments:  HashSet[token.Pos]{},
-				newline:            "\r\n",
-				options:            options,
-				globalIdentNames:   globalIdentNames,
-				globalScope:        globalScope,
-				blocks:             Stack[*strings.Builder]{},
-				identEscapesHeap:   map[*ast.Ident]bool{},
+				fset:                  fset,
+				pkg:                   pkg,
+				info:                  info,
+				targetFile:            &strings.Builder{},
+				packageImports:        &strings.Builder{},
+				requiredUsings:        HashSet[string]{},
+				importQueue:           HashSet[string]{},
+				typeAliasDeclarations: &strings.Builder{},
+				standAloneComments:    map[token.Pos]string{},
+				sortedCommentPos:      []token.Pos{},
+				processedComments:     HashSet[token.Pos]{},
+				newline:               "\r\n",
+				options:               options,
+				globalIdentNames:      globalIdentNames,
+				globalScope:           globalScope,
+				blocks:                Stack[*strings.Builder]{},
+				identEscapesHeap:      map[*ast.Ident]bool{},
 			}
 
 			visitor.visitFile(fileEntry.file)
@@ -412,6 +425,134 @@ Examples:
 	}
 
 	concurrentTasks.Wait()
+
+	// Handle package information file
+	packageInfoFileName := filepath.Join(outputFilePath, PackageInfoFileName)
+
+	var packageInfoLines []string
+
+	if _, err := os.Stat(packageInfoFileName); err == nil {
+		// Read all lines from existing package info file
+		packageInfoBytes, err := os.ReadFile(packageInfoFileName)
+
+		if err != nil {
+			log.Fatalf("Failed to read existing package info file \"%s\": %s\n", packageInfoFileName, err)
+		}
+
+		packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
+	} else {
+		// Generate new package info file from template
+		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageName, packageName)
+		packageInfoLines = strings.Split(templateFile, "\r\n")
+	}
+
+	// Handle exported type aliases
+	if len(exportedTypeAliases) > 0 {
+		// Find the line number where type aliases should be inserted
+		startLineIndex := -1
+		endLineIndex := -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<ExportedTypeAliases>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</ExportedTypeAliases>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex > endLineIndex {
+			// Read existing type aliases from package info file
+			lines := HashSet[string]{}
+
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+
+			// Add new type aliases to package info file (hashset ensures uniqueness)
+			for alias, typeName := range exportedTypeAliases {
+				lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert exported type aliases into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[startLineIndex+1:]...)...)
+		} else {
+			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+		}
+	}
+
+	// Handle interface implementations
+	if len(interfaceImplementations) > 0 {
+		// Find the line number where interface implementations should be inserted
+		startLineIndex := -1
+		endLineIndex := -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<InterfaceImplementations>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</InterfaceImplementations>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex > endLineIndex {
+			// Read existing interface lines from package info file
+			lines := HashSet[string]{}
+
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+
+			// Add new interface implementations to package info file (hashset ensures uniqueness)
+			for interfaceName, implementations := range interfaceImplementations {
+				for implementation := range implementations {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", interfaceName, implementation))
+				}
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert interface implementations into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[startLineIndex+1:]...)...)
+
+		} else {
+			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
+		}
+	}
+
+	// Write updated package info file
+	packageInfoFile, err := os.Create(packageInfoFileName)
+
+	if err != nil {
+		log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
+	}
+
+	defer packageInfoFile.Close()
+
+	for _, line := range packageInfoLines {
+		_, err = packageInfoFile.WriteString(line + "\r\n")
+
+		if err != nil {
+			log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
+		}
+	}
 }
 
 func writeProjectFiles(projectName string, projectPath string) (string, error) {
@@ -880,6 +1021,16 @@ func getTypeName(t types.Type) string {
 
 func getCSTypeName(t types.Type) string {
 	return convertToCSTypeName(getTypeName(t))
+}
+
+func getRefParamTypeName(t types.Type) string {
+	typeName := getTypeName(t)
+
+	if strings.HasPrefix(typeName, "*") {
+		return fmt.Sprintf("ref %s", convertToCSTypeName(typeName[1:]))
+	}
+
+	return convertToCSTypeName(typeName)
 }
 
 func convertToCSTypeName(typeName string) string {

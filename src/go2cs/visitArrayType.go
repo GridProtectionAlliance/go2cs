@@ -17,14 +17,14 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 
 		if arrayType.Len == nil {
 			// Handle slice type
-			v.writeOutputLn("[GoType(\"[]%s\")]", csTypeName)
+			v.writeOutput("[GoType(\"[]%s\")]", csTypeName)
 		} else {
 			// Handle array type
 			arrayLen := v.convExpr(arrayType.Len, nil)
-			v.writeOutputLn("[GoType(\"[%s]%s\")]", arrayLen, csTypeName)
+			v.writeOutput("[GoType(\"[%s]%s\")]", arrayLen, csTypeName)
 		}
 
-		v.writeOutput("public partial struct %s {}", getSanitizedIdentifier(name))
+		v.writeOutput(" partial struct %s {}", getSanitizedIdentifier(name))
 		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	} else {
