@@ -29,33 +29,66 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace go2cs;
 
-public static class MethodSyntaxExtensions
+public record MethodInfo
 {
-    public static (List<(string typeName, string paramName)> paramInfo, bool refRecv) GetMethodParameters(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
+    public required string Name { get; init; }
+
+    public required string ReturnType { get; init; }
+
+    public required (string type, string name)[] Parameters { get; init; }
+
+    public required string GenericTypes { get; init; }
+
+    public bool IsRefRecv { get; init; }
+
+    public bool IsGeneric => GenericTypes.Length > 0;
+
+    public string CallParameters =>
+        string.Join(", ", Parameters.Select(param => param.name));
+
+    public string TypedParameters => 
+        string.Join(", ", Parameters.Select(param => $"{param.type} {param.name}"));
+
+    public string GetSignature()
     {
-        // Obtain the SemanticModel from the context
-        SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
-        bool refRecv = false;
-
-        return (methodDeclaration.ParameterList.Parameters.Select(getParameterInfo).ToList(), refRecv);
-
-        (string, string) getParameterInfo(ParameterSyntax param, int index)
-        {
-            if (param.Type is null)
-                return ("object", param.Identifier.Text);
-
-            TypeInfo typeInfo = ModelExtensions.GetTypeInfo(semanticModel, param.Type);
-            ITypeSymbol? typeSymbol = typeInfo.Type;
-            string fullyQualifiedTypeName = typeSymbol?.ToDisplayString() ?? "object";
-
-            if (index == 0 && param.Modifiers.Any(SyntaxKind.ThisKeyword) && param.Modifiers.Any(m => m.IsKind(SyntaxKind.RefKeyword)))
-                refRecv = true;
-
-            return (fullyQualifiedTypeName, param.Identifier.Text);
-        }
+        return $"{Name}{GetGenericSignature()}({TypedParameters})";
     }
 
-    public static string GetReturnType(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
+    public string GetGenericSignature()
+    {
+        return IsGeneric ? $"<{GenericTypes}>" : "";
+    }
+}
+
+public static class MethodSyntaxExtensions
+{
+    public static MethodInfo GetMethodInfo(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
+    {
+        SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
+
+        return new MethodInfo
+        {
+            Name = methodDeclaration.Identifier.Text,
+            ReturnType = methodDeclaration.GetReturnType(context),
+            GenericTypes = string.Join(", ", methodDeclaration.TypeParameterList?.Parameters.Select(param => param.Identifier.Text) ?? []),
+            Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
+            {
+                if (param.Type is null)
+                    return (type: "object", name: param.Identifier.Text);
+
+                TypeInfo typeInfo = semanticModel.GetTypeInfo(param.Type);
+                ITypeSymbol? typeSymbol = typeInfo.Type;
+                string fullyQualifiedTypeName = typeSymbol?.ToDisplayString() ?? "object";
+                
+                return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
+            }).ToArray(),
+            IsRefRecv = methodDeclaration.ParameterList.Parameters.Any(param =>
+                param.Modifiers.Any(SyntaxKind.ThisKeyword) &&
+                param.Modifiers.Any(SyntaxKind.RefKeyword))
+        };
+    }
+
+    private static string GetReturnType(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
     {
         SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
 

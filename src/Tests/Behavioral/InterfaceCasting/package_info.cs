@@ -40,11 +40,11 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImpl<error, MyError>]
-[assembly: GoImpl<Animal, Dog>]
-[assembly: GoImpl<Animal, Cat>]
-[assembly: GoImpl<Animal, Llama>]
-[assembly: GoImpl<Animal, JavaProgrammer>]
+[assembly: GoImpl<Cat, Animal>]
+[assembly: GoImpl<Dog, Animal>]
+[assembly: GoImpl<JavaProgrammer, Animal>]
+[assembly: GoImpl<Llama, Animal>]
+[assembly: GoImpl<MyError, error>]
 // </InterfaceImplementations>
 
 namespace go;
@@ -53,3 +53,10 @@ namespace go;
 public static partial class main_package
 {
 }
+
+
+
+
+
+
+

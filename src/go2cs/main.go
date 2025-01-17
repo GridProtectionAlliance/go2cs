@@ -266,6 +266,7 @@ Examples:
 		if projectFileName, err = writeProjectFiles(filepath.Base(inputFilePath), outputFilePath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", outputFilePath, err)
 		} else {
+			// TODO: Change to WalkDir and check for files in sub-directories that may be part of same package
 			// Parse all .go files in the directory
 			err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
@@ -464,13 +465,16 @@ Examples:
 			}
 		}
 
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex > endLineIndex {
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 			// Read existing type aliases from package info file
 			lines := HashSet[string]{}
 
-			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
+			// If processing a single file, instead of all package files, merge type aliases
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
 			}
 
 			// Add new type aliases to package info file (hashset ensures uniqueness)
@@ -484,7 +488,7 @@ Examples:
 
 			// Insert exported type aliases into package info file
 			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[startLineIndex+1:]...)...)
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
 		} else {
 			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
 		}
@@ -508,19 +512,22 @@ Examples:
 			}
 		}
 
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex > endLineIndex {
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
 			// Read existing interface lines from package info file
 			lines := HashSet[string]{}
 
-			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
+			// If processing a single file, instead of all package files, merge interface implementations
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
 			}
 
 			// Add new interface implementations to package info file (hashset ensures uniqueness)
 			for interfaceName, implementations := range interfaceImplementations {
 				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", interfaceName, implementation))
+					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>]", implementation, interfaceName))
 				}
 			}
 
@@ -530,7 +537,7 @@ Examples:
 
 			// Insert interface implementations into package info file
 			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[startLineIndex+1:]...)...)
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
 
 		} else {
 			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
@@ -949,21 +956,32 @@ func paramsArePointers(paramTypes *types.Tuple) []bool {
 	return paramIsPointer
 }
 
-func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr string) string {
-	return convertToInterfaceType(v.getType(interfaceExpr, false), targetExpr)
+func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
+	return convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)
 }
 
-func convertToInterfaceType(interfaceType types.Type, targetExpr string) string {
-	result := &strings.Builder{}
+func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
+	// Track interface types that need to an implementation mapping
+	// to properly handle duck typed Go interface implementations
+	interfaceTypeName := convertToCSTypeName(getTypeName(interfaceType))
+	targetTypeName := convertToCSTypeName(getTypeName(targetType))
 
-	// Convert to interface type using Go converted interface ".As" method,
-	// this handles duck typed Go interface implementations
-	result.WriteString(convertToCSTypeName(getTypeName(interfaceType)))
-	result.WriteString(".As(")
-	result.WriteString(targetExpr)
-	result.WriteRune(')')
+	var prefix string
 
-	return result.String()
+	if strings.HasPrefix(targetTypeName, "ptr<") {
+		targetTypeName = targetTypeName[4 : len(targetTypeName)-1]
+		prefix = "~"
+	}
+
+	packageLock.Lock()
+	if _, ok := interfaceImplementations[interfaceTypeName]; ok {
+		interfaceImplementations[interfaceTypeName].Add(targetTypeName)
+	} else {
+		interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+	}
+	packageLock.Unlock()
+
+	return prefix + exprResult
 }
 
 func getIdentifier(node ast.Node) *ast.Ident {

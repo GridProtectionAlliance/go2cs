@@ -26,7 +26,7 @@ using System;
 namespace go;
 
 /// <summary>
-/// Represents a Go package attribute.
+/// Marks a class as a Go package.
 /// </summary>
 /// <param name="packageName">Defines the package name.</param>
 [AttributeUsage(AttributeTargets.Class)]

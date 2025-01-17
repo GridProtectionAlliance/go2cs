@@ -26,10 +26,15 @@ using System;
 namespace go;
 
 /// <summary>
-/// Represents a Go type alias attribute.
+/// Defines an exported alias for a type.
 /// </summary>
 /// <param name="alias">Alias name.</param>
 /// <param name="typeName">Type name of the alias.</param>
+/// <remarks>
+/// This attribute is used to define an exported alias for a specific type.
+/// When packages are referenced, any defined exported aliases will be imported
+/// into the local project as global usings with a package prefix.
+/// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class GoTypeAliasAttribute(string alias, string typeName) : Attribute
 {

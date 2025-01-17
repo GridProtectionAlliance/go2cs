@@ -7,8 +7,8 @@ namespace go2cs.Templates.InterfaceImpl;
 internal class InterfaceImplTemplate : TemplateBase
 {
     // Template Parameters
-    public required string InterfaceName;
     public required string StructName;
+    public required string InterfaceName;
     public required List<MethodInfo> Methods;
 
     public override string TemplateBody =>
@@ -30,16 +30,10 @@ internal class InterfaceImplTemplate : TemplateBase
                 if (result.Length > 0)
                     result.AppendLine("        ");
 
-                string genericSignature = getGenericSignature(method);
-                result.Append($"{method.ReturnType} {InterfaceName}.{method.Name}{genericSignature}({method.TypedParameters}) => this.{method.Name}{genericSignature}({method.Parameters});");
+                result.Append($"{method.ReturnType} {InterfaceName}.{method.GetSignature()} => this.{method.Name}{method.GetGenericSignature()}({method.CallParameters});");
             }
 
             return result.ToString();
-
-            string getGenericSignature(MethodInfo method)
-            {
-                return method.IsGeneric ? $"<{method.TypeParameters}>" : "";
-            }
         }
     }
 }

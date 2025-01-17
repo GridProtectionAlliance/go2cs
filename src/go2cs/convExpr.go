@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 	"strings"
 )
 
@@ -25,6 +26,7 @@ type CallExprContext struct {
 	keyValueSource    KeyValueSource
 	keyValueIdent     string
 	forceMultiLine    bool
+	interfaceType     types.Type
 }
 
 func DefaultCallExprContext() *CallExprContext {
@@ -35,6 +37,7 @@ func DefaultCallExprContext() *CallExprContext {
 		keyValueSource:    StructSource,
 		keyValueIdent:     "",
 		forceMultiLine:    false,
+		interfaceType:     nil,
 	}
 }
 

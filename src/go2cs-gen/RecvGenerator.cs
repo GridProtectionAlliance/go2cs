@@ -59,39 +59,37 @@ public class RecvGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AttributeFinder<MethodDeclarationSyntax> { HasAttributes: true } attributeFinder)
             return;
 
-        foreach ((MethodDeclarationSyntax targetSyntax, _) in attributeFinder.TargetAttributes)
+        foreach ((MethodDeclarationSyntax methodSyntax, _) in attributeFinder.TargetAttributes)
         {
-            string packageNamespace = targetSyntax.GetNamespaceName();
-            string packageClassName = targetSyntax.GetParentClassName();
+            string packageNamespace = methodSyntax.GetNamespaceName();
+            string packageClassName = methodSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
-            string identifier = targetSyntax.Identifier.Text;
+            string identifier = methodSyntax.Identifier.Text;
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
 
-            string[] usingStatements = targetSyntax.SyntaxTree
+            string[] usingStatements = methodSyntax.SyntaxTree
                 .GetRoot()
                 .DescendantNodes()
                 .OfType<UsingDirectiveSyntax>()
                 .Select(directive => directive.GetText().ToString().Trim())
                 .ToArray();
 
-            (List<(string typeName, string paramName)> methodParams, bool refRecv) = targetSyntax.GetMethodParameters(context);
+            MethodInfo method = methodSyntax.GetMethodInfo(context);
 
             // Only process methods with a reference receiver to create
             // a generated overload the handles a ptr<T> receiver
-            if (methodParams.Count == 0 || !refRecv)
+            if (method.Parameters.Length == 0 || !method.IsRefRecv)
                 continue;
 
             string generatedSource = new ReceiverMethodTemplate
-                {
-                    PackageNamespace = packageNamespace,
-                    PackageName = packageName,
-                    Scope = scope,
-                    MethodName = identifier,
-                    ReturnType = targetSyntax.GetReturnType(context),
-                    MethodParameters = methodParams,
-                    UsingStatements = usingStatements
-                }
-                .Generate();
+            {
+                PackageNamespace = packageNamespace,
+                PackageName = packageName,
+                Scope = scope,
+                Method = method,
+                UsingStatements = usingStatements
+            }
+            .Generate();
 
 
             // Add the source code to the compilation

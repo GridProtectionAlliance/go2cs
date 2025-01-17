@@ -26,8 +26,18 @@ using System;
 namespace go;
 
 /// <summary>
-/// Represents a method that is a receiver method.
+/// Marks a reference based receiver method for automatic code generation.
 /// </summary>
+/// <remarks>
+/// <para>
+/// This attribute is used to auto-generate a pointer receiver method that
+/// references a <see cref="ptr{T}"/> type which calls this receiver method
+/// declared with a <see langword="ref" /> type.
+/// </para>
+/// <para>
+/// See the <c>RecvGenerator</c> in the go2cs code generators for details.
+/// </para>
+/// </remarks>
 [AttributeUsage(AttributeTargets.Method)]
 public class GoRecvAttribute : Attribute
 {

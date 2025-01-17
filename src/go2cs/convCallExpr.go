@@ -109,7 +109,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			typeExpr := callExpr.Args[0]
 
 			if ident := getIdentifier(typeExpr); ident != nil {
-				return v.convertToHeapTypeDecl(ident, true)
+				return fmt.Sprintf("@new<%s>()", ident)
 			}
 
 			typeName := v.getPrintedNode(typeExpr)

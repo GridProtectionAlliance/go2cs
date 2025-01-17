@@ -7,18 +7,16 @@ namespace go2cs.Templates.ReceiverMethod;
 internal class ReceiverMethodTemplate : TemplateBase
 {
     // Template Parameters
-    public required string MethodName;
-    public required string ReturnType;
-    public required List<(string typeName, string paramName)> MethodParameters;
+    public required MethodInfo Method;
     private string? m_receiverParamName;
 
     public override string TemplateBody =>
         $$"""
               [{{GeneratedCodeAttribute}}]
-              {{Scope}} static {{ReturnType}} {{MethodName}}({{DeclParams}})
+              {{Scope}} static {{Method.ReturnType}} {{Method.Name}}({{DeclParams}})
               {
                   ref var {{ReceiverParamName}} = ref Ꮡ{{ReceiverParamName}}.val;
-                  return {{ReceiverParamName}}.{{MethodName}}({{CallParams}});
+                  return {{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
               }
           """;
 
@@ -29,16 +27,16 @@ internal class ReceiverMethodTemplate : TemplateBase
             List<string> result = [];
             bool first = true;
 
-            foreach ((string typeName, string paramName) in MethodParameters)
+            foreach ((string type, string name) in Method.Parameters)
             {
                 if (first)
                 {
-                    result.Add($"this ptr<{typeName}> Ꮡ{paramName}");
+                    result.Add($"this ptr<{type}> Ꮡ{name}");
                     first = false;
                 }
                 else
                 {
-                    result.Add($"{typeName} {paramName}");
+                    result.Add($"{type} {name}");
                 }
             }
 
@@ -47,8 +45,8 @@ internal class ReceiverMethodTemplate : TemplateBase
     }
 
     private string ReceiverParamName =>
-        m_receiverParamName ??= MethodParameters.First().paramName;
+        m_receiverParamName ??= Method.Parameters.First().name;
 
     private string CallParams => 
-        string.Join(", ", MethodParameters.Skip(1).Select(item => item.paramName));
+        string.Join(", ", Method.Parameters.Skip(1).Select(item => item.name));
 }

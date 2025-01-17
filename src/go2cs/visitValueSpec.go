@@ -37,7 +37,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 						if len(heapTypeDecl) > 0 {
 							v.writeOutput(heapTypeDecl)
 						} else {
-							v.writeOutput("%s %s = default;", csTypeName, csIDName)
+							v.writeOutput("%s %s = default!;", csTypeName, csIDName)
 						}
 					} else {
 						access := getAccess(goIDName)

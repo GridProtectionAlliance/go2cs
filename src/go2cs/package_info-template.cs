@@ -39,7 +39,7 @@ using go;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-// Example: [assembly: GoImpl<error, main_package.MyError>]
+// Example: [assembly: GoImpl<main_package.MyError, error>]
 // </InterfaceImplementations>
 
 namespace go;

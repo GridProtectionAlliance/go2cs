@@ -85,7 +85,7 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 			if resultParamIsInterface != nil && resultParamIsInterface[i] {
 				resultParamType := resultParams.At(i).Type()
-				result.WriteString(convertToInterfaceType(resultParamType, resultExpr))
+				result.WriteString(convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
 			} else {
 				if resultParamIsPointer != nil && resultParamIsPointer[i] {
 					ident := getIdentifier(expr)

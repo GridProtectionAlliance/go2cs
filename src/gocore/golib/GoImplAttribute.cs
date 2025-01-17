@@ -26,25 +26,29 @@ using System;
 namespace go;
 
 /// <summary>
-/// Represents a Go interface implementation attribute.
+/// Marks a struct target for interface implementation mapping.
 /// </summary>
-/// <typeparam name="TInterface">Type of interface to implement.</typeparam>
-/// <typeparam name="TTarget">Type of target that implements interface.</typeparam>
+/// <typeparam name="TStruct">Struct type that implements interface.</typeparam>
+/// <typeparam name="TInterface">Interface type to implement.</typeparam>
 /// <remarks>
+/// <para>
 /// This attribute is used to auto-generate backend C# code needed to implement
-/// an interface in a Go-like manner. See the <c>InterfaceGenerator</c> in the go2cs
-/// code generators for operational details.
+/// an interface using matching receiver methods.
+/// </para>
+/// <para>
+/// </para>
+/// See the <c>ImplGenerator</c> in the go2cs code generators for details.
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplAttribute<TInterface, TTarget> : Attribute
+public class GoImplAttribute<TStruct, TInterface> : Attribute
 {
+    /// <summary>
+    /// Gets the type of target that implements interface.
+    /// </summary>
+    public Type TargetType => typeof(TStruct);
+
     /// <summary>
     /// Gets the type of interface to implement.
     /// </summary>
     public Type InterfaceType => typeof(TInterface);
-
-    /// <summary>
-    /// Gets the type of target that implements interface.
-    /// </summary>
-    public Type TargetType => typeof(TTarget);
 }

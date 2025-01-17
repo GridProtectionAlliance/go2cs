@@ -36,22 +36,12 @@ using System.Diagnostics;
 
 namespace go2cs;
 
-public record MethodInfo
-{
-    public required string Name { get; init; }
-    public required string ReturnType { get; init; }
-    public required bool IsGeneric { get; init; }
-    public required string TypeParameters { get; init; }
-    public required string Parameters { get; init; }
-    public required string TypedParameters { get; init; }
-}
-
 [Generator]
 public class ImplGenerator : ISourceGenerator
 {
     private const string Namespace = "go";
     private const string AttributeName = "GoImpl";
-    private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TInterface, TTarget>";
+    private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
 
     public void Initialize(GeneratorInitializationContext context)
     {
@@ -83,19 +73,19 @@ public class ImplGenerator : ISourceGenerator
                 .ToArray();
 
             // Extract generic type arguments from "GoImplementAttribute"
-            (ITypeSymbol? interfaceType, ITypeSymbol? structType) = GetGenericTypeArguments(attribute, syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = GetGenericTypeArguments(attribute, syntaxContext);
             
-            if (interfaceType is null || structType is null)
+            if (structType is null || interfaceType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
 
-            if (interfaceType.TypeKind != TypeKind.Interface)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, first generic type argument must be an interface.");
-
             if (structType.TypeKind != TypeKind.Struct)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be a struct.");
+                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, first generic type argument must be a struct.");
 
-            string interfaceName = interfaceType.Name;
+            if (interfaceType.TypeKind != TypeKind.Interface)
+                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
+
             string structName = structType.Name;
+            string interfaceName = interfaceType.Name;
 
             List<MethodInfo> methods = interfaceType.GetMembers()
                 .OfType<IMethodSymbol>()
@@ -105,10 +95,8 @@ public class ImplGenerator : ISourceGenerator
                 {
                     Name = method.Name,
                     ReturnType = method.ReturnType.ToDisplayString(),
-                    IsGeneric = method.IsGenericMethod,
-                    TypeParameters = string.Join(", ", method.TypeParameters.Select(type => type.ToDisplayString())),
-                    Parameters = string.Join(", ", method.Parameters.Select(param => param.Name)),
-                    TypedParameters = string.Join(", ", method.Parameters.Select(param => $"{param.ToDisplayString()} {param.Name}"))
+                    Parameters = method.Parameters.Select(param => (name: param.Name, type: param.ToDisplayString())).ToArray(),
+                    GenericTypes = string.Join(", ", method.TypeParameters.Select(type => type.ToDisplayString()))
                 })
                 .ToList();
 
@@ -116,8 +104,8 @@ public class ImplGenerator : ISourceGenerator
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
-                InterfaceName = interfaceName,
                 StructName = structName,
+                InterfaceName = interfaceName,
                 Methods = methods,
                 UsingStatements = usingStatements
             }
@@ -138,7 +126,7 @@ public class ImplGenerator : ISourceGenerator
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
     }
 
-    private static (ITypeSymbol? interfaceType, ITypeSymbol? targetType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
+    private static (ITypeSymbol? structType, ITypeSymbol? interfaceType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
     {
         // Check if the attribute type is generic
         if (attributeSyntax.Name is not GenericNameSyntax genericName)
@@ -151,9 +139,9 @@ public class ImplGenerator : ISourceGenerator
             return (null, null);
 
         // Get semantic information for each type argument
-        ITypeSymbol? interfaceType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
-        ITypeSymbol? targetType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
+        ITypeSymbol? structType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
+        ITypeSymbol? interfaceType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
 
-        return (interfaceType, targetType);
+        return (structType, interfaceType);
     }
 }

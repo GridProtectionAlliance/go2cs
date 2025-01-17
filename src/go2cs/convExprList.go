@@ -3,6 +3,7 @@ package main
 import (
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strings"
 )
 
@@ -16,12 +17,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	keyValueContext := DefaultKeyValueContext()
 	forceMultiLine := false
 	hasSpreadOperator := false
+	var interfaceType types.Type
 
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
 		keyValueContext.ident = callContext.keyValueIdent
 		forceMultiLine = callContext.forceMultiLine
 		hasSpreadOperator = callContext.hasSpreadOperator
+		interfaceType = callContext.interfaceType
 	}
 
 	for i, expr := range exprs {
@@ -62,7 +65,11 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
-		result.WriteString(v.convExpr(expr, contexts))
+		if interfaceType == nil {
+			result.WriteString(v.convExpr(expr, contexts))
+		} else {
+			result.WriteString(convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
+		}
 
 		// If the last expression has a spread operator, use elipsis property as source
 		// this way elements are passed as arguments instead of a slice or array

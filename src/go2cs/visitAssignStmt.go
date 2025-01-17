@@ -238,7 +238,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			rhsExpr := v.convExpr(rhs, contexts)
 
 			if lhsTypeIsInterface[i] {
-				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhsExpr))
+				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
 				result.WriteString(rhsExpr)
 			}
@@ -308,7 +308,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				rhsExpr := v.convExpr(rhs, contexts)
 
 				if lhsTypeIsInterface[i] {
-					result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
+					result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
 				} else {
 					result.WriteString(rhsExpr)
 				}
@@ -322,7 +322,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
+						result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}
@@ -363,7 +363,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(lhs, rhsExpr))
+						result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}

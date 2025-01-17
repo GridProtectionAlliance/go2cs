@@ -1,5 +1,3 @@
-﻿// ReSharper disable InconsistentNaming
-// ReSharper disable PreferConcreteValueOverDefault
 namespace go;
 
 using fmt = fmt_package;
@@ -15,7 +13,7 @@ public static @string Error(this MyError err) {
 }
 
 private static error f() {
-    return error.As(new MyError("foo"));
+    return new MyError("foo");
 }
 
 [GoType] partial interface Animal {

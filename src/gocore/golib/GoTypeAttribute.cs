@@ -27,13 +27,17 @@ using System;
 namespace go;
 
 /// <summary>
-/// Represents a Go type definition attribute.
+/// Marks a struct or interface for automatic code generation.
 /// </summary>
 /// <param name="definition">Type definition string, if applicable.</param>
 /// <remarks>
+/// <para>
 /// This attribute is used to auto-generate backend C# type code needed to emulate
-/// behaviour for a Go type definition. See the <c>TypeGenerator</c> in the go2cs
-/// code generators for operational details.
+/// behaviour for a Go type definition.
+/// </para>
+/// <para>
+/// See the <c>TypeGenerator</c> in the go2cs code generators for details.
+/// </para>
 /// </remarks>
 /// <param name="definition">Type definition string.</param>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Interface)]

@@ -31,26 +31,38 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	callContext.keyValueIdent = context.ident
 	compositeSuffix := ""
 
-	var lbracePrefix, rbracePrefix string
+	// Get the element type for arrays/slices/maps to check for interfaces
+	var elementType types.Type
+	var needsInterfaceCast bool
+	var isEmpty bool
 
-	lbrace := "{"
-	rbrace := "}"
-
-	if _, ok := exprType.(*types.Array); ok {
+	switch t := exprType.(type) {
+	case *types.Array:
+		elementType = t.Elem()
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".array()"
-	}
-
-	if _, ok := exprType.(*types.Slice); ok {
+	case *types.Slice:
+		elementType = t.Elem()
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".slice()"
-	}
-
-	if _, ok := exprType.(*types.Map); ok {
+	case *types.Map:
+		elementType = t.Elem()
 		callContext.keyValueSource = MapSource
 	}
+
+	// Check if element type is an interface
+	if elementType != nil {
+		needsInterfaceCast, isEmpty = isInterface(elementType)
+		if needsInterfaceCast && !isEmpty {
+			callContext.interfaceType = elementType
+		}
+	}
+
+	var lbracePrefix, rbracePrefix string
+	lbrace := "{"
+	rbrace := "}"
 
 	if named, ok := exprType.(*types.Named); ok {
 		if _, ok := named.Underlying().(*types.Struct); ok {
@@ -63,11 +75,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		rbracePrefix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 	}
 
-	// Check if first element is a key value pair expression
+	// Check for sparse array initialization
 	if callContext.keyValueSource == ArraySource && len(compositeLit.Elts) > 0 {
-		// Check for indexed specifiers representing sparse array/slice initialization
 		if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
-			// Find maximum value of key in composite literals
 			maxKeyValue := 0
 
 			for _, elt := range compositeLit.Elts {
@@ -78,7 +88,6 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 								maxKeyValue = int(keyValue)
 							}
 						} else {
-							// If key is not a constant, then it is not a sparse array
 							maxKeyValue = 0
 							break
 						}
@@ -87,7 +96,6 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			}
 
 			if maxKeyValue > 0 {
-				// Sparse array/slice initialization can be initialized like a map
 				callContext.keyValueSource = MapSource
 				arrayTypeContext.compositeInitializer = false
 				arrayTypeContext.maxLength = maxKeyValue + 1
@@ -114,7 +122,35 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	}
 
-	result.WriteString(fmt.Sprintf("%s%s%s%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext), rbracePrefix, rbrace, compositeSuffix))
+	// Convert elements with potential interface casting
+	if needsInterfaceCast && !isEmpty {
+		elements := &strings.Builder{}
+
+		for i, elt := range compositeLit.Elts {
+			if i > 0 {
+				elements.WriteString(", ")
+			}
+
+			var expr string
+
+			if kv, ok := elt.(*ast.KeyValueExpr); ok {
+				// Handle key-value pairs (for maps or sparse arrays)
+				keyStr := v.convExpr(kv.Key, nil)
+				valStr := v.convExpr(kv.Value, nil)
+				expr = fmt.Sprintf("%s, %s", keyStr, convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
+			} else {
+				// Handle regular elements
+				expr = convertToInterfaceType(elementType, v.getType(elt, false), v.convExpr(elt, nil))
+			}
+
+			elements.WriteString(expr)
+		}
+		result.WriteString(elements.String())
+	} else {
+		result.WriteString(v.convExprList(compositeLit.Elts, compositeLit.Lbrace, callContext))
+	}
+
+	result.WriteString(fmt.Sprintf("%s%s%s", rbracePrefix, rbrace, compositeSuffix))
 
 	return result.String()
 }
