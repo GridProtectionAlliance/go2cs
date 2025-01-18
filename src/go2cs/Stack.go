@@ -21,7 +21,7 @@
 //
 //******************************************************************************************************
 
-package stack
+package main
 
 // Stack represents a stack data structure
 type Stack[T any] struct {

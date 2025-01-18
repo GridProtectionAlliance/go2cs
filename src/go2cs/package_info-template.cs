@@ -19,7 +19,7 @@ using go;
 // go2cs code converter will generate a `global using` statement for the alias in
 // the converted source, e.g.: `global using Table = go.map<go.@string, nint>;`.
 // Although scope of `global using` is available to all files in the project, all
-// converted Go code for the project target the same package, so `global using`
+// converted Go code for the project targets the same package, so `global using`
 // statements will effectively have package level scope.
 
 // Additionally, `GoTypeAlias` attributes will be generated here for exported type

@@ -32,8 +32,8 @@ namespace go;
 /// <param name="definition">Type definition string, if applicable.</param>
 /// <remarks>
 /// <para>
-/// This attribute is used to auto-generate backend C# type code needed to emulate
-/// behaviour for a Go type definition.
+/// This attribute is used to auto-generate backend C# type code needed to
+/// emulate Go behaviour for a type definition.
 /// </para>
 /// <para>
 /// See the <c>TypeGenerator</c> in the go2cs code generators for details.

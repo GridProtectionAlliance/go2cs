@@ -23,7 +23,6 @@
 
 //#define DEBUG_GENERATOR
 
-using System.Collections.Generic;
 using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

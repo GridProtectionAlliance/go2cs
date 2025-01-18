@@ -78,6 +78,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 				if !anyTypeIsInt && lhsTypeIsInt[i] {
 					anyTypeIsInt = true
 				}
+			} else if indexExpr, ok := lhs.(*ast.IndexExpr); ok {
+				ident = getIdentifier(indexExpr.X)
+
+				isInterface, isEmpty := v.isInterface(ident)
+				lhsTypeIsInterface[i] = isInterface && !isEmpty
 			}
 		} else {
 			if v.isReassignment(ident) {
@@ -224,7 +229,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					// Track the name of the variable on the LHS for composite literals,
 					// this is needed for sparse array initializations
 					keyValueContext := DefaultKeyValueContext()
-					keyValueContext.ident = ident.Name
+					keyValueContext.ident = ident
 					contexts = append(contexts, keyValueContext)
 				}
 			}
@@ -296,7 +301,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 					// Track the name of the variable on the LHS for composite literals,
 					// this is needed for sparse array initializations
 					keyValueContext := DefaultKeyValueContext()
-					keyValueContext.ident = ident.Name
+					keyValueContext.ident = ident
 					contexts = append(contexts, keyValueContext)
 				}
 			}

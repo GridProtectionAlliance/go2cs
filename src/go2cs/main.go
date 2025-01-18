@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"embed"
-	_ "embed"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -23,9 +22,6 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
-
-	. "go2cs/hashset"
-	. "go2cs/stack"
 )
 
 type Options struct {
@@ -266,7 +262,6 @@ Examples:
 		if projectFileName, err = writeProjectFiles(filepath.Base(inputFilePath), outputFilePath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", outputFilePath, err)
 		} else {
-			// TODO: Change to WalkDir and check for files in sub-directories that may be part of same package
 			// Parse all .go files in the directory
 			err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
 				if err != nil {
@@ -541,6 +536,15 @@ Examples:
 
 		} else {
 			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
+		}
+	}
+
+	// Remove trailing empty lines
+	for i := len(packageInfoLines) - 1; i >= 0; i-- {
+		if strings.TrimSpace(packageInfoLines[i]) == "" {
+			packageInfoLines = packageInfoLines[:i]
+		} else {
+			break
 		}
 	}
 
@@ -957,6 +961,13 @@ func paramsArePointers(paramTypes *types.Tuple) []bool {
 }
 
 func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
+	// Target selector or index expression source if this source of the interface expression
+	if selectorExpr, ok := interfaceExpr.(*ast.SelectorExpr); ok {
+		interfaceExpr = selectorExpr.Sel
+	} else if indexExpr, ok := interfaceExpr.(*ast.IndexExpr); ok {
+		interfaceExpr = indexExpr.X
+	}
+
 	return convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)
 }
 
@@ -984,6 +995,32 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 	return prefix + exprResult
 }
 
+// getUnderlyingType attempts to get the concrete type underneath an interface type
+func (v *Visitor) getUnderlyingType(expr ast.Expr) types.Type {
+	typ := v.info.TypeOf(expr)
+	if typ == nil {
+		return nil
+	}
+
+	// If it's already a concrete type, return it
+	if _, isInterface := typ.Underlying().(*types.Interface); !isInterface {
+		return typ
+	}
+
+	// Get the type and value information
+	tv, ok := v.info.Types[expr]
+	if !ok {
+		return nil
+	}
+
+	// The concrete type is available in the type checker's type-and-value info
+	if tv.IsValue() {
+		return tv.Type
+	}
+
+	return nil
+}
+
 func getIdentifier(node ast.Node) *ast.Ident {
 	var ident *ast.Ident
 
@@ -1009,6 +1046,20 @@ func getIdentifier(node ast.Node) *ast.Ident {
 	*/
 
 	return ident
+}
+
+func (v *Visitor) getIdentType(ident *ast.Ident) types.Type {
+	// First check Types map
+	if typeAndValue, exists := v.info.Types[ident]; exists {
+		return typeAndValue.Type
+	}
+
+	// If not in Types, check Uses map
+	if obj := v.info.Uses[ident]; obj != nil {
+		return obj.Type()
+	}
+
+	return nil
 }
 
 func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {

@@ -26,14 +26,14 @@ using System;
 namespace go;
 
 /// <summary>
-/// Marks a struct target for interface implementation mapping.
+/// Marks an assembly with a structure interface implementation mapping.
 /// </summary>
 /// <typeparam name="TStruct">Struct type that implements interface.</typeparam>
 /// <typeparam name="TInterface">Interface type to implement.</typeparam>
 /// <remarks>
 /// <para>
 /// This attribute is used to auto-generate backend C# code needed to implement
-/// an interface using matching receiver methods.
+/// an interface for a structure using matching receiver methods.
 /// </para>
 /// <para>
 /// </para>

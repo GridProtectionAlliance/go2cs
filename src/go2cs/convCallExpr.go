@@ -44,8 +44,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				continue
 			}
 
-			if result, _ := isInterface(paramType); result {
+			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
 				callExprContext.u8StringArgOK[i] = false
+
+				if !isEmpty {
+					callExprContext.interfaceType = paramType
+				}
 			} else if isPointer(paramType) {
 				ident := getIdentifier(callExpr.Args[i])
 

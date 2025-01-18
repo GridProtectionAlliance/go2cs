@@ -5,8 +5,6 @@ import (
 	"go/ast"
 	"go/types"
 	"strings"
-
-	. "go2cs/hashset"
 )
 
 const FunctionReceiverMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"

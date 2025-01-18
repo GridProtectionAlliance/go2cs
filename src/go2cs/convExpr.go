@@ -24,7 +24,7 @@ type CallExprContext struct {
 	argTypeIsPtr      map[int]bool
 	hasSpreadOperator bool
 	keyValueSource    KeyValueSource
-	keyValueIdent     string
+	keyValueIdent     *ast.Ident
 	forceMultiLine    bool
 	interfaceType     types.Type
 }
@@ -35,7 +35,7 @@ func DefaultCallExprContext() *CallExprContext {
 		argTypeIsPtr:      make(map[int]bool),
 		hasSpreadOperator: false,
 		keyValueSource:    StructSource,
-		keyValueIdent:     "",
+		keyValueIdent:     nil,
 		forceMultiLine:    false,
 		interfaceType:     nil,
 	}
@@ -125,13 +125,13 @@ func (c IdentContext) getDefault() StmtContext {
 
 type KeyValueContext struct {
 	source KeyValueSource
-	ident  string
+	ident  *ast.Ident
 }
 
 func DefaultKeyValueContext() KeyValueContext {
 	return KeyValueContext{
 		source: StructSource,
-		ident:  "",
+		ident:  nil,
 	}
 }
 

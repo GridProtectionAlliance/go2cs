@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Text;
-using static go2cs.Common;
 
 namespace go2cs.Templates.InterfaceImpl;
 

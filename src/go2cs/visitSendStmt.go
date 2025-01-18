@@ -22,7 +22,14 @@ func (v *Visitor) visitSendStmt(sendStmt *ast.SendStmt, format FormattingContext
 		channelOperation = "Send"
 	}
 
-	v.targetFile.WriteString(fmt.Sprintf("%s.%s(%s)", v.convExpr(sendStmt.Chan, nil), channelOperation, v.convExpr(sendStmt.Value, nil)))
+	sendExpr := v.convExpr(sendStmt.Value, nil)
+	chanType := v.getExprType(sendStmt.Chan)
+
+	if needsInterfaceCast, isEmpty := isInterface(chanType); needsInterfaceCast && !isEmpty {
+		sendExpr = convertToInterfaceType(chanType, v.getExprType(sendStmt.Value), sendExpr)
+	}
+
+	v.targetFile.WriteString(fmt.Sprintf("%s.%s(%s)", v.convExpr(sendStmt.Chan, nil), channelOperation, sendExpr))
 
 	if format.includeSemiColon {
 		v.targetFile.WriteRune(';')

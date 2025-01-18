@@ -26,7 +26,7 @@ using System;
 namespace go;
 
 /// <summary>
-/// Defines an exported alias for a type.
+/// Marks an assembly with an exported alias for a type.
 /// </summary>
 /// <param name="alias">Alias name.</param>
 /// <param name="typeName">Type name of the alias.</param>
