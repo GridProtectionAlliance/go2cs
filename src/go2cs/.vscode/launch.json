@@ -34,6 +34,7 @@
                 //"..\\Tests\\Behavioral\\ChannelSendToClosed",
                 //"..\\Tests\\Behavioral\\ChannelSendToNil",
                 //"..\\Tests\\Behavioral\\Solitaire",
+                //"..\\Tests\\Behavioral\\InterfaceInheritance",
             ]
         }
     ]

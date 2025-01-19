@@ -27,12 +27,18 @@ internal class InterfaceImplTemplate : TemplateBase
             foreach (MethodInfo method in Methods)
             {
                 if (result.Length > 0)
-                    result.AppendLine("        ");
+                    result.Append("\r\n        ");
 
-                result.Append($"{method.ReturnType} {InterfaceName}.{method.GetSignature()} => this.{method.Name}{method.GetGenericSignature()}({method.CallParameters});");
+                result.Append($"{method.ReturnType} {method.GetSignature()} => this.{GetSimpleName(method.Name)}{method.GetGenericSignature()}({method.CallParameters});");
             }
 
             return result.ToString();
         }
+    }
+
+    private static string GetSimpleName(string name)
+    {
+        string[] parts = name.Split('.');
+        return parts[^1];
     }
 }

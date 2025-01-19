@@ -2,57 +2,66 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
-public partial struct T1 {
+[GoType] partial struct T1 {
     public @string name;
 }
 
 public static void M(this T1 t) {
 }
+
 public static void N(this T1 t) {
 }
+
 public static @string String(this T1 t) {
     return ""u8;
 }
+
 public static @string Error(this T1 t) {
     return ""u8;
 }
 
-public partial struct T2 {
+[GoType] partial struct T2 {
     public @string name;
 }
 
 public static void M(this T2 t) {
 }
+
 public static void N(this T2 t) {
 }
+
 public static @string String(this T2 t) {
     return ""u8;
 }
+
 public static @string Error(this T2 t) {
     return ""u8;
 }
 
-public partial interface I {
-    void M();
+[GoType] partial interface I {
+    public void M();
 }
 
-public partial interface V : I, fmt.Stringer, error {
-    void N();
+[GoType] partial interface V :
+    I,
+    fmt.Stringer,
+    error
+{
+    public void N();
 }
 
 private static void Main() {
-    var m = make_map<I, nint>();
-    I i1 = I.As(new T1("foo"))!;
-    I i2 = I.As(new T2("bar"))!;
+    var m = new map<I, nint>();
+    I i1 = new T1("foo");
+    I i2 = new T2("bar");
     m[i1] = 1;
     m[i2] = 2;
     fmt.Println(m);
-
-    var n = make_map<V, nint>();
-    V v1 = V.As(new T1("foo"))!;
-    V v2 = V.As(new T2("bar"))!;
+    var n = new map<V, nint>();
+    V v1 = new T1("foo");
+    V v2 = new T2("bar");
     v1.N();
     v2.M();
     fmt.Print(v1.String());

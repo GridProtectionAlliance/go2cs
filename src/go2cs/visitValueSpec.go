@@ -14,6 +14,40 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 
 	if tok == token.VAR {
 		for i, ident := range valueSpec.Names {
+			// Check if this is an interface type being assigned a value
+			if len(valueSpec.Values) > i {
+				// Get the type - either from explicit type or from value's type
+				var declType types.Type
+
+				if valueSpec.Type != nil {
+					declType = v.info.TypeOf(valueSpec.Type)
+				} else {
+					declType = v.info.TypeOf(ident)
+				}
+
+				if declType != nil {
+					// Check if it's an interface type
+					if iface, ok := declType.Underlying().(*types.Interface); ok && iface.NumMethods() > 0 {
+						// Get the concrete type from the RHS
+						rhsType := v.info.TypeOf(valueSpec.Values[i])
+
+						if rhsType != nil {
+							// Record the implementation
+							interfaceName := getTypeName(declType)
+							concreteTypeName := getTypeName(rhsType)
+
+							packageLock.Lock()
+							if implementations, exists := interfaceImplementations[interfaceName]; exists {
+								implementations.Add(concreteTypeName)
+							} else {
+								interfaceImplementations[interfaceName] = NewHashSet([]string{concreteTypeName})
+							}
+							packageLock.Unlock()
+						}
+					}
+				}
+			}
+
 			// Perform escape analysis to determine if the variable needs heap allocation
 			v.performEscapeAnalysis(ident, parentBlock)
 

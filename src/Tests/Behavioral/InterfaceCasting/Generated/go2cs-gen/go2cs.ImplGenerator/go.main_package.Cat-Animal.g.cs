@@ -19,6 +19,6 @@ public static partial class main_package
 {
     partial struct Cat : Animal
     {
-        go.@string Animal.Speak() => this.Speak();
+        go.@string go.main_package.Animal.Speak() => this.Speak();
     }
 }

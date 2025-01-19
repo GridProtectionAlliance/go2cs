@@ -14,6 +14,7 @@
 // </ImportedTypeAliases>
 
 using go;
+using static go.main_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -39,12 +40,13 @@ using go;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-// Example: [assembly: GoImpl<main_package.MyError, error>]
+[assembly: GoImpl<T1, V>]
+[assembly: GoImpl<T2, V>]
 // </InterfaceImplementations>
 
 namespace go;
 
-[GoPackage("%s")]
-public static partial class %s_package
+[GoPackage("main")]
+public static partial class main_package
 {
 }

@@ -17,8 +17,11 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct Llama : Animal
+    partial struct T1 : V
     {
-        go.@string go.main_package.Animal.Speak() => this.Speak();
+        void go.main_package.I.M() => this.M();
+        go.@string go.fmt_package.Stringer.String() => this.String();
+        go.@string go.error.Error() => this.Error();
+        void go.main_package.V.N() => this.N();
     }
 }

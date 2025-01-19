@@ -39,7 +39,7 @@ public static partial class fmt_package
     /// The Stringer interface type is the conventional interface for representing
     /// formatted string output.
     /// </summary>
-    public partial interface Stringer : IFormattable
+    public partial interface Stringer //: IFormattable
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static Stringer As<T>(in T target) =>

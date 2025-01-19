@@ -17,8 +17,8 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct Llama : Animal
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    public partial interface I
     {
-        go.@string go.main_package.Animal.Speak() => this.Speak();
     }
 }

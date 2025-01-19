@@ -64,7 +64,7 @@ public class ImplGenerator : ISourceGenerator
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
             string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
-            
+
             string[] usingStatements = compilationUnit.SyntaxTree
                 .GetRoot()
                 .DescendantNodes()
@@ -87,17 +87,21 @@ public class ImplGenerator : ISourceGenerator
             string structName = structType.Name;
             string interfaceName = interfaceType.Name;
 
-            List<MethodInfo> methods = interfaceType.GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where(method => method.MethodKind == MethodKind.Ordinary)
-                .Where(method => !method.IsStatic)
-                .Select(method => new MethodInfo
+            List<MethodInfo> methods = interfaceType.AllInterfaces
+                .Concat([interfaceType]) // Include the original interface
+                .SelectMany(iface => iface.GetMembers()
+                    .OfType<IMethodSymbol>()
+                    .Where(method => method.MethodKind == MethodKind.Ordinary)
+                    .Where(method => !method.IsStatic)
+                    .Select(method => (name: iface.ToDisplayString(), method)))
+                .Select(t => new MethodInfo
                 {
-                    Name = method.Name,
-                    ReturnType = method.ReturnType.ToDisplayString(),
-                    Parameters = method.Parameters.Select(param => (name: param.Name, type: param.ToDisplayString())).ToArray(),
-                    GenericTypes = string.Join(", ", method.TypeParameters.Select(type => type.ToDisplayString()))
+                    Name = $"{t.name}.{t.method.Name}",
+                    ReturnType = t.method.ReturnType.ToDisplayString(),
+                    Parameters = t.method.Parameters.Select(param => (name: param.Name, type: param.ToDisplayString())).ToArray(),
+                    GenericTypes = string.Join(", ", t.method.TypeParameters.Select(type => type.ToDisplayString()))
                 })
+                .Distinct()
                 .ToList();
 
             string generatedSource = new InterfaceImplTemplate

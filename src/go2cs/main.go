@@ -151,7 +151,7 @@ var keywords = NewHashSet[string]([]string{
 //go:embed csproj-template.xml
 var csprojTemplate []byte
 
-//go:embed package_info-template.cs
+//go:embed package_info-template.txt
 var packageInfoTemplate []byte
 
 //go:embed go2cs.ico
@@ -167,6 +167,7 @@ var publishProfiles embed.FS
 var packageName string
 var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
+var interfaceInheritances = map[string]HashSet[string]{}
 var packageLock = sync.Mutex{}
 
 func main() {
@@ -438,7 +439,7 @@ Examples:
 		packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
 	} else {
 		// Generate new package info file from template
-		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageName, packageName)
+		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageName, packageName, packageName)
 		packageInfoLines = strings.Split(templateFile, "\r\n")
 	}
 
@@ -516,6 +517,22 @@ Examples:
 				for i := startLineIndex + 1; i < endLineIndex; i++ {
 					line := packageInfoLines[i]
 					lines.Add(strings.TrimSpace(line))
+				}
+			}
+
+			// Drop lower level interface implementations where interface inheritances are already covered
+			for interfaceName, inheritedInterfaces := range interfaceInheritances {
+				for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
+					// Check if the same type implements both interfaces
+					if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
+						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
+							baseImplementations.IntersectWithSet(inheritedImplementations)
+							for _, implementation := range baseImplementations.Keys() {
+								implementedTypes := interfaceImplementations[inheritedInterfaceName]
+								implementedTypes.Remove(implementation)
+							}
+						}
+					}
 				}
 			}
 
@@ -985,8 +1002,8 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 	}
 
 	packageLock.Lock()
-	if _, ok := interfaceImplementations[interfaceTypeName]; ok {
-		interfaceImplementations[interfaceTypeName].Add(targetTypeName)
+	if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
+		implementations.Add(targetTypeName)
 	} else {
 		interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
 	}
@@ -1034,12 +1051,12 @@ func getIdentifier(node ast.Node) *ast.Ident {
 		ident = getIdentifier(chanExpr.Value)
 	} else if arrayExpr, ok := node.(*ast.ArrayType); ok {
 		ident = getIdentifier(arrayExpr.Elt)
+	} else if mapExpr, ok := node.(*ast.MapType); ok {
+		ident = getIdentifier(mapExpr.Key)
 	}
 
 	// TODO: Other types expected to have an identifier
 	/*
-		else if mapExpr, ok := node.(*ast.MapType); ok {
-			ident = getIdentifier(mapExpr.Value)
 		} else if funcExpr, ok := node.(*ast.FuncType); ok {
 			ident = getIdentifier(funcExpr.Results)
 		}

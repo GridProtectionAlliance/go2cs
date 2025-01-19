@@ -21,10 +21,11 @@
   e) ~~Handle channels with specified direction (send or receive)~~
 11) ~~Complete send statement implementation (`visitSendStmt`)~~
 12) Complete struct interfaces and embedding (will need C# GoType code converter work)
-13) Complete interface inheritance (will need C# GoType code converter work)
+13) ~~Complete interface inheritance (will need C# GoType code converter work)~~
 14) ~~Complete channel implementation (`visitChanType` / `visitCommClause`)~~
   a) Suspected complete through existing paths - add test code for when is it encountered - or remove
 15) Handle generics conversion
+16) Always include pre-package comments during conversion
 
 xx) Setup reference code packages / path options for Go modules
     1) Assume code builds in Go / toolchain executed, i.e., local source exists

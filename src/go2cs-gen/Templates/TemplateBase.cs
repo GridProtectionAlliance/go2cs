@@ -39,6 +39,9 @@ internal abstract class TemplateBase
             // spread operators, e.g., `using ꓸꓸꓸnint = System.Span<nint>;`
             m_usings.RemoveWhere(item => item.Contains("=") && !item.StartsWith("using ꓸꓸꓸ"));
 
+            // Remove any lines that are not using statements
+            m_usings.RemoveWhere(item => !item.StartsWith("using "));
+
             // Remove any static usings
             m_usings.RemoveWhere(item => item.StartsWith("using static "));
         }

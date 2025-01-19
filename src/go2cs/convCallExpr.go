@@ -87,7 +87,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					return fmt.Sprintf("new(%s)", remainingArgs)
 				} else if _, ok := typeParam.(*types.Map); ok {
 					if v.options.preferVarDecl {
-						return fmt.Sprintf("new map<%s, %s>", typeName, remainingArgs)
+						if mapExpr, ok := typeExpr.(*ast.MapType); ok {
+							ident = getIdentifier(mapExpr.Value)
+							valueTypeName := convertToCSTypeName(ident.Name)
+							return fmt.Sprintf("new map<%s, %s>(%s)", typeName, valueTypeName, remainingArgs)
+						} else {
+							println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `make` map value type argument %s", typeName))
+						}
 					}
 
 					return fmt.Sprintf("new(%s)", remainingArgs)

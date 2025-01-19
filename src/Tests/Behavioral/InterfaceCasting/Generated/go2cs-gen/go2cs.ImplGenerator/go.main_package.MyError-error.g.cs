@@ -19,6 +19,6 @@ public static partial class main_package
 {
     partial struct MyError : error
     {
-        go.@string error.Error() => this.Error();
+        go.@string go.error.Error() => this.Error();
     }
 }
