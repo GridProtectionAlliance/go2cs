@@ -118,7 +118,7 @@ public static class FieldRef<T> where T : struct
 /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
 /// </para>
 /// </remarks>
-public partial class ptr<T>
+public sealed class ptr<T>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
