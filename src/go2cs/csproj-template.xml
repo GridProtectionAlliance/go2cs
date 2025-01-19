@@ -79,12 +79,14 @@
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
   </ItemGroup>
   
-  <ItemGroup>
-    <!-- Only source files from current folder are included by default -->
+<ItemGroup>
+    <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
+    <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" />
-    <!-- TODO: Include sub-folders if code is part of same package -->
-  </ItemGroup>
+    <!-- Remove test files from current folder -->
+    <Compile Remove="*._test.cs" />
+</ItemGroup>
 
   <ItemGroup>
 	  <!-- TODO: Add references to required projects -->
