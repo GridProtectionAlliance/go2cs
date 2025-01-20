@@ -2,10 +2,9 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
-[GoType("struct")]
-private partial struct data {
+[GoType] partial struct data {
     public @string name;
 }
 
@@ -15,9 +14,7 @@ private static void printName(this data d) {
 
 private static void Main() {
     var d = new data(name: "James"u8);
-    
-    var dʗ1 = d;
-    var f1 = () => dʗ1.printName();
+    var f1 = () => d.printName();
     f1();
     d.name = "Gretchen"u8;
     f1();

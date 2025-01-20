@@ -10,20 +10,6 @@ type StmtContext interface {
 	getDefault() StmtContext
 }
 
-type ParentBlockContext struct {
-	parentBlock *ast.BlockStmt
-}
-
-func DefaultParentBlockContext() ParentBlockContext {
-	return ParentBlockContext{
-		parentBlock: nil,
-	}
-}
-
-func (c ParentBlockContext) getDefault() StmtContext {
-	return DefaultParentBlockContext()
-}
-
 type FormattingContext struct {
 	useNewLine         bool
 	includeSemiColon   bool
@@ -103,9 +89,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 
 	switch stmtType := stmt.(type) {
 	case *ast.AssignStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
 		format := getStmtContext[FormattingContext](contexts)
-		v.visitAssignStmt(stmtType, source, format)
+		v.visitAssignStmt(stmtType, format)
 	case *ast.BlockStmt:
 		context := getStmtContext[BlockStmtContext](contexts)
 		v.visitBlockStmt(stmtType, context)
@@ -114,8 +99,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.CommClause:
 		v.visitCommClause(stmtType)
 	case *ast.DeclStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
-		v.visitDeclStmt(stmtType, source)
+		v.visitDeclStmt(stmtType)
 	case *ast.DeferStmt:
 		v.visitDeferStmt(stmtType)
 	case *ast.ExprStmt:
@@ -126,8 +110,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.GoStmt:
 		v.visitGoStmt(stmtType)
 	case *ast.IfStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
-		v.visitIfStmt(stmtType, source)
+		v.visitIfStmt(stmtType)
 	case *ast.IncDecStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitIncDecStmt(stmtType, format)
@@ -139,17 +122,14 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		v.visitReturnStmt(stmtType)
 		v.lastStatementWasReturn = true
 	case *ast.SelectStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
-		v.visitSelectStmt(stmtType, source)
+		v.visitSelectStmt(stmtType)
 	case *ast.SendStmt:
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitSendStmt(stmtType, format)
 	case *ast.SwitchStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
-		v.visitSwitchStmt(stmtType, source)
+		v.visitSwitchStmt(stmtType)
 	case *ast.TypeSwitchStmt:
-		source := getStmtContext[ParentBlockContext](contexts)
-		v.visitTypeSwitchStmt(stmtType, source)
+		v.visitTypeSwitchStmt(stmtType)
 	case *ast.BadStmt:
 		println(fmt.Sprintf("WARNING: BadStmt encountered: %#v", stmtType))
 	case *ast.EmptyStmt:

@@ -1,39 +1,32 @@
-// package main -- go2cs converted at 2018 August 14 00:22:20 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StringPassByValue.go
-using fmt = go.fmt_package;
-using static go.builtin;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void Main()
-        {
-            @string a;
+using fmt = fmt_package;
 
-            a = "Hello World";
+partial class main_package {
 
-            test(a);
-            fmt.Println(a);
-            fmt.Println();
-
-            a = "Hello World";
-            test2(ref a);
-            fmt.Println(a);
-        }
-
-        private static void test(@string a)
-        {
-            fmt.Println(a);
-            a = "Goodbye World";
-            fmt.Println(a);
-        }
-
-        private static void test2(ref @string a)
-        {
-            fmt.Println(a.Deref);
-            a.Deref = "Goodbye World";
-            fmt.Println(a.Deref);
-        }
-    }
+private static void Main() {
+    @string a = default!;
+    a = "Hello World"u8;
+    test(a);
+    fmt.Println(a);
+    fmt.Println();
+    a = "Hello World"u8;
+    test2(Ꮡa);
+    fmt.Println(a);
 }
+
+private static void test(@string a) {
+    fmt.Println(a);
+    a = "Goodbye World"u8;
+    fmt.Println(a);
+}
+
+private static void test2(ptr<@string> Ꮡa) {
+    ref var a = ref Ꮡa.val;
+
+    fmt.Println(a);
+    a = "Goodbye World"u8;
+    fmt.Println(a);
+}
+
+} // end main_package

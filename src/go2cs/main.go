@@ -34,8 +34,9 @@ type Options struct {
 }
 
 type FileEntry struct {
-	file     *ast.File
-	filePath string
+	file             *ast.File
+	filePath         string
+	identEscapesHeap map[types.Object]bool
 }
 
 // CapturedVarInfo tracks information about captured variables
@@ -102,7 +103,7 @@ type Visitor struct {
 	blocks                 Stack[*strings.Builder]
 	firstStatementIsReturn bool
 	lastStatementWasReturn bool
-	identEscapesHeap       map[*ast.Ident]bool
+	identEscapesHeap       map[types.Object]bool
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
 	scopeStack             []map[string]*types.Var // Stack of local variable scopes
@@ -277,7 +278,7 @@ Examples:
 						return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
 					}
 
-					files = append(files, FileEntry{file, path})
+					files = append(files, FileEntry{file, path, map[types.Object]bool{}})
 				}
 
 				return nil
@@ -299,7 +300,7 @@ Examples:
 			log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)
 		}
 
-		files = append(files, FileEntry{file, inputFilePath})
+		files = append(files, FileEntry{file, inputFilePath, map[types.Object]bool{}})
 	}
 
 	conf := types.Config{Importer: importer.Default()}
@@ -378,6 +379,36 @@ Examples:
 		}
 	}
 
+	// Perform escape analysis for each file
+	for i := range files {
+		visitor := &Visitor{
+			fset:             fset,
+			pkg:              pkg,
+			info:             info,
+			identEscapesHeap: files[i].identEscapesHeap,
+		}
+
+		ast.Inspect(files[i].file, func(n ast.Node) bool {
+			switch node := n.(type) {
+			case *ast.FuncDecl:
+				ast.Inspect(node.Body, func(n ast.Node) bool {
+					switch n := n.(type) {
+					case *ast.AssignStmt:
+						if n.Tok == token.DEFINE {
+							for _, lhs := range n.Lhs {
+								if ident := getIdentifier(lhs); ident != nil {
+									visitor.performEscapeAnalysis(ident, node.Body)
+								}
+							}
+						}
+					}
+					return true
+				})
+			}
+			return true
+		})
+	}
+
 	var concurrentTasks sync.WaitGroup
 
 	for _, fileEntry := range files {
@@ -403,7 +434,7 @@ Examples:
 				globalIdentNames:      globalIdentNames,
 				globalScope:           globalScope,
 				blocks:                Stack[*strings.Builder]{},
-				identEscapesHeap:      map[*ast.Ident]bool{},
+				identEscapesHeap:      fileEntry.identEscapesHeap,
 			}
 
 			visitor.visitFile(fileEntry.file)
@@ -1299,14 +1330,24 @@ func extractTypes(signature string) []string {
 }
 
 func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string {
-	escapesHeap := v.identEscapesHeap[ident]
 	identType := v.info.TypeOf(ident)
 
-	if !escapesHeap || isInherentlyHeapAllocatedType(identType) {
-		return ""
+	// Check both Defs and Uses maps
+	obj := v.info.Defs[ident]
+
+	if obj == nil {
+		obj = v.info.Uses[ident]
 	}
 
-	goTypeName := getTypeName(identType)
+	if obj != nil {
+		escapesHeap := v.identEscapesHeap[obj]
+
+		if !escapesHeap || isInherentlyHeapAllocatedType(identType) {
+			return ""
+		}
+	}
+
+	goTypeName := getFullTypeName(identType)
 	csIDName := v.getIdentName(ident)
 
 	// Handle array types

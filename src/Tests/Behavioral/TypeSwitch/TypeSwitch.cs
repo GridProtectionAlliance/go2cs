@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
 private static void Main() {
     var whatAmI = (object i) => {
@@ -30,8 +30,8 @@ private static void Main() {
     };
     whatAmI(true);
     whatAmI(1);
-    whatAmI((int64)(2));
-    whatAmI((uint64)(2));
+    whatAmI(((int64)2));
+    whatAmI(((uint64)2));
     whatAmI("hey");
 }
 

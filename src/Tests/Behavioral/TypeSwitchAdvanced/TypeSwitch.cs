@@ -1,99 +1,78 @@
-using fmt = go.fmt_package;
-using static go.builtin;
-using System;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        public partial interface I
-        {
-            @string m();
-        }
+using fmt = fmt_package;
 
-        public partial struct T : I
-        {
-            public @string name;
-            public I I;
-        }
+partial class main_package {
 
-        public static @string m(this T @ref)
-        {
-            return ref.name;
-        };
+[GoType] partial interface I {
+    @string m();
+}
 
-        public partial struct S
-        {
-            public @string name;
-        }
+[GoType] partial struct T {
+    public @string name;
+}
 
-        public static @string m(this S @ref)
-        {
-            return "Am I an I?";
-        };
+private static @string m(this T @ref) {
+    return @ref.name;
+}
 
-        private static void Main()
-        { 
-            // A type `switch` compares types instead of values.  You
-            // can use this to discover the type of an interface
-            // value.  In this example, the variable `t` will have the
-            // type corresponding to its clause.
-            Action<object> whatAmI = i =>
-            {
-                var t = i;
+[GoType] partial struct S {
+    public @string name;
+}
 
-                Switch(t)
-                .Case(typeof(bool))(() =>
-                {
-                    fmt.Println("I'm a bool");
-                })
-                .Case(typeof(long))(() =>
-                {
-                    fmt.Println("I'm an int");
-                })
-                .Default(() =>
-                {
-                    fmt.Printf("Don't know type %T\n", t);
-                });
-            }
-;
-            whatAmI(true);
-            whatAmI(1L);
-            whatAmI("hey");
+private static @string m(this S @ref) {
+    return "Am I an I?"u8;
+}
 
-            object x = 7L; // x has dynamic type int and value 7
-            long i = x._<long>(); // i has type int and value 7
-            fmt.Println(i);
-
-            T y;
-
-            y.name = "Me";
-
-            f(y);
-
-            object s = S{"you"};
-
-            Switch(s)
-            .Case(typeof(I))(() =>
-            {
-                fmt.Println("S is an I!!");
-            })
-            .Case(typeof(long))(() =>
-            {
-                fmt.Println("S is nil or an int");
-            })
-            .Default(() =>
-            {
-                fmt.Println("S is not an I");
-            });
-        }
-
-        private static void f(I y)
-        { 
-            //s := y.(string)        // illegal: string does not implement I (missing method m)
-            //r := y.(io.Reader)     // r has type io.Reader and the dynamic type of y must implement both I and io.Reader
-
-            fmt.Println(y.m());
-        }
+private static void Main() {
+    var whatAmI = (object i) => {
+        switch (i.type()) {
+        case bool t:
+            fmt.Println("I'm a bool");
+            break;
+        case nint t:
+            fmt.Println("I'm an int");
+            break;
+        case int32 t:
+            fmt.Println("I'm an int");
+            break;
+        default: {
+            var t = i.type();
+            fmt.Printf("Don't know type %T\n"u8, t);
+            break;
+        }}
+    };
+    whatAmI(true);
+    whatAmI(1);
+    whatAmI("hey");
+    nint x;
+    nint i = x._<nint>();
+    fmt.Println(i);
+    T y = default!;
+    y.name = "Me"u8;
+    f(y);
+    object s = new S("you");
+    switch (s.type()) {
+    default:
+        fmt.Println("S is not an I");
+        break;
+    case I :
+        fmt.Println("S is an I!!");
+        break;
+    case default! :
+        fmt.Println("S is nil or an int");
+        break;
+    case nint :
+        fmt.Println("S is nil or an int");
+        break;
+    case int32 :
+        fmt.Println("S is nil or an int");
+        break;
     }
 }
+
+private static void f(I y) {
+    fmt.Println(y.m());
+}
+
+} // end main_package

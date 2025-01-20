@@ -2,14 +2,14 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
 private static void Main() {
     var nums = new nint[]{2, 3, 4}.slice();
     nint sum = 0;
-    nint i = default;
-    nint num = default;
-    nint total = default;
+    nint i = default!;
+    nint num = default!;
+    nint total = default!;
     foreach (var (iᴛ1, vᴛ1) in nums) {
         i = iᴛ1;
         num = vᴛ1;
@@ -44,8 +44,8 @@ private static void Main() {
     foreach (var (vΔ2, _) in kvs) {
         fmt.Println("value:", vΔ2);
     }
-    @string k = default;
-    @string v = default;
+    @string k = default!;
+    @string v = default!;
     foreach (var (kᴛ1, vᴛ2) in kvs) {
         k = kᴛ1;
         v = vᴛ2;
@@ -55,8 +55,8 @@ private static void Main() {
             fmt.Printf("%s -> %s\n"u8, kΔ3, vΔ3);
         }
         @string strΔ1 = "sub-test"u8;
-        nint i1Δ1 = default;
-        rune c1Δ1 = default;
+        nint i1Δ1 = default!;
+        rune c1Δ1 = default!;
         foreach (var (iᴛ2, rᴛ1) in strΔ1) {
             i1Δ1 = iᴛ2;
             c1Δ1 = rᴛ1;
@@ -83,8 +83,8 @@ private static void Main() {
         fmt.Println(iΔ3, c);
     }
     @string str = "test"u8;
-    nint i1 = default;
-    rune c1 = default;
+    nint i1 = default!;
+    rune c1 = default!;
     foreach (var (iᴛ3, rᴛ2) in str) {
         i1 = iᴛ3;
         c1 = rᴛ2;
@@ -99,19 +99,19 @@ private static void Main() {
     foreach (var (iΔ5, vΔ5) in slice) {
         fmt.Println(iΔ5, vΔ5);
     }
-    nint v1 = default;
+    nint v1 = default!;
     foreach (var (iᴛ4, vᴛ4) in slice) {
         i1 = iᴛ4;
         v1 = vᴛ4;
 
         fmt.Println(i1, v1);
     }
-    var farr = new float32[/*3*/]{1.1F, 2.2F, 3.3F}.array();
+    var farr = new float32[]{1.1F, 2.2F, 3.3F}.array();
     foreach (var (iΔ6, vΔ6) in farr) {
         fmt.Println(iΔ6, vΔ6);
     }
     for (nint iΔ7 = 0; iΔ7 < 10; iΔ7++) {
-        nint j = default;
+        nint j = default!;
         for (j = 0; j < 5; j++) {
             fmt.Println(iΔ7, j);
         }

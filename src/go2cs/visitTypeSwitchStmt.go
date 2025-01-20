@@ -5,7 +5,7 @@ import (
 	"go/ast"
 )
 
-func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, source ParentBlockContext) {
+func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 	var caseClauses []*ast.CaseClause
 
 	for _, stmt := range typeSwitchStmt.Body.List {
@@ -22,7 +22,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, source
 		v.writeOutput("{")
 		v.indentLevel++
 
-		v.visitStmt(typeSwitchStmt.Init, []StmtContext{source})
+		v.visitStmt(typeSwitchStmt.Init, []StmtContext{})
 	}
 
 	v.targetFile.WriteString(v.newline)
@@ -69,7 +69,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, source
 			}
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, []StmtContext{source})
+				v.visitStmt(stmt, []StmtContext{})
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -107,7 +107,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, source
 				v.indentLevel++
 
 				for _, stmt := range caseClause.Body {
-					v.visitStmt(stmt, []StmtContext{source})
+					v.visitStmt(stmt, []StmtContext{})
 				}
 
 				v.targetFile.WriteString(v.newline)

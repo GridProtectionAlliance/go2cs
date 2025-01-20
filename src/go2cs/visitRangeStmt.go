@@ -100,7 +100,6 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		if keyExpr != "_" {
 			// Get ident for key expression and check for heap allocation
 			if ident, ok := rangeStmt.Key.(*ast.Ident); ok {
-				v.performEscapeAnalysis(ident, rangeStmt.Body)
 				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 				if len(heapTypeDecl) > 0 {
@@ -116,7 +115,6 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		if len(valExpr) > 0 && valExpr != "_" {
 			// Get ident for value expression and check for heap allocation
 			if ident, ok := rangeStmt.Value.(*ast.Ident); ok {
-				v.performEscapeAnalysis(ident, rangeStmt.Body)
 				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 				if len(heapTypeDecl) > 0 {

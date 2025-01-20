@@ -1,29 +1,23 @@
-// package main -- go2cs converted at 2018 August 14 00:22:21 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithPointer.go
-using fmt = go.fmt_package;
-using static go.builtin;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        public partial struct ColorList
-        {
-            public @int Total;
-            public @string Color;
-            public Ptr<ColorList> Next;
-            public Ptr<Ptr<ColorList>> NextNext;
-        }
+using fmt = fmt_package;
 
-        private static void Main()
-        {
-            var red = ColorList{2,"red",nil,nil};
-            var blue = ColorList{2,"blue",nil,nil};
+partial class main_package {
 
-            red.Next = ref blue;
-
-            fmt.Printf("Value of red = %v\n", red);
-            fmt.Printf("Value of blue = %v\n", blue);
-        }
-    }
+[GoType] partial struct ColorList {
+    public nint Total;
+    public @string Color;
+    public ptr<ColorList> Next;
+    public ptr<ptr<ColorList>> NextNext;
 }
+
+private static void Main() {
+    var red = new ColorList(2, "red", default!, default!);
+    ref var blue = ref heap<ColorList>(out var Ꮡblue);
+    blue = new ColorList(2, "blue", default!, default!);
+    red.Next = Ꮡblue;
+    fmt.Printf("Value of red = %v\n"u8, red);
+    fmt.Printf("Value of blue = %v\n"u8, blue);
+}
+
+} // end main_package

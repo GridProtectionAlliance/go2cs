@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlockContext) {
+func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	var comClauses []*ast.CommClause
 	var defaultClause *ast.CommClause
 	hasDefault := false
@@ -216,7 +216,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt, source ParentBlock
 		v.indentLevel++
 
 		for _, stmt := range comClause.Body {
-			v.visitStmt(stmt, []StmtContext{source})
+			v.visitStmt(stmt, []StmtContext{})
 		}
 
 		v.targetFile.WriteString(v.newline)

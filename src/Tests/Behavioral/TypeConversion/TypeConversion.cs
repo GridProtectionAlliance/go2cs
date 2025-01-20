@@ -1,30 +1,21 @@
-// package main -- go2cs converted at 2018 August 14 00:22:21 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\TypeConversion.go
-using fmt = go.fmt_package;
-using static go.builtin;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void Main()
-        {
-            public partial struct Person
-            {
-                public @string Name;
-            }
+using fmt = fmt_package;
 
-            ref dynamic data;
+partial class main_package {
 
-            Person mine;
-
-            var person = (Person.Deref)(data); // ignoring tags, the underlying types are identical
-
-            person = ref mine;
-
-            fmt.Println(mine == person.Deref);
-
-            fmt.Println((slice<rune>)@string("白鵬翔"));
-        }
+private static void Main() {
+    [GoType] partial struct Person {
+        public @string Name;
+        public ptr<struct{Street string; City string}> Address;
     }
+
+    ptr<struct{Name string "json:\"name\""; Address *struct{Street string "json:\"street\""; City string "json:\"city\""} "json:\"address\""}> data = default!;
+    Person mine = default!;
+    ptr<Person> person = (Person.val)(data);
+    person = Ꮡmine;
+    fmt.Println(mine == person.val);
+    fmt.Println(slice<rune>(((@string)"白鵬翔"u8)));
 }
+
+} // end main_package

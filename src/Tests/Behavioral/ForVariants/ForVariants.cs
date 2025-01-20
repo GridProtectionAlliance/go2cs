@@ -1,73 +1,86 @@
-using System.Threading;
-
 namespace go;
 
 using fmt = fmt_package;
-//using time = time_package;
+using time = time_package;
 
-public static partial class main_package {
+partial class main_package {
 
-private static void Main() {
-    ref var i = ref heap<nint>(out var Ꮡi);
-    i = 0;
-    while (i < 10) {
-        f(Ꮡi);
-        i++;
-    }
-    fmt.Println();
-    fmt.Println("i =", i);
-    for (i = 0; i < 10; i++) {
-        f(Ꮡi);
-        for (nint j = 0; j < 3; j++) {
-            fmt.Println(i + j);
-        }
-        fmt.Println();
-    }
-    fmt.Println("i =", i);
-    fmt.Println();
-@out:
-    ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
-    for (iΔ1 = 0; iΔ1 < 5; iΔ1++) {
-        f(ᏑiΔ1);
-        ref var iΔ2 = ref heap<nint>(out var ᏑiΔ2);
-        for (iΔ2 = 12; iΔ2 < 15; iΔ2++) {
-            f(ᏑiΔ2);
-            goto break_out;
-        }
-        if (iΔ1 > 13) {
-            goto continue_out;
-        }
-        fmt.Println();
-continue_out:;
-    }
-break_out:;
-    fmt.Println();
-    fmt.Println("i =", i);
-    fmt.Println();
-    nint x = 99;
-    fmt.Println("i before thread and", i, "x before thread", x);
-    nint iʗ1 = i;
-    nint xʗ1 = x;
-    goǃ(_ => fmt.Println("i from thread and", iʗ1, "x from thread", xʗ1));
-    while (ᐧ) {
-        i++;
-        x++;
-        f(Ꮡi);
-        if (i > 12) {
-            break;
-        }
-    }
-    fmt.Println();
-    fmt.Println("i =", i);
-    fmt.Println("x = ", x);
-    Thread.Sleep(1);
-    fmt.Println("i after thread and", i, "x after thread", x);
+private static nint x = 1;
+private static nint getNext() {
+    x++;
+    return x;
 }
 
-private static void f(ptr<nint> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+private static void Main() {
+    nint i = 2;
+    fmt.Print("Write ", i, " as ");
+    switch (i) {
+    case 1:
+        fmt.Println("one");
+        break;
+    case 2:
+        fmt.Println("two");
+        break;
+    case 3:
+        {
+            fmt.Println("three");
+        }
+        break;
+    case 4:
+        fmt.Println("four");
+        break;
+    default:
+        fmt.Println("unknown");
+        break;
+    }
 
-    fmt.Print(y);
+    switch (time.Now().Weekday()) {
+    case time.Saturday or time.Sunday:
+        fmt.Println("It's the weekend");
+        break;
+    case time.Monday:
+        fmt.Println("Ugh, it's Monday");
+        break;
+    default:
+        fmt.Println("It's a weekday");
+        break;
+    }
+
+    var t = time.Now();
+    switch (ᐧ) {
+    case {} when t.Hour() is < 12:
+        fmt.Println("It's before noon");
+        break;
+    default:
+        fmt.Println("It's after noon");
+        break;
+    }
+
+    fmt.Printf("i before = %d\n"u8, i);
+    {
+        nint iΔ1 = 1;
+        var exprᴛ1 = getNext();
+        var matchᴛ1 = false;
+        if (exprᴛ1 is -1) { matchᴛ1 = true;
+            fmt.Println("negative");
+        }
+        else if (exprᴛ1 is 0) { matchᴛ1 = true;
+            fmt.Println("zero");
+        }
+        else if (exprᴛ1 is 1 or 2) { matchᴛ1 = true;
+            fmt.Println("one or two");
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+            fmt.Printf("three, but x=%d and i now = %d\n"u8, x, iΔ1);
+            fallthrough = true;
+        }
+        if (fallthrough || !matchᴛ1) { /* default: */
+            fmt.Println("plus, always a default here because of fallthrough");
+        }
+    }
+
+    fmt.Printf("i after = %d\n"u8, i);
 }
 
 } // end main_package

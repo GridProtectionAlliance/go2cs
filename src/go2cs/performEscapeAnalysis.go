@@ -29,19 +29,19 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	}
 
 	// If analysis has already been performed, return
-	if _, found := v.identEscapesHeap[ident]; found {
-		return
-	}
-
 	identObj := v.info.ObjectOf(ident)
 
 	if identObj == nil {
 		return // Could not find the object of ident
 	}
 
+	if _, found := v.identEscapesHeap[identObj]; found {
+		return
+	}
+
 	// Check if the type is inherently heap allocated
 	if isInherentlyHeapAllocatedType(identObj.Type()) {
-		v.identEscapesHeap[ident] = true
+		v.identEscapesHeap[identObj] = true
 		return
 	}
 
@@ -123,6 +123,52 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 				}
 			}
 
+		case *ast.GoStmt:
+			// Check if ident is used inside a goroutine
+			goStmtContainsIdent := false
+			ast.Inspect(n.Call, func(n ast.Node) bool {
+				if goStmtContainsIdent {
+					return false
+				}
+
+				if id := getIdentifier(n); id != nil {
+					obj := v.info.ObjectOf(id)
+					if obj == identObj {
+						goStmtContainsIdent = true
+						return false
+					}
+				}
+				return true
+			})
+
+			if goStmtContainsIdent {
+				escapes = true
+				return false
+			}
+
+		case *ast.DeferStmt:
+			// Check if ident is used inside a deferred function
+			deferStmtContainsIdent := false
+			ast.Inspect(n.Call, func(n ast.Node) bool {
+				if deferStmtContainsIdent {
+					return false
+				}
+
+				if id := getIdentifier(n); id != nil {
+					obj := v.info.ObjectOf(id)
+					if obj == identObj {
+						deferStmtContainsIdent = true
+						return false
+					}
+				}
+				return true
+			})
+
+			if deferStmtContainsIdent {
+				escapes = true
+				return false
+			}
+
 		case *ast.FuncLit:
 			// Check if ident is used inside a closure
 			closureContainsIdent := false
@@ -156,5 +202,5 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 
 	ast.Inspect(parentBlock, inspectFunc)
 
-	v.identEscapesHeap[ident] = escapes
+	v.identEscapesHeap[identObj] = escapes
 }

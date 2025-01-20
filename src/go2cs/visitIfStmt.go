@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
+func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt) {
 	if ifStmt.Init == nil {
 		v.targetFile.WriteString(v.newline)
 		v.writeOutput("")
@@ -15,7 +15,7 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
 		v.writeOutput("{")
 		v.indentLevel++
 
-		v.visitStmt(ifStmt.Init, []StmtContext{source})
+		v.visitStmt(ifStmt.Init, []StmtContext{})
 		v.targetFile.WriteRune(' ')
 	}
 
@@ -39,7 +39,7 @@ func (v *Visitor) visitIfStmt(ifStmt *ast.IfStmt, source ParentBlockContext) {
 		switch elseStmt := ifStmt.Else.(type) {
 		case *ast.IfStmt:
 			v.targetFile.WriteRune(' ')
-			v.visitIfStmt(elseStmt, source)
+			v.visitIfStmt(elseStmt)
 		case *ast.BlockStmt:
 			v.visitBlockStmt(elseStmt, context)
 		default:

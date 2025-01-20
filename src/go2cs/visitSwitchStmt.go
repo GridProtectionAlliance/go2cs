@@ -6,7 +6,7 @@ import (
 	"go/token"
 )
 
-func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlockContext) {
+func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	var caseClauses []*ast.CaseClause
 	var caseHasFallthroughStmt []bool
 
@@ -57,7 +57,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 		v.writeOutput("{")
 		v.indentLevel++
 
-		v.visitStmt(switchStmt.Init, []StmtContext{source})
+		v.visitStmt(switchStmt.Init, []StmtContext{})
 	}
 
 	v.targetFile.WriteString(v.newline)
@@ -199,7 +199,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, []StmtContext{source})
+				v.visitStmt(stmt, []StmtContext{})
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -240,7 +240,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, []StmtContext{source})
+				v.visitStmt(stmt, []StmtContext{})
 			}
 
 			v.targetFile.WriteString(v.newline)
@@ -301,7 +301,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, source ParentBlock
 			v.indentLevel++
 
 			for _, stmt := range caseClause.Body {
-				v.visitStmt(stmt, []StmtContext{source})
+				v.visitStmt(stmt, []StmtContext{})
 			}
 
 			v.targetFile.WriteString(v.newline)

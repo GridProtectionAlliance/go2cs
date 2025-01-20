@@ -2,10 +2,10 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
 private static void Main() {
-    ref var a = ref heap(new array<@string>(2), out var Ꮡa);
+    array<@string> a = default!;
     a[0] = "Hello"u8;
     a[1] = "World"u8;
     var p = Ꮡa.at<@string>(0);
@@ -20,7 +20,7 @@ private static void Main() {
     test3(a[..]);
     fmt.Println(a[0], a[1]);
     fmt.Println();
-    var primes = new nint[] {2, 3, 5, 7, 11, 13 };
+    var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
     fmt.Println(primes);
     fmt.Println(a[0]);
     stest(p);

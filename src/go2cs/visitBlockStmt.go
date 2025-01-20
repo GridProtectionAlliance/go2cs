@@ -64,7 +64,7 @@ func (v *Visitor) visitBlockStmt(blockStmt *ast.BlockStmt, context BlockStmtCont
 			}
 		}
 
-		v.visitStmt(stmt, []StmtContext{ParentBlockContext{parentBlock: blockStmt}})
+		v.visitStmt(stmt, []StmtContext{})
 
 		lastStmt = stmt
 	}

@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
 public delegate @string Stringy();
 

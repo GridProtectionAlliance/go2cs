@@ -4,7 +4,7 @@ using fmt = fmt_package;
 using time = time_package;
 using ꓸꓸꓸobject = System.Span<object>;
 
-public static partial class main_package {
+partial class main_package {
 
 private static nint x = 1;
 private static int32 getNext() {
@@ -60,8 +60,8 @@ private static void Main() {
     nint x = 5;
     fmt.Println(x);
     {
-        nint x = 6;
-        fmt.Println(x);
+        nint xΔ1 = 6;
+        fmt.Println(xΔ1);
     }
     fmt.Println(x);
     switch (time.Now().Weekday()) {

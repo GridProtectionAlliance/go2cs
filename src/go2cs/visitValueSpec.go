@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, parentBlock *ast.BlockStmt) {
+func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 	v.writeDoc(valueSpec.Doc, valueSpec.End())
 
 	if tok == token.VAR {
@@ -47,9 +47,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token, pare
 					}
 				}
 			}
-
-			// Perform escape analysis to determine if the variable needs heap allocation
-			v.performEscapeAnalysis(ident, parentBlock)
 
 			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)

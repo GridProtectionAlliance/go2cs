@@ -1,24 +1,18 @@
-// package main -- go2cs converted at 2018 August 14 00:22:21 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructWithDelegate.go
-using fmt = go.fmt_package;
-using static go.builtin;
-using System;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        public partial struct Person
-        {
-            public Action work;
-            public @string name;
-            public int32 age;
-        }
+using fmt = fmt_package;
 
-        private static void Main()
-        {
-            var person = Person{work:nil,name:"Michał",age:29};
-            fmt.Println(person); // {<nil> Michał 29}
-        }
-    }
+partial class main_package {
+
+[GoType] partial struct Person {
+    public Action work;
+    public @string name;
+    public int32 age;
 }
+
+private static void Main() {
+    var person = new Person(work: default!, name: "Michał"u8, age: 29);
+    fmt.Println(person);
+}
+
+} // end main_package

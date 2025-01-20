@@ -27,8 +27,6 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 		// Escape analysis should be performed on the for loop body for
 		// any initializations that may be using shadowed variables
-		source := ParentBlockContext{parentBlock: forStmt.Body}
-
 		heapTypeDeclTarget := &strings.Builder{}
 
 		format := FormattingContext{
@@ -38,7 +36,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			heapTypeDeclTarget: heapTypeDeclTarget,
 		}
 
-		contexts := []StmtContext{source, format}
+		contexts := []StmtContext{format}
 
 		if forStmt.Init != nil {
 			// Allowed statements in the init part of a for loop:

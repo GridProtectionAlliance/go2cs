@@ -1053,6 +1053,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 }
 
 func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
+	var escapesToHeap bool
+
+	if obj := v.info.ObjectOf(ident); obj != nil {
+		if escapes, exists := v.identEscapesHeap[obj]; exists {
+			escapesToHeap = escapes
+		}
+	}
+
 	if !v.lambdaCapture.analysisInLambda || isDiscardedVar(ident.Name) {
 		return
 	}
@@ -1065,7 +1073,6 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 	}
 
 	obj := v.info.Uses[ident]
-
 	if obj == nil {
 		return
 	}
@@ -1080,13 +1087,17 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
-	varType := varObj.Type()
+	// Check if variable needs capture due to:
+	// 1. Being a reference type that needs copying, OR
+	// 2. Having escaped to heap (being a ref in C#)
+	needsRef := v.capturedLambdaVarRequiresCopy(varObj.Type())
+	needsCapture := needsRef || escapesToHeap
 
-	if !v.capturedLambdaVarRequiresCopy(varType) {
+	if !needsCapture {
 		return
 	}
 
-	// Just record that this needs to be captured, don't generate names yet
+	// Record the capture
 	if v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] == nil {
 		v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] = make(map[*ast.Ident]bool)
 	}

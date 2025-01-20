@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlockContext, format FormattingContext) {
+func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
 	lhsExprs := assignStmt.Lhs
@@ -16,7 +16,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 	lhsLen := len(lhsExprs)
 	rhsLen := len(rhsExprs)
 
-	parentBlock := source.parentBlock
 	reassignedCount := 0
 	declaredCount := 0
 
@@ -88,11 +87,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, source ParentBlock
 			if v.isReassignment(ident) {
 				reassignedCount++
 			} else {
-				// Perform escape analysis to determine if the variable needs heap allocation
-				v.performEscapeAnalysis(ident, parentBlock)
+				obj := v.info.ObjectOf(ident)
 
-				if !v.identEscapesHeap[ident] {
-					declaredCount++
+				if obj != nil {
+					if !v.identEscapesHeap[obj] {
+						declaredCount++
+					}
 				}
 			}
 

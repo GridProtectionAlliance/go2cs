@@ -1,40 +1,31 @@
-// package main -- go2cs converted at 2018 August 14 00:22:20 UTC
-// Original source: C:\Projects\go2cs\src\Tests\Behavioral\StructPointerPromotionWithInterface.go
-using fmt = go.fmt_package;
-using time = go.time_package;
-using static go.builtin;
+namespace go;
 
-namespace go
-{
-    public static partial class main_package
-    {
-        public partial interface Abser
-        {
-            float64 Abs();
-        }
+using fmt = fmt_package;
+using time = time_package;
 
-        public partial struct MyError
-        {
-            public time.Time When;
-            public @string What;
-        }
+partial class main_package {
 
-        public partial struct MyCustomError : Abser
-        {
-            public @string Message;
-            public Abser Abser;
-            public ref MyError MyError => ref MyError_ptr;
-        }
-        private static void Main()
-        {
-            var e = MyError{time.Now(),"Hello"};
-            var a = MyCustomError{"New One",nil,&e};
-
-            a.Message = "New";
-            a.What = "World";
-
-            fmt.Println("MyError What =", e.What);
-            fmt.Println("MyCustomError What =", a.What);
-        }
-    }
+[GoType] partial interface Abser {
+    float64 Abs();
 }
+
+[GoType] partial struct MyError {
+    public Time When;
+    public @string What;
+}
+
+[GoType] partial struct MyCustomError {
+    public @string Message;
+}
+
+private static void Main() {
+    ref var e = ref heap<MyError>(out var Ꮡe);
+    e = new MyError(time.Now(), "Hello");
+    var a = new MyCustomError("New One", default!, Ꮡe);
+    a.Message = "New"u8;
+    a.What = "World"u8;
+    fmt.Println("MyError What =", e.What);
+    fmt.Println("MyCustomError What =", a.What);
+}
+
+} // end main_package

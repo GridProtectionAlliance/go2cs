@@ -1,0 +1,101 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <RootNamespace>go</RootNamespace>
+    <AssemblyName>TypeConversion</AssemblyName>
+    <Product>go2cs</Product>
+    <Version>0.1.4</Version>
+    <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
+    <AssemblyTitle>$(Description)</AssemblyTitle>
+    <Copyright>Copyright © 2025</Copyright>
+    <Authors>$(Product) Authors</Authors>
+    <Company>Grid Protection Alliance</Company>
+    <RepositoryUrl>https://github.com/GridProtectionAlliance/go2cs</RepositoryUrl>
+    <ApplicationIcon>go2cs.ico</ApplicationIcon>
+    <Nullable>enable</Nullable>
+    <NoWarn>CS0660;CS0661;CS8981;IDE0060;IDE1006</NoWarn>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
+  <!-- Enable native compiled output optimizations -->
+  <PropertyGroup>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>True</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
+  <!-- Setup packaging options for library projects -->
+  <PropertyGroup Condition="'$(OutputType)'=='Library'">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>go.$(AssemblyName)</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageDescription>$(Description) -- C# project converted from Go source</PackageDescription>
+    <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
+    <PackageIcon>go2cs.png</PackageIcon>
+    <PackageTags>$(AssemblyName);go2cs;Golang;go</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(OutputType)'=='Library'">
+    <None Include="go2cs.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+  </ItemGroup>
+
+  <!-- Expose output of source generators as local files -->
+  <PropertyGroup>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
+    <ProjectReference Include="..\..\..\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+  </ItemGroup>
+
+  <!-- Define Go type aliases -->
+  <ItemGroup>
+    <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
+    <Using Include="System.Byte" Alias="uint8" />
+    <Using Include="System.UInt16" Alias="uint16" />
+    <Using Include="System.UInt32" Alias="uint32" />
+    <Using Include="System.UInt64" Alias="uint64" />
+    <Using Include="System.SByte" Alias="int8" />
+    <Using Include="System.Int16" Alias="int16" />
+    <Using Include="System.Int32" Alias="int32" />
+    <Using Include="System.Int64" Alias="int64" />
+    <Using Include="System.Single" Alias="float32" />
+    <Using Include="System.Double" Alias="float64" />
+    <Using Include="System.Numerics.Complex" Alias="complex128" />
+    <Using Include="System.Int32" Alias="rune" />
+    <Using Include="System.UIntPtr" Alias="uintptr" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
+  </ItemGroup>
+  
+<ItemGroup>
+    <!-- Remove all .cs files, including those in sub-folders -->
+    <Compile Remove="**/*.cs" />
+    <!-- Include only .cs files from current folder -->
+    <Compile Include="*.cs" />
+    <!-- Remove test files from current folder -->
+    <Compile Remove="*._test.cs" />
+</ItemGroup>
+
+  <ItemGroup>
+	  <!-- TODO: Add references to required projects -->
+    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
+    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
+    <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" />
+    <ProjectReference Include="..\..\..\gocore\time\time.csproj" />
+  </ItemGroup>
+
+</Project>

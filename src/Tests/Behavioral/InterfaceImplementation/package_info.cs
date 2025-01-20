@@ -42,7 +42,7 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImpl<Dog, Animal>]
 [assembly: GoImpl<Frog, Animal>]
-[assembly: GoImpl<untyped nil, Animal>]
+[assembly: GoImpl<nil, Animal>]
 // </InterfaceImplementations>
 
 namespace go;

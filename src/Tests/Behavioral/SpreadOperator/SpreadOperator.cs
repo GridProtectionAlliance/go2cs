@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using ꓸꓸꓸnint = System.Span<nint>;
 
-public static partial class main_package {
+partial class main_package {
 
 private static nint sum(params ꓸꓸꓸnint numsʗp) {
     var nums = numsʗp.slice();

@@ -40,7 +40,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			callExprContext.u8StringArgOK[i] = true
 
-			funcName := getIdentifier(callExpr.Fun).Name
+			var funcName string
+
+			funcIdent := getIdentifier(callExpr.Fun)
+
+			if funcIdent != nil {
+				funcName = funcIdent.Name
+			}
 
 			// Handle builtin functions that take `...Type` parameters, treat as `interface{}`
 			if funcName == "print" || funcName == "println" {

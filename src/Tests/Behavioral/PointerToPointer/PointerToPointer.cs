@@ -2,10 +2,9 @@ namespace go;
 
 using fmt = fmt_package;
 
-public static partial class main_package {
+partial class main_package {
 
-[GoType("struct")]
-public partial struct Buffer {
+[GoType] partial struct Buffer {
     public slice<byte> buf;
     public nint off;
     public int8 lastRead;
@@ -14,10 +13,10 @@ public partial struct Buffer {
 private const int8 opRead = -1;
 private const int8 opInvalid = 0;
 private static void Main() {
-    ref var a = ref heap(new nint(), out var Ꮡa);
-    ptr<nint> ptr = default;
-    ptr<ptr<nint>> pptr = default;
-    ptr<ptr<ptr<nint>>> ppptr = default;
+    nint a = default!;
+    ptr<nint> ptr = default!;
+    ptr<ptr<nint>> pptr = default!;
+    ptr<ptr<ptr<nint>>> ppptr = default!;
     a = 3000;
     ptr = Ꮡa;
     pptr = addr(ptr);
@@ -41,18 +40,17 @@ private static void Main() {
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 }
 
-public static (nint n, error err) Read(this ptr<Buffer> Ꮡb, slice<byte> p) {
+[GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     nint n = default;
     error err = default;
 
-    ref var b = ref Ꮡb.val;
     b.lastRead = opInvalid;
     b.off += n;
     if (n > 0) {
         b.lastRead = opRead;
     }
     (addr(new Buffer(buf: p))).Read(p);
-    return (n, error.As(null));
+    return (n, default!);
 }
 
 public static ptr<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {

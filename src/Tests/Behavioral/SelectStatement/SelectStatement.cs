@@ -4,8 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")]
-public partial struct IntSlice {}
+[GoType("[]nint")] partial struct IntSlice {}
 
 private static void g1(channel<nint> ch) {
     ch.ᐸꟷ(12);
@@ -72,12 +71,14 @@ private static void sieve() {
     var chʗ1 = ch;
     goǃ(_ => generate(chʗ1));
     while (ᐧ) {
-        nint prime = ᐸꟷ(ch);
+        ref var prime = ref heap<nint>(out var Ꮡprime);
+        prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(1);
         var chʗ2 = ch;
         var ch1ʗ1 = ch1;
-        goǃ(_ => filter(chʗ2, ch1ʗ1, prime));
+        var primeʗ1 = prime;
+        goǃ(_ => filter(chʗ2, ch1ʗ1, primeʗ1));
         ch = ch1;
         if (prime > 40) {
             break;
@@ -124,7 +125,7 @@ private static void Main() {
             break;
         }
     }
-    ch1 = default;
+    ch1 = default!;
     close(ch2);
     switch (select(ch1.ᐸꟷ(1, ꓸꓸꓸ), ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
     case 0:
@@ -163,7 +164,8 @@ private static void Main() {
     var fʗ1 = fΔ1;
     var quitʗ1 = quit;
     goǃ(() => {
-        for (nint i = 0; i < 10; i++) {
+        ref var i = ref heap<nint>(out var Ꮡi);
+        for (i = 0; i < 10; i++) {
             fmt.Println(ᐸꟷ(fʗ1));
         }
         quitʗ1.ᐸꟷ(0);
