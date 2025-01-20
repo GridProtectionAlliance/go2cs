@@ -27,6 +27,7 @@ type CallExprContext struct {
 	keyValueIdent     *ast.Ident
 	forceMultiLine    bool
 	interfaceType     types.Type
+	sourceIsRuneArray bool
 }
 
 func DefaultCallExprContext() *CallExprContext {
@@ -38,6 +39,7 @@ func DefaultCallExprContext() *CallExprContext {
 		keyValueIdent:     nil,
 		forceMultiLine:    false,
 		interfaceType:     nil,
+		sourceIsRuneArray: false,
 	}
 }
 
@@ -46,12 +48,14 @@ func (c CallExprContext) getDefault() StmtContext {
 }
 
 type BasicLitContext struct {
-	u8StringOK bool
+	u8StringOK        bool
+	sourceIsRuneArray bool
 }
 
 func DefaultBasicLitContext() BasicLitContext {
 	return BasicLitContext{
-		u8StringOK: true,
+		u8StringOK:        true,
+		sourceIsRuneArray: false,
 	}
 }
 

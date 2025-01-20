@@ -40,7 +40,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			callExprContext.u8StringArgOK[i] = true
 
-			if paramType, ok = getParameterType(funType, i); !ok {
+			funcName := getIdentifier(callExpr.Fun).Name
+
+			// Handle builtin functions that take `...Type` parameters, treat as `interface{}`
+			if funcName == "print" || funcName == "println" {
+				paramType = types.NewInterfaceType(nil, nil)
+			} else if paramType, ok = getParameterType(funType, i); !ok {
 				continue
 			}
 
@@ -132,6 +137,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext := DefaultLambdaContext()
 	lambdaContext.isCallExpr = true
 	lambdaContext.deferredDecls = context.deferredDecls
+
+	funType := v.getTypeName(callExpr.Fun, true)
+	callExprContext.sourceIsRuneArray = funType == "[]rune"
 
 	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, []ExprContext{lambdaContext}), v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
 }
