@@ -10,14 +10,8 @@ func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeConte
 		typeName := convertToCSTypeName(ident.Name)
 
 		if context.compositeInitializer {
-			var arraySize string
-
-			if arrayType.Len != nil {
-				arraySize = "/*" + v.convExpr(arrayType.Len, nil) + "*/"
-			}
-
 			// Use basic array type for composite literal initialization of slice or array
-			return fmt.Sprintf("%s[%s]", typeName, arraySize)
+			return fmt.Sprintf("%s[]", typeName)
 		}
 
 		var suffix string
