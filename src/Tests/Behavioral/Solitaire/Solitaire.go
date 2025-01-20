@@ -37,6 +37,7 @@ var board = []rune(
 var center int
 
 func init() {
+	println("init fn 1")
 	n := 0
 	for pos, field := range board {
 		if field == '○' {
@@ -47,6 +48,10 @@ func init() {
 	if n != 1 {
 		center = -1 // no single hole
 	}
+}
+
+func init() {
+	println("init fn 2")
 }
 
 var moves int // number of times move is called

@@ -77,6 +77,7 @@
     <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
     <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
   </ItemGroup>
   
 <ItemGroup>
@@ -93,6 +94,7 @@
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
     <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
+    <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" />
   </ItemGroup>
 
 </Project>

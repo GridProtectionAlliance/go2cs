@@ -1,84 +1,65 @@
 namespace go;
 
-public static partial class main_package {
+using fmt = fmt_package;
 
-public partial interface Animal {
+partial class main_package {
+
+[GoType] partial interface Animal {
     @string Type();
     @string Swim();
 }
 
-public partial struct Dog {
+[GoType] partial struct Dog {
     public @string Name;
     public @string Breed;
 }
 
-public partial struct Frog {
+[GoType] partial struct Frog {
     public @string Name;
     public @string Color;
 }
 
 private static void Main() {
-    ptr<Frog> f = @new<Frog>();
-    ptr<Dog> d = @new<Dog>();
-    ref array<Animal> zoo = ref heap(new array<Animal>(new Animal[] { Animal.As(f)!, Animal.As(d)! }), out ptr<array<Animal>> _addr_zoo);
-
-    Animal a = Animal.As(null)!;
+    var f = @new<Frog>();
+    var d = @new<Dog>();
+    ref var zoo = ref heap<array<Animal>>(out var Ꮡzoo);
+    zoo = new Animal[]{~f, ~d}.array();
+    Animal a = default!;
     fmt.Printf("%T\n"u8, a);
-
-    {
-        Animal a__prev1 = a;
-
-        foreach (var (_, __a) in zoo) {
-            a = __a;
-            fmt.Println(a.Type(), "can"u8, a.Swim());
-        }
-        a = a__prev1;
+    foreach (var (_, aΔ1) in zoo) {
+        fmt.Println(a.Type(), "can", a.Swim());
     }
-
     fmt.Printf("%T\n"u8, a);
-
-    ShowZoo(_addr_zoo); 
-
-    // Post function comment
-    fmt.Printf("%T\n"u8, a); 
-
-    // vowels[ch] is true if ch is a vowel
-    array<bool> vowels = new array<bool>(InitKeyedValues<bool>(128, ('a', true), ('e', true), ('i', true), ('o', true), ('u', true), ('y', true)));
+    ShowZoo(Ꮡzoo);
+    fmt.Printf("%T\n"u8, a);
+    var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();
     fmt.Println(vowels);
 }
 
-public static void ShowZoo(ptr<array<Animal>> _addr_zoo) {
-    ref array<Animal> zoo = ref _addr_zoo.val;
+public static void ShowZoo(ptr<array<Animal>> Ꮡzoo) {
+    ref var zoo = ref Ꮡzoo.val;
 
-    Animal a = Animal.As(null)!;
+    Animal a = default!;
+    foreach (var (_, vᴛ1) in zoo) {
+        a = vᴛ1;
 
-    foreach (var (_, __a) in zoo) {
-        a = __a;
-        fmt.Println(a.Type(), "can"u8, a.Swim());
+        fmt.Println(a.Type(), "can", a.Swim());
     }
 }
 
-private static @string Type(this ptr<Frog> _addr_f) {
-    ref Frog f = ref _addr_f.val;
-
+[GoRecv] public static @string Type(this ref Frog f) {
     return "Frog"u8;
 }
 
-private static @string Swim(this ptr<Frog> _addr_f) {
-    ref Frog f = ref _addr_f.val;
-
+[GoRecv] public static @string Swim(this ref Frog f) {
     return "Kick"u8;
 }
 
-private static @string Swim(this ptr<Dog> _addr_d) {
-    ref Dog d = ref _addr_d.val;
-
+[GoRecv] public static @string Swim(this ref Dog d) {
     return "Paddle"u8;
 }
 
-private static @string Type(this ptr<Dog> _addr_d) {
-    ref Dog d = ref _addr_d.val;
-
+[GoRecv] public static @string Type(this ref Dog d) {
     return "Doggie"u8;
 }
 

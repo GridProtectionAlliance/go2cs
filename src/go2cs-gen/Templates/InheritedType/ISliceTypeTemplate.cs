@@ -6,6 +6,7 @@ internal static class ISliceTypeTemplate
 {
     public static string Generate(string typeName) =>
         $$"""
+        
                 public {{typeName}}[] Source => m_value;
                     
                 public ISlice<{{typeName}}> Append({{typeName}}[] elems) => m_value.Append(elems);
@@ -33,9 +34,9 @@ internal static class ISliceTypeTemplate
                     get => ref m_value[index];
                 }
                 
-                public Span<nint> ꓸꓸꓸ => ToSpan();
+                public Span<{{typeName}}> ꓸꓸꓸ => ToSpan();
                 
-                public Span<nint> ToSpan()
+                public Span<{{typeName}}> ToSpan()
                 {
                     return m_value.ToSpan();
                 }

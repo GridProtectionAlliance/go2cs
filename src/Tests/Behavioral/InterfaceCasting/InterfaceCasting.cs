@@ -17,7 +17,7 @@ private static error f() {
 }
 
 [GoType] partial interface Animal {
-    public @string Speak();
+    @string Speak();
 }
 
 [GoType] partial struct Dog {

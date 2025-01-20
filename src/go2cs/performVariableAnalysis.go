@@ -12,6 +12,7 @@ import (
 type TrackerType string
 
 const (
+	BlockTracker      TrackerType = "block"
 	RangeTracker      TrackerType = "range"
 	ForTracker        TrackerType = "for"
 	FuncTracker       TrackerType = "func"
@@ -76,8 +77,14 @@ func newTrackerRegistry() *trackerRegistry {
 	}
 	// Initialize all tracker types
 	for _, t := range []TrackerType{
-		RangeTracker, ForTracker, FuncTracker,
-		IfTracker, SwitchTracker, TypeSwitchTracker, SelectTracker,
+		BlockTracker,
+		RangeTracker,
+		ForTracker,
+		FuncTracker,
+		IfTracker,
+		SwitchTracker,
+		TypeSwitchTracker,
+		SelectTracker,
 	} {
 		reg.trackers[t] = newNestedVarTracker(string(t))
 	}
@@ -546,13 +553,24 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			if initialBlock {
 				initialBlock = false
-
 				// Add function parameters (including receiver and results) to the current scope
 				addFunctionParams(funcDecl, signature)
+			} else {
+				// Only track non-initial blocks
+				blockTracker := registry.get(BlockTracker)
+				blockTracker.enter()
+				blockTracker.processing = true
 			}
 
 			for _, stmt := range node.List {
 				visitNode(stmt)
+			}
+
+			if !initialBlock {
+				// Only cleanup tracking for non-initial blocks
+				blockTracker := registry.get(BlockTracker)
+				blockTracker.processing = false
+				blockTracker.exit()
 			}
 
 			// Exit the current scope

@@ -168,6 +168,7 @@ var packageName string
 var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
 var interfaceInheritances = map[string]HashSet[string]{}
+var initFuncCounter int
 var packageLock = sync.Mutex{}
 
 func main() {
@@ -991,8 +992,8 @@ func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.
 func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
-	interfaceTypeName := convertToCSTypeName(getTypeName(interfaceType))
-	targetTypeName := convertToCSTypeName(getTypeName(targetType))
+	interfaceTypeName := convertToCSTypeName(getFullTypeName(interfaceType))
+	targetTypeName := convertToCSTypeName(getFullTypeName(targetType))
 
 	var prefix string
 
@@ -1100,6 +1101,19 @@ func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
 func getTypeName(t types.Type) string {
 	if named, ok := t.(*types.Named); ok {
 		return named.Obj().Name()
+	}
+
+	return strings.ReplaceAll(t.String(), "..", "")
+}
+
+func getFullTypeName(t types.Type) string {
+	if named, ok := t.(*types.Named); ok {
+		obj := named.Obj()
+		pkg := obj.Pkg()
+		if pkg != nil && pkg.Name() != packageName {
+			return pkg.Name() + PackageSuffix + "." + obj.Name()
+		}
+		return obj.Name()
 	}
 
 	return strings.ReplaceAll(t.String(), "..", "")

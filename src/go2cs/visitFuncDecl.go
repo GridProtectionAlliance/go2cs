@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const FunctionReceiverMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
+const FunctionAttributeMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
@@ -50,14 +50,32 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
+	functionAccess := getAccess(goFunctionName)
+	isModuleInitializer := false
+
 	if funcDecl.Recv == nil {
 		// Handle Go "main" function as a special case, in C# this should be capitalized "Main"
 		if csFunctionName == "main" {
 			csFunctionName = "Main"
+		} else if csFunctionName == "init" {
+			isModuleInitializer = true
+
+			// C# module initializer functions should have internal scope
+			functionAccess = "internal"
+
+			packageLock.Lock()
+
+			if initFuncCounter > 0 {
+				csFunctionName = fmt.Sprintf("init%s%d", ShadowVarMarker, initFuncCounter)
+			}
+
+			initFuncCounter++
+
+			packageLock.Unlock()
 		}
 	}
 
-	functionReceiverMarker := fmt.Sprintf(FunctionReceiverMarker, goFunctionName)
+	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
 	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
@@ -65,7 +83,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = functionBlockPrefixMarker
 
-	v.writeOutput("%s%s static %s %s(%s)%s", functionReceiverMarker, getAccess(goFunctionName), generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
+	v.writeOutput("%s%s static %s %s(%s)%s", functionAttributeMarker, functionAccess, generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = false
@@ -222,10 +240,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// Replace function markers
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
-	if strings.HasPrefix(parameterSignature, "this ref ") {
-		v.replaceMarker(functionReceiverMarker, "[GoRecv] ")
+	if isModuleInitializer {
+		v.replaceMarker(functionAttributeMarker, "[GoInit] ")
+	} else if strings.HasPrefix(parameterSignature, "this ref ") {
+		v.replaceMarker(functionAttributeMarker, "[GoRecv] ")
 	} else {
-		v.replaceMarker(functionReceiverMarker, "")
+		v.replaceMarker(functionAttributeMarker, "")
 	}
 
 	var funcExecutionContext string

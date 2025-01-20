@@ -319,7 +319,7 @@ public static partial class sort_package
     }
 
     // TODO: For every public method that accesses an interface type, build a wrapper function that handles interface type conversion
-    public static void Sort<TInterface>(TInterface data) where TInterface : struct => Sort(new Interface<TInterface>(data));
+    //public static void Sort<TInterface>(TInterface data) where TInterface : struct => Sort(new Interface<TInterface>(data));
 
     // maxDepth returns a threshold at which quicksort should switch
     // to heapsort. It returns 2*ceil(lg(n+1)).

@@ -3,7 +3,7 @@ namespace go;
 using fmt = fmt_package;
 using sort = sort_package;
 
-public static partial class main_package {
+partial class main_package {
 
 private const float32 w = 1;
 public const nint _addr_X = 1;
@@ -53,26 +53,22 @@ private static nint dynamicFn1() {
     return 4;
 }
 
-[GoType("interface")]
-public partial interface NodeR {
-    public nint Pos();
-    public nint End12();
-    public @string Name(nint offset);
+[GoType] partial interface NodeR {
+    nint Pos();
+    nint End12();
+    @string Name(nint offset);
 }
 
-[GoType("struct")]
-public partial struct Person {
+[GoType] partial struct Person {
     public @string Name;
     [GoTag(@"json:""Tag""")]
     public nint Age;
     public float32 ShoeSize;
 }
 
-[GoType("[]Person")]
-public partial struct PeopleByShoeSize {}
+[GoType("[]Person")] partial struct PeopleByShoeSize {}
 
-[GoType("[]Person")]
-public partial struct PeopleByAge {}
+[GoType("[]Person")] partial struct PeopleByAge {}
 
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);
@@ -128,7 +124,7 @@ private static void Main() {
     Testing();
     @string x = "Hello, 世界 \u0053\u004a3"u8;
     fmt.Println(x);
-    var people = new Person[] {
+    var people = new Person[]{
         new(
             Name: "Person1"u8,
             Age: 26,
@@ -156,9 +152,9 @@ private static void Main() {
         )
     }.slice();
     fmt.Println(people);
-    sort.Sort((PeopleByShoeSize)(people));
+    sort.Sort(((PeopleByShoeSize)people));
     fmt.Println(people);
-    sort.Sort((PeopleByAge)(people));
+    sort.Sort(((PeopleByAge)people));
     fmt.Println(people);
     x = """
         SELECT *

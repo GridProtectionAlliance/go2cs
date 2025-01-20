@@ -49,7 +49,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 			typeLenDeviation += token.Pos(len(resultSignature) - getSourceResultSignatureLen(signature))
 
 			result.WriteString(innerIndent)
-			result.WriteString(fmt.Sprintf("%s %s %s(%s);", getAccess(goMethodName), resultSignature, csMethodName, parameterSignature))
+			result.WriteString(fmt.Sprintf("%s %s(%s);", resultSignature, csMethodName, parameterSignature))
 			v.writeCommentString(result, method.Comment, method.Type.End()+typeLenDeviation)
 			result.WriteString(v.newline)
 		} else if method.Type != nil {

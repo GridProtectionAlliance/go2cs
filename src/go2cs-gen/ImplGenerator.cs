@@ -85,7 +85,7 @@ public class ImplGenerator : ISourceGenerator
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
 
             string structName = structType.Name;
-            string interfaceName = interfaceType.Name;
+            string interfaceName = interfaceType.ToDisplayString();
 
             List<MethodInfo> methods = interfaceType.AllInterfaces
                 .Concat([interfaceType]) // Include the original interface
@@ -98,7 +98,7 @@ public class ImplGenerator : ISourceGenerator
                 {
                     Name = $"{t.name}.{t.method.Name}",
                     ReturnType = t.method.ReturnType.ToDisplayString(),
-                    Parameters = t.method.Parameters.Select(param => (name: param.Name, type: param.ToDisplayString())).ToArray(),
+                    Parameters = t.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", t.method.TypeParameters.Select(type => type.ToDisplayString()))
                 })
                 .Distinct()

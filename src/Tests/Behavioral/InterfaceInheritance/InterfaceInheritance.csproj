@@ -93,6 +93,7 @@
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
     <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
     <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
+    <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" />
   </ItemGroup>
 
 </Project>

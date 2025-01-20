@@ -105,6 +105,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ChannelSendToNil", "Tests\B
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "go2cs-src", "go2cs-src.shproj", "{73AE8A92-BE9F-40D1-9FED-863CA2CE071C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solitaire", "Tests\Behavioral\Solitaire\Solitaire.csproj", "{2C8B1127-2301-489E-B8B2-0A3BC7A60727}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -251,6 +253,10 @@ Global
 		{47681981-68D5-430B-8062-C3A0367C0C81}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{47681981-68D5-430B-8062-C3A0367C0C81}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{47681981-68D5-430B-8062-C3A0367C0C81}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C8B1127-2301-489E-B8B2-0A3BC7A60727}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C8B1127-2301-489E-B8B2-0A3BC7A60727}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C8B1127-2301-489E-B8B2-0A3BC7A60727}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C8B1127-2301-489E-B8B2-0A3BC7A60727}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -295,6 +301,7 @@ Global
 		{4C777E33-A6EC-48BE-A9D1-47D2ACA3BDDB} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{47681981-68D5-430B-8062-C3A0367C0C81} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{73AE8A92-BE9F-40D1-9FED-863CA2CE071C} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
+		{2C8B1127-2301-489E-B8B2-0A3BC7A60727} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

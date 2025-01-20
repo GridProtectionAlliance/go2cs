@@ -14,11 +14,11 @@
                 //"-var=false",
                 //"-uco=false",
                 //"-tree",
-                //"..\\Tests\\Behavioral\\SortArrayType\\SortArrayType.go",
+                //"..\\Tests\\Behavioral\\SortArrayType",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitch.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitchMicro.go",
-                "..\\Tests\\Behavioral\\InterfaceCasting",
+                //"..\\Tests\\Behavioral\\InterfaceCasting",
                 //"..\\Tests\\Behavioral\\ForVariants\\ForVariants.go",
                 //"..\\Tests\\Behavioral\\IfStatements\\IfStatements.go",
                 //"..\\Tests\\Behavioral\\PointerToPointer",
@@ -33,8 +33,9 @@
                 //"..\\Tests\\Behavioral\\ChannelReceiveFromNil",
                 //"..\\Tests\\Behavioral\\ChannelSendToClosed",
                 //"..\\Tests\\Behavioral\\ChannelSendToNil",
-                //"..\\Tests\\Behavioral\\Solitaire",
+                "..\\Tests\\Behavioral\\Solitaire",
                 //"..\\Tests\\Behavioral\\InterfaceInheritance",
+                //"..\\Tests\\Behavioral\\InterfaceImplementation",
             ]
         }
     ]

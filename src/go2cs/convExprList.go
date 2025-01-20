@@ -58,6 +58,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if callContext != nil {
 			// Index out of bounds default to false here, so variadic params are handled correctly
 			basicLitContext.u8StringOK = callContext.u8StringArgOK[i]
+			basicLitContext.sourceIsRuneArray = callContext.sourceIsRuneArray
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]

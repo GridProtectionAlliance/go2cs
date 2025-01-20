@@ -41,7 +41,7 @@ public static @string Error(this T2 t) {
 }
 
 [GoType] partial interface I {
-    public void M();
+    void M();
 }
 
 [GoType] partial interface V :
@@ -49,7 +49,7 @@ public static @string Error(this T2 t) {
     fmt.Stringer,
     error
 {
-    public void N();
+    void N();
 }
 
 private static void Main() {
