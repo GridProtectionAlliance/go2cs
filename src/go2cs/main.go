@@ -1033,13 +1033,15 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 		prefix = "~"
 	}
 
-	packageLock.Lock()
-	if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
-		implementations.Add(targetTypeName)
-	} else {
-		interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+	if targetTypeName != "" && targetTypeName != "nil" {
+		packageLock.Lock()
+		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
+			implementations.Add(targetTypeName)
+		} else {
+			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+		}
+		packageLock.Unlock()
 	}
-	packageLock.Unlock()
 
 	return prefix + exprResult
 }

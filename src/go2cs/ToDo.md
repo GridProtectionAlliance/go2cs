@@ -45,30 +45,40 @@ xx) Add suport for Go assembler targets (*.s files)
        wrap in a .dll/.so/.dynlib with callable entry points options from C# code
     2) Note that for Go library there are often pure Go implementations to lean on initally
 
-Fix the following shadowing use case - second `x` should be shadowed:
+Fix the following sparse array initialization use case - see "Interface Implementation":
+```go
+vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': true}
+```
 ```cs
-    nint x = 5;
-    fmt.Println(x);
-    {
-        nint x = 6;
-        fmt.Println(x);
-    }
+var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();
+```
+
+Fix lambda shadow and missed shadow -- see "First Class Functions"
+```cs
+private static strategy stayAtK(nint k) {
+    var sʗ1 = s;
+    return (score s) => {
+
+private static void Main() {
+    var strategies = new slice<strategy>(win);
+    foreach (var (kΔ1, _) in strategies) {
+        strategies[k] = stayAtK(kΔ1 + 1);
 ```
 
 ## For C# code operations:
 
-01) Restructure T4 templates for Roslyn type inputs (or simplified versions) since using code will only be source generators
-    1) This will involve dropping unused code from go2cs.Common
+01) ~~Restructure T4 templates for Roslyn type inputs (or simplified versions) since using code will only be source generators~~
+    ~~1) This will involve dropping unused code from go2cs.Common~~
 02) Update source generators to accommodate remaining GoType attribute implementations, e.g.:
     1) Struct embedding (inheritance)
     2) Struct interface implementations
-    3) Interface inheritance
+    3) ~~Interface inheritance~~
     4) map type definitions (IMap implementation)
     5) channel type definitions (IChannel implementation)
     6) other...
-03) Remove current C# version of go2cs - determine if any should remain as proxy to Go version
-    1) Remove related dependencies, e.g., Antlr / command line parsing code
+03) ~~Remove current C# version of go2cs - determine if any should remain as proxy to Go version~~
+    ~~1) Remove related dependencies, e.g., Antlr / command line parsing code~~
 04) Restructure behavioral tests:
     1) Mode to compare raw code to target file, ignoring comments
-       1) Set this up soon to better handle regression testing of go2cs changes
+       ~~1) Set this up soon to better handle regression testing of go2cs changes~~
     2) Future tests can be setup to compare with comments once go2c2 has better support
