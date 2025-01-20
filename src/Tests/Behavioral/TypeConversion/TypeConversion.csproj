@@ -80,14 +80,14 @@
     <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
   </ItemGroup>
   
-<ItemGroup>
+  <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
     <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" />
     <!-- Remove test files from current folder -->
     <Compile Remove="*._test.cs" />
-</ItemGroup>
+  </ItemGroup>
 
   <ItemGroup>
 	  <!-- TODO: Add references to required projects -->

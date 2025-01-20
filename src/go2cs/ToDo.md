@@ -71,7 +71,7 @@ private static void Main() {
     ~~1) This will involve dropping unused code from go2cs.Common~~
 02) Update source generators to accommodate remaining GoType attribute implementations, e.g.:
     1) Struct embedding (inheritance)
-    2) Struct interface implementations
+    2) ~~Struct interface implementations~~
     3) ~~Interface inheritance~~
     4) map type definitions (IMap implementation)
     5) channel type definitions (IChannel implementation)

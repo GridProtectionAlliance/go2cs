@@ -2,17 +2,12 @@
 
   <PropertyGroup>
     <TargetFrameworks>net9.0</TargetFrameworks>
-
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1701;1702;IDE0057;IDE0090;IDE1006</NoWarn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <NoWarn>1701;1702;IDE0057;IDE0090;IDE1006</NoWarn>
+  <PropertyGroup>
+    <NoWarn>1701;1702;IDE0057;IDE0090;IDE1006;CS0660;CS0661;CS8981;IDE0060;IDE1006</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,8 +17,10 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" />
   </ItemGroup>
 
+  <!-- Define Go type aliases -->
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
+    <Using Include="System" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />
     <Using Include="System.UInt32" Alias="uint32" />
@@ -37,7 +34,12 @@
     <Using Include="System.Numerics.Complex" Alias="complex128" />
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
+    <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
+  </ItemGroup>
 
+  <ItemGroup>
     <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
   </ItemGroup>
 
