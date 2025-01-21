@@ -30,11 +30,10 @@ namespace BehavioralTests;
 [TestClass]
 public class TargetComparisonTests : BehavioralTestBase
 {
-    // Move up from here: "BehavioralTests\bin\Debug\net9.0"
-    private const string RootPath = @"..\..\..\..\";
-
     [ClassInitialize]
     public static void Initialize(TestContext context) => Init(context);
+
+    // Run "UpdateTestTargets" utility to add new project test methods below this line
 
     /*
     // <TestMethods>
@@ -134,39 +133,41 @@ public class TargetComparisonTests : BehavioralTestBase
 
     private void CheckTarget(string targetProject)
     {
-        string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");
-        string convertedProjectFile = $@"{projectPath}\{targetProject}.cs";
-        int exitCode;
-
-        string conversionTargetFile = $"{convertedProjectFile}.target";
-        Assert.IsTrue((exitCode = Exec(go2cs, projectPath)) == 0, $"go2cs failed with exit code {exitCode:N0}");
-        Assert.IsTrue(FileMatch(convertedProjectFile, conversionTargetFile), $"Go source file converted to C# \"{convertedProjectFile}\" does not match target \"{conversionTargetFile}\"");
+        string projPath = Path.GetFullPath($"{TestRootPath}{targetProject}");
+        string transpiledFile = $@"{projPath}\{targetProject}.cs";
+        
+        // Transpile project, if needed
+        TranspileProject(targetProject);
+        
+        string targetFile = $"{transpiledFile}.target";
+        Assert.IsTrue(FileMatch(transpiledFile, targetFile), $"Go source file converted to C# \"{transpiledFile}\" does not match target \"{targetFile}\"");
     }
 
     private static bool FileMatch(string file1, string file2)
     {
-        FileStream fileStream1 = new(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
-        FileStream fileStream2 = new(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using FileStream stream1 = new(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
+        using FileStream stream2 = new(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-        if (fileStream1.Length != fileStream2.Length)
+        try
         {
-            fileStream1.Close();
-            fileStream2.Close();
-            return false;
+            if (stream1.Length != stream2.Length)
+                return false;
+
+            int file1Byte, file2Byte;
+
+            do
+            {
+                file1Byte = stream1.ReadByte();
+                file2Byte = stream2.ReadByte();
+            }
+            while (file1Byte == file2Byte && file1Byte != -1);
+
+            return file1Byte - file2Byte == 0;
         }
-
-        int file1Byte, file2Byte;
-
-        do
+        finally
         {
-            file1Byte = fileStream1.ReadByte();
-            file2Byte = fileStream2.ReadByte();
+            stream1.Close();
+            stream2.Close();
         }
-        while (file1Byte == file2Byte && file1Byte != -1);
-
-        fileStream1.Close();
-        fileStream2.Close();
-
-        return file1Byte - file2Byte == 0;
     }
 }

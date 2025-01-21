@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  TargetBuildTests.cs - Gbtc
+//  TranspileTests.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,19 +21,17 @@
 //
 //******************************************************************************************************
 
-using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BehavioralTests;
 
 [TestClass]
-public class TargetBuildTests : BehavioralTestBase
+public class TranspileTests : BehavioralTestBase
 {
-    // Move up from here: "BehavioralTests\bin\Debug\net9.0"
-    private const string RootPath = @"..\..\..\..\";
-
     [ClassInitialize]
     public static void Initialize(TestContext context) => Init(context);
+
+    // Run "UpdateTestTargets" utility to add new project test methods below this line
 
     // <TestMethods>
 
@@ -131,9 +129,6 @@ public class TargetBuildTests : BehavioralTestBase
 
     private void CheckTarget(string targetProject)
     {
-        string projectPath = Path.GetFullPath($"{RootPath}{targetProject}");
-        int exitCode;
-
-        Assert.IsTrue((exitCode = Exec(go2cs, projectPath)) == 0, $"go2cs failed with exit code {exitCode:N0}");
+        TranspileProject(targetProject, true);
     }
 }

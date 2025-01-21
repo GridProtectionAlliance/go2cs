@@ -21,9 +21,11 @@
 //
 //******************************************************************************************************
 
-using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace BehavioralTests;
@@ -34,13 +36,24 @@ public abstract class BehavioralTestBase
     // Move up from here: "...\go2cs\src\Tests\Behavioral\BehavioralTests\bin\Debug\net9.0"
     private const string RootPath = @"..\..\..\..\..\..\..\"; // At "src" folder
 
+    protected const string TestRootPath = @"..\..\..\..\";
+
+    protected static string BinOutput { get; private set; }
+
     protected static string go2cs { get; private set; }
 
+    private static readonly ConcurrentDictionary<string, object> s_projectLocks = new(StringComparer.OrdinalIgnoreCase);
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
     protected static void Init(TestContext context)
     {
         string execPath = Directory.GetCurrentDirectory();
         string go2csSrc = Path.GetFullPath($@"{execPath}{RootPath}go2cs\");
         string go2csBin = Path.Combine(go2csSrc, @"bin\");
+
+        int projectNameIndex = execPath.IndexOf(nameof(BehavioralTests), StringComparison.OrdinalIgnoreCase);
+
+        BinOutput = execPath[(projectNameIndex+nameof(BehavioralTests).Length)..];
 
         if (!Directory.Exists(go2csBin))
             Directory.CreateDirectory(go2csBin);
@@ -53,7 +66,7 @@ public abstract class BehavioralTestBase
             FileInfo go2csExe = new(go2cs);
             FileInfo mainGo = new(Path.Combine(go2csSrc, "main.go"));
 
-            if (go2csExe.LastWriteTimeUtc >= mainGo.LastWriteTimeUtc)
+            if (go2csExe.LastWriteTime >= mainGo.LastWriteTimeUtc)
                 return;
         }
 
@@ -112,5 +125,65 @@ public abstract class BehavioralTestBase
         process.WaitForExit();
 
         return process.ExitCode;
+    }
+
+    protected void TranspileProject(string targetProject, bool forceBuild = false)
+    {
+        string targetPath = $"{TestRootPath}{targetProject}";
+        string csproj = Path.GetFullPath($@"{targetPath}\{targetProject}.csproj");
+        string projPath = Path.GetFullPath($"{targetPath}");
+
+        object projectLock = s_projectLocks.GetOrAdd(targetProject, _ => new object());
+
+        lock (projectLock)
+        {
+            if (!forceBuild && File.Exists(csproj))
+            {
+                // If all .cs files are newer than associated .go files, skip build
+                FileInfo[] goFiles = Directory.GetFiles(projPath, "*.go").Select(fileName => new FileInfo(fileName)).ToArray();
+                bool allUpToDate = true;
+
+                foreach (FileInfo goFile in goFiles)
+                {
+                    FileInfo csFile = new(Path.ChangeExtension(goFile.FullName, ".cs"));
+
+                    if (csFile.Exists && csFile.LastWriteTimeUtc > goFile.LastWriteTimeUtc)
+                        continue;
+
+                    allUpToDate = false;
+                    break;
+                }
+
+                if (allUpToDate)
+                    return;
+            }
+
+            int exitCode;
+            Assert.IsTrue((exitCode = Exec(go2cs, projPath)) == 0, $"go2cs failed with exit code {exitCode:N0}");
+        }
+    }
+
+    protected void CompileProject(string targetProject, bool forceBuild = false)
+    {
+        string targetPath = $"{TestRootPath}{targetProject}";
+        string projExe = Path.GetFullPath($@"{targetPath}{BinOutput}\{targetProject}.exe");
+        string projPath = Path.GetFullPath($"{targetPath}");
+
+        object projectLock = s_projectLocks.GetOrAdd(targetProject, _ => new object());
+
+        lock (projectLock)
+        {
+            if (!forceBuild && File.Exists(projExe))
+            {
+                FileInfo projExeInfo = new(projExe);
+
+                // If exe is newer than all .cs source files, can skip build
+                if (Directory.GetFiles(projPath, "*.cs").Select(fileName => new FileInfo(fileName)).All(info => projExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc))
+                    return;
+            }
+
+            int exitCode;
+            Assert.IsTrue((exitCode = Exec("dotnet", $"build \"{Path.Combine(projPath, $"{targetProject}.csproj")}\"")) == 0, $"dotnet build failed with exit code {exitCode:N0}");
+        }
     }
 }

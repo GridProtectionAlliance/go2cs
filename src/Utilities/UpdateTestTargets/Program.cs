@@ -18,7 +18,8 @@ foreach (string testDir in behavioralTestDirs)
 
 string[] testClasses =
 [
-    "TargetBuildTests",
+    "TranspileTests",
+    "CompileTests",
     "TargetComparisonTests"
 ];
 
