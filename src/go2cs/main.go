@@ -401,6 +401,59 @@ Examples:
 								}
 							}
 						}
+					case *ast.RangeStmt:
+						if n.Tok == token.DEFINE {
+							if key := getIdentifier(n.Key); key != nil {
+								visitor.performEscapeAnalysis(key, node.Body)
+							}
+							if value := getIdentifier(n.Value); value != nil {
+								visitor.performEscapeAnalysis(value, node.Body)
+							}
+						}
+					case *ast.DeclStmt:
+						if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
+							for _, spec := range genDecl.Specs {
+								if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+									for _, ident := range valueSpec.Names {
+										if !isDiscardedVar(ident.Name) {
+											visitor.performEscapeAnalysis(ident, node.Body)
+										}
+									}
+								}
+							}
+						}
+					case *ast.ForStmt:
+						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+							for _, lhs := range init.Lhs {
+								if ident := getIdentifier(lhs); ident != nil {
+									visitor.performEscapeAnalysis(ident, node.Body)
+								}
+							}
+						}
+					case *ast.IfStmt:
+						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+							for _, lhs := range init.Lhs {
+								if ident := getIdentifier(lhs); ident != nil {
+									visitor.performEscapeAnalysis(ident, node.Body)
+								}
+							}
+						}
+					case *ast.SwitchStmt:
+						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+							for _, lhs := range init.Lhs {
+								if ident := getIdentifier(lhs); ident != nil {
+									visitor.performEscapeAnalysis(ident, node.Body)
+								}
+							}
+						}
+					case *ast.TypeSwitchStmt:
+						if assign, ok := n.Assign.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
+							for _, lhs := range assign.Lhs {
+								if ident := getIdentifier(lhs); ident != nil {
+									visitor.performEscapeAnalysis(ident, node.Body)
+								}
+							}
+						}
 					}
 					return true
 				})
@@ -456,7 +509,7 @@ Examples:
 	concurrentTasks.Wait()
 
 	// Handle package information file
-	packageInfoFileName := filepath.Join(outputFilePath, PackageInfoFileName)
+	packageInfoFileName := filepath.Join(filepath.Dir(outputFilePath), PackageInfoFileName)
 
 	var packageInfoLines []string
 
