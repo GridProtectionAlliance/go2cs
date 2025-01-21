@@ -7,9 +7,6 @@ import (
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
-		v.enterLambdaConversion(selectorExpr)
-		defer v.exitLambdaConversion()
-
 		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
 	}
 

@@ -45,7 +45,7 @@ private static void Main() {
     whatAmI(true);
     whatAmI(1);
     whatAmI("hey");
-    nint x;
+    nint x = 7;
     nint i = x._<nint>();
     fmt.Println(i);
     T y = default!;

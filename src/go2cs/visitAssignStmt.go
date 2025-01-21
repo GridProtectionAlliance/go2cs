@@ -218,6 +218,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					v.enterLambdaConversion(selectorExpr)
 					defer v.exitLambdaConversion()
 
+					// First prepare the captures
+					v.prepareStmtCaptures(selectorExpr)
+
+					// Then generate declarations
 					if decls := v.generateCaptureDeclarations(); decls != "" {
 						result.WriteString(decls)
 					}
@@ -290,6 +294,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					v.enterLambdaConversion(selectorExpr)
 					defer v.exitLambdaConversion()
 
+					// First prepare the captures
+					v.prepareStmtCaptures(selectorExpr)
+
+					// Then generate declarations
 					if decls := v.generateCaptureDeclarations(); decls != "" {
 						result.WriteString(decls)
 					}
