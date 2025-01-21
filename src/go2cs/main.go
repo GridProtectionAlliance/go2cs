@@ -529,116 +529,110 @@ Examples:
 	}
 
 	// Handle exported type aliases
-	if len(exportedTypeAliases) > 0 {
-		// Find the line number where type aliases should be inserted
-		startLineIndex := -1
-		endLineIndex := -1
+	startLineIndex := -1
+	endLineIndex := -1
 
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<ExportedTypeAliases>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</ExportedTypeAliases>") {
-				endLineIndex = i
-				break
-			}
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<ExportedTypeAliases>") {
+			startLineIndex = i
+			continue
 		}
 
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing type aliases from package info file
-			lines := HashSet[string]{}
-
-			// If processing a single file, instead of all package files, merge type aliases
-			if !fileInfo.IsDir() {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
-			}
-
-			// Add new type aliases to package info file (hashset ensures uniqueness)
-			for alias, typeName := range exportedTypeAliases {
-				lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert exported type aliases into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-		} else {
-			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+		if strings.Contains(line, "</ExportedTypeAliases>") {
+			endLineIndex = i
+			break
 		}
 	}
 
-	// Handle interface implementations
-	if len(interfaceImplementations) > 0 {
-		// Find the line number where interface implementations should be inserted
-		startLineIndex := -1
-		endLineIndex := -1
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing type aliases from package info file
+		lines := HashSet[string]{}
 
-		for i, line := range packageInfoLines {
-			if strings.Contains(line, "<InterfaceImplementations>") {
-				startLineIndex = i
-				continue
-			}
-
-			if strings.Contains(line, "</InterfaceImplementations>") {
-				endLineIndex = i
-				break
+		// If processing a single file, instead of all package files, merge type aliases
+		if !fileInfo.IsDir() {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
 			}
 		}
 
-		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-			// Read existing interface lines from package info file
-			lines := HashSet[string]{}
+		// Add new type aliases to package info file (hashset ensures uniqueness)
+		for alias, typeName := range exportedTypeAliases {
+			lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
+		}
 
-			// If processing a single file, instead of all package files, merge interface implementations
-			if !fileInfo.IsDir() {
-				for i := startLineIndex + 1; i < endLineIndex; i++ {
-					line := packageInfoLines[i]
-					lines.Add(strings.TrimSpace(line))
-				}
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert exported type aliases into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+	} else {
+		log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Handle interface implementations
+	startLineIndex = -1
+	endLineIndex = -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<InterfaceImplementations>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</InterfaceImplementations>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing interface lines from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge interface implementations
+		if !fileInfo.IsDir() {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
 			}
+		}
 
-			// Drop lower level interface implementations where interface inheritances are already covered
-			for interfaceName, inheritedInterfaces := range interfaceInheritances {
-				for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
-					// Check if the same type implements both interfaces
-					if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
-						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
-							baseImplementations.IntersectWithSet(inheritedImplementations)
-							for _, implementation := range baseImplementations.Keys() {
-								implementedTypes := interfaceImplementations[inheritedInterfaceName]
-								implementedTypes.Remove(implementation)
-							}
+		// Drop lower level interface implementations where interface inheritances are already covered
+		for interfaceName, inheritedInterfaces := range interfaceInheritances {
+			for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
+				// Check if the same type implements both interfaces
+				if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
+					if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
+						baseImplementations.IntersectWithSet(inheritedImplementations)
+						for _, implementation := range baseImplementations.Keys() {
+							implementedTypes := interfaceImplementations[inheritedInterfaceName]
+							implementedTypes.Remove(implementation)
 						}
 					}
 				}
 			}
-
-			// Add new interface implementations to package info file (hashset ensures uniqueness)
-			for interfaceName, implementations := range interfaceImplementations {
-				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>]", implementation, interfaceName))
-				}
-			}
-
-			// Sort lines
-			sortedLines := lines.Keys()
-			sort.Strings(sortedLines)
-
-			// Insert interface implementations into package info file
-			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-
-		} else {
-			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
 		}
+
+		// Add new interface implementations to package info file (hashset ensures uniqueness)
+		for interfaceName, implementations := range interfaceImplementations {
+			for implementation := range implementations {
+				lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>]", implementation, interfaceName))
+			}
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert interface implementations into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+	} else {
+		log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
 	}
 
 	// Remove trailing empty lines
@@ -1086,7 +1080,7 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 		prefix = "~"
 	}
 
-	if targetTypeName != "" && targetTypeName != "nil" {
+	if interfaceTypeName != "" && interfaceTypeName != "nil" && targetTypeName != "" && targetTypeName != "nil" {
 		packageLock.Lock()
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 			implementations.Add(targetTypeName)

@@ -33,15 +33,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 						if rhsType != nil {
 							// Record the implementation
-							interfaceName := convertToCSTypeName(getFullTypeName(declType))
+							interfaceTypeName := convertToCSTypeName(getFullTypeName(declType))
 							concreteTypeName := convertToCSTypeName(getFullTypeName(rhsType))
 
-							if concreteTypeName != "" && concreteTypeName != "nil" {
+							if interfaceTypeName != "" && interfaceTypeName != "nil" && concreteTypeName != "" && concreteTypeName != "nil" {
 								packageLock.Lock()
-								if implementations, exists := interfaceImplementations[interfaceName]; exists {
+								if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 									implementations.Add(concreteTypeName)
 								} else {
-									interfaceImplementations[interfaceName] = NewHashSet([]string{concreteTypeName})
+									interfaceImplementations[interfaceTypeName] = NewHashSet([]string{concreteTypeName})
 								}
 								packageLock.Unlock()
 							}

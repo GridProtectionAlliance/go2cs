@@ -40,7 +40,6 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImpl<nil, error>]
 // </InterfaceImplementations>
 
 namespace go;
