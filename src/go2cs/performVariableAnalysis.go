@@ -1150,6 +1150,13 @@ func (v *Visitor) isMethodValue(sel *ast.SelectorExpr, isCallExpr bool) bool {
 	return !isCallExpr
 }
 
+func isValueType(t types.Type) bool {
+	if _, ok := t.Underlying().(*types.Basic); ok {
+		return true
+	}
+	return false
+}
+
 // Determine if a type needs to be copied when captured
 func (v *Visitor) capturedLambdaVarRequiresCopy(t types.Type) bool {
 	switch typ := t.Underlying().(type) {
@@ -1322,9 +1329,10 @@ func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
 		return false
 	}
 
-	// Only capture variables that are declared outside but used inside the lambda
-	var declaredOutside bool
-
+	// Only capture if:
+	// 1. Declared outside but used inside the lambda
+	// 2. Is a reference type OR address is taken
+	declaredOutside := false
 	for _, scope := range v.scopeStack {
 		if scope[ident.Name] == varObj {
 			declaredOutside = true
@@ -1332,7 +1340,19 @@ func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
 		}
 	}
 
-	return declaredOutside
+	if !declaredOutside {
+		return false
+	}
+
+	// Don't capture value types unless they need to escape
+	if _, ok := varObj.Type().Underlying().(*types.Basic); ok {
+		if escapes, exists := v.identEscapesHeap[varObj]; exists {
+			return escapes
+		}
+		return false
+	}
+
+	return true
 }
 
 // Check if a name conflicts with any function in scope

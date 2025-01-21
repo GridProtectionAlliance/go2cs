@@ -1,6 +1,4 @@
-﻿// ReSharper disable InconsistentNaming
-
-namespace go2cs.Templates.InheritedType;
+﻿namespace go2cs.Templates.InheritedType;
 
 internal static class ISliceTypeTemplate
 {

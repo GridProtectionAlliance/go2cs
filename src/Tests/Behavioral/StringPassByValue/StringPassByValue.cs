@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 private static void Main() {
-    @string a = default!;
+    ref var a = ref heap(new @string(), out var Ꮡa);
     a = "Hello World"u8;
     test(a);
     fmt.Println(a);

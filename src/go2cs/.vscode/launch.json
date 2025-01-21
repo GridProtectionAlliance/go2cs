@@ -27,16 +27,17 @@
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
                 //"..\\Tests\\Behavioral\\RangeStatements",
                 //"..\\Tests\\Behavioral\\SpreadOperator",
-                //"..\\Tests\\Behavioral\\VariableCapture",
+                "..\\Tests\\Behavioral\\VariableCapture",
                 //"..\\Tests\\Behavioral\\TypeSwitch",
                 //"..\\Tests\\Behavioral\\SelectStatement",
                 //"..\\Tests\\Behavioral\\ChannelReceiveFromClosed",
                 //"..\\Tests\\Behavioral\\ChannelReceiveFromNil",
                 //"..\\Tests\\Behavioral\\ChannelSendToClosed",
                 //"..\\Tests\\Behavioral\\ChannelSendToNil",
-                "..\\Tests\\Behavioral\\Solitaire",
+                //"..\\Tests\\Behavioral\\Solitaire",
                 //"..\\Tests\\Behavioral\\InterfaceInheritance",
                 //"..\\Tests\\Behavioral\\InterfaceImplementation",
+                //"..\\Tests\\Behavioral\\MethodSelector",
             ]
         }
     ]

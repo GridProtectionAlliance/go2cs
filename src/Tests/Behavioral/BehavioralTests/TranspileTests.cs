@@ -26,7 +26,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace BehavioralTests;
 
 [TestClass]
-public class TranspileTests : BehavioralTestBase
+public class A1_TranspileTests : BehavioralTestBase
 {
     [ClassInitialize]
     public static void Initialize(TestContext context) => Init(context);

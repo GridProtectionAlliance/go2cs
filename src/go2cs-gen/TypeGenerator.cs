@@ -172,6 +172,38 @@ public class TypeGenerator : ISourceGenerator
                         }
                         .Generate();
                         break;
+                    case StructDeclarationSyntax when typeDefinition.StartsWith("num:"): // numeric
+                        typeName = typeDefinition[4..].Trim();
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            PackageNamespace = packageNamespace,
+                            PackageName = packageName,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeName = typeName,
+                            TargetTypeName = identifier,
+                            TypeClass = "Numeric",
+                            UsingStatements = usingStatements
+                        }
+                        .Generate();
+                        break;
+                    case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition):
+                        typeName = typeDefinition;
+
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            PackageNamespace = packageNamespace,
+                            PackageName = packageName,
+                            StructName = identifier,
+                            Scope = scope,
+                            TypeName = typeName,
+                            TargetTypeName = typeName,
+                            TypeClass = "Other",
+                            UsingStatements = usingStatements
+                        }
+                        .Generate();
+                        break;
                     case StructDeclarationSyntax:
                         throw new NotSupportedException($"Unsupported [{AttributeName}] definition \"{typeDefinition}\" on struct \"{identifier}\".");
                     case InterfaceDeclarationSyntax:

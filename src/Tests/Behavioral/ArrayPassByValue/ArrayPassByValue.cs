@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 private static void Main() {
-    array<@string> a = default!;
+    ref var a = ref heap(new array<@string>(2), out var Ꮡa);
     a[0] = "Hello"u8;
     a[1] = "World"u8;
     var p = Ꮡa.at<@string>(0);

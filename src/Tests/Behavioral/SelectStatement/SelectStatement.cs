@@ -71,14 +71,12 @@ private static void sieve() {
     var chʗ1 = ch;
     goǃ(_ => generate(chʗ1));
     while (ᐧ) {
-        ref var prime = ref heap<nint>(out var Ꮡprime);
-        prime = ᐸꟷ(ch);
+        nint prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(1);
         var chʗ2 = ch;
         var ch1ʗ1 = ch1;
-        var primeʗ1 = prime;
-        goǃ(_ => filter(chʗ2, ch1ʗ1, primeʗ1));
+        goǃ(_ => filter(chʗ2, ch1ʗ1, prime));
         ch = ch1;
         if (prime > 40) {
             break;
@@ -164,8 +162,7 @@ private static void Main() {
     var fʗ1 = fΔ1;
     var quitʗ1 = quit;
     goǃ(() => {
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < 10; i++) {
+        for (nint i = 0; i < 10; i++) {
             fmt.Println(ᐸꟷ(fʗ1));
         }
         quitʗ1.ᐸꟷ(0);

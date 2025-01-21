@@ -126,22 +126,43 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		case *ast.GoStmt:
 			// Check if ident is used inside a goroutine
 			goStmtContainsIdent := false
-			ast.Inspect(n.Call, func(n ast.Node) bool {
-				if goStmtContainsIdent {
-					return false
-				}
+			takesAddress := false
+			usedAsRef := false
 
+			ast.Inspect(n.Call, func(n ast.Node) bool {
 				if id := getIdentifier(n); id != nil {
 					obj := v.info.ObjectOf(id)
 					if obj == identObj {
 						goStmtContainsIdent = true
+
+						// Check if it's a value type
+						if _, ok := obj.Type().Underlying().(*types.Basic); ok {
+							// Value types only escape if their address is taken
+							return true // continue checking for address operations
+						}
+						// Reference types still need to escape
 						return false
 					}
 				}
+
+				// Check for address-of operations
+				if unary, ok := n.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+					if id := getIdentifier(unary.X); id != nil {
+						if obj := v.info.ObjectOf(id); obj == identObj {
+							takesAddress = true
+							return false
+						}
+					}
+				}
+
 				return true
 			})
 
-			if goStmtContainsIdent {
+			// Only escape if:
+			// 1. It's a reference type used in goroutine
+			// 2. It's a value type whose address is taken
+			// 3. It's passed by reference somewhere
+			if goStmtContainsIdent && (!isValueType(identObj.Type()) || takesAddress || usedAsRef) {
 				escapes = true
 				return false
 			}
@@ -149,22 +170,39 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		case *ast.DeferStmt:
 			// Check if ident is used inside a deferred function
 			deferStmtContainsIdent := false
-			ast.Inspect(n.Call, func(n ast.Node) bool {
-				if deferStmtContainsIdent {
-					return false
-				}
+			takesAddress := false
+			usedAsRef := false
 
+			ast.Inspect(n.Call, func(n ast.Node) bool {
 				if id := getIdentifier(n); id != nil {
 					obj := v.info.ObjectOf(id)
 					if obj == identObj {
 						deferStmtContainsIdent = true
+
+						// Check if it's a value type
+						if _, ok := obj.Type().Underlying().(*types.Basic); ok {
+							// Value types only escape if their address is taken
+							return true // continue checking
+						}
 						return false
 					}
 				}
+
+				// Check for address-of operations
+				if unary, ok := n.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+					if id := getIdentifier(unary.X); id != nil {
+						if obj := v.info.ObjectOf(id); obj == identObj {
+							takesAddress = true
+							return false
+						}
+					}
+				}
+
 				return true
 			})
 
-			if deferStmtContainsIdent {
+			// Only escape if necessary
+			if deferStmtContainsIdent && (!isValueType(identObj.Type()) || takesAddress || usedAsRef) {
 				escapes = true
 				return false
 			}
@@ -172,29 +210,45 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		case *ast.FuncLit:
 			// Check if ident is used inside a closure
 			closureContainsIdent := false
+			takesAddress := false
+			usedAsRef := false
 
 			ast.Inspect(n.Body, func(n ast.Node) bool {
-				if closureContainsIdent {
-					return false
-				}
-
 				if id := getIdentifier(n); id != nil {
 					obj := v.info.ObjectOf(id)
-
 					if obj == identObj {
 						closureContainsIdent = true
+
+						// Check if it's a value type
+						if _, ok := obj.Type().Underlying().(*types.Basic); ok {
+							// Value types only escape if their address is taken
+							return true // continue checking for address operations
+						}
+						// Reference types still need to escape
 						return false
+					}
+				}
+
+				// Check for address-of operations
+				if unary, ok := n.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+					if id := getIdentifier(unary.X); id != nil {
+						if obj := v.info.ObjectOf(id); obj == identObj {
+							takesAddress = true
+							return false
+						}
 					}
 				}
 
 				return true
 			})
 
-			if closureContainsIdent {
-				// For now, we assume that variables captured by closures might escape
-				escapes = true
-				return false
-			}
+			// Only escape if:
+			// 1. It's a reference type used in closure
+			// 2. It's a value type whose address is taken
+			// 3. It's passed by reference somewhere
+			escapes = (closureContainsIdent && !isValueType(identObj.Type())) ||
+				takesAddress ||
+				usedAsRef
 		}
 
 		return true // Continue traversing

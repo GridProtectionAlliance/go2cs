@@ -10,6 +10,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if ok, typeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 		expr := v.convExpr(arg, nil)
+		typeName = convertToCSTypeName(typeName)
 
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {

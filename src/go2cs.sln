@@ -106,6 +106,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solitaire", "Tests\Behavior
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateTestTargets", "Utilities\UpdateTestTargets\UpdateTestTargets.csproj", "{1B583B1F-B9E1-4E6A-BF2B-271A83EF312E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MethodSelector", "Tests\Behavioral\MethodSelector\MethodSelector.csproj", "{630F3EB1-4A21-42C5-B274-AA3885861663}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -260,6 +262,10 @@ Global
 		{1B583B1F-B9E1-4E6A-BF2B-271A83EF312E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1B583B1F-B9E1-4E6A-BF2B-271A83EF312E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1B583B1F-B9E1-4E6A-BF2B-271A83EF312E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{630F3EB1-4A21-42C5-B274-AA3885861663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{630F3EB1-4A21-42C5-B274-AA3885861663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{630F3EB1-4A21-42C5-B274-AA3885861663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{630F3EB1-4A21-42C5-B274-AA3885861663}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -306,6 +312,7 @@ Global
 		{73AE8A92-BE9F-40D1-9FED-863CA2CE071C} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 		{2C8B1127-2301-489E-B8B2-0A3BC7A60727} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{1B583B1F-B9E1-4E6A-BF2B-271A83EF312E} = {BC53B46E-B2FA-4174-A0A2-326DD554B237}
+		{630F3EB1-4A21-42C5-B274-AA3885861663} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

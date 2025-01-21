@@ -28,7 +28,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace BehavioralTests;
 
 [TestClass]
-public class TargetComparisonTests : BehavioralTestBase
+public class C3_TargetComparisonTests : BehavioralTestBase
 {
     [ClassInitialize]
     public static void Initialize(TestContext context) => Init(context);

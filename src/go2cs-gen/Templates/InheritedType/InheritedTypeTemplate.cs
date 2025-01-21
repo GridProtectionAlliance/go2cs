@@ -27,6 +27,7 @@ internal class InheritedTypeTemplate : TemplateBase
         //"Map" => IMapTypeTemplate.Generate(TargetTypeName, TargetValueTypeName),
         //"Channel" => IChannelTypeTemplate.Generate(TargetTypeName),
         //"Array" => IArrayImplementation.Generate(TargetTypeName),
+        "Numeric" => NumericTypeTemplate.Generate(TargetTypeName),
         _ => ""
     };
 

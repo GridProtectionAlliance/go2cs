@@ -26,7 +26,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace BehavioralTests;
 
 [TestClass]
-public class CompileTests : BehavioralTestBase
+public class B2_CompileTests : BehavioralTestBase
 {
     [ClassInitialize]
     public static void Initialize(TestContext context) => Init(context);

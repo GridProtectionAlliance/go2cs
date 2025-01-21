@@ -126,8 +126,16 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 				if len(headTypeDecl) > 0 {
 					v.writeOutput(headTypeDecl)
+
+					if len(csValue) > 0 {
+						v.writeOutput("%s = %s;", csIDName, csValue)
+					}
 				} else {
-					v.writeOutput("%s %s;", csTypeName, csIDName)
+					if len(csValue) > 0 {
+						v.writeOutput("%s %s = %s;", csTypeName, csIDName, csValue)
+					} else {
+						v.writeOutput("%s %s;", csTypeName, csIDName)
+					}
 				}
 			} else {
 				access := getAccess(goIDName)

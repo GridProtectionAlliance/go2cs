@@ -76,6 +76,8 @@ public static partial class fmt_package
     public static void Printf(@string format, params object[] args) =>
         Console.Write(Sprintf(format, args));
 
+    public static string Sprint(object? arg) => arg?.ToString() ?? "nil";
+
     public static string Sprintf(@string format, params object[] args)
     {
         (format, args) = ConvertFormat(format, args);

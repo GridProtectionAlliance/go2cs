@@ -11,7 +11,7 @@ private static void Main() {
     }
 
     ptr<struct{Name string "json:\"name\""; Address *struct{Street string "json:\"street\""; City string "json:\"city\""} "json:\"address\""}> data = default!;
-    Person mine = default!;
+    ref var mine = ref heap(new Person(), out var Ꮡmine);
     ptr<Person> person = (Person.val)(data);
     person = Ꮡmine;
     fmt.Println(mine == person.val);

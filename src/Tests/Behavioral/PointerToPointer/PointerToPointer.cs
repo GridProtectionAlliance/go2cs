@@ -13,7 +13,7 @@ partial class main_package {
 private const int8 opRead = -1;
 private const int8 opInvalid = 0;
 private static void Main() {
-    nint a = default!;
+    ref var a = ref heap(new nint(), out var Ꮡa);
     ptr<nint> ptr = default!;
     ptr<ptr<nint>> pptr = default!;
     ptr<ptr<ptr<nint>>> ppptr = default!;
