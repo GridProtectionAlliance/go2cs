@@ -62,8 +62,8 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
-    //[TestMethod]
-    //public void CheckImportOptions() => CheckTarget("ImportOptions");
+    [TestMethod]
+    public void CheckImportOptions() => CheckTarget("ImportOptions");
 
     [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
@@ -76,6 +76,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
+
+    [TestMethod]
+    public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
@@ -104,8 +107,8 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckStructPromotion() => CheckTarget("StructPromotion");
 
-    //[TestMethod]
-    //public void CheckStructPromotionWithInterface() => CheckTarget("StructPromotionWithInterface");
+    [TestMethod]
+    public void CheckStructPromotionWithInterface() => CheckTarget("StructPromotionWithInterface");
 
     [TestMethod]
     public void CheckStructWithDelegate() => CheckTarget("StructWithDelegate");

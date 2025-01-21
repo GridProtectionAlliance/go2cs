@@ -76,18 +76,18 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
-    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
-    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
   
-<ItemGroup>
+  <ItemGroup>
     <!-- Remove all .cs files, including those in sub-folders -->
     <Compile Remove="**/*.cs" />
     <!-- Include only .cs files from current folder -->
     <Compile Include="*.cs" />
     <!-- Remove test files from current folder -->
     <Compile Remove="*._test.cs" />
-</ItemGroup>
+  </ItemGroup>
 
   <ItemGroup>
 	  <!-- TODO: Add references to required projects -->

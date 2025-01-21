@@ -180,7 +180,7 @@ public class TypeGenerator : ISourceGenerator
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             StructName = identifier,
-                            Scope = scope,
+                            Scope = $"{scope} readonly",
                             TypeName = typeName,
                             TargetTypeName = identifier,
                             TypeClass = "Numeric",

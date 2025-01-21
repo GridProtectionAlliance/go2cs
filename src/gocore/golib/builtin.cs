@@ -679,12 +679,12 @@ public static class builtin
     }
 
     /// <summary>
-    /// Creates a new heap allocated copy of existing <paramref name="target"/> value.
+    /// Gets a pointer to a new heap allocated copy of <paramref name="target"/> value.
     /// </summary>
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="target">Target value.</param>
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
-    public static ptr<T> addr<T>(in T target)
+    public static ptr<T> Ꮡ<T>(in T target)
     {
         return new ptr<T>(target);
     }
@@ -704,7 +704,7 @@ public static class builtin
     /// </remarks>
     public static ref T heap<T>(out ptr<T> pointer)
     {
-        pointer = addr<T>(default!);
+        pointer = Ꮡ<T>(default!);
         return ref pointer.val;
     }
 
@@ -724,7 +724,7 @@ public static class builtin
     /// </remarks>
     public static ref T heap<T>(in T target, out ptr<T> pointer)
     {
-        pointer = addr(target);
+        pointer = Ꮡ(target);
         return ref pointer.val;
     }
 

@@ -32,12 +32,12 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context TupleResultCon
 
 		// Check if unary target is a pointer to a pointer
 		if _, ok := v.getType(unaryExpr.X, true).(*types.Pointer); ok {
-			return fmt.Sprintf("addr(%s)", v.convExpr(unaryExpr.X, nil))
+			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
 		}
 
 		// Check if unary target is not a variable or a field
 		if _, ok := unaryExpr.X.(*ast.Ident); !ok {
-			return fmt.Sprintf("addr(%s)", v.convExpr(unaryExpr.X, nil))
+			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
 		}
 
 		return AddressPrefix + v.convExpr(unaryExpr.X, nil)

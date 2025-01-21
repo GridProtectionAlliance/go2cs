@@ -19,8 +19,8 @@ private static void Main() {
     ptr<ptr<ptr<nint>>> ppptr = default!;
     a = 3000;
     ptr = Ꮡa;
-    pptr = addr(ptr);
-    ppptr = addr(pptr);
+    pptr = Ꮡ(ptr);
+    ppptr = Ꮡ(pptr);
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
     fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
@@ -49,14 +49,14 @@ private static void Main() {
     if (n > 0) {
         b.lastRead = opRead;
     }
-    (addr(new Buffer(buf: p))).Read(p);
+    (Ꮡ(new Buffer(buf: p))).Read(p);
     return (n, default!);
 }
 
 public static ptr<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
     ptr<Buffer> b1 = default;
 
-    return addr(new Buffer(buf: buf));
+    return Ꮡ(new Buffer(buf: buf));
 }
 
 public static void PrintValPtr(ptr<nint> Ꮡptr) {

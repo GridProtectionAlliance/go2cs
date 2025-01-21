@@ -132,8 +132,8 @@ const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `c
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 
 // TODO: Consider removing items that are also reserved by Go to reduce search space
-var keywords = NewHashSet[string]([]string{
-	// The following are all valid C# keywords, if encountered in Go code they should be escaped
+var keywords = NewHashSet([]string{
+	// The following are all valid C# keywords, if encountered in Go code they should be escaped with `@`
 	"abstract", "as", "base", "bool", "catch", "char", "checked", "class", "const", "decimal",
 	"delegate", "do", "double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach",
 	"implicit", "in", "interface", "internal", "is", "lock", "namespace", "new", "null", "object",
@@ -142,7 +142,8 @@ var keywords = NewHashSet[string]([]string{
 	"try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
 	"__argslist", "__makeref", "__reftype", "__refvalue",
 	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	"GoType", "GoUntyped", "GoTag", "GoTypeAlias", "GoImplement", "go\u01C3", "ConvertToType",
+	// TODO: Handle these differently - adding an `@` to the beginning does nothing since they are not reserved words
+	//"GoType", "GoUntyped", "GoTag", "GoTypeAlias", "GoImplement", "go\u01C3", "ConvertToType",
 })
 
 // These C# keywords overlap with Go keywords, so they do not need detection

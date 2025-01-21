@@ -63,7 +63,7 @@ public static partial class errors_package {
 // Each call to New returns a distinct error value even if the text is identical.
 public static error New(@string text)
 {
-    return error.As(addr(new errorString(text))!)!;
+    return error.As(Ꮡ(new errorString(text))!)!;
 }
 
 // errorString is a trivial implementation of error.

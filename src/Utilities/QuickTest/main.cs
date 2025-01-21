@@ -40,7 +40,7 @@ namespace go
 
         private static ref int Test()
         {
-            ref int c = ref addr(12).val;
+            ref int c = ref Ꮡ(12).val;
 
             return ref c;
         }
