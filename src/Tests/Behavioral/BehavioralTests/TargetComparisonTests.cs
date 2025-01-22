@@ -35,7 +35,6 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     // Run "UpdateTestTargets" utility to add new project test methods below this line
 
-    /*
     // <TestMethods>
 
     [TestMethod]
@@ -132,7 +131,6 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     // </TestMethods>
-    */
 
     private void CheckTarget(string targetProject)
     {

@@ -53,17 +53,7 @@ vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': 
 var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();
 ```
 
-Fix lambda shadow and missed shadow -- see "First Class Functions"
-```cs
-private static strategy stayAtK(nint k) {
-    var sʗ1 = s;
-    return (score s) => {
-
-private static void Main() {
-    var strategies = new slice<strategy>(win);
-    foreach (var (kΔ1, _) in strategies) {
-        strategies[k] = stayAtK(kΔ1 + 1);
-```
+~~Fix lambda shadow and missed shadow -- see "First Class Functions"~~
 
 ## For C# code operations:
 

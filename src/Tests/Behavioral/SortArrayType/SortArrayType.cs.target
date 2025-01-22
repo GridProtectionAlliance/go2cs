@@ -1,4 +1,4 @@
-﻿namespace go;
+namespace go;
 
 using fmt = fmt_package;
 using sort = sort_package;

@@ -66,3 +66,19 @@ foreach (string testClass in testClasses)
         throw new InvalidOperationException($"Could not find '<TestMethods>...</TestMethods>' section in \"{testFile}\"");
     }
 }
+
+if (args.Length > 0 && args[0] == "--createTargetFiles")
+{
+    // For each Go file converted to C#, create a target file for regression testing comparisons
+    foreach (string targetTest in targetTests)
+    {
+        string projPath = Path.GetFullPath($"{RootPath}Tests\\Behavioral\\{targetTest}");
+        string transpiledFile = $@"{projPath}\{targetTest}.cs";
+        string targetFile = $"{transpiledFile}.target";
+
+        if (!File.Exists(transpiledFile))
+            Console.Error.WriteLine($"WARNING: Transpiled file \"{transpiledFile}\" does not exist -- skipping target file creation...");
+        else
+            File.Copy(transpiledFile, targetFile, true);
+    }
+}
