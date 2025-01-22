@@ -27,7 +27,7 @@ private static void Main() {
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
     foreach (var (_, aΔ1) in zoo) {
-        fmt.Println(a.Type(), "can", a.Swim());
+        fmt.Println(aΔ1.Type(), "can", aΔ1.Swim());
     }
     fmt.Printf("%T\n"u8, a);
     ShowZoo(Ꮡzoo);

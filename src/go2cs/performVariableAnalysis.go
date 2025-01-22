@@ -914,16 +914,45 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				reassignVar,
 			)
 
+			// Track the shadowed names of range variables
+			rangeVars := make(map[string]string)
+
+			// Process range variables and remember their shadowed names
 			if node.Key != nil {
-				processor.processIdent(getIdentifier(node.Key), node.Tok == token.DEFINE)
+				if keyIdent := getIdentifier(node.Key); keyIdent != nil {
+					processor.processIdent(keyIdent, node.Tok == token.DEFINE)
+					// Store any shadowed name that was created
+					if shadowName, ok := v.identNames[keyIdent]; ok {
+						rangeVars[keyIdent.Name] = shadowName
+					}
+				}
 			}
 			if node.Value != nil {
-				processor.processIdent(getIdentifier(node.Value), node.Tok == token.DEFINE)
+				if valueIdent := getIdentifier(node.Value); valueIdent != nil {
+					processor.processIdent(valueIdent, node.Tok == token.DEFINE)
+					// Store any shadowed name that was created
+					if shadowName, ok := v.identNames[valueIdent]; ok {
+						rangeVars[valueIdent.Name] = shadowName
+					}
+				}
 			}
 
 			tracker.processing = false
 
 			visitNode(node.X)
+
+			// Process identifiers in the loop body to use shadowed names
+			ast.Inspect(node.Body, func(n ast.Node) bool {
+				if ident, ok := n.(*ast.Ident); ok {
+					if shadowName, exists := rangeVars[ident.Name]; exists {
+						if obj := v.info.Uses[ident]; obj != nil {
+							v.identNames[ident] = shadowName
+						}
+					}
+				}
+				return true
+			})
+
 			visitNode(node.Body)
 
 			tracker.exit()

@@ -31,9 +31,8 @@ private static (score, bool) stay(score s) {
 private delegate action strategy(score _);
 
 private static strategy stayAtK(nint k) {
-    var sʗ1 = s;
     return (score s) => {
-        if (sʗ1.thisTurn >= k) {
+        if (s.thisTurn >= k) {
             return stay;
         }
         return roll;
@@ -94,7 +93,7 @@ private static @string ratioString(params ꓸꓸꓸnint valsʗp) {
 private static void Main() {
     var strategies = new slice<strategy>(win);
     foreach (var (kΔ1, _) in strategies) {
-        strategies[k] = stayAtK(kΔ1 + 1);
+        strategies[kΔ1] = stayAtK(kΔ1 + 1);
     }
     var (wins, games) = roundRobin(strategies);
     nint k = default!;
