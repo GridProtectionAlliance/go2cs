@@ -17,8 +17,8 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convCompositeLit.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convExprList.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\convFunLit.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\convFunType.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convFuncLit.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convFuncType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIdent.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexListExpr.go" />
@@ -33,8 +33,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convTypeAssertExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convUnaryExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\go.mod" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\hashset\HashSet.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\hashset\HashSet_test.tt" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\HashSet.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\performEscapeAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\performVariableAnalysis.go" />
@@ -49,7 +48,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\win-x86.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_386.syso" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_amd64.syso" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\stack\Stack.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\Stack.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\ToDo.md" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitAssignStmt.go" />
@@ -67,6 +66,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitFuncType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitGenDecl.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitGoStmt.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\visitIdent.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitIfStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitImportSpec.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitIncDecStmt.go" />
@@ -89,6 +89,7 @@
     <Content Include="$(MSBuildThisFileDirectory)go2cs\csproj-template.xml" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\go2cs.ico" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\go2cs.png" />
+    <Content Include="$(MSBuildThisFileDirectory)go2cs\package_info-template.txt" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_128.png" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_16.png" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_192.png" />
@@ -99,8 +100,5 @@
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_64.png" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\icon_96.png" />
     <Content Include="$(MSBuildThisFileDirectory)go2cs\winres\winres.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)go2cs\package_info-template.cs" />
   </ItemGroup>
 </Project>

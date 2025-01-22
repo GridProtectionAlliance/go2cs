@@ -18,9 +18,9 @@ foreach (string testDir in behavioralTestDirs)
 
 string[] testClasses =
 [
-    "TranspileTests",
-    "CompileTests",
-    "TargetComparisonTests"
+    "TranspileTests",           // Tests transpilation of Go code to C# code
+    "CompileTests",             // Tests compilation of transpiled C# code
+    "TargetComparisonTests"     // Tests comparison of transpiled C# code to expected target
 ];
 
 foreach (string testClass in testClasses)
