@@ -62,11 +62,11 @@ public abstract class BehavioralTestBase
 
         if (File.Exists(go2cs))
         {
-            // Compare exe timestamp to "main.go" see if we need to rebuild
+            // Compare exe timestamp to all "*.go" files to see if we need to rebuild
             FileInfo go2csExe = new(go2cs);
-            FileInfo mainGo = new(Path.Combine(go2csSrc, "main.go"));
+            FileInfo[] goFiles = Directory.GetFiles(go2csSrc, "*.go").Select(fileName => new FileInfo(fileName)).ToArray();
 
-            if (go2csExe.LastWriteTime >= mainGo.LastWriteTimeUtc)
+            if (goFiles.All(goFile => go2csExe.LastWriteTime >= goFile.LastWriteTimeUtc))
                 return;
         }
 
