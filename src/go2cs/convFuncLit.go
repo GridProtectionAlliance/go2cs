@@ -9,6 +9,31 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	v.enterLambdaConversion(funcLit)
 	defer v.exitLambdaConversion()
 
+	// Create a map of parameters to avoid capturing them
+	paramNames := make(map[string]bool)
+
+	if funcLit.Type.Params != nil {
+		for _, field := range funcLit.Type.Params.List {
+			for _, name := range field.Names {
+				paramNames[name.Name] = true
+			}
+		}
+	}
+
+	// Filter out any captures that are actually parameters
+	if captures, exists := v.lambdaCapture.stmtCaptures[funcLit]; exists {
+		for ident := range captures {
+			if paramNames[ident.Name] {
+				delete(captures, ident)
+			}
+		}
+
+		// If no captures remain, remove the empty map
+		if len(captures) == 0 {
+			delete(v.lambdaCapture.stmtCaptures, funcLit)
+		}
+	}
+
 	v.prepareStmtCaptures(funcLit)
 
 	result := strings.Builder{}
