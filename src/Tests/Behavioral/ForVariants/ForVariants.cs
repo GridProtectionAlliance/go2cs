@@ -57,7 +57,7 @@ break_out:;
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println("x = ", x);
-    time.Sleep(1);
+    time.Sleep(100);
     fmt.Println("i after thread and", i, "x after thread", x);
 }
 

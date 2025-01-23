@@ -892,7 +892,7 @@ public static class builtin
             TypeCode.Boolean => "bool",
             TypeCode.SByte => "int8",
             TypeCode.Int16 => "int16",
-            TypeCode.Int32 => "int32",
+            TypeCode.Int32 => "int",
             TypeCode.Int64 => "int64",
             TypeCode.Byte => "byte",
             TypeCode.UInt16 => "uint16",

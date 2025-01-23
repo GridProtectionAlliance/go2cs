@@ -136,6 +136,6 @@ public class B2_CompileTests : BehavioralTestBase
         TranspileProject(targetProject);
 
         // Compile the transpiled project
-        CompileProject(targetProject, true);
+        CompileCSProject(targetProject, true);
     }
 }

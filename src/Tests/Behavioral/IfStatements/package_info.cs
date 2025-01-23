@@ -46,6 +46,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+// [GoTestMatchingConsoleOutput] -- TODO: reenable after using std fmt package
 public static partial class main_package
 {
 }

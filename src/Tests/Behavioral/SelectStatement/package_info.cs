@@ -45,6 +45,7 @@ using go;
 namespace go;
 
 [GoPackage("main")]
+// Cannot test matching console output, select is non-deterministic
 public static partial class main_package
 {
 }

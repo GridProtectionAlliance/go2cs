@@ -38,9 +38,11 @@ public abstract class BehavioralTestBase
 
     protected const string TestRootPath = @"..\..\..\..\";
 
-    protected static string BinOutput { get; private set; }
+    protected static string BinOutput { get; private set; } = null!;
 
-    protected static string go2cs { get; private set; }
+    protected static string NetVersion { get; private set; } = null!;
+
+    protected static string go2cs { get; private set; } = null!;
 
     private static readonly ConcurrentDictionary<string, object> s_projectLocks = new(StringComparer.OrdinalIgnoreCase);
 
@@ -53,7 +55,8 @@ public abstract class BehavioralTestBase
 
         int projectNameIndex = execPath.IndexOf(nameof(BehavioralTests), StringComparison.OrdinalIgnoreCase);
 
-        BinOutput = execPath[(projectNameIndex+nameof(BehavioralTests).Length)..];
+        BinOutput = execPath[(projectNameIndex + nameof(BehavioralTests).Length)..];
+        NetVersion = BinOutput.Split(@"\", StringSplitOptions.RemoveEmptyEntries)[^1];
 
         if (!Directory.Exists(go2csBin))
             Directory.CreateDirectory(go2csBin);
@@ -62,34 +65,31 @@ public abstract class BehavioralTestBase
 
         if (File.Exists(go2cs))
         {
-            // Compare exe timestamp to all "*.go" files to see if we need to rebuild
+            // Compare exe timestamp to "main.go" see if we need to rebuild
             FileInfo go2csExe = new(go2cs);
-            FileInfo[] goFiles = Directory.GetFiles(go2csSrc, "*.go").Select(fileName => new FileInfo(fileName)).ToArray();
+            FileInfo mainGo = new(Path.Combine(go2csSrc, "main.go"));
 
-            if (goFiles.All(goFile => go2csExe.LastWriteTime >= goFile.LastWriteTimeUtc))
+            if (go2csExe.LastWriteTime >= mainGo.LastWriteTimeUtc)
                 return;
         }
 
-        Process build = Process.Start(new ProcessStartInfo("go", $"build -o \"{go2cs}\"")
-        {
-            WorkingDirectory = go2csSrc
-        });
+        int exitCode = Exec(context, "go", $"build -o \"{go2cs}\"", go2csSrc);
 
-        if (build is null)
-            throw new InvalidOperationException("Failed to start \"go build\" process");
-
-        build.WaitForExit();
-
-        if (build.ExitCode != 0)
-            throw new InvalidOperationException($"\"go build\" failed with exit code {build.ExitCode:N0}");
+        if (exitCode != 0)
+            throw new InvalidOperationException($"\"go build\" failed with exit code {exitCode:N0}");
 
         if (!File.Exists(go2cs))
             throw new InvalidOperationException($"Failed to find \"go2cs.exe\" build for testing, check path: {go2cs}");
     }
 
-    public TestContext TestContext { get; set; }
+    public TestContext? TestContext { get; set; }
 
-    protected int Exec(string application, string arguments)
+    protected int Exec(string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null)
+    {
+        return Exec(TestContext, application, arguments, workingDir, outputHandler);
+    }
+
+    protected static int Exec(TestContext? context, string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null)
     {
         ProcessStartInfo startInfo = new()
         {
@@ -97,27 +97,44 @@ public abstract class BehavioralTestBase
             WindowStyle = ProcessWindowStyle.Hidden,
             CreateNoWindow = true,
             FileName = application,
-            Arguments = arguments,
+            Arguments = arguments ?? "",
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
+
+        if (!string.IsNullOrWhiteSpace(workingDir))
+            startInfo.WorkingDirectory = workingDir;
 
         using Process process = new();
         
         process.StartInfo = startInfo;
         process.EnableRaisingEvents = true;
 
-        process.OutputDataReceived += (_, e) =>
+        if (outputHandler is null)
         {
-            if (!string.IsNullOrEmpty(e.Data))
-                TestContext?.WriteLine(e.Data);
-        };
+            process.OutputDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    context?.WriteLine(e.Data);
+            };
+        }
+        else
+        {
+            process.OutputDataReceived += outputHandler;
+        }
 
-        process.ErrorDataReceived += (_, e) =>
+        if (outputHandler is null)
         {
-            if (!string.IsNullOrEmpty(e.Data))
-                TestContext?.WriteLine($"[ErrOut]: {e.Data}");
-        };
+            process.ErrorDataReceived += (_, e) =>
+            {
+                if (!string.IsNullOrEmpty(e.Data))
+                    context?.WriteLine($"[ErrOut]: {e.Data}");
+            };
+        }
+        else
+        {
+            process.ErrorDataReceived += outputHandler;
+        }
 
         process.Start();
         process.BeginOutputReadLine();
@@ -159,15 +176,15 @@ public abstract class BehavioralTestBase
             }
 
             int exitCode;
-            Assert.IsTrue((exitCode = Exec(go2cs, projPath)) == 0, $"go2cs failed with exit code {exitCode:N0}");
+            Assert.IsTrue((exitCode = Exec(go2cs, projPath)) == 0, $"go2cs transpile for \"{targetProject}\" failed with exit code {exitCode:N0}");
         }
     }
 
-    protected void CompileProject(string targetProject, bool forceBuild = false)
+    protected void CompileCSProject(string targetProject, bool forceBuild = false)
     {
         string targetPath = $"{TestRootPath}{targetProject}";
-        string projExe = Path.GetFullPath($@"{targetPath}{BinOutput}\{targetProject}.exe");
         string projPath = Path.GetFullPath($"{targetPath}");
+        string projExe = Path.Combine(projPath, $@"bin\Release\{NetVersion}\{targetProject}.exe");
 
         object projectLock = s_projectLocks.GetOrAdd(targetProject, _ => new object());
 
@@ -183,7 +200,28 @@ public abstract class BehavioralTestBase
             }
 
             int exitCode;
-            Assert.IsTrue((exitCode = Exec("dotnet", $"build \"{Path.Combine(projPath, $"{targetProject}.csproj")}\"")) == 0, $"dotnet build failed with exit code {exitCode:N0}");
+
+            // Compile C# project
+            Assert.IsTrue((exitCode = Exec("dotnet", $"build --configuration Release \"{Path.Combine(projPath, $"{targetProject}.csproj")}\"")) == 0, $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
         }
+    }
+
+    protected void CompileGoProject(string targetProject)
+    {
+        string targetPath = $"{TestRootPath}{targetProject}";
+        string projPath = Path.GetFullPath($"{targetPath}");
+        string outputPath = Path.Combine(projPath, @"bin\Release\Go");
+
+        if (!Directory.Exists(outputPath))
+            Directory.CreateDirectory(outputPath);
+
+        int exitCode;
+
+        // Make sure Go module is initialized
+        if (!File.Exists(Path.Combine(projPath, "go.mod")))
+            Assert.IsTrue((exitCode = Exec("go", $"mod init go2cs/{targetProject}", projPath)) == 0, $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+
+        // Compile Go project
+        Assert.IsTrue((exitCode = Exec("go", $"build -o \"{outputPath}\"", projPath)) == 0, $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
     }
 }

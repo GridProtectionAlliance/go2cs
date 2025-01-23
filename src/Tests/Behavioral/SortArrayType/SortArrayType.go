@@ -143,6 +143,10 @@ func Testing() (E2 int, p string) {
 }
 
 func main() {
+    fmt.Println(MultiLine)
+    fmt.Println(MultiLine2)
+    fmt.Println(MultiLine3)
+
 	Testing()
 
 	// Hello World SJ3

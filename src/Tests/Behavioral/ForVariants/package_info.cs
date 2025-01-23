@@ -46,6 +46,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
+// Cannot test matching console output, go result is non-deterministic
 public static partial class main_package
 {
 }

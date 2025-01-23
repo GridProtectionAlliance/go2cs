@@ -20,7 +20,6 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
-// ReSharper disable InconsistentNaming
 
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -34,6 +33,7 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public static void Initialize(TestContext context) => Init(context);
 
     // Run "UpdateTestTargets" utility to add new project test methods below this line
+    // Run with "--createTargetFiles" option to update and/or create new test targets
 
     // <TestMethods>
 

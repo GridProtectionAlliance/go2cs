@@ -27,11 +27,14 @@ public const float64 Float2 = 3.14e+100;
 public static readonly GoUntyped GiantFloat = /* 1e309 */
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 public static readonly @string MultiLine = """
+
         Line1 /123
         Line2 ""Yo""
         Line3
-        """u8;
+        
+"""u8;
 public static readonly @string MultiLine2 = """"
+
         Line1 /123
         Line2 """Yo"""
         Line3
@@ -121,6 +124,9 @@ public static (nint E2, @string p) Testing() {
 }
 
 private static void Main() {
+    fmt.Println(MultiLine);
+    fmt.Println(MultiLine2);
+    fmt.Println(MultiLine3);
     Testing();
     @string x = "Hello, 世界 \u0053\u004a3"u8;
     fmt.Println(x);
@@ -157,6 +163,7 @@ private static void Main() {
     sort.Sort(((PeopleByAge)people));
     fmt.Println(people);
     x = """
+
         SELECT *
         FROM 
 """u8 + "`Role`"u8;

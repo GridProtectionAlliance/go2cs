@@ -56,7 +56,7 @@ public static partial class fmt_package
     }
 
     public static void Print(params object[] args) =>
-        Console.Write(string.Join(" ", args.Select(ToString)));
+        Console.Write(string.Join("", args.Select(ToString)));
 
     /// <summary>
     /// Formats arguments in an implementation-specific way and writes the result to console along with a new line.

@@ -136,7 +136,8 @@ private static void Main() {
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
-            fmt.Printf("three, but x=%d and i now = %d\n"u8, x, iΔ1);
+            fmt.Printf("three, but x=%d "u8, x);
+            fmt.Printf("and i now = %d\n"u8, iΔ1);
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1) { /* default: */
