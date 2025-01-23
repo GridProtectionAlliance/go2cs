@@ -24,7 +24,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 		}
 
 		fieldType := v.getType(field.Type, false)
-		goTypeName := getCSTypeName(fieldType)
+		goTypeName := getFullTypeName(fieldType)
 		csTypeName := convertToCSTypeName(goTypeName)
 		typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName))
 

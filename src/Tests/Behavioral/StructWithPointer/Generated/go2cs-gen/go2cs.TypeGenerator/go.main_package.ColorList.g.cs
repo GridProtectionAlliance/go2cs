@@ -56,7 +56,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Total.ToString(), Color.ToString(), Next.ToString(), NextNext.ToString()
+            Total.ToString(), Color.ToString(), Next?.ToString() ?? "<nil>", NextNext?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

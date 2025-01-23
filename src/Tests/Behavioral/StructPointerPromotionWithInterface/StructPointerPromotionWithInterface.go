@@ -9,7 +9,7 @@ type (
 	Abser interface {
 		Abs() float64
 	}
-	
+
 	MyError struct {
 		When time.Time
 		What string
@@ -23,8 +23,8 @@ type (
 )
 
 func main() {
-	e:= MyError{time.Now(), "Hello"}
-	a:=MyCustomError{"New One", nil, &e}
+	e := MyError{time.Now(), "Hello"}
+	a := MyCustomError{"New One", nil, &e}
 
 	a.Message = "New"
 	a.What = "World"

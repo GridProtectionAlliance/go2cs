@@ -237,7 +237,8 @@ public sealed class ptr<T>
     /// <inheritdoc />
     public override string ToString()
     {
-        return $"&{m_val?.ToString() ?? "nil"}";
+        // $"&{m_val?.ToString() ?? "nil"}";
+        return this.PrintPointer();
     }
 
     private bool Equals(ptr<T>? other)
@@ -303,6 +304,7 @@ public sealed class ptr<T>
     //     public static T* operator ~(ptr<T> value) => value.m_value;
     // However, going down the fully unmanaged path creates a cascading set of
     // issues, see header comments for the ptr<T> "experimental" implementation
+
 
     // Enable comparisons between nil and ptr<T> instance
     public static bool operator ==(ptr<T>? value, NilType _)

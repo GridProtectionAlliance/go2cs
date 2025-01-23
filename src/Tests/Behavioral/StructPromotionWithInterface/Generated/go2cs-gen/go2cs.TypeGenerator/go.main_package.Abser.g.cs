@@ -17,8 +17,8 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct T : go.main_package.I
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    public partial interface Abser
     {
-        go.@string go.main_package.I.m() => this.m();
     }
 }

@@ -167,7 +167,7 @@ public static class TypeExtensions
     public static unsafe string PrintPointer(this object? instance)
     {
         if (instance is null)
-            return "nil";
+            return "<nil>";
 
         try
         {
@@ -180,7 +180,7 @@ public static class TypeExtensions
         }
         catch
         {
-            return "nil";
+            return "<nil>";
         }
     }
 

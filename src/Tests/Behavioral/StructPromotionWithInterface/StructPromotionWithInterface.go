@@ -11,7 +11,7 @@ type (
 	Abser interface {
 		Abs() float64 // To the right comments
 	}
-	
+
 	// Middle type comment
 	MyError struct {
 		When time.Time
@@ -28,9 +28,10 @@ type (
 		MyError
 		error
 	}
-	
+
 	// Bottom inner type comment
 )
+
 // Below type comment
 
 // The following takes precedence over instance call to Abs()
@@ -39,7 +40,7 @@ func (myErr *MyCustomError) Abs() float64 {
 }
 
 func main() {
-	a:= MyCustomError{"New One", nil, MyError{time.Now(), "Hello"}}
+	a := MyCustomError{"New One", nil, MyError{time.Now(), "Hello"}, nil}
 	a.Abs()
 	a.Message = "New"
 	fmt.Println("MyCustomError method =", a.Abs())

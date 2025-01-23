@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>>>MARKER:OUTPUT_TYPE<<</OutputType>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>StructPromotionWithInterface</AssemblyName>
     <Product>go2cs</Product>

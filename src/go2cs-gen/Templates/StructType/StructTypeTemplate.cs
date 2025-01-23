@@ -9,7 +9,7 @@ internal class StructTypeTemplate : TemplateBase
 {
     // Template Parameters
     public required string StructName;
-    public required List<(string typeName, string fieldName)> StructFields;
+    public required List<(string typeName, string fieldName, bool isReferenceType)> StructFields;
 
     public override string TemplateBody =>
         $$"""
@@ -35,7 +35,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 public override string ToString() => string.Concat("{", string.Join(" ",
                 [
-                    {{(StructFields.Count > 0 ? string.Join(", ", StructFields.Select(item => $"{item.fieldName}.ToString()")) : "\"\"")}}
+                    {{(StructFields.Count > 0 ? string.Join(", ", StructFields.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
             }
         """;
@@ -46,7 +46,7 @@ internal class StructTypeTemplate : TemplateBase
         {
             StringBuilder result = new();
 
-            foreach ((string typeName, string fieldName) in StructFields)
+            foreach ((string typeName, string fieldName, _) in StructFields)
             {
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
@@ -71,7 +71,7 @@ internal class StructTypeTemplate : TemplateBase
             result.AppendLine($"{TypeElemIndent}{{");
 
             // Construct from nil
-            foreach ((string typeName, string fieldName) in StructFields)
+            foreach ((_, string fieldName, _) in StructFields)
             {
                 result.Append($"{TypeElemIndent}    ");
 
@@ -92,7 +92,7 @@ internal class StructTypeTemplate : TemplateBase
             result.AppendLine(")");
             result.AppendLine($"{TypeElemIndent}{{");
 
-            foreach ((string typeName, string fieldName) in StructFields)
+            foreach ((_, string fieldName, _) in StructFields)
             {
                 result.Append($"{TypeElemIndent}    ");
 
@@ -108,5 +108,11 @@ internal class StructTypeTemplate : TemplateBase
 
             return result.ToString();
         }
+    }
+
+    private string GetToStringImplementation((string _, string fieldName, bool isReferenceType) item)
+    {
+        (_, string fieldName, bool isReferenceType) = item;
+        return isReferenceType ? $"{fieldName}?.ToString() ?? \"<nil>\"" : $"{fieldName}.ToString()";
     }
 }

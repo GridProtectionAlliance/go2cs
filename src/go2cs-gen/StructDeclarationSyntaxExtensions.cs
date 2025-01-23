@@ -31,12 +31,12 @@ namespace go2cs;
 
 public static class StructDeclarationSyntaxExtensions
 {
-    public static List<(string typeName, string fieldName)> GetStructFields(this StructDeclarationSyntax structDeclaration, GeneratorExecutionContext context)
+    public static List<(string typeName, string fieldName, bool isReferenceType)> GetStructFields(this StructDeclarationSyntax structDeclaration, GeneratorExecutionContext context)
     {
         // Obtain the SemanticModel from the context
         SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
 
-        List<(string typeName, string fieldName)> fields = [];
+        List<(string typeName, string fieldName, bool isReferenceType)> fields = [];
 
         foreach (FieldDeclarationSyntax? fieldDeclaration in structDeclaration.Members.OfType<FieldDeclarationSyntax>())
         {
@@ -48,10 +48,13 @@ public static class StructDeclarationSyntaxExtensions
             ITypeSymbol? typeSymbol = typeInfo.Type;
             string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
+            // Determine if the type is a reference type
+            bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+
             foreach (VariableDeclaratorSyntax variableDeclarator in fieldDeclaration.Declaration.Variables)
             {
                 string fieldName = variableDeclarator.Identifier.Text;
-                fields.Add((fullyQualifiedTypeName, fieldName));
+                fields.Add((fullyQualifiedTypeName, fieldName, isReferenceType));
             }
         }
 

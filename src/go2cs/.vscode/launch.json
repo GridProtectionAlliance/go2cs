@@ -15,7 +15,7 @@
                 //"-uco=false",
                 //"-comments=true",
                 //"-tree",
-                "..\\Tests\\Behavioral\\SortArrayType",
+                //"..\\Tests\\Behavioral\\SortArrayType",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue\\ArrayPassByValue.go",
                 //"..\\Tests\\Behavioral\\ExprSwitch",
                 //"..\\Tests\\Behavioral\\ExprSwitch\\ExprSwitchMicro.go",
@@ -38,6 +38,8 @@
                 //"..\\Tests\\Behavioral\\InterfaceInheritance",
                 //"..\\Tests\\Behavioral\\InterfaceImplementation",
                 //"..\\Tests\\Behavioral\\MethodSelector",
+                "..\\Tests\\Behavioral\\StructPromotionWithInterface",
+                //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
             ]
         }
     ]

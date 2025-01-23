@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0;net8.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>TypeSwitchAdvanced</AssemblyName>
+    <AssemblyName>SortArrayType</AssemblyName>
     <Product>go2cs</Product>
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>

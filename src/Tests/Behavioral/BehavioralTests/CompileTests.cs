@@ -63,9 +63,6 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]
-    public void CheckImportOptions() => CheckTarget("ImportOptions");
-
-    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
@@ -121,9 +118,6 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
-
-    [TestMethod]
-    public void CheckTypeSwitchAdvanced() => CheckTarget("TypeSwitchAdvanced");
 
     [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");

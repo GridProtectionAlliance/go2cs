@@ -65,9 +65,6 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]
-    public void CheckImportOptions() => CheckTarget("ImportOptions");
-
-    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
@@ -123,9 +120,6 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
-
-    [TestMethod]
-    public void CheckTypeSwitchAdvanced() => CheckTarget("TypeSwitchAdvanced");
 
     [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");

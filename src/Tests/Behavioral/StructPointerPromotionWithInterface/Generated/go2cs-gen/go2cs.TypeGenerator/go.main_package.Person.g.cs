@@ -21,23 +21,23 @@ public static partial class main_package
     public partial struct Person
     {
         // Field References
-        public static ref global::System.Action Ꮡwork(ref Person instance) => ref instance.work;
-        public static ref global::go.@string Ꮡname(ref Person instance) => ref instance.name;
-        public static ref int Ꮡage(ref Person instance) => ref instance.age;
+        public static ref global::go.@string ᏑName(ref Person instance) => ref instance.Name;
+        public static ref nint ᏑAge(ref Person instance) => ref instance.Age;
+        public static ref float ᏑShoeSize(ref Person instance) => ref instance.ShoeSize;
         
         // Constructors
         public Person(NilType _)
         {
-            this.work = default;
-            this.name = default;
-            this.age = default;
+            this.Name = default;
+            this.Age = default;
+            this.ShoeSize = default;
         }
 
-        public Person(global::System.Action work = default, global::go.@string name = default, int age = default)
+        public Person(global::go.@string Name = default, nint Age = default, float ShoeSize = default)
         {
-            this.work = work;
-            this.name = name;
-            this.age = age;
+            this.Name = Name;
+            this.Age = Age;
+            this.ShoeSize = ShoeSize;
         }
         
         // Enable comparisons between nil and Person struct
@@ -53,7 +53,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            work?.ToString() ?? "<nil>", name.ToString(), age.ToString()
+            Name.ToString(), Age.ToString(), ShoeSize.ToString()
         ]), "}");
     }
 }
