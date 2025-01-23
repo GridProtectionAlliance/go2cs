@@ -699,7 +699,7 @@ public static class builtin
     /// This is a convenience function to allow default local struct ref and <see cref="ж{T}"/>
     /// to be created in a single call, e.g.:
     /// <code language="cs">
-    ///     ref var v = ref heap(out ptr&lt;Vertex&gt; v_ptr);
+    ///     ref var v = ref heap(out ж&lt;Vertex&gt; Ꮡv);
     /// </code>
     /// </remarks>
     public static ref T heap<T>(out ж<T> pointer)
@@ -719,7 +719,7 @@ public static class builtin
     /// This is a convenience function to allow local struct ref and <see cref="ж{T}"/>
     /// to be created in a single call, e.g.:
     /// <code language="cs">
-    ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var v_ptr);
+    ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var &v);
     /// </code>
     /// </remarks>
     public static ref T heap<T>(in T target, out ж<T> pointer)
