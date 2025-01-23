@@ -101,6 +101,7 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
                     
                     case StructDeclarationSyntax when typeDefinition.StartsWith("[]"): // slice
@@ -117,7 +118,9 @@ public class TypeGenerator : ISourceGenerator
                             TypeClass = "Slice"
                         }
                         .Generate();
+
                         break;
+
                     case StructDeclarationSyntax when typeDefinition.StartsWith("map["):
                         string[] mapTypes = typeDefinition[4..^1].Split(',');
                         string keyTypeName = mapTypes[0].Trim();
@@ -137,7 +140,9 @@ public class TypeGenerator : ISourceGenerator
 
                         }
                         .Generate();
+
                         break;
+
                     case StructDeclarationSyntax when typeDefinition.StartsWith("chan "):
                         typeName = typeDefinition[5..].Trim();
 
@@ -153,6 +158,7 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
                     
                     case StructDeclarationSyntax when typeDefinition.StartsWith("["): // array
@@ -171,7 +177,9 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
+
                     case StructDeclarationSyntax when typeDefinition.StartsWith("num:"): // numeric
                         typeName = typeDefinition[4..].Trim();
 
@@ -187,7 +195,9 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
+
                     case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition):
                         typeName = typeDefinition;
 
@@ -203,9 +213,12 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
+
                     case StructDeclarationSyntax:
                         throw new NotSupportedException($"Unsupported [{AttributeName}] definition \"{typeDefinition}\" on struct \"{identifier}\".");
+
                     case InterfaceDeclarationSyntax:
                         generatedSource = new InterfaceTypeTemplate
                         {
@@ -216,7 +229,9 @@ public class TypeGenerator : ISourceGenerator
                             UsingStatements = usingStatements
                         }
                         .Generate();
+
                         break;
+
                     default:
                         throw new NotSupportedException($"Unsupported [{AttributeName}] on {targetSyntax.GetType().Name} type \"{identifier}\".");
                 }
