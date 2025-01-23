@@ -14,9 +14,9 @@ private const int8 opRead = -1;
 private const int8 opInvalid = 0;
 private static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
-    ptr<nint> ptr = default!;
-    ptr<ptr<nint>> pptr = default!;
-    ptr<ptr<ptr<nint>>> ppptr = default!;
+    ж<nint> ptr = default!;
+    ж<ж<nint>> pptr = default!;
+    ж<ж<ж<nint>>> ppptr = default!;
     a = 3000;
     ptr = Ꮡa;
     pptr = Ꮡ(ptr);
@@ -53,20 +53,20 @@ private static void Main() {
     return (n, default!);
 }
 
-public static ptr<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
-    ptr<Buffer> b1 = default;
+public static ж<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
+    ж<Buffer> b1 = default;
 
     return Ꮡ(new Buffer(buf: buf));
 }
 
-public static void PrintValPtr(ptr<nint> Ꮡptr) {
+public static void PrintValPtr(ж<nint> Ꮡptr) {
     ref var ptr = ref Ꮡptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
     ptr++;
 }
 
-public static ptr<nint> EscapePrintValPtr(ptr<nint> Ꮡout) {
+public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
     ref var @out = ref Ꮡout.val;
 
     fmt.Printf("Value available at *ptr = %d\n"u8, @out);
@@ -78,13 +78,13 @@ public static ptr<nint> EscapePrintValPtr(ptr<nint> Ꮡout) {
     return Ꮡout;
 }
 
-public static void PrintValPtr2Ptr(ptr<ptr<nint>> Ꮡpptr) {
+public static void PrintValPtr2Ptr(ж<ж<nint>> Ꮡpptr) {
     ref var pptr = ref Ꮡpptr.val;
 
     fmt.Printf("Value available at **pptr = %d\n"u8, pptr.val);
 }
 
-public static void PrintValPtr2Ptr2Ptr(ptr<ptr<ptr<nint>>> Ꮡppptr) {
+public static void PrintValPtr2Ptr2Ptr(ж<ж<ж<nint>>> Ꮡppptr) {
     ref var ppptr = ref Ꮡppptr.val;
 
     fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.val.val);

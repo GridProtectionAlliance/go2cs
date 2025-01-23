@@ -515,7 +515,7 @@ public static class builtin
     /// </summary>
     /// <param name="array">Target array pointer.</param>
     /// <returns>The length of the <paramref name="array"/>.</returns>
-    public static nint len<T>(in ptr<array<T>> array)
+    public static nint len<T>(in ж<array<T>> array)
     {
         return array.val.Length;
     }
@@ -545,7 +545,7 @@ public static class builtin
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>
     /// <returns>The length of the <paramref name="slice"/>.</returns>
-    public static nint len<T>(in ptr<slice<T>> slice)
+    public static nint len<T>(in ж<slice<T>> slice)
     {
         return slice.val.Length;
     }
@@ -575,7 +575,7 @@ public static class builtin
     /// </summary>
     /// <param name="str">Target string pointer.</param>
     /// <returns>The length of the <paramref name="str"/>.</returns>
-    public static nint len(in ptr<@string> str)
+    public static nint len(in ж<@string> str)
     {
         return str.val.Length;
     }
@@ -615,7 +615,7 @@ public static class builtin
     /// </summary>
     /// <param name="map">Target map pointer.</param>
     /// <returns>The length of the <paramref name="map"/>.</returns>
-    public static nint len<TKey, TValue>(in ptr<map<TKey, TValue>> map) where TKey : notnull
+    public static nint len<TKey, TValue>(in ж<map<TKey, TValue>> map) where TKey : notnull
     {
         return map.val.Count;
     }
@@ -645,7 +645,7 @@ public static class builtin
     /// </summary>
     /// <param name="channel">Target channel.</param>
     /// <returns>The length of the <paramref name="channel"/>.</returns>
-    public static nint len<T>(in ptr<channel<T>> channel)
+    public static nint len<T>(in ж<channel<T>> channel)
     {
         return channel.val.Length;
     }
@@ -684,9 +684,9 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="target">Target value.</param>
     /// <returns>Pointer to heap allocated copy of <paramref name="target"/> value.</returns>
-    public static ptr<T> Ꮡ<T>(in T target)
+    public static ж<T> Ꮡ<T>(in T target)
     {
-        return new ptr<T>(target);
+        return new ж<T>(target);
     }
 
     /// <summary>
@@ -696,13 +696,13 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <returns>Reference to heap allocated instance of the zero value for type <typeparamref name="T"/>.</returns>
     /// <remarks>
-    /// This is a convenience function to allow default local struct ref and <see cref="go.ptr{T}"/>
+    /// This is a convenience function to allow default local struct ref and <see cref="ж{T}"/>
     /// to be created in a single call, e.g.:
     /// <code language="cs">
     ///     ref var v = ref heap(out ptr&lt;Vertex&gt; v_ptr);
     /// </code>
     /// </remarks>
-    public static ref T heap<T>(out ptr<T> pointer)
+    public static ref T heap<T>(out ж<T> pointer)
     {
         pointer = Ꮡ<T>(default!);
         return ref pointer.val;
@@ -716,13 +716,13 @@ public static class builtin
     /// <param name="pointer">Out reference to pointer to heap allocated copy of <paramref name="target"/> value.</param>
     /// <returns>Reference to heap allocated copy of <paramref name="target"/> value.</returns>
     /// <remarks>
-    /// This is a convenience function to allow local struct ref and <see cref="go.ptr{T}"/>
+    /// This is a convenience function to allow local struct ref and <see cref="ж{T}"/>
     /// to be created in a single call, e.g.:
     /// <code language="cs">
     ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var v_ptr);
     /// </code>
     /// </remarks>
-    public static ref T heap<T>(in T target, out ptr<T> pointer)
+    public static ref T heap<T>(in T target, out ж<T> pointer)
     {
         pointer = Ꮡ(target);
         return ref pointer.val;
@@ -732,9 +732,9 @@ public static class builtin
     /// Creates a heap allocated pointer reference to a new zero value instance of type.
     /// </summary>
     /// <returns>Pointer to heap allocated zero value of provided type.</returns>
-    public static ptr<T> @new<T>() where T : new()
+    public static ж<T> @new<T>() where T : new()
     {
-        return new ptr<T>(new T());
+        return new ж<T>(new T());
     }
 
     /// <summary>
@@ -743,9 +743,9 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="inputs">Constructor parameters.</param>
     /// <returns>New reference for <typeparamref name="T"/>.</returns>
-    public static ptr<T> @new<T>(params object[] inputs)
+    public static ж<T> @new<T>(params object[] inputs)
     {
-        return new ptr<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
+        return new ж<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
     }
 
     /// <summary>

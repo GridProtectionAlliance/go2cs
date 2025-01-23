@@ -120,6 +120,7 @@ const PackageInfoFileName = "package_info.cs"
 // to different fonts or display environments. Defaults have been chosen based on better
 // appearance with the Visual Studio default code font "Cascadia Mono":
 
+const PointerPrefix = "\u0436"               // Variants: ж Ж ǂ
 const AddressPrefix = "\u13D1"               // Variants: Ꮡ ꝸ
 const ShadowVarMarker = "\u0394"             // Variants: Δ Ʌ ꞥ
 const CapturedVarMarker = "\u0297"           // Variants: ʗ ɔ ᴄ
@@ -1064,7 +1065,7 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 
 	var prefix string
 
-	if strings.HasPrefix(targetTypeName, "ptr<") {
+	if strings.HasPrefix(targetTypeName, PointerPrefix+"<") {
 		targetTypeName = targetTypeName[4 : len(targetTypeName)-1]
 		prefix = "~"
 	}
@@ -1302,7 +1303,7 @@ func convertToCSFullTypeName(typeName string) string {
 
 	// Handle pointer types
 	if strings.HasPrefix(typeName, "*") {
-		return fmt.Sprintf("%s.ptr<%s>", RootNamespace, convertToCSTypeName(typeName[1:]))
+		return fmt.Sprintf("%s.%s<%s>", RootNamespace, PointerPrefix, convertToCSTypeName(typeName[1:]))
 	}
 
 	switch typeName {
@@ -1404,7 +1405,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		}
 
 		if createNew {
-			return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out ptr<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, arrayType, AddressPrefix, csIDName)
+			return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out %s<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, PointerPrefix, arrayType, AddressPrefix, csIDName)
 		}
 
 		return fmt.Sprintf("ref array<%s> %s = ref heap<array<%s>>(out %s%s);", arrayType, csIDName, arrayType, AddressPrefix, csIDName)
@@ -1421,7 +1422,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	}
 
 	if createNew {
-		return fmt.Sprintf("ref %s %s = ref heap(out ptr<%s> %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
+		return fmt.Sprintf("ref %s %s = ref heap(out %s<%s> %s%s);", csTypeName, csIDName, PointerPrefix, csTypeName, AddressPrefix, csIDName)
 	}
 
 	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)

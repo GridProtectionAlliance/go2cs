@@ -27,7 +27,7 @@ private static void Main() {
     fmt.Println(a[0]);
 }
 
-private static void stest(ptr<@string> Ꮡp) {
+private static void stest(ж<@string> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
     p = "hello"u8;
@@ -41,7 +41,7 @@ private static void test(array<@string> a) {
     fmt.Println(a[0], a[1]);
 }
 
-private static void test2(ptr<array<@string>> Ꮡa) {
+private static void test2(ж<array<@string>> Ꮡa) {
     ref var a = ref Ꮡa.val;
 
     fmt.Println(a[0], a[1]);

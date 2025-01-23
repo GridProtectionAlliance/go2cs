@@ -36,7 +36,7 @@ private static void Main() {
     fmt.Println(vowels);
 }
 
-public static void ShowZoo(ptr<array<Animal>> Ꮡzoo) {
+public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.val;
 
     Animal a = default!;

@@ -154,7 +154,7 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="ptr"></param>
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
-    public static string PrintPointer<T>(this ptr<T> ptr)
+    public static string PrintPointer<T>(this ж<T> ptr)
     {
         return ptr.val.PrintPointer();
     }
@@ -233,7 +233,7 @@ public static class TypeExtensions
         // TODO: Since Go restricts receiver functions (extensions in C#) to the same package, a lookup per package (namespace in C#) will be optimal here
         lock (s_extensionMethods)
         {
-            bool isGenericType = (targetType == typeof(ptr<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
+            bool isGenericType = (targetType == typeof(ж<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
 
             if (isGenericType)
                 targetType = targetType.GetGenericTypeDefinition();

@@ -61,7 +61,7 @@ break_out:;
     fmt.Println("i after thread and", i, "x after thread", x);
 }
 
-private static void f(ptr<nint> Ꮡy) {
+private static void f(ж<nint> Ꮡy) {
     ref var y = ref Ꮡy.val;
 
     fmt.Print(y);

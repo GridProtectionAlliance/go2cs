@@ -39,11 +39,11 @@ public static partial class strings_package
 
     // NewReader returns a new Reader reading from s.
     // It is similar to bytes.NewBufferString but more efficient and read-only.
-    public static ptr<Reader> NewReader(@string s) {
+    public static ж<Reader> NewReader(@string s) {
         return Ꮡ(new Reader(s, 0, -1));
     }
 
-    public static (nint n, error err) Read(this ptr<Reader> r, in slice<byte> b) =>
+    public static (nint n, error err) Read(this ж<Reader> r, in slice<byte> b) =>
         Read(ref r.val, b);
 
     // Size returns the original length of the underlying string.

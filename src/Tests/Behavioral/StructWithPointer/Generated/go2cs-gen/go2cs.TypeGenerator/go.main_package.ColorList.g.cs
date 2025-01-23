@@ -23,8 +23,8 @@ public static partial class main_package
         // Field References
         public static ref nint ᏑTotal(ref ColorList instance) => ref instance.Total;
         public static ref global::go.@string ᏑColor(ref ColorList instance) => ref instance.Color;
-        public static ref global::go.ptr<global::go.main_package.ColorList> ᏑNext(ref ColorList instance) => ref instance.Next;
-        public static ref global::go.ptr<global::go.ptr<global::go.main_package.ColorList>> ᏑNextNext(ref ColorList instance) => ref instance.NextNext;
+        public static ref global::go.ж<global::go.main_package.ColorList> ᏑNext(ref ColorList instance) => ref instance.Next;
+        public static ref global::go.ж<global::go.ж<global::go.main_package.ColorList>> ᏑNextNext(ref ColorList instance) => ref instance.NextNext;
         
         // Constructors
         public ColorList(NilType _)
@@ -35,7 +35,7 @@ public static partial class main_package
             this.NextNext = default;
         }
 
-        public ColorList(nint Total = default, global::go.@string Color = default, global::go.ptr<global::go.main_package.ColorList> Next = default, global::go.ptr<global::go.ptr<global::go.main_package.ColorList>> NextNext = default)
+        public ColorList(nint Total = default, global::go.@string Color = default, global::go.ж<global::go.main_package.ColorList> Next = default, global::go.ж<global::go.ж<global::go.main_package.ColorList>> NextNext = default)
         {
             this.Total = Total;
             this.Color = Color;

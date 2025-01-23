@@ -7,8 +7,8 @@ partial class main_package {
 [GoType] partial struct ColorList {
     public nint Total;
     public @string Color;
-    public ptr<ColorList> Next;
-    public ptr<ptr<ColorList>> NextNext;
+    public ж<ColorList> Next;
+    public ж<ж<ColorList>> NextNext;
 }
 
 private static void Main() {

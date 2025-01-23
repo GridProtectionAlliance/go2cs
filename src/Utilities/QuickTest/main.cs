@@ -108,15 +108,15 @@ namespace go
 
         private static ref NumError syntaxError(@string fn, @string str)
         {
-            return ref new ptr<NumError>(new NumError{Func = fn, Num = str, Err = null}).val;
+            return ref new ж<NumError>(new NumError{Func = fn, Num = str, Err = null}).val;
         }
 
         public struct ColorList
         {
             public long Total;
             public string Color;
-            public ptr<ColorList> Next;
-            public ptr<ptr<ColorList>> NextNext;
+            public ж<ColorList> Next;
+            public ж<ж<ColorList>> NextNext;
         }
 
         public partial struct MyError
@@ -164,7 +164,7 @@ namespace go
             public double Abs() => s_AbsByRef?.Invoke(ref this) ?? s_AbsByVal?.Invoke(this) ?? Abser?.Abs() ?? throw new Exception(); //RuntimeErrorPanic.NilPointerDereference();
 
             // MyError structure promotion
-            private readonly ptr<MyError> m_MyErrorRef;
+            private readonly ж<MyError> m_MyErrorRef;
 
             private ref MyError MyError_val => ref m_MyErrorRef.val;
 
@@ -195,14 +195,14 @@ namespace go
             {
                 this.Message = "";
                 this.Abser = null;
-                this.m_MyErrorRef = new ptr<MyError>(new MyError(nil));
+                this.m_MyErrorRef = new ж<MyError>(new MyError(nil));
             }
 
             public MyCustomError(string Message, Abser Abser, MyError MyError)
             {
                 this.Message = Message;
                 this.Abser = Abser;
-                this.m_MyErrorRef = new ptr<MyError>(MyError);
+                this.m_MyErrorRef = new ж<MyError>(MyError);
             }
         }
 
@@ -242,7 +242,7 @@ namespace go
         // It prints into a buffer that must be set up separately.
         private struct fmt
         {
-            public ptr<buffer> buf;
+            public ж<buffer> buf;
 
             public fmtFlags fmtFlags;
 
@@ -534,7 +534,7 @@ namespace go
 
         private static ref int Main8()
         {
-            ptr<int> i = new ptr<int>(42), j = new ptr<int>(2701);
+            ж<int> i = new ж<int>(42), j = new ж<int>(2701);
 
             ref int p = ref i.val;
             Console.WriteLine(p);
@@ -545,7 +545,7 @@ namespace go
             p = p / 37;
             Console.WriteLine(j);
 
-            ptr<Vertex> v = new ptr<Vertex>(new Vertex { X = 1, Y = 2 });
+            ж<Vertex> v = new ж<Vertex>(new Vertex { X = 1, Y = 2 });
             ref Vertex pv = ref v.val;
 
             pv.X = 12;
@@ -557,9 +557,9 @@ namespace go
             return ref i.val;
         }
 
-        private static ptr<int> Main9()
+        private static ж<int> Main9()
         {
-            ptr<int> i = new ptr<int>(42);
+            ж<int> i = new ж<int>(42);
 
             //ptr<int> j = new ptr<int>(2701);
 

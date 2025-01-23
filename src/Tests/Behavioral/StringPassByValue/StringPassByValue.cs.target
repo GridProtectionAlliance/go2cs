@@ -21,7 +21,7 @@ private static void test(@string a) {
     fmt.Println(a);
 }
 
-private static void test2(ptr<@string> Ꮡa) {
+private static void test2(ж<@string> Ꮡa) {
     ref var a = ref Ꮡa.val;
 
     fmt.Println(a);

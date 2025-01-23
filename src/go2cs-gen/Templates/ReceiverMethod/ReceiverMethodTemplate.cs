@@ -31,7 +31,7 @@ internal class ReceiverMethodTemplate : TemplateBase
             {
                 if (first)
                 {
-                    result.Add($"this ptr<{type}> Ꮡ{name}");
+                    result.Add($"this ж<{type}> Ꮡ{name}");
                     first = false;
                 }
                 else

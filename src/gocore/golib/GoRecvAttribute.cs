@@ -31,7 +31,7 @@ namespace go;
 /// <remarks>
 /// <para>
 /// This attribute is used to auto-generate a pointer receiver method that
-/// references a <see cref="ptr{T}"/> type which calls this receiver method
+/// references a <see cref="ж{T}"/> type which calls this receiver method
 /// declared with a <see langword="ref" /> type.
 /// </para>
 /// <para>

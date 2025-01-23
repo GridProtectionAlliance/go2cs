@@ -46,7 +46,7 @@ public static partial class fmt_package
             (Stringer<T>)target!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Stringer As<T>(ptr<T> target_ptr) =>
+        public static Stringer As<T>(ж<T> target_ptr) =>
             (Stringer<T>)target_ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -57,7 +57,7 @@ public static partial class fmt_package
     public class Stringer<T> : Stringer
     {
         private T m_target;
-        private readonly ptr<T>? m_target_ptr;
+        private readonly ж<T>? m_target_ptr;
         private readonly bool m_target_is_ptr;
 
         public ref T Target
@@ -73,7 +73,7 @@ public static partial class fmt_package
 
         public Stringer(in T target) => m_target = target;
 
-        public Stringer(ptr<T> target_ptr)
+        public Stringer(ж<T> target_ptr)
         {
             m_target_ptr = target_ptr;
             m_target_is_ptr = true;
@@ -144,7 +144,7 @@ public static partial class fmt_package
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static explicit operator Stringer<T>(in ptr<T> target_ptr) => new Stringer<T>(target_ptr);
+        public static explicit operator Stringer<T>(in ж<T> target_ptr) => new Stringer<T>(target_ptr);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static explicit operator Stringer<T>(in T target) => new Stringer<T>(target);

@@ -100,7 +100,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
 
     // Following value type is heap allocated so read-only or struct copy calls can still update
     // original value, e.g., allowing "builtin.close" method without requiring a "ref" parameter.
-    private readonly ptr<bool> m_isClosed;
+    private readonly ж<bool> m_isClosed;
 
     private static readonly WaitHandle s_signaled = new ManualResetEventSlim(true).WaitHandle;
     private static readonly WaitHandle s_unsignaled = new ManualResetEventSlim(false).WaitHandle;
@@ -122,7 +122,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
         m_selectSendEvent = new ManualResetEventSlim(false);
         m_queue = new ConcurrentQueue<T>();
         m_enumeratorTokenSource = new CancellationTokenSource();
-        m_isClosed = new ptr<bool>(false);
+        m_isClosed = new ж<bool>(false);
         Capacity = size;
     }
 

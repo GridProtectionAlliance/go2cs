@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public static go.@string Speak(this ptr<go.main_package.Cat> Ꮡc)
+    public static go.@string Speak(this ж<go.main_package.Cat> Ꮡc)
     {
         ref var c = ref Ꮡc.val;
         return c.Speak();

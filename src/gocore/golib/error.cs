@@ -48,7 +48,7 @@ public interface error // : IFormattable
         return new error<T>(target!);
     }
 
-    public static error As<T>(ptr<T> target_ptr)
+    public static error As<T>(ж<T> target_ptr)
     {
         return new error<T>(target_ptr);
     }
@@ -62,7 +62,7 @@ public interface error // : IFormattable
 public class error<T> : error
 {
     private T m_target = default!;
-    private readonly ptr<T>? m_target_ptr;
+    private readonly ж<T>? m_target_ptr;
     private readonly bool m_target_is_ptr;
 
     public ref T Target
@@ -81,13 +81,13 @@ public class error<T> : error
         m_target = target;
     }
 
-    public error(ptr<T> target_ptr)
+    public error(ж<T> target_ptr)
     {
         m_target_ptr = target_ptr;
         m_target_is_ptr = true;
     }
 
-    private delegate @string ErrorByPtr(ptr<T> value);
+    private delegate @string ErrorByPtr(ж<T> value);
     private delegate @string ErrorByVal(T value);
 
     private static readonly ErrorByPtr? s_ErrorByPtr;
@@ -132,7 +132,7 @@ public class error<T> : error
     static error()
     {
         Type targetType = typeof(T);
-        Type targetTypeByPtr = typeof(ptr<T>);
+        Type targetTypeByPtr = typeof(ж<T>);
 
         MethodInfo? extensionMethod = targetTypeByPtr.GetExtensionMethod("Error");
 
@@ -148,7 +148,7 @@ public class error<T> : error
             throw new NotImplementedException($"{targetType.FullName} does not implement error.Error method", new Exception("Error"));
     }
 
-    public static explicit operator error<T>(in ptr<T> target_ptr)
+    public static explicit operator error<T>(in ж<T> target_ptr)
     {
         return new error<T>(target_ptr);
     }

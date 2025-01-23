@@ -45,7 +45,7 @@ public static partial class io_package
             (Reader<T>)target!;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static Reader As<T>(ptr<T> target_ptr) =>
+        public static Reader As<T>(ж<T> target_ptr) =>
             (Reader<T>)target_ptr;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
@@ -56,7 +56,7 @@ public static partial class io_package
     public class Reader<T> : Reader
     {
         private T m_target;
-        private readonly ptr<T>? m_target_ptr;
+        private readonly ж<T>? m_target_ptr;
         private readonly bool m_target_is_ptr;
 
         public ref T Target
@@ -72,7 +72,7 @@ public static partial class io_package
 
         public Reader(in T target) => m_target = target;
 
-        public Reader(ptr<T> target_ptr)
+        public Reader(ж<T> target_ptr)
         {
             m_target_ptr = target_ptr;
             m_target_is_ptr = true;
@@ -143,7 +143,7 @@ public static partial class io_package
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
-        public static explicit operator Reader<T>(in ptr<T> target_ptr) => new Reader<T>(target_ptr);
+        public static explicit operator Reader<T>(in ж<T> target_ptr) => new Reader<T>(target_ptr);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining), DebuggerNonUserCode]
         public static explicit operator Reader<T>(in T target) => new Reader<T>(target);

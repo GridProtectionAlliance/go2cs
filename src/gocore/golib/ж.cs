@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  ptr.cs - Gbtc
+//  ж.cs - Gbtc
 //
 //  Copyright © 2020, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -31,20 +31,20 @@ using System.Reflection.Emit;
 namespace go;
 
 /// <summary>
-/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ptr{T}"/> reference.
+/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ж{T}"/> reference.
 /// </summary>
 /// <typeparam name="TElem">Field type.</typeparam>
-/// <param name="structPtr"><see cref="ptr{T}"/> heap reference of struct.</param>
-/// <returns>A <c>ref</c> to the field value within the struct <see cref="ptr{T}"/> reference.</returns>
+/// <param name="structPtr"><see cref="ж{T}"/> heap reference of struct.</param>
+/// <returns>A <c>ref</c> to the field value within the struct <see cref="ж{T}"/> reference.</returns>
 public delegate ref TElem FieldRefFunc<TElem>(object structPtr);
 
 /// <summary>
-/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ptr{T}"/> reference.
+/// Delegate that returns a <c>ref</c> to a field value within a struct <see cref="ж{T}"/> reference.
 /// </summary>
 /// <typeparam name="T">Struct type.</typeparam>
 /// <typeparam name="TElem">Field type.</typeparam>
 /// <param name="structRef">Reference to struct.</param>
-/// <returns>A <c>ref</c> to the field value within the struct <see cref="ptr{T}"/> reference.</returns>
+/// <returns>A <c>ref</c> to the field value within the struct <see cref="ж{T}"/> reference.</returns>
 public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
 
 /// <summary>
@@ -64,7 +64,7 @@ public static class FieldRef<T> where T : struct
     /// </exception>
     public static FieldRefFunc<TElem> Create<TElem>(string fieldName)
     {
-        // Get the FieldInfo for fieldName in struct T referenced by ptr<T>
+        // Get the FieldInfo for fieldName in struct T referenced by ж<T>
         FieldInfo structField = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                              ?? throw new InvalidOperationException($"Field '{fieldName}' not found in type {typeof(T).FullName}");
 
@@ -78,10 +78,10 @@ public static class FieldRef<T> where T : struct
 
         ILGenerator il = method.GetILGenerator();
 
-        // Emit IL code to load the field address: ((ptr<T>)obj).m_val.fieldName
+        // Emit IL code to load the field address: ((ж<T>)obj).m_val.fieldName
         il.Emit(OpCodes.Ldarg_0);               // Load the object argument
-        il.Emit(OpCodes.Castclass, s_ptrType);  // Cast to ptr<T>
-        il.Emit(OpCodes.Ldflda, s_ptrValField); // Load address of ptr<T>.m_val struct, type &T
+        il.Emit(OpCodes.Castclass, s_ptrType);  // Cast to ж<T>
+        il.Emit(OpCodes.Ldflda, s_ptrValField); // Load address of ж<T>.m_val struct, type &T
         il.Emit(OpCodes.Ldflda, structField);   // Load address of m_val struct field, type &TElem
         il.Emit(OpCodes.Ret);                   // Return
 
@@ -89,10 +89,10 @@ public static class FieldRef<T> where T : struct
         return (FieldRefFunc<TElem>)method.CreateDelegate(typeof(FieldRefFunc<TElem>));
     }
 
-    // Type of ptr<T>
-    private static readonly Type s_ptrType = typeof(ptr<T>);
+    // Type of ж<T>
+    private static readonly Type s_ptrType = typeof(ж<T>);
 
-    // FieldInfo for m_val in ptr<T>
+    // FieldInfo for m_val in ж<T>
     private static readonly FieldInfo s_ptrValField = s_ptrType.GetField("m_val", BindingFlags.Instance | BindingFlags.NonPublic)!;
 }
 
@@ -103,7 +103,7 @@ public static class FieldRef<T> where T : struct
 /// <remarks>
 /// <para>
 /// A new .NET class instance is always allocated on the heap and registered for garbage collection.
-/// The <see cref="ptr{T}"/> class is used to create a reference to a heap allocated instance of type
+/// The <see cref="ж{T}"/> class is used to create a reference to a heap allocated instance of type
 /// <typeparamref name="T"/> so that the type can (1) have scope beyond the current stack, and (2)
 /// have the ability to create a safe pointer to the type, i.e., a reference.
 /// </para>
@@ -111,14 +111,14 @@ public static class FieldRef<T> where T : struct
 /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that value
 /// will be "boxed" for heap allocation. Since boxed value will be a new copy of original value, make
 /// sure to use ref-based <see cref="val"/> for updates instead of a local stack copy of value.
-/// See the <see cref="builtin.heap{T}(out ptr{T})"/> and notes on boxing:
+/// See the <see cref="builtin.heap{T}(out ж{T})"/> and notes on boxing:
 /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
 /// </para>
 /// <para>
 /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
 /// </para>
 /// </remarks>
-public sealed class ptr<T>
+public sealed class ж<T>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
@@ -128,20 +128,20 @@ public sealed class ptr<T>
     /// Creates a new heap allocated reference to an instance of type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="value">Source value for heap allocated reference.</param>
-    public ptr(in T value)
+    public ж(in T value)
     {
         m_val = value;
     }
 
     // Create a new reference to a field in a heap allocated struct
-    internal ptr(object source, FieldRefFunc<T> fieldRefFunc)
+    internal ж(object source, FieldRefFunc<T> fieldRefFunc)
     {
         m_structFieldRef = (source, fieldRefFunc);
         m_val = default!;
     }
 
     // Create a new indexed reference into an existing heap allocated array
-    internal ptr(IArray array, int index)
+    internal ж(IArray array, int index)
     {
         m_arrayIndexRef = (array, index);
         m_val = default!;
@@ -151,12 +151,12 @@ public sealed class ptr<T>
     /// Creates a new heap allocated reference from a nil value.
     /// </summary>
     /// <param name="_"></param>
-    public ptr(NilType _) : this(default(T)!) { }
+    public ж(NilType _) : this(default(T)!) { }
 
     /// <summary>
     /// Creates a new heap allocated reference.
     /// </summary>
-    public ptr() : this(default(T)!) { }
+    public ж() : this(default(T)!) { }
 
     /// <summary>
     /// Gets a reference to the value of type <typeparamref name="T"/>.
@@ -193,9 +193,9 @@ public sealed class ptr<T>
     /// <typeparam name="TElem">Type of field.</typeparam>
     /// <param name="fieldRefFunc">Struct field reference delegate.</param>
     /// <returns>Pointer to field of struct.</returns>
-    public ptr<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
+    public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
-        return new ptr<TElem>(this, fieldRefFunc);
+        return new ж<TElem>(this, fieldRefFunc);
     }
 
     /// <summary>
@@ -204,13 +204,13 @@ public sealed class ptr<T>
     /// <typeparam name="TElem">Type of field.</typeparam>
     /// <param name="fieldRefFunc">Struct field reference delegate.</param>
     /// <returns>Pointer to field of struct.</returns>
-    public ptr<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
+    public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
-        return new ptr<TElem>(this, getFieldRef);
+        return new ж<TElem>(this, getFieldRef);
 
         ref TElem getFieldRef(object structPtr)
         {
-            ptr<T> ptr = (ptr<T>)structPtr;
+            ж<T> ptr = (ж<T>)structPtr;
             return ref fieldRefFunc(ref ptr.m_val);
         }
     }
@@ -223,7 +223,7 @@ public sealed class ptr<T>
     /// <returns>Pointer to element at specified index.</returns>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
     /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
-    public ptr<Telem> at<Telem>(int index)
+    public ж<Telem> at<Telem>(int index)
     {
         if (m_val is not IArray<Telem> array)
             throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
@@ -231,7 +231,7 @@ public sealed class ptr<T>
         if (!array.IndexIsValid(index))
             throw new IndexOutOfRangeException("Index is out of range for array or slice.");
 
-        return new ptr<Telem>(array, index);
+        return new ж<Telem>(array, index);
     }
 
     /// <inheritdoc />
@@ -241,7 +241,7 @@ public sealed class ptr<T>
         return this.PrintPointer();
     }
 
-    private bool Equals(ptr<T>? other)
+    private bool Equals(ж<T>? other)
     {
         if (other is null)
             return false;
@@ -267,7 +267,7 @@ public sealed class ptr<T>
     /// <inheritdoc />
     public override bool Equals(object? obj)
     {
-        return obj is ptr<T> other && Equals(other);
+        return obj is ж<T> other && Equals(other);
     }
 
     /// <inheritdoc />
@@ -278,11 +278,11 @@ public sealed class ptr<T>
     }
 
     // WISH: Would be super cool if this operator supported "ref" return, like:
-    //     public static ref T operator ~(ptr<T> value) => ref value.m_value;
+    //     public static ref T operator ~(ж<T> value) => ref value.m_value;
     // or ideally C# supported an overloaded ref-based pointer operator, like:
-    //     public static ref T operator *(ptr<T> value) => ref value.m_value;
+    //     public static ref T operator *(ж<T> value) => ref value.m_value;
     // or maybe even an overall "ref" operator for a class, like:
-    //     public static ref T operator ref(ptr<T> value) => ref value.m_value;
+    //     public static ref T operator ref(ж<T> value) => ref value.m_value;
     // Converted code like this:
     //     var v = 2; var vp = ptr(v);
     //     vp.val = 999;
@@ -292,7 +292,7 @@ public sealed class ptr<T>
     //     *vp = 999; // or
     //     ref vp = 999;
     // As it stands, this operator just returns a copy of the structure value:
-    public static T operator ~(ptr<T> value)
+    public static T operator ~(ж<T> value)
     {
         return value.m_val;
     }
@@ -301,28 +301,28 @@ public sealed class ptr<T>
     // https://github.com/dotnet/roslyn/issues/45881
 
     // Also, the following unsafe return option is possible when T is unmanaged:
-    //     public static T* operator ~(ptr<T> value) => value.m_value;
+    //     public static T* operator ~(ж<T> value) => value.m_value;
     // However, going down the fully unmanaged path creates a cascading set of
-    // issues, see header comments for the ptr<T> "experimental" implementation
+    // issues, see header comments for the ж<T> "experimental" implementation
 
 
-    // Enable comparisons between nil and ptr<T> instance
-    public static bool operator ==(ptr<T>? value, NilType _)
+    // Enable comparisons between nil and ж<T> instance
+    public static bool operator ==(ж<T>? value, NilType _)
     {
         return value is null;
     }
 
-    public static bool operator !=(ptr<T>? value, NilType nil)
+    public static bool operator !=(ж<T>? value, NilType nil)
     {
         return !(value == nil);
     }
 
-    public static bool operator ==(NilType nil, ptr<T>? value)
+    public static bool operator ==(NilType nil, ж<T>? value)
     {
         return value == nil;
     }
 
-    public static bool operator !=(NilType nil, ptr<T>? value)
+    public static bool operator !=(NilType nil, ж<T>? value)
     {
         return value != nil;
     }

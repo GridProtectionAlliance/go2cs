@@ -72,7 +72,7 @@ private partial struct errorString
     public @string s;
 }
 
-private static @string Error(this ptr<errorString> _addr_e)
+private static @string Error(this ж<errorString> _addr_e)
 {
     ref errorString e = ref _addr_e.val;
 
