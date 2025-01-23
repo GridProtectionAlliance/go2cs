@@ -888,28 +888,9 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 				while = strings.Contains(str, prefix)
 			}
 
-			// Ensure multiline C# raw string literals starts with newline
-			if !strings.HasPrefix(str, "\n") {
-				prefix += v.newline
-			}
-
-			// Check if Go raw string literal ends with newline
-			if strings.HasSuffix(str, "\n") {
-				// In this case last new line is not considered part of the C# raw string literal,
-				// so we need to add another to ensure consistent raw string literal content
-				suffix = v.newline + suffix
-			}
-
-			// Ensure multiline C# raw string literals ends with newline
-			if strings.HasSuffix(str[:len(str)-1], "\n") {
-				// Get index of last newline
-				lastNewline := strings.LastIndex(str, "\n")
-
-				// Check if any characters beyond the last newline are not whitespace
-				if strings.TrimSpace(str[lastNewline:]) != "" {
-					suffix = v.newline + suffix
-				}
-			}
+			// Multiline C# raw string literals start and end with newlines
+			prefix += v.newline
+			suffix = v.newline + suffix
 
 			return prefix + str + suffix, true
 		}
