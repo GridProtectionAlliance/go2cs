@@ -36,8 +36,8 @@ namespace go;
 /// an interface for a structure using matching receiver methods.
 /// </para>
 /// <para>
-/// </para>
 /// See the <c>ImplGenerator</c> in the go2cs code generators for details.
+/// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class GoImplAttribute<TStruct, TInterface> : Attribute
@@ -51,4 +51,17 @@ public class GoImplAttribute<TStruct, TInterface> : Attribute
     /// Gets the type of interface to implement.
     /// </summary>
     public Type InterfaceType => typeof(TInterface);
+
+    /// <summary>
+    /// Gets or sets flag that determines if interface is a promoted
+    /// field in the structure.
+    /// </summary>
+    public bool Promoted { get; set; }
+
+    /// <summary>
+    /// Gets or sets list of method names that are directly implemented
+    /// for the target structure, thus overriding receivers of promoted
+    /// interface.
+    /// </summary>
+    public string Overrides { get; set; }
 }

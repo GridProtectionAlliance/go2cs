@@ -38,6 +38,7 @@
                 //"..\\Tests\\Behavioral\\InterfaceInheritance",
                 //"..\\Tests\\Behavioral\\InterfaceImplementation",
                 //"..\\Tests\\Behavioral\\MethodSelector",
+                //"..\\Tests\\Behavioral\\StructPromotion",
                 "..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
             ]

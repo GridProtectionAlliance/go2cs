@@ -8,6 +8,7 @@ internal class InterfaceImplTemplate : TemplateBase
     // Template Parameters
     public required string StructName;
     public required string InterfaceName;
+    public required bool Promoted;
     public required List<MethodInfo> Methods;
 
     public override string TemplateBody =>
@@ -29,7 +30,10 @@ internal class InterfaceImplTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append("\r\n        ");
 
-                result.Append($"{method.ReturnType} {method.GetSignature()} => this.{GetSimpleName(method.Name)}{method.GetGenericSignature()}({method.CallParameters});");
+                if (Promoted)
+                    result.Append($"public {method.ReturnType} {method.GetSignature()} => {GetSimpleName(InterfaceName)}.{GetSimpleName(method.Name)}{method.GetGenericSignature()}({method.CallParameters});");
+                else
+                    result.Append($"{method.ReturnType} {method.GetSignature()} => this.{GetSimpleName(method.Name)}{method.GetGenericSignature()}({method.CallParameters});");
             }
 
             return result.ToString();

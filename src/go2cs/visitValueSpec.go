@@ -31,20 +31,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 						// Get the concrete type from the RHS
 						rhsType := v.info.TypeOf(valueSpec.Values[i])
 
+						// Record the implementation
 						if rhsType != nil {
-							// Record the implementation
-							interfaceTypeName := convertToCSTypeName(getFullTypeName(declType))
-							concreteTypeName := convertToCSTypeName(getFullTypeName(rhsType))
-
-							if interfaceTypeName != "" && interfaceTypeName != "nil" && concreteTypeName != "" && concreteTypeName != "nil" {
-								packageLock.Lock()
-								if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
-									implementations.Add(concreteTypeName)
-								} else {
-									interfaceImplementations[interfaceTypeName] = NewHashSet([]string{concreteTypeName})
-								}
-								packageLock.Unlock()
-							}
+							convertToInterfaceType(declType, rhsType, "")
 						}
 					}
 				}

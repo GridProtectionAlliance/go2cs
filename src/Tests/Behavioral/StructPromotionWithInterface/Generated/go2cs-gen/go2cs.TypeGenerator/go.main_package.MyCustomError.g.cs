@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -22,16 +22,25 @@ public static partial class main_package
     {
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
+        public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
+        public static ref global::go.main_package.MyError ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
+        public static ref global::go.error Ꮡerror(ref MyCustomError instance) => ref instance.error;
         
         // Constructors
         public MyCustomError(NilType _)
         {
-            this.Message = default;
+            this.Message = default!;
+            this.Abser = default!;
+            this.MyError = default!;
+            this.error = default!;
         }
 
-        public MyCustomError(global::go.@string Message = default)
+        public MyCustomError(global::go.@string Message = default, global::go.main_package.Abser Abser = default, global::go.main_package.MyError MyError = default, global::go.error error = default)
         {
             this.Message = Message;
+            this.Abser = Abser;
+            this.MyError = MyError;
+            this.error = error;
         }
         
         // Enable comparisons between nil and MyCustomError struct
@@ -47,7 +56,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Message.ToString()
+            Message.ToString(), Abser?.ToString() ?? "<nil>", MyError.ToString(), error?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

@@ -80,7 +80,7 @@ internal class StructTypeTemplate : TemplateBase
                 //     result.AppendLine($"this.m_{fieldName}Ref = new ptr<{typeName}>(new {typeName}(nil));");
                 // else
 
-                result.AppendLine($"this.{fieldName} = default;");
+                result.AppendLine($"this.{fieldName} = default!;");
             }
 
             result.AppendLine($"{TypeElemIndent}}}");

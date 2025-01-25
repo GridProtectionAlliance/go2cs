@@ -5,42 +5,38 @@ import (
 	"time"
 )
 
-// Above type comment
 type (
-	// Top inner type comment
 	Abser interface {
-		Abs() float64 // To the right comments
+		Abs() float64
 	}
 
-	// Middle type comment
 	MyError struct {
 		When time.Time
 		What string
 	}
-	// Weirdly placed comment
 
-	/* Hello 1
-	 * Hello 2
-	 * Hello 3 */
 	MyCustomError struct {
-		Message string // My custom error message
+		Message string
 		Abser
 		MyError
 		error
 	}
 
-	// Bottom inner type comment
+	MyAbser struct {
+	}
 )
 
-// Below type comment
-
-// The following takes precedence over instance call to Abs()
+// The following takes precedence over Abser promoted field call to Abs()
 func (myErr *MyCustomError) Abs() float64 {
 	return 0.0
 }
 
+func (myAbs MyAbser) Abs() float64 {
+	return 1.0
+}
+
 func main() {
-	a := MyCustomError{"New One", nil, MyError{time.Now(), "Hello"}, nil}
+	a := MyCustomError{"New One", MyAbser{}, MyError{time.Now(), "Hello"}, nil}
 	a.Abs()
 	a.Message = "New"
 	fmt.Println("MyCustomError method =", a.Abs())

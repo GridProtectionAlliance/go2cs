@@ -115,10 +115,12 @@ const PackageSuffix = "_package"
 const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
 const PackageInfoFileName = "package_info.cs"
 
-// Extended Unicode characters are being used to help avoid conflicts with Go identifiers
-// for intermediate and temporary variables. Some character variants will be better suited
-// to different fonts or display environments. Defaults have been chosen based on better
-// appearance with the Visual Studio default code font "Cascadia Mono":
+// Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
+// symbols, markers, intermediate and temporary variables. These characters have to be valid
+// C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting
+// characters, combining characters, or formatting characters. Some character variants will
+// be better suited to different fonts or display environments. Defaults have been chosen
+// based on better appearance with the Visual Studio default code font "Cascadia Mono":
 
 const PointerPrefix = "\u0436"               // Variants: ж Ж ǂ
 const AddressPrefix = "\u13D1"               // Variants: Ꮡ ꝸ
@@ -132,24 +134,29 @@ const TypeAliasDot = "\uA4F8"                // Variants: ꓸ
 const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 
-// TODO: Consider removing items that are also reserved by Go to reduce search space
 var keywords = NewHashSet([]string{
 	// The following are all valid C# keywords, if encountered in Go code they should be escaped with `@`
-	"abstract", "as", "base", "bool", "catch", "char", "checked", "class", "const", "decimal",
-	"delegate", "do", "double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach",
-	"implicit", "in", "interface", "internal", "is", "lock", "namespace", "new", "null", "object",
-	"operator", "out", "override", "params", "private", "protected", "public", "readonly", "ref",
-	"sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "string", "struct", "this", "throw",
-	"try", "typeof", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile", "while",
-	"__argslist", "__makeref", "__reftype", "__refvalue",
-	// The following C# type names are reserved by go2cs as they may be used during code conversion
-	// TODO: Handle these differently - adding an `@` to the beginning does nothing since they are not reserved words
-	//"GoType", "GoUntyped", "GoTag", "GoTypeAlias", "GoImplement", "go\u01C3", "ConvertToType",
+	"abstract", "as", "base", "catch", "char", "checked", "class", "const", "decimal", "delegate", "do",
+	"double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach", "implicit", "in",
+	"internal", "is", "lock", "namespace", "null", "object", "operator", "out", "override", "params",
+	"private", "protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof",
+	"stackalloc", "static", "this", "throw", "try", "typeof", "unchecked", "unsafe", "ushort", "using",
+	"virtual", "void", "volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
+
+	// The remaining C# keywords overlap with Go keywords, so they do not need detection
+	// "bool", "break", "byte", "case", "const", "continue", "default", "else", "false", "float", "for"
+	// "goto", "if", "int", ""interface", long", "new", "return", "select", "string", "struct", "switch",
+	// "true", "var", "uint", "ulong"
 })
 
-// These C# keywords overlap with Go keywords, so they do not need detection
-// "break", "byte", "case", "const", "continue", "default", "else", "false", "float", "for",
-// "goto", "if", "int", "long", "return", "select", "switch", "true", "var", "uint", "ulong"
+// The following names are reserved by go2cs, if encountered in Go code they should be escaped with `Δ`
+var reserved = NewHashSet([]string{
+	"array", "channel", "ConvertToType", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImpl",
+	"GoImplAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
+	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
+	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3",
+	"map", "slice",
+})
 
 //go:embed csproj-template.xml
 var csprojTemplate []byte
@@ -170,6 +177,7 @@ var publishProfiles embed.FS
 var packageName string
 var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
+var promotedInterfaceImplementations = map[string]map[string]string{}
 var interfaceInheritances = map[string]HashSet[string]{}
 var initFuncCounter int
 var packageLock = sync.Mutex{}
@@ -510,8 +518,14 @@ Examples:
 
 	concurrentTasks.Wait()
 
+	var packageInfoFileName string
+
 	// Handle package information file
-	packageInfoFileName := filepath.Join(filepath.Dir(outputFilePath), PackageInfoFileName)
+	if fileInfo.IsDir() {
+		packageInfoFileName = filepath.Join(outputFilePath, PackageInfoFileName)
+	} else {
+		packageInfoFileName = filepath.Join(filepath.Dir(outputFilePath), PackageInfoFileName)
+	}
 
 	var packageInfoLines []string
 
@@ -622,6 +636,17 @@ Examples:
 		for interfaceName, implementations := range interfaceImplementations {
 			for implementation := range implementations {
 				lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>]", implementation, interfaceName))
+			}
+		}
+
+		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
+		for interfaceName, implementations := range promotedInterfaceImplementations {
+			for implementation, methods := range implementations {
+				if len(methods) > 0 {
+					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true, Overrides = \"%s\")]", implementation, interfaceName, methods))
+				} else {
+					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true)]", implementation, interfaceName))
+				}
 			}
 		}
 
@@ -910,14 +935,16 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 }
 
 func getSanitizedIdentifier(identifier string) string {
-	if strings.HasPrefix(identifier, "@") {
+	if strings.HasPrefix(identifier, "@") || strings.HasPrefix(identifier, ShadowVarMarker) {
 		return identifier // Already sanitized
 	}
 
-	if keywords.Contains(identifier) ||
-		strings.HasPrefix(identifier, AddressPrefix) ||
-		strings.HasSuffix(identifier, PackageSuffix) {
+	if keywords.Contains(identifier) {
 		return "@" + identifier
+	}
+
+	if reserved.Contains(identifier) || strings.HasSuffix(identifier, PackageSuffix) {
+		return ShadowVarMarker + identifier
 	}
 
 	return identifier
@@ -1072,11 +1099,13 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 
 	if interfaceTypeName != "" && interfaceTypeName != "nil" && targetTypeName != "" && targetTypeName != "nil" {
 		packageLock.Lock()
+
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
 			implementations.Add(targetTypeName)
 		} else {
 			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
 		}
+
 		packageLock.Unlock()
 	}
 

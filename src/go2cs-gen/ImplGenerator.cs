@@ -87,6 +87,10 @@ public class ImplGenerator : ISourceGenerator
             string structName = structType.Name;
             string interfaceName = interfaceType.ToDisplayString();
 
+            // Get the attribute's Promoted argument value, if defined
+            string[] arguments = attribute.GetArgumentValues();
+            bool promoted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+
             List<MethodInfo> methods = interfaceType.AllInterfaces
                 .Concat([interfaceType]) // Include the original interface
                 .SelectMany(iface => iface.GetMembers()
@@ -96,7 +100,7 @@ public class ImplGenerator : ISourceGenerator
                     .Select(method => (name: iface.ToDisplayString(), method)))
                 .Select(t => new MethodInfo
                 {
-                    Name = $"{t.name}.{t.method.Name}",
+                    Name = promoted ? t.method.Name : $"{t.name}.{t.method.Name}",
                     ReturnType = t.method.ReturnType.ToDisplayString(),
                     Parameters = t.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", t.method.TypeParameters.Select(type => type.ToDisplayString()))
@@ -110,6 +114,7 @@ public class ImplGenerator : ISourceGenerator
                 PackageName = packageName,
                 StructName = structName,
                 InterfaceName = interfaceName,
+                Promoted = promoted,
                 Methods = methods,
                 UsingStatements = usingStatements
             }

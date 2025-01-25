@@ -50,6 +50,29 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	case *types.Map:
 		elementType = t.Elem()
 		callContext.keyValueSource = MapSource
+	case *types.Named:
+		if structType, ok := t.Underlying().(*types.Struct); ok {
+			// Check composite lit elements against struct fields
+			for i := 0; i < structType.NumFields(); i++ {
+				field := structType.Field(i)
+
+				if i < len(compositeLit.Elts) {
+					// Check if field is an embedded interface
+					if field.Embedded() {
+						if fieldType := field.Type(); fieldType != nil {
+							if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
+								// Record implementation
+								eltType := v.info.TypeOf(compositeLit.Elts[i])
+
+								if eltType != nil {
+									convertToInterfaceType(fieldType, eltType, "")
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	// Check if element type is an interface

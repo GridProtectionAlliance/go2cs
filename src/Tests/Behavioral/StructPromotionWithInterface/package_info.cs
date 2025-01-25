@@ -39,6 +39,9 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImpl<MyAbser, Abser>]
+[assembly: GoImpl<MyCustomError, Abser>(Promoted = true, Overrides = "Abs")]
+[assembly: GoImpl<MyCustomError, error>(Promoted = true)]
 // </InterfaceImplementations>
 
 namespace go;

@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -27,8 +27,8 @@ public static partial class main_package
         // Constructors
         public MyError(NilType _)
         {
-            this.When = default;
-            this.What = default;
+            this.When = default!;
+            this.What = default!;
         }
 
         public MyError(global::go.time_package.Time When = default, global::go.@string What = default)
