@@ -19,6 +19,7 @@ public static partial class main_package
 {
     partial struct MyAbser : go.main_package.Abser
     {
+        // 'Abser.Abs' explicit implementation mapped to direct struct receiver method:
         double go.main_package.Abser.Abs() => this.Abs();
     }
 }

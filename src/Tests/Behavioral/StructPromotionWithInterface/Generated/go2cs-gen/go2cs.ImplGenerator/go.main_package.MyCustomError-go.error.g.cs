@@ -19,6 +19,7 @@ public static partial class main_package
 {
     partial struct MyCustomError : go.error
     {
+        // 'error.Error' implicit implementation mapped to promoted interface receiver method:
         public go.@string Error() => error.Error();
     }
 }

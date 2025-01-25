@@ -73,16 +73,9 @@ public static class Common
         }
     }
 
-    public static string RemoveSurrounding(this string source, string left = "\"", string right = "\"")
+    public static string GetSimpleName(string name)
     {
-        if (string.IsNullOrEmpty(source))
-            return source;
-
-        if (!source.StartsWith(left) || !source.EndsWith(right))
-            return source;
-
-        return source.Length > left.Length + right.Length ?
-            source.Substring(left.Length, source.Length - (left.Length + right.Length)) :
-            string.Empty;
+        string[] parts = name.Split('.');
+        return parts[^1];
     }
 }

@@ -19,6 +19,8 @@ public static partial class main_package
 {
     partial struct MyCustomError : go.main_package.Abser
     {
-        public double Abs() => Abser.Abs();
+        // 'Abser.Abs' explicit implementation mapped to direct struct receiver method,
+        // this overrides promoted interface method 'Abser.Abs':
+        double go.main_package.Abser.Abs() => this.Abs();
     }
 }

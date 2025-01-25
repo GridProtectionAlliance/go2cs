@@ -35,7 +35,7 @@ public static partial class main_package
             this.error = default!;
         }
 
-        public MyCustomError(global::go.@string Message = default, global::go.main_package.Abser Abser = default, global::go.main_package.MyError MyError = default, global::go.error error = default)
+        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!, global::go.main_package.MyError MyError = default!, global::go.error error = default!)
         {
             this.Message = Message;
             this.Abser = Abser;

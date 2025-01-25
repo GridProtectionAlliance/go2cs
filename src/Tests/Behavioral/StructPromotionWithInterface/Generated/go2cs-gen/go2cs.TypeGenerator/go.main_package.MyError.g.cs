@@ -31,7 +31,7 @@ public static partial class main_package
             this.What = default!;
         }
 
-        public MyError(global::go.time_package.Time When = default, global::go.@string What = default)
+        public MyError(global::go.time_package.Time When = default!, global::go.@string What = default!)
         {
             this.When = When;
             this.What = What;

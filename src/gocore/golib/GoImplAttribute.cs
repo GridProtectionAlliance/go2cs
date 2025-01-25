@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  GoImplementAttribute.cs - Gbtc
+//  GoImplAttribute.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -43,16 +43,6 @@ namespace go;
 public class GoImplAttribute<TStruct, TInterface> : Attribute
 {
     /// <summary>
-    /// Gets the type of target that implements interface.
-    /// </summary>
-    public Type TargetType => typeof(TStruct);
-
-    /// <summary>
-    /// Gets the type of interface to implement.
-    /// </summary>
-    public Type InterfaceType => typeof(TInterface);
-
-    /// <summary>
     /// Gets or sets flag that determines if interface is a promoted
     /// field in the structure.
     /// </summary>
@@ -63,5 +53,5 @@ public class GoImplAttribute<TStruct, TInterface> : Attribute
     /// for the target structure, thus overriding receivers of promoted
     /// interface.
     /// </summary>
-    public string Overrides { get; set; }
+    public string? Overrides { get; set; }
 }

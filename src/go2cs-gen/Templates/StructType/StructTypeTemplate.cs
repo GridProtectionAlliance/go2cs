@@ -88,7 +88,7 @@ internal class StructTypeTemplate : TemplateBase
 
             // Construct from fields
             result.Append($"{TypeElemIndent}public {StructName}(");
-            result.Append(string.Join(", ", StructFields.Select(item => $"{item.typeName} {item.fieldName} = default")));
+            result.Append(string.Join(", ", StructFields.Select(item => $"{item.typeName} {item.fieldName} = default!")));
             result.AppendLine(")");
             result.AppendLine($"{TypeElemIndent}{{");
 

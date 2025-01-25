@@ -29,6 +29,7 @@ using System.Linq;
 using go2cs.Templates.InterfaceImpl;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Common;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -50,7 +51,7 @@ public class ImplGenerator : ISourceGenerator
             Debugger.Launch();
     #endif
 
-        // Register to find "GoImplementAttribute" on type declarations
+        // Register to find "GoImplAttribute" on assembly attribute declarations
         context.RegisterForSyntaxNotifications(() => new AssemblyAttributeFinder(FullAttributeName));
     }
 
@@ -72,7 +73,7 @@ public class ImplGenerator : ISourceGenerator
                 .Select(directive => directive.GetText().ToString().Trim())
                 .ToArray();
 
-            // Extract generic type arguments from "GoImplementAttribute"
+            // Extract generic type arguments from "GoImplAttribute"
             (ITypeSymbol? structType, ITypeSymbol? interfaceType) = GetGenericTypeArguments(attribute, syntaxContext);
             
             if (structType is null || interfaceType is null)
@@ -90,6 +91,9 @@ public class ImplGenerator : ISourceGenerator
             // Get the attribute's Promoted argument value, if defined
             string[] arguments = attribute.GetArgumentValues();
             bool promoted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+            HashSet<string> overrides = new(arguments.Length > 1 ? arguments[1][1..^1].Trim()
+                .Split([','], StringSplitOptions.RemoveEmptyEntries)
+                .Select(method => method.Trim()) : [], StringComparer.Ordinal);
 
             List<MethodInfo> methods = interfaceType.AllInterfaces
                 .Concat([interfaceType]) // Include the original interface
@@ -98,12 +102,12 @@ public class ImplGenerator : ISourceGenerator
                     .Where(method => method.MethodKind == MethodKind.Ordinary)
                     .Where(method => !method.IsStatic)
                     .Select(method => (name: iface.ToDisplayString(), method)))
-                .Select(t => new MethodInfo
+                .Select(info => new MethodInfo
                 {
-                    Name = promoted ? t.method.Name : $"{t.name}.{t.method.Name}",
-                    ReturnType = t.method.ReturnType.ToDisplayString(),
-                    Parameters = t.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
-                    GenericTypes = string.Join(", ", t.method.TypeParameters.Select(type => type.ToDisplayString()))
+                    Name = promoted && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
+                    ReturnType = info.method.ReturnType.ToDisplayString(),
+                    Parameters = info.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
+                    GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString()))
                 })
                 .Distinct()
                 .ToList();
@@ -115,6 +119,7 @@ public class ImplGenerator : ISourceGenerator
                 StructName = structName,
                 InterfaceName = interfaceName,
                 Promoted = promoted,
+                Overrides = overrides,
                 Methods = methods,
                 UsingStatements = usingStatements
             }
