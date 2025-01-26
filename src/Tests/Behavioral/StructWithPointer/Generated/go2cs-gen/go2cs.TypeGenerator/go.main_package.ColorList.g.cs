@@ -29,13 +29,13 @@ public static partial class main_package
         // Constructors
         public ColorList(NilType _)
         {
-            this.Total = default;
-            this.Color = default;
-            this.Next = default;
-            this.NextNext = default;
+            this.Total = default!;
+            this.Color = default!;
+            this.Next = default!;
+            this.NextNext = default!;
         }
 
-        public ColorList(nint Total = default, global::go.@string Color = default, global::go.ж<global::go.main_package.ColorList> Next = default, global::go.ж<global::go.ж<global::go.main_package.ColorList>> NextNext = default)
+        public ColorList(nint Total = default!, global::go.@string Color = default!, global::go.ж<global::go.main_package.ColorList> Next = default!, global::go.ж<global::go.ж<global::go.main_package.ColorList>> NextNext = default!)
         {
             this.Total = Total;
             this.Color = Color;

@@ -19,6 +19,7 @@ public static partial class main_package
 {
     partial struct MyError : go.error
     {
+        // 'error.Error' explicit implementation mapped to direct struct receiver method:
         go.@string go.error.Error() => this.Error();
     }
 }

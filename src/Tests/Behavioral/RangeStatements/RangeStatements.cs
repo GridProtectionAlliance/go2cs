@@ -95,12 +95,12 @@ private static void Main() {
     foreach (var (iΔ4, vΔ4) in arr) {
         fmt.Println(iΔ4, vΔ4);
     }
-    var slice = new slice<nint>(5){[2] = 42, [4] = 100};
-    foreach (var (iΔ5, vΔ5) in slice) {
+    var Δslice = new slice<nint>(5){[2] = 42, [4] = 100};
+    foreach (var (iΔ5, vΔ5) in Δslice) {
         fmt.Println(iΔ5, vΔ5);
     }
     nint v1 = default!;
-    foreach (var (iᴛ4, vᴛ4) in slice) {
+    foreach (var (iᴛ4, vᴛ4) in Δslice) {
         i1 = iᴛ4;
         v1 = vᴛ4;
 

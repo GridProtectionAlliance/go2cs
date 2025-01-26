@@ -16,14 +16,24 @@ partial class main_package {
 
 [GoType] partial struct MyCustomError {
     public @string Message;
+    public Abser Abser;
+    public MyError MyError;
+    public error error;
+}
+
+[GoType] partial struct MyAbser {
 }
 
 [GoRecv] public static float64 Abs(this ref MyCustomError myErr) {
     return 0.0F;
 }
 
+public static float64 Abs(this MyAbser myAbs) {
+    return 1.0F;
+}
+
 private static void Main() {
-    var a = new MyCustomError("New One", default!, new MyError(time.Now(), "Hello"), default!);
+    var a = new MyCustomError("New One", new MyAbser(), new MyError(time.Now(), "Hello"), default!);
     a.Abs();
     a.Message = "New"u8;
     fmt.Println("MyCustomError method =", a.Abs());

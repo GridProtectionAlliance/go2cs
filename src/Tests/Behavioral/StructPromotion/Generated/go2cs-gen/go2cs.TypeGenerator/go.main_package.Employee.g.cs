@@ -26,10 +26,10 @@ public static partial class main_package
         // Constructors
         public Employee(NilType _)
         {
-            this.position = default;
+            this.position = default!;
         }
 
-        public Employee(global::go.@string position = default)
+        public Employee(global::go.@string position = default!)
         {
             this.position = position;
         }

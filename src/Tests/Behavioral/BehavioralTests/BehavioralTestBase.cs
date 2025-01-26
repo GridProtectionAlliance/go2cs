@@ -21,6 +21,11 @@
 //
 //******************************************************************************************************
 
+// Comment out the following line to standard dotnet builds instead of publish profiles for C# projects.
+// Using publish profiles can increase run-time startup performance, after first run initialization, but
+// increases build times due to extra compile time processing, e.g. trimming analysis, etc.
+//#define USE_PUBLISH_PROFILES
+
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.IO;
@@ -43,6 +48,22 @@ public abstract class BehavioralTestBase
     protected static string NetVersion { get; private set; } = null!;
 
     protected static string go2cs { get; private set; } = null!;
+
+    protected static string PublishProfile { get; private set; } = "win-x64";
+
+    protected static string GetCSExecPath(string projPath, string targetProject)
+    {
+    #if USE_PUBLISH_PROFILES
+        return Path.Combine(projPath, $@"bin\Release\{NetVersion}\publish\{PublishProfile}");
+    #else
+        return Path.Combine(projPath, $@"bin\Release\{NetVersion}\");
+    #endif
+    }
+
+    protected static string GetGoExePath(string projPath, string targetProject)
+    {
+        return Path.Combine(projPath, @"bin\Release\Go");
+    }
 
     private static readonly ConcurrentDictionary<string, object> s_projectLocks = new(StringComparer.OrdinalIgnoreCase);
 
@@ -176,7 +197,8 @@ public abstract class BehavioralTestBase
             }
 
             int exitCode;
-            Assert.IsTrue((exitCode = Exec(go2cs, projPath)) == 0, $"go2cs transpile for \"{targetProject}\" failed with exit code {exitCode:N0}");
+
+            Assert.AreEqual(0, exitCode = Exec(go2cs, projPath), $"go2cs transpile for \"{targetProject}\" failed with exit code {exitCode:N0}");
         }
     }
 
@@ -184,8 +206,8 @@ public abstract class BehavioralTestBase
     {
         string targetPath = $"{TestRootPath}{targetProject}";
         string projPath = Path.GetFullPath($"{targetPath}");
-        string projExe = Path.Combine(projPath, $@"bin\Release\{NetVersion}\{targetProject}.exe");
-
+        string csExePath = GetCSExecPath(projPath, targetProject);
+        string projExe = Path.Combine(csExePath, $"{targetProject}.exe");
         object projectLock = s_projectLocks.GetOrAdd(targetProject, _ => new object());
 
         lock (projectLock)
@@ -202,7 +224,15 @@ public abstract class BehavioralTestBase
             int exitCode;
 
             // Compile C# project
-            Assert.IsTrue((exitCode = Exec("dotnet", $"build --configuration Release \"{Path.Combine(projPath, $"{targetProject}.csproj")}\"")) == 0, $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+        #if USE_PUBLISH_PROFILES
+            Assert.AreEqual(0, exitCode = Exec("dotnet", $"publish \"{Path.Combine(projPath, $"{targetProject}.csproj")}\" -f {NetVersion} -r {PublishProfile} -c Release --sc true -o \"{csExePath}\""), $"dotnet publish for \"{targetProject}\" failed with exit code {exitCode:N0}");
+        #else
+            Assert.AreEqual(0, exitCode = Exec("dotnet", $"build --configuration Release \"{Path.Combine(projPath, $"{targetProject}.csproj")}\""), $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+        #endif
+
+            // If matching console output, run once after compile to ensure any first run initialization steps are completed
+            if (MatchConsoleOutput(targetProject))
+                Assert.AreEqual(0, exitCode = Exec(projExe, null, csExePath), $"Initial run of \"{targetProject}\" failed with exit code {exitCode:N0}");
         }
     }
 
@@ -210,18 +240,39 @@ public abstract class BehavioralTestBase
     {
         string targetPath = $"{TestRootPath}{targetProject}";
         string projPath = Path.GetFullPath($"{targetPath}");
-        string outputPath = Path.Combine(projPath, @"bin\Release\Go");
+        string goExePath = GetGoExePath(projPath, targetProject);
 
-        if (!Directory.Exists(outputPath))
-            Directory.CreateDirectory(outputPath);
+        if (!Directory.Exists(goExePath))
+            Directory.CreateDirectory(goExePath);
+        
+        object projectLock = s_projectLocks.GetOrAdd(targetProject, _ => new object());
 
-        int exitCode;
+        lock (projectLock)
+        {
+            int exitCode;
 
-        // Make sure Go module is initialized
-        if (!File.Exists(Path.Combine(projPath, "go.mod")))
-            Assert.IsTrue((exitCode = Exec("go", $"mod init go2cs/{targetProject}", projPath)) == 0, $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+            // Make sure Go module is initialized
+            if (!File.Exists(Path.Combine(projPath, "go.mod")))
+                Assert.AreEqual(0, exitCode = Exec("go", $"mod init go2cs/{targetProject}", projPath), $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
 
-        // Compile Go project
-        Assert.IsTrue((exitCode = Exec("go", $"build -o \"{outputPath}\"", projPath)) == 0, $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+            // Compile Go project
+            Assert.AreEqual(0, exitCode = Exec("go", $"build -o \"{goExePath}\"", projPath), $"go build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+        }
+    }
+
+    private static bool MatchConsoleOutput(string targetProject)
+    {
+        // Access "package_info.cs" file for the target test project
+        string packageInfoFile = Path.GetFullPath($@"{TestRootPath}{targetProject}\package_info.cs");
+
+        if (!File.Exists(packageInfoFile))
+            return false;
+
+        string[] packageInfoLines = File.ReadAllLines(packageInfoFile);
+
+        // Check for "GoTestMatchingConsoleOutput" attribute -- for now, just check for its presence
+        // by looking for the attribute name in the file on its own line. Future implementations could
+        // load assembly and verify attribute presence via reflection - this is a simpler approach.
+        return packageInfoLines.Any(line => line.Trim().Equals("[GoTestMatchingConsoleOutput]"));
     }
 }

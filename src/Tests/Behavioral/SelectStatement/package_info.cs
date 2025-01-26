@@ -27,7 +27,6 @@ using go;
 // when referenced.
 
 // <ExportedTypeAliases>
-// Example: [assembly: GoTypeAlias("Table", "go.map<go.@string, nint>")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,7 +38,6 @@ using go;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-// Example: [assembly: GoImplement<error, main_package.MyError>]
 // </InterfaceImplementations>
 
 namespace go;

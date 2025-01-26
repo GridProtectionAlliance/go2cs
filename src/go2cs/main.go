@@ -641,9 +641,9 @@ Examples:
 
 		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 		for interfaceName, implementations := range promotedInterfaceImplementations {
-			for implementation, methods := range implementations {
-				if len(methods) > 0 {
-					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true, Overrides = \"%s\")]", implementation, interfaceName, methods))
+			for implementation, overrides := range implementations {
+				if len(overrides) > 0 {
+					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true, Overrides = \"%s\")]", implementation, interfaceName, overrides))
 				} else {
 					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true)]", implementation, interfaceName))
 				}
@@ -1093,7 +1093,7 @@ func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exp
 	var prefix string
 
 	if strings.HasPrefix(targetTypeName, PointerPrefix+"<") {
-		targetTypeName = targetTypeName[4 : len(targetTypeName)-1]
+		targetTypeName = targetTypeName[3 : len(targetTypeName)-1]
 		prefix = "~"
 	}
 

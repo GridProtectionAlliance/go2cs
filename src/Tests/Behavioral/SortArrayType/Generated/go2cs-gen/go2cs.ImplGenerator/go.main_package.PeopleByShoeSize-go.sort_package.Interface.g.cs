@@ -19,8 +19,13 @@ public static partial class main_package
 {
     partial struct PeopleByShoeSize : go.sort_package.Interface
     {
+        // 'Interface.Len' explicit implementation mapped to direct struct receiver method:
         nint go.sort_package.Interface.Len() => this.Len();
+
+        // 'Interface.Less' explicit implementation mapped to direct struct receiver method:
         bool go.sort_package.Interface.Less(nint i, nint j) => this.Less(i, j);
+
+        // 'Interface.Swap' explicit implementation mapped to direct struct receiver method:
         void go.sort_package.Interface.Swap(nint i, nint j) => this.Swap(i, j);
     }
 }

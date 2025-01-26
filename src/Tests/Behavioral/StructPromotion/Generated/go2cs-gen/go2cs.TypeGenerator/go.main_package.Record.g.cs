@@ -21,15 +21,20 @@ public static partial class main_package
     public partial struct Record
     {
         // Field References
-        // -- Record has no defined fields
+        public static ref global::go.main_package.Person ᏑPerson(ref Record instance) => ref instance.Person;
+        public static ref global::go.main_package.Employee ᏑEmployee(ref Record instance) => ref instance.Employee;
         
         // Constructors
         public Record(NilType _)
         {
+            this.Person = default!;
+            this.Employee = default!;
         }
 
-        public Record()
+        public Record(global::go.main_package.Person Person = default!, global::go.main_package.Employee Employee = default!)
         {
+            this.Person = Person;
+            this.Employee = Employee;
         }
         
         // Enable comparisons between nil and Record struct
@@ -45,7 +50,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ""
+            Person.ToString(), Employee.ToString()
         ]), "}");
     }
 }

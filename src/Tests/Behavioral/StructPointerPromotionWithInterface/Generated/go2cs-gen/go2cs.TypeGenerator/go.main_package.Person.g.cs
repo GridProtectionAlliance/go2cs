@@ -28,12 +28,12 @@ public static partial class main_package
         // Constructors
         public Person(NilType _)
         {
-            this.Name = default;
-            this.Age = default;
-            this.ShoeSize = default;
+            this.Name = default!;
+            this.Age = default!;
+            this.ShoeSize = default!;
         }
 
-        public Person(global::go.@string Name = default, nint Age = default, float ShoeSize = default)
+        public Person(global::go.@string Name = default!, nint Age = default!, float ShoeSize = default!)
         {
             this.Name = Name;
             this.Age = Age;

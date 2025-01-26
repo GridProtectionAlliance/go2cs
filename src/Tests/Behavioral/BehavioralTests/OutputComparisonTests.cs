@@ -58,6 +58,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStructPromotionWithInterface() => CheckTarget("StructPromotionWithInterface");
+
+    [TestMethod]
     public void CheckStructWithDelegate() => CheckTarget("StructWithDelegate");
 
     [TestMethod]
@@ -84,7 +87,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         // Set stop watch for performance measurement
         Stopwatch stopwatch = new();
 
-        string csExe = Path.Combine(projPath, $@"bin\Release\{NetVersion}\{targetProject}.exe");
+        string csExe = Path.Combine(GetCSExecPath(projPath, targetProject), $"{targetProject}.exe");
         Assert.IsTrue(File.Exists(csExe), $"Expected C# executable does not exist: {csExe}");
 
         StringBuilder csOutput = new();
@@ -96,7 +99,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         Assert.AreEqual(0, csExitCode, $"C# executable failed with exit code {csExitCode:N0}");
         TestContext?.WriteLine($"C# execution Time: {stopwatch.ElapsedMilliseconds:N0} ms");
 
-        string goExe = Path.Combine(projPath, $@"bin\Release\Go\{targetProject}.exe");
+        string goExe = Path.Combine(GetGoExePath(projPath, targetProject), $"{targetProject}.exe");
         Assert.IsTrue(File.Exists(goExe), $"Expected Go executable does not exist: {goExe}");
 
         StringBuilder goOutput = new();

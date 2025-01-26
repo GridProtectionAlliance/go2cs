@@ -29,12 +29,12 @@ public static partial class main_package
         // Constructors
         public score(NilType _)
         {
-            this.player = default;
-            this.opponent = default;
-            this.thisTurn = default;
+            this.player = default!;
+            this.opponent = default!;
+            this.thisTurn = default!;
         }
 
-        public score(nint player = default, nint opponent = default, nint thisTurn = default)
+        public score(nint player = default!, nint opponent = default!, nint thisTurn = default!)
         {
             this.player = player;
             this.opponent = opponent;

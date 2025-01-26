@@ -107,8 +107,11 @@ public static class TypeExtensions
         }
     }
 
+#if RUNTIME_INTERFACE_RESOLUTION
+
     static TypeExtensions()
     {
+
         s_extensionMethods = new List<(MethodInfo, Type)>();
 
         AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -149,6 +152,8 @@ public static class TypeExtensions
         }
     }
 
+#endif
+
     /// <summary>
     /// Gets an object's pointer value, for display purposes, in hexadecimal format.
     /// </summary>
@@ -175,7 +180,7 @@ public static class TypeExtensions
             // and being accessed for display purposes only. The GC will
             // move this pointer location at will.
             TypedReference reference = __makeref(instance);
-            IntPtr ptr = **(IntPtr**)&reference;
+            nint ptr = **(nint**)&reference;
             return $"0x{ptr:x}";
         }
         catch
@@ -238,6 +243,10 @@ public static class TypeExtensions
             if (isGenericType)
                 targetType = targetType.GetGenericTypeDefinition();
 
+            return isGenericType ?
+                s_extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
+                s_extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+
             bool isGenericMatch(Type methodType)
             {
                 if (methodType.IsGenericType)
@@ -245,10 +254,6 @@ public static class TypeExtensions
 
                 return methodType == targetType;
             }
-
-            return isGenericType ?
-                s_extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
-                s_extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
         }
     }
 
@@ -278,18 +283,14 @@ public static class TypeExtensions
 
         try
         {
-            if (delegateType.IsGenericType && methodInfo.IsGenericMethod)
-            {
-                Type extensionTarget = delegateType.GetGenericArguments()[0];
+            if (!delegateType.IsGenericType || !methodInfo.IsGenericMethod)
+                return Delegate.CreateDelegate(delegateType, methodInfo);
+            
+            Type extensionTarget = delegateType.GetGenericArguments()[0];
 
-                if (extensionTarget.IsGenericType)
-                    return Delegate.CreateDelegate(delegateType, methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]));
-
-                return Delegate.CreateDelegate(delegateType, methodInfo.MakeGenericMethod(extensionTarget));
-            }
-                    
-
-            return Delegate.CreateDelegate(delegateType, methodInfo);
+            return Delegate.CreateDelegate(delegateType, extensionTarget.IsGenericType ? 
+                methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]) : 
+                methodInfo.MakeGenericMethod(extensionTarget));
         }
         catch (ArgumentException)
         {

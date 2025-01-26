@@ -19,7 +19,10 @@ public static partial class main_package
 {
     partial struct Dog : go.main_package.Animal
     {
+        // 'Animal.Type' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Type() => this.Type();
+
+        // 'Animal.Swim' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Swim() => this.Swim();
     }
 }

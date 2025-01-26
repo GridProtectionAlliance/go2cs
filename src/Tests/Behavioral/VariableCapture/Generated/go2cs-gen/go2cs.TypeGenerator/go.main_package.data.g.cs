@@ -26,10 +26,10 @@ public static partial class main_package
         // Constructors
         public data(NilType _)
         {
-            this.name = default;
+            this.name = default!;
         }
 
-        public data(global::go.@string name = default)
+        public data(global::go.@string name = default!)
         {
             this.name = name;
         }

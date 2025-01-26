@@ -19,6 +19,7 @@ public static partial class main_package
 {
     partial struct JavaProgrammer : go.main_package.Animal
     {
+        // 'Animal.Speak' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Speak() => this.Speak();
     }
 }

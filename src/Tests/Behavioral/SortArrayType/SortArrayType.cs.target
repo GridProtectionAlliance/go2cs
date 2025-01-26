@@ -50,7 +50,7 @@ public static @string B2 = "42"u8;
 public static nint C21 = dynamicFn1();
 public static bool D21;
 public static bool E2;
-public static bool @Ta_package = false;
+public static bool ΔTa_package = false;
 private static bool otherID = true;
 private static nint dynamicFn1() {
     return 4;

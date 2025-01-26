@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0</TargetFrameworks>
+    <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
     <AssemblyName>InterfaceCasting</AssemblyName>
     <Product>go2cs</Product>

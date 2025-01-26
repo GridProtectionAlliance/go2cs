@@ -28,12 +28,12 @@ public static partial class main_package
         // Constructors
         public Buffer(NilType _)
         {
-            this.buf = default;
-            this.off = default;
-            this.lastRead = default;
+            this.buf = default!;
+            this.off = default!;
+            this.lastRead = default!;
         }
 
-        public Buffer(global::go.slice<byte> buf = default, nint off = default, sbyte lastRead = default)
+        public Buffer(global::go.slice<byte> buf = default!, nint off = default!, sbyte lastRead = default!)
         {
             this.buf = buf;
             this.off = off;

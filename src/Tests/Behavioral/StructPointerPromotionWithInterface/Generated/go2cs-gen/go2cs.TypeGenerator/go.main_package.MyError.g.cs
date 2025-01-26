@@ -27,11 +27,11 @@ public static partial class main_package
         // Constructors
         public MyError(NilType _)
         {
-            this.When = default;
-            this.What = default;
+            this.When = default!;
+            this.What = default!;
         }
 
-        public MyError(global::go.time_package.Time When = default, global::go.@string What = default)
+        public MyError(global::go.time_package.Time When = default!, global::go.@string What = default!)
         {
             this.When = When;
             this.What = What;

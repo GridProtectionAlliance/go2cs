@@ -27,11 +27,11 @@ public static partial class main_package
         // Constructors
         public Dog(NilType _)
         {
-            this.Name = default;
-            this.Breed = default;
+            this.Name = default!;
+            this.Breed = default!;
         }
 
-        public Dog(global::go.@string Name = default, global::go.@string Breed = default)
+        public Dog(global::go.@string Name = default!, global::go.@string Breed = default!)
         {
             this.Name = Name;
             this.Breed = Breed;

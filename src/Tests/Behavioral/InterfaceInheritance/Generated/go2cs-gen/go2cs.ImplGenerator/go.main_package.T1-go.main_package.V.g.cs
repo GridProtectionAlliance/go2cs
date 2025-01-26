@@ -19,9 +19,16 @@ public static partial class main_package
 {
     partial struct T1 : go.main_package.V
     {
+        // 'V.M' explicit implementation mapped to direct struct receiver method:
         void go.main_package.I.M() => this.M();
+
+        // 'V.String' explicit implementation mapped to direct struct receiver method:
         go.@string go.fmt_package.Stringer.String() => this.String();
+
+        // 'V.Error' explicit implementation mapped to direct struct receiver method:
         go.@string go.error.Error() => this.Error();
+
+        // 'V.N' explicit implementation mapped to direct struct receiver method:
         void go.main_package.V.N() => this.N();
     }
 }

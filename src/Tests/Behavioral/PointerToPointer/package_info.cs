@@ -28,7 +28,6 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-// Example: [assembly: GoTypeAlias("Table", "go.map<go.@string, nint>")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

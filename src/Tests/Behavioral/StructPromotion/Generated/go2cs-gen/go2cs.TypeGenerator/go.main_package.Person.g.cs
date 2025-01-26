@@ -27,11 +27,11 @@ public static partial class main_package
         // Constructors
         public Person(NilType _)
         {
-            this.name = default;
-            this.age = default;
+            this.name = default!;
+            this.age = default!;
         }
 
-        public Person(global::go.@string name = default, int age = default)
+        public Person(global::go.@string name = default!, int age = default!)
         {
             this.name = name;
             this.age = age;

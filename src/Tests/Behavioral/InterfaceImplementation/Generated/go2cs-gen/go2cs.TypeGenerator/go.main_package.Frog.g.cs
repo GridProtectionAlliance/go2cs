@@ -27,11 +27,11 @@ public static partial class main_package
         // Constructors
         public Frog(NilType _)
         {
-            this.Name = default;
-            this.Color = default;
+            this.Name = default!;
+            this.Color = default!;
         }
 
-        public Frog(global::go.@string Name = default, global::go.@string Color = default)
+        public Frog(global::go.@string Name = default!, global::go.@string Color = default!)
         {
             this.Name = Name;
             this.Color = Color;

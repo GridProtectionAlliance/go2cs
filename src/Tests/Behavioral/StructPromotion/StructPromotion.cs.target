@@ -22,6 +22,8 @@ public static bool IsManager(this Employee e) {
 }
 
 [GoType] partial struct Record {
+    public Person Person;
+    public Employee Employee;
 }
 
 private static void Main() {

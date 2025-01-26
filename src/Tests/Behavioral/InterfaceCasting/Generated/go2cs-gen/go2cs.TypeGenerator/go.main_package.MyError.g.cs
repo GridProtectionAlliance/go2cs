@@ -26,10 +26,10 @@ public static partial class main_package
         // Constructors
         public MyError(NilType _)
         {
-            this.description = default;
+            this.description = default!;
         }
 
-        public MyError(global::go.@string description = default)
+        public MyError(global::go.@string description = default!)
         {
             this.description = description;
         }
