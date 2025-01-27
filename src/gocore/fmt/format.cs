@@ -39,14 +39,10 @@ public static partial class fmt_package
     
     private static @string ToString(object arg)
     {
-        Stringer? stringer = arg as Stringer ?? Stringer.As(arg);
-
-        if (stringer is not null)
+        if (arg is Stringer stringer)
             return stringer.String();
 
-        error? err = arg as error ?? error.As(arg);
-
-        if (err is not null)
+        if (arg is error err)
             return err.Error();
 
         if (arg is bool)

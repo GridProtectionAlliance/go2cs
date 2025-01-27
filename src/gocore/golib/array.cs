@@ -186,7 +186,7 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public override string ToString()
     {
-        return $"[{string.Join(" ", ((IEnumerable<T>)this).Take(20))}{(Length > 20 ? " ..." : "")}]";
+        return $"[{string.Join(" ", ((IEnumerable<T>)this).Take(200))}{(Length > 200 ? " ..." : "")}]";
     }
 
     public override int GetHashCode()

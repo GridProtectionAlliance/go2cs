@@ -35,6 +35,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var elementType types.Type
 	var needsInterfaceCast bool
 	var isEmpty bool
+	var definedLen int
 
 	switch t := exprType.(type) {
 	case *types.Array:
@@ -42,6 +43,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".array()"
+		definedLen = int(t.Len())
 	case *types.Slice:
 		elementType = t.Elem()
 		callContext.keyValueSource = ArraySource
@@ -106,6 +108,11 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			for _, elt := range compositeLit.Elts {
 				if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
 					if basicLit, ok := keyValue.Key.(*ast.BasicLit); ok {
+						// Check for rune literal
+						if strings.HasPrefix(basicLit.Value, "'") && strings.HasSuffix(basicLit.Value, "'") {
+							basicLit.Value = strconv.Itoa(int(basicLit.Value[1 : len(basicLit.Value)-1][0]))
+						}
+
 						if keyValue, err := strconv.ParseInt(basicLit.Value, 0, 64); err == nil {
 							if int(keyValue) > maxKeyValue {
 								maxKeyValue = int(keyValue)
@@ -121,7 +128,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			if maxKeyValue > 0 {
 				callContext.keyValueSource = MapSource
 				arrayTypeContext.compositeInitializer = false
-				arrayTypeContext.maxLength = maxKeyValue + 1
+
+				if definedLen > 0 {
+					arrayTypeContext.maxLength = definedLen
+				} else {
+					arrayTypeContext.maxLength = maxKeyValue + 1
+				}
+
 				compositeSuffix = ""
 			}
 		}

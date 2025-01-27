@@ -106,7 +106,14 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			}
 		}
 	case token.CHAR:
-		result.WriteString(replaceOctalChars(value))
+		strVal := replaceOctalChars(value)
+		intVal, err := strconv.Atoi(strVal)
+
+		if err == nil {
+			result.WriteString(fmt.Sprintf("'%c'", rune(intVal)))
+		} else {
+			result.WriteString(strVal)
+		}
 	case token.STRING:
 		strVal, isRawStr := v.getStringLiteral(value)
 
