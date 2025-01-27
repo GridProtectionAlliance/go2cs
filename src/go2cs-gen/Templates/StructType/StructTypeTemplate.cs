@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 
 namespace go2cs.Templates.StructType;
@@ -80,16 +79,24 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append($"\r\n{TypeElemIndent}public ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType)}.{memberName};");
             }
 
+            result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessor References");
+
+            foreach ((string promotedStructType, _, _, _) in promotedStructs)
+            {
+                foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
+                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {StructName} instance) => ref instance.{GetSimpleName(promotedStructType)}.{memberName};");
+            }
+
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Method References");
 
             // Get all extension methods for the struct, any directly defined receivers
             // take precedence over promoted struct methods that have the same name
-            IEnumerable<MethodInfo>? structMethods = getStructDeclaration(FullyQualifiedStructType)?.GetExtensionMethods(Context);
+            IEnumerable<MethodInfo>? structMethods = Context.GetStructDeclaration(FullyQualifiedStructType)?.GetExtensionMethods(Context);
             HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
-                IEnumerable<MethodInfo>? promotedStructMethods = getStructDeclaration(promotedStructType)?.GetExtensionMethods(Context);
+                IEnumerable<MethodInfo>? promotedStructMethods = Context.GetStructDeclaration(promotedStructType)?.GetExtensionMethods(Context);
 
                 foreach (MethodInfo method in promotedStructMethods ?? [])
                 {
@@ -109,33 +116,9 @@ internal class StructTypeTemplate : TemplateBase
 
             return result.ToString();
 
-            StructDeclarationSyntax? getStructDeclaration(string structTypeName)
-            {
-                return Context
-                    .Compilation
-                    .SyntaxTrees
-                    .SelectMany(tree => tree.GetRoot()
-                        .DescendantNodes()
-                        .OfType<StructDeclarationSyntax>())
-                    .FirstOrDefault(structDecl =>
-                    {
-                        ISymbol? symbol = Context
-                            .Compilation
-                            .GetSemanticModel(structDecl.SyntaxTree)
-                            .GetDeclaredSymbol(structDecl);
-
-                        string symbolName = symbol?.ToDisplayString() ?? "";
-
-                        if (!symbolName.StartsWith("global::") && structTypeName.StartsWith("global::"))
-                            symbolName = "global::" + symbolName;
-
-                        return symbolName == structTypeName;
-                    });
-            }
-
             IEnumerable<(string typeName, string memberName)> getStructMembers(string structTypeName)
             {
-                return getStructDeclaration(structTypeName)?
+                return Context.GetStructDeclaration(structTypeName)?
                     .GetStructMembers(Context, true)
                     .Select(item => (item.typeName, item.memberName)) ?? [];
             }
@@ -196,7 +179,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append($"{TypeElemIndent}    ");
 
                 result.AppendLine(isPromotedStruct ?
-                    $"Ꮡʗ{memberName} = new ж<{typeName}>(new {typeName}(nil));" :
+                    $"Ꮡʗ{memberName} = new ж<{typeName}>({memberName});" :
                     $"this.{memberName} = {memberName};");
             }
 

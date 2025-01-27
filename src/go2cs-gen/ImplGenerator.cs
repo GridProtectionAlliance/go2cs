@@ -91,9 +91,11 @@ public class ImplGenerator : ISourceGenerator
             // Get the attribute's Promoted argument value, if defined
             string[] arguments = attribute.GetArgumentValues();
             bool promoted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
-            HashSet<string> overrides = new(arguments.Length > 1 ? arguments[1][1..^1].Trim()
-                .Split([','], StringSplitOptions.RemoveEmptyEntries)
-                .Select(method => method.Trim()) : [], StringComparer.Ordinal);
+
+            // Get all extension methods for the struct, any directly defined receivers
+            // take precedence over promoted interface methods that have the same name
+            IEnumerable<MethodInfo>? structMethods = context.GetStructDeclaration(structType.ToDisplayString())?.GetExtensionMethods(context);
+            HashSet<string> overrides = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
             List<MethodInfo> methods = interfaceType.AllInterfaces
                 .Concat([interfaceType]) // Include the original interface

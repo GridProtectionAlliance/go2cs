@@ -17,9 +17,10 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct MyCustomError : go.main_package.Abser
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    public static double Abs1(this ж<go.main_package.MyCustomError> ᏑmyErr)
     {
-        // 'Abser.Abs' implicit implementation mapped to promoted interface receiver method:
-        public double Abs() => Abser.Abs();
+        ref var myErr = ref ᏑmyErr.val;
+        return myErr.Abs1();
     }
 }

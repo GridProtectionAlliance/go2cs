@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -21,23 +21,33 @@ public static partial class main_package
     public partial struct MyCustomError
     {
         // Promoted Struct References
-        // -- MyCustomError has no promoted structs
+        private readonly ж<global::go.ж<global::go.main_package.MyError>> ᏑʗMyError;
+
+        // Promoted Struct Accessors
+        public partial ref global::go.ж<global::go.main_package.MyError> MyError => ref ᏑʗMyError.val;
+
+        // Promoted Struct Field Accessors
+
+        // Promoted Struct Method References
 
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
         public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
+        public static ref global::go.ж<global::go.main_package.MyError> ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
         
         // Constructors
         public MyCustomError(NilType _)
         {
             this.Message = default!;
             this.Abser = default!;
+            ᏑʗMyError = new ж<global::go.ж<global::go.main_package.MyError>>(new global::go.ж<global::go.main_package.MyError>(nil));
         }
 
-        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!)
+        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!, global::go.ж<global::go.main_package.MyError> MyError = default!)
         {
             this.Message = Message;
             this.Abser = Abser;
+            ᏑʗMyError = new ж<global::go.ж<global::go.main_package.MyError>>(MyError);
         }
         
         // Enable comparisons between nil and MyCustomError struct
@@ -53,7 +63,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Message.ToString(), Abser?.ToString() ?? "<nil>"
+            Message.ToString(), Abser?.ToString() ?? "<nil>", MyError?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -51,8 +51,8 @@ public static partial class main_package
 
         public Record(global::go.main_package.Person Person = default!, global::go.main_package.Employee Employee = default!)
         {
-            ᏑʗPerson = new ж<global::go.main_package.Person>(new global::go.main_package.Person(nil));
-            ᏑʗEmployee = new ж<global::go.main_package.Employee>(new global::go.main_package.Employee(nil));
+            ᏑʗPerson = new ж<global::go.main_package.Person>(Person);
+            ᏑʗEmployee = new ж<global::go.main_package.Employee>(Employee);
         }
         
         // Enable comparisons between nil and Record struct

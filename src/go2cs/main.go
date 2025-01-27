@@ -177,7 +177,7 @@ var publishProfiles embed.FS
 var packageName string
 var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
-var promotedInterfaceImplementations = map[string]map[string]string{}
+var promotedInterfaceImplementations = map[string]HashSet[string]{}
 var interfaceInheritances = map[string]HashSet[string]{}
 var initFuncCounter int
 var packageLock = sync.Mutex{}
@@ -641,12 +641,8 @@ Examples:
 
 		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 		for interfaceName, implementations := range promotedInterfaceImplementations {
-			for implementation, overrides := range implementations {
-				if len(overrides) > 0 {
-					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true, Overrides = \"%s\")]", implementation, interfaceName, overrides))
-				} else {
-					lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true)]", implementation, interfaceName))
-				}
+			for implementation := range implementations {
+				lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true)]", implementation, interfaceName))
 			}
 		}
 

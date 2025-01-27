@@ -40,7 +40,7 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImpl<MyAbser, Abser>]
-[assembly: GoImpl<MyCustomError, Abser>(Promoted = true, Overrides = "Abs")]
+[assembly: GoImpl<MyCustomError, Abser>(Promoted = true)]
 [assembly: GoImpl<MyCustomError, error>(Promoted = true)]
 // </InterfaceImplementations>
 

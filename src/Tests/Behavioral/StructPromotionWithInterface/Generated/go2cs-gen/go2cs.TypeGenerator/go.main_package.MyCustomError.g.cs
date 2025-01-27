@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -29,6 +29,10 @@ public static partial class main_package
         // Promoted Struct Field Accessors
         public ref global::go.time_package.Time When => ref MyError.When;
         public ref global::go.@string What => ref MyError.What;
+
+        // Promoted Struct Field Accessor References
+        public static ref global::go.time_package.Time ᏑWhen(ref MyCustomError instance) => ref instance.MyError.When;
+        public static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.What;
 
         // Promoted Struct Method References
 
@@ -51,7 +55,7 @@ public static partial class main_package
         {
             this.Message = Message;
             this.Abser = Abser;
-            ᏑʗMyError = new ж<global::go.main_package.MyError>(new global::go.main_package.MyError(nil));
+            ᏑʗMyError = new ж<global::go.main_package.MyError>(MyError);
             this.error = error;
         }
         

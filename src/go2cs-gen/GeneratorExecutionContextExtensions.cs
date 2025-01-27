@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  GoImplAttribute.cs - Gbtc
+//  GeneratorExecutionContextExtensions.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,35 +16,40 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  01/13/2025 - J. Ritchie Carroll
+//  01/27/2025 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
+using System.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace go;
+namespace go2cs;
 
-/// <summary>
-/// Marks an assembly with a structure interface implementation mapping.
-/// </summary>
-/// <typeparam name="TStruct">Struct type that implements interface.</typeparam>
-/// <typeparam name="TInterface">Interface type to implement.</typeparam>
-/// <remarks>
-/// <para>
-/// This attribute is used to auto-generate backend C# code needed to implement
-/// an interface for a structure using matching receiver methods.
-/// </para>
-/// <para>
-/// See the <c>ImplGenerator</c> in the go2cs code generators for details.
-/// </para>
-/// </remarks>
-[AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplAttribute<TStruct, TInterface> : Attribute
+public static class GeneratorExecutionContextExtensions
 {
-    /// <summary>
-    /// Gets or sets flag that determines if interface is a promoted
-    /// field in the structure.
-    /// </summary>
-    public bool Promoted { get; set; }
+    public static StructDeclarationSyntax? GetStructDeclaration(this GeneratorExecutionContext Context, string structTypeName)
+    {
+        return Context
+            .Compilation
+            .SyntaxTrees
+            .SelectMany(tree => tree.GetRoot()
+                .DescendantNodes()
+                .OfType<StructDeclarationSyntax>())
+            .FirstOrDefault(structDecl =>
+            {
+                ISymbol? symbol = Context
+                    .Compilation
+                    .GetSemanticModel(structDecl.SyntaxTree)
+                    .GetDeclaredSymbol(structDecl);
+
+                string symbolName = symbol?.ToDisplayString() ?? "";
+
+                if (!symbolName.StartsWith("global::") && structTypeName.StartsWith("global::"))
+                    symbolName = "global::" + symbolName;
+
+                return symbolName == structTypeName;
+            });
+    }
 }
