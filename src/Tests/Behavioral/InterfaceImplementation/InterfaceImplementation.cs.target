@@ -32,7 +32,7 @@ private static void Main() {
     fmt.Printf("%T\n"u8, a);
     ShowZoo(Ꮡzoo);
     fmt.Printf("%T\n"u8, a);
-    var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();
+    var vowels = new array<bool>(128){['a'] = true, ['e'] = true, ['i'] = true, ['o'] = true, ['u'] = true, ['y'] = true};
     fmt.Println(vowels);
 }
 

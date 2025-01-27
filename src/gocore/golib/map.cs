@@ -111,7 +111,7 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     public override string ToString()
     {
-        return $"map[{(m_map is null ? "nil" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
+        return $"map[{(m_map is null ? "<nil>" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
     }
 
     public override int GetHashCode()

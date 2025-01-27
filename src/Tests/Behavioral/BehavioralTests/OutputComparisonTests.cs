@@ -49,6 +49,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

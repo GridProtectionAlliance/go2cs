@@ -72,7 +72,7 @@ public static partial class fmt_package
     public static void Printf(@string format, params object[] args) =>
         Console.Write(Sprintf(format, args));
 
-    public static string Sprint(object? arg) => arg?.ToString() ?? "nil";
+    public static string Sprint(object? arg) => arg?.ToString() ?? "<nil>";
 
     public static string Sprintf(@string format, params object[] args)
     {
@@ -102,7 +102,10 @@ public static partial class fmt_package
                     
                     if (gotTypeName.StartsWith("go."))
                         gotTypeName = gotTypeName[3..];
-                    
+
+                    if (gotTypeName == "nil")
+                        gotTypeName = "<nil>";
+
                     args[index] = gotTypeName;
                     format = new Regex(Regex.Escape(match.Value)).Replace(format, $"{{{index++}}}", 1);
                     break;

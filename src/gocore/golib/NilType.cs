@@ -54,7 +54,7 @@ public class NilType : IConvertible
 
     public override string ToString()
     {
-        return "nil";
+        return "<nil>";
     }
 
     // IArray to nil comparisons
