@@ -52,7 +52,7 @@ private static void Main() {
     error err = default!;
     err = new MyError("bar");
     fmt.Printf("%v %v\n"u8, f(), err);
-    var animals = new Animal[]{~@new<Dog>(), ~@new<Cat>(), new Llama(), new JavaProgrammer()}.slice();
+    var animals = new Animal[]{~@new<Dog>(), ~@new<Cat>(), new Llama(nil), new JavaProgrammer(nil)}.slice();
     foreach (var (_, animal) in animals) {
         fmt.Println(animal.Speak());
     }

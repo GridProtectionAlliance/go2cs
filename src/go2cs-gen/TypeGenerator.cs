@@ -67,6 +67,7 @@ public class TypeGenerator : ISourceGenerator
             string packageClassName = targetSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
+            string fullyQualifiedIdentifier = context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree).GetDeclaredSymbol(targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
 
             string[] usingStatements = targetSyntax.SyntaxTree
@@ -93,11 +94,10 @@ public class TypeGenerator : ISourceGenerator
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             Scope = scope,
+                            Context = context,
                             StructName = identifier,
-                            StructFields = structDeclaration.GetStructFields(context),
-                            //PromotedStructs = [], // TODO: Add this
-                            //PromotedFunctions = [], // TODO: Add this
-                            //PromotedFields = [], // TODO: Add this
+                            FullyQualifiedStructType = fullyQualifiedIdentifier,
+                            StructMembers = structDeclaration.GetStructMembers(context, true),
                             UsingStatements = usingStatements
                         }
                         .Generate();

@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct MyError
     {
+        // Promoted Struct References
+        // -- MyError has no promoted structs
+
         // Field References
         public static ref global::go.time_package.Time ᏑWhen(ref MyError instance) => ref instance.When;
         public static ref global::go.@string ᏑWhat(ref MyError instance) => ref instance.What;

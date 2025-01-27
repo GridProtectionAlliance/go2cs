@@ -20,6 +20,18 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct MyCustomError
     {
+        // Promoted Struct References
+        private readonly ж<global::go.main_package.MyError> ᏑʗMyError;
+
+        // Promoted Struct Accessors
+        public partial ref global::go.main_package.MyError MyError => ref ᏑʗMyError.val;
+
+        // Promoted Struct Field Accessors
+        public ref global::go.time_package.Time When => ref MyError.When;
+        public ref global::go.@string What => ref MyError.What;
+
+        // Promoted Struct Method References
+
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
         public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
@@ -31,7 +43,7 @@ public static partial class main_package
         {
             this.Message = default!;
             this.Abser = default!;
-            this.MyError = default!;
+            ᏑʗMyError = new ж<global::go.main_package.MyError>(new global::go.main_package.MyError(nil));
             this.error = default!;
         }
 
@@ -39,7 +51,7 @@ public static partial class main_package
         {
             this.Message = Message;
             this.Abser = Abser;
-            this.MyError = MyError;
+            ᏑʗMyError = new ж<global::go.main_package.MyError>(new global::go.main_package.MyError(nil));
             this.error = error;
         }
         

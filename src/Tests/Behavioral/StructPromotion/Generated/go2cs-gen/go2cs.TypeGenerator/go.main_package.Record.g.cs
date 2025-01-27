@@ -20,6 +20,24 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct Record
     {
+        // Promoted Struct References
+        private readonly ж<global::go.main_package.Person> ᏑʗPerson;
+        private readonly ж<global::go.main_package.Employee> ᏑʗEmployee;
+
+        // Promoted Struct Accessors
+        public partial ref global::go.main_package.Person Person => ref ᏑʗPerson.val;
+        public partial ref global::go.main_package.Employee Employee => ref ᏑʗEmployee.val;
+
+        // Promoted Struct Field Accessors
+        public ref global::go.@string name => ref Person.name;
+        public ref int age => ref Person.age;
+        public ref global::go.@string position => ref Employee.position;
+
+        // Promoted Struct Method References
+        // 'Person.IsDr' method mapped to overridden 'Record' receiver method
+        public bool IsAdult() => Person.IsAdult();
+        public bool IsManager() => Employee.IsManager();
+
         // Field References
         public static ref global::go.main_package.Person ᏑPerson(ref Record instance) => ref instance.Person;
         public static ref global::go.main_package.Employee ᏑEmployee(ref Record instance) => ref instance.Employee;
@@ -27,14 +45,14 @@ public static partial class main_package
         // Constructors
         public Record(NilType _)
         {
-            this.Person = default!;
-            this.Employee = default!;
+            ᏑʗPerson = new ж<global::go.main_package.Person>(new global::go.main_package.Person(nil));
+            ᏑʗEmployee = new ж<global::go.main_package.Employee>(new global::go.main_package.Employee(nil));
         }
 
         public Record(global::go.main_package.Person Person = default!, global::go.main_package.Employee Employee = default!)
         {
-            this.Person = Person;
-            this.Employee = Employee;
+            ᏑʗPerson = new ж<global::go.main_package.Person>(new global::go.main_package.Person(nil));
+            ᏑʗEmployee = new ж<global::go.main_package.Employee>(new global::go.main_package.Employee(nil));
         }
         
         // Enable comparisons between nil and Record struct

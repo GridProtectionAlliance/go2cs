@@ -20,24 +20,24 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct MyCustomError
     {
+        // Promoted Struct References
+        // -- MyCustomError has no promoted structs
+
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
         public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
-        public static ref global::go.ж<global::go.main_package.MyError>* ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
         
         // Constructors
         public MyCustomError(NilType _)
         {
             this.Message = default!;
             this.Abser = default!;
-            this.MyError = default!;
         }
 
-        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!, global::go.ж<global::go.main_package.MyError>* MyError = default!)
+        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!)
         {
             this.Message = Message;
             this.Abser = Abser;
-            this.MyError = MyError;
         }
         
         // Enable comparisons between nil and MyCustomError struct
@@ -53,7 +53,7 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Message.ToString(), Abser?.ToString() ?? "<nil>", MyError.ToString()
+            Message.ToString(), Abser?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

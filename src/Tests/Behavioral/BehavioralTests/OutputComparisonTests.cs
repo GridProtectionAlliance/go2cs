@@ -61,6 +61,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStructPromotion() => CheckTarget("StructPromotion");
+
+    [TestMethod]
     public void CheckStructPromotionWithInterface() => CheckTarget("StructPromotionWithInterface");
 
     [TestMethod]

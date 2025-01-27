@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct Llama
     {
+        // Promoted Struct References
+        // -- Llama has no promoted structs
+
         // Field References
         // -- Llama has no defined fields
         

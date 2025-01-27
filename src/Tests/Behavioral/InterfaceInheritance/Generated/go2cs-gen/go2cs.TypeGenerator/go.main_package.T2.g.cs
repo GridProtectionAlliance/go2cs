@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct T2
     {
+        // Promoted Struct References
+        // -- T2 has no promoted structs
+
         // Field References
         public static ref global::go.@string Ꮡname(ref T2 instance) => ref instance.name;
         

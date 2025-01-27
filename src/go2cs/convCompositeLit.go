@@ -156,6 +156,11 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
+	} else {
+		// If constructing a struct with no parameters, pass in a nill value
+		if _, ok := exprType.(*types.Named); ok {
+			result.WriteString("nil")
+		}
 	}
 
 	// Convert elements with potential interface casting

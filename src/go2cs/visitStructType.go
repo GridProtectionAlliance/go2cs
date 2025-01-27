@@ -75,12 +75,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 							methodName:    method.Name(),
 						})
 					}
+
+					v.writeOutput("public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
 				} else if _, ok := identType.(*types.Struct); ok {
-					// It's a struct type
+					// Handle promoted struct implementations
+					v.writeOutput("public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
 				}
 			}
 
-			v.writeOutput("public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
 			v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
 			v.targetFile.WriteString(v.newline)
 		} else {

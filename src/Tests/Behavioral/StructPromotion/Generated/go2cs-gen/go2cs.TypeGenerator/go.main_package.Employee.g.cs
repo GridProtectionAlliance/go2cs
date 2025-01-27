@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct Employee
     {
+        // Promoted Struct References
+        // -- Employee has no promoted structs
+
         // Field References
         public static ref global::go.@string Ꮡposition(ref Employee instance) => ref instance.position;
         

@@ -21,6 +21,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     private partial struct score
     {
+        // Promoted Struct References
+        // -- score has no promoted structs
+
         // Field References
         public static ref nint Ꮡplayer(ref score instance) => ref instance.player;
         public static ref nint Ꮡopponent(ref score instance) => ref instance.opponent;

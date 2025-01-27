@@ -17,7 +17,7 @@ partial class main_package {
 [GoType] partial struct MyCustomError {
     public @string Message;
     public Abser Abser;
-    public ж<MyError> *MyError;
+
 }
 
 private static void Main() {

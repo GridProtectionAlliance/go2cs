@@ -31,7 +31,9 @@ namespace go2cs;
 
 public static class StructDeclarationSyntaxExtensions
 {
-    public static List<(string typeName, string fieldName, bool isReferenceType)> GetStructFields(this StructDeclarationSyntax structDeclaration, GeneratorExecutionContext context)
+    public static List<(string typeName, string fieldName, bool isReferenceType)> GetStructFields(
+        this StructDeclarationSyntax structDeclaration, 
+        GeneratorExecutionContext context)
     {
         // Obtain the SemanticModel from the context
         SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
@@ -43,21 +45,131 @@ public static class StructDeclarationSyntaxExtensions
             if (fieldDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword))
                 continue;
 
-            TypeSyntax variableTypeSyntax = fieldDeclaration.Declaration.Type;
-            TypeInfo typeInfo = semanticModel.GetTypeInfo(variableTypeSyntax);
+            TypeInfo typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
             ITypeSymbol? typeSymbol = typeInfo.Type;
             string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
             // Determine if the type is a reference type
             bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
 
-            foreach (VariableDeclaratorSyntax variableDeclarator in fieldDeclaration.Declaration.Variables)
-            {
-                string fieldName = variableDeclarator.Identifier.Text;
-                fields.Add((fullyQualifiedTypeName, fieldName, isReferenceType));
-            }
+            foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
+                fields.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType));
         }
 
         return fields;
+    }
+
+    public static List<(string typeName, string propertyName, bool isReferenceType)> GetStructProperties(
+        this StructDeclarationSyntax structDeclaration, 
+        GeneratorExecutionContext context)
+    {
+        SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+        List<(string typeName, string propertyName, bool isReferenceType)> properties = [];
+
+        foreach (PropertyDeclarationSyntax? propertyDeclaration in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
+        {
+            if (propertyDeclaration.Modifiers.Any(SyntaxKind.StaticKeyword))
+                continue;
+
+            TypeSyntax propertyType = propertyDeclaration.Type is RefTypeSyntax refType ? refType.Type : propertyDeclaration.Type;
+            TypeInfo typeInfo = semanticModel.GetTypeInfo(propertyType);
+            ITypeSymbol? typeSymbol = typeInfo.Type;
+            string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+            // Determine if the type is a reference type
+            bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+
+            properties.Add((fullyQualifiedTypeName, propertyDeclaration.Identifier.Text, isReferenceType));
+        }
+
+        return properties;
+    }
+
+    // Gets fields and properties of a struct, maintaining the order in which they are defined
+    public static List<(string typeName, string memberName, bool isReferenceType, bool isProperty)> GetStructMembers(
+        this StructDeclarationSyntax structDeclaration,
+        GeneratorExecutionContext context,
+        bool filterToRefProperties = false)
+    {
+        SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+        List<(string typeName, string memberName, bool isReferenceType, bool isProperty)> members = [];
+
+        foreach (MemberDeclarationSyntax? member in structDeclaration.Members)
+        {
+            if (member.Modifiers.Any(SyntaxKind.StaticKeyword))
+                continue;
+
+            switch (member)
+            {
+                case PropertyDeclarationSyntax propertyDeclaration:
+                {
+                    if (filterToRefProperties && propertyDeclaration.Type.Kind() != SyntaxKind.RefType)
+                        continue;
+
+                    TypeSyntax propertyType = propertyDeclaration.Type is RefTypeSyntax refType ? refType.Type : propertyDeclaration.Type;
+                    TypeInfo typeInfo = semanticModel.GetTypeInfo(propertyType);
+                    ITypeSymbol? typeSymbol = typeInfo.Type;
+                    string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+                    // Determine if the type is a reference type
+                    bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+
+                    members.Add((fullyQualifiedTypeName, propertyDeclaration.Identifier.Text, isReferenceType, true));
+                    
+                    break;
+                }
+                case FieldDeclarationSyntax fieldDeclaration:
+                {
+                    TypeInfo typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
+                    ITypeSymbol? typeSymbol = typeInfo.Type;
+                    string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+
+                    // Determine if the type is a reference type
+                    bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+
+                    foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
+                        members.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType, false));
+                    
+                    break;
+                }
+            }
+        }
+
+        return members;
+    }
+
+    public static IEnumerable<MethodInfo> GetExtensionMethods(
+        this StructDeclarationSyntax structDeclaration, 
+        GeneratorExecutionContext context)
+    {
+        string structName = structDeclaration.Identifier.Text;
+        Compilation compilation = context.Compilation;
+
+        // Get all extension method declarations in the compilation
+        IEnumerable<MethodDeclarationSyntax> extensions = compilation.SyntaxTrees
+            .SelectMany(tree => tree.GetRoot()
+                .DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .Where(method => 
+                    method.Modifiers.Any(m =>  m.IsKind(SyntaxKind.StaticKeyword)) &&
+                    method.ParameterList.Parameters.Count > 0))
+            .Where(method => method.IsExtensionMethodForStruct(structName));
+
+        return extensions.Select(method => method.GetMethodInfo(context));
+    }
+
+    private static bool IsExtensionMethodForStruct(this MethodDeclarationSyntax method, string structName)
+    {
+        ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();
+        
+        if (firstParam is null || !firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)))
+            return false;
+
+        string paramType = firstParam.Type?.ToString() ?? "";
+        
+        return paramType == structName ||
+               paramType == $"ref {structName}" ||
+               paramType == $"in {structName}" ||
+               paramType == $"ref readonly {structName}";
     }
 }

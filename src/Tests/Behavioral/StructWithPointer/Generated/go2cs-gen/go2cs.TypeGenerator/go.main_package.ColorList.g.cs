@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct ColorList
     {
+        // Promoted Struct References
+        // -- ColorList has no promoted structs
+
         // Field References
         public static ref nint ᏑTotal(ref ColorList instance) => ref instance.Total;
         public static ref global::go.@string ᏑColor(ref ColorList instance) => ref instance.Color;

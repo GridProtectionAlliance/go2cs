@@ -17,7 +17,7 @@ partial class main_package {
 [GoType] partial struct MyCustomError {
     public @string Message;
     public Abser Abser;
-    public MyError MyError;
+    public partial ref MyError MyError { get; }
     public error error;
 }
 
@@ -33,7 +33,7 @@ public static float64 Abs(this MyAbser myAbs) {
 }
 
 private static void Main() {
-    var a = new MyCustomError("New One", new MyAbser(), new MyError(time.Now(), "Hello"), default!);
+    var a = new MyCustomError("New One", new MyAbser(nil), new MyError(time.Now(), "Hello"), default!);
     a.Abs();
     a.Message = "New"u8;
     fmt.Println("MyCustomError method =", a.Abs());

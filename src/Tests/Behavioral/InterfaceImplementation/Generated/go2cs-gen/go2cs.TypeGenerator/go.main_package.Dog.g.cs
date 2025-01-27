@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct Dog
     {
+        // Promoted Struct References
+        // -- Dog has no promoted structs
+
         // Field References
         public static ref global::go.@string ᏑName(ref Dog instance) => ref instance.Name;
         public static ref global::go.@string ᏑBreed(ref Dog instance) => ref instance.Breed;

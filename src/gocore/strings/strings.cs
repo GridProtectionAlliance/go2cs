@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using io = go.io_package;
 
 namespace go;
@@ -66,4 +67,7 @@ public static partial class strings_package
 
     public static @string Join(in slice<@string> source, @string separator) => 
         string.Join(separator, source);
+
+    public static bool HasPrefix(@string s, @string prefix) => 
+        s.ToString().StartsWith(prefix, StringComparison.Ordinal);
 }

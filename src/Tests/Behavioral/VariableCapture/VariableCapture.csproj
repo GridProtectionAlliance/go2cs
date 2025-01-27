@@ -96,6 +96,7 @@
     <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
     <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" />
     <ProjectReference Include="..\..\..\gocore\time\time.csproj" />
+    <ProjectReference Include="..\..\..\gocore\strings\strings.csproj" />
   </ItemGroup>
 
 </Project>

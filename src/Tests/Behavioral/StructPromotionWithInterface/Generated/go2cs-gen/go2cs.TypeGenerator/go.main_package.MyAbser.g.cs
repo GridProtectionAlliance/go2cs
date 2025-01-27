@@ -20,6 +20,9 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct MyAbser
     {
+        // Promoted Struct References
+        // -- MyAbser has no promoted structs
+
         // Field References
         // -- MyAbser has no defined fields
         
