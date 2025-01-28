@@ -935,6 +935,9 @@ func getSanitizedIdentifier(identifier string) string {
 		return identifier // Already sanitized
 	}
 
+	// Remove pointer dereference operator if present
+	identifier = strings.TrimPrefix(identifier, "*")
+
 	if keywords.Contains(identifier) {
 		return "@" + identifier
 	}

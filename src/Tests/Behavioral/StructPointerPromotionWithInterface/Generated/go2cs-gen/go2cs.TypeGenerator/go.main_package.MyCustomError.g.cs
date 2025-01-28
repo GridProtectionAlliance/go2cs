@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -27,8 +27,15 @@ public static partial class main_package
         public partial ref global::go.ж<global::go.main_package.MyError> MyError => ref ᏑʗMyError.val;
 
         // Promoted Struct Field Accessors
+        public ref global::go.time_package.Time When => ref MyError.val.When;
+        public ref global::go.@string What => ref MyError.val.What;
+
+        // Promoted Struct Field Accessor References
+        public static ref global::go.time_package.Time ᏑWhen(ref MyCustomError instance) => ref instance.MyError.val.When;
+        public static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.val.What;
 
         // Promoted Struct Method References
+        // 'MyError.val.Time' method mapped to overridden 'MyCustomError' receiver method
 
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;

@@ -21,7 +21,7 @@
                 //"..\\Tests\\Behavioral\\InterfaceCasting",
                 //"..\\Tests\\Behavioral\\ForVariants",
                 //"..\\Tests\\Behavioral\\IfStatements",
-                //"..\\Tests\\Behavioral\\PointerToPointer",
+                "..\\Tests\\Behavioral\\PointerToPointer",
                 //"..\\Tests\\Behavioral\\LambdaFunctions",
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
                 //"..\\Tests\\Behavioral\\RangeStatements",
@@ -38,7 +38,7 @@
                 //"..\\Tests\\Behavioral\\InterfaceImplementation",
                 //"..\\Tests\\Behavioral\\MethodSelector",
                 //"..\\Tests\\Behavioral\\StructPromotion",
-                "..\\Tests\\Behavioral\\StructPromotionWithInterface",
+                //"..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
             ]
         }

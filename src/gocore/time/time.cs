@@ -41,6 +41,8 @@ public static class time_package
 
     public static int Weekday(this in Time time) => (int)time.DateTime.DayOfWeek;
 
+    public static int Unix(this in Time time) => (int)time.DateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
+
     public static Time UTC(this in Time time) => new Time { DateTime = time.DateTime.ToUniversalTime() };
 
     public const int Sunday = 0;

@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -17,9 +17,10 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct Llama : go.main_package.Animal
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    public static double Time1(this ж<go.main_package.MyCustomError> ᏑmyErr)
     {
-        // 'Animal.Speak' explicit implementation mapped to direct struct receiver method:
-        go.@string go.main_package.Animal.Speak() => this.Speak();
+        ref var myErr = ref ᏑmyErr.val;
+        return myErr.Time1();
     }
 }

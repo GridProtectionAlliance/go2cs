@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -32,6 +32,11 @@ public static partial class main_package
         public ref global::go.@string name => ref Person.name;
         public ref int age => ref Person.age;
         public ref global::go.@string position => ref Employee.position;
+
+        // Promoted Struct Field Accessor References
+        public static ref global::go.@string Ꮡname(ref Record instance) => ref instance.Person.name;
+        public static ref int Ꮡage(ref Record instance) => ref instance.Person.age;
+        public static ref global::go.@string Ꮡposition(ref Record instance) => ref instance.Employee.position;
 
         // Promoted Struct Method References
         // 'Person.IsDr' method mapped to overridden 'Record' receiver method

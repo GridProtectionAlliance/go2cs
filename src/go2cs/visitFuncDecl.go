@@ -124,7 +124,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 						resultParameters.WriteString(v.newline)
 
-						v.writeString(resultParameters, "%s%s %s = default;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName)
+						v.writeString(resultParameters, "%s%s %s = default!;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName)
 
 						paramIndex++
 					}

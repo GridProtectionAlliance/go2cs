@@ -31,6 +31,12 @@ public static class GeneratorExecutionContextExtensions
 {
     public static StructDeclarationSyntax? GetStructDeclaration(this GeneratorExecutionContext Context, string structTypeName)
     {
+        // If struct type is a pointer, i.e., ж<T>, then get the underlying type
+        int startIndex = structTypeName.IndexOf('ж');
+
+        if (startIndex > -1 && structTypeName.EndsWith(">"))
+            structTypeName = structTypeName[(startIndex + 2)..^1];
+
         return Context
             .Compilation
             .SyntaxTrees

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -146,6 +147,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	}
 
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
+		var lastLeftExpr string
+		var lastRightExpr string
+
 		// Handle LHS
 		if declaredCount > 0 {
 			if declaredCount > 1 || v.options.preferVarDecl {
@@ -179,7 +183,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
-			result.WriteString(v.convExpr(lhs, []ExprContext{context}))
+			lhsExpr := v.convExpr(lhs, []ExprContext{context})
+			lastLeftExpr = lhsExpr
+
+			result.WriteString(lhsExpr)
 		}
 
 		if lhsLen > 1 {
@@ -245,6 +252,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			rhsExpr := v.convExpr(rhs, contexts)
+			lastRightExpr = rhsExpr
 
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhs, rhsExpr))
@@ -259,6 +267,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 		if format.includeSemiColon {
 			result.WriteRune(';')
+		}
+
+		if lhsLen == 1 && rhsLen == 1 && strings.HasPrefix(lastLeftExpr, AddressPrefix) && strings.HasPrefix(lastRightExpr, AddressPrefix) && operator == " = " {
+			// This is a special case for `&a = &b` which should be extended
+			// to update local deference variable as well, e.g.: `x = ref Ꮡy.val`
+			lastLeftExpr = getSanitizedIdentifier(lastLeftExpr[len(AddressPrefix):])
+			result.WriteString(fmt.Sprintf(" %s = ref %s.val;", lastLeftExpr, lastRightExpr))
 		}
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer

@@ -52,6 +52,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]
+    public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]
@@ -59,6 +62,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
+
+    [TestMethod]
+    public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]
     public void CheckStructPromotion() => CheckTarget("StructPromotion");

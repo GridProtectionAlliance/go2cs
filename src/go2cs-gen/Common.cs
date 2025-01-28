@@ -75,7 +75,19 @@ public static class Common
 
     public static string GetSimpleName(string name)
     {
+        // Check if type name is a pointer, i.e., ж<T>
+        int startIndex = name.IndexOf('ж');
+        bool isPointer = false;
+
+        // For pointer types, get dereferenced underlying type
+        if (startIndex > -1 && name.EndsWith(">"))
+        {
+            name = $"{name[(startIndex + 2)..^1]}";
+            isPointer = true;
+        }
+
         string[] parts = name.Split('.');
-        return parts[^1];
+        
+        return $"{parts[^1]}{(isPointer ? ".val" : "")}";
     }
 }

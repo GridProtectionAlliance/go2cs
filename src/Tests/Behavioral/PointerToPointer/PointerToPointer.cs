@@ -41,8 +41,8 @@ private static void Main() {
 }
 
 [GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
-    nint n = default;
-    error err = default;
+    nint n = default!;
+    error err = default!;
 
     b.lastRead = opInvalid;
     b.off += n;
@@ -54,7 +54,7 @@ private static void Main() {
 }
 
 public static ж<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
-    ж<Buffer> b1 = default;
+    ж<Buffer> b1 = default!;
 
     return Ꮡ(new Buffer(buf: buf));
 }
@@ -72,7 +72,7 @@ public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
     fmt.Printf("Value available at *ptr = %d\n"u8, @out);
     ref var i = ref heap<nint>(out var Ꮡi);
     i = 99;
-    Ꮡout = Ꮡi;
+    Ꮡout = Ꮡi; @out = ref Ꮡi.val;
     fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, @out);
     PrintValPtr(Ꮡout);
     return Ꮡout;
