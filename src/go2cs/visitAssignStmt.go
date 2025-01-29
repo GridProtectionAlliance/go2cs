@@ -147,8 +147,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	}
 
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
-		var lastLeftExpr string
-		var lastRightExpr string
+		leftExprs := NewHashSet([]string{})
 
 		// Handle LHS
 		if declaredCount > 0 {
@@ -184,7 +183,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			lhsExpr := v.convExpr(lhs, []ExprContext{context})
-			lastLeftExpr = lhsExpr
+			leftExprs.Add(lhsExpr)
 
 			result.WriteString(lhsExpr)
 		}
@@ -252,7 +251,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			rhsExpr := v.convExpr(rhs, contexts)
-			lastRightExpr = rhsExpr
 
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhs, rhsExpr))
@@ -269,12 +267,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			result.WriteRune(';')
 		}
 
-		if lhsLen == 1 && rhsLen == 1 && strings.HasPrefix(lastLeftExpr, AddressPrefix) && strings.HasPrefix(lastRightExpr, AddressPrefix) && operator == " = " {
-			// This is a special case for `&a = &b` which should be extended
-			// to update local deference variable as well, e.g.: `x = ref Ꮡy.val`
-			lastLeftExpr = getSanitizedIdentifier(lastLeftExpr[len(AddressPrefix):])
-			result.WriteString(fmt.Sprintf(" %s = ref %s.val;", lastLeftExpr, lastRightExpr))
+		if len(leftExprs) > 0 && operator == " = " {
+			for _, leftExpr := range leftExprs.Keys() {
+				if strings.HasPrefix(leftExpr, AddressPrefix) {
+					// This is a special case for pointer reassignments which should be extended
+					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.val`
+					derefExpr := getSanitizedIdentifier(leftExpr[len(AddressPrefix):])
+					result.WriteString(fmt.Sprintf(" %s = ref %s.val;", derefExpr, leftExpr))
+				}
+			}
 		}
+
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
 		for i := 0; i < lhsLen; i++ {
