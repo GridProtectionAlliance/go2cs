@@ -200,8 +200,6 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.FuncLit:
 		context := getExprContext[LambdaContext](contexts)
 		return v.convFuncLit(exprType, context)
-	// case *ast.FuncType:
-	// 	return v.convFuncType(exprType)
 	case *ast.Ident:
 		context := getExprContext[IdentContext](contexts)
 		return v.convIdent(exprType, context)
@@ -209,8 +207,6 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convIndexExpr(exprType)
 	case *ast.IndexListExpr:
 		return v.convIndexListExpr(exprType)
-	case *ast.InterfaceType:
-		return v.convInterfaceType(exprType)
 	case *ast.KeyValueExpr:
 		context := getExprContext[KeyValueContext](contexts)
 		return v.convKeyValueExpr(exprType, context)
@@ -225,8 +221,6 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convSliceExpr(exprType)
 	case *ast.StarExpr:
 		return v.convStarExpr(exprType)
-	case *ast.StructType:
-		return v.convStructType(exprType)
 	case *ast.TypeAssertExpr:
 		return v.convTypeAssertExpr(exprType)
 	case *ast.UnaryExpr:

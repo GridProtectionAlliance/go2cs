@@ -4,15 +4,20 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // Handles struct types in the context of a TypeSpec
-func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *ast.CommentGroup) {
-	v.targetFile.WriteString(v.newline)
-	v.writeDoc(doc, structType.Pos())
+func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *ast.CommentGroup, target *strings.Builder) {
+	if target == nil {
+		target = v.targetFile
+	}
+
+	target.WriteString(v.newline)
+	v.writeDocString(target, doc, structType.Pos())
 
 	structTypeName := getSanitizedIdentifier(name)
-	v.writeOutputLn("[GoType] partial struct %s {", structTypeName)
+	v.writeStringLn(target, "[GoType] partial struct %s {", structTypeName)
 	v.indentLevel++
 
 	// Track promoted interface methods that could be shadowed by receivers
@@ -25,13 +30,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 	promotedInterfaceMethods := NewHashSet([]InterfaceMethodInfo{})
 
 	for _, field := range structType.Fields.List {
-		v.writeDoc(field.Doc, field.Pos())
+		v.writeDocString(target, field.Doc, field.Pos())
 
 		if field.Tag != nil {
-			v.writeOutput("[GoTag(")
-			v.targetFile.WriteString(v.convBasicLit(field.Tag, BasicLitContext{u8StringOK: false}))
-			v.targetFile.WriteString(")]")
-			v.targetFile.WriteString(v.newline)
+			v.writeString(target, "[GoTag(")
+			target.WriteString(v.convBasicLit(field.Tag, BasicLitContext{u8StringOK: false}))
+			target.WriteString(")]")
+			target.WriteString(v.newline)
 		}
 
 		fieldType := v.getType(field.Type, false)
@@ -87,7 +92,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 					})
 				}
 
-				v.writeOutput("public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+				v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
 			} else {
 				if ptrType, ok := identType.(*types.Pointer); ok {
 					if _, ok = ptrType.Elem().(*types.Named); !ok {
@@ -98,20 +103,20 @@ func (v *Visitor) visitStructType(structType *ast.StructType, name string, doc *
 				}
 
 				// Handle promoted struct implementations
-				v.writeOutput("public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
+				v.writeString(target, "public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
 			}
 
-			v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
-			v.targetFile.WriteString(v.newline)
+			v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+			target.WriteString(v.newline)
 		} else {
 			for _, ident := range field.Names {
-				v.writeOutput("public %s %s;", csFullTypeName, getSanitizedIdentifier(ident.Name))
-				v.writeComment(field.Comment, field.Type.End()+typeLenDeviation)
-				v.targetFile.WriteString(v.newline)
+				v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(ident.Name))
+				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+				target.WriteString(v.newline)
 			}
 		}
 	}
 
 	v.indentLevel--
-	v.writeOutputLn("}")
+	v.writeStringLn(target, "}")
 }
