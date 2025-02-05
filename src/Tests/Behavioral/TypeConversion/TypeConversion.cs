@@ -1,3 +1,5 @@
+using go;
+
 namespace go;
 
 using fmt = fmt_package;

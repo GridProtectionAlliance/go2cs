@@ -305,6 +305,15 @@ public sealed class ж<T>
     // However, going down the fully unmanaged path creates a cascading set of
     // issues, see header comments for the ж<T> "experimental" implementation
 
+    public static bool operator ==(ж<T>? value1, ж<T>? value2)
+    {
+        return value1?.Equals(value2) ?? value2 is null;
+    }
+
+    public static bool operator !=(ж<T>? value1, ж<T>? value2)
+    {
+        return !(value1 == value2);
+    }
 
     // Enable comparisons between nil and ж<T> instance
     public static bool operator ==(ж<T>? value, NilType _)

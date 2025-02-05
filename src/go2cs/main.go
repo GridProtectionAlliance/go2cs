@@ -708,7 +708,11 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 		}
 	}
 
-	// TODO: Need to know which projects to reference based on package imports
+	// TODO: Need to know which projects to reference based on package imports.
+	// Original src path location to referenced project can be determined by using:
+	//     go list -f '{{.Standard}}:{{.Dir}}' "import/path/package/name"
+	// This returns `std:dir`, where `std` is `true` if package is in the standard
+	// library and `dir` is the Go source code directory of the package.
 
 	// Generate project file contents
 	projectFileContents := fmt.Sprintf(string(csprojTemplate),
