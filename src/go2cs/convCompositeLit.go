@@ -67,7 +67,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 								eltType := v.info.TypeOf(compositeLit.Elts[i])
 
 								if eltType != nil {
-									convertToInterfaceType(fieldType, eltType, "")
+									v.convertToInterfaceType(fieldType, eltType, "")
 								}
 							}
 						}
@@ -178,10 +178,10 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				// Handle key-value pairs (for maps or sparse arrays)
 				keyStr := v.convExpr(kv.Key, nil)
 				valStr := v.convExpr(kv.Value, nil)
-				expr = fmt.Sprintf("%s, %s", keyStr, convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
+				expr = fmt.Sprintf("%s, %s", keyStr, v.convertToInterfaceType(elementType, v.getType(kv.Value, false), valStr))
 			} else {
 				// Handle regular elements
-				expr = convertToInterfaceType(elementType, v.getType(elt, false), v.convExpr(elt, nil))
+				expr = v.convertToInterfaceType(elementType, v.getType(elt, false), v.convExpr(elt, nil))
 			}
 
 			elements.WriteString(expr)

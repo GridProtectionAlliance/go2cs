@@ -107,7 +107,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 					v.targetFile.WriteString(v.newline)
 					wroteHeapTypeDecl = true
 				} else if !v.options.preferVarDecl {
-					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 			}
 		}
@@ -122,7 +122,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 					v.targetFile.WriteString(v.newline)
 					wroteHeapTypeDecl = true
 				} else if !v.options.preferVarDecl {
-					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 			}
 		}
@@ -152,7 +152,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempKeyExpr = v.getTempVarName("i")
 
 				if !v.options.preferVarDecl {
-					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
@@ -164,7 +164,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempValExpr = v.getTempVarName("r")
 
 				if !v.options.preferVarDecl {
-					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
@@ -229,7 +229,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempKeyExpr = v.getTempVarName(keyName)
 
 				if !v.options.preferVarDecl {
-					keyType = getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
 
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
@@ -241,7 +241,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				tempValExpr = v.getTempVarName("v")
 
 				if !v.options.preferVarDecl {
-					valType = getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
 
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)

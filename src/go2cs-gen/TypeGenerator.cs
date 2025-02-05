@@ -86,6 +86,12 @@ public class TypeGenerator : ISourceGenerator
                 string typeDefinition = arguments.Length > 0 ? arguments[0][1..^1].Trim() : string.Empty;
                 string generatedSource, typeName;
 
+                if (typeDefinition.Equals("internal"))
+                {
+                    typeDefinition = string.Empty;
+                    scope = "internal";
+                }
+
                 switch (targetSyntax)
                 {
                     case StructDeclarationSyntax structDeclaration when string.IsNullOrWhiteSpace(typeDefinition):

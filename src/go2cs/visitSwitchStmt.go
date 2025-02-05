@@ -76,7 +76,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			if v.options.preferVarDecl {
 				v.writeOutput("var ")
 			} else {
-				exprType := convertToCSTypeName(v.getTypeName(switchStmt.Tag, false))
+				exprType := convertToCSTypeName(v.getExprTypeName(switchStmt.Tag, false))
 				v.targetFile.WriteString(exprType)
 				v.targetFile.WriteRune(' ')
 			}

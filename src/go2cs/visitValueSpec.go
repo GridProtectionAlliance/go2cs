@@ -33,7 +33,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 						// Record the implementation
 						if rhsType != nil {
-							convertToInterfaceType(declType, rhsType, "")
+							v.convertToInterfaceType(declType, rhsType, "")
 						}
 					}
 				}
@@ -48,7 +48,18 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				if def != nil {
 					v.targetFile.WriteString(v.newline)
 
-					goTypeName := getTypeName(def.Type())
+					// Check if value spec type is a struct or a pointer to a struct
+					valueSpecType := valueSpec.Type
+
+					if ptrType, ok := valueSpecType.(*ast.StarExpr); ok {
+						if subStructType, ok := ptrType.X.(*ast.StructType); ok {
+							v.visitStructType(subStructType, v.getExprType(ptrType.X), csIDName, valueSpec.Comment, v.inFunction)
+						}
+					} else if subStructType, ok := valueSpecType.(*ast.StructType); ok {
+						v.visitStructType(subStructType, v.getExprType(valueSpecType), csIDName, valueSpec.Comment, v.inFunction)
+					}
+
+					goTypeName := v.getTypeName(def.Type())
 					csTypeName := convertToCSTypeName(goTypeName)
 
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
@@ -80,7 +91,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				if def != nil {
 					v.targetFile.WriteString(v.newline)
 
-					csTypeName := getCSTypeName(def.Type())
+					csTypeName := v.getCSTypeName(def.Type())
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
@@ -90,7 +101,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 							v.writeOutputLn(headTypeDecl)
 							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
 						} else {
-							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
+							if v.options.preferVarDecl {
+								v.writeOutput("var %s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
+							} else {
+								v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
+							}
 						}
 					} else {
 						access := getAccess(goIDName)
@@ -105,7 +120,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 			v.targetFile.WriteString(v.newline)
 
-			csTypeName := convertToCSTypeName(getTypeName(tv.Type))
+			csTypeName := convertToCSTypeName(v.getTypeName(tv.Type))
 			goValue := tv.Value.ExactString()
 			csValue := v.convExpr(valueSpec.Values[i], nil)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
@@ -140,7 +155,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			csIDName := getSanitizedIdentifier(goIDName)
 
 			c := v.info.ObjectOf(ident).(*types.Const)
-			goTypeName := getTypeName(c.Type())
+			goTypeName := v.getTypeName(c.Type())
 			csTypeName := convertToCSTypeName(goTypeName)
 			access := getAccess(goIDName)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))

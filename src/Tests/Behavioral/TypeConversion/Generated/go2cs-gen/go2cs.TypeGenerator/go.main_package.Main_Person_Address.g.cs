@@ -18,38 +18,38 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct Main_Person_Address
+    internal partial struct main_Person_Address
     {
         // Promoted Struct References
-        // -- Main_Person_Address has no promoted structs
+        // -- main_Person_Address has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑStreet(ref Main_Person_Address instance) => ref instance.Street;
-        public static ref global::go.@string ᏑCity(ref Main_Person_Address instance) => ref instance.City;
+        public static ref global::go.@string ᏑStreet(ref main_Person_Address instance) => ref instance.Street;
+        public static ref global::go.@string ᏑCity(ref main_Person_Address instance) => ref instance.City;
         
         // Constructors
-        public Main_Person_Address(NilType _)
+        public main_Person_Address(NilType _)
         {
             this.Street = default!;
             this.City = default!;
         }
 
-        public Main_Person_Address(global::go.@string Street = default!, global::go.@string City = default!)
+        public main_Person_Address(global::go.@string Street = default!, global::go.@string City = default!)
         {
             this.Street = Street;
             this.City = City;
         }
         
-        // Enable comparisons between nil and Main_Person_Address struct
-        public static bool operator ==(Main_Person_Address value, NilType nil) => value.Equals(default(Main_Person_Address));
+        // Enable comparisons between nil and main_Person_Address struct
+        public static bool operator ==(main_Person_Address value, NilType nil) => value.Equals(default(main_Person_Address));
 
-        public static bool operator !=(Main_Person_Address value, NilType nil) => !(value == nil);
+        public static bool operator !=(main_Person_Address value, NilType nil) => !(value == nil);
 
-        public static bool operator ==(NilType nil, Main_Person_Address value) => value == nil;
+        public static bool operator ==(NilType nil, main_Person_Address value) => value == nil;
 
-        public static bool operator !=(NilType nil, Main_Person_Address value) => value != nil;
+        public static bool operator !=(NilType nil, main_Person_Address value) => value != nil;
 
-        public static implicit operator Main_Person_Address(NilType nil) => default(Main_Person_Address);
+        public static implicit operator main_Person_Address(NilType nil) => default(main_Person_Address);
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [

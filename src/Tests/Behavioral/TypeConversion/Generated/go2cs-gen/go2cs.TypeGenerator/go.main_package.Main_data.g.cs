@@ -18,38 +18,38 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct Main_data
+    internal partial struct main_data
     {
         // Promoted Struct References
-        // -- Main_data has no promoted structs
+        // -- main_data has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑName(ref Main_data instance) => ref instance.Name;
-        public static ref global::go.ж<global::go.main_package.Main_data_Address> ᏑAddress(ref Main_data instance) => ref instance.Address;
+        public static ref global::go.@string ᏑName(ref main_data instance) => ref instance.Name;
+        public static ref global::go.ж<global::go.main_package.main_data_Address> ᏑAddress(ref main_data instance) => ref instance.Address;
         
         // Constructors
-        public Main_data(NilType _)
+        public main_data(NilType _)
         {
             this.Name = default!;
             this.Address = default!;
         }
 
-        public Main_data(global::go.@string Name = default!, global::go.ж<global::go.main_package.Main_data_Address> Address = default!)
+        public main_data(global::go.@string Name = default!, global::go.ж<global::go.main_package.main_data_Address> Address = default!)
         {
             this.Name = Name;
             this.Address = Address;
         }
         
-        // Enable comparisons between nil and Main_data struct
-        public static bool operator ==(Main_data value, NilType nil) => value.Equals(default(Main_data));
+        // Enable comparisons between nil and main_data struct
+        public static bool operator ==(main_data value, NilType nil) => value.Equals(default(main_data));
 
-        public static bool operator !=(Main_data value, NilType nil) => !(value == nil);
+        public static bool operator !=(main_data value, NilType nil) => !(value == nil);
 
-        public static bool operator ==(NilType nil, Main_data value) => value == nil;
+        public static bool operator ==(NilType nil, main_data value) => value == nil;
 
-        public static bool operator !=(NilType nil, Main_data value) => value != nil;
+        public static bool operator !=(NilType nil, main_data value) => value != nil;
 
-        public static implicit operator Main_data(NilType nil) => default(Main_data);
+        public static implicit operator main_data(NilType nil) => default(main_data);
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [

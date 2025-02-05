@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+const FunctionPrefixMarker = ">>MARKER:FUNCTION_%s_PREFIX<<"
 const FunctionAttributeMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
@@ -22,6 +23,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	v.currentFuncDecl = funcDecl
 	v.currentFuncType = v.info.ObjectOf(funcDecl.Name).(*types.Func)
+	v.currentFuncName = csFunctionName
+	v.currentFuncPrefix = &strings.Builder{}
 
 	v.varNames = make(map[*types.Var]string)
 
@@ -75,6 +78,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
+	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
 	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
@@ -83,7 +87,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = functionBlockPrefixMarker
 
-	v.writeOutput("%s%s static %s %s(%s)%s", functionAttributeMarker, functionAccess, generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
+	v.writeOutput("%s%s%s static %s %s(%s)%s", functionPrefixMarker, functionAttributeMarker, functionAccess, v.generateResultSignature(signature), csFunctionName, functionParametersMarker, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = false
@@ -124,7 +128,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 						resultParameters.WriteString(v.newline)
 
-						v.writeString(resultParameters, "%s%s %s = default!;", v.indent(v.indentLevel+1), getCSTypeName(param.Type()), paramName)
+						v.writeString(resultParameters, "%s%s %s = default!;", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), paramName)
 
 						paramIndex++
 					}
@@ -161,7 +165,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				if v.options.preferVarDecl {
 					v.writeString(resultParameters, "%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
 				} else {
-					v.writeString(resultParameters, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					v.writeString(resultParameters, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
 				}
 			}
 		}
@@ -193,7 +197,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				if i == 0 && funcDecl.Recv != nil {
 					updatedSignature.WriteString("this ")
-					updatedSignature.WriteString(getRefParamTypeName(param.Type()))
+					updatedSignature.WriteString(v.getRefParamTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
 					updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
 					continue
@@ -208,7 +212,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 					// If parameter is a slice, convert it to a Span
 					if sliceType, ok := param.Type().(*types.Slice); ok {
-						typeName := getCSTypeName(sliceType.Elem())
+						typeName := v.getCSTypeName(sliceType.Elem())
 
 						updatedSignature.WriteString(ElipsisOperator + typeName)
 						v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
@@ -221,7 +225,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					updatedSignature.WriteRune(' ')
 					updatedSignature.WriteString(getVariadicParamName(param))
 				} else {
-					updatedSignature.WriteString(getCSTypeName(param.Type()))
+					updatedSignature.WriteString(v.getCSTypeName(param.Type()))
 					updatedSignature.WriteRune(' ')
 
 					if _, ok := param.Type().(*types.Pointer); ok {
@@ -272,6 +276,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	v.replaceMarker(functionExecContextMarker, funcExecutionContext)
 	v.replaceMarker(functionBlockPrefixMarker, blockPrefix)
+
+	if v.currentFuncPrefix.Len() > 0 {
+		v.currentFuncPrefix.WriteString(v.newline)
+	}
+
+	v.replaceMarker(functionPrefixMarker, v.currentFuncPrefix.String())
 
 	if useFuncExecutionContext {
 		v.writeOutputLn(");")
@@ -328,7 +338,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")
-			result.WriteString(getRefParamTypeName(param.Type()))
+			result.WriteString(v.getRefParamTypeName(param.Type()))
 			result.WriteRune(' ')
 			result.WriteString(getSanitizedIdentifier(param.Name()))
 			continue
@@ -343,7 +353,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// If parameter is a slice, convert it to a Span
 			if sliceType, ok := param.Type().(*types.Slice); ok {
-				typeName := getCSTypeName(sliceType.Elem())
+				typeName := v.getCSTypeName(sliceType.Elem())
 
 				result.WriteString(ElipsisOperator + typeName)
 				v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
@@ -356,7 +366,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			result.WriteRune(' ')
 			result.WriteString(getVariadicParamName(param))
 		} else {
-			result.WriteString(getCSTypeName(param.Type()))
+			result.WriteString(v.getCSTypeName(param.Type()))
 			result.WriteRune(' ')
 			result.WriteString(getSanitizedIdentifier(param.Name()))
 		}
@@ -365,7 +375,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 	return result.String()
 }
 
-func generateResultSignature(signature *types.Signature) string {
+func (v *Visitor) generateResultSignature(signature *types.Signature) string {
 	results := signature.Results()
 
 	if results == nil {
@@ -377,7 +387,7 @@ func generateResultSignature(signature *types.Signature) string {
 	if results.Len() == 1 {
 		param := results.At(0)
 
-		result.WriteString(getCSTypeName(param.Type()))
+		result.WriteString(v.getCSTypeName(param.Type()))
 
 		if param.Name() != "" {
 			result.WriteString(" /*")
@@ -397,7 +407,7 @@ func generateResultSignature(signature *types.Signature) string {
 
 		param := results.At(i)
 
-		result.WriteString(getCSTypeName(param.Type()))
+		result.WriteString(v.getCSTypeName(param.Type()))
 
 		if param.Name() != "" {
 			result.WriteRune(' ')

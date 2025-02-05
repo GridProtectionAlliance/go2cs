@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Abser
+    private partial interface abser
     {
     }
 }

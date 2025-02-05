@@ -69,7 +69,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if interfaceType == nil {
 			result.WriteString(v.convExpr(expr, contexts))
 		} else {
-			result.WriteString(convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
+			result.WriteString(v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
 		}
 
 		// If the last expression has a spread operator, use elipsis property as source

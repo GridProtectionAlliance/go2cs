@@ -1308,7 +1308,7 @@ func (v *Visitor) generateCaptureDeclarations() string {
 		if v.options.preferVarDecl {
 			decls.WriteString("var ")
 		} else {
-			decls.WriteString(getCSTypeName(info.varType))
+			decls.WriteString(v.getCSTypeName(info.varType))
 			decls.WriteRune(' ')
 		}
 

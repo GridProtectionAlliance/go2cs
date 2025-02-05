@@ -165,7 +165,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 									if v.options.preferVarDecl {
 										v.targetFile.WriteString("var ")
 									} else {
-										exprType := convertToCSTypeName(v.getTypeName(lhs, false))
+										exprType := convertToCSTypeName(v.getExprTypeName(lhs, false))
 										v.targetFile.WriteString(exprType)
 										v.targetFile.WriteRune(' ')
 									}

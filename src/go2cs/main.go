@@ -80,6 +80,9 @@ type Visitor struct {
 	options            Options
 	globalIdentNames   map[*ast.Ident]string // Global identifiers to adjusted names map
 	globalScope        map[string]*types.Var // Global variable scope
+	liftedTypeNames    HashSet[string]
+	liftedTypeMap      map[types.Type]string
+	subStructTypes     map[types.Type][]types.Type
 
 	// ImportSpec variables
 	currentImportPath     string
@@ -89,15 +92,17 @@ type Visitor struct {
 	typeAliasDeclarations *strings.Builder
 
 	// FuncDecl variables
-	inFunction       bool
-	currentFuncDecl  *ast.FuncDecl
-	currentFuncType  *types.Func
-	paramNames       HashSet[string]
-	varNames         map[*types.Var]string
-	hasDefer         bool
-	hasRecover       bool
-	capturedVarCount map[string]int
-	tempVarCount     map[string]int
+	inFunction        bool
+	currentFuncDecl   *ast.FuncDecl
+	currentFuncType   *types.Func
+	currentFuncName   string
+	currentFuncPrefix *strings.Builder
+	paramNames        HashSet[string]
+	varNames          map[*types.Var]string
+	hasDefer          bool
+	hasRecover        bool
+	capturedVarCount  map[string]int
+	tempVarCount      map[string]int
 
 	// BlockStmt variables
 	blocks                 Stack[*strings.Builder]
@@ -179,6 +184,7 @@ var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
 var promotedInterfaceImplementations = map[string]HashSet[string]{}
 var interfaceInheritances = map[string]HashSet[string]{}
+var implicitConversions = map[string]HashSet[string]{}
 var initFuncCounter int
 var packageLock = sync.Mutex{}
 
@@ -485,6 +491,9 @@ Examples:
 				pkg:                   pkg,
 				info:                  info,
 				targetFile:            &strings.Builder{},
+				liftedTypeNames:       HashSet[string]{},
+				liftedTypeMap:         map[types.Type]string{},
+				subStructTypes:        map[types.Type][]types.Type{},
 				packageImports:        &strings.Builder{},
 				requiredUsings:        HashSet[string]{},
 				importQueue:           HashSet[string]{},
@@ -656,6 +665,53 @@ Examples:
 
 	} else {
 		log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
+	}
+
+	// Handle implicit conversions
+	startLineIndex = -1
+	endLineIndex = -1
+
+	for i, line := range packageInfoLines {
+		if strings.Contains(line, "<ImplicitConversions>") {
+			startLineIndex = i
+			continue
+		}
+
+		if strings.Contains(line, "</ImplicitConversions>") {
+			endLineIndex = i
+			break
+		}
+	}
+
+	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+		// Read existing interface lines from package info file
+		lines := HashSet[string]{}
+
+		// If processing a single file, instead of all package files, merge implicit conversions
+		if !fileInfo.IsDir() {
+			for i := startLineIndex + 1; i < endLineIndex; i++ {
+				line := packageInfoLines[i]
+				lines.Add(strings.TrimSpace(line))
+			}
+		}
+
+		// Add new implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceType, targetTypes := range implicitConversions {
+			for targetType := range targetTypes {
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", sourceType, targetType))
+			}
+		}
+
+		// Sort lines
+		sortedLines := lines.Keys()
+		sort.Strings(sortedLines)
+
+		// Insert implicit conversions into package info file
+		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+	} else {
+		log.Fatalf("Failed to find '<ImplicitConversions>...</ImplicitConversions>' section for inserting implicit conversions into package info file \"%s\"\n", packageInfoFileName)
 	}
 
 	// Remove trailing empty lines
@@ -1076,7 +1132,7 @@ func paramsArePointers(paramTypes *types.Tuple) []bool {
 	return paramIsPointer
 }
 
-func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
+func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
 	// Target selector or index expression source if this source of the interface expression
 	if selectorExpr, ok := interfaceExpr.(*ast.SelectorExpr); ok {
 		interfaceExpr = selectorExpr.Sel
@@ -1084,14 +1140,14 @@ func (v *Visitor) convertToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.
 		interfaceExpr = indexExpr.X
 	}
 
-	return convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)
+	return v.convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)
 }
 
-func convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
+func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
-	interfaceTypeName := convertToCSTypeName(getFullTypeName(interfaceType))
-	targetTypeName := convertToCSTypeName(getFullTypeName(targetType))
+	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType))
+	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType))
 
 	var prefix string
 
@@ -1196,37 +1252,65 @@ func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
 	return exprType
 }
 
-func (v *Visitor) getTypeName(expr ast.Expr, underlying bool) string {
-	return getTypeName(v.getType(expr, underlying))
+func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
+	return v.getTypeName(v.getType(expr, underlying))
 }
 
-func getTypeName(t types.Type) string {
+func (v *Visitor) getTypeName(t types.Type) string {
+	if pointer, ok := t.(*types.Pointer); ok {
+		return "*" + v.getTypeName(pointer.Elem())
+	}
+
+	if name, ok := v.liftedTypeMap[t]; ok {
+		return name
+	}
+
 	if named, ok := t.(*types.Named); ok {
 		return named.Obj().Name()
 	}
 
-	return strings.ReplaceAll(t.String(), "..", "")
-}
-
-func getFullTypeName(t types.Type) string {
-	if named, ok := t.(*types.Named); ok {
-		obj := named.Obj()
-		pkg := obj.Pkg()
-		if pkg != nil && pkg.Name() != packageName {
-			return pkg.Name() + PackageSuffix + "." + obj.Name()
-		}
-		return obj.Name()
+	if _, ok := t.(*types.Struct); ok {
+		println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
 	}
 
 	return strings.ReplaceAll(t.String(), "..", "")
 }
 
-func getCSTypeName(t types.Type) string {
-	return convertToCSTypeName(getTypeName(t))
+func (v *Visitor) getFullTypeName(t types.Type) string {
+	if pointer, ok := t.(*types.Pointer); ok {
+		if name, ok := v.liftedTypeMap[pointer.Elem()]; ok {
+			return "*" + name
+		}
+	}
+
+	if name, ok := v.liftedTypeMap[t]; ok {
+		return name
+	}
+
+	if named, ok := t.(*types.Named); ok {
+		obj := named.Obj()
+		pkg := obj.Pkg()
+
+		if pkg != nil && pkg.Name() != packageName {
+			return pkg.Name() + PackageSuffix + "." + obj.Name()
+		}
+
+		return obj.Name()
+	}
+
+	if _, ok := t.(*types.Struct); ok {
+		println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+	}
+
+	return strings.ReplaceAll(t.String(), "..", "")
 }
 
-func getRefParamTypeName(t types.Type) string {
-	typeName := getTypeName(t)
+func (v *Visitor) getCSTypeName(t types.Type) string {
+	return convertToCSTypeName(v.getTypeName(t))
+}
+
+func (v *Visitor) getRefParamTypeName(t types.Type) string {
+	typeName := v.getTypeName(t)
 
 	if strings.HasPrefix(typeName, "*") {
 		return fmt.Sprintf("ref %s", convertToCSTypeName(typeName[1:]))
@@ -1356,7 +1440,7 @@ func convertToCSFullTypeName(typeName string) string {
 	case "interface{}":
 		return "object"
 	default:
-		return getSanitizedIdentifier(typeName)
+		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
 	}
 }
 
@@ -1418,7 +1502,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		}
 	}
 
-	goTypeName := getFullTypeName(identType)
+	goTypeName := v.getFullTypeName(identType)
 	csIDName := v.getIdentName(ident)
 
 	// Handle array types

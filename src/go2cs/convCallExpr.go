@@ -4,20 +4,66 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
-	if ok, typeName := v.isTypeConversion(callExpr); ok {
+	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 		expr := v.convExpr(arg, nil)
-		typeName = convertToCSTypeName(typeName)
+
+		targetTypeName = getSanitizedIdentifier(convertToCSTypeName(targetTypeName))
+		targetType := v.getType(callExpr.Fun, true)
+		argType := v.getType(arg, true)
+
+		var targetTypeIsPointer bool
+
+		// Check if funType is a struct or a pointer to a struct
+		if ptrType, ok := targetType.(*types.Pointer); ok {
+			targetType = ptrType.Elem().Underlying()
+			targetTypeIsPointer = true
+		}
+
+		if _, ok := targetType.(*types.Struct); ok {
+			// Check if argType is a struct or a pointer to a struct
+			if ptrType, ok := argType.(*types.Pointer); ok {
+				argType = ptrType.Elem().Underlying()
+			}
+
+			if _, ok := argType.(*types.Struct); ok {
+				if targetTypeIsPointer {
+					// Dereference target type when casting to pointer types,
+					// in C# implicit casting requires the target type to be
+					// direct type, not a pointer type
+					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
+				}
+
+				// If both funcType and argType are structs, track implicit conversions
+				packageLock.Lock()
+
+				argTypeName := v.getCSTypeName(argType)
+				var conversions HashSet[string]
+				var exists bool
+
+				if conversions, exists = implicitConversions[argTypeName]; exists {
+					conversions.Add(targetTypeName)
+				} else {
+					conversions = NewHashSet([]string{targetTypeName})
+					implicitConversions[argTypeName] = conversions
+				}
+
+				v.addImplicitSubStructConversions(argType, targetTypeName)
+
+				packageLock.Unlock()
+			}
+		}
 
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
-			return fmt.Sprintf("((%s)(%s))", getSanitizedIdentifier(typeName), expr)
+			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)
 		}
 
-		return fmt.Sprintf("((%s)%s)", getSanitizedIdentifier(typeName), expr)
+		return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
 	}
 
 	constructType := ""
@@ -145,7 +191,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext.isCallExpr = true
 	lambdaContext.deferredDecls = context.deferredDecls
 
-	funType := v.getTypeName(callExpr.Fun, true)
+	funType := v.getExprTypeName(callExpr.Fun, true)
 	callExprContext.sourceIsRuneArray = funType == "[]rune"
 
 	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, []ExprContext{lambdaContext}), v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
@@ -154,28 +200,48 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 	// Get the object associated with the function being called
 	var obj types.Object
+	var isPointer bool
 
-	switch funExpr := callExpr.Fun.(type) {
-	case *ast.Ident:
-		obj = v.info.ObjectOf(funExpr)
-	case *ast.SelectorExpr:
-		obj = v.info.ObjectOf(funExpr.Sel)
-	default:
-		return false, ""
+	targetExpr := callExpr.Fun
+
+	for targetExpr != nil {
+		switch funExpr := targetExpr.(type) {
+		case *ast.ParenExpr:
+			targetExpr = funExpr.X
+			continue
+		case *ast.IndexExpr:
+			targetExpr = funExpr.X
+			continue
+		case *ast.StarExpr:
+			if ident, ok := funExpr.X.(*ast.Ident); ok {
+				obj = v.info.ObjectOf(ident)
+				isPointer = true
+			}
+			targetExpr = nil
+		case *ast.Ident:
+			obj = v.info.ObjectOf(funExpr)
+			targetExpr = nil
+		case *ast.SelectorExpr:
+			obj = v.info.ObjectOf(funExpr.Sel)
+			targetExpr = nil
+		default:
+			return false, ""
+		}
 	}
+
 	if obj == nil {
 		return false, ""
 	}
 
 	// Check if the function being called is a type name
-	typeName, ok := obj.(*types.TypeName)
+	resolvedTypeName, ok := obj.(*types.TypeName)
 
 	if !ok {
 		return false, ""
 	}
 
 	// Get the target type
-	targetType := typeName.Type()
+	targetType := resolvedTypeName.Type()
 
 	// Type conversions typically have exactly one argument
 	if len(callExpr.Args) != 1 {
@@ -185,8 +251,19 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 	// Get the type of the argument
 	argType := v.info.TypeOf(callExpr.Args[0])
 
+	// Check if the argument is a pointer
+	if pointer, ok := argType.(*types.Pointer); ok {
+		argType = pointer.Elem()
+	}
+
+	typeName := v.getTypeName(targetType)
+
+	if isPointer {
+		typeName = "*" + typeName
+	}
+
 	// Check if the argument type is convertible to the target type
-	return types.ConvertibleTo(argType, targetType), typeName.Name()
+	return types.ConvertibleTo(argType, targetType), typeName
 }
 
 func (v *Visitor) needsParentheses(expr ast.Expr) bool {
@@ -249,4 +326,48 @@ func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
 	default:
 		return false
 	}
+}
+
+func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetTypeName string) {
+	if subStructTypes, exists := v.subStructTypes[sourceType]; exists {
+		for _, subStructType := range subStructTypes {
+			// Check if subStructType is a pointer
+			if ptrType, ok := subStructType.(*types.Pointer); ok {
+				subStructType = ptrType.Elem()
+			}
+
+			subStructTypeName := v.getCSTypeName(subStructType)
+			sourceTypeName := getRootSubStructName(subStructTypeName)
+
+			if strings.HasSuffix(targetTypeName, ">") {
+				targetTypeName = fmt.Sprintf("%s_%s>", targetTypeName[:len(targetTypeName)-1], sourceTypeName)
+			} else {
+				targetTypeName = fmt.Sprintf("%s_%s", targetTypeName, sourceTypeName)
+			}
+
+			// Recursively add implicit conversions for sub-structs
+			v.addImplicitSubStructConversions(subStructType, targetTypeName)
+
+			var conversions HashSet[string]
+			var exists bool
+
+			if conversions, exists = implicitConversions[subStructTypeName]; exists {
+				conversions.Add(targetTypeName)
+			} else {
+				conversions = NewHashSet([]string{targetTypeName})
+				implicitConversions[subStructTypeName] = conversions
+			}
+		}
+	}
+}
+
+func getRootSubStructName(subStructName string) string {
+	// Get text beyond last underscore
+	lastUnderscoreIndex := strings.LastIndex(subStructName, "_")
+
+	if lastUnderscoreIndex == -1 {
+		return subStructName
+	}
+
+	return subStructName[lastUnderscoreIndex+1:]
 }

@@ -20,7 +20,7 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 			concreteType := v.getUnderlyingType(typeAssertExpr.X)
 
 			if concreteType != nil {
-				convertToInterfaceType(targetType, concreteType, "")
+				v.convertToInterfaceType(targetType, concreteType, "")
 			}
 		}
 	}

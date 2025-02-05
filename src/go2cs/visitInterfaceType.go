@@ -42,11 +42,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 			}
 
 			signature := methodType.Signature()
-			resultSignature := generateResultSignature(signature)
+			resultSignature := v.generateResultSignature(signature)
 			parameterSignature := v.generateParametersSignature(signature, false)
 
-			typeLenDeviation += token.Pos(len(parameterSignature) - getSourceParameterSignatureLen(signature))
-			typeLenDeviation += token.Pos(len(resultSignature) - getSourceResultSignatureLen(signature))
+			typeLenDeviation += token.Pos(len(parameterSignature) - v.getSourceParameterSignatureLen(signature))
+			typeLenDeviation += token.Pos(len(resultSignature) - v.getSourceResultSignatureLen(signature))
 
 			result.WriteString(innerIndent)
 			result.WriteString(fmt.Sprintf("%s %s(%s);", resultSignature, csMethodName, parameterSignature))
@@ -93,7 +93,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 	v.targetFile.WriteString(interfaceResult)
 }
 
-func getSourceParameterSignatureLen(signature *types.Signature) int {
+func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {
 	parameters := signature.Params()
 
 	if parameters == nil {
@@ -109,7 +109,7 @@ func getSourceParameterSignatureLen(signature *types.Signature) int {
 			result += 2
 		}
 
-		result += len(getTypeName(param.Type()))
+		result += len(v.getTypeName(param.Type()))
 
 		if param.Name() != "" {
 			result += 1 + len(param.Name())
@@ -119,7 +119,7 @@ func getSourceParameterSignatureLen(signature *types.Signature) int {
 	return result
 }
 
-func getSourceResultSignatureLen(signature *types.Signature) int {
+func (v *Visitor) getSourceResultSignatureLen(signature *types.Signature) int {
 	results := signature.Results()
 
 	if results == nil {
@@ -127,7 +127,7 @@ func getSourceResultSignatureLen(signature *types.Signature) int {
 	}
 
 	if results.Len() == 1 {
-		return len(getTypeName(results.At(0).Type()))
+		return len(v.getTypeName(results.At(0).Type()))
 	}
 
 	result := 2
@@ -137,7 +137,7 @@ func getSourceResultSignatureLen(signature *types.Signature) int {
 			result += 2
 		}
 
-		result += len(getTypeName(results.At(i).Type()))
+		result += len(v.getTypeName(results.At(i).Type()))
 	}
 
 	return result

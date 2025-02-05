@@ -65,7 +65,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 				isInterface, isEmpty := v.isInterface(ident)
 				lhsTypeIsInterface[i] = isInterface && !isEmpty
-				typeName := v.getTypeName(ident, true)
+				typeName := v.getExprTypeName(ident, true)
 
 				lhsTypeIsString[i] = typeName == "string"
 
@@ -99,7 +99,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			isInterface, isEmpty := v.isInterface(ident)
 			lhsTypeIsInterface[i] = isInterface && !isEmpty
-			typeName := v.getTypeName(ident, true)
+			typeName := v.getExprTypeName(ident, true)
 
 			lhsTypeIsString[i] = typeName == "string"
 
@@ -147,7 +147,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	}
 
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
-		leftExprs := NewHashSet([]string{})
+		leftExprs := HashSet[string]{}
 
 		// Handle LHS
 		if declaredCount > 0 {
@@ -155,7 +155,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString("var ")
 			} else {
 				ident := getIdentifier(lhsExprs[0])
-				lhsType := convertToCSTypeName(v.getTypeName(ident, false))
+				lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
 				result.WriteString(lhsType)
 				result.WriteRune(' ')
 			}
@@ -253,7 +253,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			rhsExpr := v.convExpr(rhs, contexts)
 
 			if lhsTypeIsInterface[i] {
-				result.WriteString(v.convertToInterfaceType(lhsExprs[i], rhs, rhsExpr))
+				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
 				result.WriteString(rhsExpr)
 			}
@@ -339,7 +339,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				rhsExpr := v.convExpr(rhs, contexts)
 
 				if lhsTypeIsInterface[i] {
-					result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
+					result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 				} else {
 					result.WriteString(rhsExpr)
 				}
@@ -353,7 +353,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
+						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}
@@ -382,7 +382,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						if v.options.preferVarDecl && !lhsTypeIsInt[i] {
 							result.WriteString("var ")
 						} else {
-							lhsType := convertToCSTypeName(v.getTypeName(ident, false))
+							lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
 							result.WriteString(lhsType)
 							result.WriteRune(' ')
 						}
@@ -394,7 +394,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					rhsExpr := v.convExpr(rhs, contexts)
 
 					if lhsTypeIsInterface[i] {
-						result.WriteString(v.convertToInterfaceType(lhs, rhs, rhsExpr))
+						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
 					}

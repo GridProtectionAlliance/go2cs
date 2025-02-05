@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -39,7 +39,7 @@ public static partial class main_package
 
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
-        public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
+        public static ref global::go.main_package.abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
         public static ref global::go.ж<global::go.main_package.MyError> ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
         
         // Constructors
@@ -50,7 +50,7 @@ public static partial class main_package
             ᏑʗMyError = new ж<global::go.ж<global::go.main_package.MyError>>(new global::go.ж<global::go.main_package.MyError>(nil));
         }
 
-        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!, global::go.ж<global::go.main_package.MyError> MyError = default!)
+        public MyCustomError(global::go.@string Message = default!, global::go.main_package.abser Abser = default!, global::go.ж<global::go.main_package.MyError> MyError = default!)
         {
             this.Message = Message;
             this.Abser = Abser;

@@ -5,7 +5,7 @@ using time = time_package;
 
 partial class main_package {
 
-[GoType] partial interface Abser {
+[GoType] partial interface abser {
     float64 Abs();
 }
 
@@ -16,7 +16,7 @@ partial class main_package {
 
 [GoType] partial struct MyCustomError {
     public @string Message;
-    public Abser Abser;
+    public abser Abser;
     public partial ref ж<MyError> MyError { get; }
 }
 

@@ -8,7 +8,7 @@ import (
 
 func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parameterSignature string) {
 	signature := v.getSignature(funcType)
-	resultsSignature = generateResultSignature(signature)
+	resultsSignature = v.generateResultSignature(signature)
 	parameterSignature = v.generateParametersSignature(signature, false)
 	return
 }

@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -17,9 +17,9 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct MyCustomError : go.main_package.Abser
+    partial struct MyCustomError : go.main_package.abser
     {
-        // 'Abser.Abs' implicit implementation mapped to promoted interface receiver method:
-        public double Abs() => Abser.Abs();
+        // 'abser.Abs' implicit implementation mapped to promoted interface receiver method:
+        public double Abs() => abser.Abs();
     }
 }

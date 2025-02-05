@@ -14,7 +14,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		if keySourceType != nil {
 			if needsInterfaceCast, isEmpty := isInterface(keySourceType); needsInterfaceCast && !isEmpty {
 				valueType := v.getExprType(keyValueExpr.Value)
-				valueExpr = convertToInterfaceType(keySourceType, valueType, valueExpr)
+				valueExpr = v.convertToInterfaceType(keySourceType, valueType, valueExpr)
 			}
 		}
 	}

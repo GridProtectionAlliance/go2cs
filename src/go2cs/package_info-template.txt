@@ -43,6 +43,10 @@ using static go.%s_package;
 // Example: [assembly: GoImpl<main_package.MyError, error>]
 // </InterfaceImplementations>
 
+// <ImplicitConversions>
+// Example: [assembly: GoImplicitConv<main_package.MyError, error>]
+// </ImplicitConversions>
+
 namespace go;
 
 [GoPackage("%s")]
