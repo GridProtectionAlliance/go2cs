@@ -4,15 +4,34 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
-    [GoType] partial struct Person {
-        public @string Name;
-        public ж<struct{Street string; City string}> Address;
-    }
+[GoType] partial struct main_Person_Address {
+    public @string Street;
+    public @string City;
+}
 
-    ж<struct{Name string "json:\"name\""; Address *struct{Street string "json:\"street\""; City string "json:\"city\""} "json:\"address\""}> data = default!;
-    ref var mine = ref heap(new Person(), out var Ꮡmine);
-    ж<Person> person = (Person.val)(data);
+[GoType] partial struct main_Person {
+    public @string Name;
+    public ж<main_Person_Address> Address;
+}
+
+[GoType] partial struct main_data_Address {
+    [GoTag(@"json:""street""")]
+    public @string Street;
+    [GoTag(@"json:""city""")]
+    public @string City;
+}
+
+[GoType] partial struct main_data {
+    [GoTag(@"json:""name""")]
+    public @string Name;
+    [GoTag(@"json:""address""")]
+    public ж<main_data_Address> Address;
+}
+
+private static void Main() {
+    ж<main_data> data = default!;
+    ref var mine = ref heap(new main_Person(), out var Ꮡmine);
+    ж<main_Person> person = ((ж<main_Person>)(data?.val ?? default!));
     person = Ꮡmine;
     fmt.Println(mine == person.val);
     fmt.Println(slice<rune>(((@string)"白鵬翔"u8)));

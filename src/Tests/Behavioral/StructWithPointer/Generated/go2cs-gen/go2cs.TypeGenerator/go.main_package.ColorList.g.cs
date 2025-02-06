@@ -46,6 +46,30 @@ public static partial class main_package
             this.NextNext = NextNext;
         }
         
+        // Enable comparisons between ColorList struct types
+        public bool Equals(ColorList other)
+        {
+            return 
+                Total == other.Total &&
+                Color == other.Color &&
+                Next == other.Next &&
+                NextNext == other.NextNext;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is ColorList other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Total, Color, Next, NextNext);
+        }
+        
+        public static bool operator ==(ColorList left, ColorList right) => left.Equals(right);
+        
+        public static bool operator !=(ColorList left, ColorList right) => !(left == right);
+
         // Enable comparisons between nil and ColorList struct
         public static bool operator ==(ColorList value, NilType nil) => value.Equals(default(ColorList));
 
@@ -59,7 +83,10 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Total.ToString(), Color.ToString(), Next?.ToString() ?? "<nil>", NextNext?.ToString() ?? "<nil>"
+            Total.ToString(),
+            Color.ToString(),
+            Next?.ToString() ?? "<nil>",
+            NextNext?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

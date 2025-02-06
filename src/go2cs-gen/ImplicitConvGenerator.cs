@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  ImplementGenerator.cs - Gbtc
+//  ImplicitConvGenerator.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -26,7 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using go2cs.Templates.InterfaceImpl;
+using go2cs.Templates.ImplicitConv;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
@@ -38,20 +38,20 @@ using System.Diagnostics;
 namespace go2cs;
 
 [Generator]
-public class ImplGenerator : ISourceGenerator
+public class ImplicitConvGenerator : ISourceGenerator
 {
     private const string Namespace = "go";
-    private const string AttributeName = "GoImpl";
-    private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
+    private const string AttributeName = "GoImplicitConv";
+    private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TSource, TTarget>";
 
     public void Initialize(GeneratorInitializationContext context)
     {
-    #if DEBUG_GENERATOR
+#if DEBUG_GENERATOR
         if (!Debugger.IsAttached)
             Debugger.Launch();
-    #endif
+#endif
 
-        // Register to find "GoImplAttribute" on assembly attribute declarations
+        // Register to find "GoImplicitConv" on assembly attribute declarations
         context.RegisterForSyntaxNotifications(() => new AssemblyAttributeFinder(FullAttributeName));
     }
 
@@ -73,62 +73,41 @@ public class ImplGenerator : ISourceGenerator
                 .Select(directive => directive.GetText().ToString().Trim())
                 .ToArray();
 
-            // Extract generic type arguments from "GoImplAttribute"
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = GetGenericTypeArguments(attribute, syntaxContext);
+            // Extract generic type arguments from "GoImplicitConv"
+            (ITypeSymbol? sourceType, ITypeSymbol? targetType) = GetGenericTypeArguments(attribute, syntaxContext);
             
-            if (structType is null || interfaceType is null)
+            if (sourceType is null || targetType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
 
-            if (structType.TypeKind != TypeKind.Struct)
+            if (sourceType.TypeKind != TypeKind.Struct)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, first generic type argument must be a struct.");
 
-            if (interfaceType.TypeKind != TypeKind.Interface)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
+            string sourceTypeName = sourceType.GetFullTypeName();
+            string targetTypeName = targetType.GetFullTypeName();
 
-            string structName = structType.Name;
-            string interfaceName = interfaceType.ToDisplayString();
+            StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
 
-            // Get the attribute's Promoted argument value, if defined
-            string[] arguments = attribute.GetArgumentValues();
-            bool promoted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+            if (structDeclaration is null)
+                throw new InvalidOperationException($"Unable to find struct declaration named \"{targetTypeName}\"");
 
-            // Get all extension methods for the struct, any directly defined receivers
-            // take precedence over promoted interface methods that have the same name
-            IEnumerable<MethodInfo>? structMethods = context.GetStructDeclaration(structType.ToDisplayString())?.GetExtensionMethods(context);
-            HashSet<string> overrides = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
-
-            List<MethodInfo> methods = interfaceType.AllInterfaces
-                .Concat([interfaceType]) // Include the original interface
-                .SelectMany(iface => iface.GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Where(method => method.MethodKind == MethodKind.Ordinary)
-                    .Where(method => !method.IsStatic)
-                    .Select(method => (name: iface.ToDisplayString(), method)))
-                .Select(info => new MethodInfo
-                {
-                    Name = promoted && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
-                    ReturnType = info.method.ReturnType.ToDisplayString(),
-                    Parameters = info.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
-                    GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString()))
-                })
-                .Distinct()
+            List<(string typeName, string memberName)> structMembers = structDeclaration
+                .GetStructMembers(context, true)
+                .Select(member => (member.typeName, member.memberName))
                 .ToList();
 
-            string generatedSource = new InterfaceImplTemplate
+            string generatedSource = new ImplicitConvTemplate
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
-                StructName = structName,
-                InterfaceName = interfaceName,
-                Promoted = promoted,
-                Overrides = overrides,
-                Methods = methods,
+                SourceTypeName = sourceTypeName,
+                TargetTypeName = targetTypeName,
+                StructMembers = structMembers,
                 UsingStatements = usingStatements
             }
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}.g.cs", generatedSource);
+            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}.g.cs"), generatedSource);
         }
     }
 
@@ -142,7 +121,7 @@ public class ImplGenerator : ISourceGenerator
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
     }
 
-    private static (ITypeSymbol? structType, ITypeSymbol? interfaceType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
+    private static (ITypeSymbol? sourceType, ITypeSymbol? targetType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
     {
         // Check if the attribute type is generic
         if (attributeSyntax.Name is not GenericNameSyntax genericName)
@@ -155,9 +134,19 @@ public class ImplGenerator : ISourceGenerator
             return (null, null);
 
         // Get semantic information for each type argument
-        ITypeSymbol? structType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
-        ITypeSymbol? interfaceType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
+        ITypeSymbol? sourceType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
+        ITypeSymbol? targetType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
 
-        return (structType, interfaceType);
+        return (sourceType, targetType);
+    }
+
+    private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)
+    {
+        if (PointerExpr.IsMatch(structName))
+            structName = structName[(structName.IndexOf('<') + 1)..^1];
+
+        return context.SemanticModel.Compilation.SyntaxTrees
+            .SelectMany(tree => tree.GetRoot().DescendantNodes().OfType<StructDeclarationSyntax>())
+            .FirstOrDefault(structDeclaration => structDeclaration.Identifier.Text == structName);
     }
 }

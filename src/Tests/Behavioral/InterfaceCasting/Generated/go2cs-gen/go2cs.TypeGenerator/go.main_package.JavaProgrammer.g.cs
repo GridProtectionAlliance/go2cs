@@ -35,6 +35,27 @@ public static partial class main_package
         {
         }
         
+        // Enable comparisons between JavaProgrammer struct types
+        public bool Equals(JavaProgrammer other)
+        {
+            return 
+                true;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is JavaProgrammer other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        
+        public static bool operator ==(JavaProgrammer left, JavaProgrammer right) => left.Equals(right);
+        
+        public static bool operator !=(JavaProgrammer left, JavaProgrammer right) => !(left == right);
+
         // Enable comparisons between nil and JavaProgrammer struct
         public static bool operator ==(JavaProgrammer value, NilType nil) => value.Equals(default(JavaProgrammer));
 

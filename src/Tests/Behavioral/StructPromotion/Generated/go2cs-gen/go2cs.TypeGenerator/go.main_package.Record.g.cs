@@ -60,6 +60,28 @@ public static partial class main_package
             ᏑʗEmployee = new ж<global::go.main_package.Employee>(Employee);
         }
         
+        // Enable comparisons between Record struct types
+        public bool Equals(Record other)
+        {
+            return 
+                Person == other.Person &&
+                Employee == other.Employee;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Record other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Person, Employee);
+        }
+        
+        public static bool operator ==(Record left, Record right) => left.Equals(right);
+        
+        public static bool operator !=(Record left, Record right) => !(left == right);
+
         // Enable comparisons between nil and Record struct
         public static bool operator ==(Record value, NilType nil) => value.Equals(default(Record));
 
@@ -73,7 +95,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Person.ToString(), Employee.ToString()
+            Person.ToString(),
+            Employee.ToString()
         ]), "}");
     }
 }

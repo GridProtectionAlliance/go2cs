@@ -31,25 +31,28 @@ using static go.main_package;
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
-// will generate an assembly level `GoImpl` attribute for each unique cast. This
-// allows the interface to be implemented in the C# source code using source
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
 // code generation (see go2cs-gen). An alternate interface implementation exists
 // that can resolve duck-typed interfaces at run-time, but handling interface
 // implementations at compile-time results in faster startup times, avoiding
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImpl<Cat, Animal>]
-[assembly: GoImpl<Dog, Animal>]
-[assembly: GoImpl<JavaProgrammer, Animal>]
-[assembly: GoImpl<Llama, Animal>]
-[assembly: GoImpl<MyError, error>]
+[assembly: GoImplement<Cat, Animal>]
+[assembly: GoImplement<Dog, Animal>]
+[assembly: GoImplement<JavaProgrammer, Animal>]
+[assembly: GoImplement<Llama, Animal>]
+[assembly: GoImplement<MyError, error>]
 // </InterfaceImplementations>
+
+// <ImplicitConversions>
+// </ImplicitConversions>
 
 namespace go;
 
 [GoPackage("main")]
-// [GoTestMatchingConsoleOutput] -- TODO: reenable after using std fmt package
+//[GoTestMatchingConsoleOutput] -- TODO: enable after conversion of std fmt package
 public static partial class main_package
 {
 }

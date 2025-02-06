@@ -72,7 +72,7 @@ public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
     fmt.Printf("Value available at *ptr = %d\n"u8, @out);
     ref var i = ref heap<nint>(out var Ꮡi);
     i = 99;
-    Ꮡout = Ꮡi; @out = ref Ꮡi.val;
+    Ꮡout = Ꮡi; @out = ref Ꮡout.val;
     fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, @out);
     PrintValPtr(Ꮡout);
     return Ꮡout;

@@ -35,6 +35,27 @@ public static partial class main_package
         {
         }
         
+        // Enable comparisons between Llama struct types
+        public bool Equals(Llama other)
+        {
+            return 
+                true;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Llama other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        
+        public static bool operator ==(Llama left, Llama right) => left.Equals(right);
+        
+        public static bool operator !=(Llama left, Llama right) => !(left == right);
+
         // Enable comparisons between nil and Llama struct
         public static bool operator ==(Llama value, NilType nil) => value.Equals(default(Llama));
 

@@ -156,11 +156,11 @@ var keywords = NewHashSet([]string{
 
 // The following names are reserved by go2cs, if encountered in Go code they should be escaped with `Δ`
 var reserved = NewHashSet([]string{
-	"array", "channel", "ConvertToType", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImpl",
-	"GoImplAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
-	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
-	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3",
-	"map", "slice",
+	"array", "channel", "ConvertToType", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImplement",
+	"GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute",
+	"GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
+	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
+	"GoUntyped", "go\u01C3", "map", "slice",
 })
 
 //go:embed csproj-template.xml
@@ -644,14 +644,14 @@ Examples:
 		// Add new interface implementations to package info file (hashset ensures uniqueness)
 		for interfaceName, implementations := range interfaceImplementations {
 			for implementation := range implementations {
-				lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>]", implementation, interfaceName))
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", implementation, interfaceName))
 			}
 		}
 
 		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 		for interfaceName, implementations := range promotedInterfaceImplementations {
 			for implementation := range implementations {
-				lines.Add(fmt.Sprintf("[assembly: GoImpl<%s, %s>(Promoted = true)]", implementation, interfaceName))
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", implementation, interfaceName))
 			}
 		}
 

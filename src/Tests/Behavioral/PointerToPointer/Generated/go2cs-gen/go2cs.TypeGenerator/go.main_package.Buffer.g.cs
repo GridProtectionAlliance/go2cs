@@ -43,6 +43,29 @@ public static partial class main_package
             this.lastRead = lastRead;
         }
         
+        // Enable comparisons between Buffer struct types
+        public bool Equals(Buffer other)
+        {
+            return 
+                buf == other.buf &&
+                off == other.off &&
+                lastRead == other.lastRead;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Buffer other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(buf, off, lastRead);
+        }
+        
+        public static bool operator ==(Buffer left, Buffer right) => left.Equals(right);
+        
+        public static bool operator !=(Buffer left, Buffer right) => !(left == right);
+
         // Enable comparisons between nil and Buffer struct
         public static bool operator ==(Buffer value, NilType nil) => value.Equals(default(Buffer));
 
@@ -56,7 +79,9 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            buf.ToString(), off.ToString(), lastRead.ToString()
+            buf.ToString(),
+            off.ToString(),
+            lastRead.ToString()
         ]), "}");
     }
 }

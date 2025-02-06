@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -17,10 +17,11 @@ namespace go;
 
 public static partial class main_package
 {
-    [GeneratedCode("go2cs-gen", "0.1.4")]
-    public static double Abs1(this ж<go.main_package.MyCustomError> ᏑmyErr)
+    partial struct main_data
     {
-        ref var myErr = ref ᏑmyErr.val;
-        return myErr.Abs1();
-    }
+        public static implicit operator ж<main_Person>(main_data src)
+        {
+            return Ꮡ(new main_Person(src.Name, src.Address?.val ?? default!));
+        }
+    }    
 }

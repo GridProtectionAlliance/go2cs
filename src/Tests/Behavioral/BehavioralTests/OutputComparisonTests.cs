@@ -76,6 +76,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStructWithDelegate() => CheckTarget("StructWithDelegate");
 
     [TestMethod]
+    public void CheckTypeConversion() => CheckTarget("TypeConversion");
+
+    [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]

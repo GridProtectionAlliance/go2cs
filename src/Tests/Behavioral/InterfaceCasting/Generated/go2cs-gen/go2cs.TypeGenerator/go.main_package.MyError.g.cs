@@ -37,6 +37,27 @@ public static partial class main_package
             this.description = description;
         }
         
+        // Enable comparisons between MyError struct types
+        public bool Equals(MyError other)
+        {
+            return 
+                description == other.description;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is MyError other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(description);
+        }
+        
+        public static bool operator ==(MyError left, MyError right) => left.Equals(right);
+        
+        public static bool operator !=(MyError left, MyError right) => !(left == right);
+
         // Enable comparisons between nil and MyError struct
         public static bool operator ==(MyError value, NilType nil) => value.Equals(default(MyError));
 

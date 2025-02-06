@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -39,7 +39,7 @@ public static partial class main_package
 
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
-        public static ref global::go.main_package.abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
+        public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
         public static ref global::go.ж<global::go.main_package.MyError> ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
         
         // Constructors
@@ -50,13 +50,36 @@ public static partial class main_package
             ᏑʗMyError = new ж<global::go.ж<global::go.main_package.MyError>>(new global::go.ж<global::go.main_package.MyError>(nil));
         }
 
-        public MyCustomError(global::go.@string Message = default!, global::go.main_package.abser Abser = default!, global::go.ж<global::go.main_package.MyError> MyError = default!)
+        public MyCustomError(global::go.@string Message = default!, global::go.main_package.Abser Abser = default!, global::go.ж<global::go.main_package.MyError> MyError = default!)
         {
             this.Message = Message;
             this.Abser = Abser;
             ᏑʗMyError = new ж<global::go.ж<global::go.main_package.MyError>>(MyError);
         }
         
+        // Enable comparisons between MyCustomError struct types
+        public bool Equals(MyCustomError other)
+        {
+            return 
+                Message == other.Message &&
+                Abser == other.Abser &&
+                MyError == other.MyError;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is MyCustomError other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Message, Abser, MyError);
+        }
+        
+        public static bool operator ==(MyCustomError left, MyCustomError right) => left.Equals(right);
+        
+        public static bool operator !=(MyCustomError left, MyCustomError right) => !(left == right);
+
         // Enable comparisons between nil and MyCustomError struct
         public static bool operator ==(MyCustomError value, NilType nil) => value.Equals(default(MyCustomError));
 
@@ -70,7 +93,9 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Message.ToString(), Abser?.ToString() ?? "<nil>", MyError?.ToString() ?? "<nil>"
+            Message.ToString(),
+            Abser?.ToString() ?? "<nil>",
+            MyError?.ToString() ?? "<nil>"
         ]), "}");
     }
 }

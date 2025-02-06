@@ -33,6 +33,11 @@ public static class time_package
 
         public override string ToString() => 
             DateTime.ToString("yyyy-MM-dd HH:mm:ss.fffffff K");
+
+        public static bool operator ==(Time t1, Time t2) => t1.DateTime == t2.DateTime;
+
+        public static bool operator !=(Time t1, Time t2) => !(t1 == t2);
+
     }
 
     public static Time Now() => new Time { DateTime = DateTime.Now };
@@ -44,6 +49,7 @@ public static class time_package
     public static int Unix(this in Time time) => (int)time.DateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 
     public static Time UTC(this in Time time) => new Time { DateTime = time.DateTime.ToUniversalTime() };
+
 
     public const int Sunday = 0;
     public const int Monday = 1;

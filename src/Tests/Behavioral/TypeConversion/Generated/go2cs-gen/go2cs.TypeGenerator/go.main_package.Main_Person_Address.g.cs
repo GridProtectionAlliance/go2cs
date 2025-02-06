@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -40,6 +40,28 @@ public static partial class main_package
             this.City = City;
         }
         
+        // Enable comparisons between main_Person_Address struct types
+        public bool Equals(main_Person_Address other)
+        {
+            return 
+                Street == other.Street &&
+                City == other.City;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is main_Person_Address other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Street, City);
+        }
+        
+        public static bool operator ==(main_Person_Address left, main_Person_Address right) => left.Equals(right);
+        
+        public static bool operator !=(main_Person_Address left, main_Person_Address right) => !(left == right);
+
         // Enable comparisons between nil and main_Person_Address struct
         public static bool operator ==(main_Person_Address value, NilType nil) => value.Equals(default(main_Person_Address));
 
@@ -53,7 +75,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Street.ToString(), City.ToString()
+            Street.ToString(),
+            City.ToString()
         ]), "}");
     }
 }

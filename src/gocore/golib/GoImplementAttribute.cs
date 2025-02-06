@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  GoImplAttribute.cs - Gbtc
+//  GoImplementAttribute.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -36,11 +36,11 @@ namespace go;
 /// an interface for a structure using matching receiver methods.
 /// </para>
 /// <para>
-/// See the <c>ImplGenerator</c> in the go2cs code generators for details.
+/// See the <c>ImplementGenerator</c> in the go2cs code generators for details.
 /// </para>
 /// </remarks>
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-public class GoImplAttribute<TStruct, TInterface> : Attribute
+public class GoImplementAttribute<TStruct, TInterface> : Attribute
 {
     /// <summary>
     /// Gets or sets flag that determines if interface is a promoted

@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    private partial struct score
+    internal partial struct score
     {
         // Promoted Struct References
         // -- score has no promoted structs
@@ -44,6 +44,29 @@ public static partial class main_package
             this.thisTurn = thisTurn;
         }
         
+        // Enable comparisons between score struct types
+        public bool Equals(score other)
+        {
+            return 
+                player == other.player &&
+                opponent == other.opponent &&
+                thisTurn == other.thisTurn;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is score other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(player, opponent, thisTurn);
+        }
+        
+        public static bool operator ==(score left, score right) => left.Equals(right);
+        
+        public static bool operator !=(score left, score right) => !(left == right);
+
         // Enable comparisons between nil and score struct
         public static bool operator ==(score value, NilType nil) => value.Equals(default(score));
 
@@ -57,7 +80,9 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            player.ToString(), opponent.ToString(), thisTurn.ToString()
+            player.ToString(),
+            opponent.ToString(),
+            thisTurn.ToString()
         ]), "}");
     }
 }

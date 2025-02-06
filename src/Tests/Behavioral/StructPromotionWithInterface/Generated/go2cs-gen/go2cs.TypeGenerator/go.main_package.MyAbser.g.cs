@@ -35,6 +35,27 @@ public static partial class main_package
         {
         }
         
+        // Enable comparisons between MyAbser struct types
+        public bool Equals(MyAbser other)
+        {
+            return 
+                true;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is MyAbser other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        
+        public static bool operator ==(MyAbser left, MyAbser right) => left.Equals(right);
+        
+        public static bool operator !=(MyAbser left, MyAbser right) => !(left == right);
+
         // Enable comparisons between nil and MyAbser struct
         public static bool operator ==(MyAbser value, NilType nil) => value.Equals(default(MyAbser));
 

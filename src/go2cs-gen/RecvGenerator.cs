@@ -27,7 +27,7 @@ using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
-
+using static go2cs.Common;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -91,7 +91,7 @@ public class RecvGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource($"{packageNamespace}.{packageClassName}.{identifier}.g.cs", generatedSource);
+            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs"), generatedSource);
         }
     }
 }

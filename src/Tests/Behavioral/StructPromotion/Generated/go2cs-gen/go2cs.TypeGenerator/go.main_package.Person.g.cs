@@ -40,6 +40,28 @@ public static partial class main_package
             this.age = age;
         }
         
+        // Enable comparisons between Person struct types
+        public bool Equals(Person other)
+        {
+            return 
+                name == other.name &&
+                age == other.age;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Person other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(name, age);
+        }
+        
+        public static bool operator ==(Person left, Person right) => left.Equals(right);
+        
+        public static bool operator !=(Person left, Person right) => !(left == right);
+
         // Enable comparisons between nil and Person struct
         public static bool operator ==(Person value, NilType nil) => value.Equals(default(Person));
 
@@ -53,7 +75,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            name.ToString(), age.ToString()
+            name.ToString(),
+            age.ToString()
         ]), "}");
     }
 }

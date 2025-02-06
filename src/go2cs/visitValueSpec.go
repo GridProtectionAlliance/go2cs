@@ -101,11 +101,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 							v.writeOutputLn(headTypeDecl)
 							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
 						} else {
-							if v.options.preferVarDecl {
-								v.writeOutput("var %s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
-							} else {
-								v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
-							}
+							// Following decalrations must use explicit type, do not use `v.options.preferVarDecl` for these:
+							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
 						}
 					} else {
 						access := getAccess(goIDName)

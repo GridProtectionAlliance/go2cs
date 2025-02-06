@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -17,9 +17,11 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct MyCustomError : go.main_package.abser
+    partial struct main_data_Address
     {
-        // 'abser.Abs' implicit implementation mapped to promoted interface receiver method:
-        public double Abs() => abser.Abs();
-    }
+        public static implicit operator ж<main_Person_Address>(main_data_Address src)
+        {
+            return Ꮡ(new main_Person_Address(src.Street, src.City));
+        }
+    }    
 }

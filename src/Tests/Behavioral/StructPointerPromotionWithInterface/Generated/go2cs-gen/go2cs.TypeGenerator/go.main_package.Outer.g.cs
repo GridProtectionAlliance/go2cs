@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -37,6 +37,27 @@ public static partial class main_package
             this.ptr = ptr;
         }
         
+        // Enable comparisons between Outer struct types
+        public bool Equals(Outer other)
+        {
+            return 
+                ptr == other.ptr;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Outer other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ptr);
+        }
+        
+        public static bool operator ==(Outer left, Outer right) => left.Equals(right);
+        
+        public static bool operator !=(Outer left, Outer right) => !(left == right);
+
         // Enable comparisons between nil and Outer struct
         public static bool operator ==(Outer value, NilType nil) => value.Equals(default(Outer));
 

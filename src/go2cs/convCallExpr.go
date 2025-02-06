@@ -33,8 +33,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if _, ok := argType.(*types.Struct); ok {
 				if targetTypeIsPointer {
 					// Dereference target type when casting to pointer types,
-					// in C# implicit casting requires the target type to be
-					// direct type, not a pointer type
+					// in C# implicit casting operator requires the target type
+					// to be a direct type, not a pointer type
 					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
 				}
 

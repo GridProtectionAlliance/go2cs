@@ -35,6 +35,27 @@ public static partial class main_package
         {
         }
         
+        // Enable comparisons between Dog struct types
+        public bool Equals(Dog other)
+        {
+            return 
+                true;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Dog other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        
+        public static bool operator ==(Dog left, Dog right) => left.Equals(right);
+        
+        public static bool operator !=(Dog left, Dog right) => !(left == right);
+
         // Enable comparisons between nil and Dog struct
         public static bool operator ==(Dog value, NilType nil) => value.Equals(default(Dog));
 

@@ -35,13 +35,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	v.writeDocString(target, doc, structType.Pos())
 
 	structTypeName := getSanitizedIdentifier(name)
-	var liftedMarker string
-
-	if lifted {
-		liftedMarker = "(\"internal\")"
-	}
-
-	v.writeStringLn(target, "[GoType%s] partial struct %s {", liftedMarker, structTypeName)
+	v.writeStringLn(target, "[GoType] partial struct %s {", structTypeName)
 	v.indentLevel++
 
 	// Track promoted interface methods that could be shadowed by receivers

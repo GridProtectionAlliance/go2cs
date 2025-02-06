@@ -37,6 +37,27 @@ public static partial class main_package
             this.position = position;
         }
         
+        // Enable comparisons between Employee struct types
+        public bool Equals(Employee other)
+        {
+            return 
+                position == other.position;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Employee other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(position);
+        }
+        
+        public static bool operator ==(Employee left, Employee right) => left.Equals(right);
+        
+        public static bool operator !=(Employee left, Employee right) => !(left == right);
+
         // Enable comparisons between nil and Employee struct
         public static bool operator ==(Employee value, NilType nil) => value.Equals(default(Employee));
 

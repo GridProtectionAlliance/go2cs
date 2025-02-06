@@ -32,19 +32,19 @@ using static go.%s_package;
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
-// will generate an assembly level `GoImpl` attribute for each unique cast. This
-// allows the interface to be implemented in the C# source code using source
+// will generate an assembly level `GoImplement` attribute for each unique cast.
+// This allows the interface to be implemented in the C# source code using source
 // code generation (see go2cs-gen). An alternate interface implementation exists
 // that can resolve duck-typed interfaces at run-time, but handling interface
 // implementations at compile-time results in faster startup times, avoiding
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-// Example: [assembly: GoImpl<main_package.MyError, error>]
+// Example: [assembly: GoImplement<main_package.MyError, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-// Example: [assembly: GoImplicitConv<main_package.MyError, error>]
+// Example: [assembly: GoImplicitConv<Main_Data, ж<Main_Person>>]
 // </ImplicitConversions>
 
 namespace go;

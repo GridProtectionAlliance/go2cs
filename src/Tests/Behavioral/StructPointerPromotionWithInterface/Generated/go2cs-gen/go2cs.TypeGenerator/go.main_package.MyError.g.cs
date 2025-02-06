@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -40,6 +40,28 @@ public static partial class main_package
             this.What = What;
         }
         
+        // Enable comparisons between MyError struct types
+        public bool Equals(MyError other)
+        {
+            return 
+                When == other.When &&
+                What == other.What;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is MyError other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(When, What);
+        }
+        
+        public static bool operator ==(MyError left, MyError right) => left.Equals(right);
+        
+        public static bool operator !=(MyError left, MyError right) => !(left == right);
+
         // Enable comparisons between nil and MyError struct
         public static bool operator ==(MyError value, NilType nil) => value.Equals(default(MyError));
 
@@ -53,7 +75,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            When.ToString(), What.ToString()
+            When.ToString(),
+            What.ToString()
         ]), "}");
     }
 }

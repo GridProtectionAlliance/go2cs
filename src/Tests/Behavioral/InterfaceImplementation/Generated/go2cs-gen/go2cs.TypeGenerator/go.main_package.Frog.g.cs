@@ -40,6 +40,28 @@ public static partial class main_package
             this.Color = Color;
         }
         
+        // Enable comparisons between Frog struct types
+        public bool Equals(Frog other)
+        {
+            return 
+                Name == other.Name &&
+                Color == other.Color;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Frog other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Color);
+        }
+        
+        public static bool operator ==(Frog left, Frog right) => left.Equals(right);
+        
+        public static bool operator !=(Frog left, Frog right) => !(left == right);
+
         // Enable comparisons between nil and Frog struct
         public static bool operator ==(Frog value, NilType nil) => value.Equals(default(Frog));
 
@@ -53,7 +75,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Name.ToString(), Color.ToString()
+            Name.ToString(),
+            Color.ToString()
         ]), "}");
     }
 }

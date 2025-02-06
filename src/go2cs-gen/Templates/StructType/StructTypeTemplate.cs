@@ -29,6 +29,27 @@ internal class StructTypeTemplate : TemplateBase
                 // Constructors
                 {{Constructors}}
                 
+                // Enable comparisons between {{StructName}} struct types
+                public bool Equals({{StructName}} other)
+                {
+                    return 
+                        {{CompareFields}};
+                }
+                
+                public override bool Equals(object? obj)
+                {
+                    return obj is {{StructName}} other && Equals(other);
+                }
+                
+                public override int GetHashCode()
+                {
+                    return {{HashCode}};
+                }
+                
+                public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
+                
+                public static bool operator !=({{StructName}} left, {{StructName}} right) => !(left == right);
+        
                 // Enable comparisons between nil and {{StructName}} struct
                 public static bool operator ==({{StructName}} value, NilType nil) => value.Equals(default({{StructName}}));
 
@@ -42,7 +63,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 public override string ToString() => string.Concat("{", string.Join(" ",
                 [
-                    {{(StructMembers.Count > 0 ? string.Join(", ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
+                    {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
             }
         """;
@@ -193,4 +214,16 @@ internal class StructTypeTemplate : TemplateBase
     {
         return item.isReferenceType ? $"{item.memberName}?.ToString() ?? \"<nil>\"" : $"{item.memberName}.ToString()";
     }
+
+    private string CompareFields => StructMembers.Count > 0 ? 
+        string.Join(" &&\r\n                ", CompareList) :
+        "true";
+
+    private IEnumerable<string> CompareList => StructMembers.Select(member => $"{member.memberName} == other.{member.memberName}");
+
+    private string HashCode => StructMembers.Count > 0 ? 
+        $"HashCode.Combine({ParamList})" : 
+        "base.GetHashCode()";
+
+    private string ParamList => string.Join(", ", StructMembers.Select(member => member.memberName));
 }

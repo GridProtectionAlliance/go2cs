@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    private partial struct data
+    internal partial struct data
     {
         // Promoted Struct References
         // -- data has no promoted structs
@@ -37,6 +37,27 @@ public static partial class main_package
             this.name = name;
         }
         
+        // Enable comparisons between data struct types
+        public bool Equals(data other)
+        {
+            return 
+                name == other.name;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is data other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(name);
+        }
+        
+        public static bool operator ==(data left, data right) => left.Equals(right);
+        
+        public static bool operator !=(data left, data right) => !(left == right);
+
         // Enable comparisons between nil and data struct
         public static bool operator ==(data value, NilType nil) => value.Equals(default(data));
 

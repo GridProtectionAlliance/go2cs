@@ -31,6 +31,7 @@ using go2cs.Templates.InterfaceType;
 using go2cs.Templates.StructType;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Common;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -68,7 +69,10 @@ public class TypeGenerator : ISourceGenerator
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
             string fullyQualifiedIdentifier = context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree).GetDeclaredSymbol(targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
-            string scope = char.IsUpper(identifier[0]) ? "public" : "private";
+            
+            // Since many types are referenced by assembly attributes outside namespace,
+            // "internal" scope is used so types can be referenced instead of "private"
+            string scope = char.IsUpper(identifier[0]) ? "public" : "internal";
 
             string[] usingStatements = targetSyntax.SyntaxTree
                 .GetRoot()
@@ -85,12 +89,6 @@ public class TypeGenerator : ISourceGenerator
                 // Get the attribute's first constructor argument value, type definition
                 string typeDefinition = arguments.Length > 0 ? arguments[0][1..^1].Trim() : string.Empty;
                 string generatedSource, typeName;
-
-                if (typeDefinition.Equals("internal"))
-                {
-                    typeDefinition = string.Empty;
-                    scope = "internal";
-                }
 
                 switch (targetSyntax)
                 {
@@ -243,7 +241,7 @@ public class TypeGenerator : ISourceGenerator
                 }
 
                 // Add the source code to the compilation
-                context.AddSource($"{packageNamespace}.{packageClassName}.{identifier}.g.cs", generatedSource);
+                context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs"), generatedSource);
             }
         }
     }

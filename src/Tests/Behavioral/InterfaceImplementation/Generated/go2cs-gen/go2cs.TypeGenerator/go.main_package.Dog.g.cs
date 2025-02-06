@@ -40,6 +40,28 @@ public static partial class main_package
             this.Breed = Breed;
         }
         
+        // Enable comparisons between Dog struct types
+        public bool Equals(Dog other)
+        {
+            return 
+                Name == other.Name &&
+                Breed == other.Breed;
+        }
+        
+        public override bool Equals(object? obj)
+        {
+            return obj is Dog other && Equals(other);
+        }
+        
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Breed);
+        }
+        
+        public static bool operator ==(Dog left, Dog right) => left.Equals(right);
+        
+        public static bool operator !=(Dog left, Dog right) => !(left == right);
+
         // Enable comparisons between nil and Dog struct
         public static bool operator ==(Dog value, NilType nil) => value.Equals(default(Dog));
 
@@ -53,7 +75,8 @@ public static partial class main_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            Name.ToString(), Breed.ToString()
+            Name.ToString(),
+            Breed.ToString()
         ]), "}");
     }
 }
