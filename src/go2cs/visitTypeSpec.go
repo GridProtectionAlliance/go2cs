@@ -10,9 +10,16 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 	// Handle type alias
 	if typeSpec.Assign.IsValid() {
-		typeName := convertToCSFullTypeName(v.convExpr(typeSpec.Type, nil))
+		// Get types.Type from typeSpec.Type expr
+		typeSpecType := v.info.TypeOf(typeSpec.Type)
 
-		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s%s", name, typeName, v.newline))
+		if typeSpecType == nil {
+			panic(fmt.Sprintf("Failed to get type for type alias %s", name))
+		}
+
+		typeName := convertToCSFullTypeName(v.getFullTypeName(typeSpecType, false))
+
+		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", name, typeName, v.newline))
 
 		// Add exported type aliases to package info
 		if getAccess(name) == "public" {
@@ -44,7 +51,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType))
 	case *ast.StructType:
-		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
+		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, false)
 	default:
 		panic(fmt.Sprintf("Unexpected TypeSpec type: %#v", typeSpecType))
 	}

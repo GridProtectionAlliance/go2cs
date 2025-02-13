@@ -177,7 +177,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			typeExpr := callExpr.Args[0]
 
 			if ident := getIdentifier(typeExpr); ident != nil {
-				return fmt.Sprintf("@new<%s>()", ident)
+				return fmt.Sprintf("@new<%s>()", convertToCSTypeName(ident.Name))
 			}
 
 			typeName := v.getPrintedNode(typeExpr)
@@ -256,7 +256,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 		argType = pointer.Elem()
 	}
 
-	typeName := v.getTypeName(targetType)
+	typeName := v.getTypeName(targetType, false)
 
 	if isPointer {
 		typeName = "*" + typeName

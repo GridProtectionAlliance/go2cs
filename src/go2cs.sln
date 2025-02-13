@@ -120,6 +120,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructWithDelegate", "Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructWithPointer", "Tests\Behavioral\StructWithPointer\StructWithPointer.csproj", "{8FF3A11C-FD1F-442D-AFA1-E4DEDEA6ABF5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QuickTest", "Tests\Behavioral\QuickTest\QuickTest.csproj", "{601F48D8-7B0C-4479-A0D4-4FF05338A756}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeConversionInterfaceParam", "Tests\Behavioral\TypeConversionInterfaceParam\TypeConversionInterfaceParam.csproj", "{ECF33090-149B-40F8-89BB-752EFAE12BF4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -302,6 +306,14 @@ Global
 		{8FF3A11C-FD1F-442D-AFA1-E4DEDEA6ABF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FF3A11C-FD1F-442D-AFA1-E4DEDEA6ABF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FF3A11C-FD1F-442D-AFA1-E4DEDEA6ABF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{601F48D8-7B0C-4479-A0D4-4FF05338A756}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{601F48D8-7B0C-4479-A0D4-4FF05338A756}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{601F48D8-7B0C-4479-A0D4-4FF05338A756}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{601F48D8-7B0C-4479-A0D4-4FF05338A756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECF33090-149B-40F8-89BB-752EFAE12BF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECF33090-149B-40F8-89BB-752EFAE12BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECF33090-149B-40F8-89BB-752EFAE12BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECF33090-149B-40F8-89BB-752EFAE12BF4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -355,6 +367,8 @@ Global
 		{E8949508-0534-4ACA-8E45-18D92021CED6} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{B901B7DB-EDE9-4828-8918-E9612DB443E4} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{8FF3A11C-FD1F-442D-AFA1-E4DEDEA6ABF5} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{601F48D8-7B0C-4479-A0D4-4FF05338A756} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{ECF33090-149B-40F8-89BB-752EFAE12BF4} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

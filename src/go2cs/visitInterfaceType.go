@@ -12,6 +12,51 @@ const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
 // Handles map types in context of a TypeSpec
 func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name string, doc *ast.CommentGroup) {
+	for _, field := range interfaceType.Methods.List {
+		// Check if this is an actual method (has a function type)
+		if funcType, ok := field.Type.(*ast.FuncType); ok {
+			var indentOffset int
+
+			if v.inFunction {
+				indentOffset = 1
+			}
+
+			// Loop through function results to check if any are structs
+			if funcType.Results != nil {
+				for index, resultField := range funcType.Results.List {
+					var fieldName string
+
+					if resultField.Names == nil {
+						fieldName = fmt.Sprintf("%sR%d", name, index)
+					} else {
+						fieldName = fmt.Sprintf("%s_%s", name, resultField.Names[0].Name)
+					}
+
+					// Check if the return type is a struct or pointer to a struct
+					if structType, exprType := v.extractStructType(resultField.Type); structType != nil {
+						v.indentLevel += indentOffset
+						v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
+						v.indentLevel -= indentOffset
+					}
+				}
+			}
+
+			// Loop through function parameters to check if any are structs
+			if funcType.Params != nil {
+				for _, paramField := range funcType.Params.List {
+					for _, paramName := range paramField.Names {
+						// Check if the parameter type is a struct or pointer to a struct
+						if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
+							v.indentLevel += indentOffset
+							v.visitStructType(structType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true)
+							v.indentLevel -= indentOffset
+						}
+					}
+				}
+			}
+		}
+	}
+
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(doc, interfaceType.Pos())
 
@@ -28,13 +73,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 
 	for _, method := range interfaceType.Methods.List {
 		if len(method.Names) == 1 {
-
 			v.writeDocString(result, method.Doc, method.Pos())
 
 			goMethodName := method.Names[0].Name
 			csMethodName := getSanitizedFunctionName(goMethodName)
 			typeLenDeviation := token.Pos(len(csMethodName) - len(goMethodName))
-
 			methodType := v.info.ObjectOf(method.Names[0]).(*types.Func)
 
 			if methodType == nil {
@@ -109,7 +152,7 @@ func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int
 			result += 2
 		}
 
-		result += len(v.getTypeName(param.Type()))
+		result += len(v.getTypeName(param.Type(), false))
 
 		if param.Name() != "" {
 			result += 1 + len(param.Name())
@@ -127,7 +170,7 @@ func (v *Visitor) getSourceResultSignatureLen(signature *types.Signature) int {
 	}
 
 	if results.Len() == 1 {
-		return len(v.getTypeName(results.At(0).Type()))
+		return len(v.getTypeName(results.At(0).Type(), false))
 	}
 
 	result := 2
@@ -137,7 +180,7 @@ func (v *Visitor) getSourceResultSignatureLen(signature *types.Signature) int {
 			result += 2
 		}
 
-		result += len(v.getTypeName(results.At(i).Type()))
+		result += len(v.getTypeName(results.At(i).Type(), false))
 	}
 
 	return result

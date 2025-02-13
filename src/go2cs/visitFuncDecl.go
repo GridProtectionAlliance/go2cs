@@ -50,6 +50,40 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
+	// Loop through function results to check if any are structs
+	if funcDecl.Type.Results != nil {
+		for index, field := range funcDecl.Type.Results.List {
+			var fieldName string
+
+			if field.Names == nil {
+				fieldName = fmt.Sprintf("R%d", index)
+			} else {
+				fieldName = field.Names[0].Name
+			}
+
+			// Check if the return type is a struct or pointer to a struct
+			if structType, exprType := v.extractStructType(field.Type); structType != nil {
+				v.indentLevel++
+				v.visitStructType(structType, exprType, fieldName, field.Comment, true)
+				v.indentLevel--
+			}
+		}
+	}
+
+	// Loop through function parameters to check if any are structs
+	if funcDecl.Type.Params != nil {
+		for _, field := range funcDecl.Type.Params.List {
+			for _, name := range field.Names {
+				// Check if the parameter type is a struct or pointer to a struct
+				if structType, exprType := v.extractStructType(field.Type); structType != nil {
+					v.indentLevel++
+					v.visitStructType(structType, exprType, name.Name, field.Comment, true)
+					v.indentLevel--
+				}
+			}
+		}
+	}
+
 	v.targetFile.WriteString(v.newline)
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 

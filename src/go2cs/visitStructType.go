@@ -9,19 +9,25 @@ import (
 )
 
 // Handles struct types in the context of a TypeSpec, ValueSpec, or FieldList
-func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) {
+func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (structTypeName string) {
 	var target *strings.Builder
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
-		target = &strings.Builder{}
+		if v.inFunction {
+			target = &strings.Builder{}
 
-		if !strings.HasPrefix(name, v.currentFuncName+"_") {
-			name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
+			if !strings.HasPrefix(name, v.currentFuncName+"_") {
+				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
+			}
+
+			v.indentLevel--
 		}
 
-		v.liftedTypeMap[identType] = v.getUniqueLiftedTypeName(name)
-		v.indentLevel--
+		structTypeName = v.getUniqueLiftedTypeName(name)
+		v.liftedTypeMap[identType] = structTypeName
+	} else {
+		structTypeName = name
 	}
 
 	if target == nil {
@@ -34,7 +40,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	v.writeDocString(target, doc, structType.Pos())
 
-	structTypeName := getSanitizedIdentifier(name)
+	structTypeName = getSanitizedIdentifier(name)
 	v.writeStringLn(target, "[GoType] partial struct %s {", structTypeName)
 	v.indentLevel++
 
@@ -89,8 +95,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		}
 
 		fieldType := v.getType(field.Type, false)
-		goTypeName := v.getTypeName(fieldType)
-		goFullTypeName := v.getFullTypeName(fieldType)
+		goTypeName := v.getTypeName(fieldType, false)
+		goFullTypeName := v.getFullTypeName(fieldType, false)
 		csFullTypeName := convertToCSTypeName(goFullTypeName)
 		typeLenDeviation := token.Pos(len(csFullTypeName) - len(goFullTypeName))
 
@@ -143,16 +149,22 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
 			} else {
+				var handled bool
+
 				if ptrType, ok := identType.(*types.Pointer); ok {
 					if _, ok = ptrType.Elem().(*types.Named); !ok {
-						continue
+						v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+						handled = true
 					}
 				} else if _, ok = identType.(*types.Struct); !ok {
-					continue
+					v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+					handled = true
 				}
 
 				// Handle promoted struct implementations
-				v.writeString(target, "public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
+				if !handled {
+					v.writeString(target, "public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
+				}
 			}
 
 			v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
@@ -169,7 +181,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	v.indentLevel--
 	v.writeStringLn(target, "}")
 
-	if lifted {
+	if lifted && v.inFunction {
 		if v.currentFuncPrefix.Len() > 0 {
 			v.currentFuncPrefix.WriteString(v.newline)
 		}
@@ -177,6 +189,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		v.currentFuncPrefix.WriteString(target.String())
 		v.indentLevel++
 	}
+
+	return
 }
 
 func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {

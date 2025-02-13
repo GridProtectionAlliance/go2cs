@@ -94,6 +94,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			lbrace = "("
 			rbrace = ")"
 		}
+	} else if _, ok := exprType.(*types.Struct); ok {
+		lbrace = "("
+		rbrace = ")"
 	}
 
 	if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].Pos(), compositeLit.Rbrace) {
@@ -150,6 +153,11 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	identContext := DefaultIdentContext()
 	identContext.isType = true
+
+	if context.ident != nil {
+		identContext.name = context.ident.Name
+	}
+
 	contexts := []ExprContext{arrayTypeContext, identContext}
 
 	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, v.convExpr(compositeLit.Type, contexts), lbracePrefix, lbrace))

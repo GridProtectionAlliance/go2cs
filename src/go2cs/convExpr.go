@@ -114,12 +114,14 @@ func (c TupleResultContext) getDefault() StmtContext {
 type IdentContext struct {
 	isPointer bool
 	isType    bool
+	name      string
 }
 
 func DefaultIdentContext() IdentContext {
 	return IdentContext{
 		isPointer: false,
 		isType:    false,
+		name:      "",
 	}
 }
 
@@ -223,6 +225,9 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convStarExpr(exprType)
 	case *ast.TypeAssertExpr:
 		return v.convTypeAssertExpr(exprType)
+	case *ast.StructType:
+		context := getExprContext[IdentContext](contexts)
+		return v.convStructType(exprType, context)
 	case *ast.UnaryExpr:
 		context := getExprContext[TupleResultContext](contexts)
 		return v.convUnaryExpr(exprType, context)

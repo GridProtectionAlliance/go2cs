@@ -140,18 +140,22 @@ const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `c
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 
 var keywords = NewHashSet([]string{
-	// The following are all valid C# keywords, if encountered in Go code they should be escaped with `@`
+	// The following are all valid C# keywords and types, when encountered in Go code they should be
+	// escaped with an `@` prefix which allows them to be used as identifiers in C#:
 	"abstract", "as", "base", "catch", "char", "checked", "class", "const", "decimal", "delegate", "do",
-	"double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach", "implicit", "in",
-	"internal", "is", "lock", "namespace", "null", "object", "operator", "out", "override", "params",
-	"private", "protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof",
-	"stackalloc", "static", "this", "throw", "try", "typeof", "unchecked", "unsafe", "ushort", "using",
-	"virtual", "void", "volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
+	"double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach", "float", "implicit",
+	"in", "internal", "is", "lock", "long", "namespace", "null", "object", "operator", "out", "override",
+	"params", "private", "protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof",
+	"stackalloc", "static", "this", "throw", "try", "typeof", "ulong", "unchecked", "unsafe", "ushort",
+	"using", "virtual", "void", "volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
 
-	// The remaining C# keywords overlap with Go keywords, so they do not need detection
-	// "bool", "break", "byte", "case", "const", "continue", "default", "else", "false", "float", "for"
-	// "goto", "if", "int", ""interface", long", "new", "return", "select", "string", "struct", "switch",
-	// "true", "var", "uint", "ulong"
+	// The following C# types overlap with Go types, however, Go unnamed fields in structs will use type
+	// name as the field name, so these should also be escaped with an `@` when encountered:
+	"bool", "byte", "int", "string", "uint",
+
+	// The remaining C# keywords overlap with Go keywords, so they do not need detection:
+	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if",
+	// "interface", "new", "return", "select", "struct", "switch", "true", "var"
 })
 
 // The following names are reserved by go2cs, if encountered in Go code they should be escaped with `Δ`
@@ -160,7 +164,7 @@ var reserved = NewHashSet([]string{
 	"GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute",
 	"GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
 	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
-	"GoUntyped", "go\u01C3", "map", "slice",
+	"GoUntyped", "go\u01C3", "slice",
 })
 
 //go:embed csproj-template.xml
@@ -1146,8 +1150,8 @@ func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr 
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
-	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType))
-	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType))
+	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
+	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
 
 	var prefix string
 
@@ -1253,12 +1257,12 @@ func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
 }
 
 func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
-	return v.getTypeName(v.getType(expr, underlying))
+	return v.getTypeName(v.getType(expr, underlying), underlying)
 }
 
-func (v *Visitor) getTypeName(t types.Type) string {
+func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if pointer, ok := t.(*types.Pointer); ok {
-		return "*" + v.getTypeName(pointer.Elem())
+		return "*" + v.getTypeName(pointer.Elem(), isUnderlying)
 	}
 
 	if name, ok := v.liftedTypeMap[t]; ok {
@@ -1269,14 +1273,16 @@ func (v *Visitor) getTypeName(t types.Type) string {
 		return named.Obj().Name()
 	}
 
-	if _, ok := t.(*types.Struct); ok {
-		println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+	if !isUnderlying {
+		if _, ok := t.(*types.Struct); ok {
+			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+		}
 	}
 
 	return strings.ReplaceAll(t.String(), "..", "")
 }
 
-func (v *Visitor) getFullTypeName(t types.Type) string {
+func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	if pointer, ok := t.(*types.Pointer); ok {
 		if name, ok := v.liftedTypeMap[pointer.Elem()]; ok {
 			return "*" + name
@@ -1298,19 +1304,21 @@ func (v *Visitor) getFullTypeName(t types.Type) string {
 		return obj.Name()
 	}
 
-	if _, ok := t.(*types.Struct); ok {
-		println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+	if !isUnderlying {
+		if _, ok := t.(*types.Struct); ok {
+			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+		}
 	}
 
 	return strings.ReplaceAll(t.String(), "..", "")
 }
 
 func (v *Visitor) getCSTypeName(t types.Type) string {
-	return convertToCSTypeName(v.getTypeName(t))
+	return convertToCSTypeName(v.getTypeName(t, false))
 }
 
 func (v *Visitor) getRefParamTypeName(t types.Type) string {
-	typeName := v.getTypeName(t)
+	typeName := v.getTypeName(t, false)
 
 	if strings.HasPrefix(typeName, "*") {
 		return fmt.Sprintf("ref %s", convertToCSTypeName(typeName[1:]))
@@ -1444,6 +1452,18 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 }
 
+func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type) {
+	if starExpr, ok := expr.(*ast.StarExpr); ok {
+		if structType, ok := starExpr.X.(*ast.StructType); ok {
+			return structType, v.getType(starExpr.X, false)
+		}
+	} else if structType, ok := expr.(*ast.StructType); ok {
+		return structType, v.getType(expr, false)
+	}
+
+	return nil, nil
+}
+
 func extractTypes(signature string) []string {
 	// Remove any whitespace at the ends
 	signature = strings.TrimSpace(signature)
@@ -1502,7 +1522,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		}
 	}
 
-	goTypeName := v.getFullTypeName(identType)
+	goTypeName := v.getFullTypeName(identType, false)
 	csIDName := v.getIdentName(ident)
 
 	// Handle array types

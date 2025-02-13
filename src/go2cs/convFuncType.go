@@ -1,12 +1,47 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
 )
 
 func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parameterSignature string) {
+	// Loop through function results to check if any are structs
+	if funcType.Results != nil {
+		for index, resultField := range funcType.Results.List {
+			var fieldName string
+
+			if resultField.Names == nil {
+				fieldName = fmt.Sprintf("func_R%d", index)
+			} else {
+				fieldName = fmt.Sprintf("func_%s", resultField.Names[0].Name)
+			}
+
+			// Check if the return type is a struct or pointer to a struct
+			if structType, exprType := v.extractStructType(resultField.Type); structType != nil {
+				v.indentLevel++
+				v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
+				v.indentLevel--
+			}
+		}
+	}
+
+	// Loop through function parameters to check if any are structs
+	if funcType.Params != nil {
+		for _, paramField := range funcType.Params.List {
+			for _, paramName := range paramField.Names {
+				// Check if the parameter type is a struct or pointer to a struct
+				if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
+					v.indentLevel++
+					v.visitStructType(structType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true)
+					v.indentLevel--
+				}
+			}
+		}
+	}
+
 	signature := v.getSignature(funcType)
 	resultsSignature = v.generateResultSignature(signature)
 	parameterSignature = v.generateParametersSignature(signature, false)

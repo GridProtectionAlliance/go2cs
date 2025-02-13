@@ -15,6 +15,7 @@
                 //"-uco=false",
                 //"-comments=true",
                 //"-tree",
+                //"..\\Tests\\Behavioral\\QuickTest",
                 //"..\\Tests\\Behavioral\\SortArrayType",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue,
                 //"..\\Tests\\Behavioral\\ExprSwitch",
@@ -40,7 +41,8 @@
                 //"..\\Tests\\Behavioral\\StructPromotion",
                 //"..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
-                "..\\Tests\\Behavioral\\TypeConversion",
+                //"..\\Tests\\Behavioral\\TypeConversion",
+                "..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
             ]
         }
     ]

@@ -51,15 +51,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 					// Check if value spec type is a struct or a pointer to a struct
 					valueSpecType := valueSpec.Type
 
-					if ptrType, ok := valueSpecType.(*ast.StarExpr); ok {
-						if subStructType, ok := ptrType.X.(*ast.StructType); ok {
-							v.visitStructType(subStructType, v.getExprType(ptrType.X), csIDName, valueSpec.Comment, v.inFunction)
-						}
-					} else if subStructType, ok := valueSpecType.(*ast.StructType); ok {
-						v.visitStructType(subStructType, v.getExprType(valueSpecType), csIDName, valueSpec.Comment, v.inFunction)
+					if subStructType, exprType := v.extractStructType(valueSpecType); subStructType != nil {
+						v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true)
 					}
 
-					goTypeName := v.getTypeName(def.Type())
+					goTypeName := v.getTypeName(def.Type(), false)
 					csTypeName := convertToCSTypeName(goTypeName)
 
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
@@ -117,7 +113,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 
 			v.targetFile.WriteString(v.newline)
 
-			csTypeName := convertToCSTypeName(v.getTypeName(tv.Type))
+			csTypeName := convertToCSTypeName(v.getTypeName(tv.Type, false))
 			goValue := tv.Value.ExactString()
 			csValue := v.convExpr(valueSpec.Values[i], nil)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
@@ -152,7 +148,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			csIDName := getSanitizedIdentifier(goIDName)
 
 			c := v.info.ObjectOf(ident).(*types.Const)
-			goTypeName := v.getTypeName(c.Type())
+			goTypeName := v.getTypeName(c.Type(), false)
 			csTypeName := convertToCSTypeName(goTypeName)
 			access := getAccess(goIDName)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
