@@ -114,14 +114,14 @@ func (c TupleResultContext) getDefault() StmtContext {
 type IdentContext struct {
 	isPointer bool
 	isType    bool
-	name      string
+	ident     *ast.Ident
 }
 
 func DefaultIdentContext() IdentContext {
 	return IdentContext{
 		isPointer: false,
 		isType:    false,
-		name:      "",
+		ident:     nil,
 	}
 }
 

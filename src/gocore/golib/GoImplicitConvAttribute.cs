@@ -42,4 +42,8 @@ namespace go;
 [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
 public class GoImplicitConvAttribute<TSource, TTarget> : Attribute
 {
+    /// <summary>
+    /// Gets or sets flag that determines if operator conversion order should be inverted.
+    /// </summary>
+    public bool Inverted { get; set; }
 }

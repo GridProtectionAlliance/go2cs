@@ -43,6 +43,8 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<Process_data, DataProcessor_data>(Inverted = true)]
+[assembly: GoImplicitConv<main_data, DataProcessor_data>]
 // </ImplicitConversions>
 
 namespace go;

@@ -189,6 +189,7 @@ var interfaceImplementations = map[string]HashSet[string]{}
 var promotedInterfaceImplementations = map[string]HashSet[string]{}
 var interfaceInheritances = map[string]HashSet[string]{}
 var implicitConversions = map[string]HashSet[string]{}
+var invertedImplicitConversions = map[string]HashSet[string]{}
 var initFuncCounter int
 var packageLock = sync.Mutex{}
 
@@ -706,6 +707,13 @@ Examples:
 			}
 		}
 
+		// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceName, targetTypes := range invertedImplicitConversions {
+			for targetType := range targetTypes {
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceName))
+			}
+		}
+
 		// Sort lines
 		sortedLines := lines.Keys()
 		sort.Strings(sortedLines)
@@ -1172,10 +1180,81 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		packageLock.Unlock()
 	}
 
+	if derivedInterfaceType, ok := interfaceType.Underlying().(*types.Interface); ok {
+		if targetStructType, ok := targetType.(*types.Named); ok {
+			// Iterate over methods of the derived interface looking for struct parameters
+			for i := 0; i < derivedInterfaceType.NumMethods(); i++ {
+				interfaceMethod := derivedInterfaceType.Method(i)
+				interfaceMethodSignature, ok := interfaceMethod.Type().(*types.Signature)
+
+				if !ok {
+					continue
+				}
+
+				// Lookup matching receiver method for target struct by name
+				methodInfo, _, _ := types.LookupFieldOrMethod(types.NewPointer(targetStructType), true, v.pkg, interfaceMethod.Name())
+
+				if methodInfo == nil {
+					methodInfo, _, _ = types.LookupFieldOrMethod(targetStructType, true, v.pkg, interfaceMethod.Name())
+				}
+
+				if methodInfo == nil {
+					continue
+				}
+
+				targetMethodSignature, ok := methodInfo.Type().(*types.Signature)
+
+				if !ok {
+					continue
+				}
+
+				// Iterate over parameters of the interface method
+				totalParameters := interfaceMethodSignature.Params().Len()
+
+				for j := 0; j < totalParameters; j++ {
+					interfaceParamType := interfaceMethodSignature.Params().At(j).Type().Underlying()
+					targetParameterType := targetMethodSignature.Params().At(j).Type().Underlying()
+
+					// Check if targetParamType is a struct or a pointer to a struct
+					if ptrType, ok := targetParameterType.(*types.Pointer); ok {
+						targetParameterType = ptrType.Elem().Underlying()
+					}
+
+					if _, ok := targetParameterType.(*types.Struct); ok {
+						// Check if interfaceParamType is a struct or a pointer to a struct
+						if ptrType, ok := interfaceParamType.(*types.Pointer); ok {
+							interfaceParamType = ptrType.Elem().Underlying()
+						}
+
+						if _, ok := interfaceParamType.(*types.Struct); ok {
+							// Both interfaceParamType and targetParamType are structs, track implicit conversions
+							packageLock.Lock()
+
+							interfaceParamTypeName := v.getCSTypeName(interfaceParamType)
+							targetParamTypeName := v.getCSTypeName(targetParameterType)
+							var conversions HashSet[string]
+							var exists bool
+
+							// For interface methods that have struct parameters, tracked implicit conversions
+							// are inverted to allow for implicit conversions from struct to interface
+							if conversions, exists = invertedImplicitConversions[interfaceParamTypeName]; exists {
+								conversions.Add(targetParamTypeName)
+							} else {
+								conversions = NewHashSet([]string{targetParamTypeName})
+								invertedImplicitConversions[interfaceParamTypeName] = conversions
+							}
+
+							packageLock.Unlock()
+						}
+					}
+				}
+			}
+		}
+	}
+
 	return prefix + exprResult
 }
 
-// getUnderlyingType attempts to get the concrete type underneath an interface type
 func (v *Visitor) getUnderlyingType(expr ast.Expr) types.Type {
 	typ := v.info.TypeOf(expr)
 	if typ == nil {
@@ -1229,12 +1308,17 @@ func getIdentifier(node ast.Node) *ast.Ident {
 }
 
 func (v *Visitor) getIdentType(ident *ast.Ident) types.Type {
-	// First check Types map
-	if typeAndValue, exists := v.info.Types[ident]; exists {
-		return typeAndValue.Type
+	// First check the Types map (for expressions)
+	if tv, ok := v.info.Types[ident]; ok {
+		return tv.Type
 	}
 
-	// If not in Types, check Uses map
+	// Then check the Defs map (for declarations)
+	if obj := v.info.Defs[ident]; obj != nil {
+		return obj.Type()
+	}
+
+	// Finally, check the Uses map (for identifier usages)
 	if obj := v.info.Uses[ident]; obj != nil {
 		return obj.Type()
 	}

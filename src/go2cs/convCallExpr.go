@@ -102,6 +102,42 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				continue
 			}
 
+			argType := v.getType(callExpr.Args[i], true).Underlying()
+			targetType := paramType.Underlying()
+
+			// Check if paramType is a struct or a pointer to a struct
+			if ptrType, ok := targetType.(*types.Pointer); ok {
+				targetType = ptrType.Elem().Underlying()
+			}
+
+			if _, ok := targetType.(*types.Struct); ok {
+				// Check if argType is a struct or a pointer to a struct
+				if ptrType, ok := argType.(*types.Pointer); ok {
+					argType = ptrType.Elem().Underlying()
+				}
+
+				if _, ok := argType.(*types.Struct); ok {
+					// If both paramType and argType are structs, track implicit conversions
+					packageLock.Lock()
+
+					argTypeName := v.getCSTypeName(argType)
+					targetTypeName := v.getCSTypeName(targetType)
+					var conversions HashSet[string]
+					var exists bool
+
+					if conversions, exists = implicitConversions[argTypeName]; exists {
+						conversions.Add(targetTypeName)
+					} else {
+						conversions = NewHashSet([]string{targetTypeName})
+						implicitConversions[argTypeName] = conversions
+					}
+
+					v.addImplicitSubStructConversions(argType, targetTypeName)
+
+					packageLock.Unlock()
+				}
+			}
+
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
 				callExprContext.u8StringArgOK[i] = false
 

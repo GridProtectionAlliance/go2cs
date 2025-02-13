@@ -155,7 +155,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	identContext.isType = true
 
 	if context.ident != nil {
-		identContext.name = context.ident.Name
+		identContext.ident = context.ident
 	}
 
 	contexts := []ExprContext{arrayTypeContext, identContext}

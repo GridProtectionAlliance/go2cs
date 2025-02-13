@@ -10,33 +10,38 @@ internal class ImplicitConvTemplate : TemplateBase
     // Template Parameters
     public required string SourceTypeName;
     public required string TargetTypeName;
+    public required bool Inverted;
     public required List<(string typeName, string memberName)> StructMembers;
 
     public override string TemplateBody =>
         $$"""
              partial struct {{SourceTypeName}}
              {
-                 public static implicit operator {{TargetTypeName}}({{SourceTypeName}} src)
+                 public static implicit operator {{LHTypeName}}({{RHTypeName}} src)
                  {
                      return {{ConvExpr}};
                  }
              }    
          """;
 
+    public string LHTypeName => Inverted ? SourceTypeName : TargetTypeName;
+
+    public string RHTypeName => Inverted ? TargetTypeName : SourceTypeName;
+
     private string ConvExpr
     {
         get
         {
-            if (!PointerExpr.IsMatch(TargetTypeName))
-                return $"new {TargetTypeName}({ParamList})";
+            if (!PointerExpr.IsMatch(LHTypeName))
+                return $"new {LHTypeName}({ParamList})";
             
-            int ltIndex = TargetTypeName.IndexOf('<');
-            int gtIndex = TargetTypeName.LastIndexOf('>');
+            int ltIndex = LHTypeName.IndexOf('<');
+            int gtIndex = LHTypeName.LastIndexOf('>');
 
             if (gtIndex > ltIndex)
-                return $"Ꮡ(new {TargetTypeName[(ltIndex + 1)..gtIndex]}({ParamList}))";
+                return $"Ꮡ(new {LHTypeName[(ltIndex + 1)..gtIndex]}({ParamList}))";
 
-            throw new FormatException($"Unexpected target type name \"{TargetTypeName}\"");
+            throw new FormatException($"Unexpected target type name \"{LHTypeName}\"");
         }
     }
 

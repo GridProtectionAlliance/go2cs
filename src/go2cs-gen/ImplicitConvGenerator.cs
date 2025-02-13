@@ -85,6 +85,10 @@ public class ImplicitConvGenerator : ISourceGenerator
             string sourceTypeName = sourceType.GetFullTypeName();
             string targetTypeName = targetType.GetFullTypeName();
 
+            // Get the attribute's Inverted argument value, if defined
+            string[] arguments = attribute.GetArgumentValues();
+            bool inverted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+
             StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
 
             if (structDeclaration is null)
@@ -101,6 +105,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                 PackageName = packageName,
                 SourceTypeName = sourceTypeName,
                 TargetTypeName = targetTypeName,
+                Inverted = inverted,
                 StructMembers = structMembers,
                 UsingStatements = usingStatements
             }
