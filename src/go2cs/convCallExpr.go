@@ -13,8 +13,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		expr := v.convExpr(arg, nil)
 
 		targetTypeName = getSanitizedIdentifier(convertToCSTypeName(targetTypeName))
-		targetType := v.getType(callExpr.Fun, true)
-		argType := v.getType(arg, true)
+		targetType := v.getType(callExpr.Fun, false)
+		argType := v.getType(arg, false)
 
 		var targetTypeIsPointer bool
 
@@ -41,18 +41,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// If both funcType and argType are structs, track implicit conversions
 				packageLock.Lock()
 
+				var targetConversionsMap map[string]HashSet[string]
+
+				if targetTypeIsPointer {
+					targetConversionsMap = indirectImplicitConversions
+				} else {
+					targetConversionsMap = implicitConversions
+				}
+
 				argTypeName := v.getCSTypeName(argType)
 				var conversions HashSet[string]
 				var exists bool
 
-				if conversions, exists = implicitConversions[argTypeName]; exists {
+				if conversions, exists = targetConversionsMap[argTypeName]; exists {
 					conversions.Add(targetTypeName)
 				} else {
 					conversions = NewHashSet([]string{targetTypeName})
-					implicitConversions[argTypeName] = conversions
+					targetConversionsMap[argTypeName] = conversions
 				}
 
-				v.addImplicitSubStructConversions(argType, targetTypeName)
+				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
 
 				packageLock.Unlock()
 			}
@@ -102,40 +110,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				continue
 			}
 
-			argType := v.getType(callExpr.Args[i], true).Underlying()
-			targetType := paramType.Underlying()
-
-			// Check if paramType is a struct or a pointer to a struct
-			if ptrType, ok := targetType.(*types.Pointer); ok {
-				targetType = ptrType.Elem().Underlying()
-			}
-
-			if _, ok := targetType.(*types.Struct); ok {
-				// Check if argType is a struct or a pointer to a struct
-				if ptrType, ok := argType.(*types.Pointer); ok {
-					argType = ptrType.Elem().Underlying()
-				}
-
-				if _, ok := argType.(*types.Struct); ok {
-					// If both paramType and argType are structs, track implicit conversions
-					packageLock.Lock()
-
-					argTypeName := v.getCSTypeName(argType)
-					targetTypeName := v.getCSTypeName(targetType)
-					var conversions HashSet[string]
-					var exists bool
-
-					if conversions, exists = implicitConversions[argTypeName]; exists {
-						conversions.Add(targetTypeName)
-					} else {
-						conversions = NewHashSet([]string{targetTypeName})
-						implicitConversions[argTypeName] = conversions
-					}
-
-					v.addImplicitSubStructConversions(argType, targetTypeName)
-
-					packageLock.Unlock()
-				}
+			if callExpr.Args != nil && i < len(callExpr.Args) {
+				argType := v.getType(callExpr.Args[i], false)
+				targetType := paramType
+				v.checkForDynamicStructs(argType, targetType)
 			}
 
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
@@ -364,7 +342,7 @@ func (v *Visitor) isConstructorCall(callExpr *ast.CallExpr) bool {
 	}
 }
 
-func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetTypeName string) {
+func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetTypeName string, indirect bool) {
 	if subStructTypes, exists := v.subStructTypes[sourceType]; exists {
 		for _, subStructType := range subStructTypes {
 			// Check if subStructType is a pointer
@@ -382,16 +360,24 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 			}
 
 			// Recursively add implicit conversions for sub-structs
-			v.addImplicitSubStructConversions(subStructType, targetTypeName)
+			v.addImplicitSubStructConversions(subStructType, targetTypeName, indirect)
+
+			var targetConversionsMap map[string]HashSet[string]
+
+			if indirect {
+				targetConversionsMap = indirectImplicitConversions
+			} else {
+				targetConversionsMap = implicitConversions
+			}
 
 			var conversions HashSet[string]
 			var exists bool
 
-			if conversions, exists = implicitConversions[subStructTypeName]; exists {
+			if conversions, exists = targetConversionsMap[subStructTypeName]; exists {
 				conversions.Add(targetTypeName)
 			} else {
 				conversions = NewHashSet([]string{targetTypeName})
-				implicitConversions[subStructTypeName] = conversions
+				targetConversionsMap[subStructTypeName] = conversions
 			}
 		}
 	}

@@ -29,9 +29,13 @@ namespace go2cs;
 
 public static class AttributeSyntaxExtensions
 {
-    public static string[] GetArgumentValues(this AttributeSyntax attribute)
+    public static (string name, string value)[] GetArgumentValues(this AttributeSyntax attribute)
     {
         SeparatedSyntaxList<AttributeArgumentSyntax> arguments = attribute.ArgumentList?.Arguments ?? default;
-        return arguments.Select(argument => argument.Expression.NormalizeWhitespace().ToFullString()).ToArray();
+
+        return arguments.Select(argument => (
+            name: argument.NameEquals?.Name.Identifier.Text ?? string.Empty,
+            value: argument.Expression.NormalizeWhitespace().ToFullString()
+        )).ToArray();
     }
 }

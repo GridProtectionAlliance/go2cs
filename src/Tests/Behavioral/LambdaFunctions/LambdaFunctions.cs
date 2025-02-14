@@ -26,7 +26,7 @@ private static void Main() {
     Stringy f = returnsAFunction();
     f();
     Stringy baz = () => "anonymous stringy\n"u8;
-    fmt.Printf(baz());
+    fmt.Print(baz());
 }
 
 } // end main_package

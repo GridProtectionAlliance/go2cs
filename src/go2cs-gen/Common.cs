@@ -123,4 +123,9 @@ public static class Common
     {
         return new string(fileName.Select(c => InvalidChars.Contains(c) ? '_' : c).ToArray());
     }
+
+    public static string GetUnsanitizedIdentifier(string name)
+    {
+        return name.StartsWith("@") ? name[1..] : name;
+    }
 }

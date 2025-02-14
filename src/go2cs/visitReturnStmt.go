@@ -75,6 +75,12 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				result.WriteString(", ")
 			}
 
+			if resultParams != nil && i < resultParams.Len() {
+				argType := v.getType(expr, false)
+				targetType := resultParams.At(i).Type()
+				v.checkForDynamicStructs(argType, targetType)
+			}
+
 			lambdaContext.deferredDecls = &strings.Builder{}
 
 			resultExpr := v.convExpr(expr, []ExprContext{basicLitContext, lambdaContext})

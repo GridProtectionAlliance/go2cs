@@ -46,4 +46,12 @@ public class GoImplicitConvAttribute<TSource, TTarget> : Attribute
     /// Gets or sets flag that determines if operator conversion order should be inverted.
     /// </summary>
     public bool Inverted { get; set; }
+
+    /// <summary>
+    /// Gets or sets flag that determines if pointer conversion should be based on value.
+    /// </summary>
+    /// <remarks>
+    /// Implicit C# conversion operators require one of the parameters to be the source instance.
+    /// </remarks>
+    public bool Indirect { get; set; }
 }

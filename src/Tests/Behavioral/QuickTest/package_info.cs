@@ -44,6 +44,7 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<test_x, test_R0>]
 // </ImplicitConversions>
 
 namespace go;

@@ -74,6 +74,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceInheritance() => CheckTarget("InterfaceInheritance");
 
     [TestMethod]
+    public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
@@ -81,6 +84,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
+
+    [TestMethod]
+    public void CheckQuickTest() => CheckTarget("QuickTest");
 
     [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
@@ -117,6 +123,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
+
+    [TestMethod]
+    public void CheckTypeConversionInterfaceParam() => CheckTarget("TypeConversionInterfaceParam");
+
+    [TestMethod]
+    public void CheckTypeConversionReturnType() => CheckTarget("TypeConversionReturnType");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");

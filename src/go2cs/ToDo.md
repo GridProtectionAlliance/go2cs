@@ -20,10 +20,12 @@
   d) ~~Test `nil` channel which is never ready for communication~~
   e) ~~Handle channels with specified direction (send or receive)~~
 11) ~~Complete send statement implementation (`visitSendStmt`)~~
-12) Complete struct interfaces and embedding (will need C# GoType code converter work)
+12) ~~Complete struct interfaces and embedding (will need C# GoType code converter work)~~
 13) ~~Complete interface inheritance (will need C# GoType code converter work)~~
 14) ~~Complete channel implementation (`visitChanType` / `visitCommClause`)~~
   a) Suspected complete through existing paths - add test code for when is it encountered - or remove
+15) ~~Handle dynamic struct type lifting~~
+  a) Implement remaining dynamic struct implicit cast checks `v.checkForDynamicStructs(argType, targetType)` in the following visitors: `AssignStmt`, `CompositeLit`, `IndexExpr`, `BinaryExpr`, `UnaryExpr`, `SelectorExpr`, `TypeSwitchStmt`, `ValueSpec` 
 15) Handle generics conversion
 16) Always include pre-package comments during conversion
 
@@ -45,14 +47,13 @@ xx) Add suport for Go assembler targets (*.s files)
        wrap in a .dll/.so/.dynlib with callable entry points options from C# code
     2) Note that for Go library there are often pure Go implementations to lean on initally
 
-Fix the following sparse array initialization use case - see "Interface Implementation":
-```go
-vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': true}
-```
-```cs
-var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();
-```
-
+~~Fix the following sparse array initialization use case - see "Interface Implementation":~~
+~~```go~~
+~~vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': true}~~
+~~```~~
+~~```cs~~
+~~var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = true, vowels['o'] = true, vowels['u'] = true, vowels['y'] = true}.array();~~
+~~```~~
 ~~Fix lambda shadow and missed shadow -- see "First Class Functions"~~
 
 ## For C# code operations:
@@ -60,7 +61,7 @@ var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = tr
 01) ~~Restructure T4 templates for Roslyn type inputs (or simplified versions) since using code will only be source generators~~
     ~~1) This will involve dropping unused code from go2cs.Common~~
 02) Update source generators to accommodate remaining GoType attribute implementations, e.g.:
-    1) Struct embedding (inheritance)
+    1) ~~Struct embedding (inheritance)~~
     2) ~~Struct interface implementations~~
     3) ~~Interface inheritance~~
     4) map type definitions (IMap implementation)
@@ -68,7 +69,7 @@ var vowels = new bool[]{vowels['a'] = true, vowels['e'] = true, vowels['i'] = tr
     6) other...
 03) ~~Remove current C# version of go2cs - determine if any should remain as proxy to Go version~~
     ~~1) Remove related dependencies, e.g., Antlr / command line parsing code~~
-04) Restructure behavioral tests:
-    1) Mode to compare raw code to target file, ignoring comments
+04) ~~Restructure behavioral tests:~~
+    1) ~~Mode to compare raw code to target file, ignoring comments~~
        ~~1) Set this up soon to better handle regression testing of go2cs changes~~
     2) Future tests can be setup to compare with comments once go2c2 has better support

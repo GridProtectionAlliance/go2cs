@@ -190,6 +190,7 @@ var promotedInterfaceImplementations = map[string]HashSet[string]{}
 var interfaceInheritances = map[string]HashSet[string]{}
 var implicitConversions = map[string]HashSet[string]{}
 var invertedImplicitConversions = map[string]HashSet[string]{}
+var indirectImplicitConversions = map[string]HashSet[string]{}
 var initFuncCounter int
 var packageLock = sync.Mutex{}
 
@@ -708,9 +709,16 @@ Examples:
 		}
 
 		// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
-		for sourceName, targetTypes := range invertedImplicitConversions {
+		for sourceType, targetTypes := range invertedImplicitConversions {
 			for targetType := range targetTypes {
-				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceName))
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceType))
+			}
+		}
+
+		// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
+		for sourceType, targetTypes := range indirectImplicitConversions {
+			for targetType := range targetTypes {
+				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
 			}
 		}
 
@@ -1021,6 +1029,14 @@ func getSanitizedIdentifier(identifier string) string {
 	return identifier
 }
 
+func getUnsanitizedIdentifier(identifier string) string {
+	if strings.HasPrefix(identifier, "@") {
+		return identifier[1:] // Remove "@" prefix
+	}
+
+	return identifier
+}
+
 func getSanitizedFunctionName(funcName string) string {
 	funcName = getSanitizedIdentifier(funcName)
 
@@ -1255,6 +1271,67 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	return prefix + exprResult
 }
 
+func isDynamicStruct(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+	// If it's a pointer, get its element.
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+	// If it's a named type, then it’s not dynamic.
+	if _, ok := t.(*types.Named); ok {
+		return false
+	}
+	// Finally, it must be a struct.
+	_, ok := t.(*types.Struct)
+	return ok
+}
+
+func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Type) {
+	if argType == nil || targetType == nil {
+		return
+	}
+
+	// Only proceed if both types are dynamic (anonymous) structs.
+	if !isDynamicStruct(argType) || !isDynamicStruct(targetType) {
+		return
+	}
+
+	// If targetType is a pointer, get its element and underlying type.
+	if ptrType, ok := targetType.(*types.Pointer); ok {
+		targetType = ptrType.Elem().Underlying()
+	}
+
+	if _, ok := targetType.(*types.Struct); ok {
+		// Likewise for argType.
+		if ptrType, ok := argType.(*types.Pointer); ok {
+			argType = ptrType.Elem().Underlying()
+		}
+
+		if _, ok := argType.(*types.Struct); ok {
+			// Both are dynamic structs; track implicit conversions.
+			packageLock.Lock()
+
+			argTypeName := v.getCSTypeName(argType)
+			targetTypeName := v.getCSTypeName(targetType)
+			var conversions HashSet[string]
+			var exists bool
+
+			if conversions, exists = implicitConversions[argTypeName]; exists {
+				conversions.Add(targetTypeName)
+			} else {
+				conversions = NewHashSet([]string{targetTypeName})
+				implicitConversions[argTypeName] = conversions
+			}
+
+			v.addImplicitSubStructConversions(argType, targetTypeName, false)
+
+			packageLock.Unlock()
+		}
+	}
+}
+
 func (v *Visitor) getUnderlyingType(expr ast.Expr) types.Type {
 	typ := v.info.TypeOf(expr)
 	if typ == nil {
@@ -1327,6 +1404,10 @@ func (v *Visitor) getIdentType(ident *ast.Ident) types.Type {
 }
 
 func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
+	if expr == nil {
+		return nil
+	}
+
 	exprType := v.info.TypeOf(expr)
 
 	if exprType == nil {

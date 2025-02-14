@@ -89,8 +89,8 @@ public class ImplementGenerator : ISourceGenerator
             string interfaceName = interfaceType.GetFullTypeName(true);
 
             // Get the attribute's Promoted argument value, if defined
-            string[] arguments = attribute.GetArgumentValues();
-            bool promoted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+            (string name, string value)[] arguments = attribute.GetArgumentValues();
+            bool promoted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false");
 
             // Get all extension methods for the struct, any directly defined receivers
             // take precedence over promoted interface methods that have the same name

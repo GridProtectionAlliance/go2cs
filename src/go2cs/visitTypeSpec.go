@@ -51,7 +51,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType))
 	case *ast.StructType:
-		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, false)
+		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
 	default:
 		panic(fmt.Sprintf("Unexpected TypeSpec type: %#v", typeSpecType))
 	}

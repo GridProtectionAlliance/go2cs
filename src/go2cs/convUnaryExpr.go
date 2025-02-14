@@ -15,7 +15,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context TupleResultCon
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			if _, ok := v.getType(selectorExpr.X, true).(*types.Struct); ok {
 				// For a structure field, we use the "ж.of(StructType.ᏑField)" syntax
-				return fmt.Sprintf("%s%s.of(%s.%s%s)", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.getExprTypeName(selectorExpr.X, false), AddressPrefix, v.convExpr(selectorExpr.Sel, nil))
+				return fmt.Sprintf("%s%s.of(%s.%s%s)", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.getExprTypeName(selectorExpr.X, false), AddressPrefix, getUnsanitizedIdentifier(v.convExpr(selectorExpr.Sel, nil)))
 			}
 		}
 

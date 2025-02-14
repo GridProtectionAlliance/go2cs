@@ -84,10 +84,19 @@ public class TypeGenerator : ISourceGenerator
             foreach (AttributeSyntax attribute in attributes)
             {
                 // Get the attribute's argument values
-                string[] arguments = attribute.GetArgumentValues();
+                (string _, string value)[] arguments = attribute.GetArgumentValues();
 
-                // Get the attribute's first constructor argument value, type definition
-                string typeDefinition = arguments.Length > 0 ? arguments[0][1..^1].Trim() : string.Empty;
+                // Get the attribute's first constructor argument value, the type definition
+                string typeDefinition = string.Empty;
+
+                if (arguments.Length > 0)
+                {
+                    string value = arguments[0].value;
+                    
+                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
+                        typeDefinition = value[1..^1].Trim();
+                }
+
                 string generatedSource, typeName;
 
                 switch (targetSyntax)

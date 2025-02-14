@@ -11,6 +11,7 @@ internal class ImplicitConvTemplate : TemplateBase
     public required string SourceTypeName;
     public required string TargetTypeName;
     public required bool Inverted;
+    public required bool Indirect;
     public required List<(string typeName, string memberName)> StructMembers;
 
     public override string TemplateBody =>
@@ -47,9 +48,9 @@ internal class ImplicitConvTemplate : TemplateBase
 
     private string ParamList => string.Join(", ", StructMembers.Select(GetParamExpr));
 
-    private static string GetParamExpr((string typeName, string memberName) member)
+    private string GetParamExpr((string, string) member)
     {
         (string typeName, string memberName) = member;
-        return PointerExpr.IsMatch(typeName) ? $"src.{memberName}?.val ?? default!" : $"src.{memberName}";
+        return Indirect && PointerExpr.IsMatch(typeName) ? $"src.{memberName}?.val ?? default!" : $"src.{memberName}";
     }
 }

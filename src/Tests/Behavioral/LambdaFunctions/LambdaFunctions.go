@@ -26,5 +26,5 @@ func main() {
 	var baz Stringy = func() string {
 		return "anonymous stringy\n"
 	}
-	fmt.Printf(baz())
+	fmt.Print(baz())
 }

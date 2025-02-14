@@ -85,9 +85,10 @@ public class ImplicitConvGenerator : ISourceGenerator
             string sourceTypeName = sourceType.GetFullTypeName();
             string targetTypeName = targetType.GetFullTypeName();
 
-            // Get the attribute's Inverted argument value, if defined
-            string[] arguments = attribute.GetArgumentValues();
-            bool inverted = arguments.Length > 0 && bool.Parse(arguments[0].Trim());
+            // Get the attribute's argument values, if defined
+            (string name, string value)[] arguments = attribute.GetArgumentValues();
+            bool inverted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Inverted")).value?.Trim() ?? "false");
+            bool indirect = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Indirect")).value?.Trim() ?? "false");
 
             StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
 
@@ -106,6 +107,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                 SourceTypeName = sourceTypeName,
                 TargetTypeName = targetTypeName,
                 Inverted = inverted,
+                Indirect = indirect,
                 StructMembers = structMembers,
                 UsingStatements = usingStatements
             }

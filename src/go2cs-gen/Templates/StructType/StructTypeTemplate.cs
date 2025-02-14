@@ -160,7 +160,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                result.Append($"public static ref {typeName} Ꮡ{memberName}(ref {StructName} instance) => ref instance.{memberName};");
+                result.Append($"public static ref {typeName} Ꮡ{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
             }
 
             return result.ToString();
