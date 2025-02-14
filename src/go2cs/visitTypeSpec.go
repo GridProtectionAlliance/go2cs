@@ -41,7 +41,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.Ident:
 		v.visitIdent(typeSpecType, name)
 	case *ast.InterfaceType:
-		v.visitInterfaceType(typeSpecType, name, doc)
+		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
 	case *ast.MapType:
 		v.visitMapType(typeSpecType)
 	case *ast.ParenExpr:

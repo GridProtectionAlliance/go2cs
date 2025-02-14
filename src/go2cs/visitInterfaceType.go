@@ -11,7 +11,7 @@ import (
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
 // Handles map types in context of a TypeSpec
-func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name string, doc *ast.CommentGroup) {
+func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) {
 	for _, field := range interfaceType.Methods.List {
 		// Check if this is an actual method (has a function type)
 		if funcType, ok := field.Type.(*ast.FuncType); ok {
@@ -57,8 +57,33 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 		}
 	}
 
-	v.targetFile.WriteString(v.newline)
-	v.writeDoc(doc, interfaceType.Pos())
+	var target *strings.Builder
+
+	// Intra-function type declarations are not allowed in C#
+	if lifted {
+		if v.inFunction {
+			target = &strings.Builder{}
+
+			if !strings.HasPrefix(name, v.currentFuncName+"_") {
+				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
+			}
+
+			v.indentLevel--
+		}
+
+		name = v.getUniqueLiftedTypeName(name)
+		v.liftedTypeMap[identType] = name
+	}
+
+	if target == nil {
+		target = v.targetFile
+	}
+
+	if !v.inFunction {
+		target.WriteString(v.newline)
+	}
+
+	v.writeDocString(target, doc, interfaceType.Pos())
 
 	result := &strings.Builder{}
 	inheritedInterfaces := []string{}
@@ -133,7 +158,16 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, name stri
 		interfaceResult = strings.ReplaceAll(interfaceResult, InterfaceInheritanceMarker, " ")
 	}
 
-	v.targetFile.WriteString(interfaceResult)
+	target.WriteString(interfaceResult)
+
+	if lifted && v.inFunction {
+		if v.currentFuncPrefix.Len() > 0 {
+			v.currentFuncPrefix.WriteString(v.newline)
+		}
+
+		v.currentFuncPrefix.WriteString(target.String())
+		v.indentLevel++
+	}
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {

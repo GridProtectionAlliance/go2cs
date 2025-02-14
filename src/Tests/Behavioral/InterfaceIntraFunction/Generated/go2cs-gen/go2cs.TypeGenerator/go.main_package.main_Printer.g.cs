@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -17,11 +17,8 @@ namespace go;
 
 public static partial class main_package
 {
-    partial struct test_x
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    internal partial interface main_Printer
     {
-        public static implicit operator test_R0(test_x src)
-        {
-            return new test_R0(src.@string, src.@int, src.P, src.M);
-        }
-    }    
+    }
 }

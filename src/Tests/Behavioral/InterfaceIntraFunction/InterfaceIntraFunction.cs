@@ -12,12 +12,12 @@ public static void Print(this Message m) {
     fmt.Println(m.Text);
 }
 
-private static void Main() {
-    [GoType] partial interface Printer {
-        void Print();
-    }
+[GoType] partial interface main_Printer {
+    void Print();
+}
 
-    Printer p = new Message("Hello, from a function-scoped interface!");
+private static void Main() {
+    main_Printer p = new Message("Hello, from a function-scoped interface!");
     p.Print();
 }
 

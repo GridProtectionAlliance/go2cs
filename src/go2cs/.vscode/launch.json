@@ -43,8 +43,8 @@
                 //"..\\Tests\\Behavioral\\StructPromotion",
                 //"..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
-                "..\\Tests\\Behavioral\\TypeConversion",
-                //"..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
+                //"..\\Tests\\Behavioral\\TypeConversion",
+                "..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
             ]
         }

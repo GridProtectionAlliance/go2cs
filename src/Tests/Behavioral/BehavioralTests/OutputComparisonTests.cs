@@ -52,6 +52,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]
+    public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
