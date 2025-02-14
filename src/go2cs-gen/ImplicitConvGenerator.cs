@@ -74,7 +74,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                 .ToArray();
 
             // Extract generic type arguments from "GoImplicitConv"
-            (ITypeSymbol? sourceType, ITypeSymbol? targetType) = GetGenericTypeArguments(attribute, syntaxContext);
+            (ITypeSymbol? sourceType, ITypeSymbol? targetType) = attribute.Get2GenericTypeArguments(syntaxContext);
             
             if (sourceType is null || targetType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
@@ -126,25 +126,6 @@ public class ImplicitConvGenerator : ISourceGenerator
     private static string? GetFirstClassName(CompilationUnitSyntax compilationUnit)
     {
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
-    }
-
-    private static (ITypeSymbol? sourceType, ITypeSymbol? targetType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
-    {
-        // Check if the attribute type is generic
-        if (attributeSyntax.Name is not GenericNameSyntax genericName)
-            return (null, null);
-
-        // Get the type arguments
-        SeparatedSyntaxList<TypeSyntax> typeArguments = genericName.TypeArgumentList.Arguments;
-
-        if (typeArguments.Count != 2)
-            return (null, null);
-
-        // Get semantic information for each type argument
-        ITypeSymbol? sourceType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
-        ITypeSymbol? targetType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
-
-        return (sourceType, targetType);
     }
 
     private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)

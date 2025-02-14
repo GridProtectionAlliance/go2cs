@@ -74,7 +74,7 @@ public class ImplementGenerator : ISourceGenerator
                 .ToArray();
 
             // Extract generic type arguments from "GoImplementAttribute"
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = GetGenericTypeArguments(attribute, syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attribute.Get2GenericTypeArguments(syntaxContext);
             
             if (structType is null || interfaceType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
@@ -140,24 +140,5 @@ public class ImplementGenerator : ISourceGenerator
     private static string? GetFirstClassName(CompilationUnitSyntax compilationUnit)
     {
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
-    }
-
-    private static (ITypeSymbol? structType, ITypeSymbol? interfaceType) GetGenericTypeArguments(AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
-    {
-        // Check if the attribute type is generic
-        if (attributeSyntax.Name is not GenericNameSyntax genericName)
-            return (null, null);
-
-        // Get the type arguments
-        SeparatedSyntaxList<TypeSyntax> typeArguments = genericName.TypeArgumentList.Arguments;
-
-        if (typeArguments.Count != 2)
-            return (null, null);
-
-        // Get semantic information for each type argument
-        ITypeSymbol? structType = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
-        ITypeSymbol? interfaceType = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
-
-        return (structType, interfaceType);
     }
 }

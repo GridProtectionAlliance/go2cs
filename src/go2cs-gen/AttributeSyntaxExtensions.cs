@@ -38,4 +38,24 @@ public static class AttributeSyntaxExtensions
             value: argument.Expression.NormalizeWhitespace().ToFullString()
         )).ToArray();
     }
+
+
+    public static (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) Get2GenericTypeArguments(this AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
+    {
+        // Check if the attribute type is generic
+        if (attributeSyntax.Name is not GenericNameSyntax genericName)
+            return (null, null);
+
+        // Get the type arguments
+        SeparatedSyntaxList<TypeSyntax> typeArguments = genericName.TypeArgumentList.Arguments;
+
+        if (typeArguments.Count != 2)
+            return (null, null);
+
+        // Get semantic information for each type argument
+        ITypeSymbol? typeArg1 = context.SemanticModel.GetTypeInfo(typeArguments[0]).Type;
+        ITypeSymbol? typeArg2 = context.SemanticModel.GetTypeInfo(typeArguments[1]).Type;
+
+        return (typeArg1, typeArg2);
+    }
 }
