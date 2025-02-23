@@ -292,6 +292,12 @@ public sealed class ж<T>
     //     *vp = 999; // or
     //     ref vp = 999;
     // As it stands, this operator just returns a copy of the structure value:
+
+    /// <summary>
+    /// Dereferences the heap allocated reference to the value of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="value">Pointer value to dereference.</param>
+    /// <returns>Dereferenced pointer value.</returns>
     public static T operator ~(ж<T> value)
     {
         return value.m_val;

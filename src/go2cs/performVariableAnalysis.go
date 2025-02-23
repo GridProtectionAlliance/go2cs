@@ -645,8 +645,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					continue
 				}
 
-				varObj := obj.(*types.Var)
-				declareVar(varName, varObj, ident)
+				// Ignore constants here
+				if varObj, ok := obj.(*types.Var); ok {
+					declareVar(varName, varObj, ident)
+				}
 			}
 
 			// Visit values

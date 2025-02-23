@@ -138,6 +138,7 @@ const ElipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 const TypeAliasDot = "\uA4F8"                // Variants: ꓸ
 const ChannelLeftOp = "\u1438\uA7F7"         // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"        // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
+const PointerDerefOp = "~"                   // Example: `~ptr` for dereferencing a pointer
 
 var keywords = NewHashSet([]string{
 	// The following are all valid C# keywords and types, when encountered in Go code they should be
@@ -1181,7 +1182,7 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 
 	if strings.HasPrefix(targetTypeName, PointerPrefix+"<") {
 		targetTypeName = targetTypeName[3 : len(targetTypeName)-1]
-		prefix = "~"
+		prefix = PointerDerefOp
 	}
 
 	if interfaceTypeName != "" && interfaceTypeName != "nil" && targetTypeName != "" && targetTypeName != "nil" {

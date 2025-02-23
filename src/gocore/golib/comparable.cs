@@ -31,12 +31,12 @@ namespace go;
 /// </summary>
 public interface comparable<T> : IEquatable<T> where T : comparable<T>
 {
-    static virtual bool operator ==(T left, T right)
+    public static virtual bool operator ==(T left, T right)
     {
         return left.Equals(right);
     }
 
-    static virtual bool operator !=(T left, T right)
+    public static virtual bool operator !=(T left, T right)
     {
         return !left.Equals(right);
     }

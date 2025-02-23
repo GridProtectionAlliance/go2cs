@@ -11,7 +11,32 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	rightOperand := v.convExpr(binaryExpr.Y, nil)
 
 	if !context.usePattenMatch {
-		if binaryOp == "<<" || binaryOp == ">>" {
+		// Check for comparisons between interface and pointer types,
+		// dereferencing pointer type for the comparison if necessary
+		if binaryOp == "==" || binaryOp == "!=" {
+			lhsType := v.getExprType(binaryExpr.X)
+			rhsType := v.getExprType(binaryExpr.Y)
+
+			lhsIsInterface, isEmpty := isInterface(lhsType)
+
+			if isEmpty {
+				lhsIsInterface = false
+			}
+
+			if lhsIsInterface && isPointer(rhsType) {
+				rightOperand = fmt.Sprintf("%s%s", PointerDerefOp, rightOperand)
+			} else {
+				rhsIsInterface, isEmpty := isInterface(rhsType)
+
+				if isEmpty {
+					rhsIsInterface = false
+				}
+
+				if rhsIsInterface && isPointer(lhsType) {
+					leftOperand = fmt.Sprintf("%s%s", PointerDerefOp, leftOperand)
+				}
+			}
+		} else if binaryOp == "<<" || binaryOp == ">>" {
 			rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)
 		}
 

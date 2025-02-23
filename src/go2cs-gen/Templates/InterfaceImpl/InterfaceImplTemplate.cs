@@ -18,6 +18,27 @@ internal class InterfaceImplTemplate : TemplateBase
              partial struct {{StructName}} : {{InterfaceName}}
              {
                  {{MethodsImplementation}}
+                 
+                 // Handle comparisons between '{{StructName}}' and '{{GetSimpleName(InterfaceName)}}'
+                 public static bool operator ==({{StructName}} src, {{InterfaceName}} iface)
+                 {
+                     return iface is {{StructName}} val && val == src;
+                 }
+                 
+                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface)
+                 {
+                     return !(src == iface);
+                 }
+                 
+                 public static bool operator ==({{InterfaceName}} iface, {{StructName}} src)
+                 {
+                     return iface is {{StructName}} val && val == src;
+                 }
+                 
+                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src)
+                 {
+                     return !(iface == src);
+                 }
              }
          """;
 

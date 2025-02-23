@@ -639,4 +639,41 @@ public struct channel<T> : IChannel, IEnumerable<T>
         source.Send(value);
         return source;
     }
+
+    // From Go spec: Two channel values are equal if they were created by the same call to make or if both have value nil.
+    public static bool operator ==(channel<T> left, channel<T> right)
+    {
+        return ReferenceEquals(left.m_queue, right.m_queue);
+    }
+
+    public static bool operator !=(channel<T> left, channel<T> right)
+    {
+        return !(left == right);
+    }
+
+    // Enable comparisons between nil and channel struct
+    public static bool operator ==(channel<T> value, NilType nil)
+    {
+        return value == default(channel<T>);
+    }
+
+    public static bool operator !=(channel<T> value, NilType nil)
+    {
+        return !(value == nil);
+    }
+
+    public static bool operator ==(NilType nil, channel<T> value)
+    {
+        return value == nil;
+    }
+
+    public static bool operator !=(NilType nil, channel<T> value)
+    {
+        return value != nil;
+    }
+
+    public static implicit operator channel<T>(NilType nil)
+    {
+        return default;
+    }
 }

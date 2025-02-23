@@ -241,10 +241,18 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 					constVal = "iota"
 				}
 
-				if v.inFunction {
-					v.writeOutput("const %s %s = %s;", csTypeName, csIDName, constVal)
+				orgExpr := v.getPrintedNode(valueSpec.Values[i])
+
+				if constVal == orgExpr {
+					orgExpr = ""
 				} else {
-					v.writeOutput("%s const %s %s = %s;", access, csTypeName, csIDName, constVal)
+					orgExpr = fmt.Sprintf(" /* %s */", orgExpr)
+				}
+
+				if v.inFunction {
+					v.writeOutput("const %s %s =%s %s;", csTypeName, csIDName, orgExpr, constVal)
+				} else {
+					v.writeOutput("%s const %s %s =%s %s;", access, csTypeName, csIDName, orgExpr, constVal)
 				}
 
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+1)
