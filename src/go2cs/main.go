@@ -155,17 +155,18 @@ var keywords = NewHashSet([]string{
 	"bool", "byte", "int", "string", "uint",
 
 	// The remaining C# keywords overlap with Go keywords, so they do not need detection:
-	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if",
-	// "interface", "new", "return", "select", "struct", "switch", "true", "var"
+	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if", "interface",
+	// "new", "return", "select", "struct", "switch", "true", "var"
 })
 
-// The following names are reserved by go2cs, if encountered in Go code they should be escaped with `Δ`
+// The following names are reserved by go2cs or C#, if encountered in Go code, suffix with `Δ` and indexer:
 var reserved = NewHashSet([]string{
-	"AreEqual", "array", "channel", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImplement",
-	"GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute",
-	"GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
-	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
-	"GoUntyped", "go\u01C3", "NilType", "PanicException", "slice",
+	"AreEqual", "array", "channel", "Equals", "Finalize", "GetGoTypeName", "GetHashCode", "GetType",
+	"GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute",
+	"GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput",
+	"GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute",
+	"GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3", "MemberwiseClone", "NilType", "PanicException",
+	"slice", "ToString",
 })
 
 //go:embed csproj-template.xml
