@@ -86,11 +86,10 @@ public abstract class BehavioralTestBase
 
         if (File.Exists(go2cs))
         {
-            // Compare exe timestamp to "main.go" see if we need to rebuild
-            FileInfo go2csExe = new(go2cs);
-            FileInfo mainGo = new(Path.Combine(go2csSrc, "main.go"));
+            FileInfo go2csExeInfo = new(go2cs);
 
-            if (go2csExe.LastWriteTime >= mainGo.LastWriteTimeUtc)
+            // If exe is newer than all .go source files, can skip build
+            if (Directory.GetFiles(go2csSrc, "*.go").Select(fileName => new FileInfo(fileName)).All(info => go2csExeInfo.LastWriteTimeUtc > info.LastWriteTimeUtc))
                 return;
         }
 
@@ -272,7 +271,7 @@ public abstract class BehavioralTestBase
 
         // Check for "GoTestMatchingConsoleOutput" attribute -- for now, just check for its presence
         // by looking for the attribute name in the file on its own line. Future implementations could
-        // load assembly and verify attribute presence via reflection - this is a simpler approach.
+        // load assembly and verify attribute presence via reflection -- this is a simpler approach:
         return packageInfoLines.Any(line => line.Trim().Equals("[GoTestMatchingConsoleOutput]"));
     }
 }

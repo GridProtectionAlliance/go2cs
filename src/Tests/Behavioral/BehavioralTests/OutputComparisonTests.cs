@@ -144,20 +144,14 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
         void csOutputHandler(object sender, DataReceivedEventArgs e)
         {
-            lock (sender)
-            {
-                if (e.Data is not null)
-                    csOutput.AppendLine(e.Data);
-            }
+            if (e.Data is not null)
+                csOutput.AppendLine(e.Data);
         }
 
         void goOutputHandler(object sender, DataReceivedEventArgs e)
         {
-            lock (sender)
-            {
-                if (e.Data is not null)
-                    goOutput.AppendLine(e.Data);
-            }
+            if (e.Data is not null)
+                goOutput.AppendLine(e.Data);
         }
     }
 }
