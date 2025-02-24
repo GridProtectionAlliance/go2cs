@@ -27,42 +27,21 @@ internal static class ISliceTypeTemplate
                     set => ((IArray)m_value)[index] = value;
                 }
                     
-                public ref {{typeName}} this[nint index]
-                {
-                    get => ref m_value[index];
-                }
+                public ref {{typeName}} this[nint index] => ref m_value[index];
                 
                 public Span<{{typeName}}> ꓸꓸꓸ => ToSpan();
                 
-                public Span<{{typeName}}> ToSpan()
-                {
-                    return m_value.ToSpan();
-                }
+                public Span<{{typeName}}> ToSpan() => m_value.ToSpan();
                 
-                public ISlice? Append(object[] elems)
-                {
-                    return ((ISlice)m_value).Append(elems);
-                }
+                public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
                 
-                public IEnumerator<(nint, {{typeName}})> GetEnumerator()
-                {
-                    return m_value.GetEnumerator();
-                }
+                public IEnumerator<(nint, {{typeName}})> GetEnumerator() => m_value.GetEnumerator();
                 
-                IEnumerator IEnumerable.GetEnumerator()
-                {
-                    return ((IEnumerable)m_value).GetEnumerator();
-                }
+                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
                 
-                public bool Equals(IArray<{{typeName}}>? other)
-                {
-                    return m_value.Equals(other);
-                }
+                public bool Equals(IArray<{{typeName}}>? other) => m_value.Equals(other);
                 
-                public bool Equals(ISlice<{{typeName}}>? other)
-                {
-                   return m_value.Equals(other);
-                }
+                public bool Equals(ISlice<{{typeName}}>? other) => m_value.Equals(other);
                 
                 public object Clone() => ((ICloneable)m_value).Clone();
         """;

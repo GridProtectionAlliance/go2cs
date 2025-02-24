@@ -19,26 +19,14 @@ internal class InterfaceImplTemplate : TemplateBase
              {
                  {{MethodsImplementation}}
                  
-                 // Handle comparisons between '{{StructName}}' and '{{GetSimpleName(InterfaceName)}}'
-                 public static bool operator ==({{StructName}} src, {{InterfaceName}} iface)
-                 {
-                     return iface is {{StructName}} val && val == src;
-                 }
+                 // Handle comparisons between struct '{{StructName}}' and interface '{{GetSimpleName(InterfaceName)}}'
+                 public static bool operator ==({{StructName}} src, {{InterfaceName}} iface) => iface is {{StructName}} val && val == src;
                  
-                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface)
-                 {
-                     return !(src == iface);
-                 }
+                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface) => return !(src == iface);
                  
-                 public static bool operator ==({{InterfaceName}} iface, {{StructName}} src)
-                 {
-                     return iface is {{StructName}} val && val == src;
-                 }
+                 public static bool operator ==({{InterfaceName}} iface, {{StructName}} src) => iface is {{StructName}} val && val == src;
                  
-                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src)
-                 {
-                     return !(iface == src);
-                 }
+                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src) => return !(iface == src);
              }
          """;
 
@@ -59,19 +47,19 @@ internal class InterfaceImplTemplate : TemplateBase
 
                 if (Promoted && !methodOverriden)
                 {
-                    result.Append($"// '{simpleInterfaceName}.{simpleMethodName}' implicit implementation mapped to promoted interface receiver method:\r\n        ");
+                    result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' implicit implementation mapped to promoted interface receiver method:\r\n        ");
                     result.Append($"public {method.ReturnType} {method.GetSignature()} => {GetSimpleName(InterfaceName)}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
                 else
                 {
                     if (Promoted && methodOverriden)
                     {
-                        result.Append($"// '{simpleInterfaceName}.{simpleMethodName}' explicit implementation mapped to direct struct receiver method,\r\n        ");
+                        result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' explicit implementation mapped to direct struct receiver method,\r\n        ");
                         result.Append($"// this overrides promoted interface method '{GetSimpleName(InterfaceName)}.{simpleMethodName}':\r\n        ");
                     }
                     else
                     {
-                        result.Append($"// '{simpleInterfaceName}.{simpleMethodName}' explicit implementation mapped to direct struct receiver method:\r\n        ");
+                        result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' explicit implementation mapped to direct struct receiver method:\r\n        ");
                     }
 
                     result.Append($"{method.ReturnType} {method.GetSignature()} => this.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");

@@ -29,28 +29,22 @@ internal class StructTypeTemplate : TemplateBase
                 // Constructors
                 {{Constructors}}
                 
-                // Enable comparisons between {{StructName}} struct types
+                // Handle comparisons between struct '{{StructName}}' instances
                 public bool Equals({{StructName}} other)
                 {
                     return 
                         {{CompareFields}};
                 }
                 
-                public override bool Equals(object? obj)
-                {
-                    return obj is {{StructName}} other && Equals(other);
-                }
+                public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
                 
-                public override int GetHashCode()
-                {
-                    return {{HashCode}};
-                }
+                public override int GetHashCode() => return {{HashCode}};
                 
                 public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
                 
                 public static bool operator !=({{StructName}} left, {{StructName}} right) => !(left == right);
         
-                // Enable comparisons between nil and {{StructName}} struct
+                // Handle comparisons between 'nil' and struct '{{StructName}}'
                 public static bool operator ==({{StructName}} value, NilType nil) => value.Equals(default({{StructName}}));
 
                 public static bool operator !=({{StructName}} value, NilType nil) => !(value == nil);

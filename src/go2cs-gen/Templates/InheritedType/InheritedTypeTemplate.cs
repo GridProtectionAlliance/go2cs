@@ -36,18 +36,18 @@ internal class InheritedTypeTemplate : TemplateBase
             [{{GeneratedCodeAttribute}}]
             {{Scope}} partial struct {{StructName}}{{ImplementedInterface}}
             {
-                // Value of the {{StructName}} struct
+                // Value of the struct '{{StructName}}'
                 private readonly {{TypeName}} m_value;
                 {{InterfaceImplementation}}
                 
                 public {{StructName}}({{TypeName}} value) => m_value = value;
         
-                // Enable implicit conversions between {{TypeName}} and {{StructName}} struct
+                // Handle implicit conversions between '{{TypeName}}' and struct '{{StructName}}'
                 public static implicit operator {{StructName}}({{TypeName}} value) => new {{StructName}}(value);
                     
                 public static implicit operator {{TypeName}}({{StructName}} value) => value.m_value;
                     
-                // Enable comparisons between nil and {{StructName}} struct
+                // Handle comparisons between 'nil' and struct '{{StructName}}'
                 public static bool operator ==({{StructName}} value, NilType nil) => value.Equals(default({{StructName}}));
         
                 public static bool operator !=({{StructName}} value, NilType nil) => !(value == nil);
