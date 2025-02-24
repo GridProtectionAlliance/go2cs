@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -40,7 +40,7 @@ public static partial class main_package
             this.Breed = Breed;
         }
         
-        // Enable comparisons between Dog struct types
+        // Handle comparisons between struct 'Dog' instances
         public bool Equals(Dog other)
         {
             return 
@@ -48,21 +48,15 @@ public static partial class main_package
                 Breed == other.Breed;
         }
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Dog other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Dog other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Breed);
-        }
+        public override int GetHashCode() => HashCode.Combine(Name, Breed);
         
         public static bool operator ==(Dog left, Dog right) => left.Equals(right);
         
         public static bool operator !=(Dog left, Dog right) => !(left == right);
 
-        // Enable comparisons between nil and Dog struct
+        // Handle comparisons between 'nil' and struct 'Dog'
         public static bool operator ==(Dog value, NilType nil) => value.Equals(default(Dog));
 
         public static bool operator !=(Dog value, NilType nil) => !(value == nil);

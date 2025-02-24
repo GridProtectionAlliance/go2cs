@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -19,10 +19,19 @@ public static partial class main_package
 {
     partial struct Frog : go.main_package.Animal
     {
-        // 'Animal.Type' explicit implementation mapped to direct struct receiver method:
+        // 'Animal.Type()' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Type() => this.Type();
 
-        // 'Animal.Swim' explicit implementation mapped to direct struct receiver method:
+        // 'Animal.Swim()' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Swim() => this.Swim();
+        
+        // Handle comparisons between struct 'Frog' and interface 'Animal'
+        public static bool operator ==(Frog src, go.main_package.Animal iface) => iface is Frog val && val == src;
+        
+        public static bool operator !=(Frog src, go.main_package.Animal iface) => !(src == iface);
+        
+        public static bool operator ==(go.main_package.Animal iface, Frog src) => iface is Frog val && val == src;
+        
+        public static bool operator !=(go.main_package.Animal iface, Frog src) => !(iface == src);
     }
 }

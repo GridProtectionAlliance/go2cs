@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using System;
 
 #nullable enable
 
@@ -40,7 +40,7 @@ public static partial class main_package
             this.Color = Color;
         }
         
-        // Enable comparisons between Frog struct types
+        // Handle comparisons between struct 'Frog' instances
         public bool Equals(Frog other)
         {
             return 
@@ -48,21 +48,15 @@ public static partial class main_package
                 Color == other.Color;
         }
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Frog other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Frog other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Color);
-        }
+        public override int GetHashCode() => HashCode.Combine(Name, Color);
         
         public static bool operator ==(Frog left, Frog right) => left.Equals(right);
         
         public static bool operator !=(Frog left, Frog right) => !(left == right);
 
-        // Enable comparisons between nil and Frog struct
+        // Handle comparisons between 'nil' and struct 'Frog'
         public static bool operator ==(Frog value, NilType nil) => value.Equals(default(Frog));
 
         public static bool operator !=(Frog value, NilType nil) => !(value == nil);

@@ -9,16 +9,17 @@
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Collections;
+using System.Numerics;
 using System;
 
 #nullable enable
 
 namespace go;
 
-public static partial class main_package
+public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Animal
+    public partial interface Complex
     {
     }
 }

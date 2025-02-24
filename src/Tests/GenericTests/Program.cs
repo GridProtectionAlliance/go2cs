@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Numerics;
 using go;
 using sort = go.sort_package;
 
@@ -51,8 +52,21 @@ namespace ConstraintTests
                 // so can pass the result to sort.Sort.
                 // The elements will be sorted using the < operator.
                 sort.Sort(orderedSlice[T](s))
-            }         
+            }
+
+            func Last[T int | int8 | int16 | int32](s []T) T {
+                return s[len(s)-1]
+            }
+           
          */
+
+        public static T Sum<T>(slice<T> s) where T : INumber<T>
+        {
+            T sum = default;
+            foreach ((_, T value) in s)
+                sum += value;
+            return sum;
+        }
 
         public interface Ordered<T> : IComparable<Ordered<T>>
         {

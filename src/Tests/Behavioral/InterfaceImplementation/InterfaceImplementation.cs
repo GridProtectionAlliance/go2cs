@@ -9,6 +9,9 @@ partial class main_package {
     @string Swim();
 }
 
+[GoType] partial interface Test {
+}
+
 [GoType] partial struct Dog {
     public @string Name;
     public @string Breed;
@@ -24,6 +27,10 @@ private static void Main() {
     var d = @new<Dog>();
     ref var zoo = ref heap<array<Animal>>(out var Ꮡzoo);
     zoo = new Animal[]{~f, ~d}.array();
+    Test t = default!;
+    fmt.Printf("Iface cmp result = %v\n"u8, zoo[0] == ~f);
+    fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], zoo[0]));
+    fmt.Printf("Iface cmp result = %v\n"u8, !AreEqual(zoo[0], t));
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
     foreach (var (_, aΔ1) in zoo) {

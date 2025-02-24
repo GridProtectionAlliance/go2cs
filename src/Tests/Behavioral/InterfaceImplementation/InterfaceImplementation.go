@@ -7,6 +7,9 @@ type Animal interface {
 	Swim() string
 }
 
+type Test interface {
+}
+
 type Dog struct {
 	Name  string
 	Breed string
@@ -21,6 +24,11 @@ func main() {
 	f := new(Frog)
 	d := new(Dog)
 	zoo := [...]Animal{f, d}
+	var t Test
+
+	fmt.Printf("Iface cmp result = %v\n", zoo[0] == f)
+	fmt.Printf("Iface cmp result = %v\n", zoo[0] == zoo[0])
+	fmt.Printf("Iface cmp result = %v\n", zoo[0] != t)
 
 	var a Animal = nil
 	fmt.Printf("%T\n", a)
