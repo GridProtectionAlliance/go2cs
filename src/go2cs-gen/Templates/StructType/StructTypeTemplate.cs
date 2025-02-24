@@ -30,11 +30,8 @@ internal class StructTypeTemplate : TemplateBase
                 {{Constructors}}
                 
                 // Handle comparisons between struct '{{StructName}}' instances
-                public bool Equals({{StructName}} other)
-                {
-                    return 
-                        {{CompareFields}};
-                }
+                public bool Equals({{StructName}} other) =>
+                    {{CompareFields}};
                 
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
                 
@@ -210,7 +207,7 @@ internal class StructTypeTemplate : TemplateBase
     }
 
     private string CompareFields => StructMembers.Count > 0 ? 
-        string.Join(" &&\r\n                ", CompareList) :
+        string.Join(" &&\r\n            ", CompareList) :
         "true";
 
     private IEnumerable<string> CompareList => StructMembers.Select(member => $"{member.memberName} == other.{member.memberName}");
