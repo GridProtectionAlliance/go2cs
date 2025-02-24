@@ -22,11 +22,11 @@ internal class InterfaceImplTemplate : TemplateBase
                  // Handle comparisons between struct '{{StructName}}' and interface '{{GetSimpleName(InterfaceName)}}'
                  public static bool operator ==({{StructName}} src, {{InterfaceName}} iface) => iface is {{StructName}} val && val == src;
                  
-                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface) => return !(src == iface);
+                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface) => !(src == iface);
                  
                  public static bool operator ==({{InterfaceName}} iface, {{StructName}} src) => iface is {{StructName}} val && val == src;
                  
-                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src) => return !(iface == src);
+                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src) => !(iface == src);
              }
          """;
 

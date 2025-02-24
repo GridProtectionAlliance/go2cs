@@ -18,10 +18,7 @@ internal class ImplicitConvTemplate : TemplateBase
         $$"""
              partial struct {{SourceTypeName}}
              {
-                 public static implicit operator {{LHTypeName}}({{RHTypeName}} src)
-                 {
-                     return {{ConvExpr}};
-                 }
+                 public static implicit operator {{LHTypeName}}({{RHTypeName}} src) => {{ConvExpr}};
              }    
          """;
 

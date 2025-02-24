@@ -38,7 +38,7 @@ internal class StructTypeTemplate : TemplateBase
                 
                 public override bool Equals(object? obj) => obj is {{StructName}} other && Equals(other);
                 
-                public override int GetHashCode() => return {{HashCode}};
+                public override int GetHashCode() => {{HashCode}};
                 
                 public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
                 

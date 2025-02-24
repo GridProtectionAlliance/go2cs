@@ -19,21 +19,22 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 
 			lhsIsInterface, isEmpty := isInterface(lhsType)
 
-			if isEmpty {
-				lhsIsInterface = false
-			}
-
-			if lhsIsInterface && isPointer(rhsType) {
+			if lhsIsInterface && !isEmpty && isPointer(rhsType) {
 				rightOperand = fmt.Sprintf("%s%s", PointerDerefOp, rightOperand)
 			} else {
 				rhsIsInterface, isEmpty := isInterface(rhsType)
 
-				if isEmpty {
-					rhsIsInterface = false
+				if rhsIsInterface && !isEmpty && isPointer(lhsType) {
+					leftOperand = fmt.Sprintf("%s%s", PointerDerefOp, leftOperand)
 				}
 
-				if rhsIsInterface && isPointer(lhsType) {
-					leftOperand = fmt.Sprintf("%s%s", PointerDerefOp, leftOperand)
+				if lhsIsInterface && rhsIsInterface {
+					// Handle interface comparison with special runtime function
+					if binaryOp == "==" {
+						return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)
+					} else {
+						return fmt.Sprintf("!AreEqual(%s, %s)", leftOperand, rightOperand)
+					}
 				}
 			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {

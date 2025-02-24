@@ -161,11 +161,11 @@ var keywords = NewHashSet([]string{
 
 // The following names are reserved by go2cs, if encountered in Go code they should be escaped with `Δ`
 var reserved = NewHashSet([]string{
-	"array", "channel", "ConvertToType", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImplement",
+	"AreEqual", "array", "channel", "GetGoTypeName", "GoFunc", "GoFuncRoot", "GoImplement",
 	"GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute",
 	"GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
 	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
-	"GoUntyped", "go\u01C3", "slice",
+	"GoUntyped", "go\u01C3", "NilType", "PanicException", "slice",
 })
 
 //go:embed csproj-template.xml
