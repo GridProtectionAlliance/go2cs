@@ -1528,7 +1528,11 @@ public static class builtin
         if (leftType != right.GetType())
             return false;
 
-        // Get equality "==" operator for type using reflection
+        // Get equality "==" operator for type using reflection - not sure of a
+        // better way to optimize this save creating lookup table. I suspect this
+        // is not a very common operation, so it may not be worth the cost of the
+        // fixed memory overhead, however, if the call was in a tight loop or
+        // being called frequently, it might be worthwhile.
         MethodInfo? equalityOperator = leftType.GetEqualityOperator();
 
         // If equality operator is not found, use default object.Equals
