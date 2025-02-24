@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  RuntimeErrorPanic.cs - Gbtc
+//  FatalError.cs - Gbtc
 //
 //  Copyright © 2024, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,22 +21,15 @@
 //
 //******************************************************************************************************
 
-namespace go;
+namespace go.runtime;
 
 /// <summary>
-/// Represents common runtime error messages thrown in Go environment.
+/// Represents common fatal error messages reported in Go environment.
 /// </summary>
-public static class RuntimeErrorPanic
+public static class FatalError
 {
-    private const string NilPointerDereferenceMessage = "runtime error: invalid memory address or nil pointer dereference";
-    public static PanicException NilPointerDereference()
+    public static string DeadLock()
     {
-        return new PanicException(NilPointerDereferenceMessage);
-    }
-
-    private const string IndexOutOfRangeMessage = "runtime error: index out of range [{0}] with length {1}";
-    public static PanicException IndexOutOfRange(int64 index, int64 length)
-    {
-        return new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
+        return "all goroutines are asleep - deadlock!";
     }
 }

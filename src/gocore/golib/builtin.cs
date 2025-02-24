@@ -27,10 +27,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using go.runtime;
 using static System.Math;
+using TypeExtensions = go.runtime.TypeExtensions;
 
 namespace go;
 
@@ -405,7 +408,7 @@ public static class builtin
             else
             {
                 for (nint i = 0; i < min; i++)
-                    dst[dst.Low + i] = (T1)ConvertToType((IConvertible)src[src.Low + i]!);
+                    dst[dst.Low + i] = (T1)TypeExtensions.ConvertToType((IConvertible)src[src.Low + i]!);
             }
         }
 
@@ -719,7 +722,7 @@ public static class builtin
     /// This is a convenience function to allow local struct ref and <see cref="ж{T}"/>
     /// to be created in a single call, e.g.:
     /// <code language="cs">
-    ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var &v);
+    ///     ref var v = ref heap(new Vertex(40.68433, -74.39967), out var Ꮡv);
     /// </code>
     /// </remarks>
     public static ref T heap<T>(in T target, out ж<T> pointer)
@@ -863,67 +866,6 @@ public static class builtin
             string str => new @string(str),
             _ => target
         };
-    }
-
-    /// <summary>
-    /// Gets the common Go type name for the specified <paramref name="value"/>.
-    /// </summary>
-    /// <param name="value">Value to evaluate.</param>
-    /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
-    public static string GetGoTypeName(object? value)
-    {
-        return GetGoTypeName(value?.GetType());
-    }
-
-    /// <summary>
-    /// Gets the common Go type name for the specified <paramref name="type"/>.
-    /// </summary>
-    /// <param name="type">Target type</param>
-    /// <returns>Common Go type name for the specified <paramref name="type"/>.</returns>
-    public static string GetGoTypeName(Type? type)
-    {
-        if (type is null)
-            return "nil";
-
-        return Type.GetTypeCode(type) switch
-        {
-            TypeCode.String => "string",
-            TypeCode.Char => "rune",
-            TypeCode.Boolean => "bool",
-            TypeCode.SByte => "int8",
-            TypeCode.Int16 => "int16",
-            TypeCode.Int32 => "int",
-            TypeCode.Int64 => "int64",
-            TypeCode.Byte => "byte",
-            TypeCode.UInt16 => "uint16",
-            TypeCode.UInt32 => "uint32",
-            TypeCode.UInt64 => "uint64",
-            TypeCode.Single => "float32",
-            TypeCode.Double => "float64",
-            _ => handleDefault()
-        };
-
-        string handleDefault()
-        {
-            string typeName = type.FullName ?? type.Name;
-
-            return typeName switch
-            {
-                "System.Numerics.Complex" => "complex128",
-                "go.complex64" => "complex64",
-                _ => type == typeof(object) ? "interface {}" : typeName
-            };
-        }
-    }
-
-    /// <summary>
-    /// Gets the common Go type name for the specified type <typeparamref name="T"/>.
-    /// </summary>
-    /// <typeparam name="T">Target type.</typeparam>
-    /// <returns>Common Go type name for the specified type <typeparamref name="T"/>.</returns>
-    public static string GetGoTypeName<T>()
-    {
-        return GetGoTypeName(typeof(T));
     }
 
     // ** Conversion Functions **
@@ -1530,8 +1472,134 @@ public static class builtin
         return @string(value);
     }
 
+    /// <summary>
+    /// Converts value to a complex64 imaginary number.
+    /// </summary>
+    /// <param name="imaginary">Value to convert to imaginary.</param>
+    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+    public static complex64 i(float imaginary)
+    {
+        return new complex64(0.0F, imaginary);
+    }
+
+    /// <summary>
+    /// Converts value to a complex128 imaginary number.
+    /// </summary>
+    /// <param name="imaginary">Value to convert to imaginary.</param>
+    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+    public static complex128 i(double imaginary)
+    {
+        return new complex128(0.0D, imaginary);
+    }
+
     // ** Helper Functions **
     
+    /*
+        Note: the following helper functions are not part of the Go standard library, so
+        functions should be considered reserved names during the code conversion process.
+    */
+
+    /// <summary>
+    /// Compares two objects for equality.
+    /// </summary>
+    /// <param name="left">Left object.</param>
+    /// <param name="right">Right object.</param>
+    /// <returns><c>true</c> if both objects are equal; otherwise, <c>false</c>.</returns>
+    /// <remarks>
+    /// When both objects being compared are interface references, this method will match Go's behavior for comparing
+    /// interfaces , i.e., two interface values are considered equal if they have identical dynamic types and equal
+    /// dynamic values or if both have value nil. Since the type being referenced by the interface is not known at
+    /// compile time, this method uses reflection to get the equality operator for the type and calls it if available.
+    /// If the equality operator is not found, the default <see cref="object.Equals(object, object)"/> method is used.
+    /// </remarks>
+    public static bool AreEqual(object? left, object? right)
+    {
+        // Check if both are null
+        if (left is null && right is null)
+            return true;
+
+        // Check if one is null
+        if (left is null || right is null)
+            return false;
+
+        Type leftType = left.GetType();
+
+        // Check if both are the same type
+        if (leftType != right.GetType())
+            return false;
+
+        // Get equality "==" operator for type using reflection
+        MethodInfo? equalityOperator = leftType.GetEqualityOperator();
+
+        // If equality operator is not found, use default object.Equals
+        if (equalityOperator is null)
+            return left.Equals(right);
+
+        // Call equality operator
+        return (bool)equalityOperator.Invoke(null, [left, right])!;
+    }
+
+    /// <summary>
+    /// Gets the common Go type name for the specified <paramref name="value"/>.
+    /// </summary>
+    /// <param name="value">Value to evaluate.</param>
+    /// <returns>Common Go type name for the specified <paramref name="value"/>.</returns>
+    public static string GetGoTypeName(object? value)
+    {
+        return GetGoTypeName(value?.GetType());
+    }
+
+    /// <summary>
+    /// Gets the common Go type name for the specified <paramref name="type"/>.
+    /// </summary>
+    /// <param name="type">Target type</param>
+    /// <returns>Common Go type name for the specified <paramref name="type"/>.</returns>
+    public static string GetGoTypeName(Type? type)
+    {
+        if (type is null)
+            return "nil";
+
+        return Type.GetTypeCode(type) switch
+        {
+            TypeCode.String => "string",
+            TypeCode.Char => "rune",
+            TypeCode.Boolean => "bool",
+            TypeCode.SByte => "int8",
+            TypeCode.Int16 => "int16",
+            TypeCode.Int32 => "int",
+            TypeCode.Int64 => "int64",
+            TypeCode.Byte => "byte",
+            TypeCode.UInt16 => "uint16",
+            TypeCode.UInt32 => "uint32",
+            TypeCode.UInt64 => "uint64",
+            TypeCode.Single => "float32",
+            TypeCode.Double => "float64",
+            _ => handleDefault()
+        };
+
+        string handleDefault()
+        {
+            string typeName = type.FullName ?? type.Name;
+
+            return typeName switch
+            {
+                "System.Numerics.Complex" => "complex128",
+                "go.complex64" => "complex64",
+                _ => type == typeof(object) ? "interface {}" : typeName
+            };
+        }
+    }
+
+    /// <summary>
+    /// Gets the common Go type name for the specified type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Target type.</typeparam>
+    /// <returns>Common Go type name for the specified type <typeparamref name="T"/>.</returns>
+    public static string GetGoTypeName<T>()
+    {
+        return GetGoTypeName(typeof(T));
+    }
+
     /*
     /// <summary>
     /// Copies length elements from <paramref name="source"/> array, starting at <paramref name="sourceIndex"/>,
@@ -1605,26 +1673,6 @@ public static class builtin
     }
     */
 
-    /// <summary>
-    /// Converts value to a complex64 imaginary number.
-    /// </summary>
-    /// <param name="imaginary">Value to convert to imaginary.</param>
-    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex64 i(float imaginary)
-    {
-        return new complex64(0.0F, imaginary);
-    }
-
-    /// <summary>
-    /// Converts value to a complex128 imaginary number.
-    /// </summary>
-    /// <param name="imaginary">Value to convert to imaginary.</param>
-    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex128 i(double imaginary)
-    {
-        return new complex128(0.0D, imaginary);
-    }
-
 #if EXPERIMENTAL
 
     // When using stack allocated strings, you need a function to convert the stack string to a heap string
@@ -1645,34 +1693,6 @@ public static class builtin
     public static @string str(sstring value) => value;
 
 #endif
-
-    /// <summary>
-    /// Returns a Go type equivalent to the specified value.
-    /// </summary>
-    /// <param name="value">An object that implements the <see cref="IConvertible" /> interface.</param>
-    /// <returns>A Go type whose value is equivalent to <paramref name="value"/>.</returns>
-    public static object ConvertToType<T>(in T? value) where T : IConvertible
-    {
-        if (value is null)
-            return nil;
-
-        return value.GetTypeCode() switch
-        {
-            TypeCode.Boolean => value.ToBoolean(null),
-            TypeCode.Char => (rune)value.ToChar(null),
-            TypeCode.SByte => value.ToSByte(null),
-            TypeCode.Byte => value.ToByte(null),
-            TypeCode.Int16 => value.ToInt16(null),
-            TypeCode.UInt16 => value.ToUInt16(null),
-            TypeCode.Int32 => value.ToInt32(null),
-            TypeCode.UInt32 => value.ToUInt32(null),
-            TypeCode.Int64 => value.ToInt64(null),
-            TypeCode.UInt64 => value.ToUInt64(null),
-            TypeCode.Single => value.ToSingle(null),
-            TypeCode.Double => value.ToDouble(null),
-            _ => (@string)value.ToString(null)
-        };
-    }
 
     // ** Go Function Execution Context Handlers **/
 

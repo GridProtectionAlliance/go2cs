@@ -20,6 +20,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
+using go.runtime;
 using go2cs.AST;
 
 namespace go

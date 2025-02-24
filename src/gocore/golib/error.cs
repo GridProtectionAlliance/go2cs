@@ -27,6 +27,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using go.runtime;
 
 // TODO: Keep error implementation updated to match best interface template pattern
 

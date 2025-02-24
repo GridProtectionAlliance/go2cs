@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using go.runtime;
 
 namespace go;
 
@@ -558,7 +559,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         baseTypeArray = new T[array.Length];
 
         for (int i = 0; i < array.Length; i++)
-            baseTypeArray[i] = (T)ConvertToType((IConvertible)array[i]!);
+            baseTypeArray[i] = (T)TypeExtensions.ConvertToType((IConvertible)array[i]!);
 
         return baseTypeArray;
     }

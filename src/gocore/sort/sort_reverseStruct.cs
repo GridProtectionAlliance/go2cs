@@ -12,6 +12,7 @@ using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using go.runtime;
 
 #nullable enable
 

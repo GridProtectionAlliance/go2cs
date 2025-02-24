@@ -32,7 +32,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace go;
+namespace go.runtime;
 
 /// <summary>
 /// Defines type related helper functions.
@@ -190,6 +190,16 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Get the "==" equality operator for the specified <paramref name="type"/>.
+    /// </summary>
+    /// <param name="type">Type to search for equality operator.</param>
+    /// <returns>Equality operator for <paramref name="type"/> if found; otherwise, <c>null</c>.</returns>
+    public static MethodInfo? GetEqualityOperator(this Type type)
+    {
+        return type.GetMethod("op_Equality", BindingFlags.Static | BindingFlags.Public, [type, type]);
+    }
+
+    /// <summary>
     /// Determines if <paramref name="targetType"/> implements specified <paramref name="interfaceType"/>.
     /// </summary>
     /// <param name="targetType">Target type to test.</param>
@@ -285,11 +295,11 @@ public static class TypeExtensions
         {
             if (!delegateType.IsGenericType || !methodInfo.IsGenericMethod)
                 return Delegate.CreateDelegate(delegateType, methodInfo);
-            
+
             Type extensionTarget = delegateType.GetGenericArguments()[0];
 
-            return Delegate.CreateDelegate(delegateType, extensionTarget.IsGenericType ? 
-                methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]) : 
+            return Delegate.CreateDelegate(delegateType, extensionTarget.IsGenericType ?
+                methodInfo.MakeGenericMethod(extensionTarget.GetGenericArguments()[0]) :
                 methodInfo.MakeGenericMethod(extensionTarget));
         }
         catch (ArgumentException)
@@ -380,6 +390,34 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Returns a Go type equivalent to the specified value.
+    /// </summary>
+    /// <param name="value">An object that implements the <see cref="IConvertible" /> interface.</param>
+    /// <returns>A Go type whose value is equivalent to <paramref name="value"/>.</returns>
+    public static object ConvertToType<T>(in T? value) where T : IConvertible
+    {
+        if (value is null)
+            return nil;
+
+        return value.GetTypeCode() switch
+        {
+            TypeCode.Boolean => value.ToBoolean(null),
+            TypeCode.Char => (rune)value.ToChar(null),
+            TypeCode.SByte => value.ToSByte(null),
+            TypeCode.Byte => value.ToByte(null),
+            TypeCode.Int16 => value.ToInt16(null),
+            TypeCode.UInt16 => value.ToUInt16(null),
+            TypeCode.Int32 => value.ToInt32(null),
+            TypeCode.UInt32 => value.ToUInt32(null),
+            TypeCode.Int64 => value.ToInt64(null),
+            TypeCode.UInt64 => value.ToUInt64(null),
+            TypeCode.Single => value.ToSingle(null),
+            TypeCode.Double => value.ToDouble(null),
+            _ => (@string)value.ToString(null)
+        };
+    }
+
+    /// <summary>
     /// Tries to cast input value as an integer.
     /// </summary>
     /// <param name="value">Value to try to cast.</param>
@@ -444,7 +482,7 @@ public static class TypeExtensions
     /// <returns><c>true</c> is <paramref name="value"/> is a numeric type; otherwise, <c>false</c>.</returns>
     public static bool IsNumeric(this IConvertible? value)
     {
-        return value is not null && IsNumericType(value.GetTypeCode());
+        return value is not null && value.GetTypeCode().IsNumericType();
     }
 
     /// <summary>
@@ -461,18 +499,18 @@ public static class TypeExtensions
         return typeCode switch
         {
             TypeCode.Boolean => true,
-            TypeCode.SByte   => true,
-            TypeCode.Byte    => true,
-            TypeCode.Int16   => true,
-            TypeCode.UInt16  => true,
-            TypeCode.Int32   => true,
-            TypeCode.UInt32  => true,
-            TypeCode.Int64   => true,
-            TypeCode.UInt64  => true,
-            TypeCode.Single  => true,
-            TypeCode.Double  => true,
+            TypeCode.SByte => true,
+            TypeCode.Byte => true,
+            TypeCode.Int16 => true,
+            TypeCode.UInt16 => true,
+            TypeCode.Int32 => true,
+            TypeCode.UInt32 => true,
+            TypeCode.Int64 => true,
+            TypeCode.UInt64 => true,
+            TypeCode.Single => true,
+            TypeCode.Double => true,
             TypeCode.Decimal => true,
-            _                => false
+            _ => false
         };
     }
 

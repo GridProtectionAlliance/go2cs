@@ -27,6 +27,7 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using go.runtime;
 
 namespace go;
 

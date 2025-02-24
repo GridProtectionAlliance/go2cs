@@ -13,6 +13,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using go.runtime;
 
 #nullable enable
 #pragma warning disable CS0660, CS0661

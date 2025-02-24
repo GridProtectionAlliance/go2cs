@@ -27,6 +27,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using go.runtime;
 using static go.fmt_package;
 
 #pragma warning disable IDE0044, CS8618
