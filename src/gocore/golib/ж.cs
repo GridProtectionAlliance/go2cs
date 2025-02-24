@@ -97,7 +97,7 @@ public static class FieldRef<T> where T : struct
 }
 
 /// <summary>
-/// Represents a heap allocated reference to an instance of type <typeparamref name="T"/>.
+/// Represents a pointer to a heap allocated instance of type <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>
 /// <remarks>
@@ -125,7 +125,7 @@ public sealed class ж<T>
     private T m_val;
 
     /// <summary>
-    /// Creates a new heap allocated reference to an instance of type <typeparamref name="T"/>.
+    /// Creates a new pointer to heap allocated instance of type <typeparamref name="T"/>.
     /// </summary>
     /// <param name="value">Source value for heap allocated reference.</param>
     public ж(in T value)
@@ -148,13 +148,13 @@ public sealed class ж<T>
     }
 
     /// <summary>
-    /// Creates a new heap allocated reference from a nil value.
+    /// Creates a new pointer from a nil value.
     /// </summary>
     /// <param name="_"></param>
     public ж(NilType _) : this(default(T)!) { }
 
     /// <summary>
-    /// Creates a new heap allocated reference.
+    /// Creates a new pointer.
     /// </summary>
     public ж() : this(default(T)!) { }
 
@@ -166,7 +166,7 @@ public sealed class ж<T>
     {
         get
         {
-            // Get reference to pointer value
+            // Get reference to standard pointer value
             if (m_structFieldRef is null && m_arrayIndexRef is null)
                 return ref m_val;
 
