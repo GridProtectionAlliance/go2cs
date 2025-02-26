@@ -9,6 +9,7 @@
     <Import_RootNamespace>go2cs_src</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)go2cs\constraintOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convBasicLit.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convBinaryExpr.go" />
@@ -22,7 +23,6 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIdent.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexListExpr.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\convInterfaceType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convKeyValueExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convMapType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convParenExpr.go" />
