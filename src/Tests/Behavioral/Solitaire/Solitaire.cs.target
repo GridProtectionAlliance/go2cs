@@ -2,7 +2,7 @@ namespace go;
 
 partial class main_package {
 
-public const nint N = 12;
+public const nint N = /* 11 + 1 */ 12;
 private static slice<rune> board = slice<rune>(
     (@string)"""
 ...........

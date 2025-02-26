@@ -40,29 +40,20 @@ public static partial class main_package
             this.Address = Address;
         }
         
-        // Enable comparisons between main_data struct types
-        public bool Equals(main_data other)
-        {
-            return 
-                Name == other.Name &&
-                Address == other.Address;
-        }
+        // Handle comparisons between struct 'main_data' instances
+        public bool Equals(main_data other) =>
+            Name == other.Name &&
+            Address == other.Address;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is main_data other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is main_data other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Address);
-        }
+        public override int GetHashCode() => HashCode.Combine(Name, Address);
         
         public static bool operator ==(main_data left, main_data right) => left.Equals(right);
         
         public static bool operator !=(main_data left, main_data right) => !(left == right);
 
-        // Enable comparisons between nil and main_data struct
+        // Handle comparisons between 'nil' and struct 'main_data'
         public static bool operator ==(main_data value, NilType nil) => value.Equals(default(main_data));
 
         public static bool operator !=(main_data value, NilType nil) => !(value == nil);

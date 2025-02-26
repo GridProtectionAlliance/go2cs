@@ -37,28 +37,19 @@ public static partial class main_package
             this.name = name;
         }
         
-        // Enable comparisons between data struct types
-        public bool Equals(data other)
-        {
-            return 
-                name == other.name;
-        }
+        // Handle comparisons between struct 'data' instances
+        public bool Equals(data other) =>
+            name == other.name;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is data other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is data other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(name);
-        }
+        public override int GetHashCode() => HashCode.Combine(name);
         
         public static bool operator ==(data left, data right) => left.Equals(right);
         
         public static bool operator !=(data left, data right) => !(left == right);
 
-        // Enable comparisons between nil and data struct
+        // Handle comparisons between 'nil' and struct 'data'
         public static bool operator ==(data value, NilType nil) => value.Equals(default(data));
 
         public static bool operator !=(data value, NilType nil) => !(value == nil);

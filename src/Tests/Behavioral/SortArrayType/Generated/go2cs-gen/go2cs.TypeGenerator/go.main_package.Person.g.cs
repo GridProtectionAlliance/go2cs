@@ -43,30 +43,21 @@ public static partial class main_package
             this.ShoeSize = ShoeSize;
         }
         
-        // Enable comparisons between Person struct types
-        public bool Equals(Person other)
-        {
-            return 
-                Name == other.Name &&
-                Age == other.Age &&
-                ShoeSize == other.ShoeSize;
-        }
+        // Handle comparisons between struct 'Person' instances
+        public bool Equals(Person other) =>
+            Name == other.Name &&
+            Age == other.Age &&
+            ShoeSize == other.ShoeSize;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Person other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Person other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name, Age, ShoeSize);
-        }
+        public override int GetHashCode() => HashCode.Combine(Name, Age, ShoeSize);
         
         public static bool operator ==(Person left, Person right) => left.Equals(right);
         
         public static bool operator !=(Person left, Person right) => !(left == right);
 
-        // Enable comparisons between nil and Person struct
+        // Handle comparisons between 'nil' and struct 'Person'
         public static bool operator ==(Person value, NilType nil) => value.Equals(default(Person));
 
         public static bool operator !=(Person value, NilType nil) => !(value == nil);

@@ -37,28 +37,19 @@ public static partial class main_package
             this.position = position;
         }
         
-        // Enable comparisons between Employee struct types
-        public bool Equals(Employee other)
-        {
-            return 
-                position == other.position;
-        }
+        // Handle comparisons between struct 'Employee' instances
+        public bool Equals(Employee other) =>
+            position == other.position;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Employee other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Employee other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(position);
-        }
+        public override int GetHashCode() => HashCode.Combine(position);
         
         public static bool operator ==(Employee left, Employee right) => left.Equals(right);
         
         public static bool operator !=(Employee left, Employee right) => !(left == right);
 
-        // Enable comparisons between nil and Employee struct
+        // Handle comparisons between 'nil' and struct 'Employee'
         public static bool operator ==(Employee value, NilType nil) => value.Equals(default(Employee));
 
         public static bool operator !=(Employee value, NilType nil) => !(value == nil);

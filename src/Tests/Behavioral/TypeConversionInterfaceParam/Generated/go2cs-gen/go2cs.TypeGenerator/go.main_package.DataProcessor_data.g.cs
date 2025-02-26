@@ -43,30 +43,21 @@ public static partial class main_package
             this.Valid = Valid;
         }
         
-        // Enable comparisons between DataProcessor_data struct types
-        public bool Equals(DataProcessor_data other)
-        {
-            return 
-                ID == other.ID &&
-                Name == other.Name &&
-                Valid == other.Valid;
-        }
+        // Handle comparisons between struct 'DataProcessor_data' instances
+        public bool Equals(DataProcessor_data other) =>
+            ID == other.ID &&
+            Name == other.Name &&
+            Valid == other.Valid;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is DataProcessor_data other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is DataProcessor_data other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ID, Name, Valid);
-        }
+        public override int GetHashCode() => HashCode.Combine(ID, Name, Valid);
         
         public static bool operator ==(DataProcessor_data left, DataProcessor_data right) => left.Equals(right);
         
         public static bool operator !=(DataProcessor_data left, DataProcessor_data right) => !(left == right);
 
-        // Enable comparisons between nil and DataProcessor_data struct
+        // Handle comparisons between 'nil' and struct 'DataProcessor_data'
         public static bool operator ==(DataProcessor_data value, NilType nil) => value.Equals(default(DataProcessor_data));
 
         public static bool operator !=(DataProcessor_data value, NilType nil) => !(value == nil);

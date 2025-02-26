@@ -19,9 +19,6 @@ public static partial class main_package
 {
     partial struct Process_data
     {
-        public static implicit operator Process_data(DataProcessor_data src)
-        {
-            return new Process_data(src.ID, src.Name, src.Valid);
-        }
+        public static implicit operator Process_data(DataProcessor_data src) => new Process_data(src.ID, src.Name, src.Valid);
     }    
 }

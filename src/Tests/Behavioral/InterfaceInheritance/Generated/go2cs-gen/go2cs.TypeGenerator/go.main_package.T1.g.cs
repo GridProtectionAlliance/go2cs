@@ -37,28 +37,19 @@ public static partial class main_package
             this.name = name;
         }
         
-        // Enable comparisons between T1 struct types
-        public bool Equals(T1 other)
-        {
-            return 
-                name == other.name;
-        }
+        // Handle comparisons between struct 'T1' instances
+        public bool Equals(T1 other) =>
+            name == other.name;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is T1 other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is T1 other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(name);
-        }
+        public override int GetHashCode() => HashCode.Combine(name);
         
         public static bool operator ==(T1 left, T1 right) => left.Equals(right);
         
         public static bool operator !=(T1 left, T1 right) => !(left == right);
 
-        // Enable comparisons between nil and T1 struct
+        // Handle comparisons between 'nil' and struct 'T1'
         public static bool operator ==(T1 value, NilType nil) => value.Equals(default(T1));
 
         public static bool operator !=(T1 value, NilType nil) => !(value == nil);

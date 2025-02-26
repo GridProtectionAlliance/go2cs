@@ -37,28 +37,19 @@ public static partial class main_package
             this.Value = Value;
         }
         
-        // Enable comparisons between Inner struct types
-        public bool Equals(Inner other)
-        {
-            return 
-                Value == other.Value;
-        }
+        // Handle comparisons between struct 'Inner' instances
+        public bool Equals(Inner other) =>
+            Value == other.Value;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Inner other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Inner other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Value);
-        }
+        public override int GetHashCode() => HashCode.Combine(Value);
         
         public static bool operator ==(Inner left, Inner right) => left.Equals(right);
         
         public static bool operator !=(Inner left, Inner right) => !(left == right);
 
-        // Enable comparisons between nil and Inner struct
+        // Handle comparisons between 'nil' and struct 'Inner'
         public static bool operator ==(Inner value, NilType nil) => value.Equals(default(Inner));
 
         public static bool operator !=(Inner value, NilType nil) => !(value == nil);

@@ -19,7 +19,16 @@ public static partial class main_package
 {
     partial struct Processor : go.main_package.DataProcessor
     {
-        // 'DataProcessor.Process' explicit implementation mapped to direct struct receiver method:
+        // 'DataProcessor.Process()' explicit implementation mapped to direct struct receiver method:
         void go.main_package.DataProcessor.Process(go.main_package.DataProcessor_data data) => this.Process(data);
+
+        // Handle comparisons between struct 'Processor' and interface 'DataProcessor'
+        public static bool operator ==(Processor src, go.main_package.DataProcessor iface) => iface is Processor val && val == src;
+        
+        public static bool operator !=(Processor src, go.main_package.DataProcessor iface) => !(src == iface);
+        
+        public static bool operator ==(go.main_package.DataProcessor iface, Processor src) => iface is Processor val && val == src;
+        
+        public static bool operator !=(go.main_package.DataProcessor iface, Processor src) => !(iface == src);
     }
 }

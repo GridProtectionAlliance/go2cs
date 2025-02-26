@@ -19,13 +19,22 @@ public static partial class main_package
 {
     partial struct PeopleByAge : go.sort_package.Interface
     {
-        // 'Interface.Len' explicit implementation mapped to direct struct receiver method:
+        // 'Interface.Len()' explicit implementation mapped to direct struct receiver method:
         nint go.sort_package.Interface.Len() => this.Len();
 
-        // 'Interface.Less' explicit implementation mapped to direct struct receiver method:
+        // 'Interface.Less()' explicit implementation mapped to direct struct receiver method:
         bool go.sort_package.Interface.Less(nint i, nint j) => this.Less(i, j);
 
-        // 'Interface.Swap' explicit implementation mapped to direct struct receiver method:
+        // 'Interface.Swap()' explicit implementation mapped to direct struct receiver method:
         void go.sort_package.Interface.Swap(nint i, nint j) => this.Swap(i, j);
+
+        // Handle comparisons between struct 'PeopleByAge' and interface 'Interface'
+        public static bool operator ==(PeopleByAge src, go.sort_package.Interface iface) => iface is PeopleByAge val && val == src;
+        
+        public static bool operator !=(PeopleByAge src, go.sort_package.Interface iface) => !(src == iface);
+        
+        public static bool operator ==(go.sort_package.Interface iface, PeopleByAge src) => iface is PeopleByAge val && val == src;
+        
+        public static bool operator !=(go.sort_package.Interface iface, PeopleByAge src) => !(iface == src);
     }
 }

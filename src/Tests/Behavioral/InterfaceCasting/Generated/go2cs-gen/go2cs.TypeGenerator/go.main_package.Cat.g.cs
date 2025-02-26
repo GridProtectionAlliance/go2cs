@@ -35,28 +35,19 @@ public static partial class main_package
         {
         }
         
-        // Enable comparisons between Cat struct types
-        public bool Equals(Cat other)
-        {
-            return 
-                true;
-        }
+        // Handle comparisons between struct 'Cat' instances
+        public bool Equals(Cat other) =>
+            true;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Cat other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Cat other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
         
         public static bool operator ==(Cat left, Cat right) => left.Equals(right);
         
         public static bool operator !=(Cat left, Cat right) => !(left == right);
 
-        // Enable comparisons between nil and Cat struct
+        // Handle comparisons between 'nil' and struct 'Cat'
         public static bool operator ==(Cat value, NilType nil) => value.Equals(default(Cat));
 
         public static bool operator !=(Cat value, NilType nil) => !(value == nil);

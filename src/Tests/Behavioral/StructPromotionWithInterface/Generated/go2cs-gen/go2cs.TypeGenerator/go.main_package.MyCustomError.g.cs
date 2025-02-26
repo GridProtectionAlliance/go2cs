@@ -59,31 +59,22 @@ public static partial class main_package
             this.error = error;
         }
         
-        // Enable comparisons between MyCustomError struct types
-        public bool Equals(MyCustomError other)
-        {
-            return 
-                Message == other.Message &&
-                Abser == other.Abser &&
-                MyError == other.MyError &&
-                error == other.error;
-        }
+        // Handle comparisons between struct 'MyCustomError' instances
+        public bool Equals(MyCustomError other) =>
+            Message == other.Message &&
+            Abser == other.Abser &&
+            MyError == other.MyError &&
+            error == other.error;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is MyCustomError other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is MyCustomError other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Message, Abser, MyError, error);
-        }
+        public override int GetHashCode() => HashCode.Combine(Message, Abser, MyError, error);
         
         public static bool operator ==(MyCustomError left, MyCustomError right) => left.Equals(right);
         
         public static bool operator !=(MyCustomError left, MyCustomError right) => !(left == right);
 
-        // Enable comparisons between nil and MyCustomError struct
+        // Handle comparisons between 'nil' and struct 'MyCustomError'
         public static bool operator ==(MyCustomError value, NilType nil) => value.Equals(default(MyCustomError));
 
         public static bool operator !=(MyCustomError value, NilType nil) => !(value == nil);

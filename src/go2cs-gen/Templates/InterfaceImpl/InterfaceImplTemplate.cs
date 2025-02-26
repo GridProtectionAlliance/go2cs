@@ -17,16 +17,7 @@ internal class InterfaceImplTemplate : TemplateBase
         $$"""
              partial struct {{StructName}} : {{InterfaceName}}
              {
-                 {{MethodsImplementation}}
-                 
-                 // Handle comparisons between struct '{{StructName}}' and interface '{{GetSimpleName(InterfaceName)}}'
-                 public static bool operator ==({{StructName}} src, {{InterfaceName}} iface) => iface is {{StructName}} val && val == src;
-                 
-                 public static bool operator !=({{StructName}} src, {{InterfaceName}} iface) => !(src == iface);
-                 
-                 public static bool operator ==({{InterfaceName}} iface, {{StructName}} src) => iface is {{StructName}} val && val == src;
-                 
-                 public static bool operator !=({{InterfaceName}} iface, {{StructName}} src) => !(iface == src);
+                 {{MethodsImplementation}}{{Comparisions}}
              }
          """;
 
@@ -67,6 +58,38 @@ internal class InterfaceImplTemplate : TemplateBase
             }
 
             return result.ToString();
+        }
+    }
+
+    private string Comparisions
+    {
+        get
+        {
+            // Operators can only be public
+            return OperatorScope != "public" ? 
+                string.Empty : 
+                $"""
+                
+                
+                        // Handle comparisons between struct '{StructName}' and interface '{GetSimpleName(InterfaceName)}'
+                        public static bool operator ==({StructName} src, {InterfaceName} iface) => iface is {StructName} val && val == src;
+                        
+                        public static bool operator !=({StructName} src, {InterfaceName} iface) => !(src == iface);
+                        
+                        public static bool operator ==({InterfaceName} iface, {StructName} src) => iface is {StructName} val && val == src;
+                        
+                        public static bool operator !=({InterfaceName} iface, {StructName} src) => !(iface == src);
+                """;
+        }
+    }
+
+    private string OperatorScope
+    {
+        get
+        {
+            string structNameScope = char.IsUpper(StructName[0]) ? "public" : "internal";
+            string interfaceNameScope = char.IsUpper(GetSimpleName(InterfaceName)[0]) ? "public" : "internal";
+            return structNameScope == interfaceNameScope ? structNameScope : "internal";
         }
     }
 }

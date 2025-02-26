@@ -16,7 +16,7 @@
                 //"-comments=true",
                 //"-tree",
                 //"..\\Tests\\Behavioral\\QuickTest",
-                //"..\\Tests\\Behavioral\\SortArrayType",
+                "..\\Tests\\Behavioral\\SortArrayType",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue",
                 //"..\\Tests\\Behavioral\\ExprSwitch",
                 //"..\\Tests\\Behavioral\\InterfaceCasting",
@@ -48,7 +48,8 @@
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
-                "..\\Tests\\Behavioral\\TypeInference",
+                //"..\\Tests\\Behavioral\\TypeInference",
+                //"..\\Tests\\Behavioral\\GenericTypeInference",
             ]
         }
     ]

@@ -19,16 +19,25 @@ public static partial class main_package
 {
     partial struct T2 : go.main_package.V
     {
-        // 'V.M' explicit implementation mapped to direct struct receiver method:
+        // 'V.M()' explicit implementation mapped to direct struct receiver method:
         void go.main_package.I.M() => this.M();
 
-        // 'V.String' explicit implementation mapped to direct struct receiver method:
+        // 'V.String()' explicit implementation mapped to direct struct receiver method:
         go.@string go.fmt_package.Stringer.String() => this.String();
 
-        // 'V.Error' explicit implementation mapped to direct struct receiver method:
+        // 'V.Error()' explicit implementation mapped to direct struct receiver method:
         go.@string go.error.Error() => this.Error();
 
-        // 'V.N' explicit implementation mapped to direct struct receiver method:
+        // 'V.N()' explicit implementation mapped to direct struct receiver method:
         void go.main_package.V.N() => this.N();
+
+        // Handle comparisons between struct 'T2' and interface 'V'
+        public static bool operator ==(T2 src, go.main_package.V iface) => iface is T2 val && val == src;
+        
+        public static bool operator !=(T2 src, go.main_package.V iface) => !(src == iface);
+        
+        public static bool operator ==(go.main_package.V iface, T2 src) => iface is T2 val && val == src;
+        
+        public static bool operator !=(go.main_package.V iface, T2 src) => !(iface == src);
     }
 }

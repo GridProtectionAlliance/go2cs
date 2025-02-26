@@ -46,31 +46,22 @@ public static partial class main_package
             this.NextNext = NextNext;
         }
         
-        // Enable comparisons between ColorList struct types
-        public bool Equals(ColorList other)
-        {
-            return 
-                Total == other.Total &&
-                Color == other.Color &&
-                Next == other.Next &&
-                NextNext == other.NextNext;
-        }
+        // Handle comparisons between struct 'ColorList' instances
+        public bool Equals(ColorList other) =>
+            Total == other.Total &&
+            Color == other.Color &&
+            Next == other.Next &&
+            NextNext == other.NextNext;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is ColorList other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is ColorList other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Total, Color, Next, NextNext);
-        }
+        public override int GetHashCode() => HashCode.Combine(Total, Color, Next, NextNext);
         
         public static bool operator ==(ColorList left, ColorList right) => left.Equals(right);
         
         public static bool operator !=(ColorList left, ColorList right) => !(left == right);
 
-        // Enable comparisons between nil and ColorList struct
+        // Handle comparisons between 'nil' and struct 'ColorList'
         public static bool operator ==(ColorList value, NilType nil) => value.Equals(default(ColorList));
 
         public static bool operator !=(ColorList value, NilType nil) => !(value == nil);

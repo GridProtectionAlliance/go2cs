@@ -19,9 +19,6 @@ public static partial class main_package
 {
     partial struct test_x
     {
-        public static implicit operator test_R0(test_x src)
-        {
-            return new test_R0(src.@string, src.@int, src.P, src.M);
-        }
+        public static implicit operator test_R0(test_x src) => new test_R0(src.@string, src.@int, src.P, src.M);
     }    
 }

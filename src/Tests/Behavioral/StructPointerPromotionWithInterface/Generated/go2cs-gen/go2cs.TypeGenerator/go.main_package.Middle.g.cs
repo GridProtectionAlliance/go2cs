@@ -48,28 +48,19 @@ public static partial class main_package
             ᏑʗInner = new ж<global::go.ж<global::go.main_package.Inner>>(Inner);
         }
         
-        // Enable comparisons between Middle struct types
-        public bool Equals(Middle other)
-        {
-            return 
-                Inner == other.Inner;
-        }
+        // Handle comparisons between struct 'Middle' instances
+        public bool Equals(Middle other) =>
+            Inner == other.Inner;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Middle other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Middle other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Inner);
-        }
+        public override int GetHashCode() => HashCode.Combine(Inner);
         
         public static bool operator ==(Middle left, Middle right) => left.Equals(right);
         
         public static bool operator !=(Middle left, Middle right) => !(left == right);
 
-        // Enable comparisons between nil and Middle struct
+        // Handle comparisons between 'nil' and struct 'Middle'
         public static bool operator ==(Middle value, NilType nil) => value.Equals(default(Middle));
 
         public static bool operator !=(Middle value, NilType nil) => !(value == nil);

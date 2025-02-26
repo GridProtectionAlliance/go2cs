@@ -19,9 +19,6 @@ public static partial class main_package
 {
     partial struct main_data
     {
-        public static implicit operator DataProcessor_data(main_data src)
-        {
-            return new DataProcessor_data(src.ID, src.Name, src.Valid);
-        }
+        public static implicit operator DataProcessor_data(main_data src) => new DataProcessor_data(src.ID, src.Name, src.Valid);
     }    
 }

@@ -37,28 +37,19 @@ public static partial class main_package
             this.Text = Text;
         }
         
-        // Enable comparisons between Message struct types
-        public bool Equals(Message other)
-        {
-            return 
-                Text == other.Text;
-        }
+        // Handle comparisons between struct 'Message' instances
+        public bool Equals(Message other) =>
+            Text == other.Text;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Message other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Message other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Text);
-        }
+        public override int GetHashCode() => HashCode.Combine(Text);
         
         public static bool operator ==(Message left, Message right) => left.Equals(right);
         
         public static bool operator !=(Message left, Message right) => !(left == right);
 
-        // Enable comparisons between nil and Message struct
+        // Handle comparisons between 'nil' and struct 'Message'
         public static bool operator ==(Message value, NilType nil) => value.Equals(default(Message));
 
         public static bool operator !=(Message value, NilType nil) => !(value == nil);

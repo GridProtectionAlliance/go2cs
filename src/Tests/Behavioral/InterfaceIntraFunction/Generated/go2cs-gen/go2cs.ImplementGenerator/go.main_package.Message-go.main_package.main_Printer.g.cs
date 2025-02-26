@@ -19,7 +19,7 @@ public static partial class main_package
 {
     partial struct Message : go.main_package.main_Printer
     {
-        // 'main_Printer.Print' explicit implementation mapped to direct struct receiver method:
+        // 'main_Printer.Print()' explicit implementation mapped to direct struct receiver method:
         void go.main_package.main_Printer.Print() => this.Print();
     }
 }

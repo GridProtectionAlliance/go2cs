@@ -2,9 +2,19 @@ package main
 
 import (
 	"fmt"
-
-	"golang.org/x/exp/constraints"
 )
+
+type Signed interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64
+}
+
+type Unsigned interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+}
+
+type Integer interface {
+	Signed | Unsigned
+}
 
 type Point []int32
 
@@ -13,7 +23,7 @@ func (p Point) String() string {
 }
 
 // Scale returns a copy of s with each element multiplied by c.
-func Scale[S ~[]E, E constraints.Integer](s S, c E) S {
+func Scale[S ~[]E, E Integer](s S, c E) S {
 	r := make(S, len(s))
 	for i, v := range s {
 		r[i] = v * c

@@ -19,9 +19,6 @@ public static partial class main_package
 {
     partial struct main_data_Address
     {
-        public static implicit operator ж<main_Person_Address>(main_data_Address src)
-        {
-            return Ꮡ(new main_Person_Address(src.Street, src.City));
-        }
+        public static implicit operator ж<main_Person_Address>(main_data_Address src) => Ꮡ(new main_Person_Address(src.Street, src.City));
     }    
 }

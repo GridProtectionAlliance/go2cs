@@ -42,6 +42,10 @@ internal class InheritedTypeTemplate : TemplateBase
                 
                 public {{StructName}}({{TypeName}} value) => m_value = value;
         
+                public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
+        
+                public static bool operator !=({{StructName}} left, {{StructName}} right) => !(left == right);
+        
                 // Handle implicit conversions between '{{TypeName}}' and struct '{{StructName}}'
                 public static implicit operator {{StructName}}({{TypeName}} value) => new {{StructName}}(value);
                     

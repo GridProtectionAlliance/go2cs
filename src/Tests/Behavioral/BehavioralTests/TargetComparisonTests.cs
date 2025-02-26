@@ -38,6 +38,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
@@ -53,6 +56,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckChannelSendToNil() => CheckTarget("ChannelSendToNil");
 
     [TestMethod]
+    public void CheckConstraints() => CheckTarget("Constraints");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
@@ -60,6 +66,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
+
+   // [TestMethod]
+    public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
@@ -129,6 +138,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeConversionReturnType() => CheckTarget("TypeConversionReturnType");
+
+    [TestMethod]
+    public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");

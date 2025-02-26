@@ -35,28 +35,19 @@ public static partial class main_package
         {
         }
         
-        // Enable comparisons between Processor struct types
-        public bool Equals(Processor other)
-        {
-            return 
-                true;
-        }
+        // Handle comparisons between struct 'Processor' instances
+        public bool Equals(Processor other) =>
+            true;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Processor other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Processor other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
         
         public static bool operator ==(Processor left, Processor right) => left.Equals(right);
         
         public static bool operator !=(Processor left, Processor right) => !(left == right);
 
-        // Enable comparisons between nil and Processor struct
+        // Handle comparisons between 'nil' and struct 'Processor'
         public static bool operator ==(Processor value, NilType nil) => value.Equals(default(Processor));
 
         public static bool operator !=(Processor value, NilType nil) => !(value == nil);

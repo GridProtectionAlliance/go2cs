@@ -20,16 +20,12 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public readonly partial struct Counter
     {
-        // Value of the Counter struct
+        // Value of the struct 'Counter'
         private readonly nint m_value;
         
         public override bool Equals(object? obj) => obj is Counter other && m_value == other.m_value;
         
         public override int GetHashCode() => m_value.GetHashCode();
-        
-        public static bool operator ==(Counter left, Counter right) => left.m_value == right.m_value;
-        
-        public static bool operator !=(Counter left, Counter right) => !(left == right);
         
         public static bool operator <(Counter left, Counter right) => left.m_value < right.m_value;
         
@@ -55,12 +51,16 @@ public static partial class main_package
         
         public Counter(nint value) => m_value = value;
 
-        // Enable implicit conversions between nint and Counter struct
+        public static bool operator ==(Counter left, Counter right) => left.Equals(right);
+
+        public static bool operator !=(Counter left, Counter right) => !(left == right);
+
+        // Handle implicit conversions between 'nint' and struct 'Counter'
         public static implicit operator Counter(nint value) => new Counter(value);
             
         public static implicit operator nint(Counter value) => value.m_value;
             
-        // Enable comparisons between nil and Counter struct
+        // Handle comparisons between 'nil' and struct 'Counter'
         public static bool operator ==(Counter value, NilType nil) => value.Equals(default(Counter));
 
         public static bool operator !=(Counter value, NilType nil) => !(value == nil);

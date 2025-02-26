@@ -40,29 +40,20 @@ public static partial class main_package
             this.City = City;
         }
         
-        // Enable comparisons between main_data_Address struct types
-        public bool Equals(main_data_Address other)
-        {
-            return 
-                Street == other.Street &&
-                City == other.City;
-        }
+        // Handle comparisons between struct 'main_data_Address' instances
+        public bool Equals(main_data_Address other) =>
+            Street == other.Street &&
+            City == other.City;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is main_data_Address other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is main_data_Address other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Street, City);
-        }
+        public override int GetHashCode() => HashCode.Combine(Street, City);
         
         public static bool operator ==(main_data_Address left, main_data_Address right) => left.Equals(right);
         
         public static bool operator !=(main_data_Address left, main_data_Address right) => !(left == right);
 
-        // Enable comparisons between nil and main_data_Address struct
+        // Handle comparisons between 'nil' and struct 'main_data_Address'
         public static bool operator ==(main_data_Address value, NilType nil) => value.Equals(default(main_data_Address));
 
         public static bool operator !=(main_data_Address value, NilType nil) => !(value == nil);

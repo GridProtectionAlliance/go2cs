@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"go/types"
 	"strconv"
+	"strings"
 )
 
 func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
@@ -241,12 +242,27 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 					constVal = "iota"
 				}
 
-				orgExpr := v.getPrintedNode(valueSpec.Values[i])
+				orgExpr := ""
+
+				if len(valueSpec.Values) >= i+1 {
+					orgExpr = strings.TrimSpace(v.getPrintedNode(valueSpec.Values[i]))
+				}
 
 				if constVal == orgExpr {
 					orgExpr = ""
 				} else {
-					orgExpr = fmt.Sprintf(" /* %s */", orgExpr)
+					// Try parse both constVal and orgExpr as floating point numbers to see if they are same
+					if constNum, err := strconv.ParseFloat(constVal, 64); err == nil {
+						if orgNum, err := strconv.ParseFloat(orgExpr, 64); err == nil {
+							if constNum == orgNum {
+								orgExpr = ""
+							}
+						}
+					}
+
+					if len(orgExpr) > 0 {
+						orgExpr = fmt.Sprintf(" /* %s */", orgExpr)
+					}
 				}
 
 				if v.inFunction {

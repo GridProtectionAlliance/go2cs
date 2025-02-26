@@ -43,30 +43,21 @@ public static partial class main_package
             this.Valid = Valid;
         }
         
-        // Enable comparisons between main_data struct types
-        public bool Equals(main_data other)
-        {
-            return 
-                ID == other.ID &&
-                Name == other.Name &&
-                Valid == other.Valid;
-        }
+        // Handle comparisons between struct 'main_data' instances
+        public bool Equals(main_data other) =>
+            ID == other.ID &&
+            Name == other.Name &&
+            Valid == other.Valid;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is main_data other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is main_data other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ID, Name, Valid);
-        }
+        public override int GetHashCode() => HashCode.Combine(ID, Name, Valid);
         
         public static bool operator ==(main_data left, main_data right) => left.Equals(right);
         
         public static bool operator !=(main_data left, main_data right) => !(left == right);
 
-        // Enable comparisons between nil and main_data struct
+        // Handle comparisons between 'nil' and struct 'main_data'
         public static bool operator ==(main_data value, NilType nil) => value.Equals(default(main_data));
 
         public static bool operator !=(main_data value, NilType nil) => !(value == nil);

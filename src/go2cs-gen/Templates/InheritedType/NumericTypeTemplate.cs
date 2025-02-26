@@ -9,10 +9,6 @@ internal static class NumericTypeTemplate
                 
                 public override int GetHashCode() => m_value.GetHashCode();
                 
-                public static bool operator ==({{typeName}} left, {{typeName}} right) => left.m_value == right.m_value;
-                
-                public static bool operator !=({{typeName}} left, {{typeName}} right) => !(left == right);
-                
                 public static bool operator <({{typeName}} left, {{typeName}} right) => left.m_value < right.m_value;
                 
                 public static bool operator <=({{typeName}} left, {{typeName}} right) => left.m_value <= right.m_value;

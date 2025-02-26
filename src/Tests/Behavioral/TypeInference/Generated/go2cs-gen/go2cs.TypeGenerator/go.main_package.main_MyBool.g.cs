@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -25,6 +25,10 @@ public static partial class main_package
         
         
         public main_MyBool(bool value) => m_value = value;
+
+        public static bool operator ==(main_MyBool left, main_MyBool right) => left.Equals(right);
+
+        public static bool operator !=(main_MyBool left, main_MyBool right) => !(left == right);
 
         // Handle implicit conversions between 'bool' and struct 'main_MyBool'
         public static implicit operator main_MyBool(bool value) => new main_MyBool(value);

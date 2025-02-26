@@ -19,7 +19,16 @@ public static partial class main_package
 {
     partial struct Llama : go.main_package.Animal
     {
-        // 'Animal.Speak' explicit implementation mapped to direct struct receiver method:
+        // 'Animal.Speak()' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Speak() => this.Speak();
+
+        // Handle comparisons between struct 'Llama' and interface 'Animal'
+        public static bool operator ==(Llama src, go.main_package.Animal iface) => iface is Llama val && val == src;
+        
+        public static bool operator !=(Llama src, go.main_package.Animal iface) => !(src == iface);
+        
+        public static bool operator ==(go.main_package.Animal iface, Llama src) => iface is Llama val && val == src;
+        
+        public static bool operator !=(go.main_package.Animal iface, Llama src) => !(iface == src);
     }
 }

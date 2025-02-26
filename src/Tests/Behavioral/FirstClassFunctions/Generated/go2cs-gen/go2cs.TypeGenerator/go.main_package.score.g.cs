@@ -44,30 +44,21 @@ public static partial class main_package
             this.thisTurn = thisTurn;
         }
         
-        // Enable comparisons between score struct types
-        public bool Equals(score other)
-        {
-            return 
-                player == other.player &&
-                opponent == other.opponent &&
-                thisTurn == other.thisTurn;
-        }
+        // Handle comparisons between struct 'score' instances
+        public bool Equals(score other) =>
+            player == other.player &&
+            opponent == other.opponent &&
+            thisTurn == other.thisTurn;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is score other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is score other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(player, opponent, thisTurn);
-        }
+        public override int GetHashCode() => HashCode.Combine(player, opponent, thisTurn);
         
         public static bool operator ==(score left, score right) => left.Equals(right);
         
         public static bool operator !=(score left, score right) => !(left == right);
 
-        // Enable comparisons between nil and score struct
+        // Handle comparisons between 'nil' and struct 'score'
         public static bool operator ==(score value, NilType nil) => value.Equals(default(score));
 
         public static bool operator !=(score value, NilType nil) => !(value == nil);

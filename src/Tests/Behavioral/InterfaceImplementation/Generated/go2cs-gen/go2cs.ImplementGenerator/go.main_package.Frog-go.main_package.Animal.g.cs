@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -24,7 +24,7 @@ public static partial class main_package
 
         // 'Animal.Swim()' explicit implementation mapped to direct struct receiver method:
         go.@string go.main_package.Animal.Swim() => this.Swim();
-        
+
         // Handle comparisons between struct 'Frog' and interface 'Animal'
         public static bool operator ==(Frog src, go.main_package.Animal iface) => iface is Frog val && val == src;
         

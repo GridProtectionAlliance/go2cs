@@ -19,8 +19,17 @@ public static partial class main_package
 {
     partial struct MyCustomError : go.main_package.Abser
     {
-        // 'Abser.Abs' explicit implementation mapped to direct struct receiver method,
+        // 'Abser.Abs()' explicit implementation mapped to direct struct receiver method,
         // this overrides promoted interface method 'Abser.Abs':
         double go.main_package.Abser.Abs() => this.Abs();
+
+        // Handle comparisons between struct 'MyCustomError' and interface 'Abser'
+        public static bool operator ==(MyCustomError src, go.main_package.Abser iface) => iface is MyCustomError val && val == src;
+        
+        public static bool operator !=(MyCustomError src, go.main_package.Abser iface) => !(src == iface);
+        
+        public static bool operator ==(go.main_package.Abser iface, MyCustomError src) => iface is MyCustomError val && val == src;
+        
+        public static bool operator !=(go.main_package.Abser iface, MyCustomError src) => !(iface == src);
     }
 }

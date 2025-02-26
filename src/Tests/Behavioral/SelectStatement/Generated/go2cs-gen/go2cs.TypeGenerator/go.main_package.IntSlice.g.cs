@@ -20,7 +20,7 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct IntSlice : ISlice<nint>
     {
-        // Value of the IntSlice struct
+        // Value of the struct 'IntSlice'
         private readonly slice<nint> m_value;
         
         public nint[] Source => m_value;
@@ -45,53 +45,36 @@ public static partial class main_package
             set => ((IArray)m_value)[index] = value;
         }
             
-        public ref nint this[nint index]
-        {
-            get => ref m_value[index];
-        }
+        public ref nint this[nint index] => ref m_value[index];
         
         public Span<nint> ꓸꓸꓸ => ToSpan();
         
-        public Span<nint> ToSpan()
-        {
-            return m_value.ToSpan();
-        }
+        public Span<nint> ToSpan() => m_value.ToSpan();
         
-        public ISlice? Append(object[] elems)
-        {
-            return ((ISlice)m_value).Append(elems);
-        }
+        public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
         
-        public IEnumerator<(nint, nint)> GetEnumerator()
-        {
-            return m_value.GetEnumerator();
-        }
+        public IEnumerator<(nint, nint)> GetEnumerator() => m_value.GetEnumerator();
         
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)m_value).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
         
-        public bool Equals(IArray<nint>? other)
-        {
-            return m_value.Equals(other);
-        }
+        public bool Equals(IArray<nint>? other) => m_value.Equals(other);
         
-        public bool Equals(ISlice<nint>? other)
-        {
-           return m_value.Equals(other);
-        }
+        public bool Equals(ISlice<nint>? other) => m_value.Equals(other);
         
         public object Clone() => ((ICloneable)m_value).Clone();
         
         public IntSlice(slice<nint> value) => m_value = value;
 
-        // Enable implicit conversions between slice<nint> and IntSlice struct
+        public static bool operator ==(IntSlice left, IntSlice right) => left.Equals(right);
+
+        public static bool operator !=(IntSlice left, IntSlice right) => !(left == right);
+
+        // Handle implicit conversions between 'slice<nint>' and struct 'IntSlice'
         public static implicit operator IntSlice(slice<nint> value) => new IntSlice(value);
             
         public static implicit operator slice<nint>(IntSlice value) => value.m_value;
             
-        // Enable comparisons between nil and IntSlice struct
+        // Handle comparisons between 'nil' and struct 'IntSlice'
         public static bool operator ==(IntSlice value, NilType nil) => value.Equals(default(IntSlice));
 
         public static bool operator !=(IntSlice value, NilType nil) => !(value == nil);

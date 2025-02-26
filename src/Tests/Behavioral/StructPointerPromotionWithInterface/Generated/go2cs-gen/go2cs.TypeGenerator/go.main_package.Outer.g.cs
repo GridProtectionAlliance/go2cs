@@ -37,28 +37,19 @@ public static partial class main_package
             this.ptr = ptr;
         }
         
-        // Enable comparisons between Outer struct types
-        public bool Equals(Outer other)
-        {
-            return 
-                ptr == other.ptr;
-        }
+        // Handle comparisons between struct 'Outer' instances
+        public bool Equals(Outer other) =>
+            ptr == other.ptr;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is Outer other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is Outer other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(ptr);
-        }
+        public override int GetHashCode() => HashCode.Combine(ptr);
         
         public static bool operator ==(Outer left, Outer right) => left.Equals(right);
         
         public static bool operator !=(Outer left, Outer right) => !(left == right);
 
-        // Enable comparisons between nil and Outer struct
+        // Handle comparisons between 'nil' and struct 'Outer'
         public static bool operator ==(Outer value, NilType nil) => value.Equals(default(Outer));
 
         public static bool operator !=(Outer value, NilType nil) => !(value == nil);

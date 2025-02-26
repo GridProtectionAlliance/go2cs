@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -46,31 +46,22 @@ public static partial class main_package
             this.M = M;
         }
         
-        // Enable comparisons between test_x struct types
-        public bool Equals(test_x other)
-        {
-            return 
-                @string == other.@string &&
-                @int == other.@int &&
-                P == other.P &&
-                M == other.M;
-        }
+        // Handle comparisons between struct 'test_x' instances
+        public bool Equals(test_x other) =>
+            @string == other.@string &&
+            @int == other.@int &&
+            P == other.P &&
+            M == other.M;
         
-        public override bool Equals(object? obj)
-        {
-            return obj is test_x other && Equals(other);
-        }
+        public override bool Equals(object? obj) => obj is test_x other && Equals(other);
         
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(@string, @int, P, M);
-        }
+        public override int GetHashCode() => HashCode.Combine(@string, @int, P, M);
         
         public static bool operator ==(test_x left, test_x right) => left.Equals(right);
         
         public static bool operator !=(test_x left, test_x right) => !(left == right);
 
-        // Enable comparisons between nil and test_x struct
+        // Handle comparisons between 'nil' and struct 'test_x'
         public static bool operator ==(test_x value, NilType nil) => value.Equals(default(test_x));
 
         public static bool operator !=(test_x value, NilType nil) => !(value == nil);

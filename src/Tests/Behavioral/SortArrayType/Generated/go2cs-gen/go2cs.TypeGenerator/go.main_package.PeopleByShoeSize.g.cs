@@ -20,7 +20,7 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct PeopleByShoeSize : ISlice<Person>
     {
-        // Value of the PeopleByShoeSize struct
+        // Value of the struct 'PeopleByShoeSize'
         private readonly slice<Person> m_value;
         
         public Person[] Source => m_value;
@@ -45,53 +45,36 @@ public static partial class main_package
             set => ((IArray)m_value)[index] = value;
         }
             
-        public ref Person this[nint index]
-        {
-            get => ref m_value[index];
-        }
+        public ref Person this[nint index] => ref m_value[index];
         
         public Span<Person> ꓸꓸꓸ => ToSpan();
         
-        public Span<Person> ToSpan()
-        {
-            return m_value.ToSpan();
-        }
+        public Span<Person> ToSpan() => m_value.ToSpan();
         
-        public ISlice? Append(object[] elems)
-        {
-            return ((ISlice)m_value).Append(elems);
-        }
+        public ISlice? Append(object[] elems) => ((ISlice)m_value).Append(elems);
         
-        public IEnumerator<(nint, Person)> GetEnumerator()
-        {
-            return m_value.GetEnumerator();
-        }
+        public IEnumerator<(nint, Person)> GetEnumerator() => m_value.GetEnumerator();
         
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return ((IEnumerable)m_value).GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
         
-        public bool Equals(IArray<Person>? other)
-        {
-            return m_value.Equals(other);
-        }
+        public bool Equals(IArray<Person>? other) => m_value.Equals(other);
         
-        public bool Equals(ISlice<Person>? other)
-        {
-           return m_value.Equals(other);
-        }
+        public bool Equals(ISlice<Person>? other) => m_value.Equals(other);
         
         public object Clone() => ((ICloneable)m_value).Clone();
         
         public PeopleByShoeSize(slice<Person> value) => m_value = value;
 
-        // Enable implicit conversions between slice<Person> and PeopleByShoeSize struct
+        public static bool operator ==(PeopleByShoeSize left, PeopleByShoeSize right) => left.Equals(right);
+
+        public static bool operator !=(PeopleByShoeSize left, PeopleByShoeSize right) => !(left == right);
+
+        // Handle implicit conversions between 'slice<Person>' and struct 'PeopleByShoeSize'
         public static implicit operator PeopleByShoeSize(slice<Person> value) => new PeopleByShoeSize(value);
             
         public static implicit operator slice<Person>(PeopleByShoeSize value) => value.m_value;
             
-        // Enable comparisons between nil and PeopleByShoeSize struct
+        // Handle comparisons between 'nil' and struct 'PeopleByShoeSize'
         public static bool operator ==(PeopleByShoeSize value, NilType nil) => value.Equals(default(PeopleByShoeSize));
 
         public static bool operator !=(PeopleByShoeSize value, NilType nil) => !(value == nil);
