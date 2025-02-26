@@ -1,28 +1,63 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 // Handles identity types in context of a TypeSpec
-func (v *Visitor) visitIdent(ident *ast.Ident, name string) {
-	identType := v.getIdentType(ident).Underlying()
-	goTypeName := identType.String()
+func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string, lifted bool) {
+	underlyingIdentType := v.getIdentType(ident).Underlying()
+	goTypeName := underlyingIdentType.String()
 	csTypeName := convertToCSTypeName(goTypeName)
 
-	v.targetFile.WriteString(v.newline)
+	var target *strings.Builder
 
-	if isNumericType(identType) {
-		// Handle numeric type
-		v.writeOutput("[GoType(\"num:%s\")]", csTypeName)
-	} else {
-		// Handle other types
-		v.writeOutput("[GoType(\"%s\")]", csTypeName)
+	// Intra-function type declarations are not allowed in C#
+	if lifted {
+		if v.inFunction {
+			target = &strings.Builder{}
+
+			if !strings.HasPrefix(name, v.currentFuncName+"_") {
+				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
+			}
+
+			v.indentLevel--
+		}
+
+		name = v.getUniqueLiftedTypeName(name)
+		v.liftedTypeMap[identType] = name
 	}
 
-	v.writeOutput(" partial struct %s {}", getSanitizedIdentifier(name))
-	v.targetFile.WriteString(v.newline)
+	if target == nil {
+		target = v.targetFile
+	}
+
+	if !v.inFunction {
+		target.WriteString(v.newline)
+	}
+
+	if isNumericType(underlyingIdentType) {
+		// Handle numeric type
+		v.writeString(target, "[GoType(\"num:%s\")]", csTypeName)
+	} else {
+		// Handle other types
+		v.writeString(target, "[GoType(\"%s\")]", csTypeName)
+	}
+
+	v.writeString(target, " partial struct %s {}", getSanitizedIdentifier(name))
+	target.WriteString(v.newline)
+
+	if lifted && v.inFunction {
+		if v.currentFuncPrefix.Len() > 0 {
+			v.currentFuncPrefix.WriteString(v.newline)
+		}
+
+		v.currentFuncPrefix.WriteString(target.String())
+		v.indentLevel++
+	}
 }
 
 func isNumericType(typ types.Type) bool {

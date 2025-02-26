@@ -46,9 +46,9 @@
                 //"..\\Tests\\Behavioral\\TypeConversion",
                 //"..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
-                "..\\Tests\\Behavioral\\AnyKeyMap",
+                //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
-                //"..\\Tests\\Behavioral\\TypeInference",
+                "..\\Tests\\Behavioral\\TypeInference",
             ]
         }
     ]

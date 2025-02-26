@@ -7,6 +7,7 @@ import (
 
 func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	name := v.getIdentName(typeSpec.Name)
+	identType := v.getIdentType(typeSpec.Name)
 
 	// Handle type alias
 	if typeSpec.Assign.IsValid() {
@@ -39,7 +40,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.FuncType:
 		v.visitFuncType(typeSpecType, name)
 	case *ast.Ident:
-		v.visitIdent(typeSpecType, name)
+		v.visitIdent(typeSpecType, identType, name, v.inFunction)
 	case *ast.InterfaceType:
 		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
 	case *ast.MapType:
