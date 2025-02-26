@@ -15,7 +15,7 @@ using System;
 
 namespace go;
 
-public static partial class main_package
+public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial struct Frog

@@ -18,7 +18,10 @@ namespace go;
 public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Integer
+    public partial interface PromotedTest3<T> :
+        comparable<T>
+        where T :
+        comparable<T>
     {
     }
 }

@@ -15,10 +15,12 @@ using System;
 
 namespace go;
 
-public static partial class constraints_package
+public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Integer
+    public static go.@string Swim(this ж<go.main_package.Dog> Ꮡd)
     {
+        ref var d = ref Ꮡd.val;
+        return d.Swim();
     }
 }

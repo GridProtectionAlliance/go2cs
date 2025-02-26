@@ -48,7 +48,7 @@ public interface ISlice : IArray
     ISlice? Append(object[] elems);
 }
 
-public interface ISlice<T> : IArray<T>, ISlice, comparable<ISlice<T>>
+public interface ISlice<T> : IArray<T>, ISlice
 {
     ISlice<T> Append(params T[] elems);
 }

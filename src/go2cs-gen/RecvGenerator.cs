@@ -91,7 +91,7 @@ public class RecvGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs"), generatedSource);
+            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs"), generatedSource);
         }
     }
 }

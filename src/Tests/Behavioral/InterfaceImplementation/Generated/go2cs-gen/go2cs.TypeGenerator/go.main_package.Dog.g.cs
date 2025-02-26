@@ -41,12 +41,9 @@ public static partial class main_package
         }
         
         // Handle comparisons between struct 'Dog' instances
-        public bool Equals(Dog other)
-        {
-            return 
-                Name == other.Name &&
-                Breed == other.Breed;
-        }
+        public bool Equals(Dog other) =>
+            Name == other.Name &&
+            Breed == other.Breed;
         
         public override bool Equals(object? obj) => obj is Dog other && Equals(other);
         

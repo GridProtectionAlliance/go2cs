@@ -1,78 +1,80 @@
-using System.Numerics;
-
 namespace go;
 
 partial class constraints_package {
 
-    // In the case of generic constraints, restrictions in C# work somewhat differently than in Go. In C# a constraint
-    // can be a class, an interface and a few special cases. In Go, all constraints are interfaces and can be restricted
-    // to types, i.e., structs and heap-allocated types alike. Since at the point of the C# code conversion Go will have
-    // already parsed and validated the code, we can assume that all the type-based constraints will have been satisfied.
-    // Also, any defined method-set constraints will be handled as normal for existing interface conversion handling.
-    // The remaining step to be handled is to determine the set of operators that all types in the constraint type-set
-    // have in common, which is the set of operators that the C# code will need to account for. There are three sets of
-    // operators to be considered: arithmetic, comparison and equality. The arithmetic operators apply only to numeric
-    // types, the comparison operators apply to types that can be ordered and the equality operators apply to types that
-    // can be compared for equality. See "Operators" section in the Go specification: https://go.dev/ref/spec#Operators
-
-    /*
-        Arithmetic operators:
-
-        +    sum                    integers, floats, complex values, strings
-        -    difference             integers, floats, complex values
-        *    product                integers, floats, complex values
-        /    quotient               integers, floats, complex values
-        %    remainder              integers
-
-        &    bitwise AND            integers
-        |    bitwise OR             integers
-        ^    bitwise XOR            integers
-        &^   bit clear (AND NOT)    integers
-
-        <<   left shift             integer << integer >= 0
-        >>   right shift            integer >> integer >= 0
-
-        Comparison operators:
-
-        ==    equal                 comparable types
-        !=    not equal             comparable types
-        <     less                  ordered types
-        <=    less or equal         ordered types
-        >     greater               ordered types
-        >=    greater or equal      ordered types
-
-        comparable types:           bools, integers, floats, complex values, strings, pointers, channels, interfaces, structs, arrays
-        ordered types:              integers, floats, strings
-     */
-
-[GoType] partial interface Signed<T> : ISignedNumber<T> where T : ISignedNumber<T>
-    //~@int | ~int8 | ~int16 | ~int32 | ~int64
-{
+[GoType] partial struct Frog {
+    public @string Name;
+    public @string Color;
 }
 
-[GoType] partial interface Unsigned<T> : IUnsignedNumber<T> where T : IUnsignedNumber<T>
-    //~@uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
-{
+[GoType] partial interface ConstraintTest1<T> {
+    //  Type constraints: string | []int | map[string]int | chan string | *int | [2]int | Frog
+    // Derived operators: none
+    @string Upper();
 }
 
-[GoType] partial interface Integer<T> : INumber<T> where T : INumber<T>
-    //Signed | Unsigned
-{
+[GoType("Operators = Comparable")]
+partial interface ConstraintTest2<T> {
+    //  Type constraints: string | chan string | *int | [2]int | Frog
+    // Derived operators: ==, !=
+    @string Lower();
 }
 
-[GoType] partial interface Float<T> : IFloatingPointIeee754<T> where T : IFloatingPointIeee754<T>
-    //~float32 | ~float64
-{
+[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Signed<T> {
+    //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64
+    // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType] partial interface Complex<T> : INumberBase<T> where T : INumberBase<T>
-    //~complex64 | ~complex128
-{
+[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Unsigned<T> {
+    //  Type constraints: ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
+    // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType] partial interface Ordered<T> where T : comparable<T>
-    //Integer | Float | ~@string
+[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Integer<T> {
+    //  Type constraints: Signed | Unsigned
+    // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
+}
+
+[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface PromotedTest1<T> {
+    //  Type constraints: Signed
+    // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
+}
+
+[GoType] partial interface PromotedTest2<T> :
+    ConstraintTest1<T>
 {
+    //  Type constraints: ConstraintTest1
+    // Derived operators: none
+}
+
+[GoType("Operators = Comparable")]
+partial interface PromotedTest3<T> :
+    ConstraintTest2<T>
+{
+    //  Type constraints: ConstraintTest2
+    // Derived operators: ==, !=
+}
+
+[GoType("Operators = Sum, Arithmetic, Comparable, Ordered")]
+partial interface Float<T> {
+    //  Type constraints: ~float32 | ~float64
+    // Derived operators: +, -, *, /, ==, !=, <, <=, >, >=
+}
+
+[GoType("Operators = Sum, Arithmetic, Comparable")]
+partial interface Complex<T> {
+    //  Type constraints: ~complex64 | ~complex128
+    // Derived operators: +, -, *, /, ==, !=
+}
+
+[GoType("Operators = Sum, Comparable, Ordered")]
+partial interface Ordered<T> {
+    //  Type constraints: Integer | Float | ~string
+    // Derived operators: +, ==, !=, <, <=, >, >=
 }
 
 } // end constraints_package

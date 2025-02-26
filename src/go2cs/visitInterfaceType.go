@@ -8,6 +8,8 @@ import (
 	"strings"
 )
 
+const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
+const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
 // Handles map types in context of a TypeSpec
@@ -87,10 +89,12 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	result := &strings.Builder{}
 	inheritedInterfaces := []string{}
+	typeConstraints := HashSet[ConstraintType]{}
+	var operatorSets HashSet[OperatorSet]
 	outerIndent := v.indent(v.indentLevel)
 
 	result.WriteString(outerIndent)
-	result.WriteString(fmt.Sprintf("[GoType] partial interface %s%s{", getSanitizedIdentifier(name), InterfaceInheritanceMarker))
+	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(name), InterfaceInheritanceMarker))
 	result.WriteString(v.newline)
 
 	v.indentLevel++
@@ -116,12 +120,23 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			typeLenDeviation += token.Pos(len(parameterSignature) - v.getSourceParameterSignatureLen(signature))
 			typeLenDeviation += token.Pos(len(resultSignature) - v.getSourceResultSignatureLen(signature))
 
-			result.WriteString(innerIndent)
-			result.WriteString(fmt.Sprintf("%s %s(%s);", resultSignature, csMethodName, parameterSignature))
+			result.WriteString(fmt.Sprintf("%s%s %s(%s);", innerIndent, resultSignature, csMethodName, parameterSignature))
 			v.writeCommentString(result, method.Comment, method.Type.End()+typeLenDeviation)
 			result.WriteString(v.newline)
 		} else if method.Type != nil {
-			inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil))
+			if isConstraint, methodCount := v.IsTypeConstraint(method.Type); isConstraint {
+				result.WriteString(fmt.Sprintf("%s//  Type constraints: %s%s", innerIndent, v.getPrintedNode(method.Type), v.newline))
+				typeConstraints.UnionWithSet(v.GetAllConstraintTypes(method.Type))
+				operatorSets = GetOperatorSet(typeConstraints)
+				result.WriteString(fmt.Sprintf("%s// Derived operators: %s%s", innerIndent, GetOperatorSetAsString(operatorSets), v.newline))
+
+				// If type constraint constains any methods, add it to the inherited interfaces
+				if methodCount > 0 {
+					inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil)+"<T>")
+				}
+			} else {
+				inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil))
+			}
 		} else {
 			panic("Unexpected method declaration in interface: %s" + v.getPrintedNode(method))
 		}
@@ -132,10 +147,22 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	result.WriteRune('}')
 	result.WriteString(v.newline)
 
-	interfaceResult := result.String()
+	inheritedResult := ""
+
+	if len(typeConstraints) > 0 {
+		inheritedResult += "<T>"
+	}
+
+	interfaceAttrs := ""
+	postAttrs := " "
+
+	if len(operatorSets) > 0 {
+		interfaceAttrs += fmt.Sprintf("(\"Operators = %s\")", GetOperatorSetAttributes(operatorSets))
+		postAttrs = v.newline
+	}
 
 	if len(inheritedInterfaces) > 0 {
-		inheritedResult := " :" + v.newline
+		inheritedResult += " :" + v.newline
 
 		for i, inheritedInterface := range inheritedInterfaces {
 			if i > 0 {
@@ -147,18 +174,19 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		inheritedResult += v.newline + outerIndent
 
-		interfaceResult = strings.ReplaceAll(interfaceResult, InterfaceInheritanceMarker, inheritedResult)
-
 		// Track which interfaces this interface inherits from so
 		// duplicate interface implementations can be avoided
 		packageLock.Lock()
 		interfaceInheritances[name] = NewHashSet(inheritedInterfaces)
 		packageLock.Unlock()
 	} else {
-		interfaceResult = strings.ReplaceAll(interfaceResult, InterfaceInheritanceMarker, " ")
+		inheritedResult += " "
 	}
 
-	target.WriteString(interfaceResult)
+	target.WriteString(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(result.String(),
+		InterfaceTypeAttributeMarker, interfaceAttrs),
+		InterfacePostAtributeMarker, postAttrs),
+		InterfaceInheritanceMarker, inheritedResult))
 
 	if lifted && v.inFunction {
 		if v.currentFuncPrefix.Len() > 0 {

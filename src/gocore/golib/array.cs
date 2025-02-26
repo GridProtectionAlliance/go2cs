@@ -46,7 +46,7 @@ public interface IArray : IEnumerable, ICloneable
     }
 }
 
-public interface IArray<T> : IArray, IEnumerable<(nint, T)>, comparable<IArray<T>>
+public interface IArray<T> : IArray, IEnumerable<(nint, T)>
 {
     new T[] Source { get; }
     

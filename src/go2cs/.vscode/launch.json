@@ -36,7 +36,7 @@
                 //"..\\Tests\\Behavioral\\ChannelSendToNil",
                 //"..\\Tests\\Behavioral\\Solitaire",
                 //"..\\Tests\\Behavioral\\InterfaceInheritance",
-                "..\\Tests\\Behavioral\\InterfaceImplementation",
+                //"..\\Tests\\Behavioral\\InterfaceImplementation",
                 //"..\\Tests\\Behavioral\\InterfaceIntraFunction",
                 //"..\\Tests\\Behavioral\\MethodSelector",
                 //"..\\Tests\\Behavioral\\StringPassByValue",
@@ -47,7 +47,7 @@
                 //"..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
-                //"..\\Tests\\Behavioral\\Constraints",
+                "..\\Tests\\Behavioral\\Constraints",
                 //"..\\Tests\\Behavioral\\TypeInference",
             ]
         }

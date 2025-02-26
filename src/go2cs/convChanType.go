@@ -5,5 +5,5 @@ import (
 )
 
 func (v *Visitor) convChanType(chanType *ast.ChanType) string {
-	return "/* convChanType: " + v.getPrintedNode(chanType) + " */"
+	return convertToCSTypeName(v.getExprTypeName(chanType, false))
 }

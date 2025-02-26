@@ -18,7 +18,16 @@ namespace go;
 public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Integer
+    public partial interface Float<T> :
+        runtime.SumOperator<T>,
+        runtime.ArithmeticOperators<T>,
+        comparable<T>,
+        runtime.OrderedOperators<T>
+        where T :
+        runtime.SumOperator<T>,
+        runtime.ArithmeticOperators<T>,
+        comparable<T>,
+        runtime.OrderedOperators<T>
     {
     }
 }

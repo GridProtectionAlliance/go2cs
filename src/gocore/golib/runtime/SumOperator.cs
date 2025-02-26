@@ -1,7 +1,7 @@
 ﻿//******************************************************************************************************
-//  comparable.cs - Gbtc
+//  SumOperator.cs - Gbtc
 //
-//  Copyright © 2024, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,25 +16,21 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  11/26/2024 - J. Ritchie Carroll
+//  02/24/2025 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
-// ReSharper disable InconsistentNaming
 
 using System.Numerics;
 
-namespace go;
+namespace go.runtime;
 
 /// <summary>
-/// Represents the C# implementation of the Go built-in <c>comparable</c> constraint.
+/// Represent the operator constraints for the `+` operator.
 /// </summary>
-/// <remarks>
-/// Defines constraints for the `==`, `!=` operators.
-/// </remarks>
 /// <typeparam name="T">Constrained type.</typeparam>
-public interface comparable<T> : 
-    IEqualityOperators<T, T, bool> 
-    where T : comparable<T>
+public interface SumOperator<T> : 
+    IAdditionOperators<T, T, T> 
+    where T : SumOperator<T>
 {
 }

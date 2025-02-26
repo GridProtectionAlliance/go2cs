@@ -30,8 +30,12 @@ using go2cs.Templates.InheritedType;
 using go2cs.Templates.InterfaceType;
 using go2cs.Templates.StructType;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static go2cs.Common;
+using System.Data.Common;
+
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -68,7 +72,25 @@ public class TypeGenerator : ISourceGenerator
             string packageClassName = targetSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
-            string fullyQualifiedIdentifier = context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree).GetDeclaredSymbol(targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
+
+            // Add generic type parameters to the identifier
+            if (targetSyntax is TypeDeclarationSyntax typeDecl)
+            {
+                // TypeDeclarationSyntax is the base for ClassDeclarationSyntax, StructDeclarationSyntax, and InterfaceDeclarationSyntax
+                if (typeDecl.TypeParameterList is { Parameters.Count: > 0 })
+                {
+                    IEnumerable<string> typeParamNames = typeDecl.TypeParameterList.Parameters.Select(p => p.Identifier.Text);
+                    identifier += $"<{string.Join(", ", typeParamNames)}>";
+                }
+            }
+            else if (targetSyntax is RecordDeclarationSyntax { TypeParameterList.Parameters.Count: > 0 } recordDecl)
+            {
+                // Handle record declaration separately
+                IEnumerable<string> typeParamNames = recordDecl.TypeParameterList.Parameters.Select(p => p.Identifier.Text);
+                identifier += $"<{string.Join(", ", typeParamNames)}>";
+            }
+
+            string fullyQualifiedIdentifier = ModelExtensions.GetDeclaredSymbol(context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree), targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
             
             // Since many types are referenced by assembly attributes outside namespace,
             // "internal" scope is used so types can be referenced instead of "private"
@@ -233,12 +255,26 @@ public class TypeGenerator : ISourceGenerator
                         throw new NotSupportedException($"Unsupported [{AttributeName}] definition \"{typeDefinition}\" on struct \"{identifier}\".");
 
                     case InterfaceDeclarationSyntax:
+                        string[]? operatorConstraints = null;
+
+                        if (!string.IsNullOrWhiteSpace(typeDefinition))
+                        {
+                            string[] parts = typeDefinition.Split(["="], StringSplitOptions.RemoveEmptyEntries);
+
+                            if (parts.Length > 1)
+                            {
+                                if (parts[0].Trim().Equals("Operators", StringComparison.OrdinalIgnoreCase))
+                                    operatorConstraints = parts[1].Split([','], StringSplitOptions.RemoveEmptyEntries).Select(part => part.Trim()).ToArray();
+                            }
+                        }
+
                         generatedSource = new InterfaceTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             Scope = scope,
                             InterfaceName = identifier,
+                            OperatorConstraints = operatorConstraints ?? [],
                             UsingStatements = usingStatements
                         }
                         .Generate();

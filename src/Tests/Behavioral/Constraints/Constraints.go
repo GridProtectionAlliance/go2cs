@@ -6,6 +6,22 @@
 // with type parameters.
 package constraints
 
+
+type Frog struct {
+	Name  string
+	Color string
+}
+
+type ConstraintTest1 interface {
+	string | []int | map[string]int | chan string | *int | [2]int | Frog
+    Upper() string
+}
+
+type ConstraintTest2 interface {
+	string | chan string | *int | [2]int | Frog
+    Lower() string
+}
+
 // Signed is a constraint that permits any signed integer type.
 // If future releases of Go add new predeclared signed integer types,
 // this constraint will be modified to include them.
@@ -25,6 +41,18 @@ type Unsigned interface {
 // this constraint will be modified to include them.
 type Integer interface {
 	Signed | Unsigned
+}
+
+type PromotedTest1 interface {
+	Signed
+}
+
+type PromotedTest2 interface {
+	ConstraintTest1
+}
+
+type PromotedTest3 interface {
+	ConstraintTest2
 }
 
 // Float is a constraint that permits any floating-point type.
