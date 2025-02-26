@@ -1405,6 +1405,39 @@ func (v *Visitor) getIdentType(ident *ast.Ident) types.Type {
 	return nil
 }
 
+func (v *Visitor) typeExists(name string) bool {
+	// Look in the package scope
+	obj := v.pkg.Scope().Lookup(name)
+
+	if obj != nil && (obj.Type() != nil || obj.Type().Underlying() != nil) {
+		return true
+	}
+
+	// Or search through all definitions
+	for _, obj := range v.info.Defs {
+		if obj != nil && obj.Name() == name && (obj.Type() != nil || obj.Type().Underlying() != nil) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
+	typeName = getSanitizedIdentifier(typeName)
+	uniqueTypeName := typeName
+	count := 0
+
+	for v.liftedTypeNames.Contains(uniqueTypeName) || v.typeExists(uniqueTypeName) {
+		count++
+		uniqueTypeName = fmt.Sprintf("%s%s%d", typeName, TempVarMarker, count)
+	}
+
+	v.liftedTypeNames.Add(uniqueTypeName)
+
+	return uniqueTypeName
+}
+
 func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
 	if expr == nil {
 		return nil

@@ -4,7 +4,10 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("bool")] partial struct main_MyBool {}
+[GoType] partial struct main_MyBool {
+}
+
+[GoType("bool")] partial struct main_MyBoolᴛ1 {}
 
 private static void Main() {
     const bool c = /* 3 < 4 */ true;
@@ -12,7 +15,7 @@ private static void Main() {
     nint y = default!;
     bool b3 = x == y;
     bool b4 = x == y;
-    main_MyBool b5 = x == y;
+    main_MyBoolᴛ1 b5 = x == y;
     fmt.Println(c);
     fmt.Println(b3);
     fmt.Println(b4);

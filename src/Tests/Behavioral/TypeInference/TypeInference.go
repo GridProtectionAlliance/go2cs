@@ -2,10 +2,14 @@ package main
 
 import "fmt"
 
+// Make sure lifted type name does not conflict with existing type name
+type main_MyBool struct {
+}
+
 func main() {
 	const c = 3 < 4 // c is the untyped boolean constant true
 
-	type MyBool bool
+	type MyBool bool // <-- type to be lifted
 	var x, y int
 	var (
 		// The result of a comparison is an untyped boolean.

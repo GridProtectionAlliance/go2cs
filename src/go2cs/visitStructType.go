@@ -192,18 +192,3 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	return
 }
-
-func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
-	typeName = getSanitizedIdentifier(typeName)
-	uniqueTypeName := typeName
-	count := 0
-
-	for v.liftedTypeNames.Contains(uniqueTypeName) {
-		count++
-		uniqueTypeName = fmt.Sprintf("%s%s%d", typeName, TempVarMarker, count)
-	}
-
-	v.liftedTypeNames.Add(uniqueTypeName)
-
-	return uniqueTypeName
-}
