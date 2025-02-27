@@ -55,7 +55,11 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is test_x other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(@string, @int, P, M);
+        public override int GetHashCode() => HashCode.Combine(
+            @string,
+            @int,
+            P,
+            M);
         
         public static bool operator ==(test_x left, test_x right) => left.Equals(right);
         

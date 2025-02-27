@@ -43,7 +43,8 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Message other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Text);
+        public override int GetHashCode() => HashCode.Combine(
+            Text);
         
         public static bool operator ==(Message left, Message right) => left.Equals(right);
         

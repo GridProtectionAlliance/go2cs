@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'Cat' instances
         public bool Equals(Cat other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is Cat other && Equals(other);
         

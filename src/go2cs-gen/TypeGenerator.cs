@@ -30,12 +30,8 @@ using go2cs.Templates.InheritedType;
 using go2cs.Templates.InterfaceType;
 using go2cs.Templates.StructType;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using static go2cs.Common;
-using System.Data.Common;
-
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -68,29 +64,23 @@ public class TypeGenerator : ISourceGenerator
             
         foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree);
+
             string packageNamespace = targetSyntax.GetNamespaceName();
             string packageClassName = targetSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = targetSyntax.Identifier.Text;
+            bool hasEqualityOperators = true;
 
             // Add generic type parameters to the identifier
-            if (targetSyntax is TypeDeclarationSyntax typeDecl)
+            if (targetSyntax is TypeDeclarationSyntax { TypeParameterList.Parameters.Count: > 0 } typeDecl)
             {
-                // TypeDeclarationSyntax is the base for ClassDeclarationSyntax, StructDeclarationSyntax, and InterfaceDeclarationSyntax
-                if (typeDecl.TypeParameterList is { Parameters.Count: > 0 })
-                {
-                    IEnumerable<string> typeParamNames = typeDecl.TypeParameterList.Parameters.Select(p => p.Identifier.Text);
-                    identifier += $"<{string.Join(", ", typeParamNames)}>";
-                }
-            }
-            else if (targetSyntax is RecordDeclarationSyntax { TypeParameterList.Parameters.Count: > 0 } recordDecl)
-            {
-                // Handle record declaration separately
-                IEnumerable<string> typeParamNames = recordDecl.TypeParameterList.Parameters.Select(p => p.Identifier.Text);
+                IEnumerable<string> typeParamNames = typeDecl.TypeParameterList.Parameters.Select(p => p.Identifier.Text);
                 identifier += $"<{string.Join(", ", typeParamNames)}>";
+                hasEqualityOperators = typeDecl.AllGenericTypesHaveConstraint(semanticModel, "System.Numerics.IEqualityOperators`3");
             }
 
-            string fullyQualifiedIdentifier = ModelExtensions.GetDeclaredSymbol(context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree), targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
+            string fullyQualifiedIdentifier = semanticModel.GetDeclaredSymbol(targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
             
             // Since many types are referenced by assembly attributes outside namespace,
             // "internal" scope is used so types can be referenced instead of "private"
@@ -133,6 +123,7 @@ public class TypeGenerator : ISourceGenerator
                             StructName = identifier,
                             FullyQualifiedStructType = fullyQualifiedIdentifier,
                             StructMembers = structDeclaration.GetStructMembers(context, true),
+                            HasEqualityOperators = hasEqualityOperators,
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -267,6 +258,8 @@ public class TypeGenerator : ISourceGenerator
                                     operatorConstraints = parts[1].Split([','], StringSplitOptions.RemoveEmptyEntries).Select(part => part.Trim()).ToArray();
                             }
                         }
+
+                        usingStatements = usingStatements.Append("using System.Numerics;").ToArray();
 
                         generatedSource = new InterfaceTypeTemplate
                         {

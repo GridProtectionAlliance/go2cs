@@ -51,7 +51,10 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Person other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(work, name, age);
+        public override int GetHashCode() => HashCode.Combine(
+            work,
+            name,
+            age);
         
         public static bool operator ==(Person left, Person right) => left.Equals(right);
         

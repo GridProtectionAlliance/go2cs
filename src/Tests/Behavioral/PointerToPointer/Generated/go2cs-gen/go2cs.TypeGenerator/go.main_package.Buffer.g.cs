@@ -51,7 +51,10 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Buffer other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(buf, off, lastRead);
+        public override int GetHashCode() => HashCode.Combine(
+            buf,
+            off,
+            lastRead);
         
         public static bool operator ==(Buffer left, Buffer right) => left.Equals(right);
         

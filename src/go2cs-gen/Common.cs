@@ -28,6 +28,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 
 namespace go2cs;
@@ -84,22 +85,37 @@ public static class Common
         }
     }
 
-    public static string GetSimpleName(string name)
+    public static bool IsGenericType(string typeName)
+    {
+        return typeName.Contains('<') && typeName.Contains('>');
+    }
+
+    public static string GetSimpleName(string typeName, bool dropGeneric = false)
     {
         // Check if type name is a pointer, i.e., ж<T>
-        int startIndex = name.IndexOf('ж');
+        int startIndex = typeName.IndexOf('ж');
         bool isPointer = false;
 
         // For pointer types, get dereferenced underlying type
-        if (startIndex > -1 && name.EndsWith(">"))
+        if (startIndex > -1 && typeName.EndsWith(">"))
         {
-            name = $"{name[(startIndex + 2)..^1]}";
+            typeName = $"{typeName[(startIndex + 2)..^1]}";
             isPointer = true;
         }
 
-        string[] parts = name.Split('.');
+        string[] parts = typeName.Split('.');
 
-        return $"{parts[^1]}{(isPointer ? ".val" : "")}";
+        string simpleName = $"{parts[^1]}{(isPointer ? ".val" : "")}";
+
+        if (dropGeneric)
+        {
+            startIndex = typeName.IndexOf('<');
+
+            if (startIndex > 1 && typeName.EndsWith(">"))
+                simpleName = $"{simpleName[..startIndex]}";
+        }
+
+        return simpleName;
     }
 
     public static string GetFullTypeName(this ITypeSymbol? typeSymbol, bool useDisplayString = false)

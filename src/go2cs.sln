@@ -136,6 +136,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Constraints", "Tests\Behavi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeInference", "Tests\Behavioral\TypeInference\TypeInference.csproj", "{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeDecl", "Tests\Behavioral\GenericTypeDecl\GenericTypeDecl.csproj", "{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeInference", "Tests\Behavioral\GenericTypeInference\GenericTypeInference.csproj", "{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -350,6 +354,14 @@ Global
 		{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -411,6 +423,8 @@ Global
 		{4D324B0D-F669-4167-82E6-DCF9E89F3CA7} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{77AE528D-F43A-4066-BFC3-E3D6BB70186C} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

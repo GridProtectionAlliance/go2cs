@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'Processor' instances
         public bool Equals(Processor other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is Processor other && Equals(other);
         

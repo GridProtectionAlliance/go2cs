@@ -41,7 +41,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	v.writeDocString(target, doc, structType.Pos())
 
 	structTypeName = getSanitizedIdentifier(name)
-	v.writeStringLn(target, "[GoType] partial struct %s {", structTypeName)
+	typeParams, constraints := v.getGenericDefinition(identType)
+
+	if len(constraints) == 0 {
+		constraints = " "
+	} else {
+		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
+	}
+
+	v.writeStringLn(target, "[GoType] partial struct %s%s%s{", structTypeName, typeParams, constraints)
 	v.indentLevel++
 
 	// Track promoted interface methods that could be shadowed by receivers

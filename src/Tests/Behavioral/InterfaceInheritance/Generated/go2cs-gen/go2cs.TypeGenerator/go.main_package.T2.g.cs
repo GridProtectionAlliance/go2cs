@@ -43,7 +43,8 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is T2 other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(name);
+        public override int GetHashCode() => HashCode.Combine(
+            name);
         
         public static bool operator ==(T2 left, T2 right) => left.Equals(right);
         

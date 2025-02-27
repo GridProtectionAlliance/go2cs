@@ -47,7 +47,9 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Dog other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Name, Breed);
+        public override int GetHashCode() => HashCode.Combine(
+            Name,
+            Breed);
         
         public static bool operator ==(Dog left, Dog right) => left.Equals(right);
         

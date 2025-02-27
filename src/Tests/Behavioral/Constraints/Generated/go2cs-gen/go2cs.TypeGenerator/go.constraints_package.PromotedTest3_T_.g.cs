@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 
 #nullable enable
 
@@ -19,9 +20,9 @@ public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial interface PromotedTest3<T> :
-        comparable<T>
+        IEqualityOperators<T, T, bool>
         where T :
-        comparable<T>
+        IEqualityOperators<T, T, bool>
     {
     }
 }

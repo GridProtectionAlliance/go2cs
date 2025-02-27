@@ -47,7 +47,9 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Frog other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Name, Color);
+        public override int GetHashCode() => HashCode.Combine(
+            Name,
+            Color);
         
         public static bool operator ==(Frog left, Frog right) => left.Equals(right);
         

@@ -49,8 +49,8 @@ public static class StructDeclarationSyntaxExtensions
             ITypeSymbol? typeSymbol = typeInfo.Type;
             string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-            // Determine if the type is a reference type
-            bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+            // Determine if the type is a reference type or an unconstrained generic type
+            bool isReferenceType = IsReferenceTypeOrUnconstrainedGeneric(typeSymbol);
 
             foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
                 fields.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType));
@@ -76,8 +76,8 @@ public static class StructDeclarationSyntaxExtensions
             ITypeSymbol? typeSymbol = typeInfo.Type;
             string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-            // Determine if the type is a reference type
-            bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+            // Determine if the type is a reference type or an unconstrained generic type
+            bool isReferenceType = IsReferenceTypeOrUnconstrainedGeneric(typeSymbol);
 
             properties.Add((fullyQualifiedTypeName, propertyDeclaration.Identifier.Text, isReferenceType));
         }
@@ -102,40 +102,54 @@ public static class StructDeclarationSyntaxExtensions
             switch (member)
             {
                 case PropertyDeclarationSyntax propertyDeclaration:
-                {
-                    if (filterToRefProperties && propertyDeclaration.Type.Kind() != SyntaxKind.RefType)
-                        continue;
+                    {
+                        if (filterToRefProperties && propertyDeclaration.Type.Kind() != SyntaxKind.RefType)
+                            continue;
 
-                    TypeSyntax propertyType = propertyDeclaration.Type is RefTypeSyntax refType ? refType.Type : propertyDeclaration.Type;
-                    TypeInfo typeInfo = semanticModel.GetTypeInfo(propertyType);
-                    ITypeSymbol? typeSymbol = typeInfo.Type;
-                    string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+                        TypeSyntax propertyType = propertyDeclaration.Type is RefTypeSyntax refType ? refType.Type : propertyDeclaration.Type;
+                        TypeInfo typeInfo = semanticModel.GetTypeInfo(propertyType);
+                        ITypeSymbol? typeSymbol = typeInfo.Type;
+                        string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-                    // Determine if the type is a reference type
-                    bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+                        // Determine if the type is a reference type or an unconstrained generic type
+                        bool isReferenceType = IsReferenceTypeOrUnconstrainedGeneric(typeSymbol);
 
-                    members.Add((fullyQualifiedTypeName, propertyDeclaration.Identifier.Text, isReferenceType, true));
-                    
-                    break;
-                }
+                        members.Add((fullyQualifiedTypeName, propertyDeclaration.Identifier.Text, isReferenceType, true));
+
+                        break;
+                    }
                 case FieldDeclarationSyntax fieldDeclaration:
-                {
-                    TypeInfo typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
-                    ITypeSymbol? typeSymbol = typeInfo.Type;
-                    string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
+                    {
+                        TypeInfo typeInfo = semanticModel.GetTypeInfo(fieldDeclaration.Declaration.Type);
+                        ITypeSymbol? typeSymbol = typeInfo.Type;
+                        string fullyQualifiedTypeName = typeSymbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "object";
 
-                    // Determine if the type is a reference type
-                    bool isReferenceType = typeSymbol?.IsReferenceType ?? true; // Default to true for safety if type is unknown
+                        // Determine if the type is a reference type or an unconstrained generic type
+                        bool isReferenceType = IsReferenceTypeOrUnconstrainedGeneric(typeSymbol);
 
-                    foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
-                        members.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType, false));
-                    
-                    break;
-                }
+                        foreach (VariableDeclaratorSyntax variable in fieldDeclaration.Declaration.Variables)
+                            members.Add((fullyQualifiedTypeName, variable.Identifier.Text, isReferenceType, false));
+
+                        break;
+                    }
             }
         }
 
         return members;
+    }
+
+    // Determine if type is a reference type or unconstrained generic type parameter
+    private static bool IsReferenceTypeOrUnconstrainedGeneric(ITypeSymbol? typeSymbol)
+    {
+        if (typeSymbol is null)
+            return true; // Default to true for safety if type is unknown
+
+        // If it's already a reference type, return true
+        if (typeSymbol.IsReferenceType)
+            return true;
+
+        // Check if it's a type parameter (generic) and has no constraints or only has reference type constraint
+        return typeSymbol is ITypeParameterSymbol { HasValueTypeConstraint: false };
     }
 
     public static IEnumerable<MethodInfo> GetExtensionMethods(

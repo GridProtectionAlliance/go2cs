@@ -14,6 +14,10 @@ internal class StructTypeTemplate : TemplateBase
     public required string StructName;
     public required string FullyQualifiedStructType;
     public required List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> StructMembers;
+    public required bool HasEqualityOperators;
+
+    private string? s_nonGenericStructName;
+    public string NonGenericStructName => s_nonGenericStructName ??= GetSimpleName(StructName, true);
 
     public override string TemplateBody =>
         $$"""
@@ -29,7 +33,7 @@ internal class StructTypeTemplate : TemplateBase
                 // Constructors
                 {{Constructors}}
                 
-                // Handle comparisons between struct '{{StructName}}' instances
+                // Handle comparisons between struct '{{NonGenericStructName}}' instances
                 public bool Equals({{StructName}} other) =>
                     {{CompareFields}};
                 
@@ -41,7 +45,7 @@ internal class StructTypeTemplate : TemplateBase
                 
                 public static bool operator !=({{StructName}} left, {{StructName}} right) => !(left == right);
         
-                // Handle comparisons between 'nil' and struct '{{StructName}}'
+                // Handle comparisons between 'nil' and struct '{{NonGenericStructName}}'
                 public static bool operator ==({{StructName}} value, NilType nil) => value.Equals(default({{StructName}}));
 
                 public static bool operator !=({{StructName}} value, NilType nil) => !(value == nil);
@@ -66,7 +70,7 @@ internal class StructTypeTemplate : TemplateBase
             (string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)[] promotedStructs = StructMembers.Where(item => item.isPromotedStruct).ToArray();
 
             if (promotedStructs.Length == 0)
-                return $"// -- {StructName} has no promoted structs";
+                return $"// -- {NonGenericStructName} has no promoted structs";
 
             StringBuilder result = new();
 
@@ -96,7 +100,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {StructName} instance) => ref instance.{GetSimpleName(promotedStructType)}.{memberName};");
+                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType)}.{memberName};");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Method References");
@@ -114,7 +118,7 @@ internal class StructTypeTemplate : TemplateBase
                 {
                     if (structMethodNames.Contains(method.Name))
                     {
-                        result.Append($"\r\n{TypeElemIndent}// '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{StructName}' receiver method");
+                        result.Append($"\r\n{TypeElemIndent}// '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{NonGenericStructName}' receiver method");
                         continue;
                     }
 
@@ -142,7 +146,7 @@ internal class StructTypeTemplate : TemplateBase
         get
         {
             if (StructMembers.Count == 0)
-                return $"// -- {StructName} has no defined fields";
+                return $"// -- {NonGenericStructName} has no defined fields";
 
             StringBuilder result = new();
 
@@ -164,7 +168,7 @@ internal class StructTypeTemplate : TemplateBase
         {
             StringBuilder result = new();
 
-            result.AppendLine($"public {StructName}(NilType _)");
+            result.AppendLine($"public {NonGenericStructName}(NilType _)");
             result.AppendLine($"{TypeElemIndent}{{");
 
             // Construct from nil
@@ -181,7 +185,7 @@ internal class StructTypeTemplate : TemplateBase
             result.AppendLine();
 
             // Construct from fields
-            result.Append($"{TypeElemIndent}public {StructName}(");
+            result.Append($"{TypeElemIndent}public {NonGenericStructName}(");
             result.Append(string.Join(", ", StructMembers.Select(item => $"{item.typeName} {item.memberName} = default!")));
             result.AppendLine(")");
             result.AppendLine($"{TypeElemIndent}{{");
@@ -206,15 +210,17 @@ internal class StructTypeTemplate : TemplateBase
         return item.isReferenceType ? $"{item.memberName}?.ToString() ?? \"<nil>\"" : $"{item.memberName}.ToString()";
     }
 
-    private string CompareFields => StructMembers.Count > 0 ? 
+    private string CompareFields => HasEqualityOperators && StructMembers.Count > 0 ? 
         string.Join(" &&\r\n            ", CompareList) :
-        "true";
+        StructMembers.Count > 0 ? "false /* missing equality constraints */" : "true /* empty */";
 
     private IEnumerable<string> CompareList => StructMembers.Select(member => $"{member.memberName} == other.{member.memberName}");
 
-    private string HashCode => StructMembers.Count > 0 ? 
-        $"HashCode.Combine({ParamList})" : 
-        "base.GetHashCode()";
+    public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" : 
+        $"""                    
+        HashCode.Combine(
+                    {ParamList})
+        """;
 
-    private string ParamList => string.Join(", ", StructMembers.Select(member => member.memberName));
+    private string ParamList => string.Join(",\r\n            ", StructMembers.Select(member => member.memberName));
 }

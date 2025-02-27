@@ -48,7 +48,8 @@
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
-                "..\\Tests\\Behavioral\\TypeInference",
+                //"..\\Tests\\Behavioral\\TypeInference",
+                "..\\Tests\\Behavioral\\GenericTypeDecl",
                 //"..\\Tests\\Behavioral\\GenericTypeInference",
             ]
         }

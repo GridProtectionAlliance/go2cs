@@ -54,7 +54,8 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Middle other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Inner);
+        public override int GetHashCode() => HashCode.Combine(
+            Inner);
         
         public static bool operator ==(Middle left, Middle right) => left.Equals(right);
         

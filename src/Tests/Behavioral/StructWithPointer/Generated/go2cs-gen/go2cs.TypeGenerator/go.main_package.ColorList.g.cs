@@ -55,7 +55,11 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is ColorList other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Total, Color, Next, NextNext);
+        public override int GetHashCode() => HashCode.Combine(
+            Total,
+            Color,
+            Next,
+            NextNext);
         
         public static bool operator ==(ColorList left, ColorList right) => left.Equals(right);
         

@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 
 #nullable enable
 
@@ -19,15 +20,19 @@ public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial interface Float<T> :
-        runtime.SumOperator<T>,
-        runtime.ArithmeticOperators<T>,
-        comparable<T>,
-        runtime.OrderedOperators<T>
+        IAdditionOperators<T, T, T>,
+        ISubtractionOperators<T, T, T>,
+        IMultiplyOperators<T, T, T>,
+        IDivisionOperators<T, T, T>,
+        IEqualityOperators<T, T, bool>,
+        IComparisonOperators<T, T, bool>
         where T :
-        runtime.SumOperator<T>,
-        runtime.ArithmeticOperators<T>,
-        comparable<T>,
-        runtime.OrderedOperators<T>
+        IAdditionOperators<T, T, T>,
+        ISubtractionOperators<T, T, T>,
+        IMultiplyOperators<T, T, T>,
+        IDivisionOperators<T, T, T>,
+        IEqualityOperators<T, T, bool>,
+        IComparisonOperators<T, T, bool>
     {
     }
 }

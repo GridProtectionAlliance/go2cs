@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 
 #nullable enable
 
@@ -19,13 +20,13 @@ public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
     public partial interface Ordered<T> :
-        runtime.SumOperator<T>,
-        comparable<T>,
-        runtime.OrderedOperators<T>
+        IAdditionOperators<T, T, T>,
+        IEqualityOperators<T, T, bool>,
+        IComparisonOperators<T, T, bool>
         where T :
-        runtime.SumOperator<T>,
-        comparable<T>,
-        runtime.OrderedOperators<T>
+        IAdditionOperators<T, T, T>,
+        IEqualityOperators<T, T, bool>,
+        IComparisonOperators<T, T, bool>
     {
     }
 }

@@ -47,7 +47,9 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is main_data_Address other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Street, City);
+        public override int GetHashCode() => HashCode.Combine(
+            Street,
+            City);
         
         public static bool operator ==(main_data_Address left, main_data_Address right) => left.Equals(right);
         

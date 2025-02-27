@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'Llama' instances
         public bool Equals(Llama other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is Llama other && Equals(other);
         

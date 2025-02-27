@@ -31,6 +31,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using go.runtime;
 
@@ -39,7 +40,17 @@ namespace go;
 /// <summary>
 /// Represents a structure with heap allocated data that behaves like a Go string.
 /// </summary>
-public readonly struct @string : IConvertible, IEquatable<@string>, IComparable<@string>, IReadOnlyList<byte>, IEnumerable<rune>, IEnumerable<(nint, rune)>, IEnumerable<char>, ICloneable
+public readonly struct @string : 
+    IConvertible, 
+    IEquatable<@string>, 
+    IComparable<@string>, 
+    IReadOnlyList<byte>, 
+    IEnumerable<rune>, 
+    IEnumerable<(nint, rune)>, 
+    IEnumerable<char>, 
+    ICloneable, 
+    IComparisonOperators<@string, @string, bool>,
+    IAdditionOperators<@string, @string, @string>
 {
     internal readonly byte[] m_value;
 

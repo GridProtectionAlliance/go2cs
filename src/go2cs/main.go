@@ -1405,6 +1405,50 @@ func (v *Visitor) getIdentType(ident *ast.Ident) types.Type {
 	return nil
 }
 
+func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
+	var named *types.Named
+	var signature *types.Signature
+	var ok bool
+
+	if named, ok = srcType.(*types.Named); !ok {
+		if signature, ok = srcType.(*types.Signature); !ok {
+			return "", ""
+		}
+	}
+
+	var typeParams *types.TypeParamList
+
+	if named != nil {
+		typeParams = named.TypeParams()
+	} else {
+		typeParams = signature.TypeParams()
+	}
+
+	if typeParams == nil || typeParams.Len() == 0 {
+		return "", ""
+	}
+
+	typeParamNames := make([]string, typeParams.Len())
+	constraints := []string{}
+
+	for i := range typeParams.Len() {
+		typeParam := typeParams.At(i)
+		typeParamNames[i] = typeParam.Obj().Name()
+
+		constraint := v.getTypeName(typeParam.Constraint(), false)
+
+		if len(constraint) == 0 || constraint == "any" || constraint == "interface{}" {
+			constraint = "new()"
+		} else {
+			constraint = fmt.Sprintf("%s, new()", constraint)
+		}
+
+		constraints = append(constraints, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], constraint))
+	}
+
+	return fmt.Sprintf("<%s>", strings.Join(typeParamNames, ", ")), strings.Join(constraints, "")
+}
+
 func (v *Visitor) typeExists(name string) bool {
 	// Look in the package scope
 	obj := v.pkg.Scope().Lookup(name)

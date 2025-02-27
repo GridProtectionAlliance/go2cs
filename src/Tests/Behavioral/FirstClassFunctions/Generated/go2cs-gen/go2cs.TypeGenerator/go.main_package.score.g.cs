@@ -52,7 +52,10 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is score other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(player, opponent, thisTurn);
+        public override int GetHashCode() => HashCode.Combine(
+            player,
+            opponent,
+            thisTurn);
         
         public static bool operator ==(score left, score right) => left.Equals(right);
         

@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'JavaProgrammer' instances
         public bool Equals(JavaProgrammer other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is JavaProgrammer other && Equals(other);
         

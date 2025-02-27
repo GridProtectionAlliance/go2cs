@@ -43,7 +43,8 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Outer other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(ptr);
+        public override int GetHashCode() => HashCode.Combine(
+            ptr);
         
         public static bool operator ==(Outer left, Outer right) => left.Equals(right);
         

@@ -68,7 +68,11 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is MyCustomError other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(Message, Abser, MyError, error);
+        public override int GetHashCode() => HashCode.Combine(
+            Message,
+            Abser,
+            MyError,
+            error);
         
         public static bool operator ==(MyCustomError left, MyCustomError right) => left.Equals(right);
         

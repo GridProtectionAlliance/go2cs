@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'MyAbser' instances
         public bool Equals(MyAbser other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is MyAbser other && Equals(other);
         

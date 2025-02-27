@@ -6,5 +6,8 @@ import (
 )
 
 func (v *Visitor) convIndexListExpr(indexListExpr *ast.IndexListExpr) string {
-	return fmt.Sprintf("%s[%s]", v.convExpr(indexListExpr.X, nil), v.convExprList(indexListExpr.Indices, indexListExpr.Lbrack, nil))
+	callExprContext := DefaultCallExprContext()
+	callExprContext.sourceIsTypeParams = true
+
+	return fmt.Sprintf("%s<%s>", v.convExpr(indexListExpr.X, nil), v.convExprList(indexListExpr.Indices, indexListExpr.Lbrack, callExprContext))
 }

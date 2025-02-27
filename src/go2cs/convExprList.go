@@ -62,6 +62,9 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]
+
+			// Check if the argument is a type parameter
+			identContext.isType = callContext.sourceIsTypeParams
 		}
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}

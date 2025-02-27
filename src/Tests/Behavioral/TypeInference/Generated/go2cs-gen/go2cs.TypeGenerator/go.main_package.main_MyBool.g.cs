@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'main_MyBool' instances
         public bool Equals(main_MyBool other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is main_MyBool other && Equals(other);
         

@@ -37,7 +37,7 @@ public static partial class main_package
         
         // Handle comparisons between struct 'Dog' instances
         public bool Equals(Dog other) =>
-            true;
+            true /* empty */;
         
         public override bool Equals(object? obj) => obj is Dog other && Equals(other);
         

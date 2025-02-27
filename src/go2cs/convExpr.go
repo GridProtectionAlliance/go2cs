@@ -20,26 +20,28 @@ type ExprContext interface {
 }
 
 type CallExprContext struct {
-	u8StringArgOK     map[int]bool
-	argTypeIsPtr      map[int]bool
-	hasSpreadOperator bool
-	keyValueSource    KeyValueSource
-	keyValueIdent     *ast.Ident
-	forceMultiLine    bool
-	interfaceType     types.Type
-	sourceIsRuneArray bool
+	u8StringArgOK      map[int]bool
+	argTypeIsPtr       map[int]bool
+	hasSpreadOperator  bool
+	keyValueSource     KeyValueSource
+	keyValueIdent      *ast.Ident
+	forceMultiLine     bool
+	interfaceType      types.Type
+	sourceIsRuneArray  bool
+	sourceIsTypeParams bool
 }
 
 func DefaultCallExprContext() *CallExprContext {
 	return &CallExprContext{
-		u8StringArgOK:     make(map[int]bool),
-		argTypeIsPtr:      make(map[int]bool),
-		hasSpreadOperator: false,
-		keyValueSource:    StructSource,
-		keyValueIdent:     nil,
-		forceMultiLine:    false,
-		interfaceType:     nil,
-		sourceIsRuneArray: false,
+		u8StringArgOK:      make(map[int]bool),
+		argTypeIsPtr:       make(map[int]bool),
+		hasSpreadOperator:  false,
+		keyValueSource:     StructSource,
+		keyValueIdent:      nil,
+		forceMultiLine:     false,
+		interfaceType:      nil,
+		sourceIsRuneArray:  false,
+		sourceIsTypeParams: false,
 	}
 }
 
