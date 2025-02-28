@@ -58,40 +58,20 @@ public interface IChannel : IEnumerable
     void Close();
 }
 
-public static class channel
+public interface IChannel<T> : IChannel
 {
-    public const int DeadLockDetectionTimeout = 200;
+    void Send(in T value);
 
-    public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout)
-    {
-        SemaphoreSlim semaphore = new(0, 1);
-        bool tokenCanceled = false;
-        bool result = true;
+    bool Sent(in T value);
 
-        try
-        {
-            result = semaphore.Wait(timeout, token);
-        }
-        catch (OperationCanceledException)
-        {
-            tokenCanceled = true;
-        }
-        finally
-        {
-            if (!tokenCanceled)
-                semaphore.Release();
-        }
-
-        // Will return false if semaphore was not acquired, i.e., timeout occurred
-        return result;
-    }
+    bool Received(out T value);
 }
 
 /// <summary>
 /// Represents a concurrency primitive that operates like a Go channel.
 /// </summary>
 /// <typeparam name="T">Target type for channel.</typeparam>
-public struct channel<T> : IChannel, IEnumerable<T>
+public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
 {
     private readonly ManualResetEventSlim m_canAddEvent;
     private readonly ManualResetEventSlim m_canTakeEvent;
@@ -115,8 +95,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
     /// </param>
     public channel(nint size)
     {
-        if (size < 1)
-            throw new ArgumentOutOfRangeException(nameof(size));
+        ArgumentOutOfRangeException.ThrowIfLessThan(size, 1);
 
         m_canAddEvent = new ManualResetEventSlim(false);
         m_canTakeEvent = new ManualResetEventSlim(false);
@@ -560,7 +539,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
             return true;
         }
 
-        value = default!;
+        value = null!;
         return false;
     }
 
@@ -583,7 +562,7 @@ public struct channel<T> : IChannel, IEnumerable<T>
         while (!IsClosed)
         {
             T value = default!;
-            bool assigned = false;
+            bool assigned;
 
             try
             {
@@ -676,5 +655,40 @@ public struct channel<T> : IChannel, IEnumerable<T>
     public static implicit operator channel<T>(NilType nil)
     {
         return default;
+    }
+
+    /// <inheritdoc />
+    public static channel<T> Make(nint p1 = 0, nint p2 = -1)
+    {
+        return new channel<T>(p1);
+    }
+}
+
+public static class channel
+{
+    public const int DeadLockDetectionTimeout = 200;
+
+    public static bool Wait(CancellationToken token, int timeout = DeadLockDetectionTimeout)
+    {
+        SemaphoreSlim semaphore = new(0, 1);
+        bool tokenCanceled = false;
+        bool result = true;
+
+        try
+        {
+            result = semaphore.Wait(timeout, token);
+        }
+        catch (OperationCanceledException)
+        {
+            tokenCanceled = true;
+        }
+        finally
+        {
+            if (!tokenCanceled)
+                semaphore.Release();
+        }
+
+        // Will return false if semaphore was not acquired, i.e., timeout occurred
+        return result;
     }
 }

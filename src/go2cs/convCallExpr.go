@@ -150,14 +150,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, callExprContext)
 
+			isTypeParam := false
+
+			if typeConstraint, ok := typeParam.(*types.TypeParam); ok {
+				typeParam = v.getConstraintType(typeConstraint)
+				isTypeParam = typeParam != nil
+			}
+
 			if typeParam != nil {
-				if _, ok := typeParam.(*types.Slice); ok {
+				if _, ok := typeParam.(*types.Slice); ok && !isTypeParam {
 					if v.options.preferVarDecl {
 						return fmt.Sprintf("new slice<%s>(%s)", typeName, remainingArgs)
 					}
 
 					return fmt.Sprintf("new(%s)", remainingArgs)
-				} else if _, ok := typeParam.(*types.Map); ok {
+				} else if _, ok := typeParam.Underlying().(*types.Slice); ok {
+					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
+				} else if _, ok := typeParam.(*types.Map); ok && !isTypeParam {
 					if v.options.preferVarDecl {
 						if mapExpr, ok := typeExpr.(*ast.MapType); ok {
 							ident = getIdentifier(mapExpr.Value)
@@ -169,7 +178,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					return fmt.Sprintf("new(%s)", remainingArgs)
-				} else if _, ok := typeParam.(*types.Chan); ok {
+				} else if _, ok := typeParam.Underlying().(*types.Map); ok {
+					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
+				} else if _, ok := typeParam.(*types.Chan); ok && !isTypeParam {
 					if len(remainingArgs) == 0 {
 						remainingArgs = "1"
 					}
@@ -179,11 +190,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 
 					return fmt.Sprintf("new(%s)", remainingArgs)
+				} else if _, ok := typeParam.Underlying().(*types.Chan); ok {
+					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 				}
 			}
 
-			println(fmt.Sprintf("INFO: @convCallExpr - call to generic `make` method is sub-optimal, consider adding custom make case for %s", typeName))
-			return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
+			println(fmt.Sprintf("WARNING: @convCallExpr - unexpected call to `make` method for type '%s'", typeName))
+			return fmt.Sprintf("make\u01C3<%s>(%s)", typeName, remainingArgs)
 		}
 
 		// Handle new call as a special case

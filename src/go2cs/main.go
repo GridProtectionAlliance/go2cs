@@ -165,8 +165,9 @@ var reserved = NewHashSet([]string{
 	"GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute",
 	"GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput",
 	"GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute",
-	"GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3", "MemberwiseClone", "NilType", "PanicException",
-	"slice", "ToString",
+	"GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3", "IArray", "IChannel", "IMap", "ISlice", "ISupportMake",
+	"make\u01C3", "MemberwiseClone", "NilType", "PanicException", "slice", "ToString",
+	PointerPrefix, TrueMarker, OverloadDiscriminator, ElipsisOperator,
 })
 
 //go:embed csproj-template.xml
@@ -1429,24 +1430,92 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 	}
 
 	typeParamNames := make([]string, typeParams.Len())
-	constraints := []string{}
+	constraintNames := []string{}
 
 	for i := range typeParams.Len() {
 		typeParam := typeParams.At(i)
 		typeParamNames[i] = typeParam.Obj().Name()
 
-		constraint := v.getTypeName(typeParam.Constraint(), false)
+		constraint := typeParam.Constraint()
+		constraintName := v.getTypeName(constraint, false)
 
-		if len(constraint) == 0 || constraint == "any" || constraint == "interface{}" {
-			constraint = "new()"
+		if len(constraintName) == 0 || constraintName == "any" || constraintName == "interface{}" {
+			// At a minimum, generic type must implement be constructable, e.g., with `make`
+			constraintName = "new()"
 		} else {
-			constraint = fmt.Sprintf("%s, new()", constraint)
+			var iface *types.Interface
+
+			switch typ := constraint.(type) {
+			case *types.Interface:
+				iface = typ
+			case *types.Named:
+				iface = typ.Underlying().(*types.Interface)
+			case *types.Signature:
+				iface = typ.Recv().Type().Underlying().(*types.Interface)
+			default:
+				iface = nil
+			}
+
+			if iface != nil {
+				originalConstraint := fmt.Sprintf("/* %s */", constraintName)
+				constraintName = strings.TrimPrefix(constraintName, "~")
+
+				// Check for common Go types, e.g., slice, map, channel, etc.
+				if strings.HasPrefix(constraintName, "[]") {
+					// Handle slice via ISlice interface
+					constraintName = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[2:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintName, "map[") {
+					// Handle map via IMap interface
+					keyValue := strings.Split(constraintName[4:], "]")
+					constraintName = fmt.Sprintf("IMap<%s, %s>, ISupportMake<%s>", convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintName, "chan ") {
+					// Handle channel via IChannel interface
+					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[5:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintName, "chan<- ") {
+					// Handle send-only channel via IChannel interface
+					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintName, "<-chan ") {
+					// Handle receive-only channel via IChannel interface
+					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintName, "func") {
+					// TODO: Handle function
+					println(fmt.Sprintf("WARNING: @getGenericDefinition - unhandled function constraint `%s` on `%s`", constraintName, srcType.String()))
+					constraintName = originalConstraint
+				} else if strings.HasPrefix(constraintName, "struct") {
+					// TODO: Handle struct - will need to lift struct type defintion
+					println(fmt.Sprintf("WARNING: @getGenericDefinition - unhandled struct constraint `%s` on `%s`", constraintName, srcType.String()))
+					constraintName = originalConstraint
+				}
+
+				if iface.NumMethods() == 0 {
+					// For type-constraint only interfaces, C# native types cannot directly implement
+					// interface, so all base-type operator constraints must be lifted to generic type
+					// constraint defintion. This can get very noisy, but C# does not have a mechanism
+					// to hide these constraints in partial method declarations in generated code like
+					// it does for structs. For partial methods, all constraint defintions are forced
+					// to match, so there is no current benefit to declaring a partial method.
+					liftedConstraints := v.getLiftedConstraints(constraint, typeParamNames[i])
+
+					if len(liftedConstraints) > 0 {
+						constraintName = fmt.Sprintf("%s %s", originalConstraint, liftedConstraints)
+					} else {
+						constraintName = fmt.Sprintf("%s %s", originalConstraint, constraintName)
+					}
+				} else {
+					// If interface has methods, can safely assume generic type must implement it directly
+					constraintName = fmt.Sprintf("%s<%s>", constraintName, typeParamNames[i])
+				}
+
+				constraintName = fmt.Sprintf("%s, new()", constraintName)
+			} else {
+				println(fmt.Sprintf("WARNING: @getGenericDefinition - constraint `%s` on `%s` is not an interface", constraintName, srcType.String()))
+			}
 		}
 
-		constraints = append(constraints, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], constraint))
+		constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], constraintName))
 	}
 
-	return fmt.Sprintf("<%s>", strings.Join(typeParamNames, ", ")), strings.Join(constraints, "")
+	return fmt.Sprintf("<%s>", strings.Join(typeParamNames, ", ")), strings.Join(constraintNames, "")
 }
 
 func (v *Visitor) typeExists(name string) bool {
@@ -1583,6 +1652,7 @@ func convertToCSTypeName(typeName string) string {
 }
 
 func convertToCSFullTypeName(typeName string) string {
+	typeName = strings.TrimPrefix(typeName, "~")
 	typeName = strings.TrimPrefix(typeName, "untyped ")
 
 	if strings.HasPrefix(typeName, "[]") {

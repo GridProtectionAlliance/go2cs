@@ -22,14 +22,28 @@ partial interface Integer<T> {
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("[]int32")] partial struct Point {}
+[GoType("[]int32")]
+partial struct Point {
+    // TODO: Add this constructor to slice template
+    public Point(nint size)
+    {
+        m_value = new int32[size];
+    }
+}
 
 public static @string String(this Point p) {
     return fmt.Sprintf("%d"u8, p);
 }
 
-public static S Scale(S s, E c) {
+public static S Scale<S, E>(S s, E c)
+    // TODO: Add slice constraint handling
+    where S : /*~[]E*/ ISlice<E>, new()
+    // TODO: Lift base type constraints when there are no interface methods
+    where E : /*Integer*/ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
     var r = make<S>(len(s));
+
+    // TODO: Fix this range loop
     /* for i, v := range s {
 	r[i] = v * c
 } */

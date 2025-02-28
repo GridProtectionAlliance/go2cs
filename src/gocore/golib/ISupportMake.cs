@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  SumOperator.cs - Gbtc
+//  ISupportMake.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,21 +16,22 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/24/2025 - J. Ritchie Carroll
+//  02/27/2025 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System.Numerics;
-
-namespace go.runtime;
+namespace go;
 
 /// <summary>
-/// Represent the operator constraints for the `+` operator.
+/// Defines an interface to support 'make' function parameters.
 /// </summary>
-/// <typeparam name="T">Constrained type.</typeparam>
-public interface SumOperator<T> : 
-    IAdditionOperators<T, T, T> 
-    where T : SumOperator<T>
+public interface ISupportMake<out T>
 {
+    /// <summary>
+    /// Initializes type with make size and capacity parameters.
+    /// </summary>
+    /// <param name="p1">First integer parameter, commonly for size.</param>
+    /// <param name="p2">Second integer parameter, commonly for capacity.</param>
+    static abstract T Make(nint p1, nint p2);
 }

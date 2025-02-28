@@ -13,9 +13,9 @@ internal class InheritedTypeTemplate : TemplateBase
 
     public string ImplementedInterface => TypeClass switch
     {
-        "Slice" => $" : ISlice<{TargetTypeName}>",
-        "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>",
-        "Channel" => $" : IChannel<{TargetTypeName}>",
+        "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{StructName}>",
+        "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{StructName}>",
+        "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{StructName}>",
         "Array" => $" : IArray<{TargetTypeName}>",
         _ => ""
     };
@@ -23,7 +23,7 @@ internal class InheritedTypeTemplate : TemplateBase
     public string InterfaceImplementation => TypeClass switch
     {
         // TODO: Complete the implementation for the following types
-        "Slice" => ISliceTypeTemplate.Generate(TargetTypeName),
+        "Slice" => ISliceTypeTemplate.Generate(StructName, TypeName, TargetTypeName),
         //"Map" => IMapTypeTemplate.Generate(TargetTypeName, TargetValueTypeName),
         //"Channel" => IChannelTypeTemplate.Generate(TargetTypeName),
         //"Array" => IArrayImplementation.Generate(TargetTypeName),

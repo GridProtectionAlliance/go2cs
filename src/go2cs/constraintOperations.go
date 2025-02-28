@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -152,10 +153,10 @@ var orderedOperatorTypes = NewHashSet([]ConstraintType{
 	Float32, Float64, String,
 })
 
-// GetOperatorSet takes a set of constraint types and returns the set of
+// getOperatorSet takes a set of constraint types and returns the set of
 // operators that can be applied to those types. This is used to determine
 // which operators can be used in generic functions and methods.
-func GetOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet] {
+func getOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet] {
 	operatorSet := HashSet[OperatorSet]{}
 
 	if constraintTypes.IsSubsetOfSet(comparableOperatorTypes) {
@@ -181,9 +182,9 @@ func GetOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet
 	return operatorSet
 }
 
-// GetOperatorSetAsString takes a set of operator sets and returns a string
+// getOperatorSetAsString takes a set of operator sets and returns a string
 // representation of the operators in those sets.
-func GetOperatorSetAsString(operatorSets HashSet[OperatorSet]) string {
+func getOperatorSetAsString(operatorSets HashSet[OperatorSet]) string {
 	operatorSetKeys := operatorSets.Keys()
 
 	sort.Slice(operatorSetKeys, func(i, j int) bool {
@@ -203,9 +204,9 @@ func GetOperatorSetAsString(operatorSets HashSet[OperatorSet]) string {
 	return strings.Join(results, ", ")
 }
 
-// GetOperatorSetAttributes takes a set of operator sets and returns a string
+// getOperatorSetAttributes takes a set of operator sets and returns a string
 // representation of the attribute targets of those sets.
-func GetOperatorSetAttributes(operatorSets HashSet[OperatorSet]) string {
+func getOperatorSetAttributes(operatorSets HashSet[OperatorSet]) string {
 	operatorSetKeys := operatorSets.Keys()
 
 	sort.Slice(operatorSetKeys, func(i, j int) bool {
@@ -240,8 +241,62 @@ func GetOperatorSetAttributes(operatorSets HashSet[OperatorSet]) string {
 	return strings.Join(results, ", ")
 }
 
-// IsTypeConstraint determines if an interface type or type expression represents a type constraint
-func (v *Visitor) IsTypeConstraint(expr ast.Expr) (bool, int) {
+// getLiftedConstraints takes a constraint type and its name and returns the
+// lifted C# operator constraints for that type.
+func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
+	typeConstraints := v.getConstraintTypeSetFromType(typ)
+	operatorSets := getOperatorSet(typeConstraints)
+
+	operatorSetKeys := operatorSets.Keys()
+
+	sort.Slice(operatorSetKeys, func(i, j int) bool {
+		return int(operatorSetKeys[i]) < int(operatorSetKeys[j])
+	})
+
+	results := []string{}
+
+	for _, opSet := range operatorSetKeys {
+		var constraints []string
+
+		switch opSet {
+		case SumOperator:
+			constraints = []string{
+				fmt.Sprintf("IAdditionOperators<%s, %s, %s>", name, name, name),
+			}
+		case ArithmeticOperators:
+			constraints = []string{
+				fmt.Sprintf("ISubtractionOperators<%s, %s, %s>", name, name, name),
+				fmt.Sprintf("IMultiplyOperators<%s, %s, %s>", name, name, name),
+				fmt.Sprintf("IDivisionOperators<%s, %s, %s>", name, name, name),
+			}
+		case IntegerOperators:
+			constraints = []string{
+				fmt.Sprintf("IModulusOperators<%s, %s, %s>", name, name, name),
+				fmt.Sprintf("IBitwiseOperators<%s, %s, %s>", name, name, name),
+				fmt.Sprintf("IShiftOperators<%s, %s, %s>", name, name, name),
+			}
+		case ComparableOperators:
+			constraints = []string{
+				fmt.Sprintf("IEqualityOperators<%s, %s, bool>", name, name),
+			}
+		case OrderedOperators:
+			constraints = []string{
+				fmt.Sprintf("IComparisonOperators<%s, %s, bool>", name, name),
+			}
+		default:
+			constraints = []string{}
+		}
+
+		if len(constraints) > 0 {
+			results = append(results, constraints...)
+		}
+	}
+
+	return strings.Join(results, ", ")
+}
+
+// isTypeConstraint determines if an interface type or type expression represents a type constraint
+func (v *Visitor) isTypeConstraint(expr ast.Expr) (bool, int) {
 	// Check if we're dealing with an interface type
 	if ifaceType, ok := expr.(*ast.InterfaceType); ok {
 		// Empty interface{} is not a type constraint
@@ -329,8 +384,8 @@ func (v *Visitor) typeIsTypeConstraint(typ types.Type) (bool, int) {
 	}
 }
 
-// GetAllConstraintTypes collects all underlying type constraints
-func (v *Visitor) GetAllConstraintTypes(expr ast.Expr) HashSet[ConstraintType] {
+// getConstraintTypeSetFromExpr collects all underlying type constraints
+func (v *Visitor) getConstraintTypeSetFromExpr(expr ast.Expr) HashSet[ConstraintType] {
 	var results []types.Type
 
 	// Helper to process expressions recursively
@@ -425,64 +480,7 @@ func (v *Visitor) GetAllConstraintTypes(expr ast.Expr) HashSet[ConstraintType] {
 	process(expr)
 
 	// Convert the type results to a HashSet of ConstraintType
-	constraintTypes := HashSet[ConstraintType]{}
-
-	for _, typ := range results {
-		switch t := typ.(type) {
-		case *types.Basic:
-			switch t.Kind() {
-			case types.Bool:
-				constraintTypes.Add(Bool)
-			case types.Int:
-				constraintTypes.Add(Int)
-			case types.Int8:
-				constraintTypes.Add(Int8)
-			case types.Int16:
-				constraintTypes.Add(Int16)
-			case types.Int32:
-				constraintTypes.Add(Int32)
-			case types.Int64:
-				constraintTypes.Add(Int64)
-			case types.Uint:
-				constraintTypes.Add(Uint)
-			case types.Uint8:
-				constraintTypes.Add(Uint8)
-			case types.Uint16:
-				constraintTypes.Add(Uint16)
-			case types.Uint32:
-				constraintTypes.Add(Uint32)
-			case types.Uint64:
-				constraintTypes.Add(Uint64)
-			case types.Float32:
-				constraintTypes.Add(Float32)
-			case types.Float64:
-				constraintTypes.Add(Float64)
-			case types.Complex64:
-				constraintTypes.Add(Complex64)
-			case types.Complex128:
-				constraintTypes.Add(Complex128)
-			case types.String:
-				constraintTypes.Add(String)
-			}
-		case *types.Pointer:
-			constraintTypes.Add(Pointer)
-		case *types.Array:
-			constraintTypes.Add(Array)
-		case *types.Chan:
-			constraintTypes.Add(Channel)
-		case *types.Struct:
-			constraintTypes.Add(Struct)
-		case *types.Named:
-			// For named types, check it they are structs
-			if _, ok := t.Underlying().(*types.Struct); ok {
-				constraintTypes.Add(Struct)
-			}
-		default:
-			constraintTypes.Add(Invalid)
-		}
-	}
-
-	return constraintTypes
+	return getConstraintTypeSet(results)
 }
 
 // getConstraintsFromType recursively collects the concrete underlying types from a given types.Type,
@@ -533,4 +531,94 @@ func (v *Visitor) getConstraintsFromType(typ types.Type) []types.Type {
 	}
 
 	return constraints
+}
+
+func (v *Visitor) getConstraintTypeSetFromType(typ types.Type) HashSet[ConstraintType] {
+	return getConstraintTypeSet(v.getConstraintsFromType(typ))
+}
+
+func getConstraintTypeSet(constraintTypes []types.Type) HashSet[ConstraintType] {
+	// Convert the type results to a HashSet of ConstraintType
+	constraintTypeSet := HashSet[ConstraintType]{}
+
+	for _, typ := range constraintTypes {
+		switch t := typ.(type) {
+		case *types.Basic:
+			switch t.Kind() {
+			case types.Bool:
+				constraintTypeSet.Add(Bool)
+			case types.Int:
+				constraintTypeSet.Add(Int)
+			case types.Int8:
+				constraintTypeSet.Add(Int8)
+			case types.Int16:
+				constraintTypeSet.Add(Int16)
+			case types.Int32:
+				constraintTypeSet.Add(Int32)
+			case types.Int64:
+				constraintTypeSet.Add(Int64)
+			case types.Uint:
+				constraintTypeSet.Add(Uint)
+			case types.Uint8:
+				constraintTypeSet.Add(Uint8)
+			case types.Uint16:
+				constraintTypeSet.Add(Uint16)
+			case types.Uint32:
+				constraintTypeSet.Add(Uint32)
+			case types.Uint64:
+				constraintTypeSet.Add(Uint64)
+			case types.Float32:
+				constraintTypeSet.Add(Float32)
+			case types.Float64:
+				constraintTypeSet.Add(Float64)
+			case types.Complex64:
+				constraintTypeSet.Add(Complex64)
+			case types.Complex128:
+				constraintTypeSet.Add(Complex128)
+			case types.String:
+				constraintTypeSet.Add(String)
+			}
+		case *types.Pointer:
+			constraintTypeSet.Add(Pointer)
+		case *types.Array:
+			constraintTypeSet.Add(Array)
+		case *types.Chan:
+			constraintTypeSet.Add(Channel)
+		case *types.Struct:
+			constraintTypeSet.Add(Struct)
+		case *types.Named:
+			// For named types, check it they are structs
+			if _, ok := t.Underlying().(*types.Struct); ok {
+				constraintTypeSet.Add(Struct)
+			}
+		default:
+			constraintTypeSet.Add(Invalid)
+		}
+	}
+
+	return constraintTypeSet
+}
+
+func (v *Visitor) getConstraintType(typeConstraint *types.TypeParam) types.Type {
+	if typeConstraint == nil {
+		return nil
+	}
+
+	// Get the constraint
+	constraint := typeConstraint.Constraint()
+
+	// The constraint is typically an interface type
+	iface, ok := constraint.Underlying().(*types.Interface)
+
+	if !ok {
+		return nil
+	}
+
+	typeConstraints := v.getConstraintsFromType(iface)
+
+	if len(typeConstraints) > 0 {
+		return typeConstraints[0]
+	}
+
+	return nil
 }

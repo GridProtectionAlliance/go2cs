@@ -24,21 +24,23 @@
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace go;
 
-public interface IMap : IEnumerable
+public interface IMap
 {
     nint Length { get; }
-
-    object? this[object key] { get; set; }
 }
 
-public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, TValue> where TKey : notnull
+public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
+{
+    (TValue, bool) this[TKey key, bool _] { get; }
+}
+
+public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<TKey, TValue>> where TKey : notnull
 {
     private readonly Dictionary<TKey, TValue> m_map;
 
@@ -47,9 +49,9 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         m_map = new Dictionary<TKey, TValue>();
     }
 
-    public map(int size)
+    public map(nint size)
     {
-        m_map = new Dictionary<TKey, TValue>(size);
+        m_map = new Dictionary<TKey, TValue>((int)size);
     }
 
     public map(IEnumerable<KeyValuePair<TKey, TValue>> map)
@@ -57,6 +59,7 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         m_map = new Dictionary<TKey, TValue>(map);
     }
 
+    /// <inheritdoc />
     public int Count => m_map.Count;
 
     public TValue this[TKey key]
@@ -70,11 +73,13 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         get => m_map.TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
     }
 
+    /// <inheritdoc />
     public void Add(TKey key, TValue value)
     {
         m_map.Add(key, value);
     }
 
+    /// <inheritdoc />
     public bool Remove(TKey key)
     {
         return m_map.Remove(key);
@@ -85,6 +90,7 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         m_map.Clear();
     }
 
+    /// <inheritdoc />
     public bool TryGetValue(TKey key, out TValue value)
     {
         if (m_map is not null)
@@ -94,6 +100,7 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         return false;
     }
 
+    /// <inheritdoc />
     public bool ContainsKey(TKey key)
     {
         return m_map.ContainsKey(key);
@@ -104,16 +111,19 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         return m_map.Equals(other.m_map);
     }
 
+    /// <inheritdoc />
     public override bool Equals(object? obj)
     {
         return obj is map<TKey, TValue> other && Equals(other);
     }
 
+    /// <inheritdoc />
     public override string ToString()
     {
         return $"map[{(m_map is null ? "<nil>" : string.Join(" ", m_map.Select(kvp => $"{kvp.Key}:{kvp.Value}").Take(20)))}{(Count > 20 ? " ..." : "")}]";
     }
 
+    /// <inheritdoc />
     public override int GetHashCode()
     {
         return m_map.GetHashCode();
@@ -196,46 +206,10 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
 
     nint IMap.Length => Count;
 
-    object? IMap.this[object key]
-    {
-        get => this[(TKey)key];
-        set => this[(TKey)key] = (TValue)value!;
-    }
-
     TValue IDictionary<TKey, TValue>.this[TKey key]
     {
         get => this[key];
         set => this[key] = value;
-    }
-
-    void IDictionary.Add(object key, object? value)
-    {
-        ((IDictionary)m_map)?.Add(key, value);
-    }
-
-    void IDictionary.Remove(object key)
-    {
-        ((IDictionary)m_map)?.Remove(key);
-    }
-
-    bool IDictionary.Contains(object key)
-    {
-        return ((IDictionary)m_map)?.Contains(key) ?? false;
-    }
-
-    IDictionaryEnumerator IDictionary.GetEnumerator()
-    {
-        return ((IDictionary)m_map)?.GetEnumerator()!;
-    }
-
-    bool IDictionary.IsFixedSize => ((IDictionary)m_map)?.IsFixedSize ?? false;
-
-    bool IDictionary.IsReadOnly => ((IDictionary)m_map)?.IsReadOnly ?? false;
-
-    object? IDictionary.this[object key]
-    {
-        get => this[(TKey)key];
-        set => this[(TKey)key] = (TValue)value!;
     }
 
     ICollection<TValue> IDictionary<TKey, TValue>.Values => m_map.Values;
@@ -269,19 +243,6 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
         ((ICollection<KeyValuePair<TKey, TValue>>)m_map)?.CopyTo(array, arrayIndex);
     }
 
-    ICollection IDictionary.Keys => ((IDictionary)m_map)?.Keys!;
-
-    ICollection IDictionary.Values => ((IDictionary)m_map)?.Values!;
-
-    bool ICollection.IsSynchronized => ((ICollection)m_map)?.IsSynchronized ?? false;
-
-    object ICollection.SyncRoot => ((ICollection)m_map)?.SyncRoot ?? this;
-
-    void ICollection.CopyTo(Array array, int index)
-    {
-        ((ICollection)m_map)?.CopyTo(array, index);
-    }
-
     IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
         return ((IEnumerable<KeyValuePair<TKey, TValue>>)m_map)?.GetEnumerator()!;
@@ -293,4 +254,10 @@ public readonly struct map<TKey, TValue> : IMap, IDictionary, IDictionary<TKey, 
     }
 
     #endregion
+    
+    /// <inheritdoc />
+    public static map<TKey, TValue> Make(nint p1 = 0, nint p2 = -1)
+    {
+        return new map<TKey, TValue>(p1);
+    }
 }

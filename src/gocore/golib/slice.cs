@@ -63,7 +63,7 @@ public interface ISlice<T> : IArray<T>, ISlice
 // option in the future, at least for slices that are private and used with internal package functions only.
 
 [Serializable]
-public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -547,6 +547,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     #endregion
+
+    /// <inheritdoc />
+    public static slice<T> Make(nint p1 = 0, nint p2 = -1)
+    {
+        return new slice<T>(p1, p2);
+    }
 
     public static slice<T> From<TSource>(TSource[]? array)
     {

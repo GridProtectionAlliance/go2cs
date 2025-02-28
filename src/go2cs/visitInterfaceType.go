@@ -124,11 +124,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			v.writeCommentString(result, method.Comment, method.Type.End()+typeLenDeviation)
 			result.WriteString(v.newline)
 		} else if method.Type != nil {
-			if isConstraint, methodCount := v.IsTypeConstraint(method.Type); isConstraint {
+			if isConstraint, methodCount := v.isTypeConstraint(method.Type); isConstraint {
 				result.WriteString(fmt.Sprintf("%s//  Type constraints: %s%s", innerIndent, v.getPrintedNode(method.Type), v.newline))
-				typeConstraints.UnionWithSet(v.GetAllConstraintTypes(method.Type))
-				operatorSets = GetOperatorSet(typeConstraints)
-				result.WriteString(fmt.Sprintf("%s// Derived operators: %s%s", innerIndent, GetOperatorSetAsString(operatorSets), v.newline))
+				typeConstraints.UnionWithSet(v.getConstraintTypeSetFromExpr(method.Type))
+				operatorSets = getOperatorSet(typeConstraints)
+				result.WriteString(fmt.Sprintf("%s// Derived operators: %s%s", innerIndent, getOperatorSetAsString(operatorSets), v.newline))
 
 				// If type constraint constains any methods, add it to the inherited interfaces
 				if methodCount > 0 {
@@ -157,7 +157,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	postAttrs := " "
 
 	if len(operatorSets) > 0 {
-		interfaceAttrs += fmt.Sprintf("(\"Operators = %s\")", GetOperatorSetAttributes(operatorSets))
+		interfaceAttrs += fmt.Sprintf("(\"Operators = %s\")", getOperatorSetAttributes(operatorSets))
 		postAttrs = v.newline
 	}
 

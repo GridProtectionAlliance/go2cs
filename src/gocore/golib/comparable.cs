@@ -26,6 +26,8 @@ using System.Numerics;
 
 namespace go;
 
+// TODO: Delete this, native types do not implement this interface - must use IEqualityOperators directly instead when comparable is encountered
+
 /// <summary>
 /// Represents the C# implementation of the Go built-in <c>comparable</c> constraint.
 /// </summary>

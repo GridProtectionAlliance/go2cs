@@ -654,13 +654,29 @@ public static class builtin
     }
 
     /// <summary>
-    /// Allocates and initializes a new object.
+    /// Allocates and initializes a new object for known types, e.g., <see cref="ISlice{T}"/>,
+    /// <see cref="IMap{TKey, TValue}"/>, and <see cref="IChannel"/>.
     /// </summary>
-    /// <param name="p1">Size parameter.</param>
-    /// <param name="p2">Capacity parameter,</param>
+    /// <param name="p1">First integer parameter, commonly for size.</param>
+    /// <param name="p2">Second integer parameter, commonly for capacity.</param>
     /// <typeparam name="T">Type of object.</typeparam>
     /// <returns>New object.</returns>
-    public static T make<T>(nint p1 = 0, nint p2 = -1) where T : new()
+    public static T make<T>(nint p1 = 0, nint p2 = -1) where T : ISupportMake<T>, new()
+    {
+        if (p1 == 0 && p2 == -1)
+            return new T();
+
+        return T.Make(p1, p2);
+    }
+
+    /// <summary>
+    /// Allocates and initializes a new object.
+    /// </summary>
+    /// <param name="p1">First integer parameter, commonly for size.</param>
+    /// <param name="p2">Second integer parameter, commonly for capacity.</param>
+    /// <typeparam name="T">Type of object.</typeparam>
+    /// <returns>New object.</returns>
+    public static T makeǃ<T>(nint p1 = 0, nint p2 = -1) where T : new()
     {
         if (p1 == 0 && p2 == -1)
             return new T();

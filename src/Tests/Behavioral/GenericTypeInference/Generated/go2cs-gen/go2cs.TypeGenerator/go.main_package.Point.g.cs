@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct Point : ISlice<int32>
+    public partial struct Point : ISlice<int32>, ISupportMake<Point>
     {
         // Value of the struct 'Point'
         private readonly slice<int32> m_value;
@@ -62,6 +62,16 @@ public static partial class main_package
         public bool Equals(ISlice<int32>? other) => m_value.Equals(other);
         
         public object Clone() => ((ICloneable)m_value).Clone();
+        
+        public Point(nint length, nint capacity = -1, nint low = 0)
+        {
+            m_value = new slice<int32>(length, capacity, low);
+        }
+        
+        public static Point Make(nint p1 = 0, nint p2 = -1)
+        {
+            return new Point(p1, p2);
+        }
         
         public Point(slice<int32> value) => m_value = value;
 
