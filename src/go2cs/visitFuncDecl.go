@@ -8,6 +8,7 @@ import (
 )
 
 const FunctionPrefixMarker = ">>MARKER:FUNCTION_%s_PREFIX<<"
+const FunctionAccessMarker = ">>MARKER:FUNCTION_%s_ACCESS<<"
 const FunctionAttributeMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
@@ -113,6 +114,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
+	functionAccessMarker := fmt.Sprintf(FunctionAccessMarker, goFunctionName)
 	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
@@ -127,7 +129,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
 	}
 
-	v.writeOutput("%s%s%s static %s %s%s(%s)%s%s", functionPrefixMarker, functionAttributeMarker, functionAccess, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
+	v.writeOutput("%s%s%s static %s %s%s(%s)%s%s", functionPrefixMarker, functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = false
@@ -136,8 +138,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasRecover
-	parameterSignature := v.generateParametersSignature(signature, true)
+	parameterSignature, receiverAccess := v.generateParametersSignature(signature, true)
 	blockPrefix := ""
+
+	// If receiver access is not public, update function access to match
+	if len(receiverAccess) > 0 && receiverAccess != "public" {
+		functionAccess = receiverAccess
+	}
 
 	if !signatureOnly {
 		resultParameters := &strings.Builder{}
@@ -237,7 +244,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				if i == 0 && funcDecl.Recv != nil {
 					updatedSignature.WriteString("this ")
-					updatedSignature.WriteString(v.getRefParamTypeName(param.Type()))
+
+					// Get receiver parameter type
+					recvTypeName := v.getRefParamTypeName(param.Type())
+
+					// Update function access to match receiver type
+					functionAccess = getAccess(recvTypeName)
+
+					updatedSignature.WriteString(recvTypeName)
 					updatedSignature.WriteRune(' ')
 					updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
 					continue
@@ -282,6 +296,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	}
 
 	// Replace function markers
+	v.replaceMarker(functionAccessMarker, functionAccess)
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
 	if isModuleInitializer {
@@ -364,20 +379,28 @@ func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
 	return parameters
 }
 
-func (v *Visitor) generateParametersSignature(signature *types.Signature, addRecv bool) string {
+func (v *Visitor) generateParametersSignature(signature *types.Signature, addRecv bool) (string, string) {
 	parameters := getParameters(signature, addRecv)
 
 	if parameters == nil {
-		return ""
+		return "", ""
 	}
 
 	result := strings.Builder{}
+	var receiverAccess string
 
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
 
 		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")
+
+			// Get receiver parameter type
+			recvTypeName := v.getRefParamTypeName(param.Type())
+
+			// Update function access to match receiver type
+			receiverAccess = getAccess(recvTypeName)
+
 			result.WriteString(v.getRefParamTypeName(param.Type()))
 			result.WriteRune(' ')
 			result.WriteString(getSanitizedIdentifier(param.Name()))
@@ -412,7 +435,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 		}
 	}
 
-	return result.String()
+	return result.String(), receiverAccess
 }
 
 func (v *Visitor) generateResultSignature(signature *types.Signature) string {

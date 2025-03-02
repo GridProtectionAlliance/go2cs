@@ -8,11 +8,11 @@ partial class main_package {
     public @string name;
 }
 
-private static void printName(this data d) {
+internal static void printName(this data d) {
     fmt.Println("Name =", d.name);
 }
 
-private static void Main() {
+internal static void Main() {
     var d = new data(name: "James"u8);
     
     var dʗ1 = d;

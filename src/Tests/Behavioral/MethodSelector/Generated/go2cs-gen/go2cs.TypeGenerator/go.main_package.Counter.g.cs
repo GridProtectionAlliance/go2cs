@@ -47,9 +47,9 @@ public static partial class main_package
         
         public static Counter operator %(Counter left, Counter right) => new(left.m_value % right.m_value);
         
-        public override string ToString() => m_value.ToString();
-        
         public Counter(nint value) => m_value = value;
+
+        public override string ToString() => m_value.ToString();
 
         public static bool operator ==(Counter left, Counter right) => left.Equals(right);
 

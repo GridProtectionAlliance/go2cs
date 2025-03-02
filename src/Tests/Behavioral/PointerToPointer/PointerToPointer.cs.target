@@ -10,9 +10,9 @@ partial class main_package {
     public int8 lastRead;
 }
 
-private const int8 opRead = -1;
-private const int8 opInvalid = 0;
-private static void Main() {
+internal const int8 opRead = -1;
+internal const int8 opInvalid = 0;
+internal static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
     ж<nint> ptr = default!;
     ж<ж<nint>> pptr = default!;
@@ -40,7 +40,7 @@ private static void Main() {
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 }
 
-[GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
+[GoRecv] internal static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

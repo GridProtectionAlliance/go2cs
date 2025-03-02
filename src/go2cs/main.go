@@ -1054,11 +1054,11 @@ func getSanitizedFunctionName(funcName string) string {
 }
 
 func getAccess(name string) string {
-	// If name starts with a lowercase letter, scope is "private"
+	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
 	if unicode.IsLower(ch) {
-		return "private"
+		return "internal"
 	}
 
 	// Otherwise, scope is "public"
@@ -1490,10 +1490,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 				if iface.NumMethods() == 0 {
 					// For type-constraint only interfaces, C# native types cannot directly implement
 					// interface, so all base-type operator constraints must be lifted to generic type
-					// constraint defintion. This can get very noisy, but C# does not have a mechanism
+					// constraint defintion. This can get very noisy and C# does not have a mechanism
 					// to hide these constraints in partial method declarations in generated code like
 					// it does for structs. For partial methods, all constraint defintions are forced
-					// to match, so there is no current benefit to declaring a partial method.
+					// to match, so there is no current benefit to declaring a partial method here.
 					liftedConstraints := v.getLiftedConstraints(constraint, typeParamNames[i])
 
 					if len(liftedConstraints) > 0 {
@@ -1583,7 +1583,21 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	if named, ok := t.(*types.Named); ok {
-		return named.Obj().Name()
+		obj := named.Obj()
+		pkg := obj.Pkg()
+
+		// Handle builtin types with no package
+		if pkg == nil {
+			return obj.Name()
+		}
+
+		// For types in current package, return only the name
+		if pkg == v.pkg {
+			return obj.Name()
+		}
+
+		// Return package path and type name for imported packages
+		return pkg.Path() + "." + obj.Name()
 	}
 
 	if !isUnderlying {

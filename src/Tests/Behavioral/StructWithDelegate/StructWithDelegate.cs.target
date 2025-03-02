@@ -10,7 +10,7 @@ partial class main_package {
     public int32 age;
 }
 
-private static void Main() {
+internal static void Main() {
     var person = new Person(work: default!, name: "Michał"u8, age: 29);
     fmt.Println(person);
 }

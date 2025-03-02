@@ -32,7 +32,7 @@ namespace go;
 // This is a simple proxy for the fmt package for testing...
 public static partial class fmt_package
 {
-    [GeneratedRegex(@"\%.*(?<type>[vtbcdoOqxXUeEfFgGspT%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    [GeneratedRegex(@"\%(?:[0-9]*(?:\.[0-9]*)?)?(?<type>[vtbcdoOqxXUeEfFgGspT%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
     private static partial Regex FormatExpr();
 
     private static readonly Regex s_formatExpr = FormatExpr();

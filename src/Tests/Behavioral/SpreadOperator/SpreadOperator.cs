@@ -5,7 +5,7 @@ using ꓸꓸꓸnint = System.Span<nint>;
 
 partial class main_package {
 
-private static nint sum(params ꓸꓸꓸnint numsʗp) {
+internal static nint sum(params ꓸꓸꓸnint numsʗp) {
     var nums = numsʗp.slice();
 
     nint total = 0;
@@ -15,7 +15,7 @@ private static nint sum(params ꓸꓸꓸnint numsʗp) {
     return total;
 }
 
-private static void Main() {
+internal static void Main() {
     var values = new nint[]{1, 2, 3}.slice();
     fmt.Println(sum(values.ꓸꓸꓸ));
     fmt.Println(sum(1, 2, 3));

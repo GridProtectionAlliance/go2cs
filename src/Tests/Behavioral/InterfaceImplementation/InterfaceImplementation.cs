@@ -22,7 +22,7 @@ partial class main_package {
     public @string Color;
 }
 
-private static void Main() {
+internal static void Main() {
     var f = @new<Frog>();
     var d = @new<Dog>();
     ref var zoo = ref heap<array<Animal>>(out var Ꮡzoo);
@@ -54,19 +54,19 @@ public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {
     }
 }
 
-[GoRecv] public static @string Type(this ref Frog f) {
+[GoRecv] internal static @string Type(this ref Frog f) {
     return "Frog"u8;
 }
 
-[GoRecv] public static @string Swim(this ref Frog f) {
+[GoRecv] internal static @string Swim(this ref Frog f) {
     return "Kick"u8;
 }
 
-[GoRecv] public static @string Swim(this ref Dog d) {
+[GoRecv] internal static @string Swim(this ref Dog d) {
     return "Paddle"u8;
 }
 
-[GoRecv] public static @string Type(this ref Dog d) {
+[GoRecv] internal static @string Type(this ref Dog d) {
     return "Doggie"u8;
 }
 

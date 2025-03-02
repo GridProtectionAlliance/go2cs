@@ -20,33 +20,23 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     internal partial struct main_MyBool
     {
-        // Promoted Struct References
-        // -- main_MyBool has no promoted structs
+        // Value of the struct 'main_MyBool'
+        private readonly bool m_value;
+        
+        
+        public main_MyBool(bool value) => m_value = value;
 
-        // Field References
-        // -- main_MyBool has no defined fields
-        
-        // Constructors
-        public main_MyBool(NilType _)
-        {
-        }
+        public override string ToString() => m_value.ToString().ToLowerInvariant();
 
-        public main_MyBool()
-        {
-        }
-        
-        // Handle comparisons between struct 'main_MyBool' instances
-        public bool Equals(main_MyBool other) =>
-            true /* empty */;
-        
-        public override bool Equals(object? obj) => obj is main_MyBool other && Equals(other);
-        
-        public override int GetHashCode() => base.GetHashCode();
-        
         public static bool operator ==(main_MyBool left, main_MyBool right) => left.Equals(right);
-        
+
         public static bool operator !=(main_MyBool left, main_MyBool right) => !(left == right);
 
+        // Handle implicit conversions between 'bool' and struct 'main_MyBool'
+        public static implicit operator main_MyBool(bool value) => new main_MyBool(value);
+            
+        public static implicit operator bool(main_MyBool value) => value.m_value;
+            
         // Handle comparisons between 'nil' and struct 'main_MyBool'
         public static bool operator ==(main_MyBool value, NilType nil) => value.Equals(default(main_MyBool));
 
@@ -57,10 +47,5 @@ public static partial class main_package
         public static bool operator !=(NilType nil, main_MyBool value) => value != nil;
 
         public static implicit operator main_MyBool(NilType nil) => default(main_MyBool);
-
-        public override string ToString() => string.Concat("{", string.Join(" ",
-        [
-            ""
-        ]), "}");
     }
 }

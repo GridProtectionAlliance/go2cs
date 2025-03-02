@@ -5,7 +5,7 @@ using time = time_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     ref var i = ref heap<nint>(out var Ꮡi);
     i = 0;
     while (i < 10) {
@@ -61,7 +61,7 @@ break_out:;
     fmt.Println("i after thread and", i, "x after thread", x);
 }
 
-private static void f(ж<nint> Ꮡy) {
+internal static void f(ж<nint> Ꮡy) {
     ref var y = ref Ꮡy.val;
 
     fmt.Print(y);

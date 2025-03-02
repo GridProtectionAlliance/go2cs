@@ -11,7 +11,7 @@ partial class main_package {
     public ж<ж<ColorList>> NextNext;
 }
 
-private static void Main() {
+internal static void Main() {
     var red = new ColorList(2, "red", default!, default!);
     ref var blue = ref heap<ColorList>(out var Ꮡblue);
     blue = new ColorList(2, "blue", default!, default!);

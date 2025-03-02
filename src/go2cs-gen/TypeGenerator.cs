@@ -235,7 +235,7 @@ public class TypeGenerator : ISourceGenerator
                             Scope = scope,
                             TypeName = typeName,
                             TargetTypeName = typeName,
-                            TypeClass = "Other",
+                            TypeClass = typeDefinition,
                             UsingStatements = usingStatements
                         }
                         .Generate();

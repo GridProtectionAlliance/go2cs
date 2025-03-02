@@ -3,7 +3,7 @@ namespace go;
 partial class main_package {
 
 public const nint N = /* 11 + 1 */ 12;
-private static slice<rune> board = slice<rune>(
+internal static slice<rune> board = slice<rune>(
     (@string)"""
 ...........
 ...........
@@ -18,7 +18,7 @@ private static slice<rune> board = slice<rune>(
 ...........
 
 """);
-private static nint center;
+internal static nint center;
 [GoInit] internal static void init() {
     println("init fn 1");
     nint n = 0;
@@ -37,8 +37,8 @@ private static nint center;
     println("init fn 2");
 }
 
-private static nint moves;
-private static bool move(nint pos, nint dir) {
+internal static nint moves;
+internal static bool move(nint pos, nint dir) {
     moves++;
     if (board[pos] == '●' && board[pos + dir] == '●' && board[pos + 2 * dir] == '○') {
         board[pos] = '○';
@@ -49,13 +49,13 @@ private static bool move(nint pos, nint dir) {
     return false;
 }
 
-private static void unmove(nint pos, nint dir) {
+internal static void unmove(nint pos, nint dir) {
     board[pos] = '●';
     board[pos + dir] = '●';
     board[pos + 2 * dir] = '○';
 }
 
-private static bool solve() {
+internal static bool solve() {
     nint last = default!;
     nint n = default!;
     foreach (var (pos, field) in board) {
@@ -81,7 +81,7 @@ private static bool solve() {
     return false;
 }
 
-private static void Main() {
+internal static void Main() {
     if (!solve()) {
         println("no solution found");
     }

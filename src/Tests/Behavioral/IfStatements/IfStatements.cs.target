@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     {
         nint a = -1; if (a < 0) {
             fmt.Println("a is less than 0");

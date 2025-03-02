@@ -35,7 +35,7 @@ public static bool IsDr(this Record p) {
     return strings.HasPrefix(p.name, "Dr"u8) && p.age > 18;
 }
 
-private static void Main() {
+internal static void Main() {
     var person = new Person(name: "Dr. Michał"u8, age: 29);
     fmt.Println(person);
     fmt.Println(person.IsDr());

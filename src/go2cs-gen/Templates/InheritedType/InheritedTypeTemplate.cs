@@ -16,7 +16,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{StructName}>",
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{StructName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{StructName}>",
-        "Array" => $" : IArray<{TargetTypeName}>",
+        "Array" => $", IArray<{TargetTypeName}>",
         _ => ""
     };
 
@@ -31,6 +31,12 @@ internal class InheritedTypeTemplate : TemplateBase
         _ => ""
     };
 
+    public string ToStringImplementation => TypeClass switch
+    {
+        "bool" => "m_value.ToString().ToLowerInvariant()",
+        _ => "m_value.ToString()"
+    };
+
     public override string TemplateBody =>
         $$"""
             [{{GeneratedCodeAttribute}}]
@@ -41,6 +47,8 @@ internal class InheritedTypeTemplate : TemplateBase
                 {{InterfaceImplementation}}
                 
                 public {{StructName}}({{TypeName}} value) => m_value = value;
+        
+                public override string ToString() => {{ToStringImplementation}};
         
                 public static bool operator ==({{StructName}} left, {{StructName}} right) => left.Equals(right);
         

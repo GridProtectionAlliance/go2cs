@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     ref var a = ref heap(new array<@string>(2), out var Ꮡa);
     a[0] = "Hello"u8;
     a[1] = "World"u8;
@@ -27,13 +27,13 @@ private static void Main() {
     fmt.Println(a[0]);
 }
 
-private static void stest(ж<@string> Ꮡp) {
+internal static void stest(ж<@string> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
     p = "hello"u8;
 }
 
-private static void test(array<@string> a) {
+internal static void test(array<@string> a) {
     a = a.Clone();
 
     fmt.Println(a[0], a[1]);
@@ -41,7 +41,7 @@ private static void test(array<@string> a) {
     fmt.Println(a[0], a[1]);
 }
 
-private static void test2(ж<array<@string>> Ꮡa) {
+internal static void test2(ж<array<@string>> Ꮡa) {
     ref var a = ref Ꮡa.val;
 
     fmt.Println(a[0], a[1]);
@@ -49,7 +49,7 @@ private static void test2(ж<array<@string>> Ꮡa) {
     fmt.Println(a[0], a[1]);
 }
 
-private static void test3(slice<@string> a) {
+internal static void test3(slice<@string> a) {
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;
     fmt.Println(a[0], a[1]);

@@ -6,10 +6,10 @@
 // </auto-generated>
 //---------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Collections;
 using System;
+using System.CodeDom.Compiler;
+using System.Collections;
+using System.Collections.Generic;
 
 #nullable enable
 
@@ -63,17 +63,13 @@ public static partial class main_package
         
         public object Clone() => ((ICloneable)m_value).Clone();
         
-        public Point(nint length, nint capacity = -1, nint low = 0)
-        {
-            m_value = new slice<int32>(length, capacity, low);
-        }
-        
-        public static Point Make(nint p1 = 0, nint p2 = -1)
-        {
-            return new Point(p1, p2);
-        }
+        public static Point Make(nint p1 = 0, nint p2 = -1) => new Point(p1, p2);
+
+        public Point(nint length, nint capacity = -1, nint low = 0) => m_value = new slice<int32>(length, capacity, low);
         
         public Point(slice<int32> value) => m_value = value;
+
+        public override string ToString() => m_value.ToString();
 
         public static bool operator ==(Point left, Point right) => left.Equals(right);
 

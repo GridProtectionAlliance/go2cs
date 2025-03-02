@@ -20,7 +20,7 @@ partial class main_package {
     public partial ref ж<MyError> MyError { get; }
 }
 
-[GoRecv] public static float64 Time(this ref MyCustomError myErr) {
+[GoRecv] internal static float64 Time(this ref MyCustomError myErr) {
     return 0.0F;
 }
 
@@ -40,7 +40,7 @@ public static float64 Time(this MyError myErr) {
     public ж<ж<Inner>> ptr;
 }
 
-private static void Main() {
+internal static void Main() {
     ref var e = ref heap<MyError>(out var Ꮡe);
     e = new MyError(time.Now(), "Hello");
     var a = new MyCustomError("New One", default!, Ꮡe);

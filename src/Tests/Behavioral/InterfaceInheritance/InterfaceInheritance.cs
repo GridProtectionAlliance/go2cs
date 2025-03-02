@@ -52,7 +52,7 @@ public static @string Error(this T2 t) {
     void N();
 }
 
-private static void Main() {
+internal static void Main() {
     var m = new map<I, nint>();
     I i1 = new T1("foo");
     I i2 = new T2("bar");

@@ -21,7 +21,7 @@ partial class main_package {
     public M M;
 }
 
-private static test_R0 test() {
+internal static test_R0 test() {
     test_x x = default!;
     x.@string = "Go"u8;
     x.@int = @new<nint>();
@@ -30,7 +30,7 @@ private static test_R0 test() {
     return x;
 }
 
-private static void Main() {
+internal static void Main() {
     var x = test();
     fmt.Println(x);
 }

@@ -3,7 +3,18 @@ package main
 import "fmt"
 
 // Make sure lifted type name does not conflict with existing type name
-type main_MyBool struct {
+type main_MyBool bool
+
+func ShowValue(val fmt.Stringer) {
+	fmt.Println(val.String())
+}
+
+func (b main_MyBool) String() string {
+	if b {
+		return "true-ish"
+	}
+
+	return "false-ish"
 }
 
 func main() {
@@ -23,4 +34,7 @@ func main() {
 	fmt.Println(b3)
 	fmt.Println(b4)
 	fmt.Println(b5)
+
+	var other main_MyBool
+	ShowValue(other)
 }

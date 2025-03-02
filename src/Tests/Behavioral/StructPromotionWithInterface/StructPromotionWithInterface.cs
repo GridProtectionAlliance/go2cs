@@ -24,7 +24,7 @@ partial class main_package {
 [GoType] partial struct MyAbser {
 }
 
-[GoRecv] public static float64 Abs(this ref MyCustomError myErr) {
+[GoRecv] internal static float64 Abs(this ref MyCustomError myErr) {
     return 0.0F;
 }
 
@@ -32,7 +32,7 @@ public static float64 Abs(this MyAbser myAbs) {
     return 1.0F;
 }
 
-private static void Main() {
+internal static void Main() {
     var a = new MyCustomError("New One", new MyAbser(nil), new MyError(time.Now(), "Hello"), default!);
     a.Abs();
     a.Message = "New"u8;

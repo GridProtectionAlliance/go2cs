@@ -6,17 +6,17 @@ using ꓸꓸꓸnint = System.Span<nint>;
 
 partial class main_package {
 
-private const nint win = 100;
-private const nint gamesPerSeries = 10;
+internal const nint win = 100;
+internal const nint gamesPerSeries = 10;
 [GoType] partial struct score {
     public nint player;
     public nint opponent;
     public nint thisTurn;
 }
 
-private delegate (score result, bool turnIsOver) action(score current);
+internal delegate (score result, bool turnIsOver) action(score current);
 
-private static (score, bool) roll(score s) {
+internal static (score, bool) roll(score s) {
     nint outcome = rand.Intn(6) + 1;
     if (outcome == 1) {
         return (new score(s.opponent, s.player, 0), true);
@@ -24,13 +24,13 @@ private static (score, bool) roll(score s) {
     return (new score(s.player, s.opponent, outcome + s.thisTurn), false);
 }
 
-private static (score, bool) stay(score s) {
+internal static (score, bool) stay(score s) {
     return (new score(s.opponent, s.player + s.thisTurn, 0), true);
 }
 
-private delegate action strategy(score _);
+internal delegate action strategy(score _);
 
-private static strategy stayAtK(nint k) {
+internal static strategy stayAtK(nint k) {
     return (score s) => {
         if (s.thisTurn >= k) {
             return stay;
@@ -39,7 +39,7 @@ private static strategy stayAtK(nint k) {
     };
 }
 
-private static nint play(strategy strategy0, strategy strategy1) {
+internal static nint play(strategy strategy0, strategy strategy1) {
     var strategies = new strategy[]{strategy0, strategy1}.slice();
     score s = default!;
     bool turnIsOver = default!;
@@ -54,7 +54,7 @@ private static nint play(strategy strategy0, strategy strategy1) {
     return currentPlayer;
 }
 
-private static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
+internal static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
     var wins = new slice<nint>(len(strategies));
     for (nint i = 0; i < len(strategies); i++) {
         for (nint j = i + 1; j < len(strategies); j++) {
@@ -72,7 +72,7 @@ private static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
     return (wins, gamesPerStrategy);
 }
 
-private static @string ratioString(params ꓸꓸꓸnint valsʗp) {
+internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     var vals = valsʗp.slice();
 
     nint total = 0;
@@ -90,7 +90,7 @@ private static @string ratioString(params ꓸꓸꓸnint valsʗp) {
     return s;
 }
 
-private static void Main() {
+internal static void Main() {
     var strategies = new slice<strategy>(win);
     foreach (var (kΔ1, _) in strategies) {
         strategies[kΔ1] = stayAtK(kΔ1 + 1);

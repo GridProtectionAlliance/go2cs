@@ -28,7 +28,5 @@ internal static class NumericTypeTemplate
                 public static {{typeName}} operator /({{typeName}} left, {{typeName}} right) => new(left.m_value / right.m_value);
                 
                 public static {{typeName}} operator %({{typeName}} left, {{typeName}} right) => new(left.m_value % right.m_value);
-                
-                public override string ToString() => m_value.ToString();
         """;
 }

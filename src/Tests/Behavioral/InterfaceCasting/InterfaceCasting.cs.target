@@ -12,7 +12,7 @@ public static @string Error(this MyError err) {
     return fmt.Sprintf("error: %s"u8, err.description);
 }
 
-private static error f() {
+internal static error f() {
     return new MyError("foo");
 }
 
@@ -30,7 +30,7 @@ public static @string Speak(this Dog d) {
 [GoType] partial struct Cat {
 }
 
-[GoRecv] public static @string Speak(this ref Cat c) {
+[GoRecv] internal static @string Speak(this ref Cat c) {
     return "Meow!"u8;
 }
 
@@ -48,7 +48,7 @@ public static @string Speak(this JavaProgrammer j) {
     return "Design patterns!"u8;
 }
 
-private static void Main() {
+internal static void Main() {
     error err = default!;
     err = new MyError("bar");
     fmt.Printf("%v %v\n"u8, f(), err);

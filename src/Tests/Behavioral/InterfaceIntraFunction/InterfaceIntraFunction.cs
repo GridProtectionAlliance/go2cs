@@ -16,7 +16,7 @@ public static void Print(this Message m) {
     void Print();
 }
 
-private static void Main() {
+internal static void Main() {
     main_Printer p = new Message("Hello, from a function-scoped interface!");
     p.Print();
 }

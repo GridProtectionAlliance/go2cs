@@ -65,7 +65,10 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
 
-    //[TestMethod]
+    [TestMethod]
+    public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
+
+    [TestMethod]
     public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]

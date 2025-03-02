@@ -28,7 +28,7 @@ partial class main_package {
     public ж<main_data_Address> Address;
 }
 
-private static void Main() {
+internal static void Main() {
     ж<main_data> data = default!;
     ref var mine = ref heap(new main_Person(), out var Ꮡmine);
     ж<main_Person> person = ((ж<main_Person>)(data?.val ?? default!));

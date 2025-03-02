@@ -6,15 +6,15 @@ partial class main_package {
 
 [GoType("[]nint")] partial struct IntSlice {}
 
-private static void g1(channel<nint> ch) {
+internal static void g1(channel<nint> ch) {
     ch.ᐸꟷ(12);
 }
 
-private static void g2(channel<nint> ch) {
+internal static void g2(channel<nint> ch) {
     ch.ᐸꟷ(32);
 }
 
-private static void sum(slice<nint> s, channel<nint> c) {
+internal static void sum(slice<nint> s, channel<nint> c) {
     nint sum = 0;
     foreach (var (_, v) in s) {
         sum += v;
@@ -22,7 +22,7 @@ private static void sum(slice<nint> s, channel<nint> c) {
     c.ᐸꟷ(sum);
 }
 
-private static void fibonacci(channel<nint> f, channel<nint> quit) {
+internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint x = 0;
     nint y = 1;
     while (ᐧ) {
@@ -37,7 +37,7 @@ private static void fibonacci(channel<nint> f, channel<nint> quit) {
     }
 }
 
-private static void sendOnly(channel/*<-*/<@string> s) {
+internal static void sendOnly(channel/*<-*/<@string> s) {
     s.ᐸꟷ("output"u8);
 }
 
@@ -52,13 +52,13 @@ public static Action<Func<nint, bool>> All(this IntSlice s) {
     };
 }
 
-private static void generate(channel/*<-*/<nint> ch) {
+internal static void generate(channel/*<-*/<nint> ch) {
     for (nint i = 2; ᐧ ; i++) {
         ch.ᐸꟷ(i);
     }
 }
 
-private static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
+internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nint prime) {
     foreach (var i in src) {
         if (i % prime != 0) {
             dst.ᐸꟷ(i);
@@ -66,7 +66,7 @@ private static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, nin
     }
 }
 
-private static void sieve() {
+internal static void sieve() {
     var ch = new channel<nint>(1);
     var chʗ1 = ch;
     goǃ(_ => generate(chʗ1));
@@ -84,11 +84,11 @@ private static void sieve() {
     }
 }
 
-private static nint f() {
+internal static nint f() {
     return 0;
 }
 
-private static void Main() {
+internal static void Main() {
     var ch = new channel<nint>(2);
     ch.ᐸꟷ(1);
     ch.ᐸꟷ(2);

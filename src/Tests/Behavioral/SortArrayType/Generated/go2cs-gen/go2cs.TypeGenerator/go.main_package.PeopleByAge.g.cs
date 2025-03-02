@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct PeopleByAge : ISlice<Person>
+    public partial struct PeopleByAge : ISlice<Person>, ISupportMake<PeopleByAge>
     {
         // Value of the struct 'PeopleByAge'
         private readonly slice<Person> m_value;
@@ -63,7 +63,13 @@ public static partial class main_package
         
         public object Clone() => ((ICloneable)m_value).Clone();
         
+        public static PeopleByAge Make(nint p1 = 0, nint p2 = -1) => new PeopleByAge(p1, p2);
+
+        public PeopleByAge(nint length, nint capacity = -1, nint low = 0) => m_value = new slice<Person>(length, capacity, low);
+        
         public PeopleByAge(slice<Person> value) => m_value = value;
+
+        public override string ToString() => m_value.ToString();
 
         public static bool operator ==(PeopleByAge left, PeopleByAge right) => left.Equals(right);
 

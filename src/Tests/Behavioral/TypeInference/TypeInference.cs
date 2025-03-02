@@ -4,12 +4,22 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct main_MyBool {
+[GoType("bool")] partial struct main_MyBool {}
+
+public static void ShowValue(fmt.Stringer val) {
+    fmt.Println(val.String());
+}
+
+internal static @string String(this main_MyBool b) {
+    if (b) {
+        return "true-ish"u8;
+    }
+    return "false-ish"u8;
 }
 
 [GoType("bool")] partial struct main_MyBoolᴛ1 {}
 
-private static void Main() {
+internal static void Main() {
     const bool c = /* 3 < 4 */ true;
     nint x = default!;
     nint y = default!;
@@ -20,6 +30,8 @@ private static void Main() {
     fmt.Println(b3);
     fmt.Println(b4);
     fmt.Println(b5);
+    main_MyBool other = default!;
+    ShowValue(other);
 }
 
 } // end main_package

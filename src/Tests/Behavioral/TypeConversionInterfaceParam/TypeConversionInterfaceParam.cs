@@ -33,7 +33,7 @@ public static void Process(this Processor p, Process_data data) {
     public bool Valid;
 }
 
-private static void Main() {
+internal static void Main() {
     DataProcessor p = default!;
     p = new Processor(nil);
     var data = new main_data(ID: 1, Name: "Alice"u8, Valid: true);

@@ -44,7 +44,7 @@ func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parame
 
 	signature := v.getSignature(funcType)
 	resultsSignature = v.generateResultSignature(signature)
-	parameterSignature = v.generateParametersSignature(signature, false)
+	parameterSignature, _ = v.generateParametersSignature(signature, false)
 	return
 }
 

@@ -5,7 +5,7 @@ using sort = sort_package;
 
 partial class main_package {
 
-private const float32 w = 1;
+internal const float32 w = 1;
 public const nint _addr_X = 1;
 public const nint Y = 2;
 public const nint Z = 3;
@@ -51,8 +51,8 @@ public static nint C21 = dynamicFn1();
 public static bool D21;
 public static bool E2;
 public static bool ΔTa_package = false;
-private static bool otherID = true;
-private static nint dynamicFn1() {
+internal static bool otherID = true;
+internal static nint dynamicFn1() {
     return 4;
 }
 
@@ -123,7 +123,7 @@ public static (nint E2, @string p) Testing() {
     return (E2, p);
 }
 
-private static void Main() {
+internal static void Main() {
     fmt.Println(MultiLine);
     fmt.Println(MultiLine2);
     fmt.Println(MultiLine3);

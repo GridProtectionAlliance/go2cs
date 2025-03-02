@@ -6,21 +6,21 @@ using ꓸꓸꓸobject = System.Span<object>;
 
 partial class main_package {
 
-private static nint x = 1;
-private static int32 getNext() {
+internal static nint x = 1;
+internal static int32 getNext() {
     x++;
     return ((int32)x);
 }
 
-private static @string getStr(@string test) {
+internal static @string getStr(@string test) {
     return "string"u8 + test;
 }
 
-private static @string getStr2(object test1, @string test2) {
+internal static @string getStr2(object test1, @string test2) {
     return test1._<@string>() + test2;
 }
 
-private static @string getStr3(@string format, params ꓸꓸꓸobject aʗp) {
+internal static @string getStr3(@string format, params ꓸꓸꓸobject aʗp) {
     var a = aʗp.slice();
 
     return fmt.Sprintf(format, a.ꓸꓸꓸ);
@@ -31,7 +31,7 @@ public static nint Foo(nint n) {
     return n;
 }
 
-private static void Main() {
+internal static void Main() {
     fmt.Println(getStr("test"u8));
     fmt.Println(getStr2("hello, ", "world"u8));
     fmt.Println(getStr3("hello, %s"u8, "world"));

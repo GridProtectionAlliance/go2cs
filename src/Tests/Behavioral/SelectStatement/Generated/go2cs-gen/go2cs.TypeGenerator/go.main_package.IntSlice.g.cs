@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct IntSlice : ISlice<nint>
+    public partial struct IntSlice : ISlice<nint>, ISupportMake<IntSlice>
     {
         // Value of the struct 'IntSlice'
         private readonly slice<nint> m_value;
@@ -63,7 +63,13 @@ public static partial class main_package
         
         public object Clone() => ((ICloneable)m_value).Clone();
         
+        public static IntSlice Make(nint p1 = 0, nint p2 = -1) => new IntSlice(p1, p2);
+
+        public IntSlice(nint length, nint capacity = -1, nint low = 0) => m_value = new slice<nint>(length, capacity, low);
+        
         public IntSlice(slice<nint> value) => m_value = value;
+
+        public override string ToString() => m_value.ToString();
 
         public static bool operator ==(IntSlice left, IntSlice right) => left.Equals(right);
 

@@ -33,9 +33,9 @@ public static S Scale<S, E>(S s, E c)
     where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
  {
     var r = make<S>(len(s));
-    /* for i, v := range s {
-	r[i] = v * c
-} */
+    foreach (var (i, v) in s) {
+        r[i] = v * c;
+    }
     return r;
 }
 
@@ -44,7 +44,7 @@ public static void ScaleAndPrint(Point p) {
     fmt.Println(r.String());
 }
 
-private static void Main() {
+internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
     ScaleAndPrint(p);

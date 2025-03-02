@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     ref var a = ref heap(new @string(), out var Ꮡa);
     a = "Hello World"u8;
     test(a);
@@ -15,13 +15,13 @@ private static void Main() {
     fmt.Println(a);
 }
 
-private static void test(@string a) {
+internal static void test(@string a) {
     fmt.Println(a);
     a = "Goodbye World"u8;
     fmt.Println(a);
 }
 
-private static void test2(ж<@string> Ꮡa) {
+internal static void test2(ж<@string> Ꮡa) {
     ref var a = ref Ꮡa.val;
 
     fmt.Println(a);

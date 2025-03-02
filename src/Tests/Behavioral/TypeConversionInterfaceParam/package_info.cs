@@ -50,7 +50,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
-//[GoTestMatchingConsoleOutput] -- TODO: enable after conversion of std fmt package
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
 }

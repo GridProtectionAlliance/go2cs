@@ -67,7 +67,10 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
 
-   // [TestMethod]
+    [TestMethod]
+    public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
+
+    [TestMethod]
     public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]

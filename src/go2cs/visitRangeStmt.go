@@ -18,6 +18,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		rangeType = named.Underlying()
 	}
 
+	// Get the constraint type if it's a type parameter
+	if typeParam, ok := rangeType.(*types.TypeParam); ok {
+		rangeType = v.getConstraintType(typeParam)
+	}
+
 	var isSlice, isArray, isMap, isChan, isStr, untypedStr, isInt, untypedInt bool
 	yieldFunc := -1
 

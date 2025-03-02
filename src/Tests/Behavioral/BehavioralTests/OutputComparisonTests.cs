@@ -40,6 +40,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
@@ -47,6 +50,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
+
+    [TestMethod]
+    public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
+
+    [TestMethod]
+    public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
@@ -89,6 +98,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
+
+    [TestMethod]
+    public void CheckTypeConversionInterfaceParam() => CheckTarget("TypeConversionInterfaceParam");
+
+    [TestMethod]
+    public void CheckTypeInference() => CheckTarget("TypeInference");
 
     [TestMethod]
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");

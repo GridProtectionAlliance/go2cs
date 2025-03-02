@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     map<any, @string> tbl = default!;
     tbl = new map<any, @string>();
     tbl["12"] = "1"u8;

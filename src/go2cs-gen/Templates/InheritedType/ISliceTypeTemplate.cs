@@ -45,14 +45,8 @@ internal static class ISliceTypeTemplate
                 
                 public object Clone() => ((ICloneable)m_value).Clone();
                 
-                public {{structName}}(nint length, nint capacity = -1, nint low = 0)
-                {
-                    m_value = new {{typeName}}(length, capacity, low);
-                }
-                
-                public static {{structName}} Make(nint p1 = 0, nint p2 = -1)
-                {
-                    return new {{structName}}(p1, p2);
-                }
+                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1, p2);
+        
+                public {{structName}}(nint length, nint capacity = -1, nint low = 0) => m_value = new {{typeName}}(length, capacity, low);
         """;
 }

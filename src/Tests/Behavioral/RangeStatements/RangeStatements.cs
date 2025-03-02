@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-private static void Main() {
+internal static void Main() {
     var nums = new nint[]{2, 3, 4}.slice();
     nint sum = 0;
     nint i = default!;
@@ -130,7 +130,7 @@ private static void Main() {
     }
 }
 
-private static void calculate(nint x) {
+internal static void calculate(nint x) {
     nint y = x * 2;
     {
         nint xΔ1 = y - 1; if (xΔ1 > 0) {
