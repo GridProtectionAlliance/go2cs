@@ -61,6 +61,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]
+    public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]

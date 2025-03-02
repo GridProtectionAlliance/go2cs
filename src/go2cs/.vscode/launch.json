@@ -23,7 +23,7 @@
                 //"..\\Tests\\Behavioral\\ForVariants",
                 //"..\\Tests\\Behavioral\\IfStatements",
                 //"..\\Tests\\Behavioral\\PointerToPointer",
-                "..\\Tests\\Behavioral\\LambdaFunctions",
+                //"..\\Tests\\Behavioral\\LambdaFunctions",
                 //"..\\Tests\\Behavioral\\FirstClassFunctions",
                 //"..\\Tests\\Behavioral\\RangeStatements",
                 //"..\\Tests\\Behavioral\\SpreadOperator",
@@ -48,10 +48,11 @@
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
-                //"..\\Tests\\Behavioral\\TypeInference",
+                "..\\Tests\\Behavioral\\TypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeDecl",
                 //"..\\Tests\\Behavioral\\GenericFuncDecl",
+                //"..\\Tests\\Behavioral\\GenericTypeInstantiation",
             ]
         }
     ]

@@ -109,7 +109,8 @@ public class ImplementGenerator : ISourceGenerator
                     Name = promoted && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
                     ReturnType = info.method.ReturnType.ToDisplayString(),
                     Parameters = info.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
-                    GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString()))
+                    GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
+                    TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray())
                 })
                 .Distinct()
                 .ToList();

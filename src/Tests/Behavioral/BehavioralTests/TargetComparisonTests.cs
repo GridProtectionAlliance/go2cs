@@ -77,6 +77,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]
+    public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

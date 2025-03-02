@@ -13,10 +13,10 @@ internal class ReceiverMethodTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
               [{{GeneratedCodeAttribute}}]
-              {{Scope}} static {{Method.ReturnType}} {{Method.Name}}({{DeclParams}})
+              {{Scope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
               {
                   ref var {{ReceiverParamName}} = ref Ꮡ{{ReceiverParamName}}.val;
-                  return {{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
+                  {{ReturnStatement}}{{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
               }
           """;
 
@@ -43,6 +43,9 @@ internal class ReceiverMethodTemplate : TemplateBase
             return string.Join(", ", result);
         }
     }
+
+    private string ReturnStatement =>
+        Method.ReturnType == "void" ? "" : "return ";
 
     private string ReceiverParamName =>
         m_receiverParamName ??= Method.Parameters.First().name;

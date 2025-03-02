@@ -21,10 +21,12 @@
 //
 //******************************************************************************************************
 
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Templates.TemplateBase;
 
 namespace go2cs;
 
@@ -38,6 +40,8 @@ public record MethodInfo
 
     public required string GenericTypes { get; init; }
 
+    public required Dictionary<string, string[]> TypeConstraints { get; init; }
+
     public bool IsRefRecv { get; init; }
 
     public bool IsGeneric => GenericTypes.Length > 0;
@@ -45,7 +49,7 @@ public record MethodInfo
     public string CallParameters =>
         string.Join(", ", Parameters.Select(param => param.name));
 
-    public string TypedParameters => 
+    public string TypedParameters =>
         string.Join(", ", Parameters.Select(param => $"{param.type} {param.name}"));
 
     public string GetSignature()
@@ -57,6 +61,25 @@ public record MethodInfo
     {
         return IsGeneric ? $"<{GenericTypes}>" : "";
     }
+
+    public string GetWhereConstraints()
+    {
+        if (!IsGeneric || TypeConstraints.Count == 0)
+            return string.Empty;
+
+        List<string> constraints = [];
+
+        foreach (KeyValuePair<string, string[]> kvp in TypeConstraints)
+        {
+            string typeParam = kvp.Key;
+            string[] typeConstraints = kvp.Value;
+
+            if (typeConstraints.Length > 0)
+                constraints.Add($"where {typeParam} : {string.Join(", ", typeConstraints)}");
+        }
+
+        return $"\r\n{TypeElemIndent}{string.Join("\r\n        ", constraints)}";
+    }
 }
 
 public static class MethodSyntaxExtensions
@@ -65,11 +88,41 @@ public static class MethodSyntaxExtensions
     {
         SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
 
+        string[] typeParameters = methodDeclaration.TypeParameterList?.Parameters
+            .Select(param => param.Identifier.Text)
+            .ToArray() ?? [];
+
+        Dictionary<string, string[]> typeConstraints = [];
+
+        // Initialize dictionary with empty constraint arrays for each type parameter
+        foreach (string typeParam in typeParameters)
+            typeConstraints[typeParam] = [];
+
+        // Process constraints if they exist
+        if (methodDeclaration.ConstraintClauses.Any())
+        {
+            foreach (TypeParameterConstraintClauseSyntax constraintClause in methodDeclaration.ConstraintClauses)
+            {
+                string typeParamName = constraintClause.Name.Identifier.Text;
+
+                if (!typeConstraints.ContainsKey(typeParamName))
+                    continue;
+
+                string[] constraints = constraintClause.Constraints
+                    .Select(constraint => GetConstraintText(constraint, semanticModel))
+                    .Where(text => !string.IsNullOrEmpty(text))
+                    .ToArray();
+
+                typeConstraints[typeParamName] = constraints;
+            }
+        }
+
         return new MethodInfo
         {
             Name = methodDeclaration.Identifier.Text,
-            ReturnType = methodDeclaration.GetReturnType(context),
-            GenericTypes = string.Join(", ", methodDeclaration.TypeParameterList?.Parameters.Select(param => param.Identifier.Text) ?? []),
+            ReturnType = methodDeclaration.GetReturnType(semanticModel),
+            GenericTypes = string.Join(", ", typeParameters),
+            TypeConstraints = typeConstraints,
             Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
             {
                 if (param.Type is null)
@@ -78,7 +131,7 @@ public static class MethodSyntaxExtensions
                 TypeInfo typeInfo = semanticModel.GetTypeInfo(param.Type);
                 ITypeSymbol? typeSymbol = typeInfo.Type;
                 string fullyQualifiedTypeName = typeSymbol?.ToDisplayString() ?? "object";
-                
+
                 return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
             }).ToArray(),
             IsRefRecv = methodDeclaration.ParameterList.Parameters.Any(param =>
@@ -87,10 +140,21 @@ public static class MethodSyntaxExtensions
         };
     }
 
-    private static string GetReturnType(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
+    private static string GetConstraintText(TypeParameterConstraintSyntax constraint, SemanticModel semanticModel)
     {
-        SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
+        return constraint switch
+        {
+            ClassOrStructConstraintSyntax classOrStruct => classOrStruct.ClassOrStructKeyword.IsKind(SyntaxKind.ClassKeyword) ? "class" : "struct",
+            ConstructorConstraintSyntax => "new()",
+            DefaultConstraintSyntax => "default",
+            TypeConstraintSyntax typeConstraint =>
+                semanticModel.GetTypeInfo(typeConstraint.Type).Type?.ToDisplayString() ?? typeConstraint.Type.ToString(),
+            _ => string.Empty
+        };
+    }
 
+    private static string GetReturnType(this MethodDeclarationSyntax methodDeclaration, SemanticModel semanticModel)
+    {
         TypeInfo typeInfo = semanticModel.GetTypeInfo(methodDeclaration.ReturnType);
         ITypeSymbol? typeSymbol = typeInfo.Type;
 

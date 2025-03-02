@@ -162,9 +162,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public nint Length => m_length;
 
-    public nint Capacity => m_array.Length - m_low;
+    public nint Capacity => (m_array?.Length ?? 0) - m_low;
 
-    public nint Available => m_array.Length - m_length;
+    public nint Available => (m_array?.Length ?? 0) - m_length;
 
     // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support

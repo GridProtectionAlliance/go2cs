@@ -1423,6 +1423,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		typeParams = named.TypeParams()
 	} else {
 		typeParams = signature.TypeParams()
+
+		if typeParams == nil {
+			typeParams = signature.RecvTypeParams()
+		}
 	}
 
 	if typeParams == nil || typeParams.Len() == 0 {
@@ -1582,22 +1586,16 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return name
 	}
 
+	var pkgPrefix string
+
 	if named, ok := t.(*types.Named); ok {
 		obj := named.Obj()
 		pkg := obj.Pkg()
 
 		// Handle builtin types with no package
-		if pkg == nil {
-			return obj.Name()
+		if pkg != nil && pkg != v.pkg {
+			pkgPrefix = pkg.Path() + "."
 		}
-
-		// For types in current package, return only the name
-		if pkg == v.pkg {
-			return obj.Name()
-		}
-
-		// Return package path and type name for imported packages
-		return pkg.Path() + "." + obj.Name()
 	}
 
 	if !isUnderlying {
@@ -1606,7 +1604,13 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
-	return strings.ReplaceAll(t.String(), "..", "")
+	typeName := strings.ReplaceAll(t.String(), "..", "")
+
+	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
+		return pkgPrefix + typeName
+	}
+
+	return typeName
 }
 
 func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
@@ -1624,11 +1628,10 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		obj := named.Obj()
 		pkg := obj.Pkg()
 
+		// Handle builtin types with no package
 		if pkg != nil && pkg.Name() != packageName {
 			return pkg.Name() + PackageSuffix + "." + obj.Name()
 		}
-
-		return obj.Name()
 	}
 
 	if !isUnderlying {
@@ -1669,18 +1672,12 @@ func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 	typeName = strings.TrimPrefix(typeName, "untyped ")
 
-	if strings.HasPrefix(typeName, "[]") {
+	// Replace all `[` and `]` with `<` and `>` to handle generic types
+	typeName = strings.ReplaceAll(typeName, "[", "<")
+	typeName = strings.ReplaceAll(typeName, "]", ">")
+
+	if strings.HasPrefix(typeName, "<>") {
 		return fmt.Sprintf("%s.slice<%s>", RootNamespace, convertToCSTypeName(typeName[2:]))
-	}
-
-	// Handle array types
-	if strings.HasPrefix(typeName, "[") {
-		return fmt.Sprintf("%s.array<%s>", RootNamespace, convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:]))
-	}
-
-	if strings.HasPrefix(typeName, "map[") {
-		keyValue := strings.Split(typeName[4:], "]")
-		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
 	}
 
 	if strings.HasPrefix(typeName, "chan ") {
@@ -1693,6 +1690,16 @@ func convertToCSFullTypeName(typeName string) string {
 
 	if strings.HasPrefix(typeName, "<-chan ") {
 		return fmt.Sprintf("%s./*<-*/channel<%s>", RootNamespace, convertToCSTypeName(typeName[7:]))
+	}
+
+	// Handle array types
+	if strings.HasPrefix(typeName, "<") {
+		return fmt.Sprintf("%s.array<%s>", RootNamespace, convertToCSTypeName(typeName[strings.Index(typeName, ">")+1:]))
+	}
+
+	if strings.HasPrefix(typeName, "map<") {
+		keyValue := strings.Split(typeName[4:], ">")
+		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
 	}
 
 	if typeName == "func()" {

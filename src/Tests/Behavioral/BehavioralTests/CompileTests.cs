@@ -75,6 +75,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericTypeInference() => CheckTarget("GenericTypeInference");
 
     [TestMethod]
+    public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]
