@@ -140,6 +140,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeDecl", "Tests\Be
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeInference", "Tests\Behavioral\GenericTypeInference\GenericTypeInference.csproj", "{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericFuncDecl", "Tests\Behavioral\GenericFuncDecl\GenericFuncDecl.csproj", "{A32E991D-4CE6-43E6-8550-23E4717B1578}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -362,6 +364,10 @@ Global
 		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A32E991D-4CE6-43E6-8550-23E4717B1578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A32E991D-4CE6-43E6-8550-23E4717B1578}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A32E991D-4CE6-43E6-8550-23E4717B1578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A32E991D-4CE6-43E6-8550-23E4717B1578}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -425,6 +431,7 @@ Global
 		{CE60E17B-DBCE-4C0A-A2F2-351C6F7ABB9B} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{C7F036C9-423B-4194-8D10-1C3DB4C4E0BA} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{0D73FBF3-D1BB-417D-9F5B-32828E95FF2C} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{A32E991D-4CE6-43E6-8550-23E4717B1578} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

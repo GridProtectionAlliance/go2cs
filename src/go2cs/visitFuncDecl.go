@@ -122,17 +122,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = functionBlockPrefixMarker
-
 	typeParams, constraints := v.getGenericDefinition(v.currentFuncType.Type())
-
-	if len(constraints) > 0 {
-		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
-	}
 
 	v.writeOutput("%s%s%s static %s %s%s(%s)%s%s", functionPrefixMarker, functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
-		blockContext.format.useNewLine = false
+		blockContext.format.useNewLine = len(constraints) > 0
 		v.visitBlockStmt(funcDecl.Body, blockContext)
 	}
 

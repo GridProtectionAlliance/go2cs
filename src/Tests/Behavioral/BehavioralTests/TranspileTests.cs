@@ -66,6 +66,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
+
+    [TestMethod]
     public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
 
     [TestMethod]
