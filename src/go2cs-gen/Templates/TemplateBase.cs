@@ -26,7 +26,7 @@ internal abstract class TemplateBase
     public const string TypeElemIndent = "        ";
 
     public virtual string Usings => 
-        string.Join("\r\n", m_usings.OrderBy(stmt => stmt));
+        string.Join("\r\n", m_usings.OrderBy(stmt => stmt.TrimEnd(';'), StringComparer.Ordinal));
 
     public virtual string Generate()
     {
