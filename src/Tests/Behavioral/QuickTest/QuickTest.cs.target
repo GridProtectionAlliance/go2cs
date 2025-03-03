@@ -26,7 +26,7 @@ internal static test_R0 test() {
     x.@string = "Go"u8;
     x.@int = @new<nint>();
     x.P = @new<bool>();
-    x.M = make<M>();
+    x.M = new M();
     return x;
 }
 
