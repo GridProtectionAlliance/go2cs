@@ -58,6 +58,7 @@ type ConstraintType int
 // Comparable types are the widest set of types that can be used with the
 // `==` and `!=` operators. Each type in Go that can support these operators
 // should be represented by a unique enum value here:
+
 const (
 	Invalid ConstraintType = iota
 	Bool
@@ -109,7 +110,7 @@ const (
 )
 
 // operators is a map of operator sets to the operators string representations.
-// Only valid C# operators are included here, so "&^" is not included.
+// Only valid C# operators are defined here, so "&^" is not included.
 var operators = map[OperatorSet][]string{
 	SumOperator:         {"+"},
 	ArithmeticOperators: {"-", "*", "/"},
@@ -213,32 +214,32 @@ func getOperatorSetAttributes(operatorSets HashSet[OperatorSet]) string {
 		return int(operatorSetKeys[i]) < int(operatorSetKeys[j])
 	})
 
-	results := []string{}
+	targets := []string{}
 
 	for _, opSet := range operatorSetKeys {
-		var constName string
+		var setName string
 
 		switch opSet {
 		case SumOperator:
-			constName = "Sum"
+			setName = "Sum"
 		case ArithmeticOperators:
-			constName = "Arithmetic"
+			setName = "Arithmetic"
 		case IntegerOperators:
-			constName = "Integer"
+			setName = "Integer"
 		case ComparableOperators:
-			constName = "Comparable"
+			setName = "Comparable"
 		case OrderedOperators:
-			constName = "Ordered"
+			setName = "Ordered"
 		default:
-			constName = ""
+			setName = ""
 		}
 
-		if len(constName) > 0 {
-			results = append(results, constName)
+		if len(setName) > 0 {
+			targets = append(targets, setName)
 		}
 	}
 
-	return strings.Join(results, ", ")
+	return strings.Join(targets, ", ")
 }
 
 // getLiftedConstraints takes a constraint type and its name and returns the
@@ -253,7 +254,7 @@ func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
 		return int(operatorSetKeys[i]) < int(operatorSetKeys[j])
 	})
 
-	results := []string{}
+	liftedConstraints := []string{}
 
 	for _, opSet := range operatorSetKeys {
 		var constraints []string
@@ -288,11 +289,11 @@ func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
 		}
 
 		if len(constraints) > 0 {
-			results = append(results, constraints...)
+			liftedConstraints = append(liftedConstraints, constraints...)
 		}
 	}
 
-	return strings.Join(results, ", ")
+	return strings.Join(liftedConstraints, ", ")
 }
 
 // isTypeConstraint determines if an interface type or type expression represents a type constraint
