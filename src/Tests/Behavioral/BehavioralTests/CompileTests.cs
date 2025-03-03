@@ -66,6 +66,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckGenericCompositeLiterals() => CheckTarget("GenericCompositeLiterals");
+
+    [TestMethod]
     public void CheckGenericCompositeType() => CheckTarget("GenericCompositeType");
 
     [TestMethod]

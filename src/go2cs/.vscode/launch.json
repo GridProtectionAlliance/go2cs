@@ -56,7 +56,8 @@
                 //"..\\Tests\\Behavioral\\GenericFuncCall",
                 //"..\\Tests\\Behavioral\\GenericCompositeType",
                 //"..\\Tests\\Behavioral\\GenericStructFields",
-                "..\\Tests\\Behavioral\\GenericTypeAssertions",
+                //"..\\Tests\\Behavioral\\GenericTypeAssertions",
+                "..\\Tests\\Behavioral\\GenericCompositeLiterals",
             ]
         }
     ]

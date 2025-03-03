@@ -52,6 +52,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckGenericCompositeLiterals() => CheckTarget("GenericCompositeLiterals");
+
+    [TestMethod]
     public void CheckGenericCompositeType() => CheckTarget("GenericCompositeType");
 
     [TestMethod]
