@@ -78,6 +78,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericStructFields() => CheckTarget("GenericStructFields");
 
     [TestMethod]
+    public void CheckGenericTypeAssertions() => CheckTarget("GenericTypeAssertions");
+
+    [TestMethod]
     public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
 
     [TestMethod]

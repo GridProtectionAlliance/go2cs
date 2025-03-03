@@ -80,6 +80,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericStructFields() => CheckTarget("GenericStructFields");
 
     [TestMethod]
+    public void CheckGenericTypeAssertions() => CheckTarget("GenericTypeAssertions");
+
+    [TestMethod]
     public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
 
     [TestMethod]

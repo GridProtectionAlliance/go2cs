@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string {
@@ -25,5 +26,14 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 		}
 	}
 
-	return fmt.Sprintf("%s._<%s>()", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, nil)))
+	// Get the type information for this expression
+	typesInfo := v.info.TypeOf(typeAssertExpr)
+	var safeAssertDescriminator string
+
+	// Check if this is used in a multi-value context, thus making it a safe assertion
+	if tuple, isTuple := typesInfo.(*types.Tuple); isTuple && tuple.Len() == 2 {
+		safeAssertDescriminator = TrueMarker
+	}
+
+	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, nil)), safeAssertDescriminator)
 }

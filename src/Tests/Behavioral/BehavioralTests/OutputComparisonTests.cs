@@ -61,6 +61,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
 
     [TestMethod]
+    public void CheckGenericTypeAssertions() => CheckTarget("GenericTypeAssertions");
+
+    [TestMethod]
     public void CheckGenericTypeDecl() => CheckTarget("GenericTypeDecl");
 
     [TestMethod]

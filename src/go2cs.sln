@@ -150,6 +150,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericCompositeType", "Tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericStructFields", "Tests\Behavioral\GenericStructFields\GenericStructFields.csproj", "{FF33EB25-4520-4664-9F3F-8BB1606EFAEC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeAssertions", "Tests\Behavioral\GenericTypeAssertions\GenericTypeAssertions.csproj", "{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -392,6 +394,10 @@ Global
 		{FF33EB25-4520-4664-9F3F-8BB1606EFAEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FF33EB25-4520-4664-9F3F-8BB1606EFAEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FF33EB25-4520-4664-9F3F-8BB1606EFAEC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -460,6 +466,7 @@ Global
 		{93A41039-3E92-42FF-AE72-2EF0700DA527} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{D956CF2F-21BD-436D-9D9E-BD918BD505F6} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{FF33EB25-4520-4664-9F3F-8BB1606EFAEC} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}
