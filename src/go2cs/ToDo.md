@@ -27,7 +27,7 @@
 15) ~~Handle dynamic struct type lifting~~
   a) Implement remaining dynamic struct implicit cast checks `v.checkForDynamicStructs(argType, targetType)` in the following visitors: `AssignStmt`, `CompositeLit`, `IndexExpr`, `BinaryExpr`, `UnaryExpr`, `SelectorExpr`, `TypeSwitchStmt`, `ValueSpec` 
 16) ~~Handle intra-function type declaration lifting (see TypeInference)~~
-16) Handle generics conversion
+16) ~~Handle generics conversion~~
 17) Always include pre-package comments during conversion
 
 xx) Setup reference code packages / path options for Go modules
