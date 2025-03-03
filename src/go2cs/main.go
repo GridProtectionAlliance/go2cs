@@ -331,9 +331,10 @@ Examples:
 	conf := types.Config{Importer: importer.Default()}
 
 	info := &types.Info{
-		Types: make(map[ast.Expr]types.TypeAndValue),
-		Defs:  make(map[*ast.Ident]types.Object),
-		Uses:  make(map[*ast.Ident]types.Object),
+		Types:      make(map[ast.Expr]types.TypeAndValue),
+		Defs:       make(map[*ast.Ident]types.Object),
+		Uses:       make(map[*ast.Ident]types.Object),
+		Selections: make(map[*ast.SelectorExpr]*types.Selection),
 	}
 
 	extractFiles := func(files []FileEntry) []*ast.File {
@@ -1672,6 +1673,22 @@ func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 	typeName = strings.TrimPrefix(typeName, "untyped ")
 
+	// Find all types inside '[T1, T2]' type expressions and recurse into them for conversion
+	if strings.Contains(typeName, "[") {
+		start := strings.Index(typeName, "[")
+		end := strings.Index(typeName[start:], "]") + start
+
+		if end != -1 {
+			subTypes := strings.Split(typeName[start+1:end], ",")
+
+			for i := range subTypes {
+				subTypes[i] = convertToCSTypeName(subTypes[i])
+			}
+
+			typeName = fmt.Sprintf("%s[%s]%s", typeName[:start], strings.Join(subTypes, ", "), typeName[end+1:])
+		}
+	}
+
 	// Replace all `[` and `]` with `<` and `>` to handle generic types
 	typeName = strings.ReplaceAll(typeName, "[", "<")
 	typeName = strings.ReplaceAll(typeName, "]", ">")
@@ -1699,7 +1716,7 @@ func convertToCSFullTypeName(typeName string) string {
 
 	if strings.HasPrefix(typeName, "map<") {
 		keyValue := strings.Split(typeName[4:], ">")
-		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]))
+		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, keyValue[0], convertToCSTypeName(keyValue[1]))
 	}
 
 	if typeName == "func()" {

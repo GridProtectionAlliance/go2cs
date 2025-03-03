@@ -99,18 +99,18 @@ func (c LambdaContext) getDefault() StmtContext {
 	return DefaultLambdaContext()
 }
 
-type TupleResultContext struct {
+type UnaryExprContext struct {
 	isTupleResult bool
 }
 
-func DefaultTupleResultContext() TupleResultContext {
-	return TupleResultContext{
+func DefaultUnaryExprContext() UnaryExprContext {
+	return UnaryExprContext{
 		isTupleResult: false,
 	}
 }
 
-func (c TupleResultContext) getDefault() StmtContext {
-	return DefaultTupleResultContext()
+func (c UnaryExprContext) getDefault() StmtContext {
+	return DefaultUnaryExprContext()
 }
 
 type IdentContext struct {
@@ -231,7 +231,7 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		context := getExprContext[IdentContext](contexts)
 		return v.convStructType(exprType, context)
 	case *ast.UnaryExpr:
-		context := getExprContext[TupleResultContext](contexts)
+		context := getExprContext[UnaryExprContext](contexts)
 		return v.convUnaryExpr(exprType, context)
 	case *ast.BadExpr:
 		println(fmt.Sprintf("WARNING: BadExpr encountered: %#v", exprType))

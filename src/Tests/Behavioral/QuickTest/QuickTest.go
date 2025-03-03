@@ -2,24 +2,17 @@ package main
 
 import "fmt"
 
-type P = *bool
-type M = map[int]int
-
-func test() struct { string; *int; P; M } {
-    var x struct {
-        string // a defined non-pointer type
-        *int   // a non-defined pointer type
-        P      // an alias of a non-defined pointer type
-        M      // an alias of a non-defined type
-    }
-    x.string = "Go"
-    x.int = new(int)
-    x.P = new(bool)
-    x.M = make(M)
-    return x;
+// Option represents an optional value
+type Option[T any] struct {
+	value T
+	valid bool
 }
 
 func main() {
-    x := test()
-    fmt.Println(x)
+	optionPtr := &Option[string]{
+		value: "hello",
+		valid: true,
+	}
+	
+	fmt.Printf("Option value: %s, valid: %t\n", optionPtr.value, optionPtr.valid)
 }

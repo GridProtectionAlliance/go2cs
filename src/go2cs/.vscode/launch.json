@@ -48,11 +48,13 @@
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
-                "..\\Tests\\Behavioral\\TypeInference",
+                //"..\\Tests\\Behavioral\\TypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeDecl",
                 //"..\\Tests\\Behavioral\\GenericFuncDecl",
-                //"..\\Tests\\Behavioral\\GenericTypeInstantiation",
+                "..\\Tests\\Behavioral\\GenericTypeInstantiation",
+                //"..\\Tests\\Behavioral\\GenericFuncCall",
+                //"..\\Tests\\Behavioral\\GenericCompositeType",
             ]
         }
     ]

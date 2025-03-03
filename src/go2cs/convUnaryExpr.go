@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context TupleResultContext) string {
+func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
 		// Check if the unary expression is an address of a structure field

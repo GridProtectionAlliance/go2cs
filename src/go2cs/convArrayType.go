@@ -3,39 +3,42 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 )
 
 func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeContext) string {
-	if ident := getIdentifier(arrayType.Elt); ident != nil {
-		typeName := convertToCSTypeName(ident.Name)
+	typeName := v.getExprTypeName(arrayType, false)
 
-		if context.compositeInitializer {
-			// Use basic array type for composite literal initialization of slice or array
-			return fmt.Sprintf("%s[]", typeName)
+	if context.compositeInitializer && strings.Contains(typeName, "[") {
+		// Remove array brackets for composite literal initialization
+		start := strings.Index(typeName, "[")
+		end := strings.Index(typeName[start:], "]") + start
+
+		if end != -1 {
+			typeName = typeName[:start] + typeName[end+1:]
 		}
-
-		var suffix string
-
-		if context.maxLength > 0 {
-			suffix = fmt.Sprintf("(%d)", context.maxLength)
-		}
-
-		if v.options.preferVarDecl {
-			if arrayType.Len == nil {
-				return fmt.Sprintf("slice<%s>%s", typeName, suffix)
-			} else {
-				return fmt.Sprintf("array<%s>%s", typeName, suffix)
-			}
-		}
-
-		if len(suffix) > 0 {
-			return suffix
-		}
-
-		return "()"
-	} else {
-		typeName := v.getPrintedNode(arrayType.Elt)
-		println(fmt.Sprintf("WARNING: @convArrayType - Failed to resolve `ast.ArrayType` element %s", typeName))
-		return fmt.Sprintf("/* [...]%s */", typeName)
 	}
+
+	typeName = convertToCSTypeName(typeName)
+
+	if context.compositeInitializer {
+		// Use basic array type for composite literal initialization of slice or array
+		return fmt.Sprintf("%s[]", typeName)
+	}
+
+	var suffix string
+
+	if context.maxLength > 0 {
+		suffix = fmt.Sprintf("(%d)", context.maxLength)
+	}
+
+	if v.options.preferVarDecl {
+		return fmt.Sprintf("%s%s", typeName, suffix)
+	}
+
+	if len(suffix) > 0 {
+		return suffix
+	}
+
+	return "()"
 }

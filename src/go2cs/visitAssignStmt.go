@@ -245,7 +245,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			if tupleResult {
-				tupleResultContext := DefaultTupleResultContext()
+				tupleResultContext := DefaultUnaryExprContext()
 				tupleResultContext.isTupleResult = tupleResult
 				contexts = append(contexts, tupleResultContext)
 			}

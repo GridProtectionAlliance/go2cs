@@ -130,19 +130,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if ident.Name == "make" {
 			typeExpr := callExpr.Args[0]
 			typeParam := v.info.TypeOf(typeExpr)
-
-			var typeName string
-
-			if ident := getIdentifier(typeExpr); ident != nil {
-				typeName = convertToCSTypeName(ident.Name)
-			} else {
-				typeName = v.getPrintedNode(typeExpr)
-				println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `make` type argument %s", typeName))
-				typeName = fmt.Sprintf("/* %s */", typeName)
-			}
-
+			typeName := convertToCSTypeName(v.getExprTypeName(typeExpr, false))
 			remainingArgs := v.convExprList(callExpr.Args[1:], callExpr.Lparen, callExprContext)
-
 			isTypeParam := false
 
 			if typeConstraint, ok := typeParam.(*types.TypeParam); ok {
@@ -151,41 +140,21 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 
 			if typeParam != nil {
-				if _, ok := typeParam.(*types.Slice); ok && !isTypeParam {
-					if v.options.preferVarDecl {
-						return fmt.Sprintf("new slice<%s>(%s)", typeName, remainingArgs)
-					}
-
-					return fmt.Sprintf("new(%s)", remainingArgs)
-				} else if _, ok := typeParam.Underlying().(*types.Slice); ok {
-					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
-				} else if _, ok := typeParam.(*types.Map); ok && !isTypeParam {
-					if v.options.preferVarDecl {
-						if mapExpr, ok := typeExpr.(*ast.MapType); ok {
-							ident = getIdentifier(mapExpr.Value)
-							valueTypeName := convertToCSTypeName(ident.Name)
-							return fmt.Sprintf("new map<%s, %s>(%s)", typeName, valueTypeName, remainingArgs)
-						} else {
-							println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `make` map value type argument %s", typeName))
-						}
-					}
-
-					return fmt.Sprintf("new(%s)", remainingArgs)
-				} else if _, ok := typeParam.Underlying().(*types.Map); ok {
-					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
-				} else if _, ok := typeParam.(*types.Chan); ok && !isTypeParam {
+				if _, ok := typeParam.(*types.Chan); ok && !isTypeParam {
 					if len(remainingArgs) == 0 {
 						remainingArgs = "1"
 					}
+				}
 
-					if v.options.preferVarDecl {
-						return fmt.Sprintf("new channel<%s>(%s)", typeName, remainingArgs)
-					}
-
-					return fmt.Sprintf("new(%s)", remainingArgs)
-				} else if _, ok := typeParam.Underlying().(*types.Chan); ok {
+				if isTypeParam {
 					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 				}
+
+				if v.options.preferVarDecl {
+					return fmt.Sprintf("new %s(%s)", typeName, remainingArgs)
+				}
+
+				return fmt.Sprintf("new(%s)", remainingArgs)
 			}
 
 			println(fmt.Sprintf("WARNING: @convCallExpr - unexpected call to `make` method for type '%s'", typeName))
@@ -196,13 +165,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if ident.Name == "new" {
 			typeExpr := callExpr.Args[0]
 
-			if ident := getIdentifier(typeExpr); ident != nil {
-				return fmt.Sprintf("@new<%s>()", convertToCSTypeName(ident.Name))
-			}
-
-			typeName := v.getPrintedNode(typeExpr)
-			println(fmt.Sprintf("WARNING: @convCallExpr - Failed to resolve `new` type argument %s", typeName))
-			typeName = fmt.Sprintf("/* %s */", typeName)
+			typeName := convertToCSTypeName(v.getExprTypeName(typeExpr, false))
 			return fmt.Sprintf("@new<%s>()", typeName)
 		}
 	}
@@ -211,10 +174,35 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext.isCallExpr = true
 	lambdaContext.deferredDecls = context.deferredDecls
 
-	funType := v.getExprTypeName(callExpr.Fun, true)
-	callExprContext.sourceIsRuneArray = funType == "[]rune"
+	funcType := v.getType(callExpr.Fun, false)
+	var typeParamExpr string
 
-	return fmt.Sprintf("%s%s(%s)", constructType, v.convExpr(callExpr.Fun, []ExprContext{lambdaContext}), v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
+	resultType := v.info.TypeOf(callExpr)
+
+	if resultType != nil {
+		if named, ok := resultType.(*types.Named); ok {
+			if named.TypeArgs().Len() > 0 {
+				var typeParams []string
+
+				for i := 0; i < named.TypeArgs().Len(); i++ {
+					typeParams = append(typeParams, v.getCSTypeName(named.TypeArgs().At(i)))
+				}
+
+				typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
+			}
+		}
+	}
+
+	funcTypeName := v.getTypeName(funcType, true)
+	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune"
+
+	funcName := v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
+
+	if !strings.HasSuffix(funcName, typeParamExpr) {
+		funcName += typeParamExpr
+	}
+
+	return fmt.Sprintf("%s%s(%s)", constructType, funcName, v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
