@@ -147,4 +147,7 @@ public static partial class fmt_package
 
     public static string Sprintf(ReadOnlySpan<byte> format, params object[] args) =>
         Sprintf((@string)format, args);
+
+    public static error Errorf(ReadOnlySpan<byte> format, params object[] args) =>
+        null!;
 }

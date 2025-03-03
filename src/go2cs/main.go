@@ -1715,8 +1715,9 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	if strings.HasPrefix(typeName, "map<") {
-		keyValue := strings.Split(typeName[4:], ">")
-		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, keyValue[0], convertToCSTypeName(keyValue[1]))
+		innerType := typeName[4:]
+		keyType, valueType := splitMapKeyValue(innerType)
+		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyType), convertToCSTypeName(valueType))
 	}
 
 	if typeName == "func()" {
@@ -1802,6 +1803,28 @@ func convertToCSFullTypeName(typeName string) string {
 	default:
 		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
 	}
+}
+
+func splitMapKeyValue(typeStr string) (string, string) {
+	depth := 0
+	for i, char := range typeStr {
+		if char == '<' {
+			depth++
+		} else if char == '>' {
+			depth--
+			if depth < 0 {
+				// Found the first top-level closing bracket
+				// This is the boundary between key and value
+				if i+1 < len(typeStr) {
+					return typeStr[:i], typeStr[i+1:]
+				}
+				return typeStr[:i], ""
+			}
+		}
+	}
+
+	// If we didn't find a proper split, return original and empty
+	return typeStr, ""
 }
 
 func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type) {
