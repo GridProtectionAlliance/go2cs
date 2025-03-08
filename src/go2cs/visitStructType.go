@@ -11,6 +11,7 @@ import (
 // Handles struct types in the context of a TypeSpec, ValueSpec, or FieldList
 func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (structTypeName string) {
 	var target *strings.Builder
+	var preLiftIndentLevel int
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -21,7 +22,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
 			}
 
-			v.indentLevel--
+			preLiftIndentLevel = v.indentLevel
+			v.indentLevel = 0
 		}
 
 		structTypeName = v.getUniqueLiftedTypeName(name)
@@ -195,7 +197,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		}
 
 		v.currentFuncPrefix.WriteString(target.String())
-		v.indentLevel++
+		v.indentLevel = preLiftIndentLevel
 	}
 
 	return

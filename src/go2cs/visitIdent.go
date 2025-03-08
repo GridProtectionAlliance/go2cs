@@ -14,6 +14,7 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 	csTypeName := convertToCSTypeName(goTypeName)
 
 	var target *strings.Builder
+	var preLiftIndentLevel int
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -24,7 +25,8 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
 			}
 
-			v.indentLevel--
+			preLiftIndentLevel = v.indentLevel
+			v.indentLevel = 0
 		}
 
 		name = v.getUniqueLiftedTypeName(name)
@@ -56,7 +58,7 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		}
 
 		v.currentFuncPrefix.WriteString(target.String())
-		v.indentLevel++
+		v.indentLevel = preLiftIndentLevel
 	}
 }
 

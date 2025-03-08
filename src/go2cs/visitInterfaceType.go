@@ -60,6 +60,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	}
 
 	var target *strings.Builder
+	var preLiftIndentLevel int
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -70,7 +71,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
 			}
 
-			v.indentLevel--
+			preLiftIndentLevel = v.indentLevel
+			v.indentLevel = 0
 		}
 
 		interfaceTypeName = v.getUniqueLiftedTypeName(name)
@@ -196,7 +198,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 
 		v.currentFuncPrefix.WriteString(target.String())
-		v.indentLevel++
+		v.indentLevel = preLiftIndentLevel
 	}
 
 	return
