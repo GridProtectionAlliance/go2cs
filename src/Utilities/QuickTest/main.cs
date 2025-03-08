@@ -21,7 +21,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using go.runtime;
-using go2cs.AST;
+//using go2cs.AST;
 
 namespace go
 {
@@ -34,9 +34,9 @@ namespace go
 
         public static void JsonTest()
         {
-            const string RootPath = @"..\..\..\..\..";
-            using FileStream stream = File.OpenRead($@"{RootPath}\Tests\solitaire.json");
-            var file = JsonSerializer.Deserialize<FileNode>(stream);
+            //const string RootPath = @"..\..\..\..\..";
+            //using FileStream stream = File.OpenRead($@"{RootPath}\Tests\solitaire.json");
+            //var file = JsonSerializer.Deserialize<FileNode>(stream);
         }
 
         private static ref int Test()

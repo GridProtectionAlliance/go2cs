@@ -22,8 +22,8 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
-    <ProjectReference Include="..\..\gocore\golib\golib.csproj" />
-    <ProjectReference Include="..\..\gocore\sort\sort.csproj" />
+    <ProjectReference Include="..\..\core\golib\golib.csproj" />
+    <ProjectReference Include="..\..\core\sort\sort.csproj" />
   </ItemGroup>
 
 </Project>
