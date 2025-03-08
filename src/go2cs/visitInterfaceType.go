@@ -13,7 +13,7 @@ const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
 // Handles map types in context of a TypeSpec
-func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) {
+func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (interfaceTypeName string) {
 	for _, field := range interfaceType.Methods.List {
 		// Check if this is an actual method (has a function type)
 		if funcType, ok := field.Type.(*ast.FuncType); ok {
@@ -73,8 +73,10 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			v.indentLevel--
 		}
 
-		name = v.getUniqueLiftedTypeName(name)
-		v.liftedTypeMap[identType] = name
+		interfaceTypeName = v.getUniqueLiftedTypeName(name)
+		v.liftedTypeMap[identType] = interfaceTypeName
+	} else {
+		interfaceTypeName = name
 	}
 
 	if target == nil {
@@ -94,7 +96,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	outerIndent := v.indent(v.indentLevel)
 
 	result.WriteString(outerIndent)
-	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(name), InterfaceInheritanceMarker))
+	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), InterfaceInheritanceMarker))
 	result.WriteString(v.newline)
 
 	v.indentLevel++
@@ -177,7 +179,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		// Track which interfaces this interface inherits from so
 		// duplicate interface implementations can be avoided
 		packageLock.Lock()
-		interfaceInheritances[name] = NewHashSet(inheritedInterfaces)
+		interfaceInheritances[interfaceTypeName] = NewHashSet(inheritedInterfaces)
 		packageLock.Unlock()
 	} else {
 		inheritedResult += " "
@@ -196,6 +198,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		v.currentFuncPrefix.WriteString(target.String())
 		v.indentLevel++
 	}
+
+	return
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {

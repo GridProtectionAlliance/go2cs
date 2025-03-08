@@ -79,9 +79,15 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 		if postCodeComments.Len() > 0 {
 			v.writeOutputLn(postCodeComments.String())
+		} else {
+			if v.needsNewLine(v.targetFile.String()) {
+				v.targetFile.WriteString(v.newline)
+			}
 		}
 	} else {
-		v.targetFile.WriteString(v.newline)
+		if v.needsNewLine(v.targetFile.String()) {
+			v.targetFile.WriteString(v.newline)
+		}
 	}
 
 	v.writeOutputLn("} // end %s%s", packageName, PackageSuffix)
@@ -113,4 +119,11 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	v.targetFile.Reset()
 	v.targetFile.WriteString(targetFile)
+}
+
+func (v *Visitor) needsNewLine(text string) bool {
+	newLineLen := len(v.newline)
+	lastChars := text[len(text)-(newLineLen*2):]
+
+	return lastChars != v.newline+v.newline
 }

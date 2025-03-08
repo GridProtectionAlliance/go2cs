@@ -210,8 +210,8 @@ func main() {
 	var err error
 
 	// Resolve GOROOT and GOPATH variables, any defined environment
-	// variables will take precedence over defaults and command line
-	// flags will override all
+	// variables will take precedence over derived values and command
+	// line flags will override all
 	if goRoot = os.Getenv("GOROOT"); len(goRoot) == 0 {
 		if goRoot, err = getGoEnv("GOROOT"); err != nil {
 			goRoot = runtime.GOROOT()

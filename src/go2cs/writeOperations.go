@@ -59,13 +59,16 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 				continue
 			}
 
-			builder.WriteString(prefix)
-			builder.WriteString(comment)
+			comment = strings.ReplaceAll(comment, "\n", v.newline)
+
+			if !strings.HasSuffix(comment, v.newline) {
+				comment += v.newline
+			}
+
 			lines += strings.Count(comment, "\n")
 
-			if doc != nil {
-				builder.WriteString(v.newline)
-			}
+			builder.WriteString(prefix)
+			builder.WriteString(comment)
 
 			delete(v.standAloneComments, pos)
 			handledPos = append(handledPos, pos)
@@ -110,13 +113,10 @@ func (v *Visitor) writeDocString(builder *strings.Builder, doc *ast.CommentGroup
 		return
 	}
 
-	wroteStandAloneComment, _ := v.writeStandAloneCommentString(builder, targetPos, doc, "")
+	/*wroteStandAloneComment_, _ :=*/
+	v.writeStandAloneCommentString(builder, targetPos, doc, "")
 
 	if doc == nil {
-		if wroteStandAloneComment {
-			builder.WriteString(v.newline)
-		}
-
 		return
 	}
 

@@ -10,8 +10,9 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
-	v.writeDoc(valueSpec.Doc, valueSpec.End())
+func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup, tok token.Token) {
+	v.targetFile.WriteString(v.newline)
+	v.writeDoc(doc, valueSpec.End())
 
 	if tok == token.VAR {
 		for i, ident := range valueSpec.Names {
@@ -47,7 +48,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				def := v.info.Defs[ident]
 
 				if def != nil {
-					v.targetFile.WriteString(v.newline)
+					if i > 0 {
+						v.targetFile.WriteString(v.newline)
+					}
 
 					// Check if value spec type is a struct or a pointer to a struct
 					valueSpecType := valueSpec.Type
@@ -86,7 +89,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				def := v.info.Defs[ident]
 
 				if def != nil {
-					v.targetFile.WriteString(v.newline)
+					if i > 0 {
+						v.targetFile.WriteString(v.newline)
+					}
 
 					csTypeName := v.getCSTypeName(def.Type())
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
@@ -112,7 +117,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 				continue
 			}
 
-			v.targetFile.WriteString(v.newline)
+			if i > 0 {
+				v.targetFile.WriteString(v.newline)
+			}
 
 			csTypeName := convertToCSTypeName(v.getTypeName(tv.Type, false))
 			goValue := tv.Value.ExactString()
@@ -187,7 +194,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			constHandled := false
 
 			writeUntypedConst := func() {
-				v.targetFile.WriteString(v.newline)
+				if i > 0 {
+					v.targetFile.WriteString(v.newline)
+				}
 
 				if v.inFunction {
 					v.writeOutput("GoUntyped %s = /* ", csIDName)
@@ -223,7 +232,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			}
 
 			if c.Val().Kind() == constant.String {
-				v.targetFile.WriteString(v.newline)
+				if i > 0 {
+					v.targetFile.WriteString(v.newline)
+				}
 
 				if v.inFunction {
 					v.writeOutput("@string %s = %s;", csIDName, constVal)
@@ -236,7 +247,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, tok token.Token) {
 			}
 
 			if !constHandled {
-				v.targetFile.WriteString(v.newline)
+				if i > 0 {
+					v.targetFile.WriteString(v.newline)
+				}
 
 				if srcVal == "iota" {
 					constVal = "iota"
