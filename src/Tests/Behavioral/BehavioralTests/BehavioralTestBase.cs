@@ -51,18 +51,20 @@ public abstract class BehavioralTestBase
 
     protected static string PublishProfile { get; private set; } = "win-x64";
 
+    protected static string TargetConfig { get; private set; } = "Release";
+
     protected static string GetCSExecPath(string projPath, string targetProject)
     {
     #if USE_PUBLISH_PROFILES
-        return Path.Combine(projPath, $@"bin\Release\{NetVersion}\publish\{PublishProfile}");
+        return Path.Combine(projPath, $@"bin\{TargetConfig}\{NetVersion}\publish\{PublishProfile}");
     #else
-        return Path.Combine(projPath, $@"bin\Release\{NetVersion}\");
+        return Path.Combine(projPath, $@"bin\{TargetConfig}\{NetVersion}\");
     #endif
     }
 
     protected static string GetGoExePath(string projPath, string targetProject)
     {
-        return Path.Combine(projPath, @"bin\Release\Go");
+        return Path.Combine(projPath, $@"bin\{TargetConfig}\Go");
     }
 
     private static readonly ConcurrentDictionary<string, object> s_projectLocks = new(StringComparer.OrdinalIgnoreCase);
@@ -211,6 +213,9 @@ public abstract class BehavioralTestBase
 
         lock (projectLock)
         {
+            // Set 'go2csPath' environment variable
+            Environment.SetEnvironmentVariable("go2csPath", Path.GetFullPath($@"{TestRootPath}..\..\"));
+
             if (!forceBuild && File.Exists(projExe))
             {
                 FileInfo projExeInfo = new(projExe);
@@ -224,9 +229,9 @@ public abstract class BehavioralTestBase
 
             // Compile C# project
         #if USE_PUBLISH_PROFILES
-            Assert.AreEqual(0, exitCode = Exec("dotnet", $"publish \"{Path.Combine(projPath, $"{targetProject}.csproj")}\" -f {NetVersion} -r {PublishProfile} -c Release --sc true -o \"{csExePath}\""), $"dotnet publish for \"{targetProject}\" failed with exit code {exitCode:N0}");
+            Assert.AreEqual(0, exitCode = Exec("dotnet", $"publish \"{Path.Combine(projPath, $"{targetProject}.csproj")}\" -f {NetVersion} -r {PublishProfile} -c {TargetConfig} --sc true -o \"{csExePath}\""), $"dotnet publish for \"{targetProject}\" failed with exit code {exitCode:N0}");
         #else
-            Assert.AreEqual(0, exitCode = Exec("dotnet", $"build --configuration Release \"{Path.Combine(projPath, $"{targetProject}.csproj")}\""), $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
+            Assert.AreEqual(0, exitCode = Exec("dotnet", $"build --configuration {TargetConfig} \"{Path.Combine(projPath, $"{targetProject}.csproj")}\""), $"dotnet build for \"{targetProject}\" failed with exit code {exitCode:N0}");
         #endif
 
             // If matching console output, run once after compile to ensure any first run initialization steps are completed

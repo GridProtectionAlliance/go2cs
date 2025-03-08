@@ -23,6 +23,11 @@
     <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
+  </PropertyGroup>
+
   <!-- Enable native compiled output optimizations -->
   <PropertyGroup>
     <PublishReadyToRun>true</PublishReadyToRun>
@@ -55,7 +60,7 @@
 
   <ItemGroup>
     <Compile Remove="$(CompilerGeneratedFilesOutputPath)/**/*.cs" />
-    <ProjectReference Include="..\..\..\go2cs-gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
+    <ProjectReference Include="$(go2csPath)gen\go2cs-gen.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" PrivateAssets="All" />
   </ItemGroup>
 
   <!-- Define Go type aliases -->
@@ -93,12 +98,13 @@
 
   <ItemGroup>
 	  <!-- TODO: Add references to required projects -->
-    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
-    <ProjectReference Include="..\..\..\gocore\fmt\fmt.csproj" />
-    <ProjectReference Include="..\..\..\gocore\math\math.csproj" />
-    <ProjectReference Include="..\..\..\gocore\sort\sort.csproj" />
-    <ProjectReference Include="..\..\..\gocore\time\time.csproj" />
-    <ProjectReference Include="..\..\..\gocore\strings\strings.csproj" />
+    <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core\errors\errors.csproj" />
+    <ProjectReference Include="$(go2csPath)core\math\math.csproj" />
+    <ProjectReference Include="$(go2csPath)core\sort\sort.csproj" />
+    <ProjectReference Include="$(go2csPath)core\time\time.csproj" />
+    <ProjectReference Include="$(go2csPath)core\strings\strings.csproj" />
   </ItemGroup>
 
 </Project>

@@ -25,6 +25,8 @@
   <ItemGroup>
     <Using Include="go.builtin" Static="True" />
     <Using Include="System" />
+    <Using Include="System.Numerics" />
+    <Using Include="System.Object" Alias="any" />
     <Using Include="System.Byte" Alias="uint8" />
     <Using Include="System.UInt16" Alias="uint16" />
     <Using Include="System.UInt32" Alias="uint32" />
@@ -39,12 +41,17 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
     <Using Include="System.Numerics.BigInteger" Alias="GoUntyped" />
-    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTag" />
-    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInit" />
+    <Using Include="System.ComponentModel.DescriptionAttribute" Alias="GoTagAttribute" />
+    <Using Include="System.Runtime.CompilerServices.ModuleInitializerAttribute" Alias="GoInitAttribute" />
   </ItemGroup>
 
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\..\gocore\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
   </ItemGroup>
 
 </Project>

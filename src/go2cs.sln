@@ -16,26 +16,26 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6BC3FFAC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuickTest", "Utilities\QuickTest\QuickTest.csproj", "{3F91B351-7FB1-4466-8EDA-65777FE10C9B}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "gocore", "gocore", "{D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "core", "core", "{D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}"
 	ProjectSection(SolutionItems) = preProject
-		deploy-gocore.bat = deploy-gocore.bat
+		deploy-core.bat = deploy-core.bat
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChannelTests", "Tests\ChannelTests\ChannelTests.csproj", "{8F4CDC83-470F-4550-8BD9-47BC24BFA58A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "golib", "gocore\golib\golib.csproj", "{040CFA10-7D89-4E46-92E0-C73FA99AB8F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "golib", "core\golib\golib.csproj", "{040CFA10-7D89-4E46-92E0-C73FA99AB8F8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fmt", "gocore\fmt\fmt.csproj", "{C31814D6-E4C2-4873-AD78-BB561277BC70}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "fmt", "core\fmt\fmt.csproj", "{C31814D6-E4C2-4873-AD78-BB561277BC70}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "strings", "gocore\strings\strings.csproj", "{7560A82B-AABB-4D64-952B-A10979955630}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "strings", "core\strings\strings.csproj", "{7560A82B-AABB-4D64-952B-A10979955630}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "errors", "gocore\errors\errors.csproj", "{7A3E9121-FB19-47A8-B01B-7CBAF18ACF8E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "errors", "core\errors\errors.csproj", "{7A3E9121-FB19-47A8-B01B-7CBAF18ACF8E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "io", "gocore\io\io.csproj", "{B5F26B50-DE5D-4218-AC40-FF7D4BA0F476}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "io", "core\io\io.csproj", "{B5F26B50-DE5D-4218-AC40-FF7D4BA0F476}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sync", "gocore\sync\sync.csproj", "{2E3B5E98-225B-4DDE-AB89-D0A9AE827657}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sync", "core\sync\sync.csproj", "{2E3B5E98-225B-4DDE-AB89-D0A9AE827657}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "time", "gocore\time\time.csproj", "{E7DFFC46-ABE6-4C35-A9C3-7530AFF7CDB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "time", "core\time\time.csproj", "{E7DFFC46-ABE6-4C35-A9C3-7530AFF7CDB5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{8862BC7D-C577-4972-8995-B217B51EC948}"
 	ProjectSection(SolutionItems) = preProject
@@ -70,17 +70,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaFunctions", "Tests\Be
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PointerToPointer", "Tests\Behavioral\PointerToPointer\PointerToPointer.csproj", "{C012354D-9B10-4ECA-8E2D-BEA5A0643ECD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sort", "gocore\sort\sort.csproj", "{CAD9D6C9-3393-48CC-A4F8-4C0DF1F53D93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "sort", "core\sort\sort.csproj", "{CAD9D6C9-3393-48CC-A4F8-4C0DF1F53D93}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GenericTests", "Tests\GenericTests\GenericTests.csproj", "{FAADAA70-3DE3-411F-A679-39D1757B84D9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "go2cs-gen", "go2cs-gen\go2cs-gen.csproj", "{BF939235-2F28-4B8E-A34C-CBE30DA45415}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IfStatements", "Tests\Behavioral\IfStatements\IfStatements.csproj", "{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FirstClassFunctions", "Tests\Behavioral\FirstClassFunctions\FirstClassFunctions.csproj", "{ACA466A0-4D34-409B-BF97-D04E3A4CA2D9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "math", "gocore\math\math.csproj", "{4F7B7DCD-C13E-417F-B930-BDEC3541604D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "math", "core\math\math.csproj", "{4F7B7DCD-C13E-417F-B930-BDEC3541604D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RangeStatements", "Tests\Behavioral\RangeStatements\RangeStatements.csproj", "{63F33680-54ED-4317-85FF-05A0E9C0D513}"
 EndProject
@@ -153,6 +151,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericTypeAssertions", "Tests\Behavioral\GenericTypeAssertions\GenericTypeAssertions.csproj", "{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericCompositeLiterals", "Tests\Behavioral\GenericCompositeLiterals\GenericCompositeLiterals.csproj", "{E58C50D2-9F12-4E9C-81F9-A246F11C8615}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "go2cs-gen", "gen\go2cs-gen.csproj", "{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -248,10 +248,6 @@ Global
 		{FAADAA70-3DE3-411F-A679-39D1757B84D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FAADAA70-3DE3-411F-A679-39D1757B84D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FAADAA70-3DE3-411F-A679-39D1757B84D9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BF939235-2F28-4B8E-A34C-CBE30DA45415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BF939235-2F28-4B8E-A34C-CBE30DA45415}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BF939235-2F28-4B8E-A34C-CBE30DA45415}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BF939235-2F28-4B8E-A34C-CBE30DA45415}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -404,6 +400,10 @@ Global
 		{E58C50D2-9F12-4E9C-81F9-A246F11C8615}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E58C50D2-9F12-4E9C-81F9-A246F11C8615}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E58C50D2-9F12-4E9C-81F9-A246F11C8615}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -434,7 +434,6 @@ Global
 		{C012354D-9B10-4ECA-8E2D-BEA5A0643ECD} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{CAD9D6C9-3393-48CC-A4F8-4C0DF1F53D93} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 		{FAADAA70-3DE3-411F-A679-39D1757B84D9} = {6F09E8D8-D54E-46B1-875C-987A40094FF5}
-		{BF939235-2F28-4B8E-A34C-CBE30DA45415} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 		{A78DC0F0-49F9-4E0B-A29E-77241B95A5E5} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{ACA466A0-4D34-409B-BF97-D04E3A4CA2D9} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{4F7B7DCD-C13E-417F-B930-BDEC3541604D} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
@@ -474,6 +473,7 @@ Global
 		{FF33EB25-4520-4664-9F3F-8BB1606EFAEC} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{E58C50D2-9F12-4E9C-81F9-A246F11C8615} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{2D94FB0E-53A4-5AC7-31AA-D57DB04285D5} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}
