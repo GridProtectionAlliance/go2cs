@@ -1773,6 +1773,7 @@ func convertToCSTypeName(typeName string) string {
 func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 	typeName = strings.TrimPrefix(typeName, "untyped ")
+	typeName = convertImportPathToNamespace(typeName)
 
 	// Find all types inside '[T1, T2]' type expressions and recurse into them for conversion
 	if strings.Contains(typeName, "[") {
@@ -1904,6 +1905,18 @@ func convertToCSFullTypeName(typeName string) string {
 	default:
 		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
 	}
+}
+
+func convertImportPathToNamespace(importPath string) string {
+	// Split import path by "/"
+	importPathParts := strings.Split(importPath, "/")
+
+	// Update all import path parts to sanitized identifiers
+	for i, part := range importPathParts {
+		importPathParts[i] = getSanitizedIdentifier(part)
+	}
+
+	return strings.Join(importPathParts, ".")
 }
 
 func splitMapKeyValue(typeStr string) (string, string) {

@@ -16,7 +16,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	v.importQueue.Add(v.currentImportPath)
 
-	importPath := strings.ReplaceAll(v.currentImportPath, "/", ".")
+	importPath := convertImportPathToNamespace(v.currentImportPath)
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())
 
