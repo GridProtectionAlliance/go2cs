@@ -230,6 +230,9 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.StructType:
 		context := getExprContext[IdentContext](contexts)
 		return v.convStructType(exprType, context)
+	case *ast.InterfaceType:
+		context := getExprContext[IdentContext](contexts)
+		return v.convInterfaceType(exprType, context)
 	case *ast.UnaryExpr:
 		context := getExprContext[UnaryExprContext](contexts)
 		return v.convUnaryExpr(exprType, context)
