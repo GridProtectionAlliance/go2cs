@@ -85,7 +85,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
+	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
+	functionAccessMarker := fmt.Sprintf(FunctionAccessMarker, goFunctionName)
+	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
+	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
+	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
+	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
+
 	v.targetFile.WriteString(v.newline)
+	v.targetFile.WriteString(functionPrefixMarker)
 	v.writeDoc(funcDecl.Doc, funcDecl.Pos())
 
 	functionAccess := getAccess(goFunctionName)
@@ -113,18 +121,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		}
 	}
 
-	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
-	functionAccessMarker := fmt.Sprintf(FunctionAccessMarker, goFunctionName)
-	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
-	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
-	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
-	functionBlockPrefixMarker := fmt.Sprintf(FunctionBlockPrefixMarker, goFunctionName)
-
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = functionBlockPrefixMarker
 	typeParams, constraints := v.getGenericDefinition(v.currentFuncType.Type())
 
-	v.writeOutput("%s%s%s static %s %s%s(%s)%s%s", functionPrefixMarker, functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
+	v.writeOutput("%s%s static %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
