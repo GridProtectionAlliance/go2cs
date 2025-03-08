@@ -1773,7 +1773,10 @@ func convertToCSTypeName(typeName string) string {
 func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "~")
 	typeName = strings.TrimPrefix(typeName, "untyped ")
-	typeName = convertImportPathToNamespace(typeName)
+
+	if strings.Contains(typeName, "/") {
+		typeName = convertImportPathToNamespace(typeName)
+	}
 
 	// Find all types inside '[T1, T2]' type expressions and recurse into them for conversion
 	if strings.Contains(typeName, "[") {
