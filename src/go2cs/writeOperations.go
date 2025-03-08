@@ -61,7 +61,7 @@ func (v *Visitor) writeStandAloneCommentString(builder *strings.Builder, targetP
 
 			comment = strings.ReplaceAll(comment, "\n", v.newline)
 
-			if !strings.HasSuffix(comment, v.newline) {
+			if !strings.Contains(prefix, "\n") && !strings.HasSuffix(comment, v.newline) {
 				comment += v.newline
 			}
 
