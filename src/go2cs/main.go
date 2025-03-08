@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/importer"
 	"go/parser"
 	"go/printer"
@@ -14,8 +15,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"sync"
@@ -25,6 +28,11 @@ import (
 )
 
 type Options struct {
+	goRoot              string
+	goPath              string
+	go2csPath           string
+	convertStdLib       bool
+	targetPlatform      string
 	indentSpaces        int
 	preferVarDecl       bool
 	useChannelOperators bool
@@ -198,19 +206,67 @@ var initFuncCounter int
 var packageLock = sync.Mutex{}
 
 func main() {
+	var goRoot, goPath, go2csPath string
+	var err error
+
+	// Resolve GOROOT and GOPATH variables, any defined environment
+	// variables will take precedence over defaults and command line
+	// flags will override all
+	if goRoot = os.Getenv("GOROOT"); len(goRoot) == 0 {
+		if goRoot, err = getGoEnv("GOROOT"); err != nil {
+			goRoot = runtime.GOROOT()
+		}
+
+		if len(goRoot) == 0 {
+			log.Fatalln("Failed to resolve GOROOT path")
+		}
+
+		os.Setenv("GOROOT", goRoot)
+	}
+
+	if goPath = os.Getenv("GOPATH"); len(goPath) == 0 {
+		if goPath, err = getGoEnv("GOPATH"); err != nil {
+			goPath = build.Default.GOPATH
+		}
+
+		if len(goPath) == 0 {
+			log.Fatalln("Failed to resolve GOPATH path")
+		}
+
+		os.Setenv("GOPATH", goPath)
+	}
+
+	// Resolve GO2CSPATH environment variable
+	if go2csPath = os.Getenv("GO2CSPATH"); len(go2csPath) == 0 {
+		homeDir, err := os.UserHomeDir()
+
+		if err != nil {
+			homeDir = strings.TrimSuffix(strings.TrimSuffix(goPath, "go"), string(os.PathSeparator))
+		}
+
+		go2csPath = path.Join(homeDir, "go2cs")
+
+		os.Setenv("GO2CSPATH", go2csPath)
+	}
+
+	// Define command line flags for options
 	commandLine := flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
 	commandLine.SetOutput(io.Discard)
 
-	// Define command line flags for options
-	indentSpaces := commandLine.Int("indent", 4, "Number of spaces for indentation")
-	preferVarDecl := commandLine.Bool("var", true, "Prefer \"var\" declarations")
-	useChannelOperators := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
-	includeComments := commandLine.Bool("comments", false, "Include comments in output")
-	parseCgoTargets := commandLine.Bool("cgo", false, "Parse cgo targets")
-	showParseTree := commandLine.Bool("tree", false, "Show parse tree")
-	csprojFile := commandLine.String("csproj", "", "Path to custom .csproj template file")
+	goRootCmd := commandLine.String("goroot", goRoot, "Path to Go root directory")
+	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
+	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
+	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
+	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
+	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
+	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
+	useChannelOperatorsCmd := commandLine.Bool("uco", true, fmt.Sprintf("Use channel operators: %s / %s", ChannelLeftOp, ChannelRightOp))
+	includeCommentsCmd := commandLine.Bool("comments", false, "Include comments in output")
+	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Parse cgo targets")
+	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
+	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
 
-	err := commandLine.Parse(os.Args[1:])
+	err = commandLine.Parse(os.Args[1:])
 	inputFilePath := strings.TrimSpace(commandLine.Arg(0))
 
 	if err != nil || inputFilePath == "" {
@@ -238,21 +294,26 @@ Examples:
 	}
 
 	options := Options{
-		indentSpaces:        *indentSpaces,
-		preferVarDecl:       *preferVarDecl,
-		useChannelOperators: *useChannelOperators,
-		includeComments:     *includeComments,
-		parseCgoTargets:     *parseCgoTargets,
-		showParseTree:       *showParseTree,
+		goRoot:              *goRootCmd,
+		goPath:              *goPathCmd,
+		go2csPath:           *go2csPathCmd,
+		convertStdLib:       *convertStdLibCmd,
+		targetPlatform:      *targetPlatformCmd,
+		indentSpaces:        *indentSpacesCmd,
+		preferVarDecl:       *preferVarDeclCmd,
+		useChannelOperators: *useChannelOperatorsCmd,
+		includeComments:     *includeCommentsCmd,
+		parseCgoTargets:     *parseCgoTargetsCmd,
+		showParseTree:       *showParseTreeCmd,
 	}
 
 	// Load custom .csproj template if specified
-	if *csprojFile != "" {
+	if *csprojFileCmd != "" {
 		var err error
-		csprojTemplate, err = os.ReadFile(*csprojFile)
+		csprojTemplate, err = os.ReadFile(*csprojFileCmd)
 
 		if err != nil {
-			log.Fatalf("Failed to read custom .csproj template file \"%s\": %s\n", *csprojFile, err)
+			log.Fatalf("Failed to read custom .csproj template file \"%s\": %s\n", *csprojFileCmd, err)
 		}
 	}
 
@@ -296,7 +357,14 @@ Examples:
 					return err
 				}
 
-				if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") {
+				if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go") {
+					if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
+						return fmt.Errorf("failed to evaluate build constraints for file \"%s\": %s", path, err)
+					} else if !match {
+						// Skipping file due to non-matching build constraints
+						return nil
+					}
+
 					file, err := parser.ParseFile(fset, path, nil, parseMode)
 
 					if err != nil {
@@ -317,6 +385,12 @@ Examples:
 		// If the input is a single file, parse it
 		if !strings.HasSuffix(inputFilePath, ".go") {
 			log.Fatalln("Invalid file extension for input source file: please provide a .go file as first argument")
+		}
+
+		if match, err := CheckBuildConstraints(inputFilePath, options.targetPlatform); err != nil {
+			log.Fatalf("Failed to evaluate build constraints for file \"%s\": %s", inputFilePath, err)
+		} else if !match {
+			log.Fatalf("Not parsing input source \"%s\" due to non-matching build constraints", inputFilePath)
 		}
 
 		file, err := parser.ParseFile(fset, inputFilePath, nil, parseMode)
@@ -765,9 +839,28 @@ Examples:
 	}
 }
 
+func getGoEnv(name string) (string, error) {
+	cmd := exec.Command("go", "env", name)
+	var out bytes.Buffer
+
+	cmd.Stdout = &out
+	err := cmd.Run()
+
+	if err != nil {
+		return "", fmt.Errorf("failed to get Go environment %s: %w", name, err)
+	}
+
+	return strings.TrimSpace(out.String()), nil
+}
+
 func writeProjectFiles(projectName string, projectPath string) (string, error) {
 	// Make sure project path ends with a directory separator
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
+
+	// Ensure project directory exists
+	if err := os.MkdirAll(projectPath, 0755); err != nil {
+		return "", fmt.Errorf("failed to create project directory \"%s\": %s", projectPath, err)
+	}
 
 	iconFileName := projectPath + "go2cs.ico"
 
@@ -1579,6 +1672,10 @@ func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
 }
 
 func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
+	if t == nil {
+		return ""
+	}
+
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getTypeName(pointer.Elem(), isUnderlying)
 	}
@@ -1615,6 +1712,10 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 }
 
 func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
+	if t == nil {
+		return ""
+	}
+
 	if pointer, ok := t.(*types.Pointer); ok {
 		if name, ok := v.liftedTypeMap[pointer.Elem()]; ok {
 			return "*" + name

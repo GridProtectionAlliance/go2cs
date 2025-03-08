@@ -46,7 +46,7 @@
                 //"..\\Tests\\Behavioral\\TypeConversion",
                 //"..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
-                //"..\\Tests\\Behavioral\\AnyKeyMap",
+                "..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
                 //"..\\Tests\\Behavioral\\TypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeInference",
@@ -57,7 +57,9 @@
                 //"..\\Tests\\Behavioral\\GenericCompositeType",
                 //"..\\Tests\\Behavioral\\GenericStructFields",
                 //"..\\Tests\\Behavioral\\GenericTypeAssertions",
-                "..\\Tests\\Behavioral\\GenericCompositeLiterals",
+                //"..\\Tests\\Behavioral\\GenericCompositeLiterals",
+                //"C:\\Program Files\\Go\\src\\errors",
+                //"C:\\Users\\rcarroll\\go2cs\\core\\errors"
             ]
         }
     ]
