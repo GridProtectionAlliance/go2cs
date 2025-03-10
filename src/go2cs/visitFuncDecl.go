@@ -265,7 +265,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						typeName := v.getCSTypeName(sliceType.Elem())
 
 						updatedSignature.WriteString(ElipsisOperator + typeName)
-						v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
+						v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", ElipsisOperator, typeName, typeName))
 					} else {
 						updatedSignature.WriteString("object[]")
 					}

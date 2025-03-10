@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public static double Abs(this ж<go.main_package.MyCustomError> ᏑmyErr)
+    internal static double Abs(this ж<go.main_package.MyCustomError> ᏑmyErr)
     {
         ref var myErr = ref ᏑmyErr.val;
         return myErr.Abs();

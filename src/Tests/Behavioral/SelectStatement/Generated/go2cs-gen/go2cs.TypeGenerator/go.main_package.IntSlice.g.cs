@@ -89,6 +89,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, IntSlice value) => value != nil;
 
-        public static implicit operator IntSlice(NilType nil) => default(IntSlice);
+        public static implicit operator IntSlice(NilType nil) => default(IntSlice)!;
     }
 }

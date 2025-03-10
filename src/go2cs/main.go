@@ -491,6 +491,10 @@ Examples:
 		ast.Inspect(files[i].file, func(n ast.Node) bool {
 			switch node := n.(type) {
 			case *ast.FuncDecl:
+				if node.Body == nil {
+					return true
+				}
+
 				ast.Inspect(node.Body, func(n ast.Node) bool {
 					switch n := n.(type) {
 					case *ast.AssignStmt:

@@ -89,6 +89,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, PeopleByAge value) => value != nil;
 
-        public static implicit operator PeopleByAge(NilType nil) => default(PeopleByAge);
+        public static implicit operator PeopleByAge(NilType nil) => default(PeopleByAge)!;
     }
 }

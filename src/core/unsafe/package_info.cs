@@ -50,24 +50,4 @@ namespace go;
 [GoPackage("unsafe")]
 public static unsafe partial class unsafe_package
 {
-    public static partial uintptr Sizeof<T>(T _)
-    {
-        return (uintptr)sizeof(T);
-    }
-
-    public static partial uintptr Offsetof(ArbitraryType x)
-    {
-        throw new NotImplementedException();
-    }
-
-    public static partial uintptr Alignof(ArbitraryType x)
-    {
-        throw new NotImplementedException();
-    }
-
-    public static partial T* Add<T>(T* ptr, int len)
-    {
-        ptr += len;
-        return ptr;
-    }
 }

@@ -18,7 +18,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public static (T, bool) Dequeue<T>(this ж<go.main_package.Queue<T>> Ꮡq)
+    internal static (T, bool) Dequeue<T>(this ж<go.main_package.Queue<T>> Ꮡq)
         where T : new()
     {
         ref var q = ref Ꮡq.val;

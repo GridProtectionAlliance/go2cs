@@ -89,6 +89,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, PeopleByShoeSize value) => value != nil;
 
-        public static implicit operator PeopleByShoeSize(NilType nil) => default(PeopleByShoeSize);
+        public static implicit operator PeopleByShoeSize(NilType nil) => default(PeopleByShoeSize)!;
     }
 }

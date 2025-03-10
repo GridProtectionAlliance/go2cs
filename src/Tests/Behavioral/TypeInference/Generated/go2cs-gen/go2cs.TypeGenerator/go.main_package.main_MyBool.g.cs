@@ -46,6 +46,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, main_MyBool value) => value != nil;
 
-        public static implicit operator main_MyBool(NilType nil) => default(main_MyBool);
+        public static implicit operator main_MyBool(NilType nil) => default(main_MyBool)!;
     }
 }

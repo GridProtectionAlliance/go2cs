@@ -69,6 +69,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, Counter value) => value != nil;
 
-        public static implicit operator Counter(NilType nil) => default(Counter);
+        public static implicit operator Counter(NilType nil) => default(Counter)!;
     }
 }

@@ -371,7 +371,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	}
 
 	// Collect all function-level declarations
-	ast.Inspect(funcDecl.Body, collectFunctionLevelDecls)
+	if funcDecl.Body != nil {
+		ast.Inspect(funcDecl.Body, collectFunctionLevelDecls)
+	}
 
 	// Helper functions
 	isDeclaredInCurrentScope := func(varName string) bool {
@@ -548,6 +550,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	visitNode = func(n ast.Node) {
 		switch node := n.(type) {
 		case *ast.BlockStmt:
+			if node == nil {
+				return
+			}
+
 			// Enter a new scope
 			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
 

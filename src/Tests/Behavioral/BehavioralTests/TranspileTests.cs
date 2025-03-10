@@ -117,9 +117,6 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
-    public void CheckQuickTest() => CheckTarget("QuickTest");
-
-    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

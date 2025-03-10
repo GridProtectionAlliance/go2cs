@@ -39,7 +39,7 @@ namespace go.runtime;
 /// </summary>
 public static class TypeExtensions
 {
-    private static readonly List<(MethodInfo method, Type type)> s_extensionMethods;
+    private static readonly List<(MethodInfo method, Type type)> s_extensionMethods = default!;
 
     private sealed class TypePrecedenceComparer : Comparer<Type>
     {

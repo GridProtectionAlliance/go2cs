@@ -89,6 +89,6 @@ public static partial class main_package
 
         public static bool operator !=(NilType nil, Point value) => value != nil;
 
-        public static implicit operator Point(NilType nil) => default(Point);
+        public static implicit operator Point(NilType nil) => default(Point)!;
     }
 }
