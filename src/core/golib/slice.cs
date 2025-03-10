@@ -155,6 +155,8 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public Span<T> ꓸꓸꓸ => ToSpan(); // Spread operator
 
+    internal PinnedBuffer buffer => new(m_array, Length);
+
     public nint Low => m_low;
 
     public nint High => m_low + m_length;
@@ -568,6 +570,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             baseTypeArray[i] = (T)TypeExtensions.ConvertToType((IConvertible)array[i]!);
 
         return baseTypeArray;
+    }
+
+    public static slice<T> Append(in slice<T> slice, params Span<T> elems)
+    {
+        return Append(slice, elems.ToArray());
     }
 
     public static slice<T> Append(in slice<T> slice, params T[] elems)

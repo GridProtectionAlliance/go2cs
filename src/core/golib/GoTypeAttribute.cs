@@ -40,7 +40,7 @@ namespace go;
 /// </para>
 /// </remarks>
 /// <param name="definition">Type definition string.</param>
-[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Interface)]
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Interface | AttributeTargets.Class)]
 public class GoTypeAttribute(string definition = "") : Attribute
 {
     /// <summary>

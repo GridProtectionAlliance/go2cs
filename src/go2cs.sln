@@ -150,6 +150,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericCompositeLiterals", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "go2cs-gen", "gen\go2cs-gen\go2cs-gen.csproj", "{5770C780-5488-F5CF-7BFC-E13B027A8F88}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "unsafe", "core\unsafe\unsafe.csproj", "{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -392,6 +394,10 @@ Global
 		{5770C780-5488-F5CF-7BFC-E13B027A8F88}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5770C780-5488-F5CF-7BFC-E13B027A8F88}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5770C780-5488-F5CF-7BFC-E13B027A8F88}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -460,6 +466,7 @@ Global
 		{827AB737-E5BD-4E0E-8AE8-2CC0CB7F5663} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{E58C50D2-9F12-4E9C-81F9-A246F11C8615} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{5770C780-5488-F5CF-7BFC-E13B027A8F88} = {78E6A8DC-83D6-4536-BE17-211B1B1D0D97}
+		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

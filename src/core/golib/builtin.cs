@@ -182,6 +182,16 @@ public static class builtin
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
     }
 
+    public static slice<T> append<T>(slice<T> slice, params T[] elems)
+    {
+        return go.slice<T>.Append(slice, elems)!;
+    }
+
+    public static slice<T> append<T>(slice<T> slice, params Span<T> elems)
+    {
+        return go.slice<T>.Append(slice, elems)!;
+    }
+
     /// <summary>
     /// Gets the length of the <paramref name="array"/> (same as len(array)).
     /// </summary>
@@ -917,6 +927,16 @@ public static class builtin
     public static slice<T> slice<T>(T[] source)
     {
         return source;
+    }
+
+    /// <summary>
+    /// Converts Go <param name="source"/> string to Go slice of bytes.
+    /// </summary>
+    /// <param name="source">C# source string.</param>
+    /// <returns>Slice of bytes from Go string</returns>
+    public static slice<byte> slice(@string source)
+    {
+        return source.Slice(0, len(source));
     }
 
     /// <summary>

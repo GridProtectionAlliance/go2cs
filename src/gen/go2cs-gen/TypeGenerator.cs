@@ -137,7 +137,7 @@ public class TypeGenerator : ISourceGenerator
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             Scope = scope,
                             TypeName = $"slice<{typeName}>",
                             TargetTypeName = typeName,
@@ -157,7 +157,7 @@ public class TypeGenerator : ISourceGenerator
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             Scope = scope,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             TypeName = $"map<{keyTypeName}, {valueTypeName}>",
                             TargetTypeName = keyTypeName,
                             TargetValueTypeName = valueTypeName,
@@ -176,7 +176,7 @@ public class TypeGenerator : ISourceGenerator
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             Scope = scope,
                             TypeName = $"channel<{typeName}>",
                             TargetTypeName = typeName,
@@ -195,7 +195,7 @@ public class TypeGenerator : ISourceGenerator
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             Scope = scope,
                             TypeName = $"array<{typeName}>",
                             TargetTypeName = typeName,
@@ -213,7 +213,7 @@ public class TypeGenerator : ISourceGenerator
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             Scope = $"{scope} readonly",
                             TypeName = typeName,
                             TargetTypeName = identifier,
@@ -231,7 +231,7 @@ public class TypeGenerator : ISourceGenerator
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
-                            StructName = identifier,
+                            ObjectName = identifier,
                             Scope = scope,
                             TypeName = typeName,
                             TargetTypeName = typeName,
@@ -268,6 +268,25 @@ public class TypeGenerator : ISourceGenerator
                             Scope = scope,
                             InterfaceName = identifier,
                             OperatorConstraints = operatorConstraints ?? [],
+                            UsingStatements = usingStatements
+                        }
+                        .Generate();
+
+                        break;
+
+                    case ClassDeclarationSyntax when typeDefinition.StartsWith("ж<"): // pointer
+                        typeName = typeDefinition[2..^1];
+                        
+                        generatedSource = new InheritedTypeTemplate
+                        {
+                            PackageNamespace = packageNamespace,
+                            PackageName = packageName,
+                            ObjectName = identifier,
+                            ObjectKind = "class",
+                            Scope = scope,
+                            TypeName = $"ж<{typeName}>",
+                            TargetTypeName = typeName,
+                            TypeClass = "Pointer",
                             UsingStatements = usingStatements
                         }
                         .Generate();

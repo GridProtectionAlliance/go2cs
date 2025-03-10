@@ -124,6 +124,15 @@ public readonly struct @string :
         return new slice<byte>(m_value, (int)start, (int)(start + length));
     }
 
+    public Span<byte> ToSpan()
+    {
+        return new Span<byte>(m_value);
+    }
+
+    public Span<byte> ꓸꓸꓸ => ToSpan(); // Spread operator
+
+    internal PinnedBuffer buffer => new(m_value, Length);
+
     public override string ToString()
     {
         return Encoding.UTF8.GetString(m_value);

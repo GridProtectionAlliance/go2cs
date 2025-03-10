@@ -27,7 +27,11 @@
 using System;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using go.runtime;
+
+[assembly:InternalsVisibleTo("unsafe")]
 
 namespace go;
 
@@ -98,6 +102,49 @@ public static class FieldRef<T> where T : struct
 }
 
 /// <summary>
+/// Defines an interface that represents a pointer <see cref="ж{T}"/> type.
+/// </summary>
+/// <typeparam name="T">Type for heap based reference.</typeparam>
+public interface IPointer<T>
+{
+    /// <summary>
+    /// Gets a reference to the value of type <typeparamref name="T"/>.
+    /// </summary>
+    ref T val { get; }
+
+    /// <summary>
+    /// Gets a pointer to the field of a struct.
+    /// </summary>
+    /// <typeparam name="TElem">Type of field.</typeparam>
+    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
+    /// <returns>Pointer to field of struct.</returns>
+    ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc);
+
+    /// <summary>
+    /// Gets a pointer to the field of a struct.
+    /// </summary>
+    /// <typeparam name="TElem">Type of field.</typeparam>
+    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
+    /// <returns>Pointer to field of struct.</returns>
+    ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc);
+
+    /// <summary>
+    /// Gets a pointer to element at the specified index for <see cref="array{T}"/> or <see cref="slice{T}"/> types.
+    /// </summary>
+    /// <typeparam name="TElem">Element type of array or slice.</typeparam>
+    /// <param name="index">Index of element to get pointer for.</param>
+    /// <returns>Pointer to element at specified index.</returns>
+    ж<TElem> at<TElem>(int index);
+
+    /// <summary>
+    /// Dereferences the heap allocated reference to the value of type <typeparamref name="T"/>.
+    /// </summary>
+    /// <param name="value">Pointer value to dereference.</param>
+    /// <returns>Dereferenced pointer value.</returns>
+    static abstract T operator ~(IPointer<T> value);
+}
+
+/// <summary>
 /// Represents a pointer to a heap allocated instance of type <typeparamref name="T"/>.
 /// </summary>
 /// <typeparam name="T">Type for heap based reference.</typeparam>
@@ -119,7 +166,7 @@ public static class FieldRef<T> where T : struct
 /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
 /// </para>
 /// </remarks>
-public sealed class ж<T>
+public sealed class ж<T> : IPointer<T>, IEquatable<ж<T>>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
@@ -159,9 +206,7 @@ public sealed class ж<T>
     /// </summary>
     public ж() : this(default(T)!) { }
 
-    /// <summary>
-    /// Gets a reference to the value of type <typeparamref name="T"/>.
-    /// </summary>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get reference to value, source is not a valid array or slice pointer.</exception>
     public ref T val
     {
@@ -189,39 +234,54 @@ public sealed class ж<T>
     }
 
     /// <summary>
-    /// Gets a pointer to the field of a struct.
+    /// Gets a pointer to the value of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="TElem">Type of field.</typeparam>
-    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
-    /// <returns>Pointer to field of struct.</returns>
+    internal PinnedBuffer PinnedBuffer
+    {
+        get
+        {
+            // Get reference to standard pointer value
+            if (m_structFieldRef is null && m_arrayIndexRef is null)
+                return new PinnedBuffer(val, Marshal.SizeOf<T>());
+
+            // Get reference to struct field
+            if (m_structFieldRef is not null)
+            {
+                (object source, FieldRefFunc<T> _) = m_structFieldRef!.Value;
+                return new PinnedBuffer(val, Marshal.SizeOf(source));
+            }
+
+            // Get reference to array or slice element
+            (IArray array, int _) = m_arrayIndexRef!.Value;
+
+            if (array is IArray<T> typedArray)
+                return new PinnedBuffer(val, array.Length);
+
+            throw new InvalidOperationException("Cannot get pinned buffer to value, source is not a valid struct field, array or slice reference.");
+        }
+    }
+
+    internal (IArray, int)? ArrayRef => m_arrayIndexRef;
+
+    /// <inheritdoc/>
     public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc)
     {
         return new ж<TElem>(this, fieldRefFunc);
     }
 
-    /// <summary>
-    /// Gets a pointer to the field of a struct.
-    /// </summary>
-    /// <typeparam name="TElem">Type of field.</typeparam>
-    /// <param name="fieldRefFunc">Struct field reference delegate.</param>
-    /// <returns>Pointer to field of struct.</returns>
+    /// <inheritdoc/>
     public ж<TElem> of<TElem>(FieldRefFunc<T, TElem> fieldRefFunc)
     {
         return new ж<TElem>(this, getFieldRef);
 
         ref TElem getFieldRef(object structPtr)
         {
-            ж<T> ptr = (ж<T>)structPtr;
-            return ref fieldRefFunc(ref ptr.m_val);
+            ж<T> typedPtr = (ж<T>)structPtr;
+            return ref fieldRefFunc(ref typedPtr.m_val);
         }
     }
 
-    /// <summary>
-    /// Gets a pointer to element at the specified index for <see cref="array{T}"/> or <see cref="slice{T}"/> types.
-    /// </summary>
-    /// <typeparam name="Telem">Element type of array or slice.</typeparam>
-    /// <param name="index">Index of element to get pointer for.</param>
-    /// <returns>Pointer to element at specified index.</returns>
+    /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
     /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
     public ж<Telem> at<Telem>(int index)
@@ -242,7 +302,8 @@ public sealed class ж<T>
         return this.PrintPointer();
     }
 
-    private bool Equals(ж<T>? other)
+    /// <inheritdoc/>
+    public bool Equals(ж<T>? other)
     {
         if (other is null)
             return false;
@@ -302,6 +363,11 @@ public sealed class ж<T>
     public static T operator ~(ж<T> value)
     {
         return value.m_val;
+    }
+
+    static T IPointer<T>.operator ~(IPointer<T> value)
+    {
+        return value.val;
     }
 
     // I posted a suggestion for at least the "ref" operator:
