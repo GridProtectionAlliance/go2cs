@@ -13,7 +13,7 @@ internal class ReceiverMethodTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
               [{{GeneratedCodeAttribute}}]
-              {{Scope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
+              {{TargetScope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
               {
                   ref var {{ReceiverParamName}} = ref Ꮡ{{ReceiverParamName}}.val;
                   {{ReturnStatement}}{{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
@@ -52,4 +52,13 @@ internal class ReceiverMethodTemplate : TemplateBase
 
     private string CallParams => 
         string.Join(", ", Method.Parameters.Skip(1).Select(item => item.name));
+
+    private string TargetScope
+    {
+        get
+        {
+            string receiverScope = char.IsUpper(GetSimpleName(Method.Parameters[0].name)[0]) ? "public" : "internal";
+            return Scope == receiverScope ? Scope : "internal";
+        }
+    }
 }
