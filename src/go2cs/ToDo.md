@@ -29,20 +29,20 @@
 16) ~~Handle intra-function type declaration lifting (see TypeInference)~~
 17) ~~Handle generics conversion~~
 18) ~~Always include pre-package comments during conversion~~
-19) Reduce `return ~Ꮡ(new errorString(text));` expressions to `return (new errorString(text));`
+19) Reduce `return ~Ꮡ(new errorString(text));` expressions to `return new errorString(text);`
 20) ~~Check using imports in generated related to spread operators - needs fully qualify namespaces - see if Roslyn can expand these in source generation~~
 21) For manually converted code, e.g., `unsafe` package, need to let transpiler which files to ignore during conversion - may be a standard list from standard library
 22) Handle certain `unsafe` function conversions manually, e.g., `Offsetof` and `Alignof` which need some special parameter handling, e.g.: `unsafe.Offsetof(x)` to `@unsafe.Offsetof(x.GetType())`
 22) ~~For package names, e.g., `unsafe_package` - currently prefix is being unnecessarily sanitized, e.g., `@unsafe_package` - need to check name as a whole~~
-23) Left side of an assign with a pointer de-ref, e.g., `(~e)` needs to be `e.val` instead
+23) ~~Left side of an assign with a pointer de-ref, e.g., `(~e)` needs to be `e.val` instead~~
 24) Update auto-interface implementation to ignore various invalid implement targets
 
 xx) Setup reference code packages / path options for Go modules
     1) Assume code builds in Go / toolchain executed, i.e., local source exists
-    2) Define target location for converted code, e.g., `$GOPATH/pkg/mod/go2cs`
+    2) Define target location for converted code, e.g., `$GOPATH/../go2cs/pkg/mod`
     3) Match original sub-path path for source starting from new root, e.g.:
        a) If original path is: `$GOPATH/pkg/mod/github.com/cosiner\argv@v0.1.0`
-       b) Converted path is: `$GOPATH/pkg/mod/go2cs/github.com/cosiner\argv@v0.1.0`
+       b) Converted path is: `$GOPATH/../go2cs/pkg/mod/github.com/cosiner\argv@v0.1.0`
 xx) ~~Add support for comment based directives~~
 xx) Add support for "cgo" targets
 xx) Complete code comment conversions, this may be predicated on the following:

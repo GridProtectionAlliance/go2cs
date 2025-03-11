@@ -69,7 +69,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								field := structType.Field(i)
 								if field.Name() == selectorExpr.Sel.Name {
 									// If the field belongs to the struct, automatically dereference the pointer
-									return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+									if context.isAssignment {
+										// Left-hand side of assignment cannot use pointer dereference operator
+										return fmt.Sprintf("(%s.val).%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+									} else {
+										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+									}
 								}
 							}
 						}

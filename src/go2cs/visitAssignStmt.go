@@ -333,7 +333,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			if ident == nil {
-				result.WriteString(v.convExpr(lhs, nil))
+				result.WriteString(v.convExpr(lhs, contexts))
 				result.WriteString(operator)
 
 				rhsExpr := v.convExpr(rhs, contexts)
@@ -347,7 +347,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteRune(';')
 			} else {
 				if v.isReassignment(ident) {
-					result.WriteString(v.convExpr(lhs, nil))
+					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, contexts)
@@ -362,7 +362,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				} else if lhsTypeIsString[i] {
 					// Handle string variables
 					result.WriteString("@string ")
-					result.WriteString(v.convExpr(lhs, nil))
+					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 					result.WriteString(v.convExpr(rhs, contexts))
 					result.WriteRune(';')
@@ -388,7 +388,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						}
 					}
 
-					result.WriteString(v.convExpr(lhs, nil))
+					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
 					rhsExpr := v.convExpr(rhs, contexts)

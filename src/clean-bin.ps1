@@ -1,5 +1,5 @@
-# Clean-BinObj.ps1
-# Script to remove all bin and obj folders from the current directory and subdirectories
+# Clean-Bin.ps1
+# Script to remove all bin, obj and Generated folders from the current directory and subdirectories
 
 # Set the current location as the root directory for the search
 $rootDirectory = Get-Location

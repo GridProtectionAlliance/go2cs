@@ -249,19 +249,11 @@ public readonly struct @string :
         return value.ToString();
     }
 
-#if EXPERIMENTAL
-
-    public static explicit operator @string(ReadOnlySpan<byte> value) => new(value);
-
-#else
-    
     public static implicit operator @string(ReadOnlySpan<byte> value)
     {
         return new @string(value);
     }
 
-#endif
-    
     public static implicit operator @string(slice<byte> value)
     {
         return new @string(value);
