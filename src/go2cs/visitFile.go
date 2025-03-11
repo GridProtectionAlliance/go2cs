@@ -64,8 +64,10 @@ func (v *Visitor) visitFile(file *ast.File) {
 	v.writeOutputLn("namespace %s;", RootNamespace)
 	v.targetFile.WriteString(v.newline)
 
+	packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+
 	v.writeOutput(UsingsMarker)
-	v.writeOutputLn("%spartial class %s%s {", UnsafeMarker, packageName, PackageSuffix)
+	v.writeOutputLn("%spartial class %s {", UnsafeMarker, packageClassName)
 
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
@@ -90,7 +92,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 	}
 
-	v.writeOutputLn("} // end %s%s", packageName, PackageSuffix)
+	v.writeOutputLn("} // end %s", packageClassName)
 
 	targetFile := v.targetFile.String()
 

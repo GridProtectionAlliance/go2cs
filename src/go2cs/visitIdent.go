@@ -49,7 +49,7 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		v.writeString(target, "[GoType(\"%s\")]", csTypeName)
 	}
 
-	v.writeString(target, " partial struct %s {}", getSanitizedIdentifier(name))
+	v.writeString(target, " partial struct %s;", getSanitizedIdentifier(name))
 	target.WriteString(v.newline)
 
 	if lifted && v.inFunction {

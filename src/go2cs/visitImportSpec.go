@@ -16,7 +16,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	v.importQueue.Add(v.currentImportPath)
 
-	importPath := convertImportPathToNamespace(v.currentImportPath)
+	importPath := convertImportPathToNamespace(v.currentImportPath, PackageSuffix)
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())
 
@@ -24,9 +24,9 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 		alias := importSpec.Name.Name
 
 		if alias == "." {
-			v.packageImports.WriteString(fmt.Sprintf("using static %s%s;", importPath, PackageSuffix))
+			v.packageImports.WriteString(fmt.Sprintf("using static %s;", importPath))
 		} else {
-			v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", alias, importPath, PackageSuffix))
+			v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(alias), importPath))
 		}
 	} else {
 		// Get package name from the import path, last name after last "."
@@ -37,7 +37,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 			importName = importPath[lastDotIndex+1:]
 		}
 
-		v.packageImports.WriteString(fmt.Sprintf("using %s = %s%s;", importName, importPath, PackageSuffix))
+		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(strings.TrimSuffix(importName, PackageSuffix)), importPath))
 	}
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())

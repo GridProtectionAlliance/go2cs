@@ -415,7 +415,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				typeName := v.getCSTypeName(sliceType.Elem())
 
 				result.WriteString(ElipsisOperator + typeName)
-				v.addRequiredUsing(fmt.Sprintf("%s%s = System.Span<%s>", ElipsisOperator, typeName, typeName))
+				v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", ElipsisOperator, typeName, typeName))
 			} else {
 				result.WriteString("object[]")
 			}

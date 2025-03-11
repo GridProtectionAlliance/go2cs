@@ -637,7 +637,8 @@ Examples:
 		packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
 	} else {
 		// Generate new package info file from template
-		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageName, packageName, packageName)
+		packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageClassName, packageName, packageClassName)
 		packageInfoLines = strings.Split(templateFile, "\r\n")
 	}
 
@@ -1111,6 +1112,18 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 	return v.info.Types[expr].IsValue() && !isCallExpr
 }
 
+func getSanitizedImport(identifier string) string {
+	if strings.HasPrefix(identifier, "@") {
+		return identifier // Already sanitized
+	}
+
+	if keywords.Contains(identifier) {
+		return "@" + identifier
+	}
+
+	return identifier
+}
+
 func getSanitizedIdentifier(identifier string) string {
 	if strings.HasPrefix(identifier, "@") || strings.HasPrefix(identifier, ShadowVarMarker) {
 		return identifier // Already sanitized
@@ -1277,6 +1290,10 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// to properly handle duck typed Go interface implementations
 	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
 	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
+
+	if targetTypeName == "" || targetTypeName == "nil" || targetTypeName == "any" {
+		return exprResult
+	}
 
 	var prefix string
 
@@ -1736,7 +1753,7 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg.Name() != packageName {
-			return pkg.Name() + PackageSuffix + "." + obj.Name()
+			return getSanitizedImport(pkg.Name()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
 		}
 	}
 
@@ -1779,7 +1796,7 @@ func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "untyped ")
 
 	if strings.Contains(typeName, "/") {
-		typeName = convertImportPathToNamespace(typeName)
+		typeName = convertImportPathToNamespace(typeName, "")
 	}
 
 	// Find all types inside '[T1, T2]' type expressions and recurse into them for conversion
@@ -1914,13 +1931,17 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 }
 
-func convertImportPathToNamespace(importPath string) string {
+func convertImportPathToNamespace(importPath string, packageSuffix string) string {
 	// Split import path by "/"
 	importPathParts := strings.Split(importPath, "/")
 
 	// Update all import path parts to sanitized identifiers
 	for i, part := range importPathParts {
-		importPathParts[i] = getSanitizedIdentifier(part)
+		if i == len(importPathParts)-1 {
+			part = part + packageSuffix
+		}
+
+		importPathParts[i] = getSanitizedImport(part)
 	}
 
 	return strings.Join(importPathParts, ".")

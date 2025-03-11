@@ -24,7 +24,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 			v.writeOutput("[GoType(\"[%s]%s\")]", arrayLen, csTypeName)
 		}
 
-		v.writeOutput(" partial struct %s {}", getSanitizedIdentifier(name))
+		v.writeOutput(" partial struct %s;", getSanitizedIdentifier(name))
 		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	} else {
