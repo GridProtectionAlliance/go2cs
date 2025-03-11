@@ -23,7 +23,7 @@ internal static nint center;
     println("init fn 1");
     nint n = 0;
     foreach (var (pos, field) in board) {
-        if (field == '○') {
+        if (field == (rune)'○') {
             center = pos;
             n++;
         }
@@ -40,26 +40,26 @@ internal static nint center;
 internal static nint moves;
 internal static bool move(nint pos, nint dir) {
     moves++;
-    if (board[pos] == '●' && board[pos + dir] == '●' && board[pos + 2 * dir] == '○') {
-        board[pos] = '○';
-        board[pos + dir] = '○';
-        board[pos + 2 * dir] = '●';
+    if (board[pos] == (rune)'●' && board[pos + dir] == (rune)'●' && board[pos + 2 * dir] == (rune)'○') {
+        board[pos] = (rune)'○';
+        board[pos + dir] = (rune)'○';
+        board[pos + 2 * dir] = (rune)'●';
         return true;
     }
     return false;
 }
 
 internal static void unmove(nint pos, nint dir) {
-    board[pos] = '●';
-    board[pos + dir] = '●';
-    board[pos + 2 * dir] = '○';
+    board[pos] = (rune)'●';
+    board[pos + dir] = (rune)'●';
+    board[pos + 2 * dir] = (rune)'○';
 }
 
 internal static bool solve() {
     nint last = default!;
     nint n = default!;
     foreach (var (pos, field) in board) {
-        if (field == '●') {
+        if (field == (rune)'●') {
             foreach (var (_, dir) in new nint[]{-1, -N, +1, +N}.array()) {
                 if (move(pos, dir)) {
                     if (solve()) {

@@ -246,7 +246,7 @@ public static class builtin
     /// slice = append(slice, anotherSlice...)
     /// </code>
     /// </remarks>
-    public static slice<byte> append(slice<byte> slice, params Span<rune> elems)
+    public static slice<byte> append(slice<byte> slice, params ReadOnlySpan<rune> elems)
     {
         return go.slice<byte>.Append(slice, elems.ToUTF8Bytes());
     }
@@ -257,7 +257,7 @@ public static class builtin
     /// <param name="runes">Runes to convert to bytes.</param>
     /// <returns>byte array representing UTF-8 encoding of runes.</returns>
     /// <exception cref="InvalidOperationException">Buffer too small for UTF-8 encoding.</exception>
-    public static byte[] ToUTF8Bytes(this Span<rune> runes)
+    public static byte[] ToUTF8Bytes(this in ReadOnlySpan<rune> runes)
     {
         // Estimate buffer size (4 bytes per rune as worst case)
         int estimatedBytes = runes.Length * 4;
@@ -268,7 +268,7 @@ public static class builtin
 
         int bytesWritten = 0;
 
-        foreach (rune codePoint in runes)
+        foreach (Rune codePoint in runes)
         {
             // Encoding not expected to fail given 4x buffer
             if (!codePoint.TryEncodeToUtf8(buffer[bytesWritten..], out int runeBytes))
@@ -1028,17 +1028,6 @@ public static class builtin
     }
 
     /// <summary>
-    /// Converts C# <paramref name="source"/> string to Go slice of bytes.
-    /// </summary>
-    /// <typeparam name="_">Unused type allows for 'slice&lt;byte&gt;(@string)' expressions.</typeparam>
-    /// <param name="source">C# source string.</param>
-    /// <returns>Slice of bytes from Go string</returns>
-    public static slice<byte> slice<_>(@string source)
-    {
-        return slice(source);
-    }
-
-    /// <summary>
     /// Converts C# <paramref name="source"/> string array to Go <see cref="go.slice{@string}"/>.
     /// </summary>
     /// <param name="source">C# source array.</param>
@@ -1085,7 +1074,7 @@ public static class builtin
     /// <returns><paramref name="value"/> converted to a rune.</returns>
     public static rune rune(int32 value)
     {
-        return new rune(value);
+        return value;
     }
 
     /// <summary>
@@ -1485,39 +1474,9 @@ public static class builtin
     /// </summary>
     /// <param name="value">Value to convert.</param>
     /// <returns><paramref name="value"/> converted to a <see cref="@string"/>.</returns>
-    public static @string @string(sstring value)
+    public static @string @string(Span<rune> value)
     {
-        return value;
-    }
-
-    /// <summary>
-    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
-    /// </summary>
-    /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    public static sstring sstring(string value)
-    {
-        return value;
-    }
-
-    /// <summary>
-    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
-    /// </summary>
-    /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    public static sstring sstring(ReadOnlySpan<byte> value)
-    {
-        return new sstring(value);
-    }
-
-    /// <summary>
-    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
-    /// </summary>
-    /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    public static sstring sstring(@string value)
-    {
-        return value;
+        return new @string(value);
     }
 
     /// <summary>
@@ -1596,15 +1555,6 @@ public static class builtin
 
         // Handle custom value types
         return value.ToString()!;
-    }
-    /// <summary>
-    /// Converts <paramref name="value"/> to a <see cref="go.sstring"/>.
-    /// </summary>
-    /// <param name="value">Value to convert.</param>
-    /// <returns><paramref name="value"/> converted to a <see cref="go.sstring"/>.</returns>
-    public static sstring sstring(object? value)
-    {
-        return @string(value);
     }
 
     /// <summary>

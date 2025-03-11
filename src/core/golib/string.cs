@@ -66,14 +66,14 @@ public readonly struct @string :
         m_value = bytes ?? [];
     }
 
-    public @string(ReadOnlySpan<byte> bytes)
+    public @string(in ReadOnlySpan<byte> bytes)
     {
         m_value = bytes.ToArray();
     }
 
     public @string(char[] value) : this(new string(value)) { }
 
-    public @string(Span<rune> value) : this(value.ToUTF8Bytes()) { }
+    public @string(in ReadOnlySpan<rune> value) : this(value.ToUTF8Bytes()) { }
 
     public @string(in slice<byte> value) : this(value.ToArray()) { }
 
@@ -212,18 +212,18 @@ public readonly struct @string :
 
         while (!bytes.IsEmpty)
         {
-            OperationStatus status = Rune.DecodeFromUtf8(bytes, out rune rune, out int bytesConsumed);
+            OperationStatus status = Rune.DecodeFromUtf8(bytes, out Rune rune, out int bytesConsumed);
 
             switch (status)
             {
                 case OperationStatus.Done:
-                    runes[runeIndex++] = rune;
+                    runes[runeIndex++] = rune.Value;
                     break;
                 case OperationStatus.InvalidData:
                 case OperationStatus.NeedMoreData:
                 case OperationStatus.DestinationTooSmall:
                     // Follow Go behavior: Replace invalid sequences with Unicode replacement character
-                    runes[runeIndex++] = new rune(0xFFFD);
+                    runes[runeIndex++] = 0xFFFD;
                     bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
                     break;
             }
@@ -292,7 +292,7 @@ public readonly struct @string :
         return new slice<char>(((IEnumerable<char>)value).ToArray());
     }
 
-    public static explicit operator byte[](@string value)
+    public static implicit operator byte[](@string value)
     {
         return value.m_value;
     }
@@ -309,15 +309,15 @@ public readonly struct @string :
 
     public static implicit operator @string(rune[] value)
     {
-        return new @string(new Span<rune>(value));
+        return new @string(new ReadOnlySpan<rune>(value));
     }
 
-    public static implicit operator Span<rune>(@string value)
+    public static implicit operator ReadOnlySpan<rune>(@string value)
     {
         return value.ToRunes();
     }
 
-    public static implicit operator @string(Span<rune> value)
+    public static implicit operator @string(ReadOnlySpan<rune> value)
     {
         return new @string(value);
     }

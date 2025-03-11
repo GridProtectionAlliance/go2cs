@@ -9,10 +9,10 @@ $totalFoldersFound = 0
 $totalFoldersRemoved = 0
 $totalErrors = 0
 
-Write-Host "Searching for bin and obj folders in: $rootDirectory" -ForegroundColor Cyan
+Write-Host "Searching for bin, obj and Generated folders in: $rootDirectory" -ForegroundColor Cyan
 
 # Get all bin and obj directories
-$foldersToDelete = Get-ChildItem -Path $rootDirectory -Include "bin", "obj" -Directory -Recurse -ErrorAction SilentlyContinue
+$foldersToDelete = Get-ChildItem -Path $rootDirectory -Include "bin", "obj", "Generated" -Directory -Recurse -ErrorAction SilentlyContinue
 
 $totalFoldersFound = $foldersToDelete.Count
 

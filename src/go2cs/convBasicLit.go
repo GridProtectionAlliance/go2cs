@@ -106,26 +106,19 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			}
 		}
 	case token.CHAR:
-		// Parse the rune value
-		r, _, _, err := strconv.UnquoteChar(value[1:len(value)-1], '\'')
+		value = replaceOctalChars(value)
+		intVal, err := strconv.Atoi(value)
 
 		if err == nil {
-			if r <= 0xFFFF {
+			if intVal <= 0xFFFF {
 				// Character can be represented as a char in C# Rune
-				result.WriteString(fmt.Sprintf("new rune(%s)", strings.ReplaceAll(fmt.Sprintf("%q", string(r)), "\"", "'")))
+				result.WriteString(fmt.Sprintf("(rune)'%c'", intVal))
 			} else {
 				// For characters beyond BMP, we can use the direct code point
-				result.WriteString(fmt.Sprintf("new rune(0x%X)", r))
+				result.WriteString(fmt.Sprintf("0x%X", intVal))
 			}
 		} else {
-			// Fallback for parsing errors
-			intVal, err := strconv.Atoi(value)
-
-			if err == nil {
-				result.WriteString(fmt.Sprintf("new rune(0x%X)", intVal))
-			} else {
-				result.WriteString(fmt.Sprintf("new rune(%s)", replaceOctalChars(value)))
-			}
+			result.WriteString(fmt.Sprintf("(rune)%s", value))
 		}
 	case token.STRING:
 		strVal, isRawStr := v.getStringLiteral(value)

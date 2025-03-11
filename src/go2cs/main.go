@@ -1109,7 +1109,14 @@ func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
 func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 	_, isCallExpr := expr.(*ast.CallExpr)
 
-	return v.info.Types[expr].IsValue() && !isCallExpr
+	// Get the type and value information
+	tv, ok := v.info.Types[expr]
+
+	if !ok {
+		return false
+	}
+
+	return tv.IsValue() && !isCallExpr
 }
 
 func getSanitizedImport(identifier string) string {

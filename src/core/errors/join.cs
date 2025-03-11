@@ -52,7 +52,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     }
     var b = slice<byte>(e.errs[0].Error());
     foreach (var (_, err) in e.errs[1..]) {
-        b = append(b, new rune('\n'));
+        b = append(b, (rune)'\n');
         b = append(b, err.Error().ꓸꓸꓸ);
     }
     // At this point, b has at least one byte '\n'.

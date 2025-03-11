@@ -69,9 +69,9 @@ internal static nint dynamicFn1() {
     public float32 ShoeSize;
 }
 
-[GoType("[]Person")] partial struct PeopleByShoeSize {}
+[GoType("[]Person")] partial struct PeopleByShoeSize;
 
-[GoType("[]Person")] partial struct PeopleByAge {}
+[GoType("[]Person")] partial struct PeopleByAge;
 
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);

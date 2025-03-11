@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
-using ꓸꓸꓸobject = System.Span<object>;
+using ꓸꓸꓸobject = Span<object>;
 
 partial class main_package {
 
@@ -113,9 +113,9 @@ internal static void Main() {
     }
 
     fmt.Println(hour);
-    var c = '\r';
+    var c = (rune)'\r';
     switch (c) {
-    case ' ' or '\t' or '\n' or '\f' or '\r':
+    case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r':
         fmt.Println("whitespace");
         break;
     }

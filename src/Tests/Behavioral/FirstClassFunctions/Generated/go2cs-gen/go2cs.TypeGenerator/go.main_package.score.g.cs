@@ -10,7 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using ꓸꓸꓸnint = System.Span<nint>;
+using ꓸꓸꓸnint = global::System.Span<nint>;
 
 #nullable enable
 

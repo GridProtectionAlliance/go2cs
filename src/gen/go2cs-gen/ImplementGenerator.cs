@@ -60,21 +60,19 @@ public class ImplementGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AssemblyAttributeFinder { HasAttributes: true } attributeFinder)
             return;
 
-        foreach ((AttributeSyntax attribute, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
+        foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
+            SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
+
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
             string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
-
-            string[] usingStatements = compilationUnit.SyntaxTree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<UsingDirectiveSyntax>()
-                .Select(directive => directive.GetText().ToString().Trim())
-                .ToArray();
+            
+            string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             // Extract generic type arguments from "GoImplementAttribute"
-            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attribute.Get2GenericTypeArguments(syntaxContext);
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
             
             if (structType is null || interfaceType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
@@ -89,7 +87,7 @@ public class ImplementGenerator : ISourceGenerator
             string interfaceName = interfaceType.GetFullTypeName(true);
 
             // Get the attribute's Promoted argument value, if defined
-            (string name, string value)[] arguments = attribute.GetArgumentValues();
+            (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
             bool promoted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false");
 
             // Get all extension methods for the struct, any directly defined receivers

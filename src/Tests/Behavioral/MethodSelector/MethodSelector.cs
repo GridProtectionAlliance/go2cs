@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("num:nint")] partial struct Counter {}
+[GoType("num:nint")] partial struct Counter;
 
 public static @string String(this Counter c) {
     return fmt.Sprint(((nint)c));

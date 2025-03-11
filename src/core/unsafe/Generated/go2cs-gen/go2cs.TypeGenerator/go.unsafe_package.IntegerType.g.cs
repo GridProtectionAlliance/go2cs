@@ -10,9 +10,10 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using go.runtime;
+using global::System.Diagnostics.CodeAnalysis;
+using global::System.Reflection;
+using global::System.Runtime.InteropServices;
+using global::go.runtime;
 
 #nullable enable
 

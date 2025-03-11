@@ -64,7 +64,8 @@ public class TypeGenerator : ISourceGenerator
             
         foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
-            SemanticModel semanticModel = context.Compilation.GetSemanticModel(targetSyntax.SyntaxTree);
+            SyntaxTree syntaxTree = targetSyntax.SyntaxTree;
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
 
             string packageNamespace = targetSyntax.GetNamespaceName();
             string packageClassName = targetSyntax.GetParentClassName();
@@ -86,7 +87,7 @@ public class TypeGenerator : ISourceGenerator
             // "internal" scope is used so types can be referenced instead of "private"
             string scope = char.IsUpper(identifier[0]) ? "public" : "internal";
 
-            string[] usingStatements = GetFullyQualifiedUsingStatements(targetSyntax, semanticModel);
+            string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             foreach (AttributeSyntax attribute in attributes)
             {

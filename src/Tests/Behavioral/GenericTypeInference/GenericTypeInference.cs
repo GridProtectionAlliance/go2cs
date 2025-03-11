@@ -22,7 +22,7 @@ partial interface Integer<T> {
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("[]int32")] partial struct Point {}
+[GoType("[]int32")] partial struct Point;
 
 public static @string String(this Point p) {
     return fmt.Sprintf("%d"u8, p);

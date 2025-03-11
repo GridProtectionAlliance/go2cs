@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("[]nint")] partial struct IntSlice {}
+[GoType("[]nint")] partial struct IntSlice;
 
 internal static void g1(channel<nint> ch) {
     ch.ᐸꟷ(12);

@@ -136,9 +136,9 @@ public static class Common
         }
     }
 
-    public static string[] GetFullyQualifiedUsingStatements(BaseTypeDeclarationSyntax targetSyntax, SemanticModel semanticModel)
+    public static string[] GetFullyQualifiedUsingStatements(SyntaxTree syntaxTree, SemanticModel semanticModel)
     {
-        return targetSyntax.SyntaxTree
+        return syntaxTree
             .GetRoot()
             .DescendantNodes()
             .OfType<UsingDirectiveSyntax>()

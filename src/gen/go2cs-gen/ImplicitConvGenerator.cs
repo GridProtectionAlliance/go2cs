@@ -60,21 +60,19 @@ public class ImplicitConvGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AssemblyAttributeFinder { HasAttributes: true } attributeFinder)
             return;
 
-        foreach ((AttributeSyntax attribute, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
+        foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
+            SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
+
             string packageNamespace = GetNamespace(namespaceSyntax) ?? Namespace;
             string packageClassName = GetFirstClassName(compilationUnit) ?? throw new MissingMemberException($"No package class found in same file as [assembly: {AttributeName}]");
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
 
-            string[] usingStatements = compilationUnit.SyntaxTree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<UsingDirectiveSyntax>()
-                .Select(directive => directive.GetText().ToString().Trim())
-                .ToArray();
+            string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             // Extract generic type arguments from "GoImplicitConv"
-            (ITypeSymbol? sourceType, ITypeSymbol? targetType) = attribute.Get2GenericTypeArguments(syntaxContext);
+            (ITypeSymbol? sourceType, ITypeSymbol? targetType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
             
             if (sourceType is null || targetType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
@@ -86,7 +84,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             string targetTypeName = targetType.GetFullTypeName();
 
             // Get the attribute's argument values, if defined
-            (string name, string value)[] arguments = attribute.GetArgumentValues();
+            (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
             bool inverted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Inverted")).value?.Trim() ?? "false");
             bool indirect = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Indirect")).value?.Trim() ?? "false");
 

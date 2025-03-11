@@ -33,9 +33,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using go.runtime;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace go;
+namespace go.experimental;
 
 // This is an experiment with a stack allocated string type which should improve performance
 // of string operations by avoiding heap allocations. This works fine in stack oriented code
@@ -518,7 +517,7 @@ public readonly ref struct sstring
 
             while (b1 < e1)
             {
-                if (*(b1) != *(b2) || *(b1 + 1) != *(b2 + 1) ||
+                if (*b1 != *b2 || *(b1 + 1) != *(b2 + 1) ||
                     *(b1 + 2) != *(b2 + 2) || *(b1 + 3) != *(b2 + 3) ||
                     *(b1 + 4) != *(b2 + 4) || *(b1 + 5) != *(b2 + 5) ||
                     *(b1 + 6) != *(b2 + 6) || *(b1 + 7) != *(b2 + 7) ||

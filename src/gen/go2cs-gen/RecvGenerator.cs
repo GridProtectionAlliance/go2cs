@@ -60,18 +60,16 @@ public class RecvGenerator : ISourceGenerator
 
         foreach ((MethodDeclarationSyntax methodSyntax, _) in attributeFinder.TargetAttributes)
         {
+            SyntaxTree syntaxTree = methodSyntax.SyntaxTree;
+            SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
+
             string packageNamespace = methodSyntax.GetNamespaceName();
             string packageClassName = methodSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = methodSyntax.Identifier.Text;
             string scope = char.IsUpper(identifier[0]) ? "public" : "private";
 
-            string[] usingStatements = methodSyntax.SyntaxTree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<UsingDirectiveSyntax>()
-                .Select(directive => directive.GetText().ToString().Trim())
-                .ToArray();
+            string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
             MethodInfo method = methodSyntax.GetMethodInfo(context);
 

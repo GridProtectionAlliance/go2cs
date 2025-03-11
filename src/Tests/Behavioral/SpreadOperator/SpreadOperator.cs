@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using ꓸꓸꓸnint = System.Span<nint>;
+using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 

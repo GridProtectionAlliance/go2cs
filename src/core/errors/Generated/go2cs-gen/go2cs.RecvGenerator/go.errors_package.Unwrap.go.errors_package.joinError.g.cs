@@ -10,7 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using ꓸꓸꓸerror = System.Span<go.error>;
+using ꓸꓸꓸerror = global::System.Span<global::go.error>;
 
 #nullable enable
 

@@ -118,30 +118,6 @@ public static partial class fmt_package
         return (format, args);
     }
     
-    public static void Print(ReadOnlySpan<byte> arg) =>
-        Console.Write(((sstring)arg).ToString());
-
-    public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2) =>
-        Console.Write($"{(sstring)arg1} {(sstring)arg2}");
-
-    public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3) =>
-        Console.Write($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3}");
-
-    public static void Print(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3, ReadOnlySpan<byte> arg4) =>
-        Console.Write($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3} {(sstring)arg4}");
-    
-    public static void Println(ReadOnlySpan<byte> arg) => 
-        Console.WriteLine((sstring)arg);
-
-    public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2) =>
-        Console.WriteLine($"{(sstring)arg1} {(sstring)arg2}");
-
-    public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3) =>
-        Console.WriteLine($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3}");
-
-    public static void Println(ReadOnlySpan<byte> arg1, ReadOnlySpan<byte> arg2, ReadOnlySpan<byte> arg3, ReadOnlySpan<byte> arg4) =>
-        Console.WriteLine($"{(sstring)arg1} {(sstring)arg2} {(sstring)arg3} {(sstring)arg4}");
-
     public static void Printf(ReadOnlySpan<byte> format, params object[] args) =>
         Printf((@string)format, args);
 
