@@ -8,6 +8,7 @@ import (
 	"go/token"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -291,6 +292,99 @@ func (e *BuildConstraintEvaluator) CheckDirectives(directives []Directive) (bool
 	return false, nil
 }
 
+// isFileNameCompatible checks if a Go source file should be included in a build
+// based on its filename suffixes (e.g., _linux.go, _windows_amd64.go)
+func isFileNameCompatible(filename string, evaluator *BuildConstraintEvaluator) bool {
+	// Ignore non-Go files
+	if !strings.HasSuffix(filename, ".go") {
+		return false
+	}
+
+	// Extract the base name without extension
+	base := strings.TrimSuffix(filepath.Base(filename), ".go")
+
+	// If the file doesn't have an underscore, it's included in all builds
+	if !strings.Contains(base, "_") {
+		return true
+	}
+
+	// Check for test files which have different build rules
+	isTest := strings.HasSuffix(base, "_test")
+	if isTest {
+		base = strings.TrimSuffix(base, "_test")
+	}
+
+	// Get the parts after the last non-empty element before any _test suffix
+	parts := strings.Split(base, "_")
+
+	// If we only have a single part or just a _test suffix, there's no build constraint
+	if len(parts) <= 1 || (len(parts) == 2 && isTest && parts[1] == "") {
+		return true
+	}
+
+	// Handle operating system constraints
+	osConstraints := []string{}
+	archConstraints := []string{}
+
+	// Parse the file name parts to extract OS and arch constraints
+	// Skip the first part as it's the base name
+	for i := 1; i < len(parts); i++ {
+		part := parts[i]
+		if part == "" {
+			continue
+		}
+
+		// Handle common OS and architecture identifiers
+		// First check if it's an architecture
+		switch part {
+		case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "mips", "mipsle",
+			"mips64", "mips64le", "s390x", "wasm":
+			archConstraints = append(archConstraints, part)
+		// Then check if it's an OS
+		case "linux", "darwin", "windows", "freebsd", "netbsd", "openbsd",
+			"android", "ios", "js", "solaris", "plan9", "aix":
+			osConstraints = append(osConstraints, part)
+		// Handle less common constraints directly
+		default:
+			// Check if this constraint is allowed
+			if !evaluator.allowedPlatforms[part] {
+				return false
+			}
+		}
+	}
+
+	// If we have OS constraints, at least one must match
+	if len(osConstraints) > 0 {
+		osMatch := false
+		for _, os := range osConstraints {
+			if evaluator.allowedPlatforms[os] {
+				osMatch = true
+				break
+			}
+		}
+		if !osMatch {
+			return false
+		}
+	}
+
+	// If we have architecture constraints, at least one must match
+	if len(archConstraints) > 0 {
+		archMatch := false
+		for _, arch := range archConstraints {
+			if evaluator.allowedPlatforms[arch] {
+				archMatch = true
+				break
+			}
+		}
+		if !archMatch {
+			return false
+		}
+	}
+
+	return true
+}
+
+// Modified CheckBuildConstraints that handles both directives and filename constraints
 func CheckBuildConstraints(filename string, targetPlatform string) (bool, error) {
 	// Parse the source code to extract directives
 	directives, err := ParseDirectives(filename)
@@ -300,8 +394,19 @@ func CheckBuildConstraints(filename string, targetPlatform string) (bool, error)
 	}
 
 	// Create a new build constraint evaluator
-	evaluator := NewBuildConstraintEvaluator(([]string{targetPlatform}))
+	evaluator := NewBuildConstraintEvaluator([]string{targetPlatform})
 
-	// Check if the build is allowed based on the directives
+	// First, check if the filename itself indicates build constraints
+	if !isFileNameCompatible(filename, evaluator) {
+		return false, nil
+	}
+
+	// If no build directives exist, we already passed the filename check
+	buildDirectives := FilterByType(directives, BuildDirective)
+	if len(buildDirectives) == 0 {
+		return true, nil
+	}
+
+	// Otherwise, check explicit build directives
 	return evaluator.CheckDirectives(directives)
 }
