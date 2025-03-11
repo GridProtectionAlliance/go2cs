@@ -26,7 +26,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -170,6 +169,7 @@ public static class builtin
     /// resliced to accommodate the new elements. If it does not, a new underlying array will be
     /// allocated.
     /// </summary>
+    /// <typeparam name="T">Type of slice.</typeparam>
     /// <param name="slice">Destination slice pointer.</param>
     /// <param name="elems">Elements to append.</param>
     /// <returns>New slice with specified values appended.</returns>
@@ -186,21 +186,77 @@ public static class builtin
         return (slice<T>)slice.Append(elems.Cast<object>().ToArray())!;
     }
 
+    /// <summary>
+    /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
+    /// resliced to accommodate the new elements. If it does not, a new underlying array will be
+    /// allocated.
+    /// </summary>
+    /// <typeparam name="T">Type of slice.</typeparam>
+    /// <param name="slice">Destination slice pointer.</param>
+    /// <param name="elems">Elements to append.</param>
+    /// <returns>New slice with specified values appended.</returns>
+    /// <remarks>
+    /// Append returns the updated slice. It is therefore necessary to store the result of append,
+    /// often in the variable holding the slice itself:
+    /// <code>
+    /// slice = append(slice, elem1, elem2)
+    /// slice = append(slice, anotherSlice...)
+    /// </code>
+    /// </remarks>
     public static slice<T> append<T>(slice<T> slice, params T[] elems)
     {
-        return go.slice<T>.Append(slice, elems)!;
+        return go.slice<T>.Append(slice, elems);
     }
 
+    /// <summary>
+    /// Appends elements to the end of a slice. If it has sufficient capacity, the destination is
+    /// resliced to accommodate the new elements. If it does not, a new underlying array will be
+    /// allocated.
+    /// </summary>
+    /// <typeparam name="T">Type of slice.</typeparam>
+    /// <param name="slice">Destination slice pointer.</param>
+    /// <param name="elems">Elements to append.</param>
+    /// <returns>New slice with specified values appended.</returns>
+    /// <remarks>
+    /// Append returns the updated slice. It is therefore necessary to store the result of append,
+    /// often in the variable holding the slice itself:
+    /// <code>
+    /// slice = append(slice, elem1, elem2)
+    /// slice = append(slice, anotherSlice...)
+    /// </code>
+    /// </remarks>
     public static slice<T> append<T>(slice<T> slice, params Span<T> elems)
     {
-        return go.slice<T>.Append(slice, elems)!;
+        return go.slice<T>.Append(slice, elems);
     }
 
+    /// <summary>
+    /// Appends runes to the end of a byte slice. If it has sufficient capacity, the destination is
+    /// resliced to accommodate the new elements. If it does not, a new underlying array will be
+    /// allocated.
+    /// </summary>
+    /// <param name="slice">Destination slice pointer.</param>
+    /// <param name="elems">Elements to append.</param>
+    /// <returns>New slice with specified values appended.</returns>
+    /// <remarks>
+    /// Append returns the updated slice. It is therefore necessary to store the result of append,
+    /// often in the variable holding the slice itself:
+    /// <code>
+    /// slice = append(slice, elem1, elem2)
+    /// slice = append(slice, anotherSlice...)
+    /// </code>
+    /// </remarks>
     public static slice<byte> append(slice<byte> slice, params Span<rune> elems)
     {
         return go.slice<byte>.Append(slice, elems.ToUTF8Bytes());
     }
 
+    /// <summary>
+    /// Converts a span of runes to a UTF-8 byte array.
+    /// </summary>
+    /// <param name="runes">Runes to convert to bytes.</param>
+    /// <returns>byte array representing UTF-8 encoding of runes.</returns>
+    /// <exception cref="InvalidOperationException">Buffer too small for UTF-8 encoding.</exception>
     public static byte[] ToUTF8Bytes(this Span<rune> runes)
     {
         // Estimate buffer size (4 bytes per rune as worst case)
@@ -951,11 +1007,11 @@ public static class builtin
     }
 
     /// <summary>
-    /// Converts C# <paramref name="source"/> array to Go <see cref="slice{T}"/>.
+    /// Converts C# <paramref name="source"/> array to Go <see cref="go.slice{T}"/>.
     /// </summary>
     /// <typeparam name="T">Type of array.</typeparam>
     /// <param name="source">C# source array.</param>
-    /// <returns>Go <see cref="slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
+    /// <returns>Go <see cref="go.slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
     public static slice<T> slice<T>(T[] source)
     {
         return source;
@@ -983,10 +1039,10 @@ public static class builtin
     }
 
     /// <summary>
-    /// Converts C# <paramref name="source"/> string array to Go <see cref="slice{@string}"/>.
+    /// Converts C# <paramref name="source"/> string array to Go <see cref="go.slice{@string}"/>.
     /// </summary>
     /// <param name="source">C# source array.</param>
-    /// <returns>Go <see cref="slice{@string}"/> wrapper for C# <paramref name="source"/> string array.</returns>
+    /// <returns>Go <see cref="go.slice{@string}"/> wrapper for C# <paramref name="source"/> string array.</returns>
     public static slice<@string> slice(IReadOnlyCollection<string> source)
     {
         return @string(source);
