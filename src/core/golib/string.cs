@@ -26,8 +26,10 @@
 // ReSharper disable LoopCanBeConvertedToQuery
 // ReSharper disable ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 // ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable UseSymbolAlias
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,13 +73,13 @@ public readonly struct @string :
 
     public @string(char[] value) : this(new string(value)) { }
 
-    public @string(rune[] value) : this(new string(value.Select(rune => (char)rune).ToArray())) { }
+    public @string(Span<rune> value) : this(value.ToUTF8Bytes()) { }
 
     public @string(in slice<byte> value) : this(value.ToArray()) { }
 
     public @string(in slice<char> value) : this(value.ToArray()) { }
 
-    public @string(in slice<rune> value) : this(value.ToArray()) { }
+    public @string(in slice<rune> value) : this(value.ToSpan()) { }
 
     public @string(string? value)
     {
@@ -121,7 +123,7 @@ public readonly struct @string :
 
     public slice<byte> Slice(nint start, nint length)
     {
-        return new slice<byte>(m_value, (int)start, (int)(start + length));
+        return new slice<byte>(m_value, start, start + length);
     }
 
     public Span<byte> ToSpan()
@@ -181,26 +183,55 @@ public readonly struct @string :
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
-        char[] runes = DecodeRunes();
+        rune[] runes = ToRunes();
 
         for (int i = 0; i < runes.Length; i++)
             yield return (i, runes[i]);
     }
 
-    private char[] DecodeRunes()
+    public rune[] ToRunes()
+    {
+        // Estimate the rune length (1 rune per byte as worst case)
+        int estimatedLength = m_value.Length;
+
+        Span<rune> runes = estimatedLength <= StackAllocThreshold / 4 ?
+            stackalloc rune[estimatedLength] :
+            new rune[estimatedLength];
+
+        int runesDecoded = DecodeRunes(runes);
+        return runes[..runesDecoded].ToArray();
+    }
+
+    private int DecodeRunes(Span<rune> runes)
     {
         if (m_value.Length == 0)
-            return [];
+            return 0;
 
-        Decoder decoder = Encoding.UTF8.GetDecoder();
-        Span<char> chars = new char[m_value.Length];
+        int runeIndex = 0;
+        ReadOnlySpan<byte> bytes = m_value;
 
-        decoder.Convert(m_value, chars, true, out _, out int used, out bool completed);
+        while (!bytes.IsEmpty)
+        {
+            OperationStatus status = Rune.DecodeFromUtf8(bytes, out rune rune, out int bytesConsumed);
 
-        if (!completed)
-            chars[used++] = '\uFFFD';
+            switch (status)
+            {
+                case OperationStatus.Done:
+                    runes[runeIndex++] = rune;
+                    break;
+                case OperationStatus.InvalidData:
+                case OperationStatus.NeedMoreData:
+                case OperationStatus.DestinationTooSmall:
+                    // Follow Go behavior: Replace invalid sequences with Unicode replacement character
+                    runes[runeIndex++] = new rune(0xFFFD);
+                    bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
+                    break;
+            }
 
-        return chars[..used].ToArray();
+            bytes = bytes[bytesConsumed..];
+        }
+
+        return runeIndex;
     }
 
     public static @string Default => new("");
@@ -273,10 +304,20 @@ public readonly struct @string :
 
     public static implicit operator rune[](@string value)
     {
-        return ((IEnumerable<rune>)value).ToArray();
+        return value.ToRunes();
     }
 
     public static implicit operator @string(rune[] value)
+    {
+        return new @string(new Span<rune>(value));
+    }
+
+    public static implicit operator Span<rune>(@string value)
+    {
+        return value.ToRunes();
+    }
+
+    public static implicit operator @string(Span<rune> value)
     {
         return new @string(value);
     }
@@ -457,8 +498,8 @@ public readonly struct @string :
 
     IEnumerator<rune> IEnumerable<rune>.GetEnumerator()
     {
-        foreach (char item in ToString())
-            yield return item;
+        foreach (rune codePoint in ToRunes())
+            yield return codePoint;
     }
 
     IEnumerator<char> IEnumerable<char>.GetEnumerator()

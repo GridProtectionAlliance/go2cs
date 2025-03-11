@@ -86,12 +86,7 @@ public class TypeGenerator : ISourceGenerator
             // "internal" scope is used so types can be referenced instead of "private"
             string scope = char.IsUpper(identifier[0]) ? "public" : "internal";
 
-            string[] usingStatements = targetSyntax.SyntaxTree
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<UsingDirectiveSyntax>()
-                .Select(directive => directive.GetText().ToString().Trim())
-                .ToArray();
+            string[] usingStatements = GetFullyQualifiedUsingStatements(targetSyntax, semanticModel);
 
             foreach (AttributeSyntax attribute in attributes)
             {

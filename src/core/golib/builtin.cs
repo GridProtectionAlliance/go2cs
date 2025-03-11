@@ -22,9 +22,11 @@
 //******************************************************************************************************
 // ReSharper disable InconsistentNaming
 // ReSharper disable BuiltInTypeReferenceStyle
+// ReSharper disable UseSymbolAlias
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -39,6 +41,8 @@ namespace go;
 
 public static class builtin
 {
+    public const int StackAllocThreshold = 1024; // 1KB
+
     [ModuleInitializer]
     internal static void InitializeGoLib()
     {
@@ -190,6 +194,34 @@ public static class builtin
     public static slice<T> append<T>(slice<T> slice, params Span<T> elems)
     {
         return go.slice<T>.Append(slice, elems)!;
+    }
+
+    public static slice<byte> append(slice<byte> slice, params Span<rune> elems)
+    {
+        return go.slice<byte>.Append(slice, elems.ToUTF8Bytes());
+    }
+
+    public static byte[] ToUTF8Bytes(this Span<rune> runes)
+    {
+        // Estimate buffer size (4 bytes per rune as worst case)
+        int estimatedBytes = runes.Length * 4;
+        
+        Span<byte> buffer = estimatedBytes <= StackAllocThreshold ? 
+            stackalloc byte[estimatedBytes] : 
+            new byte[estimatedBytes];
+
+        int bytesWritten = 0;
+
+        foreach (rune codePoint in runes)
+        {
+            // Encoding not expected to fail given 4x buffer
+            if (!codePoint.TryEncodeToUtf8(buffer[bytesWritten..], out int runeBytes))
+                throw new InvalidOperationException("Buffer too small for UTF-8 encoding");
+            
+            bytesWritten += runeBytes;
+        }
+
+        return buffer[..bytesWritten].ToArray();
     }
 
     /// <summary>
@@ -940,6 +972,17 @@ public static class builtin
     }
 
     /// <summary>
+    /// Converts C# <paramref name="source"/> string to Go slice of bytes.
+    /// </summary>
+    /// <typeparam name="_">Unused type allows for 'slice&lt;byte&gt;(@string)' expressions.</typeparam>
+    /// <param name="source">C# source string.</param>
+    /// <returns>Slice of bytes from Go string</returns>
+    public static slice<byte> slice<_>(@string source)
+    {
+        return slice(source);
+    }
+
+    /// <summary>
     /// Converts C# <paramref name="source"/> string array to Go <see cref="slice{@string}"/>.
     /// </summary>
     /// <param name="source">C# source array.</param>
@@ -986,7 +1029,7 @@ public static class builtin
     /// <returns><paramref name="value"/> converted to a rune.</returns>
     public static rune rune(int32 value)
     {
-        return value;
+        return new rune(value);
     }
 
     /// <summary>
@@ -996,7 +1039,7 @@ public static class builtin
     /// <returns><paramref name="value"/> converted to a rune.</returns>
     public static rune rune(object value)
     {
-        return (int)Convert.ChangeType(value, TypeCode.Int32);
+        return rune((int32)Convert.ChangeType(value, TypeCode.Int32));
     }
 
     /// <summary>
@@ -1490,7 +1533,7 @@ public static class builtin
             return new @string((slice<char>)value);
 
         if (itemType == typeof(array<rune>) || itemType == typeof(rune[]))
-            return new @string((rune[])value);
+            return new @string(new Span<rune>((rune[])value));
 
         if (itemType == typeof(slice<rune>))
             return new @string((slice<rune>)value);

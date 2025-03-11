@@ -28,8 +28,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.CSharp;
 
 namespace go2cs;
 
@@ -73,7 +74,7 @@ public static class Common
 
         GeneratedCodeAttribute = $"""GeneratedCode("{AssemblyName}", "{Version}")""";
 
-        PointerExpr = new Regex(@"^(?:[^<]*)?ж<.*$", RegexOptions.Compiled);
+        PointerExpr = new Regex("^(?:[^<]*)?ж<.*$", RegexOptions.Compiled);
         InvalidChars = [..Path.GetInvalidFileNameChars()];
 
         return;
@@ -133,6 +134,58 @@ public static class Common
             default:
                 return useDisplayString ? typeSymbol.ToDisplayString() : typeSymbol.Name;
         }
+    }
+
+    public static string[] GetFullyQualifiedUsingStatements(BaseTypeDeclarationSyntax targetSyntax, SemanticModel semanticModel)
+    {
+        return targetSyntax.SyntaxTree
+            .GetRoot()
+            .DescendantNodes()
+            .OfType<UsingDirectiveSyntax>()
+            .Select(directive =>
+            {
+                if (directive.Name is null)
+                    return "";
+
+                // For alias directives, maintain the alias but fully qualify the target
+                if (directive.Alias is not null)
+                {
+                    ISymbol? symbol = semanticModel.GetSymbolInfo(directive.Name).Symbol;
+
+                    if (symbol is not null)
+                    {
+                        string fullyQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        return $"using {directive.Alias.Name.Identifier.Text} = {fullyQualifiedName};";
+                    }
+                    
+                    return directive.GetText().ToString().Trim();
+                }
+                
+                // Static using directives
+                if (directive.StaticKeyword.Kind() is not SyntaxKind.None)
+                {
+                    ISymbol? symbol = semanticModel.GetSymbolInfo(directive.Name).Symbol;
+
+                    if (symbol is not null)
+                    {
+                        string fullyQualifiedName = symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                        return $"using static {fullyQualifiedName};";
+                    }
+
+                    return directive.GetText().ToString().Trim();
+                }
+
+                // Standard namespace imports
+                ISymbol? namespaceSymbol = semanticModel.GetSymbolInfo(directive.Name).Symbol;
+
+                if (namespaceSymbol is not null)
+                {
+                    return $"using {namespaceSymbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)};";
+                }
+                
+                return directive.GetText().ToString().Trim();
+            })
+            .ToArray();
     }
 
     public static string GetValidFileName(string fileName)

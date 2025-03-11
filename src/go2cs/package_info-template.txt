@@ -14,7 +14,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.%s_package;
+using static go.%s;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -50,6 +50,6 @@ using static go.%s_package;
 namespace go;
 
 [GoPackage("%s")]
-public static partial class %s_package
+public static partial class %s
 {
 }

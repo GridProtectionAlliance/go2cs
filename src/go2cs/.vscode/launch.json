@@ -58,10 +58,10 @@
                 //"..\\Tests\\Behavioral\\GenericStructFields",
                 //"..\\Tests\\Behavioral\\GenericTypeAssertions",
                 //"..\\Tests\\Behavioral\\GenericCompositeLiterals",
-                //"C:\\Program Files\\Go\\src\\errors",
-                //"C:\\Users\\rcarroll\\go2cs\\core\\errors"
-                "C:\\Program Files\\Go\\src\\unsafe",
-                "C:\\Users\\rcarroll\\go2cs\\core\\unsafe",
+                "C:\\Program Files\\Go\\src\\errors",
+                "C:\\Users\\rcarroll\\go2cs\\core\\errors"
+                //"C:\\Program Files\\Go\\src\\unsafe",
+                //"C:\\Users\\rcarroll\\go2cs\\core\\unsafe",
             ]
         }
     ]

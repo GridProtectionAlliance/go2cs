@@ -28,7 +28,7 @@ func replaceOctalChars(value string) string {
 			decimal, err := strconv.ParseInt(octal[1:], 8, 64)
 
 			if err == nil {
-				if decimal <= math.MaxUint16 {
+				if decimal <= 0xFFFF {
 					value = strings.Replace(value, octal, fmt.Sprintf("\\u%04x", decimal), 1)
 				} else {
 					value = strings.Replace(value, octal, fmt.Sprintf("\\U%08x", decimal), 1)
@@ -106,13 +106,26 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			}
 		}
 	case token.CHAR:
-		strVal := replaceOctalChars(value)
-		intVal, err := strconv.Atoi(strVal)
+		// Parse the rune value
+		r, _, _, err := strconv.UnquoteChar(value[1:len(value)-1], '\'')
 
 		if err == nil {
-			result.WriteString(fmt.Sprintf("'%c'", rune(intVal)))
+			if r <= 0xFFFF {
+				// Character can be represented as a char in C# Rune
+				result.WriteString(fmt.Sprintf("new rune(%s)", strings.ReplaceAll(fmt.Sprintf("%q", string(r)), "\"", "'")))
+			} else {
+				// For characters beyond BMP, we can use the direct code point
+				result.WriteString(fmt.Sprintf("new rune(0x%X)", r))
+			}
 		} else {
-			result.WriteString(strVal)
+			// Fallback for parsing errors
+			intVal, err := strconv.Atoi(value)
+
+			if err == nil {
+				result.WriteString(fmt.Sprintf("new rune(0x%X)", intVal))
+			} else {
+				result.WriteString(fmt.Sprintf("new rune(%s)", replaceOctalChars(value)))
+			}
 		}
 	case token.STRING:
 		strVal, isRawStr := v.getStringLiteral(value)
