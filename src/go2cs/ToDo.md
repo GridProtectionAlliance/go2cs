@@ -29,7 +29,7 @@
 16) ~~Handle intra-function type declaration lifting (see TypeInference)~~
 17) ~~Handle generics conversion~~
 18) ~~Always include pre-package comments during conversion~~
-19) Reduce `return ~Ꮡ(new errorString(text));` expressions to `return new errorString(text);`
+19) ~~Reduce `return ~Ꮡ(new errorString(text));` expressions to `return new errorString(text);`~~
 20) ~~Check using imports in generated related to spread operators - needs fully qualify namespaces - see if Roslyn can expand these in source generation~~
 21) For manually converted code, e.g., `unsafe` package, need to let transpiler which files to ignore during conversion - may be a standard list from standard library
 22) Handle certain `unsafe` function conversions manually, e.g., `Offsetof` and `Alignof` which need some special parameter handling, e.g.: `unsafe.Offsetof(x)` to `@unsafe.Offsetof(x.GetType())`

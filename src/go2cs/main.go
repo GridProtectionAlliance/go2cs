@@ -1393,6 +1393,17 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		}
 	}
 
+	// Handle special case for pointer dereference of immediate address of operation, this
+	// is an unnecessary operation as it creates a pointer to an object and then immediately
+	// dereferences the pointer value, so we can just return the expression result instead
+	if prefix == PointerDerefOp {
+		if strings.HasPrefix(exprResult, AddressPrefix+"(") {
+			return strings.TrimSuffix(strings.TrimPrefix(exprResult, AddressPrefix+"("), ")")
+		} else if strings.HasPrefix(exprResult, "@new<") {
+			return fmt.Sprintf("new %s()", strings.TrimSuffix(strings.TrimPrefix(exprResult, "@new<"), ">()"))
+		}
+	}
+
 	return prefix + exprResult
 }
 
