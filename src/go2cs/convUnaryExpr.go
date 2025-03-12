@@ -21,7 +21,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 
 		// Check if the unary expression is an address of an indexed array or slice
 		if indexExpr, ok := unaryExpr.X.(*ast.IndexExpr); ok {
-			typeName := v.getExprTypeName(indexExpr.X, true)
+			exprType := v.getType(indexExpr.X, true)
+
+			// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax
+			if getIdentifier(indexExpr.X) != nil {
+				if _, ok := exprType.Underlying().(*types.Slice); ok {
+					return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
+				}
+			}
+
+			typeName := v.getTypeName(exprType, false)
 
 			if strings.HasPrefix(typeName, "[") {
 				// For an indexed reference into an array or slice, we use the "ж.at<T>(index)" syntax

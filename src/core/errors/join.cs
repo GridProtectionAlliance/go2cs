@@ -34,7 +34,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     ));
     foreach (var (_, err) in errs) {
         if (err != default!) {
-            (e.val).errs = append((~e).errs, err);
+            e.val.errs = append((~e).errs, err);
         }
     }
     return ~e;
@@ -56,7 +56,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
         b = append(b, err.Error().ꓸꓸꓸ);
     }
     // At this point, b has at least one byte '\n'.
-    return @unsafe.String(Ꮡ(b[0]), len(b));
+    return @unsafe.String(Ꮡ(b, 0), len(b));
 }
 
 [GoRecv] internal static slice<error> Unwrap(this ref joinError e) {

@@ -2088,6 +2088,9 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
 }
 
+// isInherentlyHeapAllocatedType checks if the type is inherently heap allocated,
+// i.e., a reference type that is not a stack allocated value type, e.g., maps,
+// slices, channels, interfaces, functions, and pointers.
 func isInherentlyHeapAllocatedType(typ types.Type) bool {
 	switch typ.Underlying().(type) {
 	case *types.Map, *types.Slice, *types.Chan, *types.Interface, *types.Signature, *types.Pointer:
