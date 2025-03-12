@@ -113,7 +113,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				callExprContext.u8StringArgOK[i] = false
 
 				if !isEmpty {
-					callExprContext.interfaceType = paramType
+					callExprContext.interfaceTypes[i] = paramType
 				}
 			} else if isPointer(paramType) {
 				ident := getIdentifier(callExpr.Args[i])

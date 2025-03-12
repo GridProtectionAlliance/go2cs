@@ -81,7 +81,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	if elementType != nil {
 		needsInterfaceCast, isEmpty = isInterface(elementType)
 		if needsInterfaceCast && !isEmpty {
-			callContext.interfaceType = elementType
+			for i := 0; i < len(compositeLit.Elts); i++ {
+				callContext.interfaceTypes[i] = elementType
+			}
 		}
 	}
 

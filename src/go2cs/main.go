@@ -1309,7 +1309,10 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		prefix = PointerDerefOp
 	}
 
-	if interfaceTypeName != "" && interfaceTypeName != "nil" && targetTypeName != "" && targetTypeName != "nil" {
+	if interfaceTypeName != "" && interfaceTypeName != "nil" &&
+		targetTypeName != "" && targetTypeName != "nil" &&
+		interfaceTypeName != targetTypeName {
+
 		packageLock.Lock()
 
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {

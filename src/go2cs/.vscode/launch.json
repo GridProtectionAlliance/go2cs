@@ -19,7 +19,7 @@
                 //"..\\Tests\\Behavioral\\SortArrayType",
                 //"..\\Tests\\Behavioral\\ArrayPassByValue",
                 //"..\\Tests\\Behavioral\\ExprSwitch",
-                "..\\Tests\\Behavioral\\InterfaceCasting",
+                //"..\\Tests\\Behavioral\\InterfaceCasting",
                 //"..\\Tests\\Behavioral\\ForVariants",
                 //"..\\Tests\\Behavioral\\IfStatements",
                 //"..\\Tests\\Behavioral\\PointerToPointer",
@@ -58,8 +58,8 @@
                 //"..\\Tests\\Behavioral\\GenericStructFields",
                 //"..\\Tests\\Behavioral\\GenericTypeAssertions",
                 //"..\\Tests\\Behavioral\\GenericCompositeLiterals",
-                //"C:\\Program Files\\Go\\src\\errors",
-                //"C:\\Users\\rcarroll\\go2cs\\core\\errors"
+                "C:\\Program Files\\Go\\src\\errors",
+                "C:\\Users\\rcarroll\\go2cs\\core\\errors"
                 //"C:\\Program Files\\Go\\src\\unsafe",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\unsafe",
             ]

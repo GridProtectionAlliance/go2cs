@@ -17,14 +17,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	keyValueContext := DefaultKeyValueContext()
 	forceMultiLine := false
 	hasSpreadOperator := false
-	var interfaceType types.Type
+	var interfaceTypes map[int]types.Type
 
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
 		keyValueContext.ident = callContext.keyValueIdent
 		forceMultiLine = callContext.forceMultiLine
 		hasSpreadOperator = callContext.hasSpreadOperator
-		interfaceType = callContext.interfaceType
+		interfaceTypes = callContext.interfaceTypes
 	}
 
 	for i, expr := range exprs {
@@ -69,10 +69,10 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
-		if interfaceType == nil {
-			result.WriteString(v.convExpr(expr, contexts))
-		} else {
+		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil {
 			result.WriteString(v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
+		} else {
+			result.WriteString(v.convExpr(expr, contexts))
 		}
 
 		// If the last expression has a spread operator, use elipsis property as source

@@ -35,7 +35,7 @@
 22) Handle certain `unsafe` function conversions manually, e.g., `Offsetof` and `Alignof` which need some special parameter handling, e.g.: `unsafe.Offsetof(x)` to `@unsafe.Offsetof(x.GetType())`
 22) ~~For package names, e.g., `unsafe_package` - currently prefix is being unnecessarily sanitized, e.g., `@unsafe_package` - need to check name as a whole~~
 23) ~~Left side of an assign with a pointer de-ref, e.g., `(~e)` needs to be `e.val` instead~~
-24) Update auto-interface implementation to ignore various invalid implement targets
+24) ~~Update auto-interface implementation to ignore various invalid implement targets~~
 
 xx) Setup reference code packages / path options for Go modules
     1) Assume code builds in Go / toolchain executed, i.e., local source exists

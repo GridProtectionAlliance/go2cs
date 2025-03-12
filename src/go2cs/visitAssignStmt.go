@@ -393,7 +393,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 					rhsExpr := v.convExpr(rhs, contexts)
 
-					if lhsTypeIsInterface[i] {
+					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
+
+					if lhsTypeIsInterface[i] && !rhsIsTypeAssert {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
