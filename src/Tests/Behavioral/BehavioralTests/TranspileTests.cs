@@ -165,6 +165,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]
+    public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     // </TestMethods>

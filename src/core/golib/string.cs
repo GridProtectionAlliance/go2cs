@@ -274,6 +274,16 @@ public readonly struct @string :
         return new slice<rune>(((IEnumerable<rune>)value).ToArray());
     }
 
+    public static implicit operator @string(rune value)
+    {
+        return new @string([value]);
+    }
+
+    public static implicit operator rune(@string value)
+    {
+        return value.ToRunes().FirstOrDefault();
+    }
+
     public static implicit operator @string(slice<char> value)
     {
         return new @string(value);
