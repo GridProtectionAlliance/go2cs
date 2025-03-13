@@ -234,7 +234,7 @@ public sealed class ж<T> : IPointer<T>, IEquatable<ж<T>>
     }
 
     /// <summary>
-    /// Gets a pointer to the value of type <typeparamref name="T"/>.
+    /// Gets a pinned pointer to the value of type <typeparamref name="T"/>.
     /// </summary>
     internal PinnedBuffer PinnedBuffer
     {
@@ -254,7 +254,7 @@ public sealed class ж<T> : IPointer<T>, IEquatable<ж<T>>
             // Get reference to array or slice element
             (IArray array, int _) = m_arrayIndexRef!.Value;
 
-            if (array is IArray<T> typedArray)
+            if (array is IArray<T>)
                 return new PinnedBuffer(val, array.Length);
 
             throw new InvalidOperationException("Cannot get pinned buffer to value, source is not a valid struct field, array or slice reference.");
