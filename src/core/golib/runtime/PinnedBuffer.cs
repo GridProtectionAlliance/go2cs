@@ -23,11 +23,21 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace go.runtime;
 
-internal class PinnedBuffer : IArray, IDisposable
+/// <summary>
+/// Represents a pinned buffer that can be used as an array pointer reference.
+/// </summary>
+/// <remarks>
+/// Buffer is allocated with a pinned handle so it can be used in unmanaged code.
+/// Because buffer is pinned, it will not be moved by the garbage collector.
+/// Pinned buffer class is disposable and registered with the garbage collector
+/// so allocated handle will be freed when class is no longer referenced.
+/// </remarks>
+internal class PinnedBuffer : IArray<byte>, IDisposable
 {
     private GCHandle m_handle;
     private readonly int m_len;
@@ -53,13 +63,6 @@ internal class PinnedBuffer : IArray, IDisposable
         m_len = len;
     }
 
-    public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
-
-    public unsafe Span<byte> ToSpan()
-    {
-        return new Span<byte>(Pointer, m_len);
-    }
-
     ~PinnedBuffer()
     {
         Dispose(false);
@@ -75,11 +78,76 @@ internal class PinnedBuffer : IArray, IDisposable
     {
         if (m_disposed)
             return;
-            
+
         if (m_handle.IsAllocated)
             m_handle.Free();
 
         m_disposed = true;
+    }
+
+    public unsafe byte* Pointer => (byte*)m_handle.AddrOfPinnedObject();
+
+    public nint Length => m_len;
+
+    public Span<byte> ꓸꓸꓸ => ToSpan();
+
+    public byte[] Source => ToSpan().ToArray();
+
+    Array IArray.Source => Source;
+
+    public unsafe ref byte this[nint index]
+    {
+        get
+        {
+            if (index < 0 || index >= m_len)
+                throw new IndexOutOfRangeException();
+
+            return ref Pointer[index];
+        }
+    }
+
+    // IArray implementation allows PinnedBuffer to be used as
+    // an indexed array pointer reference, see ptr constructor:
+    // ж(IArray array, int index)
+    unsafe object? IArray.this[nint index]
+    {
+        get => this[index];
+        set
+        {
+            if (index < 0 || index >= m_len)
+                throw new IndexOutOfRangeException();
+
+            Pointer[index] = value switch
+            {
+                byte val => val,
+                null => 0,
+                _ => throw new ArgumentException("Invalid value type.")
+            };
+        }
+    }
+
+    public unsafe Span<byte> ToSpan()
+    {
+        return new Span<byte>(Pointer, m_len);
+    }
+
+    public IEnumerator<(nint, byte)> GetEnumerator()
+    {
+        byte[] array = Source;
+        nint index = 0;
+
+        foreach (byte item in array)
+            yield return (index++, item);
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return Source.GetEnumerator();
+    }
+
+    public object Clone()
+    {
+        return new PinnedBuffer(m_handle, m_len);
     }
 
     public static implicit operator PinnedBuffer(byte[] array)
@@ -100,30 +168,5 @@ internal class PinnedBuffer : IArray, IDisposable
     public static implicit operator PinnedBuffer(@string src)
     {
         return new PinnedBuffer(src, src.Length);
-    }
-
-    object ICloneable.Clone() => new PinnedBuffer(m_handle, m_len);
-
-    IEnumerator IEnumerable.GetEnumerator() => ToSpan().ToArray().GetEnumerator();
-
-    Array IArray.Source => ToSpan().ToArray();
-
-    nint IArray.Length => m_len;
-
-    // IArray implementation allows PinnedBuffer to be used as
-    // an indexed array pointer reference, see ptr constructor:
-    // ж(IArray array, int index)
-    unsafe object? IArray.this[nint index]
-    {
-        get => Pointer[index];
-        set
-        {
-            Pointer[index] = value switch
-            {
-                byte val => val,
-                null => 0,
-                _ => throw new ArgumentException("Invalid value type.")
-            };
-        }
     }
 }

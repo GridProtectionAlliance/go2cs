@@ -28,6 +28,7 @@
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
     <ProjectReference Include="..\..\core\golib\golib.csproj" />
+    <ProjectReference Include="..\..\core\unsafe\unsafe.csproj" />
   </ItemGroup>
 
 </Project>
