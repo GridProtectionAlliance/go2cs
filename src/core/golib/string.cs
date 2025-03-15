@@ -137,7 +137,7 @@ public readonly struct @string :
 
     public override string ToString()
     {
-        return Encoding.UTF8.GetString(m_value);
+        return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(m_value));
     }
 
     public bool Equals(@string other)
@@ -183,10 +183,52 @@ public readonly struct @string :
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
-        rune[] runes = ToRunes();
+        return new RuneSpanEnumerator(m_value);
+    }
 
-        for (int i = 0; i < runes.Length; i++)
-            yield return (i, runes[i]);
+    private class RuneSpanEnumerator(byte[] bytes) : IEnumerator<(nint, rune)>
+    {
+        private readonly byte[] m_bytes = bytes;
+        private int m_byteIndex;
+        private int m_runeIndex = -1;
+        private (nint, rune) m_current;
+
+        public (nint, rune) Current => m_current;
+
+        object IEnumerator.Current => Current;
+
+        void IDisposable.Dispose() { }
+
+        public bool MoveNext()
+        {
+            if (m_byteIndex >= m_bytes.Length)
+                return false;
+
+            ReadOnlySpan<byte> remainingBytes = new(m_bytes, m_byteIndex, m_bytes.Length - m_byteIndex);
+            OperationStatus status = Rune.DecodeFromUtf8(remainingBytes, out Rune rune, out int bytesConsumed);
+
+            if (status == OperationStatus.Done)
+            {
+                m_current = (++m_runeIndex, rune.Value);
+            }
+            else
+            {
+                // When status is InvalidData or NeedMoreData or DestinationTooSmall, follow
+                // Go behavior: Replace invalid sequences with Unicode replacement character
+                m_current = (++m_runeIndex, RuneReplacementChar);
+                bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
+            }
+
+            m_byteIndex += bytesConsumed;
+            return true;
+        }
+
+        public void Reset()
+        {
+            m_byteIndex = 0;
+            m_runeIndex = -1;
+            m_current = default;
+        }
     }
 
     public rune[] ToRunes()
@@ -207,31 +249,29 @@ public readonly struct @string :
         if (m_value.Length == 0)
             return 0;
 
-        int runeIndex = 0;
+        int index = 0;
         ReadOnlySpan<byte> bytes = m_value;
 
         while (!bytes.IsEmpty)
         {
             OperationStatus status = Rune.DecodeFromUtf8(bytes, out Rune rune, out int bytesConsumed);
 
-            switch (status)
+            if (status == OperationStatus.Done)
             {
-                case OperationStatus.Done:
-                    runes[runeIndex++] = rune.Value;
-                    break;
-                case OperationStatus.InvalidData:
-                case OperationStatus.NeedMoreData:
-                case OperationStatus.DestinationTooSmall:
-                    // Follow Go behavior: Replace invalid sequences with Unicode replacement character
-                    runes[runeIndex++] = 0xFFFD;
-                    bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
-                    break;
+                runes[index++] = rune.Value;
+            }
+            else
+            {
+                // When status is InvalidData or NeedMoreData or DestinationTooSmall, follow
+                // Go behavior: Replace invalid sequences with Unicode replacement character
+                runes[index++] = RuneReplacementChar;
+                bytesConsumed = bytesConsumed == 0 ? 1 : bytesConsumed;
             }
 
             bytes = bytes[bytesConsumed..];
         }
 
-        return runeIndex;
+        return index;
     }
 
     public static @string Default => new("");
@@ -279,7 +319,7 @@ public readonly struct @string :
         return new @string([value]);
     }
 
-    public static implicit operator rune(@string value)
+    public static explicit operator rune(@string value)
     {
         return value.ToRunes().FirstOrDefault();
     }
@@ -509,47 +549,15 @@ public readonly struct @string :
         return ToString().GetEnumerator();
     }
 
-    private static unsafe bool BytesAreEqual(byte[] data1, byte[] data2)
+    private static bool BytesAreEqual(byte[] data1, byte[] data2)
     {
         if (data1 == data2)
             return true;
 
-        if (data1.Length != data2.Length)
-            return false;
-
-        if (data1.Length == 0)
-            return true;
-
-        fixed (byte* bytes1 = data1, bytes2 = data2)
-        {
-            int len = data1.Length;
-            int rem = len % (sizeof(long) * 16);
-            long* b1 = (long*)bytes1;
-            long* b2 = (long*)bytes2;
-            long* e1 = (long*)(bytes1 + len - rem);
-
-            while (b1 < e1)
-            {
-                if (*(b1) != *(b2) || *(b1 + 1) != *(b2 + 1) ||
-                    *(b1 + 2) != *(b2 + 2) || *(b1 + 3) != *(b2 + 3) ||
-                    *(b1 + 4) != *(b2 + 4) || *(b1 + 5) != *(b2 + 5) ||
-                    *(b1 + 6) != *(b2 + 6) || *(b1 + 7) != *(b2 + 7) ||
-                    *(b1 + 8) != *(b2 + 8) || *(b1 + 9) != *(b2 + 9) ||
-                    *(b1 + 10) != *(b2 + 10) || *(b1 + 11) != *(b2 + 11) ||
-                    *(b1 + 12) != *(b2 + 12) || *(b1 + 13) != *(b2 + 13) ||
-                    *(b1 + 14) != *(b2 + 14) || *(b1 + 15) != *(b2 + 15))
-                    return false;
-                b1 += 16;
-                b2 += 16;
-            }
-
-            for (int i = 0; i < rem; i++)
-                if (data1[len - 1 - i] != data2[len - 1 - i])
-                    return false;
-
-            return true;
-        }
+        return data1.Length == data2.Length && new ReadOnlySpan<byte>(data1).SequenceEqual(new ReadOnlySpan<byte>(data2));
     }
+
+    private const rune RuneReplacementChar = 0xFFFD;
 
     #endregion
 }
