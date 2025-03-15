@@ -13,6 +13,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using go.runtime;
+using go;
+
+[module: GoManualConversion]
 
 #pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 #pragma warning disable IL2072
@@ -192,7 +195,23 @@ unsafe partial class unsafe_package  {
 //	hdr.Data = uintptr(unsafe.Pointer(p))
 //	hdr.Len = n
 //	s := *(*string)(unsafe.Pointer(&hdr)) // p possibly already lost
-[GoType("ж<ArbitraryType>")] partial class Pointer;
+public class Pointer(uintptr value) : ж<uintptr>(value) {
+    public static implicit operator Pointer(uintptr value) {
+        return new Pointer(value);
+    }
+
+    public static implicit operator uintptr(Pointer value) {
+        return value.val;
+    }
+
+    public static implicit operator Pointer(void* value) {
+        return new Pointer((uintptr)value);
+    }
+
+    public static implicit operator void*(Pointer value) {
+        return (void*)value.val;
+    }
+}
 
 // Sizeof takes an expression x of any type and returns the size in bytes
 // of a hypothetical variable v as if v was declared via var v = x.

@@ -166,7 +166,7 @@ public interface IPointer<T>
 /// So long as a reference to this class exists, so will the value of type <typeparamref name="T"/>.
 /// </para>
 /// </remarks>
-public sealed class ж<T> : IPointer<T>, IEquatable<ж<T>>
+public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
@@ -407,6 +407,28 @@ public sealed class ж<T> : IPointer<T>, IEquatable<ж<T>>
     public static bool operator !=(NilType nil, ж<T>? value)
     {
         return value != nil;
+    }
+
+    public static unsafe implicit operator ж<T>(uintptr value)
+    {
+        return new ж<T>(*(T*)value);
+    }
+
+    public static unsafe implicit operator uintptr(ж<T> value)
+    {
+        fixed (void* ptr = &value.val)
+            return (uintptr)ptr;
+    }
+
+    public static unsafe implicit operator ж<T>(void* value)
+    {
+        return new ж<T>(*(T*)value);
+    }
+
+    public static unsafe implicit operator void*(ж<T> value)
+    {
+        fixed (T* ptr = &value.val)
+            return ptr;
     }
 
     private static readonly bool IsReferenceType = default(T) is null;
