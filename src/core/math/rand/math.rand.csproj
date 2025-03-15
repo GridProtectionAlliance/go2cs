@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>math_package</AssemblyName>
-    <ApplicationIcon>..\go2cs.ico</ApplicationIcon>
-    <PackageId>go.math</PackageId>
+    <AssemblyName>rand_package</AssemblyName>
+    <ApplicationIcon>..\..\go2cs.ico</ApplicationIcon>
+    <PackageId>go.math.rand</PackageId>
     <Authors>Grid Protection Alliance</Authors>
     <Company>Grid Protection Alliance</Company>
     <Product>go2cs</Product>
-    <Title>go2cs math package</Title>
-    <PackageDescription>Go math package in .NET for use with go2cs</PackageDescription>
+    <Title>go2cs math.rand package</Title>
+    <PackageDescription>Go math.rand package in .NET for use with go2cs</PackageDescription>
     <Description>Go math package in .NET for use with go2cs</Description>
     <Copyright>Copyright © 2024</Copyright>
     <PackageProjectUrl>https://github.com/GridProtectionAlliance/go2cs</PackageProjectUrl>
@@ -27,14 +27,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="rand\**" />
-    <EmbeddedResource Remove="rand\**" />
-    <None Remove="rand\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\go2cs.ico" Pack="true" PackagePath="" Visible="false" />
-    <None Include="..\go2cs.png" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\..\go2cs.ico" Pack="true" PackagePath="" Visible="false" />
+    <None Include="..\..\go2cs.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +47,7 @@
     <Using Include="System.Int32" Alias="rune" />
     <Using Include="System.UIntPtr" Alias="uintptr" />
 
-    <ProjectReference Include="..\golib\golib.csproj" /> <!--Condition="'$(Configuration)'=='Debug'"-->
+    <ProjectReference Include="..\..\golib\golib.csproj" /> <!--Condition="'$(Configuration)'=='Debug'"-->
     <!--<PackageReference Include="go.lib" Version="0.1.0" Condition="'$(Configuration)'=='Release'" />-->
   </ItemGroup>
 
