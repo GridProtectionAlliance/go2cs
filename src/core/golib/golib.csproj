@@ -26,6 +26,23 @@
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(OutDir)'==''">
+    <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(go2csPath)'==''">
+    <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
+    <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
+  </PropertyGroup>
+
+  <!-- Enable native compiled output optimizations -->
+  <PropertyGroup>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishTrimmed>True</PublishTrimmed>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="experimental\**" />
     <EmbeddedResource Remove="experimental\**" />
