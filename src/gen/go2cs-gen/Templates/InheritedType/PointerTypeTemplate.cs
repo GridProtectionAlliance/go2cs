@@ -18,5 +18,27 @@ internal static class PointerTypeTemplate
                 public ж<Telem> at<Telem>(int index) => m_value.at<Telem>(index);
                 
                 static {{targetTypeName}} IPointer<{{targetTypeName}}>.operator ~(IPointer<{{targetTypeName}}> value) => value.val;
+
+                public static unsafe implicit operator {{className}}(uintptr value)
+                {
+                    return new {{className}}(*({{targetTypeName}}*)value);
+                }
+                
+                public static unsafe implicit operator uintptr({{className}} value)
+                {
+                    fixed (void* ptr = &value.val)
+                        return (uintptr)ptr;
+                }
+                
+                public static unsafe implicit operator {{className}}(void* value)
+                {
+                    return new {{className}}(*({{targetTypeName}}*)value);
+                }
+                
+                public static unsafe implicit operator void*({{className}} value)
+                {
+                    fixed ({{targetTypeName}}* ptr = &value.val)
+                        return ptr;
+                }
         """;
 }
