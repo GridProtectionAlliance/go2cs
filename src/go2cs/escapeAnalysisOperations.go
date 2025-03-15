@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"sync"
 )
 
 // The escape analysis function is used to determine if a variable escapes the current
@@ -21,6 +22,104 @@ import (
 // Future implementations could consider functions that (a) are within the same package
 // and (b) have private scope, that could look ahead for parameter uses that could use
 // a C# ref structure instead of using a heap allocation with a ж<T> (pointer type).
+
+func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Package, info *types.Info) {
+	var concurrentTasks sync.WaitGroup
+
+	for _, fileEntry := range files {
+		concurrentTasks.Add(1)
+
+		go func(fileEntry FileEntry) {
+			defer concurrentTasks.Done()
+
+			visitor := &Visitor{
+				fset:             fset,
+				pkg:              pkg,
+				info:             info,
+				identEscapesHeap: fileEntry.identEscapesHeap,
+			}
+
+			ast.Inspect(fileEntry.file, func(n ast.Node) bool {
+				switch node := n.(type) {
+				case *ast.FuncDecl:
+					if node.Body == nil {
+						return true
+					}
+
+					ast.Inspect(node.Body, func(n ast.Node) bool {
+						switch n := n.(type) {
+						case *ast.AssignStmt:
+							if n.Tok == token.DEFINE {
+								for _, lhs := range n.Lhs {
+									if ident := getIdentifier(lhs); ident != nil {
+										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+							}
+						case *ast.RangeStmt:
+							if n.Tok == token.DEFINE {
+								if key := getIdentifier(n.Key); key != nil {
+									visitor.performEscapeAnalysis(key, node.Body)
+								}
+								if value := getIdentifier(n.Value); value != nil {
+									visitor.performEscapeAnalysis(value, node.Body)
+								}
+							}
+						case *ast.DeclStmt:
+							if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
+								for _, spec := range genDecl.Specs {
+									if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+										for _, ident := range valueSpec.Names {
+											if !isDiscardedVar(ident.Name) {
+												visitor.performEscapeAnalysis(ident, node.Body)
+											}
+										}
+									}
+								}
+							}
+						case *ast.ForStmt:
+							if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+								for _, lhs := range init.Lhs {
+									if ident := getIdentifier(lhs); ident != nil {
+										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+							}
+						case *ast.IfStmt:
+							if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+								for _, lhs := range init.Lhs {
+									if ident := getIdentifier(lhs); ident != nil {
+										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+							}
+						case *ast.SwitchStmt:
+							if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
+								for _, lhs := range init.Lhs {
+									if ident := getIdentifier(lhs); ident != nil {
+										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+							}
+						case *ast.TypeSwitchStmt:
+							if assign, ok := n.Assign.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
+								for _, lhs := range assign.Lhs {
+									if ident := getIdentifier(lhs); ident != nil {
+										visitor.performEscapeAnalysis(ident, node.Body)
+									}
+								}
+							}
+						}
+						return true
+					})
+				}
+				return true
+			})
+		}(fileEntry)
+	}
+
+	concurrentTasks.Wait()
+}
 
 // Perform escape analysis on the given identifier within the specified block
 func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.BlockStmt) {

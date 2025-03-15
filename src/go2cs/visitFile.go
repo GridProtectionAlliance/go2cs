@@ -10,7 +10,6 @@ import (
 
 const TypeAliasMarker = ">>MARKER:TYPEALIASES<<"
 const UsingsMarker = ">>MARKER:USINGS<<"
-const UnsafeMarker = ">>MARKER:UNSAFE<<"
 
 func (v *Visitor) Visit(node ast.Node) ast.Visitor {
 	if node != nil {
@@ -67,7 +66,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
 
 	v.writeOutput(UsingsMarker)
-	v.writeOutputLn("%spartial class %s {", UnsafeMarker, packageClassName)
+	v.writeOutputLn("partial class %s {", packageClassName)
 
 	for _, decl := range file.Decls {
 		v.visitDecl(decl)
@@ -105,12 +104,6 @@ func (v *Visitor) visitFile(file *ast.File) {
 	}
 
 	targetFile = strings.ReplaceAll(targetFile, UsingsMarker, v.packageImports.String())
-
-	if v.usesUnsafeCode {
-		targetFile = strings.ReplaceAll(targetFile, UnsafeMarker, "unsafe ")
-	} else {
-		targetFile = strings.ReplaceAll(targetFile, UnsafeMarker, "")
-	}
 
 	if v.typeAliasDeclarations.Len() > 0 {
 		v.typeAliasDeclarations.WriteString(v.newline)

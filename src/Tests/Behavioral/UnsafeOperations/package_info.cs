@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-// Example: global using mypkgꓸTable = go.map<go.@string, nint>;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,7 +46,7 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
-// Cannot test matching console output, pointer value output is non-deterministic
+[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
 }

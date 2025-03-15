@@ -172,6 +172,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	lambdaContext := DefaultLambdaContext()
 	lambdaContext.isCallExpr = true
+	lambdaContext.isPointerCast = context.isPointerCast
 	lambdaContext.deferredDecls = context.deferredDecls
 
 	funcType := v.getType(callExpr.Fun, false)

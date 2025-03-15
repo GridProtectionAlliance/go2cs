@@ -34,6 +34,7 @@
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- Setup packaging options for library projects -->
@@ -97,14 +98,9 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <!-- TODO: Add references to required projects -->
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
-    <ProjectReference Include="$(go2csPath)core\errors\errors.csproj" />
-    <ProjectReference Include="$(go2csPath)core\math\math.csproj" />
-    <ProjectReference Include="$(go2csPath)core\sort\sort.csproj" />
     <ProjectReference Include="$(go2csPath)core\time\time.csproj" />
-    <ProjectReference Include="$(go2csPath)core\strings\strings.csproj" />
   </ItemGroup>
 
 </Project>

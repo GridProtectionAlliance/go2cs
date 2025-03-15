@@ -46,11 +46,11 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.MapType:
 		v.visitMapType(typeSpecType)
 	case *ast.ParenExpr:
-		v.targetFile.WriteString(v.convParenExpr(typeSpecType))
+		v.targetFile.WriteString(v.convParenExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.SelectorExpr:
 		v.targetFile.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.StarExpr:
-		v.targetFile.WriteString(v.convStarExpr(typeSpecType))
+		v.targetFile.WriteString(v.convStarExpr(typeSpecType, DefaultStarExprContext()))
 	case *ast.StructType:
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
 	default:

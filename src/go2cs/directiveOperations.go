@@ -410,3 +410,87 @@ func CheckBuildConstraints(filename string, targetPlatform string) (bool, error)
 	// Otherwise, check explicit build directives
 	return evaluator.CheckDirectives(directives)
 }
+
+// containsManualConversionMarker checks if a file contains the GoManualConversion module marker
+// that is not commented out. It supports both the standard form "[module: go.GoManualConversion]"
+// and the C# attribute form "[module: go.GoManualConversionAttribute]", with or without
+// the "go." namespace prefix. Function will exit early if a class definition is detected, as the
+// marker should appear before class definitions.
+func containsManualConversionMarker(filename string) (bool, error) {
+	// Check if file exists
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		return false, nil
+	}
+
+	file, err := os.Open(filename)
+
+	if err != nil {
+		return false, fmt.Errorf("error opening file: %w", err)
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	// Regex to check if a line starts with a comment
+	commentStartRE := regexp.MustCompile(`^\s*//|^\s*/\*`)
+
+	// Regex to match the module pattern with or without "go." namespace prefix
+	// and with or without the "Attribute" suffix (for C# compatibility)
+	modulePatternRE := regexp.MustCompile(`\[\s*module\s*:\s*(?:go\.)?\s*GoManualConversion(?:Attribute)?\s*\]`)
+
+	// Regex to detect class definition
+	// This looks for the word "class" surrounded by spaces/boundaries
+	// followed by an identifier (which is a sequence of letters, digits, or underscores, starting with a letter)
+	classDefinitionRE := regexp.MustCompile(`\bclass\s+\w+`)
+
+	// Keep track of if we're in a multiline comment
+	inMultilineComment := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		// Check for multiline comment boundaries
+		if !inMultilineComment && strings.Contains(line, "/*") {
+			inMultilineComment = true
+		}
+
+		if inMultilineComment {
+			if strings.Contains(line, "*/") {
+				inMultilineComment = false
+				// The rest of the line after */ could contain relevant code
+				// Extract the part after */
+				parts := strings.Split(line, "*/")
+				if len(parts) > 1 {
+					line = parts[1]
+				} else {
+					continue
+				}
+			} else {
+				continue
+			}
+		}
+
+		// Skip single-line comments
+		if commentStartRE.MatchString(line) {
+			continue
+		}
+
+		// Check if the line contains the marker
+		if modulePatternRE.MatchString(line) {
+			return true, nil
+		}
+
+		// Check if the line contains a class definition - exit early if found
+		// This is fine because valid module markers will come before class definitions
+		if classDefinitionRE.MatchString(line) {
+			return false, nil
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return false, fmt.Errorf("error reading file: %w", err)
+	}
+
+	return false, nil
+}

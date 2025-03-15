@@ -20,6 +20,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -84,7 +85,6 @@ type Visitor struct {
 	processedComments  HashSet[token.Pos]
 	newline            string
 	indentLevel        int
-	usesUnsafeCode     bool
 	options            Options
 	globalIdentNames   map[*ast.Ident]string // Global identifiers to adjusted names map
 	globalScope        map[string]*types.Var // Global variable scope
@@ -126,6 +126,8 @@ type Visitor struct {
 const RootNamespace = "go"
 const PackageSuffix = "_package"
 const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
+const UnsafeMarker = ">>MARKER:UNSAFE<<"
+const ProjectReferenceMarker = ">>MARKER:PROJECT_REFERENCE<<"
 const PackageInfoFileName = "package_info.cs"
 
 // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
@@ -167,7 +169,7 @@ var keywords = NewHashSet([]string{
 	// "new", "return", "select", "struct", "switch", "true", "var"
 })
 
-// The following names are reserved by go2cs or C#, if encountered in Go code, suffix with `Δ` and indexer:
+// The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
 var reserved = NewHashSet([]string{
 	"AreEqual", "array", "channel", "Equals", "Finalize", "GetGoTypeName", "GetHashCode", "GetType",
 	"GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute",
@@ -195,6 +197,7 @@ var publishProfiles embed.FS
 
 // Define package level variables
 var packageName string
+var projectImports HashSet[string]
 var exportedTypeAliases = map[string]string{}
 var interfaceImplementations = map[string]HashSet[string]{}
 var promotedInterfaceImplementations = map[string]HashSet[string]{}
@@ -203,6 +206,7 @@ var implicitConversions = map[string]HashSet[string]{}
 var invertedImplicitConversions = map[string]HashSet[string]{}
 var indirectImplicitConversions = map[string]HashSet[string]{}
 var initFuncCounter int
+var usesUnsafeCode bool
 var packageLock = sync.Mutex{}
 
 func main() {
@@ -244,7 +248,7 @@ func main() {
 			homeDir = strings.TrimSuffix(strings.TrimSuffix(goPath, "go"), string(os.PathSeparator))
 		}
 
-		go2csPath = path.Join(homeDir, "go2cs")
+		go2csPath = filepath.Join(homeDir, "go2cs")
 
 		os.Setenv("GO2CSPATH", go2csPath)
 	}
@@ -331,7 +335,7 @@ Examples:
 
 	if options.includeComments {
 		parseMode = parser.ParseComments | parser.SkipObjectResolution
-	} else {
+	} else if len(goRoot) == 0 {
 		parseMode = parser.SkipObjectResolution
 	}
 
@@ -348,7 +352,9 @@ Examples:
 
 	if fileInfo.IsDir() {
 		// If the input is a directory, write project files (if needed)
-		if projectFileName, err = writeProjectFiles(filepath.Base(inputFilePath), outputFilePath); err != nil {
+		projectName := getProjectName(inputFilePath, options)
+
+		if projectFileName, err = writeProjectFiles(projectName, outputFilePath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", outputFilePath, err)
 		} else {
 			// Parse all .go files in the directory
@@ -365,19 +371,31 @@ Examples:
 						return nil
 					}
 
-					file, err := parser.ParseFile(fset, path, nil, parseMode)
+					// See if output already exists and has been marked as manually converted
+					outputFileName := filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
+					manualConv, err := containsManualConversionMarker(outputFileName)
 
 					if err != nil {
-						return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
+						updateProjectFile(projectFileName, outputFilePath, nil, options)
+						log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
 					}
 
-					files = append(files, FileEntry{file, path, map[types.Object]bool{}})
+					if !manualConv {
+						file, err := parser.ParseFile(fset, path, nil, parseMode)
+
+						if err != nil {
+							return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
+						}
+
+						files = append(files, FileEntry{file, path, map[types.Object]bool{}})
+					}
 				}
 
 				return nil
 			})
 
 			if err != nil {
+				updateProjectFile(projectFileName, outputFilePath, nil, options)
 				log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
 			}
 		}
@@ -393,13 +411,28 @@ Examples:
 			log.Fatalf("Not parsing input source \"%s\" due to non-matching build constraints", inputFilePath)
 		}
 
-		file, err := parser.ParseFile(fset, inputFilePath, nil, parseMode)
+		// See if output already exists and has been marked as manually converted
+		outputFileName := strings.TrimSuffix(outputFilePath, ".go") + ".cs"
+		manualConv, err := containsManualConversionMarker(outputFileName)
 
 		if err != nil {
-			log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)
+			log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
 		}
 
-		files = append(files, FileEntry{file, inputFilePath, map[types.Object]bool{}})
+		if !manualConv {
+			file, err := parser.ParseFile(fset, inputFilePath, nil, parseMode)
+
+			if err != nil {
+				log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)
+			}
+
+			files = append(files, FileEntry{file, inputFilePath, map[types.Object]bool{}})
+		}
+	}
+
+	if len(files) == 0 {
+		updateProjectFile(projectFileName, outputFilePath, nil, options)
+		log.Fatalf("No valid Go source files found for conversion in input path \"%s", inputFilePath)
 	}
 
 	conf := types.Config{Importer: importer.Default()}
@@ -424,47 +457,8 @@ Examples:
 	pkg, err := conf.Check(".", fset, extractFiles(files), info)
 
 	if err != nil {
+		updateProjectFile(projectFileName, outputFilePath, nil, options)
 		log.Fatalf("Failed to parse types from input source files: %s\n", err)
-	}
-
-	// Once we have the package details, we can determine the assembly output type
-	outputType := getAssemblyOutputType(pkg)
-
-	// Update project file with correct output type
-	if len(projectFileName) > 0 {
-		projectContents, err := os.ReadFile(projectFileName)
-
-		if err != nil {
-			log.Fatalf("Failed to read project file %q: %s", projectFileName, err)
-		}
-
-		// Replace the output type marker with the actual output type
-		newContents := []byte(strings.ReplaceAll(string(projectContents), OutputTypeMarker, outputType))
-
-		// Rewrite project file atomically
-		err = os.WriteFile(projectFileName, newContents, 0644)
-
-		if err != nil {
-			log.Fatalf("Failed to write project file %q: %s", projectFileName, err)
-		}
-
-		// For executable projects, write OS-specific publish profiles
-		if outputType == "Exe" {
-			err = writePublishProfiles(outputFilePath)
-
-			if err != nil {
-				log.Fatalf("Failed to write publish profiles for project \"%s\": %s\n", outputFilePath, err)
-			}
-		}
-
-		// For library projects, write package files, like icon
-		if outputType == "Library" {
-			err = writePackageFiles(outputFilePath)
-
-			if err != nil {
-				log.Fatalf("Failed to write package files for project \"%s\": %s\n", outputFilePath, err)
-			}
-		}
 	}
 
 	globalIdentNames := make(map[*ast.Ident]string)
@@ -480,93 +474,10 @@ Examples:
 	}
 
 	// Perform escape analysis for each file
-	for i := range files {
-		visitor := &Visitor{
-			fset:             fset,
-			pkg:              pkg,
-			info:             info,
-			identEscapesHeap: files[i].identEscapesHeap,
-		}
-
-		ast.Inspect(files[i].file, func(n ast.Node) bool {
-			switch node := n.(type) {
-			case *ast.FuncDecl:
-				if node.Body == nil {
-					return true
-				}
-
-				ast.Inspect(node.Body, func(n ast.Node) bool {
-					switch n := n.(type) {
-					case *ast.AssignStmt:
-						if n.Tok == token.DEFINE {
-							for _, lhs := range n.Lhs {
-								if ident := getIdentifier(lhs); ident != nil {
-									visitor.performEscapeAnalysis(ident, node.Body)
-								}
-							}
-						}
-					case *ast.RangeStmt:
-						if n.Tok == token.DEFINE {
-							if key := getIdentifier(n.Key); key != nil {
-								visitor.performEscapeAnalysis(key, node.Body)
-							}
-							if value := getIdentifier(n.Value); value != nil {
-								visitor.performEscapeAnalysis(value, node.Body)
-							}
-						}
-					case *ast.DeclStmt:
-						if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
-							for _, spec := range genDecl.Specs {
-								if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-									for _, ident := range valueSpec.Names {
-										if !isDiscardedVar(ident.Name) {
-											visitor.performEscapeAnalysis(ident, node.Body)
-										}
-									}
-								}
-							}
-						}
-					case *ast.ForStmt:
-						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
-							for _, lhs := range init.Lhs {
-								if ident := getIdentifier(lhs); ident != nil {
-									visitor.performEscapeAnalysis(ident, node.Body)
-								}
-							}
-						}
-					case *ast.IfStmt:
-						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
-							for _, lhs := range init.Lhs {
-								if ident := getIdentifier(lhs); ident != nil {
-									visitor.performEscapeAnalysis(ident, node.Body)
-								}
-							}
-						}
-					case *ast.SwitchStmt:
-						if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
-							for _, lhs := range init.Lhs {
-								if ident := getIdentifier(lhs); ident != nil {
-									visitor.performEscapeAnalysis(ident, node.Body)
-								}
-							}
-						}
-					case *ast.TypeSwitchStmt:
-						if assign, ok := n.Assign.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
-							for _, lhs := range assign.Lhs {
-								if ident := getIdentifier(lhs); ident != nil {
-									visitor.performEscapeAnalysis(ident, node.Body)
-								}
-							}
-						}
-					}
-					return true
-				})
-			}
-			return true
-		})
-	}
+	performEscapeAnalysis(files, fset, pkg, info)
 
 	var concurrentTasks sync.WaitGroup
+	projectImports = NewHashSet([]string{})
 
 	for _, fileEntry := range files {
 		concurrentTasks.Add(1)
@@ -610,10 +521,21 @@ Examples:
 			if err := visitor.writeOutputFile(outputFileName); err != nil {
 				log.Printf("%s\n", err)
 			}
+
+			packageLock.Lock()
+			projectImports.UnionWithSet(visitor.importQueue)
+			packageLock.Unlock()
 		}(fileEntry)
 	}
 
 	concurrentTasks.Wait()
+
+	// Update project file with correct output type and unsafe code settings
+	err = updateProjectFile(projectFileName, outputFilePath, pkg, options)
+
+	if err != nil {
+		log.Fatalf("Failed to update project file \"%s\": %s\n", projectFileName, err)
+	}
 
 	var packageInfoFileName string
 
@@ -858,6 +780,9 @@ func getGoEnv(name string) (string, error) {
 	return strings.TrimSpace(out.String()), nil
 }
 
+// writeProjectFiles writes the project files for the given project name and path.
+// Note that primary csproj file is written with markers that will need to be replaced
+// before the conversion is complete, even in cases where log.Fatalf is called.
 func writeProjectFiles(projectName string, projectPath string) (string, error) {
 	// Make sure project path ends with a directory separator
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
@@ -886,38 +811,89 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 		}
 	}
 
-	// TODO: Need to know which projects to reference based on package imports.
-	// Original src path location to referenced project can be determined by using:
-	//     go list -f '{{.Standard}}:{{.Dir}}' "import/path/package/name"
-	// This returns `std:dir`, where `std` is `true` if package is in the standard
-	// library and `dir` is the Go source code directory of the package.
-
 	// Generate project file contents
 	projectFileContents := fmt.Sprintf(string(csprojTemplate),
 		OutputTypeMarker,
 		projectName,
-		time.Now().Year())
+		time.Now().Year(),
+		UnsafeMarker,
+		ProjectReferenceMarker,
+	)
 
 	projectFileName := projectPath + projectName + ".csproj"
+	projectFile, err := os.Create(projectFileName)
 
-	// Check if project file needs to be written
-	if needToWriteFile(projectFileName, []byte(projectFileContents)) {
-		projectFile, err := os.Create(projectFileName)
+	if err != nil {
+		return "", fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
+	}
 
-		if err != nil {
-			return "", fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
-		}
+	defer projectFile.Close()
 
-		_, err = projectFile.WriteString(projectFileContents)
+	_, err = projectFile.WriteString(projectFileContents)
 
-		if err != nil {
-			return "", fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
-		}
-
-		defer projectFile.Close()
+	if err != nil {
+		return "", fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
 	}
 
 	return projectFileName, nil
+}
+
+func updateProjectFile(projectFileName string, outputFilePath string, pkg *types.Package, options Options) error {
+	if len(projectFileName) == 0 {
+		return nil
+	}
+
+	projectContents, err := os.ReadFile(projectFileName)
+
+	if err != nil {
+		return fmt.Errorf("failed to read project file %q: %s", projectFileName, err)
+	}
+
+	// Get assembly output type from the package details
+	outputType := getAssemblyOutputType(pkg)
+
+	// Replace the output type marker with the actual output type
+	newContents := []byte(strings.ReplaceAll(string(projectContents), OutputTypeMarker, outputType))
+
+	// Replace the unsafe code marker with the actual unsafe code setting
+	newContents = []byte(strings.ReplaceAll(string(newContents), UnsafeMarker, strconv.FormatBool(usesUnsafeCode)))
+
+	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)
+	projectReferences := &strings.Builder{}
+
+	for _, info := range packageInfoMap {
+		projectReferences.WriteString(fmt.Sprintf("\r\n    <ProjectReference Include=\"%s\" />", info.ProjectReference))
+	}
+
+	// Replace the project reference marker with the actual project references
+	newContents = []byte(strings.ReplaceAll(string(newContents), ProjectReferenceMarker, projectReferences.String()))
+
+	// Rewrite project file atomically
+	err = os.WriteFile(projectFileName, newContents, 0644)
+
+	if err != nil {
+		return fmt.Errorf("failed to write project file %q: %s", projectFileName, err)
+	}
+
+	// For executable projects, write OS-specific publish profiles
+	if outputType == "Exe" {
+		err = writePublishProfiles(outputFilePath)
+
+		if err != nil {
+			return fmt.Errorf("failed to write publish profiles for project \"%s\": %s", outputFilePath, err)
+		}
+	}
+
+	// For library projects, write package files, like icon
+	if outputType == "Library" {
+		err = writePackageFiles(outputFilePath)
+
+		if err != nil {
+			return fmt.Errorf("failed to write package files for project \"%s\": %s", outputFilePath, err)
+		}
+	}
+
+	return nil
 }
 
 func writePackageFiles(projectPath string) error {
@@ -1031,6 +1007,10 @@ func getAssemblyOutputType(pkg *types.Package) string {
 }
 
 func hasMainFunction(pkg *types.Package) bool {
+	if pkg == nil {
+		return false
+	}
+
 	// First check if this is a main package
 	if pkg.Name() != "main" {
 		return false
@@ -1132,6 +1112,23 @@ func getSanitizedImport(identifier string) string {
 }
 
 func getSanitizedIdentifier(identifier string) string {
+	if strings.Contains(identifier, ".") {
+		// Split identifiers based on dot separator and sanitize each part
+		parts := strings.Split(identifier, ".")
+
+		if len(parts) > 1 {
+			for i, part := range parts {
+				if i == len(parts)-1 {
+					parts[i] = getSanitizedIdentifier(part)
+				} else {
+					parts[i] = getSanitizedImport(part)
+				}
+			}
+
+			return strings.Join(parts, ".")
+		}
+	}
+
 	if strings.HasPrefix(identifier, "@") || strings.HasPrefix(identifier, ShadowVarMarker) {
 		return identifier // Already sanitized
 	}
@@ -1950,22 +1947,6 @@ func convertToCSFullTypeName(typeName string) string {
 	default:
 		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
 	}
-}
-
-func convertImportPathToNamespace(importPath string, packageSuffix string) string {
-	// Split import path by "/"
-	importPathParts := strings.Split(importPath, "/")
-
-	// Update all import path parts to sanitized identifiers
-	for i, part := range importPathParts {
-		if i == len(importPathParts)-1 {
-			part = part + packageSuffix
-		}
-
-		importPathParts[i] = getSanitizedImport(part)
-	}
-
-	return strings.Join(importPathParts, ".")
 }
 
 func splitMapKeyValue(typeStr string) (string, string) {

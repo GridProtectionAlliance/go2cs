@@ -1,11 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 )
 
-func (v *Visitor) convStarExpr(starExpr *ast.StarExpr) string {
+func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) string {
 	ident := getIdentifier(starExpr.X)
 
 	if ident != nil && v.identIsParameter(ident) {
@@ -29,7 +30,30 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr) string {
 		if pointerDepth > 1 {
 			baseExpr += ".val"
 		}
+
 		return baseExpr + ".val"
+	}
+
+	// In a parenthesis, we are applying a pointer cast operation
+	if context.inParenExpr {
+		pointerType := convertToCSTypeName(v.getTypeName(v.getType(starExpr.X, true), false))
+		return fmt.Sprintf("%s<%s>", PointerPrefix, pointerType)
+	}
+
+	// Check for a call expr that contains a paren expr with a star expresssion inside it where starExpr.X is an identifier
+	if callExpr, ok := starExpr.X.(*ast.CallExpr); ok {
+		if len(callExpr.Args) == 1 {
+			if parenExpr, ok := callExpr.Fun.(*ast.ParenExpr); ok {
+				if _, ok := parenExpr.X.(*ast.StarExpr); ok {
+					if ident := getIdentifier(parenExpr.X); ident != nil {
+						// In this case we are dealing with a casted pointer dereference, e.g., "*(*int)"
+						context := DefaultLambdaContext()
+						context.isPointerCast = true
+						return fmt.Sprintf("%s%s", PointerDerefOp, v.convExpr(starExpr.X, []ExprContext{context}))
+					}
+				}
+			}
+		}
 	}
 
 	// Default behavior for other cases

@@ -84,6 +84,7 @@ func (c ArrayTypeContext) getDefault() StmtContext {
 type LambdaContext struct {
 	isAssignment  bool
 	isCallExpr    bool
+	isPointerCast bool
 	deferredDecls *strings.Builder
 }
 
@@ -91,6 +92,7 @@ func DefaultLambdaContext() LambdaContext {
 	return LambdaContext{
 		isAssignment:  false,
 		isCallExpr:    false,
+		isPointerCast: false,
 		deferredDecls: nil,
 	}
 }
@@ -164,6 +166,21 @@ func (c PatternMatchExprContext) getDefault() StmtContext {
 	return DefaultPatternMatchExprContext()
 }
 
+type StarExprContext struct {
+	inParenExpr   bool
+	isPointerCast bool
+}
+
+func DefaultStarExprContext() StarExprContext {
+	return StarExprContext{
+		inParenExpr: false,
+	}
+}
+
+func (c StarExprContext) getDefault() StmtContext {
+	return DefaultStarExprContext()
+}
+
 func getExprContext[TContext ExprContext](contexts []ExprContext) TContext {
 	var zeroValue TContext
 
@@ -217,14 +234,16 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 	case *ast.MapType:
 		return v.convMapType(exprType)
 	case *ast.ParenExpr:
-		return v.convParenExpr(exprType)
+		context := getExprContext[LambdaContext](contexts)
+		return v.convParenExpr(exprType, context)
 	case *ast.SelectorExpr:
 		context := getExprContext[LambdaContext](contexts)
 		return v.convSelectorExpr(exprType, context)
 	case *ast.SliceExpr:
 		return v.convSliceExpr(exprType)
 	case *ast.StarExpr:
-		return v.convStarExpr(exprType)
+		context := getExprContext[StarExprContext](contexts)
+		return v.convStarExpr(exprType, context)
 	case *ast.TypeAssertExpr:
 		return v.convTypeAssertExpr(exprType)
 	case *ast.StructType:

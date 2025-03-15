@@ -43,3 +43,19 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())
 	v.packageImports.WriteString(v.newline)
 }
+
+func convertImportPathToNamespace(importPath string, packageSuffix string) string {
+	// Split import path by "/"
+	importPathParts := strings.Split(importPath, "/")
+
+	// Update all import path parts to sanitized identifiers
+	for i, part := range importPathParts {
+		if i == len(importPathParts)-1 {
+			part = part + packageSuffix
+		}
+
+		importPathParts[i] = getSanitizedImport(part)
+	}
+
+	return strings.Join(importPathParts, ".")
+}

@@ -49,7 +49,14 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		v.writeString(target, "[GoType(\"%s\")]", csTypeName)
 	}
 
-	v.writeString(target, " partial struct %s;", getSanitizedIdentifier(name))
+	if strings.HasPrefix(name, PointerPrefix) {
+		// Handle pointer types
+		v.writeString(target, " partial class %s;", getSanitizedIdentifier(name))
+		usesUnsafeCode = true
+	} else {
+		v.writeString(target, " partial struct %s;", getSanitizedIdentifier(name))
+	}
+
 	target.WriteString(v.newline)
 
 	if lifted && v.inFunction {
