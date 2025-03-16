@@ -352,6 +352,14 @@ Examples:
 		Dir:  inputFilePath,
 	}
 
+	targetParts := strings.Split(options.targetPlatform, "/")
+
+	if len(targetParts) != 2 {
+		log.Fatalf("Invalid target platform format: %s\n", options.targetPlatform)
+	}
+
+	cfg.Env = append(os.Environ(), fmt.Sprintf(`"GOOS=%s", "GOARCH=%s"`, targetParts[0], targetParts[1]))
+
 	var pkgs []*packages.Package
 
 	if strings.HasPrefix(strings.ToLower(inputFilePath), strings.ToLower(options.goPath)) {
