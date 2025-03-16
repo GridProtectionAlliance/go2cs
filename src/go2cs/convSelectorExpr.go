@@ -39,15 +39,13 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					if obj := v.info.ObjectOf(exprIdent); obj != nil {
 						// Check if it's a receiver or parameter pointer variable
 						if selVar, ok := obj.(*types.Var); ok {
-							currentFuncSignature := v.currentFuncType.Signature()
-
 							// If it's a receiver, skip dereferencing
-							if currentFuncSignature.Recv() == selVar {
+							if v.currentFuncSignature.Recv() == selVar {
 								return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
 							}
 
 							// Check if it's a function parameter
-							params := currentFuncSignature.Params()
+							params := v.currentFuncSignature.Params()
 
 							for i := range params.Len() {
 								// It's a function parameter, skip dereferencing

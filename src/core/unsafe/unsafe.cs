@@ -23,6 +23,13 @@ using go;
 
 namespace go;
 
+/// <summary>
+/// The unsafe package contains operations that step around the type safety of Go programs.
+/// Note that the operations in this package are not type safe and can lead to undefined behavior.
+/// In the case of C# operations, the return values will be in context of the C# type system,
+/// not Go. Any Go code that has been converted to C# and is dependent on memory layout of Go
+/// types will certainly not work as expected and could cause unexpected behavior.
+/// </summary>
 unsafe partial class unsafe_package  {
 
 // ArbitraryType is here for the purposes of documentation only and is not actually

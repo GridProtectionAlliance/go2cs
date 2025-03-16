@@ -40,6 +40,7 @@
                 //"..\\Tests\\Behavioral\\InterfaceIntraFunction",
                 //"..\\Tests\\Behavioral\\MethodSelector",
                 //"..\\Tests\\Behavioral\\StringPassByValue",
+                //"..\\Tests\\Behavioral\\StructWithPointer",
                 //"..\\Tests\\Behavioral\\StructPromotion",
                 //"..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
@@ -65,6 +66,10 @@
                 //"C:\\Users\\rcarroll\\go2cs\\core\\unsafe",
                 //"C:\\Users\\rcarroll\\go\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0\\features",
                 //"C:\\Users\\rcarroll\\go2cs\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0\\features",
+                //"C:\\Users\\rcarroll\\go\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0",
+                //"C:\\Users\\rcarroll\\go2cs\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0",
+                //"C:\\Program Files\\Go\\src\\internal\\reflectlite",
+                //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\reflectlite"
             ]
         }
     ]

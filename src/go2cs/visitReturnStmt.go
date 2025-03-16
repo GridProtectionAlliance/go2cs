@@ -15,14 +15,14 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	result.WriteString(v.indent(v.indentLevel))
 	result.WriteString("return")
 
-	signature := v.currentFuncType.Signature()
+	signature := v.currentFuncSignature
 
 	if returnStmt.Results == nil {
 		// Check if result signature has named return values
-		if v.currentFuncType != nil {
+		if signature != nil {
 			results := &strings.Builder{}
 
-			for i := 0; i < signature.Results().Len(); i++ {
+			for i := range signature.Results().Len() {
 				if i > 0 && results.Len() > 0 {
 					results.WriteString(", ")
 				}
@@ -89,11 +89,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				deferredDecls.WriteString(lambdaContext.deferredDecls.String())
 			}
 
-			if resultParamIsInterface != nil && resultParamIsInterface[i] {
+			if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
 				resultParamType := resultParams.At(i).Type()
 				result.WriteString(v.convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
 			} else {
-				if resultParamIsPointer != nil && resultParamIsPointer[i] {
+				if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
 					ident := getIdentifier(expr)
 
 					if ident != nil && v.identIsParameter(ident) {

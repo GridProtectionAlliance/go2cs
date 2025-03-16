@@ -115,10 +115,12 @@ func getProjectName(importPath string, options Options) string {
 	}
 
 	importPath = strings.ReplaceAll(importPath, "\\", "/")
+	importPath = strings.TrimPrefix(importPath, "/")
 	importPath = strings.TrimPrefix(importPath, "go2cs/")
 
 	// Replace path separators with dots
 	parts := strings.Split(importPath, "/")
+
 	return strings.Join(parts, ".")
 }
 

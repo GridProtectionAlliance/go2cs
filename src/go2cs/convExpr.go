@@ -167,8 +167,7 @@ func (c PatternMatchExprContext) getDefault() StmtContext {
 }
 
 type StarExprContext struct {
-	inParenExpr   bool
-	isPointerCast bool
+	inParenExpr bool
 }
 
 func DefaultStarExprContext() StarExprContext {

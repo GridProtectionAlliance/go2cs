@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"path/filepath"
 	"strings"
 )
 
@@ -205,6 +206,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		argParts := strings.Split(argExpr, ".")
 
 		if funcName == "@unsafe.Offsetof" {
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Offsetof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
+
 			if len(argParts) == 2 {
 				// `unsafe.Offsetof(structValue.field)` to
 				// `@unsafe.Offsetof(structValue.GetType(), "field")`
@@ -212,8 +215,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			} else {
 				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Offsetof' argument format: %s", argExpr))
 			}
-
 		} else if funcName == "@unsafe.Alignof" {
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Alignof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
+
 			if len(argParts) == 1 {
 				// `unsafe.Alignof(x)` to
 				// `@unsafe.Alignof(x.GetType())`
@@ -225,6 +229,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			} else {
 				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Alignof' argument format: %s", argExpr))
 			}
+		} else if funcName == "@unsafe.Sizeof" {
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Sizeof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
 		}
 	}
 

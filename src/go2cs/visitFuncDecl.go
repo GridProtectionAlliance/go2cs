@@ -23,17 +23,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
 
 	v.currentFuncDecl = funcDecl
-	v.currentFuncType = v.info.ObjectOf(funcDecl.Name).(*types.Func)
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}
 
 	v.varNames = make(map[*types.Var]string)
 
-	if v.currentFuncType == nil {
+	currentFuncType := v.info.ObjectOf(funcDecl.Name).(*types.Func)
+
+	if currentFuncType == nil {
 		panic("Failed to find function \"" + goFunctionName + "\" in the type info")
 	}
 
-	signature := v.currentFuncType.Signature()
+	signature := currentFuncType.Signature()
+	v.currentFuncSignature = signature
 
 	// Analyze function variables for reassignments and redeclarations (variable shadows)
 	v.performVariableAnalysis(funcDecl, signature)
@@ -123,7 +125,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	blockContext := DefaultBlockStmtContext()
 	blockContext.innerPrefix = functionBlockPrefixMarker
-	typeParams, constraints := v.getGenericDefinition(v.currentFuncType.Type())
+	typeParams, constraints := v.getGenericDefinition(currentFuncType.Type())
 
 	v.writeOutput("%s%s static %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 

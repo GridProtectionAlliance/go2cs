@@ -7,8 +7,6 @@ import (
 	"fmt"
 	"go/ast"
 	"go/build"
-	"go/importer"
-	"go/parser"
 	"go/printer"
 	"go/token"
 	"go/types"
@@ -26,6 +24,8 @@ import (
 	"time"
 	"unicode"
 	"unicode/utf8"
+
+	"golang.org/x/tools/go/packages"
 )
 
 type Options struct {
@@ -100,17 +100,17 @@ type Visitor struct {
 	typeAliasDeclarations *strings.Builder
 
 	// FuncDecl variables
-	inFunction        bool
-	currentFuncDecl   *ast.FuncDecl
-	currentFuncType   *types.Func
-	currentFuncName   string
-	currentFuncPrefix *strings.Builder
-	paramNames        HashSet[string]
-	varNames          map[*types.Var]string
-	hasDefer          bool
-	hasRecover        bool
-	capturedVarCount  map[string]int
-	tempVarCount      map[string]int
+	inFunction           bool
+	currentFuncDecl      *ast.FuncDecl
+	currentFuncSignature *types.Signature
+	currentFuncName      string
+	currentFuncPrefix    *strings.Builder
+	paramNames           HashSet[string]
+	varNames             map[*types.Var]string
+	hasDefer             bool
+	hasRecover           bool
+	capturedVarCount     map[string]int
+	tempVarCount         map[string]int
 
 	// BlockStmt variables
 	blocks                 Stack[*strings.Builder]
@@ -198,13 +198,13 @@ var publishProfiles embed.FS
 // Define package level variables
 var packageName string
 var projectImports HashSet[string]
-var exportedTypeAliases = map[string]string{}
-var interfaceImplementations = map[string]HashSet[string]{}
-var promotedInterfaceImplementations = map[string]HashSet[string]{}
-var interfaceInheritances = map[string]HashSet[string]{}
-var implicitConversions = map[string]HashSet[string]{}
-var invertedImplicitConversions = map[string]HashSet[string]{}
-var indirectImplicitConversions = map[string]HashSet[string]{}
+var exportedTypeAliases map[string]string
+var interfaceImplementations map[string]HashSet[string]
+var promotedInterfaceImplementations map[string]HashSet[string]
+var interfaceInheritances map[string]HashSet[string]
+var implicitConversions map[string]HashSet[string]
+var invertedImplicitConversions map[string]HashSet[string]
+var indirectImplicitConversions map[string]HashSet[string]
 var initFuncCounter int
 var usesUnsafeCode bool
 var packageLock = sync.Mutex{}
@@ -279,8 +279,7 @@ func main() {
 		}
 
 		fmt.Fprintln(os.Stderr, `
-File usage: go2cs [options] <input.go> [output.cs]
- Dir usage: go2cs [options] <input_dir> [output_dir]
+ Usage: go2cs [options] <input_dir> [output_dir]
  
  Options:`)
 
@@ -321,9 +320,6 @@ Examples:
 		}
 	}
 
-	fset := token.NewFileSet()
-	files := []FileEntry{}
-
 	// Check if the input is a file or a directory
 	fileInfo, err := os.Stat(inputFilePath)
 
@@ -331,15 +327,11 @@ Examples:
 		log.Fatalf("Failed to access input file path \"%s\": %s\n", inputFilePath, err)
 	}
 
-	var parseMode parser.Mode
-
-	if options.includeComments {
-		parseMode = parser.ParseComments | parser.SkipObjectResolution
-	} else if len(goRoot) == 0 {
-		parseMode = parser.SkipObjectResolution
+	if !fileInfo.IsDir() {
+		inputFilePath = filepath.Dir(inputFilePath)
 	}
 
-	outputFilePath := ""
+	var outputFilePath string
 
 	// If the user has provided a second argument, we will use it as the output directory or file
 	if commandLine.NArg() > 1 {
@@ -348,420 +340,404 @@ Examples:
 		outputFilePath = inputFilePath
 	}
 
-	var projectFileName string
+	inputFilePath, err = filepath.Abs(inputFilePath)
 
-	if fileInfo.IsDir() {
-		// If the input is a directory, write project files (if needed)
-		projectName := getProjectName(inputFilePath, options)
+	if err != nil {
+		log.Fatalf("Failed to get absolute file path \"%s\": %s\n", inputFilePath, err)
+		return
+	}
 
-		if projectFileName, err = writeProjectFiles(projectName, outputFilePath); err != nil {
-			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", outputFilePath, err)
+	cfg := &packages.Config{
+		Mode: packages.LoadAllSyntax,
+		Dir:  inputFilePath,
+	}
+
+	var pkgs []*packages.Package
+
+	if strings.HasPrefix(strings.ToLower(inputFilePath), strings.ToLower(options.goPath)) {
+		pkgs, err = packages.Load(cfg, "./...")
+	} else {
+		pkgs, err = packages.Load(cfg, inputFilePath)
+	}
+
+	for _, pkg := range pkgs {
+		if len(pkg.Errors) > 0 {
+			log.Printf("Errors: %v", pkg.Errors)
+		}
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
+	}
+
+	for _, pkg := range pkgs {
+		// Reset package level variables for each package
+		packageName = ""
+		projectImports = NewHashSet([]string{})
+		exportedTypeAliases = make(map[string]string)
+		interfaceImplementations = make(map[string]HashSet[string])
+		promotedInterfaceImplementations = make(map[string]HashSet[string])
+		interfaceInheritances = make(map[string]HashSet[string])
+		implicitConversions = make(map[string]HashSet[string])
+		invertedImplicitConversions = make(map[string]HashSet[string])
+		indirectImplicitConversions = make(map[string]HashSet[string])
+		initFuncCounter = 0
+		usesUnsafeCode = false
+
+		files := []FileEntry{}
+		fset := pkg.Fset
+		packageTypes := pkg.Types
+		info := pkg.TypesInfo
+
+		packageInputPath := inputFilePath
+		packageOutputPath := outputFilePath
+
+		if len(pkg.Dir) > 0 && pkg.Dir != packageInputPath {
+			// Adjust output path if the input is a subdirectory of the package directory
+			subPath := strings.Replace(pkg.Dir, packageInputPath, "", 1)
+			packageOutputPath = filepath.Join(packageOutputPath, subPath)
+			packageInputPath = pkg.Dir
+		}
+
+		var projectFileName string
+		projectName := getProjectName(packageInputPath, options)
+
+		if projectFileName, err = writeProjectFiles(projectName, packageOutputPath); err != nil {
+			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
 		} else {
-			// Parse all .go files in the directory
-			err := filepath.Walk(inputFilePath, func(path string, info os.FileInfo, err error) error {
+			for i, file := range pkg.Syntax {
+				path := pkg.GoFiles[i]
+
+				if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
+					updateProjectFile(projectFileName, packageOutputPath, nil, options)
+					log.Fatalf("Failed to evaluate build constraints for file \"%s\": %s", path, err)
+				} else if !match {
+					// Skipping file due to non-matching build constraints
+					continue
+				}
+
+				// See if output already exists and has been marked as manually converted
+				outputFileName := filepath.Join(packageOutputPath, strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
+				manualConv, err := containsManualConversionMarker(outputFileName)
+
 				if err != nil {
-					return err
+					updateProjectFile(projectFileName, packageOutputPath, nil, options)
+					log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
 				}
 
-				if !info.IsDir() && strings.HasSuffix(info.Name(), ".go") && !strings.HasSuffix(info.Name(), "_test.go") {
-					if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
-						return fmt.Errorf("failed to evaluate build constraints for file \"%s\": %s", path, err)
-					} else if !match {
-						// Skipping file due to non-matching build constraints
-						return nil
-					}
-
-					// See if output already exists and has been marked as manually converted
-					outputFileName := filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(path), ".go")+".cs")
-					manualConv, err := containsManualConversionMarker(outputFileName)
-
-					if err != nil {
-						updateProjectFile(projectFileName, outputFilePath, nil, options)
-						log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
-					}
-
-					if !manualConv {
-						file, err := parser.ParseFile(fset, path, nil, parseMode)
-
-						if err != nil {
-							return fmt.Errorf("failed to parse input source file \"%s\": %s", path, err)
-						}
-
-						files = append(files, FileEntry{file, path, map[types.Object]bool{}})
-					}
+				if !manualConv {
+					files = append(files, FileEntry{file, path, map[types.Object]bool{}})
 				}
-
-				return nil
-			})
-
-			if err != nil {
-				updateProjectFile(projectFileName, outputFilePath, nil, options)
-				log.Fatalf("Failed to parse files in directory \"%s\": %s\n", inputFilePath, err)
 			}
 		}
-	} else {
-		// If the input is a single file, parse it
-		if !strings.HasSuffix(inputFilePath, ".go") {
-			log.Fatalln("Invalid file extension for input source file: please provide a .go file as first argument")
+
+		if len(files) == 0 {
+			updateProjectFile(projectFileName, packageOutputPath, nil, options)
+			println(fmt.Sprintf("WARNING: No valid Go source files found for conversion in input path \"%s\"", packageInputPath))
+			continue
 		}
 
-		if match, err := CheckBuildConstraints(inputFilePath, options.targetPlatform); err != nil {
-			log.Fatalf("Failed to evaluate build constraints for file \"%s\": %s", inputFilePath, err)
-		} else if !match {
-			log.Fatalf("Not parsing input source \"%s\" due to non-matching build constraints", inputFilePath)
+		globalIdentNames := make(map[*ast.Ident]string)
+		globalScope := map[string]*types.Var{}
+
+		// Pre-process all global variables in package
+		for _, fileEntry := range files {
+			performGlobalVariableAnalysis(fileEntry.file.Decls, info, globalIdentNames, globalScope)
+
+			if options.showParseTree {
+				ast.Fprint(os.Stdout, fset, fileEntry.file, nil)
+			}
 		}
 
-		// See if output already exists and has been marked as manually converted
-		outputFileName := strings.TrimSuffix(outputFilePath, ".go") + ".cs"
-		manualConv, err := containsManualConversionMarker(outputFileName)
+		// Perform escape analysis for each file
+		performEscapeAnalysis(files, fset, packageTypes, info)
+
+		var concurrentTasks sync.WaitGroup
+
+		for _, fileEntry := range files {
+			concurrentTasks.Add(1)
+
+			go func(fileEntry FileEntry) {
+				defer concurrentTasks.Done()
+
+				visitor := &Visitor{
+					fset:                  fset,
+					pkg:                   packageTypes,
+					info:                  info,
+					targetFile:            &strings.Builder{},
+					liftedTypeNames:       HashSet[string]{},
+					liftedTypeMap:         map[types.Type]string{},
+					subStructTypes:        map[types.Type][]types.Type{},
+					packageImports:        &strings.Builder{},
+					requiredUsings:        HashSet[string]{},
+					importQueue:           HashSet[string]{},
+					typeAliasDeclarations: &strings.Builder{},
+					standAloneComments:    map[token.Pos]string{},
+					sortedCommentPos:      []token.Pos{},
+					processedComments:     HashSet[token.Pos]{},
+					newline:               "\r\n",
+					options:               options,
+					globalIdentNames:      globalIdentNames,
+					globalScope:           globalScope,
+					blocks:                Stack[*strings.Builder]{},
+					identEscapesHeap:      fileEntry.identEscapesHeap,
+				}
+
+				visitor.visitFile(fileEntry.file)
+
+				var outputFileName string
+
+				if fileInfo.IsDir() {
+					outputFileName = filepath.Join(packageOutputPath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
+				} else {
+					outputFileName = strings.TrimSuffix(packageOutputPath, ".go") + ".cs"
+				}
+
+				if err := visitor.writeOutputFile(outputFileName); err != nil {
+					log.Printf("%s\n", err)
+				}
+
+				packageLock.Lock()
+				projectImports.UnionWithSet(visitor.importQueue)
+				packageLock.Unlock()
+			}(fileEntry)
+		}
+
+		concurrentTasks.Wait()
+
+		// Update project file with correct output type and unsafe code settings
+		err = updateProjectFile(projectFileName, packageOutputPath, packageTypes, options)
 
 		if err != nil {
-			log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
+			log.Fatalf("Failed to update project file \"%s\": %s\n", projectFileName, err)
 		}
 
-		if !manualConv {
-			file, err := parser.ParseFile(fset, inputFilePath, nil, parseMode)
+		var packageInfoFileName string
 
-			if err != nil {
-				log.Fatalf("Failed to parse input source file \"%s\": %s\n", inputFilePath, err)
-			}
-
-			files = append(files, FileEntry{file, inputFilePath, map[types.Object]bool{}})
-		}
-	}
-
-	if len(files) == 0 {
-		updateProjectFile(projectFileName, outputFilePath, nil, options)
-		log.Fatalf("No valid Go source files found for conversion in input path \"%s", inputFilePath)
-	}
-
-	conf := types.Config{Importer: importer.Default()}
-
-	info := &types.Info{
-		Types:      make(map[ast.Expr]types.TypeAndValue),
-		Defs:       make(map[*ast.Ident]types.Object),
-		Uses:       make(map[*ast.Ident]types.Object),
-		Selections: make(map[*ast.SelectorExpr]*types.Selection),
-	}
-
-	extractFiles := func(files []FileEntry) []*ast.File {
-		result := make([]*ast.File, len(files))
-
-		for i, fileEntry := range files {
-			result[i] = fileEntry.file
-		}
-
-		return result
-	}
-
-	pkg, err := conf.Check(".", fset, extractFiles(files), info)
-
-	if err != nil {
-		updateProjectFile(projectFileName, outputFilePath, nil, options)
-		log.Fatalf("Failed to parse types from input source files: %s\n", err)
-	}
-
-	globalIdentNames := make(map[*ast.Ident]string)
-	globalScope := map[string]*types.Var{}
-
-	// Pre-process all global variables in package
-	for _, fileEntry := range files {
-		performGlobalVariableAnalysis(fileEntry.file.Decls, info, globalIdentNames, globalScope)
-
-		if options.showParseTree {
-			ast.Fprint(os.Stdout, fset, fileEntry.file, nil)
-		}
-	}
-
-	// Perform escape analysis for each file
-	performEscapeAnalysis(files, fset, pkg, info)
-
-	var concurrentTasks sync.WaitGroup
-	projectImports = NewHashSet([]string{})
-
-	for _, fileEntry := range files {
-		concurrentTasks.Add(1)
-
-		go func(fileEntry FileEntry) {
-			defer concurrentTasks.Done()
-
-			visitor := &Visitor{
-				fset:                  fset,
-				pkg:                   pkg,
-				info:                  info,
-				targetFile:            &strings.Builder{},
-				liftedTypeNames:       HashSet[string]{},
-				liftedTypeMap:         map[types.Type]string{},
-				subStructTypes:        map[types.Type][]types.Type{},
-				packageImports:        &strings.Builder{},
-				requiredUsings:        HashSet[string]{},
-				importQueue:           HashSet[string]{},
-				typeAliasDeclarations: &strings.Builder{},
-				standAloneComments:    map[token.Pos]string{},
-				sortedCommentPos:      []token.Pos{},
-				processedComments:     HashSet[token.Pos]{},
-				newline:               "\r\n",
-				options:               options,
-				globalIdentNames:      globalIdentNames,
-				globalScope:           globalScope,
-				blocks:                Stack[*strings.Builder]{},
-				identEscapesHeap:      fileEntry.identEscapesHeap,
-			}
-
-			visitor.visitFile(fileEntry.file)
-
-			var outputFileName string
-
-			if fileInfo.IsDir() {
-				outputFileName = filepath.Join(outputFilePath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
-			} else {
-				outputFileName = strings.TrimSuffix(outputFilePath, ".go") + ".cs"
-			}
-
-			if err := visitor.writeOutputFile(outputFileName); err != nil {
-				log.Printf("%s\n", err)
-			}
-
-			packageLock.Lock()
-			projectImports.UnionWithSet(visitor.importQueue)
-			packageLock.Unlock()
-		}(fileEntry)
-	}
-
-	concurrentTasks.Wait()
-
-	// Update project file with correct output type and unsafe code settings
-	err = updateProjectFile(projectFileName, outputFilePath, pkg, options)
-
-	if err != nil {
-		log.Fatalf("Failed to update project file \"%s\": %s\n", projectFileName, err)
-	}
-
-	var packageInfoFileName string
-
-	// Handle package information file
-	if fileInfo.IsDir() {
-		packageInfoFileName = filepath.Join(outputFilePath, PackageInfoFileName)
-	} else {
-		packageInfoFileName = filepath.Join(filepath.Dir(outputFilePath), PackageInfoFileName)
-	}
-
-	var packageInfoLines []string
-
-	if _, err := os.Stat(packageInfoFileName); err == nil {
-		// Read all lines from existing package info file
-		packageInfoBytes, err := os.ReadFile(packageInfoFileName)
-
-		if err != nil {
-			log.Fatalf("Failed to read existing package info file \"%s\": %s\n", packageInfoFileName, err)
-		}
-
-		packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
-	} else {
-		// Generate new package info file from template
-		packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
-		templateFile := fmt.Sprintf(string(packageInfoTemplate), packageClassName, packageName, packageClassName)
-		packageInfoLines = strings.Split(templateFile, "\r\n")
-	}
-
-	// Handle exported type aliases
-	startLineIndex := -1
-	endLineIndex := -1
-
-	for i, line := range packageInfoLines {
-		if strings.Contains(line, "<ExportedTypeAliases>") {
-			startLineIndex = i
-			continue
-		}
-
-		if strings.Contains(line, "</ExportedTypeAliases>") {
-			endLineIndex = i
-			break
-		}
-	}
-
-	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		// Read existing type aliases from package info file
-		lines := HashSet[string]{}
-
-		// If processing a single file, instead of all package files, merge type aliases
-		if !fileInfo.IsDir() {
-			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
-			}
-		}
-
-		// Add new type aliases to package info file (hashset ensures uniqueness)
-		for alias, typeName := range exportedTypeAliases {
-			lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
-		}
-
-		// Sort lines
-		sortedLines := lines.Keys()
-		sort.Strings(sortedLines)
-
-		// Insert exported type aliases into package info file
-		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-	} else {
-		log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
-	}
-
-	// Handle interface implementations
-	startLineIndex = -1
-	endLineIndex = -1
-
-	for i, line := range packageInfoLines {
-		if strings.Contains(line, "<InterfaceImplementations>") {
-			startLineIndex = i
-			continue
-		}
-
-		if strings.Contains(line, "</InterfaceImplementations>") {
-			endLineIndex = i
-			break
-		}
-	}
-
-	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		// Read existing interface lines from package info file
-		lines := HashSet[string]{}
-
-		// If processing a single file, instead of all package files, merge interface implementations
-		if !fileInfo.IsDir() {
-			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
-			}
-		}
-
-		// Drop lower level interface implementations where interface inheritances are already covered
-		for interfaceName, inheritedInterfaces := range interfaceInheritances {
-			for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
-				// Check if the same type implements both interfaces
-				if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
-					if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
-						baseImplementations.IntersectWithSet(inheritedImplementations)
-						for _, implementation := range baseImplementations.Keys() {
-							implementedTypes := interfaceImplementations[inheritedInterfaceName]
-							implementedTypes.Remove(implementation)
-						}
-					}
-				}
-			}
-		}
-
-		// Add new interface implementations to package info file (hashset ensures uniqueness)
-		for interfaceName, implementations := range interfaceImplementations {
-			for implementation := range implementations {
-				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", implementation, interfaceName))
-			}
-		}
-
-		// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
-		for interfaceName, implementations := range promotedInterfaceImplementations {
-			for implementation := range implementations {
-				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", implementation, interfaceName))
-			}
-		}
-
-		// Sort lines
-		sortedLines := lines.Keys()
-		sort.Strings(sortedLines)
-
-		// Insert interface implementations into package info file
-		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-
-	} else {
-		log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
-	}
-
-	// Handle implicit conversions
-	startLineIndex = -1
-	endLineIndex = -1
-
-	for i, line := range packageInfoLines {
-		if strings.Contains(line, "<ImplicitConversions>") {
-			startLineIndex = i
-			continue
-		}
-
-		if strings.Contains(line, "</ImplicitConversions>") {
-			endLineIndex = i
-			break
-		}
-	}
-
-	if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
-		// Read existing interface lines from package info file
-		lines := HashSet[string]{}
-
-		// If processing a single file, instead of all package files, merge implicit conversions
-		if !fileInfo.IsDir() {
-			for i := startLineIndex + 1; i < endLineIndex; i++ {
-				line := packageInfoLines[i]
-				lines.Add(strings.TrimSpace(line))
-			}
-		}
-
-		// Add new implicit conversions to package info file (hashset ensures uniqueness)
-		for sourceType, targetTypes := range implicitConversions {
-			for targetType := range targetTypes {
-				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", sourceType, targetType))
-			}
-		}
-
-		// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
-		for sourceType, targetTypes := range invertedImplicitConversions {
-			for targetType := range targetTypes {
-				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceType))
-			}
-		}
-
-		// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
-		for sourceType, targetTypes := range indirectImplicitConversions {
-			for targetType := range targetTypes {
-				lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
-			}
-		}
-
-		// Sort lines
-		sortedLines := lines.Keys()
-		sort.Strings(sortedLines)
-
-		// Insert implicit conversions into package info file
-		packageInfoLines = append(packageInfoLines[:startLineIndex+1],
-			append(sortedLines, packageInfoLines[endLineIndex:]...)...)
-
-	} else {
-		log.Fatalf("Failed to find '<ImplicitConversions>...</ImplicitConversions>' section for inserting implicit conversions into package info file \"%s\"\n", packageInfoFileName)
-	}
-
-	// Remove trailing empty lines
-	for i := len(packageInfoLines) - 1; i >= 0; i-- {
-		if strings.TrimSpace(packageInfoLines[i]) == "" {
-			packageInfoLines = packageInfoLines[:i]
+		// Handle package information file
+		if fileInfo.IsDir() {
+			packageInfoFileName = filepath.Join(packageOutputPath, PackageInfoFileName)
 		} else {
-			break
+			packageInfoFileName = filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
 		}
-	}
 
-	// Write updated package info file
-	packageInfoFile, err := os.Create(packageInfoFileName)
+		var packageInfoLines []string
 
-	if err != nil {
-		log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
-	}
+		if _, err := os.Stat(packageInfoFileName); err == nil {
+			// Read all lines from existing package info file
+			packageInfoBytes, err := os.ReadFile(packageInfoFileName)
 
-	defer packageInfoFile.Close()
+			if err != nil {
+				log.Fatalf("Failed to read existing package info file \"%s\": %s\n", packageInfoFileName, err)
+			}
 
-	for _, line := range packageInfoLines {
-		_, err = packageInfoFile.WriteString(line + "\r\n")
+			packageInfoLines = strings.Split(string(packageInfoBytes), "\r\n")
+		} else {
+			// Generate new package info file from template
+			packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+			templateFile := fmt.Sprintf(string(packageInfoTemplate), packageClassName, packageName, packageClassName)
+			packageInfoLines = strings.Split(templateFile, "\r\n")
+		}
+
+		// Handle exported type aliases
+		startLineIndex := -1
+		endLineIndex := -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<ExportedTypeAliases>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</ExportedTypeAliases>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+			// Read existing type aliases from package info file
+			lines := HashSet[string]{}
+
+			// If processing a single file, instead of all package files, merge type aliases
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
+			}
+
+			// Add new type aliases to package info file (hashset ensures uniqueness)
+			for alias, typeName := range exportedTypeAliases {
+				lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert exported type aliases into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+		} else {
+			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+		}
+
+		// Handle interface implementations
+		startLineIndex = -1
+		endLineIndex = -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<InterfaceImplementations>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</InterfaceImplementations>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+			// Read existing interface lines from package info file
+			lines := HashSet[string]{}
+
+			// If processing a single file, instead of all package files, merge interface implementations
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
+			}
+
+			// Drop lower level interface implementations where interface inheritances are already covered
+			for interfaceName, inheritedInterfaces := range interfaceInheritances {
+				for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
+					// Check if the same type implements both interfaces
+					if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
+						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
+							baseImplementations.IntersectWithSet(inheritedImplementations)
+							for _, implementation := range baseImplementations.Keys() {
+								implementedTypes := interfaceImplementations[inheritedInterfaceName]
+								implementedTypes.Remove(implementation)
+							}
+						}
+					}
+				}
+			}
+
+			// Add new interface implementations to package info file (hashset ensures uniqueness)
+			for interfaceName, implementations := range interfaceImplementations {
+				for implementation := range implementations {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", implementation, interfaceName))
+				}
+			}
+
+			// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
+			for interfaceName, implementations := range promotedInterfaceImplementations {
+				for implementation := range implementations {
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", implementation, interfaceName))
+				}
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert interface implementations into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+		} else {
+			log.Fatalf("Failed to find '<InterfaceImplementations>...</InterfaceImplementations>' section for inserting interface implementations into package info file \"%s\"\n", packageInfoFileName)
+		}
+
+		// Handle implicit conversions
+		startLineIndex = -1
+		endLineIndex = -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<ImplicitConversions>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</ImplicitConversions>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+			// Read existing interface lines from package info file
+			lines := HashSet[string]{}
+
+			// If processing a single file, instead of all package files, merge implicit conversions
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
+			}
+
+			// Add new implicit conversions to package info file (hashset ensures uniqueness)
+			for sourceType, targetTypes := range implicitConversions {
+				for targetType := range targetTypes {
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", sourceType, targetType))
+				}
+			}
+
+			// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
+			for sourceType, targetTypes := range invertedImplicitConversions {
+				for targetType := range targetTypes {
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceType))
+				}
+			}
+
+			// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
+			for sourceType, targetTypes := range indirectImplicitConversions {
+				for targetType := range targetTypes {
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
+				}
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert implicit conversions into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+
+		} else {
+			log.Fatalf("Failed to find '<ImplicitConversions>...</ImplicitConversions>' section for inserting implicit conversions into package info file \"%s\"\n", packageInfoFileName)
+		}
+
+		// Remove trailing empty lines
+		for i := len(packageInfoLines) - 1; i >= 0; i-- {
+			if strings.TrimSpace(packageInfoLines[i]) == "" {
+				packageInfoLines = packageInfoLines[:i]
+			} else {
+				break
+			}
+		}
+
+		// Write updated package info file
+		packageInfoFile, err := os.Create(packageInfoFileName)
 
 		if err != nil {
-			log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
+			log.Fatalf("Failed to create package info file \"%s\": %s\n", packageInfoFileName, err)
+		}
+
+		defer packageInfoFile.Close()
+
+		for _, line := range packageInfoLines {
+			_, err = packageInfoFile.WriteString(line + "\r\n")
+
+			if err != nil {
+				log.Fatalf("Failed to write to package info file \"%s\": %s\n", packageInfoFileName, err)
+			}
 		}
 	}
 }
@@ -1731,7 +1707,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg != v.pkg {
-			pkgPrefix = pkg.Path() + "."
+			pkgPrefix = pkg.Name() + "."
 		}
 	}
 
@@ -1742,6 +1718,10 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	typeName := strings.ReplaceAll(t.String(), "..", "")
+	packagePathPrefix := v.pkg.Path() + "."
+
+	// Remove package path prefix, if any, from the type name
+	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 
 	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
 		return pkgPrefix + typeName
@@ -1781,7 +1761,13 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
-	return strings.ReplaceAll(t.String(), "..", "")
+	typeName := strings.ReplaceAll(t.String(), "..", "")
+	packagePathPrefix := v.pkg.Path() + "."
+
+	// Remove package path prefix, if any, from the type name
+	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
+
+	return typeName
 }
 
 func (v *Visitor) getCSTypeName(t types.Type) string {

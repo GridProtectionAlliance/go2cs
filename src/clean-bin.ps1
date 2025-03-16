@@ -17,7 +17,7 @@ $foldersToDelete = Get-ChildItem -Path $rootDirectory -Include "bin", "obj", "Ge
 $totalFoldersFound = $foldersToDelete.Count
 
 if ($totalFoldersFound -eq 0) {
-    Write-Host "No bin or obj folders found." -ForegroundColor Green
+    Write-Host "No bin, obj or Generated folders found." -ForegroundColor Green
     exit
 }
 

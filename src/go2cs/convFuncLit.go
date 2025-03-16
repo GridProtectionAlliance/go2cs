@@ -2,10 +2,20 @@ package main
 
 import (
 	"go/ast"
+	"go/types"
 	"strings"
 )
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
+	if v.currentFuncSignature == nil {
+		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
+	}
+
+	if v.lambdaCapture == nil {
+		v.lambdaCapture = newLambdaCapture()
+		v.capturedVarCount = make(map[string]int)
+	}
+
 	v.enterLambdaConversion(funcLit)
 	defer v.exitLambdaConversion()
 
