@@ -199,7 +199,36 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	funcName := v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
 
-	if !strings.HasSuffix(funcName, typeParamExpr) {
+	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases
+	if len(constructType) == 0 && len(callExpr.Args) == 1 {
+		argExpr := v.convExpr(callExpr.Args[0], nil)
+		argParts := strings.Split(argExpr, ".")
+
+		if funcName == "@unsafe.Offsetof" {
+			if len(argParts) == 2 {
+				// `unsafe.Offsetof(structValue.field)` to
+				// `@unsafe.Offsetof(structValue.GetType(), "field")`
+				return fmt.Sprintf("%s(%s.GetType(), \"%s\")", funcName, argParts[0], argParts[1])
+			} else {
+				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Offsetof' argument format: %s", argExpr))
+			}
+
+		} else if funcName == "@unsafe.Alignof" {
+			if len(argParts) == 1 {
+				// `unsafe.Alignof(x)` to
+				// `@unsafe.Alignof(x.GetType())`
+				return fmt.Sprintf("%s(%s.GetType())", funcName, argParts[0])
+			} else if len(argParts) == 2 {
+				// `unsafe.Alignof(s.f)` to
+				// `@unsafe.Alignof(s.GetType(), "f")`
+				return fmt.Sprintf("%s(%s.GetType(), \"%s\")", funcName, argParts[0], argParts[1])
+			} else {
+				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Alignof' argument format: %s", argExpr))
+			}
+		}
+	}
+
+	if len(typeParamExpr) > 0 && !strings.HasSuffix(funcName, typeParamExpr) {
 		funcName += typeParamExpr
 	}
 

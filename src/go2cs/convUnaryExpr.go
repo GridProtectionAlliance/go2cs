@@ -49,7 +49,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
 		}
 
-		return AddressPrefix + v.convExpr(unaryExpr.X, nil)
+		var escapesHeap bool
+		ident := getIdentifier(unaryExpr.X)
+
+		obj := v.info.Defs[ident]
+
+		if obj == nil {
+			obj = v.info.Uses[ident]
+		}
+
+		if obj != nil {
+			escapesHeap = v.identEscapesHeap[obj]
+		}
+
+		if escapesHeap {
+			// If the variables escapes to heap, existing pointer reference should exist
+			return AddressPrefix + v.convExpr(unaryExpr.X, nil)
+		}
+
+		// Otherwise, call the address of function to get a pointer reference
+		return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
 	}
 
 	if unaryExpr.Op == token.ARROW {

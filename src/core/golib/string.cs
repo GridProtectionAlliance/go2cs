@@ -56,6 +56,11 @@ public readonly struct @string :
 {
     internal readonly byte[] m_value;
 
+    // If @string needs to match sizeof in Go, it would need to be 16 bytes,
+    // in this case 8-byte length value would need to be added here:
+    //      private readonly int64 m_length;
+    // Currently goal is to match Go's string behavior, not memory layout.
+
     public @string()
     {
         m_value = [];

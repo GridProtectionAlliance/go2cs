@@ -101,6 +101,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 						if len(headTypeDecl) > 0 {
 							v.writeOutputLn(headTypeDecl)
+							v.targetFile.WriteString(v.newline)
 							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
 						} else {
 							// Following decalrations must use explicit type, do not use `v.options.preferVarDecl` for these:
@@ -133,6 +134,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					v.writeOutput(headTypeDecl)
 
 					if len(csValue) > 0 {
+						v.targetFile.WriteString(v.newline)
 						v.writeOutput("%s = %s;", csIDName, csValue)
 					}
 				} else {

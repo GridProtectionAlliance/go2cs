@@ -18,6 +18,7 @@ using go;
 [module: GoManualConversion]
 
 #pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
+#pragma warning disable IL2070
 #pragma warning disable IL2072
 
 namespace go;
@@ -242,25 +243,25 @@ public static uintptr Offsetof(Type structType, string fieldName) {
     return (uintptr)Marshal.OffsetOf(structType, fieldName);
 }
 
-// Alignof takes an expression x of any type and returns the required alignment
-// of a hypothetical variable v as if v was declared via var v = x.
-// It is the largest value m such that the address of v is always zero mod m.
-// It is the same as the value returned by [reflect.TypeOf](x).Align().
-// As a special case, if a variable s is of struct type and f is a field
-// within that struct, then Alignof(s.f) will return the required alignment
-// of a field of that type within a struct. This case is the same as the
-// value returned by [reflect.TypeOf](s.f).FieldAlign().
-// The return value of Alignof is a Go constant if the type of the argument
-// does not have variable size.
-// (See the description of [Sizeof] for a definition of variable sized types.)
-// go2cs conversion converts:
-// `unsafe.Offsetof(x)` to
-// `@unsafe.Offsetof(x.GetType())` and
-// `unsafe.Offsetof(s.f)` to
-// `@unsafe.Offsetof(s.GetType(), "f")`
-public static uintptr Alignof([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] Type type, string? fieldName = null) {
+    // Alignof takes an expression x of any type and returns the required alignment
+    // of a hypothetical variable v as if v was declared via var v = x.
+    // It is the largest value m such that the address of v is always zero mod m.
+    // It is the same as the value returned by [reflect.TypeOf](x).Align().
+    // As a special case, if a variable s is of struct type and f is a field
+    // within that struct, then Alignof(s.f) will return the required alignment
+    // of a field of that type within a struct. This case is the same as the
+    // value returned by [reflect.TypeOf](s.f).FieldAlign().
+    // The return value of Alignof is a Go constant if the type of the argument
+    // does not have variable size.
+    // (See the description of [Sizeof] for a definition of variable sized types.)
+    // go2cs conversion converts:
+    // `unsafe.Alignof(x)` to
+    // `@unsafe.Alignof(x.GetType())` and
+    // `unsafe.Alignof(s.f)` to
+    // `@unsafe.Alignof(s.GetType(), "f")`
+    public static uintptr Alignof(Type type, string? fieldName = null) {
     // Handle the special case for struct fields
-    if (fieldName != null && type is { IsValueType: true, IsPrimitive: false })
+    if (fieldName is not null && type is { IsValueType: true, IsPrimitive: false })
     {
         // Find the specified field
         FieldInfo? field = type.GetField(fieldName, 
@@ -268,7 +269,7 @@ public static uintptr Alignof([DynamicallyAccessedMembers(DynamicallyAccessedMem
             BindingFlags.Public |
             BindingFlags.NonPublic);
 
-        if (field != null)
+        if (field is not null)
         {
             // Get the field type and determine its alignment
             Type fieldType = field.FieldType;
@@ -422,7 +423,7 @@ public static ж<T> Add<T>(ж<T> ptr, nint len) {
 
     (IArray array, int index)? arrayRef  = ptr.ArrayRef;
 
-    if (arrayRef == null)
+    if (arrayRef is null)
         return new ж<T>();
 
     (IArray array, int index) = arrayRef.Value;
