@@ -407,17 +407,16 @@ Examples:
 			packageInputPath = pkg.Dir
 		}
 
-		var projectFileName string
+		var projectFileName, projectFileContents string
 		projectName := getProjectName(packageInputPath, options)
 
-		if projectFileName, err = writeProjectFiles(projectName, packageOutputPath); err != nil {
+		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
 		} else {
 			for i, file := range pkg.Syntax {
 				path := pkg.GoFiles[i]
 
 				if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
-					updateProjectFile(projectFileName, packageOutputPath, nil, options)
 					log.Fatalf("Failed to evaluate build constraints for file \"%s\": %s", path, err)
 				} else if !match {
 					// Skipping file due to non-matching build constraints
@@ -429,7 +428,6 @@ Examples:
 				manualConv, err := containsManualConversionMarker(outputFileName)
 
 				if err != nil {
-					updateProjectFile(projectFileName, packageOutputPath, nil, options)
 					log.Fatalf("Failed to check for manual conversion in file \"%s\": %s\n", outputFileName, err)
 				}
 
@@ -440,7 +438,6 @@ Examples:
 		}
 
 		if len(files) == 0 {
-			updateProjectFile(projectFileName, packageOutputPath, nil, options)
 			println(fmt.Sprintf("WARNING: No valid Go source files found for conversion in input path \"%s\"", packageInputPath))
 			continue
 		}
@@ -513,11 +510,11 @@ Examples:
 
 		concurrentTasks.Wait()
 
-		// Update project file with correct output type and unsafe code settings
-		err = updateProjectFile(projectFileName, packageOutputPath, packageTypes, options)
+		// Write project file with correct output type and unsafe code settings
+		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)
 
 		if err != nil {
-			log.Fatalf("Failed to update project file \"%s\": %s\n", projectFileName, err)
+			log.Fatalf("Error while writing project file \"%s\": %s\n", projectFileName, err)
 		}
 
 		var packageInfoFileName string
@@ -764,16 +761,15 @@ func getGoEnv(name string) (string, error) {
 	return strings.TrimSpace(out.String()), nil
 }
 
-// writeProjectFiles writes the project files for the given project name and path.
-// Note that primary csproj file is written with markers that will need to be replaced
-// before the conversion is complete, even in cases where log.Fatalf is called.
-func writeProjectFiles(projectName string, projectPath string) (string, error) {
+// prepareProjectFiles writes the project related files for the given project name and path,
+// and returns project file contents with template parameters to be written to a file later.
+func prepareProjectFiles(projectName string, projectPath string) (string, string, error) {
 	// Make sure project path ends with a directory separator
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
 
 	// Ensure project directory exists
 	if err := os.MkdirAll(projectPath, 0755); err != nil {
-		return "", fmt.Errorf("failed to create project directory \"%s\": %s", projectPath, err)
+		return "", "", fmt.Errorf("failed to create project directory \"%s\": %s", projectPath, err)
 	}
 
 	iconFileName := projectPath + "go2cs.ico"
@@ -783,7 +779,7 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 		iconFile, err := os.Create(iconFileName)
 
 		if err != nil {
-			return "", fmt.Errorf("failed to create icon file \"%s\": %s", iconFileName, err)
+			return "", "", fmt.Errorf("failed to create icon file \"%s\": %s", iconFileName, err)
 		}
 
 		defer iconFile.Close()
@@ -791,7 +787,7 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 		_, err = iconFile.Write(iconFileBytes)
 
 		if err != nil {
-			return "", fmt.Errorf("failed to write to icon file \"%s\": %s", iconFileName, err)
+			return "", "", fmt.Errorf("failed to write to icon file \"%s\": %s", iconFileName, err)
 		}
 	}
 
@@ -805,39 +801,16 @@ func writeProjectFiles(projectName string, projectPath string) (string, error) {
 	)
 
 	projectFileName := projectPath + projectName + ".csproj"
-	projectFile, err := os.Create(projectFileName)
 
-	if err != nil {
-		return "", fmt.Errorf("failed to create project file \"%s\": %s", projectFileName, err)
-	}
-
-	defer projectFile.Close()
-
-	_, err = projectFile.WriteString(projectFileContents)
-
-	if err != nil {
-		return "", fmt.Errorf("failed to write to project file \"%s\": %s", projectFileName, err)
-	}
-
-	return projectFileName, nil
+	return projectFileName, projectFileContents, nil
 }
 
-func updateProjectFile(projectFileName string, outputFilePath string, pkg *types.Package, options Options) error {
-	if len(projectFileName) == 0 {
-		return nil
-	}
-
-	projectContents, err := os.ReadFile(projectFileName)
-
-	if err != nil {
-		return fmt.Errorf("failed to read project file %q: %s", projectFileName, err)
-	}
-
+func writeProjectFile(projectFileName string, projectFileContents string, outputFilePath string, pkg *types.Package, options Options) error {
 	// Get assembly output type from the package details
 	outputType := getAssemblyOutputType(pkg)
 
 	// Replace the output type marker with the actual output type
-	newContents := []byte(strings.ReplaceAll(string(projectContents), OutputTypeMarker, outputType))
+	newContents := []byte(strings.ReplaceAll(string(projectFileContents), OutputTypeMarker, outputType))
 
 	// Replace the unsafe code marker with the actual unsafe code setting
 	newContents = []byte(strings.ReplaceAll(string(newContents), UnsafeMarker, strconv.FormatBool(usesUnsafeCode)))
@@ -852,16 +825,19 @@ func updateProjectFile(projectFileName string, outputFilePath string, pkg *types
 	// Replace the project reference marker with the actual project references
 	newContents = []byte(strings.ReplaceAll(string(newContents), ProjectReferenceMarker, projectReferences.String()))
 
-	// Rewrite project file atomically
-	err = os.WriteFile(projectFileName, newContents, 0644)
+	// Check if project file needs to be written
+	if needToWriteFile(projectFileName, newContents) {
+		// Write project file atomically
+		err := os.WriteFile(projectFileName, newContents, 0644)
 
-	if err != nil {
-		return fmt.Errorf("failed to write project file %q: %s", projectFileName, err)
+		if err != nil {
+			return fmt.Errorf("failed to write project file: %s", err)
+		}
 	}
 
 	// For executable projects, write OS-specific publish profiles
 	if outputType == "Exe" {
-		err = writePublishProfiles(outputFilePath)
+		err := writePublishProfiles(outputFilePath)
 
 		if err != nil {
 			return fmt.Errorf("failed to write publish profiles for project \"%s\": %s", outputFilePath, err)
@@ -870,7 +846,7 @@ func updateProjectFile(projectFileName string, outputFilePath string, pkg *types
 
 	// For library projects, write package files, like icon
 	if outputType == "Library" {
-		err = writePackageFiles(outputFilePath)
+		err := writePackageFiles(outputFilePath)
 
 		if err != nil {
 			return fmt.Errorf("failed to write package files for project \"%s\": %s", outputFilePath, err)
