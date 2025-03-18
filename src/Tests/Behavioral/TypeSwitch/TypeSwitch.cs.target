@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void Main() {
-    var whatAmI = (object i) => {
+    var whatAmI = (any i) => {
         switch (i.type()) {
         case bool t:
             fmt.Println("I'm a bool");

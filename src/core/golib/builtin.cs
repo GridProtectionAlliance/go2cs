@@ -79,7 +79,8 @@ public static class builtin
     public static readonly NilType nil = NilType.Default;
 
     /// <summary>
-    /// Defines a constant used to represent an always true state.
+    /// Defines a true constant used as a discriminator for accessing overloads with
+    /// different return types.
     /// </summary>
     /// <remarks>
     /// Common use is for expression-based switch values where focus is
@@ -88,7 +89,7 @@ public static class builtin
     public const bool ᐧ = true;
 
     /// <summary>
-    /// Defines a constant used as a discriminator for accessing overloads with
+    /// Defines a false constant used as a discriminator for accessing overloads with
     /// different return types.
     /// </summary>
     /// <remarks>
@@ -98,7 +99,7 @@ public static class builtin
     public const bool ꟷ = false;
 
     /// <summary>
-    /// Defines a constant used as a discriminator for accessing overloads with
+    /// Defines a nil constant used as a discriminator for accessing overloads with
     /// different return types.
     /// </summary>
     /// <remarks>
@@ -956,7 +957,7 @@ public static class builtin
         }
         catch (InvalidCastException ex)
         {
-            throw new PanicException($"interface conversion: interface{{}} is {GetGoTypeName(target.GetType())}, not {GetGoTypeName(typeof(T))}", ex);
+            throw new PanicException($"interface conversion: interface {{}} is {GetGoTypeName(target.GetType())}, not {GetGoTypeName(typeof(T))}", ex);
         }
     }
 

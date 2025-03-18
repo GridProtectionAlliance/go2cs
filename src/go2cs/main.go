@@ -1007,6 +1007,10 @@ func (v *Visitor) addRequiredUsing(usingName string) {
 }
 
 func (v *Visitor) getPrintedNode(node ast.Node) string {
+	if node == nil {
+		return ""
+	}
+
 	result := &strings.Builder{}
 	printer.Fprint(result, v.fset, node)
 	return result.String()
@@ -1267,8 +1271,9 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	}
 
 	if interfaceTypeName != "" && interfaceTypeName != "nil" &&
-		targetTypeName != "" && targetTypeName != "nil" &&
-		interfaceTypeName != targetTypeName {
+		interfaceTypeName != targetTypeName &&
+		interfaceTypeName != "any" &&
+		!strings.Contains(targetTypeName, "interface{") {
 
 		packageLock.Lock()
 
@@ -1702,16 +1707,15 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	typeName := strings.ReplaceAll(t.String(), "..", "")
+	packagePathPrefix := v.pkg.Path() + "."
+
+	// Remove package path, if any, from the type name
+	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 	slashIndex := strings.LastIndex(typeName, "/")
 
 	if slashIndex != -1 {
 		typeName = typeName[slashIndex+1:]
 	}
-
-	packagePathPrefix := v.pkg.Path() + "."
-
-	// Remove package path prefix, if any, from the type name
-	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 
 	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
 		return pkgPrefix + typeName
@@ -1752,16 +1756,15 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	typeName := strings.ReplaceAll(t.String(), "..", "")
+	packagePathPrefix := v.pkg.Path() + "."
+
+	// Remove package path, if any, from the type name
+	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 	slashIndex := strings.LastIndex(typeName, "/")
 
 	if slashIndex != -1 {
 		typeName = typeName[slashIndex+1:]
 	}
-
-	packagePathPrefix := v.pkg.Path() + "."
-
-	// Remove package path prefix, if any, from the type name
-	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 
 	return typeName
 }

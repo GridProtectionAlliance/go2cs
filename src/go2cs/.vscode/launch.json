@@ -59,8 +59,8 @@
                 //"..\\Tests\\Behavioral\\GenericStructFields",
                 //"..\\Tests\\Behavioral\\GenericTypeAssertions",
                 //"..\\Tests\\Behavioral\\GenericCompositeLiterals",
-                //"..\\Tests\\Behavioral\\UnsafeOperations",
-                "..\\Tests\\Behavioral\\TypeAssert",
+                "..\\Tests\\Behavioral\\UnsafeOperations",
+                //"..\\Tests\\Behavioral\\TypeAssert",
                 //"C:\\Program Files\\Go\\src\\errors",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\errors"
                 //"C:\\Program Files\\Go\\src\\unsafe",

@@ -88,8 +88,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 			for _, expr := range caseClause.List {
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
-
-				caseExprs = append(caseExprs, v.convExpr(expr, []ExprContext{identContext}))
+				caseExprs = append(caseExprs, caseExpr)
 
 				if caseExpr == "nint" {
 					caseExprs = append(caseExprs, "int32")

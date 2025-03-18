@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"path/filepath"
 	"strings"
@@ -206,7 +207,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		argParts := strings.Split(argExpr, ".")
 
 		if funcName == "@unsafe.Offsetof" {
-			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Offsetof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Offsetof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), getShortFileName(v.file)))
 
 			if len(argParts) == 2 {
 				// `unsafe.Offsetof(structValue.field)` to
@@ -216,7 +217,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Offsetof' argument format: %s", argExpr))
 			}
 		} else if funcName == "@unsafe.Alignof" {
-			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Alignof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Alignof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), getShortFileName(v.file)))
 
 			if len(argParts) == 1 {
 				// `unsafe.Alignof(x)` to
@@ -230,7 +231,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				println(fmt.Sprintf("WARNING: Unexpected 'unsafe.Alignof' argument format: %s", argExpr))
 			}
 		} else if funcName == "@unsafe.Sizeof" {
-			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Sizeof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), filepath.Base(v.file.Name())))
+			println(fmt.Sprintf("WARNING: Go code converted to C# using 'unsafe.Sizeof' may not produce same value as Go - verify usage: %s in \"%s\"", v.getPrintedNode(callExpr), getShortFileName(v.file)))
 		}
 	}
 
@@ -422,4 +423,12 @@ func getRootSubStructName(subStructName string) string {
 	}
 
 	return subStructName[lastUnderscoreIndex+1:]
+}
+
+func getShortFileName(fileToken *token.File) string {
+	if fileToken == nil {
+		return ""
+	}
+
+	return filepath.Base(fileToken.Name())
 }

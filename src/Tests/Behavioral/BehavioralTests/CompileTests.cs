@@ -150,6 +150,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckTypeAssert() => CheckTarget("TypeAssert");
+
+    [TestMethod]
     public void CheckTypeConversion() => CheckTarget("TypeConversion");
 
     [TestMethod]

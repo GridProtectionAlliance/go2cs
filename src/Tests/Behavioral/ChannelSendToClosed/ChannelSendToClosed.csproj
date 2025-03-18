@@ -23,6 +23,10 @@
     <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(USERPROFILE)'==''">
+    <USERPROFILE>$(HOME)</USERPROFILE>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(go2csPath)'==''">
     <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
     <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>

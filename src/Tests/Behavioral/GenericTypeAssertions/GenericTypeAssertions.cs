@@ -10,8 +10,8 @@ partial class main_package {
     public T Value;
 }
 
-public static object GetValue(nint index) {
-    var values = new object[]{
+public static any GetValue(nint index) {
+    var values = new any[]{
         new Box<nint>(Value: 42),
         new Box<@string>(Value: "hello"u8),
         new Box<float64>(Value: 3.14F)

@@ -47,7 +47,7 @@ internal static void Main() {
         items: new float64[]{3.14F, 2.71F, 1.618F}.slice()
     );
     fmt.Printf("Float queue size: %d\n"u8, floatQueue.Size());
-    var queues = new object[]{
+    var queues = new any[]{
         new Queue<nint>(nil),
         new Queue<@string>(nil),
         new Queue<bool>(items: new bool[]{true, false}.slice())

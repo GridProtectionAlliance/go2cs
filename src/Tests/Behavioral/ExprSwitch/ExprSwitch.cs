@@ -2,7 +2,7 @@ namespace go;
 
 using fmt = fmt_package;
 using time = time_package;
-using ꓸꓸꓸobject = Span<object>;
+using ꓸꓸꓸany = Span<any>;
 
 partial class main_package {
 
@@ -16,11 +16,11 @@ internal static @string getStr(@string test) {
     return "string"u8 + test;
 }
 
-internal static @string getStr2(object test1, @string test2) {
+internal static @string getStr2(any test1, @string test2) {
     return test1._<@string>() + test2;
 }
 
-internal static @string getStr3(@string format, params ꓸꓸꓸobject aʗp) {
+internal static @string getStr3(@string format, params ꓸꓸꓸany aʗp) {
     var a = aʗp.slice();
 
     return fmt.Sprintf(format, a.ꓸꓸꓸ);
