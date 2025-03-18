@@ -971,6 +971,9 @@ public static class builtin
     {
         try
         {
+            if (target is string str && typeof(T) == typeof(@string))
+                return ((T)(object)(new @string(str)), true);
+
             return ((T)target, true);
         }
         catch (InvalidCastException)
@@ -1684,6 +1687,9 @@ public static class builtin
 
             return typeName switch
             {
+                "go.string" => "string",
+                "System.IntPtr" => "int",
+                "System.UIntPtr" => "uintptr",
                 "System.Numerics.Complex" => "complex128",
                 "go.complex64" => "complex64",
                 _ => type == typeof(object) ? "interface {}" : typeName

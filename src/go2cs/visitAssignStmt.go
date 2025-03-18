@@ -51,6 +51,8 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if unaryExpr.Op == token.ARROW {
 				tupleResult = lhsLen > 1
 			}
+		} else if _, ok := rhsExprs[0].(*ast.TypeAssertExpr); ok {
+			tupleResult = lhsLen > 1
 		}
 	}
 

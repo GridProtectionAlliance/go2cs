@@ -746,6 +746,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				})
 			}
 
+			visitNode(node.Call)
+
 			// Exit capture analysis context
 			v.lambdaCapture.analysisInLambda = false
 			v.lambdaCapture.currentLambda = nil
@@ -787,6 +789,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				})
 			}
 
+			visitNode(node.Call)
+
 			// Exit capture analysis context
 			v.lambdaCapture.analysisInLambda = false
 			v.lambdaCapture.currentLambda = nil
@@ -814,6 +818,21 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			tracker.processing = false
+
+			if node.Init != nil {
+				// Manually check for recover function in the init statement
+				if assign, ok := node.Init.(*ast.AssignStmt); ok {
+					if assign.Tok == token.DEFINE {
+						if assign.Rhs != nil {
+							if len(assign.Rhs) == 1 {
+								if call, ok := assign.Rhs[0].(*ast.CallExpr); ok {
+									visitNode(call)
+								}
+							}
+						}
+					}
+				}
+			}
 
 			// Visit condition
 			if node.Cond != nil {
@@ -1065,6 +1084,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				v.lambdaCapture.analysisInLambda = false
 				v.lambdaCapture.currentLambda = nil
 			}
+
 		default:
 			// Visit child nodes
 			ast.Inspect(n, func(child ast.Node) bool {

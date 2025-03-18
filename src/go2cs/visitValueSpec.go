@@ -17,6 +17,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 	if tok == token.VAR {
 		for i, ident := range valueSpec.Names {
+			var isAnyType bool
+			var isInterfaceType bool
+
 			// Check if this is an interface type being assigned a value
 			if len(valueSpec.Values) > i {
 				// Get the type - either from explicit type or from value's type
@@ -30,13 +33,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 				if declType != nil {
 					// Check if it's an interface type
-					if iface, ok := declType.Underlying().(*types.Interface); ok && iface.NumMethods() > 0 {
-						// Get the concrete type from the RHS
-						rhsType := v.info.TypeOf(valueSpec.Values[i])
+					if iface, ok := declType.Underlying().(*types.Interface); ok {
+						isInterfaceType = true
 
-						// Record the implementation
-						if rhsType != nil {
-							v.convertToInterfaceType(declType, rhsType, "")
+						if iface.NumMethods() > 0 {
+							// Get the concrete type from the RHS
+							rhsType := v.info.TypeOf(valueSpec.Values[i])
+
+							// Record the implementation
+							if rhsType != nil {
+								v.convertToInterfaceType(declType, rhsType, "")
+							}
+						} else {
+							isAnyType = true
 						}
 					}
 				}
@@ -44,6 +53,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)
+
+			context := DefaultBasicLitContext()
+			context.u8StringOK = !isInterfaceType
 
 			if len(valueSpec.Values) <= i {
 				def := v.info.Defs[ident]
@@ -103,15 +115,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						if len(headTypeDecl) > 0 {
 							v.writeOutputLn(headTypeDecl)
 							v.targetFile.WriteString(v.newline)
-							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], nil))
+							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
 						} else {
-							// Following decalrations must use explicit type, do not use `v.options.preferVarDecl` for these:
-							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
+							// Following declarations must use explicit type, do not use `v.options.preferVarDecl` for these:
+							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
 						}
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation -= token.Pos(len(access) + 9)
-						v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], nil))
+						v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
 					}
 
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)
@@ -123,9 +135,16 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				v.targetFile.WriteString(v.newline)
 			}
 
-			csTypeName := convertToCSTypeName(v.getTypeName(tv.Type, false))
+			var csTypeName string
+
+			if isAnyType {
+				csTypeName = "any"
+			} else {
+				csTypeName = convertToCSTypeName(v.getTypeName(tv.Type, false))
+			}
+
 			goValue := tv.Value.ExactString()
-			csValue := v.convExpr(valueSpec.Values[i], nil)
+			csValue := v.convExpr(valueSpec.Values[i], []ExprContext{context})
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
 
 			if v.inFunction {

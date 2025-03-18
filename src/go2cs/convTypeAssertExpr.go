@@ -35,5 +35,8 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 		safeAssertDescriminator = TrueMarker
 	}
 
-	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, nil)), safeAssertDescriminator)
+	context := DefaultIdentContext()
+	context.isType = true
+
+	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, []ExprContext{context})), safeAssertDescriminator)
 }

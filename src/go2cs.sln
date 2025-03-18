@@ -156,6 +156,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnsafeOperations", "Tests\B
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "math.rand", "core\math\rand\math.rand.csproj", "{37A41250-3FE7-A868-45CF-0A2C65B89753}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeAssert", "Tests\Behavioral\TypeAssert\TypeAssert.csproj", "{E181E327-3711-1D42-3430-CEE2B07F9CB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -410,6 +412,10 @@ Global
 		{37A41250-3FE7-A868-45CF-0A2C65B89753}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37A41250-3FE7-A868-45CF-0A2C65B89753}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37A41250-3FE7-A868-45CF-0A2C65B89753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E181E327-3711-1D42-3430-CEE2B07F9CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E181E327-3711-1D42-3430-CEE2B07F9CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E181E327-3711-1D42-3430-CEE2B07F9CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E181E327-3711-1D42-3430-CEE2B07F9CB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -481,6 +487,7 @@ Global
 		{3B3CDD1F-00B0-4414-6BB2-E25938C4F4D3} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 		{48B6D6E0-82BF-F179-2CF4-DBD09E20161D} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{37A41250-3FE7-A868-45CF-0A2C65B89753} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
+		{E181E327-3711-1D42-3430-CEE2B07F9CB6} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

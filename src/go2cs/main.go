@@ -1702,6 +1702,12 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	typeName := strings.ReplaceAll(t.String(), "..", "")
+	slashIndex := strings.LastIndex(typeName, "/")
+
+	if slashIndex != -1 {
+		typeName = typeName[slashIndex+1:]
+	}
+
 	packagePathPrefix := v.pkg.Path() + "."
 
 	// Remove package path prefix, if any, from the type name
@@ -1746,6 +1752,12 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	typeName := strings.ReplaceAll(t.String(), "..", "")
+	slashIndex := strings.LastIndex(typeName, "/")
+
+	if slashIndex != -1 {
+		typeName = typeName[slashIndex+1:]
+	}
+
 	packagePathPrefix := v.pkg.Path() + "."
 
 	// Remove package path prefix, if any, from the type name
@@ -1913,7 +1925,7 @@ func convertToCSFullTypeName(typeName string) string {
 	case "string":
 		return RootNamespace + ".@string"
 	case "interface{}":
-		return "object"
+		return "any"
 	default:
 		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
 	}
