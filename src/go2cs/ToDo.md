@@ -36,7 +36,7 @@
 22) ~~For package names, e.g., `unsafe_package` - currently prefix is being unnecessarily sanitized, e.g., `@unsafe_package` - need to check name as a whole~~
 23) ~~Left side of an assign with a pointer de-ref, e.g., `(~e)` needs to be `e.val` instead~~
 24) ~~Update auto-interface implementation to ignore various invalid implement targets~~
-25) Add option to allow recursive conversion of dependent
+25) Add option to allow recursive conversion of dependent packages
 
 xx) ~~Setup reference code packages / path options for Go modules~~
     1) ~~Assume code builds in Go / toolchain executed, i.e., local source exists~~

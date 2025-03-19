@@ -103,8 +103,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core\strings\strings.csproj" />
     <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core\strings\strings.csproj" />
   </ItemGroup>
 
 </Project>

@@ -144,13 +144,6 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		return
 	}
 
-	// Optimization for basic types: skip detailed analysis for basic types
-	// that are used in simple, non-escaping patterns
-	if isBasicType(identObj.Type()) && isSimpleUsage(ident, parentBlock, v.info) {
-		v.identEscapesHeap[identObj] = false
-		return
-	}
-
 	escapes := false
 
 	// Helper function to check if identObj occurs within an expression
@@ -187,13 +180,70 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		case *ast.UnaryExpr:
 			// Check if ident is used in an address-of operation
 			if n.Op == token.AND {
-				if containsIdent(n.X) {
-					// The address of the ident is taken, simple response
-					// is to just assume it escapes. Future iterations
-					// may be able to provide more nuance and use C# ref
-					// structure operations to avoid heap allocation
-					escapes = true
-					return false
+				// Direct address of identifier
+				if id, ok := n.X.(*ast.Ident); ok {
+					if obj := v.info.ObjectOf(id); obj == identObj {
+						escapes = true
+						return false
+					}
+				}
+
+				// Address of array/slice element
+				if indexExpr, ok := n.X.(*ast.IndexExpr); ok {
+					if id, ok := indexExpr.X.(*ast.Ident); ok {
+						if obj := v.info.ObjectOf(id); obj == identObj {
+							escapes = true
+							return false
+						}
+					}
+				}
+
+				// For composite literals, special case:
+				// If the variable is used only as part of calculating a value for a field,
+				// it doesn't escape to the heap
+				if compLit, ok := n.X.(*ast.CompositeLit); ok {
+					// First check if our identifier is used in the type part
+					// (like array size) - if so, it doesn't escape
+					if containsIdentInTypeExpr(compLit.Type, identObj, v.info) {
+						return true
+					}
+
+					// Now check if our identifier is directly stored in a field
+					// or just used in a calculation
+					for _, elt := range compLit.Elts {
+						// Check value expressions - by default assume safe unless
+						// we find a direct assignment of our identifier
+						if kv, ok := elt.(*ast.KeyValueExpr); ok {
+							// Key doesn't matter, only value
+							if id, ok := kv.Value.(*ast.Ident); ok {
+								if obj := v.info.ObjectOf(id); obj == identObj {
+									// Direct assignment of our identifier to a field
+									// This is a gray area - in many cases it's safe,
+									// but for simplicity assume escape
+									escapes = true
+									return false
+								}
+							}
+
+							// If our identifier is used in a calculation but not
+							// directly stored, it doesn't escape
+							// e.g., &Struct{field: n+1} doesn't make n escape
+							if containsIdentInValueCalc(kv.Value, identObj, v.info) {
+								// Don't mark as escaping - continue checking other elements
+								continue
+							}
+						} else if id, ok := elt.(*ast.Ident); ok {
+							// Direct use of identifier as element
+							if obj := v.info.ObjectOf(id); obj == identObj {
+								escapes = true
+								return false
+							}
+						}
+					}
+
+					// If we get here, the identifier is only used in calculations
+					// for field values, not directly stored in the composite literal
+					return true
 				}
 			}
 
@@ -330,7 +380,6 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 							// Value types only escape if their address is taken
 							return true // continue checking for address operations
 						}
-
 						// Reference types still need to escape
 						return false
 					}
@@ -366,138 +415,75 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	v.identEscapesHeap[identObj] = escapes
 }
 
-// Helper function to determine if a type is a basic value type
-func isBasicType(t types.Type) bool {
-	if t == nil {
+// Check if the identifier is used in a type expression (like array size)
+func containsIdentInTypeExpr(node ast.Expr, targetObj types.Object, info *types.Info) bool {
+	if node == nil {
 		return false
 	}
 
-	basic, ok := t.Underlying().(*types.Basic)
-	if !ok {
-		return false
-	}
+	found := false
 
-	// Check if it's a non-reference basic type
-	kind := basic.Kind()
-	return kind >= types.Bool && kind <= types.Float64
-}
-
-// Helper function to check if a variable has a simple usage pattern
-// that doesn't require heap allocation (like an integer counter)
-func isSimpleUsage(ident *ast.Ident, block *ast.BlockStmt, info *types.Info) bool {
-	if block == nil {
-		return false
-	}
-
-	// Get the variable object
-	identObj := info.ObjectOf(ident)
-
-	if identObj == nil {
-		return false
-	}
-
-	// Track if the ident is used in simple operations
-	addressTaken := false
-	assignedTo := false
-	usedInCondition := false
-	usedInIncrement := false
-
-	// Check usage patterns
-	ast.Inspect(block, func(n ast.Node) bool {
-		if addressTaken {
-			return false // Stop inspection if address is taken
+	ast.Inspect(node, func(n ast.Node) bool {
+		if found {
+			return false
 		}
 
-		switch node := n.(type) {
-		case *ast.UnaryExpr:
-			// Check if ident's address is taken
-			if node.Op == token.AND {
-				if id := getIdentifier(node.X); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						addressTaken = true
-						return false
-					}
-				}
+		if id, ok := n.(*ast.Ident); ok {
+			if obj := info.ObjectOf(id); obj == targetObj {
+				found = true
+				return false
 			}
-
-			// Check for increment/decrement
-			if node.Op == token.INC || node.Op == token.DEC {
-				if id := getIdentifier(node.X); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						usedInIncrement = true
-					}
-				}
-			}
-
-		case *ast.AssignStmt:
-			// Check if ident is assigned to
-			for _, lhs := range node.Lhs {
-				if id := getIdentifier(lhs); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						assignedTo = true
-						break
-					}
-				}
-			}
-
-			// Check if ident is used in assignment
-			if node.Tok == token.ADD_ASSIGN || node.Tok == token.SUB_ASSIGN {
-				for _, lhs := range node.Lhs {
-					if id := getIdentifier(lhs); id != nil {
-						if obj := info.ObjectOf(id); obj == identObj {
-							usedInIncrement = true
-							break
-						}
-					}
-				}
-			}
-
-		case *ast.BinaryExpr:
-			// Check if ident is used in conditions
-			if isComparisonOperator(node.Op) || isLogicalOperator(node.Op) {
-				if id := getIdentifier(node.X); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						usedInCondition = true
-					}
-				}
-
-				if id := getIdentifier(node.Y); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						usedInCondition = true
-					}
-				}
-			}
-
-		case *ast.FuncLit:
-			// Check for presence in closures - simple values can still be captured
-			// without taking addresses if they're not mutated
-			ast.Inspect(node.Body, func(n ast.Node) bool {
-				if id := getIdentifier(n); id != nil {
-					if obj := info.ObjectOf(id); obj == identObj {
-						// If it appears in an assignment, we need to do a further check
-						// to see if this identifier is on the left-hand side
-						if assign, ok := n.(*ast.AssignStmt); ok {
-							// This is an assignment statement, but we need to check
-							// other identifiers to see if our target is on the LHS
-							for _, lhs := range assign.Lhs {
-								if idLHS := getIdentifier(lhs); idLHS != nil {
-									if objLHS := info.ObjectOf(idLHS); objLHS == identObj {
-										addressTaken = true
-										return false
-									}
-								}
-							}
-						}
-					}
-				}
-				return true
-			})
 		}
 
 		return true
 	})
 
-	// Simple usage pattern: a basic variable that's used only for counting or conditions
-	// and never has its address taken
-	return !addressTaken && (usedInIncrement || (assignedTo && usedInCondition))
+	return found
+}
+
+// Check if the identifier is used in a value calculation but not directly stored
+func containsIdentInValueCalc(node ast.Expr, targetObj types.Object, info *types.Info) bool {
+	// Direct assignment of identifier is handled separately
+	if id, ok := node.(*ast.Ident); ok {
+		if obj := info.ObjectOf(id); obj == targetObj {
+			return false // This is direct assignment, not just calculation
+		}
+		return false // Some other identifier
+	}
+
+	// Check if identifier is used in a binary operation
+	if binExpr, ok := node.(*ast.BinaryExpr); ok {
+		return containsIdentInValueCalc(binExpr.X, targetObj, info) ||
+			containsIdentInValueCalc(binExpr.Y, targetObj, info)
+	}
+
+	// Check if identifier is used in a function call argument
+	if callExpr, ok := node.(*ast.CallExpr); ok {
+		for _, arg := range callExpr.Args {
+			if containsIdentInValueCalc(arg, targetObj, info) {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	// For other expression types, do a general search
+	found := false
+	ast.Inspect(node, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if id, ok := n.(*ast.Ident); ok {
+			if obj := info.ObjectOf(id); obj == targetObj {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
 }
