@@ -815,11 +815,22 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// Replace the unsafe code marker with the actual unsafe code setting
 	newContents = []byte(strings.ReplaceAll(string(newContents), UnsafeMarker, strconv.FormatBool(usesUnsafeCode)))
 
+	// Extract project references from imports
 	packageInfoMap := getImportPackageInfo(projectImports.Keys(), options)
 	projectReferences := &strings.Builder{}
 
+	// Ensure project references are sorted so that the project file output is deterministic
+	references := make([]string, 0, len(packageInfoMap))
+
 	for _, info := range packageInfoMap {
-		projectReferences.WriteString(fmt.Sprintf("\r\n    <ProjectReference Include=\"%s\" />", info.ProjectReference))
+		references = append(references, info.ProjectReference)
+	}
+
+	sort.Strings(references)
+
+	// Build project references XML
+	for _, reference := range references {
+		projectReferences.WriteString(fmt.Sprintf("\r\n    <ProjectReference Include=\"%s\" />", reference))
 	}
 
 	// Replace the project reference marker with the actual project references
