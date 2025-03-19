@@ -1207,7 +1207,12 @@ func (v *Visitor) isMethodValue(sel *ast.SelectorExpr, isCallExpr bool) bool {
 	return !isCallExpr
 }
 
+// isValueType determines if a type is a value type
 func isValueType(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
 	if _, ok := t.Underlying().(*types.Basic); ok {
 		return true
 	}

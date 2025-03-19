@@ -144,6 +144,13 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		return
 	}
 
+	// Optimization for basic types: skip detailed analysis for basic types
+	// that are used in simple, non-escaping patterns
+	if isBasicType(identObj.Type()) && isSimpleUsage(ident, parentBlock, v.info) {
+		v.identEscapesHeap[identObj] = false
+		return
+	}
+
 	escapes := false
 
 	// Helper function to check if identObj occurs within an expression
@@ -323,6 +330,7 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 							// Value types only escape if their address is taken
 							return true // continue checking for address operations
 						}
+
 						// Reference types still need to escape
 						return false
 					}
@@ -356,4 +364,140 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	ast.Inspect(parentBlock, inspectFunc)
 
 	v.identEscapesHeap[identObj] = escapes
+}
+
+// Helper function to determine if a type is a basic value type
+func isBasicType(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	basic, ok := t.Underlying().(*types.Basic)
+	if !ok {
+		return false
+	}
+
+	// Check if it's a non-reference basic type
+	kind := basic.Kind()
+	return kind >= types.Bool && kind <= types.Float64
+}
+
+// Helper function to check if a variable has a simple usage pattern
+// that doesn't require heap allocation (like an integer counter)
+func isSimpleUsage(ident *ast.Ident, block *ast.BlockStmt, info *types.Info) bool {
+	if block == nil {
+		return false
+	}
+
+	// Get the variable object
+	identObj := info.ObjectOf(ident)
+
+	if identObj == nil {
+		return false
+	}
+
+	// Track if the ident is used in simple operations
+	addressTaken := false
+	assignedTo := false
+	usedInCondition := false
+	usedInIncrement := false
+
+	// Check usage patterns
+	ast.Inspect(block, func(n ast.Node) bool {
+		if addressTaken {
+			return false // Stop inspection if address is taken
+		}
+
+		switch node := n.(type) {
+		case *ast.UnaryExpr:
+			// Check if ident's address is taken
+			if node.Op == token.AND {
+				if id := getIdentifier(node.X); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						addressTaken = true
+						return false
+					}
+				}
+			}
+
+			// Check for increment/decrement
+			if node.Op == token.INC || node.Op == token.DEC {
+				if id := getIdentifier(node.X); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						usedInIncrement = true
+					}
+				}
+			}
+
+		case *ast.AssignStmt:
+			// Check if ident is assigned to
+			for _, lhs := range node.Lhs {
+				if id := getIdentifier(lhs); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						assignedTo = true
+						break
+					}
+				}
+			}
+
+			// Check if ident is used in assignment
+			if node.Tok == token.ADD_ASSIGN || node.Tok == token.SUB_ASSIGN {
+				for _, lhs := range node.Lhs {
+					if id := getIdentifier(lhs); id != nil {
+						if obj := info.ObjectOf(id); obj == identObj {
+							usedInIncrement = true
+							break
+						}
+					}
+				}
+			}
+
+		case *ast.BinaryExpr:
+			// Check if ident is used in conditions
+			if isComparisonOperator(node.Op) || isLogicalOperator(node.Op) {
+				if id := getIdentifier(node.X); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						usedInCondition = true
+					}
+				}
+
+				if id := getIdentifier(node.Y); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						usedInCondition = true
+					}
+				}
+			}
+
+		case *ast.FuncLit:
+			// Check for presence in closures - simple values can still be captured
+			// without taking addresses if they're not mutated
+			ast.Inspect(node.Body, func(n ast.Node) bool {
+				if id := getIdentifier(n); id != nil {
+					if obj := info.ObjectOf(id); obj == identObj {
+						// If it appears in an assignment, we need to do a further check
+						// to see if this identifier is on the left-hand side
+						if assign, ok := n.(*ast.AssignStmt); ok {
+							// This is an assignment statement, but we need to check
+							// other identifiers to see if our target is on the LHS
+							for _, lhs := range assign.Lhs {
+								if idLHS := getIdentifier(lhs); idLHS != nil {
+									if objLHS := info.ObjectOf(idLHS); objLHS == identObj {
+										addressTaken = true
+										return false
+									}
+								}
+							}
+						}
+					}
+				}
+				return true
+			})
+		}
+
+		return true
+	})
+
+	// Simple usage pattern: a basic variable that's used only for counting or conditions
+	// and never has its address taken
+	return !addressTaken && (usedInIncrement || (assignedTo && usedInCondition))
 }
