@@ -12,7 +12,7 @@ const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
 const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
-// Handles map types in context of a TypeSpec
+// Handles interface types in context of a TypeSpec
 func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (interfaceTypeName string) {
 	for _, field := range interfaceType.Methods.List {
 		// Check if this is an actual method (has a function type)

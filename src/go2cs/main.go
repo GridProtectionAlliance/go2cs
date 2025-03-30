@@ -171,7 +171,7 @@ var keywords = NewHashSet([]string{
 
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
 var reserved = NewHashSet([]string{
-	"AreEqual", "array", "channel", "Equals", "Finalize", "GetGoTypeName", "GetHashCode", "GetType",
+	"AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName", "GetHashCode", "GetType",
 	"GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute",
 	"GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput",
 	"GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute",
@@ -1553,7 +1553,7 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		constraintName := v.getTypeName(constraint, false)
 
 		if len(constraintName) == 0 || constraintName == "any" || constraintName == "interface{}" {
-			// At a minimum, generic type must implement be constructable, e.g., with `make`
+			// At a minimum, generic type must implement 'ISupportMake' to be constructable, e.g., with `make`
 			constraintName = "new()"
 		} else {
 			var iface *types.Interface

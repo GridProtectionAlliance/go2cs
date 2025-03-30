@@ -9,6 +9,14 @@ import (
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
 	// Check if this is a method value being used in an assignment
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
+		// Check if selector expression needs to be converted to a lambda function for assignment
+		if ident, ok := selectorExpr.X.(*ast.Ident); ok {
+			if v.isPackageIdentifier(ident) {
+				// This is a package selector (like fmt.Println) -- no need for lambda
+				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+			}
+		}
+
 		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
 	}
 

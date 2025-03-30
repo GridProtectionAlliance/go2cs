@@ -1207,6 +1207,12 @@ func (v *Visitor) isMethodValue(sel *ast.SelectorExpr, isCallExpr bool) bool {
 	return !isCallExpr
 }
 
+func (v *Visitor) isPackageIdentifier(ident *ast.Ident) bool {
+	obj := v.info.Uses[ident]
+	_, ok := obj.(*types.PkgName)
+	return ok
+}
+
 // isValueType determines if a type is a value type
 func isValueType(t types.Type) bool {
 	if t == nil {

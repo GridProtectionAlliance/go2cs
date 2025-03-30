@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -18,6 +19,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	forceMultiLine := false
 	hasSpreadOperator := false
 	var interfaceTypes map[int]types.Type
+	var callArgs []string
 
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
@@ -25,6 +27,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		forceMultiLine = callContext.forceMultiLine
 		hasSpreadOperator = callContext.hasSpreadOperator
 		interfaceTypes = callContext.interfaceTypes
+		callArgs = callContext.callArgs
 	}
 
 	for i, expr := range exprs {
@@ -57,7 +60,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// Check for call context, such as arguments allows u8 strings or is a pointer type
 		if callContext != nil {
 			// Index out of bounds default to false here, so variadic params are handled correctly
-			basicLitContext.u8StringOK = callContext.u8StringArgOK[i]
+			basicLitContext.u8StringOK = callContext.u8StringArgOK[i] && callArgs == nil
 			basicLitContext.sourceIsRuneArray = callContext.sourceIsRuneArray
 
 			// Check if the argument is a pointer type
@@ -69,16 +72,25 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
+		arg := &strings.Builder{}
+
 		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil {
-			result.WriteString(v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
+			arg.WriteString(v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
 		} else {
-			result.WriteString(v.convExpr(expr, contexts))
+			arg.WriteString(v.convExpr(expr, contexts))
 		}
 
 		// If the last expression has a spread operator, use elipsis property as source
 		// this way elements are passed as arguments instead of a slice or array
 		if hasSpreadOperator && i == len(exprs)-1 {
-			result.WriteString("." + ElipsisOperator)
+			arg.WriteString("." + ElipsisOperator)
+		}
+
+		if callArgs == nil {
+			result.WriteString(arg.String())
+		} else {
+			result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
+			callArgs[i] = arg.String()
 		}
 
 		if exprOnNewLine {

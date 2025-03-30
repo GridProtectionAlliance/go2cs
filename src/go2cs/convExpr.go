@@ -29,6 +29,7 @@ type CallExprContext struct {
 	forceMultiLine     bool
 	sourceIsRuneArray  bool
 	sourceIsTypeParams bool
+	callArgs           []string
 }
 
 func DefaultCallExprContext() *CallExprContext {
@@ -42,6 +43,7 @@ func DefaultCallExprContext() *CallExprContext {
 		forceMultiLine:     false,
 		sourceIsRuneArray:  false,
 		sourceIsTypeParams: false,
+		callArgs:           nil,
 	}
 }
 
@@ -84,16 +86,20 @@ func (c ArrayTypeContext) getDefault() StmtContext {
 type LambdaContext struct {
 	isAssignment  bool
 	isCallExpr    bool
+	renderParams  bool
 	isPointerCast bool
 	deferredDecls *strings.Builder
+	callArgs      []string
 }
 
 func DefaultLambdaContext() LambdaContext {
 	return LambdaContext{
 		isAssignment:  false,
 		isCallExpr:    false,
+		renderParams:  false,
 		isPointerCast: false,
 		deferredDecls: nil,
+		callArgs:      nil,
 	}
 }
 

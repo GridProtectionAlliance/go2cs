@@ -57,6 +57,24 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
+    public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
+
+    [TestMethod]
+    public void CheckDeferClosure() => CheckTarget("DeferClosure");
+
+    [TestMethod]
+    public void CheckDeferEvalParam() => CheckTarget("DeferEvalParam");
+
+    [TestMethod]
+    public void CheckDeferEvalParamFunc() => CheckTarget("DeferEvalParamFunc");
+
+    [TestMethod]
+    public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
+
+    [TestMethod]
+    public void CheckDeferSimple() => CheckTarget("DeferSimple");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

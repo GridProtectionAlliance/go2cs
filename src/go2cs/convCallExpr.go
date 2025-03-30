@@ -84,6 +84,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
 	callExprContext := DefaultCallExprContext()
+	callExprContext.callArgs = context.callArgs
 
 	// Check if the call is using the spread operator "..."
 	if callExpr.Ellipsis.IsValid() {
@@ -237,6 +238,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	if len(typeParamExpr) > 0 && !strings.HasSuffix(funcName, typeParamExpr) {
 		funcName += typeParamExpr
+	}
+
+	if !context.renderParams && context.callArgs != nil {
+		// Capture arguments for function literal in a defer context, but do not render
+		v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
+		return fmt.Sprintf("%s%s", constructType, funcName)
 	}
 
 	return fmt.Sprintf("%s%s(%s)", constructType, funcName, v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))

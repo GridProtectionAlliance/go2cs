@@ -49,6 +49,21 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]
+    public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
+
+    [TestMethod]
+    public void CheckDeferClosure() => CheckTarget("DeferClosure");
+
+    [TestMethod]
+    public void CheckDeferEvalParam() => CheckTarget("DeferEvalParam");
+
+    [TestMethod]
+    public void CheckDeferEvalParamFunc() => CheckTarget("DeferEvalParamFunc");
+
+    [TestMethod]
+    public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

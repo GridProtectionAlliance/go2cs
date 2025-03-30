@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
@@ -775,7 +776,7 @@ public static class builtin
     /// <param name="p2">Second integer parameter, commonly for capacity.</param>
     /// <typeparam name="T">Type of object.</typeparam>
     /// <returns>New object.</returns>
-    public static T makeǃ<T>(nint p1 = 0, nint p2 = -1) where T : new()
+    public static T makeǃ<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(nint p1 = 0, nint p2 = -1) where T : new()
     {
         if (p1 == 0 && p2 == -1)
             return new T();
@@ -873,7 +874,7 @@ public static class builtin
     /// <typeparam name="T">Target type of reference.</typeparam>
     /// <param name="inputs">Constructor parameters.</param>
     /// <returns>New reference for <typeparamref name="T"/>.</returns>
-    public static ж<T> @new<T>(params object[] inputs)
+    public static ж<T> @new<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(params object[] inputs)
     {
         return new ж<T>((T)Activator.CreateInstance(typeof(T), inputs)!);
     }
@@ -1801,6 +1802,444 @@ public static class builtin
     public static @string str(sstring value) => value;
 
 #endif
+
+    // ** Go Defer Handlers with Parameters **
+
+    /// <summary>
+    /// Executes a deferred action with one parameter.
+    /// </summary>
+    /// <typeparam name="T">First parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg">First parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T>(Action<T> action, T arg, Defer defer)
+    {
+        defer(() => action(arg));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with two parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">First parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2>(Action<T1, T2> action, T1 arg1, T2 arg2, Defer defer)
+    {
+        defer(() => action(arg1, arg2));
+    }
+
+    #region [ deferǃ<T1, T2, ... T16> Implementations ]
+
+    /// <summary>
+    /// Executes a deferred action with three parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3>(Action<T1, T2, T3> action, T1 arg1, T2 arg2, T3 arg3, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with four parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with five parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with six parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with seven parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7>(Action<T1, T2, T3, T4, T5, T6, T7> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with eight parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8>(Action<T1, T2, T3, T4, T5, T6, T7, T8> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with nine parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with ten parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with eleven parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with twelve parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <typeparam name="T12">Twelfth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="arg12">Twelfth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with thirteen parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <typeparam name="T12">Twelfth parameter type.</typeparam>
+    /// <typeparam name="T13">Thirteenth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="arg12">Twelfth parameter.</param>
+    /// <param name="arg13">Thirteenth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with fourteen parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <typeparam name="T12">Twelfth parameter type.</typeparam>
+    /// <typeparam name="T13">Thirteenth parameter type.</typeparam>
+    /// <typeparam name="T14">Fourteenth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="arg12">Twelfth parameter.</param>
+    /// <param name="arg13">Thirteenth parameter.</param>
+    /// <param name="arg14">Fourteenth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with fifteen parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <typeparam name="T12">Twelfth parameter type.</typeparam>
+    /// <typeparam name="T13">Thirteenth parameter type.</typeparam>
+    /// <typeparam name="T14">Fourteenth parameter type.</typeparam>
+    /// <typeparam name="T15">Fifteenth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="arg12">Twelfth parameter.</param>
+    /// <param name="arg13">Thirteenth parameter.</param>
+    /// <param name="arg14">Fourteenth parameter.</param>
+    /// <param name="arg15">Fifteenth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15));
+    }
+
+    /// <summary>
+    /// Executes a deferred action with sixteen parameters.
+    /// </summary>
+    /// <typeparam name="T1">First parameter type.</typeparam>
+    /// <typeparam name="T2">Second parameter type.</typeparam>
+    /// <typeparam name="T3">Third parameter type.</typeparam>
+    /// <typeparam name="T4">Fourth parameter type.</typeparam>
+    /// <typeparam name="T5">Fifth parameter type.</typeparam>
+    /// <typeparam name="T6">Sixth parameter type.</typeparam>
+    /// <typeparam name="T7">Seventh parameter type.</typeparam>
+    /// <typeparam name="T8">Eighth parameter type.</typeparam>
+    /// <typeparam name="T9">Ninth parameter type.</typeparam>
+    /// <typeparam name="T10">Tenth parameter type.</typeparam>
+    /// <typeparam name="T11">Eleventh parameter type.</typeparam>
+    /// <typeparam name="T12">Twelfth parameter type.</typeparam>
+    /// <typeparam name="T13">Thirteenth parameter type.</typeparam>
+    /// <typeparam name="T14">Fourteenth parameter type.</typeparam>
+    /// <typeparam name="T15">Fifteenth parameter type.</typeparam>
+    /// <typeparam name="T16">Sixteenth parameter type.</typeparam>
+    /// <param name="action">Target defer action.</param>
+    /// <param name="arg1">First parameter.</param>
+    /// <param name="arg2">Second parameter.</param>
+    /// <param name="arg3">Third parameter.</param>
+    /// <param name="arg4">Fourth parameter.</param>
+    /// <param name="arg5">Fifth parameter.</param>
+    /// <param name="arg6">Sixth parameter.</param>
+    /// <param name="arg7">Seventh parameter.</param>
+    /// <param name="arg8">Eighth parameter.</param>
+    /// <param name="arg9">Ninth parameter.</param>
+    /// <param name="arg10">Tenth parameter.</param>
+    /// <param name="arg11">Eleventh parameter.</param>
+    /// <param name="arg12">Twelfth parameter.</param>
+    /// <param name="arg13">Thirteenth parameter.</param>
+    /// <param name="arg14">Fourteenth parameter.</param>
+    /// <param name="arg15">Fifteenth parameter.</param>
+    /// <param name="arg16">Sixteenth parameter.</param>
+    /// <param name="defer">Source defer function.</param>
+    public static void deferǃ<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> action, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8, T9 arg9, T10 arg10, T11 arg11, T12 arg12, T13 arg13, T14 arg14, T15 arg15, T16 arg16, Defer defer)
+    {
+        defer(() => action(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15, arg16));
+    }
+
+    #endregion
 
     // ** Go Function Execution Context Handlers **/
 
