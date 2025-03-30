@@ -44,8 +44,7 @@ break_out:;
     fmt.Println();
     nint x = 99;
     fmt.Println("i before thread and", i, "x before thread", x);
-    var iʗ1 = i;
-    goǃ(_ => fmt.Println("i from thread and", iʗ1, "x from thread", x));
+    goǃ((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => fmt.Println(ᴛ1, ᴛ2, ᴛ3, ᴛ4), "i from thread and", i, "x from thread", x);
     while (ᐧ) {
         i++;
         x++;

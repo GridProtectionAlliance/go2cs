@@ -170,6 +170,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferEvalParamFunc", "Tests
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferCallOrder", "Tests\Behavioral\DeferCallOrder\DeferCallOrder.csproj", "{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoCallVariations", "Tests\Behavioral\GoCallVariations\GoCallVariations.csproj", "{D9EA63C4-66C0-FA97-A77C-A99301A59354}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -452,6 +454,10 @@ Global
 		{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -530,6 +536,7 @@ Global
 		{9A556588-EC4E-5105-F7DB-951C90E5B801} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{CB4FEF72-3BEE-B263-2252-81E728B71A61} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{D9EA63C4-66C0-FA97-A77C-A99301A59354} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

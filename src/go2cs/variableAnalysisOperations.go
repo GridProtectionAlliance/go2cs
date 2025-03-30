@@ -732,19 +732,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				return true
 			})
 
-			// Process arguments
-			for _, arg := range node.Call.Args {
-				ast.Inspect(arg, func(n ast.Node) bool {
-					if id, ok := n.(*ast.Ident); ok {
-						v.processPotentialCapture(id)
-						// If it was captured, associate it with this statement
-						if _, exists := v.lambdaCapture.capturedVars[id]; exists {
-							v.lambdaCapture.stmtCaptures[node][id] = true
-						}
-					}
-					return true
-				})
-			}
+			// Note: parameters are passed as arguments to C# implementation of go
+			// statement, so we don't need to check arguments for needing capture:
+
+			// // Process arguments
+			// for _, arg := range node.Call.Args {
+			// 	ast.Inspect(arg, func(n ast.Node) bool {
+			// 		if id, ok := n.(*ast.Ident); ok {
+			// 			v.processPotentialCapture(id)
+			// 			// If it was captured, associate it with this statement
+			// 			if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+			// 				v.lambdaCapture.stmtCaptures[node][id] = true
+			// 			}
+			// 		}
+			// 		return true
+			// 	})
+			// }
 
 			visitNode(node.Call)
 
@@ -775,19 +778,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				return true
 			})
 
-			// Process arguments
-			for _, arg := range node.Call.Args {
-				ast.Inspect(arg, func(n ast.Node) bool {
-					if id, ok := n.(*ast.Ident); ok {
-						v.processPotentialCapture(id)
-						// If it was captured, associate it with this statement
-						if _, exists := v.lambdaCapture.capturedVars[id]; exists {
-							v.lambdaCapture.stmtCaptures[node][id] = true
-						}
-					}
-					return true
-				})
-			}
+			// Note: parameters are passed as arguments to C# implementation of defer
+			// statement, so we don't need to check arguments for needing capture:
+
+			// // Process arguments
+			// for _, arg := range node.Call.Args {
+			// 	ast.Inspect(arg, func(n ast.Node) bool {
+			// 		if id, ok := n.(*ast.Ident); ok {
+			// 			v.processPotentialCapture(id)
+			// 			// If it was captured, associate it with this statement
+			// 			if _, exists := v.lambdaCapture.capturedVars[id]; exists {
+			// 				v.lambdaCapture.stmtCaptures[node][id] = true
+			// 			}
+			// 		}
+			// 		return true
+			// 	})
+			// }
 
 			visitNode(node.Call)
 

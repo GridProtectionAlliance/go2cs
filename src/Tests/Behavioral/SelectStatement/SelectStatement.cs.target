@@ -68,15 +68,12 @@ internal static void filter(/*<-*/channel<nint> src, channel/*<-*/<nint> dst, ni
 
 internal static void sieve() {
     var ch = new channel<nint>(1);
-    var chʗ1 = ch;
-    goǃ(_ => generate(chʗ1));
+    goǃ(generate, ch);
     while (ᐧ) {
         nint prime = ᐸꟷ(ch);
         fmt.Print(prime, "\n");
         var ch1 = new channel<nint>(1);
-        var chʗ2 = ch;
-        var ch1ʗ1 = ch1;
-        goǃ(_ => filter(chʗ2, ch1ʗ1, prime));
+        goǃ(filter, ch, ch1, prime);
         ch = ch1;
         if (prime > 40) {
             break;
@@ -99,14 +96,10 @@ internal static void Main() {
     var ch2 = new channel<nint>(1);
     var ch3 = new channel<nint>(1);
     var ch4 = new channel<nint>(1);
-    var ch1ʗ1 = ch1;
-    goǃ(_ => g1(ch1ʗ1));
-    var ch2ʗ1 = ch2;
-    goǃ(_ => g2(ch2ʗ1));
-    var ch3ʗ1 = ch3;
-    goǃ(_ => g1(ch3ʗ1));
-    var ch4ʗ1 = ch4;
-    goǃ(_ => g2(ch4ʗ1));
+    goǃ(g1, ch1);
+    goǃ(g2, ch2);
+    goǃ(g1, ch3);
+    goǃ(g2, ch4);
     for (nint i = 0; i < 4; i++) {
         switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
         case 0 when ch1.ꟷᐳ(out var v1):
@@ -144,15 +137,9 @@ internal static void Main() {
     }
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
     var c = new channel<nint>(1);
-    var cʗ1 = c;
-    var sʗ1 = s;
-    goǃ(_ => sum(sʗ1[..(int)(len(sʗ1) / 2)], cʗ1));
-    var cʗ2 = c;
-    var sʗ2 = s;
-    goǃ(_ => sum(sʗ2[(int)(len(sʗ2) / 2)..], cʗ2));
-    var cʗ3 = c;
-    var sʗ3 = s;
-    goǃ(_ => sum(sʗ3[2..5], cʗ3));
+    goǃ(sum, s[..(int)(len(s) / 2)], c);
+    goǃ(sum, s[(int)(len(s) / 2)..], c);
+    goǃ(sum, s[2..5], c);
     nint x = ᐸꟷ(c);
     nint y = ᐸꟷ(c);
     nint z = ᐸꟷ(c);
@@ -169,8 +156,7 @@ internal static void Main() {
     });
     fibonacci(fΔ1, quit);
     var mychanl = new channel<@string>(1);
-    var mychanlʗ1 = mychanl;
-    goǃ(_ => sendOnly(mychanlʗ1));
+    goǃ(sendOnly, mychanl);
     var (result, ok) = ᐸꟷ(mychanl, ꟷ);
     fmt.Println(result, ok);
     foreach (var v in range(((IntSlice)s).All())) {
