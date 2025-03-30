@@ -120,6 +120,7 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
             Pointer[index] = value switch
             {
                 byte val => val,
+                NilType => 0,
                 null => 0,
                 _ => throw new ArgumentException("Invalid value type.")
             };
