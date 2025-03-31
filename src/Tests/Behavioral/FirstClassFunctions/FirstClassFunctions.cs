@@ -8,6 +8,7 @@ partial class main_package {
 
 internal const nint win = 100;
 internal const nint gamesPerSeries = 10;
+
 [GoType] partial struct score {
     public nint player;
     public nint opponent;

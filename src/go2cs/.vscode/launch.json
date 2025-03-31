@@ -68,7 +68,8 @@
                 //"..\\Tests\\Behavioral\\DeferEvalParamFunc",
                 //"..\\Tests\\Behavioral\\DeferCallOrder",
                 //"..\\Tests\\Behavioral\\GoCallVariations",
-                "..\\Tests\\Behavioral\\PanicRecover",
+                ///"..\\Tests\\Behavioral\\PanicRecover",
+                "..\\Tests\\Behavioral\\IotaEnum",
                 //"C:\\Program Files\\Go\\src\\errors",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\errors",
                 //"C:\\Program Files\\Go\\src\\unsafe",
@@ -80,7 +81,9 @@
                 //"C:\\Users\\rcarroll\\go\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0",
                 //"C:\\Users\\rcarroll\\go2cs\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0",
                 //"C:\\Program Files\\Go\\src\\internal\\reflectlite",
-                //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\reflectlite"
+                //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\reflectlite",
+                //"C:\\Program Files\\Go\\src\\internal\\abi",
+                //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\abi",
             ]
         }
     ]

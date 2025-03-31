@@ -12,6 +12,7 @@ partial class main_package {
 
 internal const int8 opRead = -1;
 internal const int8 opInvalid = 0;
+
 internal static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
     ж<nint> ptr = default!;

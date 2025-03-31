@@ -3,6 +3,7 @@ namespace go;
 partial class main_package {
 
 public const nint N = /* 11 + 1 */ 12;
+
 internal static slice<rune> board = slice<rune>(
     (@string)"""
 ...........
@@ -18,7 +19,9 @@ internal static slice<rune> board = slice<rune>(
 ...........
 
 """);
+
 internal static nint center;
+
 [GoInit] internal static void init() {
     println("init fn 1");
     nint n = 0;
@@ -38,6 +41,7 @@ internal static nint center;
 }
 
 internal static nint moves;
+
 internal static bool move(nint pos, nint dir) {
     moves++;
     if (board[pos] == (rune)'●' && board[pos + dir] == (rune)'●' && board[pos + 2 * dir] == (rune)'○') {

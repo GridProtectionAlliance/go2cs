@@ -9,6 +9,7 @@ internal const float32 w = 1;
 public const nint _addr_X = 1;
 public const nint Y = 2;
 public const nint Z = 3;
+
 public const nint A1 = iota;
 public const nint B = /* iota * 100 */ 0;
 public const nint _ = 1;
@@ -45,6 +46,7 @@ Line1
         "Yo"
         Line3
 """u8;
+
 public static nint A2 = 1;
 public static @string B2 = "42"u8;
 public static nint C21 = dynamicFn1();
@@ -52,6 +54,7 @@ public static bool D21;
 public static bool E2;
 public static bool ΔTa_package = false;
 internal static bool otherID = true;
+
 internal static nint dynamicFn1() {
     return 4;
 }

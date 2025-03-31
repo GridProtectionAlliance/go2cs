@@ -7,6 +7,7 @@ using ꓸꓸꓸany = Span<any>;
 partial class main_package {
 
 internal static nint x = 1;
+
 internal static int32 getNext() {
     x++;
     return ((int32)x);

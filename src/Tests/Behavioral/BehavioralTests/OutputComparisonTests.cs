@@ -97,6 +97,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
 
     [TestMethod]
+    public void CheckIotaEnum() => CheckTarget("IotaEnum");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]

@@ -182,6 +182,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			access := getAccess(goIDName)
 			typeLenDeviation := token.Pos(len(csTypeName) + len(access) + (len(csIDName) - len(goIDName)))
 
+			// Check if the type is a named type (user-defined), not a basic type
+			isNamedType := false
+
+			if _, ok := c.Type().(*types.Named); ok {
+				isNamedType = true
+			}
+
 			var tokEnd token.Pos
 			var srcVal string
 			var constVal string
@@ -303,10 +310,18 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					}
 				}
 
-				if v.inFunction {
-					v.writeOutput("const %s %s =%s %s;", csTypeName, csIDName, orgExpr, constVal)
+				var constExpr string
+
+				if isNamedType {
+					constExpr = "static readonly"
 				} else {
-					v.writeOutput("%s const %s %s =%s %s;", access, csTypeName, csIDName, orgExpr, constVal)
+					constExpr = "const"
+				}
+
+				if v.inFunction {
+					v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constVal)
+				} else {
+					v.writeOutput("%s %s %s %s =%s %s;", access, constExpr, csTypeName, csIDName, orgExpr, constVal)
 				}
 
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+1)

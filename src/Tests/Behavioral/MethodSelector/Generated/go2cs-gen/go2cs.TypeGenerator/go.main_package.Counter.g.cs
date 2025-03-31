@@ -35,17 +35,17 @@ public static partial class main_package
         
         public static bool operator >=(Counter left, Counter right) => left.m_value >= right.m_value;
         
-        public static Counter operator +(Counter left, Counter right) => new(left.m_value + right.m_value);
+        public static Counter operator +(Counter left, Counter right) => (Counter)(left.m_value + right.m_value);
         
-        public static Counter operator -(Counter left, Counter right) => new(left.m_value - right.m_value);
+        public static Counter operator -(Counter left, Counter right) => (Counter)(left.m_value - right.m_value);
         
-        public static Counter operator -(Counter value) => new(-value.m_value);
+        public static Counter operator -(Counter value) => (Counter)(-value.m_value);
         
-        public static Counter operator *(Counter left, Counter right) => new(left.m_value * right.m_value);
+        public static Counter operator *(Counter left, Counter right) => (Counter)(left.m_value * right.m_value);
         
-        public static Counter operator /(Counter left, Counter right) => new(left.m_value / right.m_value);
+        public static Counter operator /(Counter left, Counter right) => (Counter)(left.m_value / right.m_value);
         
-        public static Counter operator %(Counter left, Counter right) => new(left.m_value % right.m_value);
+        public static Counter operator %(Counter left, Counter right) => (Counter)(left.m_value % right.m_value);
         
         public Counter(nint value) => m_value = value;
 

@@ -131,6 +131,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
 
     [TestMethod]
+    public void CheckIotaEnum() => CheckTarget("IotaEnum");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
