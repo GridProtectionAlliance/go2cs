@@ -17,16 +17,16 @@ internal static class NumericTypeTemplate
                 
                 public static bool operator >=({{typeName}} left, {{typeName}} right) => left.m_value >= right.m_value;
                 
-                public static {{typeName}} operator +({{typeName}} left, {{typeName}} right) => new(left.m_value + right.m_value);
+                public static {{typeName}} operator +({{typeName}} left, {{typeName}} right) => ({{typeName}})(left.m_value + right.m_value);
                 
-                public static {{typeName}} operator -({{typeName}} left, {{typeName}} right) => new(left.m_value - right.m_value);
+                public static {{typeName}} operator -({{typeName}} left, {{typeName}} right) => ({{typeName}})(left.m_value - right.m_value);
                 
-                public static {{typeName}} operator -({{typeName}} value) => new(-value.m_value);
+                public static {{typeName}} operator -({{typeName}} value) => ({{typeName}})(-value.m_value);
                 
-                public static {{typeName}} operator *({{typeName}} left, {{typeName}} right) => new(left.m_value * right.m_value);
+                public static {{typeName}} operator *({{typeName}} left, {{typeName}} right) => ({{typeName}})(left.m_value * right.m_value);
                 
-                public static {{typeName}} operator /({{typeName}} left, {{typeName}} right) => new(left.m_value / right.m_value);
+                public static {{typeName}} operator /({{typeName}} left, {{typeName}} right) => ({{typeName}})(left.m_value / right.m_value);
                 
-                public static {{typeName}} operator %({{typeName}} left, {{typeName}} right) => new(left.m_value % right.m_value);
+                public static {{typeName}} operator %({{typeName}} left, {{typeName}} right) => ({{typeName}})(left.m_value % right.m_value);
         """;
 }
