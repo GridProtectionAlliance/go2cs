@@ -205,6 +205,7 @@ var interfaceInheritances map[string]HashSet[string]
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
 var indirectImplicitConversions map[string]HashSet[string]
+var nameCollisions map[string]bool
 var initFuncCounter int
 var usesUnsafeCode bool
 var packageLock = sync.Mutex{}
@@ -389,6 +390,7 @@ Examples:
 		implicitConversions = make(map[string]HashSet[string])
 		invertedImplicitConversions = make(map[string]HashSet[string])
 		indirectImplicitConversions = make(map[string]HashSet[string])
+		nameCollisions = make(map[string]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -444,6 +446,9 @@ Examples:
 
 		globalIdentNames := make(map[*ast.Ident]string)
 		globalScope := map[string]*types.Var{}
+
+		// Perform name collision analysis
+		performNameCollisionAnalysis(pkg)
 
 		// Pre-process all global variables in package
 		for _, fileEntry := range files {
@@ -1087,6 +1092,18 @@ func getSanitizedImport(identifier string) string {
 }
 
 func getSanitizedIdentifier(identifier string) string {
+	if nameCollisions[identifier] {
+		return getCollisionAvoidanceIdentifier(identifier)
+	}
+
+	return getCoreSanitizedIdentifier(identifier)
+}
+
+func getCollisionAvoidanceIdentifier(identifier string) string {
+	return ShadowVarMarker + identifier
+}
+
+func getCoreSanitizedIdentifier(identifier string) string {
 	if strings.Contains(identifier, ".") {
 		// Split identifiers based on dot separator and sanitize each part
 		parts := strings.Split(identifier, ".")
@@ -1131,7 +1148,7 @@ func getUnsanitizedIdentifier(identifier string) string {
 }
 
 func getSanitizedFunctionName(funcName string) string {
-	funcName = getSanitizedIdentifier(funcName)
+	funcName = getCoreSanitizedIdentifier(funcName)
 
 	// Handle special exceptions
 	if funcName == "Main" {

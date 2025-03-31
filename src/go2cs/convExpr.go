@@ -124,6 +124,7 @@ func (c UnaryExprContext) getDefault() StmtContext {
 type IdentContext struct {
 	isPointer bool
 	isType    bool
+	isMethod  bool
 	ident     *ast.Ident
 }
 
@@ -131,6 +132,7 @@ func DefaultIdentContext() IdentContext {
 	return IdentContext{
 		isPointer: false,
 		isType:    false,
+		isMethod:  false,
 		ident:     nil,
 	}
 }

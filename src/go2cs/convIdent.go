@@ -18,5 +18,9 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		return convertToCSTypeName(v.getIdentName(ident))
 	}
 
+	if context.isMethod {
+		return getSanitizedFunctionName(v.getIdentName(ident))
+	}
+
 	return getSanitizedIdentifier(v.getIdentName(ident))
 }

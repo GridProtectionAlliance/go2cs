@@ -13,11 +13,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		if ident, ok := selectorExpr.X.(*ast.Ident); ok {
 			if v.isPackageIdentifier(ident) {
 				// This is a package selector (like fmt.Println) -- no need for lambda
-				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 			}
 		}
 
-		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 	}
 
 	// Check if an expression contains an explicit dereference at any level
@@ -37,7 +37,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if exprType := v.info.TypeOf(selectorExpr.X); exprType != nil {
 		// Check if there's an explicit dereference at any level in the expression
 		if containsExplicitDeref(selectorExpr.X) {
-			return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+			return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 		}
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
@@ -49,7 +49,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						if selVar, ok := obj.(*types.Var); ok {
 							// If it's a receiver, skip dereferencing
 							if v.currentFuncSignature.Recv() == selVar {
-								return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+								return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 							}
 
 							// Check if it's a function parameter
@@ -58,7 +58,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							for i := range params.Len() {
 								// It's a function parameter, skip dereferencing
 								if params.At(i) == selVar {
-									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 								}
 							}
 						}
@@ -77,9 +77,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									// If the field belongs to the struct, automatically dereference the pointer
 									if context.isAssignment {
 										// Left-hand side of assignment cannot use pointer dereference operator
-										return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+										return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 									} else {
-										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 									}
 								}
 							}
@@ -90,5 +90,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
-	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, DefaultIdentContext()))
+	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+}
+
+func getSelIdentContext() IdentContext {
+	context := DefaultIdentContext()
+	context.isMethod = true
+	return context
 }
