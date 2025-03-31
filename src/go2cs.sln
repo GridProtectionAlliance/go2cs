@@ -172,6 +172,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeferCallOrder", "Tests\Beh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoCallVariations", "Tests\Behavioral\GoCallVariations\GoCallVariations.csproj", "{D9EA63C4-66C0-FA97-A77C-A99301A59354}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "internal.reflectlite", "core\internal\reflectlite\internal.reflectlite.csproj", "{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanicRecover", "Tests\Behavioral\PanicRecover\PanicRecover.csproj", "{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -458,6 +462,14 @@ Global
 		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D9EA63C4-66C0-FA97-A77C-A99301A59354}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -537,6 +549,8 @@ Global
 		{CB4FEF72-3BEE-B263-2252-81E728B71A61} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{902E98D0-83D5-E54F-E6F4-D0C8F3F0449A} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{D9EA63C4-66C0-FA97-A77C-A99301A59354} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{EFB58CEF-74BA-FFE9-46E4-6E16AC17D259} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
+		{CCAB0566-3434-EB6A-4BD0-C97CFB5FFEBF} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

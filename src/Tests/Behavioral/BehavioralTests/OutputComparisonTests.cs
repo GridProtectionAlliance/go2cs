@@ -103,6 +103,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckPanicRecover() => CheckTarget("PanicRecover");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
