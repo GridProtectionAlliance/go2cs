@@ -40,17 +40,17 @@ public static partial class unsafe_package
         
         public static bool operator >=(ArbitraryType left, ArbitraryType right) => left.m_value >= right.m_value;
         
-        public static ArbitraryType operator +(ArbitraryType left, ArbitraryType right) => new(left.m_value + right.m_value);
+        public static ArbitraryType operator +(ArbitraryType left, ArbitraryType right) => (ArbitraryType)(left.m_value + right.m_value);
         
-        public static ArbitraryType operator -(ArbitraryType left, ArbitraryType right) => new(left.m_value - right.m_value);
+        public static ArbitraryType operator -(ArbitraryType left, ArbitraryType right) => (ArbitraryType)(left.m_value - right.m_value);
         
-        public static ArbitraryType operator -(ArbitraryType value) => new(-value.m_value);
+        public static ArbitraryType operator -(ArbitraryType value) => (ArbitraryType)(-value.m_value);
         
-        public static ArbitraryType operator *(ArbitraryType left, ArbitraryType right) => new(left.m_value * right.m_value);
+        public static ArbitraryType operator *(ArbitraryType left, ArbitraryType right) => (ArbitraryType)(left.m_value * right.m_value);
         
-        public static ArbitraryType operator /(ArbitraryType left, ArbitraryType right) => new(left.m_value / right.m_value);
+        public static ArbitraryType operator /(ArbitraryType left, ArbitraryType right) => (ArbitraryType)(left.m_value / right.m_value);
         
-        public static ArbitraryType operator %(ArbitraryType left, ArbitraryType right) => new(left.m_value % right.m_value);
+        public static ArbitraryType operator %(ArbitraryType left, ArbitraryType right) => (ArbitraryType)(left.m_value % right.m_value);
         
         public ArbitraryType(nint value) => m_value = value;
 

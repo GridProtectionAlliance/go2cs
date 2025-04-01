@@ -69,12 +69,14 @@ func (c BasicLitContext) getDefault() StmtContext {
 
 type ArrayTypeContext struct {
 	compositeInitializer bool
+	indexedInitializer   bool
 	maxLength            int
 }
 
 func DefaultArrayTypeContext() ArrayTypeContext {
 	return ArrayTypeContext{
 		compositeInitializer: false,
+		indexedInitializer:   false,
 		maxLength:            0,
 	}
 }

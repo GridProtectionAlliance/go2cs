@@ -108,6 +108,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	// Check for sparse array initialization
 	if callContext.keyValueSource == ArraySource && len(compositeLit.Elts) > 0 {
 		if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
+			callContext.keyValueSource = MapSource
 			maxKeyValue := 0
 
 			for _, elt := range compositeLit.Elts {
@@ -131,7 +132,6 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			}
 
 			if maxKeyValue > 0 {
-				callContext.keyValueSource = MapSource
 				arrayTypeContext.compositeInitializer = false
 
 				if definedLen > 0 {
@@ -141,6 +141,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				}
 
 				compositeSuffix = ""
+			} else {
+				arrayTypeContext.indexedInitializer = true
 			}
 		}
 	}

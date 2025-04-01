@@ -7,6 +7,14 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+// The `performNameCollisionAnalysis` function analyzes the package for name collisions
+// between constants/variables and method names. Resulting collisions are stored in the
+// global `nameCollisions` map. This function is called for each package during the
+// conversion process to ensure that any potential name collisions are identified and
+// handled appropriately. This is important to avoid naming conflicts that could lead
+// to runtime errors or unexpected behavior in the generated C# code, which is more
+// strict about unique naming of discrete types than Go is in this case.
+
 func performNameCollisionAnalysis(pkg *packages.Package) {
 	constNames := make(map[string]bool)
 	methodNames := make(map[string]bool)

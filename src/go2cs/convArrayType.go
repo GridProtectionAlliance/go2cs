@@ -21,7 +21,10 @@ func (v *Visitor) convArrayType(arrayType *ast.ArrayType, context ArrayTypeConte
 
 	typeName = convertToCSTypeName(typeName)
 
-	if context.compositeInitializer {
+	if context.indexedInitializer {
+		// For indexed initialization use a sparse array for initialization of slice or array
+		return fmt.Sprintf("runtime.SparseArray<%s>", typeName)
+	} else if context.compositeInitializer {
 		// Use basic array type for composite literal initialization of slice or array
 		return fmt.Sprintf("%s[]", typeName)
 	}

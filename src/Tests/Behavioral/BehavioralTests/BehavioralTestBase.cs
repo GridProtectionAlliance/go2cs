@@ -33,6 +33,9 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+// Don't enable for timing tests:
+//[assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel)]
+
 namespace BehavioralTests;
 
 [TestClass]

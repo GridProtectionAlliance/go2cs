@@ -40,17 +40,17 @@ public static partial class unsafe_package
         
         public static bool operator >=(IntegerType left, IntegerType right) => left.m_value >= right.m_value;
         
-        public static IntegerType operator +(IntegerType left, IntegerType right) => new(left.m_value + right.m_value);
+        public static IntegerType operator +(IntegerType left, IntegerType right) => (IntegerType)(left.m_value + right.m_value);
         
-        public static IntegerType operator -(IntegerType left, IntegerType right) => new(left.m_value - right.m_value);
+        public static IntegerType operator -(IntegerType left, IntegerType right) => (IntegerType)(left.m_value - right.m_value);
         
-        public static IntegerType operator -(IntegerType value) => new(-value.m_value);
+        public static IntegerType operator -(IntegerType value) => (IntegerType)(-value.m_value);
         
-        public static IntegerType operator *(IntegerType left, IntegerType right) => new(left.m_value * right.m_value);
+        public static IntegerType operator *(IntegerType left, IntegerType right) => (IntegerType)(left.m_value * right.m_value);
         
-        public static IntegerType operator /(IntegerType left, IntegerType right) => new(left.m_value / right.m_value);
+        public static IntegerType operator /(IntegerType left, IntegerType right) => (IntegerType)(left.m_value / right.m_value);
         
-        public static IntegerType operator %(IntegerType left, IntegerType right) => new(left.m_value % right.m_value);
+        public static IntegerType operator %(IntegerType left, IntegerType right) => (IntegerType)(left.m_value % right.m_value);
         
         public IntegerType(nint value) => m_value = value;
 

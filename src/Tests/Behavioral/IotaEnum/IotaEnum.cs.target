@@ -30,12 +30,49 @@ public static readonly Kind Interface = 20;
 public static readonly Kind Map = 21;
 public static readonly Kind Pointer = 22;
 public static readonly Kind Slice = 23;
-public static readonly Kind String = 24;
+public static readonly Kind ΔString = 24;
 public static readonly Kind Struct = 25;
 public static readonly Kind UnsafePointer = 26;
 
+public static @string String(this Kind k) {
+    if (((nint)k) < len(kindNames)) {
+        return kindNames[k];
+    }
+    return kindNames[0];
+}
+
+internal static slice<@string> kindNames = new runtime.SparseArray<@string>{
+    [Invalid] = "invalid"u8,
+    [Bool] = "bool"u8,
+    [Int] = "int"u8,
+    [Int8] = "int8"u8,
+    [Int16] = "int16"u8,
+    [Int32] = "int32"u8,
+    [Int64] = "int64"u8,
+    [Uint] = "uint"u8,
+    [Uint8] = "uint8"u8,
+    [Uint16] = "uint16"u8,
+    [Uint32] = "uint32"u8,
+    [Uint64] = "uint64"u8,
+    [Uintptr] = "uintptr"u8,
+    [Float32] = "float32"u8,
+    [Float64] = "float64"u8,
+    [Complex64] = "complex64"u8,
+    [Complex128] = "complex128"u8,
+    [Array] = "array"u8,
+    [Chan] = "chan"u8,
+    [Func] = "func"u8,
+    [Interface] = "interface"u8,
+    [Map] = "map"u8,
+    [Pointer] = "ptr"u8,
+    [Slice] = "slice"u8,
+    [ΔString] = "string"u8,
+    [Struct] = "struct"u8,
+    [UnsafePointer] = "unsafe.Pointer"u8
+}.slice();
+
 internal static void Main() {
-    fmt.Printf("Slice Kind Value: %v\n"u8, Slice);
+    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), ((nint)Slice));
 }
 
 } // end main_package
