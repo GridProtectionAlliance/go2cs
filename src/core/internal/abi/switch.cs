@@ -1,7 +1,7 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
 partial class abi_package {
 
@@ -10,7 +10,7 @@ partial class abi_package {
     public nint NCases;
     // Array of NCases elements.
 // Each case must be a non-empty interface type.
-    public array<ж<InterfaceType>> Cases;
+    public array<ж<ΔInterfaceType>> Cases;
 }
 
 [GoType] partial struct InterfaceSwitchCache {
@@ -46,7 +46,7 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 [GoType] partial struct TypeAssert {
     public ж<TypeAssertCache> Cache;
-    public ж<InterfaceType> Inter;
+    public ж<ΔInterfaceType> Inter;
     public bool CanFail;
 }
 

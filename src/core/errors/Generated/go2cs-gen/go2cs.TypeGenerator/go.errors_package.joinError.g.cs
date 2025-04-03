@@ -44,7 +44,7 @@ public static partial class errors_package
         
         public override bool Equals(object? obj) => obj is joinError other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             errs);
         
         public static bool operator ==(joinError left, joinError right) => left.Equals(right);

@@ -1,7 +1,7 @@
 // Copyright 2023 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
 using @unsafe = unsafe_package;
 
@@ -13,7 +13,7 @@ partial class abi_package {
 //
 // allocated in non-garbage-collected memory
 [GoType] partial struct ITab {
-    public ж<InterfaceType> Inter;
+    public ж<ΔInterfaceType> Inter;
     public ж<Type> Type;
     public uint32 Hash;     // copy of Type.Hash. Used for type switches.
     public array<uintptr> Fun; // variable sized. fun[0]==0 means Type does not implement Inter.

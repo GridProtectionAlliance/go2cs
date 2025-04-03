@@ -1,7 +1,7 @@
 // Copyright 2024 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
 using @unsafe = unsafe_package;
 
@@ -19,7 +19,7 @@ partial class abi_package {
 //go:nocheckptr
 public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
     var x = ((uintptr)p);
-    return ((@unsafe.Pointer)(x ^ 0));
+    return ((@unsafe.Pointer)((uintptr)(x ^ 0)));
 }
 
 internal static bool alwaysFalse;

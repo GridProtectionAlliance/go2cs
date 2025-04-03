@@ -1,7 +1,7 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-namespace go;
+namespace go.@internal;
 
 using goarch = @internal.goarch_package;
 using @unsafe = unsafe_package;
@@ -69,7 +69,7 @@ partial class abi_package {
 // need to be "aligned" to the upper edge of the register to be interpreted
 // by the CPU correctly.
 [GoRecv] internal static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
-    if (argSize > goarch.PtrSize || argSize == 0 || argSize & (argSize - 1) != 0) {
+    if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         panic("invalid argSize");
     }
     var offset = ((uintptr)0);
@@ -93,7 +93,7 @@ partial class abi_package {
 //
 //go:nosplit
 [GoRecv] internal static bool Get(this ref IntArgRegBitmap b, nint i) {
-    return b[i / 8] & (((uint8)1) << (int)((i % 8))) != 0;
+    return (uint8)(b[i / 8] & (((uint8)1) << (int)((i % 8)))) != 0;
 }
 
 } // end abi_package

@@ -43,7 +43,7 @@ public static partial class errors_package
         
         public override bool Equals(object? obj) => obj is errorString other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             s);
         
         public static bool operator ==(errorString left, errorString right) => left.Equals(right);
