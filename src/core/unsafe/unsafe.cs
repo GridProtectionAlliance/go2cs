@@ -219,6 +219,12 @@ public class Pointer(uintptr value) : ж<uintptr>(value) {
     public static implicit operator void*(Pointer value) {
         return (void*)value.val;
     }
+
+    public static Pointer FromRef<T>(ref T type)
+    {
+        fixed (T* ptr = &type)
+            return new Pointer((uintptr)ptr);
+    }
 }
 
 // Sizeof takes an expression x of any type and returns the size in bytes
