@@ -46,7 +46,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Result<T> other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Value,
             Error);
         

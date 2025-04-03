@@ -43,7 +43,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Queue<T> other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             items);
         
         public static bool operator ==(Queue<T> left, Queue<T> right) => left.Equals(right);

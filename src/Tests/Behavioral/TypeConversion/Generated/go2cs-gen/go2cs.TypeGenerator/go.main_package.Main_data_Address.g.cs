@@ -47,7 +47,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is main_data_Address other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Street,
             City);
         

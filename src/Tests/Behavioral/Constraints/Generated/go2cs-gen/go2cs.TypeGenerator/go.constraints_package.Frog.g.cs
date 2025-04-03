@@ -47,7 +47,7 @@ public static partial class constraints_package
         
         public override bool Equals(object? obj) => obj is Frog other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Name,
             Color);
         

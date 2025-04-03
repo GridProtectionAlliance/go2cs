@@ -43,7 +43,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Inner other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Value);
         
         public static bool operator ==(Inner left, Inner right) => left.Equals(right);

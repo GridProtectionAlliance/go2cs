@@ -28,6 +28,9 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("ArrayType", "ΔArrayType")]
+[assembly: GoTypeAlias("Kind", "ΔKind")]
+[assembly: GoTypeAlias("MapType", "ΔMapType")]
 [assembly: GoTypeAlias("String", "ΔString")]
 // </ExportedTypeAliases>
 

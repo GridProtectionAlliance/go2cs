@@ -32,8 +32,6 @@ public static partial class main_package
         // Promoted Struct Field Accessor References
         public static ref global::go.@string ᏑValue(ref Middle instance) => ref instance.Inner.val.Value;
 
-        // Promoted Struct Method References
-
         // Field References
         public static ref global::go.ж<global::go.main_package.Inner> ᏑInner(ref Middle instance) => ref instance.Inner;
         
@@ -54,7 +52,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Middle other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Inner);
         
         public static bool operator ==(Middle left, Middle right) => left.Equals(right);
@@ -77,4 +75,6 @@ public static partial class main_package
             Inner?.ToString() ?? "<nil>"
         ]), "}");
     }
+
+    // Promoted Struct Receivers
 }

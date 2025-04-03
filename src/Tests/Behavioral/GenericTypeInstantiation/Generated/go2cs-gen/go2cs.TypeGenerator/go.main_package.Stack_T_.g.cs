@@ -43,7 +43,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Stack<T> other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             elements);
         
         public static bool operator ==(Stack<T> left, Stack<T> right) => left.Equals(right);

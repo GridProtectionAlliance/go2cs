@@ -65,16 +65,15 @@ internal static void Main() {
         fmt.Println(xΔ1);
     }
     fmt.Println(x);
-    switch (time.Now().Weekday()) {
-    case time.Saturday or time.Sunday:
+    var exprᴛ1 = time.Now().Weekday();
+    if (exprᴛ1 == time.Saturday || exprᴛ1 == time.Sunday) {
         fmt.Println("It's the weekend");
-        break;
-    case time.Monday:
+    }
+    else if (exprᴛ1 == time.Monday) {
         fmt.Println("Ugh, it's Monday");
-        break;
-    default:
+    }
+    else { /* default: */
         fmt.Println("It's a weekday");
-        break;
     }
 
     var t = time.Now();
@@ -124,19 +123,19 @@ internal static void Main() {
     fmt.Printf("i before = %d\n"u8, i);
     {
         nint iΔ1 = 1;
-        var exprᴛ1 = getNext();
+        var exprᴛ2 = getNext();
         var matchᴛ1 = false;
-        if (exprᴛ1 is -1) { matchᴛ1 = true;
+        if (exprᴛ2 is -1) { matchᴛ1 = true;
             fmt.Println("negative");
         }
-        else if (exprᴛ1 is 0) { matchᴛ1 = true;
+        else if (exprᴛ2 is 0) { matchᴛ1 = true;
             fmt.Println("zero");
         }
-        else if (exprᴛ1 is 1 or 2) { matchᴛ1 = true;
+        else if (exprᴛ2 is 1 or 2) { matchᴛ1 = true;
             fmt.Println("one or two");
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ2 is 3) { matchᴛ1 = true;
             fmt.Printf("three, but x=%d "u8, x);
             fmt.Printf("and i now = %d\n"u8, iΔ1);
             fallthrough = true;
@@ -152,12 +151,12 @@ internal static void Main() {
         var matchᴛ2 = false;
         if (next is <= -1) { matchᴛ2 = true;
             fmt.Println("negative");
-            var exprᴛ3 = getNext();
+            var exprᴛ4 = getNext();
             var matchᴛ3 = false;
-            if (exprᴛ3 is 1 or 2) { matchᴛ3 = true;
+            if (exprᴛ4 is 1 or 2) { matchᴛ3 = true;
                 fmt.Println("sub0 one or two");
             }
-            else if (exprᴛ3 is 3) { matchᴛ3 = true;
+            else if (exprᴛ4 is 3) { matchᴛ3 = true;
                 fmt.Println("sub0 three");
                 fallthrough = true;
             }
@@ -209,13 +208,13 @@ internal static void Main() {
         }
     }
 
-    var exprᴛ5 = Foo(2);
+    var exprᴛ6 = Foo(2);
     var matchᴛ5 = false;
-    if (exprᴛ5 == Foo(1) || exprᴛ5 == Foo(2) || exprᴛ5 == Foo(3)) { matchᴛ5 = true;
+    if (exprᴛ6 == Foo(1) || exprᴛ6 == Foo(2) || exprᴛ6 == Foo(3)) { matchᴛ5 = true;
         fmt.Println("First case");
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ5 && exprᴛ5 == Foo(4)) {
+    if (fallthrough || !matchᴛ5 && exprᴛ6 == Foo(4)) {
         fmt.Println("Second case");
     }
     else { /* default: */

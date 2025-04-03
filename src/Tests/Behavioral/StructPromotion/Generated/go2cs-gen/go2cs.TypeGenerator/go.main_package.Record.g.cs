@@ -38,11 +38,6 @@ public static partial class main_package
         public static ref int Ꮡage(ref Record instance) => ref instance.Person.age;
         public static ref global::go.@string Ꮡposition(ref Record instance) => ref instance.Employee.position;
 
-        // Promoted Struct Method References
-        // 'Person.IsDr' method mapped to overridden 'Record' receiver method
-        public bool IsAdult() => Person.IsAdult();
-        public bool IsManager() => Employee.IsManager();
-
         // Field References
         public static ref global::go.main_package.Person ᏑPerson(ref Record instance) => ref instance.Person;
         public static ref global::go.main_package.Employee ᏑEmployee(ref Record instance) => ref instance.Employee;
@@ -67,7 +62,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is Record other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Person,
             Employee);
         
@@ -91,5 +86,20 @@ public static partial class main_package
             Person.ToString(),
             Employee.ToString()
         ]), "}");
+    }
+
+    // Promoted Struct Receivers
+    // 'Person.IsDr' method mapped to overridden 'Record' receiver method
+    public static bool IsAdult(this ref Record target) => target.Person.IsAdult();
+    public static bool IsAdult(this ж<Record> Ꮡtarget)
+    {
+        ref var target = ref Ꮡtarget.val;
+        return target.IsAdult();
+    }
+    public static bool IsManager(this ref Record target) => target.Employee.IsManager();
+    public static bool IsManager(this ж<Record> Ꮡtarget)
+    {
+        ref var target = ref Ꮡtarget.val;
+        return target.IsManager();
     }
 }

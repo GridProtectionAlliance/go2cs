@@ -1,6 +1,23 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
+
+type Type struct {
+	Size_       uintptr
+	PtrBytes    uintptr
+	Hash        uint32
+	TFlag       TFlag
+	Align_      uint8
+	FieldAlign_ uint8
+	Kind_       Kind
+	Equal       func(unsafe.Pointer, unsafe.Pointer) bool
+	GCData      *byte
+	Str         NameOff
+	PtrToThis   TypeOff
+}
 
 type Kind uint8
 
@@ -70,6 +87,100 @@ var kindNames = []string{
 	String:        "string",
 	Struct:        "struct",
 	UnsafePointer: "unsafe.Pointer",
+}
+
+type NameOff int32
+type TypeOff int32
+type TextOff int32
+
+const (
+	KindDirectIface Kind = 1 << 5
+	KindGCProg      Kind = 1 << 6
+	KindMask        Kind = (1 << 5) - 1
+)
+
+type TFlag uint8
+
+const (
+	TFlagUncommon       TFlag = 1 << 0
+	TFlagExtraStar      TFlag = 1 << 1
+	TFlagNamed          TFlag = 1 << 2
+	TFlagRegularMemory  TFlag = 1 << 3
+	TFlagUnrolledBitmap TFlag = 1 << 4
+)
+
+func NoEscape(p unsafe.Pointer) unsafe.Pointer {
+	x := uintptr(p)
+	return unsafe.Pointer(x ^ 0)
+}
+
+type EmptyInterface struct {
+	Type *Type
+	Data unsafe.Pointer
+}
+
+func TypeOf(a any) *Type {
+	eface := *(*EmptyInterface)(unsafe.Pointer(&a))
+	return (*Type)(NoEscape(unsafe.Pointer(eface.Type)))
+}
+
+func TypeFor[T any]() *Type {
+	var v T
+	if t := TypeOf(v); t != nil {
+		return t
+	}
+	return TypeOf((*T)(nil)).Elem()
+}
+
+func (t *Type) Kind() Kind { return t.Kind_ & KindMask }
+
+func (t *Type) HasName() bool {
+	return t.TFlag&TFlagNamed != 0
+}
+
+func (t *Type) Elem() *Type {
+	switch t.Kind() {
+	case Array:
+		tt := (*ArrayType)(unsafe.Pointer(t))
+		return tt.Elem
+	case Map:
+		tt := (*MapType)(unsafe.Pointer(t))
+		return tt.Elem
+	}
+	return nil
+}
+
+type MapType struct {
+	Type
+	Key        *Type
+	Elem       *Type
+	Bucket     *Type
+	Hasher     func(unsafe.Pointer, uintptr) uintptr
+	KeySize    uint8
+	ValueSize  uint8
+	BucketSize uint16
+	Flags      uint32
+}
+
+func (t *Type) MapType() *MapType {
+	if t.Kind() != Map {
+		return nil
+	}
+	return (*MapType)(unsafe.Pointer(t))
+}
+
+type ArrayType struct {
+	Type
+	Elem  *Type // array element type
+	Slice *Type // slice type
+	Len   uintptr
+}
+
+func (t *Type) ArrayType() *ArrayType {
+	if t.Kind() != Array {
+		return nil
+	}
+	return (*ArrayType)(unsafe.Pointer(t))
 }
 
 func main() {

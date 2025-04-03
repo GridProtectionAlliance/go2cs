@@ -34,9 +34,6 @@ public static partial class main_package
         public static ref global::go.time_package.Time ᏑWhen(ref MyCustomError instance) => ref instance.MyError.val.When;
         public static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.val.What;
 
-        // Promoted Struct Method References
-        // 'MyError.val.Time' method mapped to overridden 'MyCustomError' receiver method
-
         // Field References
         public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
         public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
@@ -65,7 +62,7 @@ public static partial class main_package
         
         public override bool Equals(object? obj) => obj is MyCustomError other && Equals(other);
         
-        public override int GetHashCode() => HashCode.Combine(
+        public override int GetHashCode() => runtime.HashCode.Combine(
             Message,
             Abser,
             MyError);
@@ -92,4 +89,7 @@ public static partial class main_package
             MyError?.ToString() ?? "<nil>"
         ]), "}");
     }
+
+    // Promoted Struct Receivers
+    // 'MyError.val.Time' method mapped to overridden 'MyCustomError' receiver method
 }
