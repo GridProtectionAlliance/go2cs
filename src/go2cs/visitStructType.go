@@ -42,7 +42,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	v.writeDocString(target, doc, structType.Pos())
 
-	structTypeName = getSanitizedIdentifier(name)
+	structTypeName = getSanitizedIdentifier(structTypeName)
 	typeParams, constraints := v.getGenericDefinition(identType)
 
 	if len(constraints) == 0 {

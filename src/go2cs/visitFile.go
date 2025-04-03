@@ -60,7 +60,7 @@ func (v *Visitor) visitFile(file *ast.File) {
 	packageLock.Unlock()
 
 	v.writeOutput(TypeAliasMarker)
-	v.writeOutputLn("namespace %s;", RootNamespace)
+	v.writeOutputLn("namespace %s;", packageNamespace)
 	v.targetFile.WriteString(v.newline)
 
 	packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))

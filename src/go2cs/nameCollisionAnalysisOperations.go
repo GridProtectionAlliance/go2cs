@@ -16,20 +16,31 @@ import (
 // strict about unique naming of discrete types than Go is in this case.
 
 func performNameCollisionAnalysis(pkg *packages.Package) {
-	constNames := make(map[string]bool)
+	// Track names of various declarations
+	namedElementNames := make(map[string]bool)
 	methodNames := make(map[string]bool)
 
-	// Collect all const/var names and method names
+	// Collect all named element names and method names
 	for _, file := range pkg.Syntax {
 		ast.Inspect(file, func(n ast.Node) bool {
 			switch node := n.(type) {
 			case *ast.GenDecl:
+				// Handle constants and variables
 				if node.Tok == token.CONST || node.Tok == token.VAR {
 					for _, spec := range node.Specs {
 						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
 							for _, name := range valueSpec.Names {
-								constNames[name.Name] = true
+								namedElementNames[name.Name] = true
 							}
+						}
+					}
+				}
+
+				// Handle type declarations (structs, interfaces, type aliases)
+				if node.Tok == token.TYPE {
+					for _, spec := range node.Specs {
+						if typeSpec, ok := spec.(*ast.TypeSpec); ok {
+							namedElementNames[typeSpec.Name.Name] = true
 						}
 					}
 				}
@@ -42,7 +53,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	}
 
 	// Find collisions (names that appear in both sets)
-	for name := range constNames {
+	for name := range namedElementNames {
 		if methodNames[name] {
 			// Found a collision
 			nameCollisions[name] = true

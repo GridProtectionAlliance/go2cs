@@ -18,7 +18,7 @@ type PackageInfo struct {
 	Err              error
 }
 
-func getProjectName(importPath string, options Options) string {
+func getProjectName(importPath string, options Options) (string, string) {
 	if strings.HasPrefix(importPath, options.goRoot) {
 		importPath = pathReplace(importPath, filepath.Join(options.goRoot, "src"), "")
 	} else {
@@ -121,7 +121,17 @@ func getProjectName(importPath string, options Options) string {
 	// Replace path separators with dots
 	parts := strings.Split(importPath, "/")
 
-	return strings.Join(parts, ".")
+	projectName := strings.Join(parts, ".")
+	namespace := RootNamespace
+
+	if len(parts) > 1 {
+
+		for i := 0; i < len(parts)-1; i++ {
+			namespace += "." + getCoreSanitizedIdentifier(parts[i])
+		}
+	}
+
+	return projectName, namespace
 }
 
 // readModuleFromGoMod reads the module name from a go.mod file

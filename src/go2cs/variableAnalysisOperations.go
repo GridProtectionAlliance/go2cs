@@ -244,6 +244,46 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		v.varNames[obj] = varName
 	}
 
+	// Track native switch conversions
+	type SwitchContext struct {
+		stmt             *ast.SwitchStmt
+		caseIndex        int
+		nativeConversion bool
+	}
+
+	// Add a stack to track nested switches
+	switchContextStack := []SwitchContext{}
+	currentSwitchCase := make(map[*ast.SwitchStmt]map[string]map[int]*types.Var)
+
+	// When entering a switch in visitSwitchStmt
+	enterSwitchContext := func(switchStmt *ast.SwitchStmt, nativeConversion bool) {
+		context := SwitchContext{
+			stmt:             switchStmt,
+			caseIndex:        -1, // Will be incremented for each case
+			nativeConversion: nativeConversion,
+		}
+
+		switchContextStack = append(switchContextStack, context)
+		currentSwitchCase[switchStmt] = make(map[string]map[int]*types.Var)
+	}
+
+	// When leaving a switch
+	exitSwitchContext := func() {
+		if len(switchContextStack) > 0 {
+			switchContextStack = switchContextStack[:len(switchContextStack)-1]
+		}
+	}
+
+	// When entering a case clause
+	enterCaseContext := func(caseIndex int) {
+		if len(switchContextStack) > 0 {
+			last := len(switchContextStack) - 1
+			context := switchContextStack[last]
+			context.caseIndex = caseIndex
+			switchContextStack[last] = context
+		}
+	}
+
 	// Helper function to determine if a node is directly in the function body
 	// (not in a nested block or control structure)
 	isFunctionLevelNode := func(node ast.Node, funcBody *ast.BlockStmt) bool {
@@ -377,9 +417,35 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Helper functions
 	isDeclaredInCurrentScope := func(varName string) bool {
+		// Check if we're in an if-else converted switch case
+		if len(switchContextStack) > 0 {
+			context := switchContextStack[len(switchContextStack)-1]
+			if !context.nativeConversion && context.caseIndex >= 0 {
+				// For if-else conversions, ONLY check variables declared in THIS case
+				if caseVars, exists := currentSwitchCase[context.stmt][varName]; exists {
+					return caseVars[context.caseIndex] != nil
+				}
+
+				// Check outer scopes excluding the current scope
+				// This is important because variables from outer scopes ARE accessible,
+				// but variables from other cases are NOT
+				for i := len(v.scopeStack) - 2; i >= 0; i-- {
+					if _, exists := v.scopeStack[i][varName]; exists {
+						return true
+					}
+				}
+
+				return false
+			}
+		}
+
+		// Normal scope check for everything else
 		scope := v.scopeStack[len(v.scopeStack)-1]
-		_, exists := scope[varName]
-		return exists
+		if _, exists := scope[varName]; exists {
+			return true
+		}
+
+		return false
 	}
 
 	isDeclaredInOuterScopes := func(varName string, includeGlobal bool) bool {
@@ -458,6 +524,19 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 		scope := v.scopeStack[len(v.scopeStack)-1]
 		scope[varName] = varObj
+
+		// Also track in switch case if applicable
+		if len(switchContextStack) > 0 {
+			context := switchContextStack[len(switchContextStack)-1]
+
+			if context.caseIndex >= 0 {
+				if _, exists := currentSwitchCase[context.stmt][varName]; !exists {
+					currentSwitchCase[context.stmt][varName] = make(map[int]*types.Var)
+				}
+
+				currentSwitchCase[context.stmt][varName][context.caseIndex] = varObj
+			}
+		}
 	}
 
 	reassignVar := func(varName string, ident *ast.Ident) {
@@ -880,12 +959,84 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			tracker.processing = false
 
+			// Collect case clauses
+			var caseClauses []*ast.CaseClause
+
+			for _, stmt := range node.Body.List {
+				if caseClause, ok := stmt.(*ast.CaseClause); ok {
+					caseClauses = append(caseClauses, caseClause)
+				}
+			}
+
+			// Check if this switch statement will be converted to a native switch
+			allConst := true
+			hasFallthroughs := false
+
+			for _, caseClause := range caseClauses {
+				if caseClause.List == nil {
+					continue
+				}
+
+				// Check if all case clauses are constant values
+				for _, expr := range caseClause.List {
+					// Check if the expression is a function call or a non-value type
+					if !v.isNonCallValue(expr) {
+						allConst = false
+						break
+					}
+
+					tv, ok := v.info.Types[expr]
+
+					if !ok {
+						break
+					}
+
+					// Named typed are not constant values in C# conversion
+					if _, ok := tv.Type.(*types.Named); ok {
+						allConst = false
+						break
+					}
+				}
+
+				// Check if any case clause has a fallthrough statement
+				if caseClause.Body != nil {
+					for _, stmt := range caseClause.Body {
+						if branchStmt, ok := stmt.(*ast.BranchStmt); ok && branchStmt.Tok == token.FALLTHROUGH {
+							hasFallthroughs = true
+						}
+					}
+				}
+
+				// No need to to keep checking if we already know the result
+				if hasFallthroughs || (!allConst && node.Tag != nil) {
+					break
+				}
+			}
+
+			// Mark the switch statement for native conversion support
+			var nativeConversion bool
+
+			if hasFallthroughs || (!allConst && node.Tag != nil) {
+				nativeConversion = false
+			} else {
+				nativeConversion = true
+			}
+
+			// Enter switch context
+			enterSwitchContext(node, nativeConversion)
+
 			// Visit tag and body
 			if node.Tag != nil {
 				visitNode(node.Tag)
 			}
 
-			visitNode(node.Body)
+			for i, caseClause := range caseClauses {
+				enterCaseContext(i)
+				visitNode(caseClause)
+			}
+
+			// Exit switch context
+			exitSwitchContext()
 
 			tracker.exit()
 			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]

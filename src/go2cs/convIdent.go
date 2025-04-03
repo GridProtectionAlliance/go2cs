@@ -7,6 +7,10 @@ import (
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	if ident.Name == "nil" {
+		if context.isPointer {
+			return "nil"
+		}
+
 		return "default!"
 	}
 

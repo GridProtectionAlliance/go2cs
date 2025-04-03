@@ -197,6 +197,7 @@ var publishProfiles embed.FS
 
 // Define package level variables
 var packageName string
+var packageNamespace string
 var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var interfaceImplementations map[string]HashSet[string]
@@ -382,6 +383,7 @@ Examples:
 	for _, pkg := range pkgs {
 		// Reset package level variables for each package
 		packageName = ""
+		packageNamespace = ""
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
 		interfaceImplementations = make(map[string]HashSet[string])
@@ -409,10 +411,10 @@ Examples:
 			packageInputPath = pkg.Dir
 		}
 
-		var projectFileName, projectFileContents string
-		projectName := getProjectName(packageInputPath, options)
+		var projectName, projectFileName, projectFileContents string
+		projectName, packageNamespace = getProjectName(packageInputPath, options)
 
-		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageOutputPath); err != nil {
+		if projectFileName, projectFileContents, err = prepareProjectFiles(projectName, packageNamespace, packageOutputPath); err != nil {
 			log.Fatalf("Failed to write project files for directory \"%s\": %s\n", packageOutputPath, err)
 		} else {
 			for i, file := range pkg.Syntax {
@@ -545,7 +547,7 @@ Examples:
 		} else {
 			// Generate new package info file from template
 			packageClassName := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
-			templateFile := fmt.Sprintf(string(packageInfoTemplate), packageClassName, packageName, packageClassName)
+			templateFile := fmt.Sprintf(string(packageInfoTemplate), packageNamespace+"."+packageClassName, packageNamespace, packageName, packageClassName)
 			packageInfoLines = strings.Split(templateFile, "\r\n")
 		}
 
@@ -768,7 +770,7 @@ func getGoEnv(name string) (string, error) {
 
 // prepareProjectFiles writes the project related files for the given project name and path,
 // and returns project file contents with template parameters to be written to a file later.
-func prepareProjectFiles(projectName string, projectPath string) (string, string, error) {
+func prepareProjectFiles(projectName string, packageNamespace string, projectPath string) (string, string, error) {
 	// Make sure project path ends with a directory separator
 	projectPath = strings.TrimRight(projectPath, string(filepath.Separator)) + string(filepath.Separator)
 
@@ -799,6 +801,7 @@ func prepareProjectFiles(projectName string, projectPath string) (string, string
 	// Generate project file contents
 	projectFileContents := fmt.Sprintf(string(csprojTemplate),
 		OutputTypeMarker,
+		packageNamespace,
 		projectName,
 		time.Now().Year(),
 		UnsafeMarker,

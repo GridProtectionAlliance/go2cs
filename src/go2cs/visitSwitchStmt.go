@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 )
 
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
@@ -20,6 +21,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	}
 
 	allConst := true
+	namedTypes := false
 	hasFallthroughs := false
 	defaultCaseFallsThrough := false
 
@@ -36,6 +38,19 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			// Check if the expression is a function call or a non-value type
 			if !v.isNonCallValue(expr) {
 				allConst = false
+				break
+			}
+
+			tv, ok := v.info.Types[expr]
+
+			if !ok {
+				break
+			}
+
+			// Named typed are not constant values in C# conversion
+			if _, ok := tv.Type.(*types.Named); ok {
+				allConst = false
+				namedTypes = true
 				break
 			}
 		}
@@ -111,7 +126,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 			nextClauseIsDefault := i < len(caseClauses)-1 && (i == len(caseClauses)-2 || caseClauses[i+1].List == nil)
 
-			if i > 0 && !caseFallsThrough {
+			if i > 0 && !caseFallsThrough && !v.lastStatementWasReturn {
 				v.targetFile.WriteString("else ")
 			}
 
@@ -127,7 +142,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 				v.targetFile.WriteString("if (")
 
-				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
+				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
 
 				if caseFallsThrough {
 					v.targetFile.WriteString(fmt.Sprintf("fallthrough || !%s && ", matchVarName))
@@ -264,7 +279,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				// Use pattern match when all case list expressions are
 				// use comparison operators and the same target
 				caseClauseCount := len(caseClause.List)
-				usePattenMatch := v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
+				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
 
 				for i, expr := range caseClause.List {
 					if i == 0 {

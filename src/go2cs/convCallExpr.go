@@ -195,6 +195,47 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
 			}
 		}
+
+		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
+		// This is required since unsafe.Pointer is in its own library and no implicit cast can
+		// be added for it on the pointer class (ж<T>) in the core library without creating a
+		// circular dependency.
+		if resultType.String() == "unsafe.Pointer" {
+			if len(constructType) == 0 {
+				constructType = "(uintptr)"
+			} else if len(callExpr.Args) == 1 {
+				// Check if current function is a receiver function
+				if v.currentFuncSignature.Recv() != nil {
+					// Get the receiver type
+					recvType := v.currentFuncSignature.Recv().Type()
+
+					// Check if receiver is a pointer type
+					isRecvPointer := false
+
+					if ptrType, ok := recvType.(*types.Pointer); ok {
+						recvType = ptrType.Elem()
+						isRecvPointer = true
+					}
+
+					// Get the unsafe.Pointer call argument type
+					argType := v.info.TypeOf(callExpr.Args[0])
+					isArgPointer := false
+
+					// Check if the argument is a pointer
+					if ptrType, ok := argType.(*types.Pointer); ok {
+						argType = ptrType.Elem()
+						isArgPointer = true
+					}
+
+					// Check if the receiver type is pointer and call argument matches
+					if isRecvPointer && isArgPointer && types.Identical(recvType, argType) {
+						// Since pointer-based receiver functions are converted to C# as ref-based
+						// extension functions, we need to convert the pointer from a reference type
+						return fmt.Sprintf("(uintptr)@unsafe.Pointer.FromRef(ref %s)", v.convExpr(callExpr.Args[0], nil))
+					}
+				}
+			}
+		}
 	}
 
 	funcTypeName := v.getTypeName(funcType, true)

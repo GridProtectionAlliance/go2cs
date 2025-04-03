@@ -6,17 +6,22 @@ import (
 )
 
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
-	leftOperand := v.convExpr(binaryExpr.X, nil)
+	lhsType := v.getExprType(binaryExpr.X)
+	rhsType := v.getExprType(binaryExpr.Y)
+	identContext := DefaultIdentContext()
+
+	identContext.isPointer = isPointer(v.getExprType(binaryExpr.Y))
+	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext})
+
 	binaryOp := binaryExpr.Op.String()
-	rightOperand := v.convExpr(binaryExpr.Y, nil)
+
+	identContext.isPointer = isPointer(v.getExprType(binaryExpr.X))
+	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext})
 
 	if !context.usePattenMatch {
 		// Check for comparisons between interface and pointer types,
 		// dereferencing pointer type for the comparison if necessary
 		if binaryOp == "==" || binaryOp == "!=" {
-			lhsType := v.getExprType(binaryExpr.X)
-			rhsType := v.getExprType(binaryExpr.Y)
-
 			lhsIsInterface, isEmpty := isInterface(lhsType)
 
 			if lhsIsInterface && !isEmpty && isPointer(rhsType) {
@@ -41,10 +46,24 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)
 		}
 
+		bitwiseOp := binaryOp == "&" || binaryOp == "|" || binaryOp == "^" || binaryOp == "&^"
+
 		if binaryOp == "&^" {
 			binaryOp = " & ~"
 		} else {
 			binaryOp = " " + binaryOp + " "
+		}
+
+		// bitwise operations need to be in parentheses in C# and usually case to target type
+		if bitwiseOp {
+			binaryType := v.info.Types[binaryExpr].Type
+			var binaryTypeName string
+
+			if binaryType != nil {
+				binaryTypeName = convertToCSTypeName(v.getTypeName(binaryType, false))
+			}
+
+			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
 		}
 
 		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)

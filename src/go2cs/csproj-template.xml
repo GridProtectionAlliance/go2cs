@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>%s</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>go</RootNamespace>
+    <RootNamespace>%s</RootNamespace>
     <AssemblyName>%s</AssemblyName>
     <Product>go2cs</Product>
     <Version>0.1.4</Version>
