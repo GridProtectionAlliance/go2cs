@@ -33,7 +33,7 @@ namespace go.runtime;
 /// <typeparam name="T">Type of sparse array elements.</typeparam>
 public class SparseArray<T> : IList<T>
 {
-    private readonly Dictionary<nint, T> m_items = [];
+    private readonly Dictionary<int, T> m_items = [];
 
     /// <inheritdoc />
     public T this[int index]
@@ -75,14 +75,14 @@ public class SparseArray<T> : IList<T>
     /// <inheritdoc />
     public bool Remove(T item)
     {
-        KeyValuePair<nint, T> record = m_items.FirstOrDefault(entry => entry.Value?.Equals(item) ?? false, new KeyValuePair<nint, T>(-1, default!));
+        KeyValuePair<int, T> record = m_items.FirstOrDefault(entry => entry.Value?.Equals(item) ?? false, new KeyValuePair<int, T>(-1, default!));
         return record.Key > -1 && m_items.Remove(record.Key);
     }
 
     /// <inheritdoc />
     public int IndexOf(T item)
     {
-        KeyValuePair<nint, T> record = m_items.FirstOrDefault(entry => entry.Value?.Equals(item) ?? false, new KeyValuePair<nint, T>(-1, default!));
+        KeyValuePair<int, T> record = m_items.FirstOrDefault(entry => entry.Value?.Equals(item) ?? false, new KeyValuePair<int, T>(-1, default!));
         return (int)record.Key;
     }
 
