@@ -60,7 +60,7 @@ internal class StructTypeTemplate : TemplateBase
                 [
                     {{(StructMembers.Count > 0 ? string.Join(",\r\n            ", StructMembers.Select(GetToStringImplementation)) : "\"\"")}}
                 ]), "}");
-            }
+            }{{PromotedStructReceivers()}}
         """;
 
     private string PromotedStructDeclarations
@@ -103,33 +103,6 @@ internal class StructTypeTemplate : TemplateBase
                    result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType)}.{memberName};");
             }
 
-            result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Method References");
-
-            // Get all extension methods for the struct, any directly defined receivers
-            // take precedence over promoted struct methods that have the same name
-            IEnumerable<MethodInfo>? structMethods = Context.GetStructDeclaration(FullyQualifiedStructType)?.GetExtensionMethods(Context);
-            HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
-
-            foreach ((string promotedStructType, _, _, _) in promotedStructs)
-            {
-                IEnumerable<MethodInfo>? promotedStructMethods = Context.GetStructDeclaration(promotedStructType)?.GetExtensionMethods(Context);
-
-                foreach (MethodInfo method in promotedStructMethods ?? [])
-                {
-                    if (structMethodNames.Contains(method.Name))
-                    {
-                        result.Append($"\r\n{TypeElemIndent}// '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{NonGenericStructName}' receiver method");
-                        continue;
-                    }
-
-                    result.Append($"\r\n{TypeElemIndent}public {method.ReturnType} {method.Name}(");
-                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
-                    result.Append($") => {GetSimpleName(promotedStructType)}.{method.Name}(");
-                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
-                    result.Append(");");
-                }
-            }
-
             return result.ToString();
 
             IEnumerable<(string typeName, string memberName)> getStructMembers(string structTypeName)
@@ -139,6 +112,69 @@ internal class StructTypeTemplate : TemplateBase
                     .Select(item => (item.typeName, item.memberName)) ?? [];
             }
         }
+    }
+
+    private string PromotedStructReceivers()
+    {
+        (string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)[] promotedStructs = StructMembers.Where(item => item.isPromotedStruct).ToArray();
+
+        if (promotedStructs.Length == 0)
+            return "";
+
+        StringBuilder result = new();
+
+        result.Append("\r\n\r\n    // Promoted Struct Receivers");
+
+        // Get all extension methods for the struct, any directly defined receivers
+        // take precedence over promoted struct methods that have the same name
+        IEnumerable<MethodInfo>? structMethods = Context.GetStructDeclaration(FullyQualifiedStructType)?.GetExtensionMethods(Context);
+        HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
+
+        foreach ((string promotedStructType, _, _, _) in promotedStructs)
+        {
+            IEnumerable<MethodInfo>? promotedStructMethods = Context.GetStructDeclaration(promotedStructType)?.GetExtensionMethods(Context);
+
+            foreach (MethodInfo method in promotedStructMethods ?? [])
+            {
+                if (structMethodNames.Contains(method.Name))
+                {
+                    result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{NonGenericStructName}' receiver method");
+                    continue;
+                }
+
+                // Add ref extension method
+                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this ref {StructName} target");
+
+                if (method.Parameters.Length > 1)
+                {
+                    result.Append(", ");
+                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
+                }
+                
+                result.Append($") => target.{GetSimpleName(promotedStructType)}.{method.Name}(");
+                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
+                result.Append(");");
+
+                // Add pointer extension method
+                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this ж<{StructName}> Ꮡtarget");
+
+                if (method.Parameters.Length > 1)
+                {
+                    result.Append(", ");
+                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
+                }
+
+                result.AppendLine(")");
+                result.AppendLine("    {");
+                result.AppendLine("        ref var target = ref Ꮡtarget.val;");
+                result.Append($"        return target.{method.Name}(");
+                result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
+                result.AppendLine(");");
+                result.Append("    }");
+            }
+        }
+
+        return result.ToString();
     }
 
     private string FieldReferences
@@ -218,7 +254,7 @@ internal class StructTypeTemplate : TemplateBase
 
     public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" : 
         $"""                    
-        HashCode.Combine(
+        runtime.HashCode.Combine(
                     {ParamList})
         """;
 

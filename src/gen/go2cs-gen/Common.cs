@@ -190,7 +190,7 @@ public static class Common
 
     public static string GetValidFileName(string fileName)
     {
-        return new string(fileName.Select(c => InvalidChars.Contains(c) ? '_' : c).ToArray());
+        return new string(fileName.Replace("@", "").Select(c => InvalidChars.Contains(c) ? '_' : c).ToArray());
     }
 
     public static string GetUnsanitizedIdentifier(string name)
