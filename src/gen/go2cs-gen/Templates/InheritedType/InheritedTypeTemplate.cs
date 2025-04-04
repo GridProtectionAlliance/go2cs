@@ -19,6 +19,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Array" => $", IArray<{TargetTypeName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>",
+        "Numeric" => $" : IEquatable<{TargetTypeName}>",
         _ => ""
     };
 
@@ -29,7 +30,7 @@ internal class InheritedTypeTemplate : TemplateBase
         //"Map" => IMapTypeTemplate.Generate(TargetTypeName, TargetValueTypeName),
         //"Channel" => IChannelTypeTemplate.Generate(TargetTypeName),
         //"Array" => IArrayImplementation.Generate(TargetTypeName),
-        "Numeric" => NumericTypeTemplate.Generate(TargetTypeName),
+        "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
         _ => ""
     };

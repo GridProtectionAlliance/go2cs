@@ -23,12 +23,22 @@ namespace go;
 public static partial class unsafe_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct ArbitraryType
+    public readonly partial struct ArbitraryType : IEquatable<ArbitraryType>
     {
         // Value of the struct 'ArbitraryType'
         private readonly nint m_value;
         
-        public override bool Equals(object? obj) => obj is ArbitraryType other && m_value == other.m_value;
+        public bool Equals(ArbitraryType other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                ArbitraryType other => Equals(other),
+                nint value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

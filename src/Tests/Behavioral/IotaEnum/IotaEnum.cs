@@ -19,7 +19,8 @@ partial class main_package {
     public TypeOff PtrToThis;
 }
 
-[GoType("num:uint8")] partial struct ΔKind;
+[GoType("num:uint8")]
+partial struct ΔKind;
 
 public static readonly ΔKind Invalid = /* iota */ 0;
 public static readonly ΔKind Bool = 1;

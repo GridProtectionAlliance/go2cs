@@ -18,12 +18,22 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct TFlag
+    public readonly partial struct TFlag : IEquatable<TFlag>
     {
         // Value of the struct 'TFlag'
         private readonly uint8 m_value;
         
-        public override bool Equals(object? obj) => obj is TFlag other && m_value == other.m_value;
+        public bool Equals(TFlag other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                TFlag other => Equals(other),
+                uint8 value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         
