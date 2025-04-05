@@ -19,12 +19,22 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct ΔKind
+    public readonly partial struct ΔKind : IEquatable<ΔKind>
     {
         // Value of the struct 'ΔKind'
         private readonly uint8 m_value;
         
-        public override bool Equals(object? obj) => obj is ΔKind other && m_value == other.m_value;
+        public bool Equals(ΔKind other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                ΔKind other => Equals(other),
+                uint8 value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

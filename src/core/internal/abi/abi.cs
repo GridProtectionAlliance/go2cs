@@ -76,7 +76,7 @@ partial class abi_package {
     if (goarch.BigEndian) {
         offset = goarch.PtrSize - argSize;
     }
-    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡr.Ints.at<uintptr>(reg)))) + offset));
+    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints).at<uintptr>(reg)))) + offset));
 }
 
 [GoType("[(IntArgRegs + 7) / 8]uint8")] partial struct IntArgRegBitmap;

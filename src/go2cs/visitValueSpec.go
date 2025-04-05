@@ -187,6 +187,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 			if _, ok := c.Type().(*types.Named); ok {
 				isNamedType = true
+			} else if csTypeName == "UntypedInt" || csTypeName == "UntypedFloat" || csTypeName == "UntypedComplex" {
+				isNamedType = true
 			}
 
 			var tokEnd token.Pos
@@ -255,6 +257,16 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				// Check if const float value will exceed float64 limits
 				if _, err := strconv.ParseFloat(constVal, 64); err != nil {
 					constVal = c.Val().ExactString()
+					writeUntypedConst()
+				}
+			}
+
+			if c.Val().Kind() == constant.Complex {
+				// Check if const complex value will exceed complex128 limits
+				if _, err := strconv.ParseComplex(constVal, 128); err != nil {
+					constVal = c.Val().ExactString()
+
+					// TODO: Assignment of complex value to GoUntyped will need to be handled
 					writeUntypedConst()
 				}
 			}

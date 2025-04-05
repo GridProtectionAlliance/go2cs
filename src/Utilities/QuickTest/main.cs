@@ -680,7 +680,7 @@ public static unsafe partial class main_package
 
     public static @string testUnsafe()
     {
-        var b = slice<byte>([]);
+        var b = (slice<byte>)[];
 
         for (rune ch = 32; ch < 80; ch++)
             b = append(b, ch);

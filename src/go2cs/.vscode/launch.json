@@ -44,7 +44,7 @@
                 //"..\\Tests\\Behavioral\\StructPromotion",
                 //"..\\Tests\\Behavioral\\StructPromotionWithInterface",
                 //"..\\Tests\\Behavioral\\StructPointerPromotionWithInterface",
-                //"..\\Tests\\Behavioral\\TypeConversion",
+                "..\\Tests\\Behavioral\\TypeConversion",
                 //"..\\Tests\\Behavioral\\TypeConversionInterfaceParam",
                 //"..\\Tests\\Behavioral\\TypeConversionReturnType",
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
@@ -82,11 +82,12 @@
                 //"C:\\Users\\rcarroll\\go2cs\\pkg\\mod\\github.com\\cilium\\ebpf@v0.11.0",
                 //"C:\\Program Files\\Go\\src\\internal\\reflectlite",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\reflectlite",
-                "C:\\Program Files\\Go\\src\\internal\\abi",
+                //"C:\\Program Files\\Go\\src\\internal\\abi",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\abi",
-                "C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\abi",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\abi",
                 //"C:\\Program Files\\Go\\src\\internal\\goarch",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\goarch",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\goarch",
             ]
         }
     ]

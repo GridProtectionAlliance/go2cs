@@ -25,6 +25,7 @@
 // ReSharper disable UnusedParameter.Local
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
@@ -67,7 +68,7 @@ public static class FieldRef<T> where T : struct
     /// <exception cref="InvalidOperationException">
     /// Field <paramref name="fieldName"/> not found in type <typeparamref name="T"/>.
     /// </exception>
-    public static FieldRefFunc<TElem> Create<TElem>(string fieldName)
+    public static FieldRefFunc<TElem> Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] TElem>(string fieldName)
     {
         // Get the FieldInfo for fieldName in struct T referenced by ж<T>
         FieldInfo structField = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
@@ -134,7 +135,7 @@ public interface IPointer<T>
     /// <typeparam name="TElem">Element type of array or slice.</typeparam>
     /// <param name="index">Index of element to get pointer for.</param>
     /// <returns>Pointer to element at specified index.</returns>
-    ж<TElem> at<TElem>(int index);
+    ж<TElem> at<TElem>(nint index);
 
     /// <summary>
     /// Dereferences the heap allocated reference to the value of type <typeparamref name="T"/>.
@@ -284,7 +285,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
     /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
-    public ж<Telem> at<Telem>(int index)
+    public ж<Telem> at<Telem>(nint index)
     {
         if (m_val is not IArray<Telem> array)
             throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
@@ -292,7 +293,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (!array.IndexIsValid(index))
             throw new IndexOutOfRangeException("Index is out of range for array or slice.");
 
-        return new ж<Telem>(array, index);
+        return new ж<Telem>(array, (int)index);
     }
 
     /// <inheritdoc />

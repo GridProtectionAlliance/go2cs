@@ -50,7 +50,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     if (len(e.errs) == 1) {
         return e.errs[0].Error();
     }
-    var b = slice<byte>(e.errs[0].Error());
+    var b = (slice<byte>)e.errs[0].Error();
     foreach (var (_, err) in e.errs[1..]) {
         b = append(b, (rune)'\n');
         b = append(b, err.Error().ꓸꓸꓸ);

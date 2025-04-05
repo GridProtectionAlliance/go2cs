@@ -6,16 +6,16 @@ using sort = sort_package;
 partial class main_package {
 
 internal const float32 w = 1;
-public const nint _addr_X = 1;
-public const nint Y = 2;
-public const nint Z = 3;
+public static readonly UntypedInt _addr_X = 1;
+public static readonly UntypedInt Y = 2;
+public static readonly UntypedInt Z = 3;
 
-public const nint A1 = iota;
-public const nint B = /* iota * 100 */ 0;
-public const nint _ = 1;
-public const nint D = 100;
-public const nint E211 = 2;
-public const nint F = 200;
+public static readonly UntypedInt A1 = iota;
+public static readonly UntypedInt B = /* iota * 100 */ 0;
+public static readonly UntypedInt _ = 1;
+public static readonly UntypedInt D = 100;
+public static readonly UntypedInt E211 = 2;
+public static readonly UntypedInt F = 200;
 public static readonly GoUntyped Giant = /* 1 << 100 */
     GoUntyped.Parse("1267650600228229401496703205376");
 public static readonly GoUntyped Giant2 = /* 1 << 200 */
@@ -23,8 +23,8 @@ public static readonly GoUntyped Giant2 = /* 1 << 200 */
 public static readonly @string String = "Hello"u8;
 public static readonly @string String2 = "World"u8;
 public static readonly @string String3 = "世界 \u0053\u004a3"u8;
-public const float64 Float = 3.14;
-public const float64 Float2 = 3.14e+100;
+public static readonly UntypedFloat Float = 3.14;
+public static readonly UntypedFloat Float2 = 3.14e+100;
 public static readonly GoUntyped GiantFloat = /* 1e309 */
     GoUntyped.Parse("1000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
 public static readonly @string MultiLine = """

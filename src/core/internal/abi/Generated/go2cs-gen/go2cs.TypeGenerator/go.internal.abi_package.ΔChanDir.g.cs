@@ -19,12 +19,22 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct ΔChanDir
+    public readonly partial struct ΔChanDir : IEquatable<ΔChanDir>
     {
         // Value of the struct 'ΔChanDir'
         private readonly nint m_value;
         
-        public override bool Equals(object? obj) => obj is ΔChanDir other && m_value == other.m_value;
+        public bool Equals(ΔChanDir other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                ΔChanDir other => Equals(other),
+                nint value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

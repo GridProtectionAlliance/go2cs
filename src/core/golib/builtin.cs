@@ -28,7 +28,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -978,6 +977,39 @@ public static class builtin
     // ** Conversion Functions **
 
     /// <summary>
+    /// Converts C# <paramref name="source"/> array to Go <see cref="go.slice{T}"/>.
+    /// </summary>
+    /// <typeparam name="T">Type of array.</typeparam>
+    /// <param name="source">C# source array.</param>
+    /// <returns>Go <see cref="go.slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
+    public static slice<T> slice<T>(T[] source)
+    {
+        return source;
+    }
+
+    /// <summary>
+    /// Converts value to a complex64 imaginary number.
+    /// </summary>
+    /// <param name="imaginary">Value to convert to imaginary.</param>
+    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+    public static complex64 i(float imaginary)
+    {
+        return new complex64(0.0F, imaginary);
+    }
+
+    /// <summary>
+    /// Converts value to a complex128 imaginary number.
+    /// </summary>
+    /// <param name="imaginary">Value to convert to imaginary.</param>
+    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
+    public static complex128 i(double imaginary)
+    {
+        return new complex128(0.0D, imaginary);
+    }
+
+    /*
+    
+    /// <summary>
     /// Creates a new Go <see cref="go.array{T}"/> with specified <paramref name="length"/>.
     /// </summary>
     /// <typeparam name="T">Type of array.</typeparam>
@@ -995,17 +1027,6 @@ public static class builtin
     /// <param name="source">C# source array.</param>
     /// <returns>Go <see cref="go.array{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
     public static array<T> array<T>(T[] source)
-    {
-        return source;
-    }
-
-    /// <summary>
-    /// Converts C# <paramref name="source"/> array to Go <see cref="go.slice{T}"/>.
-    /// </summary>
-    /// <typeparam name="T">Type of array.</typeparam>
-    /// <param name="source">C# source array.</param>
-    /// <returns>Go <see cref="go.slice{T}"/> wrapper for C# <paramref name="source"/> array.</returns>
-    public static slice<T> slice<T>(T[] source)
     {
         return source;
     }
@@ -1550,31 +1571,6 @@ public static class builtin
         return value.ToString()!;
     }
 
-    /// <summary>
-    /// Converts value to a complex64 imaginary number.
-    /// </summary>
-    /// <param name="imaginary">Value to convert to imaginary.</param>
-    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex64 i(float imaginary)
-    {
-        return new complex64(0.0F, imaginary);
-    }
-
-    /// <summary>
-    /// Converts value to a complex128 imaginary number.
-    /// </summary>
-    /// <param name="imaginary">Value to convert to imaginary.</param>
-    /// <returns>New complex number with specified <paramref name="imaginary"/> part and a zero value real part.</returns>
-    public static complex128 i(double imaginary)
-    {
-        return new complex128(0.0D, imaginary);
-    }
-
-    // ** Helper Functions **
-    
-    /*
-        Note: the following helper functions are not part of the Go standard library, so
-        functions should be considered reserved names during the code conversion process.
     */
 
     /// <summary>
@@ -1686,6 +1682,7 @@ public static class builtin
     }
 
     /*
+
     /// <summary>
     /// Copies length elements from <paramref name="source"/> array, starting at <paramref name="sourceIndex"/>,
     /// to <paramref name="dest"/> array, starting at <paramref name="destinationIndex"/> where each element is
@@ -1756,6 +1753,7 @@ public static class builtin
 
         throw new InvalidCastException($"Could not parse \"{literal}\" as an imaginary value.");
     }
+
     */
 
 #if EXPERIMENTAL

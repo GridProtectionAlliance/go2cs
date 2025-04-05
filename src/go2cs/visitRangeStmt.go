@@ -145,7 +145,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 
 	if isStr {
 		if untypedStr {
-			rangeExpr = fmt.Sprintf("@string(%s)", rangeExpr)
+			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
 		}
 
 		if assignVars {

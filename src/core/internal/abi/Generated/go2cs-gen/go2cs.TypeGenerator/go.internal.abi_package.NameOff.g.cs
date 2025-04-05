@@ -19,12 +19,22 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct NameOff
+    public readonly partial struct NameOff : IEquatable<NameOff>
     {
         // Value of the struct 'NameOff'
         private readonly int32 m_value;
         
-        public override bool Equals(object? obj) => obj is NameOff other && m_value == other.m_value;
+        public bool Equals(NameOff other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                NameOff other => Equals(other),
+                int32 value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

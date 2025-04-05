@@ -19,12 +19,22 @@ namespace go.@internal;
 public static partial class goarch_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct ArchFamilyType
+    public readonly partial struct ArchFamilyType : IEquatable<ArchFamilyType>
     {
         // Value of the struct 'ArchFamilyType'
         private readonly nint m_value;
         
-        public override bool Equals(object? obj) => obj is ArchFamilyType other && m_value == other.m_value;
+        public bool Equals(ArchFamilyType other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                ArchFamilyType other => Equals(other),
+                nint value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

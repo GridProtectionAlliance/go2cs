@@ -176,8 +176,8 @@ var reserved = NewHashSet([]string{
 	"GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput",
 	"GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute",
 	"GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3", "IArray", "IChannel", "IMap", "ISlice", "ISupportMake",
-	"make\u01C3", "MemberwiseClone", "NilType", "PanicException", "slice", "ToString",
-	PointerPrefix, TrueMarker, OverloadDiscriminator, ElipsisOperator,
+	"make\u01C3", "MemberwiseClone", "NilType", "PanicException", "slice", "ToString", "UntypedInt", "UntypedFloat",
+	"UntypedComplex", PointerPrefix, TrueMarker, OverloadDiscriminator, ElipsisOperator,
 })
 
 //go:embed csproj-template.xml
@@ -1827,7 +1827,22 @@ func convertToCSTypeName(typeName string) string {
 
 func convertToCSFullTypeName(typeName string) string {
 	typeName = strings.TrimPrefix(typeName, "~")
-	typeName = strings.TrimPrefix(typeName, "untyped ")
+
+	if strings.HasPrefix(typeName, "untyped ") {
+		typeName = strings.TrimPrefix(typeName, "untyped ")
+
+		if strings.HasPrefix(typeName, "int") || strings.HasPrefix(typeName, "uint") || typeName == "rune" || typeName == "byte" {
+			return "UntypedInt"
+		}
+
+		if strings.HasPrefix(typeName, "float") {
+			return "UntypedFloat"
+		}
+
+		if strings.HasPrefix(typeName, "complex") {
+			return "UntypedComplex"
+		}
+	}
 
 	if strings.Contains(typeName, "/") {
 		typeName = convertImportPathToNamespace(typeName, "")

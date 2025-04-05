@@ -18,12 +18,22 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct Counter
+    public readonly partial struct Counter : IEquatable<Counter>
     {
         // Value of the struct 'Counter'
         private readonly nint m_value;
         
-        public override bool Equals(object? obj) => obj is Counter other && m_value == other.m_value;
+        public bool Equals(Counter other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                Counter other => Equals(other),
+                nint value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

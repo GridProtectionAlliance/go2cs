@@ -19,12 +19,22 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public readonly partial struct RF_State
+    public readonly partial struct RF_State : IEquatable<RF_State>
     {
         // Value of the struct 'RF_State'
         private readonly nint m_value;
         
-        public override bool Equals(object? obj) => obj is RF_State other && m_value == other.m_value;
+        public bool Equals(RF_State other) => m_value == other.m_value;
+
+        public override bool Equals(object? obj)
+        {
+            return obj switch
+            {
+                RF_State other => Equals(other),
+                nint value => Equals(value),
+                _ => false
+            };
+        }
         
         public override int GetHashCode() => m_value.GetHashCode();
         

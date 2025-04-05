@@ -79,7 +79,7 @@ internal static void Main() {
         total++;
     }
     fmt.Println("Total:", total);
-    foreach (var (iΔ3, c) in @string("go"u8)) {
+    foreach (var (iΔ3, c) in (@string)"go"u8) {
         fmt.Println(iΔ3, c);
     }
     @string str = "test"u8;

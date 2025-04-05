@@ -6,8 +6,8 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-internal const nint win = 100;
-internal const nint gamesPerSeries = 10;
+internal static readonly UntypedInt win = 100;
+internal static readonly UntypedInt gamesPerSeries = 10;
 
 [GoType] partial struct score {
     public nint player;

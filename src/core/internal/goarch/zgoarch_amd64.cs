@@ -6,52 +6,52 @@ partial class goarch_package {
 
 public static readonly @string GOARCH = @"amd64"u8;
 
-public const nint Is386 = 0;
+public static readonly UntypedInt Is386 = 0;
 
-public const nint IsAmd64 = 1;
+public static readonly UntypedInt IsAmd64 = 1;
 
-public const nint IsAmd64p32 = 0;
+public static readonly UntypedInt IsAmd64p32 = 0;
 
-public const nint IsArm = 0;
+public static readonly UntypedInt IsArm = 0;
 
-public const nint IsArmbe = 0;
+public static readonly UntypedInt IsArmbe = 0;
 
-public const nint IsArm64 = 0;
+public static readonly UntypedInt IsArm64 = 0;
 
-public const nint IsArm64be = 0;
+public static readonly UntypedInt IsArm64be = 0;
 
-public const nint IsLoong64 = 0;
+public static readonly UntypedInt IsLoong64 = 0;
 
-public const nint IsMips = 0;
+public static readonly UntypedInt IsMips = 0;
 
-public const nint IsMipsle = 0;
+public static readonly UntypedInt IsMipsle = 0;
 
-public const nint IsMips64 = 0;
+public static readonly UntypedInt IsMips64 = 0;
 
-public const nint IsMips64le = 0;
+public static readonly UntypedInt IsMips64le = 0;
 
-public const nint IsMips64p32 = 0;
+public static readonly UntypedInt IsMips64p32 = 0;
 
-public const nint IsMips64p32le = 0;
+public static readonly UntypedInt IsMips64p32le = 0;
 
-public const nint IsPpc = 0;
+public static readonly UntypedInt IsPpc = 0;
 
-public const nint IsPpc64 = 0;
+public static readonly UntypedInt IsPpc64 = 0;
 
-public const nint IsPpc64le = 0;
+public static readonly UntypedInt IsPpc64le = 0;
 
-public const nint IsRiscv = 0;
+public static readonly UntypedInt IsRiscv = 0;
 
-public const nint IsRiscv64 = 0;
+public static readonly UntypedInt IsRiscv64 = 0;
 
-public const nint IsS390 = 0;
+public static readonly UntypedInt IsS390 = 0;
 
-public const nint IsS390x = 0;
+public static readonly UntypedInt IsS390x = 0;
 
-public const nint IsSparc = 0;
+public static readonly UntypedInt IsSparc = 0;
 
-public const nint IsSparc64 = 0;
+public static readonly UntypedInt IsSparc64 = 0;
 
-public const nint IsWasm = 0;
+public static readonly UntypedInt IsWasm = 0;
 
 } // end goarch_package
