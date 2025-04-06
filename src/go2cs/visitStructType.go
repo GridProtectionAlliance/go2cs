@@ -110,6 +110,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		csFullTypeName := convertToCSTypeName(goFullTypeName)
 		typeLenDeviation := token.Pos(len(csFullTypeName) - len(goFullTypeName))
 
+		var arrayInitializer string
+
+		if arrayType, ok := field.Type.(*ast.ArrayType); ok {
+			if arrayType.Len != nil {
+				arrayInitializer = fmt.Sprintf(" = new(%s)", v.convExpr(arrayType.Len, nil))
+			}
+		}
+
 		if field.Names == nil {
 			// Check for promoted fields
 			var ident *ast.Ident
@@ -181,7 +189,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			target.WriteString(v.newline)
 		} else {
 			for _, ident := range field.Names {
-				v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(ident.Name))
+				v.writeString(target, "public %s %s%s;", csFullTypeName, getSanitizedIdentifier(ident.Name), arrayInitializer)
 				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
 				target.WriteString(v.newline)
 			}
