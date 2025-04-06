@@ -6,8 +6,8 @@ namespace go.@internal;
 partial class abi_package {
 
 // See abi_generic.go.
-public const nint IntArgRegs = 9;
-public const nint FloatArgRegs = 15;
-public const nint EffectiveFloatRegSize = 8;
+public static readonly UntypedInt IntArgRegs = 9;
+public static readonly UntypedInt FloatArgRegs = 15;
+public static readonly UntypedInt EffectiveFloatRegSize = 8;
 
 } // end abi_package

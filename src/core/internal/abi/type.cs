@@ -25,11 +25,11 @@ partial class abi_package {
     public uint8 FieldAlign_;   // alignment of struct field with this type
     public ΔKind Kind_;  // enumeration for C
     // function for comparing objects of this type
-// (ptr to object A, ptr to object B) -> ==?
+    // (ptr to object A, ptr to object B) -> ==?
     public Func<@unsafe.Pointer, @unsafe.Pointer, bool> Equal;
     // GCData stores the GC type data for the garbage collector.
-// If the KindGCProg bit is set in kind, GCData is a GC program.
-// Otherwise it is a ptrmask bitmap. See mbitmap.go for details.
+    // If the KindGCProg bit is set in kind, GCData is a GC program.
+    // Otherwise it is a ptrmask bitmap. See mbitmap.go for details.
     public ж<byte> GCData;
     public NameOff Str; // string form
     public TypeOff PtrToThis; // type for pointer to this type, may be zero
@@ -674,7 +674,7 @@ public static bool IsBlank(this ΔName n) {
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
         var b = ((@byte)((nint)(n & 127)));
-        n >>= 7;
+        n >>= (UntypedInt)(7);
         if (n == 0) {
             buf[i] = b;
             return i + 1;
@@ -697,17 +697,17 @@ public static @string Tag(this ΔName n) {
     if (!n.HasTag()) {
         return ""u8;
     }
-    (i, l) = n.ReadVarint(1);
+    var (i, l) = n.ReadVarint(1);
     var (i2, l2) = n.ReadVarint(1 + i + l);
     return @unsafe.String(n.DataChecked(1 + i + l + i2, "non-empty string"u8), l2);
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
     if (len(n) >= 1 << (int)(29)) {
-        panic("abi.NewName: name too long: "u8 + n[..1024] + "..."u8);
+        panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
     if (len(tag) >= 1 << (int)(29)) {
-        panic("abi.NewName: tag too long: "u8 + tag[..1024] + "..."u8);
+        panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = default!;
     array<byte> tagLen = default!;
@@ -716,14 +716,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= 1 << (int)(0);
+        bits |= (byte)(1 << (int)(0));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= 1 << (int)(1);
+        bits |= (byte)(1 << (int)(1));
     }
     if (embedded) {
-        bits |= 1 << (int)(3);
+        bits |= (byte)(1 << (int)(3));
     }
     var b = new slice<byte>(l);
     b[0] = bits;
@@ -737,9 +737,9 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     return new ΔName(Bytes: Ꮡ(b, 0));
 }
 
-public const nint TraceArgsLimit = 10; // print no more than 10 args/components
-public const nint TraceArgsMaxDepth = 5; // no more than 5 layers of nesting
-public const nint TraceArgsMaxLen = /* (TraceArgsMaxDepth*3+2)*TraceArgsLimit + 1 */ 171;
+public static readonly UntypedInt TraceArgsLimit = 10; // print no more than 10 args/components
+public static readonly UntypedInt TraceArgsMaxDepth = 5; // no more than 5 layers of nesting
+public static readonly UntypedInt TraceArgsMaxLen = /* (TraceArgsMaxDepth*3+2)*TraceArgsLimit + 1 */ 171;
 
 // Populate the data.
 // The data is a stream of bytes, which contains the offsets and sizes of the
@@ -753,17 +753,17 @@ public const nint TraceArgsMaxLen = /* (TraceArgsMaxDepth*3+2)*TraceArgsLimit + 
 //   - 0xfd - print } (at the end of an aggregate-typed argument)
 //   - 0xfc - print ... (more args/fields/elements)
 //   - 0xfb - print _ (offset too large)
-public const nint TraceArgsEndSeq = /* 0xff */ 255;
+public static readonly UntypedInt TraceArgsEndSeq = /* 0xff */ 255;
 
-public const nint TraceArgsStartAgg = /* 0xfe */ 254;
+public static readonly UntypedInt TraceArgsStartAgg = /* 0xfe */ 254;
 
-public const nint TraceArgsEndAgg = /* 0xfd */ 253;
+public static readonly UntypedInt TraceArgsEndAgg = /* 0xfd */ 253;
 
-public const nint TraceArgsDotdotdot = /* 0xfc */ 252;
+public static readonly UntypedInt TraceArgsDotdotdot = /* 0xfc */ 252;
 
-public const nint TraceArgsOffsetTooLarge = /* 0xfb */ 251;
+public static readonly UntypedInt TraceArgsOffsetTooLarge = /* 0xfb */ 251;
 
-public const nint TraceArgsSpecial = /* 0xf0 */ 240; // above this are operators, below this are ordinary offsets
+public static readonly UntypedInt TraceArgsSpecial = /* 0xf0 */ 240; // above this are operators, below this are ordinary offsets
 
 // MaxPtrmaskBytes is the maximum length of a GC ptrmask bitmap,
 // which holds 1-bit entries describing where pointers are in a given type.
@@ -794,6 +794,6 @@ public const nint TraceArgsSpecial = /* 0xf0 */ 240; // above this are operators
 // To make sure that the runtime's chansend can call typeBitsBulkBarrier,
 // we raised the limit to 2048, so that even 32-bit systems are guaranteed to
 // use bitmaps for objects up to 64 kB in size.
-public const nint MaxPtrmaskBytes = 2048;
+public static readonly UntypedInt MaxPtrmaskBytes = 2048;
 
 } // end abi_package

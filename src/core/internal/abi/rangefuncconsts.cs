@@ -18,6 +18,6 @@ public static readonly RF_State RF_PANIC = 2;           // body of loop is eithe
 
 public static readonly RF_State RF_EXHAUSTED = 3;       // iterator function return, i.e., sequence is "exhausted"
 
-public const nint RF_MISSING_PANIC = 4;       // body of loop panicked but iterator function defer-recovered it away
+public static readonly UntypedInt RF_MISSING_PANIC = 4; // body of loop panicked but iterator function defer-recovered it away
 
 } // end abi_package

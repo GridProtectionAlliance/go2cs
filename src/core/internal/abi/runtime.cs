@@ -6,6 +6,6 @@ namespace go.@internal;
 partial class abi_package {
 
 // ZeroValSize is the size in bytes of runtime.zeroVal.
-public const nint ZeroValSize = 1024;
+public static readonly UntypedInt ZeroValSize = 1024;
 
 } // end abi_package

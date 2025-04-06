@@ -16,7 +16,7 @@ partial class abi_package {
     public ж<ΔInterfaceType> Inter;
     public ж<Type> Type;
     public uint32 Hash;     // copy of Type.Hash. Used for type switches.
-    public array<uintptr> Fun; // variable sized. fun[0]==0 means Type does not implement Inter.
+    public array<uintptr> Fun = new(1); // variable sized. fun[0]==0 means Type does not implement Inter.
 }
 
 // EmptyInterface describes the layout of a "interface{}" or a "any."

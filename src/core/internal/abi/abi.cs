@@ -19,25 +19,25 @@ partial class abi_package {
 // register space otherwise.
 [GoType] partial struct RegArgs {
     // Values in these slots should be precisely the bit-by-bit
-// representation of how they would appear in a register.
-//
-// This means that on big endian arches, integer values should
-// be in the top bits of the slot. Floats are usually just
-// directly represented, but some architectures treat narrow
-// width floating point values specially (e.g. they're promoted
-// first, or they need to be NaN-boxed).
-    public array<uintptr> Ints; // untyped integer registers
-    public array<uint64> Floats; // untyped float registers
+    // representation of how they would appear in a register.
+    //
+    // This means that on big endian arches, integer values should
+    // be in the top bits of the slot. Floats are usually just
+    // directly represented, but some architectures treat narrow
+    // width floating point values specially (e.g. they're promoted
+    // first, or they need to be NaN-boxed).
+    public array<uintptr> Ints = new(IntArgRegs); // untyped integer registers
+    public array<uint64> Floats = new(FloatArgRegs); // untyped float registers
 // Fields above this point are known to assembly.
 
     // Ptrs is a space that duplicates Ints but with pointer type,
-// used to make pointers passed or returned  in registers
-// visible to the GC by making the type unsafe.Pointer.
-    public array<@unsafe.Pointer> Ptrs;
+    // used to make pointers passed or returned  in registers
+    // visible to the GC by making the type unsafe.Pointer.
+    public array<@unsafe.Pointer> Ptrs = new(IntArgRegs);
     // ReturnIsPtr is a bitmap that indicates which registers
-// contain or will contain pointers on the return path from
-// a reflectcall. The i'th bit indicates whether the i'th
-// register contains or will contain a valid Go pointer.
+    // contain or will contain pointers on the return path from
+    // a reflectcall. The i'th bit indicates whether the i'th
+    // register contains or will contain a valid Go pointer.
     public IntArgRegBitmap ReturnIsPtr;
 }
 
@@ -76,14 +76,15 @@ partial class abi_package {
     if (goarch.BigEndian) {
         offset = goarch.PtrSize - argSize;
     }
-    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints).at<uintptr>(reg)))) + offset));
+    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints[reg])))) + offset));
 }
 
-[GoType("[(IntArgRegs + 7) / 8]uint8")] partial struct IntArgRegBitmap;
+[GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */
+partial struct IntArgRegBitmap;
 
 // Set sets the i'th bit of the bitmap to 1.
 [GoRecv] internal static void Set(this ref IntArgRegBitmap b, nint i) {
-    b[i / 8] |= ((uint8)1) << (int)((i % 8));
+    b[i / 8] |= (uint8)(((uint8)1) << (int)((i % 8)));
 }
 
 // Get returns whether the i'th bit of the bitmap is set.

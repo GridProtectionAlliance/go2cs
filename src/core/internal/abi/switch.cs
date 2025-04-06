@@ -9,13 +9,13 @@ partial class abi_package {
     public ж<InterfaceSwitchCache> Cache;
     public nint NCases;
     // Array of NCases elements.
-// Each case must be a non-empty interface type.
-    public array<ж<ΔInterfaceType>> Cases;
+    // Each case must be a non-empty interface type.
+    public array<ж<ΔInterfaceType>> Cases = new(1);
 }
 
 [GoType] partial struct InterfaceSwitchCache {
     public uintptr Mask;                      // mask for index. Must be a power of 2 minus 1
-    public array<InterfaceSwitchCacheEntry> Entries; // Mask+1 entries total
+    public array<InterfaceSwitchCacheEntry> Entries = new(1); // Mask+1 entries total
 }
 
 [GoType] partial struct InterfaceSwitchCacheEntry {
@@ -35,10 +35,11 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
     }
     // We need an atomic load instruction to make the cache multithreaded-safe.
     // (AtomicLoadPtr needs to be implemented in cmd/compile/internal/ssa/_gen/ARCH.rules.)
-    switch (goarch) {
-    case "amd64"u8 or "arm64"u8 or "loong64"u8 or "mips"u8 or "mipsle"u8 or "mips64"u8 or "mips64le"u8 or "ppc64"u8 or "ppc64le"u8 or "riscv64"u8 or "s390x"u8:
+    var exprᴛ1 = goarch;
+    if (exprᴛ1 == "amd64"u8 || exprᴛ1 == "arm64"u8 || exprᴛ1 == "loong64"u8 || exprᴛ1 == "mips"u8 || exprᴛ1 == "mipsle"u8 || exprᴛ1 == "mips64"u8 || exprᴛ1 == "mips64le"u8 || exprᴛ1 == "ppc64"u8 || exprᴛ1 == "ppc64le"u8 || exprᴛ1 == "riscv64"u8 || exprᴛ1 == "s390x"u8) {
         return true;
-    default:
+    }
+    { /* default: */
         return false;
     }
 
@@ -52,14 +53,14 @@ public static bool UseInterfaceSwitchCache(@string goarch) {
 
 [GoType] partial struct TypeAssertCache {
     public uintptr Mask;
-    public array<TypeAssertCacheEntry> Entries;
+    public array<TypeAssertCacheEntry> Entries = new(1);
 }
 
 [GoType] partial struct TypeAssertCacheEntry {
     // type of source value (a *runtime._type)
     public uintptr Typ;
     // itab to use for result (a *runtime.itab)
-// nil if CanFail is set and conversion would fail.
+    // nil if CanFail is set and conversion would fail.
     public uintptr Itab;
 }
 

@@ -5,10 +5,10 @@ namespace go.@internal;
 
 partial class abi_package {
 
-public const nint StackNosplitBase = 800;
+public static readonly UntypedInt StackNosplitBase = 800;
 // We have three different sequences for stack bounds checks, depending on
 // whether the stack frame of a function is small, big, or huge.
-public const nint StackSmall = 128;
-public const nint StackBig = 4096;
+public static readonly UntypedInt StackSmall = 128;
+public static readonly UntypedInt StackBig = 4096;
 
 } // end abi_package
