@@ -14,7 +14,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		arg := callExpr.Args[0]
 		expr := v.convExpr(arg, nil)
 
-		targetTypeName = getSanitizedIdentifier(convertToCSTypeName(targetTypeName))
+		targetTypeName = convertToCSTypeName(targetTypeName)
 		targetType := v.getType(callExpr.Fun, false)
 		argType := v.getType(arg, false)
 

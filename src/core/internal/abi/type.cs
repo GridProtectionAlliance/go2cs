@@ -673,7 +673,7 @@ public static bool IsBlank(this ΔName n) {
 // Writes at most 10 bytes.
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = ((@byte)((nint)(n & 127)));
+        var b = ((byte)((nint)(n & 127)));
         n >>= (UntypedInt)(7);
         if (n == 0) {
             buf[i] = b;
