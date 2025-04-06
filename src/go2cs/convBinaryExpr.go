@@ -8,15 +8,18 @@ import (
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
+
 	identContext := DefaultIdentContext()
+	basicLitContext := DefaultBasicLitContext()
+	basicLitContext.u8StringOK = false
 
 	identContext.isPointer = isPointer(v.getExprType(binaryExpr.Y))
-	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext})
+	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
 
 	binaryOp := binaryExpr.Op.String()
 
 	identContext.isPointer = isPointer(v.getExprType(binaryExpr.X))
-	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext})
+	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
 	if !context.usePattenMatch {
 		// Check for comparisons between interface and pointer types,
