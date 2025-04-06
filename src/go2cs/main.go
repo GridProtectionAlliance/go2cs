@@ -1504,6 +1504,8 @@ func getIdentifier(node ast.Node) *ast.Ident {
 		ident = getIdentifier(arrayExpr.Elt)
 	} else if mapExpr, ok := node.(*ast.MapType); ok {
 		ident = getIdentifier(mapExpr.Key)
+	} else if selExpr, ok := node.(*ast.SelectorExpr); ok {
+		ident = getIdentifier(selExpr.X)
 	}
 
 	// TODO: Other types expected to have an identifier
