@@ -709,8 +709,8 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     if (len(tag) >= 1 << (int)(29)) {
         panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
-    array<byte> nameLen = default!;
-    array<byte> tagLen = default!;
+    array<byte> nameLen = new(10);
+    array<byte> tagLen = new(10);
     nint nameLenLen = writeVarint(nameLen[..], len(n));
     nint tagLenLen = writeVarint(tagLen[..], len(tag));
     byte bits = default!;

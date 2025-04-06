@@ -82,7 +82,29 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						if len(heapTypeDecl) > 0 {
 							v.writeOutput(heapTypeDecl)
 						} else {
-							v.writeOutput("%s %s = default!;", csTypeName, csIDName)
+							if arrayType, ok := valueSpecType.(*ast.ArrayType); ok && arrayType.Len != nil {
+								// Handle array type
+								var arrayLenValue string
+								arrayLenExpr := v.convExpr(arrayType.Len, nil)
+
+								// Check if length expression is in type information
+								if tv, ok := v.info.Types[arrayType.Len]; ok {
+									// Check if it's a constant
+									if tv.Value != nil {
+										length := tv.Value
+										intLength, _ := constant.Int64Val(length)
+										arrayLenValue = strconv.FormatInt(intLength, 10)
+									}
+								}
+
+								if len(arrayLenValue) > 0 && arrayLenValue != arrayLenExpr {
+									v.writeOutput("%s %s = new(%s); /* %s */", csTypeName, csIDName, arrayLenValue, arrayLenExpr)
+								} else {
+									v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, arrayLenExpr)
+								}
+							} else {
+								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
+							}
 						}
 					} else {
 						access := getAccess(goIDName)
