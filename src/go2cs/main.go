@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/build"
+	"go/constant"
 	"go/printer"
 	"go/token"
 	"go/types"
@@ -1079,7 +1080,28 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 		return false
 	}
 
-	return tv.IsValue() && !isCallExpr
+	return tv.IsValue() && !isStringLiteral(tv) && !isCallExpr
+}
+
+func isStringLiteral(tv types.TypeAndValue) bool {
+	// Check if it's a value
+	if !tv.IsValue() || tv.Value == nil {
+		return false
+	}
+
+	// Check if the value is a string constant
+	if tv.Value.Kind() != constant.String {
+		return false
+	}
+
+	// Check if the type is string
+	basic, ok := tv.Type.(*types.Basic)
+
+	if !ok || basic.Kind() != types.String {
+		return false
+	}
+
+	return true
 }
 
 func getSanitizedImport(identifier string) string {
