@@ -148,6 +148,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		operator = " = "
 	}
 
+	bitwiseAssignOp := assignStmt.Tok == token.AND_ASSIGN ||
+		assignStmt.Tok == token.OR_ASSIGN ||
+		assignStmt.Tok == token.XOR_ASSIGN ||
+		assignStmt.Tok == token.SHL_ASSIGN ||
+		assignStmt.Tok == token.SHR_ASSIGN ||
+		assignStmt.Tok == token.AND_NOT_ASSIGN
+
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
 		leftExprs := HashSet[string]{}
 
@@ -254,10 +261,28 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
+			var binaryTypeName string
+
+			if bitwiseAssignOp {
+				binaryType := v.info.Types[rhs].Type
+
+				if binaryType != nil {
+					binaryTypeName = convertToCSTypeName(v.getTypeName(binaryType, false))
+				}
+			}
+
+			if len(binaryTypeName) > 0 {
+				result.WriteString(fmt.Sprintf("(%s)(", binaryTypeName))
+			}
+
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
 				result.WriteString(rhsExpr)
+			}
+
+			if len(binaryTypeName) > 0 {
+				result.WriteRune(')')
 			}
 		}
 
