@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
+	"strconv"
 )
 
 // Handles array and slice types in context of a TypeSpec
@@ -20,11 +22,27 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 			v.writeOutput("[GoType(\"[]%s\")]", csTypeName)
 		} else {
 			// Handle array type
-			arrayLen := v.convExpr(arrayType.Len, nil)
-			v.writeOutput("[GoType(\"[%s]%s\")]", arrayLen, csTypeName)
+			var arrayLenValue string
+			arrayLenExpr := v.convExpr(arrayType.Len, nil)
+
+			// Check if length expression is in type information
+			if tv, ok := v.info.Types[arrayType.Len]; ok {
+				// Check if it's a constant
+				if tv.Value != nil {
+					length := tv.Value
+					intLength, _ := constant.Int64Val(length)
+					arrayLenValue = strconv.FormatInt(intLength, 10)
+				}
+			}
+
+			if len(arrayLenValue) > 0 && arrayLenValue != arrayLenExpr {
+				v.writeOutput("[GoType(\"[%s]%s\")] /* [%s]%s */%s", arrayLenValue, csTypeName, arrayLenExpr, csTypeName, v.newline)
+			} else {
+				v.writeOutput("[GoType(\"[%s]%s\")] ", arrayLenExpr, csTypeName)
+			}
 		}
 
-		v.writeOutput(" partial struct %s;", getSanitizedIdentifier(name))
+		v.writeOutput("partial struct %s;", getSanitizedIdentifier(name))
 		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	} else {
