@@ -250,10 +250,14 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 		case *ast.CallExpr:
 			// Check if ident is passed as an argument
 			for i, arg := range n.Args {
+				// Skip this arg if it's a nested call expression
+				if _, isNestedCall := arg.(*ast.CallExpr); isNestedCall {
+					continue
+				}
+
 				if containsIdent(arg) {
 					// Get the function type
 					funType := v.info.TypeOf(n.Fun)
-
 					sig, ok := funType.Underlying().(*types.Signature)
 
 					if !ok {
