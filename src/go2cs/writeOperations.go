@@ -138,6 +138,7 @@ func (v *Visitor) writeCommentString(builder *strings.Builder, comment *ast.Comm
 	for index, comment := range comment.List {
 		if index > 0 {
 			builder.WriteString(v.newline)
+			v.writeString(builder, "") // Write indent
 		}
 
 		if targetPos > token.NoPos {
