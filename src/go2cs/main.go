@@ -1083,25 +1083,89 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 	return tv.IsValue() && !isStringLiteral(tv) && !isCallExpr
 }
 
+// isStringType determines if an expression is either a string literal or a string variable
+func (v *Visitor) isStringType(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.BasicLit:
+		// Direct string literal
+		return e.Kind == token.STRING
+
+	case *ast.BinaryExpr:
+		// Handle string concatenation
+		if e.Op != token.ADD {
+			return false
+		}
+
+		// Both sides must be string types for the result to be a string
+		return v.isStringType(e.X) && v.isStringType(e.Y)
+
+	case *ast.Ident, *ast.SelectorExpr:
+		// Variable or field access - check type info
+		tv, ok := v.info.Types[expr]
+
+		if !ok {
+			return false
+		}
+
+		return isStringType(tv.Type)
+
+	case *ast.IndexExpr, *ast.SliceExpr:
+		// Slice expressions are not string literals or variables
+		return false
+
+	case *ast.CallExpr:
+		// For function calls, check the return type
+		tv, ok := v.info.Types[expr]
+
+		if !ok {
+			return false
+		}
+
+		return isStringType(tv.Type)
+
+	case *ast.ParenExpr:
+		// Handle parenthesized expressions
+		return v.isStringType(e.X)
+	}
+
+	// For any other expression type, use type information
+	tv, ok := v.info.Types[expr]
+
+	if !ok {
+		return false
+	}
+
+	return isStringType(tv.Type)
+}
+
+// isStringType checks if a type is a string type
+func isStringType(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	// Handle basic types
+	if basic, ok := t.Underlying().(*types.Basic); ok {
+		return basic.Kind() == types.String
+	}
+
+	return false
+}
+
+// isStringLiteral specifically checks if the expression is a string literal (not a variable)
 func isStringLiteral(tv types.TypeAndValue) bool {
-	// Check if it's a value
+	// Must be a constant value
 	if !tv.IsValue() || tv.Value == nil {
 		return false
 	}
 
-	// Check if the value is a string constant
+	// Must be a string constant
 	if tv.Value.Kind() != constant.String {
 		return false
 	}
 
-	// Check if the type is string
-	basic, ok := tv.Type.(*types.Basic)
-
-	if !ok || basic.Kind() != types.String {
-		return false
-	}
-
-	return true
+	// Type must be string
+	return isStringType(tv.Type)
 }
 
 func getSanitizedImport(identifier string) string {

@@ -19,7 +19,7 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 
 		if arrayType.Len == nil {
 			// Handle slice type
-			v.writeOutput("[GoType(\"[]%s\")]", csTypeName)
+			v.writeOutput("[GoType(\"[]%s\")] ", csTypeName)
 		} else {
 			// Handle array type
 			var arrayLenValue string

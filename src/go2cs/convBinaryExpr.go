@@ -11,14 +11,14 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 
 	identContext := DefaultIdentContext()
 	basicLitContext := DefaultBasicLitContext()
-	basicLitContext.u8StringOK = false
+	basicLitContext.u8StringOK = v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
 
-	identContext.isPointer = isPointer(v.getExprType(binaryExpr.Y))
+	identContext.isPointer = isPointer(rhsType)
 	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
 
 	binaryOp := binaryExpr.Op.String()
 
-	identContext.isPointer = isPointer(v.getExprType(binaryExpr.X))
+	identContext.isPointer = isPointer(lhsType)
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
 	if !context.usePattenMatch {
