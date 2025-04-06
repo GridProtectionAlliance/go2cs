@@ -17,7 +17,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
-        "Array" => $", IArray<{TargetTypeName}>",
+        "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>",
         "Numeric" => $" : IEquatable<{TargetTypeName}>",
         _ => ""
@@ -29,7 +29,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
         //"Map" => IMapTypeTemplate.Generate(TargetTypeName, TargetValueTypeName),
         //"Channel" => IChannelTypeTemplate.Generate(TargetTypeName),
-        //"Array" => IArrayImplementation.Generate(TargetTypeName),
+        "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
         _ => ""
