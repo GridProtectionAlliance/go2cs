@@ -25,31 +25,31 @@ public static partial class abi_package
         // -- Imethod has no promoted structs
 
         // Field References
-        public static ref global::go.@internal.abi_package.NameOff ᏑΔName(ref Imethod instance) => ref instance.ΔName;
+        public static ref global::go.@internal.abi_package.NameOff ᏑName(ref Imethod instance) => ref instance.Name;
         public static ref global::go.@internal.abi_package.TypeOff ᏑTyp(ref Imethod instance) => ref instance.Typ;
         
         // Constructors
         public Imethod(NilType _)
         {
-            this.ΔName = default!;
+            this.Name = default!;
             this.Typ = default!;
         }
 
-        public Imethod(global::go.@internal.abi_package.NameOff ΔName = default!, global::go.@internal.abi_package.TypeOff Typ = default!)
+        public Imethod(global::go.@internal.abi_package.NameOff Name = default!, global::go.@internal.abi_package.TypeOff Typ = default!)
         {
-            this.ΔName = ΔName;
+            this.Name = Name;
             this.Typ = Typ;
         }
         
         // Handle comparisons between struct 'Imethod' instances
         public bool Equals(Imethod other) =>
-            ΔName == other.ΔName &&
+            Name == other.Name &&
             Typ == other.Typ;
         
         public override bool Equals(object? obj) => obj is Imethod other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔName,
+            Name,
             Typ);
         
         public static bool operator ==(Imethod left, Imethod right) => left.Equals(right);
@@ -69,7 +69,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔName.ToString(),
+            Name.ToString(),
             Typ.ToString()
         ]), "}");
     }

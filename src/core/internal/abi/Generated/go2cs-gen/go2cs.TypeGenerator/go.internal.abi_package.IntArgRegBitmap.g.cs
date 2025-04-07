@@ -19,11 +19,40 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial struct IntArgRegBitmap, IArray<uint8>
+    public partial struct IntArgRegBitmap : IArray<uint8>, ISupportMake<IntArgRegBitmap>
     {
         // Value of the struct 'IntArgRegBitmap'
         private readonly array<uint8> m_value;
         
+        public uint8[] Source => m_value;
+        
+        public nint Length => ((IArray)m_value).Length;
+        
+        Array IArray.Source => ((IArray)m_value).Source!;
+        
+        object? IArray.this[nint index]
+        {
+            get => ((IArray)m_value)[index];
+            set => ((IArray)m_value)[index] = value;
+        }
+            
+        public ref uint8 this[nint index] => ref m_value[index];
+        
+        public Span<uint8> ꓸꓸꓸ => ToSpan();
+        
+        public Span<uint8> ToSpan() => m_value.ToSpan();
+        
+        public IEnumerator<(nint, uint8)> GetEnumerator() => m_value.GetEnumerator();
+        
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+        
+        public bool Equals(IArray<uint8>? other) => m_value.Equals(other);
+        
+        public object Clone() => ((ICloneable)m_value).Clone();
+        
+        public static IntArgRegBitmap Make(nint p1 = 0, nint p2 = -1) => new IntArgRegBitmap(p1);
+
+        public IntArgRegBitmap(nint length) => m_value = new array<uint8>(length);        
         
         public IntArgRegBitmap(array<uint8> value) => m_value = value;
 

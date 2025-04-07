@@ -23,10 +23,10 @@
 
 //#define DEBUG_GENERATOR
 
+using System.Collections.Generic;
 using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 using static go2cs.Common;
 
 #if DEBUG_GENERATOR
@@ -58,7 +58,7 @@ public class RecvGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AttributeFinder<MethodDeclarationSyntax> { HasAttributes: true } attributeFinder)
             return;
 
-        foreach ((MethodDeclarationSyntax methodSyntax, _) in attributeFinder.TargetAttributes)
+        foreach ((MethodDeclarationSyntax methodSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = methodSyntax.SyntaxTree;
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
@@ -71,25 +71,43 @@ public class RecvGenerator : ISourceGenerator
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
-            MethodInfo method = methodSyntax.GetMethodInfo(context);
-
-            // Only process methods with a reference receiver to create
-            // a generated overload the handles a ptr<T> receiver
-            if (method.Parameters.Length == 0 || !method.IsRefRecv)
-                continue;
-
-            string generatedSource = new ReceiverMethodTemplate
+            foreach (AttributeSyntax attribute in attributes)
             {
-                PackageNamespace = packageNamespace,
-                PackageName = packageName,
-                Scope = scope,
-                Method = method,
-                UsingStatements = usingStatements
-            }
-            .Generate();
+                string options = string.Empty;
 
-            // Add the source code to the compilation
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs"), generatedSource);
+                // Get the attribute's argument values
+                (string _, string value)[] arguments = attribute.GetArgumentValues();
+
+                // Get the attribute's first constructor argument value, the options string
+                if (arguments.Length > 0)
+                {
+                    string value = arguments[0].value;
+
+                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
+                        options = value[1..^1].Trim();
+                }
+
+                MethodInfo method = methodSyntax.GetMethodInfo(context);
+
+                // Only process methods with a reference receiver to create
+                // a generated overload the handles a ptr<T> receiver
+                if (method.Parameters.Length == 0 || !method.IsRefRecv)
+                    continue;
+
+                string generatedSource = new ReceiverMethodTemplate
+                {
+                    PackageNamespace = packageNamespace,
+                    PackageName = packageName,
+                    Scope = scope,
+                    Method = method,
+                    Options = options,
+                    UsingStatements = usingStatements
+                }
+                .Generate();
+
+                // Add the source code to the compilation
+                context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs"), generatedSource);
+            }
         }
     }
 }

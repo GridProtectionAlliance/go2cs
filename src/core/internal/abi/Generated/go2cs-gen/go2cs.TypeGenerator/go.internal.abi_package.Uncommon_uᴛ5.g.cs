@@ -22,10 +22,10 @@ public static partial class abi_package
     public partial struct Uncommon_uᴛ5
     {
         // Promoted Struct References
-        private readonly ж<global::go.@internal.abi_package.ΔMapType> ᏑʗΔMapType;
+        private readonly ж<global::go.@internal.abi_package.ΔMapType> ᏑʗMapType;
 
         // Promoted Struct Accessors
-        public partial ref global::go.@internal.abi_package.ΔMapType ΔMapType => ref ᏑʗΔMapType.val;
+        public partial ref global::go.@internal.abi_package.ΔMapType MapType => ref ᏑʗMapType.val;
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref ΔMapType.Type;
@@ -50,31 +50,31 @@ public static partial class abi_package
         public static ref uint ᏑFlags(ref Uncommon_uᴛ5 instance) => ref instance.ΔMapType.Flags;
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔMapType ᏑΔMapType(ref Uncommon_uᴛ5 instance) => ref instance.ΔMapType;
+        public static ref global::go.@internal.abi_package.ΔMapType ᏑMapType(ref Uncommon_uᴛ5 instance) => ref instance.MapType;
         public static ref global::go.@internal.abi_package.UncommonType Ꮡu(ref Uncommon_uᴛ5 instance) => ref instance.u;
         
         // Constructors
         public Uncommon_uᴛ5(NilType _)
         {
-            ᏑʗΔMapType = new ж<global::go.@internal.abi_package.ΔMapType>(new global::go.@internal.abi_package.ΔMapType(nil));
+            ᏑʗMapType = new ж<global::go.@internal.abi_package.ΔMapType>(new global::go.@internal.abi_package.ΔMapType(nil));
             this.u = default!;
         }
 
-        public Uncommon_uᴛ5(global::go.@internal.abi_package.ΔMapType ΔMapType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ5(global::go.@internal.abi_package.ΔMapType MapType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
-            ᏑʗΔMapType = new ж<global::go.@internal.abi_package.ΔMapType>(ΔMapType);
+            ᏑʗMapType = new ж<global::go.@internal.abi_package.ΔMapType>(MapType);
             this.u = u;
         }
         
         // Handle comparisons between struct 'Uncommon_uᴛ5' instances
         public bool Equals(Uncommon_uᴛ5 other) =>
-            ΔMapType == other.ΔMapType &&
+            MapType == other.MapType &&
             u == other.u;
         
         public override bool Equals(object? obj) => obj is Uncommon_uᴛ5 other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔMapType,
+            MapType,
             u);
         
         public static bool operator ==(Uncommon_uᴛ5 left, Uncommon_uᴛ5 right) => left.Equals(right);
@@ -94,7 +94,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔMapType.ToString(),
+            MapType.ToString(),
             u.ToString()
         ]), "}");
     }

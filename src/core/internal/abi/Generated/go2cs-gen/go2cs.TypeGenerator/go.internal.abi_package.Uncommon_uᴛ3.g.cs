@@ -22,10 +22,10 @@ public static partial class abi_package
     public partial struct Uncommon_uᴛ3
     {
         // Promoted Struct References
-        private readonly ж<global::go.@internal.abi_package.ΔArrayType> ᏑʗΔArrayType;
+        private readonly ж<global::go.@internal.abi_package.ΔArrayType> ᏑʗArrayType;
 
         // Promoted Struct Accessors
-        public partial ref global::go.@internal.abi_package.ΔArrayType ΔArrayType => ref ᏑʗΔArrayType.val;
+        public partial ref global::go.@internal.abi_package.ΔArrayType ArrayType => ref ᏑʗArrayType.val;
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref ΔArrayType.Type;
@@ -40,31 +40,31 @@ public static partial class abi_package
         public static ref nuint ᏑLen(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType.Len;
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔArrayType ᏑΔArrayType(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType;
+        public static ref global::go.@internal.abi_package.ΔArrayType ᏑArrayType(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType;
         public static ref global::go.@internal.abi_package.UncommonType Ꮡu(ref Uncommon_uᴛ3 instance) => ref instance.u;
         
         // Constructors
         public Uncommon_uᴛ3(NilType _)
         {
-            ᏑʗΔArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(new global::go.@internal.abi_package.ΔArrayType(nil));
+            ᏑʗArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(new global::go.@internal.abi_package.ΔArrayType(nil));
             this.u = default!;
         }
 
-        public Uncommon_uᴛ3(global::go.@internal.abi_package.ΔArrayType ΔArrayType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ3(global::go.@internal.abi_package.ΔArrayType ArrayType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
-            ᏑʗΔArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(ΔArrayType);
+            ᏑʗArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(ArrayType);
             this.u = u;
         }
         
         // Handle comparisons between struct 'Uncommon_uᴛ3' instances
         public bool Equals(Uncommon_uᴛ3 other) =>
-            ΔArrayType == other.ΔArrayType &&
+            ArrayType == other.ArrayType &&
             u == other.u;
         
         public override bool Equals(object? obj) => obj is Uncommon_uᴛ3 other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔArrayType,
+            ArrayType,
             u);
         
         public static bool operator ==(Uncommon_uᴛ3 left, Uncommon_uᴛ3 right) => left.Equals(right);
@@ -84,7 +84,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔArrayType.ToString(),
+            ArrayType.ToString(),
             u.ToString()
         ]), "}");
     }

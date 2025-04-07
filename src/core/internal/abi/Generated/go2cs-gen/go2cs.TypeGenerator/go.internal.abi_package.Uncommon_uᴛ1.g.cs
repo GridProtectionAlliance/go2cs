@@ -22,10 +22,10 @@ public static partial class abi_package
     public partial struct Uncommon_uᴛ1
     {
         // Promoted Struct References
-        private readonly ж<global::go.@internal.abi_package.ΔFuncType> ᏑʗΔFuncType;
+        private readonly ж<global::go.@internal.abi_package.ΔFuncType> ᏑʗFuncType;
 
         // Promoted Struct Accessors
-        public partial ref global::go.@internal.abi_package.ΔFuncType ΔFuncType => ref ᏑʗΔFuncType.val;
+        public partial ref global::go.@internal.abi_package.ΔFuncType FuncType => ref ᏑʗFuncType.val;
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref ΔFuncType.Type;
@@ -38,31 +38,31 @@ public static partial class abi_package
         public static ref ushort ᏑOutCount(ref Uncommon_uᴛ1 instance) => ref instance.ΔFuncType.OutCount;
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔFuncType ᏑΔFuncType(ref Uncommon_uᴛ1 instance) => ref instance.ΔFuncType;
+        public static ref global::go.@internal.abi_package.ΔFuncType ᏑFuncType(ref Uncommon_uᴛ1 instance) => ref instance.FuncType;
         public static ref global::go.@internal.abi_package.UncommonType Ꮡu(ref Uncommon_uᴛ1 instance) => ref instance.u;
         
         // Constructors
         public Uncommon_uᴛ1(NilType _)
         {
-            ᏑʗΔFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(new global::go.@internal.abi_package.ΔFuncType(nil));
+            ᏑʗFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(new global::go.@internal.abi_package.ΔFuncType(nil));
             this.u = default!;
         }
 
-        public Uncommon_uᴛ1(global::go.@internal.abi_package.ΔFuncType ΔFuncType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ1(global::go.@internal.abi_package.ΔFuncType FuncType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
-            ᏑʗΔFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(ΔFuncType);
+            ᏑʗFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(FuncType);
             this.u = u;
         }
         
         // Handle comparisons between struct 'Uncommon_uᴛ1' instances
         public bool Equals(Uncommon_uᴛ1 other) =>
-            ΔFuncType == other.ΔFuncType &&
+            FuncType == other.FuncType &&
             u == other.u;
         
         public override bool Equals(object? obj) => obj is Uncommon_uᴛ1 other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔFuncType,
+            FuncType,
             u);
         
         public static bool operator ==(Uncommon_uᴛ1 left, Uncommon_uᴛ1 right) => left.Equals(right);
@@ -82,7 +82,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔFuncType.ToString(),
+            FuncType.ToString(),
             u.ToString()
         ]), "}");
     }

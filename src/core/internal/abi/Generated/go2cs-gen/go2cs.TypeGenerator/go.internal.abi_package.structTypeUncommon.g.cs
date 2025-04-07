@@ -22,10 +22,10 @@ public static partial class abi_package
     internal partial struct structTypeUncommon
     {
         // Promoted Struct References
-        private readonly ж<global::go.@internal.abi_package.ΔStructType> ᏑʗΔStructType;
+        private readonly ж<global::go.@internal.abi_package.ΔStructType> ᏑʗStructType;
 
         // Promoted Struct Accessors
-        public partial ref global::go.@internal.abi_package.ΔStructType ΔStructType => ref ᏑʗΔStructType.val;
+        public partial ref global::go.@internal.abi_package.ΔStructType StructType => ref ᏑʗStructType.val;
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref ΔStructType.Type;
@@ -38,31 +38,31 @@ public static partial class abi_package
         public static ref global::go.slice<global::go.@internal.abi_package.StructField> ᏑFields(ref structTypeUncommon instance) => ref instance.ΔStructType.Fields;
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔStructType ᏑΔStructType(ref structTypeUncommon instance) => ref instance.ΔStructType;
+        public static ref global::go.@internal.abi_package.ΔStructType ᏑStructType(ref structTypeUncommon instance) => ref instance.StructType;
         public static ref global::go.@internal.abi_package.UncommonType Ꮡu(ref structTypeUncommon instance) => ref instance.u;
         
         // Constructors
         public structTypeUncommon(NilType _)
         {
-            ᏑʗΔStructType = new ж<global::go.@internal.abi_package.ΔStructType>(new global::go.@internal.abi_package.ΔStructType(nil));
+            ᏑʗStructType = new ж<global::go.@internal.abi_package.ΔStructType>(new global::go.@internal.abi_package.ΔStructType(nil));
             this.u = default!;
         }
 
-        public structTypeUncommon(global::go.@internal.abi_package.ΔStructType ΔStructType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public structTypeUncommon(global::go.@internal.abi_package.ΔStructType StructType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
-            ᏑʗΔStructType = new ж<global::go.@internal.abi_package.ΔStructType>(ΔStructType);
+            ᏑʗStructType = new ж<global::go.@internal.abi_package.ΔStructType>(StructType);
             this.u = u;
         }
         
         // Handle comparisons between struct 'structTypeUncommon' instances
         public bool Equals(structTypeUncommon other) =>
-            ΔStructType == other.ΔStructType &&
+            StructType == other.StructType &&
             u == other.u;
         
         public override bool Equals(object? obj) => obj is structTypeUncommon other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔStructType,
+            StructType,
             u);
         
         public static bool operator ==(structTypeUncommon left, structTypeUncommon right) => left.Equals(right);
@@ -82,7 +82,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔStructType.ToString(),
+            StructType.ToString(),
             u.ToString()
         ]), "}");
     }

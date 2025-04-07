@@ -22,10 +22,10 @@ public static partial class abi_package
     public partial struct Uncommon_uᴛ6
     {
         // Promoted Struct References
-        private readonly ж<global::go.@internal.abi_package.ΔInterfaceType> ᏑʗΔInterfaceType;
+        private readonly ж<global::go.@internal.abi_package.ΔInterfaceType> ᏑʗInterfaceType;
 
         // Promoted Struct Accessors
-        public partial ref global::go.@internal.abi_package.ΔInterfaceType ΔInterfaceType => ref ᏑʗΔInterfaceType.val;
+        public partial ref global::go.@internal.abi_package.ΔInterfaceType InterfaceType => ref ᏑʗInterfaceType.val;
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref ΔInterfaceType.Type;
@@ -38,31 +38,31 @@ public static partial class abi_package
         public static ref global::go.slice<global::go.@internal.abi_package.Imethod> ᏑMethods(ref Uncommon_uᴛ6 instance) => ref instance.ΔInterfaceType.Methods;
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔInterfaceType ᏑΔInterfaceType(ref Uncommon_uᴛ6 instance) => ref instance.ΔInterfaceType;
+        public static ref global::go.@internal.abi_package.ΔInterfaceType ᏑInterfaceType(ref Uncommon_uᴛ6 instance) => ref instance.InterfaceType;
         public static ref global::go.@internal.abi_package.UncommonType Ꮡu(ref Uncommon_uᴛ6 instance) => ref instance.u;
         
         // Constructors
         public Uncommon_uᴛ6(NilType _)
         {
-            ᏑʗΔInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(new global::go.@internal.abi_package.ΔInterfaceType(nil));
+            ᏑʗInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(new global::go.@internal.abi_package.ΔInterfaceType(nil));
             this.u = default!;
         }
 
-        public Uncommon_uᴛ6(global::go.@internal.abi_package.ΔInterfaceType ΔInterfaceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ6(global::go.@internal.abi_package.ΔInterfaceType InterfaceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
-            ᏑʗΔInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(ΔInterfaceType);
+            ᏑʗInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(InterfaceType);
             this.u = u;
         }
         
         // Handle comparisons between struct 'Uncommon_uᴛ6' instances
         public bool Equals(Uncommon_uᴛ6 other) =>
-            ΔInterfaceType == other.ΔInterfaceType &&
+            InterfaceType == other.InterfaceType &&
             u == other.u;
         
         public override bool Equals(object? obj) => obj is Uncommon_uᴛ6 other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔInterfaceType,
+            InterfaceType,
             u);
         
         public static bool operator ==(Uncommon_uᴛ6 left, Uncommon_uᴛ6 right) => left.Equals(right);
@@ -82,7 +82,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔInterfaceType.ToString(),
+            InterfaceType.ToString(),
             u.ToString()
         ]), "}");
     }

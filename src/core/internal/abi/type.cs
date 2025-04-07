@@ -176,7 +176,7 @@ public static ж<Type> TypeFor<T>()
 
 // Method on non-interface type
 [GoType] partial struct Method {
-    public NameOff ΔName; // name of method
+    public NameOff Name; // name of method
     public TypeOff Mtyp; // method type (without receiver)
     public TextOff Ifn; // fn used in interface call (one-word receiver)
     public TextOff Tfn; // fn used for normal method call
@@ -221,7 +221,7 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 
 // Imethod represents a method on an interface type
 [GoType] partial struct Imethod {
-    public NameOff ΔName; // name of method
+    public NameOff Name; // name of method
     public TypeOff Typ; // .(*FuncType) underneath
 }
 
@@ -241,8 +241,8 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
     return 0;
 }
 
-[GoRecv] internal static ж<Type> Common(this ref Type t) {
-    return t;
+[GoRecv("capture")] internal static ж<Type> Common(this ref Type t) {
+    return CommonꓸᏑt;
 }
 
 [GoType("num:nint")] partial struct ΔChanDir;
@@ -260,7 +260,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoType] partial struct structTypeUncommon {
-    public partial ref ΔStructType ΔStructType { get; }
+    public partial ref ΔStructType StructType { get; }
     public UncommonType u;
 }
 
@@ -279,7 +279,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoType] partial struct Uncommon_uᴛ1 {
-    public partial ref ΔFuncType ΔFuncType { get; }
+    public partial ref ΔFuncType FuncType { get; }
     public UncommonType u;
 }
 
@@ -289,7 +289,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoType] partial struct Uncommon_uᴛ3 {
-    public partial ref ΔArrayType ΔArrayType { get; }
+    public partial ref ΔArrayType ArrayType { get; }
     public UncommonType u;
 }
 
@@ -299,12 +299,12 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoType] partial struct Uncommon_uᴛ5 {
-    public partial ref ΔMapType ΔMapType { get; }
+    public partial ref ΔMapType MapType { get; }
     public UncommonType u;
 }
 
 [GoType] partial struct Uncommon_uᴛ6 {
-    public partial ref ΔInterfaceType ΔInterfaceType { get; }
+    public partial ref ΔInterfaceType InterfaceType { get; }
     public UncommonType u;
 }
 
@@ -575,7 +575,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoType] partial struct StructField {
-    public ΔName ΔName;  // name is always non-empty
+    public ΔName Name;  // name is always non-empty
     public ж<Type> Typ; // type of field
     public uintptr Offset; // byte offset of field
 }

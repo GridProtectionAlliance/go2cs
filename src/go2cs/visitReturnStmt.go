@@ -8,6 +8,23 @@ import (
 const DeferredDeclsMarker = ">>MARKER:DEFERRED_DECLS<<"
 
 func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
+	recvIndex := -1
+	var capturedRecvName string
+
+	// Check if receiver is directly returned
+	if ptrRecv, recvName := v.isPointerReceiver(); ptrRecv {
+		for i, result := range returnStmt.Results {
+			if ident, ok := result.(*ast.Ident); ok {
+				if ident.Name == recvName {
+					v.captureReceiver = true
+					recvIndex = i
+					capturedRecvName = v.getCapturedReceiverName(recvName)
+					break
+				}
+			}
+		}
+	}
+
 	result := strings.Builder{}
 	deferredDecls := strings.Builder{}
 
@@ -27,15 +44,19 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					results.WriteString(", ")
 				}
 
-				param := signature.Results().At(i)
+				if recvIndex != -1 && i == recvIndex {
+					result.WriteString(capturedRecvName)
+				} else {
+					param := signature.Results().At(i)
 
-				if param.Name() != "" {
-					ident := v.getVarIdent(param)
+					if param.Name() != "" {
+						ident := v.getVarIdent(param)
 
-					if ident != nil {
-						results.WriteString(getSanitizedIdentifier(v.getIdentName(ident)))
-					} else {
-						results.WriteString(getSanitizedIdentifier(param.Name()))
+						if ident != nil {
+							results.WriteString(getSanitizedIdentifier(v.getIdentName(ident)))
+						} else {
+							results.WriteString(getSanitizedIdentifier(param.Name()))
+						}
 					}
 				}
 			}
@@ -102,7 +123,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					}
 				}
 
-				result.WriteString(resultExpr)
+				if recvIndex != -1 && i == recvIndex {
+					result.WriteString(capturedRecvName)
+				} else {
+					result.WriteString(resultExpr)
+				}
 			}
 		}
 

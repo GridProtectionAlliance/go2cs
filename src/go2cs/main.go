@@ -110,6 +110,7 @@ type Visitor struct {
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool
+	captureReceiver      bool
 	capturedVarCount     map[string]int
 	tempVarCount         map[string]int
 
@@ -1228,7 +1229,7 @@ func getCoreSanitizedIdentifier(identifier string) string {
 	return identifier
 }
 
-func getUnsanitizedIdentifier(identifier string) string {
+func removeSanitizationMarker(identifier string) string {
 	if strings.HasPrefix(identifier, "@") {
 		return identifier[1:] // Remove "@" prefix
 	}
@@ -1320,6 +1321,46 @@ func isPointer(t types.Type) bool {
 	_, isPointer := exprType.(*types.Pointer)
 
 	return isPointer
+}
+
+func (v *Visitor) isPointerReceiver() (bool, string) {
+	// First check if we're in a function with a receiver
+	if !v.inFunction || v.currentFuncSignature.Recv() == nil {
+		return false, ""
+	}
+
+	// Check if receiver is a pointer type
+	recvType := v.currentFuncSignature.Recv().Type()
+	isRecvPointer := false
+
+	if _, ok := recvType.(*types.Pointer); ok {
+		isRecvPointer = true
+	}
+
+	if !isRecvPointer {
+		return false, ""
+	}
+
+	// Get the name of the receiver variable from the AST
+	var recvName string
+
+	if v.currentFuncDecl.Recv != nil && len(v.currentFuncDecl.Recv.List) > 0 {
+		// The field might have multiple names for the same type,
+		// but for a receiver there should be just one
+		if len(v.currentFuncDecl.Recv.List[0].Names) > 0 {
+			recvName = v.currentFuncDecl.Recv.List[0].Names[0].Name
+		}
+	}
+
+	return true, recvName
+}
+
+func (v *Visitor) getCapturedReceiverName(recvName string) string {
+	if !v.inFunction {
+		return ""
+	}
+
+	return fmt.Sprintf("%s%s%s%s", v.currentFuncName, TypeAliasDot, AddressPrefix, recvName)
 }
 
 func paramsAreInterfaces(paramTypes *types.Tuple, andNotEmptyInterface bool) []bool {

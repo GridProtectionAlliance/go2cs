@@ -38,7 +38,12 @@ namespace go;
 /// See the <c>RecvGenerator</c> in the go2cs code generators for details.
 /// </para>
 /// </remarks>
+/// <param name="options">Receiver options string.</param>
 [AttributeUsage(AttributeTargets.Method)]
-public class GoRecvAttribute : Attribute
+public class GoRecvAttribute(string options = "") : Attribute
 {
+    /// <summary>
+    /// Gets the receiver options string.
+    /// </summary>
+    public string Options => options;
 }

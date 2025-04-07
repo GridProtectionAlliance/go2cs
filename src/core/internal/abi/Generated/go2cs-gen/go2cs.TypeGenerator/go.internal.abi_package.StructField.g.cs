@@ -25,35 +25,35 @@ public static partial class abi_package
         // -- StructField has no promoted structs
 
         // Field References
-        public static ref global::go.@internal.abi_package.ΔName ᏑΔName(ref StructField instance) => ref instance.ΔName;
+        public static ref global::go.@internal.abi_package.ΔName ᏑName(ref StructField instance) => ref instance.Name;
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑTyp(ref StructField instance) => ref instance.Typ;
         public static ref nuint ᏑOffset(ref StructField instance) => ref instance.Offset;
         
         // Constructors
         public StructField(NilType _)
         {
-            this.ΔName = default!;
+            this.Name = default!;
             this.Typ = default!;
             this.Offset = default!;
         }
 
-        public StructField(global::go.@internal.abi_package.ΔName ΔName = default!, global::go.ж<global::go.@internal.abi_package.Type> Typ = default!, nuint Offset = default!)
+        public StructField(global::go.@internal.abi_package.ΔName Name = default!, global::go.ж<global::go.@internal.abi_package.Type> Typ = default!, nuint Offset = default!)
         {
-            this.ΔName = ΔName;
+            this.Name = Name;
             this.Typ = Typ;
             this.Offset = Offset;
         }
         
         // Handle comparisons between struct 'StructField' instances
         public bool Equals(StructField other) =>
-            ΔName == other.ΔName &&
+            Name == other.Name &&
             Typ == other.Typ &&
             Offset == other.Offset;
         
         public override bool Equals(object? obj) => obj is StructField other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔName,
+            Name,
             Typ,
             Offset);
         
@@ -74,7 +74,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔName.ToString(),
+            Name.ToString(),
             Typ?.ToString() ?? "<nil>",
             Offset.ToString()
         ]), "}");

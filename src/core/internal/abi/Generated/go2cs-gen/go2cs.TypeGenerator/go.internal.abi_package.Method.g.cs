@@ -25,7 +25,7 @@ public static partial class abi_package
         // -- Method has no promoted structs
 
         // Field References
-        public static ref global::go.@internal.abi_package.NameOff ᏑΔName(ref Method instance) => ref instance.ΔName;
+        public static ref global::go.@internal.abi_package.NameOff ᏑName(ref Method instance) => ref instance.Name;
         public static ref global::go.@internal.abi_package.TypeOff ᏑMtyp(ref Method instance) => ref instance.Mtyp;
         public static ref global::go.@internal.abi_package.TextOff ᏑIfn(ref Method instance) => ref instance.Ifn;
         public static ref global::go.@internal.abi_package.TextOff ᏑTfn(ref Method instance) => ref instance.Tfn;
@@ -33,15 +33,15 @@ public static partial class abi_package
         // Constructors
         public Method(NilType _)
         {
-            this.ΔName = default!;
+            this.Name = default!;
             this.Mtyp = default!;
             this.Ifn = default!;
             this.Tfn = default!;
         }
 
-        public Method(global::go.@internal.abi_package.NameOff ΔName = default!, global::go.@internal.abi_package.TypeOff Mtyp = default!, global::go.@internal.abi_package.TextOff Ifn = default!, global::go.@internal.abi_package.TextOff Tfn = default!)
+        public Method(global::go.@internal.abi_package.NameOff Name = default!, global::go.@internal.abi_package.TypeOff Mtyp = default!, global::go.@internal.abi_package.TextOff Ifn = default!, global::go.@internal.abi_package.TextOff Tfn = default!)
         {
-            this.ΔName = ΔName;
+            this.Name = Name;
             this.Mtyp = Mtyp;
             this.Ifn = Ifn;
             this.Tfn = Tfn;
@@ -49,7 +49,7 @@ public static partial class abi_package
         
         // Handle comparisons between struct 'Method' instances
         public bool Equals(Method other) =>
-            ΔName == other.ΔName &&
+            Name == other.Name &&
             Mtyp == other.Mtyp &&
             Ifn == other.Ifn &&
             Tfn == other.Tfn;
@@ -57,7 +57,7 @@ public static partial class abi_package
         public override bool Equals(object? obj) => obj is Method other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
-            ΔName,
+            Name,
             Mtyp,
             Ifn,
             Tfn);
@@ -79,7 +79,7 @@ public static partial class abi_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ΔName.ToString(),
+            Name.ToString(),
             Mtyp.ToString(),
             Ifn.ToString(),
             Tfn.ToString()
