@@ -28,16 +28,16 @@ public static partial class abi_package
         public partial ref global::go.@internal.abi_package.ΔArrayType ArrayType => ref ᏑʗArrayType.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@internal.abi_package.Type Type => ref ΔArrayType.Type;
-        public ref global::go.ж<global::go.@internal.abi_package.Type> Elem => ref ΔArrayType.Elem;
-        public ref global::go.ж<global::go.@internal.abi_package.Type> Slice => ref ΔArrayType.Slice;
-        public ref nuint Len => ref ΔArrayType.Len;
+        public ref global::go.@internal.abi_package.Type Type => ref ArrayType.Type;
+        public ref global::go.ж<global::go.@internal.abi_package.Type> Elem => ref ArrayType.Elem;
+        public ref global::go.ж<global::go.@internal.abi_package.Type> Slice => ref ArrayType.Slice;
+        public ref nuint Len => ref ArrayType.Len;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType.Type;
-        public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑElem(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType.Elem;
-        public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑSlice(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType.Slice;
-        public static ref nuint ᏑLen(ref Uncommon_uᴛ3 instance) => ref instance.ΔArrayType.Len;
+        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Type;
+        public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑElem(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Elem;
+        public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑSlice(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Slice;
+        public static ref nuint ᏑLen(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Len;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔArrayType ᏑArrayType(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType;

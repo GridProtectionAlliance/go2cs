@@ -28,14 +28,14 @@ public static partial class abi_package
         public partial ref global::go.@internal.abi_package.ΔStructType StructType => ref ᏑʗStructType.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@internal.abi_package.Type Type => ref ΔStructType.Type;
-        public ref global::go.@internal.abi_package.ΔName PkgPath => ref ΔStructType.PkgPath;
-        public ref global::go.slice<global::go.@internal.abi_package.StructField> Fields => ref ΔStructType.Fields;
+        public ref global::go.@internal.abi_package.Type Type => ref StructType.Type;
+        public ref global::go.@internal.abi_package.ΔName PkgPath => ref StructType.PkgPath;
+        public ref global::go.slice<global::go.@internal.abi_package.StructField> Fields => ref StructType.Fields;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@internal.abi_package.Type ᏑType(ref structTypeUncommon instance) => ref instance.ΔStructType.Type;
-        public static ref global::go.@internal.abi_package.ΔName ᏑPkgPath(ref structTypeUncommon instance) => ref instance.ΔStructType.PkgPath;
-        public static ref global::go.slice<global::go.@internal.abi_package.StructField> ᏑFields(ref structTypeUncommon instance) => ref instance.ΔStructType.Fields;
+        public static ref global::go.@internal.abi_package.Type ᏑType(ref structTypeUncommon instance) => ref instance.StructType.Type;
+        public static ref global::go.@internal.abi_package.ΔName ᏑPkgPath(ref structTypeUncommon instance) => ref instance.StructType.PkgPath;
+        public static ref global::go.slice<global::go.@internal.abi_package.StructField> ᏑFields(ref structTypeUncommon instance) => ref instance.StructType.Fields;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔStructType ᏑStructType(ref structTypeUncommon instance) => ref instance.StructType;

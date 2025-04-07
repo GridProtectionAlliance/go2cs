@@ -92,7 +92,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                    result.Append($"\r\n{TypeElemIndent}public ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType)}.{memberName};");
+                    result.Append($"\r\n{TypeElemIndent}public ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessor References");
@@ -100,7 +100,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType)}.{memberName};");
+                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
             }
 
             return result.ToString();
@@ -151,7 +151,7 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
                 }
                 
-                result.Append($") => target.{GetSimpleName(promotedStructType)}.{method.Name}(");
+                result.Append($") => target.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
                 result.Append(");");
 

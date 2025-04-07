@@ -28,14 +28,14 @@ public static partial class abi_package
         public partial ref global::go.@internal.abi_package.ΔFuncType FuncType => ref ᏑʗFuncType.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@internal.abi_package.Type Type => ref ΔFuncType.Type;
-        public ref ushort InCount => ref ΔFuncType.InCount;
-        public ref ushort OutCount => ref ΔFuncType.OutCount;
+        public ref global::go.@internal.abi_package.Type Type => ref FuncType.Type;
+        public ref ushort InCount => ref FuncType.InCount;
+        public ref ushort OutCount => ref FuncType.OutCount;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ1 instance) => ref instance.ΔFuncType.Type;
-        public static ref ushort ᏑInCount(ref Uncommon_uᴛ1 instance) => ref instance.ΔFuncType.InCount;
-        public static ref ushort ᏑOutCount(ref Uncommon_uᴛ1 instance) => ref instance.ΔFuncType.OutCount;
+        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.Type;
+        public static ref ushort ᏑInCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.InCount;
+        public static ref ushort ᏑOutCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.OutCount;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔFuncType ᏑFuncType(ref Uncommon_uᴛ1 instance) => ref instance.FuncType;
@@ -88,43 +88,43 @@ public static partial class abi_package
     }
 
     // Promoted Struct Receivers
-    public static go.ж<go.@internal.abi_package.Type> In(this ref Uncommon_uᴛ1 target, nint i) => target.ΔFuncType.In(i);
+    public static go.ж<go.@internal.abi_package.Type> In(this ref Uncommon_uᴛ1 target, nint i) => target.FuncType.In(i);
     public static go.ж<go.@internal.abi_package.Type> In(this ж<Uncommon_uᴛ1> Ꮡtarget, nint i)
     {
         ref var target = ref Ꮡtarget.val;
         return target.In(i);
     }
-    public static nint NumIn(this ref Uncommon_uᴛ1 target) => target.ΔFuncType.NumIn();
+    public static nint NumIn(this ref Uncommon_uᴛ1 target) => target.FuncType.NumIn();
     public static nint NumIn(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumIn();
     }
-    public static nint NumOut(this ref Uncommon_uᴛ1 target) => target.ΔFuncType.NumOut();
+    public static nint NumOut(this ref Uncommon_uᴛ1 target) => target.FuncType.NumOut();
     public static nint NumOut(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumOut();
     }
-    public static go.ж<go.@internal.abi_package.Type> Out(this ref Uncommon_uᴛ1 target, nint i) => target.ΔFuncType.Out(i);
+    public static go.ж<go.@internal.abi_package.Type> Out(this ref Uncommon_uᴛ1 target, nint i) => target.FuncType.Out(i);
     public static go.ж<go.@internal.abi_package.Type> Out(this ж<Uncommon_uᴛ1> Ꮡtarget, nint i)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Out(i);
     }
-    public static go.slice<go.ж<go.@internal.abi_package.Type>> InSlice(this ref Uncommon_uᴛ1 target) => target.ΔFuncType.InSlice();
+    public static go.slice<go.ж<go.@internal.abi_package.Type>> InSlice(this ref Uncommon_uᴛ1 target) => target.FuncType.InSlice();
     public static go.slice<go.ж<go.@internal.abi_package.Type>> InSlice(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.InSlice();
     }
-    public static go.slice<go.ж<go.@internal.abi_package.Type>> OutSlice(this ref Uncommon_uᴛ1 target) => target.ΔFuncType.OutSlice();
+    public static go.slice<go.ж<go.@internal.abi_package.Type>> OutSlice(this ref Uncommon_uᴛ1 target) => target.FuncType.OutSlice();
     public static go.slice<go.ж<go.@internal.abi_package.Type>> OutSlice(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.OutSlice();
     }
-    public static bool IsVariadic(this ref Uncommon_uᴛ1 target) => target.ΔFuncType.IsVariadic();
+    public static bool IsVariadic(this ref Uncommon_uᴛ1 target) => target.FuncType.IsVariadic();
     public static bool IsVariadic(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;

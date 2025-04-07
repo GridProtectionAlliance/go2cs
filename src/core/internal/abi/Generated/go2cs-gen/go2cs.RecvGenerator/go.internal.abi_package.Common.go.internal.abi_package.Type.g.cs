@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using go;
 
 #nullable enable
@@ -18,9 +19,14 @@ namespace go.@internal;
 
 public static partial class abi_package
 {
+    private static ThreadLocal<ж<go.@internal.abi_package.Type>>? Commonʗt;
+    private static ж<go.@internal.abi_package.Type> CommonꓸᏑt => Commonʗt?.Value ??
+        throw new NullReferenceException("Receiver target \"CommonꓸᏑt\" is not initialized");
+
     [GeneratedCode("go2cs-gen", "0.1.4")]
     internal static go.ж<go.@internal.abi_package.Type> Common(this ж<go.@internal.abi_package.Type> Ꮡt)
     {
+        Commonʗt = new ThreadLocal<ж<go.@internal.abi_package.Type>>(() => Ꮡt);
         ref var t = ref Ꮡt.val;
         return t.Common();
     }

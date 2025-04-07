@@ -19,7 +19,7 @@ partial class abi_package {
 // compile-time error.
 //
 // Implemented as a compile intrinsic.
-public static uintptr FuncPCABI0(any f);
+public static partial uintptr FuncPCABI0(any f);
 // FuncPCABIInternal returns the entry PC of the function f. If f is a
 // direct reference of a function, it must be defined as ABIInternal.
 // Otherwise it is a compile-time error. If f is not a direct reference
@@ -27,6 +27,6 @@ public static uintptr FuncPCABI0(any f);
 // the behavior is undefined.
 //
 // Implemented as a compile intrinsic.
-public static uintptr FuncPCABIInternal(any f);
+public static partial uintptr FuncPCABIInternal(any f);
 
 } // end abi_package

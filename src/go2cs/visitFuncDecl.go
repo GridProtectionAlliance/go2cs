@@ -7,13 +7,14 @@ import (
 	"strings"
 )
 
-const FunctionPrefixMarker = ">>MARKER:FUNCTION_%s_PREFIX<<"
-const FunctionAccessMarker = ">>MARKER:FUNCTION_%s_ACCESS<<"
-const FunctionUnsafeMarker = ">>MARKER:FUNCTION_%s_UNSAFE<<"
-const FunctionAttributeMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
-const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
-const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
-const FunctionBlockPrefixMarker = ">>MARKER:FUNCTION_%s_BLOCK_PREFIX<<"
+const FunctionPrefixMarker = ">>MARKER:FUNC_%s_PREFIX<<"
+const FunctionAccessMarker = ">>MARKER:FUNC_%s_ACCESS<<"
+const FunctionUnsafeMarker = ">>MARKER:FUNC_%s_UNSAFE<<"
+const FunctionPartialMarker = ">>MARKER:FUNC_%s_PARTIAL<<"
+const FunctionAttributeMarker = ">>MARKER:FUNC_%s_RECEIVER<<"
+const FunctionParametersMarker = ">>MARKER:FUNC_%s_PARAMETERS<<"
+const FunctionExecContextMarker = ">>MARKER:FUNC_%s_EXEC_CONTEXT<<"
+const FunctionBlockPrefixMarker = ">>MARKER:FUNC_%s_BLOCK_PREFIX<<"
 
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = true
@@ -93,6 +94,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
 	functionAccessMarker := fmt.Sprintf(FunctionAccessMarker, goFunctionName)
 	functionUnsafeMarker := fmt.Sprintf(FunctionUnsafeMarker, goFunctionName)
+	functionPartialMarker := fmt.Sprintf(FunctionPartialMarker, goFunctionName)
 	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
@@ -131,7 +133,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	blockContext.innerPrefix = functionBlockPrefixMarker
 	typeParams, constraints := v.getGenericDefinition(currentFuncType.Type())
 
-	v.writeOutput("%s%s static%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
+	v.writeOutput("%s%s static%s%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, functionPartialMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
@@ -305,6 +307,12 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		usesUnsafeCode = true
 	} else {
 		v.replaceMarker(functionUnsafeMarker, "")
+	}
+
+	if funcDecl.Body == nil {
+		v.replaceMarker(functionPartialMarker, " partial")
+	} else {
+		v.replaceMarker(functionPartialMarker, "")
 	}
 
 	v.replaceMarker(functionParametersMarker, parameterSignature)

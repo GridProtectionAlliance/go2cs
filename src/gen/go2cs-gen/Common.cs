@@ -91,7 +91,7 @@ public static class Common
         return typeName.Contains('<') && typeName.Contains('>');
     }
 
-    public static string GetSimpleName(string typeName, bool dropGeneric = false)
+    public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
         // Check if type name is a pointer, i.e., ж<T>
         int startIndex = typeName.IndexOf('ж');
@@ -115,6 +115,9 @@ public static class Common
             if (startIndex > 1 && typeName.EndsWith(">"))
                 simpleName = $"{simpleName[..startIndex]}";
         }
+
+        if (dropCollisionPrefix && simpleName.StartsWith("Δ"))
+            simpleName = simpleName[1..];
 
         return simpleName;
     }

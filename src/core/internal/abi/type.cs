@@ -194,18 +194,18 @@ public static ж<Type> TypeFor<T>()
     public uint32 _;  // unused
 }
 
-[GoRecv] internal static slice<Method> Methods(this ref UncommonType t) {
+[GoRecv] internal static unsafe slice<Method> Methods(this ref UncommonType t) {
     if (t.Mcount == 0) {
         return default!;
     }
-    return (ж<Method>)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)).slice(-1, t.Mcount, t.Mcount);
+    return new Span<Method>((Method*)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), t.Mcount);
 }
 
-[GoRecv] internal static slice<Method> ExportedMethods(this ref UncommonType t) {
+[GoRecv] internal static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
     if (t.Xcount == 0) {
         return default!;
     }
-    return (ж<Method>)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)).slice(-1, t.Xcount, t.Xcount);
+    return new Span<Method>((Method*)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), t.Xcount);
 }
 
 // addChecked returns p+x.
@@ -236,7 +236,7 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 // Len returns the length of t if t is an array type, otherwise 0
 [GoRecv] internal static nint Len(this ref Type t) {
     if (t.Kind() == Array) {
-        return ((nint)(ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t)).Len);
+        return ((nint)((ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Len);
     }
     return 0;
 }
@@ -320,31 +320,31 @@ public static readonly ΔChanDir InvalidDir = 0;
     }
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Struct) {
-        return Ꮡ((ж<structTypeUncommon>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<structTypeUncommon>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Pointer) {
-        return Ꮡ((ж<Uncommon_u>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_u>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Func) {
-        return Ꮡ((ж<Uncommon_uᴛ1>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ1>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Slice) {
-        return Ꮡ((ж<Uncommon_uᴛ2>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ2>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Array) {
-        return Ꮡ((ж<Uncommon_uᴛ3>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ3>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Chan) {
-        return Ꮡ((ж<Uncommon_uᴛ4>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ4>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Map) {
-        return Ꮡ((ж<Uncommon_uᴛ5>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ5>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Interface) {
-        return Ꮡ((ж<Uncommon_uᴛ6>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ6>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     { /* default: */
-        return Ꮡ((ж<Uncommon_uᴛ7>)((uintptr)@unsafe.Pointer.FromRef(ref t)).u);
+        return Ꮡ(((ж<Uncommon_uᴛ7>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
     }
 
 }
@@ -499,7 +499,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoRecv] internal static ж<Type> Key(this ref Type t) {
     if (t.Kind() == Map) {
-        return (ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t)).Key;
+        return ((ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Key;
     }
     return default!;
 }
@@ -542,27 +542,27 @@ public static readonly ΔChanDir InvalidDir = 0;
     return (t.OutSlice()[i]);
 }
 
-[GoRecv] internal static slice<ж<Type>> InSlice(this ref ΔFuncType t) {
-    var uadd = @unsafe.Sizeof(t.val);
+[GoRecv] internal static unsafe slice<ж<Type>> InSlice(this ref ΔFuncType t) {
+    var uadd = @unsafe.Sizeof(t);
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
     }
     if (t.InCount == 0) {
         return default!;
     }
-    return (ж<Type>)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)).slice(-1, t.InCount, t.InCount);
+    return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), t.InCount);
 }
 
-[GoRecv] internal static slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
+[GoRecv] internal static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
     var outCount = ((uint16)t.NumOut());
     if (outCount == 0) {
         return default!;
     }
-    var uadd = @unsafe.Sizeof(t.val);
+    var uadd = @unsafe.Sizeof(t);
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
     }
-    return (ж<Type>)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)).slice(t.InCount, t.InCount + outCount, t.InCount + outCount);
+    return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), t.InCount + outCount);
 }
 
 [GoRecv] internal static bool IsVariadic(this ref ΔFuncType t) {

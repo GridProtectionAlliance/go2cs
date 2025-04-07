@@ -20,6 +20,17 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string? m_receiverParamType;
     private string ReceiverParamType => m_receiverParamType ??= $"ж<{Method.Parameters.First().type}>";
 
+    public override string Generate()
+    {
+        const string ThreadingUsing = "using System.Threading;";
+
+        UsingStatements = UsingStatements is null ? 
+            [ThreadingUsing] : 
+            UsingStatements.Concat([ThreadingUsing]).ToArray();
+
+        return base.Generate();
+    }
+
     public override string TemplateBody =>
         $$"""
         {{CaptureDeclarations}}    [{{GeneratedCodeAttribute}}]

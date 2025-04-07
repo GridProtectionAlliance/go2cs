@@ -28,14 +28,14 @@ public static partial class abi_package
         public partial ref global::go.@internal.abi_package.ΔInterfaceType InterfaceType => ref ᏑʗInterfaceType.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@internal.abi_package.Type Type => ref ΔInterfaceType.Type;
-        public ref global::go.@internal.abi_package.ΔName PkgPath => ref ΔInterfaceType.PkgPath;
-        public ref global::go.slice<global::go.@internal.abi_package.Imethod> Methods => ref ΔInterfaceType.Methods;
+        public ref global::go.@internal.abi_package.Type Type => ref InterfaceType.Type;
+        public ref global::go.@internal.abi_package.ΔName PkgPath => ref InterfaceType.PkgPath;
+        public ref global::go.slice<global::go.@internal.abi_package.Imethod> Methods => ref InterfaceType.Methods;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ6 instance) => ref instance.ΔInterfaceType.Type;
-        public static ref global::go.@internal.abi_package.ΔName ᏑPkgPath(ref Uncommon_uᴛ6 instance) => ref instance.ΔInterfaceType.PkgPath;
-        public static ref global::go.slice<global::go.@internal.abi_package.Imethod> ᏑMethods(ref Uncommon_uᴛ6 instance) => ref instance.ΔInterfaceType.Methods;
+        public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ6 instance) => ref instance.InterfaceType.Type;
+        public static ref global::go.@internal.abi_package.ΔName ᏑPkgPath(ref Uncommon_uᴛ6 instance) => ref instance.InterfaceType.PkgPath;
+        public static ref global::go.slice<global::go.@internal.abi_package.Imethod> ᏑMethods(ref Uncommon_uᴛ6 instance) => ref instance.InterfaceType.Methods;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔInterfaceType ᏑInterfaceType(ref Uncommon_uᴛ6 instance) => ref instance.InterfaceType;
@@ -88,7 +88,7 @@ public static partial class abi_package
     }
 
     // Promoted Struct Receivers
-    public static nint NumMethod(this ref Uncommon_uᴛ6 target) => target.ΔInterfaceType.NumMethod();
+    public static nint NumMethod(this ref Uncommon_uᴛ6 target) => target.InterfaceType.NumMethod();
     public static nint NumMethod(this ж<Uncommon_uᴛ6> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
