@@ -165,23 +165,23 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					})
 				}
 
-				v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+				v.writeString(target, "public %s %s;", csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
 			} else {
 				var handled bool
 
 				if ptrType, ok := identType.(*types.Pointer); ok {
 					if _, ok = ptrType.Elem().(*types.Named); !ok {
-						v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+						v.writeString(target, "public %s %s;", csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
 						handled = true
 					}
 				} else if _, ok = identType.(*types.Struct); !ok {
-					v.writeString(target, "public %s %s;", csFullTypeName, getSanitizedIdentifier(goTypeName))
+					v.writeString(target, "public %s %s;", csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
 					handled = true
 				}
 
 				// Handle promoted struct implementations
 				if !handled {
-					v.writeString(target, "public partial ref %s %s { get; }", csFullTypeName, getSanitizedIdentifier(goTypeName))
+					v.writeString(target, "public partial ref %s %s { get; }", csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
 				}
 			}
 
@@ -189,7 +189,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			target.WriteString(v.newline)
 		} else {
 			for _, ident := range field.Names {
-				v.writeString(target, "public %s %s%s;", csFullTypeName, getSanitizedIdentifier(ident.Name), arrayInitializer)
+				v.writeString(target, "public %s %s%s;", csFullTypeName, getCoreSanitizedIdentifier(ident.Name), arrayInitializer)
 				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
 				target.WriteString(v.newline)
 			}
