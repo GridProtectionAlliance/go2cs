@@ -8,6 +8,7 @@ import (
 
 func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) string {
 	ident := getIdentifier(starExpr.X)
+	pointerRecv, recvName := v.isPointerReceiver()
 
 	if ident != nil && v.identIsParameter(ident) {
 		// Check if the star expression is a pointer to pointer dereference
@@ -65,6 +66,10 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	}
 
 	// Default behavior for other cases
+	if pointerRecv && ident != nil && recvName == ident.Name {
+		return v.convExpr(starExpr.X, nil)
+	}
+
 	return v.convExpr(starExpr.X, nil) + ".val"
 }
 
