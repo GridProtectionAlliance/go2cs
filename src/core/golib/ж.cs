@@ -57,7 +57,7 @@ public delegate ref TElem FieldRefFunc<T, TElem>(ref T structRef);
 /// Helper class for creating a <see cref="FieldRefFunc{TElem}"/> delegate for a struct field.
 /// </summary>
 /// <typeparam name="T">Type of struct.</typeparam>
-public static class FieldRef<T> where T : struct
+public static class FieldRef<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)] T> where T : struct
 {
     /// <summary>
     /// Creates a <see cref="FieldRefFunc{TElem}"/> delegate for a struct field.
@@ -68,7 +68,7 @@ public static class FieldRef<T> where T : struct
     /// <exception cref="InvalidOperationException">
     /// Field <paramref name="fieldName"/> not found in type <typeparamref name="T"/>.
     /// </exception>
-    public static FieldRefFunc<TElem> Create<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)] TElem>(string fieldName)
+    public static FieldRefFunc<TElem> Create<TElem>(string fieldName)
     {
         // Get the FieldInfo for fieldName in struct T referenced by ж<T>
         FieldInfo structField = typeof(T).GetField(fieldName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
@@ -96,6 +96,7 @@ public static class FieldRef<T> where T : struct
     }
 
     // Type of ж<T>
+    [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.NonPublicFields)]
     private static readonly Type s_ptrType = typeof(ж<T>);
 
     // FieldInfo for m_val in ж<T>
