@@ -37,6 +37,13 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if exprType := v.info.TypeOf(selectorExpr.X); exprType != nil {
 		// Check if there's an explicit dereference at any level in the expression
 		if containsExplicitDeref(selectorExpr.X) {
+			if callExpr, ok := selectorExpr.X.(*ast.CallExpr); ok {
+				// Check if the call expressions is a parenthesized expression
+				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
+					return fmt.Sprintf("(%s).val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+				}
+			}
+
 			return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
 		}
 
