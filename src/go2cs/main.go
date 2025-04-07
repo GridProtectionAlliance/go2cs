@@ -111,6 +111,7 @@ type Visitor struct {
 	hasDefer             bool
 	hasRecover           bool
 	captureReceiver      bool
+	useUnsafeFunc        bool
 	capturedVarCount     map[string]int
 	tempVarCount         map[string]int
 

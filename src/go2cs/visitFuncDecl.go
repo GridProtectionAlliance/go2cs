@@ -9,6 +9,7 @@ import (
 
 const FunctionPrefixMarker = ">>MARKER:FUNCTION_%s_PREFIX<<"
 const FunctionAccessMarker = ">>MARKER:FUNCTION_%s_ACCESS<<"
+const FunctionUnsafeMarker = ">>MARKER:FUNCTION_%s_UNSAFE<<"
 const FunctionAttributeMarker = ">>MARKER:FUNCTION_%s_RECEIVER<<"
 const FunctionParametersMarker = ">>MARKER:FUNCTION_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNCTION_%s_EXEC_CONTEXT<<"
@@ -19,6 +20,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.capturedVarCount = nil
 	v.tempVarCount = nil
 	v.captureReceiver = false
+	v.useUnsafeFunc = false
 
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
@@ -90,6 +92,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	functionPrefixMarker := fmt.Sprintf(FunctionPrefixMarker, goFunctionName)
 	functionAccessMarker := fmt.Sprintf(FunctionAccessMarker, goFunctionName)
+	functionUnsafeMarker := fmt.Sprintf(FunctionUnsafeMarker, goFunctionName)
 	functionAttributeMarker := fmt.Sprintf(FunctionAttributeMarker, goFunctionName)
 	functionParametersMarker := fmt.Sprintf(FunctionParametersMarker, goFunctionName)
 	functionExecContextMarker := fmt.Sprintf(FunctionExecContextMarker, goFunctionName)
@@ -128,7 +131,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	blockContext.innerPrefix = functionBlockPrefixMarker
 	typeParams, constraints := v.getGenericDefinition(currentFuncType.Type())
 
-	v.writeOutput("%s%s static %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
+	v.writeOutput("%s%s static%s %s %s%s(%s)%s%s", functionAttributeMarker, functionAccessMarker, functionUnsafeMarker, v.generateResultSignature(signature), csFunctionName, typeParams, functionParametersMarker, constraints, functionExecContextMarker)
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
@@ -296,6 +299,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	// Replace function markers
 	v.replaceMarker(functionAccessMarker, functionAccess)
+
+	if v.useUnsafeFunc {
+		v.replaceMarker(functionUnsafeMarker, " unsafe")
+		usesUnsafeCode = true
+	} else {
+		v.replaceMarker(functionUnsafeMarker, "")
+	}
+
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
 	if isModuleInitializer {

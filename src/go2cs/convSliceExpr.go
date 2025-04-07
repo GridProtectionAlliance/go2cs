@@ -4,10 +4,34 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"strings"
 )
 
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	ident := v.convExpr(sliceExpr.X, nil)
+
+	// When converting a pointer expression to a slice, we use special handling
+	if isMatch, ptrType := isPointerCast(ident); isMatch && v.inFunction && sliceExpr.High != nil {
+		v.useUnsafeFunc = true
+		prefixLength := len(ptrType) + 5
+
+		// Remove array type prefix from the pointer type, if present
+		if strings.HasPrefix(ptrType, "array<") {
+			ptrRunes := []rune(ptrType)
+			ptrType = string(ptrRunes[6 : len(ptrRunes)-1])
+		}
+
+		csPtrType := ptrType
+
+		for isMatch, ptrPtrType := isPointerExpr(ptrType); isMatch; {
+			csPtrType = ptrPtrType + "*"
+			prefixLength--
+			isMatch = false
+		}
+
+		identRunes := []rune(ident)
+		return fmt.Sprintf("new Span<%s>((%s*)%s, %s)", ptrType, csPtrType, string(identRunes[prefixLength:]), v.convExpr(sliceExpr.High, nil))
+	}
 
 	// sliceExpr[:] => sliceExpr[..]
 	if sliceExpr.Low == nil && sliceExpr.High == nil && !sliceExpr.Slice3 {
@@ -60,4 +84,45 @@ func isIntegerLiteral(expr ast.Expr) bool {
 	}
 
 	return false
+}
+
+func isPointerCast(expr string) (bool, string) {
+	if strings.HasPrefix(expr, "(") {
+		runes := []rune(expr)
+
+		if isMatch, ptrType := isPointerExpr(string(runes[1:])); isMatch {
+			return true, ptrType
+		}
+	}
+
+	return false, ""
+}
+
+func isPointerExpr(expr string) (bool, string) {
+	runes := []rune(expr)
+
+	// Check if it starts with the expected prefix
+	if len(runes) < 2 || string(runes[0:2]) != "ж<" {
+		return false, ""
+	}
+
+	// Initialize variables
+	bracketCount := 1 // We've already encountered one opening bracket
+	startPos := 2     // Start after "ж<"
+
+	// Scan through the runes to find the matching closing bracket
+	for i := startPos; i < len(runes); i++ {
+		if runes[i] == '<' {
+			bracketCount++
+		} else if runes[i] == '>' {
+			bracketCount--
+
+			if bracketCount == 0 {
+				// Found the closing bracket for our initial '<'
+				return true, string(runes[startPos:i])
+			}
+		}
+	}
+
+	return false, ""
 }

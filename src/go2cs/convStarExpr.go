@@ -37,14 +37,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 
 	// In a parenthesis, we are applying a pointer cast operation
 	if context.inParenExpr {
-		var starType types.Type
-
-		if ident := getIdentifier(starExpr.X); ident != nil {
-			starType = v.getType(ident, false)
-		} else {
-			starType = v.getType(starExpr.X, false)
-		}
-
+		starType := v.getType(starExpr.X, false)
 		pointerType := convertToCSTypeName(v.getTypeName(starType, false))
 		return fmt.Sprintf("%s<%s>", PointerPrefix, pointerType)
 	}
