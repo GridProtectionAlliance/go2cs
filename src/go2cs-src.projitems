@@ -23,6 +23,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIdent.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convIndexListExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\convInterfaceType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convKeyValueExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convMapType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convParenExpr.go" />
@@ -32,9 +33,13 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\convStructType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convTypeAssertExpr.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\convUnaryExpr.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\directiveOperations.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\escapeAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\go.mod" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\HashSet.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\nameCollisionAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\performEscapeAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\performVariableAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm.pubxml" />
@@ -50,6 +55,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\rsrc_windows_amd64.syso" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\Stack.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\ToDo.md" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\variableAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitArrayType.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitAssignStmt.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\visitBlockStmt.go" />
