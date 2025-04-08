@@ -1,6 +1,6 @@
-﻿This a slightly modified version of the Go `internal/abi` standard library package. Modifications are simply to make code compile and run in the pattern of other behavorial tests.
+﻿This is a slightly modified version of the Go `internal/abi` standard library package. Code modifications were made so that code compiles and runs in the pattern of other behavorial tests, e.g., changing pacakge name to 'main' and adding a main function for some simple test output.
 
-This package is included in the behavioral tests because it has many complex conversion needs that need regression testing, e.g.:
+This package is included in the behavioral tests because it has many complex conversion steps that need regression testing, e.g.:
 * Method and type name collisions, which are supported in Go, but not C#
 * Complex pointer conversion operations, including pointer to slice conversions
 * Extensive use of untyped integers and named types for arrays and integer types
