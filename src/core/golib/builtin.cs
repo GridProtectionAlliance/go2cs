@@ -797,6 +797,20 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets dereferenced value that <paramref name="source"/> points to.
+    /// </summary>
+    /// <typeparam name="T">Source type of reference.</typeparam>
+    /// <param name="source">Source pointer.</param>
+    /// <returns>Dereferenced value that <paramref name="source"/> points to.</returns>
+    /// <remarks>
+    /// This is equivalent to <c>~source</c> and <c>source.val</c>.
+    /// </remarks>
+    public static T ж<T>(in ж<T> source)
+    {
+        return source.val;
+    }
+
+    /// <summary>
     /// Gets a pointer to a new heap allocated copy of <paramref name="target"/> value.
     /// </summary>
     /// <typeparam name="T">Target type of reference.</typeparam>
