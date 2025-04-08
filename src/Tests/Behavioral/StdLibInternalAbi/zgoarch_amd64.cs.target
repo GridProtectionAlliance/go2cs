@@ -1,0 +1,55 @@
+namespace go;
+
+partial class main_package {
+
+public static readonly @string GOARCH = @"amd64"u8;
+
+public static readonly UntypedInt Is386 = 0;
+
+public static readonly UntypedInt IsAmd64 = 1;
+
+public static readonly UntypedInt IsAmd64p32 = 0;
+
+public static readonly UntypedInt IsArm = 0;
+
+public static readonly UntypedInt IsArmbe = 0;
+
+public static readonly UntypedInt IsArm64 = 0;
+
+public static readonly UntypedInt IsArm64be = 0;
+
+public static readonly UntypedInt IsLoong64 = 0;
+
+public static readonly UntypedInt IsMips = 0;
+
+public static readonly UntypedInt IsMipsle = 0;
+
+public static readonly UntypedInt IsMips64 = 0;
+
+public static readonly UntypedInt IsMips64le = 0;
+
+public static readonly UntypedInt IsMips64p32 = 0;
+
+public static readonly UntypedInt IsMips64p32le = 0;
+
+public static readonly UntypedInt IsPpc = 0;
+
+public static readonly UntypedInt IsPpc64 = 0;
+
+public static readonly UntypedInt IsPpc64le = 0;
+
+public static readonly UntypedInt IsRiscv = 0;
+
+public static readonly UntypedInt IsRiscv64 = 0;
+
+public static readonly UntypedInt IsS390 = 0;
+
+public static readonly UntypedInt IsS390x = 0;
+
+public static readonly UntypedInt IsSparc = 0;
+
+public static readonly UntypedInt IsSparc64 = 0;
+
+public static readonly UntypedInt IsWasm = 0;
+
+} // end main_package

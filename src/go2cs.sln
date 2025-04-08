@@ -182,6 +182,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IotaEnum", "Tests\Behaviora
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "internal.goarch", "core\internal\goarch\internal.goarch.csproj", "{14AEF7B0-B256-E8FB-3489-82D93CCBCD54}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StdLibInternalAbi", "Tests\Behavioral\StdLibInternalAbi\StdLibInternalAbi.csproj", "{9B234B42-FB10-A638-C17E-5F4A8CED1F56}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -488,6 +490,10 @@ Global
 		{14AEF7B0-B256-E8FB-3489-82D93CCBCD54}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14AEF7B0-B256-E8FB-3489-82D93CCBCD54}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{14AEF7B0-B256-E8FB-3489-82D93CCBCD54}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B234B42-FB10-A638-C17E-5F4A8CED1F56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B234B42-FB10-A638-C17E-5F4A8CED1F56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B234B42-FB10-A638-C17E-5F4A8CED1F56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B234B42-FB10-A638-C17E-5F4A8CED1F56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -572,6 +578,7 @@ Global
 		{1336F8BC-1486-E139-DE67-21DD796B33A4} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 		{04ECEC59-85A6-F919-3121-03030C17A727} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{14AEF7B0-B256-E8FB-3489-82D93CCBCD54} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
+		{9B234B42-FB10-A638-C17E-5F4A8CED1F56} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}
