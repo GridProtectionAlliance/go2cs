@@ -121,6 +121,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]

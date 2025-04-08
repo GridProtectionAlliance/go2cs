@@ -161,6 +161,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]
@@ -207,13 +210,18 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     private void CheckTarget(string targetProject)
     {
         string projPath = Path.GetFullPath($"{TestRootPath}{targetProject}");
-        string transpiledFile = $@"{projPath}\{targetProject}.cs";
-        
+
         // Transpile project, if needed
         TranspileProject(targetProject);
-        
-        string targetFile = $"{transpiledFile}.target";
-        Assert.IsTrue(FileMatch(transpiledFile, targetFile), $"Go source file converted to C# \"{transpiledFile}\" does not match target \"{targetFile}\"");
+
+        // Iterate over each .go file in project path
+        foreach (string goSrcFile in Directory.GetFiles(projPath, "*.go"))
+        {
+            string transpiledFile = $@"{projPath}\{Path.GetFileNameWithoutExtension(goSrcFile)}.cs";
+            string targetFile = $"{transpiledFile}.target";
+            
+            Assert.IsTrue(FileMatch(transpiledFile, targetFile), $"Go source file converted to C# \"{transpiledFile}\" does not match target \"{targetFile}\"");
+        }
     }
 
     private static bool FileMatch(string file1, string file2)

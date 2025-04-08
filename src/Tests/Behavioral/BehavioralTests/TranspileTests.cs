@@ -159,6 +159,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]
+    public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]

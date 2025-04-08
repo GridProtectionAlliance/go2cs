@@ -77,13 +77,18 @@ if (args.Length > 0 && args[0] == "--createTargetFiles")
     foreach (string targetTest in targetTests)
     {
         string projPath = Path.GetFullPath($"{RootPath}Tests\\Behavioral\\{targetTest}");
-        string transpiledFile = $@"{projPath}\{targetTest}.cs";
-        string targetFile = $"{transpiledFile}.target";
 
-        if (!File.Exists(transpiledFile))
-            Console.Error.WriteLine($"WARNING: Transpiled file \"{transpiledFile}\" does not exist -- skipping target file creation...");
-        else
-            File.Copy(transpiledFile, targetFile, true);
+        // Iterate over each .go file in project path
+        foreach (string goSrcFile in Directory.GetFiles(projPath, "*.go"))
+        {
+            string transpiledFile = $@"{projPath}\{Path.GetFileNameWithoutExtension(goSrcFile)}.cs";
+            string targetFile = $"{transpiledFile}.target";
+
+            if (!File.Exists(transpiledFile))
+                Console.Error.WriteLine($"WARNING: Transpiled file \"{transpiledFile}\" does not exist -- skipping target file creation...");
+            else
+                File.Copy(transpiledFile, targetFile, true);
+        }
     }
 }
 
