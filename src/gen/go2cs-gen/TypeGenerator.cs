@@ -184,17 +184,21 @@ public class TypeGenerator : ISourceGenerator
                         break;
                     
                     case StructDeclarationSyntax when typeDefinition.StartsWith("["): // array
-                        int bracketIndex = typeDefinition.IndexOf(']') + 1;
-                        typeName = typeDefinition[bracketIndex..].Trim();
+                        int sizeStart = typeDefinition.IndexOf('[') + 1;
+                        int sizeEnd = typeDefinition.IndexOf(']');
+                        string arraySize = typeDefinition[sizeStart..sizeEnd].Trim();
+                        typeName = typeDefinition[(sizeEnd + 1)..].Trim();
 
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             ObjectName = identifier,
+                            ReadOnlyValue = false,
                             Scope = scope,
                             TypeName = $"array<{typeName}>",
                             TargetTypeName = typeName,
+                            TargetTypeSize = arraySize,
                             TypeClass = "Array",
                             UsingStatements = usingStatements
                         }

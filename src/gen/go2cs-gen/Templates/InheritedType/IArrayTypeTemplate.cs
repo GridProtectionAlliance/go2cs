@@ -2,37 +2,37 @@
 
 internal static class IArrayTypeTemplate
 {
-    public static string Generate(string structName, string typeName, string targetTypeName) =>
+    public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize) =>
         $$"""
+                
+                private array<uint8> val => m_value ??= new array<uint8>(2);
         
-                public {{targetTypeName}}[] Source => m_value;
+                public {{targetTypeName}}[] Source => val;
                 
-                public nint Length => ((IArray)m_value).Length;
+                public nint Length => val.Length;
                 
-                Array IArray.Source => ((IArray)m_value).Source!;
+                Array IArray.Source => ((IArray)val).Source!;
                 
                 object? IArray.this[nint index]
                 {
-                    get => ((IArray)m_value)[index];
-                    set => ((IArray)m_value)[index] = value;
+                    get => ((IArray)val)[index];
+                    set => ((IArray)val)[index] = value;
                 }
                     
-                public ref {{targetTypeName}} this[nint index] => ref m_value[index];
+                public ref {{targetTypeName}} this[nint index] => ref val[index];
                 
                 public Span<{{targetTypeName}}> ꓸꓸꓸ => ToSpan();
                 
-                public Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
+                public Span<{{targetTypeName}}> ToSpan() => val.ToSpan();
                 
-                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => m_value.GetEnumerator();
+                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => val.GetEnumerator();
                 
-                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)val).GetEnumerator();
                 
-                public bool Equals(IArray<{{targetTypeName}}>? other) => m_value.Equals(other);
+                public bool Equals(IArray<{{targetTypeName}}>? other) => val.Equals(other);
                 
-                public object Clone() => ((ICloneable)m_value).Clone();
+                public object Clone() => ((ICloneable)val).Clone();
                 
-                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}(p1);
-        
-                public {{structName}}(nint length) => m_value = new {{typeName}}(length);        
+                public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;
 }
