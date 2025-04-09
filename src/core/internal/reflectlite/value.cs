@@ -121,13 +121,13 @@ internal static any packEface(Value v) {
             typedmemmove(t, c, ptr);
             ptr = c;
         }
-        (~e).Data = ptr;
+        e.val.Data = ptr;
         break;
     case {} when (flag)(v.flag & flagIndir) is != 0:
-        (~e).Data = ~(@unsafe.Pointer.val)(uintptr)(v.ptr);
+        e.val.Data = ~(@unsafe.Pointer.val)(uintptr)(v.ptr);
         break;
     default:
-        (~e).Data = v.ptr;
+        e.val.Data = v.ptr;
         break;
     }
 
@@ -138,7 +138,7 @@ internal static any packEface(Value v) {
     // to have any operation between the e.word and e.typ assignments
     // that would let the garbage collector observe the partially-built
     // interface value.
-    (~e).Type = t;
+    e.val.Type = t;
     return i;
 }
 

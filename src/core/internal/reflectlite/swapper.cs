@@ -55,7 +55,7 @@ public static Action<nint, nint> Swapper(any Δslice) {
         switch (size) {
         case 8:
             var @is = ~(ж<slice<int64>>)(uintptr)(v.ptr);
-            var isʗ1 = @is;
+            var isʗ1 = is;
             return (nint i, nint j) => {
                 (isʗ1[i], isʗ1[j]) = (isʗ1[j], isʗ1[i]);
             };

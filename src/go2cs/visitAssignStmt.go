@@ -174,6 +174,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			result.WriteRune('(')
 		}
 
+		lambdaContext := DefaultLambdaContext()
+		lambdaContext.isAssignment = true
+
 		for i, lhs := range lhsExprs {
 			if i > 0 {
 				result.WriteString(", ")
@@ -191,7 +194,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
-			lhsExpr := v.convExpr(lhs, []ExprContext{context})
+			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
 			leftExprs.Add(lhsExpr)
 
 			result.WriteString(lhsExpr)
@@ -218,9 +221,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			ident := getIdentifier(lhs)
-
-			lambdaContext := DefaultLambdaContext()
-			lambdaContext.isAssignment = true
 
 			if i > 0 {
 				result.WriteString(", ")

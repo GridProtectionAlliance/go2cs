@@ -33,7 +33,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
     ));
     foreach (var (_, err) in errs) {
         if (err != default!) {
-            (~e).errs = append((~e).errs, err);
+            e.val.errs = append((~e).errs, err);
         }
     }
     return ~e;
