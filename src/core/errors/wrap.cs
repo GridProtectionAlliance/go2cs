@@ -1,4 +1,3 @@
-/*
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -52,7 +51,7 @@ public static bool Is(error err, error target) {
 }
 
 [GoType] partial interface @is_type {
-    bool Is(error );
+    bool Is(error _);
 }
 
 [GoType] partial interface @is_typeᴛ1 {
@@ -130,7 +129,7 @@ public static bool As(error err, any target) {
 }
 
 [GoType] partial interface @as_type {
-    bool As(any );
+    bool As(any _);
 }
 
 [GoType] partial interface @as_typeᴛ1 {
@@ -178,4 +177,3 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
 internal static reflectlite.Type errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
-*/

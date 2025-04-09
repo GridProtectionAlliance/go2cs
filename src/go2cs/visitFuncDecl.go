@@ -425,7 +425,14 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			result.WriteString(v.getRefParamTypeName(param.Type()))
 			result.WriteRune(' ')
-			result.WriteString(getSanitizedIdentifier(param.Name()))
+
+			paramName := param.Name()
+
+			if paramName == "" {
+				paramName = "_"
+			}
+
+			result.WriteString(getSanitizedIdentifier(paramName))
 			continue
 		}
 
@@ -453,7 +460,14 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 		} else {
 			result.WriteString(v.getCSTypeName(param.Type()))
 			result.WriteRune(' ')
-			result.WriteString(getSanitizedIdentifier(param.Name()))
+
+			paramName := param.Name()
+
+			if paramName == "" {
+				paramName = "_"
+			}
+
+			result.WriteString(getSanitizedIdentifier(paramName))
 		}
 	}
 
