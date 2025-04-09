@@ -74,7 +74,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 			v.targetFile.WriteString(v.newline)
 
-			if !v.lastStatementWasReturn {
+			if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
 				v.writeOutputLn("break;")
 			}
 
@@ -111,7 +111,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 				v.targetFile.WriteString(v.newline)
 
-				if !v.lastStatementWasReturn {
+				if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
 					v.writeOutputLn("break;")
 				}
 

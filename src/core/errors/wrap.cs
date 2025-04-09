@@ -78,6 +78,7 @@ internal static bool @is(error err, error target, bool targetComparable) {
             if (err == default!) {
                 return false;
             }
+            break;
         case @is_typeᴛ2 x:
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (@is(errΔ1, target, targetComparable)) {
@@ -157,6 +158,7 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
             if (err == default!) {
                 return false;
             }
+            break;
         case @as_typeᴛ2 x:
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (errΔ1 == default!) {

@@ -121,6 +121,7 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.ReturnStmt:
 		v.visitReturnStmt(stmtType)
 		v.lastStatementWasReturn = true
+		v.lastReturnIndentLevel = v.indentLevel
 	case *ast.SelectStmt:
 		v.visitSelectStmt(stmtType)
 	case *ast.SendStmt:

@@ -221,7 +221,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 		v.targetFile.WriteString(v.newline)
 
-		if !v.lastStatementWasReturn {
+		if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
 			v.writeOutputLn("break;")
 		}
 

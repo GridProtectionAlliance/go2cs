@@ -119,6 +119,7 @@ type Visitor struct {
 	blocks                 Stack[*strings.Builder]
 	firstStatementIsReturn bool
 	lastStatementWasReturn bool
+	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
