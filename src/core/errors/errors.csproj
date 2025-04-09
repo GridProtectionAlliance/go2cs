@@ -23,6 +23,10 @@
     <OutDir>bin\$(Configuration)\$(TargetFramework)\</OutDir>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(USERPROFILE)'==''">
+    <USERPROFILE>$(HOME)</USERPROFILE>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(go2csPath)'==''">
     <go2csPath Condition="'$(Configuration)'!='Debug'">$(USERPROFILE)\go2cs\</go2csPath>
     <go2csPath Condition="'$(Configuration)'=='Debug'">$(SolutionDir)</go2csPath>
@@ -34,6 +38,7 @@
     <PublishTrimmed>True</PublishTrimmed>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- Setup packaging options for library projects -->
@@ -56,7 +61,6 @@
   <PropertyGroup>
     <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
     <CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
@@ -98,8 +102,8 @@
   </ItemGroup>
 
   <ItemGroup>
-	  <!-- TODO: Add references to required projects -->
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core\internal\reflectlite\internal.reflectlite.csproj" />
     <ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />
   </ItemGroup>
 

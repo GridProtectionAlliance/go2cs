@@ -20,7 +20,7 @@ partial class main_package {
     public partial ref ж<MyError> MyError { get; }
 }
 
-[GoRecv] internal static float64 Time(this ref MyCustomError myErr) {
+[GoRecv] public static float64 Time(this ref MyCustomError myErr) {
     return 0.0F;
 }
 

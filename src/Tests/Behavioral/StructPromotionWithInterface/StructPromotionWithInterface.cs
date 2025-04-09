@@ -24,7 +24,7 @@ partial class main_package {
 [GoType] partial struct MyAbser {
 }
 
-[GoRecv] internal static float64 Abs(this ref MyCustomError myErr) {
+[GoRecv] public static float64 Abs(this ref MyCustomError myErr) {
     return 0.0F;
 }
 

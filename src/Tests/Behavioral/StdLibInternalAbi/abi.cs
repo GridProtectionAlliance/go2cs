@@ -11,7 +11,7 @@ partial class main_package {
     public IntArgRegBitmap ReturnIsPtr;
 }
 
-[GoRecv] internal static void Dump(this ref RegArgs r) {
+[GoRecv] public static void Dump(this ref RegArgs r) {
     print("Ints:");
     foreach (var (_, x) in r.Ints) {
         print(" ", x);
@@ -29,7 +29,7 @@ partial class main_package {
     println();
 }
 
-[GoRecv] internal static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
+[GoRecv] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
     if (argSize > PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         panic("invalid argSize");
     }
@@ -43,11 +43,11 @@ partial class main_package {
 [GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap;
 
-[GoRecv] internal static void Set(this ref IntArgRegBitmap b, nint i) {
+[GoRecv] public static void Set(this ref IntArgRegBitmap b, nint i) {
     b[i / 8] |= (uint8)(((uint8)1) << (int)((i % 8)));
 }
 
-[GoRecv] internal static bool Get(this ref IntArgRegBitmap b, nint i) {
+[GoRecv] public static bool Get(this ref IntArgRegBitmap b, nint i) {
     return (uint8)(b[i / 8] & (((uint8)1) << (int)((i % 8)))) != 0;
 }
 

@@ -39,18 +39,8 @@ using static go.errors_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-//[assembly: GoImplement<(interface{As(any) bool}, bool), interface{As(any) bool}>]
-//[assembly: GoImplement<(interface{Is(error) bool}, bool), interface{Is(error) bool}>]
-//[assembly: GoImplement<(interface{Unwrap() error}, bool), interface{Unwrap() error}>]
-//[assembly: GoImplement<any, reflectlite_package.Type>]
-//[assembly: GoImplement<bool, error>]
-//[assembly: GoImplement<error, error>]
-//[assembly: GoImplement<error, reflectlite_package.Type>]
 [assembly: GoImplement<errorString, error>]
 [assembly: GoImplement<joinError, error>]
-//[assembly: GoImplement<reflectlite_package.Type, reflectlite_package.Type>]
-//[assembly: GoImplement<reflectlite_package.Value, reflectlite_package.Type>]
-//[assembly: GoImplement<slice<error>, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

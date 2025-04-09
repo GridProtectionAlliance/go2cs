@@ -41,7 +41,7 @@ internal static void Main() {
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
 }
 
-[GoRecv] internal static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
+[GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
     nint n = default!;
     error err = default!;
 

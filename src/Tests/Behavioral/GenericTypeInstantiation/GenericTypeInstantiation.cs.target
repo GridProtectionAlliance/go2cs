@@ -10,13 +10,13 @@ partial class main_package {
     public slice<T> elements;
 }
 
-[GoRecv] internal static void Push<T>(this ref Stack<T> s, T element)
+[GoRecv] public static void Push<T>(this ref Stack<T> s, T element)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     s.elements = append(s.elements, element);
 }
 
-[GoRecv] internal static (T, bool) Pop<T>(this ref Stack<T> s)
+[GoRecv] public static (T, bool) Pop<T>(this ref Stack<T> s)
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
     T zero = default!;

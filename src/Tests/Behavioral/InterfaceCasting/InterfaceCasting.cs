@@ -30,7 +30,7 @@ public static @string Speak(this Dog d) {
 [GoType] partial struct Cat {
 }
 
-[GoRecv] internal static @string Speak(this ref Cat c) {
+[GoRecv] public static @string Speak(this ref Cat c) {
     return "Meow!"u8;
 }
 

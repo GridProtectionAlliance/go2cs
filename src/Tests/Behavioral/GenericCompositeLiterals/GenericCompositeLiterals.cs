@@ -10,13 +10,13 @@ partial class main_package {
     public slice<T> items;
 }
 
-[GoRecv] internal static void Enqueue<T>(this ref Queue<T> q, T item)
+[GoRecv] public static void Enqueue<T>(this ref Queue<T> q, T item)
     where T : new()
 {
     q.items = append(q.items, item);
 }
 
-[GoRecv] internal static (T, bool) Dequeue<T>(this ref Queue<T> q)
+[GoRecv] public static (T, bool) Dequeue<T>(this ref Queue<T> q)
     where T : new()
 {
     T zero = default!;
@@ -28,7 +28,7 @@ partial class main_package {
     return (item, true);
 }
 
-[GoRecv] internal static nint Size<T>(this ref Queue<T> q)
+[GoRecv] public static nint Size<T>(this ref Queue<T> q)
     where T : new()
 {
     return len(q.items);

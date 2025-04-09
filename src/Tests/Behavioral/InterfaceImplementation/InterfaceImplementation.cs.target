@@ -54,19 +54,19 @@ public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {
     }
 }
 
-[GoRecv] internal static @string Type(this ref Frog f) {
+[GoRecv] public static @string Type(this ref Frog f) {
     return "Frog"u8;
 }
 
-[GoRecv] internal static @string Swim(this ref Frog f) {
+[GoRecv] public static @string Swim(this ref Frog f) {
     return "Kick"u8;
 }
 
-[GoRecv] internal static @string Swim(this ref Dog d) {
+[GoRecv] public static @string Swim(this ref Dog d) {
     return "Paddle"u8;
 }
 
-[GoRecv] internal static @string Type(this ref Dog d) {
+[GoRecv] public static @string Type(this ref Dog d) {
     return "Doggie"u8;
 }
 

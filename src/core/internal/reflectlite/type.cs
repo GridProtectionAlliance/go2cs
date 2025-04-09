@@ -4,7 +4,7 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime", "unsafe", and "internal/abi"
-global using Kind = go.abi_package.Kind;
+global using Kind = go.abi_package.ΔKind;
 global using nameOff = go.abi_package.NameOff;
 global using typeOff = go.abi_package.TypeOff;
 global using textOff = go.abi_package.TextOff;
@@ -17,7 +17,7 @@ global using ptrType = go.abi_package.PtrType;
 global using sliceType = go.abi_package.SliceType;
 global using structType = go.abi_package.StructType;
 
-namespace go;
+namespace go.@internal;
 
 using abi = @internal.abi_package;
 using @unsafe = unsafe_package;
@@ -35,39 +35,39 @@ partial class reflectlite_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-[GoType] partial interface Type {
+[GoType] partial interface ΔType {
 // Methods applicable to all types.
 
     // Name returns the type's name within its package for a defined type.
-// For other (non-defined) types it returns the empty string.
+    // For other (non-defined) types it returns the empty string.
     @string Name();
     // PkgPath returns a defined type's package path, that is, the import path
-// that uniquely identifies the package, such as "encoding/base64".
-// If the type was predeclared (string, error) or not defined (*T, struct{},
-// []int, or A where A is an alias for a non-defined type), the package path
-// will be the empty string.
+    // that uniquely identifies the package, such as "encoding/base64".
+    // If the type was predeclared (string, error) or not defined (*T, struct{},
+    // []int, or A where A is an alias for a non-defined type), the package path
+    // will be the empty string.
     @string PkgPath();
     // Size returns the number of bytes needed to store
-// a value of the given type; it is analogous to unsafe.Sizeof.
+    // a value of the given type; it is analogous to unsafe.Sizeof.
     uintptr Size();
     // Kind returns the specific kind of this type.
-    Kind Kind();
+    ΔKind Kind();
     // Implements reports whether the type implements the interface type u.
-    bool Implements(Type u);
+    bool Implements(ΔType u);
     // AssignableTo reports whether a value of the type is assignable to type u.
-    bool AssignableTo(Type u);
+    bool AssignableTo(ΔType u);
     // Comparable reports whether values of this type are comparable.
     bool Comparable();
     // String returns a string representation of the type.
-// The string representation may use shortened package names
-// (e.g., base64 instead of "encoding/base64") and is not
-// guaranteed to be unique among types. To test for type identity,
-// compare the Types directly.
+    // The string representation may use shortened package names
+    // (e.g., base64 instead of "encoding/base64") and is not
+    // guaranteed to be unique among types. To test for type identity,
+    // compare the Types directly.
     @string String();
     // Elem returns a type's element type.
-// It panics if the type's Kind is not Ptr.
-    Type Elem();
-    ж<abi.Type> common();
+    // It panics if the type's Kind is not Ptr.
+    ΔType Elem();
+    ж<abi.ΔType> common();
     ж<uncommonType> uncommon();
 }
 
@@ -76,11 +76,13 @@ partial class reflectlite_package {
  * A few are known to ../runtime/type.go to convey to debuggers.
  * They are also known to ../runtime/type.go.
  */
-public const abi.Kind Ptr = /* abi.Pointer */ 22;
-public const abi.Kind Interface = /* abi.Interface */ 20;
-public const abi.Kind Slice = /* abi.Slice */ 23;
-public const abi.Kind String = /* abi.String */ 24;
-public const abi.Kind Struct = /* abi.Struct */ 25;
+public static readonly abi.ΔKind Ptr = /* abi.Pointer */ 22;
+
+public static readonly abi.ΔKind Interface = /* abi.Interface */ 20;
+public static readonly abi.ΔKind Slice = /* abi.Slice */ 23;
+public static readonly abi.ΔKind ΔString = /* abi.String */ 24;
+public static readonly abi.ΔKind Struct = /* abi.Struct */ 25;
+
 [GoType] partial struct rtype {
 }
 
@@ -107,58 +109,58 @@ public const abi.Kind Struct = /* abi.Struct */ 25;
 //
 // If a name starts with "*", then the exported bit represents
 // whether the pointed to type is exported.
-[GoType] partial struct name {
+[GoType] partial struct Δname {
     public ж<byte> bytes;
 }
 
-internal static ж<byte> data(this name n, nint off, @string whySafe) {
-    return (ж<byte>)(add(new @unsafe.Pointer(n.bytes), ((uintptr)off), whySafe));
+internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
+    return (ж<byte>)((uintptr)add(new @unsafe.Pointer(n.bytes), ((uintptr)off), whySafe));
 }
 
-internal static bool isExported(this name n) {
-    return (n.bytes.val) & (1 << (int)(0)) != 0;
+internal static bool isExported(this Δname n) {
+    return (byte)((n.bytes.val) & (1 << (int)(0))) != 0;
 }
 
-internal static bool hasTag(this name n) {
-    return (n.bytes.val) & (1 << (int)(1)) != 0;
+internal static bool hasTag(this Δname n) {
+    return (byte)((n.bytes.val) & (1 << (int)(1))) != 0;
 }
 
-internal static bool embedded(this name n) {
-    return (n.bytes.val) & (1 << (int)(3)) != 0;
+internal static bool embedded(this Δname n) {
+    return (byte)((n.bytes.val) & (1 << (int)(3))) != 0;
 }
 
 // readVarint parses a varint as encoded by encoding/binary.
 // It returns the number of encoded bytes and the encoded value.
-internal static (nint, nint) readVarint(this name n, nint off) {
+internal static (nint, nint) readVarint(this Δname n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.data(off + i, "read varint"u8).val;
-        v += ((nint)(x & 127)) << (int)((7 * i));
-        if (x & 128 == 0) {
+        v += ((nint)((byte)(x & 127))) << (int)((7 * i));
+        if ((byte)(x & 128) == 0) {
             return (i + 1, v);
         }
     }
 }
 
-internal static @string name(this name n) {
-    if (n.bytes == default!) {
+internal static @string name(this Δname n) {
+    if (n.bytes == nil) {
         return ""u8;
     }
     var (i, l) = n.readVarint(1);
     return @unsafe.String(n.data(1 + i, "non-empty string"u8), l);
 }
 
-internal static @string tag(this name n) {
+internal static @string tag(this Δname n) {
     if (!n.hasTag()) {
         return ""u8;
     }
-    (i, l) = n.readVarint(1);
+    var (i, l) = n.readVarint(1);
     var (i2, l2) = n.readVarint(1 + i + l);
     return @unsafe.String(n.data(1 + i + l + i2, "non-empty string"u8), l2);
 }
 
 internal static @string pkgPath(abi.Name n) {
-    if (n.Bytes == default! || n.DataChecked(0, "name flag field"u8).val & (1 << (int)(2)) == 0) {
+    if (n.Bytes == nil || (byte)(n.DataChecked(0, "name flag field"u8).val & (1 << (int)(2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
@@ -170,8 +172,8 @@ internal static @string pkgPath(abi.Name n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((ж<byte>)(new @unsafe.Pointer(ᏑnameOff))[..], (ж<byte>)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
-    var pkgPathName = new name((ж<byte>)(resolveTypeOff(new @unsafe.Pointer(n.Bytes), nameOff)));
+    copy((ж<array<byte>>)(new @unsafe.Pointer(ᏑΔnameOff))[..], (ж<array<byte>>)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
+    var pkgPathName = new Δname((ж<byte>)((uintptr)resolveTypeOff(new @unsafe.Pointer(n.Bytes), ΔnameOff)));
     return pkgPathName.name();
 }
 
@@ -185,19 +187,19 @@ internal static @string pkgPath(abi.Name n) {
 // Implemented in the runtime package.
 //
 //go:noescape
-internal static @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off);
+internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off);
 // resolveTypeOff resolves an *rtype offset from a base type.
 // The (*rtype).typeOff method is a convenience wrapper for this function.
 // Implemented in the runtime package.
 //
 //go:noescape
-internal static @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
-internal static abi.Name nameOff(this rtype t, nameOff off) {
-    return new abi.Name(Bytes: (ж<byte>)(resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
+internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
+internal static abi.Name nameOff(this rtype t, ΔnameOff off) {
+    return new abi.Name(Bytes: (ж<byte>)((uintptr)resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
 }
 
-internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
-    return (abi.Type.val)(resolveTypeOff(new @unsafe.Pointer(t.Type), ((int32)off)));
+internal static ж<abi.ΔType> typeOff(this rtype t, ΔtypeOff off) {
+    return (abi.Type.val)((uintptr)resolveTypeOff(new @unsafe.Pointer(t.Type), ((int32)off)));
 }
 
 internal static ж<uncommonType> uncommon(this rtype t) {
@@ -206,19 +208,19 @@ internal static ж<uncommonType> uncommon(this rtype t) {
 
 internal static @string String(this rtype t) {
     @string s = t.nameOff(t.Str).Name();
-    if (t.TFlag & abi.TFlagExtraStar != 0) {
+    if ((abi.TFlag)(t.TFlag & abi.TFlagExtraStar) != 0) {
         return s[1..];
     }
     return s;
 }
 
-internal static ж<abi.Type> common(this rtype t) {
+internal static ж<abi.ΔType> common(this rtype t) {
     return t.Type;
 }
 
 internal static abi.Method exportedMethods(this rtype t) {
     var ut = t.uncommon();
-    if (ut == default!) {
+    if (ut == nil) {
         return default!;
     }
     return ut.ExportedMethods();
@@ -226,18 +228,18 @@ internal static abi.Method exportedMethods(this rtype t) {
 
 internal static nint NumMethod(this rtype t) {
     var tt = t.Type.InterfaceType();
-    if (tt != default!) {
+    if (tt != nil) {
         return tt.NumMethod();
     }
     return len(t.exportedMethods());
 }
 
 internal static @string PkgPath(this rtype t) {
-    if (t.TFlag & abi.TFlagNamed == 0) {
+    if ((abi.TFlag)(t.TFlag & abi.TFlagNamed) == 0) {
         return ""u8;
     }
     var ut = t.uncommon();
-    if (ut == default!) {
+    if (ut == nil) {
         return ""u8;
     }
     return t.nameOff((~ut).PkgPath).Name();
@@ -265,37 +267,37 @@ internal static @string Name(this rtype t) {
     return s[(int)(i + 1)..];
 }
 
-internal static rtype toRType(ж<abi.Type> Ꮡt) {
+internal static rtype toRType(ж<abi.ΔType> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
     return new rtype(t);
 }
 
-internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
+internal static ж<abi.ΔType> elem(ж<abi.ΔType> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
     var et = t.Elem();
-    if (et != default!) {
+    if (et != nil) {
         return et;
     }
     panic("reflect: Elem of invalid type "u8 + toRType(Ꮡt).String());
 }
 
-internal static Type Elem(this rtype t) {
+internal static ΔType Elem(this rtype t) {
     return toType(elem(t.common()));
 }
 
-internal static Type In(this rtype t, nint i) {
+internal static ΔType In(this rtype t, nint i) {
     var tt = t.Type.FuncType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: In of non-func type");
     }
     return toType(tt.InSlice()[i]);
 }
 
-internal static Type Key(this rtype t) {
+internal static ΔType Key(this rtype t) {
     var tt = t.Type.MapType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: Key of non-map type");
     }
     return toType((~tt).Key);
@@ -303,7 +305,7 @@ internal static Type Key(this rtype t) {
 
 internal static nint Len(this rtype t) {
     var tt = t.Type.ArrayType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: Len of non-array type");
     }
     return ((nint)(~tt).Len);
@@ -311,7 +313,7 @@ internal static nint Len(this rtype t) {
 
 internal static nint NumField(this rtype t) {
     var tt = t.Type.StructType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: NumField of non-struct type");
     }
     return len((~tt).Fields);
@@ -319,7 +321,7 @@ internal static nint NumField(this rtype t) {
 
 internal static nint NumIn(this rtype t) {
     var tt = t.Type.FuncType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: NumIn of non-func type");
     }
     return ((nint)(~tt).InCount);
@@ -327,15 +329,15 @@ internal static nint NumIn(this rtype t) {
 
 internal static nint NumOut(this rtype t) {
     var tt = t.Type.FuncType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: NumOut of non-func type");
     }
     return tt.NumOut();
 }
 
-internal static Type Out(this rtype t, nint i) {
+internal static ΔType Out(this rtype t, nint i) {
     var tt = t.Type.FuncType();
-    if (tt == default!) {
+    if (tt == nil) {
         panic("reflect: Out of non-func type");
     }
     return toType(tt.OutSlice()[i]);
@@ -354,11 +356,11 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySaf
 
 // TypeOf returns the reflection Type that represents the dynamic type of i.
 // If i is a nil interface value, TypeOf returns nil.
-public static Type TypeOf(any i) {
+public static ΔType TypeOf(any i) {
     return toType(abi.TypeOf(i));
 }
 
-internal static bool Implements(this rtype t, Type u) {
+internal static bool Implements(this rtype t, ΔType u) {
     if (u == default!) {
         panic("reflect: nil type passed to Type.Implements");
     }
@@ -368,7 +370,7 @@ internal static bool Implements(this rtype t, Type u) {
     return implements(u.common(), t.common());
 }
 
-internal static bool AssignableTo(this rtype t, Type u) {
+internal static bool AssignableTo(this rtype t, ΔType u) {
     if (u == default!) {
         panic("reflect: nil type passed to Type.AssignableTo");
     }
@@ -382,12 +384,12 @@ internal static bool Comparable(this rtype t) {
 }
 
 // implements reports whether the type V implements the interface type T.
-internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
+internal static bool implements(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
     var t = T.InterfaceType();
-    if (t == default!) {
+    if (t == nil) {
         return false;
     }
     if (len((~t).Methods) == 0) {
@@ -411,9 +413,9 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
         var vΔ1 = (ж<interfaceType>)(new @unsafe.Pointer(V));
         nint iΔ1 = 0;
         for (nint jΔ1 = 0; jΔ1 < len((~v).Methods); jΔ1++) {
-            var tm = Ꮡ((~t).Methods[iΔ1]);
+            var tm = Ꮡ((~t).Methods, iΔ1);
             var tmName = rT.nameOff((~tm).Name);
-            var vm = Ꮡ((~v).Methods[jΔ1]);
+            var vm = Ꮡ((~v).Methods, jΔ1);
             var vmName = rV.nameOff((~vm).Name);
             if (vmName.Name() == tmName.Name() && rV.typeOff((~vm).Typ) == rT.typeOff((~tm).Typ)) {
                 if (!tmName.IsExported()) {
@@ -439,13 +441,13 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
         return false;
     }
     var v = V.Uncommon();
-    if (v == default!) {
+    if (v == nil) {
         return false;
     }
     nint i = 0;
     var vmethods = v.Methods();
     for (nint j = 0; j < ((nint)(~v).Mcount); j++) {
-        var tm = Ꮡ((~t).Methods[i]);
+        var tm = Ꮡ((~t).Methods, i);
         var tmName = rT.nameOff((~tm).Name);
         var vm = vmethods[j];
         var vmName = rV.nameOff(vm.Name);
@@ -478,12 +480,12 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
 // https://golang.org/doc/go_spec.html#Assignability
 // Ignoring the interface rules (implemented elsewhere)
 // and the ideal constant rules (no ideal constants at run time).
-internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
+internal static bool directlyAssignable(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
     // x's type V is identical to T?
-    if (T == V) {
+    if (ᏑT == ᏑV) {
         return true;
     }
     // Otherwise at least one of T and V must not be defined
@@ -495,12 +497,12 @@ internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, true);
 }
 
-internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
+internal static bool haveIdenticalType(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV, bool cmpTags) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
     if (cmpTags) {
-        return T == V;
+        return ᏑT == ᏑV;
     }
     if (toRType(ᏑT).Name() != toRType(ᏑV).Name() || T.Kind() != V.Kind()) {
         return false;
@@ -508,11 +510,11 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, false);
 }
 
-internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
+internal static bool haveIdenticalUnderlyingType(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV, bool cmpTags) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
-    if (T == V) {
+    if (ᏑT == ᏑV) {
         return true;
     }
     var kind = T.Kind();
@@ -525,10 +527,11 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         return true;
     }
     // Composite types.
-    switch (kind) {
-    case abi.Array:
+    var exprᴛ1 = kind;
+    if (exprᴛ1 == abi.Array) {
         return T.Len() == V.Len() && haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
-    case abi.Chan:
+    }
+    if (exprᴛ1 == abi.Chan) {
         if (V.ChanDir() == abi.BothDir && haveIdenticalType(T.Elem(), // Special case:
  // x is a bidirectional channel value, T is a channel type,
  // and x's type V and T have identical element types.
@@ -537,41 +540,44 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         }
         return V.ChanDir() == T.ChanDir() && haveIdenticalType(T.Elem(), // Otherwise continue test for identical underlying type.
  V.Elem(), cmpTags);
-    case abi.Func:
+    }
+    if (exprᴛ1 == abi.Func) {
         var t = (ж<funcType>)(new @unsafe.Pointer(T));
         var v = (ж<funcType>)(new @unsafe.Pointer(V));
         if ((~t).OutCount != (~v).OutCount || (~t).InCount != (~v).InCount) {
             return false;
         }
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < t.NumIn(); i++) {
+        for (nint i = 0; i < t.NumIn(); i++) {
             if (!haveIdenticalType(t.In(i), v.In(i), cmpTags)) {
                 return false;
             }
         }
-        ref var i = ref heap<nint>(out var Ꮡi);
-        for (i = 0; i < t.NumOut(); i++) {
+        for (nint i = 0; i < t.NumOut(); i++) {
             if (!haveIdenticalType(t.Out(i), v.Out(i), cmpTags)) {
                 return false;
             }
         }
         return true;
-    case Interface:
-        t = (ж<interfaceType>)(new @unsafe.Pointer(T));
-        v = (ж<interfaceType>)(new @unsafe.Pointer(V));
+    }
+    if (exprᴛ1 == Interface) {
+        var t = (ж<interfaceType>)(new @unsafe.Pointer(T));
+        var v = (ж<interfaceType>)(new @unsafe.Pointer(V));
         if (len((~t).Methods) == 0 && len((~v).Methods) == 0) {
             return true;
         }
         return false;
-    case abi.Map:
+    }
+    if (exprᴛ1 == abi.Map) {
         return haveIdenticalType(T.Key(), // Might have the same methods but still
  // need a run time conversion.
  V.Key(), cmpTags) && haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
-    case Ptr or abi.Slice:
+    }
+    if (exprᴛ1 == Ptr || exprᴛ1 == abi.Slice) {
         return haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
-    case abi.Struct:
-        t = (ж<structType>)(new @unsafe.Pointer(T));
-        v = (ж<structType>)(new @unsafe.Pointer(V));
+    }
+    if (exprᴛ1 == abi.Struct) {
+        var t = (ж<structType>)(new @unsafe.Pointer(T));
+        var v = (ж<structType>)(new @unsafe.Pointer(V));
         if (len((~t).Fields) != len((~v).Fields)) {
             return false;
         }
@@ -579,8 +585,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
             return false;
         }
         foreach (var (i, _) in (~t).Fields) {
-            var tf = Ꮡ((~t).Fields[i]);
-            var vf = Ꮡ((~v).Fields[i]);
+            var tf = Ꮡ((~t).Fields, i);
+            var vf = Ꮡ((~v).Fields, i);
             if ((~tf).Name.Name() != (~vf).Name.Name()) {
                 return false;
             }
@@ -608,10 +614,10 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
 // a nil *rtype must be replaced by a nil Type, but in gccgo this
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
-internal static Type toType(ж<abi.Type> Ꮡt) {
+internal static ΔType toType(ж<abi.ΔType> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
-    if (t == default!) {
+    if (t == nil) {
         return default!;
     }
     return toRType(Ꮡt);

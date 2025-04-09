@@ -14,7 +14,7 @@
 // </ImportedTypeAliases>
 
 using go;
-using static go.reflectlite_package;
+using static go.@internal.reflectlite_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -28,7 +28,9 @@ using static go.reflectlite_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Kind", "go.abi_package.Kind")]
+[assembly: GoTypeAlias("Kind", "go.abi_package.ΔKind")]
+[assembly: GoTypeAlias("String", "ΔString")]
+[assembly: GoTypeAlias("Type", "ΔType")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -40,13 +42,13 @@ using static go.reflectlite_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rtype, Type>]
+[assembly: GoImplement<rtype, ΔType>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
 // </ImplicitConversions>
 
-namespace go;
+namespace go.@internal;
 
 [GoPackage("reflectlite")]
 public static partial class reflectlite_package

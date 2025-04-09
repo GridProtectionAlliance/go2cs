@@ -131,15 +131,15 @@ public static ж<Type> TypeFor<T>()
     return TypeOf((ж<T>)(default!)).Elem();
 }
 
-[GoRecv] internal static ΔKind Kind(this ref Type t) {
+[GoRecv] public static ΔKind Kind(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindMask);
 }
 
-[GoRecv] internal static bool HasName(this ref Type t) {
+[GoRecv] public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-[GoRecv] internal static ж<Type> Elem(this ref Type t) {
+[GoRecv] public static ж<Type> Elem(this ref Type t) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
@@ -165,7 +165,7 @@ public static ж<Type> TypeFor<T>()
     public uint32 Flags;
 }
 
-[GoRecv] internal static ж<ΔMapType> MapType(this ref Type t) {
+[GoRecv] public static ж<ΔMapType> MapType(this ref Type t) {
     if (t.Kind() != Map) {
         return default!;
     }
@@ -179,7 +179,7 @@ public static ж<Type> TypeFor<T>()
     public uintptr Len;
 }
 
-[GoRecv] internal static ж<ΔArrayType> ArrayType(this ref Type t) {
+[GoRecv] public static ж<ΔArrayType> ArrayType(this ref Type t) {
     if (t.Kind() != Array) {
         return default!;
     }

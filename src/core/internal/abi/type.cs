@@ -147,30 +147,30 @@ public static ж<Type> TypeFor<T>()
 }
 
 // only for an interface kind
-[GoRecv] internal static ΔKind Kind(this ref Type t) {
+[GoRecv] public static ΔKind Kind(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindMask);
 }
 
-[GoRecv] internal static bool HasName(this ref Type t) {
+[GoRecv] public static bool HasName(this ref Type t) {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
 // Pointers reports whether t contains pointers.
-[GoRecv] internal static bool Pointers(this ref Type t) {
+[GoRecv] public static bool Pointers(this ref Type t) {
     return t.PtrBytes != 0;
 }
 
 // IfaceIndir reports whether t is stored indirectly in an interface value.
-[GoRecv] internal static bool IfaceIndir(this ref Type t) {
+[GoRecv] public static bool IfaceIndir(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) == 0;
 }
 
 // isDirectIface reports whether t is stored directly in an interface value.
-[GoRecv] internal static bool IsDirectIface(this ref Type t) {
+[GoRecv] public static bool IsDirectIface(this ref Type t) {
     return (ΔKind)(t.Kind_ & KindDirectIface) != 0;
 }
 
-[GoRecv] internal static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
+[GoRecv] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
     return @unsafe.Slice(t.GCData, ((nint)end))[(int)(begin)..];
 }
 
@@ -194,14 +194,14 @@ public static ж<Type> TypeFor<T>()
     public uint32 _;  // unused
 }
 
-[GoRecv] internal static unsafe slice<Method> Methods(this ref UncommonType t) {
+[GoRecv] public static unsafe slice<Method> Methods(this ref UncommonType t) {
     if (t.Mcount == 0) {
         return default!;
     }
     return new Span<Method>((Method*)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), t.Mcount);
 }
 
-[GoRecv] internal static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
+[GoRecv] public static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
     if (t.Xcount == 0) {
         return default!;
     }
@@ -234,14 +234,14 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 }
 
 // Len returns the length of t if t is an array type, otherwise 0
-[GoRecv] internal static nint Len(this ref Type t) {
+[GoRecv] public static nint Len(this ref Type t) {
     if (t.Kind() == Array) {
         return ((nint)((ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Len);
     }
     return 0;
 }
 
-[GoRecv("capture")] internal static ж<Type> Common(this ref Type t) {
+[GoRecv("capture")] public static ж<Type> Common(this ref Type t) {
     return CommonꓸᏑt;
 }
 
@@ -265,7 +265,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // ChanDir returns the direction of t if t is a channel type, otherwise InvalidDir (0).
-[GoRecv] internal static ΔChanDir ChanDir(this ref Type t) {
+[GoRecv] public static ΔChanDir ChanDir(this ref Type t) {
     if (t.Kind() == Chan) {
         var ch = (ж<ChanType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
         return (~ch).Dir;
@@ -314,7 +314,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil
-[GoRecv] internal static ж<UncommonType> Uncommon(this ref Type t) {
+[GoRecv] public static ж<UncommonType> Uncommon(this ref Type t) {
     if ((TFlag)(t.TFlag & TFlagUncommon) == 0) {
         return default!;
     }
@@ -350,7 +350,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // Elem returns the element type for t if t is an array, channel, map, pointer, or slice, otherwise nil.
-[GoRecv] internal static ж<Type> Elem(this ref Type t) {
+[GoRecv] public static ж<Type> Elem(this ref Type t) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
@@ -377,7 +377,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // StructType returns t cast to a *StructType, or nil if its tag does not match.
-[GoRecv] internal static ж<ΔStructType> StructType(this ref Type t) {
+[GoRecv] public static ж<ΔStructType> StructType(this ref Type t) {
     if (t.Kind() != Struct) {
         return default!;
     }
@@ -385,7 +385,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // MapType returns t cast to a *MapType, or nil if its tag does not match.
-[GoRecv] internal static ж<ΔMapType> MapType(this ref Type t) {
+[GoRecv] public static ж<ΔMapType> MapType(this ref Type t) {
     if (t.Kind() != Map) {
         return default!;
     }
@@ -393,7 +393,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // ArrayType returns t cast to a *ArrayType, or nil if its tag does not match.
-[GoRecv] internal static ж<ΔArrayType> ArrayType(this ref Type t) {
+[GoRecv] public static ж<ΔArrayType> ArrayType(this ref Type t) {
     if (t.Kind() != Array) {
         return default!;
     }
@@ -401,7 +401,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // FuncType returns t cast to a *FuncType, or nil if its tag does not match.
-[GoRecv] internal static ж<ΔFuncType> FuncType(this ref Type t) {
+[GoRecv] public static ж<ΔFuncType> FuncType(this ref Type t) {
     if (t.Kind() != Func) {
         return default!;
     }
@@ -409,7 +409,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // InterfaceType returns t cast to a *InterfaceType, or nil if its tag does not match.
-[GoRecv] internal static ж<ΔInterfaceType> InterfaceType(this ref Type t) {
+[GoRecv] public static ж<ΔInterfaceType> InterfaceType(this ref Type t) {
     if (t.Kind() != Interface) {
         return default!;
     }
@@ -417,16 +417,16 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // Size returns the size of data with type t.
-[GoRecv] internal static uintptr Size(this ref Type t) {
+[GoRecv] public static uintptr Size(this ref Type t) {
     return t.Size_;
 }
 
 // Align returns the alignment of data with type t.
-[GoRecv] internal static nint Align(this ref Type t) {
+[GoRecv] public static nint Align(this ref Type t) {
     return ((nint)t.Align_);
 }
 
-[GoRecv] internal static nint FieldAlign(this ref Type t) {
+[GoRecv] public static nint FieldAlign(this ref Type t) {
     return ((nint)t.FieldAlign_);
 }
 
@@ -436,7 +436,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     public slice<Imethod> Methods; // sorted by hash
 }
 
-[GoRecv] internal static slice<Method> ExportedMethods(this ref Type t) {
+[GoRecv] public static slice<Method> ExportedMethods(this ref Type t) {
     var ut = t.Uncommon();
     if (ut == nil) {
         return default!;
@@ -444,7 +444,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     return ut.ExportedMethods();
 }
 
-[GoRecv] internal static nint NumMethod(this ref Type t) {
+[GoRecv] public static nint NumMethod(this ref Type t) {
     if (t.Kind() == Interface) {
         var tt = (ж<ΔInterfaceType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
         return tt.NumMethod();
@@ -453,7 +453,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 // NumMethod returns the number of interface methods in the type's method set.
-[GoRecv] internal static nint NumMethod(this ref ΔInterfaceType t) {
+[GoRecv] public static nint NumMethod(this ref ΔInterfaceType t) {
     return len(t.Methods);
 }
 
@@ -472,32 +472,32 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 // Note: flag values must match those used in the TMAP case
 // in ../cmd/compile/internal/reflectdata/reflect.go:writeType.
-[GoRecv] internal static bool IndirectKey(this ref ΔMapType mt) {
+[GoRecv] public static bool IndirectKey(this ref ΔMapType mt) {
     // store ptr to key instead of key itself
     return (uint32)(mt.Flags & 1) != 0;
 }
 
-[GoRecv] internal static bool IndirectElem(this ref ΔMapType mt) {
+[GoRecv] public static bool IndirectElem(this ref ΔMapType mt) {
     // store ptr to elem instead of elem itself
     return (uint32)(mt.Flags & 2) != 0;
 }
 
-[GoRecv] internal static bool ReflexiveKey(this ref ΔMapType mt) {
+[GoRecv] public static bool ReflexiveKey(this ref ΔMapType mt) {
     // true if k==k for all keys
     return (uint32)(mt.Flags & 4) != 0;
 }
 
-[GoRecv] internal static bool NeedKeyUpdate(this ref ΔMapType mt) {
+[GoRecv] public static bool NeedKeyUpdate(this ref ΔMapType mt) {
     // true if we need to update key on an overwrite
     return (uint32)(mt.Flags & 8) != 0;
 }
 
-[GoRecv] internal static bool HashMightPanic(this ref ΔMapType mt) {
+[GoRecv] public static bool HashMightPanic(this ref ΔMapType mt) {
     // true if hash function might panic
     return (uint32)(mt.Flags & 16) != 0;
 }
 
-[GoRecv] internal static ж<Type> Key(this ref Type t) {
+[GoRecv] public static ж<Type> Key(this ref Type t) {
     if (t.Kind() == Map) {
         return ((ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Key;
     }
@@ -526,23 +526,23 @@ public static readonly ΔChanDir InvalidDir = 0;
     public uint16 OutCount; // top bit is set if last input parameter is ...
 }
 
-[GoRecv] internal static ж<Type> In(this ref ΔFuncType t, nint i) {
+[GoRecv] public static ж<Type> In(this ref ΔFuncType t, nint i) {
     return t.InSlice()[i];
 }
 
-[GoRecv] internal static nint NumIn(this ref ΔFuncType t) {
+[GoRecv] public static nint NumIn(this ref ΔFuncType t) {
     return ((nint)t.InCount);
 }
 
-[GoRecv] internal static nint NumOut(this ref ΔFuncType t) {
+[GoRecv] public static nint NumOut(this ref ΔFuncType t) {
     return ((nint)((uint16)(t.OutCount & (1 << (int)(15) - 1))));
 }
 
-[GoRecv] internal static ж<Type> Out(this ref ΔFuncType t, nint i) {
+[GoRecv] public static ж<Type> Out(this ref ΔFuncType t, nint i) {
     return (t.OutSlice()[i]);
 }
 
-[GoRecv] internal static unsafe slice<ж<Type>> InSlice(this ref ΔFuncType t) {
+[GoRecv] public static unsafe slice<ж<Type>> InSlice(this ref ΔFuncType t) {
     var uadd = @unsafe.Sizeof(t);
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
@@ -553,7 +553,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), t.InCount);
 }
 
-[GoRecv] internal static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
+[GoRecv] public static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
     var outCount = ((uint16)t.NumOut());
     if (outCount == 0) {
         return default!;
@@ -565,7 +565,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), t.InCount + outCount);
 }
 
-[GoRecv] internal static bool IsVariadic(this ref ΔFuncType t) {
+[GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
     return (uint16)(t.OutCount & (1 << (int)(15))) != 0;
 }
 
@@ -580,7 +580,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     public uintptr Offset; // byte offset of field
 }
 
-[GoRecv] internal static bool Embedded(this ref StructField f) {
+[GoRecv] public static bool Embedded(this ref StructField f) {
     return f.Name.IsEmbedded();
 }
 

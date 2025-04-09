@@ -22,41 +22,41 @@ public static partial class abi_package
     public partial struct IntArgRegBitmap : IArray<uint8>, ISupportMake<IntArgRegBitmap>
     {
         // Value of the struct 'IntArgRegBitmap'
-        private readonly array<uint8> m_value;
+        private array<uint8>? m_value;
+                
+        private array<uint8> val => m_value ??= new array<uint8>(2);
+
+        public uint8[] Source => val;
         
-        public uint8[] Source => m_value;
+        public nint Length => val.Length;
         
-        public nint Length => ((IArray)m_value).Length;
-        
-        Array IArray.Source => ((IArray)m_value).Source!;
+        Array IArray.Source => ((IArray)val).Source!;
         
         object? IArray.this[nint index]
         {
-            get => ((IArray)m_value)[index];
-            set => ((IArray)m_value)[index] = value;
+            get => ((IArray)val)[index];
+            set => ((IArray)val)[index] = value;
         }
             
-        public ref uint8 this[nint index] => ref m_value[index];
+        public ref uint8 this[nint index] => ref val[index];
         
         public Span<uint8> ꓸꓸꓸ => ToSpan();
         
-        public Span<uint8> ToSpan() => m_value.ToSpan();
+        public Span<uint8> ToSpan() => val.ToSpan();
         
-        public IEnumerator<(nint, uint8)> GetEnumerator() => m_value.GetEnumerator();
+        public IEnumerator<(nint, uint8)> GetEnumerator() => val.GetEnumerator();
         
-        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)m_value).GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)val).GetEnumerator();
         
-        public bool Equals(IArray<uint8>? other) => m_value.Equals(other);
+        public bool Equals(IArray<uint8>? other) => val.Equals(other);
         
-        public object Clone() => ((ICloneable)m_value).Clone();
+        public object Clone() => ((ICloneable)val).Clone();
         
-        public static IntArgRegBitmap Make(nint p1 = 0, nint p2 = -1) => new IntArgRegBitmap(p1);
-
-        public IntArgRegBitmap(nint length) => m_value = new array<uint8>(length);        
+        public static IntArgRegBitmap Make(nint p1 = 0, nint p2 = -1) => new IntArgRegBitmap();
         
         public IntArgRegBitmap(array<uint8> value) => m_value = value;
 
-        public override string ToString() => m_value.ToString();
+        public override string ToString() => val.ToString();
 
         public static bool operator ==(IntArgRegBitmap left, IntArgRegBitmap right) => left.Equals(right);
 
@@ -65,7 +65,7 @@ public static partial class abi_package
         // Handle implicit conversions between 'array<uint8>' and struct 'IntArgRegBitmap'
         public static implicit operator IntArgRegBitmap(array<uint8> value) => new IntArgRegBitmap(value);
             
-        public static implicit operator array<uint8>(IntArgRegBitmap value) => value.m_value;
+        public static implicit operator array<uint8>(IntArgRegBitmap value) => value.val;
             
         // Handle comparisons between 'nil' and struct 'IntArgRegBitmap'
         public static bool operator ==(IntArgRegBitmap value, NilType nil) => value.Equals(default(IntArgRegBitmap));

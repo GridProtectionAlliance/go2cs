@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net9.0</TargetFramework>
-    <RootNamespace>go</RootNamespace>
+    <RootNamespace>go.@internal</RootNamespace>
     <AssemblyName>internal.reflectlite</AssemblyName>
     <Product>go2cs</Product>
     <Version>0.1.4</Version>

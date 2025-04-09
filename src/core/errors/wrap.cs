@@ -1,18 +1,13 @@
-/*
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 namespace go;
-
+/*
 using reflectlite = @internal.reflectlite_package;
 
 partial class errors_package {
 
 [GoType] partial interface Unwrap_type {
-    error Unwrap();
-}
-
-[GoType] partial interface Unwrap_typeᴛ1 {
     error Unwrap();
 }
 
@@ -23,8 +18,7 @@ partial class errors_package {
 // Unwrap only calls a method of the form "Unwrap() error".
 // In particular Unwrap does not unwrap errors returned by [Join].
 public static error Unwrap(error err) {
-    var u = err._<Unwrap_type>(ᐧ);
-    var ok = err._<Unwrap_typeᴛ1>(ᐧ);
+    var (u, ok) = err._<Unwrap_type>(ᐧ);
     if (!ok) {
         return default!;
     }
@@ -61,22 +55,10 @@ public static bool Is(error err, error target) {
 }
 
 [GoType] partial interface @is_typeᴛ1 {
-    bool Is(error );
+    error Unwrap();
 }
 
 [GoType] partial interface @is_typeᴛ2 {
-    error Unwrap();
-}
-
-[GoType] partial interface @is_typeᴛ3 {
-    error Unwrap();
-}
-
-[GoType] partial interface @is_typeᴛ4 {
-    slice<error> Unwrap();
-}
-
-[GoType] partial interface @is_typeᴛ5 {
     slice<error> Unwrap();
 }
 
@@ -86,18 +68,17 @@ internal static bool @is(error err, error target, bool targetComparable) {
             return true;
         }
         {
-            var x = err._<@is_type>(ᐧ);
-            var ok = err._<@is_typeᴛ1>(ᐧ); if (ok && x.Is(target)) {
+            var (x, ok) = err._<@is_type>(ᐧ); if (ok && x.Is(target)) {
                 return true;
             }
         }
         switch (err.type()) {
-        case @is_typeᴛ3 x:
+        case @is_typeᴛ1 x:
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
-        case @is_typeᴛ5 x:
+        case @is_typeᴛ2 x:
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (@is(errΔ1, target, targetComparable)) {
                     return true;
@@ -152,44 +133,31 @@ public static bool As(error err, any target) {
 }
 
 [GoType] partial interface @as_typeᴛ1 {
-    bool As(any );
+    error Unwrap();
 }
 
 [GoType] partial interface @as_typeᴛ2 {
-    error Unwrap();
-}
-
-[GoType] partial interface @as_typeᴛ3 {
-    error Unwrap();
-}
-
-[GoType] partial interface @as_typeᴛ4 {
     slice<error> Unwrap();
 }
 
-[GoType] partial interface @as_typeᴛ5 {
-    slice<error> Unwrap();
-}
-
-internal static bool @as(error err, any target, @internal.reflectlite.Value targetVal, @internal.reflectlite.Type targetType) {
+internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectlite.Type targetType) {
     while (ᐧ) {
         if (reflectlite.TypeOf(err).AssignableTo(targetType)) {
             targetVal.Elem().Set(reflectlite.ValueOf(err));
             return true;
         }
         {
-            var x = err._<@as_type>(ᐧ);
-            var ok = err._<@as_typeᴛ1>(ᐧ); if (ok && x.As(target)) {
+            var (x, ok) = err._<@as_type>(ᐧ); if (ok && x.As(target)) {
                 return true;
             }
         }
         switch (err.type()) {
-        case @as_typeᴛ3 x:
+        case @as_typeᴛ1 x:
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
-        case @as_typeᴛ5 x:
+        case @as_typeᴛ2 x:
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (errΔ1 == default!) {
                     continue;
@@ -206,7 +174,7 @@ internal static bool @as(error err, any target, @internal.reflectlite.Value targ
     }
 }
 
-internal static @internal.reflectlite.Type errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
+internal static reflectlite.Type errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
 */

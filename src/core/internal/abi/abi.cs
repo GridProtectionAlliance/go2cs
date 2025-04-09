@@ -41,7 +41,7 @@ partial class abi_package {
     public IntArgRegBitmap ReturnIsPtr;
 }
 
-[GoRecv] internal static void Dump(this ref RegArgs r) {
+[GoRecv] public static void Dump(this ref RegArgs r) {
     print("Ints:");
     foreach (var (_, x) in r.Ints) {
         print(" ", x);
@@ -68,7 +68,7 @@ partial class abi_package {
 // architectures, since sub-word-sized arguments in big endian architectures
 // need to be "aligned" to the upper edge of the register to be interpreted
 // by the CPU correctly.
-[GoRecv] internal static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
+[GoRecv] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
     if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         panic("invalid argSize");
     }
@@ -83,7 +83,7 @@ partial class abi_package {
 partial struct IntArgRegBitmap;
 
 // Set sets the i'th bit of the bitmap to 1.
-[GoRecv] internal static void Set(this ref IntArgRegBitmap b, nint i) {
+[GoRecv] public static void Set(this ref IntArgRegBitmap b, nint i) {
     b[i / 8] |= (uint8)(((uint8)1) << (int)((i % 8)));
 }
 
@@ -93,7 +93,7 @@ partial struct IntArgRegBitmap;
 // on the reflectcall return path.
 //
 //go:nosplit
-[GoRecv] internal static bool Get(this ref IntArgRegBitmap b, nint i) {
+[GoRecv] public static bool Get(this ref IntArgRegBitmap b, nint i) {
     return (uint8)(b[i / 8] & (((uint8)1) << (int)((i % 8)))) != 0;
 }
 

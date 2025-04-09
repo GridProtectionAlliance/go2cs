@@ -1252,6 +1252,10 @@ func getSanitizedFunctionName(funcName string) string {
 }
 
 func getAccess(name string) string {
+	if strings.HasPrefix(name, "ref ") {
+		name = name[4:] // Remove any "ref " prefix
+	}
+
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
