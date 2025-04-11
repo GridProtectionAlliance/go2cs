@@ -26,6 +26,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -936,14 +937,27 @@ public static class builtin
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
     /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
-    public static T _<T>(this object target)
+    public static T _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target)
     {
         try
         {
-            if (target is string str && typeof(T) == typeof(@string))
-                return (T)(object)(new @string(str));
+            switch (target)
+            {
+                case string str when typeof(T) == typeof(@string):
+                    return (T)(object)new @string(str);
+                case T typedTarget:
+                    return typedTarget;
+            }
 
-            return (T)target;
+            if (!typeof(T).IsInterface || !Implements<T>(target))
+                return (T)target;
+            
+            MethodInfo? method = typeof(T).GetMethod("As", 0, BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
+
+            if (method == null)
+                throw new InvalidCastException($"Interface '{typeof(T).Name}' does not implement 'As' conversion method.");
+
+            return (T)method.Invoke(null, [target])!;
         }
         catch (InvalidCastException ex)
         {
@@ -958,16 +972,13 @@ public static class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
-    public static (T, bool) _<T>(this object target, bool _)
+    public static (T, bool) _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target, bool _)
     {
         try
         {
-            if (target is string str && typeof(T) == typeof(@string))
-                return ((T)(object)(new @string(str)), true);
-
-            return ((T)target, true);
+            return (target._<T>(), true);
         }
-        catch (InvalidCastException)
+        catch (PanicException)
         {
             return (default, false)!;
         }
@@ -1629,6 +1640,38 @@ public static class builtin
 
         // Call equality operator
         return (bool)equalityOperator.Invoke(null, [left, right])!;
+    }
+
+    /// <summary>
+    /// Checks if the specified <paramref name="type"/> implements the specified interface <typeparamref name="TInterface"/>.
+    /// </summary>
+    /// <typeparam name="TInterface">Interface type to check.</typeparam>
+    /// <param name="type">Object to check for interface implementation.</param>
+    /// <returns><c>true</c> if the specified <paramref name="type"/> implements the specified interface <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
+    public static bool Implements<TInterface>(object? type)
+    {
+        return type switch
+        {
+            TInterface => true,
+            null => false,
+            _ => implementsInterface()
+        };
+
+        // Fall back on run-time check. This may be encountered for dynamically defined interface
+        // types or when a function is checking a private library interface internally. All type
+        // results are cached for performance, but there is an initial cost for lookup creation.
+        bool implementsInterface()
+        {
+            ImmutableHashSet<string> interfaceMethodNames = typeof(TInterface).GetInterfaceMethodNames();
+
+            // All types implement an empty interface
+            if (interfaceMethodNames.Count == 0)
+                return true;
+
+            ImmutableHashSet<string> typeExtensionMethodNames = type.GetType().GetExtensionMethodNames();
+
+            return interfaceMethodNames.Except(typeExtensionMethodNames).Count == 0;
+        }
     }
 
     /// <summary>

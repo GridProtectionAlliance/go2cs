@@ -1,3 +1,4 @@
+/*
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -72,7 +73,7 @@ internal static bool @is(error err, error target, bool targetComparable) {
                 return true;
             }
         }
-        switch (err.type()) {
+        switch (err.type()) { 
         case @is_typeᴛ1 x:
             err = x.Unwrap();
             if (err == default!) {
@@ -86,6 +87,14 @@ internal static bool @is(error err, error target, bool targetComparable) {
                 }
             }
             return false;
+        case { } x when Implements<@is_typeᴛ1>(x):
+            @is_typeᴛ1 xT1 = @is_typeᴛ1.As(x)!;
+            err = xT1.Unwrap();
+            if (err == default!)
+            {
+                return false;
+            }
+            break;
         default: {
             var x = err.type();
             return false;
@@ -179,3 +188,4 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
 internal static reflectlite.Type errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
+*/

@@ -23,12 +23,26 @@
 // ReSharper disable CheckNamespace
 // ReSharper disable UnusedMember.Global
 // ReSharper disable InconsistentNaming
+// ReSharper disable InconsistentlySynchronizedField
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading;
+
+#pragma warning disable IL2075
+#pragma warning disable IL2067
+#pragma warning disable IL2055
+#pragma warning disable IL2060
+#pragma warning disable IL2080
+#pragma warning disable IL2070
+#pragma warning disable IL2026
 
 namespace go.runtime;
 
@@ -37,7 +51,80 @@ namespace go.runtime;
 /// </summary>
 public static class TypeExtensions
 {
-    private static readonly List<(MethodInfo method, Type type)> s_extensionMethods = default!;
+    private static (MethodInfo, Type)[]? s_extensionMethods;
+    private static readonly Lock s_loadLock = new();
+    private static readonly ConcurrentDictionary<Type, MethodInfo[]> s_typeExtensionMethods = [];
+    private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
+    private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_interfaceMethodNames = [];
+    private static int s_registeredAssemblyLoadEvent;
+
+    private static (MethodInfo, Type)[] GetExtensionMethods()
+    {
+        if (Interlocked.CompareExchange(ref s_extensionMethods, null, null) is not null)
+            return s_extensionMethods!;
+
+        // Register assembly load event only once, used to clear extension method caches
+        if (Interlocked.CompareExchange(ref s_registeredAssemblyLoadEvent, 1, 0) == 0)
+            AppDomain.CurrentDomain.AssemblyLoad += ClearTypeCaches;
+
+        lock (s_loadLock)
+        {
+            // Check if another thread already loaded the extension methods
+            if (Volatile.Read(ref s_extensionMethods) is not null)
+                return s_extensionMethods!;
+
+            List<(MethodInfo, Type)> extensionMethods = [];
+
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+                LoadAssemblyExtensionMethods(assembly, extensionMethods);
+
+            s_extensionMethods = extensionMethods.ToArray();
+        }
+
+        return s_extensionMethods;
+    }
+
+    private static void ClearTypeCaches(object? sender, EventArgs e)
+    {
+        // Since not all assemblies may be loaded when initial type caches
+        // are created, we need to clear caches when any new assemblies are
+        // loaded so that caches can be recreated
+        lock (s_loadLock)
+            Volatile.Write(ref s_extensionMethods, null);
+
+        s_typeExtensionMethods.Clear();
+        s_typeExtensionMethodNames.Clear();
+        s_interfaceMethodNames.Clear();
+    }
+
+    private static void LoadAssemblyExtensionMethods(Assembly assembly, List<(MethodInfo, Type)> extensionMethods)
+    {
+        string? name = assembly.FullName;
+
+        if (string.IsNullOrEmpty(name))
+            return;
+
+        // Ignore extensions methods from the .NET framework
+        if (name.StartsWith("System.") || name.StartsWith("netstandard") || name.StartsWith("Microsoft.") || name.StartsWith("WindowsBase") || name.StartsWith("go.runtime."))
+            return;
+
+        Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");
+
+        foreach (Type type in assembly.GetTypes())
+        foreach (MethodInfo extensionMethod in getExtensionMethods(type))
+            extensionMethods.Add((extensionMethod, extensionMethod.GetExtensionTargetType()));
+        
+        return;
+
+        static IEnumerable<MethodInfo> getExtensionMethods(Type type)
+        {
+            if (!type.IsSealed || type.IsNested || type.IsGenericType)
+                return Array.Empty<MethodInfo>();
+
+            return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));
+        }
+    }
 
     private sealed class TypePrecedenceComparer : Comparer<Type>
     {
@@ -104,53 +191,6 @@ public static class TypeExtensions
             return false;
         }
     }
-
-#if RUNTIME_INTERFACE_RESOLUTION
-
-    static TypeExtensions()
-    {
-
-        s_extensionMethods = new List<(MethodInfo, Type)>();
-
-        AppDomain currentDomain = AppDomain.CurrentDomain;
-        currentDomain.AssemblyLoad += (_, e) => LoadAssemblyExtensionMethods(e.LoadedAssembly);
-
-        foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
-            LoadAssemblyExtensionMethods(assembly);
-    }
-
-    private static void LoadAssemblyExtensionMethods(Assembly assembly)
-    {
-        static IEnumerable<MethodInfo> getExtensionMethods(Type type)
-        {
-            // TODO: With addition of Golang generics, type.IsGenericType is now allowable
-            if (!type.IsSealed || type.IsNested) /* || type.IsGenericType */
-                return Array.Empty<MethodInfo>();
-
-            return type.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-                       .Where(methodInfo => methodInfo.IsDefined(typeof(ExtensionAttribute), false));
-        }
-
-        string? name = assembly.FullName;
-
-        if (string.IsNullOrEmpty(name))
-            return;
-
-        // Ignore extensions methods from the .NET framework
-        if (name.StartsWith("System.") || name.StartsWith("netstandard"))
-            return;
-
-        Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");
-
-        lock (s_extensionMethods)
-        {
-            foreach (Type type in assembly.GetTypes())
-            foreach (MethodInfo extensionMethod in getExtensionMethods(type))
-                s_extensionMethods.Add((extensionMethod, extensionMethod.GetExtensionTargetType()));
-        }
-    }
-
-#endif
 
     /// <summary>
     /// Gets an object's pointer value, for display purposes, in hexadecimal format.
@@ -227,13 +267,17 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="methodInfo">Method info.</param>
     /// <returns>
-    /// Type of the extension target, i.e., type of the first parameter; otherwise, <c>void</c>
-    /// if <paramref name="methodInfo"/> is <c>null</c> or defines no parameters.
+    /// Type of the extension target, i.e., type of the first parameter.
     /// </returns>
+    /// <exception cref="InvalidOperationException">Method has no parameters and cannot be an extension method.</exception>
     public static Type GetExtensionTargetType(this MethodInfo methodInfo)
     {
         ParameterInfo[] parameters = methodInfo.GetParameters();
-        return parameters.Length > 0 ? parameters[0].ParameterType : typeof(void);
+
+        if (parameters.Length == 0)
+            throw new InvalidOperationException("Method has no parameters and cannot be an extension method.");
+
+        return parameters[0].ParameterType;
     }
 
     /// <summary>
@@ -241,19 +285,22 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="targetType">Target <see cref="Type"/> to search.</param>
     /// <returns>Enumeration of reflected method metadata of <paramref name="targetType"/> extension methods.</returns>
-    public static IEnumerable<MethodInfo> GetExtensionMethods(this Type targetType)
+    public static MethodInfo[] GetExtensionMethods(this Type targetType)
     {
-        // TODO: Since Go restricts receiver functions (extensions in C#) to the same package, a lookup per package (namespace in C#) will be optimal here
-        lock (s_extensionMethods)
+        return s_typeExtensionMethods.GetOrAdd(targetType, _ =>
         {
+            (MethodInfo method, Type type)[] extensionMethods = GetExtensionMethods();
+
             bool isGenericType = (targetType == typeof(ж<>) ? targetType.GetGenericArguments()[0] : targetType).IsGenericType;
 
             if (isGenericType)
                 targetType = targetType.GetGenericTypeDefinition();
 
-            return isGenericType ?
-                s_extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
-                s_extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+            IEnumerable<MethodInfo> methods = isGenericType ?
+                extensionMethods.Where(value => isGenericMatch(value.type)).Select(value => value.method) :
+                extensionMethods.Where(value => value.type.IsAssignableFrom(targetType)).Select(value => value.method);
+
+            return methods.ToArray();
 
             bool isGenericMatch(Type methodType)
             {
@@ -262,7 +309,30 @@ public static class TypeExtensions
 
                 return methodType == targetType;
             }
-        }
+        });
+    }
+
+    /// <summary>
+    /// Gets all the extension method names for <paramref name="targetType"/>.
+    /// </summary>
+    /// <param name="targetType">Target <see cref="Type"/> to search.</param>
+    /// <returns>A collection of extension method names for <paramref name="targetType"/>.</returns>
+    public static ImmutableHashSet<string> GetExtensionMethodNames(this Type targetType)
+    {
+        return s_typeExtensionMethodNames.GetOrAdd(targetType, _ => [.. targetType.GetExtensionMethods().Select(info => info.Name)]);
+    }
+
+    /// <summary>
+    /// Determines if an extension method with the specified <paramref name="methodName"/> exists for the <paramref name="targetType"/>.
+    /// </summary>
+    /// <param name="targetType">Target <see cref="Type"/> to search.</param>
+    /// <param name="methodName">Name of extension method to find.</param>
+    /// <returns><c>true</c> if extension method exists; otherwise, <c>false</c>.</returns>
+    public static bool ExtensionMethodExists(this Type targetType, string methodName)
+    {
+        // Note that match by function name alone is sufficient as Go does not currently support function overloading by adjusting signature:
+        // https://golang.org/doc/faq#overloading
+        return targetType.GetExtensionMethods().Any(methodInfo => methodInfo.Name == methodName);
     }
 
     /// <summary>
@@ -276,6 +346,54 @@ public static class TypeExtensions
         // Note that match by function name alone is sufficient as Go does not currently support function overloading by adjusting signature:
         // https://golang.org/doc/faq#overloading
         return targetType.GetExtensionMethods().Where(methodInfo => methodInfo.Name == methodName).MinBy(GetExtensionTargetType, new TypePrecedenceComparer(targetType));
+    }
+
+    /// <summary>
+    /// Returns all method names defined in an interface type, including those inherited from other interfaces.
+    /// </summary>
+    /// <param name="interfaceType">The interface type to examine. Must be an interface.</param>
+    /// <returns>A collection of method names defined in the interface and its base interfaces.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided type is not an interface.</exception>
+    public static ImmutableHashSet<string> GetInterfaceMethodNames(this Type interfaceType)
+    {
+        return s_interfaceMethodNames.GetOrAdd(interfaceType, _ => [..interfaceType.GetInterfaceMethods().Select(info => info.Name)]);
+    }
+
+    /// <summary>
+    /// Returns detailed information about methods defined in an interface type, including those inherited from other interfaces.
+    /// </summary>
+    /// <param name="interfaceType">The interface type to examine. Must be an interface.</param>
+    /// <returns>A collection of MethodInfo objects for methods defined in the interface and its base interfaces.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided type is not an interface.</exception>
+    public static IEnumerable<MethodInfo> GetInterfaceMethods(this Type interfaceType)
+    {
+        // Verify the type is an interface
+        if (!interfaceType.IsInterface)
+            throw new ArgumentException($"The type '{interfaceType.FullName}' is not an interface.", nameof(interfaceType));
+
+        // Get all methods directly defined on this interface
+        MethodInfo[] methods = interfaceType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+
+        // Get all base interfaces
+        Type[] baseInterfaces = interfaceType.GetInterfaces();
+
+        // If there are no base interfaces, return just the direct methods
+        if (baseInterfaces.Length == 0)
+            return methods;
+
+        // Otherwise, combine the direct methods with inherited methods
+        HashSet<MethodInfo> allMethods = [..methods];
+
+        // Add methods from all base interfaces
+        foreach (Type baseInterface in baseInterfaces)
+        {
+            MethodInfo[] baseMethods = baseInterface.GetMethods();
+            
+            foreach (MethodInfo method in baseMethods)
+                allMethods.Add(method);
+        }
+
+        return allMethods;
     }
 
     /// <summary>
@@ -374,7 +492,7 @@ public static class TypeExtensions
     public static T? CreateInterfaceHandler<T>(this Type handlerType, object? target) where T : class
     {
         if (target is null)
-            return default;
+            return null;
 
         try
         {
@@ -383,7 +501,7 @@ public static class TypeExtensions
         }
         catch
         {
-            return default;
+            return null;
         }
     }
 
@@ -457,7 +575,7 @@ public static class TypeExtensions
                 return true;
         }
 
-        integer = default;
+        integer = 0;
         return false;
     }
 

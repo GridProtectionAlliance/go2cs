@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>errors</AssemblyName>
+    <AssemblyName>AnonymousInterfaces</AssemblyName>
     <Product>go2cs</Product>
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
@@ -103,7 +103,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
-    <ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />
+    <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
+    <ProjectReference Include="$(go2csPath)core\io\io.csproj" />
   </ItemGroup>
 
 </Project>

@@ -175,13 +175,15 @@ var keywords = NewHashSet([]string{
 
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
 var reserved = NewHashSet([]string{
-	"AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName", "GetHashCode", "GetType",
-	"GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv", "GoImplicitConvAttribute",
-	"GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute", "GoTestMatchingConsoleOutput",
-	"GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute",
-	"GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3", "IArray", "IChannel", "IMap", "ISlice", "ISupportMake",
-	"make\u01C3", "MemberwiseClone", "NilType", "PanicException", "slice", "ToString", "UntypedInt", "UntypedFloat",
-	"UntypedComplex", PointerPrefix, TrueMarker, OverloadDiscriminator, ElipsisOperator,
+	"_", "AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName",
+	"GetHashCode", "GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute",
+	"GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv",
+	"GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
+	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
+	"GoUntyped", "go\u01C3", "IArray", "IChannel", "IMap", "ISlice", "ISupportMake", "make\u01C3",
+	"MemberwiseClone", "NilType", "PanicException", "PrintPointer", "slice", "ToString", "type",
+	"TryCastAsInteger", "UntypedInt", "UntypedFloat", "UntypedComplex",
+	PointerPrefix, TrueMarker, OverloadDiscriminator, ElipsisOperator,
 })
 
 //go:embed csproj-template.xml
