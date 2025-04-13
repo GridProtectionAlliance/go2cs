@@ -245,17 +245,27 @@ public class TypeGenerator : ISourceGenerator
                     case StructDeclarationSyntax:
                         throw new NotSupportedException($"Unsupported [{AttributeName}] definition \"{typeDefinition}\" on struct \"{identifier}\".");
 
-                    case InterfaceDeclarationSyntax:
+                    case InterfaceDeclarationSyntax interfaceDeclaration:
                         string[]? operatorConstraints = null;
+                        bool runtime = false;
 
                         if (!string.IsNullOrWhiteSpace(typeDefinition))
                         {
-                            string[] parts = typeDefinition.Split(["="], StringSplitOptions.RemoveEmptyEntries);
+                            string[] keys = typeDefinition.Split([';'], StringSplitOptions.RemoveEmptyEntries);
 
-                            if (parts.Length > 1)
+                            foreach (string key in keys)
                             {
-                                if (parts[0].Trim().Equals("Operators", StringComparison.OrdinalIgnoreCase))
-                                    operatorConstraints = parts[1].Split([','], StringSplitOptions.RemoveEmptyEntries).Select(part => part.Trim()).ToArray();
+                                string[] parts = key.Split(["="], StringSplitOptions.RemoveEmptyEntries);
+
+                                if (parts.Length > 1)
+                                {
+                                    if (parts[0].Trim().Equals("operators", StringComparison.OrdinalIgnoreCase))
+                                        operatorConstraints = parts[1].Split([','], StringSplitOptions.RemoveEmptyEntries).Select(part => part.Trim()).ToArray();
+                                }
+                                else if (key.Trim().Equals("runtime", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    runtime = true;
+                                }
                             }
                         }
 
@@ -268,13 +278,15 @@ public class TypeGenerator : ISourceGenerator
                             Scope = scope,
                             InterfaceName = identifier,
                             OperatorConstraints = operatorConstraints ?? [],
+                            Methods = runtime ? interfaceDeclaration.GetInterfaceMethods(context) : [],
+                            Runtime = runtime,
                             UsingStatements = usingStatements
                         }
                         .Generate();
 
                         break;
 
-                    case ClassDeclarationSyntax when typeDefinition.StartsWith("ж<"): // pointer
+                    case ClassDeclarationSyntax when typeDefinition.StartsWith($"{PointerPrefix}<"): // pointer
                         typeName = typeDefinition[2..^1];
                         
                         generatedSource = new InheritedTypeTemplate
@@ -284,7 +296,7 @@ public class TypeGenerator : ISourceGenerator
                             ObjectName = identifier,
                             ObjectKind = "class",
                             Scope = scope,
-                            TypeName = $"ж<{typeName}>",
+                            TypeName = $"{PointerPrefix}<{typeName}>",
                             TargetTypeName = typeName,
                             TypeClass = "Pointer",
                             UsingStatements = usingStatements

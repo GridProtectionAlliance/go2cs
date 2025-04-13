@@ -10,7 +10,10 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
+using go.runtime;
 
 #nullable enable
 
@@ -21,5 +24,151 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     internal partial interface testTypeAssertion_type
     {
+        // Runtime interface conversion methods
+        public static testTypeAssertion_type As<ΔTTarget>(in ΔTTarget target) =>
+            (ΔtestTypeAssertion_type<ΔTTarget>)target!;
+
+        public static testTypeAssertion_type As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+            (ΔtestTypeAssertion_type<ΔTTarget>)target_ptr;
+
+        public static testTypeAssertion_type? As(object target) =>
+            typeof(ΔtestTypeAssertion_type<>).CreateInterfaceHandler<testTypeAssertion_type>(target);            
+    }
+
+    // Defines a runtime type for duck-typed interface implementations based on existing
+    // extension methods that satisfy interface. This class is only used as fallback for
+    // when the interface was not able to be implemented at transpile time, e.g., with
+    // dynamically declared anonymous interfaces used with type assertions.
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    internal class ΔtestTypeAssertion_type<ΔTTarget> : testTypeAssertion_type
+    {
+        private ΔTTarget m_target = default!;
+        private readonly ж<ΔTTarget>? m_target_ptr;
+        private readonly bool m_target_is_ptr;
+    
+        public ref ΔTTarget Target
+        {
+            get
+            {
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    return ref m_target_ptr.val;
+    
+                return ref m_target;
+            }
+        }
+    
+        public ΔtestTypeAssertion_type(in ΔTTarget target)
+        {
+            m_target = target;
+        }
+    
+        public ΔtestTypeAssertion_type(ж<ΔTTarget> target_ptr)
+        {
+            m_target_ptr = target_ptr;
+            m_target_is_ptr = true;
+        }
+            
+        // Implementation for 'testTypeAssertion_type.Is' receiver method 
+        private delegate bool IsByPtr(ж<ΔTTarget> targetʗ, go.error Δ_);
+        private delegate bool IsByVal(ΔTTarget targetʗ, go.error Δ_);
+        
+        private static readonly IsByPtr? s_IsByPtr;
+        private static readonly IsByVal? s_IsByVal;
+        
+        [DebuggerNonUserCode]
+        public bool Is(go.error Δ_)
+        {
+            ΔTTarget target = m_target;
+        
+            if (m_target_is_ptr && m_target_ptr is not null)
+                target = m_target_ptr.val;
+        
+            if (s_IsByPtr is null || !m_target_is_ptr)
+                return s_IsByVal!(target, Δ_);
+        
+            return s_IsByPtr(m_target_ptr!, Δ_);
+        }
+    
+        static ΔtestTypeAssertion_type()
+        {
+            Type targetType = typeof(ΔTTarget);
+            Type targetTypeByPtr = typeof(ж<ΔTTarget>);
+            MethodInfo? extensionMethod;
+                
+            // Initialization of 'testTypeAssertion_type.Is' receiver method implementation
+            extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof(Is));
+            
+            if (extensionMethod is not null)
+                s_IsByPtr = extensionMethod.CreateStaticDelegate(typeof(IsByPtr)) as IsByPtr;
+            
+            extensionMethod = targetType.GetExtensionMethod(nameof(Is));
+            
+            if (extensionMethod is not null)
+                s_IsByVal = extensionMethod.CreateStaticDelegate(typeof(IsByVal)) as IsByVal;
+            
+            if (s_IsByPtr is null && s_IsByVal is null)
+                throw new NotImplementedException($"{targetType.FullName} does not implement 'testTypeAssertion_type.{nameof(Is)}' method");
+        }
+    
+        public static explicit operator ΔtestTypeAssertion_type<ΔTTarget>(in ж<ΔTTarget> target_ptr) => new(target_ptr);
+    
+        public static explicit operator ΔtestTypeAssertion_type<ΔTTarget>(in ΔTTarget target) => new(target);
+
+        public override int GetHashCode() => Target?.GetHashCode() ?? 0;
+
+        public static bool operator ==(ΔtestTypeAssertion_type<ΔTTarget>? left, ΔtestTypeAssertion_type<ΔTTarget>? right) => left?.Equals(right) ?? right is null;
+        
+        public static bool operator !=(ΔtestTypeAssertion_type<ΔTTarget>? left, ΔtestTypeAssertion_type<ΔTTarget>? right) => !(left == right);
+
+        #region [ Operator Constraint Implementations ]
+
+        // These operator constraints exist to satisfy possible constraints defined on source interface,
+        // however, the instance of this class is only used to implement the interface methods, so these
+        // operators are only placeholders and not actually functional.
+
+        public static bool operator <(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => false;
+        
+        public static bool operator <=(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => false;
+        
+        public static bool operator >(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => false;
+        
+        public static bool operator >=(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => false;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator +(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator -(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator -(ΔtestTypeAssertion_type<ΔTTarget> value) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator *(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator /(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator %(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator &(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator |(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator ^(ΔtestTypeAssertion_type<ΔTTarget> left, ΔtestTypeAssertion_type<ΔTTarget> right) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator ~(ΔtestTypeAssertion_type<ΔTTarget> value) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator <<(ΔtestTypeAssertion_type<ΔTTarget> value, ΔtestTypeAssertion_type<ΔTTarget> shiftAmount) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator >>(ΔtestTypeAssertion_type<ΔTTarget> value, ΔtestTypeAssertion_type<ΔTTarget> shiftAmount) => default!;
+        
+        public static ΔtestTypeAssertion_type<ΔTTarget> operator >>>(ΔtestTypeAssertion_type<ΔTTarget> value, ΔtestTypeAssertion_type<ΔTTarget> shiftAmount) => default!;
+        
+        #endregion
+    
+        // Enable comparisons between nil and ΔtestTypeAssertion_type<ΔTTarget> interface instance
+        public static bool operator ==(ΔtestTypeAssertion_type<ΔTTarget> value, NilType nil) => Activator.CreateInstance<ΔtestTypeAssertion_type<ΔTTarget>>().Equals(value);
+    
+        public static bool operator !=(ΔtestTypeAssertion_type<ΔTTarget> value, NilType nil) => !(value == nil);
+    
+        public static bool operator ==(NilType nil, ΔtestTypeAssertion_type<ΔTTarget> value) => value == nil;
+    
+        public static bool operator !=(NilType nil, ΔtestTypeAssertion_type<ΔTTarget> value) => value != nil;
     }
 }

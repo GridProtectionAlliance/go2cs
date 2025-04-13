@@ -83,7 +83,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// If the last expression has a spread operator, use elipsis property as source
 		// this way elements are passed as arguments instead of a slice or array
 		if hasSpreadOperator && i == len(exprs)-1 {
-			arg.WriteString("." + ElipsisOperator)
+			arg.WriteString("." + EllipsisOperator)
 		}
 
 		if callArgs == nil {

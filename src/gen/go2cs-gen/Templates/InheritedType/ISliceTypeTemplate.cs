@@ -1,4 +1,6 @@
-﻿namespace go2cs.Templates.InheritedType;
+﻿using static go2cs.Common;
+
+namespace go2cs.Templates.InheritedType;
 
 internal static class ISliceTypeTemplate
 {
@@ -29,7 +31,7 @@ internal static class ISliceTypeTemplate
                     
                 public ref {{targetTypeName}} this[nint index] => ref m_value[index];
                 
-                public Span<{{targetTypeName}}> ꓸꓸꓸ => ToSpan();
+                public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 
                 public Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
                 

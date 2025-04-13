@@ -56,6 +56,7 @@ public static class TypeExtensions
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> s_typeExtensionMethods = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_interfaceMethodNames = [];
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> s_typeEqualityOperators = [];
     private static int s_registeredAssemblyLoadEvent;
 
     private static (MethodInfo, Type)[] GetExtensionMethods()
@@ -234,7 +235,7 @@ public static class TypeExtensions
     /// <returns>Equality operator for <paramref name="type"/> if found; otherwise, <c>null</c>.</returns>
     public static MethodInfo? GetEqualityOperator(this Type type)
     {
-        return type.GetMethod("op_Equality", BindingFlags.Static | BindingFlags.Public, [type, type]);
+        return s_typeEqualityOperators.GetOrAdd(type, _ => type.GetMethod("op_Equality", BindingFlags.Static | BindingFlags.Public, [type, type]));
     }
 
     /// <summary>

@@ -21,23 +21,25 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Common;
 
 namespace go2cs;
 
 public static class GeneratorExecutionContextExtensions
 {
-    public static StructDeclarationSyntax? GetStructDeclaration(this GeneratorExecutionContext Context, string structTypeName)
+    public static StructDeclarationSyntax? GetStructDeclaration(this GeneratorExecutionContext context, string structTypeName)
     {
         // If struct type is a pointer, i.e., ж<T>, then get the underlying type
-        int startIndex = structTypeName.IndexOf('ж');
+        int startIndex = structTypeName.IndexOf(PointerPrefix, StringComparison.Ordinal);
 
         if (startIndex > -1 && structTypeName.EndsWith(">"))
             structTypeName = structTypeName[(startIndex + 2)..^1];
 
-        return Context
+        return context
             .Compilation
             .SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
@@ -45,7 +47,7 @@ public static class GeneratorExecutionContextExtensions
                 .OfType<StructDeclarationSyntax>())
             .FirstOrDefault(structDecl =>
             {
-                ISymbol? symbol = Context
+                ISymbol? symbol = context
                     .Compilation
                     .GetSemanticModel(structDecl.SyntaxTree)
                     .GetDeclaredSymbol(structDecl);

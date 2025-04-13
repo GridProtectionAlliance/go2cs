@@ -54,7 +54,7 @@ public record MethodInfo
 
     public string GetSignature()
     {
-        return $"{Name}{GetGenericSignature()}({TypedParameters})";
+        return $"{Name}{GetGenericSignature()}({TypedParameters}){GetWhereConstraints()}";
     }
 
     public string GetGenericSignature()

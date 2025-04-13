@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -79,13 +80,13 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                result.Append($"private readonly ж<{typeName}> Ꮡʗ{memberName};");
+                result.Append($"private readonly {PointerPrefix}<{typeName}> {AddressPrefix}{CapturedVarMarker}{memberName};");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Accessors");
 
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
-                result.Append($"\r\n{TypeElemIndent}public partial ref {typeName} {memberName} => ref Ꮡʗ{memberName}.val;");
+                result.Append($"\r\n{TypeElemIndent}public partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{memberName}.val;");
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessors");
 
@@ -100,7 +101,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} Ꮡ{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
             }
 
             return result.ToString();
@@ -156,7 +157,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this ж<{StructName}> Ꮡtarget");
+                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -166,7 +167,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 result.AppendLine(")");
                 result.AppendLine("    {");
-                result.AppendLine("        ref var target = ref Ꮡtarget.val;");
+                result.AppendLine($"        ref var target = ref {AddressPrefix}target.val;");
                 result.Append($"        return target.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
                 result.AppendLine(");");
@@ -191,7 +192,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                result.Append($"public static ref {typeName} Ꮡ{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
+                result.Append($"public static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
             }
 
             return result.ToString();
@@ -213,7 +214,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append($"{TypeElemIndent}    ");
 
                 result.AppendLine(isPromotedStruct ? 
-                    $"Ꮡʗ{memberName} = new ж<{typeName}>(new {typeName}(nil));" : 
+                    $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));" : 
                     $"this.{memberName} = default!;");
             }
 
@@ -231,7 +232,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append($"{TypeElemIndent}    ");
 
                 result.AppendLine(isPromotedStruct ?
-                    $"Ꮡʗ{memberName} = new ж<{typeName}>({memberName});" :
+                    $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>({memberName});" :
                     $"this.{memberName} = {memberName};");
             }
 

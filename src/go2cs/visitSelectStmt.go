@@ -62,7 +62,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 								v.targetFile.WriteRune('(')
 								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
 								v.targetFile.WriteString(", ")
-								v.targetFile.WriteString(ElipsisOperator)
+								v.targetFile.WriteString(EllipsisOperator)
 								v.targetFile.WriteRune(')')
 							} else {
 								v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
@@ -91,7 +91,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 
 				if v.options.useChannelOperators {
 					v.targetFile.WriteString(", ")
-					v.targetFile.WriteString(ElipsisOperator)
+					v.targetFile.WriteString(EllipsisOperator)
 				}
 
 				v.targetFile.WriteRune(')')
@@ -104,7 +104,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 							v.targetFile.WriteRune('(')
 							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))
 							v.targetFile.WriteString(", ")
-							v.targetFile.WriteString(ElipsisOperator)
+							v.targetFile.WriteString(EllipsisOperator)
 							v.targetFile.WriteRune(')')
 						} else {
 							v.targetFile.WriteString(v.convExpr(unaryExpr.X, nil))

@@ -37,7 +37,7 @@ internal class ImplicitConvTemplate : TemplateBase
             int gtIndex = LHTypeName.LastIndexOf('>');
 
             if (gtIndex > ltIndex)
-                return $"Ꮡ(new {LHTypeName[(ltIndex + 1)..gtIndex]}({ParamList}))";
+                return $"{AddressPrefix}(new {LHTypeName[(ltIndex + 1)..gtIndex]}({ParamList}))";
 
             throw new FormatException($"Unexpected target type name \"{LHTypeName}\"");
         }

@@ -54,6 +54,20 @@ public static class Common
         //---------------------------------------------------------
         """;
 
+    // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
+    // symbols, markers, intermediate and temporary variables. These characters have to be valid
+    // C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting
+    // characters, combining characters, or formatting characters. Some character variants will
+    // be better suited to different fonts or display environments. Defaults have been chosen
+    // based on better appearance with common Visual Studio code fonts, e.g., "Cascadia Mono".
+    // Note: keep constants in sync with go2cs transpiler and golib core.
+    public const string PointerPrefix = "ж";
+    public const string AddressPrefix = "Ꮡ";
+    public const string ShadowVarMarker = "Δ";
+    public const string TypeAliasDot = "ꓸ";
+    public const string EllipsisOperator = "ꓸꓸꓸ";
+    public const string CapturedVarMarker = "ʗ";
+
     static Common()
     {
         const string FallBackAssemblyName = nameof(go2cs);
@@ -74,7 +88,7 @@ public static class Common
 
         GeneratedCodeAttribute = $"""GeneratedCode("{AssemblyName}", "{Version}")""";
 
-        PointerExpr = new Regex("^(?:[^<]*)?ж<.*$", RegexOptions.Compiled);
+        PointerExpr = new Regex($"^(?:[^<]*)?{PointerPrefix}<.*$", RegexOptions.Compiled);
         InvalidChars = [..Path.GetInvalidFileNameChars()];
 
         return;
@@ -94,7 +108,7 @@ public static class Common
     public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
         // Check if type name is a pointer, i.e., ж<T>
-        int startIndex = typeName.IndexOf('ж');
+        int startIndex = typeName.IndexOf(PointerPrefix, StringComparison.Ordinal);
         bool isPointer = false;
 
         // For pointer types, get dereferenced underlying type

@@ -25,6 +25,7 @@
 // ReSharper disable UseSymbolAlias
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -42,6 +43,10 @@ namespace go;
 public static class builtin
 {
     public const int StackAllocThreshold = 1024; // 1KB
+
+    private static readonly ThreadLocal<bool> s_fallthrough = new();
+    private static readonly ConcurrentDictionary<(Type, Type), bool> s_implementsInterface = [];
+    private static readonly Type[] s_asTParams = [Type.MakeGenericMethodParameter(0).MakeByRefType()];
 
     [ModuleInitializer]
     internal static void InitializeGoLib()
@@ -63,8 +68,6 @@ public static class builtin
     {
         public static T Default = default!;
     }
-
-    private static readonly ThreadLocal<bool> s_fallthrough = new();
 
     /// <summary>
     /// Predeclared identifier representing the untyped integer ordinal number of the current
@@ -951,13 +954,22 @@ public static class builtin
 
             if (!typeof(T).IsInterface || !Implements<T>(target))
                 return (T)target;
-            
-            MethodInfo? method = typeof(T).GetMethod("As", 0, BindingFlags.Public | BindingFlags.Static, [typeof(object)]);
 
+            // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
+            // define an interface that describes an abstract method implemented by another interface,
+            // so we are forced to use reflection to find the static interface conversion method...
+            MethodInfo? method = typeof(T).GetMethod("As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
+
+            // Ths following exception will not be captured by type assertion overload that returns a tuple
+            // that includes a "success" boolean since missing method is considered a code conversion error
             if (method == null)
-                throw new InvalidCastException($"Interface '{typeof(T).Name}' does not implement 'As' conversion method.");
+                throw new InvalidOperationException($"Interface '{typeof(T).Name}' does not implement 'As' conversion method.");
 
-            return (T)method.Invoke(null, [target])!;
+        #pragma warning disable IL2060
+            MethodInfo genericMethod = method.MakeGenericMethod(target.GetType());
+        #pragma warning restore IL2060
+
+            return (T)genericMethod.Invoke(null, [target])!;
         }
         catch (InvalidCastException ex)
         {
@@ -1627,11 +1639,8 @@ public static class builtin
         if (leftType != right.GetType())
             return false;
 
-        // Get equality "==" operator for type using reflection - not sure of a
-        // better way to optimize this save creating lookup table. I suspect this
-        // is not a very common operation, so it may not be worth the cost of the
-        // fixed memory overhead, however, if the call was in a tight loop or
-        // being called frequently, it might be worthwhile.
+        // Get equality "==" operator for type using reflection,
+        // lookup is cached for performance.
         MethodInfo? equalityOperator = leftType.GetEqualityOperator();
 
         // If equality operator is not found, use default object.Equals
@@ -1643,14 +1652,14 @@ public static class builtin
     }
 
     /// <summary>
-    /// Checks if the specified <paramref name="type"/> implements the specified interface <typeparamref name="TInterface"/>.
+    /// Checks if the specified <paramref name="value"/> implements the specified interface <typeparamref name="TInterface"/>.
     /// </summary>
     /// <typeparam name="TInterface">Interface type to check.</typeparam>
-    /// <param name="type">Object to check for interface implementation.</param>
-    /// <returns><c>true</c> if the specified <paramref name="type"/> implements the specified interface <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
-    public static bool Implements<TInterface>(object? type)
+    /// <param name="value">Object to check for interface implementation.</param>
+    /// <returns><c>true</c> if the specified <paramref name="value"/> implements the specified interface <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
+    public static bool Implements<TInterface>(object? value)
     {
-        return type switch
+        return value switch
         {
             TInterface => true,
             null => false,
@@ -1662,15 +1671,19 @@ public static class builtin
         // results are cached for performance, but there is an initial cost for lookup creation.
         bool implementsInterface()
         {
-            ImmutableHashSet<string> interfaceMethodNames = typeof(TInterface).GetInterfaceMethodNames();
+            return s_implementsInterface.GetOrAdd((value.GetType(), typeof(TInterface)), entry =>
+            {
+                (Type valueType, Type interfaceType) = entry;
+                ImmutableHashSet<string> interfaceMethodNames = interfaceType.GetInterfaceMethodNames();
 
-            // All types implement an empty interface
-            if (interfaceMethodNames.Count == 0)
-                return true;
+                // All types implement an empty interface
+                if (interfaceMethodNames.Count == 0)
+                    return true;
 
-            ImmutableHashSet<string> typeExtensionMethodNames = type.GetType().GetExtensionMethodNames();
+                ImmutableHashSet<string> typeExtensionMethodNames = valueType.GetExtensionMethodNames();
 
-            return interfaceMethodNames.Except(typeExtensionMethodNames).Count == 0;
+                return interfaceMethodNames.Except(typeExtensionMethodNames).Count == 0;
+            });
         }
     }
 

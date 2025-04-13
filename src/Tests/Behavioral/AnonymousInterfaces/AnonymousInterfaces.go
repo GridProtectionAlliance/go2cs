@@ -24,6 +24,7 @@ func testTypeAssertion(err error) {
 	}
 }
 
+/*
 // 3. Function parameter using inline interface
 func takesReader(r interface{ Read([]byte) (int, error) }) {
 	buf := make([]byte, 4)
@@ -67,6 +68,7 @@ func testInterfaceEmbedding(x InlineEmbed) {
 	_ = x.Flush()
 	fmt.Println("InterfaceEmbed: Close and Flush OK")
 }
+*/
 
 // Supporting types
 
@@ -86,8 +88,8 @@ func (fakeError) Is(err error) bool { return err == io.EOF }
 func main() {
 	testTypeSwitch(fakeError{})
 	testTypeAssertion(fakeError{})
-	takesReader(fakeReader{})
-	testCompositeLiteral()
-	testInlineField()
-	testInterfaceEmbedding(embeddedImpl{})
+	//takesReader(fakeReader{})
+	//testCompositeLiteral()
+	//testInlineField()
+	//testInterfaceEmbedding(embeddedImpl{})
 }

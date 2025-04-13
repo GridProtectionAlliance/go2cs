@@ -12,6 +12,11 @@ const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
 const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 
+// For interface types with generic constraints, we will be adding a C# type parameter to the
+// converted Go interface to handle operators. Since methods in interfaces can have their own
+// type constraints, we mark the type so that it will not conflict with generic method types
+const TypeT = ShadowVarMarker + "T"
+
 // Handles interface types in context of a TypeSpec
 func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (interfaceTypeName string) {
 	for _, field := range interfaceType.Methods.List {
@@ -136,7 +141,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 				// If type constraint constains any methods, add it to the inherited interfaces
 				if methodCount > 0 {
-					inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil)+"<T>")
+					inheritedInterfaces = append(inheritedInterfaces, fmt.Sprintf("%s<%s>", v.convExpr(method.Type, nil), TypeT))
 				}
 			} else {
 				inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil))
@@ -154,15 +159,31 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	inheritedResult := ""
 
 	if len(typeConstraints) > 0 {
-		inheritedResult += "<T>"
+		inheritedResult = fmt.Sprintf("%s<%s>", inheritedResult, TypeT)
 	}
 
 	interfaceAttrs := ""
 	postAttrs := " "
 
+	if lifted {
+		// Add runtime implementation attribute to lifted types since
+		// they cannot be directly implemented in C# code. For these
+		// types, a reflection based type implementation is used when
+		// type assertions and comparisons are needed.
+		interfaceAttrs = "runtime"
+	}
+
 	if len(operatorSets) > 0 {
-		interfaceAttrs += fmt.Sprintf("(\"Operators = %s\")", getOperatorSetAttributes(operatorSets))
+		if len(interfaceAttrs) > 0 {
+			interfaceAttrs += "; "
+		}
+
+		interfaceAttrs += fmt.Sprintf("operators = %s", getOperatorSetAttributes(operatorSets))
 		postAttrs = v.newline
+	}
+
+	if len(interfaceAttrs) > 0 {
+		interfaceAttrs = fmt.Sprintf("(\"%s\")", interfaceAttrs)
 	}
 
 	if len(inheritedInterfaces) > 0 {

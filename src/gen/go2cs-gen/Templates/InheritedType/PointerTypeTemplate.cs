@@ -1,4 +1,6 @@
-﻿namespace go2cs.Templates.InheritedType;
+﻿using static go2cs.Common;
+
+namespace go2cs.Templates.InheritedType;
 
 internal static class PointerTypeTemplate
 {
@@ -11,11 +13,11 @@ internal static class PointerTypeTemplate
         
                 public ref {{targetTypeName}} val => ref m_value.val;
                 
-                public ж<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
+                public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
-                public ж<TElem> of<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
+                public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
-                public ж<Telem> at<Telem>(int index) => m_value.at<Telem>(index);
+                public {{PointerPrefix}}<Telem> at<Telem>(int index) => m_value.at<Telem>(index);
                 
                 static {{targetTypeName}} IPointer<{{targetTypeName}}>.operator ~(IPointer<{{targetTypeName}}> value) => value.val;
 

@@ -1,4 +1,6 @@
-﻿namespace go2cs.Templates.InheritedType;
+﻿using static go2cs.Common;
+
+namespace go2cs.Templates.InheritedType;
 
 internal static class IArrayTypeTemplate
 {
@@ -21,7 +23,7 @@ internal static class IArrayTypeTemplate
                     
                 public ref {{targetTypeName}} this[nint index] => ref val[index];
                 
-                public Span<{{targetTypeName}}> ꓸꓸꓸ => ToSpan();
+                public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 
                 public Span<{{targetTypeName}}> ToSpan() => val.ToSpan();
                 

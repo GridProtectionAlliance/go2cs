@@ -272,8 +272,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					if sliceType, ok := param.Type().(*types.Slice); ok {
 						typeName := v.getCSTypeName(sliceType.Elem())
 
-						updatedSignature.WriteString(ElipsisOperator + typeName)
-						v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", ElipsisOperator, typeName, typeName))
+						updatedSignature.WriteString(EllipsisOperator + typeName)
+						v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
 					} else {
 						updatedSignature.WriteString("object[]")
 					}
@@ -447,8 +447,8 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			if sliceType, ok := param.Type().(*types.Slice); ok {
 				typeName := v.getCSTypeName(sliceType.Elem())
 
-				result.WriteString(ElipsisOperator + typeName)
-				v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", ElipsisOperator, typeName, typeName))
+				result.WriteString(EllipsisOperator + typeName)
+				v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
 			} else {
 				result.WriteString("object[]")
 			}

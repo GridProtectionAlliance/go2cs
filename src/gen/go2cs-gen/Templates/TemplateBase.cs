@@ -37,7 +37,7 @@ internal abstract class TemplateBase
 
             // Remove any aliases, i.e., any that contain an equals sign but excluding
             // spread operators, e.g., `using ꓸꓸꓸnint = System.Span<nint>;`
-            m_usings.RemoveWhere(item => item.Contains("=") && !item.StartsWith("using ꓸꓸꓸ"));
+            m_usings.RemoveWhere(item => item.Contains("=") && !item.StartsWith($"using {EllipsisOperator}"));
 
             // Remove any lines that are not using statements
             m_usings.RemoveWhere(item => !item.StartsWith("using "));
