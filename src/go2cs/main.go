@@ -1315,6 +1315,17 @@ func isInterface(t types.Type) (result bool, empty bool) {
 	return false, false
 }
 
+func (v *Visitor) isAnonymousInterface(expr ast.Expr) bool {
+	exprType := v.getType(expr, false)
+	_, isNamed := exprType.(*types.Named)
+
+	if _, ok := exprType.Underlying().(*types.Interface); ok && !isNamed {
+		return true
+	}
+
+	return false
+}
+
 func (v *Visitor) isPointer(ident *ast.Ident) bool {
 	obj := v.info.ObjectOf(ident)
 
