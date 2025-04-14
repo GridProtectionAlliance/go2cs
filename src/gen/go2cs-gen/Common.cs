@@ -67,6 +67,7 @@ public static class Common
     public const string TypeAliasDot = "ꓸ";
     public const string EllipsisOperator = "ꓸꓸꓸ";
     public const string CapturedVarMarker = "ʗ";
+    public const string TempVarMarker = "ᴛ";
 
     static Common()
     {

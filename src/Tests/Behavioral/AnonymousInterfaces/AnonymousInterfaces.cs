@@ -24,7 +24,7 @@ internal static void testTypeSwitch(error err) {
 }
 
 [GoType("runtime")] partial interface testTypeAssertion_type {
-    bool Is(error Δ_);
+    bool Is(error _);
 }
 
 // 2. Type Assertion using inline interface

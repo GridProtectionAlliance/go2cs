@@ -27,6 +27,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Templates.TemplateBase;
+using static go2cs.Common;
 
 namespace go2cs;
 
@@ -46,15 +47,35 @@ public record MethodInfo
 
     public bool IsGeneric => GenericTypes.Length > 0;
 
-    public string CallParameters =>
-        string.Join(", ", Parameters.Select(param => param.name));
-
-    public string TypedParameters =>
-        string.Join(", ", Parameters.Select(param => $"{param.type} {param.name}"));
-
-    public string GetSignature()
+    public string CallParameters => GetCallParameters(true);
+    
+    public string GetCallParameters(bool allowDiscarded)
     {
-        return $"{Name}{GetGenericSignature()}({TypedParameters}){GetWhereConstraints()}";
+        return string.Join(", ", Parameters.Select((param, index) =>
+        {
+            if (param.name == "_")
+                return allowDiscarded ? "_" : $"p{TempVarMarker}{index}";
+
+            return param.name;
+        }));
+    }
+
+    public string TypedParameters => GetTypedParameters(true);
+
+    public string GetTypedParameters(bool allowDiscarded)
+    {
+        return string.Join(", ", Parameters.Select((param, index) =>
+        {
+            if (param.name == "_")
+                return allowDiscarded ? $"{param.type} _" : $"{param.type} p{TempVarMarker}{index}";
+            
+            return $"{param.type} {param.name}";
+        }));
+    }
+
+    public string GetSignature(bool allowDiscarded = true)
+    {
+        return $"{Name}{GetGenericSignature()}({GetTypedParameters(allowDiscarded)}){GetWhereConstraints()}";
     }
 
     public string GetGenericSignature()

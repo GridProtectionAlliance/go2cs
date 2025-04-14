@@ -120,7 +120,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                 (InterfaceName == NonGenericInterfaceName ? 
                 $"""
                 
-                        public static {ImplementedInterfaceName}? As(object target) =>
+                        public static {InterfaceName}? As(object target) =>
                             typeof({NonGenericConversionTypeName}<>).CreateInterfaceHandler<{InterfaceName}>(target);            
                 """ : 
                 $"""
@@ -170,16 +170,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                         {
                             m_target_ptr = target_ptr;
                             m_target_is_ptr = true;
-                        }
-                        {{ReceiverMethodImplementations}}
-                    
-                        static {{NonGenericConversionTypeName}}()
-                        {
-                            Type targetType = typeof({{TypeTTarget}});
-                            Type targetTypeByPtr = typeof({{PointerPrefix}}<{{TypeTTarget}}>);
-                            MethodInfo? extensionMethod;
-                            {{ReceiverMethodInitializations}}
-                        }
+                        }{{ReceiverMethodImplementations}}{{ReceiverMethodInitializations}}
                     
                         public static explicit operator {{ConversionTypeName}}(in {{PointerPrefix}}<{{TypeTTarget}}> target_ptr) => new(target_ptr);
                     
@@ -250,6 +241,9 @@ internal class InterfaceTypeTemplate : TemplateBase
     {
         get
         {
+            if (Methods.Length == 0)
+                return "";
+
             StringBuilder results = new();
 
             foreach (MethodInfo method in Methods)
@@ -262,6 +256,7 @@ internal class InterfaceTypeTemplate : TemplateBase
     private string GetReceiverMethodImplementation(MethodInfo method)
     {
         return $$"""
+
                      
                          // Implementation for '{{NonGenericInterfaceName}}.{{method.Name}}' receiver method 
                          private delegate {{method.ReturnType}} {{method.Name}}ByPtr{{method.GetGenericSignature()}}({{PointerPrefix}}<{{TypeTTarget}}> target{{CapturedVarMarker}}{{getCommaPrefixedTypedParameters()}}){{method.GetWhereConstraints()}};
@@ -271,7 +266,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                          private static readonly {{method.Name}}ByVal? s_{{method.Name}}ByVal;
                          
                          [DebuggerNonUserCode]
-                         public {{method.ReturnType}} {{method.GetSignature()}}
+                         public {{method.ReturnType}} {{method.GetSignature(false)}}
                          {
                              {{TypeTTarget}} target = m_target;
                          
@@ -281,7 +276,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                              if (s_{{method.Name}}ByPtr is null || !m_target_is_ptr)
                                  {{getReturnStatement()}}s_{{method.Name}}ByVal!(target{{getCommaPrefixedCallParameters()}});
                          
-                             {{getReturnStatement()}}s_{{method.Name}}ByPtr(m_target_ptr!{{getCommaPrefixedCallParameters()}});
+                             {{getReturnStatement()}}s_{{method.Name}}ByPtr!(m_target_ptr!{{getCommaPrefixedCallParameters()}});
                          }
                  """;
 
@@ -297,7 +292,7 @@ internal class InterfaceTypeTemplate : TemplateBase
 
         string getCommaPrefixedCallParameters()
         {
-            string callParameters = method.CallParameters;
+            string callParameters = method.GetCallParameters(false);
 
             if (callParameters.Length > 0)
                 callParameters = $", {callParameters}";
@@ -315,10 +310,27 @@ internal class InterfaceTypeTemplate : TemplateBase
     {
         get
         {
+            if (Methods.Length == 0)
+                return "";
+
             StringBuilder results = new();
+
+            results.Append(
+                $$"""
+                  
+                  
+                          static {{NonGenericConversionTypeName}}()
+                          {
+                              Type targetType = typeof({{TypeTTarget}});
+                              Type targetTypeByPtr = typeof({{PointerPrefix}}<{{TypeTTarget}}>);
+                              MethodInfo? extensionMethod;                              
+                  """);
 
             foreach (MethodInfo method in Methods)
                 results.Append(GetReceiverMethodInitialization(method));
+
+            results.AppendLine();
+            results.Append("        }");
 
             return results.ToString();
         }
@@ -327,7 +339,8 @@ internal class InterfaceTypeTemplate : TemplateBase
     private string GetReceiverMethodInitialization(MethodInfo method)
     {
         return $$"""
-                     
+
+
                              // Initialization of '{{NonGenericInterfaceName}}.{{method.Name}}' receiver method implementation
                              extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof({{method.Name}}));
                              
