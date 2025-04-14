@@ -41,13 +41,7 @@ internal readonly struct Range(Index start, Index end) : IEquatable<Range>
         return new Range(Index.Start, end);
     }
 
-    public static Range All
-    {
-        get
-        {
-            return new(Index.Start, Index.End);
-        }
-    }
+    public static Range All => new(Index.Start, Index.End);
 
     public (int Offset, int Length) GetOffsetAndLength(int length)
     {

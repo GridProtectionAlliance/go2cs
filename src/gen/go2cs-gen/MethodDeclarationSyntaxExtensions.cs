@@ -80,6 +80,40 @@ public record MethodInfo
 
         return $"\r\n{TypeElemIndent}{string.Join("\r\n        ", constraints)}";
     }
+
+    public bool IsSameSignature(IMethodSymbol methodSymbol)
+    {
+        // Compare method names
+        if (Name != methodSymbol.Name)
+            return false;
+
+        // Compare return types - convert ITypeSymbol to string representation
+        string returnTypeString = methodSymbol.ReturnType.ToDisplayString();
+
+        if (ReturnType != returnTypeString)
+            return false;
+
+        // Compare parameter counts
+        if (Parameters.Length != methodSymbol.Parameters.Length)
+            return false;
+
+        // Compare parameter types
+        for (int i = 0; i < Parameters.Length; i++)
+        {
+            string paramType = methodSymbol.Parameters[i].Type.ToDisplayString();
+
+            if (Parameters[i].type != paramType)
+                return false;
+        }
+
+        // Compare generic type parameters count
+        int genericTypesCount = methodSymbol.TypeParameters.Length;
+
+        string[] genericTypes = string.IsNullOrEmpty(GenericTypes) ?
+            [] : GenericTypes.Split(',').Select(type => type.Trim()).ToArray();
+
+        return genericTypes.Length == genericTypesCount;
+    }
 }
 
 public static class MethodSyntaxExtensions
@@ -117,12 +151,13 @@ public static class MethodSyntaxExtensions
             }
         }
 
-        return new MethodInfo
+        return new MethodInfo()
         {
             Name = methodDeclaration.Identifier.Text,
             ReturnType = methodDeclaration.GetReturnType(semanticModel),
             GenericTypes = string.Join(", ", typeParameters),
             TypeConstraints = typeConstraints,
+            
             Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
             {
                 if (param.Type is null)
@@ -134,6 +169,7 @@ public static class MethodSyntaxExtensions
 
                 return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
             }).ToArray(),
+
             IsRefRecv = methodDeclaration.ParameterList.Parameters.Any(param =>
                 param.Modifiers.Any(SyntaxKind.ThisKeyword) &&
                 param.Modifiers.Any(SyntaxKind.RefKeyword))
@@ -159,5 +195,57 @@ public static class MethodSyntaxExtensions
         ITypeSymbol? typeSymbol = typeInfo.Type;
 
         return typeSymbol?.ToDisplayString() ?? "object";
+    }
+
+    public static MethodInfo GetMethodInfo(this IMethodSymbol methodSymbol)
+    {
+        // Convert parameters to the required tuple format
+        (string type, string name)[] parameters = methodSymbol.Parameters
+            .Select(parameter => (type: parameter.Type.ToDisplayString(), name: parameter.Name))
+            .ToArray();
+
+        // Extract generic type parameters
+        string genericTypes = string.Join(", ", methodSymbol.TypeParameters.Select(typeParameter => typeParameter.Name));
+
+        // Extract type constraints for generic parameters
+        Dictionary<string, string[]> typeConstraints = new();
+
+        foreach (ITypeParameterSymbol? typeParam in methodSymbol.TypeParameters)
+        {
+            List<string> constraints = [];
+
+            // Add class/struct constraint
+            if (typeParam.HasReferenceTypeConstraint)
+                constraints.Add("class");
+            else if (typeParam.HasValueTypeConstraint)
+                constraints.Add("struct");
+
+            // Add notnull constraint
+            if (typeParam.HasNotNullConstraint)
+                constraints.Add("notnull");
+
+            // Add interface and type constraints
+            constraints.AddRange(typeParam.ConstraintTypes.Select(constraintType => constraintType.ToDisplayString()));
+
+            // Add unmanaged constraint
+            if (typeParam.HasUnmanagedTypeConstraint)
+                constraints.Add("unmanaged");
+
+            // Add constructor constraint
+            if (typeParam.HasConstructorConstraint)
+                constraints.Add("new()");
+
+            typeConstraints[typeParam.Name] = constraints.ToArray();
+        }
+
+        return new MethodInfo
+        {
+            Name = methodSymbol.Name,
+            ReturnType = methodSymbol.ReturnType.ToDisplayString(),
+            Parameters = parameters,
+            GenericTypes = genericTypes,
+            TypeConstraints = typeConstraints,
+            IsRefRecv = methodSymbol.ReturnsByRef
+        };
     }
 }

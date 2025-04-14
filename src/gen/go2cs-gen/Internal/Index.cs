@@ -23,21 +23,9 @@ internal readonly struct Index : IEquatable<Index>
         m_value = value;
     }
 
-    public static Index Start
-    {
-        get
-        {
-            return new Index(0);
-        }
-    }
+    public static Index Start => new(0);
 
-    public static Index End
-    {
-        get
-        {
-            return new Index(~0);
-        }
-    }
+    public static Index End => new(~0);
 
     public static Index FromStart(int value)
     {
@@ -55,21 +43,9 @@ internal readonly struct Index : IEquatable<Index>
         return new Index(~value);
     }
 
-    public int Value
-    {
-        get
-        {
-            return m_value < 0 ? ~m_value : m_value;
-        }
-    }
+    public int Value => m_value < 0 ? ~m_value : m_value;
 
-    public bool IsFromEnd
-    {
-        get
-        {
-            return m_value < 0;
-        }
-    }
+    public bool IsFromEnd => m_value < 0;
 
     public int GetOffset(int length)
     {
