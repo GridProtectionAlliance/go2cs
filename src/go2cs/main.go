@@ -174,8 +174,10 @@ var keywords = NewHashSet([]string{
 })
 
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
+// Note that "_" is used for type assertion functions in go2cs converted C# code, but it is not
+// a valid method name in Go, so it is not included in the reserved list.
 var reserved = NewHashSet([]string{
-	"_", "As", "AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName",
+	"As", "AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName",
 	"GetHashCode", "GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute",
 	"GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv",
 	"GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
