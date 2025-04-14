@@ -4,6 +4,9 @@
 
 // Package constraints defines a set of useful constraints to be used
 // with type parameters.
+
+using go.runtime;
+
 namespace go;
 
 partial class constraints_package {
@@ -52,6 +55,7 @@ partial interface Integer<ΔT> {
     //  Type constraints: Signed | Unsigned
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
+
 
 [GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
 partial interface PromotedTest1<ΔT> {

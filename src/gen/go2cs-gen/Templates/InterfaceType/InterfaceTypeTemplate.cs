@@ -115,14 +115,19 @@ internal class InterfaceTypeTemplate : TemplateBase
                 
                         public static {ImplementedInterfaceName} As<{TypeTTarget}>({PointerPrefix}<{TypeTTarget}> target_ptr) =>
                             ({ConversionTypeName})target_ptr;
+                
                 """ +
                 (InterfaceName == NonGenericInterfaceName ? 
                 $"""
                 
-                
                         public static {ImplementedInterfaceName}? As(object target) =>
                             typeof({NonGenericConversionTypeName}<>).CreateInterfaceHandler<{InterfaceName}>(target);            
-                """ : "");
+                """ : 
+                $"""
+                
+                        public static {InterfaceName}? As(object target) =>
+                            ({InterfaceName}?)typeof({NonGenericConversionTypeName}<>).CreateInterfaceHandler<object>(target);             
+                """);
         }
     }
 

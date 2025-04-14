@@ -963,7 +963,7 @@ public static class builtin
             // Ths following exception will not be captured by type assertion overload that returns a tuple
             // that includes a "success" boolean since missing method is considered a code conversion error
             if (method == null)
-                throw new InvalidOperationException($"Interface '{typeof(T).Name}' does not implement 'As' conversion method.");
+                throw new InvalidOperationException($"Interface '{typeof(T).Name}' does not implement 'As' runtime conversion method.");
 
         #pragma warning disable IL2060
             MethodInfo genericMethod = method.MakeGenericMethod(target.GetType());
