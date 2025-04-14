@@ -10,7 +10,10 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
+using go.runtime;
 
 #nullable enable
 

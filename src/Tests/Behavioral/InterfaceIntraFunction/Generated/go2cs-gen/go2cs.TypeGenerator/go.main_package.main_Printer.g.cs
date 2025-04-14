@@ -67,7 +67,7 @@ public static partial class main_package
             m_target_ptr = target_ptr;
             m_target_is_ptr = true;
         }
-            
+    
         // Implementation for 'main_Printer.Print' receiver method 
         private delegate void PrintByPtr(ж<ΔTTarget> targetʗ);
         private delegate void PrintByVal(ΔTTarget targetʗ);
@@ -86,15 +86,15 @@ public static partial class main_package
             if (s_PrintByPtr is null || !m_target_is_ptr)
                 s_PrintByVal!(target);
         
-            s_PrintByPtr(m_target_ptr!);
+            s_PrintByPtr!(m_target_ptr!);
         }
-    
+
         static Δmain_Printer()
         {
             Type targetType = typeof(ΔTTarget);
             Type targetTypeByPtr = typeof(ж<ΔTTarget>);
-            MethodInfo? extensionMethod;
-                
+            MethodInfo? extensionMethod;                              
+
             // Initialization of 'main_Printer.Print' receiver method implementation
             extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof(Print));
             

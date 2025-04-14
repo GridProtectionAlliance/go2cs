@@ -19,10 +19,21 @@ using go.runtime;
 
 namespace go;
 
-public static partial class main_package
+public static partial class constraints_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Abser
+    public partial interface Complex<ΔT> :
+        IAdditionOperators<ΔT, ΔT, ΔT>,
+        ISubtractionOperators<ΔT, ΔT, ΔT>,
+        IMultiplyOperators<ΔT, ΔT, ΔT>,
+        IDivisionOperators<ΔT, ΔT, ΔT>,
+        IEqualityOperators<ΔT, ΔT, bool>
+        where ΔT :
+        IAdditionOperators<ΔT, ΔT, ΔT>,
+        ISubtractionOperators<ΔT, ΔT, ΔT>,
+        IMultiplyOperators<ΔT, ΔT, ΔT>,
+        IDivisionOperators<ΔT, ΔT, ΔT>,
+        IEqualityOperators<ΔT, ΔT, bool>
     {
     }
 }
