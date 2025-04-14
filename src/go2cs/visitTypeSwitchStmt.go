@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 )
 
 func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
@@ -105,10 +106,10 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 				caseExprs = append(caseExprs, caseExpr)
 
-				if caseExpr == "nint" {
-					caseExprs = append(caseExprs, "int32")
-				} else if caseExpr == "nuint" {
-					caseExprs = append(caseExprs, "uint32")
+				if strings.HasPrefix(caseExpr, "nint ") {
+					caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", targetIdent))
+				} else if strings.HasPrefix(caseExpr, "nuint ") {
+					caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", targetIdent))
 				}
 			}
 
