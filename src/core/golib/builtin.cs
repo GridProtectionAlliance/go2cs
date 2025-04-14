@@ -997,6 +997,19 @@ public static class builtin
     }
 
     /// <summary>
+    /// Attempts type assert of <paramref name="target"/> object as type <typeparamref name="T"/>.
+    /// </summary>
+    /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
+    /// <param name="target">Source value to type assert.</param>
+    /// <param name="value">Value cast as <typeparamref name="T"/>, if successful; otherwise <c>default</c>.</param>
+    /// <returns><c>true</c> if type assertion was successful; otherwise, <c>false</c>.</returns>
+    public static bool _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target, out T value)
+    {
+        (value, bool ok) = target._<T>(true);
+        return ok;
+    }
+
+    /// <summary>
     /// Gets common Go type for given <paramref name="target"/>.
     /// </summary>
     /// <param name="target">Target value.</param>
