@@ -4,20 +4,20 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Signed<T> {
+[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Signed<ΔT> {
     //  Type constraints: ~int | ~int8 | ~int16 | ~int32 | ~int64
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Unsigned<T> {
+[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Unsigned<ΔT> {
     //  Type constraints: ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }
 
-[GoType("Operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
-partial interface Integer<T> {
+[GoType("operators = Sum, Arithmetic, Integer, Comparable, Ordered")]
+partial interface Integer<ΔT> {
     //  Type constraints: Signed | Unsigned
     // Derived operators: +, -, *, /, %, &, |, ^, <<, >>, ==, !=, <, <=, >, >=
 }

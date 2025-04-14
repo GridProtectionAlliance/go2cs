@@ -10,7 +10,10 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Numerics;
+using System.Reflection;
+using go.runtime;
 
 #nullable enable
 
@@ -21,5 +24,151 @@ public static partial class main_package
     [GeneratedCode("go2cs-gen", "0.1.4")]
     internal partial interface main_Printer
     {
+        // Runtime interface conversion methods
+        public static main_Printer As<ΔTTarget>(in ΔTTarget target) =>
+            (Δmain_Printer<ΔTTarget>)target!;
+
+        public static main_Printer As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+            (Δmain_Printer<ΔTTarget>)target_ptr;
+
+        public static main_Printer? As(object target) =>
+            typeof(Δmain_Printer<>).CreateInterfaceHandler<main_Printer>(target);            
+    }
+
+    // Defines a runtime type for duck-typed interface implementations based on existing
+    // extension methods that satisfy interface. This class is only used as fallback for
+    // when the interface was not able to be implemented at transpile time, e.g., with
+    // dynamically declared anonymous interfaces used with type assertions.
+    [GeneratedCode("go2cs-gen", "0.1.4")]
+    internal class Δmain_Printer<ΔTTarget> : main_Printer
+    {
+        private ΔTTarget m_target = default!;
+        private readonly ж<ΔTTarget>? m_target_ptr;
+        private readonly bool m_target_is_ptr;
+    
+        public ref ΔTTarget Target
+        {
+            get
+            {
+                if (m_target_is_ptr && m_target_ptr is not null)
+                    return ref m_target_ptr.val;
+    
+                return ref m_target;
+            }
+        }
+    
+        public Δmain_Printer(in ΔTTarget target)
+        {
+            m_target = target;
+        }
+    
+        public Δmain_Printer(ж<ΔTTarget> target_ptr)
+        {
+            m_target_ptr = target_ptr;
+            m_target_is_ptr = true;
+        }
+            
+        // Implementation for 'main_Printer.Print' receiver method 
+        private delegate void PrintByPtr(ж<ΔTTarget> targetʗ);
+        private delegate void PrintByVal(ΔTTarget targetʗ);
+        
+        private static readonly PrintByPtr? s_PrintByPtr;
+        private static readonly PrintByVal? s_PrintByVal;
+        
+        [DebuggerNonUserCode]
+        public void Print()
+        {
+            ΔTTarget target = m_target;
+        
+            if (m_target_is_ptr && m_target_ptr is not null)
+                target = m_target_ptr.val;
+        
+            if (s_PrintByPtr is null || !m_target_is_ptr)
+                s_PrintByVal!(target);
+        
+            s_PrintByPtr(m_target_ptr!);
+        }
+    
+        static Δmain_Printer()
+        {
+            Type targetType = typeof(ΔTTarget);
+            Type targetTypeByPtr = typeof(ж<ΔTTarget>);
+            MethodInfo? extensionMethod;
+                
+            // Initialization of 'main_Printer.Print' receiver method implementation
+            extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof(Print));
+            
+            if (extensionMethod is not null)
+                s_PrintByPtr = extensionMethod.CreateStaticDelegate(typeof(PrintByPtr)) as PrintByPtr;
+            
+            extensionMethod = targetType.GetExtensionMethod(nameof(Print));
+            
+            if (extensionMethod is not null)
+                s_PrintByVal = extensionMethod.CreateStaticDelegate(typeof(PrintByVal)) as PrintByVal;
+            
+            if (s_PrintByPtr is null && s_PrintByVal is null)
+                throw new NotImplementedException($"{targetType.FullName} does not implement 'main_Printer.{nameof(Print)}' method");
+        }
+    
+        public static explicit operator Δmain_Printer<ΔTTarget>(in ж<ΔTTarget> target_ptr) => new(target_ptr);
+    
+        public static explicit operator Δmain_Printer<ΔTTarget>(in ΔTTarget target) => new(target);
+
+        public override int GetHashCode() => Target?.GetHashCode() ?? 0;
+
+        public static bool operator ==(Δmain_Printer<ΔTTarget>? left, Δmain_Printer<ΔTTarget>? right) => left?.Equals(right) ?? right is null;
+        
+        public static bool operator !=(Δmain_Printer<ΔTTarget>? left, Δmain_Printer<ΔTTarget>? right) => !(left == right);
+
+        #region [ Operator Constraint Implementations ]
+
+        // These operator constraints exist to satisfy possible constraints defined on source interface,
+        // however, the instance of this class is only used to implement the interface methods, so these
+        // operators are only placeholders and not actually functional.
+
+        public static bool operator <(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => false;
+        
+        public static bool operator <=(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => false;
+        
+        public static bool operator >(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => false;
+        
+        public static bool operator >=(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => false;
+        
+        public static Δmain_Printer<ΔTTarget> operator +(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator -(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator -(Δmain_Printer<ΔTTarget> value) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator *(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator /(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator %(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+
+        public static Δmain_Printer<ΔTTarget> operator &(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator |(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator ^(Δmain_Printer<ΔTTarget> left, Δmain_Printer<ΔTTarget> right) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator ~(Δmain_Printer<ΔTTarget> value) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator <<(Δmain_Printer<ΔTTarget> value, Δmain_Printer<ΔTTarget> shiftAmount) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator >>(Δmain_Printer<ΔTTarget> value, Δmain_Printer<ΔTTarget> shiftAmount) => default!;
+        
+        public static Δmain_Printer<ΔTTarget> operator >>>(Δmain_Printer<ΔTTarget> value, Δmain_Printer<ΔTTarget> shiftAmount) => default!;
+        
+        #endregion
+    
+        // Enable comparisons between nil and Δmain_Printer<ΔTTarget> interface instance
+        public static bool operator ==(Δmain_Printer<ΔTTarget> value, NilType nil) => Activator.CreateInstance<Δmain_Printer<ΔTTarget>>().Equals(value);
+    
+        public static bool operator !=(Δmain_Printer<ΔTTarget> value, NilType nil) => !(value == nil);
+    
+        public static bool operator ==(NilType nil, Δmain_Printer<ΔTTarget> value) => value == nil;
+    
+        public static bool operator !=(NilType nil, Δmain_Printer<ΔTTarget> value) => value != nil;
     }
 }

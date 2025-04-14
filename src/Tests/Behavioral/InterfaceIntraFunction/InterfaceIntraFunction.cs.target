@@ -12,7 +12,7 @@ public static void Print(this Message m) {
     fmt.Println(m.Text);
 }
 
-[GoType] partial interface main_Printer {
+[GoType("runtime")] partial interface main_Printer {
     void Print();
 }
 
