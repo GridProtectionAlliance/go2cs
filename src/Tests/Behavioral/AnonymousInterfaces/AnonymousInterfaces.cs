@@ -12,9 +12,8 @@ partial class main_package {
 // 1. Type Switch using inline interface
 internal static void testTypeSwitch(error err) {
     switch (err.type()) {
-    case {} x when Implements<testTypeSwitch_type>(x):
-        var x1 = testTypeSwitch_type.As(x);
-        fmt.Println("TypeSwitch: Unwrap =", x1.Unwrap());
+    case {} Δx when Δx._<testTypeSwitch_type>(out var x):
+        fmt.Println("TypeSwitch: Unwrap =", x.Unwrap());
         break;
     default: {
         var x = err.type();
@@ -87,7 +86,7 @@ func testInterfaceEmbedding(x InlineEmbed) {
 [GoType] partial struct fakeReader {
 }
 
-internal static (nint, error) Read(this fakeReader Δ_, slice<byte> b) {
+internal static (nint, error) Read(this fakeReader _, slice<byte> b) {
     copy(b, "DATA"u8);
     return (4, default!);
 }
@@ -95,15 +94,15 @@ internal static (nint, error) Read(this fakeReader Δ_, slice<byte> b) {
 [GoType] partial struct fakeError {
 }
 
-internal static @string Error(this fakeError Δ_) {
+internal static @string Error(this fakeError _) {
     return "fake error"u8;
 }
 
-internal static error Unwrap(this fakeError Δ_) {
+internal static error Unwrap(this fakeError _) {
     return io.EOF;
 }
 
-internal static bool Is(this fakeError Δ_, error err) {
+internal static bool Is(this fakeError _, error err) {
     return AreEqual(err, io.EOF);
 }
 

@@ -86,8 +86,23 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		} else {
 			var caseExprs []string
 
-			for _, expr := range caseClause.List {
+			for i, expr := range caseClause.List {
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
+
+				if v.isAnonymousInterface(expr) {
+					if len(targetIdent) > 0 && targetIdent != "_" {
+						// case {} Δx when Δx._<liftedIfaceType>(out var x):
+						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, targetIdent)
+						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var %s)", tempTarget, tempTarget, caseExpr, targetIdent)
+					} else {
+						// case {} t1 when t1._<liftedIfaceType>(out _):
+						tempTarget := fmt.Sprintf("%s%d", TempVarMarker, i)
+						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var _)", tempTarget, tempTarget, caseExpr)
+					}
+				} else {
+					caseExpr = fmt.Sprintf("%s %s", caseExpr, targetIdent)
+				}
+
 				caseExprs = append(caseExprs, caseExpr)
 
 				if caseExpr == "nint" {
@@ -100,8 +115,6 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 			for _, caseExpr := range caseExprs {
 				v.writeOutput("case ")
 				v.targetFile.WriteString(caseExpr)
-				v.targetFile.WriteRune(' ')
-				v.targetFile.WriteString(targetIdent)
 				v.targetFile.WriteRune(':')
 				v.indentLevel++
 

@@ -67,16 +67,16 @@ public static partial class main_package
             m_target_ptr = target_ptr;
             m_target_is_ptr = true;
         }
-            
+    
         // Implementation for 'testTypeAssertion_type.Is' receiver method 
-        private delegate bool IsByPtr(ж<ΔTTarget> targetʗ, go.error Δ_);
-        private delegate bool IsByVal(ΔTTarget targetʗ, go.error Δ_);
+        private delegate bool IsByPtr(ж<ΔTTarget> targetʗ, go.error _);
+        private delegate bool IsByVal(ΔTTarget targetʗ, go.error _);
         
         private static readonly IsByPtr? s_IsByPtr;
         private static readonly IsByVal? s_IsByVal;
         
         [DebuggerNonUserCode]
-        public bool Is(go.error Δ_)
+        public bool Is(go.error pᴛ0)
         {
             ΔTTarget target = m_target;
         
@@ -84,17 +84,17 @@ public static partial class main_package
                 target = m_target_ptr.val;
         
             if (s_IsByPtr is null || !m_target_is_ptr)
-                return s_IsByVal!(target, Δ_);
+                return s_IsByVal!(target, pᴛ0);
         
-            return s_IsByPtr(m_target_ptr!, Δ_);
+            return s_IsByPtr!(m_target_ptr!, pᴛ0);
         }
-    
+
         static ΔtestTypeAssertion_type()
         {
             Type targetType = typeof(ΔTTarget);
             Type targetTypeByPtr = typeof(ж<ΔTTarget>);
-            MethodInfo? extensionMethod;
-                
+            MethodInfo? extensionMethod;                              
+
             // Initialization of 'testTypeAssertion_type.Is' receiver method implementation
             extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof(Is));
             

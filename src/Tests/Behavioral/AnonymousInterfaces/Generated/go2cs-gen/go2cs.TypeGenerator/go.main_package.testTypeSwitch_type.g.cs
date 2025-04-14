@@ -67,7 +67,7 @@ public static partial class main_package
             m_target_ptr = target_ptr;
             m_target_is_ptr = true;
         }
-            
+    
         // Implementation for 'testTypeSwitch_type.Unwrap' receiver method 
         private delegate go.error UnwrapByPtr(ж<ΔTTarget> targetʗ);
         private delegate go.error UnwrapByVal(ΔTTarget targetʗ);
@@ -86,15 +86,15 @@ public static partial class main_package
             if (s_UnwrapByPtr is null || !m_target_is_ptr)
                 return s_UnwrapByVal!(target);
         
-            return s_UnwrapByPtr(m_target_ptr!);
+            return s_UnwrapByPtr!(m_target_ptr!);
         }
-    
+
         static ΔtestTypeSwitch_type()
         {
             Type targetType = typeof(ΔTTarget);
             Type targetTypeByPtr = typeof(ж<ΔTTarget>);
-            MethodInfo? extensionMethod;
-                
+            MethodInfo? extensionMethod;                              
+
             // Initialization of 'testTypeSwitch_type.Unwrap' receiver method implementation
             extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof(Unwrap));
             
