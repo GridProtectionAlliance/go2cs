@@ -5,7 +5,7 @@ using io = io_package;
 
 partial class main_package {
 
-[GoType("runtime")] partial interface testTypeSwitch_type {
+[GoType("dyn")] partial interface testTypeSwitch_type {
     error Unwrap();
 }
 
@@ -22,7 +22,7 @@ internal static void testTypeSwitch(error err) {
     }}
 }
 
-[GoType("runtime")] partial interface testTypeAssertion_type {
+[GoType("dyn")] partial interface testTypeAssertion_type {
     bool Is(error _);
 }
 
@@ -37,8 +37,12 @@ internal static void testTypeAssertion(error err) {
     }
 }
 
+[GoType("dyn")] partial interface takesReader_r {
+    (nint, error) Read(slice<byte> _);
+}
+
 // 3. Function parameter using inline interface
-internal static void takesReader(interface{Read(<>byte) (int, error)} r) {
+internal static void takesReader(takesReader_r r) {
     var buf = new slice<byte>(4);
     var (n, _) = r.Read(buf);
     fmt.Println("FuncParam: Read =", ((@string)(buf[..(int)(n)])));

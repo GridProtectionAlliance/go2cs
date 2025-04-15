@@ -26,7 +26,7 @@ func main() {
 		Age  int
 	})
 
-	fmt.Println("Anonymous struct type assertion:", ok) // Should be true
+	fmt.Println("Anonymous struct type assertion:", ok)
 
 	// Now test with named struct
 	someInterface = namedPerson
@@ -36,5 +36,5 @@ func main() {
 		Age  int
 	})
 
-	fmt.Println("Named struct with identical fields:", ok) // Will be false as your results showed
+	fmt.Println("Named struct with identical fields:", ok)
 }

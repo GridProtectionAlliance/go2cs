@@ -40,7 +40,7 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<fakeError, error>]
-[assembly: GoImplement<fakeReader, interface{Read(<>byte) (int, error)}>]
+[assembly: GoImplement<fakeReader, takesReader_r>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

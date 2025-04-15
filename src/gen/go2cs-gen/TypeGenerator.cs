@@ -247,7 +247,7 @@ public class TypeGenerator : ISourceGenerator
 
                     case InterfaceDeclarationSyntax interfaceDeclaration:
                         string[]? operatorConstraints = null;
-                        bool runtime = false;
+                        bool dynamic = false;
 
                         if (!string.IsNullOrWhiteSpace(typeDefinition))
                         {
@@ -262,9 +262,9 @@ public class TypeGenerator : ISourceGenerator
                                     if (parts[0].Trim().Equals("operators", StringComparison.OrdinalIgnoreCase))
                                         operatorConstraints = parts[1].Split([','], StringSplitOptions.RemoveEmptyEntries).Select(part => part.Trim()).ToArray();
                                 }
-                                else if (key.Trim().Equals("runtime", StringComparison.OrdinalIgnoreCase))
+                                else if (key.Trim().Equals("dyn", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    runtime = true;
+                                    dynamic = true;
                                 }
                             }
                         }
@@ -278,8 +278,8 @@ public class TypeGenerator : ISourceGenerator
                             Scope = scope,
                             InterfaceName = identifier,
                             OperatorConstraints = operatorConstraints ?? [],
-                            Methods = runtime ? interfaceDeclaration.GetInterfaceMethods(context) : [],
-                            Runtime = runtime,
+                            Methods = dynamic ? interfaceDeclaration.GetInterfaceMethods(context) : [],
+                            Dynamic = dynamic,
                             UsingStatements = usingStatements
                         }
                         .Generate();

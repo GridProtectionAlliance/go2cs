@@ -1315,11 +1315,14 @@ func isInterface(t types.Type) (result bool, empty bool) {
 	return false, false
 }
 
-func (v *Visitor) isAnonymousInterface(expr ast.Expr) bool {
-	exprType := v.getType(expr, false)
-	_, isNamed := exprType.(*types.Named)
+func (v *Visitor) isDynamicInterface(expr ast.Expr) bool {
+	return isDynamicInterface(v.getType(expr, false))
+}
 
-	if _, ok := exprType.Underlying().(*types.Interface); ok && !isNamed {
+func isDynamicInterface(t types.Type) bool {
+	_, isNamed := t.(*types.Named)
+
+	if _, ok := t.Underlying().(*types.Interface); ok && !isNamed {
 		return true
 	}
 

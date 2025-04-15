@@ -10,7 +10,7 @@ internal class InterfaceTypeTemplate : TemplateBase
     public required string InterfaceName;
     public required string[] OperatorConstraints;
     public required MethodInfo[] Methods;
-    public required bool Runtime;
+    public required bool Dynamic;
     private string? m_nonGenericInterfaceName;
     private string? m_conversionTypeName;
     private string? m_nonGenericConversionTypeName;
@@ -106,7 +106,7 @@ internal class InterfaceTypeTemplate : TemplateBase
     {
         get
         {
-            return !Runtime ? "" : 
+            return !Dynamic ? "" : 
                 $"""
                 
                         // Runtime interface conversion methods
@@ -135,7 +135,7 @@ internal class InterfaceTypeTemplate : TemplateBase
     {
         get
         {
-            return !Runtime ? "" :
+            return !Dynamic ? "" :
                 $$"""
                 
                 

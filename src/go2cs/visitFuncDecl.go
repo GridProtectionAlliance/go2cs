@@ -414,6 +414,14 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
 
+		if isDynamicInterface(param.Type()) {
+			if ifaceType, ok := v.currentFuncDecl.Type.Params.List[i].Type.(*ast.InterfaceType); ok {
+				v.visitInterfaceType(ifaceType, param.Type(), param.Name(), nil, true)
+			} else {
+				println(fmt.Sprintf("WARNING: Unable to find interface type for '%s parameter '%s'", v.currentFuncName, param.Name()))
+			}
+		}
+
 		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")
 

@@ -166,11 +166,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	postAttrs := " "
 
 	if lifted {
-		// Add runtime implementation attribute to lifted types since
+		// Add "dyn" implementation attribute to lifted types since
 		// they cannot be directly implemented in C# code. For these
 		// types, a reflection based type implementation is used when
 		// type assertions and comparisons are needed.
-		interfaceAttrs = "runtime"
+		interfaceAttrs = "dyn"
 	}
 
 	if len(operatorSets) > 0 {

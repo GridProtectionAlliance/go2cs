@@ -90,7 +90,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 			for i, expr := range caseClause.List {
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
 
-				if v.isAnonymousInterface(expr) {
+				if v.isDynamicInterface(expr) {
 					if len(targetIdent) > 0 && targetIdent != "_" {
 						// case {} Δx when Δx._<liftedIfaceType>(out var x):
 						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, targetIdent)
