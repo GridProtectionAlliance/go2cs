@@ -109,7 +109,7 @@ public class TypeGenerator : ISourceGenerator
 
                 switch (targetSyntax)
                 {
-                    case StructDeclarationSyntax structDeclaration when string.IsNullOrWhiteSpace(typeDefinition):
+                    case StructDeclarationSyntax structDeclaration when string.IsNullOrWhiteSpace(typeDefinition) || typeDefinition.Equals("dyn"):
                         generatedSource = new StructTypeTemplate
                         {
                             PackageNamespace = packageNamespace,

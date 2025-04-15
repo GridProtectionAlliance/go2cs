@@ -56,6 +56,7 @@ public static class TypeExtensions
     private static readonly ConcurrentDictionary<Type, MethodInfo[]> s_typeExtensionMethods = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_typeExtensionMethodNames = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_interfaceMethodNames = [];
+    private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_structFieldNames = [];
     private static readonly ConcurrentDictionary<Type, MethodInfo?> s_typeEqualityOperators = [];
     private static int s_registeredAssemblyLoadEvent;
 
@@ -398,6 +399,25 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Gets the names of all fields in a struct type.
+    /// </summary>
+    /// <param name="valueType">Struct type to search.</param>
+    /// <returns>Names of all fields in the struct type.</returns>
+    /// <exception cref="ArgumentException">Thrown when the provided type is not a value type.</exception>
+    public static ImmutableHashSet<string> GetStructFieldNames(this Type valueType)
+    {
+        return s_structFieldNames.GetOrAdd(valueType, _ =>
+        {
+            if (!valueType.IsValueType)
+                throw new ArgumentException($"Type '{valueType.FullName}' is not a value type.", nameof(valueType));
+
+            FieldInfo[] fields = valueType.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            return [..fields.Select(field => field.Name)];
+        });
+    }
+
+    /// <summary>
     /// Creates a delegate for the given static method metadata.
     /// </summary>
     /// <param name="methodInfo">Method metadata of extension method.</param>
@@ -504,6 +524,17 @@ public static class TypeExtensions
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Determines if the specified <paramref name="valueType"/> is a dynamic type.
+    /// </summary>
+    /// <param name="valueType">Type to check.</param>
+    /// <returns><c>true</c> if <paramref name="valueType"/> is a dynamic type; otherwise, <c>false</c>.</returns>
+    public static bool IsDynamicType(this Type valueType)
+    {
+        GoTypeAttribute? goType = valueType.GetCustomAttribute<GoTypeAttribute>();
+        return goType is not null && goType.Definition == "dyn";
     }
 
     /// <summary>

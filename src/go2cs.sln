@@ -186,6 +186,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StdLibInternalAbi", "Tests\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnonymousInterfaces", "Tests\Behavioral\AnonymousInterfaces\AnonymousInterfaces.csproj", "{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnonymousStructs", "Tests\Behavioral\AnonymousStructs\AnonymousStructs.csproj", "{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -500,6 +502,10 @@ Global
 		{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -586,6 +592,7 @@ Global
 		{14AEF7B0-B256-E8FB-3489-82D93CCBCD54} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 		{9B234B42-FB10-A638-C17E-5F4A8CED1F56} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}

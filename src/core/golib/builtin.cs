@@ -940,33 +940,63 @@ public static class builtin
     /// <typeparam name="T">Desired type for <paramref name="target"/>.</typeparam>
     /// <param name="target">Source value to type assert.</param>
     /// <returns><paramref name="target"/> value cast as <typeparamref name="T"/>, if successful.</returns>
-    public static T _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target)
+    public static T _<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(this object target)
     {
         try
         {
+            Type typeOfT = typeof(T);
+
             switch (target)
             {
-                case string str when typeof(T) == typeof(@string):
+                case string str when typeOfT == typeof(@string):
                     return (T)(object)new @string(str);
                 case T typedTarget:
                     return typedTarget;
             }
 
-            if (!typeof(T).IsInterface || !Implements<T>(target))
+            Type targetType = target.GetType();
+
+            if (typeOfT.IsValueType && targetType.IsValueType)
+            {
+                // Only dynamic, unnamed types can be converted to each other in Go
+                if (typeOfT.IsDynamicType() && targetType.IsDynamicType())
+                {
+                    ImmutableHashSet<string> typeOfTFieldName = typeOfT.GetStructFieldNames();
+
+                    // Check if target type has the same fields as the asserted type
+                    if (targetType.GetStructFieldNames().Except(typeOfTFieldName).Count == 0)
+                    {
+                        // Create a new instance of the asserted type
+                        T newInstance = (T)Activator.CreateInstance(typeOfT)!;
+
+                        // Copy the values of the fields from the target to the new instance
+                        foreach (string field in typeOfTFieldName)
+                            typeOfT.GetField(field)!.SetValue(newInstance,  targetType.GetField(field)!.GetValue(target));
+
+                        return newInstance;
+                    }
+                }
+            }
+
+            if (!typeOfT.IsInterface || !Implements<T>(target))
                 return (T)target;
 
             // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
             // define an interface that describes an abstract method implemented by another interface,
             // so we are forced to use reflection to find the static interface conversion method...
-            MethodInfo? method = typeof(T).GetMethod("As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
+            MethodInfo? method = typeOfT.GetMethod("As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
 
             // Ths following exception will not be captured by type assertion overload that returns a tuple
             // that includes a "success" boolean since missing method is considered a code conversion error
             if (method == null)
-                throw new InvalidOperationException($"Interface '{typeof(T).Name}' does not implement 'As' runtime conversion method.");
+                throw new InvalidOperationException($"Interface '{typeOfT.Name}' does not implement 'As' runtime conversion method.");
 
         #pragma warning disable IL2060
-            MethodInfo genericMethod = method.MakeGenericMethod(target.GetType());
+            MethodInfo genericMethod = method.MakeGenericMethod(targetType);
         #pragma warning restore IL2060
 
             return (T)genericMethod.Invoke(null, [target])!;
@@ -984,7 +1014,11 @@ public static class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="_">Overload discriminator for different return type, <see cref="ꟷ"/>.</param>
     /// <returns>Tuple of <paramref name="target"/> value cast as <typeparamref name="T"/> and success boolean.</returns>
-    public static (T, bool) _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target, bool _)
+    public static (T, bool) _<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(this object target, bool _)
     {
         try
         {
@@ -1003,7 +1037,11 @@ public static class builtin
     /// <param name="target">Source value to type assert.</param>
     /// <param name="value">Value cast as <typeparamref name="T"/>, if successful; otherwise <c>default</c>.</param>
     /// <returns><c>true</c> if type assertion was successful; otherwise, <c>false</c>.</returns>
-    public static bool _<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicMethods)] T>(this object target, out T value)
+    public static bool _<[DynamicallyAccessedMembers(
+        DynamicallyAccessedMemberTypes.PublicMethods |
+        DynamicallyAccessedMemberTypes.PublicConstructors |
+        DynamicallyAccessedMemberTypes.PublicFields
+    )] T>(this object target, out T value)
     {
         (value, bool ok) = target._<T>(true);
         return ok;

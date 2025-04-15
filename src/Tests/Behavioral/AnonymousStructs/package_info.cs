@@ -39,8 +39,6 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<fakeError, error>]
-[assembly: GoImplement<fakeReader, interface{Read(<>byte) (int, error)}>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -49,7 +47,6 @@ using static go.main_package;
 namespace go;
 
 [GoPackage("main")]
-[GoTestMatchingConsoleOutput]
 public static partial class main_package
 {
 }
