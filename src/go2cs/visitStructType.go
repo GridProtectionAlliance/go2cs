@@ -51,7 +51,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
 	}
 
-	v.writeStringLn(target, "[GoType] partial struct %s%s%s{", structTypeName, typeParams, constraints)
+	var dynamic string
+
+	if lifted {
+		dynamic = "(\"dyn\")"
+	}
+
+	v.writeStringLn(target, "[GoType%s] partial struct %s%s%s{", dynamic, structTypeName, typeParams, constraints)
 	v.indentLevel++
 
 	// Track promoted interface methods that could be shadowed by receivers
