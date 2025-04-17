@@ -32,7 +32,8 @@ public static partial class main_package
             this.a = default!;
         }
 
-        public T2(int a = default!)
+
+        internal T2(int a = default!)
         {
             this.a = a;
         }

@@ -47,7 +47,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public structTypeUncommon(global::go.main_package.ΔStructType StructType = default!, global::go.main_package.UncommonType u = default!)
+        public structTypeUncommon(global::go.main_package.ΔStructType StructType = default!)
+        {
+            ᏑʗStructType = new ж<global::go.main_package.ΔStructType>(StructType);
+        }
+
+        internal structTypeUncommon(global::go.main_package.ΔStructType StructType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗStructType = new ж<global::go.main_package.ΔStructType>(StructType);
             this.u = u;

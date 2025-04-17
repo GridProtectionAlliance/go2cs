@@ -47,7 +47,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ1(global::go.main_package.ΔFuncType FuncType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_uᴛ1(global::go.main_package.ΔFuncType FuncType = default!)
+        {
+            ᏑʗFuncType = new ж<global::go.main_package.ΔFuncType>(FuncType);
+        }
+
+        internal Uncommon_uᴛ1(global::go.main_package.ΔFuncType FuncType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗFuncType = new ж<global::go.main_package.ΔFuncType>(FuncType);
             this.u = u;

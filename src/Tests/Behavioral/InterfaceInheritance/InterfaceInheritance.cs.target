@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct T1 {
-    public @string name;
+    internal @string name;
 }
 
 public static void M(this T1 t) {
@@ -23,7 +23,7 @@ public static @string Error(this T1 t) {
 }
 
 [GoType] partial struct T2 {
-    public @string name;
+    internal @string name;
 }
 
 public static void M(this T2 t) {

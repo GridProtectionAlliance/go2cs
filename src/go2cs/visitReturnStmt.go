@@ -96,15 +96,21 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				result.WriteString(", ")
 			}
 
+			var replacementVal string
+
 			if resultParams != nil && i < resultParams.Len() {
 				argType := v.getType(expr, false)
 				targetType := resultParams.At(i).Type()
-				v.checkForDynamicStructs(argType, targetType)
+				replacementVal = v.checkForDynamicStructs(argType, targetType)
 			}
 
 			lambdaContext.deferredDecls = &strings.Builder{}
 
 			resultExpr := v.convExpr(expr, []ExprContext{basicLitContext, lambdaContext})
+
+			if len(replacementVal) > 0 {
+				resultExpr = strings.ReplaceAll(replacementVal, DynamicCastArgMarker, resultExpr)
+			}
 
 			if lambdaContext.deferredDecls.Len() > 0 {
 				deferredDecls.WriteString(lambdaContext.deferredDecls.String())

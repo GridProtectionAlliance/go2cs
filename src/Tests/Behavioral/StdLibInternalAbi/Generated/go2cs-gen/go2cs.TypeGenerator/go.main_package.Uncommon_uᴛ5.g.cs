@@ -59,7 +59,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ5(global::go.main_package.ΔMapType MapType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_uᴛ5(global::go.main_package.ΔMapType MapType = default!)
+        {
+            ᏑʗMapType = new ж<global::go.main_package.ΔMapType>(MapType);
+        }
+
+        internal Uncommon_uᴛ5(global::go.main_package.ΔMapType MapType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗMapType = new ж<global::go.main_package.ΔMapType>(MapType);
             this.u = u;

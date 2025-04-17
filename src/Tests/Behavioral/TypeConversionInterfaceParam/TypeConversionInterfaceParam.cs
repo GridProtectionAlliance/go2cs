@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct DataProcessor_data {
+[GoType("dyn")] partial struct DataProcessor_data {
     public nint ID;
     public @string Name;
     public bool Valid;
@@ -17,7 +17,7 @@ partial class main_package {
 [GoType] partial struct Processor {
 }
 
-[GoType] partial struct Process_data {
+[GoType("dyn")] partial struct Process_data {
     public nint ID;
     public @string Name;
     public bool Valid;
@@ -27,7 +27,7 @@ public static void Process(this Processor p, Process_data data) {
     fmt.Printf("Processing ID: %d, Name: %s, Valid: %t\n"u8, data.ID, data.Name, data.Valid);
 }
 
-[GoType] partial struct main_data {
+[GoType("dyn")] partial struct main_data {
     public nint ID;
     public @string Name;
     public bool Valid;

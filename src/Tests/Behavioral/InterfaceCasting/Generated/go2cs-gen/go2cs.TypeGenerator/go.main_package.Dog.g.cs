@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public Dog()
-        {
-        }
         
         // Handle comparisons between struct 'Dog' instances
         public bool Equals(Dog other) =>

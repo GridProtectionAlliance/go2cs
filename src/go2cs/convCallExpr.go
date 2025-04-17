@@ -91,10 +91,31 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		callExprContext.hasSpreadOperator = true
 	}
 
+	var replacementArgs []string
+
 	// Check if any parameters of callExpr.Fun are interface or pointer types
 	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
-		for i := 0; i < funType.Params().Len(); i++ {
+		params := funType.Params()
+
+		for i := range params.Len() {
 			var paramType types.Type
+			paramHasArg := callExpr.Args != nil && i < len(callExpr.Args)
+
+			if paramHasArg {
+				// Check if the parameter type is an anonymous struct
+				if structType, exprType := v.extractStructType(callExpr.Args[i]); structType != nil {
+					v.indentLevel++
+					v.visitStructType(structType, exprType, params.At(i).Name(), nil, true)
+					v.indentLevel--
+				}
+
+				// Check if the parameter type is an anonymous interface
+				if interfaceType, exprType := v.extractInterfaceType(callExpr.Args[i]); interfaceType != nil {
+					v.indentLevel++
+					v.visitInterfaceType(interfaceType, exprType, params.At(i).Name(), nil, true)
+					v.indentLevel--
+				}
+			}
 
 			callExprContext.u8StringArgOK[i] = true
 			funcName := v.convExpr(callExpr.Fun, nil)
@@ -106,10 +127,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				continue
 			}
 
-			if callExpr.Args != nil && i < len(callExpr.Args) {
+			if paramHasArg {
 				argType := v.getType(callExpr.Args[i], false)
 				targetType := paramType
-				v.checkForDynamicStructs(argType, targetType)
+				replacementArg := v.checkForDynamicStructs(argType, targetType)
+
+				// If a replacement argument is found, add it to the replacementArgs slice,
+				// creating the slice if it doesn't exist yet
+				if len(replacementArg) > 0 {
+					if replacementArgs == nil {
+						replacementArgs = make([]string, params.Len())
+					}
+
+					replacementArgs[i] = replacementArg
+				}
 			}
 
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
@@ -127,6 +158,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 	}
+
+	callExprContext.replacementArgs = replacementArgs
 
 	if ident, ok := callExpr.Fun.(*ast.Ident); ok {
 		// Handle make call as a special case

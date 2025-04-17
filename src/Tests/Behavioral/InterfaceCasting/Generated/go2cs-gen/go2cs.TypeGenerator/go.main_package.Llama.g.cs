@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public Llama()
-        {
-        }
         
         // Handle comparisons between struct 'Llama' instances
         public bool Equals(Llama other) =>

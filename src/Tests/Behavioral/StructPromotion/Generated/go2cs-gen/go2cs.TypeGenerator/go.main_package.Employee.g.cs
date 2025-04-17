@@ -32,7 +32,8 @@ public static partial class main_package
             this.position = default!;
         }
 
-        public Employee(global::go.@string position = default!)
+
+        internal Employee(global::go.@string position = default!)
         {
             this.position = position;
         }

@@ -25,6 +25,13 @@ func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parame
 				v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
 				v.indentLevel--
 			}
+
+			// Check if the return type is an anonymous interface
+			if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil {
+				v.indentLevel++
+				v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true)
+				v.indentLevel--
+			}
 		}
 	}
 
@@ -36,6 +43,13 @@ func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parame
 				if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
 					v.indentLevel++
 					v.visitStructType(structType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true)
+					v.indentLevel--
+				}
+
+				// Check if the parameter type is an anonymous interface
+				if interfaceType, exprType := v.extractInterfaceType(paramField.Type); interfaceType != nil {
+					v.indentLevel++
+					v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true)
 					v.indentLevel--
 				}
 			}

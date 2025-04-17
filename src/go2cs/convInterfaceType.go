@@ -9,6 +9,12 @@ func (v *Visitor) convInterfaceType(interfaceType *ast.InterfaceType, context Id
 	var name string
 	var identType types.Type
 
+	t := v.getType(interfaceType, false)
+
+	if liftedName, ok := v.liftedTypeMap[t]; ok {
+		return liftedName
+	}
+
 	if context.ident == nil {
 		name = "type"
 	} else {

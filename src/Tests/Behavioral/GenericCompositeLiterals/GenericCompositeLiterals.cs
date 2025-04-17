@@ -7,7 +7,7 @@ partial class main_package {
 [GoType] partial struct Queue<T>
     where T : new()
 {
-    public slice<T> items;
+    internal slice<T> items;
 }
 
 [GoRecv] public static void Enqueue<T>(this ref Queue<T> q, T item)

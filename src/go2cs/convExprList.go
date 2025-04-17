@@ -20,6 +20,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	hasSpreadOperator := false
 	var interfaceTypes map[int]types.Type
 	var callArgs []string
+	var replacementArgs []string
 
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
@@ -28,6 +29,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		hasSpreadOperator = callContext.hasSpreadOperator
 		interfaceTypes = callContext.interfaceTypes
 		callArgs = callContext.callArgs
+		replacementArgs = callContext.replacementArgs
 	}
 
 	for i, expr := range exprs {
@@ -72,13 +74,21 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
 
-		arg := &strings.Builder{}
+		var resultExpr string
 
 		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil {
-			arg.WriteString(v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts)))
+			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts))
 		} else {
-			arg.WriteString(v.convExpr(expr, contexts))
+			resultExpr = v.convExpr(expr, contexts)
 		}
+
+		if replacementArgs != nil && i < len(replacementArgs) && len(replacementArgs[i]) > 0 {
+			resultExpr = strings.ReplaceAll(replacementArgs[i], DynamicCastArgMarker, resultExpr)
+		}
+
+		arg := &strings.Builder{}
+
+		arg.WriteString(resultExpr)
 
 		// If the last expression has a spread operator, use elipsis property as source
 		// this way elements are passed as arguments instead of a slice or array

@@ -36,7 +36,8 @@ public static partial class main_package
             this.lastRead = default!;
         }
 
-        public Buffer(global::go.slice<byte> buf = default!, nint off = default!, sbyte lastRead = default!)
+
+        internal Buffer(global::go.slice<byte> buf = default!, nint off = default!, sbyte lastRead = default!)
         {
             this.buf = buf;
             this.off = off;

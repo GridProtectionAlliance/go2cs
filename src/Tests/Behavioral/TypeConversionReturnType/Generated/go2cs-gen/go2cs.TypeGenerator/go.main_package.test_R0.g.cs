@@ -38,7 +38,13 @@ public static partial class main_package
             this.M = default!;
         }
 
-        public test_R0(global::go.@string @string = default!, global::go.ж<nint> @int = default!, global::go.ж<bool> P = default!, global::go.map<nint, nint> M = default!)
+        public test_R0(global::go.ж<bool> P = default!, global::go.map<nint, nint> M = default!)
+        {
+            this.P = P;
+            this.M = M;
+        }
+
+        internal test_R0(global::go.@string @string = default!, global::go.ж<nint> @int = default!, global::go.ж<bool> P = default!, global::go.map<nint, nint> M = default!)
         {
             this.@string = @string;
             this.@int = @int;

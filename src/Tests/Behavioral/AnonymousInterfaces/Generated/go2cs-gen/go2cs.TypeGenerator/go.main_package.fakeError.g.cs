@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public fakeError()
-        {
-        }
         
         // Handle comparisons between struct 'fakeError' instances
         public bool Equals(fakeError other) =>

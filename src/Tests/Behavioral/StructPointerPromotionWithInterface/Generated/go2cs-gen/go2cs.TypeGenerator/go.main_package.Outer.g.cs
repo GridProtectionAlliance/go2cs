@@ -32,7 +32,8 @@ public static partial class main_package
             this.ptr = default!;
         }
 
-        public Outer(global::go.ж<global::go.ж<global::go.main_package.Inner>> ptr = default!)
+
+        internal Outer(global::go.ж<global::go.ж<global::go.main_package.Inner>> ptr = default!)
         {
             this.ptr = ptr;
         }

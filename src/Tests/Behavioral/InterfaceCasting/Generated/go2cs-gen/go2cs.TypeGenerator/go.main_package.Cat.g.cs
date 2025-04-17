@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public Cat()
-        {
-        }
         
         // Handle comparisons between struct 'Cat' instances
         public bool Equals(Cat other) =>

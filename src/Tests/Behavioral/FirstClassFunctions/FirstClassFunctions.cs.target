@@ -10,9 +10,9 @@ internal static readonly UntypedInt win = 100;
 internal static readonly UntypedInt gamesPerSeries = 10;
 
 [GoType] partial struct score {
-    public nint player;
-    public nint opponent;
-    public nint thisTurn;
+    internal nint player;
+    internal nint opponent;
+    internal nint thisTurn;
 }
 
 internal delegate (score result, bool turnIsOver) action(score current);

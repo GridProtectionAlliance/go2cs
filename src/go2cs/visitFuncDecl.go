@@ -74,6 +74,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				v.visitStructType(structType, exprType, fieldName, field.Comment, true)
 				v.indentLevel--
 			}
+
+			// Check if the return type is an anonymous interface
+			if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil {
+				v.indentLevel++
+				v.visitInterfaceType(interfaceType, exprType, fieldName, field.Comment, true)
+				v.indentLevel--
+			}
 		}
 	}
 
@@ -85,6 +92,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				if structType, exprType := v.extractStructType(field.Type); structType != nil {
 					v.indentLevel++
 					v.visitStructType(structType, exprType, name.Name, field.Comment, true)
+					v.indentLevel--
+				}
+
+				// Check if the parameter type is an anonymous interface
+				if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil {
+					v.indentLevel++
+					v.visitInterfaceType(interfaceType, exprType, name.Name, field.Comment, true)
 					v.indentLevel--
 				}
 			}
@@ -413,14 +427,6 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
-
-		if isDynamicInterface(param.Type()) {
-			if ifaceType, ok := v.currentFuncDecl.Type.Params.List[i].Type.(*ast.InterfaceType); ok {
-				v.visitInterfaceType(ifaceType, param.Type(), param.Name(), nil, true)
-			} else {
-				println(fmt.Sprintf("WARNING: Unable to find interface type for '%s parameter '%s'", v.currentFuncName, param.Name()))
-			}
-		}
 
 		if i == 0 && addRecv && signature.Recv() != nil {
 			result.WriteString("this ")

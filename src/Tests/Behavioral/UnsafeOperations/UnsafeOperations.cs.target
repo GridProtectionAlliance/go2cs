@@ -6,11 +6,11 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 [GoType] partial struct T1 {
-    public int32 a;
+    internal int32 a;
 }
 
 [GoType] partial struct T2 {
-    public int32 a;
+    internal int32 a;
 }
 
 public static uint64 Float64bits(float64 f) {
@@ -21,10 +21,10 @@ public static float64 Float64frombits(uint64 b) {
     return ~(ж<float64>)(uintptr)(new @unsafe.Pointer(Ꮡ(b)));
 }
 
-[GoType] partial struct main_x {
-    public int64 a;
-    public bool b;
-    public @string c;
+[GoType("dyn")] partial struct main_x {
+    internal int64 a;
+    internal bool b;
+    internal @string c;
 }
 
 internal static void Main() {

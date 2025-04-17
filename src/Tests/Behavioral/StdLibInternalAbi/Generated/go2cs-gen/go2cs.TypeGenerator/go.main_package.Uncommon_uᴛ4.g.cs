@@ -47,7 +47,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ4(global::go.main_package.ChanType ChanType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_uᴛ4(global::go.main_package.ChanType ChanType = default!)
+        {
+            ᏑʗChanType = new ж<global::go.main_package.ChanType>(ChanType);
+        }
+
+        internal Uncommon_uᴛ4(global::go.main_package.ChanType ChanType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗChanType = new ж<global::go.main_package.ChanType>(ChanType);
             this.u = u;

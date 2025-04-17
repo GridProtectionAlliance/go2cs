@@ -45,7 +45,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ2(global::go.main_package.SliceType SliceType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_uᴛ2(global::go.main_package.SliceType SliceType = default!)
+        {
+            ᏑʗSliceType = new ж<global::go.main_package.SliceType>(SliceType);
+        }
+
+        internal Uncommon_uᴛ2(global::go.main_package.SliceType SliceType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗSliceType = new ж<global::go.main_package.SliceType>(SliceType);
             this.u = u;

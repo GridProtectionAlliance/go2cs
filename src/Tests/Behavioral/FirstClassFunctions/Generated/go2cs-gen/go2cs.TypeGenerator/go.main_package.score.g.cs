@@ -37,7 +37,8 @@ public static partial class main_package
             this.thisTurn = default!;
         }
 
-        public score(nint player = default!, nint opponent = default!, nint thisTurn = default!)
+
+        internal score(nint player = default!, nint opponent = default!, nint thisTurn = default!)
         {
             this.player = player;
             this.opponent = opponent;

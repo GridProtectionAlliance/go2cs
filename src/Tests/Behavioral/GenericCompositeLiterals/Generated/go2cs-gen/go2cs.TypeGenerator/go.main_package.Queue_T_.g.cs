@@ -32,7 +32,8 @@ public static partial class main_package
             this.items = default!;
         }
 
-        public Queue(global::go.slice<T> items = default!)
+
+        internal Queue(global::go.slice<T> items = default!)
         {
             this.items = items;
         }

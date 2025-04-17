@@ -7,7 +7,7 @@ partial class main_package {
 [GoType] partial struct Stack<T>
     where T : /* ~int | ~string */ IAdditionOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    public slice<T> elements;
+    internal slice<T> elements;
 }
 
 [GoRecv] public static void Push<T>(this ref Stack<T> s, T element)

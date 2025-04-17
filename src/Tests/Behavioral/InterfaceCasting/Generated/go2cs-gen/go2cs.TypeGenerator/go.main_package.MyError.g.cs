@@ -32,7 +32,8 @@ public static partial class main_package
             this.description = default!;
         }
 
-        public MyError(global::go.@string description = default!)
+
+        internal MyError(global::go.@string description = default!)
         {
             this.description = description;
         }

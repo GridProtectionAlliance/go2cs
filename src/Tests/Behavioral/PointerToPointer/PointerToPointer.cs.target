@@ -5,9 +5,9 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct Buffer {
-    public slice<byte> buf;
-    public nint off;
-    public int8 lastRead;
+    internal slice<byte> buf;
+    internal nint off;
+    internal int8 lastRead;
 }
 
 internal const int8 opRead = -1;

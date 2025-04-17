@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct data {
-    public @string name;
+    internal @string name;
 }
 
 internal static void printName(this data d) {

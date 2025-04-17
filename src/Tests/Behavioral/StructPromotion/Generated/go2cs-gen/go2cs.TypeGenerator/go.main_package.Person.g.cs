@@ -34,7 +34,8 @@ public static partial class main_package
             this.age = default!;
         }
 
-        public Person(global::go.@string name = default!, int age = default!)
+
+        internal Person(global::go.@string name = default!, int age = default!)
         {
             this.name = name;
             this.age = age;

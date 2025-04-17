@@ -132,6 +132,7 @@ const PackageSuffix = "_package"
 const OutputTypeMarker = ">>MARKER:OUTPUT_TYPE<<"
 const UnsafeMarker = ">>MARKER:UNSAFE<<"
 const ProjectReferenceMarker = ">>MARKER:PROJECT_REFERENCE<<"
+const DynamicCastArgMarker = ">>MARKER:DYNAMIC_CAST_ARG<<"
 const PackageInfoFileName = "package_info.cs"
 
 // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
@@ -1315,18 +1316,64 @@ func isInterface(t types.Type) (result bool, empty bool) {
 	return false, false
 }
 
+func isEmptyInterface(interfaceType *ast.InterfaceType) bool {
+	if interfaceType == nil {
+		return false
+	}
+
+	// Empty interface has no methods
+	return len(interfaceType.Methods.List) == 0
+}
+
 func (v *Visitor) isDynamicInterface(expr ast.Expr) bool {
 	return isDynamicInterface(v.getType(expr, false))
 }
 
 func isDynamicInterface(t types.Type) bool {
-	_, isNamed := t.(*types.Named)
-
-	if _, ok := t.Underlying().(*types.Interface); ok && !isNamed {
-		return true
+	if t == nil {
+		return false
 	}
 
-	return false
+	// If it's a pointer, get its element.
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+
+	// If it's a named type, then it’s not dynamic.
+	if _, ok := t.(*types.Named); ok {
+		return false
+	}
+
+	// Finally, check if it is a direct interface.
+	_, ok := t.(*types.Interface)
+
+	return ok
+}
+
+func (v *Visitor) extractInterfaceType(expr ast.Expr) (*ast.InterfaceType, types.Type) {
+	var interfaceType *ast.InterfaceType
+
+	if starExpr, ok := expr.(*ast.StarExpr); ok {
+		interfaceType, _ = starExpr.X.(*ast.InterfaceType)
+	} else if compositeLit, ok := expr.(*ast.CompositeLit); ok {
+		interfaceType, _ = compositeLit.Type.(*ast.InterfaceType)
+	} else if typeAssertExpr, ok := expr.(*ast.TypeAssertExpr); ok {
+		interfaceType, _ = typeAssertExpr.Type.(*ast.InterfaceType)
+	} else if selectorExpr, ok := expr.(*ast.SelectorExpr); ok {
+		interfaceType, _ = selectorExpr.X.(*ast.InterfaceType)
+	} else if interfaceType, ok = expr.(*ast.InterfaceType); !ok {
+		return nil, nil
+	}
+
+	if interfaceType == nil {
+		return nil, nil
+	}
+
+	if isEmptyInterface(interfaceType) {
+		return nil, nil
+	}
+
+	return interfaceType, v.getType(expr, false)
 }
 
 func (v *Visitor) isPointer(ident *ast.Ident) bool {
@@ -1558,30 +1605,34 @@ func isDynamicStruct(t types.Type) bool {
 	if t == nil {
 		return false
 	}
+
 	// If it's a pointer, get its element.
 	if ptr, ok := t.(*types.Pointer); ok {
 		t = ptr.Elem()
 	}
+
 	// If it's a named type, then it’s not dynamic.
 	if _, ok := t.(*types.Named); ok {
 		return false
 	}
-	// Finally, it must be a struct.
+
+	// Finally, check if it is a direct struct.
 	_, ok := t.(*types.Struct)
+
 	return ok
 }
 
-func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Type) {
+func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Type) string {
 	if argType == nil || targetType == nil {
-		return
+		return ""
 	}
 
-	// Only proceed if both types are dynamic (anonymous) structs.
-	if !isDynamicStruct(argType) || !isDynamicStruct(targetType) {
-		return
+	// Only proceed if the target type is a dynamic (anonymous) struct
+	if !isDynamicStruct(targetType) {
+		return ""
 	}
 
-	// If targetType is a pointer, get its element and underlying type.
+	// If targetType is a pointer, get its element and underlying type
 	if ptrType, ok := targetType.(*types.Pointer); ok {
 		targetType = ptrType.Elem().Underlying()
 	}
@@ -1592,27 +1643,192 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 			argType = ptrType.Elem().Underlying()
 		}
 
+		var argTypeName, targetTypeName string
+
 		if _, ok := argType.(*types.Struct); ok {
-			// Both are dynamic structs; track implicit conversions.
-			packageLock.Lock()
+			// Argument is a dynamic struct and target is a dynamic struct, track implicit conversions
+			argTypeName = v.getCSTypeName(argType)
+			targetTypeName = v.getCSTypeName(targetType)
+		} else if _, ok := argType.(*types.Named); ok {
+			// Argument is a named type and target is a dynamic struct, track implicit conversions
+			argTypeName = v.getCSTypeName(argType)
+			targetTypeName = v.getCSTypeName(targetType)
+		}
 
-			argTypeName := v.getCSTypeName(argType)
-			targetTypeName := v.getCSTypeName(targetType)
-			var conversions HashSet[string]
-			var exists bool
+		if len(argTypeName) > 0 && len(targetTypeName) > 0 {
+			// In C#, operators are only allowed to be public, so if target type is
+			// private and argument type is public, we need to manually apply conversions
+			// instead of relying on implicit conversions
+			argScope := getAccess(argTypeName)
+			targetScope := getAccess(targetTypeName)
 
-			if conversions, exists = implicitConversions[argTypeName]; exists {
-				conversions.Add(targetTypeName)
+			if argScope == "public" && targetScope == "internal" {
+				return v.dynamicCast(argType, targetType, targetTypeName)
 			} else {
-				conversions = NewHashSet([]string{targetTypeName})
-				implicitConversions[argTypeName] = conversions
+				// Track implicit conversions
+				packageLock.Lock()
+
+				var conversions HashSet[string]
+				var exists bool
+
+				if conversions, exists = implicitConversions[argTypeName]; exists {
+					conversions.Add(targetTypeName)
+				} else {
+					conversions = NewHashSet([]string{targetTypeName})
+					implicitConversions[argTypeName] = conversions
+				}
+
+				v.addImplicitSubStructConversions(argType, targetTypeName, false)
+
+				packageLock.Unlock()
 			}
-
-			v.addImplicitSubStructConversions(argType, targetTypeName, false)
-
-			packageLock.Unlock()
 		}
 	}
+
+	return ""
+}
+
+// dynamicCast generates a C# expression to cast a value of sourceType to targetType
+// where both are structs that match "structurally" but are different types. This is
+// used only as a fallback operation when no implicit conversion is allowed, e.g.,
+// when the source type is public and the anonymous target type is internal. This is
+// required since C# does not allow implicit operator conversions between structs
+// with differnet access scopes, i.e., all operators in C# must be public, hence the
+// types used with an operator must also be public :-p
+func (v *Visitor) dynamicCast(sourceType types.Type, targetType types.Type, targetTypeName string) string {
+	// Unwrap pointer types if needed
+	if sourcePtr, ok := sourceType.(*types.Pointer); ok {
+		sourceType = sourcePtr.Elem()
+	}
+
+	if targetPtr, ok := targetType.(*types.Pointer); ok {
+		targetType = targetPtr.Elem()
+	}
+
+	// Get the underlying struct types
+	sourceStruct, ok := sourceType.Underlying().(*types.Struct)
+
+	if !ok {
+		println(fmt.Sprintf("WARNING: Source type '%s' used with 'dynamicCast' is not a struct", sourceType.String()))
+		return ""
+	}
+
+	targetStruct, ok := targetType.Underlying().(*types.Struct)
+
+	if !ok {
+		println(fmt.Sprintf("WARNING: Target type '%s' used with 'dynamicCast' is not a struct", targetType.String()))
+		return ""
+	}
+
+	// Track all fields we need to include in the constructor
+	params := make([]string, 0, targetStruct.NumFields())
+
+	// Process target struct fields -- note that we are ignoring unexported
+	// fields here since the target use case is to create a new instance of
+	// an internal struct that is not accessible outside the package
+	for i := range targetStruct.NumFields() {
+		targetField := targetStruct.Field(i)
+		targetFieldName := targetField.Name()
+
+		// Sanitize the field name to avoid C# keyword conflicts
+		sanitizedFieldName := getSanitizedIdentifier(targetFieldName)
+		found := false
+
+		// First try to find field directly in source struct
+		for j := range sourceStruct.NumFields() {
+			sourceField := sourceStruct.Field(j)
+			if sourceField.Name() == targetFieldName {
+				params = append(params, fmt.Sprintf("%s.%s", DynamicCastArgMarker, sanitizedFieldName))
+				found = true
+				break
+			}
+		}
+
+		// If not found directly, check for promoted fields in embedded structs
+		if !found {
+			accessPath := v.findPromotedFieldPath(sourceStruct, targetFieldName, "")
+
+			if len(accessPath) > 0 {
+				params = append(params, fmt.Sprintf("%s.%s", DynamicCastArgMarker, accessPath))
+				found = true
+			}
+		}
+
+		// If field not found in source at all, leave a comment
+		if !found {
+			// This is an unexpected error so long as this function is called in context of checking
+			// for needed dynamic struct casts, as the source and target types should be structurally
+			// equivalent in order to get to this point
+			println(fmt.Sprintf("WARNING: Field '%s' not found in source struct '%s' for dynamic cast", targetFieldName, sourceType.String()))
+			return ""
+		}
+	}
+
+	// Construct the expression using object initializer syntax
+	return fmt.Sprintf("new %s(%s)", targetTypeName, strings.Join(params, ", "))
+}
+
+// findPromotedFieldPath recursively searches for a promoted field in a struct
+// and returns the access path to that field or an empty string if not found
+func (v *Visitor) findPromotedFieldPath(sourceStruct *types.Struct, targetFieldName string, pathPrefix string) string {
+	for i := range sourceStruct.NumFields() {
+		field := sourceStruct.Field(i)
+
+		// Check if this is an embedded field (anonymous struct field)
+		if field.Anonymous() {
+			var currentPath string
+
+			if field.Name() == "" {
+				currentPath = pathPrefix // Unnamed embedded field
+			} else {
+				// Named embedded field
+				if pathPrefix == "" {
+					currentPath = getSanitizedIdentifier(field.Name())
+				} else {
+					currentPath = pathPrefix + "." + getSanitizedIdentifier(field.Name())
+				}
+			}
+
+			// Check if the field itself is what we're looking for
+			if field.Name() == targetFieldName {
+				return currentPath
+			}
+
+			// Check the embedded field's type for further embedding
+			if fieldStruct, ok := field.Type().Underlying().(*types.Struct); ok {
+				// Search within the embedded struct
+				if result := v.findPromotedFieldPath(fieldStruct, targetFieldName, currentPath); result != "" {
+					return result
+				}
+			}
+		}
+	}
+
+	return "" // Field not found in any embedded struct
+}
+
+func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type) {
+	if starExpr, ok := expr.(*ast.StarExpr); ok {
+		if structType, ok := starExpr.X.(*ast.StructType); ok {
+			return structType, v.getType(starExpr.X, false)
+		}
+	} else if compositeLit, ok := expr.(*ast.CompositeLit); ok {
+		if structType, ok := compositeLit.Type.(*ast.StructType); ok {
+			return structType, v.getType(compositeLit.Type, false)
+		}
+	} else if typeAssertExpr, ok := expr.(*ast.TypeAssertExpr); ok {
+		if structType, ok := typeAssertExpr.Type.(*ast.StructType); ok {
+			return structType, v.getType(typeAssertExpr.Type, false)
+		}
+	} else if selectorExpr, ok := expr.(*ast.SelectorExpr); ok {
+		if structType, ok := selectorExpr.X.(*ast.StructType); ok {
+			return structType, v.getType(selectorExpr.X, false)
+		}
+	} else if structType, ok := expr.(*ast.StructType); ok {
+		return structType, v.getType(expr, false)
+	}
+
+	return nil, nil
 }
 
 func (v *Visitor) getUnderlyingType(expr ast.Expr) types.Type {
@@ -2153,18 +2369,6 @@ func splitMapKeyValue(typeStr string) (string, string) {
 
 	// If we didn't find a proper split, return original and empty
 	return typeStr, ""
-}
-
-func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type) {
-	if starExpr, ok := expr.(*ast.StarExpr); ok {
-		if structType, ok := starExpr.X.(*ast.StructType); ok {
-			return structType, v.getType(starExpr.X, false)
-		}
-	} else if structType, ok := expr.(*ast.StructType); ok {
-		return structType, v.getType(expr, false)
-	}
-
-	return nil, nil
 }
 
 func extractTypes(signature string) []string {

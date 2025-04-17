@@ -34,7 +34,8 @@ public static partial class main_package
             this.valid = default!;
         }
 
-        public Option(T value = default!, bool valid = default!)
+
+        internal Option(T value = default!, bool valid = default!)
         {
             this.value = value;
             this.valid = valid;

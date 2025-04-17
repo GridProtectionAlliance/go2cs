@@ -9,6 +9,12 @@ func (v *Visitor) convStructType(structType *ast.StructType, context IdentContex
 	var name string
 	var identType types.Type
 
+	t := v.getType(structType, false)
+
+	if liftedName, ok := v.liftedTypeMap[t]; ok {
+		return liftedName
+	}
+
 	if context.ident == nil {
 		name = "type"
 	} else {

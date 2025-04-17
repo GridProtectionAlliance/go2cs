@@ -6,8 +6,8 @@ using strings = strings_package;
 partial class main_package {
 
 [GoType] partial struct Person {
-    public @string name;
-    public int32 age;
+    internal @string name;
+    internal int32 age;
 }
 
 public static bool IsDr(this Person p) {
@@ -19,7 +19,7 @@ public static bool IsAdult(this Person p) {
 }
 
 [GoType] partial struct Employee {
-    public @string position;
+    internal @string position;
 }
 
 public static bool IsManager(this Employee e) {

@@ -39,6 +39,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
+    public void CheckAnonymousStructs() => CheckTarget("AnonymousStructs");
+
+    [TestMethod]
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]

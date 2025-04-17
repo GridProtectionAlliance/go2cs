@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public MyAbser()
-        {
-        }
         
         // Handle comparisons between struct 'MyAbser' instances
         public bool Equals(MyAbser other) =>

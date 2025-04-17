@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public fakeReader()
-        {
-        }
         
         // Handle comparisons between struct 'fakeReader' instances
         public bool Equals(fakeReader other) =>

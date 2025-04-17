@@ -36,7 +36,8 @@ public static partial class main_package
             this.age = default!;
         }
 
-        public Person(global::System.Action work = default!, global::go.@string name = default!, int age = default!)
+
+        internal Person(global::System.Action work = default!, global::go.@string name = default!, int age = default!)
         {
             this.work = work;
             this.name = name;

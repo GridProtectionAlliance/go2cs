@@ -39,6 +39,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
+    public void CheckAnonymousStructs() => CheckTarget("AnonymousStructs");
+
+    [TestMethod]
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]

@@ -33,7 +33,8 @@ public static partial class errors_package
             this.errs = default!;
         }
 
-        public joinError(global::go.slice<global::go.error> errs = default!)
+
+        internal joinError(global::go.slice<global::go.error> errs = default!)
         {
             this.errs = errs;
         }

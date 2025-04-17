@@ -5,9 +5,9 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct Person {
-    public Action work;
-    public @string name;
-    public int32 age;
+    internal Action work;
+    internal @string name;
+    internal int32 age;
 }
 
 internal static void Main() {

@@ -5,7 +5,7 @@ using io = io_package;
 
 partial class main_package {
 
-[GoType("runtime")] partial interface testTypeSwitch_type {
+[GoType("dyn")] partial interface testTypeSwitch_type {
     error Unwrap();
 }
 
@@ -21,7 +21,7 @@ internal static void testTypeSwitch(error err) {
     }}
 }
 
-[GoType("runtime")] partial interface testTypeAssertion_type {
+[GoType("dyn")] partial interface testTypeAssertion_type {
     bool Is(error _);
 }
 
@@ -33,6 +33,16 @@ internal static void testTypeAssertion(error err) {
             fmt.Println("TypeAssertion: No match");
         }
     }
+}
+
+[GoType("dyn")] partial interface takesReader_r {
+    (nint, error) Read(slice<byte> _);
+}
+
+internal static void takesReader(takesReader_r r) {
+    var buf = new slice<byte>(4);
+    var (n, _) = r.Read(buf);
+    fmt.Println("FuncParam: Read =", ((@string)(buf[..(int)(n)])));
 }
 
 [GoType] partial struct fakeReader {
@@ -61,6 +71,7 @@ internal static bool Is(this fakeError _, error err) {
 internal static void Main() {
     testTypeSwitch(new fakeError(nil));
     testTypeAssertion(new fakeError(nil));
+    takesReader(new fakeReader(nil));
 }
 
 } // end main_package

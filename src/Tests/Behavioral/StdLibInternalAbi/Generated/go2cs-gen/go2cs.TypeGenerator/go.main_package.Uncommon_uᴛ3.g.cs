@@ -49,7 +49,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ3(global::go.main_package.ΔArrayType ArrayType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_uᴛ3(global::go.main_package.ΔArrayType ArrayType = default!)
+        {
+            ᏑʗArrayType = new ж<global::go.main_package.ΔArrayType>(ArrayType);
+        }
+
+        internal Uncommon_uᴛ3(global::go.main_package.ΔArrayType ArrayType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗArrayType = new ж<global::go.main_package.ΔArrayType>(ArrayType);
             this.u = u;

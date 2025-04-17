@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public Processor()
-        {
-        }
         
         // Handle comparisons between struct 'Processor' instances
         public bool Equals(Processor other) =>

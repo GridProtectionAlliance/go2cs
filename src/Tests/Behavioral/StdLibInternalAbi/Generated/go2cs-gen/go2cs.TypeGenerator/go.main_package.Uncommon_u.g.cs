@@ -45,7 +45,12 @@ public static partial class main_package
             this.u = default!;
         }
 
-        public Uncommon_u(global::go.main_package.PtrType PtrType = default!, global::go.main_package.UncommonType u = default!)
+        public Uncommon_u(global::go.main_package.PtrType PtrType = default!)
+        {
+            ᏑʗPtrType = new ж<global::go.main_package.PtrType>(PtrType);
+        }
+
+        internal Uncommon_u(global::go.main_package.PtrType PtrType = default!, global::go.main_package.UncommonType u = default!)
         {
             ᏑʗPtrType = new ж<global::go.main_package.PtrType>(PtrType);
             this.u = u;

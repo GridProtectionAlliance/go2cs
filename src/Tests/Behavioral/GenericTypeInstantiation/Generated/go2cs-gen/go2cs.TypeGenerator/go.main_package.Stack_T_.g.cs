@@ -32,7 +32,8 @@ public static partial class main_package
             this.elements = default!;
         }
 
-        public Stack(global::go.slice<T> elements = default!)
+
+        internal Stack(global::go.slice<T> elements = default!)
         {
             this.elements = elements;
         }

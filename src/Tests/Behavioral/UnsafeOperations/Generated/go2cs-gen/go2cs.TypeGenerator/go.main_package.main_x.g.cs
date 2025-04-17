@@ -36,7 +36,8 @@ public static partial class main_package
             this.c = default!;
         }
 
-        public main_x(long a = default!, bool b = default!, global::go.@string c = default!)
+
+        internal main_x(long a = default!, bool b = default!, global::go.@string c = default!)
         {
             this.a = a;
             this.b = b;

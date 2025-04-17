@@ -45,6 +45,13 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 						v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
 						v.indentLevel -= indentOffset
 					}
+
+					// Check if the return type is an anonymous interface
+					if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil {
+						v.indentLevel += indentOffset
+						v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true)
+						v.indentLevel -= indentOffset
+					}
 				}
 			}
 
@@ -56,6 +63,13 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 						if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
 							v.indentLevel += indentOffset
 							v.visitStructType(structType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true)
+							v.indentLevel -= indentOffset
+						}
+
+						// Check if the parameter type is an anonymous interface
+						if interfaceType, exprType := v.extractInterfaceType(paramField.Type); interfaceType != nil {
+							v.indentLevel += indentOffset
+							v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true)
 							v.indentLevel -= indentOffset
 						}
 					}

@@ -18,7 +18,7 @@ partial class main_package {
     public @string Message;
     public Abser Abser;
     public partial ref MyError MyError { get; }
-    public error error;
+    internal error error;
 }
 
 [GoType] partial struct MyAbser {

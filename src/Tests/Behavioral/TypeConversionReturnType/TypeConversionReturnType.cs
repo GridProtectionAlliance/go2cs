@@ -7,15 +7,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct test_R0 {
-    public @string @string;
+[GoType("dyn")] partial struct test_R0 {
+    internal @string @string;
     public ж<nint> @int;
     public P P;
     public M M;
 }
 
-[GoType] partial struct test_x {
-    public @string @string;
+[GoType("dyn")] partial struct test_x {
+    internal @string @string;
     public ж<nint> @int;
     public P P;
     public M M;

@@ -40,7 +40,15 @@ public static partial class main_package
             this._ = default!;
         }
 
-        public UncommonType(global::go.main_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!, uint _ = default!)
+        public UncommonType(global::go.main_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!)
+        {
+            this.PkgPath = PkgPath;
+            this.Mcount = Mcount;
+            this.Xcount = Xcount;
+            this.Moff = Moff;
+        }
+
+        internal UncommonType(global::go.main_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!, uint _ = default!)
         {
             this.PkgPath = PkgPath;
             this.Mcount = Mcount;

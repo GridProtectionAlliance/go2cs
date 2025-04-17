@@ -32,10 +32,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 				if declType != nil {
 					// Check if it's an interface type
-					if iface, ok := declType.Underlying().(*types.Interface); ok {
+					if isInterface, isEmpty := isInterface(declType); isInterface {
 						isInterfaceType = true
 
-						if iface.NumMethods() > 0 {
+						if isEmpty {
+							isAnyType = true
+						} else {
 							// Get the concrete type from the RHS
 							rhsType := v.info.TypeOf(valueSpec.Values[i])
 
@@ -43,8 +45,6 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							if rhsType != nil {
 								v.convertToInterfaceType(declType, rhsType, "")
 							}
-						} else {
-							isAnyType = true
 						}
 					}
 				}
@@ -69,6 +69,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 					if subStructType, exprType := v.extractStructType(valueSpecType); subStructType != nil {
 						v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true)
+					}
+
+					// Check if value spec type is an interface or a pointer to an interface
+					if subInterfaceType, exprType := v.extractInterfaceType(valueSpecType); subInterfaceType != nil {
+						v.visitInterfaceType(subInterfaceType, exprType, csIDName, valueSpec.Comment, true)
 					}
 
 					goTypeName := v.getTypeName(def.Type(), false)

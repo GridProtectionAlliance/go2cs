@@ -31,9 +31,6 @@ public static partial class main_package
         {
         }
 
-        public JavaProgrammer()
-        {
-        }
         
         // Handle comparisons between struct 'JavaProgrammer' instances
         public bool Equals(JavaProgrammer other) =>

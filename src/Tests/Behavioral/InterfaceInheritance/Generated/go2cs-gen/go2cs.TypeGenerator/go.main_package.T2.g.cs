@@ -32,7 +32,8 @@ public static partial class main_package
             this.name = default!;
         }
 
-        public T2(global::go.@string name = default!)
+
+        internal T2(global::go.@string name = default!)
         {
             this.name = name;
         }

@@ -37,7 +37,7 @@ public static float64 Time(this MyError myErr) {
 }
 
 [GoType] partial struct Outer {
-    public ж<ж<Inner>> ptr;
+    internal ж<ж<Inner>> ptr;
 }
 
 internal static void Main() {

@@ -32,7 +32,8 @@ public static partial class errors_package
             this.s = default!;
         }
 
-        public errorString(global::go.@string s = default!)
+
+        internal errorString(global::go.@string s = default!)
         {
             this.s = s;
         }

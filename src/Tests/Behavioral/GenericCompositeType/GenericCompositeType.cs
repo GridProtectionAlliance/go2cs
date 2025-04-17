@@ -7,8 +7,8 @@ partial class main_package {
 [GoType] partial struct Option<T>
     where T : new()
 {
-    public T value;
-    public bool valid;
+    internal T value;
+    internal bool valid;
 }
 
 public static Option<T> NewOption<T>(T value)

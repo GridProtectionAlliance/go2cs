@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct MyError {
-    public @string description;
+    internal @string description;
 }
 
 public static @string Error(this MyError err) {
