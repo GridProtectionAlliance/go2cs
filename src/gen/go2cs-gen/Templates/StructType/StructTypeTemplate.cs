@@ -16,8 +16,12 @@ internal class StructTypeTemplate : TemplateBase
     public required List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> StructMembers;
     public required bool HasEqualityOperators;
 
-    private string? s_nonGenericStructName;
-    public string NonGenericStructName => s_nonGenericStructName ??= GetSimpleName(StructName, true);
+    private string? m_nonGenericStructName;
+    public string NonGenericStructName => m_nonGenericStructName ??= GetSimpleName(StructName, true);
+
+    private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)>? m_publicStructMembers;
+    private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> PublicStructMembers => 
+        m_publicStructMembers ??= StructMembers.Where(item => char.IsUpper(GetSimpleName(item.memberName)[0])).ToList();
 
     public override string TemplateBody =>
         $$"""
@@ -218,27 +222,42 @@ internal class StructTypeTemplate : TemplateBase
             }
 
             result.AppendLine($"{TypeElemIndent}}}");
-            result.AppendLine();
 
-            // Construct from fields
-            result.Append($"{TypeElemIndent}public {NonGenericStructName}(");
-            result.Append(string.Join(", ", StructMembers.Select(item => $"{item.typeName} {item.memberName} = default!")));
-            result.AppendLine(")");
-            result.AppendLine($"{TypeElemIndent}{{");
+            // Generate exported constructor from public fields
+            GenerateConstructor("public", PublicStructMembers, result);
 
-            foreach ((string typeName, string memberName, _, bool isPromotedStruct) in StructMembers)
+            // Generate internal constructor with all fields
+            if (PublicStructMembers.Count != StructMembers.Count)
             {
-                result.Append($"{TypeElemIndent}    ");
-
-                result.AppendLine(isPromotedStruct ?
-                    $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>({memberName});" :
-                    $"this.{memberName} = {memberName};");
+                result.AppendLine();
+                GenerateConstructor("internal", StructMembers, result);
             }
-
-            result.Append($"{TypeElemIndent}}}");
 
             return result.ToString();
         }
+    }
+
+    private void GenerateConstructor(string scope, List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> structMembers, StringBuilder result)
+    {
+        if (structMembers.Count == 0)
+            return;
+
+        result.AppendLine();
+        result.Append($"{TypeElemIndent}{scope} {NonGenericStructName}(");
+        result.Append(string.Join(", ", structMembers.Select(item => $"{item.typeName} {item.memberName} = default!")));
+        result.AppendLine(")");
+        result.AppendLine($"{TypeElemIndent}{{");
+
+        foreach ((string typeName, string memberName, _, bool isPromotedStruct) in structMembers)
+        {
+            result.Append($"{TypeElemIndent}    ");
+
+            result.AppendLine(isPromotedStruct ?
+                $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>({memberName});" :
+                $"this.{memberName} = {memberName};");
+        }
+
+        result.Append($"{TypeElemIndent}}}");
     }
 
     private static string GetToStringImplementation((string typeName, string memberName, bool isReferenceType, bool isPromotedStruct) item)
