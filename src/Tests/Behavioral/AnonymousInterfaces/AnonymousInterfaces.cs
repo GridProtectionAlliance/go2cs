@@ -9,7 +9,6 @@ partial class main_package {
     error Unwrap();
 }
 
-// 1. Type Switch using inline interface
 internal static void testTypeSwitch(error err) {
     switch (err.type()) {
     case {} Δx when Δx._<testTypeSwitch_type>(out var x):
@@ -26,7 +25,6 @@ internal static void testTypeSwitch(error err) {
     bool Is(error _);
 }
 
-// 2. Type Assertion using inline interface
 internal static void testTypeAssertion(error err) {
     {
         var (x, ok) = err._<testTypeAssertion_type>(ᐧ); if (ok){
@@ -41,7 +39,6 @@ internal static void testTypeAssertion(error err) {
     (nint, error) Read(slice<byte> _);
 }
 
-// 3. Function parameter using inline interface
 internal static void takesReader(takesReader_r r) {
     var buf = new slice<byte>(4);
     var (n, _) = r.Read(buf);
@@ -52,7 +49,6 @@ internal static void takesReader(takesReader_r r) {
     (nint, error) Read(slice<byte> _);
 }
 
-// 4. Composite literal with inline interface
 internal static void testCompositeLiteral() {
     var readers = new testCompositeLiteral_readers[]{new fakeReader(nil)}.slice();
     var buf = new slice<byte>(4);
@@ -64,7 +60,6 @@ internal static void testCompositeLiteral() {
     (nint, error) Read(slice<byte> _);
 }
 
-// 5. Struct field with inline interface type
 [GoType] partial struct WithInlineField {
     public WithInlineField_R R;
 }
@@ -76,25 +71,33 @@ internal static void testInlineField() {
     fmt.Println("InlineField: Read =", ((@string)(buf[..(int)(n)])));
 }
 
-/*
-// 6. Interface embedding inline interface
-type InlineEmbed interface {
-	interface{ Close() error }
-	Flush() error
+
+    [GoType("dyn")] partial interface Δtype {
+        error Close();
+    }
+[GoType] partial interface InlineEmbed :
+    Δtype
+{
+    error Flush();
 }
 
-type embeddedImpl struct{}
-
-func (embeddedImpl) Close() error { return nil }
-func (embeddedImpl) Flush() error { return nil }
-
-func testInterfaceEmbedding(x InlineEmbed) {
-	_ = x.Close()
-	_ = x.Flush()
-	fmt.Println("InterfaceEmbed: Close and Flush OK")
+[GoType] partial struct embeddedImpl {
 }
-*/
-// Supporting types
+
+internal static error Close(this embeddedImpl _) {
+    return default!;
+}
+
+internal static error Flush(this embeddedImpl _) {
+    return default!;
+}
+
+internal static void testInterfaceEmbedding(InlineEmbed x) {
+    _ = x.Close();
+    _ = x.Flush();
+    fmt.Println("InterfaceEmbed: Close and Flush OK");
+}
+
 [GoType] partial struct fakeReader {
 }
 
@@ -124,8 +127,7 @@ internal static void Main() {
     takesReader(new fakeReader(nil));
     testCompositeLiteral();
     testInlineField();
+    testInterfaceEmbedding(new embeddedImpl(nil));
 }
-
-//testInterfaceEmbedding(embeddedImpl{})
 
 } // end main_package

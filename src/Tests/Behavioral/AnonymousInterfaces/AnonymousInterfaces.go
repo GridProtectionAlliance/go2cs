@@ -51,7 +51,6 @@ func testInlineField() {
 	fmt.Println("InlineField: Read =", string(buf[:n]))
 }
 
-/*
 // 6. Interface embedding inline interface
 type InlineEmbed interface {
 	interface{ Close() error }
@@ -68,7 +67,6 @@ func testInterfaceEmbedding(x InlineEmbed) {
 	_ = x.Flush()
 	fmt.Println("InterfaceEmbed: Close and Flush OK")
 }
-*/
 
 // Supporting types
 
@@ -91,5 +89,5 @@ func main() {
 	takesReader(fakeReader{})
 	testCompositeLiteral()
 	testInlineField()
-	//testInterfaceEmbedding(embeddedImpl{})
+	testInterfaceEmbedding(embeddedImpl{})
 }

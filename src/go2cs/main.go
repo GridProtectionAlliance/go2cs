@@ -2478,6 +2478,11 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	goTypeName := v.getFullTypeName(identType, false)
 	csIDName := v.getIdentName(ident)
 
+	// If identifier is discarded, return empty string
+	if csIDName == "_" {
+		return ""
+	}
+
 	// Handle array types
 	if strings.HasPrefix(goTypeName, "[") {
 		arrayLen := strings.Split(goTypeName[1:], "]")[0]

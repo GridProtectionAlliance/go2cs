@@ -39,6 +39,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<embeddedImpl, InlineEmbed>]
 [assembly: GoImplement<fakeError, error>]
 [assembly: GoImplement<fakeReader, WithInlineField_R>]
 [assembly: GoImplement<fakeReader, takesReader_r>]

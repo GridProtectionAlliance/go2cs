@@ -161,7 +161,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		// Handle LHS
 		if declaredCount > 0 {
 			if declaredCount > 1 || v.options.preferVarDecl {
-				result.WriteString("var ")
+				isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
+
+				if !isDiscarded {
+					result.WriteString("var ")
+				}
 			} else {
 				ident := getIdentifier(lhsExprs[0])
 				lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
@@ -407,7 +411,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						}
 					} else {
 						if v.options.preferVarDecl && !lhsTypeIsInt[i] {
-							result.WriteString("var ")
+							isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
+
+							if !isDiscarded {
+								result.WriteString("var ")
+							}
 						} else {
 							lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
 							result.WriteString(lhsType)
