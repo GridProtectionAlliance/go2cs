@@ -25,5 +25,5 @@ func (v *Visitor) convStructType(structType *ast.StructType, context IdentContex
 		identType = v.getIdentType(context.ident)
 	}
 
-	return v.visitStructType(structType, identType, name, nil, true)
+	return v.visitStructType(structType, identType, name, nil, true, nil)
 }

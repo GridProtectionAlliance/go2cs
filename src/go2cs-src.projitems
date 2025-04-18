@@ -40,8 +40,6 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\nameCollisionAnalysisOperations.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\performEscapeAnalysis.go" />
-    <None Include="$(MSBuildThisFileDirectory)go2cs\performVariableAnalysis.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-arm64.pubxml" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\profiles\linux-x64.pubxml" />

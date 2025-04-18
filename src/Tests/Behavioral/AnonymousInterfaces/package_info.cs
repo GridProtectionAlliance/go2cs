@@ -40,7 +40,9 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<fakeError, error>]
+[assembly: GoImplement<fakeReader, WithInlineField_R>]
 [assembly: GoImplement<fakeReader, takesReader_r>]
+[assembly: GoImplement<fakeReader, testCompositeLiteral_readers>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

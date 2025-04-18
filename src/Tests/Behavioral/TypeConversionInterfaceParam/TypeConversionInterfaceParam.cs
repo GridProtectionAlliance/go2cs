@@ -5,9 +5,9 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType("dyn")] partial struct DataProcessor_data {
-    public nint ID;
-    public @string Name;
-    public bool Valid;
+public nint ID;
+public @string Name;
+public bool Valid;
 }
 
 [GoType] partial interface DataProcessor {

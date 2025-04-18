@@ -1258,9 +1258,7 @@ func getSanitizedFunctionName(funcName string) string {
 }
 
 func getAccess(name string) string {
-	if strings.HasPrefix(name, "ref ") {
-		name = name[4:] // Remove any "ref " prefix
-	}
+	name = strings.TrimPrefix(name, "ref ")
 
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
@@ -1357,6 +1355,14 @@ func (v *Visitor) extractInterfaceType(expr ast.Expr) (*ast.InterfaceType, types
 		interfaceType, _ = starExpr.X.(*ast.InterfaceType)
 	} else if compositeLit, ok := expr.(*ast.CompositeLit); ok {
 		interfaceType, _ = compositeLit.Type.(*ast.InterfaceType)
+	} else if arrayType, ok := expr.(*ast.ArrayType); ok {
+		interfaceType, _ = arrayType.Elt.(*ast.InterfaceType)
+	} else if indexExpr, ok := expr.(*ast.IndexExpr); ok {
+		interfaceType, _ = indexExpr.X.(*ast.InterfaceType)
+	} else if sliceExpr, ok := expr.(*ast.SliceExpr); ok {
+		interfaceType, _ = sliceExpr.X.(*ast.InterfaceType)
+	} else if callExpr, ok := expr.(*ast.CallExpr); ok {
+		interfaceType, _ = callExpr.Fun.(*ast.InterfaceType)
 	} else if typeAssertExpr, ok := expr.(*ast.TypeAssertExpr); ok {
 		interfaceType, _ = typeAssertExpr.Type.(*ast.InterfaceType)
 	} else if selectorExpr, ok := expr.(*ast.SelectorExpr); ok {
@@ -1816,6 +1822,22 @@ func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type)
 		if structType, ok := compositeLit.Type.(*ast.StructType); ok {
 			return structType, v.getType(compositeLit.Type, false)
 		}
+	} else if arrayType, ok := expr.(*ast.ArrayType); ok {
+		if structType, ok := arrayType.Elt.(*ast.StructType); ok {
+			return structType, v.getType(arrayType.Elt, false)
+		}
+	} else if indexExpr, ok := expr.(*ast.IndexExpr); ok {
+		if structType, ok := indexExpr.X.(*ast.StructType); ok {
+			return structType, v.getType(indexExpr.X, false)
+		}
+	} else if sliceExpr, ok := expr.(*ast.SliceExpr); ok {
+		if structType, ok := sliceExpr.X.(*ast.StructType); ok {
+			return structType, v.getType(sliceExpr.X, false)
+		}
+	} else if callExpr, ok := expr.(*ast.CallExpr); ok {
+		if structType, ok := callExpr.Fun.(*ast.StructType); ok {
+			return structType, v.getType(callExpr.Fun, false)
+		}
 	} else if typeAssertExpr, ok := expr.(*ast.TypeAssertExpr); ok {
 		if structType, ok := typeAssertExpr.Type.(*ast.StructType); ok {
 			return structType, v.getType(typeAssertExpr.Type, false)
@@ -2051,6 +2073,30 @@ func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
 	v.liftedTypeNames.Add(uniqueTypeName)
 
 	return uniqueTypeName
+}
+
+func (v *Visitor) liftedTypeExists(expr ast.Expr) bool {
+	if expr == nil {
+		return false
+	}
+
+	exprType := v.getType(expr, false)
+
+	if exprType == nil {
+		return false
+	}
+
+	if _, ok := v.liftedTypeMap[exprType]; ok {
+		return true
+	}
+
+	if named, ok := exprType.(*types.Named); ok {
+		if _, ok := v.liftedTypeMap[named.Underlying()]; ok {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {

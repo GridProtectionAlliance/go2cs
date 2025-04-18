@@ -42,7 +42,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.Ident:
 		v.visitIdent(typeSpecType, identType, name, v.inFunction)
 	case *ast.InterfaceType:
-		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
+		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	case *ast.MapType:
 		v.visitMapType(typeSpecType)
 	case *ast.ParenExpr:
@@ -52,7 +52,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType, DefaultStarExprContext()))
 	case *ast.StructType:
-		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction)
+		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	default:
 		panic(fmt.Sprintf("Unexpected TypeSpec type: %#v", typeSpecType))
 	}

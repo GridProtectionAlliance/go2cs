@@ -67,13 +67,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// Check if value spec type is a struct or a pointer to a struct
 					valueSpecType := valueSpec.Type
 
-					if subStructType, exprType := v.extractStructType(valueSpecType); subStructType != nil {
-						v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true)
+					if subStructType, exprType := v.extractStructType(valueSpecType); subStructType != nil && !v.liftedTypeExists(subStructType) {
+						v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 					}
 
 					// Check if value spec type is an interface or a pointer to an interface
-					if subInterfaceType, exprType := v.extractInterfaceType(valueSpecType); subInterfaceType != nil {
-						v.visitInterfaceType(subInterfaceType, exprType, csIDName, valueSpec.Comment, true)
+					if subInterfaceType, exprType := v.extractInterfaceType(valueSpecType); subInterfaceType != nil && !v.liftedTypeExists(subInterfaceType) {
+						v.visitInterfaceType(subInterfaceType, exprType, csIDName, valueSpec.Comment, true, nil)
 					}
 
 					goTypeName := v.getTypeName(def.Type(), false)

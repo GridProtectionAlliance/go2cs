@@ -25,5 +25,5 @@ func (v *Visitor) convInterfaceType(interfaceType *ast.InterfaceType, context Id
 		identType = v.getIdentType(context.ident)
 	}
 
-	return v.visitInterfaceType(interfaceType, identType, name, nil, true)
+	return v.visitInterfaceType(interfaceType, identType, name, nil, true, nil)
 }

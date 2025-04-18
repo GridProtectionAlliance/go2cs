@@ -2,15 +2,15 @@ package main
 
 import "fmt"
 
-func main() {	
-	type Person struct {
-		Name    string
-		Address *struct {
-			Street string
-			City   string
-		}
+type Person struct {
+	Name    string
+	Address *struct {
+		Street string
+		City   string
 	}
+}
 
+func main() {
 	var data *struct {
 		Name    string `json:"name"`
 		Address *struct {

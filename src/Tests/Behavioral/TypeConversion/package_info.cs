@@ -42,8 +42,8 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<main_data, ж<main_Person>>(Indirect = true)]
-[assembly: GoImplicitConv<main_data_Address, ж<main_Person_Address>>(Indirect = true)]
+[assembly: GoImplicitConv<main_data, ж<Person>>(Indirect = true)]
+[assembly: GoImplicitConv<main_data_Address, ж<Person_Address>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go;

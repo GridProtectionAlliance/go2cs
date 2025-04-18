@@ -31,7 +31,6 @@ func takesReader(r interface{ Read([]byte) (int, error) }) {
 	fmt.Println("FuncParam: Read =", string(buf[:n]))
 }
 
-/*
 // 4. Composite literal with inline interface
 func testCompositeLiteral() {
 	readers := []interface{ Read([]byte) (int, error) }{fakeReader{}}
@@ -52,6 +51,7 @@ func testInlineField() {
 	fmt.Println("InlineField: Read =", string(buf[:n]))
 }
 
+/*
 // 6. Interface embedding inline interface
 type InlineEmbed interface {
 	interface{ Close() error }
@@ -89,7 +89,7 @@ func main() {
 	testTypeSwitch(fakeError{})
 	testTypeAssertion(fakeError{})
 	takesReader(fakeReader{})
-	//testCompositeLiteral()
-	//testInlineField()
+	testCompositeLiteral()
+	testInlineField()
 	//testInterfaceEmbedding(embeddedImpl{})
 }

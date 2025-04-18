@@ -8,15 +8,19 @@ import (
 	"strings"
 )
 
+const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
+
 // Handles struct types in the context of a TypeSpec, ValueSpec, or FieldList
-func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (structTypeName string) {
-	var target *strings.Builder
+func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool, target *strings.Builder) (structTypeName string) {
 	var preLiftIndentLevel int
+	var structPrefix *strings.Builder
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
 		if v.inFunction {
-			target = &strings.Builder{}
+			if target == nil {
+				target = &strings.Builder{}
+			}
 
 			if !strings.HasPrefix(name, v.currentFuncName+"_") {
 				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
@@ -28,19 +32,18 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		structTypeName = v.getUniqueLiftedTypeName(name)
 		v.liftedTypeMap[identType] = structTypeName
+		v.liftedTypeMap[v.getType(structType, false)] = structTypeName
 	} else {
 		structTypeName = name
 	}
 
 	if target == nil {
 		target = v.targetFile
-	}
 
-	if !v.inFunction {
-		target.WriteString(v.newline)
+		if !v.inFunction {
+			target.WriteString(v.newline)
+		}
 	}
-
-	v.writeDocString(target, doc, structType.Pos())
 
 	structTypeName = getSanitizedIdentifier(structTypeName)
 	typeParams, constraints := v.getGenericDefinition(identType)
@@ -50,6 +53,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	} else {
 		constraints = fmt.Sprintf("%s%s%s", constraints, v.newline, v.indent(v.indentLevel))
 	}
+
+	if !v.inFunction {
+		structPrefix = &strings.Builder{}
+	}
+
+	structPrefixMarker := fmt.Sprintf(StructPrefixMarker, structTypeName)
+	target.WriteString(structPrefixMarker)
+	v.writeDocString(target, doc, structType.Pos())
 
 	var dynamic string
 
@@ -79,11 +90,25 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			target.WriteString(v.newline)
 		}
 
+		var indentOffset int
+
+		if v.inFunction {
+			indentOffset = 1
+		} else {
+			indentOffset = -1
+		}
+
 		// Check if field is a struct or a pointer to a struct
 		if ptrType, ok := field.Type.(*ast.StarExpr); ok {
 			if subStructType, ok := ptrType.X.(*ast.StructType); ok {
 				subStructIdentType := v.getExprType(ptrType.X)
-				v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true)
+				v.indentLevel += indentOffset
+				v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				v.indentLevel -= indentOffset
+
+				if structPrefix != nil {
+					structPrefix.WriteString(v.newline)
+				}
 
 				// Track sub-struct types
 				subStructTypes := v.subStructTypes[identType]
@@ -94,10 +119,25 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				subStructTypes = append(subStructTypes, v.getExprType(ptrType))
 				v.subStructTypes[identType] = subStructTypes
+			} else if interfaceType, ok := ptrType.X.(*ast.InterfaceType); ok {
+				interfaceIdentType := v.getExprType(ptrType.X)
+				v.indentLevel += indentOffset
+				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				v.indentLevel -= indentOffset
+
+				if structPrefix != nil {
+					structPrefix.WriteString(v.newline)
+				}
 			}
 		} else if subStructType, ok := field.Type.(*ast.StructType); ok {
 			subStructIdentType := v.getExprType(field.Type)
-			v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true)
+			v.indentLevel += indentOffset
+			v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+			v.indentLevel -= indentOffset
+
+			if structPrefix != nil {
+				structPrefix.WriteString(v.newline)
+			}
 
 			// Track sub-struct types
 			subStructTypes := v.subStructTypes[identType]
@@ -108,6 +148,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 			subStructTypes = append(subStructTypes, subStructIdentType)
 			v.subStructTypes[identType] = subStructTypes
+		} else if interfaceType, ok := field.Type.(*ast.InterfaceType); ok {
+			interfaceIdentType := v.getExprType(field.Type)
+			v.indentLevel += indentOffset
+			v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+			v.indentLevel -= indentOffset
+
+			if structPrefix != nil {
+				structPrefix.WriteString(v.newline)
+			}
 		}
 
 		fieldType := v.getType(field.Type, false)
@@ -205,12 +254,19 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	v.indentLevel--
 	v.writeStringLn(target, "}")
 
+	if structPrefix == nil {
+		v.replaceMarkerString(target, structPrefixMarker, "")
+	} else {
+		v.replaceMarkerString(target, structPrefixMarker, structPrefix.String())
+	}
+
 	if lifted && v.inFunction {
 		if v.currentFuncPrefix.Len() > 0 {
 			v.currentFuncPrefix.WriteString(v.newline)
 		}
 
 		v.currentFuncPrefix.WriteString(target.String())
+		target.Reset()
 		v.indentLevel = preLiftIndentLevel
 	}
 

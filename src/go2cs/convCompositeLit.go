@@ -25,6 +25,38 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		return result.String()
 	}
 
+	var name string
+
+	if context.ident != nil {
+		if len(context.ident.Name) > 0 {
+			name = context.ident.Name
+		}
+	}
+
+	if len(name) == 0 {
+		name = "type"
+	}
+
+	var indentOffset int
+
+	if v.inFunction {
+		indentOffset = 1
+	}
+
+	// Check if the composite type is a struct or pointer to a struct
+	if structType, exprType := v.extractStructType(compositeLit.Type); structType != nil && !v.liftedTypeExists(structType) {
+		v.indentLevel += indentOffset
+		v.visitStructType(structType, exprType, name, nil, true, nil)
+		v.indentLevel -= indentOffset
+	}
+
+	// Check if the composite type is an anonymous interface
+	if interfaceType, exprType := v.extractInterfaceType(compositeLit.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
+		v.indentLevel += indentOffset
+		v.visitInterfaceType(interfaceType, exprType, name, nil, true, nil)
+		v.indentLevel -= indentOffset
+	}
+
 	exprType := v.getExprType(compositeLit.Type)
 	arrayTypeContext := DefaultArrayTypeContext()
 	callContext := DefaultCallExprContext()
@@ -36,6 +68,35 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var needsInterfaceCast bool
 	var isEmpty bool
 	var definedLen int
+
+	// Check composite lit elements against struct fields
+	checkStructFields := func(structType *types.Struct) {
+		for i := range structType.NumFields() {
+			field := structType.Field(i)
+
+			if i < len(compositeLit.Elts) {
+				// Check if field is an embedded interface
+				if fieldType := field.Type(); fieldType != nil {
+					if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
+						// Record implementation
+						var eltType types.Type
+
+						if keyValueExpr, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
+							eltType = v.info.TypeOf(keyValueExpr.Value)
+						} else {
+							eltType = v.info.TypeOf(compositeLit.Elts[i])
+						}
+
+						if eltType != nil {
+							if _, ok := eltType.Underlying().(*types.Struct); ok || field.Embedded() {
+								v.convertToInterfaceType(fieldType, eltType, "")
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	switch t := exprType.(type) {
 	case *types.Array:
@@ -54,34 +115,17 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		callContext.keyValueSource = MapSource
 	case *types.Named:
 		if structType, ok := t.Underlying().(*types.Struct); ok {
-			// Check composite lit elements against struct fields
-			for i := 0; i < structType.NumFields(); i++ {
-				field := structType.Field(i)
-
-				if i < len(compositeLit.Elts) {
-					// Check if field is an embedded interface
-					if field.Embedded() {
-						if fieldType := field.Type(); fieldType != nil {
-							if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
-								// Record implementation
-								eltType := v.info.TypeOf(compositeLit.Elts[i])
-
-								if eltType != nil {
-									v.convertToInterfaceType(fieldType, eltType, "")
-								}
-							}
-						}
-					}
-				}
-			}
+			checkStructFields(structType)
 		}
+	case *types.Struct:
+		checkStructFields(t)
 	}
 
 	// Check if element type is an interface
 	if elementType != nil {
 		needsInterfaceCast, isEmpty = isInterface(elementType)
 		if needsInterfaceCast && !isEmpty {
-			for i := 0; i < len(compositeLit.Elts); i++ {
+			for i := range compositeLit.Elts {
 				callContext.interfaceTypes[i] = elementType
 			}
 		}

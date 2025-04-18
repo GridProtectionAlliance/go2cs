@@ -18,7 +18,7 @@ const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
 const TypeT = ShadowVarMarker + "T"
 
 // Handles interface types in context of a TypeSpec
-func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool) (interfaceTypeName string) {
+func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool, target *strings.Builder) (interfaceTypeName string) {
 	for _, field := range interfaceType.Methods.List {
 		// Check if this is an actual method (has a function type)
 		if funcType, ok := field.Type.(*ast.FuncType); ok {
@@ -26,6 +26,8 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 			if v.inFunction {
 				indentOffset = 1
+			} else {
+				indentOffset = -1
 			}
 
 			// Loop through function results to check if any are structs
@@ -40,16 +42,16 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 					}
 
 					// Check if the return type is a struct or pointer to a struct
-					if structType, exprType := v.extractStructType(resultField.Type); structType != nil {
+					if structType, exprType := v.extractStructType(resultField.Type); structType != nil && !v.liftedTypeExists(structType) {
 						v.indentLevel += indentOffset
-						v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
+						v.visitStructType(structType, exprType, fieldName, resultField.Comment, true, target)
 						v.indentLevel -= indentOffset
 					}
 
 					// Check if the return type is an anonymous interface
-					if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil {
+					if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 						v.indentLevel += indentOffset
-						v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true)
+						v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true, target)
 						v.indentLevel -= indentOffset
 					}
 				}
@@ -60,16 +62,16 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 				for _, paramField := range funcType.Params.List {
 					for _, paramName := range paramField.Names {
 						// Check if the parameter type is a struct or pointer to a struct
-						if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
+						if structType, exprType := v.extractStructType(paramField.Type); structType != nil && !v.liftedTypeExists(structType) {
 							v.indentLevel += indentOffset
-							v.visitStructType(structType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true)
+							v.visitStructType(structType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true, target)
 							v.indentLevel -= indentOffset
 						}
 
 						// Check if the parameter type is an anonymous interface
-						if interfaceType, exprType := v.extractInterfaceType(paramField.Type); interfaceType != nil {
+						if interfaceType, exprType := v.extractInterfaceType(paramField.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 							v.indentLevel += indentOffset
-							v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true)
+							v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("%s_%s", name, paramName.Name), paramField.Comment, true, target)
 							v.indentLevel -= indentOffset
 						}
 					}
@@ -78,13 +80,14 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 	}
 
-	var target *strings.Builder
 	var preLiftIndentLevel int
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
 		if v.inFunction {
-			target = &strings.Builder{}
+			if target == nil {
+				target = &strings.Builder{}
+			}
 
 			if !strings.HasPrefix(name, v.currentFuncName+"_") {
 				name = fmt.Sprintf("%s_%s", v.currentFuncName, name)
@@ -96,16 +99,17 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		interfaceTypeName = v.getUniqueLiftedTypeName(name)
 		v.liftedTypeMap[identType] = interfaceTypeName
+		v.liftedTypeMap[v.getType(interfaceType, false)] = interfaceTypeName
 	} else {
 		interfaceTypeName = name
 	}
 
 	if target == nil {
 		target = v.targetFile
-	}
 
-	if !v.inFunction {
-		target.WriteString(v.newline)
+		if !v.inFunction {
+			target.WriteString(v.newline)
+		}
 	}
 
 	v.writeDocString(target, doc, interfaceType.Pos())
@@ -233,6 +237,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 
 		v.currentFuncPrefix.WriteString(target.String())
+		target.Reset()
 		v.indentLevel = preLiftIndentLevel
 	}
 

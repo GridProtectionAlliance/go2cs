@@ -20,16 +20,16 @@ func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parame
 			}
 
 			// Check if the return type is a struct or pointer to a struct
-			if structType, exprType := v.extractStructType(resultField.Type); structType != nil {
+			if structType, exprType := v.extractStructType(resultField.Type); structType != nil && !v.liftedTypeExists(structType) {
 				v.indentLevel++
-				v.visitStructType(structType, exprType, fieldName, resultField.Comment, true)
+				v.visitStructType(structType, exprType, fieldName, resultField.Comment, true, nil)
 				v.indentLevel--
 			}
 
 			// Check if the return type is an anonymous interface
-			if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil {
+			if interfaceType, exprType := v.extractInterfaceType(resultField.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 				v.indentLevel++
-				v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true)
+				v.visitInterfaceType(interfaceType, exprType, fieldName, resultField.Comment, true, nil)
 				v.indentLevel--
 			}
 		}
@@ -42,14 +42,14 @@ func (v *Visitor) convFuncType(funcType *ast.FuncType) (resultsSignature, parame
 				// Check if the parameter type is a struct or pointer to a struct
 				if structType, exprType := v.extractStructType(paramField.Type); structType != nil {
 					v.indentLevel++
-					v.visitStructType(structType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true)
+					v.visitStructType(structType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true, nil)
 					v.indentLevel--
 				}
 
 				// Check if the parameter type is an anonymous interface
 				if interfaceType, exprType := v.extractInterfaceType(paramField.Type); interfaceType != nil {
 					v.indentLevel++
-					v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true)
+					v.visitInterfaceType(interfaceType, exprType, fmt.Sprintf("func_%s", paramName.Name), paramField.Comment, true, nil)
 					v.indentLevel--
 				}
 			}

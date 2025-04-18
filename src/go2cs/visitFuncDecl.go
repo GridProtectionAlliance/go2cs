@@ -69,16 +69,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 
 			// Check if the return type is a struct or pointer to a struct
-			if structType, exprType := v.extractStructType(field.Type); structType != nil {
+			if structType, exprType := v.extractStructType(field.Type); structType != nil && !v.liftedTypeExists(structType) {
 				v.indentLevel++
-				v.visitStructType(structType, exprType, fieldName, field.Comment, true)
+				v.visitStructType(structType, exprType, fieldName, field.Comment, true, nil)
 				v.indentLevel--
 			}
 
 			// Check if the return type is an anonymous interface
-			if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil {
+			if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 				v.indentLevel++
-				v.visitInterfaceType(interfaceType, exprType, fieldName, field.Comment, true)
+				v.visitInterfaceType(interfaceType, exprType, fieldName, field.Comment, true, nil)
 				v.indentLevel--
 			}
 		}
@@ -89,16 +89,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		for _, field := range funcDecl.Type.Params.List {
 			for _, name := range field.Names {
 				// Check if the parameter type is a struct or pointer to a struct
-				if structType, exprType := v.extractStructType(field.Type); structType != nil {
+				if structType, exprType := v.extractStructType(field.Type); structType != nil && !v.liftedTypeExists(structType) {
 					v.indentLevel++
-					v.visitStructType(structType, exprType, name.Name, field.Comment, true)
+					v.visitStructType(structType, exprType, name.Name, field.Comment, true, nil)
 					v.indentLevel--
 				}
 
 				// Check if the parameter type is an anonymous interface
-				if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil {
+				if interfaceType, exprType := v.extractInterfaceType(field.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 					v.indentLevel++
-					v.visitInterfaceType(interfaceType, exprType, name.Name, field.Comment, true)
+					v.visitInterfaceType(interfaceType, exprType, name.Name, field.Comment, true, nil)
 					v.indentLevel--
 				}
 			}

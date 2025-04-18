@@ -10,63 +10,14 @@ import (
 )
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	funcType := v.getType(callExpr.Fun, false)
+
+	// Check if the call is a type conversion
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
-		expr := v.convExpr(arg, nil)
-
 		targetTypeName = convertToCSTypeName(targetTypeName)
-		targetType := v.getType(callExpr.Fun, false)
-		argType := v.getType(arg, false)
 
-		var targetTypeIsPointer bool
-
-		// Check if funType is a struct or a pointer to a struct
-		if ptrType, ok := targetType.(*types.Pointer); ok {
-			targetType = ptrType.Elem().Underlying()
-			targetTypeIsPointer = true
-		}
-
-		if _, ok := targetType.(*types.Struct); ok {
-			// Check if argType is a struct or a pointer to a struct
-			if ptrType, ok := argType.(*types.Pointer); ok {
-				argType = ptrType.Elem().Underlying()
-			}
-
-			if _, ok := argType.(*types.Struct); ok {
-				if targetTypeIsPointer {
-					// Dereference target type when casting to pointer types,
-					// in C# implicit casting operator requires the target type
-					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
-				}
-
-				// If both funcType and argType are structs, track implicit conversions
-				packageLock.Lock()
-
-				var targetConversionsMap map[string]HashSet[string]
-
-				if targetTypeIsPointer {
-					targetConversionsMap = indirectImplicitConversions
-				} else {
-					targetConversionsMap = implicitConversions
-				}
-
-				argTypeName := v.getCSTypeName(argType)
-				var conversions HashSet[string]
-				var exists bool
-
-				if conversions, exists = targetConversionsMap[argTypeName]; exists {
-					conversions.Add(targetTypeName)
-				} else {
-					conversions = NewHashSet([]string{targetTypeName})
-					targetConversionsMap[argTypeName] = conversions
-				}
-
-				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
-
-				packageLock.Unlock()
-			}
-		}
+		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
@@ -103,16 +54,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			if paramHasArg {
 				// Check if the parameter type is an anonymous struct
-				if structType, exprType := v.extractStructType(callExpr.Args[i]); structType != nil {
+				if structType, exprType := v.extractStructType(callExpr.Args[i]); structType != nil && !v.liftedTypeExists(structType) {
 					v.indentLevel++
-					v.visitStructType(structType, exprType, params.At(i).Name(), nil, true)
+					v.visitStructType(structType, exprType, params.At(i).Name(), nil, true, nil)
 					v.indentLevel--
 				}
 
 				// Check if the parameter type is an anonymous interface
-				if interfaceType, exprType := v.extractInterfaceType(callExpr.Args[i]); interfaceType != nil {
+				if interfaceType, exprType := v.extractInterfaceType(callExpr.Args[i]); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
 					v.indentLevel++
-					v.visitInterfaceType(interfaceType, exprType, params.At(i).Name(), nil, true)
+					v.visitInterfaceType(interfaceType, exprType, params.At(i).Name(), nil, true, nil)
 					v.indentLevel--
 				}
 			}
@@ -211,7 +162,6 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext.isPointerCast = context.isPointerCast
 	lambdaContext.deferredDecls = context.deferredDecls
 
-	funcType := v.getType(callExpr.Fun, false)
 	var typeParamExpr string
 
 	resultType := v.info.TypeOf(callExpr)
@@ -314,13 +264,90 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		funcName += typeParamExpr
 	}
 
+	var result string
+
 	if !context.renderParams && context.callArgs != nil {
 		// Capture arguments for function literal in a defer context, but do not render
 		v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
-		return fmt.Sprintf("%s%s", constructType, funcName)
+		result = fmt.Sprintf("%s%s", constructType, funcName)
+	} else {
+		result = fmt.Sprintf("%s%s(%s)", constructType, funcName, v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
 	}
 
-	return fmt.Sprintf("%s%s(%s)", constructType, funcName, v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
+	// Check each argument for implicit conversions
+	for _, arg := range callExpr.Args {
+		argType := v.getType(arg, false)
+		argTypeName := convertToCSTypeName(v.getTypeName(argType, false))
+
+		v.checkForImplicitConversion(funcType, arg, argTypeName)
+	}
+
+	return result
+}
+
+func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, targetTypeName string) string {
+	expr := v.convExpr(arg, nil)
+	argType := v.getType(arg, false)
+
+	var targetTypeIsPointer bool
+
+	// Check if function type is a signature, i.e., an anonymous struct
+	if sigType, ok := funcType.(*types.Signature); ok && sigType.Params().Len() > 0 {
+		funcType = sigType.Params().At(0).Type()
+	}
+
+	// Check if function type is a struct or a pointer to a struct
+	if ptrType, ok := funcType.(*types.Pointer); ok {
+		funcType = ptrType.Elem().Underlying()
+		targetTypeIsPointer = true
+	}
+
+	if _, ok := funcType.(*types.Struct); ok {
+		// Check if argType is a struct or a pointer to a struct
+		if ptrType, ok := argType.(*types.Pointer); ok {
+			argType = ptrType.Elem().Underlying()
+		}
+
+		if _, ok := argType.(*types.Struct); ok {
+			if targetTypeIsPointer {
+				// Dereference target type when casting to pointer types,
+				// in C# implicit casting operator requires the target type
+				// to be a direct type, not a pointer type
+				expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
+			}
+
+			argTypeName := v.getCSTypeName(argType)
+
+			if argTypeName != targetTypeName {
+				// If both funcType and argType are distinct structs, track implicit conversions
+				packageLock.Lock()
+
+				var targetConversionsMap map[string]HashSet[string]
+
+				if targetTypeIsPointer {
+					targetConversionsMap = indirectImplicitConversions
+				} else {
+					targetConversionsMap = implicitConversions
+				}
+
+				var conversions HashSet[string]
+				var exists bool
+
+				if conversions, exists = targetConversionsMap[argTypeName]; exists {
+					conversions.Add(targetTypeName)
+				} else {
+					conversions = NewHashSet([]string{targetTypeName})
+					targetConversionsMap[argTypeName] = conversions
+				}
+
+				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
+
+				packageLock.Unlock()
+			}
+		}
+	}
+
+	return expr
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

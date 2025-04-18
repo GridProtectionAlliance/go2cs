@@ -48,7 +48,7 @@ func main() {
 	
 	// Using the anonymous struct as a function parameter
 	fmt.Println("\n=== Function Parameter Tests ===")
-	
+
 	// Pass anonymous struct literal directly
 	processAnonymousStruct(struct {
 		Name string
