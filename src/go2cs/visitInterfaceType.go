@@ -162,7 +162,20 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 					inheritedInterfaces = append(inheritedInterfaces, fmt.Sprintf("%s<%s>", v.convExpr(method.Type, nil), TypeT))
 				}
 			} else {
+				isDynamicInterface := v.isDynamicInterface(method.Type)
+
+				if isDynamicInterface {
+					v.indentLevel--
+					v.removeLastLineFeed(result)
+					v.removeLastLineFeed(v.targetFile)
+				}
+
 				inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil))
+
+				if isDynamicInterface {
+					v.indentLevel++
+					v.targetFile.WriteString(v.newline)
+				}
 			}
 		} else {
 			panic("Unexpected method declaration in interface: %s" + v.getPrintedNode(method))

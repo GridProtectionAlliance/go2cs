@@ -17,6 +17,13 @@ func (v *Visitor) isLineFeedBetween(prevEndPos, currPos token.Pos) bool {
 	return currLine > prevLine
 }
 
+func (v *Visitor) removeLastLineFeed(builder *strings.Builder) {
+	currentResult := builder.String()
+	currentResult = strings.TrimSuffix(currentResult, v.newline)
+	builder.Reset()
+	builder.WriteString(currentResult)
+}
+
 func (v *Visitor) writeString(builder *strings.Builder, format string, a ...interface{}) {
 	if v.indentLevel > 0 {
 		builder.WriteString(v.indent(v.indentLevel))
