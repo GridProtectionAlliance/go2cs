@@ -71,14 +71,13 @@ internal static void testInlineField() {
     fmt.Println("InlineField: Read =", ((@string)(buf[..(int)(n)])));
 }
 
+[GoType("dyn")] partial interface Δtype {
+    error Close();
+}
 
-    [GoType("dyn")] partial interface Δtype {
-        error Close();
-    }
 [GoType] partial interface InlineEmbed :
     Δtype
-{
-    error Flush();
+{    error Flush();
 }
 
 [GoType] partial struct embeddedImpl {
