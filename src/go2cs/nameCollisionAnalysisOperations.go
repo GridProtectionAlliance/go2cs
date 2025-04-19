@@ -30,7 +30,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 					for _, spec := range node.Specs {
 						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
 							for _, name := range valueSpec.Names {
-								namedElementNames[name.Name] = true
+								namedElementNames[name.Name] = false
 							}
 						}
 					}
@@ -53,7 +53,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	}
 
 	// Find collisions (names that appear in both sets)
-	for name := range namedElementNames {
+	for name, export := range namedElementNames {
 		if methodNames[name] {
 			// Found a collision
 			nameCollisions[name] = true
@@ -62,7 +62,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 			// this way original name can be referenced as normal when using
 			// the name from referenced package. The name will not collide in
 			// a remote package because the type will have the package prefix.
-			if getAccess(name) == "public" {
+			if export && getAccess(name) == "public" {
 				packageLock.Lock()
 				exportedTypeAliases[getCoreSanitizedIdentifier(name)] = getCollisionAvoidanceIdentifier(name)
 				packageLock.Unlock()

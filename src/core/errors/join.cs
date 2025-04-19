@@ -40,7 +40,7 @@ public static error Join(params ꓸꓸꓸerror errsʗp) {
 }
 
 [GoType] partial struct joinError {
-    public slice<error> errs;
+    internal slice<error> errs;
 }
 
 [GoRecv] internal static @string Error(this ref joinError e) {

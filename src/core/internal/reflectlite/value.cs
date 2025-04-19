@@ -35,10 +35,10 @@ partial class reflectlite_package {
 [GoType] partial struct Value {
     // typ_ holds the type of the value represented by a Value.
     // Access using the typ method to avoid escape of v.
-    public abi.ΔType typ_;
+    internal abi.ΔType typ_;
     // Pointer-valued data or, if flagIndir is set, pointer to data.
     // Valid when either flagIndir is set or typ.pointers() is true.
-    public @unsafe.Pointer ptr;
+    internal @unsafe.Pointer ptr;
     // flag holds metadata about the value.
     // The lowest bits are flag bits:
     //	- flagStickyRO: obtained via unexported not embedded field, so read-only
@@ -51,7 +51,7 @@ partial class reflectlite_package {
     // The remaining 23+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
     // If ifaceIndir(typ), code can assume that flagIndir is set.
-    public flag flag;
+    internal flag flag;
 }
 
 [GoType("uintptr")] partial struct flag;
@@ -321,9 +321,9 @@ public static ΔKind Kind(this Value v) {
 // implemented in runtime:
 
 //go:noescape
-internal static partial nint chanlen(@unsafe.Pointer );
+internal static partial nint chanlen(@unsafe.Pointer _);
 //go:noescape
-internal static partial nint maplen(@unsafe.Pointer );
+internal static partial nint maplen(@unsafe.Pointer _);
 // Len returns v's length.
 // It panics if v's Kind is not Array, Chan, Map, Slice, or String.
 public static nint Len(this Value v) {
@@ -394,7 +394,7 @@ public static ΔType Type(this Value v) {
 // implemented in package runtime
 
 //go:noescape
-internal static partial @unsafe.Pointer unsafe_New(ж<abi.ΔType> );
+internal static partial @unsafe.Pointer unsafe_New(ж<abi.ΔType> _);
 // ValueOf returns a new Value initialized to the concrete value
 // stored in the interface i. ValueOf(nil) returns the zero Value.
 public static Value ValueOf(any i) {
@@ -469,9 +469,9 @@ internal static void escapes(any x) {
 }
 
 
-[GoType] partial struct dummyᴛ1 {
-    public bool b;
-    public any x;
+[GoType("dyn")] partial struct dummyᴛ1 {
+    internal bool b;
+    internal any x;
 }
 internal static dummyᴛ1 dummy;
 

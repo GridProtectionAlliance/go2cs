@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"embed"
+	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -17,6 +19,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -209,6 +212,7 @@ var packageName string
 var packageNamespace string
 var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
+var importedTypeAliases map[string]string
 var interfaceImplementations map[string]HashSet[string]
 var promotedInterfaceImplementations map[string]HashSet[string]
 var interfaceInheritances map[string]HashSet[string]
@@ -395,6 +399,7 @@ Examples:
 		packageNamespace = ""
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
+		importedTypeAliases = make(map[string]string)
 		interfaceImplementations = make(map[string]HashSet[string])
 		promotedInterfaceImplementations = make(map[string]HashSet[string])
 		interfaceInheritances = make(map[string]HashSet[string])
@@ -560,9 +565,53 @@ Examples:
 			packageInfoLines = strings.Split(templateFile, "\r\n")
 		}
 
-		// Handle exported type aliases
+		// Handle imported type aliases
 		startLineIndex := -1
 		endLineIndex := -1
+
+		for i, line := range packageInfoLines {
+			if strings.Contains(line, "<ImportedTypeAliases>") {
+				startLineIndex = i
+				continue
+			}
+
+			if strings.Contains(line, "</ImportedTypeAliases>") {
+				endLineIndex = i
+				break
+			}
+		}
+
+		if startLineIndex >= 0 && endLineIndex >= 0 && startLineIndex < endLineIndex {
+			// Read existing type aliases from package info file
+			lines := HashSet[string]{}
+
+			// If processing a single file, instead of all package files, merge type aliases
+			if !fileInfo.IsDir() {
+				for i := startLineIndex + 1; i < endLineIndex; i++ {
+					line := packageInfoLines[i]
+					lines.Add(strings.TrimSpace(line))
+				}
+			}
+
+			// Add new type aliases to package info file (hashset ensures uniqueness)
+			for alias, typeName := range importedTypeAliases {
+				lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
+			}
+
+			// Sort lines
+			sortedLines := lines.Keys()
+			sort.Strings(sortedLines)
+
+			// Insert imported type aliases into package info file
+			packageInfoLines = append(packageInfoLines[:startLineIndex+1],
+				append(sortedLines, packageInfoLines[endLineIndex:]...)...)
+		} else {
+			log.Fatalf("Failed to find '<ImportedTypeAliases>...</ImportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
+		}
+
+		// Handle exported type aliases
+		startLineIndex = -1
+		endLineIndex = -1
 
 		for i, line := range packageInfoLines {
 			if strings.Contains(line, "<ExportedTypeAliases>") {
@@ -840,7 +889,25 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	references := make([]string, 0, len(packageInfoMap))
 
 	for _, info := range packageInfoMap {
+		// Track project references
 		references = append(references, info.ProjectReference)
+
+		// Parse package info file for exported type aliases for each project reference,
+		// these are used as the imported type aliases in the current package
+		packageInfoFile := filepath.Join(info.TargetDir, PackageInfoFileName)
+		results, err := parseExportedTypeAliases(packageInfoFile)
+
+		if err == nil {
+			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
+			packageName := getCoreSanitizedIdentifier(info.PackageName)
+
+			for _, result := range results {
+				// Add the exported type alias to the imported type aliases map
+				importedTypeAliases[fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))] = fmt.Sprintf("go.%s%s.%s", packageName, PackageSuffix, getCoreSanitizedIdentifier(result[1]))
+			}
+		} else {
+			println("WARNING: Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
+		}
 	}
 
 	sort.Strings(references)
@@ -882,6 +949,60 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	}
 
 	return nil
+}
+
+// parseExportedTypeAliases parses a package info file and extracts the GoTypeAlias
+// entries as tuples of (source, destination) strings
+func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
+	file, err := os.Open(packageInfoFile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	// Look for the start of the ExportedTypeAliases section
+	inSection := false
+	var aliases [][2]string
+
+	// Pattern to match: [assembly: GoTypeAlias("Source", "Destination")]
+	pattern := regexp.MustCompile(`\[assembly: GoTypeAlias\("([^"]+)", "([^"]+)"\)\]`)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if strings.TrimSpace(line) == "// <ExportedTypeAliases>" {
+			inSection = true
+			continue
+		}
+
+		if strings.TrimSpace(line) == "// </ExportedTypeAliases>" {
+			break // End of section reached
+		}
+
+		if inSection {
+			matches := pattern.FindStringSubmatch(line)
+
+			if len(matches) == 3 {
+				// Extract the source and destination as tuple
+				alias := [2]string{matches[1], matches[2]}
+				aliases = append(aliases, alias)
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	if !inSection && len(aliases) == 0 {
+		return nil, errors.New("exported type aliases section not found")
+	}
+
+	return aliases, nil
 }
 
 func writePackageFiles(projectPath string) error {
@@ -2191,7 +2312,7 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg.Name() != packageName {
-			return getSanitizedImport(pkg.Name()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
+			return getSanitizedImport(pkg.Path()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
 		}
 	}
 

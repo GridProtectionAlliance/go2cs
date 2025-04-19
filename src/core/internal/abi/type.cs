@@ -261,7 +261,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoType] partial struct structTypeUncommon {
     public partial ref ΔStructType StructType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
 // ChanDir returns the direction of t if t is a channel type, otherwise InvalidDir (0).
@@ -273,44 +273,44 @@ public static readonly ΔChanDir InvalidDir = 0;
     return InvalidDir;
 }
 
-[GoType] partial struct Uncommon_u {
+[GoType("dyn")] partial struct Uncommon_u {
     public partial ref PtrType PtrType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ1 {
+[GoType("dyn")] partial struct Uncommon_uᴛ1 {
     public partial ref ΔFuncType FuncType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ2 {
+[GoType("dyn")] partial struct Uncommon_uᴛ2 {
     public partial ref SliceType SliceType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ3 {
+[GoType("dyn")] partial struct Uncommon_uᴛ3 {
     public partial ref ΔArrayType ArrayType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ4 {
+[GoType("dyn")] partial struct Uncommon_uᴛ4 {
     public partial ref ChanType ChanType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ5 {
+[GoType("dyn")] partial struct Uncommon_uᴛ5 {
     public partial ref ΔMapType MapType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ6 {
+[GoType("dyn")] partial struct Uncommon_uᴛ6 {
     public partial ref ΔInterfaceType InterfaceType { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
-[GoType] partial struct Uncommon_uᴛ7 {
+[GoType("dyn")] partial struct Uncommon_uᴛ7 {
     public partial ref Type Type { get; }
-    public UncommonType u;
+    internal UncommonType u;
 }
 
 // Uncommon returns a pointer to T's "uncommon" data if there is any, otherwise nil

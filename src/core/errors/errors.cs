@@ -66,7 +66,7 @@ public static error New(@string text) {
 
 // errorString is a trivial implementation of error.
 [GoType] partial struct errorString {
-    public @string s;
+    internal @string s;
 }
 
 [GoRecv] internal static @string Error(this ref errorString e) {

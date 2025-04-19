@@ -12,6 +12,8 @@ import (
 // PackageInfo represents information about a package
 type PackageInfo struct {
 	IsStdLib         bool
+	PackageName      string
+	RootPackageName  string
 	SourceDir        string
 	TargetDir        string
 	ProjectReference string
@@ -217,9 +219,12 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		packageName := strings.Join(importPathParts, ".")
 		projectReference := filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")
 		targetDir = strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator))
+		packageNameParts := strings.Split(packageName, ".")
 
 		result[importPath] = PackageInfo{
 			IsStdLib:         isStdLib,
+			PackageName:      packageName,
+			RootPackageName:  packageNameParts[len(packageNameParts)-1],
 			SourceDir:        sourceDir,
 			TargetDir:        targetDir,
 			ProjectReference: projectReference,

@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-// Example: global using mypkgꓸTable = go.map<go.@string, nint>;
 // </ImportedTypeAliases>
 
 using go;

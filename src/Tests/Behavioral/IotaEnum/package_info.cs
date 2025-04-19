@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-// Example: global using mypkgꓸTable = go.map<go.@string, nint>;
 // </ImportedTypeAliases>
 
 using go;
@@ -31,7 +30,6 @@ using static go.main_package;
 [assembly: GoTypeAlias("ArrayType", "ΔArrayType")]
 [assembly: GoTypeAlias("Kind", "ΔKind")]
 [assembly: GoTypeAlias("MapType", "ΔMapType")]
-[assembly: GoTypeAlias("String", "ΔString")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

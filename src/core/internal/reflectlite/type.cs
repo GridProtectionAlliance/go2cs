@@ -4,18 +4,18 @@
 
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime", "unsafe", and "internal/abi"
-global using Kind = go.abi_package.ΔKind;
-global using nameOff = go.abi_package.NameOff;
-global using typeOff = go.abi_package.TypeOff;
-global using textOff = go.abi_package.TextOff;
-global using uncommonType = go.abi_package.UncommonType;
-global using arrayType = go.abi_package.ArrayType;
-global using chanType = go.abi_package.ChanType;
-global using funcType = go.abi_package.FuncType;
-global using interfaceType = go.abi_package.InterfaceType;
-global using ptrType = go.abi_package.PtrType;
-global using sliceType = go.abi_package.SliceType;
-global using structType = go.abi_package.StructType;
+global using Kind = go.@internal.abi_package.ΔKind;
+global using nameOff = go.@internal.abi_package.NameOff;
+global using typeOff = go.@internal.abi_package.TypeOff;
+global using textOff = go.@internal.abi_package.TextOff;
+global using uncommonType = go.@internal.abi_package.UncommonType;
+global using arrayType = go.@internal.abi_package.ArrayType;
+global using chanType = go.@internal.abi_package.ChanType;
+global using funcType = go.@internal.abi_package.FuncType;
+global using interfaceType = go.@internal.abi_package.InterfaceType;
+global using ptrType = go.@internal.abi_package.PtrType;
+global using sliceType = go.@internal.abi_package.SliceType;
+global using structType = go.@internal.abi_package.StructType;
 
 namespace go.@internal;
 
@@ -110,7 +110,7 @@ public static readonly abi.ΔKind Struct = /* abi.Struct */ 25;
 // If a name starts with "*", then the exported bit represents
 // whether the pointed to type is exported.
 [GoType] partial struct Δname {
-    public ж<byte> bytes;
+    internal ж<byte> bytes;
 }
 
 internal static ж<byte> data(this Δname n, nint off, @string whySafe) {

@@ -298,17 +298,17 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 
 	// Check if function type is a struct or a pointer to a struct
 	if ptrType, ok := funcType.(*types.Pointer); ok {
-		funcType = ptrType.Elem().Underlying()
+		funcType = ptrType.Elem()
 		targetTypeIsPointer = true
 	}
 
-	if _, ok := funcType.(*types.Struct); ok {
+	if _, ok := funcType.Underlying().(*types.Struct); ok {
 		// Check if argType is a struct or a pointer to a struct
 		if ptrType, ok := argType.(*types.Pointer); ok {
-			argType = ptrType.Elem().Underlying()
+			argType = ptrType.Elem()
 		}
 
-		if _, ok := argType.(*types.Struct); ok {
+		if _, ok := argType.Underlying().(*types.Struct); ok {
 			if targetTypeIsPointer {
 				// Dereference target type when casting to pointer types,
 				// in C# implicit casting operator requires the target type
