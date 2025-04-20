@@ -24,7 +24,7 @@ public static partial class main_package
         // -- Stack has no promoted structs
 
         // Field References
-        public static ref global::go.slice<T> Ꮡelements(ref Stack<T> instance) => ref instance.elements;
+        internal static ref global::go.slice<T> Ꮡelements(ref Stack<T> instance) => ref instance.elements;
         
         // Constructors
         public Stack(NilType _)

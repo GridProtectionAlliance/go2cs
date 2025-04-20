@@ -9,13 +9,13 @@ global using nameOff = go.@internal.abi_package.NameOff;
 global using typeOff = go.@internal.abi_package.TypeOff;
 global using textOff = go.@internal.abi_package.TextOff;
 global using uncommonType = go.@internal.abi_package.UncommonType;
-global using arrayType = go.@internal.abi_package.ArrayType;
+global using arrayType = go.@internal.abi_package.ΔArrayType;
 global using chanType = go.@internal.abi_package.ChanType;
-global using funcType = go.@internal.abi_package.FuncType;
-global using interfaceType = go.@internal.abi_package.InterfaceType;
+global using funcType = go.@internal.abi_package.ΔFuncType;
+global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
 global using ptrType = go.@internal.abi_package.PtrType;
 global using sliceType = go.@internal.abi_package.SliceType;
-global using structType = go.@internal.abi_package.StructType;
+global using structType = go.@internal.abi_package.ΔStructType;
 
 namespace go.@internal;
 
@@ -51,7 +51,7 @@ partial class reflectlite_package {
     // a value of the given type; it is analogous to unsafe.Sizeof.
     uintptr Size();
     // Kind returns the specific kind of this type.
-    ΔKind Kind();
+    Kind Kind();
     // Implements reports whether the type implements the interface type u.
     bool Implements(ΔType u);
     // AssignableTo reports whether a value of the type is assignable to type u.
@@ -67,7 +67,7 @@ partial class reflectlite_package {
     // Elem returns a type's element type.
     // It panics if the type's Kind is not Ptr.
     ΔType Elem();
-    ж<abi.ΔType> common();
+    ж<abi.Type> common();
     ж<uncommonType> uncommon();
 }
 
@@ -76,12 +76,12 @@ partial class reflectlite_package {
  * A few are known to ../runtime/type.go to convey to debuggers.
  * They are also known to ../runtime/type.go.
  */
-public static readonly abi.ΔKind Ptr = /* abi.Pointer */ 22;
+public static readonly abiꓸKind Ptr = /* abi.Pointer */ 22;
 
-public static readonly abi.ΔKind Interface = /* abi.Interface */ 20;
-public static readonly abi.ΔKind Slice = /* abi.Slice */ 23;
-public static readonly abi.ΔKind ΔString = /* abi.String */ 24;
-public static readonly abi.ΔKind Struct = /* abi.Struct */ 25;
+public static readonly abiꓸKind Interface = /* abi.Interface */ 20;
+public static readonly abiꓸKind Slice = /* abi.Slice */ 23;
+public static readonly abiꓸKind ΔString = /* abi.String */ 24;
+public static readonly abiꓸKind Struct = /* abi.Struct */ 25;
 
 [GoType] partial struct rtype {
 }
@@ -159,7 +159,7 @@ internal static @string tag(this Δname n) {
     return @unsafe.String(n.data(1 + i + l + i2, "non-empty string"u8), l2);
 }
 
-internal static @string pkgPath(abi.Name n) {
+internal static @string pkgPath(abiꓸName n) {
     if (n.Bytes == nil || (byte)(n.DataChecked(0, "name flag field"u8).val & (1 << (int)(2))) == 0) {
         return ""u8;
     }
@@ -172,8 +172,8 @@ internal static @string pkgPath(abi.Name n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((ж<array<byte>>)(new @unsafe.Pointer(ᏑΔnameOff))[..], (ж<array<byte>>)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
-    var pkgPathName = new Δname((ж<byte>)((uintptr)resolveTypeOff(new @unsafe.Pointer(n.Bytes), ΔnameOff)));
+    copy((ж<array<byte>>)(new @unsafe.Pointer(ᏑnameOff))[..], (ж<array<byte>>)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
+    var pkgPathName = new Δname((ж<byte>)((uintptr)resolveTypeOff(new @unsafe.Pointer(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
 
@@ -188,17 +188,19 @@ internal static @string pkgPath(abi.Name n) {
 //
 //go:noescape
 internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModule, int32 off);
+
 // resolveTypeOff resolves an *rtype offset from a base type.
 // The (*rtype).typeOff method is a convenience wrapper for this function.
 // Implemented in the runtime package.
 //
 //go:noescape
 internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
-internal static abi.Name nameOff(this rtype t, ΔnameOff off) {
-    return new abi.Name(Bytes: (ж<byte>)((uintptr)resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
+
+internal static abiꓸName nameOff(this rtype t, nameOff off) {
+    return new abiꓸName(Bytes: (ж<byte>)((uintptr)resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
 }
 
-internal static ж<abi.ΔType> typeOff(this rtype t, ΔtypeOff off) {
+internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
     return (abi.Type.val)((uintptr)resolveTypeOff(new @unsafe.Pointer(t.Type), ((int32)off)));
 }
 
@@ -214,7 +216,7 @@ internal static @string String(this rtype t) {
     return s;
 }
 
-internal static ж<abi.ΔType> common(this rtype t) {
+internal static ж<abi.Type> common(this rtype t) {
     return t.Type;
 }
 
@@ -267,13 +269,13 @@ internal static @string Name(this rtype t) {
     return s[(int)(i + 1)..];
 }
 
-internal static rtype toRType(ж<abi.ΔType> Ꮡt) {
+internal static rtype toRType(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
     return new rtype(t);
 }
 
-internal static ж<abi.ΔType> elem(ж<abi.ΔType> Ꮡt) {
+internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
     var et = t.Elem();
@@ -384,7 +386,7 @@ internal static bool Comparable(this rtype t) {
 }
 
 // implements reports whether the type V implements the interface type T.
-internal static bool implements(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV) {
+internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
@@ -480,7 +482,7 @@ internal static bool implements(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV) {
 // https://golang.org/doc/go_spec.html#Assignability
 // Ignoring the interface rules (implemented elsewhere)
 // and the ideal constant rules (no ideal constants at run time).
-internal static bool directlyAssignable(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV) {
+internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
@@ -497,7 +499,7 @@ internal static bool directlyAssignable(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, true);
 }
 
-internal static bool haveIdenticalType(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV, bool cmpTags) {
+internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
@@ -510,7 +512,7 @@ internal static bool haveIdenticalType(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV,
     return haveIdenticalUnderlyingType(ᏑT, ᏑV, false);
 }
 
-internal static bool haveIdenticalUnderlyingType(ж<abi.ΔType> ᏑT, ж<abi.ΔType> ᏑV, bool cmpTags) {
+internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
     ref var T = ref ᏑT.val;
     ref var V = ref ᏑV.val;
 
@@ -523,7 +525,7 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.ΔType> ᏑT, ж<abi.ΔT
     }
     // Non-composite types of equal kind have same underlying type
     // (the predefined instance of the type).
-    if (abi.Bool <= kind && kind <= abi.Complex128 || kind == abi.String || kind == abi.UnsafePointer) {
+    if (abi.Bool <= kind && kind <= abi.Complex128 || kind == abi.ΔString || kind == abi.UnsafePointer) {
         return true;
     }
     // Composite types.
@@ -614,7 +616,7 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.ΔType> ᏑT, ж<abi.ΔT
 // a nil *rtype must be replaced by a nil Type, but in gccgo this
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
-internal static ΔType toType(ж<abi.ΔType> Ꮡt) {
+internal static ΔType toType(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
     if (t == nil) {

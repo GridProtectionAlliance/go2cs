@@ -24,9 +24,9 @@ public static partial class main_package
         // -- DataProcessor_data has no promoted structs
 
         // Field References
-        public static ref nint ᏑID(ref DataProcessor_data instance) => ref instance.ID;
-        public static ref global::go.@string ᏑName(ref DataProcessor_data instance) => ref instance.Name;
-        public static ref bool ᏑValid(ref DataProcessor_data instance) => ref instance.Valid;
+        internal static ref nint ᏑID(ref DataProcessor_data instance) => ref instance.ID;
+        internal static ref global::go.@string ᏑName(ref DataProcessor_data instance) => ref instance.Name;
+        internal static ref bool ᏑValid(ref DataProcessor_data instance) => ref instance.Valid;
         
         // Constructors
         public DataProcessor_data(NilType _)

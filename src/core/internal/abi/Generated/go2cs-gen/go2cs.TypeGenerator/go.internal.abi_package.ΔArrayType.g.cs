@@ -57,7 +57,7 @@ public static partial class abi_package
         public static ref global::go.@internal.abi_package.Type ᏑType(ref ΔArrayType instance) => ref instance.Type;
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑElem(ref ΔArrayType instance) => ref instance.Elem;
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑSlice(ref ΔArrayType instance) => ref instance.Slice;
-        public static ref nuint ᏑLen(ref ΔArrayType instance) => ref instance.Len;
+        internal static ref nuint ᏑLen(ref ΔArrayType instance) => ref instance.Len;
         
         // Constructors
         public ΔArrayType(NilType _)

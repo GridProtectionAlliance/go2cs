@@ -25,13 +25,13 @@ public static partial class main_package
     internal partial interface testTypeAssertion_type
     {
         // Runtime interface conversion methods
-        public static testTypeAssertion_type As<ΔTTarget>(in ΔTTarget target) =>
+        public static testTypeAssertion_type ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔtestTypeAssertion_type<ΔTTarget>)target!;
 
-        public static testTypeAssertion_type As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static testTypeAssertion_type ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔtestTypeAssertion_type<ΔTTarget>)target_ptr;
 
-        public static testTypeAssertion_type? As(object target) =>
+        public static testTypeAssertion_type? ᴛAs(object target) =>
             typeof(ΔtestTypeAssertion_type<>).CreateInterfaceHandler<testTypeAssertion_type>(target);            
     }
 

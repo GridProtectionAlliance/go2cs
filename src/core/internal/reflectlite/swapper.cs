@@ -9,6 +9,11 @@ using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
 
+    //public static bool Pointers(this ж<abi_package.Type> Ꮡtarget)
+    //{
+
+    //}
+
 // Swapper returns a function that swaps the elements in the provided
 // slice.
 //
@@ -16,7 +21,7 @@ partial class reflectlite_package {
 public static Action<nint, nint> Swapper(any Δslice) {
     var v = ValueOf(Δslice);
     if (v.Kind() != Slice) {
-        panic(Ꮡ(new ValueError(Method: "Swapper"u8, ΔKind: v.Kind())));
+        panic(Ꮡ(new ValueError(Method: "Swapper"u8, Kind: v.Kind())));
     }
     // Fast path for slices of size 0 and 1. Nothing to swap.
     switch (v.Len()) {
@@ -55,7 +60,7 @@ public static Action<nint, nint> Swapper(any Δslice) {
         switch (size) {
         case 8:
             var @is = ~(ж<slice<int64>>)(uintptr)(v.ptr);
-            var isʗ1 = is;
+            var isʗ1 = @is;
             return (nint i, nint j) => {
                 (isʗ1[i], isʗ1[j]) = (isʗ1[j], isʗ1[i]);
             };

@@ -25,7 +25,7 @@ public static partial class main_package
 
         // Field References
         public static ref global::go.main_package.Result<nint> ᏑIntResult(ref Container instance) => ref instance.IntResult;
-        public static ref global::go.main_package.Result<global::go.@string> ᏑStringResult(ref Container instance) => ref instance.StringResult;
+        internal static ref global::go.main_package.Result<global::go.@string> ᏑStringResult(ref Container instance) => ref instance.StringResult;
         public static ref global::go.slice<global::go.main_package.Result<double>> ᏑFloatValues(ref Container instance) => ref instance.FloatValues;
         public static ref global::go.map<global::go.@string, global::go.main_package.Result<bool>> ᏑMappings(ref Container instance) => ref instance.Mappings;
         

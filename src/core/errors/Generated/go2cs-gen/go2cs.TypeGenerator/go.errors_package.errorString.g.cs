@@ -24,7 +24,7 @@ public static partial class errors_package
         // -- errorString has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡs(ref errorString instance) => ref instance.s;
+        internal static ref global::go.@string Ꮡs(ref errorString instance) => ref instance.s;
         
         // Constructors
         public errorString(NilType _)

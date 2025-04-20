@@ -46,7 +46,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ2(global::go.@internal.abi_package.SliceType SliceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ2(global::go.@internal.abi_package.SliceType SliceType = default!)
+        {
+            ᏑʗSliceType = new ж<global::go.@internal.abi_package.SliceType>(SliceType);
+        }
+
+        internal Uncommon_uᴛ2(global::go.@internal.abi_package.SliceType SliceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗSliceType = new ж<global::go.@internal.abi_package.SliceType>(SliceType);
             this.u = u;

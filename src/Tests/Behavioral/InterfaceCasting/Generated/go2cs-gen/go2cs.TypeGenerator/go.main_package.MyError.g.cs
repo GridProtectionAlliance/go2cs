@@ -24,7 +24,7 @@ public static partial class main_package
         // -- MyError has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡdescription(ref MyError instance) => ref instance.description;
+        internal static ref global::go.@string Ꮡdescription(ref MyError instance) => ref instance.description;
         
         // Constructors
         public MyError(NilType _)

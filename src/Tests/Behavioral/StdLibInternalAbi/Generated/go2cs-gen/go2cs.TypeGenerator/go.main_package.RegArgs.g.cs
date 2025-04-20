@@ -24,8 +24,8 @@ public static partial class main_package
         // -- RegArgs has no promoted structs
 
         // Field References
-        public static ref global::go.array<nuint> ᏑInts(ref RegArgs instance) => ref instance.Ints;
-        public static ref global::go.array<ulong> ᏑFloats(ref RegArgs instance) => ref instance.Floats;
+        internal static ref global::go.array<nuint> ᏑInts(ref RegArgs instance) => ref instance.Ints;
+        internal static ref global::go.array<ulong> ᏑFloats(ref RegArgs instance) => ref instance.Floats;
         public static ref global::go.array<global::go.unsafe_package.Pointer> ᏑPtrs(ref RegArgs instance) => ref instance.Ptrs;
         public static ref global::go.main_package.IntArgRegBitmap ᏑReturnIsPtr(ref RegArgs instance) => ref instance.ReturnIsPtr;
         

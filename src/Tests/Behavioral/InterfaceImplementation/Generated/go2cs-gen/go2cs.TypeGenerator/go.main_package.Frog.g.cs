@@ -24,8 +24,8 @@ public static partial class main_package
         // -- Frog has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑName(ref Frog instance) => ref instance.Name;
-        public static ref global::go.@string ᏑColor(ref Frog instance) => ref instance.Color;
+        internal static ref global::go.@string ᏑName(ref Frog instance) => ref instance.Name;
+        internal static ref global::go.@string ᏑColor(ref Frog instance) => ref instance.Color;
         
         // Constructors
         public Frog(NilType _)

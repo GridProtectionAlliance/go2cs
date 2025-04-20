@@ -60,7 +60,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ5(global::go.@internal.abi_package.ΔMapType MapType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ5(global::go.@internal.abi_package.ΔMapType MapType = default!)
+        {
+            ᏑʗMapType = new ж<global::go.@internal.abi_package.ΔMapType>(MapType);
+        }
+
+        internal Uncommon_uᴛ5(global::go.@internal.abi_package.ΔMapType MapType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗMapType = new ж<global::go.@internal.abi_package.ΔMapType>(MapType);
             this.u = u;

@@ -25,13 +25,13 @@ public static partial class main_package
     internal partial interface main_Printer
     {
         // Runtime interface conversion methods
-        public static main_Printer As<ΔTTarget>(in ΔTTarget target) =>
+        public static main_Printer ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (Δmain_Printer<ΔTTarget>)target!;
 
-        public static main_Printer As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static main_Printer ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (Δmain_Printer<ΔTTarget>)target_ptr;
 
-        public static main_Printer? As(object target) =>
+        public static main_Printer? ᴛAs(object target) =>
             typeof(Δmain_Printer<>).CreateInterfaceHandler<main_Printer>(target);            
     }
 

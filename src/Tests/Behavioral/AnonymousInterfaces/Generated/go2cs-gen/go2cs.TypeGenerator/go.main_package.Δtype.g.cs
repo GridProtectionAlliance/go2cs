@@ -25,13 +25,13 @@ public static partial class main_package
     public partial interface Δtype
     {
         // Runtime interface conversion methods
-        public static Δtype As<ΔTTarget>(in ΔTTarget target) =>
+        public static Δtype ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔΔtype<ΔTTarget>)target!;
 
-        public static Δtype As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static Δtype ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔΔtype<ΔTTarget>)target_ptr;
 
-        public static Δtype? As(object target) =>
+        public static Δtype? ᴛAs(object target) =>
             typeof(ΔΔtype<>).CreateInterfaceHandler<Δtype>(target);            
     }
 

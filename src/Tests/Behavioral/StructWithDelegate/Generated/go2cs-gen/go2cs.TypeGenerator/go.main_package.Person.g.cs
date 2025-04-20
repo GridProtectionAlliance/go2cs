@@ -25,8 +25,8 @@ public static partial class main_package
 
         // Field References
         public static ref global::System.Action Ꮡwork(ref Person instance) => ref instance.work;
-        public static ref global::go.@string Ꮡname(ref Person instance) => ref instance.name;
-        public static ref int Ꮡage(ref Person instance) => ref instance.age;
+        internal static ref global::go.@string Ꮡname(ref Person instance) => ref instance.name;
+        internal static ref int Ꮡage(ref Person instance) => ref instance.age;
         
         // Constructors
         public Person(NilType _)

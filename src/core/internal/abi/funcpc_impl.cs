@@ -25,14 +25,12 @@ namespace go.@internal;
 
 partial class abi_package
 {
-    /// <inheritdoc/>
     // Implementation of FuncPCABI0
     public static partial uintptr FuncPCABI0(any f)
     {
         return default;
     }
 
-    /// <inheritdoc/>
     // Implementation of FuncPCABIInternal
     public static partial uintptr FuncPCABIInternal(any f)
     {

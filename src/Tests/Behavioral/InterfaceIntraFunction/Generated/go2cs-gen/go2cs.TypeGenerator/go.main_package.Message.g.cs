@@ -24,7 +24,7 @@ public static partial class main_package
         // -- Message has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑText(ref Message instance) => ref instance.Text;
+        internal static ref global::go.@string ᏑText(ref Message instance) => ref instance.Text;
         
         // Constructors
         public Message(NilType _)

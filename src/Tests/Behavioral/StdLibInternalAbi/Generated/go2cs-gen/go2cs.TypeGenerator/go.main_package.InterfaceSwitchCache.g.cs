@@ -24,7 +24,7 @@ public static partial class main_package
         // -- InterfaceSwitchCache has no promoted structs
 
         // Field References
-        public static ref nuint ᏑMask(ref InterfaceSwitchCache instance) => ref instance.Mask;
+        internal static ref nuint ᏑMask(ref InterfaceSwitchCache instance) => ref instance.Mask;
         public static ref global::go.array<global::go.main_package.InterfaceSwitchCacheEntry> ᏑEntries(ref InterfaceSwitchCache instance) => ref instance.Entries;
         
         // Constructors

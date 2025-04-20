@@ -26,7 +26,7 @@ public static partial class main_package
         // Field References
         public static ref global::go.ж<global::go.main_package.TypeAssertCache> ᏑCache(ref TypeAssert instance) => ref instance.Cache;
         public static ref global::go.ж<global::go.main_package.ΔInterfaceType> ᏑInter(ref TypeAssert instance) => ref instance.Inter;
-        public static ref bool ᏑCanFail(ref TypeAssert instance) => ref instance.CanFail;
+        internal static ref bool ᏑCanFail(ref TypeAssert instance) => ref instance.CanFail;
         
         // Constructors
         public TypeAssert(NilType _)

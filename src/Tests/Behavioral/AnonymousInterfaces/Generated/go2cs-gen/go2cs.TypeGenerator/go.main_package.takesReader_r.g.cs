@@ -25,13 +25,13 @@ public static partial class main_package
     internal partial interface takesReader_r
     {
         // Runtime interface conversion methods
-        public static takesReader_r As<ΔTTarget>(in ΔTTarget target) =>
+        public static takesReader_r ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔtakesReader_r<ΔTTarget>)target!;
 
-        public static takesReader_r As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static takesReader_r ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔtakesReader_r<ΔTTarget>)target_ptr;
 
-        public static takesReader_r? As(object target) =>
+        public static takesReader_r? ᴛAs(object target) =>
             typeof(ΔtakesReader_r<>).CreateInterfaceHandler<takesReader_r>(target);            
     }
 

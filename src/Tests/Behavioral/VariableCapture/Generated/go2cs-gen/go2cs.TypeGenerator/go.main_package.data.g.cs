@@ -24,7 +24,7 @@ public static partial class main_package
         // -- data has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡname(ref data instance) => ref instance.name;
+        internal static ref global::go.@string Ꮡname(ref data instance) => ref instance.name;
         
         // Constructors
         public data(NilType _)

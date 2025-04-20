@@ -48,7 +48,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ1(global::go.@internal.abi_package.ΔFuncType FuncType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ1(global::go.@internal.abi_package.ΔFuncType FuncType = default!)
+        {
+            ᏑʗFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(FuncType);
+        }
+
+        internal Uncommon_uᴛ1(global::go.@internal.abi_package.ΔFuncType FuncType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗFuncType = new ж<global::go.@internal.abi_package.ΔFuncType>(FuncType);
             this.u = u;

@@ -24,9 +24,9 @@ public static partial class main_package
         // -- Process_data has no promoted structs
 
         // Field References
-        public static ref nint ᏑID(ref Process_data instance) => ref instance.ID;
-        public static ref global::go.@string ᏑName(ref Process_data instance) => ref instance.Name;
-        public static ref bool ᏑValid(ref Process_data instance) => ref instance.Valid;
+        internal static ref nint ᏑID(ref Process_data instance) => ref instance.ID;
+        internal static ref global::go.@string ᏑName(ref Process_data instance) => ref instance.Name;
+        internal static ref bool ᏑValid(ref Process_data instance) => ref instance.Valid;
         
         // Constructors
         public Process_data(NilType _)

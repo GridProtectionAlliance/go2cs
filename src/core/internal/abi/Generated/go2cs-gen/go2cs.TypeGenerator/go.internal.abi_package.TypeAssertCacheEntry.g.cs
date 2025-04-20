@@ -25,8 +25,8 @@ public static partial class abi_package
         // -- TypeAssertCacheEntry has no promoted structs
 
         // Field References
-        public static ref nuint ᏑTyp(ref TypeAssertCacheEntry instance) => ref instance.Typ;
-        public static ref nuint ᏑItab(ref TypeAssertCacheEntry instance) => ref instance.Itab;
+        internal static ref nuint ᏑTyp(ref TypeAssertCacheEntry instance) => ref instance.Typ;
+        internal static ref nuint ᏑItab(ref TypeAssertCacheEntry instance) => ref instance.Itab;
         
         // Constructors
         public TypeAssertCacheEntry(NilType _)

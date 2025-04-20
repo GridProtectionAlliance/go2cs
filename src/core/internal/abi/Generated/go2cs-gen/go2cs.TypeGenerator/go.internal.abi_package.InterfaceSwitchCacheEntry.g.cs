@@ -25,9 +25,9 @@ public static partial class abi_package
         // -- InterfaceSwitchCacheEntry has no promoted structs
 
         // Field References
-        public static ref nuint ᏑTyp(ref InterfaceSwitchCacheEntry instance) => ref instance.Typ;
-        public static ref nint ᏑCase(ref InterfaceSwitchCacheEntry instance) => ref instance.Case;
-        public static ref nuint ᏑItab(ref InterfaceSwitchCacheEntry instance) => ref instance.Itab;
+        internal static ref nuint ᏑTyp(ref InterfaceSwitchCacheEntry instance) => ref instance.Typ;
+        internal static ref nint ᏑCase(ref InterfaceSwitchCacheEntry instance) => ref instance.Case;
+        internal static ref nuint ᏑItab(ref InterfaceSwitchCacheEntry instance) => ref instance.Itab;
         
         // Constructors
         public InterfaceSwitchCacheEntry(NilType _)

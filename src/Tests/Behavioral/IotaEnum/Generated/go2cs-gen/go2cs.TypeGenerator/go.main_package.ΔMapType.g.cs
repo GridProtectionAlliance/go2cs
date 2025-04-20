@@ -58,10 +58,10 @@ public static partial class main_package
         public static ref global::go.ж<global::go.main_package.Type> ᏑElem(ref ΔMapType instance) => ref instance.Elem;
         public static ref global::go.ж<global::go.main_package.Type> ᏑBucket(ref ΔMapType instance) => ref instance.Bucket;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, nuint, nuint> ᏑHasher(ref ΔMapType instance) => ref instance.Hasher;
-        public static ref byte ᏑKeySize(ref ΔMapType instance) => ref instance.KeySize;
-        public static ref byte ᏑValueSize(ref ΔMapType instance) => ref instance.ValueSize;
-        public static ref ushort ᏑBucketSize(ref ΔMapType instance) => ref instance.BucketSize;
-        public static ref uint ᏑFlags(ref ΔMapType instance) => ref instance.Flags;
+        internal static ref byte ᏑKeySize(ref ΔMapType instance) => ref instance.KeySize;
+        internal static ref byte ᏑValueSize(ref ΔMapType instance) => ref instance.ValueSize;
+        internal static ref ushort ᏑBucketSize(ref ΔMapType instance) => ref instance.BucketSize;
+        internal static ref uint ᏑFlags(ref ΔMapType instance) => ref instance.Flags;
         
         // Constructors
         public ΔMapType(NilType _)

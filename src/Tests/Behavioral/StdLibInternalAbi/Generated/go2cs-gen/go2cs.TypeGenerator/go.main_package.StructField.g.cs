@@ -26,7 +26,7 @@ public static partial class main_package
         // Field References
         public static ref global::go.main_package.ΔName ᏑName(ref StructField instance) => ref instance.Name;
         public static ref global::go.ж<global::go.main_package.Type> ᏑTyp(ref StructField instance) => ref instance.Typ;
-        public static ref nuint ᏑOffset(ref StructField instance) => ref instance.Offset;
+        internal static ref nuint ᏑOffset(ref StructField instance) => ref instance.Offset;
         
         // Constructors
         public StructField(NilType _)

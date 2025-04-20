@@ -24,7 +24,7 @@ public static partial class main_package
         // -- Queue has no promoted structs
 
         // Field References
-        public static ref global::go.slice<T> Ꮡitems(ref Queue<T> instance) => ref instance.items;
+        internal static ref global::go.slice<T> Ꮡitems(ref Queue<T> instance) => ref instance.items;
         
         // Constructors
         public Queue(NilType _)

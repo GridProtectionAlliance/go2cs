@@ -48,7 +48,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public structTypeUncommon(global::go.@internal.abi_package.ΔStructType StructType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public structTypeUncommon(global::go.@internal.abi_package.ΔStructType StructType = default!)
+        {
+            ᏑʗStructType = new ж<global::go.@internal.abi_package.ΔStructType>(StructType);
+        }
+
+        internal structTypeUncommon(global::go.@internal.abi_package.ΔStructType StructType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗStructType = new ж<global::go.@internal.abi_package.ΔStructType>(StructType);
             this.u = u;

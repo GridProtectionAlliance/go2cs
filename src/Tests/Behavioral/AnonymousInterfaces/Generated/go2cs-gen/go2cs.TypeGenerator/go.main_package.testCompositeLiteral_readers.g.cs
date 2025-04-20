@@ -25,13 +25,13 @@ public static partial class main_package
     internal partial interface testCompositeLiteral_readers
     {
         // Runtime interface conversion methods
-        public static testCompositeLiteral_readers As<ΔTTarget>(in ΔTTarget target) =>
+        public static testCompositeLiteral_readers ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔtestCompositeLiteral_readers<ΔTTarget>)target!;
 
-        public static testCompositeLiteral_readers As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static testCompositeLiteral_readers ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔtestCompositeLiteral_readers<ΔTTarget>)target_ptr;
 
-        public static testCompositeLiteral_readers? As(object target) =>
+        public static testCompositeLiteral_readers? ᴛAs(object target) =>
             typeof(ΔtestCompositeLiteral_readers<>).CreateInterfaceHandler<testCompositeLiteral_readers>(target);            
     }
 

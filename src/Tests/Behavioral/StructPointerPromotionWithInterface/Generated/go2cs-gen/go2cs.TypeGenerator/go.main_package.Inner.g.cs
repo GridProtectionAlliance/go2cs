@@ -24,7 +24,7 @@ public static partial class main_package
         // -- Inner has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑValue(ref Inner instance) => ref instance.Value;
+        internal static ref global::go.@string ᏑValue(ref Inner instance) => ref instance.Value;
         
         // Constructors
         public Inner(NilType _)

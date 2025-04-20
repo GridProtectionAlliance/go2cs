@@ -24,10 +24,10 @@ public static partial class main_package
         // -- test_R0 has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡstring(ref test_R0 instance) => ref instance.@string;
-        public static ref global::go.ж<nint> Ꮡint(ref test_R0 instance) => ref instance.@int;
-        public static ref global::go.ж<bool> ᏑP(ref test_R0 instance) => ref instance.P;
-        public static ref global::go.map<nint, nint> ᏑM(ref test_R0 instance) => ref instance.M;
+        internal static ref global::go.@string Ꮡstring(ref test_R0 instance) => ref instance.@string;
+        internal static ref global::go.ж<nint> Ꮡint(ref test_R0 instance) => ref instance.@int;
+        internal static ref global::go.ж<bool> ᏑP(ref test_R0 instance) => ref instance.P;
+        internal static ref global::go.map<nint, nint> ᏑM(ref test_R0 instance) => ref instance.M;
         
         // Constructors
         public test_R0(NilType _)

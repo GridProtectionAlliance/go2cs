@@ -48,7 +48,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ6(global::go.@internal.abi_package.ΔInterfaceType InterfaceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ6(global::go.@internal.abi_package.ΔInterfaceType InterfaceType = default!)
+        {
+            ᏑʗInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(InterfaceType);
+        }
+
+        internal Uncommon_uᴛ6(global::go.@internal.abi_package.ΔInterfaceType InterfaceType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗInterfaceType = new ж<global::go.@internal.abi_package.ΔInterfaceType>(InterfaceType);
             this.u = u;

@@ -48,7 +48,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ4(global::go.@internal.abi_package.ChanType ChanType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ4(global::go.@internal.abi_package.ChanType ChanType = default!)
+        {
+            ᏑʗChanType = new ж<global::go.@internal.abi_package.ChanType>(ChanType);
+        }
+
+        internal Uncommon_uᴛ4(global::go.@internal.abi_package.ChanType ChanType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗChanType = new ж<global::go.@internal.abi_package.ChanType>(ChanType);
             this.u = u;

@@ -25,7 +25,7 @@ public static partial class main_package
 
         // Field References
         public static ref T Ꮡvalue(ref Option<T> instance) => ref instance.value;
-        public static ref bool Ꮡvalid(ref Option<T> instance) => ref instance.valid;
+        internal static ref bool Ꮡvalid(ref Option<T> instance) => ref instance.valid;
         
         // Constructors
         public Option(NilType _)

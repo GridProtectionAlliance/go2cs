@@ -24,7 +24,7 @@ public static partial class main_package
         // -- Employee has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡposition(ref Employee instance) => ref instance.position;
+        internal static ref global::go.@string Ꮡposition(ref Employee instance) => ref instance.position;
         
         // Constructors
         public Employee(NilType _)

@@ -25,7 +25,7 @@ public static partial class errors_package
         // -- joinError has no promoted structs
 
         // Field References
-        public static ref global::go.slice<global::go.error> Ꮡerrs(ref joinError instance) => ref instance.errs;
+        internal static ref global::go.slice<global::go.error> Ꮡerrs(ref joinError instance) => ref instance.errs;
         
         // Constructors
         public joinError(NilType _)

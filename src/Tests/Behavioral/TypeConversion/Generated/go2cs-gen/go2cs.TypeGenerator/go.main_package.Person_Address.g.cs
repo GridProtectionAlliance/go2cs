@@ -24,8 +24,8 @@ public static partial class main_package
         // -- Person_Address has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑStreet(ref Person_Address instance) => ref instance.Street;
-        public static ref global::go.@string ᏑCity(ref Person_Address instance) => ref instance.City;
+        internal static ref global::go.@string ᏑStreet(ref Person_Address instance) => ref instance.Street;
+        internal static ref global::go.@string ᏑCity(ref Person_Address instance) => ref instance.City;
         
         // Constructors
         public Person_Address(NilType _)

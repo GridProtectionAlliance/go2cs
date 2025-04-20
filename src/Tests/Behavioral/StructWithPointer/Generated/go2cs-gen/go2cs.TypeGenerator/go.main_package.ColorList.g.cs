@@ -24,8 +24,8 @@ public static partial class main_package
         // -- ColorList has no promoted structs
 
         // Field References
-        public static ref nint ᏑTotal(ref ColorList instance) => ref instance.Total;
-        public static ref global::go.@string ᏑColor(ref ColorList instance) => ref instance.Color;
+        internal static ref nint ᏑTotal(ref ColorList instance) => ref instance.Total;
+        internal static ref global::go.@string ᏑColor(ref ColorList instance) => ref instance.Color;
         public static ref global::go.ж<global::go.main_package.ColorList> ᏑNext(ref ColorList instance) => ref instance.Next;
         public static ref global::go.ж<global::go.ж<global::go.main_package.ColorList>> ᏑNextNext(ref ColorList instance) => ref instance.NextNext;
         

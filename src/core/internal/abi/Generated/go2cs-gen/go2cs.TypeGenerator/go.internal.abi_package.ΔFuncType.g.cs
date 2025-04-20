@@ -55,8 +55,8 @@ public static partial class abi_package
 
         // Field References
         public static ref global::go.@internal.abi_package.Type ᏑType(ref ΔFuncType instance) => ref instance.Type;
-        public static ref ushort ᏑInCount(ref ΔFuncType instance) => ref instance.InCount;
-        public static ref ushort ᏑOutCount(ref ΔFuncType instance) => ref instance.OutCount;
+        internal static ref ushort ᏑInCount(ref ΔFuncType instance) => ref instance.InCount;
+        internal static ref ushort ᏑOutCount(ref ΔFuncType instance) => ref instance.OutCount;
         
         // Constructors
         public ΔFuncType(NilType _)

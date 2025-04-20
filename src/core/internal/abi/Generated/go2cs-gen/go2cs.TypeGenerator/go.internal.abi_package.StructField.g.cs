@@ -27,7 +27,7 @@ public static partial class abi_package
         // Field References
         public static ref global::go.@internal.abi_package.ΔName ᏑName(ref StructField instance) => ref instance.Name;
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑTyp(ref StructField instance) => ref instance.Typ;
-        public static ref nuint ᏑOffset(ref StructField instance) => ref instance.Offset;
+        internal static ref nuint ᏑOffset(ref StructField instance) => ref instance.Offset;
         
         // Constructors
         public StructField(NilType _)

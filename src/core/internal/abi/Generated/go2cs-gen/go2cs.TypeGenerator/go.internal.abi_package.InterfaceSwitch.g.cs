@@ -26,7 +26,7 @@ public static partial class abi_package
 
         // Field References
         public static ref global::go.ж<global::go.@internal.abi_package.InterfaceSwitchCache> ᏑCache(ref InterfaceSwitch instance) => ref instance.Cache;
-        public static ref nint ᏑNCases(ref InterfaceSwitch instance) => ref instance.NCases;
+        internal static ref nint ᏑNCases(ref InterfaceSwitch instance) => ref instance.NCases;
         public static ref global::go.array<global::go.ж<global::go.@internal.abi_package.ΔInterfaceType>> ᏑCases(ref InterfaceSwitch instance) => ref instance.Cases;
         
         // Constructors

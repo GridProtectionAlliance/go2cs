@@ -24,8 +24,8 @@ public static partial class main_package
         // -- Dog has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑName(ref Dog instance) => ref instance.Name;
-        public static ref global::go.@string ᏑBreed(ref Dog instance) => ref instance.Breed;
+        internal static ref global::go.@string ᏑName(ref Dog instance) => ref instance.Name;
+        internal static ref global::go.@string ᏑBreed(ref Dog instance) => ref instance.Breed;
         
         // Constructors
         public Dog(NilType _)

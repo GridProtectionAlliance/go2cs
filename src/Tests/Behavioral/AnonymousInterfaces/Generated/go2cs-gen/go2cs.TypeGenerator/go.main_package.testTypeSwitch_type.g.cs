@@ -25,13 +25,13 @@ public static partial class main_package
     internal partial interface testTypeSwitch_type
     {
         // Runtime interface conversion methods
-        public static testTypeSwitch_type As<ΔTTarget>(in ΔTTarget target) =>
+        public static testTypeSwitch_type ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔtestTypeSwitch_type<ΔTTarget>)target!;
 
-        public static testTypeSwitch_type As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static testTypeSwitch_type ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔtestTypeSwitch_type<ΔTTarget>)target_ptr;
 
-        public static testTypeSwitch_type? As(object target) =>
+        public static testTypeSwitch_type? ᴛAs(object target) =>
             typeof(ΔtestTypeSwitch_type<>).CreateInterfaceHandler<testTypeSwitch_type>(target);            
     }
 

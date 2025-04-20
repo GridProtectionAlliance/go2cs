@@ -24,7 +24,7 @@ public static partial class main_package
         // -- T1 has no promoted structs
 
         // Field References
-        public static ref int Ꮡa(ref T1 instance) => ref instance.a;
+        internal static ref int Ꮡa(ref T1 instance) => ref instance.a;
         
         // Constructors
         public T1(NilType _)

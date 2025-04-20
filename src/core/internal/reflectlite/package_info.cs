@@ -52,6 +52,7 @@ using static go.@internal.reflectlite_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+//[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.@internal;

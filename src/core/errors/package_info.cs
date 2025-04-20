@@ -10,7 +10,8 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-// Example: global using mypkgꓸTable = go.map<go.@string, nint>;
+//global using reflectliteꓸKind = go.@internal.reflectlite_package.go.@internal.abi_package.ΔKind;
+//global using reflectliteꓸType = go.@internal.reflectlite_package.ΔType;
 // </ImportedTypeAliases>
 
 using go;

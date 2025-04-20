@@ -188,6 +188,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnonymousInterfaces", "Test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnonymousStructs", "Tests\Behavioral\AnonymousStructs\AnonymousStructs.csproj", "{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "internal.unsafeheader", "core\internal\unsafeheader\internal.unsafeheader.csproj", "{3983E45F-626A-E73F-48B7-CFF7FED3020B}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "go2cs", "core\go2cs\go2cs.shproj", "{DC43848E-B167-4A2E-9682-3A3FA734E7DC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -506,6 +510,10 @@ Global
 		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3983E45F-626A-E73F-48B7-CFF7FED3020B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3983E45F-626A-E73F-48B7-CFF7FED3020B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3983E45F-626A-E73F-48B7-CFF7FED3020B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3983E45F-626A-E73F-48B7-CFF7FED3020B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -593,11 +601,16 @@ Global
 		{9B234B42-FB10-A638-C17E-5F4A8CED1F56} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{EF7EC32B-9B17-67C7-5BE7-28D15CEDEEDE} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
 		{ADC1A7AE-D200-2BC3-386D-9660DCB6AAFE} = {F5D0C4D5-7217-4572-A76C-AAC5BEF6219B}
+		{3983E45F-626A-E73F-48B7-CFF7FED3020B} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
+		{DC43848E-B167-4A2E-9682-3A3FA734E7DC} = {D59EEF6C-E2EA-4A78-82CB-BD028A4F0D3D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {96A9E85F-A473-4202-B41E-F0E5F3B9AF22}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		core\go2cs\go2cs.projitems*{040cfa10-7d89-4e46-92e0-c73fa99ab8f8}*SharedItemsImports = 5
+		core\go2cs\go2cs.projitems*{5770c780-5488-f5cf-7bfc-e13b027a8f88}*SharedItemsImports = 5
 		go2cs-src.projitems*{73ae8a92-be9f-40d1-9fed-863ca2ce071c}*SharedItemsImports = 13
+		core\go2cs\go2cs.projitems*{dc43848e-b167-4a2e-9682-3a3fa734e7dc}*SharedItemsImports = 13
 	EndGlobalSection
 EndGlobal

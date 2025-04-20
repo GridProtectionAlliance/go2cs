@@ -24,9 +24,9 @@ public static partial class main_package
         // -- main_x has no promoted structs
 
         // Field References
-        public static ref long Ꮡa(ref main_x instance) => ref instance.a;
-        public static ref bool Ꮡb(ref main_x instance) => ref instance.b;
-        public static ref global::go.@string Ꮡc(ref main_x instance) => ref instance.c;
+        internal static ref long Ꮡa(ref main_x instance) => ref instance.a;
+        internal static ref bool Ꮡb(ref main_x instance) => ref instance.b;
+        internal static ref global::go.@string Ꮡc(ref main_x instance) => ref instance.c;
         
         // Constructors
         public main_x(NilType _)

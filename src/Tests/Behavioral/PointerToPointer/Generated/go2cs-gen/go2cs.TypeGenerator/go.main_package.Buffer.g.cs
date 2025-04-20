@@ -24,9 +24,9 @@ public static partial class main_package
         // -- Buffer has no promoted structs
 
         // Field References
-        public static ref global::go.slice<byte> Ꮡbuf(ref Buffer instance) => ref instance.buf;
-        public static ref nint Ꮡoff(ref Buffer instance) => ref instance.off;
-        public static ref sbyte ᏑlastRead(ref Buffer instance) => ref instance.lastRead;
+        internal static ref global::go.slice<byte> Ꮡbuf(ref Buffer instance) => ref instance.buf;
+        internal static ref nint Ꮡoff(ref Buffer instance) => ref instance.off;
+        internal static ref sbyte ᏑlastRead(ref Buffer instance) => ref instance.lastRead;
         
         // Constructors
         public Buffer(NilType _)

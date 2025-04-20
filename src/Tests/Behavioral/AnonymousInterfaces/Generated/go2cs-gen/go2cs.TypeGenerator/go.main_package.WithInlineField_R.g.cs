@@ -25,13 +25,13 @@ public static partial class main_package
     public partial interface WithInlineField_R
     {
         // Runtime interface conversion methods
-        public static WithInlineField_R As<ΔTTarget>(in ΔTTarget target) =>
+        public static WithInlineField_R ᴛAs<ΔTTarget>(in ΔTTarget target) =>
             (ΔWithInlineField_R<ΔTTarget>)target!;
 
-        public static WithInlineField_R As<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
+        public static WithInlineField_R ᴛAs<ΔTTarget>(ж<ΔTTarget> target_ptr) =>
             (ΔWithInlineField_R<ΔTTarget>)target_ptr;
 
-        public static WithInlineField_R? As(object target) =>
+        public static WithInlineField_R? ᴛAs(object target) =>
             typeof(ΔWithInlineField_R<>).CreateInterfaceHandler<WithInlineField_R>(target);            
     }
 

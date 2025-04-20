@@ -50,7 +50,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_uᴛ3(global::go.@internal.abi_package.ΔArrayType ArrayType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_uᴛ3(global::go.@internal.abi_package.ΔArrayType ArrayType = default!)
+        {
+            ᏑʗArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(ArrayType);
+        }
+
+        internal Uncommon_uᴛ3(global::go.@internal.abi_package.ΔArrayType ArrayType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗArrayType = new ж<global::go.@internal.abi_package.ΔArrayType>(ArrayType);
             this.u = u;

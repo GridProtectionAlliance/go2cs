@@ -24,7 +24,7 @@ public static partial class main_package
         // -- T2 has no promoted structs
 
         // Field References
-        public static ref global::go.@string Ꮡname(ref T2 instance) => ref instance.name;
+        internal static ref global::go.@string Ꮡname(ref T2 instance) => ref instance.name;
         
         // Constructors
         public T2(NilType _)

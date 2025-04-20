@@ -26,10 +26,10 @@ public static partial class abi_package
 
         // Field References
         public static ref global::go.@internal.abi_package.NameOff ᏑPkgPath(ref UncommonType instance) => ref instance.PkgPath;
-        public static ref ushort ᏑMcount(ref UncommonType instance) => ref instance.Mcount;
-        public static ref ushort ᏑXcount(ref UncommonType instance) => ref instance.Xcount;
-        public static ref uint ᏑMoff(ref UncommonType instance) => ref instance.Moff;
-        public static ref uint Ꮡ_(ref UncommonType instance) => ref instance._;
+        internal static ref ushort ᏑMcount(ref UncommonType instance) => ref instance.Mcount;
+        internal static ref ushort ᏑXcount(ref UncommonType instance) => ref instance.Xcount;
+        internal static ref uint ᏑMoff(ref UncommonType instance) => ref instance.Moff;
+        internal static ref uint Ꮡ_(ref UncommonType instance) => ref instance._;
         
         // Constructors
         public UncommonType(NilType _)
@@ -41,7 +41,15 @@ public static partial class abi_package
             this._ = default!;
         }
 
-        public UncommonType(global::go.@internal.abi_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!, uint _ = default!)
+        public UncommonType(global::go.@internal.abi_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!)
+        {
+            this.PkgPath = PkgPath;
+            this.Mcount = Mcount;
+            this.Xcount = Xcount;
+            this.Moff = Moff;
+        }
+
+        internal UncommonType(global::go.@internal.abi_package.NameOff PkgPath = default!, ushort Mcount = default!, ushort Xcount = default!, uint Moff = default!, uint _ = default!)
         {
             this.PkgPath = PkgPath;
             this.Mcount = Mcount;

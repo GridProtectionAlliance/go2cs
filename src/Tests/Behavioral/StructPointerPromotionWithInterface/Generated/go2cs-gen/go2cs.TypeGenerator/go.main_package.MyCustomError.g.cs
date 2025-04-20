@@ -35,7 +35,7 @@ public static partial class main_package
         public static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.val.What;
 
         // Field References
-        public static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
+        internal static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;
         public static ref global::go.main_package.Abser ᏑAbser(ref MyCustomError instance) => ref instance.Abser;
         public static ref global::go.ж<global::go.main_package.MyError> ᏑMyError(ref MyCustomError instance) => ref instance.MyError;
         

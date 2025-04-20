@@ -24,7 +24,7 @@ public static partial class main_package
         // -- ΔName has no promoted structs
 
         // Field References
-        public static ref global::go.ж<byte> ᏑBytes(ref ΔName instance) => ref instance.Bytes;
+        internal static ref global::go.ж<byte> ᏑBytes(ref ΔName instance) => ref instance.Bytes;
         
         // Constructors
         public ΔName(NilType _)

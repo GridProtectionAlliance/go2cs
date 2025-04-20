@@ -6,7 +6,7 @@ namespace go.@internal;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using unsafeheader = @internal.unsafeheader_package;
-using runtime = runtime_package;
+//using runtime = runtime_package;
 using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
@@ -35,7 +35,7 @@ partial class reflectlite_package {
 [GoType] partial struct Value {
     // typ_ holds the type of the value represented by a Value.
     // Access using the typ method to avoid escape of v.
-    internal abi.ΔType typ_;
+    internal ж<@internal.abi_package.Type> typ_;
     // Pointer-valued data or, if flagIndir is set, pointer to data.
     // Valid when either flagIndir is set or typ.pointers() is true.
     internal @unsafe.Pointer ptr;
@@ -71,8 +71,8 @@ internal static readonly flag flagMethod = /* 1 << 9 */ 512;
 internal static readonly UntypedInt flagMethodShift = 10;
 internal static readonly flag flagRO = /* flagStickyRO | flagEmbedRO */ 96;
 
-internal static ΔKind kind(this flag f) {
-    return ((ΔKind)((flag)(f & flagKindMask)));
+internal static Kind kind(this flag f) {
+    return ((Kind)((flag)(f & flagKindMask)));
 }
 
 internal static flag ro(this flag f) {
@@ -82,7 +82,7 @@ internal static flag ro(this flag f) {
     return 0;
 }
 
-internal static ж<abi.ΔType> typ(this Value v) {
+internal static ж<abi.Type> typ(this Value v) {
     // Types are either static (for compiler-created types) or
     // heap-allocated but always reachable (for reflection-created
     // types, held in the central map). So there is no need to
@@ -162,7 +162,7 @@ internal static Value unpackEface(any i) {
 // in the description of each method.
 [GoType] partial struct ValueError {
     public @string Method;
-    public ΔKind Kind;
+    public Kind Kind;
 }
 
 [GoRecv] public static @string Error(this ref ValueError e) {
@@ -175,12 +175,13 @@ internal static Value unpackEface(any i) {
 // methodName returns the name of the calling method,
 // assumed to be two stack frames above.
 internal static @string methodName() {
-    var (pc, _, _, _) = runtime.Caller(2);
-    var f = runtime.FuncForPC(pc);
-    if (f == nil) {
-        return "unknown method"u8;
-    }
-    return f.Name();
+    //var (pc, _, _, _) = runtime.Caller(2);
+    //var f = runtime.FuncForPC(pc);
+    //if (f == nil) {
+    //    return "unknown method"u8;
+    //}
+    //return f.Name();
+    return "";
 }
 
 // mustBeExported panics if f records that the value was obtained using
@@ -314,7 +315,7 @@ public static bool IsValid(this Value v) {
 
 // Kind returns v's Kind.
 // If v is the zero Value (IsValid returns false), Kind returns Invalid.
-public static ΔKind Kind(this Value v) {
+public static Kind Kind(this Value v) {
     return v.kind();
 }
 
@@ -322,8 +323,10 @@ public static ΔKind Kind(this Value v) {
 
 //go:noescape
 internal static partial nint chanlen(@unsafe.Pointer _);
+
 //go:noescape
 internal static partial nint maplen(@unsafe.Pointer _);
+
 // Len returns v's length.
 // It panics if v's Kind is not Array, Chan, Map, Slice, or String.
 public static nint Len(this Value v) {
@@ -349,6 +352,7 @@ public static nint Len(this Value v) {
     // Slice is bigger than a word; assume flagIndir.
     // String is bigger than a word; assume flagIndir.
     panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
+    return 0;
 }
 
 // NumMethod returns the number of exported methods in the value's method set.
@@ -394,7 +398,8 @@ public static ΔType Type(this Value v) {
 // implemented in package runtime
 
 //go:noescape
-internal static partial @unsafe.Pointer unsafe_New(ж<abi.ΔType> _);
+internal static partial @unsafe.Pointer unsafe_New(ж<abi.Type> _);
+
 // ValueOf returns a new Value initialized to the concrete value
 // stored in the interface i. ValueOf(nil) returns the zero Value.
 public static Value ValueOf(any i) {
@@ -407,7 +412,7 @@ public static Value ValueOf(any i) {
 // assignTo returns a value v that can be assigned directly to typ.
 // It panics if v is not assignable to typ.
 // For a conversion to an interface type, target is a suggested scratch space to use.
-public static Value assignTo(this Value v, @string context, ж<abi.ΔType> Ꮡdst, @unsafe.Pointer target) {
+public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
     ref var dst = ref Ꮡdst.val;
 
     // if v.flag&flagMethod != 0 {
@@ -418,8 +423,8 @@ public static Value assignTo(this Value v, @string context, ж<abi.ΔType> Ꮡds
         var fl = (flag)((flag)(v.flag & ((flag)(flagAddr | flagIndir))) | v.flag.ro());
         fl |= (flag)(((flag)dst.Kind()));
         return new Value( // Overwrite type so that they match.
- // Same memory layout, so no harm done.
-dst, v.ptr, fl);
+             // Same memory layout, so no harm done.
+            dst, v.ptr, fl);
     case {} when implements(Ꮡdst, v.typ()):
         if (target == default!) {
             target = (uintptr)unsafe_New(Ꮡdst);
@@ -441,6 +446,7 @@ dst, v.ptr, fl);
 
     // Failed.
     panic(context + ": value of type "u8 + toRType(v.typ()).String() + " is not assignable to type "u8 + toRType(Ꮡdst).String());
+    return default!;
 }
 
 // arrayAt returns the i-th element of p,
@@ -454,11 +460,13 @@ internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSi
     return (uintptr)add(p, ((uintptr)i) * eltSize, "i < len"u8);
 }
 
-internal static partial void ifaceE2I(ж<abi.ΔType> t, any src, @unsafe.Pointer dst);
+internal static partial void ifaceE2I(ж<abi.Type> t, any src, @unsafe.Pointer dst);
+
 // typedmemmove copies a value of type t to dst from src.
 //
 //go:noescape
-internal static partial void typedmemmove(ж<abi.ΔType> t, @unsafe.Pointer dst, @unsafe.Pointer src);
+internal static partial void typedmemmove(ж<abi.Type> t, @unsafe.Pointer dst, @unsafe.Pointer src);
+
 // Dummy annotation marking that the value x escapes,
 // for use in cases where the reflect code is so clever that
 // the compiler cannot follow.

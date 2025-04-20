@@ -25,10 +25,10 @@ public static partial class main_package
 
         // Field References
         public static ref global::go.main_package.NameOff ᏑPkgPath(ref UncommonType instance) => ref instance.PkgPath;
-        public static ref ushort ᏑMcount(ref UncommonType instance) => ref instance.Mcount;
-        public static ref ushort ᏑXcount(ref UncommonType instance) => ref instance.Xcount;
-        public static ref uint ᏑMoff(ref UncommonType instance) => ref instance.Moff;
-        public static ref uint Ꮡ_(ref UncommonType instance) => ref instance._;
+        internal static ref ushort ᏑMcount(ref UncommonType instance) => ref instance.Mcount;
+        internal static ref ushort ᏑXcount(ref UncommonType instance) => ref instance.Xcount;
+        internal static ref uint ᏑMoff(ref UncommonType instance) => ref instance.Moff;
+        internal static ref uint Ꮡ_(ref UncommonType instance) => ref instance._;
         
         // Constructors
         public UncommonType(NilType _)

@@ -25,7 +25,7 @@ public static partial class main_package
 
         // Field References
         public static ref global::go.time_package.Time ᏑWhen(ref MyError instance) => ref instance.When;
-        public static ref global::go.@string ᏑWhat(ref MyError instance) => ref instance.What;
+        internal static ref global::go.@string ᏑWhat(ref MyError instance) => ref instance.What;
         
         // Constructors
         public MyError(NilType _)

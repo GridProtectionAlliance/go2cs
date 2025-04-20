@@ -25,7 +25,7 @@ public static partial class main_package
 
         // Field References
         public static ref T ᏑValue(ref Result<T> instance) => ref instance.Value;
-        public static ref global::go.error ᏑError(ref Result<T> instance) => ref instance.Error;
+        internal static ref global::go.error ᏑError(ref Result<T> instance) => ref instance.Error;
         
         // Constructors
         public Result(NilType _)

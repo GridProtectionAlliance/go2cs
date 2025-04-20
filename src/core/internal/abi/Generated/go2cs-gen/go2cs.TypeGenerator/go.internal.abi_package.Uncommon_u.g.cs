@@ -46,7 +46,12 @@ public static partial class abi_package
             this.u = default!;
         }
 
-        public Uncommon_u(global::go.@internal.abi_package.PtrType PtrType = default!, global::go.@internal.abi_package.UncommonType u = default!)
+        public Uncommon_u(global::go.@internal.abi_package.PtrType PtrType = default!)
+        {
+            ᏑʗPtrType = new ж<global::go.@internal.abi_package.PtrType>(PtrType);
+        }
+
+        internal Uncommon_u(global::go.@internal.abi_package.PtrType PtrType = default!, global::go.@internal.abi_package.UncommonType u = default!)
         {
             ᏑʗPtrType = new ж<global::go.@internal.abi_package.PtrType>(PtrType);
             this.u = u;

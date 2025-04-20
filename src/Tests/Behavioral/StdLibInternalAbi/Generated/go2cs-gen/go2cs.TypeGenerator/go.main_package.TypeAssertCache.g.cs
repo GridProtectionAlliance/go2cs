@@ -24,7 +24,7 @@ public static partial class main_package
         // -- TypeAssertCache has no promoted structs
 
         // Field References
-        public static ref nuint ᏑMask(ref TypeAssertCache instance) => ref instance.Mask;
+        internal static ref nuint ᏑMask(ref TypeAssertCache instance) => ref instance.Mask;
         public static ref global::go.array<global::go.main_package.TypeAssertCacheEntry> ᏑEntries(ref TypeAssertCache instance) => ref instance.Entries;
         
         // Constructors

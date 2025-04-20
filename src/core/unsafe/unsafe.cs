@@ -204,6 +204,21 @@ unsafe partial class unsafe_package  {
 //	hdr.Len = n
 //	s := *(*string)(unsafe.Pointer(&hdr)) // p possibly already lost
 public class Pointer(uintptr value) : ж<uintptr>(value) {
+    public Pointer this[int index] => val + (uintptr)index;
+
+    public Pointer this[nint index] => val + (uintptr)index;
+
+    public Pointer this[Range range]
+    {
+        get
+        {
+            if (range.End.Value >= 0)
+                throw new IndexOutOfRangeException($"End of range not supported for '{nameof(Pointer)}' indexing -- length is not known");
+
+            return val + (uintptr)range.Start.Value;
+        }
+    }
+
     public static implicit operator Pointer(uintptr value) {
         return new Pointer(value);
     }

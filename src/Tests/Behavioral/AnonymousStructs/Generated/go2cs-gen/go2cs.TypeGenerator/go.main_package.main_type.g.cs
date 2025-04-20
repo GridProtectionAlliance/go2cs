@@ -24,8 +24,8 @@ public static partial class main_package
         // -- main_type has no promoted structs
 
         // Field References
-        public static ref global::go.@string ᏑName(ref main_type instance) => ref instance.Name;
-        public static ref nint ᏑAge(ref main_type instance) => ref instance.Age;
+        internal static ref global::go.@string ᏑName(ref main_type instance) => ref instance.Name;
+        internal static ref nint ᏑAge(ref main_type instance) => ref instance.Age;
         
         // Constructors
         public main_type(NilType _)

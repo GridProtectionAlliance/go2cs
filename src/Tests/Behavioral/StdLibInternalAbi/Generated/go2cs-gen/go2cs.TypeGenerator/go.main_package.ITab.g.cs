@@ -26,8 +26,8 @@ public static partial class main_package
         // Field References
         public static ref global::go.ж<global::go.main_package.ΔInterfaceType> ᏑInter(ref ITab instance) => ref instance.Inter;
         public static ref global::go.ж<global::go.main_package.Type> ᏑType(ref ITab instance) => ref instance.Type;
-        public static ref uint ᏑHash(ref ITab instance) => ref instance.Hash;
-        public static ref global::go.array<nuint> ᏑFun(ref ITab instance) => ref instance.Fun;
+        internal static ref uint ᏑHash(ref ITab instance) => ref instance.Hash;
+        internal static ref global::go.array<nuint> ᏑFun(ref ITab instance) => ref instance.Fun;
         
         // Constructors
         public ITab(NilType _)

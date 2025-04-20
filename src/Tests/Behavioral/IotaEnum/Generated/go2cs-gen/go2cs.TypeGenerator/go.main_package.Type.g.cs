@@ -24,15 +24,15 @@ public static partial class main_package
         // -- Type has no promoted structs
 
         // Field References
-        public static ref nuint ᏑSize_(ref Type instance) => ref instance.Size_;
-        public static ref nuint ᏑPtrBytes(ref Type instance) => ref instance.PtrBytes;
-        public static ref uint ᏑHash(ref Type instance) => ref instance.Hash;
+        internal static ref nuint ᏑSize_(ref Type instance) => ref instance.Size_;
+        internal static ref nuint ᏑPtrBytes(ref Type instance) => ref instance.PtrBytes;
+        internal static ref uint ᏑHash(ref Type instance) => ref instance.Hash;
         public static ref global::go.main_package.TFlag ᏑTFlag(ref Type instance) => ref instance.TFlag;
-        public static ref byte ᏑAlign_(ref Type instance) => ref instance.Align_;
-        public static ref byte ᏑFieldAlign_(ref Type instance) => ref instance.FieldAlign_;
+        internal static ref byte ᏑAlign_(ref Type instance) => ref instance.Align_;
+        internal static ref byte ᏑFieldAlign_(ref Type instance) => ref instance.FieldAlign_;
         public static ref global::go.main_package.ΔKind ᏑKind_(ref Type instance) => ref instance.Kind_;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> ᏑEqual(ref Type instance) => ref instance.Equal;
-        public static ref global::go.ж<byte> ᏑGCData(ref Type instance) => ref instance.GCData;
+        internal static ref global::go.ж<byte> ᏑGCData(ref Type instance) => ref instance.GCData;
         public static ref global::go.main_package.NameOff ᏑStr(ref Type instance) => ref instance.Str;
         public static ref global::go.main_package.TypeOff ᏑPtrToThis(ref Type instance) => ref instance.PtrToThis;
         

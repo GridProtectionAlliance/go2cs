@@ -1,3 +1,4 @@
+/*
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -50,15 +51,15 @@ public static bool Is(error err, error target) {
     return @is(err, target, isComparable);
 }
 
-[GoType("dyn")] partial interface @is_type {
+[GoType("dyn")] partial interface is_type {
     bool Is(error _);
 }
 
-[GoType("dyn")] partial interface @is_typeᴛ1 {
+[GoType("dyn")] partial interface is_typeᴛ1 {
     error Unwrap();
 }
 
-[GoType("dyn")] partial interface @is_typeᴛ2 {
+[GoType("dyn")] partial interface is_typeᴛ2 {
     slice<error> Unwrap();
 }
 
@@ -68,18 +69,18 @@ internal static bool @is(error err, error target, bool targetComparable) {
             return true;
         }
         {
-            var (x, ok) = err._<@is_type>(ᐧ); if (ok && x.Is(target)) {
+            var (x, ok) = err._<is_type>(ᐧ); if (ok && x.Is(target)) {
                 return true;
             }
         }
         switch (err.type()) {
-        case {} Δx when Δx._<@is_typeᴛ1>(out var x):
+        case {} Δx when Δx._<is_typeᴛ1>(out var x):
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
             break;
-        case {} Δx when Δx._<@is_typeᴛ2>(out var x):
+        case {} Δx when Δx._<is_typeᴛ2>(out var x):
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (@is(errΔ1, target, targetComparable)) {
                     return true;
@@ -110,7 +111,7 @@ internal static bool @is(error err, error target, bool targetComparable) {
 //
 // As panics if target is not a non-nil pointer to either a type that implements
 // error, or to any interface type.
-public static bool ΔAs(error err, any target) {
+public static bool As(error err, any target) {
     if (err == default!) {
         return false;
     }
@@ -129,37 +130,37 @@ public static bool ΔAs(error err, any target) {
     return @as(err, target, val, targetType);
 }
 
-[GoType("dyn")] partial interface @as_type {
-    bool ΔAs(any _);
+[GoType("dyn")] partial interface as_type {
+    bool As(any _);
 }
 
-[GoType("dyn")] partial interface @as_typeᴛ1 {
+[GoType("dyn")] partial interface as_typeᴛ1 {
     error Unwrap();
 }
 
-[GoType("dyn")] partial interface @as_typeᴛ2 {
+[GoType("dyn")] partial interface as_typeᴛ2 {
     slice<error> Unwrap();
 }
 
-internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectlite.Type targetType) {
+internal static bool @as(error err, any target, reflectlite.Value targetVal, reflectliteꓸType targetType) {
     while (ᐧ) {
         if (reflectlite.TypeOf(err).AssignableTo(targetType)) {
             targetVal.Elem().Set(reflectlite.ValueOf(err));
             return true;
         }
         {
-            var (x, ok) = err._<@as_type>(ᐧ); if (ok && x.ΔAs(target)) {
+            var (x, ok) = err._<as_type>(ᐧ); if (ok && x.As(target)) {
                 return true;
             }
         }
         switch (err.type()) {
-        case {} Δx when Δx._<@as_typeᴛ1>(out var x):
+        case {} Δx when Δx._<as_typeᴛ1>(out var x):
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
             break;
-        case {} Δx when Δx._<@as_typeᴛ2>(out var x):
+        case {} Δx when Δx._<as_typeᴛ2>(out var x):
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (errΔ1 == default!) {
                     continue;
@@ -176,6 +177,8 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
     }
 }
 
-internal static reflectlite.Type errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
+internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
+
+*/

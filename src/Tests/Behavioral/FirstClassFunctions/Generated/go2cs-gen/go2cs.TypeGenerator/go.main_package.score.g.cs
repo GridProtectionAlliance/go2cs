@@ -25,9 +25,9 @@ public static partial class main_package
         // -- score has no promoted structs
 
         // Field References
-        public static ref nint Ꮡplayer(ref score instance) => ref instance.player;
-        public static ref nint Ꮡopponent(ref score instance) => ref instance.opponent;
-        public static ref nint ᏑthisTurn(ref score instance) => ref instance.thisTurn;
+        internal static ref nint Ꮡplayer(ref score instance) => ref instance.player;
+        internal static ref nint Ꮡopponent(ref score instance) => ref instance.opponent;
+        internal static ref nint ᏑthisTurn(ref score instance) => ref instance.thisTurn;
         
         // Constructors
         public score(NilType _)
