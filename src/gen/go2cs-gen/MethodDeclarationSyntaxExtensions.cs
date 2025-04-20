@@ -27,7 +27,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Templates.TemplateBase;
-using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs;
 

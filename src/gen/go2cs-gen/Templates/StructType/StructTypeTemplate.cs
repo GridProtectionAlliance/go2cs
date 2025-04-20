@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.StructType;
 
@@ -195,7 +196,9 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                result.Append($"public static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
+                string fieldScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+
+                result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
             }
 
             return result.ToString();

@@ -75,4 +75,6 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   </ItemGroup>
 
+  <Import Project="..\go2cs\go2cs.projitems" Label="Shared" />
+
 </Project>

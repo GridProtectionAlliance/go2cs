@@ -1,4 +1,4 @@
-﻿using static go2cs.Common;
+﻿using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 

@@ -31,6 +31,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.CSharp;
+using static go2cs.Symbols;
 
 namespace go2cs;
 
@@ -53,21 +54,6 @@ public static class Common
         // </auto-generated>
         //---------------------------------------------------------
         """;
-
-    // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
-    // symbols, markers, intermediate and temporary variables. These characters have to be valid
-    // C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting
-    // characters, combining characters, or formatting characters. Some character variants will
-    // be better suited to different fonts or display environments. Defaults have been chosen
-    // based on better appearance with common Visual Studio code fonts, e.g., "Cascadia Mono".
-    // Note: keep constants in sync with go2cs transpiler and golib core.
-    public const string PointerPrefix = "ж";
-    public const string AddressPrefix = "Ꮡ";
-    public const string ShadowVarMarker = "Δ";
-    public const string TypeAliasDot = "ꓸ";
-    public const string EllipsisOperator = "ꓸꓸꓸ";
-    public const string CapturedVarMarker = "ʗ";
-    public const string TempVarMarker = "ᴛ";
 
     static Common()
     {

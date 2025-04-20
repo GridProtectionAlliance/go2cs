@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Text;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InterfaceType;
 
@@ -110,22 +111,22 @@ internal class InterfaceTypeTemplate : TemplateBase
                 $"""
                 
                         // Runtime interface conversion methods
-                        public static {ImplementedInterfaceName} As<{TypeTTarget}>(in {TypeTTarget} target) =>
+                        public static {ImplementedInterfaceName} {TempVarMarker}As<{TypeTTarget}>(in {TypeTTarget} target) =>
                             ({ConversionTypeName})target!;
                 
-                        public static {ImplementedInterfaceName} As<{TypeTTarget}>({PointerPrefix}<{TypeTTarget}> target_ptr) =>
+                        public static {ImplementedInterfaceName} {TempVarMarker}As<{TypeTTarget}>({PointerPrefix}<{TypeTTarget}> target_ptr) =>
                             ({ConversionTypeName})target_ptr;
                 
                 """ +
                 (InterfaceName == NonGenericInterfaceName ? 
                 $"""
                 
-                        public static {InterfaceName}? As(object target) =>
+                        public static {InterfaceName}? {TempVarMarker}As(object target) =>
                             typeof({NonGenericConversionTypeName}<>).CreateInterfaceHandler<{InterfaceName}>(target);            
                 """ : 
                 $"""
                 
-                        public static {InterfaceName}? As(object target) =>
+                        public static {InterfaceName}? {TempVarMarker}As(object target) =>
                             ({InterfaceName}?)typeof({NonGenericConversionTypeName}<>).CreateInterfaceHandler<object>(target);             
                 """);
         }

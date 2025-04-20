@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.ImplicitConv;
 

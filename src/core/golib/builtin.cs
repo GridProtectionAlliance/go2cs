@@ -36,6 +36,7 @@ using System.Text;
 using System.Threading;
 using go.runtime;
 using static System.Math;
+using static go2cs.Symbols;
 using TypeExtensions = go.runtime.TypeExtensions;
 
 namespace go;
@@ -988,7 +989,7 @@ public static class builtin
             // Handle conversion of anonymous dynamically declared interfaces - unfortunately, you can't
             // define an interface that describes an abstract method implemented by another interface,
             // so we are forced to use reflection to find the static interface conversion method...
-            MethodInfo? method = typeOfT.GetMethod("As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
+            MethodInfo? method = typeOfT.GetMethod($"{TempVarMarker}As", 1, BindingFlags.Public | BindingFlags.Static, s_asTParams);
 
             // Ths following exception will not be captured by type assertion overload that returns a tuple
             // that includes a "success" boolean since missing method is considered a code conversion error

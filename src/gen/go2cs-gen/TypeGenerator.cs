@@ -32,6 +32,7 @@ using go2cs.Templates.StructType;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
