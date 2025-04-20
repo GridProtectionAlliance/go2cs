@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"embed"
-	"errors"
 	"flag"
 	"fmt"
 	"go/ast"
@@ -19,7 +17,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
@@ -181,14 +178,14 @@ var keywords = NewHashSet([]string{
 // Note that "_" is used for type assertion functions in go2cs converted C# code, but it is not
 // a valid method name in Go, so it is not included in the reserved list.
 var reserved = NewHashSet([]string{
-	"As", "AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName",
-	"GetHashCode", "GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute",
-	"GoImplicitConv", "GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv",
-	"GoRecvAttribute", "GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute",
-	"GoTag", "GoTagAttribute", "GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute",
-	"GoUntyped", "go\u01C3", "IArray", "IChannel", "IMap", "ISlice", "ISupportMake", "make\u01C3",
-	"MemberwiseClone", "NilType", "PanicException", "PrintPointer", "slice", "ToString",
-	"ToUTF8Bytes", "TryCastAsInteger", "type", "UntypedInt", "UntypedFloat", "UntypedComplex",
+	"AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName", "GetHashCode",
+	"GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
+	"GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
+	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
+	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3",
+	"IArray", "IChannel", "IMap", "ISlice", "ISupportMake", "make\u01C3", "MemberwiseClone", "NilType",
+	"PanicException", "PrintPointer", "slice", "ToString", "ToUTF8Bytes", "TryCastAsInteger", "type",
+	"UntypedInt", "UntypedFloat", "UntypedComplex",
 	PointerPrefix, TrueMarker, OverloadDiscriminator, EllipsisOperator,
 })
 
@@ -213,6 +210,7 @@ var packageNamespace string
 var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var importedTypeAliases map[string]string
+var parsedPackageInfoFiles HashSet[string]
 var interfaceImplementations map[string]HashSet[string]
 var promotedInterfaceImplementations map[string]HashSet[string]
 var interfaceInheritances map[string]HashSet[string]
@@ -400,6 +398,7 @@ Examples:
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
 		importedTypeAliases = make(map[string]string)
+		parsedPackageInfoFiles = NewHashSet([]string{})
 		interfaceImplementations = make(map[string]HashSet[string])
 		promotedInterfaceImplementations = make(map[string]HashSet[string])
 		interfaceInheritances = make(map[string]HashSet[string])
@@ -892,22 +891,8 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 		// Track project references
 		references = append(references, info.ProjectReference)
 
-		// Parse package info file for exported type aliases for each project reference,
-		// these are used as the imported type aliases in the current package
-		packageInfoFile := filepath.Join(info.TargetDir, PackageInfoFileName)
-		results, err := parseExportedTypeAliases(packageInfoFile)
-
-		if err == nil {
-			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
-			packageName := getCoreSanitizedIdentifier(info.PackageName)
-
-			for _, result := range results {
-				// Add the exported type alias to the imported type aliases map
-				importedTypeAliases[fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))] = fmt.Sprintf("go.%s%s.%s", packageName, PackageSuffix, getCoreSanitizedIdentifier(result[1]))
-			}
-		} else {
-			println("WARNING: Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
-		}
+		// Load imported type aliases for the current package, if not already loaded
+		loadImportedTypeAliases(info)
 	}
 
 	sort.Strings(references)
@@ -949,60 +934,6 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	}
 
 	return nil
-}
-
-// parseExportedTypeAliases parses a package info file and extracts the GoTypeAlias
-// entries as tuples of (source, destination) strings
-func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
-	file, err := os.Open(packageInfoFile)
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-
-	// Look for the start of the ExportedTypeAliases section
-	inSection := false
-	var aliases [][2]string
-
-	// Pattern to match: [assembly: GoTypeAlias("Source", "Destination")]
-	pattern := regexp.MustCompile(`\[assembly: GoTypeAlias\("([^"]+)", "([^"]+)"\)\]`)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		if strings.TrimSpace(line) == "// <ExportedTypeAliases>" {
-			inSection = true
-			continue
-		}
-
-		if strings.TrimSpace(line) == "// </ExportedTypeAliases>" {
-			break // End of section reached
-		}
-
-		if inSection {
-			matches := pattern.FindStringSubmatch(line)
-
-			if len(matches) == 3 {
-				// Extract the source and destination as tuple
-				alias := [2]string{matches[1], matches[2]}
-				aliases = append(aliases, alias)
-			}
-		}
-	}
-
-	if err := scanner.Err(); err != nil {
-		return nil, err
-	}
-
-	if !inSection && len(aliases) == 0 {
-		return nil, errors.New("exported type aliases section not found")
-	}
-
-	return aliases, nil
 }
 
 func writePackageFiles(projectPath string) error {
@@ -1329,7 +1260,7 @@ func getCoreSanitizedIdentifier(identifier string) string {
 		if len(parts) > 1 {
 			for i, part := range parts {
 				if i == len(parts)-1 {
-					parts[i] = getSanitizedIdentifier(part)
+					parts[i] = getCoreSanitizedIdentifier(part)
 				} else {
 					parts[i] = getSanitizedImport(part)
 				}
@@ -1690,12 +1621,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 
 						if _, ok := interfaceParamType.(*types.Struct); ok {
 							// Both interfaceParamType and targetParamType are structs, track implicit conversions
-							packageLock.Lock()
-
 							interfaceParamTypeName := v.getCSTypeName(interfaceParamType)
 							targetParamTypeName := v.getCSTypeName(targetParameterType)
 							var conversions HashSet[string]
 							var exists bool
+
+							packageLock.Lock()
 
 							// For interface methods that have struct parameters, tracked implicit conversions
 							// are inverted to allow for implicit conversions from struct to interface
@@ -1805,9 +1736,9 @@ func (v *Visitor) checkForDynamicStructs(argType types.Type, targetType types.Ty
 					implicitConversions[argTypeName] = conversions
 				}
 
-				v.addImplicitSubStructConversions(argType, targetTypeName, false)
-
 				packageLock.Unlock()
+
+				v.addImplicitSubStructConversions(argType, targetTypeName, false)
 			}
 		}
 	}
@@ -2182,7 +2113,7 @@ func (v *Visitor) typeExists(name string) bool {
 }
 
 func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
-	typeName = getSanitizedIdentifier(typeName)
+	typeName = getSanitizedIdentifier(removeSanitizationMarker(typeName))
 	uniqueTypeName := typeName
 	count := 0
 
@@ -2297,9 +2228,7 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	if pointer, ok := t.(*types.Pointer); ok {
-		if name, ok := v.liftedTypeMap[pointer.Elem()]; ok {
-			return "*" + name
-		}
+		return "*" + v.getFullTypeName(pointer.Elem(), isUnderlying)
 	}
 
 	if name, ok := v.liftedTypeMap[t]; ok {
@@ -2336,8 +2265,16 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	return typeName
 }
 
-func (v *Visitor) getCSTypeName(t types.Type) string {
-	return convertToCSTypeName(v.getTypeName(t, false))
+func getAliasedTypeName(typeName string) string {
+	packageLock.Lock()
+	_, exists := importedTypeAliases[typeName]
+	packageLock.Unlock()
+
+	if exists {
+		return strings.ReplaceAll(typeName, ".", TypeAliasDot)
+	}
+
+	return typeName
 }
 
 func (v *Visitor) getRefParamTypeName(t types.Type) string {
@@ -2348,6 +2285,10 @@ func (v *Visitor) getRefParamTypeName(t types.Type) string {
 	}
 
 	return convertToCSTypeName(typeName)
+}
+
+func (v *Visitor) getCSTypeName(t types.Type) string {
+	return convertToCSTypeName(v.getTypeName(t, false))
 }
 
 func convertToCSTypeName(typeName string) string {
@@ -2512,7 +2453,26 @@ func convertToCSFullTypeName(typeName string) string {
 	case "interface{}":
 		return "any"
 	default:
-		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(typeName))
+		if strings.Contains(typeName, PackageSuffix) {
+			parts := strings.Split(typeName, ".")
+			count := len(parts)
+
+			if count > 1 {
+				sourcePkg := strings.TrimSuffix(parts[count-2], PackageSuffix)
+				targetType := parts[count-1]
+				alias := fmt.Sprintf("%s.%s", sourcePkg, targetType)
+
+				packageLock.Lock()
+				aliasType, exists := importedTypeAliases[alias]
+				packageLock.Unlock()
+
+				if exists {
+					return aliasType
+				}
+			}
+		}
+
+		return fmt.Sprintf("%s.%s", RootNamespace, getSanitizedIdentifier(getAliasedTypeName(typeName)))
 	}
 }
 

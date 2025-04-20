@@ -15,6 +15,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	}
 
 	v.importQueue.Add(v.currentImportPath)
+	v.loadImportedTypeAliases(v.currentImportPath)
 
 	importPath := convertImportPathToNamespace(v.currentImportPath, PackageSuffix)
 

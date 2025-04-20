@@ -97,7 +97,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
-	return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
 }
 
 func getSelIdentContext() IdentContext {

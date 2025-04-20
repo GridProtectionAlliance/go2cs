@@ -377,7 +377,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	if useFuncExecutionContext {
 		v.writeOutputLn(");")
 	} else if signatureOnly {
-		v.writeOutput(";")
+		v.writeOutputLn(";")
 	} else {
 		v.targetFile.WriteString(v.newline)
 	}

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"bufio"
+	"errors"
+	"fmt"
 	"go/build"
 	"os"
 	"path/filepath"
@@ -243,4 +246,108 @@ func pathReplace(subject string, search string, replace string) string {
 	} else {
 		return strings.ReplaceAll(subject, search, replace)
 	}
+}
+
+func (v *Visitor) loadImportedTypeAliases(projectImport string) {
+	packageInfoMap := getImportPackageInfo([]string{projectImport}, v.options)
+
+	for _, info := range packageInfoMap {
+		// Load imported type aliases for the target project import, if not already loaded
+		loadImportedTypeAliases(info)
+	}
+}
+
+func loadImportedTypeAliases(info PackageInfo) {
+	packageInfoFile := filepath.Join(info.TargetDir, PackageInfoFileName)
+
+	packageLock.Lock()
+
+	// Check if this package info file has already been parsed
+	if _, ok := parsedPackageInfoFiles[packageInfoFile]; ok {
+		packageLock.Unlock()
+		return
+	}
+
+	parsedPackageInfoFiles.Add(packageInfoFile)
+	packageLock.Unlock()
+
+	// Ignore imports if the package info file does not exist
+	if _, err := os.Stat(packageInfoFile); os.IsNotExist(err) {
+		return
+	}
+
+	// Parse package info file for exported type aliases, these are used
+	// as the imported type aliases in the current package
+	results, err := parseExportedTypeAliases(packageInfoFile)
+
+	if err == nil {
+		rootPackageName := getSanitizedIdentifier(info.RootPackageName)
+		packageName := getCoreSanitizedIdentifier(info.PackageName)
+
+		for _, result := range results {
+			// Add the exported type alias to the imported type aliases map
+			alias := fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))
+			typeName := fmt.Sprintf("go.%s%s.%s", packageName, PackageSuffix, getCoreSanitizedIdentifier(result[1]))
+
+			packageLock.Lock()
+			importedTypeAliases[alias] = typeName
+			packageLock.Unlock()
+		}
+	} else {
+		println(fmt.Sprintf("WARNING: Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err))
+	}
+}
+
+// parseExportedTypeAliases parses a package info file and extracts the GoTypeAlias
+// entries as tuples of (source, destination) strings
+func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
+	file, err := os.Open(packageInfoFile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	// Look for the start of the ExportedTypeAliases section
+	inSection := false
+	var aliases [][2]string
+
+	// Pattern to match: [assembly: GoTypeAlias("Source", "Destination")]
+	pattern := regexp.MustCompile(`\[assembly: GoTypeAlias\("([^"]+)", "([^"]+)"\)\]`)
+
+	for scanner.Scan() {
+		line := scanner.Text()
+
+		if strings.TrimSpace(line) == "// <ExportedTypeAliases>" {
+			inSection = true
+			continue
+		}
+
+		if strings.TrimSpace(line) == "// </ExportedTypeAliases>" {
+			break // End of section reached
+		}
+
+		if inSection {
+			matches := pattern.FindStringSubmatch(line)
+
+			if len(matches) == 3 {
+				// Extract the source and destination as tuple
+				alias := [2]string{matches[1], matches[2]}
+				aliases = append(aliases, alias)
+			}
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	if !inSection && len(aliases) == 0 {
+		return nil, errors.New("exported type aliases section not found")
+	}
+
+	return aliases, nil
 }

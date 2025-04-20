@@ -20,12 +20,12 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	namedElementNames := make(map[string]bool)
 	methodNames := make(map[string]bool)
 
-	// Collect all named element names and method names
+	// Collect all named element names and method names (top-level declarations only)
 	for _, file := range pkg.Syntax {
-		ast.Inspect(file, func(n ast.Node) bool {
-			switch node := n.(type) {
+		for _, decl := range file.Decls {
+			switch node := decl.(type) {
 			case *ast.GenDecl:
-				// Handle constants and variables
+				// Handle constants and variables at package level (not inside functions)
 				if node.Tok == token.CONST || node.Tok == token.VAR {
 					for _, spec := range node.Specs {
 						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
@@ -40,7 +40,9 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 				if node.Tok == token.TYPE {
 					for _, spec := range node.Specs {
 						if typeSpec, ok := spec.(*ast.TypeSpec); ok {
-							namedElementNames[typeSpec.Name.Name] = true
+							if !typeSpec.Assign.IsValid() {
+								namedElementNames[typeSpec.Name.Name] = true
+							}
 						}
 					}
 				}
@@ -48,8 +50,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 			case *ast.FuncDecl:
 				methodNames[node.Name.Name] = true
 			}
-			return true
-		})
+		}
 	}
 
 	// Find collisions (names that appear in both sets)

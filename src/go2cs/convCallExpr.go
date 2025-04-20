@@ -340,9 +340,9 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 					targetConversionsMap[argTypeName] = conversions
 				}
 
-				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
-
 				packageLock.Unlock()
+
+				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
 			}
 		}
 	}
@@ -512,12 +512,16 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 			var conversions HashSet[string]
 			var exists bool
 
+			packageLock.Lock()
+
 			if conversions, exists = targetConversionsMap[subStructTypeName]; exists {
 				conversions.Add(targetTypeName)
 			} else {
 				conversions = NewHashSet([]string{targetTypeName})
 				targetConversionsMap[subStructTypeName] = conversions
 			}
+
+			packageLock.Unlock()
 		}
 	}
 }

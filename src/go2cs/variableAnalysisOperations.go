@@ -1536,7 +1536,7 @@ func (v *Visitor) generateCaptureDeclarations() string {
 		}
 
 		// Now print e.g. "fʗ1 = fΔ1;"
-		decls.WriteString(outerName)
+		decls.WriteString(getSanitizedIdentifier(outerName))
 		decls.WriteString(";")
 
 		info.used = true
@@ -1544,6 +1544,7 @@ func (v *Visitor) generateCaptureDeclarations() string {
 
 	decls.WriteString(v.newline)
 	decls.WriteString(v.indent(v.indentLevel))
+
 	return decls.String()
 }
 
