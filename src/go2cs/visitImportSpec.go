@@ -36,6 +36,12 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 		if lastDotIndex != -1 {
 			importName = importPath[lastDotIndex+1:]
+
+			namespace := importPath[:lastDotIndex]
+
+			if len(namespace) > 0 {
+				v.requiredUsings.Add(namespace)
+			}
 		}
 
 		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(strings.TrimSuffix(importName, PackageSuffix)), importPath))
