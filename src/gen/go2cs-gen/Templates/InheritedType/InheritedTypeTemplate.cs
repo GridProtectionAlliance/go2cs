@@ -63,7 +63,9 @@ internal class InheritedTypeTemplate : TemplateBase
                 {{InterfaceImplementation}}
                 
                 public {{ObjectName}}({{TypeName}} value) => m_value = value;
-        
+
+                public {{ObjectName}}(NilType _) => m_value = default!;
+                
                 public override string ToString() => {{ToStringImplementation}};
         
                 public static bool operator ==({{ObjectName}} left, {{ObjectName}} right) => left.Equals(right);
