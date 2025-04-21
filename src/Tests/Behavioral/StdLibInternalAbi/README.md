@@ -9,4 +9,4 @@ This package is included in the behavioral tests because it has many complex con
 
 WARNING: Note that even though this code compiles, many of the functions will not safely run in C#. Code in this package operates on expected memory layout of Go types -- _this will in no way match the layout the same structures that have been converted to C#_.
 
-In the actual converted standard library of this package, publically accessibly API functions and types have been manually modified to safely operate in a behavorially similar fashion in C#, e.g., by using reflrection.
+In the actual converted standard library of this package, publically accessibly API functions and types have been manually modified to safely operate in a behavorially similar fashion in C#, e.g., by using reflection.
