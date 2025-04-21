@@ -966,17 +966,19 @@ public static class builtin
                 // Only dynamic, unnamed types can be converted to each other in Go
                 if (typeOfT.IsDynamicType() && targetType.IsDynamicType())
                 {
-                    ImmutableHashSet<string> typeOfTFieldName = typeOfT.GetStructFieldNames();
+                    ImmutableHashSet<string> typeOfTFieldNames = typeOfT.GetStructFieldNames();
 
                     // Check if target type has the same fields as the asserted type
-                    if (targetType.GetStructFieldNames().Except(typeOfTFieldName).Count == 0)
+                    if (targetType.GetStructFieldNames().Except(typeOfTFieldNames).Count == 0)
                     {
                         // Create a new instance of the asserted type
                         T newInstance = (T)Activator.CreateInstance(typeOfT)!;
 
                         // Copy the values of the fields from the target to the new instance
-                        foreach (string field in typeOfTFieldName)
+                        foreach (string field in typeOfTFieldNames)
+                    #pragma warning disable IL2075
                             typeOfT.GetField(field)!.SetValue(newInstance,  targetType.GetField(field)!.GetValue(target));
+                    #pragma warning restore IL2075
 
                         return newInstance;
                     }
@@ -994,7 +996,7 @@ public static class builtin
             // Ths following exception will not be captured by type assertion overload that returns a tuple
             // that includes a "success" boolean since missing method is considered a code conversion error
             if (method == null)
-                throw new InvalidOperationException($"Interface '{typeOfT.Name}' does not implement 'As' runtime conversion method.");
+                throw new InvalidOperationException($"Interface '{typeOfT.Name}' does not implement '{TempVarMarker}As' runtime conversion method.");
 
         #pragma warning disable IL2060
             MethodInfo genericMethod = method.MakeGenericMethod(targetType);

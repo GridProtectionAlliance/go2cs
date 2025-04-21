@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static void Set(this ж<go.main_package.IntArgRegBitmap> Ꮡb, nint i)
+    public static void Set(this ж<go.main_package.IntArgRegBitmap> Ꮡb, nint i)
     {
         ref var b = ref Ꮡb.val;
         b.Set(i);

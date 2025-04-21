@@ -69,6 +69,8 @@ public static partial class main_package
         
         public PeopleByShoeSize(slice<Person> value) => m_value = value;
 
+        public PeopleByShoeSize(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(PeopleByShoeSize left, PeopleByShoeSize right) => left.Equals(right);

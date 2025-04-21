@@ -29,13 +29,13 @@ public static partial class abi_package
 
         // Promoted Struct Field Accessors
         public ref global::go.@internal.abi_package.Type Type => ref FuncType.Type;
-        public ref ushort InCount => ref FuncType.InCount;
-        public ref ushort OutCount => ref FuncType.OutCount;
+        internal ref ushort InCount => ref FuncType.InCount;
+        internal ref ushort OutCount => ref FuncType.OutCount;
 
         // Promoted Struct Field Accessor References
         public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.Type;
-        public static ref ushort ᏑInCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.InCount;
-        public static ref ushort ᏑOutCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.OutCount;
+        internal static ref ushort ᏑInCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.InCount;
+        internal static ref ushort ᏑOutCount(ref Uncommon_uᴛ1 instance) => ref instance.FuncType.OutCount;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔFuncType ᏑFuncType(ref Uncommon_uᴛ1 instance) => ref instance.FuncType;
@@ -99,14 +99,14 @@ public static partial class abi_package
         ref var target = ref Ꮡtarget.val;
         return target.In(i);
     }
-    public static nint NumIn(this ref Uncommon_uᴛ1 target) => target.FuncType.NumIn();
-    public static nint NumIn(this ж<Uncommon_uᴛ1> Ꮡtarget)
+    internal static nint NumIn(this ref Uncommon_uᴛ1 target) => target.FuncType.NumIn();
+    internal static nint NumIn(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumIn();
     }
-    public static nint NumOut(this ref Uncommon_uᴛ1 target) => target.FuncType.NumOut();
-    public static nint NumOut(this ж<Uncommon_uᴛ1> Ꮡtarget)
+    internal static nint NumOut(this ref Uncommon_uᴛ1 target) => target.FuncType.NumOut();
+    internal static nint NumOut(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumOut();
@@ -129,8 +129,8 @@ public static partial class abi_package
         ref var target = ref Ꮡtarget.val;
         return target.OutSlice();
     }
-    public static bool IsVariadic(this ref Uncommon_uᴛ1 target) => target.FuncType.IsVariadic();
-    public static bool IsVariadic(this ж<Uncommon_uᴛ1> Ꮡtarget)
+    internal static bool IsVariadic(this ref Uncommon_uᴛ1 target) => target.FuncType.IsVariadic();
+    internal static bool IsVariadic(this ж<Uncommon_uᴛ1> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IsVariadic();

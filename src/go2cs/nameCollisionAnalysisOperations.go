@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 
@@ -54,7 +55,7 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	}
 
 	// Find collisions (names that appear in both sets)
-	for name, export := range namedElementNames {
+	for name, isType := range namedElementNames {
 		if methodNames[name] {
 			// Found a collision
 			nameCollisions[name] = true
@@ -63,9 +64,15 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 			// this way original name can be referenced as normal when using
 			// the name from referenced package. The name will not collide in
 			// a remote package because the type will have the package prefix.
-			if export && getAccess(name) == "public" {
+			if getAccess(name) == "public" {
+				var typePrefix string
+
+				if !isType {
+					typePrefix = "const:"
+				}
+
 				packageLock.Lock()
-				exportedTypeAliases[getCoreSanitizedIdentifier(name)] = getCollisionAvoidanceIdentifier(name)
+				exportedTypeAliases[getCoreSanitizedIdentifier(name)] = fmt.Sprintf("%s%s", typePrefix, getCollisionAvoidanceIdentifier(name))
 				packageLock.Unlock()
 			}
 		}

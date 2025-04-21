@@ -60,6 +60,8 @@ public static partial class abi_package
         
         public FuncID(uint8 value) => m_value = value;
 
+        public FuncID(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(FuncID left, FuncID right) => left.Equals(right);

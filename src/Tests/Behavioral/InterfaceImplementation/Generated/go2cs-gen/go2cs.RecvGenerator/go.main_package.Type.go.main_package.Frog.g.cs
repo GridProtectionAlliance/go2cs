@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.@string Type(this ж<go.main_package.Frog> Ꮡf)
+    public static go.@string Type(this ж<go.main_package.Frog> Ꮡf)
     {
         ref var f = ref Ꮡf.val;
         return f.Type();

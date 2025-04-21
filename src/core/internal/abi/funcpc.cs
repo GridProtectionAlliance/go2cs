@@ -20,6 +20,7 @@ partial class abi_package {
 //
 // Implemented as a compile intrinsic.
 public static partial uintptr FuncPCABI0(any f);
+
 // FuncPCABIInternal returns the entry PC of the function f. If f is a
 // direct reference of a function, it must be defined as ABIInternal.
 // Otherwise it is a compile-time error. If f is not a direct reference

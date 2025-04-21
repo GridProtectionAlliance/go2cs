@@ -59,6 +59,8 @@ public static partial class main_package
         
         public ΔChanDir(nint value) => m_value = value;
 
+        public ΔChanDir(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(ΔChanDir left, ΔChanDir right) => left.Equals(right);

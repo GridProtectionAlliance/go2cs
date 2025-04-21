@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static void Push<T>(this ж<go.main_package.Stack<T>> Ꮡs, T element)
+    public static void Push<T>(this ж<go.main_package.Stack<T>> Ꮡs, T element)
         where T : System.Numerics.IAdditionOperators<T, T, T>, System.Numerics.IEqualityOperators<T, T, bool>, System.Numerics.IComparisonOperators<T, T, bool>, new()
     {
         ref var s = ref Ꮡs.val;

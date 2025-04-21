@@ -33,10 +33,10 @@ public static partial class abi_package
         public ref global::go.ж<global::go.@internal.abi_package.Type> Elem => ref MapType.Elem;
         public ref global::go.ж<global::go.@internal.abi_package.Type> Bucket => ref MapType.Bucket;
         public ref global::System.Func<global::go.unsafe_package.Pointer, nuint, nuint> Hasher => ref MapType.Hasher;
-        public ref byte KeySize => ref MapType.KeySize;
-        public ref byte ValueSize => ref MapType.ValueSize;
-        public ref ushort BucketSize => ref MapType.BucketSize;
-        public ref uint Flags => ref MapType.Flags;
+        internal ref byte KeySize => ref MapType.KeySize;
+        internal ref byte ValueSize => ref MapType.ValueSize;
+        internal ref ushort BucketSize => ref MapType.BucketSize;
+        internal ref uint Flags => ref MapType.Flags;
 
         // Promoted Struct Field Accessor References
         public static ref global::go.@internal.abi_package.Type ᏑType(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Type;
@@ -44,10 +44,10 @@ public static partial class abi_package
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑElem(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Elem;
         public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑBucket(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Bucket;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, nuint, nuint> ᏑHasher(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Hasher;
-        public static ref byte ᏑKeySize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.KeySize;
-        public static ref byte ᏑValueSize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.ValueSize;
-        public static ref ushort ᏑBucketSize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.BucketSize;
-        public static ref uint ᏑFlags(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Flags;
+        internal static ref byte ᏑKeySize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.KeySize;
+        internal static ref byte ᏑValueSize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.ValueSize;
+        internal static ref ushort ᏑBucketSize(ref Uncommon_uᴛ5 instance) => ref instance.MapType.BucketSize;
+        internal static ref uint ᏑFlags(ref Uncommon_uᴛ5 instance) => ref instance.MapType.Flags;
 
         // Field References
         public static ref global::go.@internal.abi_package.ΔMapType ᏑMapType(ref Uncommon_uᴛ5 instance) => ref instance.MapType;
@@ -105,32 +105,32 @@ public static partial class abi_package
     }
 
     // Promoted Struct Receivers
-    public static bool IndirectKey(this ref Uncommon_uᴛ5 target) => target.MapType.IndirectKey();
-    public static bool IndirectKey(this ж<Uncommon_uᴛ5> Ꮡtarget)
+    internal static bool IndirectKey(this ref Uncommon_uᴛ5 target) => target.MapType.IndirectKey();
+    internal static bool IndirectKey(this ж<Uncommon_uᴛ5> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IndirectKey();
     }
-    public static bool IndirectElem(this ref Uncommon_uᴛ5 target) => target.MapType.IndirectElem();
-    public static bool IndirectElem(this ж<Uncommon_uᴛ5> Ꮡtarget)
+    internal static bool IndirectElem(this ref Uncommon_uᴛ5 target) => target.MapType.IndirectElem();
+    internal static bool IndirectElem(this ж<Uncommon_uᴛ5> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IndirectElem();
     }
-    public static bool ReflexiveKey(this ref Uncommon_uᴛ5 target) => target.MapType.ReflexiveKey();
-    public static bool ReflexiveKey(this ж<Uncommon_uᴛ5> Ꮡtarget)
+    internal static bool ReflexiveKey(this ref Uncommon_uᴛ5 target) => target.MapType.ReflexiveKey();
+    internal static bool ReflexiveKey(this ж<Uncommon_uᴛ5> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.ReflexiveKey();
     }
-    public static bool NeedKeyUpdate(this ref Uncommon_uᴛ5 target) => target.MapType.NeedKeyUpdate();
-    public static bool NeedKeyUpdate(this ж<Uncommon_uᴛ5> Ꮡtarget)
+    internal static bool NeedKeyUpdate(this ref Uncommon_uᴛ5 target) => target.MapType.NeedKeyUpdate();
+    internal static bool NeedKeyUpdate(this ж<Uncommon_uᴛ5> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NeedKeyUpdate();
     }
-    public static bool HashMightPanic(this ref Uncommon_uᴛ5 target) => target.MapType.HashMightPanic();
-    public static bool HashMightPanic(this ж<Uncommon_uᴛ5> Ꮡtarget)
+    internal static bool HashMightPanic(this ref Uncommon_uᴛ5 target) => target.MapType.HashMightPanic();
+    internal static bool HashMightPanic(this ж<Uncommon_uᴛ5> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.HashMightPanic();

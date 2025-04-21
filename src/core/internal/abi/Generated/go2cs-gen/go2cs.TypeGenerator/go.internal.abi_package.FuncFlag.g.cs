@@ -60,6 +60,8 @@ public static partial class abi_package
         
         public FuncFlag(uint8 value) => m_value = value;
 
+        public FuncFlag(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(FuncFlag left, FuncFlag right) => left.Equals(right);

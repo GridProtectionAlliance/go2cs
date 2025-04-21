@@ -24,7 +24,7 @@ public static partial class abi_package
         throw new NullReferenceException("Receiver target \"CommonꓸᏑt\" is not initialized");
 
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.ж<go.@internal.abi_package.Type> Common(this ж<go.@internal.abi_package.Type> Ꮡt)
+    public static go.ж<go.@internal.abi_package.Type> Common(this ж<go.@internal.abi_package.Type> Ꮡt)
     {
         Commonʗt = new ThreadLocal<ж<go.@internal.abi_package.Type>>(() => Ꮡt);
         ref var t = ref Ꮡt.val;

@@ -69,6 +69,8 @@ public static partial class main_package
         
         public Point(slice<int32> value) => m_value = value;
 
+        public Point(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(Point left, Point right) => left.Equals(right);

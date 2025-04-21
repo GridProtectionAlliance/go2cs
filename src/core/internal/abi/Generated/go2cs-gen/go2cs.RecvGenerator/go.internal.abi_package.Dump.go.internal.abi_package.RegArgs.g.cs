@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static void Dump(this ж<go.@internal.abi_package.RegArgs> Ꮡr)
+    public static void Dump(this ж<go.@internal.abi_package.RegArgs> Ꮡr)
     {
         ref var r = ref Ꮡr.val;
         r.Dump();

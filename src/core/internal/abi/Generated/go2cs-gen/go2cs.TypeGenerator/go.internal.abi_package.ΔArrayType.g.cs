@@ -28,28 +28,28 @@ public static partial class abi_package
         public partial ref global::go.@internal.abi_package.Type Type => ref ᏑʗType.val;
 
         // Promoted Struct Field Accessors
-        public ref nuint Size_ => ref Type.Size_;
-        public ref nuint PtrBytes => ref Type.PtrBytes;
-        public ref uint Hash => ref Type.Hash;
+        internal ref nuint Size_ => ref Type.Size_;
+        internal ref nuint PtrBytes => ref Type.PtrBytes;
+        internal ref uint Hash => ref Type.Hash;
         public ref global::go.@internal.abi_package.TFlag TFlag => ref Type.TFlag;
-        public ref byte Align_ => ref Type.Align_;
-        public ref byte FieldAlign_ => ref Type.FieldAlign_;
+        internal ref byte Align_ => ref Type.Align_;
+        internal ref byte FieldAlign_ => ref Type.FieldAlign_;
         public ref global::go.@internal.abi_package.ΔKind Kind_ => ref Type.Kind_;
         public ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> Equal => ref Type.Equal;
-        public ref global::go.ж<byte> GCData => ref Type.GCData;
+        internal ref global::go.ж<byte> GCData => ref Type.GCData;
         public ref global::go.@internal.abi_package.NameOff Str => ref Type.Str;
         public ref global::go.@internal.abi_package.TypeOff PtrToThis => ref Type.PtrToThis;
 
         // Promoted Struct Field Accessor References
-        public static ref nuint ᏑSize_(ref ΔArrayType instance) => ref instance.Type.Size_;
-        public static ref nuint ᏑPtrBytes(ref ΔArrayType instance) => ref instance.Type.PtrBytes;
-        public static ref uint ᏑHash(ref ΔArrayType instance) => ref instance.Type.Hash;
+        internal static ref nuint ᏑSize_(ref ΔArrayType instance) => ref instance.Type.Size_;
+        internal static ref nuint ᏑPtrBytes(ref ΔArrayType instance) => ref instance.Type.PtrBytes;
+        internal static ref uint ᏑHash(ref ΔArrayType instance) => ref instance.Type.Hash;
         public static ref global::go.@internal.abi_package.TFlag ᏑTFlag(ref ΔArrayType instance) => ref instance.Type.TFlag;
-        public static ref byte ᏑAlign_(ref ΔArrayType instance) => ref instance.Type.Align_;
-        public static ref byte ᏑFieldAlign_(ref ΔArrayType instance) => ref instance.Type.FieldAlign_;
+        internal static ref byte ᏑAlign_(ref ΔArrayType instance) => ref instance.Type.Align_;
+        internal static ref byte ᏑFieldAlign_(ref ΔArrayType instance) => ref instance.Type.FieldAlign_;
         public static ref global::go.@internal.abi_package.ΔKind ᏑKind_(ref ΔArrayType instance) => ref instance.Type.Kind_;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> ᏑEqual(ref ΔArrayType instance) => ref instance.Type.Equal;
-        public static ref global::go.ж<byte> ᏑGCData(ref ΔArrayType instance) => ref instance.Type.GCData;
+        internal static ref global::go.ж<byte> ᏑGCData(ref ΔArrayType instance) => ref instance.Type.GCData;
         public static ref global::go.@internal.abi_package.NameOff ᏑStr(ref ΔArrayType instance) => ref instance.Type.Str;
         public static ref global::go.@internal.abi_package.TypeOff ᏑPtrToThis(ref ΔArrayType instance) => ref instance.Type.PtrToThis;
 
@@ -122,38 +122,38 @@ public static partial class abi_package
         ref var target = ref Ꮡtarget.val;
         return target.Kind();
     }
-    public static bool HasName(this ref ΔArrayType target) => target.Type.HasName();
-    public static bool HasName(this ж<ΔArrayType> Ꮡtarget)
+    internal static bool HasName(this ref ΔArrayType target) => target.Type.HasName();
+    internal static bool HasName(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.HasName();
     }
-    public static bool Pointers(this ref ΔArrayType target) => target.Type.Pointers();
-    public static bool Pointers(this ж<ΔArrayType> Ꮡtarget)
+    internal static bool Pointers(this ref ΔArrayType target) => target.Type.Pointers();
+    internal static bool Pointers(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Pointers();
     }
-    public static bool IfaceIndir(this ref ΔArrayType target) => target.Type.IfaceIndir();
-    public static bool IfaceIndir(this ж<ΔArrayType> Ꮡtarget)
+    internal static bool IfaceIndir(this ref ΔArrayType target) => target.Type.IfaceIndir();
+    internal static bool IfaceIndir(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IfaceIndir();
     }
-    public static bool IsDirectIface(this ref ΔArrayType target) => target.Type.IsDirectIface();
-    public static bool IsDirectIface(this ж<ΔArrayType> Ꮡtarget)
+    internal static bool IsDirectIface(this ref ΔArrayType target) => target.Type.IsDirectIface();
+    internal static bool IsDirectIface(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IsDirectIface();
     }
-    public static go.slice<byte> GcSlice(this ref ΔArrayType target, nuint begin, nuint end) => target.Type.GcSlice(begin, end);
-    public static go.slice<byte> GcSlice(this ж<ΔArrayType> Ꮡtarget, nuint begin, nuint end)
+    internal static go.slice<byte> GcSlice(this ref ΔArrayType target, nuint begin, nuint end) => target.Type.GcSlice(begin, end);
+    internal static go.slice<byte> GcSlice(this ж<ΔArrayType> Ꮡtarget, nuint begin, nuint end)
     {
         ref var target = ref Ꮡtarget.val;
         return target.GcSlice(begin, end);
     }
-    public static nint Len(this ref ΔArrayType target) => target.Type.Len();
-    public static nint Len(this ж<ΔArrayType> Ꮡtarget)
+    internal static nint Len(this ref ΔArrayType target) => target.Type.Len();
+    internal static nint Len(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Len();
@@ -212,20 +212,20 @@ public static partial class abi_package
         ref var target = ref Ꮡtarget.val;
         return target.InterfaceType();
     }
-    public static nuint Size(this ref ΔArrayType target) => target.Type.Size();
-    public static nuint Size(this ж<ΔArrayType> Ꮡtarget)
+    internal static nuint Size(this ref ΔArrayType target) => target.Type.Size();
+    internal static nuint Size(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Size();
     }
-    public static nint Align(this ref ΔArrayType target) => target.Type.Align();
-    public static nint Align(this ж<ΔArrayType> Ꮡtarget)
+    internal static nint Align(this ref ΔArrayType target) => target.Type.Align();
+    internal static nint Align(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Align();
     }
-    public static nint FieldAlign(this ref ΔArrayType target) => target.Type.FieldAlign();
-    public static nint FieldAlign(this ж<ΔArrayType> Ꮡtarget)
+    internal static nint FieldAlign(this ref ΔArrayType target) => target.Type.FieldAlign();
+    internal static nint FieldAlign(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.FieldAlign();
@@ -236,8 +236,8 @@ public static partial class abi_package
         ref var target = ref Ꮡtarget.val;
         return target.ExportedMethods();
     }
-    public static nint NumMethod(this ref ΔArrayType target) => target.Type.NumMethod();
-    public static nint NumMethod(this ж<ΔArrayType> Ꮡtarget)
+    internal static nint NumMethod(this ref ΔArrayType target) => target.Type.NumMethod();
+    internal static nint NumMethod(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumMethod();

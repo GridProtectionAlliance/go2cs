@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static nint NumMethod(this ж<go.@internal.abi_package.Type> Ꮡt)
+    public static nint NumMethod(this ж<go.@internal.abi_package.Type> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.NumMethod();

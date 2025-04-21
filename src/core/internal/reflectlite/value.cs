@@ -6,7 +6,7 @@ namespace go.@internal;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using unsafeheader = @internal.unsafeheader_package;
-//using runtime = runtime_package;
+using runtime = runtime_package;
 using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
@@ -51,7 +51,7 @@ partial class reflectlite_package {
     // The remaining 23+ bits give a method number for method values.
     // If flag.kind() != Func, code can assume that flagMethod is unset.
     // If ifaceIndir(typ), code can assume that flagIndir is set.
-    internal flag flag;
+    internal partial ref flag flag { get; }
 }
 
 [GoType("uintptr")] partial struct flag;
@@ -175,13 +175,12 @@ internal static Value unpackEface(any i) {
 // methodName returns the name of the calling method,
 // assumed to be two stack frames above.
 internal static @string methodName() {
-    //var (pc, _, _, _) = runtime.Caller(2);
-    //var f = runtime.FuncForPC(pc);
-    //if (f == nil) {
-    //    return "unknown method"u8;
-    //}
-    //return f.Name();
-    return "";
+    var (pc, _, _, _) = runtime.Caller(2);
+    var f = runtime.FuncForPC(pc);
+    if (f == nil) {
+        return "unknown method"u8;
+    }
+    return f.Name();
 }
 
 // mustBeExported panics if f records that the value was obtained using
@@ -345,14 +344,13 @@ public static nint Len(this Value v) {
     if (exprᴛ1 == abi.Slice) {
         return ((unsafeheader.Slice.val)(v.ptr)).val.Len;
     }
-    if (exprᴛ1 == abi.String) {
+    if (exprᴛ1 == abi.ΔString) {
         return ((unsafeheader.String.val)(v.ptr)).val.Len;
     }
 
     // Slice is bigger than a word; assume flagIndir.
     // String is bigger than a word; assume flagIndir.
     panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
-    return 0;
 }
 
 // NumMethod returns the number of exported methods in the value's method set.
@@ -423,8 +421,8 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
         var fl = (flag)((flag)(v.flag & ((flag)(flagAddr | flagIndir))) | v.flag.ro());
         fl |= (flag)(((flag)dst.Kind()));
         return new Value( // Overwrite type so that they match.
-             // Same memory layout, so no harm done.
-            dst, v.ptr, fl);
+ // Same memory layout, so no harm done.
+dst, v.ptr, fl);
     case {} when implements(Ꮡdst, v.typ()):
         if (target == default!) {
             target = (uintptr)unsafe_New(Ꮡdst);
@@ -446,7 +444,6 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
 
     // Failed.
     panic(context + ": value of type "u8 + toRType(v.typ()).String() + " is not assignable to type "u8 + toRType(Ꮡdst).String());
-    return default!;
 }
 
 // arrayAt returns the i-th element of p,

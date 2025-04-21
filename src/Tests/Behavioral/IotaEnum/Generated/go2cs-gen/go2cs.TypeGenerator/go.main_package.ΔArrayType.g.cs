@@ -27,28 +27,28 @@ public static partial class main_package
         public partial ref global::go.main_package.Type Type => ref ᏑʗType.val;
 
         // Promoted Struct Field Accessors
-        public ref nuint Size_ => ref Type.Size_;
-        public ref nuint PtrBytes => ref Type.PtrBytes;
-        public ref uint Hash => ref Type.Hash;
+        internal ref nuint Size_ => ref Type.Size_;
+        internal ref nuint PtrBytes => ref Type.PtrBytes;
+        internal ref uint Hash => ref Type.Hash;
         public ref global::go.main_package.TFlag TFlag => ref Type.TFlag;
-        public ref byte Align_ => ref Type.Align_;
-        public ref byte FieldAlign_ => ref Type.FieldAlign_;
+        internal ref byte Align_ => ref Type.Align_;
+        internal ref byte FieldAlign_ => ref Type.FieldAlign_;
         public ref global::go.main_package.ΔKind Kind_ => ref Type.Kind_;
         public ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> Equal => ref Type.Equal;
-        public ref global::go.ж<byte> GCData => ref Type.GCData;
+        internal ref global::go.ж<byte> GCData => ref Type.GCData;
         public ref global::go.main_package.NameOff Str => ref Type.Str;
         public ref global::go.main_package.TypeOff PtrToThis => ref Type.PtrToThis;
 
         // Promoted Struct Field Accessor References
-        public static ref nuint ᏑSize_(ref ΔArrayType instance) => ref instance.Type.Size_;
-        public static ref nuint ᏑPtrBytes(ref ΔArrayType instance) => ref instance.Type.PtrBytes;
-        public static ref uint ᏑHash(ref ΔArrayType instance) => ref instance.Type.Hash;
+        internal static ref nuint ᏑSize_(ref ΔArrayType instance) => ref instance.Type.Size_;
+        internal static ref nuint ᏑPtrBytes(ref ΔArrayType instance) => ref instance.Type.PtrBytes;
+        internal static ref uint ᏑHash(ref ΔArrayType instance) => ref instance.Type.Hash;
         public static ref global::go.main_package.TFlag ᏑTFlag(ref ΔArrayType instance) => ref instance.Type.TFlag;
-        public static ref byte ᏑAlign_(ref ΔArrayType instance) => ref instance.Type.Align_;
-        public static ref byte ᏑFieldAlign_(ref ΔArrayType instance) => ref instance.Type.FieldAlign_;
+        internal static ref byte ᏑAlign_(ref ΔArrayType instance) => ref instance.Type.Align_;
+        internal static ref byte ᏑFieldAlign_(ref ΔArrayType instance) => ref instance.Type.FieldAlign_;
         public static ref global::go.main_package.ΔKind ᏑKind_(ref ΔArrayType instance) => ref instance.Type.Kind_;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> ᏑEqual(ref ΔArrayType instance) => ref instance.Type.Equal;
-        public static ref global::go.ж<byte> ᏑGCData(ref ΔArrayType instance) => ref instance.Type.GCData;
+        internal static ref global::go.ж<byte> ᏑGCData(ref ΔArrayType instance) => ref instance.Type.GCData;
         public static ref global::go.main_package.NameOff ᏑStr(ref ΔArrayType instance) => ref instance.Type.Str;
         public static ref global::go.main_package.TypeOff ᏑPtrToThis(ref ΔArrayType instance) => ref instance.Type.PtrToThis;
 
@@ -121,8 +121,8 @@ public static partial class main_package
         ref var target = ref Ꮡtarget.val;
         return target.Kind();
     }
-    public static bool HasName(this ref ΔArrayType target) => target.Type.HasName();
-    public static bool HasName(this ж<ΔArrayType> Ꮡtarget)
+    internal static bool HasName(this ref ΔArrayType target) => target.Type.HasName();
+    internal static bool HasName(this ж<ΔArrayType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.HasName();

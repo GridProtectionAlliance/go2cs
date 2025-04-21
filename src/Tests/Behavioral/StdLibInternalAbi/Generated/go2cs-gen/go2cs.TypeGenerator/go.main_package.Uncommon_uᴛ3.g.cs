@@ -30,13 +30,13 @@ public static partial class main_package
         public ref global::go.main_package.Type Type => ref ArrayType.Type;
         public ref global::go.ж<global::go.main_package.Type> Elem => ref ArrayType.Elem;
         public ref global::go.ж<global::go.main_package.Type> Slice => ref ArrayType.Slice;
-        public ref nuint Len => ref ArrayType.Len;
+        internal ref nuint Len => ref ArrayType.Len;
 
         // Promoted Struct Field Accessor References
         public static ref global::go.main_package.Type ᏑType(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Type;
         public static ref global::go.ж<global::go.main_package.Type> ᏑElem(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Elem;
         public static ref global::go.ж<global::go.main_package.Type> ᏑSlice(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Slice;
-        public static ref nuint ᏑLen(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Len;
+        internal static ref nuint ᏑLen(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType.Len;
 
         // Field References
         public static ref global::go.main_package.ΔArrayType ᏑArrayType(ref Uncommon_uᴛ3 instance) => ref instance.ArrayType;

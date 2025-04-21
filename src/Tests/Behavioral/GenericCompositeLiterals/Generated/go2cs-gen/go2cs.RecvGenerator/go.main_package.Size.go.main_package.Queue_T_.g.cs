@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static nint Size<T>(this ж<go.main_package.Queue<T>> Ꮡq)
+    public static nint Size<T>(this ж<go.main_package.Queue<T>> Ꮡq)
         where T : new()
     {
         ref var q = ref Ꮡq.val;

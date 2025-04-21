@@ -64,6 +64,8 @@ public static partial class unsafe_package
         
         public ArbitraryType(nint value) => m_value = value;
 
+        public ArbitraryType(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(ArbitraryType left, ArbitraryType right) => left.Equals(right);

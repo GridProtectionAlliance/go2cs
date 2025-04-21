@@ -9,11 +9,6 @@ using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
 
-    //public static bool Pointers(this ж<abi_package.Type> Ꮡtarget)
-    //{
-
-    //}
-
 // Swapper returns a function that swaps the elements in the provided
 // slice.
 //

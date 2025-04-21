@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static void Dump(this ж<go.main_package.RegArgs> Ꮡr)
+    public static void Dump(this ж<go.main_package.RegArgs> Ꮡr)
     {
         ref var r = ref Ꮡr.val;
         r.Dump();

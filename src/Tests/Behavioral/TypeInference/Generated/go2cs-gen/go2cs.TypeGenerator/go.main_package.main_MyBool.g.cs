@@ -26,6 +26,8 @@ public static partial class main_package
         
         public main_MyBool(bool value) => m_value = value;
 
+        public main_MyBool(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString().ToLowerInvariant();
 
         public static bool operator ==(main_MyBool left, main_MyBool right) => left.Equals(right);

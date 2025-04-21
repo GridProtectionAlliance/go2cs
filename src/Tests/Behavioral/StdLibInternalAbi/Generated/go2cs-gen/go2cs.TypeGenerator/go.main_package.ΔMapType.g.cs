@@ -27,28 +27,28 @@ public static partial class main_package
         public partial ref global::go.main_package.Type Type => ref ᏑʗType.val;
 
         // Promoted Struct Field Accessors
-        public ref nuint Size_ => ref Type.Size_;
-        public ref nuint PtrBytes => ref Type.PtrBytes;
-        public ref uint Hash => ref Type.Hash;
+        internal ref nuint Size_ => ref Type.Size_;
+        internal ref nuint PtrBytes => ref Type.PtrBytes;
+        internal ref uint Hash => ref Type.Hash;
         public ref global::go.main_package.TFlag TFlag => ref Type.TFlag;
-        public ref byte Align_ => ref Type.Align_;
-        public ref byte FieldAlign_ => ref Type.FieldAlign_;
+        internal ref byte Align_ => ref Type.Align_;
+        internal ref byte FieldAlign_ => ref Type.FieldAlign_;
         public ref global::go.main_package.ΔKind Kind_ => ref Type.Kind_;
         public ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> Equal => ref Type.Equal;
-        public ref global::go.ж<byte> GCData => ref Type.GCData;
+        internal ref global::go.ж<byte> GCData => ref Type.GCData;
         public ref global::go.main_package.NameOff Str => ref Type.Str;
         public ref global::go.main_package.TypeOff PtrToThis => ref Type.PtrToThis;
 
         // Promoted Struct Field Accessor References
-        public static ref nuint ᏑSize_(ref ΔMapType instance) => ref instance.Type.Size_;
-        public static ref nuint ᏑPtrBytes(ref ΔMapType instance) => ref instance.Type.PtrBytes;
-        public static ref uint ᏑHash(ref ΔMapType instance) => ref instance.Type.Hash;
+        internal static ref nuint ᏑSize_(ref ΔMapType instance) => ref instance.Type.Size_;
+        internal static ref nuint ᏑPtrBytes(ref ΔMapType instance) => ref instance.Type.PtrBytes;
+        internal static ref uint ᏑHash(ref ΔMapType instance) => ref instance.Type.Hash;
         public static ref global::go.main_package.TFlag ᏑTFlag(ref ΔMapType instance) => ref instance.Type.TFlag;
-        public static ref byte ᏑAlign_(ref ΔMapType instance) => ref instance.Type.Align_;
-        public static ref byte ᏑFieldAlign_(ref ΔMapType instance) => ref instance.Type.FieldAlign_;
+        internal static ref byte ᏑAlign_(ref ΔMapType instance) => ref instance.Type.Align_;
+        internal static ref byte ᏑFieldAlign_(ref ΔMapType instance) => ref instance.Type.FieldAlign_;
         public static ref global::go.main_package.ΔKind ᏑKind_(ref ΔMapType instance) => ref instance.Type.Kind_;
         public static ref global::System.Func<global::go.unsafe_package.Pointer, global::go.unsafe_package.Pointer, bool> ᏑEqual(ref ΔMapType instance) => ref instance.Type.Equal;
-        public static ref global::go.ж<byte> ᏑGCData(ref ΔMapType instance) => ref instance.Type.GCData;
+        internal static ref global::go.ж<byte> ᏑGCData(ref ΔMapType instance) => ref instance.Type.GCData;
         public static ref global::go.main_package.NameOff ᏑStr(ref ΔMapType instance) => ref instance.Type.Str;
         public static ref global::go.main_package.TypeOff ᏑPtrToThis(ref ΔMapType instance) => ref instance.Type.PtrToThis;
 
@@ -151,38 +151,38 @@ public static partial class main_package
         ref var target = ref Ꮡtarget.val;
         return target.Kind();
     }
-    public static bool HasName(this ref ΔMapType target) => target.Type.HasName();
-    public static bool HasName(this ж<ΔMapType> Ꮡtarget)
+    internal static bool HasName(this ref ΔMapType target) => target.Type.HasName();
+    internal static bool HasName(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.HasName();
     }
-    public static bool Pointers(this ref ΔMapType target) => target.Type.Pointers();
-    public static bool Pointers(this ж<ΔMapType> Ꮡtarget)
+    internal static bool Pointers(this ref ΔMapType target) => target.Type.Pointers();
+    internal static bool Pointers(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Pointers();
     }
-    public static bool IfaceIndir(this ref ΔMapType target) => target.Type.IfaceIndir();
-    public static bool IfaceIndir(this ж<ΔMapType> Ꮡtarget)
+    internal static bool IfaceIndir(this ref ΔMapType target) => target.Type.IfaceIndir();
+    internal static bool IfaceIndir(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IfaceIndir();
     }
-    public static bool IsDirectIface(this ref ΔMapType target) => target.Type.IsDirectIface();
-    public static bool IsDirectIface(this ж<ΔMapType> Ꮡtarget)
+    internal static bool IsDirectIface(this ref ΔMapType target) => target.Type.IsDirectIface();
+    internal static bool IsDirectIface(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IsDirectIface();
     }
-    public static go.slice<byte> GcSlice(this ref ΔMapType target, nuint begin, nuint end) => target.Type.GcSlice(begin, end);
-    public static go.slice<byte> GcSlice(this ж<ΔMapType> Ꮡtarget, nuint begin, nuint end)
+    internal static go.slice<byte> GcSlice(this ref ΔMapType target, nuint begin, nuint end) => target.Type.GcSlice(begin, end);
+    internal static go.slice<byte> GcSlice(this ж<ΔMapType> Ꮡtarget, nuint begin, nuint end)
     {
         ref var target = ref Ꮡtarget.val;
         return target.GcSlice(begin, end);
     }
-    public static nint Len(this ref ΔMapType target) => target.Type.Len();
-    public static nint Len(this ж<ΔMapType> Ꮡtarget)
+    internal static nint Len(this ref ΔMapType target) => target.Type.Len();
+    internal static nint Len(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Len();
@@ -241,20 +241,20 @@ public static partial class main_package
         ref var target = ref Ꮡtarget.val;
         return target.InterfaceType();
     }
-    public static nuint Size(this ref ΔMapType target) => target.Type.Size();
-    public static nuint Size(this ж<ΔMapType> Ꮡtarget)
+    internal static nuint Size(this ref ΔMapType target) => target.Type.Size();
+    internal static nuint Size(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Size();
     }
-    public static nint Align(this ref ΔMapType target) => target.Type.Align();
-    public static nint Align(this ж<ΔMapType> Ꮡtarget)
+    internal static nint Align(this ref ΔMapType target) => target.Type.Align();
+    internal static nint Align(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.Align();
     }
-    public static nint FieldAlign(this ref ΔMapType target) => target.Type.FieldAlign();
-    public static nint FieldAlign(this ж<ΔMapType> Ꮡtarget)
+    internal static nint FieldAlign(this ref ΔMapType target) => target.Type.FieldAlign();
+    internal static nint FieldAlign(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.FieldAlign();
@@ -265,8 +265,8 @@ public static partial class main_package
         ref var target = ref Ꮡtarget.val;
         return target.ExportedMethods();
     }
-    public static nint NumMethod(this ref ΔMapType target) => target.Type.NumMethod();
-    public static nint NumMethod(this ж<ΔMapType> Ꮡtarget)
+    internal static nint NumMethod(this ref ΔMapType target) => target.Type.NumMethod();
+    internal static nint NumMethod(this ж<ΔMapType> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumMethod();

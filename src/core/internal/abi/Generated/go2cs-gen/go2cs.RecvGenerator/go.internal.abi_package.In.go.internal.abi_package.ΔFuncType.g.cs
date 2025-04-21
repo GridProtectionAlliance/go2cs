@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.ж<go.@internal.abi_package.Type> In(this ж<go.@internal.abi_package.ΔFuncType> Ꮡt, nint i)
+    public static go.ж<go.@internal.abi_package.Type> In(this ж<go.@internal.abi_package.ΔFuncType> Ꮡt, nint i)
     {
         ref var t = ref Ꮡt.val;
         return t.In(i);

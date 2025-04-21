@@ -60,6 +60,8 @@ public static partial class abi_package
         
         public RF_State(nint value) => m_value = value;
 
+        public RF_State(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(RF_State left, RF_State right) => left.Equals(right);

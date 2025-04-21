@@ -28,11 +28,11 @@ public static partial class main_package
 
         // Promoted Struct Field Accessors
         public ref global::go.time_package.Time When => ref MyError.val.When;
-        public ref global::go.@string What => ref MyError.val.What;
+        internal ref global::go.@string What => ref MyError.val.What;
 
         // Promoted Struct Field Accessor References
         public static ref global::go.time_package.Time ᏑWhen(ref MyCustomError instance) => ref instance.MyError.val.When;
-        public static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.val.What;
+        internal static ref global::go.@string ᏑWhat(ref MyCustomError instance) => ref instance.MyError.val.What;
 
         // Field References
         internal static ref global::go.@string ᏑMessage(ref MyCustomError instance) => ref instance.Message;

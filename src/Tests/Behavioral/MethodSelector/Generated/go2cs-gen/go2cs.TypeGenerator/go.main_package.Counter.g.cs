@@ -59,6 +59,8 @@ public static partial class main_package
         
         public Counter(nint value) => m_value = value;
 
+        public Counter(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(Counter left, Counter right) => left.Equals(right);

@@ -39,7 +39,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 			namespace := importPath[:lastDotIndex]
 
-			if len(namespace) > 0 {
+			if len(namespace) > 0 && packageNamespace != fmt.Sprintf("%s.%s", RootNamespace, namespace) {
 				v.requiredUsings.Add(namespace)
 			}
 		}

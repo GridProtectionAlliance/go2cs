@@ -289,7 +289,13 @@ func loadImportedTypeAliases(info PackageInfo) {
 			alias := fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))
 			typeName := getCoreSanitizedIdentifier(result[1])
 
-			if !strings.HasPrefix(typeName, RootNamespace) {
+			if strings.HasPrefix(typeName, "const:") {
+				typeName = strings.TrimPrefix(typeName, "const:")
+
+				packageLock.Lock()
+				constImportedTypeAliases.Add(alias)
+				packageLock.Unlock()
+			} else if !strings.HasPrefix(typeName, RootNamespace) {
 				typeName = fmt.Sprintf("%s.%s%s.%s", RootNamespace, packageName, PackageSuffix, typeName)
 			}
 

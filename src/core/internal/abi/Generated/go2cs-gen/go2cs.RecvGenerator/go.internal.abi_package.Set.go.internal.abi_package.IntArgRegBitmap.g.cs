@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static void Set(this ж<go.@internal.abi_package.IntArgRegBitmap> Ꮡb, nint i)
+    public static void Set(this ж<go.@internal.abi_package.IntArgRegBitmap> Ꮡb, nint i)
     {
         ref var b = ref Ꮡb.val;
         b.Set(i);

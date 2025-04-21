@@ -27,10 +27,10 @@ public static partial class main_package
         public partial ref global::go.ж<global::go.main_package.Inner> Inner => ref ᏑʗInner.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@string Value => ref Inner.val.Value;
+        internal ref global::go.@string Value => ref Inner.val.Value;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@string ᏑValue(ref Middle instance) => ref instance.Inner.val.Value;
+        internal static ref global::go.@string ᏑValue(ref Middle instance) => ref instance.Inner.val.Value;
 
         // Field References
         public static ref global::go.ж<global::go.main_package.Inner> ᏑInner(ref Middle instance) => ref instance.Inner;

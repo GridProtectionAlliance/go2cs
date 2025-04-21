@@ -93,8 +93,8 @@ public static partial class abi_package
     }
 
     // Promoted Struct Receivers
-    public static nint NumMethod(this ref Uncommon_uᴛ6 target) => target.InterfaceType.NumMethod();
-    public static nint NumMethod(this ж<Uncommon_uᴛ6> Ꮡtarget)
+    internal static nint NumMethod(this ref Uncommon_uᴛ6 target) => target.InterfaceType.NumMethod();
+    internal static nint NumMethod(this ж<Uncommon_uᴛ6> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.NumMethod();

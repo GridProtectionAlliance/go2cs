@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.slice<byte> GcSlice(this ж<go.main_package.Type> Ꮡt, nuint begin, nuint end)
+    public static go.slice<byte> GcSlice(this ж<go.main_package.Type> Ꮡt, nuint begin, nuint end)
     {
         ref var t = ref Ꮡt.val;
         return t.GcSlice(begin, end);

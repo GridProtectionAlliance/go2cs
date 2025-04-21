@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.slice<go.main_package.Method> Methods(this ж<go.main_package.UncommonType> Ꮡt)
+    public static go.slice<go.main_package.Method> Methods(this ж<go.main_package.UncommonType> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.Methods();

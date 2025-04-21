@@ -60,6 +60,8 @@ public static partial class abi_package
         
         public ΔKind(uint8 value) => m_value = value;
 
+        public ΔKind(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(ΔKind left, ΔKind right) => left.Equals(right);

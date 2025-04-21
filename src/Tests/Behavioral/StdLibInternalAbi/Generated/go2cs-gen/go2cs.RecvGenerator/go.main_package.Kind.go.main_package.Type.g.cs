@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.main_package.ΔKind Kind(this ж<go.main_package.Type> Ꮡt)
+    public static go.main_package.ΔKind Kind(this ж<go.main_package.Type> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.Kind();

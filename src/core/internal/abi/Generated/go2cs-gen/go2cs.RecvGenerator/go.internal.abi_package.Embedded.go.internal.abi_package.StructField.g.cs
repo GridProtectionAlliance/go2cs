@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static bool Embedded(this ж<go.@internal.abi_package.StructField> Ꮡf)
+    public static bool Embedded(this ж<go.@internal.abi_package.StructField> Ꮡf)
     {
         ref var f = ref Ꮡf.val;
         return f.Embedded();

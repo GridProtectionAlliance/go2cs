@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static bool IsVariadic(this ж<go.@internal.abi_package.ΔFuncType> Ꮡt)
+    public static bool IsVariadic(this ж<go.@internal.abi_package.ΔFuncType> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.IsVariadic();

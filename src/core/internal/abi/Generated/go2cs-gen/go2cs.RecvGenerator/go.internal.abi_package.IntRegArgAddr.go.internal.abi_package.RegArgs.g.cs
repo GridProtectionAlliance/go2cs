@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.unsafe_package.Pointer IntRegArgAddr(this ж<go.@internal.abi_package.RegArgs> Ꮡr, nint reg, nuint argSize)
+    public static go.unsafe_package.Pointer IntRegArgAddr(this ж<go.@internal.abi_package.RegArgs> Ꮡr, nint reg, nuint argSize)
     {
         ref var r = ref Ꮡr.val;
         return r.IntRegArgAddr(reg, argSize);

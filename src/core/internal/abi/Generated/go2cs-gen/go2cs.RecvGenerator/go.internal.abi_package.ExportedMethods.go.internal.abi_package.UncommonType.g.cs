@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.slice<go.@internal.abi_package.Method> ExportedMethods(this ж<go.@internal.abi_package.UncommonType> Ꮡt)
+    public static go.slice<go.@internal.abi_package.Method> ExportedMethods(this ж<go.@internal.abi_package.UncommonType> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.ExportedMethods();

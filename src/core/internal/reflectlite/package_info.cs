@@ -36,6 +36,7 @@ using static go.@internal.reflectlite_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Kind", "go.@internal.abi_package.ΔKind")]
+[assembly: GoTypeAlias("String", "const:ΔString")]
 [assembly: GoTypeAlias("Type", "ΔType")]
 // </ExportedTypeAliases>
 
@@ -52,7 +53,7 @@ using static go.@internal.reflectlite_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-//[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
+[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go.@internal;

@@ -5,6 +5,7 @@
 namespace go;
 
 using reflectlite = @internal.reflectlite_package;
+using @internal;
 
 partial class errors_package {
 
@@ -180,5 +181,4 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
 internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
-
 */

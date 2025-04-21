@@ -34,6 +34,7 @@ using static go.main_package;
 [assembly: GoTypeAlias("Kind", "ΔKind")]
 [assembly: GoTypeAlias("MapType", "ΔMapType")]
 [assembly: GoTypeAlias("Name", "ΔName")]
+[assembly: GoTypeAlias("String", "const:ΔString")]
 [assembly: GoTypeAlias("StructType", "ΔStructType")]
 // </ExportedTypeAliases>
 

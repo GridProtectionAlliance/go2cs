@@ -20,7 +20,7 @@ namespace go.@internal;
 public static partial class abi_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static bool ReflexiveKey(this ж<go.@internal.abi_package.ΔMapType> Ꮡmt)
+    public static bool ReflexiveKey(this ж<go.@internal.abi_package.ΔMapType> Ꮡmt)
     {
         ref var mt = ref Ꮡmt.val;
         return mt.ReflexiveKey();

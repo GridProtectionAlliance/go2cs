@@ -30,6 +30,7 @@ using static go.main_package;
 [assembly: GoTypeAlias("ArrayType", "ΔArrayType")]
 [assembly: GoTypeAlias("Kind", "ΔKind")]
 [assembly: GoTypeAlias("MapType", "ΔMapType")]
+[assembly: GoTypeAlias("String", "const:ΔString")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

@@ -23,7 +23,7 @@ public static partial class main_package
         throw new NullReferenceException("Receiver target \"CommonꓸᏑt\" is not initialized");
 
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.ж<go.main_package.Type> Common(this ж<go.main_package.Type> Ꮡt)
+    public static go.ж<go.main_package.Type> Common(this ж<go.main_package.Type> Ꮡt)
     {
         Commonʗt = new ThreadLocal<ж<go.main_package.Type>>(() => Ꮡt);
         ref var t = ref Ꮡt.val;

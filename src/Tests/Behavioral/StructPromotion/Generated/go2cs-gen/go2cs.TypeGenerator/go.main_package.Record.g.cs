@@ -29,14 +29,14 @@ public static partial class main_package
         public partial ref global::go.main_package.Employee Employee => ref ᏑʗEmployee.val;
 
         // Promoted Struct Field Accessors
-        public ref global::go.@string name => ref Person.name;
-        public ref int age => ref Person.age;
-        public ref global::go.@string position => ref Employee.position;
+        internal ref global::go.@string name => ref Person.name;
+        internal ref int age => ref Person.age;
+        internal ref global::go.@string position => ref Employee.position;
 
         // Promoted Struct Field Accessor References
-        public static ref global::go.@string Ꮡname(ref Record instance) => ref instance.Person.name;
-        public static ref int Ꮡage(ref Record instance) => ref instance.Person.age;
-        public static ref global::go.@string Ꮡposition(ref Record instance) => ref instance.Employee.position;
+        internal static ref global::go.@string Ꮡname(ref Record instance) => ref instance.Person.name;
+        internal static ref int Ꮡage(ref Record instance) => ref instance.Person.age;
+        internal static ref global::go.@string Ꮡposition(ref Record instance) => ref instance.Employee.position;
 
         // Field References
         public static ref global::go.main_package.Person ᏑPerson(ref Record instance) => ref instance.Person;
@@ -90,14 +90,14 @@ public static partial class main_package
 
     // Promoted Struct Receivers
     // 'Person.IsDr' method mapped to overridden 'Record' receiver method
-    public static bool IsAdult(this ref Record target) => target.Person.IsAdult();
-    public static bool IsAdult(this ж<Record> Ꮡtarget)
+    internal static bool IsAdult(this ref Record target) => target.Person.IsAdult();
+    internal static bool IsAdult(this ж<Record> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IsAdult();
     }
-    public static bool IsManager(this ref Record target) => target.Employee.IsManager();
-    public static bool IsManager(this ж<Record> Ꮡtarget)
+    internal static bool IsManager(this ref Record target) => target.Employee.IsManager();
+    internal static bool IsManager(this ж<Record> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.IsManager();

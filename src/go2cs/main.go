@@ -210,6 +210,7 @@ var packageNamespace string
 var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var importedTypeAliases map[string]string
+var constImportedTypeAliases HashSet[string]
 var parsedPackageInfoFiles HashSet[string]
 var interfaceImplementations map[string]HashSet[string]
 var promotedInterfaceImplementations map[string]HashSet[string]
@@ -398,6 +399,7 @@ Examples:
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
 		importedTypeAliases = make(map[string]string)
+		constImportedTypeAliases = NewHashSet([]string{})
 		parsedPackageInfoFiles = NewHashSet([]string{})
 		interfaceImplementations = make(map[string]HashSet[string])
 		promotedInterfaceImplementations = make(map[string]HashSet[string])
@@ -594,7 +596,9 @@ Examples:
 
 			// Add new type aliases to package info file (hashset ensures uniqueness)
 			for alias, typeName := range importedTypeAliases {
-				lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
+				if !constImportedTypeAliases.Contains(alias) {
+					lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
+				}
 			}
 
 			// Sort lines
@@ -2267,10 +2271,21 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 func getAliasedTypeName(typeName string) string {
 	packageLock.Lock()
-	_, exists := importedTypeAliases[typeName]
+	alias, exists := importedTypeAliases[typeName]
+	isConst := constImportedTypeAliases.Contains(typeName)
 	packageLock.Unlock()
 
 	if exists {
+		if isConst {
+			parts := strings.Split(typeName, ".")
+
+			if len(parts) == 1 {
+				return alias
+			}
+
+			return fmt.Sprintf("%s.%s", strings.Join(parts[:len(parts)-1], "."), alias)
+		}
+
 		return strings.ReplaceAll(typeName, ".", TypeAliasDot)
 	}
 

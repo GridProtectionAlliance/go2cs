@@ -60,6 +60,8 @@ public static partial class abi_package
         
         public TextOff(int32 value) => m_value = value;
 
+        public TextOff(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(TextOff left, TextOff right) => left.Equals(right);

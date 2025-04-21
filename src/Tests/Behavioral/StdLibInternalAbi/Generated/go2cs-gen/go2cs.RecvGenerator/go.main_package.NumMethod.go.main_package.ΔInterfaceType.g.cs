@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static nint NumMethod(this ж<go.main_package.ΔInterfaceType> Ꮡt)
+    public static nint NumMethod(this ж<go.main_package.ΔInterfaceType> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.NumMethod();

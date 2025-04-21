@@ -19,7 +19,7 @@ namespace go;
 public static partial class main_package
 {
     [GeneratedCode("go2cs-gen", "0.1.4")]
-    internal static go.ж<go.main_package.Type> Elem(this ж<go.main_package.Type> Ꮡt)
+    public static go.ж<go.main_package.Type> Elem(this ж<go.main_package.Type> Ꮡt)
     {
         ref var t = ref Ꮡt.val;
         return t.Elem();

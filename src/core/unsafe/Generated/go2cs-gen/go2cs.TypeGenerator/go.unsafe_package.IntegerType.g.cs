@@ -64,6 +64,8 @@ public static partial class unsafe_package
         
         public IntegerType(nint value) => m_value = value;
 
+        public IntegerType(NilType _) => m_value = default!;
+        
         public override string ToString() => m_value.ToString();
 
         public static bool operator ==(IntegerType left, IntegerType right) => left.Equals(right);
