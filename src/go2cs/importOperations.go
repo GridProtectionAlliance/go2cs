@@ -287,7 +287,11 @@ func loadImportedTypeAliases(info PackageInfo) {
 		for _, result := range results {
 			// Add the exported type alias to the imported type aliases map
 			alias := fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))
-			typeName := fmt.Sprintf("go.%s%s.%s", packageName, PackageSuffix, getCoreSanitizedIdentifier(result[1]))
+			typeName := getCoreSanitizedIdentifier(result[1])
+
+			if !strings.HasPrefix(typeName, RootNamespace) {
+				typeName = fmt.Sprintf("%s.%s%s.%s", RootNamespace, packageName, PackageSuffix, typeName)
+			}
 
 			packageLock.Lock()
 			importedTypeAliases[alias] = typeName
