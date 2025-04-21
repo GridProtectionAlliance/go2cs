@@ -78,8 +78,6 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		methodName    string
 	}
 
-	promotedInterfaceMethods := HashSet[InterfaceMethodInfo]{}
-
 	for _, field := range structType.Fields.List {
 		v.writeDocString(target, field.Doc, field.Pos())
 
@@ -197,7 +195,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 			identType := identObj.Type().Underlying()
 
-			if interfaceType, ok := identType.(*types.Interface); ok {
+			if _, ok := identType.(*types.Interface); ok {
 				// Add to promoted interface implementations
 				packageLock.Lock()
 
@@ -209,17 +207,6 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				packageLock.Unlock()
 
-				// Record the methods of the promoted interface
-				for i := 0; i < interfaceType.NumMethods(); i++ {
-					method := interfaceType.Method(i)
-
-					promotedInterfaceMethods.Add(InterfaceMethodInfo{
-						interfaceType: interfaceType,
-						interfaceName: ident.Name,
-						methodName:    method.Name(),
-					})
-				}
-
 				v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
 			} else {
 				var handled bool
@@ -230,8 +217,10 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 						handled = true
 					}
 				} else if _, ok = identType.(*types.Struct); !ok {
-					v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
-					handled = true
+					if _, ok := identObj.Type().(*types.Named); !ok {
+						v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+						handled = true
+					}
 				}
 
 				// Handle promoted struct implementations
