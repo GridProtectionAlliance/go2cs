@@ -90,14 +90,20 @@ internal class StructTypeTemplate : TemplateBase
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Accessors");
 
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
-                result.Append($"\r\n{TypeElemIndent}public partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{memberName}.val;");
+            {
+                string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{memberName}.val;");
+            }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessors");
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                    result.Append($"\r\n{TypeElemIndent}public ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                {
+                    string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                }
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessor References");
@@ -105,7 +111,10 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
-                   result.Append($"\r\n{TypeElemIndent}public static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                {
+                    string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                }
             }
 
             return result.ToString();
@@ -148,7 +157,9 @@ internal class StructTypeTemplate : TemplateBase
                 }
 
                 // Add ref extension method
-                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this ref {StructName} target");
+                string methodScope = Scope ?? "public";
+                methodScope = method.ReturnType == "void" ? methodScope : char.IsUpper(GetSimpleName(method.ReturnType)[0]) ? methodScope : "internal";
+                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this ref {StructName} target");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -161,7 +172,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {Scope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
+                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
 
                 if (method.Parameters.Length > 1)
                 {
@@ -172,7 +183,7 @@ internal class StructTypeTemplate : TemplateBase
                 result.AppendLine(")");
                 result.AppendLine("    {");
                 result.AppendLine($"        ref var target = ref {AddressPrefix}target.val;");
-                result.Append($"        return target.{method.Name}(");
+                result.Append($"        {(method.ReturnType == "void" ? "" : "return ")}target.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
                 result.AppendLine(");");
                 result.Append("    }");

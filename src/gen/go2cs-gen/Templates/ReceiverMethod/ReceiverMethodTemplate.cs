@@ -91,7 +91,7 @@ internal class ReceiverMethodTemplate : TemplateBase
     {
         get
         {
-            string receiverScope = char.IsUpper(GetSimpleName(Method.Parameters[0].name)[0]) ? "public" : "internal";
+            string receiverScope = char.IsUpper(GetSimpleName(Method.Parameters[0].type)[0]) ? "public" : "internal";
             return Scope == receiverScope ? Scope : "internal";
         }
     }
