@@ -19,6 +19,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
+		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
+		// This is required since unsafe.Pointer is in its own library and no implicit cast can
+		// be added for it on the pointer class (ж<T>) in the core library without creating a
+		// circular dependency. Although C# allows circular dependencies, NuGet does not. If the
+		// target happens to not be an unsafe pointer, the cast is still safe since all pointer
+		// types support this cast operation.
+		if context.isPointerCast {
+			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)

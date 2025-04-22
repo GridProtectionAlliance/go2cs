@@ -144,6 +144,7 @@ public static class builtin
     /// </summary>
     /// <param name="state">State of panic exception.</param>
     /// <exception cref="PanicException">Panic exception with the specified <paramref name="state"/>.</exception>
+    [DoesNotReturn]
     public static void panic(object state)
     {
         throw new PanicException(state);
