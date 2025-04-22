@@ -219,6 +219,10 @@ public static bool CanSet(this Value v) {
     return (flag)(v.flag & ((flag)(flagAddr | flagRO))) == flagAddr;
 }
 
+[GoType("dyn")] partial interface Elem_type {
+    void M();
+}
+
 // Elem returns the value that the interface v contains
 // or that the pointer v points to.
 // It panics if v's Kind is not Interface or Pointer.
@@ -229,9 +233,9 @@ public static Value Elem(this Value v) {
     if (exprᴛ1 == abi.Interface) {
         any eface = default!;
         if (v.typ().NumMethod() == 0){
-            eface = ~((ж<any>)v.ptr);
+            eface = ~(ж<any>)(uintptr)(v.ptr);
         } else {
-            eface = ((any)((ж<interface{M()}>)(v.ptr).val));
+            eface = ((any)((ж<Elem_type>)(v.ptr).val));
         }
         var x = unpackEface(eface);
         if (x.flag != 0) {
@@ -258,6 +262,10 @@ public static Value Elem(this Value v) {
     panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
 }
 
+[GoType("dyn")] partial interface valueInterface_type {
+    void M();
+}
+
 internal static any valueInterface(Value v) {
     if (v.flag == 0) {
         panic(Ꮡ(new ValueError("reflectlite.Value.Interface", 0)));
@@ -267,9 +275,9 @@ internal static any valueInterface(Value v) {
         // Empty interface has one layout, all interfaces with
         // methods have a second layout.
         if (v.numMethod() == 0) {
-            return ~((ж<any>)v.ptr);
+            return ~(ж<any>)(uintptr)(v.ptr);
         }
-        return (ж<interface{M()}>)(v.ptr).val;
+        return (ж<valueInterface_type>)(v.ptr).val;
     }
     return packEface(v);
 }
@@ -435,7 +443,7 @@ dst, v.ptr, fl);
         }
         var x = valueInterface(v);
         if (dst.NumMethod() == 0){
-            ~((ж<any>)target) = x;
+            ~(ж<any>)(uintptr)(target) = x;
         } else {
             ifaceE2I(Ꮡdst, x, target);
         }

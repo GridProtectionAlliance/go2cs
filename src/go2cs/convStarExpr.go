@@ -37,6 +37,20 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 
 	// In a parenthesis, we are applying a pointer cast operation
 	if context.inParenExpr {
+		// Check if the pointer target type is a struct or pointer to a struct
+		if structType, exprType := v.extractStructType(starExpr); structType != nil && !v.liftedTypeExists(structType) {
+			v.indentLevel++
+			v.visitStructType(structType, exprType, "type", nil, true, nil)
+			v.indentLevel--
+		}
+
+		// Check if the pointer target type is an anonymous interface
+		if interfaceType, exprType := v.extractInterfaceType(starExpr); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
+			v.indentLevel++
+			v.visitInterfaceType(interfaceType, exprType, "type", nil, true, nil)
+			v.indentLevel--
+		}
+
 		starType := v.getType(starExpr.X, false)
 		pointerType := convertToCSTypeName(v.getTypeName(starType, false))
 		return fmt.Sprintf("%s<%s>", PointerPrefix, pointerType)
@@ -51,7 +65,8 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 						// In this case we are dealing with a casted pointer dereference, e.g., "*(*int)"
 						context := DefaultLambdaContext()
 						context.isPointerCast = true
-						return fmt.Sprintf("%s%s", PointerDerefOp, v.convExpr(starExpr.X, []ExprContext{context}))
+						result := v.convExpr(starExpr.X, []ExprContext{context})
+						return fmt.Sprintf("%s%s", PointerDerefOp, result)
 					}
 				}
 			}

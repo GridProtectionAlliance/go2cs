@@ -98,7 +98,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		// Check if field is a struct or a pointer to a struct
 		if ptrType, ok := field.Type.(*ast.StarExpr); ok {
-			if subStructType, ok := ptrType.X.(*ast.StructType); ok {
+			if subStructType, ok := ptrType.X.(*ast.StructType); ok && !v.liftedTypeExists(subStructType) {
 				subStructIdentType := v.getExprType(ptrType.X)
 				v.indentLevel += indentOffset
 				v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
@@ -117,7 +117,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				subStructTypes = append(subStructTypes, v.getExprType(ptrType))
 				v.subStructTypes[identType] = subStructTypes
-			} else if interfaceType, ok := ptrType.X.(*ast.InterfaceType); ok {
+			} else if interfaceType, ok := ptrType.X.(*ast.InterfaceType); ok && !v.liftedTypeExists(interfaceType) {
 				interfaceIdentType := v.getExprType(ptrType.X)
 				v.indentLevel += indentOffset
 				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
