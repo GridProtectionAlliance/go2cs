@@ -110,7 +110,7 @@ internal static any packEface(Value v) {
     var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡi));
     // First, fill in the data portion of the interface.
     switch (ᐧ) {
-    case {} when t.IfaceIndir():
+    case {} when t.IfaceIndir(): {
         if ((flag)(v.flag & flagIndir) == 0) {
             panic("bad indir");
         }
@@ -123,13 +123,15 @@ internal static any packEface(Value v) {
         }
         e.val.Data = ptr;
         break;
-    case {} when (flag)(v.flag & flagIndir) is != 0:
+    }
+    case {} when (flag)(v.flag & flagIndir) is != 0: {
         e.val.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
-    default:
+    }
+    default: {
         e.val.Data = v.ptr;
         break;
-    }
+    }}
 
     // Value is indirect, but interface is direct. We need
     // to load the data at v.ptr into the interface data word.
@@ -425,13 +427,14 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
     // 	v = makeMethodValue(context, v)
     // }
     switch (ᐧ) {
-    case {} when directlyAssignable(Ꮡdst, v.typ()):
+    case {} when directlyAssignable(Ꮡdst, v.typ()): {
         var fl = (flag)((flag)(v.flag & ((flag)(flagAddr | flagIndir))) | v.flag.ro());
         fl |= (flag)(((flag)dst.Kind()));
         return new Value( // Overwrite type so that they match.
  // Same memory layout, so no harm done.
 Ꮡdst, v.ptr, fl);
-    case {} when implements(Ꮡdst, v.typ()):
+    }
+    case {} when implements(Ꮡdst, v.typ()): {
         if (target == nil) {
             target = (uintptr)unsafe_New(Ꮡdst);
         }
@@ -448,7 +451,7 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
             ifaceE2I(Ꮡdst, x, target.val);
         }
         return new Value(Ꮡdst, target.val, (flag)(flagIndir | ((flag)abi.Interface)));
-    }
+    }}
 
     // Failed.
     panic(context + ": value of type "u8 + toRType(v.typ()).String() + " is not assignable to type "u8 + toRType(Ꮡdst).String());

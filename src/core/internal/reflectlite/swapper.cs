@@ -20,17 +20,18 @@ public static Action<nint, nint> Swapper(any Δslice) {
     }
     // Fast path for slices of size 0 and 1. Nothing to swap.
     switch (v.Len()) {
-    case 0:
+    case 0: {
         return (nint i, nint j) => {
             panic("reflect: slice index out of range");
         };
-    case 1:
+    }
+    case 1: {
         return (nint i, nint j) => {
             if (i != 0 || j != 0) {
                 panic("reflect: slice index out of range");
             }
         };
-    }
+    }}
 
     var typ = v.Type().Elem().common();
     var size = typ.Size();
@@ -53,28 +54,34 @@ public static Action<nint, nint> Swapper(any Δslice) {
         }
     } else {
         switch (size) {
-        case 8:
+        case 8: {
             var @is = ~(ж<slice<int64>>)(uintptr)(v.ptr);
             var isʗ1 = @is;
             return (nint i, nint j) => {
                 (isʗ1[i], isʗ1[j]) = (isʗ1[j], isʗ1[i]);
             };
-        case 4:
-            @is = ~(ж<slice<int32>>)(uintptr)(v.ptr);
+        }
+        case 4: {
+            var @is = ~(ж<slice<int32>>)(uintptr)(v.ptr);
+            var isʗ2 = @is;
             return (nint i, nint j) => {
-                (@is[i], @is[j]) = (@is[j], @is[i]);
-            };
-        case 2:
-            @is = ~(ж<slice<int16>>)(uintptr)(v.ptr);
-            return (nint i, nint j) => {
-                (@is[i], @is[j]) = (@is[j], @is[i]);
-            };
-        case 1:
-            @is = ~(ж<slice<int8>>)(uintptr)(v.ptr);
-            return (nint i, nint j) => {
-                (@is[i], @is[j]) = (@is[j], @is[i]);
+                (isʗ2[i], isʗ2[j]) = (isʗ2[j], isʗ2[i]);
             };
         }
+        case 2: {
+            var @is = ~(ж<slice<int16>>)(uintptr)(v.ptr);
+            var isʗ3 = @is;
+            return (nint i, nint j) => {
+                (isʗ3[i], isʗ3[j]) = (isʗ3[j], isʗ3[i]);
+            };
+        }
+        case 1: {
+            var @is = ~(ж<slice<int8>>)(uintptr)(v.ptr);
+            var isʗ4 = @is;
+            return (nint i, nint j) => {
+                (isʗ4[i], isʗ4[j]) = (isʗ4[j], isʗ4[i]);
+            };
+        }}
 
     }
     var s = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);

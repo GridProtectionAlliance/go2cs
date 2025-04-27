@@ -39,24 +39,28 @@ internal static void Main() {
     nint i = 2;
     fmt.Print("Write ", i, " as ");
     switch (i) {
-    case 1:
+    case 1: {
         fmt.Println("one");
         break;
-    case 2:
+    }
+    case 2: {
         fmt.Println("two");
         break;
-    case 3:
+    }
+    case 3: {
         {
             fmt.Println("three");
         }
         break;
-    case 4 or 5 or 6:
+    }
+    case 4 or 5 or 6: {
         fmt.Println("four, five or siz");
         break;
-    default:
+    }
+    default: {
         fmt.Println("unknown");
         break;
-    }
+    }}
 
     nint x = 5;
     fmt.Println(x);
@@ -78,47 +82,53 @@ internal static void Main() {
 
     var t = time.Now();
     switch (ᐧ) {
-    case {} when t.Hour() is < 12:
+    case {} when t.Hour() is < 12: {
         fmt.Println("It's before noon");
         break;
-    default:
+    }
+    default: {
         fmt.Println("It's after noon");
         break;
-    }
+    }}
 
     nint hour = 1;
     nint hour1 = time.Now().Hour();
     {
         nint hourΔ1 = time.Now().Hour();
         switch (ᐧ) {
-        case {} when hourΔ1 is 1 or < 12 or 2:
+        case {} when hourΔ1 is 1 or < 12 or 2: {
             fmt.Println("Good morning!");
             break;
-        case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4):
+        }
+        case {} when (hourΔ1 == 1) || (hourΔ1 < 12) || (hourΔ1 == 2 || hour1 == 4): {
             fmt.Println("Good morning (opt 2)!");
             break;
-        case {} when hourΔ1 is < 17:
+        }
+        case {} when hourΔ1 is < 17: {
             fmt.Println("Good afternoon!");
             break;
-        case {} when hourΔ1 is 0:
+        }
+        case {} when hourΔ1 is 0: {
             fmt.Println("Midnight!");
             break;
-        case {} when hourΔ1 == 0 && hour1 == 1:
+        }
+        case {} when hourΔ1 == 0 && hour1 == 1: {
             fmt.Println("Midnight (opt 2)!");
             break;
-        default:
+        }
+        default: {
             fmt.Println("Good evening!");
             break;
-        }
+        }}
     }
 
     fmt.Println(hour);
     var c = (rune)'\r';
     switch (c) {
-    case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r':
+    case (rune)' ' or (rune)'\t' or (rune)'\n' or (rune)'\f' or (rune)'\r': {
         fmt.Println("whitespace");
         break;
-    }
+    }}
 
     fmt.Printf("i before = %d\n"u8, i);
     {
@@ -168,12 +178,12 @@ internal static void Main() {
         else if (next is 0) { matchᴛ2 = true;
             fmt.Println("zero");
             {
-                var nextΔ1 = getNext();
+                var nextΔ2 = getNext();
                 var matchᴛ4 = false;
-                if (nextΔ1 is 1 or <= 2) { matchᴛ4 = true;
+                if (nextΔ2 is 1 or <= 2) { matchᴛ4 = true;
                     fmt.Println("sub1 one or two");
                 }
-                else if (nextΔ1 is 3) { matchᴛ4 = true;
+                else if (nextΔ2 is 3) { matchᴛ4 = true;
                     fmt.Println("sub1 three");
                     fallthrough = true;
                 }
@@ -186,16 +196,18 @@ internal static void Main() {
         else if (next is 1 or 2) { matchᴛ2 = true;
             fmt.Println("one or two");
             switch (next) {
-            case 1 or 2:
+            case 1 or 2: {
                 fmt.Println("sub2 one or two");
                 break;
-            case 3:
+            }
+            case 3: {
                 fmt.Println("sub2 three");
                 break;
-            default:
+            }
+            default: {
                 fmt.Println("sub2 default");
                 break;
-            }
+            }}
 
             fallthrough = true;
         }

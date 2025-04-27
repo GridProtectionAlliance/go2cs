@@ -37,15 +37,18 @@ internal static void Main() {
         }
     }
     switch (GetValue(1).type()) {
-    case Box<nint> v:
+    case Box<nint> v: {
         fmt.Printf("Int box: %d\n"u8, v.Value);
         break;
-    case Box<@string> v:
+    }
+    case Box<@string> v: {
         fmt.Printf("String box: %s\n"u8, v.Value);
         break;
-    case Box<float64> v:
+    }
+    case Box<float64> v: {
         fmt.Printf("Float box: %f\n"u8, v.Value);
         break;
+    }
     default: {
         var v = GetValue(1).type();
         fmt.Println("Unknown box type");

@@ -49,15 +49,16 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 	identContext := DefaultIdentContext()
 	identContext.isType = true
 
-	for _, caseClause := range caseClauses {
+	for i, caseClause := range caseClauses {
+		if i > 0 {
+			v.targetFile.WriteString(v.newline)
+		}
+
 		if caseClause.List == nil {
-			v.writeOutput("default:")
+			v.writeOutputLn("default: {")
+			v.indentLevel++
 
 			if len(targetIdent) > 0 {
-				v.targetFile.WriteString(" {")
-				v.targetFile.WriteString(v.newline)
-				v.indentLevel++
-
 				if v.options.preferVarDecl {
 					v.writeOutput("var")
 				} else {
@@ -65,8 +66,6 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 
 				v.targetFile.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, typeVar))
-			} else {
-				v.indentLevel++
 			}
 
 			for _, stmt := range caseClause.Body {
@@ -80,10 +79,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 			}
 
 			v.indentLevel--
-
-			if len(targetIdent) > 0 {
-				v.writeOutput("}")
-			}
+			v.writeOutput("}")
 		} else {
 			var caseExprs []string
 
@@ -113,10 +109,14 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 			}
 
-			for _, caseExpr := range caseExprs {
+			for i, caseExpr := range caseExprs {
+				if i > 0 {
+					v.targetFile.WriteString(v.newline)
+				}
+
 				v.writeOutput("case ")
 				v.targetFile.WriteString(caseExpr)
-				v.targetFile.WriteRune(':')
+				v.targetFile.WriteString(": {")
 				v.indentLevel++
 
 				for _, stmt := range caseClause.Body {
@@ -130,14 +130,15 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 
 				v.indentLevel--
+				v.writeOutput("}")
 			}
 		}
 	}
 
-	if len(targetIdent) > 0 {
-		v.targetFile.WriteRune('}')
-	} else {
-		v.writeOutput("}")
+	v.targetFile.WriteRune('}')
+
+	if len(targetIdent) == 0 {
+		v.targetFile.WriteString(v.newline)
 	}
 
 	// Close any locally scoped declared variable sub-block

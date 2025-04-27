@@ -233,9 +233,13 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 		v.targetFile.WriteString(") {")
 		v.targetFile.WriteString(v.newline)
 
-		for _, caseClause := range caseClauses {
+		for i, caseClause := range caseClauses {
+			if i > 0 {
+				v.targetFile.WriteString(v.newline)
+			}
+
 			if caseClause.List == nil {
-				v.writeOutput("default:")
+				v.writeOutput("default: {")
 			} else {
 				for i, expr := range caseClause.List {
 					if i == 0 {
@@ -247,7 +251,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					v.targetFile.WriteString(v.convExpr(expr, nil))
 
 					if i == len(caseClause.List)-1 {
-						v.targetFile.WriteRune(':')
+						v.targetFile.WriteString(": {")
 					}
 				}
 			}
@@ -265,16 +269,22 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			}
 
 			v.indentLevel--
+			v.writeOutput("}")
 		}
 
-		v.writeOutputLn("}")
+		v.targetFile.WriteRune('}')
+		v.targetFile.WriteString(v.newline)
 	} else {
 		// Most common scenario with expression switches
 		v.writeOutput("switch (%s) {%s", TrueMarker, v.newline)
 
-		for _, caseClause := range caseClauses {
+		for i, caseClause := range caseClauses {
+			if i > 0 {
+				v.targetFile.WriteString(v.newline)
+			}
+
 			if caseClause.List == nil {
-				v.writeOutput("default:")
+				v.writeOutput("default: {")
 			} else {
 				// Use pattern match when all case list expressions are
 				// use comparison operators and the same target
@@ -308,7 +318,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					}
 
 					if i == caseClauseCount-1 {
-						v.targetFile.WriteRune(':')
+						v.targetFile.WriteString(": {")
 					}
 				}
 			}
@@ -326,9 +336,11 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			}
 
 			v.indentLevel--
+			v.writeOutput("}")
 		}
 
-		v.writeOutputLn("}")
+		v.targetFile.WriteRune('}')
+		v.targetFile.WriteString(v.newline)
 	}
 
 	// Close any locally scoped declared variable sub-block

@@ -27,13 +27,14 @@ internal static void fibonacci(channel<nint> f, channel<nint> quit) {
     nint y = 1;
     while (ᐧ) {
         switch (select(f.ᐸꟷ(x, ꓸꓸꓸ), ᐸꟷ(quit, ꓸꓸꓸ))) {
-        case 0:
+        case 0: {
             (x, y) = (y, x + y);
             break;
-        case 1 when quit.ꟷᐳ(out _):
+        }
+        case 1 when quit.ꟷᐳ(out _): {
             fmt.Println("quit");
             return;
-        }
+        }}
     }
 }
 
@@ -102,39 +103,46 @@ internal static void Main() {
     goǃ(g2, ch4);
     for (nint i = 0; i < 4; i++) {
         switch (select(ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
-        case 0 when ch1.ꟷᐳ(out var v1):
+        case 0 when ch1.ꟷᐳ(out var v1): {
             fmt.Println("Got: ", v1);
-            break;
-        case 1 when ch2.ꟷᐳ(out var v1):
-            fmt.Println("Got: ", v1);
-            break;
-        case 2 when ch3.ꟷᐳ(out var v1, out var okΔ1):
-            fmt.Println("OK: ", okΔ1, " -- got: ", v1);
-            break;
-        case 3 when ch4.ꟷᐳ(out a[f()]):
-            fmt.Println("Got: ", a[f()]);
             break;
         }
+        case 1 when ch2.ꟷᐳ(out var v1): {
+            fmt.Println("Got: ", v1);
+            break;
+        }
+        case 2 when ch3.ꟷᐳ(out var v1, out var okΔ1): {
+            fmt.Println("OK: ", okΔ1, " -- got: ", v1);
+            break;
+        }
+        case 3 when ch4.ꟷᐳ(out a[f()]): {
+            fmt.Println("Got: ", a[f()]);
+            break;
+        }}
     }
     ch1 = default!;
     close(ch2);
     switch (select(ch1.ᐸꟷ(1, ꓸꓸꓸ), ᐸꟷ(ch1, ꓸꓸꓸ), ᐸꟷ(ch2, ꓸꓸꓸ), ᐸꟷ(ch3, ꓸꓸꓸ), ᐸꟷ(ch4, ꓸꓸꓸ))) {
-    case 0:
+    case 0: {
         fmt.Println("unexpected send to nil channel");
         break;
-    case 1 when ch1.ꟷᐳ(out var v1):
+    }
+    case 1 when ch1.ꟷᐳ(out var v1): {
         fmt.Println("unexpected received from nil channel: ", v1);
         break;
-    case 2 when ch2.ꟷᐳ(out var v1):
+    }
+    case 2 when ch2.ꟷᐳ(out var v1): {
         fmt.Println("closed channel 2 selected immediately: ", v1);
         break;
-    case 3 when ch3.ꟷᐳ(out var v1, out var okΔ2):
+    }
+    case 3 when ch3.ꟷᐳ(out var v1, out var okΔ2): {
         fmt.Println("unexpected: OK: ", okΔ2, " -- got: ", v1);
         break;
-    case 4 when ch4.ꟷᐳ(out a[f()]):
+    }
+    case 4 when ch4.ꟷᐳ(out a[f()]): {
         fmt.Println("unexpected: ", a[f()]);
         break;
-    }
+    }}
     var s = new nint[]{7, 2, 8, -9, 4, 0}.slice();
     var c = new channel<nint>(1);
     goǃ(sum, s[..(int)(len(s) / 2)], c);

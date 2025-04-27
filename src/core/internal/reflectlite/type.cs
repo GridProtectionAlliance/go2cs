@@ -256,13 +256,14 @@ internal static @string Name(this rtype t) {
     nint sqBrackets = 0;
     while (i >= 0 && (s[i] != (rune)'.' || sqBrackets != 0)) {
         switch (s[i]) {
-        case (rune)']':
+        case (rune)']': {
             sqBrackets++;
             break;
-        case (rune)'[':
+        }
+        case (rune)'[': {
             sqBrackets--;
             break;
-        }
+        }}
 
         i--;
     }

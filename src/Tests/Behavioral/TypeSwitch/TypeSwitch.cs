@@ -7,21 +7,26 @@ partial class main_package {
 internal static void Main() {
     var whatAmI = (any i) => {
         switch (i.type()) {
-        case bool t:
+        case bool t: {
             fmt.Println("I'm a bool");
             break;
-        case nint t:
+        }
+        case nint t: {
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;
-        case int32 t:
+        }
+        case int32 t: {
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;
-        case int64 t:
+        }
+        case int64 t: {
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;
-        case uint64 t:
+        }
+        case uint64 t: {
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;
+        }
         default: {
             var t = i.type();
             fmt.Printf("Don't know type %T\n"u8, t);

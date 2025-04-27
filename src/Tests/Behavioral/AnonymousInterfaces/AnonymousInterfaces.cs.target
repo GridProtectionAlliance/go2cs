@@ -11,9 +11,10 @@ partial class main_package {
 
 internal static void testTypeSwitch(error err) {
     switch (err.type()) {
-    case {} Δx when Δx._<testTypeSwitch_type>(out var x):
+    case {} Δx when Δx._<testTypeSwitch_type>(out var x): {
         fmt.Println("TypeSwitch: Unwrap =", x.Unwrap());
         break;
+    }
     default: {
         var x = err.type();
         fmt.Println("TypeSwitch: No match");

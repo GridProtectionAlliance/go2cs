@@ -127,8 +127,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	v.targetFile.WriteString(v.newline)
 
 	for i, comClause := range comClauses {
+		if i > 0 {
+			v.targetFile.WriteString(v.newline)
+		}
+
 		if comClause.Comm == nil {
-			v.writeOutput("default:")
+			v.writeOutput("default: {")
 		} else {
 			v.writeOutput("case ")
 
@@ -210,7 +214,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 				}
 			}
 
-			v.targetFile.WriteString(":")
+			v.targetFile.WriteString(": {")
 		}
 
 		v.indentLevel++
@@ -226,7 +230,8 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 		}
 
 		v.indentLevel--
+		v.writeOutput("}")
 	}
 
-	v.writeOutput("}")
+	v.targetFile.WriteRune('}')
 }
