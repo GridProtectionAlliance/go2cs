@@ -16,7 +16,6 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
 		targetTypeName = convertToCSTypeName(targetTypeName)
-
 		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
 		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
@@ -234,6 +233,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	funcTypeName := v.getTypeName(funcType, true)
 	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune"
 
+	if len(callExpr.Args) == 1 {
+		argTypeName := v.getExprTypeName(callExpr.Args[0], true)
+
+		if argTypeName == "unsafe.Pointer" {
+			lambdaContext.isPointerCast = true
+		}
+	}
+
 	funcName := v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
 
 	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases
@@ -281,7 +288,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
 		result = fmt.Sprintf("%s%s", constructType, funcName)
 	} else {
-		result = fmt.Sprintf("%s%s(%s)", constructType, funcName, v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext))
+		expr := v.convExprList(callExpr.Args, callExpr.Lparen, callExprContext)
+
+		if strings.HasSuffix(funcName, "(uintptr)") && strings.HasPrefix(expr, "(uintptr)") {
+			// Remove redundant cast to uintptr
+			expr = expr[9:]
+		}
+
+		result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
 	}
 
 	// Check each argument for implicit conversions
@@ -318,46 +332,113 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 			argType = ptrType.Elem()
 		}
 
-		if _, ok := argType.Underlying().(*types.Struct); ok {
-			if targetTypeIsPointer {
-				// Dereference target type when casting to pointer types,
-				// in C# implicit casting operator requires the target type
-				// to be a direct type, not a pointer type
-				expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
-			}
-
-			argTypeName := v.getCSTypeName(argType)
-
-			if argTypeName != targetTypeName {
-				// If both funcType and argType are distinct structs, track implicit conversions
-				packageLock.Lock()
-
-				var targetConversionsMap map[string]HashSet[string]
-
+		if !types.Identical(funcType, argType) {
+			if _, ok := argType.Underlying().(*types.Struct); ok {
 				if targetTypeIsPointer {
-					targetConversionsMap = indirectImplicitConversions
-				} else {
-					targetConversionsMap = implicitConversions
+					// Dereference target type when casting to pointer types,
+					// in C# implicit casting operator requires the target type
+					// to be a direct type, not a pointer type
+					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
 				}
 
-				var conversions HashSet[string]
-				var exists bool
+				argTypeName := v.getCSTypeName(argType)
 
-				if conversions, exists = targetConversionsMap[argTypeName]; exists {
-					conversions.Add(targetTypeName)
-				} else {
-					conversions = NewHashSet([]string{targetTypeName})
-					targetConversionsMap[argTypeName] = conversions
+				if targetTypeName != argTypeName {
+					// If both funcType and argType are distinct structs, track implicit conversions
+					packageLock.Lock()
+
+					var targetConversionsMap map[string]HashSet[string]
+
+					if targetTypeIsPointer {
+						targetConversionsMap = indirectImplicitConversions
+					} else {
+						targetConversionsMap = implicitConversions
+					}
+
+					var conversions HashSet[string]
+					var exists bool
+
+					if conversions, exists = targetConversionsMap[argTypeName]; exists {
+						conversions.Add(targetTypeName)
+					} else {
+						conversions = NewHashSet([]string{targetTypeName})
+						targetConversionsMap[argTypeName] = conversions
+					}
+
+					packageLock.Unlock()
+
+					v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
+				}
+			}
+		}
+	}
+
+	// Check if the function type is an aliased numeric type
+	if ok, _ := isAliasedNumericType(funcType); ok {
+		// Check if argType is a pointer type
+		if ptrType, ok := argType.(*types.Pointer); ok {
+			argType = ptrType.Elem()
+		}
+
+		if !types.Identical(funcType, argType) {
+			// Check if the arg type is an aliased numeric type
+			if ok, valueTypeName := isAliasedNumericType(argType); ok {
+				if targetTypeIsPointer {
+					// Dereference target type when casting to pointer types,
+					// in C# implicit casting operator requires the target type
+					// to be a direct type, not a pointer type
+					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
 				}
 
-				packageLock.Unlock()
+				argTypeName := v.getCSTypeName(argType)
 
-				v.addImplicitSubStructConversions(argType, targetTypeName, targetTypeIsPointer)
+				if targetTypeName != argTypeName {
+					if strings.Contains(argTypeName, ".") || strings.Contains(argTypeName, TypeAliasDot) {
+						valueTypeName = fmt.Sprintf("imported:%s", valueTypeName)
+						targetTypeName, argTypeName = argTypeName, targetTypeName
+					}
+
+					// If both funcType and argType are both aliased numeric types, track value conversions
+					packageLock.Lock()
+
+					var targetConversionsMap map[string]map[string]string
+
+					if targetTypeIsPointer {
+						targetConversionsMap = indirectNumericConversions
+					} else {
+						targetConversionsMap = numericConversions
+					}
+
+					var conversions map[string]string
+					var exists bool
+
+					if conversions, exists = targetConversionsMap[argTypeName]; exists {
+						conversions[targetTypeName] = valueTypeName
+					} else {
+						conversions = make(map[string]string)
+						conversions[targetTypeName] = valueTypeName
+						targetConversionsMap[argTypeName] = conversions
+					}
+
+					packageLock.Unlock()
+				}
 			}
 		}
 	}
 
 	return expr
+}
+
+func isAliasedNumericType(targetType types.Type) (bool, string) {
+	if aliasedType, ok := targetType.(*types.Alias); ok {
+		underlyingType := aliasedType.Underlying()
+		return isNumericType(underlyingType), convertToCSTypeName(underlyingType.String())
+	} else if namedType, ok := targetType.(*types.Named); ok {
+		underlyingType := namedType.Underlying()
+		return isNumericType(underlyingType), convertToCSTypeName(underlyingType.String())
+	}
+
+	return false, ""
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

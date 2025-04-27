@@ -13,6 +13,7 @@ internal class ImplicitConvTemplate : TemplateBase
     public required string TargetTypeName;
     public required bool Inverted;
     public required bool Indirect;
+    public required string? ValueType;
     public required List<(string typeName, string memberName)> StructMembers;
 
     public override string TemplateBody =>
@@ -44,7 +45,9 @@ internal class ImplicitConvTemplate : TemplateBase
         }
     }
 
-    private string ParamList => string.Join(", ", StructMembers.Select(GetParamExpr));
+    private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
+        string.Join(", ", StructMembers.Select(GetParamExpr)) : 
+        $"({ValueType})src.val";
 
     private string GetParamExpr((string, string) member)
     {

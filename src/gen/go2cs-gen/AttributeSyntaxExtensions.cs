@@ -39,7 +39,6 @@ public static class AttributeSyntaxExtensions
         )).ToArray();
     }
 
-
     public static (ITypeSymbol? typeArg1, ITypeSymbol? typeArg2) Get2GenericTypeArguments(this AttributeSyntax attributeSyntax, GeneratorSyntaxContext context)
     {
         // Check if the attribute type is generic

@@ -7,8 +7,6 @@ internal static class IArrayTypeTemplate
     public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize) =>
         $$"""
                 
-                private array<uint8> val => m_value ??= new array<uint8>(2);
-        
                 public {{targetTypeName}}[] Source => val;
                 
                 public nint Length => val.Length;

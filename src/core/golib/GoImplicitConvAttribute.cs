@@ -54,4 +54,12 @@ public class GoImplicitConvAttribute<TSource, TTarget> : Attribute
     /// Implicit C# conversion operators require one of the parameters to be the source instance.
     /// </remarks>
     public bool Indirect { get; set; }
+
+    /// <summary>
+    /// Gets or sets the value type of the target type.
+    /// </summary>
+    /// <remarks>
+    /// If value is defined, conversion is from one aliased type to another.
+    /// </remarks>
+    public string? ValueType { get; set; }
 }

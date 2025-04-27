@@ -218,6 +218,8 @@ var interfaceInheritances map[string]HashSet[string]
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
 var indirectImplicitConversions map[string]HashSet[string]
+var numericConversions map[string]map[string]string
+var indirectNumericConversions map[string]map[string]string
 var nameCollisions map[string]bool
 var initFuncCounter int
 var usesUnsafeCode bool
@@ -407,6 +409,8 @@ Examples:
 		implicitConversions = make(map[string]HashSet[string])
 		invertedImplicitConversions = make(map[string]HashSet[string])
 		indirectImplicitConversions = make(map[string]HashSet[string])
+		numericConversions = make(map[string]map[string]string)
+		indirectNumericConversions = make(map[string]map[string]string)
 		nameCollisions = make(map[string]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
@@ -772,6 +776,38 @@ Examples:
 			for sourceType, targetTypes := range indirectImplicitConversions {
 				for targetType := range targetTypes {
 					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
+				}
+			}
+
+			// Add new numeric conversions to package info file (maps ensure uniqueness)
+			for sourceType, targetTypes := range numericConversions {
+				for targetType, valueType := range targetTypes {
+					var inverted bool
+
+					if strings.HasPrefix(valueType, "imported:") {
+						valueType = strings.TrimPrefix(valueType, "imported:")
+						inverted = false
+					} else {
+						inverted = true
+					}
+
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, ValueType = \"%s\")]", sourceType, targetType, inverted, valueType))
+				}
+			}
+
+			// Add new indirect numeric conversions to package info file (maps ensure uniqueness)
+			for sourceType, targetTypes := range indirectNumericConversions {
+				for targetType, valueType := range targetTypes {
+					var inverted bool
+
+					if strings.HasPrefix(valueType, "imported:") {
+						valueType = strings.TrimPrefix(valueType, "imported:")
+						inverted = false
+					} else {
+						inverted = true
+					}
+
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, Indirect = true, ValueType = \"%s\")]", sourceType, targetType, inverted, valueType))
 				}
 			}
 
@@ -1452,6 +1488,13 @@ func isPointer(t types.Type) bool {
 	exprType := t.Underlying()
 
 	_, isPointer := exprType.(*types.Pointer)
+
+	// Also check for an unsafe.Pointer
+	if !isPointer {
+		if basic, ok := t.(*types.Basic); ok {
+			isPointer = basic.Kind() == types.UnsafePointer
+		}
+	}
 
 	return isPointer
 }

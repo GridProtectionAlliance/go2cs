@@ -37,6 +37,12 @@ internal class InheritedTypeTemplate : TemplateBase
         _ => ""
     };
 
+    private string ValueGetter => TypeClass switch
+    {
+        "Array" => $"m_value ??= new {TypeName}({TargetTypeSize ?? "0"})",
+        _ => "m_value"
+    };
+
     private string Value => TypeClass switch
     {
         "Array" => "val", // Null-coalescing property auto-creates array on first reference
@@ -65,6 +71,8 @@ internal class InheritedTypeTemplate : TemplateBase
                 public {{ObjectName}}({{TypeName}} value) => m_value = value;
 
                 public {{ObjectName}}(NilType _) => m_value = default!;
+
+                public {{TypeName}} val => {{ValueGetter}};
                 
                 public override string ToString() => {{ToStringImplementation}};
         

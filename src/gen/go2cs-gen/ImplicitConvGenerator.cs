@@ -87,16 +87,28 @@ public class ImplicitConvGenerator : ISourceGenerator
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
             bool inverted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Inverted")).value?.Trim() ?? "false");
             bool indirect = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Indirect")).value?.Trim() ?? "false");
+            string? valueType = arguments.FirstOrDefault(arg => arg.name.Equals("ValueType")).value?.Trim();
 
-            StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
+            List<(string typeName, string memberName)> structMembers;
 
-            if (structDeclaration is null)
-                throw new InvalidOperationException($"Unable to find struct declaration named \"{targetTypeName}\"");
+            if (string.IsNullOrWhiteSpace(valueType))
+            {
+                StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
 
-            List<(string typeName, string memberName)> structMembers = structDeclaration
-                .GetStructMembers(context, true)
-                .Select(member => (member.typeName, member.memberName))
-                .ToList();
+                if (structDeclaration is null)
+                    throw new InvalidOperationException($"Unable to find struct declaration named \"{targetTypeName}\"");
+
+                structMembers = structDeclaration
+                    .GetStructMembers(context, true)
+                    .Select(member => (member.typeName, member.memberName))
+                    .ToList();
+            }
+            else
+            {
+                valueType = valueType![1..^1];
+                structMembers = [];
+                targetTypeName = targetType.GetFullTypeName(true);
+            }
 
             string generatedSource = new ImplicitConvTemplate
             {
@@ -106,13 +118,14 @@ public class ImplicitConvGenerator : ISourceGenerator
                 TargetTypeName = targetTypeName,
                 Inverted = inverted,
                 Indirect = indirect,
+                ValueType = valueType,
                 StructMembers = structMembers,
                 UsingStatements = usingStatements
             }
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}.g.cs"), generatedSource);
+            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs"), generatedSource);
         }
     }
 
