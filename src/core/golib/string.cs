@@ -556,10 +556,7 @@ public readonly struct @string :
 
     private static bool BytesAreEqual(byte[] data1, byte[] data2)
     {
-        if (data1 == data2)
-            return true;
-
-        return data1.Length == data2.Length && new ReadOnlySpan<byte>(data1).SequenceEqual(new ReadOnlySpan<byte>(data2));
+        return data1 == data2 || new ReadOnlySpan<byte>(data1).SequenceEqual(new ReadOnlySpan<byte>(data2));
     }
 
     private const rune RuneReplacementChar = 0xFFFD;

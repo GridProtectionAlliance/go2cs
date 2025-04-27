@@ -201,7 +201,7 @@ public static class TypeExtensions
     /// <returns>Object pointer value as string in hexadecimal format.</returns>
     public static string PrintPointer<T>(this ж<T> ptr)
     {
-        return ptr.val.PrintPointer();
+        return ptr == nil ? "<nil>" : ptr.val.PrintPointer();
     }
 
     /// <summary>

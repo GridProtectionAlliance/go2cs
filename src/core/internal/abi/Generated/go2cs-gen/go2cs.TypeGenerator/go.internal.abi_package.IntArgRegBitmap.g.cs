@@ -57,6 +57,8 @@ public static partial class abi_package
         public IntArgRegBitmap(array<uint8> value) => m_value = value;
 
         public IntArgRegBitmap(NilType _) => m_value = default!;
+
+        public array<uint8> val => m_value;
         
         public override string ToString() => val.ToString();
 

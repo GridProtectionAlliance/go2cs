@@ -27,6 +27,8 @@ public static partial class main_package
         public main_MyBool(bool value) => m_value = value;
 
         public main_MyBool(NilType _) => m_value = default!;
+
+        public bool val => m_value;
         
         public override string ToString() => m_value.ToString().ToLowerInvariant();
 

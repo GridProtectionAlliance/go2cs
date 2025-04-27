@@ -13,12 +13,14 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	basicLitContext := DefaultBasicLitContext()
 	basicLitContext.u8StringOK = v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
 
-	identContext.isPointer = isPointer(rhsType)
+	rhsIsPointer := isPointer(rhsType)
+	identContext.isPointer = rhsIsPointer
 	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
 
 	binaryOp := binaryExpr.Op.String()
 
-	identContext.isPointer = isPointer(lhsType)
+	lhsIsPointer := isPointer(lhsType)
+	identContext.isPointer = lhsIsPointer
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
 	if !context.usePattenMatch {
@@ -27,12 +29,12 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		if binaryOp == "==" || binaryOp == "!=" {
 			lhsIsInterface, isEmpty := isInterface(lhsType)
 
-			if lhsIsInterface && !isEmpty && isPointer(rhsType) {
+			if lhsIsInterface && !isEmpty && rhsIsPointer {
 				rightOperand = fmt.Sprintf("%s%s", PointerDerefOp, rightOperand)
 			} else {
 				rhsIsInterface, isEmpty := isInterface(rhsType)
 
-				if rhsIsInterface && !isEmpty && isPointer(lhsType) {
+				if rhsIsInterface && !isEmpty && lhsIsPointer {
 					leftOperand = fmt.Sprintf("%s%s", PointerDerefOp, leftOperand)
 				}
 

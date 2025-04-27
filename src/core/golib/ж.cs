@@ -112,7 +112,13 @@ public interface IPointer<T>
     /// <summary>
     /// Gets a reference to the value of type <typeparamref name="T"/>.
     /// </summary>
+    /// <exception cref="PanicException">runtime error: invalid memory address or nil pointer dereference</exception>
     ref T val { get; }
+
+    /// <summary>
+    /// Gets flag indicating if the pointer is null.
+    /// </summary>
+    bool IsNull { get; }
 
     /// <summary>
     /// Gets a pointer to the field of a struct.
@@ -172,6 +178,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 {
     private readonly (object, FieldRefFunc<T>)? m_structFieldRef;
     private readonly (IArray, int)? m_arrayIndexRef;
+    private readonly bool m_isNull;
     private T m_val;
 
     /// <summary>
@@ -201,12 +208,16 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// Creates a new pointer from a nil value.
     /// </summary>
     /// <param name="_"></param>
-    public ж(NilType _) : this(default(T)!) { }
+    public ж(NilType _)
+    {
+        m_val = default!;
+        m_isNull = true;
+    }
 
     /// <summary>
-    /// Creates a new pointer.
+    /// Creates a new nil pointer.
     /// </summary>
-    public ж() : this(default(T)!) { }
+    public ж() : this(nil) { }
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get reference to value, source is not a valid array or slice pointer.</exception>
@@ -216,7 +227,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         {
             // Get reference to standard pointer value
             if (m_structFieldRef is null && m_arrayIndexRef is null)
-                return ref m_val;
+            {
+                if (IsNull)
+                    throw RuntimeErrorPanic.NilPointerDereference();
+                
+                return ref m_val!;
+            }
 
             // Get reference to struct field
             if (m_structFieldRef is not null)
@@ -235,6 +251,9 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         }
     }
 
+    /// <inheritdoc/>
+    public bool IsNull => m_isNull || m_val is null;
+
     /// <summary>
     /// Gets a pinned pointer to the value of type <typeparamref name="T"/>.
     /// </summary>
@@ -244,7 +263,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         {
             // Get reference to standard pointer value
             if (m_structFieldRef is null && m_arrayIndexRef is null)
+            {
+                if (IsNull)
+                    throw RuntimeErrorPanic.NilPointerDereference();
+                
                 return new PinnedBuffer(val, Marshal.SizeOf<T>());
+            }
 
             // Get reference to struct field
             if (m_structFieldRef is not null)
@@ -279,7 +303,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         ref TElem getFieldRef(object structPtr)
         {
             ж<T> typedPtr = (ж<T>)structPtr;
-            return ref fieldRefFunc(ref typedPtr.m_val);
+            return ref fieldRefFunc(ref typedPtr.m_val!);
         }
     }
 
@@ -315,10 +339,10 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
         if (IsReferenceType)
         {
-            if (m_val is null && other.m_val is null)
+            if (IsNull && other.IsNull)
                 return true;
 
-            if (m_val is null || other.m_val is null)
+            if (IsNull || other.IsNull)
                 return false;
 
             if (ReferenceEquals(m_val, other.m_val))
@@ -364,11 +388,17 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <returns>Dereferenced pointer value.</returns>
     public static T operator ~(ж<T> value)
     {
+        if (value.IsNull)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
         return value.m_val;
     }
 
     static T IPointer<T>.operator ~(IPointer<T> value)
     {
+        if (value.IsNull)
+            throw RuntimeErrorPanic.NilPointerDereference();
+
         return value.val;
     }
 
@@ -393,7 +423,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     // Enable comparisons between nil and ж<T> instance
     public static bool operator ==(ж<T>? value, NilType _)
     {
-        return value is null;
+        return value?.IsNull ?? true;
     }
 
     public static bool operator !=(ж<T>? value, NilType nil)
@@ -409,6 +439,11 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     public static bool operator !=(NilType nil, ж<T>? value)
     {
         return value != nil;
+    }
+
+    public static implicit operator ж<T>(NilType _)
+    {
+        return new ж<T>(nil);
     }
 
     public static unsafe implicit operator ж<T>(uintptr value)

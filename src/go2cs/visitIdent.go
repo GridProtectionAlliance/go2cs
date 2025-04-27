@@ -75,7 +75,8 @@ func isNumericType(typ types.Type) bool {
 
 		return kind == types.Int || kind == types.Int8 || kind == types.Int16 || kind == types.Int32 || kind == types.Int64 ||
 			kind == types.Uint || kind == types.Uint8 || kind == types.Uint16 || kind == types.Uint32 || kind == types.Uint64 ||
-			kind == types.Float32 || kind == types.Float64 || kind == types.Complex64 || kind == types.Complex128
+			kind == types.Float32 || kind == types.Float64 || kind == types.Complex64 || kind == types.Complex128 ||
+			kind == types.Uintptr || kind == types.UnsafePointer
 	}
 
 	return false

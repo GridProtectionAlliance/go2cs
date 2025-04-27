@@ -116,7 +116,7 @@ public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
 
 public static ж<Type> TypeOf(any a) {
     var eface = ~(ж<EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(a)));
-    return (ж<Type>)((uintptr)NoEscape(new @unsafe.Pointer(eface.Type)));
+    return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
 }
 
 public static ж<Type> TypeFor<T>()
@@ -142,11 +142,11 @@ public static ж<Type> TypeFor<T>()
 [GoRecv] public static ж<Type> Elem(this ref Type t) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
-        var tt = (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
     if (exprᴛ1 == Map) {
-        var tt = (ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
 
@@ -169,7 +169,7 @@ public static ж<Type> TypeFor<T>()
     if (t.Kind() != Map) {
         return default!;
     }
-    return (ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoType] partial struct ΔArrayType {
@@ -183,7 +183,7 @@ public static ж<Type> TypeFor<T>()
     if (t.Kind() != Array) {
         return default!;
     }
-    return (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 internal static void Main() {

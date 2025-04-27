@@ -203,7 +203,15 @@ unsafe partial class unsafe_package  {
 //	hdr.Data = uintptr(unsafe.Pointer(p))
 //	hdr.Len = n
 //	s := *(*string)(unsafe.Pointer(&hdr)) // p possibly already lost
-public class Pointer(uintptr value) : ж<uintptr>(value) {
+public class Pointer : ж<uintptr> {
+    public Pointer(uintptr value) : base(value)
+    {
+    }
+
+    public Pointer(NilType _) : base(nil)
+    {
+    }
+
     public Pointer this[int index] => val + (uintptr)index;
 
     public Pointer this[nint index] => val + (uintptr)index;
@@ -217,6 +225,32 @@ public class Pointer(uintptr value) : ж<uintptr>(value) {
 
             return val + (uintptr)range.Start.Value;
         }
+    }
+
+    // Enable comparisons between nil and ж<T> instance
+    public static bool operator ==(Pointer? value, NilType _)
+    {
+        return value?.IsNull ?? true;
+    }
+
+    public static bool operator !=(Pointer? value, NilType nil)
+    {
+        return !(value == nil);
+    }
+
+    public static bool operator ==(NilType nil, Pointer? value)
+    {
+        return value == nil;
+    }
+
+    public static bool operator !=(NilType nil, Pointer? value)
+    {
+        return value != nil;
+    }
+    
+    public static implicit operator Pointer(NilType _)
+    {
+        return new Pointer(nil);
     }
 
     public static implicit operator Pointer(uintptr value) {

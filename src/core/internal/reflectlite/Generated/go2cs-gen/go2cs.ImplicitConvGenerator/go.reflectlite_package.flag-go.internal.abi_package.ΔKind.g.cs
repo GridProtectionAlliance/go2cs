@@ -16,10 +16,10 @@ using global::go;
 
 namespace go;
 
-public static partial class main_package
+public static partial class reflectlite_package
 {
-    partial struct main_anonPerson
+    partial struct flag
     {
-        public static implicit operator processAnonymousStruct_data(main_anonPerson src) => new processAnonymousStruct_data(src.Name, src.Age);
+        public static implicit operator go.@internal.abi_package.ΔKind(flag src) => new go.@internal.abi_package.ΔKind((uint8)src.val);
     }    
 }

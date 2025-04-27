@@ -65,6 +65,8 @@ public static partial class unsafe_package
         public ArbitraryType(nint value) => m_value = value;
 
         public ArbitraryType(NilType _) => m_value = default!;
+
+        public nint val => m_value;
         
         public override string ToString() => m_value.ToString();
 

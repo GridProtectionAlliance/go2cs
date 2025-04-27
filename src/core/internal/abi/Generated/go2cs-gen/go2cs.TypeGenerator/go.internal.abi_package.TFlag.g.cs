@@ -61,6 +61,8 @@ public static partial class abi_package
         public TFlag(uint8 value) => m_value = value;
 
         public TFlag(NilType _) => m_value = default!;
+
+        public uint8 val => m_value;
         
         public override string ToString() => m_value.ToString();
 

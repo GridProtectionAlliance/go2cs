@@ -53,7 +53,8 @@ using static go.@internal.reflectlite_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<flag, Kind>]
+[assembly: GoImplicitConv<flag, Kind>(Inverted = true, ValueType = "uintptr")]
+[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 // </ImplicitConversions>
 
 namespace go.@internal;

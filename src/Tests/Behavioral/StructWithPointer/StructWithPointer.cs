@@ -12,9 +12,9 @@ partial class main_package {
 }
 
 internal static void Main() {
-    var red = new ColorList(2, "red", default!, default!);
+    var red = new ColorList(2, "red", nil, nil);
     ref var blue = ref heap<ColorList>(out var Ꮡblue);
-    blue = new ColorList(2, "blue", default!, default!);
+    blue = new ColorList(2, "blue", nil, nil);
     red.Next = Ꮡblue;
     fmt.Printf("Value of red = %v\n"u8, red);
     fmt.Printf("Value of blue = %v\n"u8, blue);

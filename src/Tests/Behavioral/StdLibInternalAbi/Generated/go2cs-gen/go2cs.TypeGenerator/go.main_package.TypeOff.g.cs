@@ -60,6 +60,8 @@ public static partial class main_package
         public TypeOff(int32 value) => m_value = value;
 
         public TypeOff(NilType _) => m_value = default!;
+
+        public int32 val => m_value;
         
         public override string ToString() => m_value.ToString();
 

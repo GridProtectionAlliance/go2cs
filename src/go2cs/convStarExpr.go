@@ -24,12 +24,15 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 
 	// Special handling for field access (e.g., outer.ptr)
 	if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
-		pointerDepth := v.getSelectorExprPointerDepth(selectorExpr)
 		baseExpr := v.convExpr(starExpr.X, nil)
+		pointerDepth := v.getSelectorExprPointerDepth(selectorExpr)
 
 		// For multi-level pointers, we need to add enough .val
 		if pointerDepth > 1 {
 			baseExpr += ".val"
+		} else if _, ok := v.getIdentType(selectorExpr.Sel).(*types.Pointer); !ok {
+			// Selector is not a pointer, assume this is a pointer cast operation
+			return fmt.Sprintf("%s<%s>", PointerPrefix, baseExpr)
 		}
 
 		return baseExpr + ".val"

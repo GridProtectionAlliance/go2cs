@@ -114,7 +114,7 @@ public static readonly abiꓸKind Struct = /* abi.Struct */ 25;
 }
 
 internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
-    return (ж<byte>)((uintptr)add(new @unsafe.Pointer(n.bytes), ((uintptr)off), whySafe));
+    return (ж<byte>)(uintptr)(add(new @unsafe.Pointer(n.bytes), ((uintptr)off), whySafe));
 }
 
 internal static bool isExported(this Δname n) {
@@ -172,8 +172,8 @@ internal static @string pkgPath(abiꓸName n) {
     ref var nameOff = ref heap(new int32(), out var ᏑnameOff);
     // Note that this field may not be aligned in memory,
     // so we cannot use a direct int32 assignment here.
-    copy((ж<array<byte>>)(new @unsafe.Pointer(ᏑnameOff))[..], (ж<array<byte>>)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
-    var pkgPathName = new Δname((ж<byte>)((uintptr)resolveTypeOff(new @unsafe.Pointer(n.Bytes), nameOff)));
+    copy((ж<array<byte>>)(uintptr)(new @unsafe.Pointer(ᏑnameOff))[..], (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(n.DataChecked(off, "name offset field"u8)))[..]);
+    var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(new @unsafe.Pointer(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
 
@@ -197,11 +197,11 @@ internal static partial @unsafe.Pointer resolveNameOff(@unsafe.Pointer ptrInModu
 internal static partial @unsafe.Pointer resolveTypeOff(@unsafe.Pointer rtype, int32 off);
 
 internal static abiꓸName nameOff(this rtype t, nameOff off) {
-    return new abiꓸName(Bytes: (ж<byte>)((uintptr)resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
+    return new abiꓸName(Bytes: (ж<byte>)(uintptr)(resolveNameOff(new @unsafe.Pointer(t.Type), ((int32)off))));
 }
 
 internal static ж<abi.Type> typeOff(this rtype t, typeOff off) {
-    return (abi.Type.val)((uintptr)resolveTypeOff(new @unsafe.Pointer(t.Type), ((int32)off)));
+    return (ж<abi.Type>)(uintptr)(resolveTypeOff(new @unsafe.Pointer(t.Type), ((int32)off)));
 }
 
 internal static ж<uncommonType> uncommon(this rtype t) {
@@ -272,7 +272,7 @@ internal static @string Name(this rtype t) {
 internal static rtype toRType(ж<abi.Type> Ꮡt) {
     ref var t = ref Ꮡt.val;
 
-    return new rtype(t);
+    return new rtype(Ꮡt);
 }
 
 internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
@@ -412,7 +412,7 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     // the quadratic time  a naive search would require.
     // See also ../runtime/iface.go.
     if (V.Kind() == Interface) {
-        var vΔ1 = (ж<interfaceType>)(new @unsafe.Pointer(V));
+        var vΔ1 = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(V));
         nint iΔ1 = 0;
         for (nint jΔ1 = 0; jΔ1 < len((~v).Methods); jΔ1++) {
             var tm = Ꮡ((~t).Methods, iΔ1);
@@ -544,8 +544,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
  V.Elem(), cmpTags);
     }
     if (exprᴛ1 == abi.Func) {
-        var t = (ж<funcType>)(new @unsafe.Pointer(T));
-        var v = (ж<funcType>)(new @unsafe.Pointer(V));
+        var t = (ж<funcType>)(uintptr)(new @unsafe.Pointer(T));
+        var v = (ж<funcType>)(uintptr)(new @unsafe.Pointer(V));
         if ((~t).OutCount != (~v).OutCount || (~t).InCount != (~v).InCount) {
             return false;
         }
@@ -562,8 +562,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         return true;
     }
     if (exprᴛ1 == Interface) {
-        var t = (ж<interfaceType>)(new @unsafe.Pointer(T));
-        var v = (ж<interfaceType>)(new @unsafe.Pointer(V));
+        var t = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(T));
+        var v = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(V));
         if (len((~t).Methods) == 0 && len((~v).Methods) == 0) {
             return true;
         }
@@ -578,8 +578,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         return haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
     }
     if (exprᴛ1 == abi.Struct) {
-        var t = (ж<structType>)(new @unsafe.Pointer(T));
-        var v = (ж<structType>)(new @unsafe.Pointer(V));
+        var t = (ж<structType>)(uintptr)(new @unsafe.Pointer(T));
+        var v = (ж<structType>)(uintptr)(new @unsafe.Pointer(V));
         if (len((~t).Fields) != len((~v).Fields)) {
             return false;
         }

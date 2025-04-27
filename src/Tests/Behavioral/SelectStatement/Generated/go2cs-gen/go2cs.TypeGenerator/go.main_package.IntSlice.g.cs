@@ -70,6 +70,8 @@ public static partial class main_package
         public IntSlice(slice<nint> value) => m_value = value;
 
         public IntSlice(NilType _) => m_value = default!;
+
+        public slice<nint> val => m_value;
         
         public override string ToString() => m_value.ToString();
 

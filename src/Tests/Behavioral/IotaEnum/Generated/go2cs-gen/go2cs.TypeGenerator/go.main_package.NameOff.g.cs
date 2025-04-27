@@ -60,6 +60,8 @@ public static partial class main_package
         public NameOff(int32 value) => m_value = value;
 
         public NameOff(NilType _) => m_value = default!;
+
+        public int32 val => m_value;
         
         public override string ToString() => m_value.ToString();
 

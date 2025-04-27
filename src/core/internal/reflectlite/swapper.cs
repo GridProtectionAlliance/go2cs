@@ -77,7 +77,7 @@ public static Action<nint, nint> Swapper(any Δslice) {
         }
 
     }
-    var s = (unsafeheader.Slice.val)(v.ptr);
+    var s = (ж<unsafeheader.Slice>)(uintptr)(v.ptr);
     var tmp = (uintptr)unsafe_New(typ);
     // swap scratch space
     var sʗ1 = s;

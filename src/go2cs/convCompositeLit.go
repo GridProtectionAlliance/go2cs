@@ -92,6 +92,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 								v.convertToInterfaceType(fieldType, eltType, "")
 							}
 						}
+					} else if ok := isPointer(fieldType); ok {
+						callContext.argTypeIsPtr[i] = true
 					}
 				}
 			}

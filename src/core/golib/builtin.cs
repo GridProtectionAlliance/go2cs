@@ -838,6 +838,18 @@ public static class builtin
     {
         return new ж<T>(target, index);
     }
+    
+    /// <summary>
+    /// Gets a pointer to slice or array element at <paramref name="index"/>.
+    /// </summary>
+    /// <typeparam name="T">Target type of reference.</typeparam>
+    /// <param name="target">Target value.</param>
+    /// <param name="index">Index of element.</param>
+    /// <returns>Pointer to slice or array element at <paramref name="index"/>.</returns>
+    public static ж<T> Ꮡ<T>(in IArray<T> target, nint index)
+    {
+        return new ж<T>(target, (int)index);
+    }
 
     /// <summary>
     /// Creates a new heap allocated instance of the zero value for type <typeparamref name="T"/>.

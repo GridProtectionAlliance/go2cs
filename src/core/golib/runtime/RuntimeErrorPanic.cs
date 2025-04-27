@@ -21,6 +21,9 @@
 //
 //******************************************************************************************************
 
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace go.runtime;
 
 /// <summary>
@@ -28,13 +31,15 @@ namespace go.runtime;
 /// </summary>
 public static class RuntimeErrorPanic
 {
-    private const string NilPointerDereferenceMessage = "runtime error: invalid memory address or nil pointer dereference";
+    private const string RuntimeErrorMessage = "runtime error: ";
+
+    private const string NilPointerDereferenceMessage = $"{RuntimeErrorMessage}invalid memory address or nil pointer dereference";
     public static PanicException NilPointerDereference()
     {
         return new PanicException(NilPointerDereferenceMessage);
     }
 
-    private const string IndexOutOfRangeMessage = "runtime error: index out of range [{0}] with length {1}";
+    private const string IndexOutOfRangeMessage = $"{RuntimeErrorMessage}index out of range [{{0}}] with length {{1}}";
     public static PanicException IndexOutOfRange(int64 index, int64 length)
     {
         return new PanicException(string.Format(IndexOutOfRangeMessage, index, length));

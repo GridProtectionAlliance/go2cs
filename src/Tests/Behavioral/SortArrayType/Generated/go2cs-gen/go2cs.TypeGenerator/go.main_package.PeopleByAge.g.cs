@@ -70,6 +70,8 @@ public static partial class main_package
         public PeopleByAge(slice<Person> value) => m_value = value;
 
         public PeopleByAge(NilType _) => m_value = default!;
+
+        public slice<Person> val => m_value;
         
         public override string ToString() => m_value.ToString();
 

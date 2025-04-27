@@ -105,7 +105,7 @@ internal static slice<@string> kindNames = new runtime.SparseArray<@string>{
 
 public static ж<Type> TypeOf(any a) {
     var eface = ~(ж<EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(a)));
-    return (ж<Type>)((uintptr)NoEscape(new @unsafe.Pointer(eface.Type)));
+    return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
 }
 
 public static ж<Type> TypeFor<T>()
@@ -163,14 +163,14 @@ public static ж<Type> TypeFor<T>()
     if (t.Mcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), t.Mcount);
+    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), t.Mcount);
 }
 
 [GoRecv] public static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
     if (t.Xcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), t.Xcount);
+    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), t.Xcount);
 }
 
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
@@ -191,7 +191,7 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 
 [GoRecv] public static nint Len(this ref Type t) {
     if (t.Kind() == Array) {
-        return ((nint)((ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Len);
+        return ((nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Len);
     }
     return 0;
 }
@@ -220,7 +220,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoRecv] public static ΔChanDir ChanDir(this ref Type t) {
     if (t.Kind() == Chan) {
-        var ch = (ж<ChanType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var ch = (ж<ChanType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~ch).Dir;
     }
     return InvalidDir;
@@ -272,31 +272,31 @@ public static readonly ΔChanDir InvalidDir = 0;
     }
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Struct) {
-        return Ꮡ(((ж<structTypeUncommon>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<structTypeUncommon>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Pointer) {
-        return Ꮡ(((ж<Uncommon_u>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_u>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Func) {
-        return Ꮡ(((ж<Uncommon_uᴛ1>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ1>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Slice) {
-        return Ꮡ(((ж<Uncommon_uᴛ2>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ2>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Array) {
-        return Ꮡ(((ж<Uncommon_uᴛ3>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ3>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Chan) {
-        return Ꮡ(((ж<Uncommon_uᴛ4>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ4>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Map) {
-        return Ꮡ(((ж<Uncommon_uᴛ5>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ5>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     if (exprᴛ1 == Interface) {
-        return Ꮡ(((ж<Uncommon_uᴛ6>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ6>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
     { /* default: */
-        return Ꮡ(((ж<Uncommon_uᴛ7>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ7>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
     }
 
 }
@@ -304,23 +304,23 @@ public static readonly ΔChanDir InvalidDir = 0;
 [GoRecv] public static ж<Type> Elem(this ref Type t) {
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
-        var tt = (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
     if (exprᴛ1 == Chan) {
-        var tt = (ж<ChanType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ChanType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
     if (exprᴛ1 == Map) {
-        var tt = (ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
     if (exprᴛ1 == Pointer) {
-        var tt = (ж<PtrType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<PtrType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
     if (exprᴛ1 == Slice) {
-        var tt = (ж<SliceType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<SliceType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return (~tt).Elem;
     }
 
@@ -331,35 +331,35 @@ public static readonly ΔChanDir InvalidDir = 0;
     if (t.Kind() != Struct) {
         return default!;
     }
-    return (ж<ΔStructType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔStructType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoRecv] public static ж<ΔMapType> MapType(this ref Type t) {
     if (t.Kind() != Map) {
         return default!;
     }
-    return (ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoRecv] public static ж<ΔArrayType> ArrayType(this ref Type t) {
     if (t.Kind() != Array) {
         return default!;
     }
-    return (ж<ΔArrayType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoRecv] public static ж<ΔFuncType> FuncType(this ref Type t) {
     if (t.Kind() != Func) {
         return default!;
     }
-    return (ж<ΔFuncType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔFuncType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoRecv] public static ж<ΔInterfaceType> InterfaceType(this ref Type t) {
     if (t.Kind() != Interface) {
         return default!;
     }
-    return (ж<ΔInterfaceType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+    return (ж<ΔInterfaceType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
 }
 
 [GoRecv] public static uintptr Size(this ref Type t) {
@@ -390,7 +390,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoRecv] public static nint NumMethod(this ref Type t) {
     if (t.Kind() == Interface) {
-        var tt = (ж<ΔInterfaceType>)((uintptr)@unsafe.Pointer.FromRef(ref t));
+        var tt = (ж<ΔInterfaceType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
         return tt.NumMethod();
     }
     return len(t.ExportedMethods());
@@ -434,7 +434,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoRecv] public static ж<Type> Key(this ref Type t) {
     if (t.Kind() == Map) {
-        return ((ж<ΔMapType>)((uintptr)@unsafe.Pointer.FromRef(ref t))).val.Key;
+        return ((ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Key;
     }
     return default!;
 }
@@ -474,7 +474,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     if (t.InCount == 0) {
         return default!;
     }
-    return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), t.InCount);
+    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), t.InCount);
 }
 
 [GoRecv] public static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
@@ -486,7 +486,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
     }
-    return new Span<ж<Type>>((Type**)((uintptr)addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), t.InCount + outCount);
+    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), t.InCount + outCount);
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
@@ -519,11 +519,11 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
-    return (ж<byte>)((uintptr)addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), whySafe));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), whySafe));
 }
 
 public static ж<byte> Data(this ΔName n, nint off) {
-    return (ж<byte>)((uintptr)addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), "the runtime doesn't need to give you a reason"u8));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), "the runtime doesn't need to give you a reason"u8));
 }
 
 public static bool IsExported(this ΔName n) {

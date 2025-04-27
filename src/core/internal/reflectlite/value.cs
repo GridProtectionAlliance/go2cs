@@ -54,7 +54,7 @@ partial class reflectlite_package {
     internal partial ref flag flag { get; }
 }
 
-[GoType("uintptr")] partial struct flag;
+[GoType("num:uintptr")] partial struct flag;
 
 // A method value represents a curried method invocation
 // like r.Read for some receiver r. The typ+val+flag bits describe
@@ -88,7 +88,7 @@ internal static ж<abi.Type> typ(this Value v) {
     // types, held in the central map). So there is no need to
     // escape types. noescape here help avoid unnecessary escape
     // of v.
-    return (abi.Type.val)((uintptr)abi.NoEscape(new @unsafe.Pointer(v.typ_)));
+    return (ж<abi.Type>)(uintptr)(abi.NoEscape(new @unsafe.Pointer(v.typ_)));
 }
 
 // pointer returns the underlying pointer represented by v.
@@ -98,7 +98,7 @@ internal static @unsafe.Pointer pointer(this Value v) {
         panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
-        return ~(@unsafe.Pointer.val)(uintptr)(v.ptr);
+        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
     }
     return v.ptr;
 }
@@ -107,7 +107,7 @@ internal static @unsafe.Pointer pointer(this Value v) {
 internal static any packEface(Value v) {
     var t = v.typ();
     any i = default!;
-    var e = (abi.EmptyInterface.val)(new @unsafe.Pointer(Ꮡi));
+    var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡi));
     // First, fill in the data portion of the interface.
     switch (ᐧ) {
     case {} when t.IfaceIndir():
@@ -124,7 +124,7 @@ internal static any packEface(Value v) {
         e.val.Data = ptr;
         break;
     case {} when (flag)(v.flag & flagIndir) is != 0:
-        e.val.Data = ~(@unsafe.Pointer.val)(uintptr)(v.ptr);
+        e.val.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     default:
         e.val.Data = v.ptr;
@@ -144,7 +144,7 @@ internal static any packEface(Value v) {
 
 // unpackEface converts the empty interface i to a Value.
 internal static Value unpackEface(any i) {
-    var e = (abi.EmptyInterface.val)(new @unsafe.Pointer(Ꮡ(i)));
+    var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)));
     // NOTE: don't read e.word until we know whether it is really a pointer or not.
     var t = e.val.Type;
     if (t == nil) {
@@ -154,7 +154,7 @@ internal static Value unpackEface(any i) {
     if (t.IfaceIndir()) {
         f |= (flag)(flagIndir);
     }
-    return new Value(t, (~e).Data, f);
+    return new Value(Ꮡt, (~e).Data, f);
 }
 
 // A ValueError occurs when a Value method is invoked on
@@ -235,7 +235,7 @@ public static Value Elem(this Value v) {
         if (v.typ().NumMethod() == 0){
             eface = ~(ж<any>)(uintptr)(v.ptr);
         } else {
-            eface = ((any)((ж<Elem_type>)(v.ptr).val));
+            eface = ((any)((ж<Elem_type>)(uintptr)(v.ptr).val));
         }
         var x = unpackEface(eface);
         if (x.flag != 0) {
@@ -246,17 +246,17 @@ public static Value Elem(this Value v) {
     if (exprᴛ1 == abi.Pointer) {
         var ptr = v.ptr;
         if ((flag)(v.flag & flagIndir) != 0) {
-            ptr = ~(@unsafe.Pointer.val)(uintptr)(ptr);
+            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
         }
-        if (ptr == default!) {
+        if (ptr == nil) {
             // The returned value's address is v's value.
             return new Value(nil);
         }
-        var tt = (ж<ptrType>)(new @unsafe.Pointer(v.typ()));
+        var tt = (ж<ptrType>)(uintptr)(new @unsafe.Pointer(v.typ()));
         var typ = tt.val.Elem;
         var fl = (flag)((flag)((flag)(v.flag & flagRO) | flagIndir) | flagAddr);
         fl |= (flag)(((flag)typ.Kind()));
-        return new Value(typ, ptr, fl);
+        return new Value(Ꮡtyp, ptr.val, fl);
     }
 
     panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
@@ -277,7 +277,7 @@ internal static any valueInterface(Value v) {
         if (v.numMethod() == 0) {
             return ~(ж<any>)(uintptr)(v.ptr);
         }
-        return (ж<valueInterface_type>)(v.ptr).val;
+        return (ж<valueInterface_type>)(uintptr)(v.ptr).val;
     }
     return packEface(v);
 }
@@ -298,12 +298,12 @@ public static bool IsNil(this Value v) {
             // if v.flag&flagMethod != 0 {
             // 	return false
             // }
-            ptr = ~(@unsafe.Pointer.val)(uintptr)(ptr);
+            ptr = ~(ж<@unsafe.Pointer>)(uintptr)(ptr);
         }
-        return ptr == default!;
+        return ptr == nil;
     }
     if (exprᴛ1 == abi.Interface || exprᴛ1 == abi.Slice) {
-        return ~(@unsafe.Pointer.val)(uintptr)(v.ptr) == default!;
+        return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr) == nil;
     }
 
     // Both interface and slice are nil if first word is 0.
@@ -340,7 +340,7 @@ public static nint Len(this Value v) {
     var k = v.kind();
     var exprᴛ1 = k;
     if (exprᴛ1 == abi.Array) {
-        var tt = (ж<arrayType>)(new @unsafe.Pointer(v.typ()));
+        var tt = (ж<arrayType>)(uintptr)(new @unsafe.Pointer(v.typ()));
         return ((nint)(~tt).Len);
     }
     if (exprᴛ1 == abi.Chan) {
@@ -350,10 +350,10 @@ public static nint Len(this Value v) {
         return maplen((uintptr)v.pointer());
     }
     if (exprᴛ1 == abi.Slice) {
-        return ((unsafeheader.Slice.val)(v.ptr)).val.Len;
+        return ((ж<unsafeheader.Slice>)(uintptr)(v.ptr)).val.Len;
     }
     if (exprᴛ1 == abi.ΔString) {
-        return ((unsafeheader.String.val)(v.ptr)).val.Len;
+        return ((ж<unsafeheader.String>)(uintptr)(v.ptr)).val.Len;
     }
 
     // Slice is bigger than a word; assume flagIndir.
@@ -384,7 +384,7 @@ public static void Set(this Value v, Value x) {
     if ((flag)(x.flag & flagIndir) != 0){
         typedmemmove(v.typ(), v.ptr, x.ptr);
     } else {
-        ~(@unsafe.Pointer.val)(uintptr)(v.ptr) = x.ptr;
+        ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr) = x.ptr;
     }
 }
 
@@ -430,24 +430,24 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
         fl |= (flag)(((flag)dst.Kind()));
         return new Value( // Overwrite type so that they match.
  // Same memory layout, so no harm done.
-dst, v.ptr, fl);
+Ꮡdst, v.ptr, fl);
     case {} when implements(Ꮡdst, v.typ()):
-        if (target == default!) {
+        if (target == nil) {
             target = (uintptr)unsafe_New(Ꮡdst);
         }
         if (v.Kind() == abi.Interface && v.IsNil()) {
             // A nil ReadWriter passed to nil Reader is OK,
             // but using ifaceE2I below will panic.
             // Avoid the panic by returning a nil dst (e.g., Reader) explicitly.
-            return new Value(dst, default!, ((flag)abi.Interface));
+            return new Value(Ꮡdst, nil, ((flag)abi.Interface));
         }
         var x = valueInterface(v);
         if (dst.NumMethod() == 0){
             ~(ж<any>)(uintptr)(target) = x;
         } else {
-            ifaceE2I(Ꮡdst, x, target);
+            ifaceE2I(Ꮡdst, x, target.val);
         }
-        return new Value(dst, target, (flag)(flagIndir | ((flag)abi.Interface)));
+        return new Value(Ꮡdst, target.val, (flag)(flagIndir | ((flag)abi.Interface)));
     }
 
     // Failed.
@@ -462,7 +462,7 @@ dst, v.ptr, fl);
 // whySafe must explain why i < len. (Passing "i < len" is fine;
 // the benefit is to surface this assumption at the call site.)
 internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSize, @string whySafe) {
-    return (uintptr)add(p, ((uintptr)i) * eltSize, "i < len"u8);
+    return (uintptr)add(p.val, ((uintptr)i) * eltSize, "i < len"u8);
 }
 
 internal static partial void ifaceE2I(ж<abi.Type> t, any src, @unsafe.Pointer dst);

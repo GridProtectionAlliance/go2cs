@@ -60,6 +60,8 @@ public static partial class main_package
         public Counter(nint value) => m_value = value;
 
         public Counter(NilType _) => m_value = default!;
+
+        public nint val => m_value;
         
         public override string ToString() => m_value.ToString();
 

@@ -61,6 +61,8 @@ public static partial class goarch_package
         public ArchFamilyType(nint value) => m_value = value;
 
         public ArchFamilyType(NilType _) => m_value = default!;
+
+        public nint val => m_value;
         
         public override string ToString() => m_value.ToString();
 

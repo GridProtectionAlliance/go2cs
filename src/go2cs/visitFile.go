@@ -95,7 +95,11 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	targetFile := v.targetFile.String()
 
-	for requiredUsing := range v.requiredUsings {
+	// Ensure using ortder is consistent
+	requiredUsings := v.requiredUsings.Keys()
+	sort.Strings(requiredUsings)
+
+	for _, requiredUsing := range requiredUsings {
 		v.packageImports.WriteString(fmt.Sprintf("using %s;%s", requiredUsing, v.newline))
 	}
 

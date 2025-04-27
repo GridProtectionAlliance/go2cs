@@ -60,6 +60,8 @@ public static partial class main_package
         public FuncID(uint8 value) => m_value = value;
 
         public FuncID(NilType _) => m_value = default!;
+
+        public uint8 val => m_value;
         
         public override string ToString() => m_value.ToString();
 

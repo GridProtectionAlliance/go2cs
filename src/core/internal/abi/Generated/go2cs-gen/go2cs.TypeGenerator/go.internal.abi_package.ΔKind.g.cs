@@ -61,6 +61,8 @@ public static partial class abi_package
         public ΔKind(uint8 value) => m_value = value;
 
         public ΔKind(NilType _) => m_value = default!;
+
+        public uint8 val => m_value;
         
         public override string ToString() => m_value.ToString();
 
