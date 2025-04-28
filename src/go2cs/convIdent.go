@@ -29,9 +29,11 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			identEscapesHeap = v.identEscapesHeap[obj]
 		}
 
+		identType := v.getIdentType(ident)
+
 		// Check if the identifier is not already a pointer type or is a parameter or escapes heap,
 		// in these cases, we need to add the address operator to reference the pointer variable
-		if _, ok := v.getIdentType(ident).(*types.Pointer); !ok || v.identIsParameter(ident) || identEscapesHeap {
+		if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
 			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@")
 		}
 	}

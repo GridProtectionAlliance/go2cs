@@ -156,7 +156,7 @@ internal static Value unpackEface(any i) {
     if (t.IfaceIndir()) {
         f |= (flag)(flagIndir);
     }
-    return new Value(Ꮡt, (~e).Data, f);
+    return new Value(t, (~e).Data, f);
 }
 
 // A ValueError occurs when a Value method is invoked on
@@ -258,7 +258,7 @@ public static Value Elem(this Value v) {
         var typ = tt.val.Elem;
         var fl = (flag)((flag)((flag)(v.flag & flagRO) | flagIndir) | flagAddr);
         fl |= (flag)(((flag)typ.Kind()));
-        return new Value(Ꮡtyp, ptr.val, fl);
+        return new Value(typ, ptr.val, fl);
     }
 
     panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
