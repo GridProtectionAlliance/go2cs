@@ -180,7 +180,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if named.TypeArgs().Len() > 0 {
 				var typeParams []string
 
-				for i := 0; i < named.TypeArgs().Len(); i++ {
+				for i := range named.TypeArgs().Len() {
 					typeParams = append(typeParams, v.getCSTypeName(named.TypeArgs().At(i)))
 				}
 

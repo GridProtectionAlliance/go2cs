@@ -2248,7 +2248,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if !isUnderlying {
 		if _, ok := t.(*types.Struct); ok {
 			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
-		} else if _, ok := t.(*types.Interface); ok {
+		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
 			println(fmt.Sprintf("WARNING: Unresolved dynamic interface type: %s", t.String()))
 		}
 	}
@@ -2297,7 +2297,7 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	if !isUnderlying {
 		if _, ok := t.(*types.Struct); ok {
 			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
-		} else if _, ok := t.(*types.Interface); ok {
+		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
 			println(fmt.Sprintf("WARNING: Unresolved dynamic interface type: %s", t.String()))
 		}
 	}
