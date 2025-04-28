@@ -25,7 +25,7 @@ internal static void f() => func((defer, recover) => {
 internal static void g(nint i) => func((defer, _) => {
     if (i > 3) {
         fmt.Println("Panicking!");
-        panic(fmt.Sprintf("%v"u8, i));
+        throw panic(fmt.Sprintf("%v"u8, i));
     }
     deferǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), "Defer in g", i, defer);
     fmt.Println("Printing in g", i);

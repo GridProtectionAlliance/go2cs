@@ -48,7 +48,7 @@ public static partial class main_package
         public static TextOff operator +(TextOff left, TextOff right) => (TextOff)(left.m_value + right.m_value);
         
         public static TextOff operator -(TextOff left, TextOff right) => (TextOff)(left.m_value - right.m_value);
-        
+
         public static TextOff operator -(TextOff value) => (TextOff)(-value.m_value);
         
         public static TextOff operator *(TextOff left, TextOff right) => (TextOff)(left.m_value * right.m_value);

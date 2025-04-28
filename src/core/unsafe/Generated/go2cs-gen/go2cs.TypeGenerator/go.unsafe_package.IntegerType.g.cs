@@ -53,6 +53,8 @@ public static partial class unsafe_package
         public static IntegerType operator +(IntegerType left, IntegerType right) => (IntegerType)(left.m_value + right.m_value);
         
         public static IntegerType operator -(IntegerType left, IntegerType right) => (IntegerType)(left.m_value - right.m_value);
+
+        public static IntegerType operator -(IntegerType value) => (IntegerType)(-value.m_value);
         
         public static IntegerType operator *(IntegerType left, IntegerType right) => (IntegerType)(left.m_value * right.m_value);
         

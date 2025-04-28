@@ -588,10 +588,10 @@ public static @string Tag(this ΔName n) {
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
     if (len(n) >= 1 << (int)(29)) {
-        panic("abi.NewName: name too long: " + n[..1024] + "...");
+        throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
     if (len(tag) >= 1 << (int)(29)) {
-        panic("abi.NewName: tag too long: " + tag[..1024] + "...");
+        throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
     array<byte> tagLen = new(10);

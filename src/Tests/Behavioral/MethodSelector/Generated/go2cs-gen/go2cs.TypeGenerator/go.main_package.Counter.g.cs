@@ -48,7 +48,7 @@ public static partial class main_package
         public static Counter operator +(Counter left, Counter right) => (Counter)(left.m_value + right.m_value);
         
         public static Counter operator -(Counter left, Counter right) => (Counter)(left.m_value - right.m_value);
-        
+
         public static Counter operator -(Counter value) => (Counter)(-value.m_value);
         
         public static Counter operator *(Counter left, Counter right) => (Counter)(left.m_value * right.m_value);

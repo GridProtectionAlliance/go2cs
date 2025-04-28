@@ -141,15 +141,12 @@ public static class builtin
     }
 
     /// <summary>
-    /// Raises a <see cref="PanicException"/> with the specified <paramref name="state"/>.
+    /// Returns a new <see cref="PanicException"/> with the specified <paramref name="state"/>.
     /// </summary>
     /// <param name="state">State of panic exception.</param>
-    /// <exception cref="PanicException">Panic exception with the specified <paramref name="state"/>.</exception>
-    [DoesNotReturn]
-    [StackTraceHidden]
-    public static void panic(object state)
+    public static PanicException panic(object state)
     {
-        throw new PanicException(state);
+        return new PanicException(state);
     }
 
     /// <summary>

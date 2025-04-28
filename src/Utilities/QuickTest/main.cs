@@ -469,7 +469,7 @@ public static unsafe partial class main_package
         if (i > 3)
         {
             Console.WriteLine("Panicking!");
-            panic($"{i}");
+            throw panic($"{i}");
         }
 
         defer(() => Console.WriteLine($"Defer in g {i}"));

@@ -95,7 +95,7 @@ internal static ж<abi.Type> typ(this Value v) {
 // v.Kind() must be Pointer, Map, Chan, Func, or UnsafePointer
 internal static @unsafe.Pointer pointer(this Value v) {
     if (v.typ().Size() != goarch.PtrSize || !v.typ().Pointers()) {
-        panic("can't call pointer on a non-pointer Value");
+        throw panic("can't call pointer on a non-pointer Value");
     }
     if ((flag)(v.flag & flagIndir) != 0) {
         return ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
@@ -112,7 +112,7 @@ internal static any packEface(Value v) {
     switch (ᐧ) {
     case {} when t.IfaceIndir(): {
         if ((flag)(v.flag & flagIndir) == 0) {
-            panic("bad indir");
+            throw panic("bad indir");
         }
         var ptr = v.ptr;
         if ((flag)(v.flag & flagAddr) != 0) {
@@ -189,10 +189,10 @@ internal static @string methodName() {
 // an unexported field.
 internal static void mustBeExported(this flag f) {
     if (f == 0) {
-        panic(Ꮡ(new ValueError(methodName(), 0)));
+        throw panic(Ꮡ(new ValueError(methodName(), 0)));
     }
     if ((flag)(f & flagRO) != 0) {
-        panic("reflect: "u8 + methodName() + " using value obtained using unexported field"u8);
+        throw panic("reflect: "u8 + methodName() + " using value obtained using unexported field"u8);
     }
 }
 
@@ -201,14 +201,14 @@ internal static void mustBeExported(this flag f) {
 // or it is not addressable.
 internal static void mustBeAssignable(this flag f) {
     if (f == 0) {
-        panic(Ꮡ(new ValueError(methodName(), abi.Invalid)));
+        throw panic(Ꮡ(new ValueError(methodName(), abi.Invalid)));
     }
     // Assignable if addressable and not read-only.
     if ((flag)(f & flagRO) != 0) {
-        panic("reflect: "u8 + methodName() + " using value obtained using unexported field"u8);
+        throw panic("reflect: "u8 + methodName() + " using value obtained using unexported field"u8);
     }
     if ((flag)(f & flagAddr) == 0) {
-        panic("reflect: "u8 + methodName() + " using unaddressable value"u8);
+        throw panic("reflect: "u8 + methodName() + " using unaddressable value"u8);
     }
 }
 
@@ -261,7 +261,7 @@ public static Value Elem(this Value v) {
         return new Value(typ, ptr.val, fl);
     }
 
-    panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
+    throw panic(Ꮡ(new ValueError("reflectlite.Value.Elem", v.kind())));
 }
 
 [GoType("dyn")] partial interface valueInterface_type {
@@ -270,7 +270,7 @@ public static Value Elem(this Value v) {
 
 internal static any valueInterface(Value v) {
     if (v.flag == 0) {
-        panic(Ꮡ(new ValueError("reflectlite.Value.Interface", 0)));
+        throw panic(Ꮡ(new ValueError("reflectlite.Value.Interface", 0)));
     }
     if (v.kind() == abi.Interface) {
         // Special case: return the element inside the interface.
@@ -310,7 +310,7 @@ public static bool IsNil(this Value v) {
 
     // Both interface and slice are nil if first word is 0.
     // Both are always bigger than a word; assume flagIndir.
-    panic(Ꮡ(new ValueError("reflectlite.Value.IsNil", v.kind())));
+    throw panic(Ꮡ(new ValueError("reflectlite.Value.IsNil", v.kind())));
 }
 
 // IsValid reports whether v represents a value.
@@ -360,13 +360,13 @@ public static nint Len(this Value v) {
 
     // Slice is bigger than a word; assume flagIndir.
     // String is bigger than a word; assume flagIndir.
-    panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
+    throw panic(Ꮡ(new ValueError("reflect.Value.Len", v.kind())));
 }
 
 // NumMethod returns the number of exported methods in the value's method set.
 internal static nint numMethod(this Value v) {
     if (v.typ() == nil) {
-        panic(Ꮡ(new ValueError("reflectlite.Value.NumMethod", abi.Invalid)));
+        throw panic(Ꮡ(new ValueError("reflectlite.Value.NumMethod", abi.Invalid)));
     }
     return v.typ().NumMethod();
 }
@@ -394,7 +394,7 @@ public static void Set(this Value v, Value x) {
 public static ΔType Type(this Value v) {
     var f = v.flag;
     if (f == 0) {
-        panic(Ꮡ(new ValueError("reflectlite.Value.Type", abi.Invalid)));
+        throw panic(Ꮡ(new ValueError("reflectlite.Value.Type", abi.Invalid)));
     }
     // Method values not supported.
     return toRType(v.typ());
@@ -454,7 +454,7 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
     }}
 
     // Failed.
-    panic(context + ": value of type "u8 + toRType(v.typ()).String() + " is not assignable to type "u8 + toRType(Ꮡdst).String());
+    throw panic(context + ": value of type "u8 + toRType(v.typ()).String() + " is not assignable to type "u8 + toRType(Ꮡdst).String());
 }
 
 // arrayAt returns the i-th element of p,

@@ -509,14 +509,14 @@ public static ж<T> Add<T>(ж<T> ptr, nint len) {
 // a run-time panic occurs.
 public static slice<T> Slice<T>(ж<T> ptr, nint len) {
     if (len < 0)
-        panic("len is negative");
+        throw panic("len is negative");
 
     if (ptr == nil)
     {
         if (len == 0)
             return [];
 
-        panic("ptr is nil and len is not zero");
+        throw panic("ptr is nil and len is not zero");
     }
 
     fixed (T* pointer = &ptr.val)
@@ -550,14 +550,14 @@ public static ж<T> SliceData<T>(slice<T> slice) {
 // must not be modified as long as the returned string value exists.
 public static @string String(ж<byte> ptr, nint len) {
     if (len < 0)
-        panic("len is negative");
+        throw panic("len is negative");
 
     if (ptr == nil)
     {
         if (len == 0)
             return [];
 
-        panic("ptr is nil and len is not zero");
+        throw panic("ptr is nil and len is not zero");
     }
 
     fixed (byte* pointer = &ptr.val)

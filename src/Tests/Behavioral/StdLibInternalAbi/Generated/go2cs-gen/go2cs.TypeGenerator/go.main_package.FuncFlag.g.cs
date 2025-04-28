@@ -49,8 +49,6 @@ public static partial class main_package
         
         public static FuncFlag operator -(FuncFlag left, FuncFlag right) => (FuncFlag)(left.m_value - right.m_value);
         
-        public static FuncFlag operator -(FuncFlag value) => (FuncFlag)(-value.m_value);
-        
         public static FuncFlag operator *(FuncFlag left, FuncFlag right) => (FuncFlag)(left.m_value * right.m_value);
         
         public static FuncFlag operator /(FuncFlag left, FuncFlag right) => (FuncFlag)(left.m_value / right.m_value);

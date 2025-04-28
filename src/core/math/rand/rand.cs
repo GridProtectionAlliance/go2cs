@@ -10,7 +10,7 @@ public static partial class rand_package
     public static int Intn(int n)
     {
         if (n <= 0)
-            panic("invalid argument to Intn");
+            throw panic("invalid argument to Intn");
 
         return Random.Shared.Next(n); // Returns a random integer in [0, n)
     }

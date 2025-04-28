@@ -70,7 +70,7 @@ partial class abi_package {
 // by the CPU correctly.
 [GoRecv] public static @unsafe.Pointer IntRegArgAddr(this ref RegArgs r, nint reg, uintptr argSize) {
     if (argSize > goarch.PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
-        panic("invalid argSize");
+        throw panic("invalid argSize");
     }
     var offset = ((uintptr)0);
     if (goarch.BigEndian) {

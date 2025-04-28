@@ -49,8 +49,6 @@ public static partial class main_package
         
         public static ΔKind operator -(ΔKind left, ΔKind right) => (ΔKind)(left.m_value - right.m_value);
         
-        public static ΔKind operator -(ΔKind value) => (ΔKind)(-value.m_value);
-        
         public static ΔKind operator *(ΔKind left, ΔKind right) => (ΔKind)(left.m_value * right.m_value);
         
         public static ΔKind operator /(ΔKind left, ΔKind right) => (ΔKind)(left.m_value / right.m_value);

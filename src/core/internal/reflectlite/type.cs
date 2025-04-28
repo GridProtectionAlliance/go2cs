@@ -283,7 +283,7 @@ internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
     if (et != nil) {
         return et;
     }
-    panic("reflect: Elem of invalid type "u8 + toRType(Ꮡt).String());
+    throw panic("reflect: Elem of invalid type "u8 + toRType(Ꮡt).String());
 }
 
 internal static ΔType Elem(this rtype t) {
@@ -293,7 +293,7 @@ internal static ΔType Elem(this rtype t) {
 internal static ΔType In(this rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
-        panic("reflect: In of non-func type");
+        throw panic("reflect: In of non-func type");
     }
     return toType(tt.InSlice()[i]);
 }
@@ -301,7 +301,7 @@ internal static ΔType In(this rtype t, nint i) {
 internal static ΔType Key(this rtype t) {
     var tt = t.Type.MapType();
     if (tt == nil) {
-        panic("reflect: Key of non-map type");
+        throw panic("reflect: Key of non-map type");
     }
     return toType((~tt).Key);
 }
@@ -309,7 +309,7 @@ internal static ΔType Key(this rtype t) {
 internal static nint Len(this rtype t) {
     var tt = t.Type.ArrayType();
     if (tt == nil) {
-        panic("reflect: Len of non-array type");
+        throw panic("reflect: Len of non-array type");
     }
     return ((nint)(~tt).Len);
 }
@@ -317,7 +317,7 @@ internal static nint Len(this rtype t) {
 internal static nint NumField(this rtype t) {
     var tt = t.Type.StructType();
     if (tt == nil) {
-        panic("reflect: NumField of non-struct type");
+        throw panic("reflect: NumField of non-struct type");
     }
     return len((~tt).Fields);
 }
@@ -325,7 +325,7 @@ internal static nint NumField(this rtype t) {
 internal static nint NumIn(this rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
-        panic("reflect: NumIn of non-func type");
+        throw panic("reflect: NumIn of non-func type");
     }
     return ((nint)(~tt).InCount);
 }
@@ -333,7 +333,7 @@ internal static nint NumIn(this rtype t) {
 internal static nint NumOut(this rtype t) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
-        panic("reflect: NumOut of non-func type");
+        throw panic("reflect: NumOut of non-func type");
     }
     return tt.NumOut();
 }
@@ -341,7 +341,7 @@ internal static nint NumOut(this rtype t) {
 internal static ΔType Out(this rtype t, nint i) {
     var tt = t.Type.FuncType();
     if (tt == nil) {
-        panic("reflect: Out of non-func type");
+        throw panic("reflect: Out of non-func type");
     }
     return toType(tt.OutSlice()[i]);
 }
@@ -365,17 +365,17 @@ public static ΔType TypeOf(any i) {
 
 internal static bool Implements(this rtype t, ΔType u) {
     if (u == default!) {
-        panic("reflect: nil type passed to Type.Implements");
+        throw panic("reflect: nil type passed to Type.Implements");
     }
     if (u.Kind() != Interface) {
-        panic("reflect: non-interface type passed to Type.Implements");
+        throw panic("reflect: non-interface type passed to Type.Implements");
     }
     return implements(u.common(), t.common());
 }
 
 internal static bool AssignableTo(this rtype t, ΔType u) {
     if (u == default!) {
-        panic("reflect: nil type passed to Type.AssignableTo");
+        throw panic("reflect: nil type passed to Type.AssignableTo");
     }
     var uu = u.common();
     var tt = t.common();

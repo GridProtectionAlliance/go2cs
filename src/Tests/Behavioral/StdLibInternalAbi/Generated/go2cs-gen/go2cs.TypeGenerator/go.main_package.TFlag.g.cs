@@ -49,8 +49,6 @@ public static partial class main_package
         
         public static TFlag operator -(TFlag left, TFlag right) => (TFlag)(left.m_value - right.m_value);
         
-        public static TFlag operator -(TFlag value) => (TFlag)(-value.m_value);
-        
         public static TFlag operator *(TFlag left, TFlag right) => (TFlag)(left.m_value * right.m_value);
         
         public static TFlag operator /(TFlag left, TFlag right) => (TFlag)(left.m_value / right.m_value);

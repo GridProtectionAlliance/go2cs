@@ -160,9 +160,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Handle new call as a special case
 		if ident.Name == "new" {
 			typeExpr := callExpr.Args[0]
-
 			typeName := convertToCSTypeName(v.getExprTypeName(typeExpr, false))
 			return fmt.Sprintf("@new<%s>()", typeName)
+		}
+
+		// Handle panic call as a special case
+		if ident.Name == "panic" {
+			context := DefaultBasicLitContext()
+			context.u8StringOK = false
+			return fmt.Sprintf("throw panic(%s)", v.convExpr(callExpr.Args[0], []ExprContext{context}))
 		}
 	}
 

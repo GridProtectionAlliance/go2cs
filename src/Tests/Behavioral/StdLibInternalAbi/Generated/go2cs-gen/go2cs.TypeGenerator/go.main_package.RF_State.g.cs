@@ -48,7 +48,7 @@ public static partial class main_package
         public static RF_State operator +(RF_State left, RF_State right) => (RF_State)(left.m_value + right.m_value);
         
         public static RF_State operator -(RF_State left, RF_State right) => (RF_State)(left.m_value - right.m_value);
-        
+
         public static RF_State operator -(RF_State value) => (RF_State)(-value.m_value);
         
         public static RF_State operator *(RF_State left, RF_State right) => (RF_State)(left.m_value * right.m_value);

@@ -49,8 +49,6 @@ public static partial class main_package
         
         public static FuncID operator -(FuncID left, FuncID right) => (FuncID)(left.m_value - right.m_value);
         
-        public static FuncID operator -(FuncID value) => (FuncID)(-value.m_value);
-        
         public static FuncID operator *(FuncID left, FuncID right) => (FuncID)(left.m_value * right.m_value);
         
         public static FuncID operator /(FuncID left, FuncID right) => (FuncID)(left.m_value / right.m_value);

@@ -16,19 +16,19 @@ partial class reflectlite_package {
 public static Action<nint, nint> Swapper(any Δslice) {
     var v = ValueOf(Δslice);
     if (v.Kind() != Slice) {
-        panic(Ꮡ(new ValueError(Method: "Swapper"u8, Kind: v.Kind())));
+        throw panic(Ꮡ(new ValueError(Method: "Swapper"u8, Kind: v.Kind())));
     }
     // Fast path for slices of size 0 and 1. Nothing to swap.
     switch (v.Len()) {
     case 0: {
         return (nint i, nint j) => {
-            panic("reflect: slice index out of range");
+            throw panic("reflect: slice index out of range");
         };
     }
     case 1: {
         return (nint i, nint j) => {
             if (i != 0 || j != 0) {
-                panic("reflect: slice index out of range");
+                throw panic("reflect: slice index out of range");
             }
         };
     }}
@@ -91,7 +91,7 @@ public static Action<nint, nint> Swapper(any Δslice) {
     var typʗ1 = typ;
     return (nint i, nint j) => {
         if (((nuint)i) >= ((nuint)(~sʗ1).Len) || ((nuint)j) >= ((nuint)(~sʗ1).Len)) {
-            panic("reflect: slice index out of range");
+            throw panic("reflect: slice index out of range");
         }
         var val1 = (uintptr)arrayAt((~sʗ1).Data, i, size, "i < s.Len"u8);
         var val2 = (uintptr)arrayAt((~sʗ1).Data, j, size, "j < s.Len"u8);
