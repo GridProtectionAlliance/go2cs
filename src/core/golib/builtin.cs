@@ -28,6 +28,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -145,6 +146,7 @@ public static class builtin
     /// <param name="state">State of panic exception.</param>
     /// <exception cref="PanicException">Panic exception with the specified <paramref name="state"/>.</exception>
     [DoesNotReturn]
+    [StackTraceHidden]
     public static void panic(object state)
     {
         throw new PanicException(state);
@@ -988,8 +990,8 @@ public static class builtin
                         T newInstance = (T)Activator.CreateInstance(typeOfT)!;
 
                         // Copy the values of the fields from the target to the new instance
-                        foreach (string field in typeOfTFieldNames)
                     #pragma warning disable IL2075
+                        foreach (string field in typeOfTFieldNames)
                             typeOfT.GetField(field)!.SetValue(newInstance,  targetType.GetField(field)!.GetValue(target));
                     #pragma warning restore IL2075
 
