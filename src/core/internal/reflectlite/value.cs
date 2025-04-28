@@ -124,7 +124,7 @@ internal static any packEface(Value v) {
         e.val.Data = ptr;
         break;
     }
-    case {} when (flag)(v.flag & flagIndir) is != 0: {
+    case {} when (flag)(v.flag & flagIndir) != 0: {
         e.val.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     }

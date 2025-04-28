@@ -360,6 +360,15 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 				usePattenMatch = false
 				break
 			}
+
+			// Check for binary expressions with bitwise operations
+			if binaryExpr, ok := expr.(*ast.BinaryExpr); ok {
+				// Check if expression involves bitwise operation followed by comparison
+				if isBitwiseFollowedByComparison(binaryExpr) {
+					usePattenMatch = false
+					break
+				}
+			}
 		}
 
 		return usePattenMatch
@@ -378,6 +387,12 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 			}
 
 			if !isComparisonOperator(binaryExpr.Op) {
+				usePattenMatch = false
+				break
+			}
+
+			// Check for bitwise operations in the left operand
+			if containsBitwiseOperation(binaryExpr.X) {
 				usePattenMatch = false
 				break
 			}
@@ -401,4 +416,34 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 	}
 
 	return usePattenMatch
+}
+
+// Helper function to check if an expression contains bitwise operations
+func containsBitwiseOperation(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.BinaryExpr:
+		return isBitwiseOperator(e.Op) ||
+			containsBitwiseOperation(e.X) ||
+			containsBitwiseOperation(e.Y)
+	case *ast.ParenExpr:
+		return containsBitwiseOperation(e.X)
+	default:
+		return false
+	}
+}
+
+// Helper function to check if an operator is a bitwise operator
+func isBitwiseOperator(op token.Token) bool {
+	return op == token.AND || op == token.OR || op == token.XOR ||
+		op == token.SHL || op == token.SHR || op == token.AND_NOT
+}
+
+// Helper function to check if expression is bitwise operation followed by comparison
+func isBitwiseFollowedByComparison(expr *ast.BinaryExpr) bool {
+	// Check if this is a comparison expression
+	if isComparisonOperator(expr.Op) {
+		// Check if left side contains bitwise operations
+		return containsBitwiseOperation(expr.X)
+	}
+	return false
 }
