@@ -24,8 +24,6 @@ public static partial class abi_package
         // Value of the struct 'IntArgRegBitmap'
         private array<uint8>? m_value;
                 
-        private array<uint8> val => m_value ??= new array<uint8>(2);
-
         public uint8[] Source => val;
         
         public nint Length => val.Length;
@@ -58,7 +56,7 @@ public static partial class abi_package
 
         public IntArgRegBitmap(NilType _) => m_value = default!;
 
-        public array<uint8> val => m_value;
+        public array<uint8> val => m_value ??= new array<uint8>(2);
         
         public override string ToString() => val.ToString();
 

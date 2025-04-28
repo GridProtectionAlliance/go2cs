@@ -50,8 +50,6 @@ public static partial class abi_package
         
         public static ΔChanDir operator -(ΔChanDir left, ΔChanDir right) => (ΔChanDir)(left.m_value - right.m_value);
         
-        public static ΔChanDir operator -(ΔChanDir value) => (ΔChanDir)(-value.m_value);
-        
         public static ΔChanDir operator *(ΔChanDir left, ΔChanDir right) => (ΔChanDir)(left.m_value * right.m_value);
         
         public static ΔChanDir operator /(ΔChanDir left, ΔChanDir right) => (ΔChanDir)(left.m_value / right.m_value);

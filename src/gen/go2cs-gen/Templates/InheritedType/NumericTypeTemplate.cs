@@ -2,6 +2,9 @@
 
 internal static class NumericTypeTemplate
 {
+    private static bool IsUnsignedType(string typeName) =>
+        typeName is "uint8" or "uint16" or "uint32" or "uint64" or "byte" or "rune" or "uintptr";
+
     public static string Generate(string typeName, string targetTypeName) =>
         $$"""
         
@@ -29,14 +32,19 @@ internal static class NumericTypeTemplate
                 
                 public static {{targetTypeName}} operator +({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value + right.m_value);
                 
-                public static {{targetTypeName}} operator -({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value - right.m_value);
-                
-                public static {{targetTypeName}} operator -({{targetTypeName}} value) => ({{targetTypeName}})(-value.m_value);
+                public static {{targetTypeName}} operator -({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value - right.m_value);{{GetUnaryNegationOperator(typeName, targetTypeName)}}
                 
                 public static {{targetTypeName}} operator *({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value * right.m_value);
                 
                 public static {{targetTypeName}} operator /({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value / right.m_value);
                 
                 public static {{targetTypeName}} operator %({{targetTypeName}} left, {{targetTypeName}} right) => ({{targetTypeName}})(left.m_value % right.m_value);
+        """;
+
+    private static string GetUnaryNegationOperator(string typeName, string targetTypeName) => IsUnsignedType(typeName) ? "" : 
+       $"""
+        
+        
+                public static {targetTypeName} operator -({targetTypeName} value) => ({targetTypeName})(-value.m_value);
         """;
 }

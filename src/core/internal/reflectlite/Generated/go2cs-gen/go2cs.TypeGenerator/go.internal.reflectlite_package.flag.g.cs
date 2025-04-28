@@ -50,8 +50,6 @@ public static partial class reflectlite_package
         
         public static flag operator -(flag left, flag right) => (flag)(left.m_value - right.m_value);
         
-        public static flag operator -(flag value) => (flag)(-value.m_value);
-        
         public static flag operator *(flag left, flag right) => (flag)(left.m_value * right.m_value);
         
         public static flag operator /(flag left, flag right) => (flag)(left.m_value / right.m_value);

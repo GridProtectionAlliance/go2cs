@@ -50,8 +50,6 @@ public static partial class abi_package
         
         public static NameOff operator -(NameOff left, NameOff right) => (NameOff)(left.m_value - right.m_value);
         
-        public static NameOff operator -(NameOff value) => (NameOff)(-value.m_value);
-        
         public static NameOff operator *(NameOff left, NameOff right) => (NameOff)(left.m_value * right.m_value);
         
         public static NameOff operator /(NameOff left, NameOff right) => (NameOff)(left.m_value / right.m_value);
