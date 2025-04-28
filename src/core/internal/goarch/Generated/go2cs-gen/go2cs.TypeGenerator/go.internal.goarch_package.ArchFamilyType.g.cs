@@ -50,8 +50,6 @@ public static partial class goarch_package
         
         public static ArchFamilyType operator -(ArchFamilyType left, ArchFamilyType right) => (ArchFamilyType)(left.m_value - right.m_value);
         
-        public static ArchFamilyType operator -(ArchFamilyType value) => (ArchFamilyType)(-value.m_value);
-        
         public static ArchFamilyType operator *(ArchFamilyType left, ArchFamilyType right) => (ArchFamilyType)(left.m_value * right.m_value);
         
         public static ArchFamilyType operator /(ArchFamilyType left, ArchFamilyType right) => (ArchFamilyType)(left.m_value / right.m_value);

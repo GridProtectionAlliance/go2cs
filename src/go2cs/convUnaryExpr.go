@@ -115,7 +115,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			escapesHeap = v.identEscapesHeap[obj]
 		}
 
-		if escapesHeap {
+		if escapesHeap && !isInherentlyHeapAllocatedType(v.getIdentType(ident)) {
 			// If the variables escapes to heap, existing pointer reference should exist
 			return AddressPrefix + v.convExpr(unaryExpr.X, nil)
 		}
