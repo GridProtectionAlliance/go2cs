@@ -60,7 +60,7 @@ public class ImplementGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AssemblyAttributeFinder { HasAttributes: true } attributeFinder)
             return;
 
-        foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
+        foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
             SemanticModel semanticModel = context.Compilation.GetSemanticModel(syntaxTree);
@@ -131,7 +131,7 @@ public class ImplementGenerator : ISourceGenerator
         }
     }
 
-    private static string? GetNamespace(NamespaceDeclarationSyntax? namespaceSyntax)
+    private static string? GetNamespace(FileScopedNamespaceDeclarationSyntax? namespaceSyntax)
     {
         return namespaceSyntax?.Name.ToString();
     }

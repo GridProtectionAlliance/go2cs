@@ -49,6 +49,8 @@ public static partial class abi_package
         public static TypeOff operator +(TypeOff left, TypeOff right) => (TypeOff)(left.m_value + right.m_value);
         
         public static TypeOff operator -(TypeOff left, TypeOff right) => (TypeOff)(left.m_value - right.m_value);
+
+        public static TypeOff operator -(TypeOff value) => (TypeOff)(-value.m_value);
         
         public static TypeOff operator *(TypeOff left, TypeOff right) => (TypeOff)(left.m_value * right.m_value);
         

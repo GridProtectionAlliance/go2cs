@@ -10,23 +10,17 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
-using System.Numerics;
+using global::go;
+using go;
 
 #nullable enable
 
-namespace go;
+namespace go.@internal;
 
-public static partial class main_package
+public static partial class reflectlite_package
 {
-    [GeneratedCode("go2cs-gen", "0.1.4")]
-    public partial interface Ordered<T> :
-        IAdditionOperators<T, T, T>,
-        IEqualityOperators<T, T, bool>,
-        IComparisonOperators<T, T, bool>
-        where T :
-        IAdditionOperators<T, T, T>,
-        IEqualityOperators<T, T, bool>,
-        IComparisonOperators<T, T, bool>
+    partial struct flag
     {
-    }
+        public static implicit operator go.@internal.abi_package.ΔKind(flag src) => new go.@internal.abi_package.ΔKind((uint8)src.val);
+    }    
 }

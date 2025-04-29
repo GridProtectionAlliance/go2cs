@@ -31,7 +31,7 @@ namespace go2cs;
 
 public sealed class AssemblyAttributeFinder(string attributeFullName) : ISyntaxContextReceiver
 {
-    public List<(AttributeSyntax attribute, GeneratorSyntaxContext context, CompilationUnitSyntax compilationUnit, NamespaceDeclarationSyntax? namespaceSyntax)> TargetAttributes = [];
+    public List<(AttributeSyntax attribute, GeneratorSyntaxContext context, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax)> TargetAttributes = [];
 
     public bool HasAttributes => TargetAttributes.Count > 0;
 
@@ -53,8 +53,8 @@ public sealed class AssemblyAttributeFinder(string attributeFullName) : ISyntaxC
             return;
 
         // Find the first namespace in the file (if any)
-        NamespaceDeclarationSyntax? namespaceSyntax = compilationUnit.Members
-            .OfType<NamespaceDeclarationSyntax>()
+        FileScopedNamespaceDeclarationSyntax? namespaceSyntax = compilationUnit.Members
+            .OfType<FileScopedNamespaceDeclarationSyntax>()
             .FirstOrDefault();
 
         // Add each attribute with its containing context

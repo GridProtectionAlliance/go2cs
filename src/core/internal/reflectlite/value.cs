@@ -6,7 +6,7 @@ namespace go.@internal;
 using abi = @internal.abi_package;
 using goarch = @internal.goarch_package;
 using unsafeheader = @internal.unsafeheader_package;
-using runtime = runtime_package;
+//using runtime = runtime_package;
 using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
@@ -55,6 +55,10 @@ partial class reflectlite_package {
 }
 
 [GoType("num:uintptr")] partial struct flag;
+//partial struct flag
+//{
+//    public static implicit operator flag(go.@internal.abi_package.ΔKind src) => new flag((uintptr)src.val);
+//}
 
 // A method value represents a curried method invocation
 // like r.Read for some receiver r. The typ+val+flag bits describe
@@ -177,12 +181,13 @@ internal static Value unpackEface(any i) {
 // methodName returns the name of the calling method,
 // assumed to be two stack frames above.
 internal static @string methodName() {
-    var (pc, _, _, _) = runtime.Caller(2);
-    var f = runtime.FuncForPC(pc);
-    if (f == nil) {
-        return "unknown method"u8;
-    }
-    return f.Name();
+    //var (pc, _, _, _) = runtime.Caller(2);
+    //var f = runtime.FuncForPC(pc);
+    //if (f == nil) {
+    //    return "unknown method"u8;
+    //}
+    //return f.Name();
+    return "";
 }
 
 // mustBeExported panics if f records that the value was obtained using

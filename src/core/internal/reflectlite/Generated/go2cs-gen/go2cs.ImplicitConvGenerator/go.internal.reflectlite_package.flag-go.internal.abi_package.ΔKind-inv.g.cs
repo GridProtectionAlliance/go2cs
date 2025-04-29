@@ -11,15 +11,16 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using global::go;
+using go;
 
 #nullable enable
 
-namespace go;
+namespace go.@internal;
 
 public static partial class reflectlite_package
 {
     partial struct flag
     {
-        public static implicit operator go.@internal.abi_package.ΔKind(flag src) => new go.@internal.abi_package.ΔKind((uint8)src.val);
+        public static implicit operator flag(go.@internal.abi_package.ΔKind src) => new flag((uintptr)src.val);
     }    
 }

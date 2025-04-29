@@ -11,10 +11,11 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using global::go;
+using go;
 
 #nullable enable
 
-namespace go;
+namespace go.@internal;
 
 public static partial class reflectlite_package
 {
