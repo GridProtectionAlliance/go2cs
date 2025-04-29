@@ -66,10 +66,15 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 				if _, ok := parenExpr.X.(*ast.StarExpr); ok {
 					if ident := getIdentifier(parenExpr.X); ident != nil {
 						// In this case we are dealing with a casted pointer dereference, e.g., "*(*int)"
-						context := DefaultLambdaContext()
-						context.isPointerCast = true
-						result := v.convExpr(starExpr.X, []ExprContext{context})
-						return fmt.Sprintf("%s%s", PointerDerefOp, result)
+						lambdaContext := DefaultLambdaContext()
+						lambdaContext.isPointerCast = true
+						result := v.convExpr(starExpr.X, []ExprContext{lambdaContext})
+
+						if context.inLhsAssign {
+							return fmt.Sprintf("(%s).val", result)
+						} else {
+							return fmt.Sprintf("%s%s", PointerDerefOp, result)
+						}
 					}
 				}
 			}

@@ -364,6 +364,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 
 			if ident == nil {
+				if _, ok := lhs.(*ast.StarExpr); ok {
+					starExprContext := DefaultStarExprContext()
+					starExprContext.inLhsAssign = true
+					contexts = append(contexts, starExprContext)
+				}
+
 				result.WriteString(v.convExpr(lhs, contexts))
 				result.WriteString(operator)
 

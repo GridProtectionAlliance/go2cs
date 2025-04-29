@@ -386,7 +386,7 @@ public static void Set(this Value v, Value x) {
     if ((flag)(x.flag & flagIndir) != 0){
         typedmemmove(v.typ(), v.ptr, x.ptr);
     } else {
-        ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr) = x.ptr;
+        ((ж<@unsafe.Pointer>)(uintptr)(v.ptr)).val = x.ptr;
     }
 }
 
@@ -446,7 +446,7 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
         }
         var x = valueInterface(v);
         if (dst.NumMethod() == 0){
-            ~(ж<any>)(uintptr)(target) = x;
+            ((ж<any>)(uintptr)(target)).val = x;
         } else {
             ifaceE2I(Ꮡdst, x, target.val);
         }

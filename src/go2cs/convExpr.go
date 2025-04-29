@@ -180,11 +180,13 @@ func (c PatternMatchExprContext) getDefault() StmtContext {
 
 type StarExprContext struct {
 	inParenExpr bool
+	inLhsAssign bool
 }
 
 func DefaultStarExprContext() StarExprContext {
 	return StarExprContext{
 		inParenExpr: false,
+		inLhsAssign: false,
 	}
 }
 
