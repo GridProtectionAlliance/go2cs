@@ -2256,6 +2256,18 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	typeName := strings.ReplaceAll(t.String(), "..", "")
 	packagePathPrefix := v.pkg.Path() + "."
 
+	var prefix string
+
+	// Check for slice or array prefix
+	if strings.HasPrefix(typeName, "[") {
+		endBracket := strings.Index(typeName, "]")
+
+		if endBracket != -1 {
+			prefix = typeName[:endBracket+1]
+			typeName = typeName[endBracket+1:]
+		}
+	}
+
 	// Remove package path, if any, from the type name
 	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
 	slashIndex := strings.LastIndex(typeName, "/")
@@ -2265,10 +2277,10 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
-		return pkgPrefix + typeName
+		return prefix + pkgPrefix + typeName
 	}
 
-	return typeName
+	return prefix + typeName
 }
 
 func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
