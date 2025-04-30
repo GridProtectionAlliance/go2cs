@@ -176,13 +176,44 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			var ident *ast.Ident
 			var ok bool
 
-			if ident, ok = field.Type.(*ast.Ident); !ok {
-				if ptrType, ok := field.Type.(*ast.StarExpr); ok {
-					if ident, ok = ptrType.X.(*ast.Ident); !ok {
-						continue
+			var isIdentFieldType bool
+			var selectorType bool
+
+			if ident, ok = field.Type.(*ast.Ident); ok {
+				isIdentFieldType = true
+			} else if ptrType, ok := field.Type.(*ast.StarExpr); ok {
+				if ident, ok = ptrType.X.(*ast.Ident); ok {
+					isIdentFieldType = true
+				}
+			}
+
+			if !isIdentFieldType {
+				if selectorExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+					if ident, ok = selectorExpr.X.(*ast.Ident); ok {
+						isIdentFieldType = true
+						selectorType = true
 					}
-				} else {
-					continue
+				} else if ptrType, ok := field.Type.(*ast.StarExpr); ok {
+					if selectorExpr, ok := ptrType.X.(*ast.SelectorExpr); ok {
+						if ident, ok = selectorExpr.X.(*ast.Ident); ok {
+							isIdentFieldType = true
+							selectorType = true
+						}
+					}
+				}
+			}
+
+			if !isIdentFieldType {
+				continue
+			}
+
+			if selectorType {
+				// Get index of last dot in go type name
+				dotIndex := strings.LastIndex(goTypeName, ".")
+
+				if dotIndex != -1 {
+					// Get the name of the struct type
+					goTypeName = goTypeName[dotIndex+1:]
 				}
 			}
 
@@ -211,15 +242,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			} else {
 				var handled bool
 
-				if ptrType, ok := identType.(*types.Pointer); ok {
-					if _, ok = ptrType.Elem().(*types.Named); !ok {
-						v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
-						handled = true
-					}
-				} else if _, ok = identType.(*types.Struct); !ok {
-					if _, ok := identObj.Type().(*types.Named); !ok {
-						v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
-						handled = true
+				if _, ok := identObj.(*types.PkgName); !ok {
+					if ptrType, ok := identType.(*types.Pointer); ok {
+						if _, ok = ptrType.Elem().(*types.Named); !ok {
+							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+							handled = true
+						}
+					} else if _, ok = identType.(*types.Struct); !ok {
+						if _, ok := identObj.Type().(*types.Named); !ok {
+							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+							handled = true
+						}
 					}
 				}
 
