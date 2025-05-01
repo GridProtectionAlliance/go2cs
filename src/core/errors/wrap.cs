@@ -1,4 +1,3 @@
-/*
 // Copyright 2018 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
@@ -75,19 +74,21 @@ internal static bool @is(error err, error target, bool targetComparable) {
             }
         }
         switch (err.type()) {
-        case {} Δx when Δx._<is_typeᴛ1>(out var x):
+        case {} Δx when Δx._<is_typeᴛ1>(out var x): {
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
             break;
-        case {} Δx when Δx._<is_typeᴛ2>(out var x):
+        }
+        case {} Δx when Δx._<is_typeᴛ2>(out var x): {
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (@is(errΔ1, target, targetComparable)) {
                     return true;
                 }
             }
             return false;
+        }
         default: {
             var x = err.type();
             return false;
@@ -117,16 +118,16 @@ public static bool As(error err, any target) {
         return false;
     }
     if (target == default!) {
-        panic("errors: target cannot be nil");
+        throw panic("errors: target cannot be nil");
     }
     var val = reflectlite.ValueOf(target);
     var typ = val.Type();
     if (typ.Kind() != reflectlite.Ptr || val.IsNil()) {
-        panic("errors: target must be a non-nil pointer");
+        throw panic("errors: target must be a non-nil pointer");
     }
     var targetType = typ.Elem();
     if (targetType.Kind() != reflectlite.Interface && !targetType.Implements(errorType)) {
-        panic("errors: *target must be interface or implement error");
+        throw panic("errors: *target must be interface or implement error");
     }
     return @as(err, target, val, targetType);
 }
@@ -155,13 +156,14 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
             }
         }
         switch (err.type()) {
-        case {} Δx when Δx._<as_typeᴛ1>(out var x):
+        case {} Δx when Δx._<as_typeᴛ1>(out var x): {
             err = x.Unwrap();
             if (err == default!) {
                 return false;
             }
             break;
-        case {} Δx when Δx._<as_typeᴛ2>(out var x):
+        }
+        case {} Δx when Δx._<as_typeᴛ2>(out var x): {
             foreach (var (_, errΔ1) in x.Unwrap()) {
                 if (errΔ1 == default!) {
                     continue;
@@ -171,6 +173,7 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
                 }
             }
             return false;
+        }
         default: {
             var x = err.type();
             return false;
@@ -181,4 +184,3 @@ internal static bool @as(error err, any target, reflectlite.Value targetVal, ref
 internal static reflectliteꓸType errorType = reflectlite.TypeOf(((ж<error>)default!)).Elem();
 
 } // end errors_package
-*/
