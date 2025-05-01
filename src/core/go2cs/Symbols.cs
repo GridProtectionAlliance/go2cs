@@ -25,6 +25,8 @@ namespace go2cs;
 
 public static class Symbols
 {
+    public const string PackageSuffix = "_package";
+
     // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
     // symbols, markers, intermediate and temporary variables. These characters have to be valid
     // C# identifiers, i.e., Unicode letter characters, decimal digit characters, connecting
