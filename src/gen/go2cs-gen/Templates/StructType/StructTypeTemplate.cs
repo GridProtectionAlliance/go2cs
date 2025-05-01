@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
 using static go2cs.Symbols;
 
@@ -121,8 +122,13 @@ internal class StructTypeTemplate : TemplateBase
 
             IEnumerable<(string typeName, string memberName)> getStructMembers(string structTypeName)
             {
-                return Context.GetStructDeclaration(structTypeName)?
-                    .GetStructMembers(Context, true)
+                (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(structTypeName);
+                
+                if (structDecl is null)
+                    return [];
+
+                return structDecl
+                    .GetStructMembers(compilation!, true)
                     .Select(item => (item.typeName, item.memberName)) ?? [];
             }
         }
@@ -141,12 +147,14 @@ internal class StructTypeTemplate : TemplateBase
 
         // Get all extension methods for the struct, any directly defined receivers
         // take precedence over promoted struct methods that have the same name
-        IEnumerable<MethodInfo>? structMethods = Context.GetStructDeclaration(FullyQualifiedStructType)?.GetExtensionMethods(Context);
+        (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(FullyQualifiedStructType);
+        IEnumerable<MethodInfo>? structMethods = structDecl is null ? [] : structDecl.GetExtensionMethods(compilation!);
         HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
         foreach ((string promotedStructType, _, _, _) in promotedStructs)
         {
-            IEnumerable<MethodInfo>? promotedStructMethods = Context.GetStructDeclaration(promotedStructType)?.GetExtensionMethods(Context);
+            (structDecl, compilation) = Context.GetStructDeclaration(promotedStructType);
+            IEnumerable<MethodInfo>? promotedStructMethods = structDecl is null ?[] : structDecl.GetExtensionMethods(compilation!);
 
             foreach (MethodInfo method in promotedStructMethods ?? [])
             {

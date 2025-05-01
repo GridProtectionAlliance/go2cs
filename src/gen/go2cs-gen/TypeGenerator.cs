@@ -119,7 +119,7 @@ public class TypeGenerator : ISourceGenerator
                             Context = context,
                             StructName = identifier,
                             FullyQualifiedStructType = fullyQualifiedIdentifier,
-                            StructMembers = structDeclaration.GetStructMembers(context, true),
+                            StructMembers = structDeclaration.GetStructMembers(context.Compilation, true),
                             HasEqualityOperators = hasEqualityOperators,
                             UsingStatements = usingStatements
                         }

@@ -87,7 +87,7 @@ public class RecvGenerator : ISourceGenerator
                         options = value[1..^1].Trim();
                 }
 
-                MethodInfo method = methodSyntax.GetMethodInfo(context);
+                MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
 
                 // Only process methods with a reference receiver to create
                 // a generated overload the handles a ptr<T> receiver

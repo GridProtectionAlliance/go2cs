@@ -99,7 +99,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                     throw new InvalidOperationException($"Unable to find struct declaration named \"{targetTypeName}\"");
 
                 structMembers = structDeclaration
-                    .GetStructMembers(context, true)
+                    .GetStructMembers(context.Compilation, true)
                     .Select(member => (member.typeName, member.memberName))
                     .ToList();
             }

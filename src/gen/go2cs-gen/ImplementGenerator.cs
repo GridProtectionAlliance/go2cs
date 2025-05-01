@@ -92,7 +92,8 @@ public class ImplementGenerator : ISourceGenerator
 
             // Get all extension methods for the struct, any directly defined receivers
             // take precedence over promoted interface methods that have the same name
-            IEnumerable<MethodInfo>? structMethods = context.GetStructDeclaration(structType.ToDisplayString())?.GetExtensionMethods(context);
+            (StructDeclarationSyntax? structDecl, Compilation? compilation) = context.GetStructDeclaration(structType.ToDisplayString());
+            IEnumerable<MethodInfo>? structMethods = structDecl is null ? [] : structDecl.GetExtensionMethods(compilation!);
             HashSet<string> overrides = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
             List<MethodInfo> methods = interfaceType.AllInterfaces

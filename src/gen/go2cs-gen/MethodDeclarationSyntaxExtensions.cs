@@ -139,9 +139,9 @@ public record MethodInfo
 
 public static class MethodSyntaxExtensions
 {
-    public static MethodInfo GetMethodInfo(this MethodDeclarationSyntax methodDeclaration, GeneratorExecutionContext context)
+    public static MethodInfo GetMethodInfo(this MethodDeclarationSyntax methodDeclaration, Compilation compilation)
     {
-        SemanticModel semanticModel = context.Compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
+        SemanticModel semanticModel = compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
 
         string[] typeParameters = methodDeclaration.TypeParameterList?.Parameters
             .Select(param => param.Identifier.Text)

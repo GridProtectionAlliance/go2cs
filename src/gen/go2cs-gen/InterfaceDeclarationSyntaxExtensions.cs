@@ -48,7 +48,7 @@ public static class InterfaceDeclarationSyntaxExtensions
         IEnumerable<MethodInfo> directMethods = interfaceDeclaration
             .Members
             .OfType<MethodDeclarationSyntax>()
-            .Select(method => method.GetMethodInfo(context));
+            .Select(method => method.GetMethodInfo(context.Compilation));
 
         allMethods.AddRange(directMethods);
 

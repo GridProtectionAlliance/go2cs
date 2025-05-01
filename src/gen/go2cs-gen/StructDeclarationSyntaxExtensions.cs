@@ -88,13 +88,13 @@ public static class StructDeclarationSyntaxExtensions
     // Gets fields and properties of a struct, maintaining the order in which they are defined
     public static List<(string typeName, string memberName, bool isReferenceType, bool isProperty)> GetStructMembers(
         this StructDeclarationSyntax structDeclaration,
-        GeneratorExecutionContext context,
+        Compilation compilation,
         bool filterToRefProperties = false)
     {
-        SemanticModel semanticModel = context.Compilation.GetSemanticModel(structDeclaration.SyntaxTree);
+        SemanticModel semanticModel = compilation.GetSemanticModel(structDeclaration.SyntaxTree);
         List<(string typeName, string memberName, bool isReferenceType, bool isProperty)> members = [];
 
-        foreach (MemberDeclarationSyntax? member in structDeclaration.Members)
+        foreach (MemberDeclarationSyntax member in structDeclaration.Members)
         {
             if (member.Modifiers.Any(SyntaxKind.StaticKeyword))
                 continue;
@@ -154,10 +154,9 @@ public static class StructDeclarationSyntaxExtensions
 
     public static IEnumerable<MethodInfo> GetExtensionMethods(
         this StructDeclarationSyntax structDeclaration, 
-        GeneratorExecutionContext context)
+        Compilation compilation)
     {
         string structName = structDeclaration.Identifier.Text;
-        Compilation compilation = context.Compilation;
 
         // Get all extension method declarations in the compilation
         IEnumerable<MethodDeclarationSyntax> extensions = compilation.SyntaxTrees
@@ -169,7 +168,7 @@ public static class StructDeclarationSyntaxExtensions
                     method.ParameterList.Parameters.Count > 0))
             .Where(method => method.IsExtensionMethodForStruct(structName));
 
-        return extensions.Select(method => method.GetMethodInfo(context));
+        return extensions.Select(method => method.GetMethodInfo(compilation));
     }
 
     private static bool IsExtensionMethodForStruct(this MethodDeclarationSyntax method, string structName)
