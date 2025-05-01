@@ -52,10 +52,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	}
 
 	var replacementArgs []string
+	funcSignature := v.getFunctionSignature(callExpr)
 
-	// Check if any parameters of callExpr.Fun are interface or pointer types
-	if funType, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
-		params := funType.Params()
+	if funcSignature != nil {
+		// Check if any parameters of callExpr.Fun are interface or pointer types
+		params := funcSignature.Params()
 
 		for i := range params.Len() {
 			var paramType types.Type
@@ -81,9 +82,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			funcName := v.convExpr(callExpr.Fun, nil)
 
 			// Handle builtin functions that take `...Type` parameters, treat as `interface{}`
+			var ok bool
+
 			if funcName == "print" || funcName == "println" {
 				paramType = types.NewInterfaceType(nil, nil)
-			} else if paramType, ok = getParameterType(funType, i); !ok {
+			} else if paramType, ok = getParameterType(funcSignature, i); !ok {
 				continue
 			}
 
@@ -178,7 +181,6 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext.deferredDecls = context.deferredDecls
 
 	var typeParamExpr string
-
 	resultType := v.info.TypeOf(callExpr)
 
 	if resultType != nil {
@@ -640,4 +642,183 @@ func getShortFileName(fileToken *token.File) string {
 	}
 
 	return filepath.Base(fileToken.Name())
+}
+
+func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature {
+	switch fun := callExpr.Fun.(type) {
+	case *ast.Ident:
+		// Simple identifiers
+		obj := v.info.Uses[fun]
+		if obj == nil {
+			return nil
+		}
+
+		if fn, ok := obj.(*types.Func); ok {
+			return fn.Type().(*types.Signature)
+		}
+
+		if vr, ok := obj.(*types.Var); ok {
+			if sig, ok := vr.Type().(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.SelectorExpr:
+		// Qualified identifiers and method calls
+		sel, ok := v.info.Selections[fun]
+		if ok {
+			// Method call
+			if fn, ok := sel.Obj().(*types.Func); ok {
+				return fn.Type().(*types.Signature)
+			}
+			return nil
+		}
+
+		// Package-qualified function
+		if _, ok := fun.X.(*ast.Ident); ok {
+			obj := v.info.Uses[fun.Sel]
+			if obj == nil {
+				return nil
+			}
+
+			if fn, ok := obj.(*types.Func); ok {
+				return fn.Type().(*types.Signature)
+			}
+
+			if vr, ok := obj.(*types.Var); ok {
+				if sig, ok := vr.Type().(*types.Signature); ok {
+					return sig
+				}
+			}
+		}
+
+	case *ast.ParenExpr:
+		// Handle parenthesized expressions like (pkg.Func)()
+		return v.getFunctionSignature(&ast.CallExpr{Fun: fun.X})
+
+	case *ast.CallExpr:
+		// Functions returned by other functions
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.FuncLit:
+		// Anonymous functions
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.IndexExpr:
+		// Generic function instantiations
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.IndexListExpr:
+		// Multiple type parameter instantiations
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.TypeAssertExpr:
+		// Type assertions: (x.(T))()
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.StarExpr:
+		// Dereferencing a function pointer: (*fnPtr)()
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.UnaryExpr:
+		// Unary expressions like (*ptr)()
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.BinaryExpr:
+		// Binary expressions that somehow evaluate to functions
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.CompositeLit:
+		// Composite literals that are callable
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+
+	case *ast.ArrayType, *ast.ChanType, *ast.FuncType, *ast.InterfaceType,
+		*ast.MapType, *ast.StructType:
+		// Type expressions
+		if t := v.info.TypeOf(fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+	}
+
+	// Handle type conversion cases that return callable functions
+	// This covers cases like (*byte)(unsafe.Pointer(...))
+	if callExpr, ok := callExpr.Fun.(*ast.CallExpr); ok {
+		if fun, ok := callExpr.Fun.(*ast.ParenExpr); ok {
+			if t := v.info.TypeOf(fun.X); t != nil {
+				if sig, ok := t.(*types.Signature); ok {
+					return sig
+				}
+			}
+		}
+
+		// Handle types directly
+		if t := v.info.TypeOf(callExpr.Fun); t != nil {
+			if sig, ok := t.(*types.Signature); ok {
+				return sig
+			}
+		}
+	}
+
+	// Final general fallback - this should catch most remaining cases
+	if t := v.info.TypeOf(callExpr.Fun); t != nil {
+		if sig, ok := t.(*types.Signature); ok {
+			return sig
+		}
+
+		if sig, ok := t.Underlying().(*types.Signature); ok {
+			return sig
+		}
+	}
+
+	resultType := v.info.TypeOf(callExpr)
+
+	if resultType != nil && strings.Contains(resultType.String(), "unsafe.Pointer") {
+		pkg := types.NewPackage("unsafe", "unsafe")
+
+		// Only concerned with making the parameter a "pointer like" type
+		uintptrType := types.Typ[types.Uintptr]
+		params := types.NewTuple(types.NewParam(token.NoPos, pkg, "", types.NewPointer(uintptrType)))
+
+		return types.NewSignatureType(nil, nil, nil, params, nil, false)
+	}
+
+	return nil
 }
