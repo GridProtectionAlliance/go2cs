@@ -820,6 +820,12 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				switch init := node.Init.(type) {
 				case *ast.AssignStmt:
 					processor.processAssignStmt(init)
+				case *ast.IncDecStmt:
+					// Process increment/decrement expressions
+					if ident, ok := init.X.(*ast.Ident); ok {
+						// This is always a reassignment, never a declaration
+						processor.processIdent(ident, false)
+					}
 				}
 			}
 
@@ -875,6 +881,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				switch init := node.Init.(type) {
 				case *ast.AssignStmt:
 					processor.processAssignStmt(init)
+				case *ast.IncDecStmt:
+					if ident, ok := init.X.(*ast.Ident); ok {
+						processor.processIdent(ident, false) // Treat as reassignment
+					}
 				}
 			}
 
@@ -906,6 +916,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 					// Exit the current scope
 					v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+
+					// Ensure case clause identifiers in expressions are checked for shadowing
+					for _, expr := range caseClause.List {
+						ast.Inspect(expr, func(n ast.Node) bool {
+							if ident, ok := n.(*ast.Ident); ok {
+								if obj := v.info.Uses[ident]; obj != nil {
+									if varObj, ok := obj.(*types.Var); ok {
+										if adjustedName, ok := v.varNames[varObj]; ok {
+											v.identNames[ident] = adjustedName
+										}
+									}
+								}
+							}
+							return true
+						})
+					}
 				}
 			}
 
@@ -947,6 +973,21 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				processor.processAssignStmt(assign)
 			}
 
+			// Add handling for identifiers within type switch assign
+			if assign, ok := node.Assign.(*ast.ExprStmt); ok {
+				if typeAssert, ok := assign.X.(*ast.TypeAssertExpr); ok {
+					if ident, ok := typeAssert.X.(*ast.Ident); ok {
+						if obj := v.info.Uses[ident]; obj != nil {
+							if varObj, ok := obj.(*types.Var); ok {
+								if adjustedName, ok := v.varNames[varObj]; ok {
+									v.identNames[ident] = adjustedName
+								}
+							}
+						}
+					}
+				}
+			}
+
 			tracker.processing = false
 
 			visitNode(node.Body)
@@ -982,6 +1023,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					}
 				}
 			}
+
 			if node.Value != nil {
 				if valueIdent := getIdentifier(node.Value); valueIdent != nil {
 					processor.processIdent(valueIdent, node.Tok == token.DEFINE)
@@ -989,6 +1031,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					if shadowName, ok := v.identNames[valueIdent]; ok {
 						rangeVars[valueIdent.Name] = shadowName
 					}
+				}
+			}
+
+			if node.Key != nil && node.Tok == token.ASSIGN {
+				if keyIdent := getIdentifier(node.Key); keyIdent != nil {
+					processor.processIdent(keyIdent, false) // Treat as reassignment
+				}
+			}
+
+			if node.Value != nil && node.Tok == token.ASSIGN {
+				if valueIdent := getIdentifier(node.Value); valueIdent != nil {
+					processor.processIdent(valueIdent, false) // Treat as reassignment
 				}
 			}
 
@@ -1113,6 +1167,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 		case *ast.SelectorExpr:
+			// First, process X part for shadowing if it's an identifier
+			if id, ok := node.X.(*ast.Ident); ok {
+				if obj := v.info.Uses[id]; obj != nil {
+					if varObj, ok := obj.(*types.Var); ok {
+						if adjustedName, ok := v.varNames[varObj]; ok {
+							v.identNames[id] = adjustedName
+						}
+					}
+				}
+			}
+
+			// Then handle the existing lambda conversion logic
 			if v.requiresLambdaConversion(node) {
 				v.lambdaCapture.analysisInLambda = true
 				v.lambdaCapture.currentLambda = node
@@ -1125,6 +1191,77 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				v.lambdaCapture.analysisInLambda = false
 				v.lambdaCapture.currentLambda = nil
 			}
+
+			// Recursively visit X and Sel
+			visitNode(node.X)
+			visitNode(node.Sel)
+
+		case *ast.TypeAssertExpr:
+			// Process the expression being asserted
+			if expr, ok := node.X.(*ast.Ident); ok {
+				if obj := v.info.Uses[expr]; obj != nil {
+					if varObj, ok := obj.(*types.Var); ok {
+						if adjustedName, ok := v.varNames[varObj]; ok {
+							v.identNames[expr] = adjustedName
+						}
+					}
+				}
+			}
+			visitNode(node.X)
+			visitNode(node.Type)
+
+		case *ast.CompositeLit:
+			// Process identifiers in key expressions for struct literals and map literals
+			for _, elt := range node.Elts {
+				if kv, ok := elt.(*ast.KeyValueExpr); ok {
+					if ident, ok := kv.Key.(*ast.Ident); ok {
+						if obj := v.info.Uses[ident]; obj != nil {
+							if varObj, ok := obj.(*types.Var); ok {
+								if adjustedName, ok := v.varNames[varObj]; ok {
+									v.identNames[ident] = adjustedName
+								}
+							}
+						}
+					}
+				}
+			}
+
+			// Visit children normally
+			ast.Inspect(node, func(child ast.Node) bool {
+				if child == node {
+					return true
+				}
+				if child != nil {
+					visitNode(child)
+				}
+				return false
+			})
+
+		case *ast.IndexExpr:
+			// Process the array/slice/map being indexed
+			if ident, ok := node.X.(*ast.Ident); ok {
+				if obj := v.info.Uses[ident]; obj != nil {
+					if varObj, ok := obj.(*types.Var); ok {
+						if adjustedName, ok := v.varNames[varObj]; ok {
+							v.identNames[ident] = adjustedName
+						}
+					}
+				}
+			}
+
+			// Process the index expression
+			if ident, ok := node.Index.(*ast.Ident); ok {
+				if obj := v.info.Uses[ident]; obj != nil {
+					if varObj, ok := obj.(*types.Var); ok {
+						if adjustedName, ok := v.varNames[varObj]; ok {
+							v.identNames[ident] = adjustedName
+						}
+					}
+				}
+			}
+
+			visitNode(node.X)
+			visitNode(node.Index)
 
 		default:
 			// Visit child nodes
