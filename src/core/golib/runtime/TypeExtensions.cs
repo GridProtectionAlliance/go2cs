@@ -240,6 +240,16 @@ public static class TypeExtensions
     }
 
     /// <summary>
+    /// Get the "~" ones complement operator for the specified <paramref name="type"/>.
+    /// </summary>
+    /// <param name="type">Type to search for equality operator.</param>
+    /// <returns>Ones complement operator for <paramref name="type"/> if found; otherwise, <c>null</c>.</returns>
+    public static MethodInfo? GetOnesComplementOperator(this Type type)
+    {
+        return s_typeEqualityOperators.GetOrAdd(type, _ => type.GetMethod("op_OnesComplement", BindingFlags.Static | BindingFlags.Public, [type]));
+    }
+
+    /// <summary>
     /// Determines if <paramref name="targetType"/> implements specified <paramref name="interfaceType"/>.
     /// </summary>
     /// <param name="targetType">Target type to test.</param>
