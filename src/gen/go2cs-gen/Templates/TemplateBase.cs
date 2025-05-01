@@ -50,6 +50,9 @@ internal abstract class TemplateBase
         if (!string.IsNullOrWhiteSpace(PackageNamespace) && !PackageNamespace.Equals("go"))
             m_usings.Add("using go;");
 
+        if (m_usings.Contains("using global::go;") && m_usings.Contains("using go;"))
+            m_usings.Remove("using global::go;");
+
         return $"{TemplateHeader}{TemplateBody}{TemplateFooter}";
     }
 
