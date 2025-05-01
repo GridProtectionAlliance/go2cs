@@ -49,12 +49,12 @@ using static go.@internal.reflectlite_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<rtype, ΔType>]
+//[assembly: GoImplement<rtype, ΔType>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
-[assembly: GoImplicitConv<flag, Kind>(Inverted = true, ValueType = "uintptr")]
-[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
+//[assembly: GoImplicitConv<flag, Kind>(Inverted = true, ValueType = "uintptr")]
+//[assembly: GoImplicitConv<flag, abiꓸKind>(Inverted = false, ValueType = "uint8")]
 // </ImplicitConversions>
 
 namespace go.@internal;

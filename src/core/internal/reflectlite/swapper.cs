@@ -1,11 +1,15 @@
 // Copyright 2016 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+using go;
+
+[module: GoManualConversion]
+
 namespace go.@internal;
 
-using goarch = @internal.goarch_package;
-using unsafeheader = @internal.unsafeheader_package;
-using @unsafe = unsafe_package;
+//using goarch = @internal.goarch_package;
+//using unsafeheader = @internal.unsafeheader_package;
+//using @unsafe = unsafe_package;
 
 partial class reflectlite_package {
 
@@ -15,9 +19,11 @@ partial class reflectlite_package {
 // Swapper panics if the provided interface is not a slice.
 public static Action<nint, nint> Swapper(any Δslice) {
     var v = ValueOf(Δslice);
+
     if (v.Kind() != Slice) {
         throw panic(Ꮡ(new ValueError(Method: "Swapper"u8, Kind: v.Kind())));
     }
+
     // Fast path for slices of size 0 and 1. Nothing to swap.
     switch (v.Len()) {
     case 0: {
@@ -33,6 +39,14 @@ public static Action<nint, nint> Swapper(any Δslice) {
         };
     }}
 
+    ISlice @is = (v.Target as ISlice)!;
+    ISlice isʗ1 = @is;
+
+    return (i, j) => {
+        (isʗ1[i], isʗ1[j]) = (isʗ1[j], isʗ1[i]);
+    };
+
+    /*
     var typ = v.Type().Elem().common();
     var size = typ.Size();
     var hasPtr = typ.Pointers();
@@ -99,6 +113,7 @@ public static Action<nint, nint> Swapper(any Δslice) {
         typedmemmove(typʗ1, val1, val2);
         typedmemmove(typʗ1, val2, tmp);
     };
+    */
 }
 
 } // end reflectlite_package

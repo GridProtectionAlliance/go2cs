@@ -11,6 +11,9 @@ using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using global::System.Diagnostics;
+using global::System.Reflection;
+using global::go.runtime;
 using go;
 
 #nullable enable

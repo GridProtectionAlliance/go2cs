@@ -100,13 +100,18 @@
     <!-- Remove test files from current folder -->
     <Compile Remove="*._test.cs" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Remove="type_impl.cs" />
+    <Compile Remove="value_impl.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
     <ProjectReference Include="$(go2csPath)core\internal\abi\internal.abi.csproj" />
     <ProjectReference Include="$(go2csPath)core\internal\goarch\internal.goarch.csproj" />
-    <ProjectReference Include="$(go2csPath)core\internal\unsafeheader\internal.unsafeheader.csproj" />
-    <ProjectReference Include="$(go2csPath)core\runtime\runtime.csproj" />
+    <!-- ProjectReference Include="$(go2csPath)core\internal\unsafeheader\internal.unsafeheader.csproj" / -->
+    <!-- ProjectReference Include="$(go2csPath)core\runtime\runtime.csproj" / -->
     <ProjectReference Include="$(go2csPath)core\unsafe\unsafe.csproj" />
   </ItemGroup>
 

@@ -5,17 +5,23 @@
 // Package reflectlite implements lightweight version of reflect, not using
 // any package except for "runtime", "unsafe", and "internal/abi"
 global using Kind = go.@internal.abi_package.ΔKind;
-global using nameOff = go.@internal.abi_package.NameOff;
-global using typeOff = go.@internal.abi_package.TypeOff;
-global using textOff = go.@internal.abi_package.TextOff;
-global using uncommonType = go.@internal.abi_package.UncommonType;
-global using arrayType = go.@internal.abi_package.ΔArrayType;
-global using chanType = go.@internal.abi_package.ChanType;
-global using funcType = go.@internal.abi_package.ΔFuncType;
-global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
-global using ptrType = go.@internal.abi_package.PtrType;
-global using sliceType = go.@internal.abi_package.SliceType;
-global using structType = go.@internal.abi_package.ΔStructType;
+//global using nameOff = go.@internal.abi_package.NameOff;
+//global using typeOff = go.@internal.abi_package.TypeOff;
+//global using textOff = go.@internal.abi_package.TextOff;
+//global using uncommonType = go.@internal.abi_package.UncommonType;
+//global using arrayType = go.@internal.abi_package.ΔArrayType;
+//global using chanType = go.@internal.abi_package.ChanType;
+//global using funcType = go.@internal.abi_package.ΔFuncType;
+//global using interfaceType = go.@internal.abi_package.ΔInterfaceType;
+//global using ptrType = go.@internal.abi_package.PtrType;
+//global using sliceType = go.@internal.abi_package.SliceType;
+//global using structType = go.@internal.abi_package.ΔStructType;
+
+using System.Runtime.InteropServices;
+using go;
+using go.runtime;
+
+[module: GoManualConversion]
 
 namespace go.@internal;
 
@@ -35,8 +41,8 @@ partial class reflectlite_package {
 // Type values are comparable, such as with the == operator,
 // so they can be used as map keys.
 // Two Type values are equal if they represent identical types.
-[GoType] partial interface ΔType {
-// Methods applicable to all types.
+[GoType] partial interface ΔType { 
+    // Methods applicable to all types.
 
     // Name returns the type's name within its package for a defined type.
     // For other (non-defined) types it returns the empty string.
@@ -67,8 +73,146 @@ partial class reflectlite_package {
     // Elem returns a type's element type.
     // It panics if the type's Kind is not Ptr.
     ΔType Elem();
+    
+    /*
     ж<abi.Type> common();
     ж<uncommonType> uncommon();
+    */
+}
+
+internal class ProxyTypeImpl : ΔType
+{
+    public required Type TargetType { get; init; }
+
+    public @string Name()
+    {
+        return TargetType.Name;
+    }
+
+    public @string PkgPath()
+    {
+        throw new NotImplementedException();
+    }
+
+    public uintptr Size()
+    {
+        return (uintptr)Marshal.SizeOf(TargetType);
+    }
+
+    public Kind Kind()
+    {
+        if (TargetType == typeof(bool))
+            return abi.Bool;
+        if (TargetType == typeof(nint))
+            return abi.Int;
+        if (TargetType == typeof(int8))
+            return abi.Int8;
+        if (TargetType == typeof(int16))
+            return abi.Int16;
+        if (TargetType == typeof(int32))
+            return abi.Int32;
+        if (TargetType == typeof(int64))
+            return abi.Int64;
+        if (TargetType == typeof(nuint))
+            return abi.Uint;
+        if (TargetType == typeof(uint8))
+            return abi.Uint8;
+        if (TargetType == typeof(uint16))
+            return abi.Uint16;
+        if (TargetType == typeof(uint32))
+            return abi.Uint32;
+        if (TargetType == typeof(uint64))
+            return abi.Uint64;
+        if (TargetType == typeof(uintptr)) // TODO: This will never be reached since it matches nuint above
+            return abi.Uintptr;
+        if (TargetType == typeof(float32))
+            return abi.Float32;
+        if (TargetType == typeof(float64))
+            return abi.Float64;
+        if (TargetType == typeof(complex64))
+            return abi.Complex64;
+        if (TargetType == typeof(complex128))
+            return abi.Complex128;
+        if (TargetType.IsPointer)
+            return abi.Pointer;
+        if (TargetType.IsInterface)
+            return abi.Interface;
+        if (TargetType.IsValueType)
+            return abi.Struct;
+        if (TargetType == typeof(@unsafe.Pointer))
+            return abi.UnsafePointer;
+        if (TargetType == typeof(@string) || TargetType == typeof(string))
+            return abi.ΔString;
+
+        if (!TargetType.IsGenericType)
+            return abi.Invalid;
+        
+        Type genericTarget = TargetType.GetGenericTypeDefinition();
+
+        if (genericTarget == typeof(array<>))
+            return abi.Array;
+        if (genericTarget == typeof(channel<>))
+            return abi.Chan;
+        if (genericTarget == typeof(Action<>) || genericTarget == typeof(Func<>))
+            return abi.Func;
+        if (genericTarget == typeof(map<,>))
+            return abi.Map;
+        if (genericTarget == typeof(ж<>))
+            return abi.Pointer;
+        if (genericTarget == typeof(slice<>))
+            return abi.Slice;
+
+        return abi.Invalid;
+    }
+
+    public bool Implements(ΔType u)
+    {
+        if (u == null)
+            throw panic("reflect: nil type passed to Type.Implements");
+
+        Type uType = u.GetType();
+
+        if (!uType.IsInterface)
+            throw panic("reflect: non-interface type passed to Type.Implements");
+
+        return TargetType.ImplementsInterface(uType);
+    }
+
+    public bool AssignableTo(ΔType u)
+    {
+        if (u == null)
+            throw panic("reflect: nil type passed to Type.AssignableTo");
+
+        Type uType = u.GetType();
+
+        return TargetType.IsAssignableTo(uType);
+    }
+
+    public bool Comparable()
+    {
+        return TargetType.GetEqualityOperator() is not null;
+    }
+
+    public @string String()
+    {
+        return TargetType.Name;
+    }
+
+    public ΔType Elem()
+    {
+        Kind kind = Kind();
+        Type[] genericArgs = TargetType.GetGenericArguments();
+
+        if (genericArgs.Length > 0 &&
+                kind == abi.Array ||
+                kind == abi.Chan ||
+                kind == abi.Map ||
+                kind == abi.Pointer |
+                kind == abi.Slice)
+            return new ProxyTypeImpl { TargetType = genericArgs[0] };
+
+        throw panic("reflect: Elem of invalid type "u8 + String());
+    }
 }
 
 /*
@@ -83,6 +227,7 @@ public static readonly abiꓸKind Slice = /* abi.Slice */ 23;
 public static readonly abiꓸKind ΔString = /* abi.String */ 24;
 public static readonly abiꓸKind Struct = /* abi.Struct */ 25;
 
+/*
 [GoType] partial struct rtype {
     public partial ref ж<@internal.abi_package.Type> Type { get; }
 }
@@ -177,12 +322,14 @@ internal static @string pkgPath(abiꓸName n) {
     var pkgPathName = new Δname((ж<byte>)(uintptr)(resolveTypeOff(new @unsafe.Pointer(n.Bytes), nameOff)));
     return pkgPathName.name();
 }
+*/
 
 /*
  * The compiler knows the exact layout of all the data structures above.
  * The compiler does not know about the data structures and methods below.
  */
 
+/*
 // resolveNameOff resolves a name offset from a base pointer.
 // The (*rtype).nameOff method is a convenience wrapper for this function.
 // Implemented in the runtime package.
@@ -357,13 +504,16 @@ internal static ΔType Out(this rtype t, nint i) {
 internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x, @string whySafe) {
     return ((@unsafe.Pointer)(((uintptr)p) + x));
 }
+*/
 
 // TypeOf returns the reflection Type that represents the dynamic type of i.
 // If i is a nil interface value, TypeOf returns nil.
 public static ΔType TypeOf(any i) {
-    return toType(abi.TypeOf(i));
+    return new ProxyTypeImpl { TargetType = i.GetType() };
+    //return toType(abi.TypeOf(i));
 }
 
+/*
 internal static bool Implements(this rtype t, ΔType u) {
     if (u == default!) {
         throw panic("reflect: nil type passed to Type.Implements");
@@ -626,5 +776,6 @@ internal static ΔType toType(ж<abi.Type> Ꮡt) {
     }
     return toRType(Ꮡt);
 }
+*/
 
 } // end reflectlite_package

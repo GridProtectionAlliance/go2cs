@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using go;
 
 #nullable enable
@@ -22,24 +23,37 @@ public static partial class reflectlite_package
     internal partial struct rtype
     {
         // Promoted Struct References
-        // -- rtype has no promoted structs
+        private readonly ж<global::go.ж<global::go.@internal.abi_package.Type>> ᏑʗType;
+
+        // Promoted Struct Accessors
+        public partial ref global::go.ж<global::go.@internal.abi_package.Type> Type => ref ᏑʗType.val;
+
+        // Promoted Struct Field Accessors
+
+        // Promoted Struct Field Accessor References
 
         // Field References
-        // -- rtype has no defined fields
+        public static ref global::go.ж<global::go.@internal.abi_package.Type> ᏑType(ref rtype instance) => ref instance.Type;
         
         // Constructors
         public rtype(NilType _)
         {
+            ᏑʗType = new ж<global::go.ж<global::go.@internal.abi_package.Type>>(new global::go.ж<global::go.@internal.abi_package.Type>(nil));
         }
 
+        public rtype(global::go.ж<global::go.@internal.abi_package.Type> Type = default!)
+        {
+            ᏑʗType = new ж<global::go.ж<global::go.@internal.abi_package.Type>>(Type);
+        }
         
         // Handle comparisons between struct 'rtype' instances
         public bool Equals(rtype other) =>
-            true /* empty */;
+            Type == other.Type;
         
         public override bool Equals(object? obj) => obj is rtype other && Equals(other);
         
-        public override int GetHashCode() => base.GetHashCode();
+        public override int GetHashCode() => runtime.HashCode.Combine(
+            Type);
         
         public static bool operator ==(rtype left, rtype right) => left.Equals(right);
         
@@ -58,7 +72,9 @@ public static partial class reflectlite_package
 
         public override string ToString() => string.Concat("{", string.Join(" ",
         [
-            ""
+            Type?.ToString() ?? "<nil>"
         ]), "}");
     }
+
+    // Promoted Struct Receivers
 }

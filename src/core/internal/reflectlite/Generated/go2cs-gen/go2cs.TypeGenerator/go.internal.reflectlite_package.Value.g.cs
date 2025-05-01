@@ -10,6 +10,7 @@ using System;
 using System.CodeDom.Compiler;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using go;
 
 #nullable enable
@@ -89,25 +90,33 @@ public static partial class reflectlite_package
     }
 
     // Promoted Struct Receivers
+    [OverloadResolutionPriority(1)]
     public static go.@internal.abi_package.ΔKind kind(this ref Value target) => target.flag.kind();
+    [OverloadResolutionPriority(1)]
     public static go.@internal.abi_package.ΔKind kind(this ж<Value> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.kind();
     }
+    [OverloadResolutionPriority(1)]
     internal static go.@internal.reflectlite_package.flag ro(this ref Value target) => target.flag.ro();
+    [OverloadResolutionPriority(1)]
     internal static go.@internal.reflectlite_package.flag ro(this ж<Value> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         return target.ro();
     }
+    [OverloadResolutionPriority(1)]
     public static void mustBeExported(this ref Value target) => target.flag.mustBeExported();
+    [OverloadResolutionPriority(1)]
     public static void mustBeExported(this ж<Value> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
         target.mustBeExported();
     }
+    [OverloadResolutionPriority(1)]
     public static void mustBeAssignable(this ref Value target) => target.flag.mustBeAssignable();
+    [OverloadResolutionPriority(1)]
     public static void mustBeAssignable(this ж<Value> Ꮡtarget)
     {
         ref var target = ref Ꮡtarget.val;
