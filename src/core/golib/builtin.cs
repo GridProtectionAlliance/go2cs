@@ -28,7 +28,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -485,22 +484,75 @@ public static class builtin
     }
 
     /// <summary>
+    /// Copies elements from a source array into a destination array.
+    /// </summary>
+    /// <param name="dst">Destination array.</param>
+    /// <param name="src">Source array.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in array<T1> dst, in array<T2> src)
+    {
+        return copy(dst.Slice(0, dst.Length), src.Slice(0, src.Length));
+    }
+
+    /// <summary>
+    /// Copies elements from a source array pointer into a destination array pointer.
+    /// </summary>
+    /// <param name="dst">Destination array pointer.</param>
+    /// <param name="src">Source array pointer.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in ж<array<T1>> dst, in ж<array<T2>> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)dst);
+        ArgumentNullException.ThrowIfNull((object?)src);
+
+        return copy(dst.val, src.val);
+    }
+
+    /// <summary>
+    /// Copies elements from a source array pointer into a destination array.
+    /// </summary>
+    /// <param name="dst">Destination array pointer.</param>
+    /// <param name="src">Source array.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in ж<array<T1>> dst, in array<T2> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)dst);
+
+        return copy(dst.val, src);
+    }
+
+    /// <summary>
+    /// Copies elements from a source array into a destination array pointer.
+    /// </summary>
+    /// <param name="dst">Destination array.</param>
+    /// <param name="src">Source array pointer.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in array<T1> dst, in ж<array<T2>> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)src);
+
+        return copy(dst, src.val);
+    }
+
+    /// <summary>
     /// Copies elements from a source slice into a destination slice.
     /// The source and destination may overlap.
     /// </summary>
-    /// <param name="dst">Destination slice pointer.</param>
-    /// <param name="src">Source slice pointer.</param>
+    /// <param name="dst">Destination slice.</param>
+    /// <param name="src">Source slice.</param>
     /// <returns>
     /// The number of elements copied, which will be the minimum of len(src) and len(dst).
     /// </returns>
     public static nint copy<T1, T2>(in slice<T1> dst, in slice<T2> src)
     {
-        if (dst == nil)
-            throw new InvalidOperationException("Destination slice array reference is null.");
-
-        if (src == nil)
-            throw new InvalidOperationException("Source slice array reference is null.");
-
         nint min = Min(dst.Length, src.Length);
 
         if (min > 0)
@@ -520,10 +572,59 @@ public static class builtin
     }
 
     /// <summary>
-    /// Copies elements from a source slice into a destination slice.
+    /// Copies elements from a source slice pointer into a destination slice pointer.
     /// The source and destination may overlap.
     /// </summary>
     /// <param name="dst">Destination slice pointer.</param>
+    /// <param name="src">Source slice pointer.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in ж<slice<T1>> dst, in ж<slice<T2>> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)dst);
+        ArgumentNullException.ThrowIfNull((object?)src);
+
+        return copy(dst.val, src.val);
+    }
+
+    /// <summary>
+    /// Copies elements from a source slice pointer into a destination slice.
+    /// The source and destination may overlap.
+    /// </summary>
+    /// <param name="dst">Destination slice pointer.</param>
+    /// <param name="src">Source slice.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in ж<slice<T1>> dst, in slice<T2> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)dst);
+
+        return copy(dst.val, src);
+    }
+
+    /// <summary>
+    /// Copies elements from a source slice into a destination slice pointer.
+    /// The source and destination may overlap.
+    /// </summary>
+    /// <param name="dst">Destination slice.</param>
+    /// <param name="src">Source slice pointer.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    public static nint copy<T1, T2>(in slice<T1> dst, in ж<slice<T2>> src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)src);
+
+        return copy(dst, src.val);
+    }
+
+    /// <summary>
+    /// Copies elements from a source slice into a destination slice.
+    /// The source and destination may overlap.
+    /// </summary>
+    /// <param name="dst">Destination slice.</param>
     /// <param name="src">Source slice.</param>
     /// <returns>
     /// The number of elements copied, which will be the minimum of len(src) and len(dst).
@@ -535,6 +636,25 @@ public static class builtin
     {
         slice<byte> bytes = src;
         return copy(dst, bytes);
+    }
+
+    /// <summary>
+    /// Copies elements from a source slice pointer into a destination slice.
+    /// The source and destination may overlap.
+    /// </summary>
+    /// <param name="dst">Destination slice pointer.</param>
+    /// <param name="src">Source slice.</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    /// <remarks>
+    /// As a special case, it also will copy bytes from a string to a slice of bytes.
+    /// </remarks>
+    public static nint copy(in ж<slice<byte>> dst, in @string src)
+    {
+        ArgumentNullException.ThrowIfNull((object?)dst);
+
+        return copy(dst.val, src);
     }
 
     /// <summary>
