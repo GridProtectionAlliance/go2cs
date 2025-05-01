@@ -84,6 +84,7 @@ public static readonly abiꓸKind ΔString = /* abi.String */ 24;
 public static readonly abiꓸKind Struct = /* abi.Struct */ 25;
 
 [GoType] partial struct rtype {
+    public partial ref ж<@internal.abi_package.Type> Type { get; }
 }
 
 // name is an encoded type name with optional extra data.
@@ -220,7 +221,7 @@ internal static ж<abi.Type> common(this rtype t) {
     return t.Type;
 }
 
-internal static abi.Method exportedMethods(this rtype t) {
+internal static slice<abi.Method> exportedMethods(this rtype t) {
     var ut = t.uncommon();
     if (ut == nil) {
         return default!;
@@ -413,12 +414,12 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
     // the quadratic time  a naive search would require.
     // See also ../runtime/iface.go.
     if (V.Kind() == Interface) {
-        var vΔ1 = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(V));
+        var vΔ1 = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(ᏑV));
         nint iΔ1 = 0;
-        for (nint jΔ1 = 0; jΔ1 < len((~v).Methods); jΔ1++) {
+        for (nint jΔ1 = 0; jΔ1 < len((~vΔ1).Methods); jΔ1++) {
             var tm = Ꮡ((~t).Methods, iΔ1);
             var tmName = rT.nameOff((~tm).Name);
-            var vm = Ꮡ((~v).Methods, jΔ1);
+            var vm = Ꮡ((~vΔ1).Methods, jΔ1);
             var vmName = rV.nameOff((~vm).Name);
             if (vmName.Name() == tmName.Name() && rV.typeOff((~vm).Typ) == rT.typeOff((~tm).Typ)) {
                 if (!tmName.IsExported()) {
@@ -428,14 +429,14 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
                     }
                     @string vmPkgPath = pkgPath(vmName);
                     if (vmPkgPath == ""u8) {
-                        vmPkgPath = (~v).PkgPath.Name();
+                        vmPkgPath = (~vΔ1).PkgPath.Name();
                     }
                     if (tmPkgPath != vmPkgPath) {
                         continue;
                     }
                 }
                 {
-                    i++; if (iΔ1 >= len((~t).Methods)) {
+                    iΔ1++; if (iΔ1 >= len((~t).Methods)) {
                         return true;
                     }
                 }
@@ -545,8 +546,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
  V.Elem(), cmpTags);
     }
     if (exprᴛ1 == abi.Func) {
-        var t = (ж<funcType>)(uintptr)(new @unsafe.Pointer(T));
-        var v = (ж<funcType>)(uintptr)(new @unsafe.Pointer(V));
+        var t = (ж<funcType>)(uintptr)(new @unsafe.Pointer(ᏑT));
+        var v = (ж<funcType>)(uintptr)(new @unsafe.Pointer(ᏑV));
         if ((~t).OutCount != (~v).OutCount || (~t).InCount != (~v).InCount) {
             return false;
         }
@@ -563,8 +564,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         return true;
     }
     if (exprᴛ1 == Interface) {
-        var t = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(T));
-        var v = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(V));
+        var t = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(ᏑT));
+        var v = (ж<interfaceType>)(uintptr)(new @unsafe.Pointer(ᏑV));
         if (len((~t).Methods) == 0 && len((~v).Methods) == 0) {
             return true;
         }
@@ -579,8 +580,8 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
         return haveIdenticalType(T.Elem(), V.Elem(), cmpTags);
     }
     if (exprᴛ1 == abi.Struct) {
-        var t = (ж<structType>)(uintptr)(new @unsafe.Pointer(T));
-        var v = (ж<structType>)(uintptr)(new @unsafe.Pointer(V));
+        var t = (ж<structType>)(uintptr)(new @unsafe.Pointer(ᏑT));
+        var v = (ж<structType>)(uintptr)(new @unsafe.Pointer(ᏑV));
         if (len((~t).Fields) != len((~v).Fields)) {
             return false;
         }
