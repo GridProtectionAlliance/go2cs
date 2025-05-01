@@ -48,7 +48,7 @@ namespace go;
 // instances are defined across various files. As a result, reflection-based detection of this
 // attribute only confirms that at least one file in the module was manually converted, not
 // identifying individual files.
-[AttributeUsage(AttributeTargets.Module)]
+[AttributeUsage(AttributeTargets.Module, AllowMultiple = true)]
 public class GoManualConversionAttribute : Attribute
 {
 }
