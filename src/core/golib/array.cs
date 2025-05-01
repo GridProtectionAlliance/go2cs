@@ -141,6 +141,12 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice<T> this[Range range] => new(m_array, range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length));
 
+
+    public slice<T> Slice(nint start, nint length)
+    {
+        return Slice((int)start, (int)length);
+    }
+
     public slice<T> Slice(int start, int length)
     {
         return new slice<T>(m_array, start, start + length);
