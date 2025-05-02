@@ -34,7 +34,7 @@ func replaceOctalChars(value string) string {
 					value = strings.Replace(value, octal, fmt.Sprintf("\\U%08x", decimal), 1)
 				}
 			} else {
-				println(fmt.Sprintf("WARNING: Failed to parse octal literal \\%s: %s", octal, err))
+				showWarning("Failed to parse octal literal \\%s: %s", octal, err)
 			}
 		}
 	}
@@ -73,7 +73,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 				result.WriteRune('U')
 			}
 		} else {
-			println(fmt.Sprintf("WARNING: Failed to parse integer literal as a 64-bit signed or unsigned int: %s", value))
+			v.showWarning("Failed to parse integer literal as a 64-bit signed or unsigned int: %s", value)
 			result.WriteString(value)
 		}
 	case token.FLOAT:

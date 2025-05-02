@@ -269,9 +269,9 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		context := getExprContext[UnaryExprContext](contexts)
 		return v.convUnaryExpr(exprType, context)
 	case *ast.BadExpr:
-		println(fmt.Sprintf("WARNING: BadExpr encountered: %#v", exprType))
+		v.showWarning("@convExpr - BadExpr encountered: %#v", exprType)
 		return ""
 	default:
-		panic(fmt.Sprintf("Unexpected Expr type: %#v", exprType))
+		panic(fmt.Sprintf("@convExpr - Unexpected Expr type: %#v", exprType))
 	}
 }

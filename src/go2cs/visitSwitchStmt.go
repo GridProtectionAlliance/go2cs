@@ -16,7 +16,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			caseClauses = append(caseClauses, caseClause)
 			caseHasFallthroughStmt = append(caseHasFallthroughStmt, false)
 		} else {
-			println(fmt.Sprintf("WARNING: unexpected Stmt type (non CaseClause) encountered in SwitchStmt: %T", stmt))
+			v.showWarning("@visitSwitchStmt - unexpected Stmt type (non CaseClause) encountered in SwitchStmt: %T", stmt)
 		}
 	}
 

@@ -461,7 +461,7 @@ Examples:
 		}
 
 		if len(files) == 0 {
-			println(fmt.Sprintf("WARNING: No valid Go source files found for conversion in input path \"%s\"", packageInputPath))
+			showWarning("No valid Go source files found for conversion in input path \"%s\"", packageInputPath)
 			continue
 		}
 
@@ -1134,6 +1134,16 @@ func (v *Visitor) getPrintedNode(node ast.Node) string {
 	result := &strings.Builder{}
 	printer.Fprint(result, v.fset, node)
 	return result.String()
+}
+
+func showWarning(format string, a ...interface{}) {
+	message := fmt.Sprintf(format, a...)
+	println(fmt.Sprintf("WARNING: %s", message))
+}
+
+func (v *Visitor) showWarning(format string, a ...interface{}) {
+	message := fmt.Sprintf(format, a...)
+	showWarning("%s in \"%s\"", message, getShortFileName(v.file))
 }
 
 func (v *Visitor) getStringLiteral(str string) (result string, isRawStr bool) {
@@ -1814,14 +1824,14 @@ func (v *Visitor) dynamicCast(sourceType types.Type, targetType types.Type, targ
 	sourceStruct, ok := sourceType.Underlying().(*types.Struct)
 
 	if !ok {
-		println(fmt.Sprintf("WARNING: Source type '%s' used with 'dynamicCast' is not a struct", sourceType.String()))
+		v.showWarning("Source type '%s' used with 'dynamicCast' is not a struct", sourceType.String())
 		return ""
 	}
 
 	targetStruct, ok := targetType.Underlying().(*types.Struct)
 
 	if !ok {
-		println(fmt.Sprintf("WARNING: Target type '%s' used with 'dynamicCast' is not a struct", targetType.String()))
+		v.showWarning("Target type '%s' used with 'dynamicCast' is not a struct", targetType.String())
 		return ""
 	}
 
@@ -1864,7 +1874,7 @@ func (v *Visitor) dynamicCast(sourceType types.Type, targetType types.Type, targ
 			// This is an unexpected error so long as this function is called in context of checking
 			// for needed dynamic struct casts, as the source and target types should be structurally
 			// equivalent in order to get to this point
-			println(fmt.Sprintf("WARNING: Field '%s' not found in source struct '%s' for dynamic cast", targetFieldName, sourceType.String()))
+			v.showWarning("Field '%s' not found in source struct '%s' for dynamic cast", targetFieldName, sourceType.String())
 			return ""
 		}
 	}
@@ -2102,11 +2112,11 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
 				} else if strings.HasPrefix(constraintName, "func") {
 					// TODO: Handle function
-					println(fmt.Sprintf("WARNING: @getGenericDefinition - unhandled function constraint `%s` on `%s`", constraintName, srcType.String()))
+					v.showWarning("@getGenericDefinition - unhandled function constraint `%s` on `%s`", constraintName, srcType.String())
 					constraintName = originalConstraint
 				} else if strings.HasPrefix(constraintName, "struct") {
 					// TODO: Handle struct - will need to lift struct type defintion
-					println(fmt.Sprintf("WARNING: @getGenericDefinition - unhandled struct constraint `%s` on `%s`", constraintName, srcType.String()))
+					v.showWarning("@getGenericDefinition - unhandled struct constraint `%s` on `%s`", constraintName, srcType.String())
 					constraintName = originalConstraint
 				}
 
@@ -2131,7 +2141,7 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 
 				constraintName = fmt.Sprintf("%s, new()", constraintName)
 			} else {
-				println(fmt.Sprintf("WARNING: @getGenericDefinition - constraint `%s` on `%s` is not an interface", constraintName, srcType.String()))
+				v.showWarning("@getGenericDefinition - constraint `%s` on `%s` is not an interface", constraintName, srcType.String())
 			}
 		}
 
@@ -2247,9 +2257,9 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 	if !isUnderlying {
 		if _, ok := t.(*types.Struct); ok {
-			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+			v.showWarning("Unresolved dynamic struct type: %s", t.String())
 		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
-			println(fmt.Sprintf("WARNING: Unresolved dynamic interface type: %s", t.String()))
+			v.showWarning("Unresolved dynamic interface type: %s", t.String())
 		}
 	}
 
@@ -2308,9 +2318,9 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 	if !isUnderlying {
 		if _, ok := t.(*types.Struct); ok {
-			println(fmt.Sprintf("WARNING: Unresolved dynamic struct type: %s", t.String()))
+			v.showWarning("Unresolved dynamic struct type: %s", t.String())
 		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
-			println(fmt.Sprintf("WARNING: Unresolved dynamic interface type: %s", t.String()))
+			v.showWarning("Unresolved dynamic interface type: %s", t.String())
 		}
 	}
 

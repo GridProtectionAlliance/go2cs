@@ -13,7 +13,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		if caseClause, ok := stmt.(*ast.CaseClause); ok {
 			caseClauses = append(caseClauses, caseClause)
 		} else {
-			println(fmt.Sprintf("WARNING: unexpected Stmt type (non CaseClause) encountered in TypeSwitchStmt: %T", stmt))
+			v.showWarning("@visitTypeSwitchStmt - unexpected Stmt type (non CaseClause) encountered in TypeSwitchStmt: %T", stmt)
 		}
 	}
 

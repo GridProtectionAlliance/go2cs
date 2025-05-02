@@ -342,7 +342,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 					if len(orgExpr) > 0 {
 						if strings.Contains(orgExpr, "unsafe.Sizeof") {
-							println(fmt.Sprintf("WARNING: Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const %s = %s in \"%s\"", goIDName, orgExpr, getShortFileName(v.file)))
+							v.showWarning("Go const converted to C# using 'unsafe.Sizeof' may not match run-time value - verify usage: const %s = %s", goIDName, orgExpr)
 						}
 
 						orgExpr = fmt.Sprintf(" /* %s */", orgExpr)

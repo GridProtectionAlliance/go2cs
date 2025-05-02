@@ -61,7 +61,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 
 	if !isSlice && !isArray && !isMap && !isChan && yieldFunc == -1 && !isInt && !isStr {
 		rangeVal := v.getPrintedNode(rangeStmt)
-		println(fmt.Sprintf("WARNING: @visitRangeStmt - unexpected `ast.RangeStmt` expression %s", rangeVal))
+		v.showWarning("@visitRangeStmt - unexpected 'ast.RangeStmt' expression %s", rangeVal)
 		v.writeOutput("/* %s */", rangeVal)
 		return
 	}

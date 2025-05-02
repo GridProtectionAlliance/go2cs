@@ -64,7 +64,7 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	}
 
 	expr := v.getPrintedNode(sliceExpr)
-	println(fmt.Sprintf("WARNING: @convSliceEpr - Failed to convert `ast.SliceExpr` format %s", expr))
+	v.showWarning("@convSliceEpr - Failed to convert 'ast.SliceExpr' format %s", expr)
 	return fmt.Sprintf("/* %s */", expr)
 }
 

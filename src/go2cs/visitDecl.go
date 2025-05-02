@@ -12,8 +12,8 @@ func (v *Visitor) visitDecl(decl ast.Decl) {
 	case *ast.FuncDecl:
 		v.visitFuncDecl(declType)
 	case *ast.BadDecl:
-		println(fmt.Sprintf("WARNING: BadDecl encountered: %#v", declType))
+		v.showWarning("@visitDecl - BadDecl encountered: %#v", declType)
 	default:
-		panic(fmt.Sprintf("Unexpected Decl type: %#v", declType))
+		panic(fmt.Sprintf("@visitDecl - Unexpected Decl type: %#v", declType))
 	}
 }

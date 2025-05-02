@@ -304,7 +304,7 @@ func loadImportedTypeAliases(info PackageInfo) {
 			packageLock.Unlock()
 		}
 	} else {
-		println(fmt.Sprintf("WARNING: Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err))
+		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
 }
 

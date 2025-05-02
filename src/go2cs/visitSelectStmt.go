@@ -22,7 +22,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 				comClauses = append(comClauses, comClause)
 			}
 		} else {
-			println("WARNING: unexpected Stmt type (non CommClause) encountered in SelectStmt")
+			v.showWarning("@visitSelectStmt - unexpected Stmt type (non CommClause) encountered in SelectStmt")
 		}
 	}
 
@@ -73,7 +73,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 					}
 				} else {
 					assignment := v.getPrintedNode(assignStmt)
-					println(fmt.Sprintf("WARNING: @visitSelectStmt - Failed to resolve expected `AssignStmt` arguments: %s", assignment))
+					v.showWarning("@visitSelectStmt - Failed to resolve expected 'AssignStmt' arguments: %s", assignment)
 					v.targetFile.WriteString(fmt.Sprintf("/* %s */", assignment))
 				}
 			} else if sendStmt, ok := comClause.Comm.(*ast.SendStmt); ok {
@@ -116,7 +116,7 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			}
 
 			if !handled {
-				println("WARNING: unexpected Stmt type \"" + v.getPrintedNode(comClause.Comm) + "\" encountered in SelectStmt")
+				v.showWarning("@visitSelectStmt - unexpected Stmt type \"" + v.getPrintedNode(comClause.Comm) + "\" encountered in SelectStmt")
 			}
 		}
 
