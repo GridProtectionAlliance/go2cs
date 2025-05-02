@@ -91,7 +91,12 @@ internal class ProxyTypeImpl : ΔType
 
     public @string PkgPath()
     {
-        throw new NotImplementedException();
+        string fullTypeName = TargetType.FullName ?? TargetType.Name;
+
+        if (fullTypeName.StartsWith("go."))
+            fullTypeName = fullTypeName[3..];
+
+        return fullTypeName.Replace('.', '/');
     }
 
     public uintptr Size()
