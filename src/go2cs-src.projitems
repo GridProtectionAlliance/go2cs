@@ -36,6 +36,7 @@
     <None Include="$(MSBuildThisFileDirectory)go2cs\directiveOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\escapeAnalysisOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\go.mod" />
+    <None Include="$(MSBuildThisFileDirectory)go2cs\go.sum" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\HashSet.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\importOperations.go" />
     <None Include="$(MSBuildThisFileDirectory)go2cs\main.go" />
