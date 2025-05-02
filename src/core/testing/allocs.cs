@@ -19,7 +19,7 @@ partial class testing_package {
 public static float64 /*avg*/ AllocsPerRun(nint runs, Action f) => func((defer, _) => {
     float64 avg = default!;
 
-    defer(runtime.GOMAXPROCS, runtime.GOMAXPROCS(1), defer);
+    deferǃ(runtime.GOMAXPROCS, runtime.GOMAXPROCS(1), defer);
     // Warm up the function
     f();
     // Measure the starting statistics

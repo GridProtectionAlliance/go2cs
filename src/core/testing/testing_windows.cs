@@ -9,6 +9,8 @@ using windows = @internal.syscall.windows_package;
 using bits = math.bits_package;
 using syscall = syscall_package;
 using time = time_package;
+using @internal.syscall;
+using math;
 
 partial class testing_package {
 
@@ -40,7 +42,7 @@ internal static bool isWindowsRetryable(error err) {
 // TODO: If Windows runtime implements high resolution timing then highPrecisionTime
 // can be removed.
 [GoType] partial struct highPrecisionTime {
-    public int64 now;
+    internal int64 now;
 }
 
 // highPrecisionTimeNow returns high precision time for benchmarking.
@@ -62,6 +64,7 @@ internal static time.Duration sub(this highPrecisionTime a, highPrecisionTime b)
 }
 
 internal static int64 queryPerformanceFrequency;
+
 // highPrecisionTimeSince returns duration since a.
 internal static time.Duration highPrecisionTimeSince(highPrecisionTime a) {
     return highPrecisionTimeNow().sub(a);

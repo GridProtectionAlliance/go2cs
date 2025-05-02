@@ -8,6 +8,8 @@ using fmt = fmt_package;
 using goexperiment = @internal.goexperiment_package;
 using os = os_package;
 using atomic = sync.atomic_package;
+using @internal;
+using sync;
 
 partial class testing_package {
 
@@ -26,6 +28,7 @@ partial class testing_package {
 }
 
 internal static Cover cover;
+
 // Cover records information about test coverage checking.
 // NOTE: This struct is internal to the testing infrastructure and may change.
 // It is not covered (yet) by the Go 1 compatibility guidelines.
@@ -112,7 +115,7 @@ internal static void coverReport() => func((defer, _) => {
             if (count > 0) {
                 active += stmts;
             }
-            if (f != default!) {
+            if (f != nil) {
                 var (_, errΔ1) = fmt.Fprintf(~f, "%s:%d.%d,%d.%d %d %d\n"u8, name,
                     blocks[i].Line0, blocks[i].Col0,
                     blocks[i].Line1, blocks[i].Col1,

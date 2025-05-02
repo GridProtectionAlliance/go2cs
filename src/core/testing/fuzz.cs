@@ -1,7 +1,7 @@
 // Copyright 2020 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-global using corpusEntry = go.struct{Parent string; Path string; Data <>byte; Values <>any; Generation int; IsSeed bool};
+global using corpusEntry = go.testing_package.corpusEntryᴛ1;
 
 namespace go;
 
@@ -15,6 +15,7 @@ using reflect = reflect_package;
 using runtime = runtime_package;
 using strings = strings_package;
 using time = time_package;
+using path;
 using ꓸꓸꓸany = Span<any>;
 
 partial class testing_package {
@@ -33,10 +34,12 @@ internal static durationOrCountFlag minimizeDuration = new durationOrCountFlag(d
 internal static ж<@string> fuzzCacheDir;
 internal static ж<bool> isFuzzWorker;
 internal static @string corpusDir = "testdata/fuzz"u8;
+
 // fuzzWorkerExitCode is used as an exit code by fuzz worker processes after an
 // internal error. This distinguishes internal errors from uncontrolled panics
 // and other failures. Keep in sync with internal/fuzz.workerExitCode.
-internal const nint fuzzWorkerExitCode = 70;
+internal static readonly UntypedInt fuzzWorkerExitCode = 70;
+
 // InternalFuzzTarget is an internal type but exported because it is
 // cross-package; it is part of the implementation of the "go test" command.
 [GoType] partial struct InternalFuzzTarget {
@@ -60,29 +63,42 @@ internal const nint fuzzWorkerExitCode = 70;
 // executing the fuzz target, only (*T) methods can be used. The only *F methods
 // that are allowed in the (*F).Fuzz function are (*F).Failed and (*F).Name.
 [GoType] partial struct F {
-    public partial ref common common { get; }
-    public ж<fuzzContext> fuzzContext;
-    public ж<testContext> testContext;
+    internal partial ref common common { get; }
+    internal ж<fuzzContext> fuzzContext;
+    internal ж<testContext> testContext;
     // inFuzzFn is true when the fuzz function is running. Most F methods cannot
-// be called when inFuzzFn is true.
-    public bool inFuzzFn;
+    // be called when inFuzzFn is true.
+    internal bool inFuzzFn;
     // corpus is a set of seed corpus entries, added with F.Add and loaded
-// from testdata.
-    public slice<corpusEntry> corpus;
-    public fuzzResult result;
-    public bool fuzzCalled;
+    // from testdata.
+    internal slice<corpusEntry> corpus;
+    internal fuzzResult result;
+    internal bool fuzzCalled;
 }
 
 public static TB _ = (ж<F>)(default!);
-[GoType] partial struct Helper_type {
+
+// corpusEntry is an alias to the same type as internal/fuzz.CorpusEntry.
+// We use a type alias because we don't want to export this type, and we can't
+// import internal/fuzz from testing.
+[GoType("dyn")] partial struct corpusEntryᴛ1 {
+    public @string Parent;
+    public @string Path;
+    public slice<byte> Data;
+    public slice<any> Values;
+    public nint Generation;
+    public bool IsSeed;
+}
+
+[GoType("dyn")] partial struct Helper_f {
 }
 
 // Helper marks the calling function as a test helper function.
 // When printing file and line information, that function will be skipped.
 // Helper may be called simultaneously from multiple goroutines.
-[GoRecv] internal static void Helper(this ref F f) => func((defer, _) => {
+[GoRecv] public static void Helper(this ref F f) => func((defer, _) => {
     if (f.inFuzzFn) {
-        panic("testing: f.Helper was called inside the fuzz target, use t.Helper instead");
+        throw panic("testing: f.Helper was called inside the fuzz target, use t.Helper instead");
     }
     // common.Helper is inlined here.
     // If we called it, it would mark F.Helper as the helper
@@ -93,15 +109,15 @@ public static TB _ = (ж<F>)(default!);
         f.helperPCs = new map<uintptr, struct{}>();
     }
     // repeating code from callerName here to save walking a stack frame
-    array<uintptr> pc = default!;
+    array<uintptr> pc = new(1);
     nint n = runtime.Callers(2, pc[..]);
     // skip runtime.Callers + Helper
     if (n == 0) {
-        panic("testing: zero callers found");
+        throw panic("testing: zero callers found");
     }
     {
         var (_, found) = f.helperPCs[pc[0]]; if (!found) {
-            f.helperPCs[pc[0]] = new Helper_type();
+            f.helperPCs[pc[0]] = new Helper_f();
             f.helperNames = default!;
         }
     }
@@ -110,22 +126,22 @@ public static TB _ = (ж<F>)(default!);
 // map will be recreated next time it is needed
 
 // Fail marks the function as having failed but continues execution.
-[GoRecv] internal static void Fail(this ref F f) {
+[GoRecv] public static void Fail(this ref F f) {
     // (*F).Fail may be called by (*T).Fail, which we should allow. However, we
     // shouldn't allow direct (*F).Fail calls from inside the (*F).Fuzz function.
     if (f.inFuzzFn) {
-        panic("testing: f.Fail was called inside the fuzz target, use t.Fail instead");
+        throw panic("testing: f.Fail was called inside the fuzz target, use t.Fail instead");
     }
     f.common.Helper();
     f.common.Fail();
 }
 
 // Skipped reports whether the test was skipped.
-[GoRecv] internal static bool Skipped(this ref F f) {
+[GoRecv] public static bool Skipped(this ref F f) {
     // (*F).Skipped may be called by tRunner, which we should allow. However, we
     // shouldn't allow direct (*F).Skipped calls from inside the (*F).Fuzz function.
     if (f.inFuzzFn) {
-        panic("testing: f.Skipped was called inside the fuzz target, use t.Skipped instead");
+        throw panic("testing: f.Skipped was called inside the fuzz target, use t.Skipped instead");
     }
     f.common.Helper();
     return f.common.Skipped();
@@ -134,14 +150,14 @@ public static TB _ = (ж<F>)(default!);
 // Add will add the arguments to the seed corpus for the fuzz test. This will be
 // a no-op if called after or within the fuzz target, and args must match the
 // arguments for the fuzz target.
-[GoRecv] internal static void Add(this ref F f, params ꓸꓸꓸany argsʗp) {
+[GoRecv] public static void Add(this ref F f, params ꓸꓸꓸany argsʗp) {
     var args = argsʗp.slice();
 
     slice<any> values = default!;
     foreach (var (i, _) in args) {
         {
             var t = reflect.TypeOf(args[i]); if (!supportedTypes[t]) {
-                panic(fmt.Sprintf("testing: unsupported type to Add %v"u8, t));
+                throw panic(fmt.Sprintf("testing: unsupported type to Add %v"u8, t));
             }
         }
         values = append(values, args[i]);
@@ -153,8 +169,8 @@ public static TB _ = (ж<F>)(default!);
 internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, bool>{
     [reflect.TypeOf((slice<byte>)(""))] = true,
     [reflect.TypeOf(((@string)""u8))] = true,
-    [reflect.TypeOf(((@bool)false))] = true,
-    [reflect.TypeOf(((@byte)0))] = true,
+    [reflect.TypeOf(((bool)false))] = true,
+    [reflect.TypeOf(((byte)0))] = true,
     [reflect.TypeOf(((rune)0))] = true,
     [reflect.TypeOf(((float32)0))] = true,
     [reflect.TypeOf(((float64)0))] = true,
@@ -169,6 +185,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
     [reflect.TypeOf(((uint32)0))] = true,
     [reflect.TypeOf(((uint64)0))] = true
 };
+
 // Fuzz runs the fuzz function, ff, for fuzz testing. If ff fails for a set of
 // arguments, those arguments will be added to the seed corpus.
 //
@@ -195,9 +212,9 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
 // When fuzzing, F.Fuzz does not return until a problem is found, time runs out
 // (set with -fuzztime), or the test process is interrupted by a signal. F.Fuzz
 // should be called exactly once, unless F.Skip or [F.Fail] is called beforehand.
-[GoRecv] internal static void Fuzz(this ref F f, any ff) => func((defer, _) => {
+[GoRecv] public static void Fuzz(this ref F f, any ff) => func((defer, _) => {
     if (f.fuzzCalled) {
-        panic("testing: F.Fuzz called more than once");
+        throw panic("testing: F.Fuzz called more than once");
     }
     f.fuzzCalled = true;
     if (f.failed) {
@@ -209,20 +226,20 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
     fn = reflect.ValueOf(ff);
     var fnType = fn.Type();
     if (fnType.Kind() != reflect.Func) {
-        panic("testing: F.Fuzz must receive a function");
+        throw panic("testing: F.Fuzz must receive a function");
     }
     if (fnType.NumIn() < 2 || !AreEqual(fnType.In(0), reflect.TypeOf((ж<T>)(default!)))) {
-        panic("testing: fuzz target must receive at least two arguments, where the first argument is a *T");
+        throw panic("testing: fuzz target must receive at least two arguments, where the first argument is a *T");
     }
     if (fnType.NumOut() != 0) {
-        panic("testing: fuzz target must not return a value");
+        throw panic("testing: fuzz target must not return a value");
     }
     // Save the types of the function to compare against the corpus.
     slice<reflect.Type> types = default!;
     for (nint i = 1; i < fnType.NumIn(); i++) {
         var t = fnType.In(i);
         if (!supportedTypes[t]) {
-            panic(fmt.Sprintf("testing: unsupported type for fuzzing %v"u8, t));
+            throw panic(fmt.Sprintf("testing: unsupported type for fuzzing %v"u8, t));
         }
         types = append(types, t);
     }
@@ -230,24 +247,24 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
     // corpus and entries declared with F.Add.
     //
     // Don't load the seed corpus if this is a worker process; we won't use it.
-    if ((~f.fuzzContext).mode != fuzzWorker) {
+    if (f.fuzzContext.mode != fuzzWorker) {
         foreach (var (_, c) in f.corpus) {
             {
-                var err = (~f.fuzzContext).deps.CheckCorpus(c.Values, types); if (err != default!) {
+                var err = f.fuzzContext.deps.CheckCorpus(c.Values, types); if (err != default!) {
                     // TODO(#48302): Report the source location of the F.Add call.
                     f.Fatal(err);
                 }
             }
         }
         // Load seed corpus
-        (c, err) = (~f.fuzzContext).deps.ReadCorpus(filepath.Join(corpusDir, f.name), types);
+        (c, err) = f.fuzzContext.deps.ReadCorpus(filepath.Join(corpusDir, f.name), types);
         if (err != default!) {
             f.Fatal(err);
         }
         foreach (var (i, _) in c) {
             c[i].IsSeed = true;
             // these are all seed corpus values
-            if ((~f.fuzzContext).mode == fuzzCoordinator) {
+            if (f.fuzzContext.mode == fuzzCoordinator) {
                 // If this is the coordinator process, zero the values, since we don't need
                 // to hold onto them.
                 c[i].Values = default!;
@@ -264,7 +281,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
         if (e.Values == default!) {
             // The corpusEntry must have non-nil Values in order to run the
             // test. If Values is nil, it is a bug in our code.
-            panic(fmt.Sprintf("corpus file %q was not unmarshaled"u8, e.Path));
+            throw panic(fmt.Sprintf("corpus file %q was not unmarshaled"u8, e.Path));
         }
         if (shouldFailFast()) {
             return true;
@@ -273,16 +290,16 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
         if (e.Path != ""u8) {
             testName = fmt.Sprintf("%s/%s"u8, testName, filepath.Base(e.Path));
         }
-        if ((~f.testContext).isFuzzing) {
+        if (f.testContext.isFuzzing) {
             // Don't preserve subtest names while fuzzing. If fn calls T.Run,
             // there will be a very large number of subtests with duplicate names,
             // which will use a large amount of memory. The subtest names aren't
             // useful since there's no way to re-run them deterministically.
-            (~f.testContext).match.clearSubNames();
+            f.testContext.match.clearSubNames();
         }
         // Record the stack trace at the point of this call so that if the subtest
-// function - which runs in a separate stack - is marked as a helper, we can
-// continue walking the stack into the parent test.
+        // function - which runs in a separate stack - is marked as a helper, we can
+        // continue walking the stack into the parent test.
         ref var pc = ref heap(new array<uintptr>(50), out var Ꮡpc);
         nint n = runtime.Callers(2, pc[..]);
         var t = Ꮡ(new T(
@@ -302,46 +319,43 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
             t.parent.val.w = captureOut;
         }
         t.w = new indenter(Ꮡ((~t).common));
-        if (t.chatty != default!) {
+        if (t.chatty != nil) {
             t.chatty.Updatef(t.name, "=== RUN   %s\n"u8, t.name);
         }
-        f.common.inFuzzFn = true;
-        f.inFuzzFn = true;
-        goǃ(_ => tRunner(tʗ1, 
-        var eʗ2 = e;
-        var fnʗ3 = fn;
-        var tʗ1 = t;
+        (f.common.inFuzzFn, f.inFuzzFn) = (true, true);
+        goǃ(tRunner, t, 
+        var eʗ1 = e;
+        var fnʗ2 = fn;
         (ж<T> t) => {
             var args = new reflect.Value[]{reflect.ValueOf(tΔ1)}.slice();
-            foreach (var (_, v) in eʗ2.Values) {
+            foreach (var (_, v) in eʗ1.Values) {
                 args = append(args, reflect.ValueOf(v));
             }
             // Before resetting the current coverage, defer the snapshot so that
             // we make sure it is called right before the tRunner function
             // exits, regardless of whether it was executed cleanly, panicked,
             // or if the fuzzFn called t.Fatal.
-            if ((~f.testContext).isFuzzing) {
-                defer((~f.fuzzContext).deps.SnapshotCoverage);
-                (~f.fuzzContext).deps.ResetCoverage();
+            if (f.testContext.isFuzzing) {
+                defer(f.fuzzContext.deps.SnapshotCoverage);
+                f.fuzzContext.deps.ResetCoverage();
             }
             fn.Call(args);
-        }));
+        });
         ᐸꟷ(t.signal);
-        if (t.chatty != default! && (~t.chatty).json) {
+        if (t.chatty != nil && (~t.chatty).json) {
             t.chatty.Updatef((~t.parent).name, "=== NAME  %s\n"u8, (~t.parent).name);
         }
-        f.common.inFuzzFn = false;
-        f.inFuzzFn = false;
+        (f.common.inFuzzFn, f.inFuzzFn) = (false, false);
         return !t.Failed();
     };
-    switch ((~f.fuzzContext).mode) {
-    case fuzzCoordinator:
+    var exprᴛ1 = f.fuzzContext.mode;
+    if (exprᴛ1 == fuzzCoordinator) {
         @string corpusTargetDir = filepath.Join(corpusDir, // Fuzzing is enabled, and this is the test process started by 'go test'.
  // Act as the coordinator process, and coordinate workers to perform the
  // actual fuzzing.
  f.name);
         @string cacheTargetDir = filepath.Join(fuzzCacheDir.val, f.name);
-        var err = (~f.fuzzContext).deps.CoordinateFuzzing(
+        var err = f.fuzzContext.deps.CoordinateFuzzing(
             fuzzDuration.d,
             ((int64)fuzzDuration.n),
             minimizeDuration.d,
@@ -364,10 +378,10 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
                 }
             }
         }
-        break;
-    case fuzzWorker:
+    }
+    else if (exprᴛ1 == fuzzWorker) {
         {
-            var errΔ1 = (~f.fuzzContext).deps.RunFuzzWorker(
+            var err = f.fuzzContext.deps.RunFuzzWorker(
             var runʗ2 = run;
             (corpusEntry e) => {
                 
@@ -378,32 +392,31 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
                     }
                 }
                 return default!;
-            }); if (errΔ1 != default!) {
+            }); if (err != default!) {
                 // Internal errors are marked with f.Fail; user code may call this too, before F.Fuzz.
                 // The worker will exit with fuzzWorkerExitCode, indicating this is a failure
                 // (and 'go test' should exit non-zero) but a failing input should not be recorded.
-                f.Errorf("communicating with fuzzing coordinator: %v"u8, errΔ1);
+                f.Errorf("communicating with fuzzing coordinator: %v"u8, err);
             }
         }
-        break;
-    default:
+    }
+    else { /* default: */
         foreach (var (_, e) in f.corpus) {
             // Fuzzing is not enabled, or will be done later. Only run the seed
             // corpus now.
             @string name = fmt.Sprintf("%s/%s"u8, f.name, filepath.Base(e.Path));
             {
-                var (_, ok, _) = (~f.testContext).match.fullName(default!, name); if (ok) {
+                var (_, ok, _) = f.testContext.match.fullName(nil, name); if (ok) {
                     run(f.w, e);
                 }
             }
         }
-        break;
     }
 
 });
 
 [GoRecv] internal static void report(this ref F f) {
-    if (isFuzzWorker.val || f.parent == default!) {
+    if (isFuzzWorker.val || f.parent == nil) {
         return;
     }
     @string dstr = fmtDuration(f.duration);
@@ -411,7 +424,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
     if (f.Failed()){
         f.flushToParent(f.name, format, "FAIL", f.name, dstr);
     } else 
-    if (f.chatty != default!) {
+    if (f.chatty != nil) {
         if (f.Skipped()){
             f.flushToParent(f.name, format, "SKIP", f.name, dstr);
         } else {
@@ -443,23 +456,24 @@ internal static @string String(this fuzzResult r) {
 {
     error Unwrap();
     // CrashPath returns the path of the subtest that corresponds to the saved
-// crash input file in the seed corpus. The test can be re-run with go test
-// -run=$test/$name $test is the fuzz test name, and $name is the
-// filepath.Base of the string returned here.
+    // crash input file in the seed corpus. The test can be re-run with go test
+    // -run=$test/$name $test is the fuzz test name, and $name is the
+    // filepath.Base of the string returned here.
     @string CrashPath();
 }
 
 // fuzzContext holds fields common to all fuzz tests.
 [GoType] partial struct fuzzContext {
-    public testDeps deps;
-    public fuzzMode mode;
+    internal testDeps deps;
+    internal fuzzMode mode;
 }
 
 [GoType("num:uint8")] partial struct fuzzMode;
 
-internal const fuzzMode seedCorpusOnly = /* iota */ 0;
-internal const fuzzMode fuzzCoordinator = 1;
-internal const fuzzMode fuzzWorker = 2;
+internal static readonly fuzzMode seedCorpusOnly = /* iota */ 0;
+internal static readonly fuzzMode fuzzCoordinator = 1;
+internal static readonly fuzzMode fuzzWorker = 2;
+
 // runFuzzTests runs the fuzz tests matching the pattern for -run. This will
 // only run the (*F).Fuzz function for each seed corpus without using the
 // fuzzing engine to generate or mutate inputs.
@@ -497,13 +511,13 @@ internal static (bool ran, bool ok) runFuzzTests(testDeps deps, slice<InternalFu
                 if (shouldFailFast()) {
                     break;
                 }
-                var (testName, matched, _) = (~tctx).match.fullName(default!, ft.Name);
+                var (testName, matched, _) = (~tctx).match.fullName(nil, ft.Name);
                 if (!matched) {
                     continue;
                 }
-                if (mFuzz != default!) {
+                if (mFuzz != nil) {
                     {
-                        var (_, fuzzMatched, _) = mFuzz.fullName(default!, ft.Name); if (fuzzMatched) {
+                        var (_, fuzzMatched, _) = mFuzz.fullName(nil, ft.Name); if (fuzzMatched) {
                             // If this will be fuzzed, then don't run the seed corpus
                             // right now. That will happen later.
                             continue;
@@ -523,14 +537,12 @@ internal static (bool ran, bool ok) runFuzzTests(testDeps deps, slice<InternalFu
                     fuzzContext: fctx
                 ));
                 f.w = new indenter(Ꮡ((~f).common));
-                if (f.chatty != default!) {
+                if (f.chatty != nil) {
                     f.chatty.Updatef(f.name, "=== RUN   %s\n"u8, f.name);
                 }
-                var fʗ1 = f;
-                var ftʗ1 = ft;
-                goǃ(_ => fRunner(fʗ1, ftʗ1.Fn));
+                goǃ(fRunner, f, ft.Fn);
                 ᐸꟷ(f.signal);
-                if (f.chatty != default! && (~f.chatty).json) {
+                if (f.chatty != nil && (~f.chatty).json) {
                     f.chatty.Updatef((~f.parent).name, "=== NAME  %s\n"u8, (~f.parent).name);
                 }
                 ok = ok && !f.Failed();
@@ -579,7 +591,7 @@ internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> 
     @string testName = default!;
     slice<@string> matched = default!;
     foreach (var (i, _) in fuzzTests) {
-        var (name, okΔ1, _) = (~tctx).match.fullName(default!, fuzzTests[i].Name);
+        var (name, okΔ1, _) = (~tctx).match.fullName(nil, fuzzTests[i].Name);
         if (!okΔ1) {
             continue;
         }
@@ -609,14 +621,12 @@ internal static bool /*ok*/ runFuzzing(testDeps deps, slice<InternalFuzzTarget> 
         testContext: tctx
     ));
     f.w = new indenter(Ꮡ((~f).common));
-    if (f.chatty != default!) {
+    if (f.chatty != nil) {
         f.chatty.Updatef(f.name, "=== RUN   %s\n"u8, f.name);
     }
-    var fʗ1 = f;
-    var fuzzTestʗ1 = fuzzTest;
-    goǃ(_ => fRunner(fʗ1, (~fuzzTestʗ1).Fn));
+    goǃ(fRunner, f, (~fuzzTest).Fn);
     ᐸꟷ(f.signal);
-    if (f.chatty != default!) {
+    if (f.chatty != nil) {
         f.chatty.Updatef((~f.parent).name, "=== NAME  %s\n"u8, (~f.parent).name);
     }
     return !f.failed;
@@ -684,7 +694,7 @@ internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recov
                     f.Logf("cleanup panicked with %v"u8, r);
                 }
             }
-            for (var root = Ꮡ(f.common); (~root).parent != default!; root = root.val.parent) {
+            for (var root = Ꮡ(f.common); (~root).parent != nil; root = root.val.parent) {
                 (~root).mu.Lock();
                 root.val.duration += highPrecisionTimeSince((~root).start);
                 var d = root.val.duration;
@@ -692,7 +702,7 @@ internal static void fRunner(ж<F> Ꮡf, Action<ж<F>> fn) => func((defer, recov
                 root.flushToParent((~root).name, "--- FAIL: %s (%s)\n"u8, (~root).name, fmtDuration(d));
             }
             didPanic = true;
-            panic(errΔ1);
+            throw panic(errΔ1);
         };
         if (err != default!) {
             doPanic(err);

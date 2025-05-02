@@ -36,7 +36,7 @@ internal static (bool ran, bool ok) runExamples(Func<@string, @string, (bool, er
     foreach (var (_, vᴛ1) in examples) {
         eg = vᴛ1;
 
-        var (_, matched, _) = m.fullName(default!, eg.Name);
+        var (_, matched, _) = m.fullName(nil, eg.Name);
         if (!matched) {
             continue;
         }
@@ -92,10 +92,10 @@ internal static @string sortLines(@string output) {
     }
     if (recovered != default!){
         // Propagate the previously recovered result, by panicking.
-        panic(recovered);
+        throw panic(recovered);
     } else 
     if (!finished) {
-        panic(errNilPanicOrGoexit);
+        throw panic(errNilPanicOrGoexit);
     }
     return passed;
 }

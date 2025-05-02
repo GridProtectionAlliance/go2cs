@@ -10,7 +10,6 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
-// Example: global using mypkgꓸTable = go.map<go.@string, nint>;
 // </ImportedTypeAliases>
 
 using go;
@@ -47,11 +46,10 @@ using static go.testing_package;
 [assembly: GoImplement<alternationMatch, filterMatch>]
 [assembly: GoImplement<chattyFlag, flag_package.Value>]
 [assembly: GoImplement<durationOrCountFlag, flag_package.Value>]
-[assembly: GoImplement<indenter, io_package.Writer>]
 [assembly: GoImplement<matchStringOnly, testDeps>]
-[assembly: GoImplement<os.File, io_package.Writer>]
+[assembly: GoImplement<os_package.File, io_package.Writer>]
 [assembly: GoImplement<simpleMatch, filterMatch>]
-[assembly: GoImplement<strings.Builder, io_package.Writer>]
+[assembly: GoImplement<strings_package.Builder, io_package.Writer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

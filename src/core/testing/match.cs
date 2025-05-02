@@ -13,23 +13,23 @@ partial class testing_package {
 
 // matcher sanitizes, uniques, and filters names of subtests and subbenchmarks.
 [GoType] partial struct matcher {
-    public filterMatch filter;
-    public filterMatch skip;
-    public Func<@string, @string, (bool, error)> matchFunc;
-    public sync_package.Mutex mu;
+    internal filterMatch filter;
+    internal filterMatch skip;
+    internal Func<@string, @string, (bool, error)> matchFunc;
+    internal sync_package.Mutex mu;
     // subNames is used to deduplicate subtest names.
-// Each key is the subtest name joined to the deduplicated name of the parent test.
-// Each value is the count of the number of occurrences of the given subtest name
-// already seen.
-    public map<@string, int32> subNames;
+    // Each key is the subtest name joined to the deduplicated name of the parent test.
+    // Each value is the count of the number of occurrences of the given subtest name
+    // already seen.
+    internal map<@string, int32> subNames;
 }
 
 [GoType] partial interface filterMatch {
     // matches checks the name against the receiver's pattern strings using the
-// given match function.
+    // given match function.
     (bool ok, bool partial) matches(slice<@string> name, Func<@string, @string, (bool, error)> matchString);
     // verify checks that the receiver's pattern strings are valid filters by
-// calling the given match function.
+    // calling the given match function.
     error verify(@string name, Func<@string, @string, (bool, error)> matchString);
 }
 
@@ -40,6 +40,7 @@ partial class testing_package {
 // TODO: fix test_main to avoid race and improve caching, also allowing to
 // eliminate this Mutex.
 internal static sync.Mutex matchMutex;
+
 internal static ж<matcher> allMatcher() {
     return newMatcher(default!, ""u8, ""u8, ""u8);
 }
@@ -88,7 +89,7 @@ internal static ж<matcher> newMatcher(Func<@string, @string, (bool, error)> mat
     name = subname;
     m.mu.Lock();
     defer(m.mu.Unlock);
-    if (c != default! && c.level > 0) {
+    if (c != nil && c.level > 0) {
         name = m.unique(c.name, rewrite(subname));
     }
     matchMutex.Lock();
@@ -184,10 +185,11 @@ internal static filterMatch splitRegexp(@string s) {
     nint cp = 0;
     for (nint i = 0; i < len(s); ) {
         switch (s[i]) {
-        case (rune)'[':
+        case (rune)'[': {
             cs++;
             break;
-        case (rune)']':
+        }
+        case (rune)']': {
             {
                 cs--; if (cs < 0) {
                     // An unmatched ']' is legal.
@@ -195,20 +197,24 @@ internal static filterMatch splitRegexp(@string s) {
                 }
             }
             break;
-        case (rune)'(':
+        }
+        case (rune)'(': {
             if (cs == 0) {
                 cp++;
             }
             break;
-        case (rune)')':
+        }
+        case (rune)')': {
             if (cs == 0) {
                 cp--;
             }
             break;
-        case (rune)'\\':
+        }
+        case (rune)'\\': {
             i++;
             break;
-        case (rune)'/':
+        }
+        case (rune)'/': {
             if (cs == 0 && cp == 0) {
                 a = append(a, s[..(int)(i)]);
                 s = s[(int)(i + 1)..];
@@ -216,7 +222,8 @@ internal static filterMatch splitRegexp(@string s) {
                 continue;
             }
             break;
-        case (rune)'|':
+        }
+        case (rune)'|': {
             if (cs == 0 && cp == 0) {
                 a = append(a, s[..(int)(i)]);
                 s = s[(int)(i + 1)..];
@@ -226,7 +233,7 @@ internal static filterMatch splitRegexp(@string s) {
                 continue;
             }
             break;
-        }
+        }}
 
         i++;
     }
@@ -244,7 +251,7 @@ internal static filterMatch splitRegexp(@string s) {
     while (ᐧ) {
         var n = m.subNames[@base];
         if (n < 0) {
-            panic("subtest count overflow");
+            throw panic("subtest count overflow");
         }
         m.subNames[@base] = n + 1;
         if (n == 0 && subname != ""u8) {
@@ -305,17 +312,19 @@ internal static @string rewrite(@string s) {
     var b = new byte[]{}.slice();
     foreach (var (_, r) in s) {
         switch (ᐧ) {
-        case {} when isSpace(r):
+        case {} when isSpace(r): {
             b = append(b, (rune)'_');
             break;
-        case {} when !strconv.IsPrint(r):
-            @string sΔ1 = strconv.QuoteRune(r);
-            b = append(b, sΔ1[1..(int)(len(sΔ1) - 1)].ꓸꓸꓸ);
-            break;
-        default:
-            b = append(b, ((@string)r).ꓸꓸꓸ);
+        }
+        case {} when !strconv.IsPrint(r): {
+            @string sΔ2 = strconv.QuoteRune(r);
+            b = append(b, sΔ2[1..(int)(len(sΔ2) - 1)].ꓸꓸꓸ);
             break;
         }
+        default: {
+            b = append(b, ((@string)r).ꓸꓸꓸ);
+            break;
+        }}
 
     }
     return ((@string)b);
@@ -324,9 +333,9 @@ internal static @string rewrite(@string s) {
 internal static bool isSpace(rune r) {
     if (r < 8192){
         switch (r) {
-        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 133 or 160 or 5760:
+        case (rune)'\t' or (rune)'\n' or (rune)'\v' or (rune)'\f' or (rune)'\r' or (rune)' ' or 133 or 160 or 5760: {
             return true;
-        }
+        }}
 
     } else {
         // Note: not the same as Unicode Z class.
@@ -334,9 +343,9 @@ internal static bool isSpace(rune r) {
             return true;
         }
         switch (r) {
-        case 8232 or 8233 or 8239 or 8287 or 12288:
+        case 8232 or 8233 or 8239 or 8287 or 12288: {
             return true;
-        }
+        }}
 
     }
     return false;
