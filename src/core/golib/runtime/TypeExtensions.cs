@@ -58,6 +58,7 @@ public static class TypeExtensions
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_interfaceMethodNames = [];
     private static readonly ConcurrentDictionary<Type, ImmutableHashSet<string>> s_structFieldNames = [];
     private static readonly ConcurrentDictionary<Type, MethodInfo?> s_typeEqualityOperators = [];
+    private static readonly ConcurrentDictionary<Type, MethodInfo?> s_onesComplementOperators = [];
     private static int s_registeredAssemblyLoadEvent;
 
     private static (MethodInfo, Type)[] GetExtensionMethods()
@@ -244,9 +245,15 @@ public static class TypeExtensions
     /// </summary>
     /// <param name="type">Type to search for equality operator.</param>
     /// <returns>Ones complement operator for <paramref name="type"/> if found; otherwise, <c>null</c>.</returns>
+    /// <remarks>
+    /// For go2cs pointers, <see cref="go.ж{T}"/>, the ones complement operator is used to dereference
+    /// the pointer, i.e., to get the value that the pointer points to, its element. Since the pointer
+    /// class is a generic type, this function can be used to get the pointer value using the static
+    /// ones complement operator without needing to know the pointer type.
+    /// </remarks>
     public static MethodInfo? GetOnesComplementOperator(this Type type)
     {
-        return s_typeEqualityOperators.GetOrAdd(type, _ => type.GetMethod("op_OnesComplement", BindingFlags.Static | BindingFlags.Public, [type]));
+        return s_onesComplementOperators.GetOrAdd(type, _ => type.GetMethod("op_OnesComplement", BindingFlags.Static | BindingFlags.Public, [type]));
     }
 
     /// <summary>
