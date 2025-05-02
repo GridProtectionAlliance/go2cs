@@ -18,7 +18,45 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			panic(fmt.Sprintf("Failed to get type for type alias %s", name))
 		}
 
-		typeName := convertToCSFullTypeName(v.getFullTypeName(typeSpecType, false))
+		var usePackagePrefix bool
+
+		// Check if the aliased type is a struct or pointer to a struct
+		if structType, exprType := v.extractStructType(typeSpec.Type); structType != nil && !v.liftedTypeExists(structType) {
+			if v.inFunction {
+				v.indentLevel++
+			}
+
+			v.visitStructType(structType, exprType, name, doc, true, nil)
+
+			if v.inFunction {
+				v.indentLevel--
+			}
+
+			usePackagePrefix = true
+		}
+
+		// Check if the aliased type is an anonymous interface
+		if interfaceType, exprType := v.extractInterfaceType(typeSpec.Type); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
+			if v.inFunction {
+				v.indentLevel++
+			}
+
+			v.visitInterfaceType(interfaceType, exprType, name, doc, true, nil)
+
+			if v.inFunction {
+				v.indentLevel--
+			}
+
+			usePackagePrefix = true
+		}
+
+		var typeNamePrefix string
+
+		if usePackagePrefix {
+			typeNamePrefix = getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix)) + "/"
+		}
+
+		typeName := convertToCSFullTypeName(typeNamePrefix + v.getFullTypeName(typeSpecType, false))
 
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", name, typeName, v.newline))
 
