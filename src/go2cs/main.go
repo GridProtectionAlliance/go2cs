@@ -993,8 +993,14 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	references := make([]string, 0, len(packageInfoMap))
 
 	for _, info := range packageInfoMap {
+		reference := info.ProjectReference
+
+		if len(reference) == 0 {
+			continue
+		}
+
 		// Track project references
-		references = append(references, info.ProjectReference)
+		references = append(references, reference)
 
 		// Load imported type aliases for the current package, if not already loaded
 		loadImportedTypeAliases(info)
