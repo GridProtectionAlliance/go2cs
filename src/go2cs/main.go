@@ -41,6 +41,7 @@ type Options struct {
 	includeComments     bool
 	parseCgoTargets     bool
 	showParseTree       bool
+	debugMode           bool
 }
 
 type FileEntry struct {
@@ -277,6 +278,7 @@ func main() {
 	goPathCmd := commandLine.String("gopath", goPath, "Path to Go path directory")
 	go2csPathCmd := commandLine.String("go2cspath", go2csPath, "Path to C# converted code")
 	convertStdLibCmd := commandLine.Bool("stdlib", false, "Convert Go standard library")
+	parallelProcCmd := commandLine.Int("parallel", 1, "Number of packages to convert in parallel (1-4)")
 	targetPlatformCmd := commandLine.String("platforms", fmt.Sprintf("%s/%s", runtime.GOOS, runtime.GOARCH), "Target platform for conversion, format: os/arch")
 	indentSpacesCmd := commandLine.Int("indent", 4, "Number of spaces for indentation")
 	preferVarDeclCmd := commandLine.Bool("var", true, "Prefer \"var\" declarations")
@@ -285,11 +287,22 @@ func main() {
 	parseCgoTargetsCmd := commandLine.Bool("cgo", false, "Parse cgo targets")
 	showParseTreeCmd := commandLine.Bool("tree", false, "Show parse tree")
 	csprojFileCmd := commandLine.String("csproj", "", "Path to custom .csproj template file")
+	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
 
 	err = commandLine.Parse(os.Args[1:])
-	inputFilePath := strings.TrimSpace(commandLine.Arg(0))
 
-	if err != nil || inputFilePath == "" {
+	var inputFilePath string
+	var convertStdLib bool
+
+	if err == nil {
+		convertStdLib = *convertStdLibCmd
+	}
+
+	if !convertStdLib {
+		inputFilePath = strings.TrimSpace(commandLine.Arg(0))
+	}
+
+	if err != nil || (!convertStdLib && len(inputFilePath) == 0) {
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
@@ -308,6 +321,8 @@ Examples:
   go2cs example.go
   go2cs -cgo=true input_dir output_dir
   go2cs package_dir
+  go2cs -stdlib                           # Convert the entire Go standard library
+  go2cs -stdlib fmt io/ioutil strings     # Convert specific standard library packages
  `)
 		os.Exit(1)
 	}
@@ -316,7 +331,7 @@ Examples:
 		goRoot:              *goRootCmd,
 		goPath:              *goPathCmd,
 		go2csPath:           *go2csPathCmd,
-		convertStdLib:       *convertStdLibCmd,
+		convertStdLib:       convertStdLib,
 		targetPlatform:      *targetPlatformCmd,
 		indentSpaces:        *indentSpacesCmd,
 		preferVarDecl:       *preferVarDeclCmd,
@@ -324,6 +339,7 @@ Examples:
 		includeComments:     *includeCommentsCmd,
 		parseCgoTargets:     *parseCgoTargetsCmd,
 		showParseTree:       *showParseTreeCmd,
+		debugMode:           *debugModeCmd,
 	}
 
 	// Load custom .csproj template if specified
@@ -336,32 +352,73 @@ Examples:
 		}
 	}
 
-	// Check if the input is a file or a directory
-	fileInfo, err := os.Stat(inputFilePath)
-
-	if err != nil {
-		log.Fatalf("Failed to access input file path \"%s\": %s\n", inputFilePath, err)
+	// Set parallel processing environment variable if specified
+	if *parallelProcCmd > 1 {
+		// Limit to 4 parallel processes
+		parallelCount := *parallelProcCmd
+		if parallelCount > 4 {
+			parallelCount = 4
+		}
+		os.Setenv("GO2CS_PARALLEL", strconv.Itoa(parallelCount))
 	}
 
-	if !fileInfo.IsDir() {
-		inputFilePath = filepath.Dir(inputFilePath)
-	}
+	if convertStdLib {
+		// Initialize standard library converter
+		converter := NewStdLibConverter(options)
 
-	var outputFilePath string
+		// Check if specific packages are specified
+		var packageFilter []string
 
-	// If the user has provided a second argument, we will use it as the output directory or file
-	if commandLine.NArg() > 1 {
-		outputFilePath = strings.TrimSpace(commandLine.Arg(1))
+		if commandLine.NArg() > 0 {
+			packageFilter = make([]string, commandLine.NArg())
+
+			for i := range commandLine.NArg() {
+				packageFilter[i] = strings.TrimSpace(commandLine.Arg(i))
+			}
+
+			fmt.Printf("Only converting specified packages: %s\n", strings.Join(packageFilter, ", "))
+		}
+
+		// Run the conversion process
+		if err := converter.ScanAndConvertFiltered(packageFilter); err != nil {
+			log.Fatalf("Standard library conversion failed: %v", err)
+		}
 	} else {
-		outputFilePath = inputFilePath
-	}
+		// Check if the input is a file or a directory
+		fileInfo, err := os.Stat(inputFilePath)
 
-	inputFilePath, err = filepath.Abs(inputFilePath)
+		if err != nil {
+			log.Fatalf("Failed to access input file path \"%s\": %s\n", inputFilePath, err)
+		}
 
-	if err != nil {
-		log.Fatalf("Failed to get absolute file path \"%s\": %s\n", inputFilePath, err)
-		return
+		isDir := fileInfo.IsDir()
+
+		if !isDir {
+			inputFilePath = filepath.Dir(inputFilePath)
+		}
+
+		var outputFilePath string
+
+		// If the user has provided a second argument, we will use it as the output directory or file
+		if commandLine.NArg() > 1 {
+			outputFilePath = strings.TrimSpace(commandLine.Arg(1))
+		} else {
+			outputFilePath = inputFilePath
+		}
+
+		inputFilePath, err = filepath.Abs(inputFilePath)
+
+		if err != nil {
+			log.Fatalf("Failed to get absolute file path \"%s\": %s\n", inputFilePath, err)
+			return
+		}
+
+		processConversion(inputFilePath, isDir, outputFilePath, options)
 	}
+}
+
+func processConversion(inputFilePath string, isDir bool, outputFilePath string, options Options) {
+	var err error
 
 	cfg := &packages.Config{
 		Mode: packages.LoadAllSyntax,
@@ -440,7 +497,7 @@ Examples:
 				path := pkg.GoFiles[i]
 
 				if match, err := CheckBuildConstraints(path, options.targetPlatform); err != nil {
-					log.Fatalf("Failed to evaluate build constraints for file \"%s\": %s", path, err)
+					showWarning("Failed to evaluate build constraints for file \"%s\": %s", path, err)
 				} else if !match {
 					// Skipping file due to non-matching build constraints
 					continue
@@ -489,7 +546,15 @@ Examples:
 			concurrentTasks.Add(1)
 
 			go func(fileEntry FileEntry) {
-				defer concurrentTasks.Done()
+				defer func() {
+					if !options.debugMode {
+						if r := recover(); r != nil {
+							showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
+						}
+					}
+
+					concurrentTasks.Done()
+				}()
 
 				visitor := &Visitor{
 					fset:                  fset,
@@ -518,7 +583,7 @@ Examples:
 
 				var outputFileName string
 
-				if fileInfo.IsDir() {
+				if isDir {
 					outputFileName = filepath.Join(packageOutputPath, strings.TrimSuffix(filepath.Base(fileEntry.filePath), ".go")+".cs")
 				} else {
 					outputFileName = strings.TrimSuffix(packageOutputPath, ".go") + ".cs"
@@ -546,7 +611,7 @@ Examples:
 		var packageInfoFileName string
 
 		// Handle package information file
-		if fileInfo.IsDir() {
+		if isDir {
 			packageInfoFileName = filepath.Join(packageOutputPath, PackageInfoFileName)
 		} else {
 			packageInfoFileName = filepath.Join(filepath.Dir(packageOutputPath), PackageInfoFileName)
@@ -591,7 +656,7 @@ Examples:
 			lines := HashSet[string]{}
 
 			// If processing a single file, instead of all package files, merge type aliases
-			if !fileInfo.IsDir() {
+			if !isDir {
 				for i := startLineIndex + 1; i < endLineIndex; i++ {
 					line := packageInfoLines[i]
 					lines.Add(strings.TrimSpace(line))
@@ -637,7 +702,7 @@ Examples:
 			lines := HashSet[string]{}
 
 			// If processing a single file, instead of all package files, merge type aliases
-			if !fileInfo.IsDir() {
+			if !isDir {
 				for i := startLineIndex + 1; i < endLineIndex; i++ {
 					line := packageInfoLines[i]
 					lines.Add(strings.TrimSpace(line))
@@ -681,7 +746,7 @@ Examples:
 			lines := HashSet[string]{}
 
 			// If processing a single file, instead of all package files, merge interface implementations
-			if !fileInfo.IsDir() {
+			if !isDir {
 				for i := startLineIndex + 1; i < endLineIndex; i++ {
 					line := packageInfoLines[i]
 					lines.Add(strings.TrimSpace(line))
@@ -751,7 +816,7 @@ Examples:
 			lines := HashSet[string]{}
 
 			// If processing a single file, instead of all package files, merge implicit conversions
-			if !fileInfo.IsDir() {
+			if !isDir {
 				for i := startLineIndex + 1; i < endLineIndex; i++ {
 					line := packageInfoLines[i]
 					lines.Add(strings.TrimSpace(line))
@@ -2409,22 +2474,6 @@ func convertToCSFullTypeName(typeName string) string {
 		typeName = convertImportPathToNamespace(typeName, "")
 	}
 
-	// Find all types inside '[T1, T2]' type expressions and recurse into them for conversion
-	if strings.Contains(typeName, "[") {
-		start := strings.Index(typeName, "[")
-		end := strings.Index(typeName[start:], "]") + start
-
-		if end != -1 {
-			subTypes := strings.Split(typeName[start+1:end], ",")
-
-			for i := range subTypes {
-				subTypes[i] = convertToCSTypeName(subTypes[i])
-			}
-
-			typeName = fmt.Sprintf("%s[%s]%s", typeName[:start], strings.Join(subTypes, ", "), typeName[end+1:])
-		}
-	}
-
 	// Replace all `[` and `]` with `<` and `>` to handle generic types
 	typeName = strings.ReplaceAll(typeName, "[", "<")
 	typeName = strings.ReplaceAll(typeName, "]", ">")
@@ -2454,6 +2503,22 @@ func convertToCSFullTypeName(typeName string) string {
 		innerType := typeName[4:]
 		keyType, valueType := splitMapKeyValue(innerType)
 		return fmt.Sprintf("%s.map<%s, %s>", RootNamespace, convertToCSTypeName(keyType), convertToCSTypeName(valueType))
+	}
+
+	// Find all types inside '<T1, T2>' type expressions and recurse into them for conversion
+	if strings.Contains(typeName, "<") {
+		start := strings.Index(typeName, "<")
+		end := strings.Index(typeName[start:], ">") + start
+
+		if end != -1 {
+			subTypes := strings.Split(typeName[start+1:end], ",")
+
+			for i := range subTypes {
+				subTypes[i] = strings.TrimSpace(convertToCSTypeName(subTypes[i]))
+			}
+
+			typeName = fmt.Sprintf("%s<%s>%s", typeName[:start], strings.Join(subTypes, ", "), typeName[end+1:])
+		}
 	}
 
 	if typeName == "func()" {

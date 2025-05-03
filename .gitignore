@@ -331,3 +331,16 @@ ASALocalRun/
 
 rsrc_windows_386.syso
 rsrc_windows_amd64.syso
+
+# -- go2cs specific exclusions --
+
+# Don't ignore the debug folder in src/core
+!src/core/debug/
+!src/core/debug/*
+
+# But do ignore any debug folders in subdirectories
+src/core/debug/**/[Dd]ebug/
+
+# Don't ignore the log folder in src/core
+!src/core/log/
+!src/core/log/*

@@ -15,7 +15,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		typeSpecType := v.info.TypeOf(typeSpec.Type)
 
 		if typeSpecType == nil {
-			panic(fmt.Sprintf("Failed to get type for type alias %s", name))
+			panic(fmt.Sprintf("@visitTypeSpec - Failed to get type for type alias %s", name))
 		}
 
 		var usePackagePrefix bool
@@ -92,6 +92,6 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.StructType:
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	default:
-		panic(fmt.Sprintf("Unexpected TypeSpec type: %#v", typeSpecType))
+		panic(fmt.Sprintf("@visitTypeSpec - Unexpected TypeSpec type: %#v", v.getPrintedNode(typeSpecType)))
 	}
 }

@@ -137,7 +137,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			methodType := v.info.ObjectOf(method.Names[0]).(*types.Func)
 
 			if methodType == nil {
-				panic("Failed to find interface method \"" + goMethodName + "\" in the type info")
+				panic("@visitInterfaceType - Failed to find interface method \"" + goMethodName + "\" in the type info")
 			}
 
 			signature := methodType.Signature()
@@ -178,7 +178,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 				}
 			}
 		} else {
-			panic("Unexpected method declaration in interface: %s" + v.getPrintedNode(method))
+			panic("@visitInterfaceType - Unexpected method declaration in interface: %s" + v.getPrintedNode(method))
 		}
 	}
 

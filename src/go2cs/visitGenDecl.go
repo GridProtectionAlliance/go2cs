@@ -18,7 +18,7 @@ func (v *Visitor) visitGenDecl(genDecl *ast.GenDecl) {
 		case *ast.TypeSpec:
 			v.visitTypeSpec(specType, genDecl.Doc)
 		default:
-			panic(fmt.Sprintf("unexpected GenDecl Spec: %#v", specType))
+			panic(fmt.Sprintf("@visitGenDecl - unexpected GenDecl Spec: %#v", v.getPrintedNode(specType)))
 		}
 	}
 

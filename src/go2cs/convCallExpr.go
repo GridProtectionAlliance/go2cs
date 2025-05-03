@@ -382,7 +382,7 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 	}
 
 	// Check if the function type is an aliased numeric type
-	if ok, _ := isAliasedNumericType(funcType); ok {
+	if ok := isAliasedNumericType(funcType); ok {
 		// Check if argType is a pointer type
 		if ptrType, ok := argType.(*types.Pointer); ok {
 			argType = ptrType.Elem()
@@ -390,7 +390,9 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 
 		if !types.Identical(funcType, argType) {
 			// Check if the arg type is an aliased numeric type
-			if ok, valueTypeName := isAliasedNumericType(argType); ok {
+			if ok := isAliasedNumericType(argType); ok {
+				valueTypeName := convertToCSTypeName(v.getTypeName(argType, true))
+
 				if targetTypeIsPointer {
 					// Dereference target type when casting to pointer types,
 					// in C# implicit casting operator requires the target type
@@ -437,16 +439,16 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 	return expr
 }
 
-func isAliasedNumericType(targetType types.Type) (bool, string) {
+func isAliasedNumericType(targetType types.Type) bool {
 	if aliasedType, ok := targetType.(*types.Alias); ok {
 		underlyingType := aliasedType.Underlying()
-		return isNumericType(underlyingType), convertToCSTypeName(underlyingType.String())
+		return isNumericType(underlyingType)
 	} else if namedType, ok := targetType.(*types.Named); ok {
 		underlyingType := namedType.Underlying()
-		return isNumericType(underlyingType), convertToCSTypeName(underlyingType.String())
+		return isNumericType(underlyingType)
 	}
 
-	return false, ""
+	return false
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

@@ -272,6 +272,6 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		v.showWarning("@convExpr - BadExpr encountered: %#v", exprType)
 		return ""
 	default:
-		panic(fmt.Sprintf("@convExpr - Unexpected Expr type: %#v", exprType))
+		panic(fmt.Sprintf("@convExpr - Unexpected Expr type: %#v", v.getPrintedNode(exprType)))
 	}
 }

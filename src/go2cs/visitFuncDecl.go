@@ -35,7 +35,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	currentFuncType := v.info.ObjectOf(funcDecl.Name).(*types.Func)
 
 	if currentFuncType == nil {
-		panic("Failed to find function \"" + goFunctionName + "\" in the type info")
+		panic("@visitFuncDecl - Failed to find function \"" + goFunctionName + "\" in the type info")
 	}
 
 	signature := currentFuncType.Signature()

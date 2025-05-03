@@ -136,6 +136,6 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.EmptyStmt:
 		// Nothing to do
 	default:
-		panic(fmt.Sprintf("@visitStmt - Unexpected Stmt type: %#v", stmtType))
+		panic(fmt.Sprintf("@visitStmt - Unexpected Stmt type: %#v", v.getPrintedNode(stmtType)))
 	}
 }
