@@ -479,7 +479,7 @@ func (c *StdLibConverter) convertAllPackages() error {
 		defer benchmark.Close()
 		fmt.Fprintf(benchmark, "Go Standard Library Conversion - Started %s\n\n", c.startTime.Format(time.RFC3339))
 		fmt.Fprintf(benchmark, "%-45s %-15s %-15s %s\n", "Package", "Status", "Duration", "Timestamp")
-		fmt.Fprintf(benchmark, "%s\n", strings.Repeat("-", 100))
+		fmt.Fprintf(benchmark, "%s\n", strings.Repeat("-", 103))
 	}
 
 	// Determine concurrency level - use 1 for sequential processing for stability,
@@ -724,11 +724,26 @@ func (c *StdLibConverter) GenerateDependencyGraph() error {
 		fmt.Fprintf(f, "  \"%s\" [label=\"%s\"];\n", pkgName, pkgPath)
 	}
 
+	// Sort packages for consistent output
+	sortedPackages := make([]string, 0, len(c.packages))
+
+	for pkgPath := range c.packages {
+		sortedPackages = append(sortedPackages, pkgPath)
+	}
+
+	sort.Strings(sortedPackages)
+
 	// Write edges for dependencies
-	for pkgPath, pkg := range c.packages {
+	for _, pkgPath := range sortedPackages {
 		// Sanitize package name for DOT
 		pkgName := strings.ReplaceAll(pkgPath, "/", "_")
 		pkgName = strings.ReplaceAll(pkgName, ".", "_")
+
+		// Get the package object
+		pkg := c.packages[pkgPath]
+
+		// Sort dependencies for consistent output
+		sort.Strings(pkg.Dependencies)
 
 		for _, dep := range pkg.Dependencies {
 			// Sanitize dependency name for DOT
@@ -866,9 +881,6 @@ func (c *StdLibConverter) GenerateConversionReport() error {
 
 // formatDuration formats a duration into a human-readable string
 func formatDuration(d time.Duration) string {
-	// Round to seconds
-	d = d.Round(time.Second)
-
 	if d < time.Minute {
 		return fmt.Sprintf("%.3gs", d.Seconds())
 	} else if d < time.Hour {
