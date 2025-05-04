@@ -178,6 +178,16 @@ func NewBuildConstraintEvaluator(platforms []string) *BuildConstraintEvaluator {
 		allowedMap["posix"] = true
 	}
 
+	// Set standard compiler tags
+	allowedMap["gc"] = true // Standard Go compiler
+	allowedMap["gccgo"] = false
+	allowedMap["tinygo"] = false
+
+	// Set Go version tags
+	for i := range MaxSupportedGoVersion {
+		allowedMap[fmt.Sprintf("go1.%d", i)] = true
+	}
+
 	// For cgo, we defer to explicit settings rather than auto-detecting
 
 	return &BuildConstraintEvaluator{
