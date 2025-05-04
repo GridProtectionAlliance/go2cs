@@ -160,20 +160,20 @@ const PointerDerefOp = "~"                    // Example: `~ptr` for dereferenci
 var keywords = NewHashSet([]string{
 	// The following are all valid C# keywords and types, when encountered in Go code they should be
 	// escaped with an `@` prefix which allows them to be used as identifiers in C#:
-	"abstract", "as", "base", "catch", "char", "checked", "class", "const", "decimal", "delegate", "do",
-	"double", "enum", "event", "explicit", "extern", "finally", "fixed", "foreach", "float", "implicit",
-	"in", "internal", "is", "lock", "long", "namespace", "null", "object", "operator", "out", "override",
-	"params", "private", "protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof",
-	"stackalloc", "static", "this", "throw", "try", "typeof", "ulong", "unchecked", "unsafe", "ushort",
-	"using", "virtual", "void", "volatile", "while", "__argslist", "__makeref", "__reftype", "__refvalue",
+	"abstract", "as", "base", "catch", "char", "checked", "class", "const", "decimal", "delegate", "do", "double",
+	"enum", "event", "explicit", "extern", "finally", "fixed", "foreach", "float", "implicit", "in", "internal",
+	"is", "lock", "long", "namespace", "new", "null", "object", "operator", "out", "override", "params", "private",
+	"protected", "public", "readonly", "ref", "sbyte", "sealed", "short", "sizeof", "stackalloc", "static", "this",
+	"throw", "try", "typeof", "ulong", "unchecked", "unsafe", "ushort", "using", "virtual", "void", "volatile",
+	"while", "__argslist", "__makeref", "__reftype", "__refvalue",
 
 	// The following C# types overlap with Go types, however, Go unnamed fields in structs will use type
 	// name as the field name, so these should also be escaped with an `@` when encountered:
 	"bool", "byte", "int", "string", "uint",
 
 	// The remaining C# keywords overlap with Go keywords, so they do not need detection:
-	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if", "interface",
-	// "new", "return", "select", "struct", "switch", "true", "var"
+	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if",
+	// "interface", "return", "select", "struct", "switch", "true", "var"
 })
 
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:
@@ -1437,7 +1437,7 @@ func getAccess(name string) string {
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
-	if unicode.IsLower(ch) {
+	if unicode.IsLower(ch) || ch == '_' {
 		return "internal"
 	}
 

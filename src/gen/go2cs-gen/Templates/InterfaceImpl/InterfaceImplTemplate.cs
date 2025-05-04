@@ -87,8 +87,8 @@ internal class InterfaceImplTemplate : TemplateBase
     {
         get
         {
-            string structNameScope = char.IsUpper(StructName[0]) ? "public" : "internal";
-            string interfaceNameScope = char.IsUpper(GetSimpleName(InterfaceName)[0]) ? "public" : "internal";
+            string structNameScope = GetScope(StructName);
+            string interfaceNameScope = GetScope(GetSimpleName(InterfaceName));
             return structNameScope == interfaceNameScope ? structNameScope : "internal";
         }
     }

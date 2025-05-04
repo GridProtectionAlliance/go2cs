@@ -23,7 +23,7 @@ internal class StructTypeTemplate : TemplateBase
 
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)>? m_publicStructMembers;
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> PublicStructMembers => 
-        m_publicStructMembers ??= StructMembers.Where(item => char.IsUpper(GetSimpleName(item.memberName)[0])).ToList();
+        m_publicStructMembers ??= StructMembers.Where(item => GetScope(GetSimpleName(item.memberName)) == "public").ToList();
 
     public override string TemplateBody =>
         $$"""
@@ -92,7 +92,7 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
             {
-                string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                string typeScope = GetScope(GetSimpleName(typeName));
                 result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{memberName}.val;");
             }
 
@@ -102,7 +102,7 @@ internal class StructTypeTemplate : TemplateBase
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
                 {
-                    string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                    string typeScope = GetScope(GetSimpleName(typeName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
             }
@@ -113,7 +113,7 @@ internal class StructTypeTemplate : TemplateBase
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
                 {
-                    string typeScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
+                    string typeScope = GetScope(GetSimpleName(typeName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
             }
@@ -166,7 +166,7 @@ internal class StructTypeTemplate : TemplateBase
 
                 // Add ref extension method
                 string methodScope = Scope ?? "public";
-                methodScope = method.ReturnType == "void" ? methodScope : char.IsUpper(GetSimpleName(method.ReturnType)[0]) ? methodScope : "internal";
+                methodScope = method.ReturnType == "void" ? methodScope : GetScope(GetSimpleName(method.ReturnType)) == "public" ? methodScope : "internal";
                 result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this ref {StructName} target");
 
                 if (method.Parameters.Length > 1)
@@ -215,8 +215,7 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                string fieldScope = char.IsUpper(GetSimpleName(typeName)[0]) ? "public" : "internal";
-
+                string fieldScope = GetScope(GetSimpleName(typeName));
                 result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
             }
 

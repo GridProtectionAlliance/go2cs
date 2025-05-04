@@ -197,8 +197,14 @@ public static class Common
         return new string(fileName.Replace("@", "").Select(c => InvalidChars.Contains(c) ? '_' : c).ToArray());
     }
 
-    public static string GetUnsanitizedIdentifier(string name)
+    public static string GetUnsanitizedIdentifier(string identifier)
     {
-        return name.StartsWith("@") ? name[1..] : name;
+        return identifier.StartsWith("@") ? identifier[1..] : identifier;
+    }
+
+    public static string GetScope(string identifier)
+    {
+        char firstChar = identifier[0];
+        return char.IsUpper(firstChar) || firstChar == '_' ? "public" : "internal";
     }
 }

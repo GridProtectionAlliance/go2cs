@@ -86,7 +86,7 @@ public class TypeGenerator : ISourceGenerator
             
             // Since many types are referenced by assembly attributes outside namespace,
             // "internal" scope is used so types can be referenced instead of "private"
-            string scope = char.IsUpper(identifier[0]) ? "public" : "internal";
+            string scope = GetScope(identifier);
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 

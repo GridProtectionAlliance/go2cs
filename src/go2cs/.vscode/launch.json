@@ -13,7 +13,7 @@
             "args": [
                 //"-var=false",
                 //"-uco=false",
-                "-stdlib",
+                //"-stdlib",
                 "-comments",
                 "-go2cspath=C:\\Projects\\gpa\\go2cs\\src",
                 //"-tree",
@@ -100,6 +100,8 @@
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\unsafeheader",
                 //"C:\\Program Files\\Go\\src\\internal\\fuzz",
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\fuzz",
+                "C:\\Program Files\\Go\\src\\sync\\atomic",
+                "C:\\Projects\\gpa\\go2cs\\src\\core\\sync\\atomic",
             ]
         }
     ]

@@ -67,7 +67,7 @@ public class RecvGenerator : ISourceGenerator
             string packageClassName = methodSyntax.GetParentClassName();
             string packageName = packageClassName.EndsWith("_package") ? packageClassName[..^8] : packageClassName;
             string identifier = methodSyntax.Identifier.Text;
-            string scope = char.IsUpper(identifier[0]) ? "public" : "private";
+            string scope = GetScope(identifier);
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 
