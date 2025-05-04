@@ -71,12 +71,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	v.writeStringLn(target, "[GoType%s] partial struct %s%s%s{", dynamic, structTypeName, typeParams, constraints)
 	v.indentLevel++
 
-	// Track promoted interface methods that could be shadowed by receivers
-	type InterfaceMethodInfo struct {
-		interfaceType *types.Interface
-		interfaceName string
-		methodName    string
-	}
+	var prevNameDiscardedCount int
 
 	for _, field := range structType.Fields.List {
 		v.writeDocString(target, field.Doc, field.Pos())
@@ -266,7 +261,17 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			target.WriteString(v.newline)
 		} else {
 			for _, ident := range field.Names {
-				v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, getCoreSanitizedIdentifier(ident.Name), arrayInitializer)
+				fieldName := getCoreSanitizedIdentifier(ident.Name)
+
+				if fieldName == "_" {
+					for range prevNameDiscardedCount {
+						fieldName = fieldName + "_"
+					}
+
+					prevNameDiscardedCount++
+				}
+
+				v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, fieldName, arrayInitializer)
 				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
 				target.WriteString(v.newline)
 			}
