@@ -135,6 +135,7 @@ const UnsafeMarker = ">>MARKER:UNSAFE<<"
 const ProjectReferenceMarker = ">>MARKER:PROJECT_REFERENCE<<"
 const DynamicCastArgMarker = ">>MARKER:DYNAMIC_CAST_ARG<<"
 const PackageInfoFileName = "package_info.cs"
+const MaxSupportedGoVersion = 23
 
 // Extended Unicode characters are being used to help avoid conflicts with Go identifiers for
 // symbols, markers, intermediate and temporary variables. These characters have to be valid
