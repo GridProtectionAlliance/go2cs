@@ -2142,7 +2142,14 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		typeParamNames[i] = typeParam.Obj().Name()
 
 		constraint := typeParam.Constraint()
-		constraintName := v.getTypeName(constraint, false)
+		var constraintName string
+
+		// Check if the constraint type is an anonymous interface
+		if _, ok := constraint.(*types.Interface); ok {
+			constraintName = constraint.String()
+		} else {
+			constraintName = v.getTypeName(constraint, false)
+		}
 
 		if len(constraintName) == 0 || constraintName == "any" || constraintName == "interface{}" {
 			// At a minimum, generic type must implement 'ISupportMake' to be constructable, e.g., with `make`
@@ -2163,33 +2170,40 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 
 			if iface != nil {
 				originalConstraint := fmt.Sprintf("/* %s */", constraintName)
-				constraintName = strings.TrimPrefix(constraintName, "~")
+				constraintName = strings.TrimPrefix(strings.TrimSpace(constraintName), "~")
+				constraintExpr := strings.ReplaceAll(constraintName, " ", "")
+				var typeConstraint string
 
 				// Check for common Go types, e.g., slice, map, channel, etc.
-				if strings.HasPrefix(constraintName, "[]") {
+				if strings.HasPrefix(constraintExpr, "[]") {
 					// Handle slice via ISlice interface
-					constraintName = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[2:]), typeParamNames[i])
-				} else if strings.HasPrefix(constraintName, "map[") {
+					typeConstraint = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[2:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintExpr, "map[") {
 					// Handle map via IMap interface
 					keyValue := strings.Split(constraintName[4:], "]")
-					constraintName = fmt.Sprintf("IMap<%s, %s>, ISupportMake<%s>", convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]), typeParamNames[i])
-				} else if strings.HasPrefix(constraintName, "chan ") {
+					typeConstraint = fmt.Sprintf("IMap<%s, %s>, ISupportMake<%s>", convertToCSTypeName(keyValue[0]), convertToCSTypeName(keyValue[1]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintExpr, "chan ") {
 					// Handle channel via IChannel interface
-					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[5:]), typeParamNames[i])
-				} else if strings.HasPrefix(constraintName, "chan<- ") {
+					typeConstraint = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[5:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintExpr, "chan<- ") {
 					// Handle send-only channel via IChannel interface
-					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
-				} else if strings.HasPrefix(constraintName, "<-chan ") {
+					typeConstraint = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintExpr, "<-chan ") {
 					// Handle receive-only channel via IChannel interface
-					constraintName = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
-				} else if strings.HasPrefix(constraintName, "func") {
+					typeConstraint = fmt.Sprintf("IChannel<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[7:]), typeParamNames[i])
+				} else if strings.HasPrefix(constraintExpr, "func") {
 					// TODO: Handle function
 					v.showWarning("@getGenericDefinition - unhandled function constraint `%s` on `%s`", constraintName, srcType.String())
-					constraintName = originalConstraint
-				} else if strings.HasPrefix(constraintName, "struct") {
+					typeConstraint = originalConstraint
+				} else if strings.HasPrefix(constraintExpr, "struct") {
 					// TODO: Handle struct - will need to lift struct type defintion
 					v.showWarning("@getGenericDefinition - unhandled struct constraint `%s` on `%s`", constraintName, srcType.String())
-					constraintName = originalConstraint
+					typeConstraint = originalConstraint
+				} else {
+					// Handle special case for string and []byte types
+					if constraintExpr == "string" || constraintExpr == "[]byte" || constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
+						typeConstraint = "ISlice<byte>"
+					}
 				}
 
 				if iface.NumMethods() == 0 {
@@ -2202,9 +2216,17 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					liftedConstraints := v.getLiftedConstraints(constraint, typeParamNames[i])
 
 					if len(liftedConstraints) > 0 {
-						constraintName = fmt.Sprintf("%s %s", originalConstraint, liftedConstraints)
+						if len(typeConstraint) == 0 {
+							constraintName = fmt.Sprintf("%s %s", originalConstraint, liftedConstraints)
+						} else {
+							constraintName = fmt.Sprintf("%s %s, %s", originalConstraint, typeConstraint, liftedConstraints)
+						}
 					} else {
-						constraintName = fmt.Sprintf("%s %s", originalConstraint, constraintName)
+						if len(typeConstraint) == 0 {
+							constraintName = fmt.Sprintf("%s %s", originalConstraint, constraintName)
+						} else {
+							constraintName = fmt.Sprintf("%s %s", originalConstraint, typeConstraint)
+						}
 					}
 				} else {
 					// If interface has methods, can safely assume generic type must implement it directly

@@ -582,6 +582,7 @@ func getConstraintTypeSet(constraintTypes []types.Type) HashSet[ConstraintType] 
 		case *types.Pointer:
 			constraintTypeSet.Add(Pointer)
 		case *types.Array:
+		case *types.Slice:
 			constraintTypeSet.Add(Array)
 		case *types.Chan:
 			constraintTypeSet.Add(Channel)
