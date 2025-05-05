@@ -52,7 +52,7 @@
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
                 //"..\\Tests\\Behavioral\\TypeInference",
-                //"..\\Tests\\Behavioral\\GenericTypeInference",
+                "..\\Tests\\Behavioral\\GenericTypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeDecl",
                 //"..\\Tests\\Behavioral\\GenericFuncDecl",
                 //"..\\Tests\\Behavioral\\GenericTypeInstantiation",
@@ -93,6 +93,8 @@
                 //"C:\\Program Files\\Go\\src\\internal\\abi",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\abi",
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\abi",
+                //"C:\\Program Files\\Go\\src\\internal\\bytealg",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\bytealg",
                 //"C:\\Program Files\\Go\\src\\internal\\goarch",
                 //"C:\\Users\\rcarroll\\go2cs\\core\\internal\\goarch",
                 //"C:\\Program Files\\Go\\src\\internal\\goarch",
@@ -100,8 +102,8 @@
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\unsafeheader",
                 //"C:\\Program Files\\Go\\src\\internal\\fuzz",
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\fuzz",
-                "C:\\Program Files\\Go\\src\\sync\\atomic",
-                "C:\\Projects\\gpa\\go2cs\\src\\core\\sync\\atomic",
+                //"C:\\Program Files\\Go\\src\\sync\\atomic",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\sync\\atomic",
             ]
         }
     ]
