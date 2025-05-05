@@ -139,6 +139,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public ref T this[ulong index] => ref this[(nint)index];
 
+    public slice<T> this[Range range] => new(m_array, range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length));
+
+    public slice<T> Slice(int start, int length)
+    {
+        return new slice<T>(m_array, start, start + length);
+    }
+
+    public slice<T> Slice(nint start, nint length)
+    {
+        return Slice((int)start, (int)length);
+    }
+
     public int IndexOf(in T item)
     {
         int index = Array.IndexOf(m_array, item, 0, m_array.Length);
