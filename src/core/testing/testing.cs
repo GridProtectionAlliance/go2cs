@@ -915,9 +915,9 @@ internal static @string fmtDuration(time.Duration d) {
     void @private();
 }
 
-public static TB _ = (ж<T>)(default!);
+internal static TB _ = (ж<T>)(default!);
 
-public static TB _ = (ж<B>)(default!);
+internal static TB _ = (ж<B>)(default!);
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
 //
@@ -1884,7 +1884,7 @@ internal static error StopTestLog(this matchStringOnly f) {
 internal static void SetPanicOnExit0(this matchStringOnly f, bool _) {
 }
 
-internal static error CoordinateFuzzing(this matchStringOnly f, time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflect.Type> _, @string _, @string _) {
+internal static error CoordinateFuzzing(this matchStringOnly f, time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflectꓸType> _, @string _, @string _) {
     return errMain;
 }
 
@@ -1892,11 +1892,11 @@ internal static error RunFuzzWorker(this matchStringOnly f, Func<corpusEntry, er
     return errMain;
 }
 
-internal static (slice<corpusEntry>, error) ReadCorpus(this matchStringOnly f, @string _, slice<reflect.Type> _) {
+internal static (slice<corpusEntry>, error) ReadCorpus(this matchStringOnly f, @string _, slice<reflectꓸType> _) {
     return (default!, errMain);
 }
 
-internal static error CheckCorpus(this matchStringOnly f, slice<any> _, slice<reflect.Type> _) {
+internal static error CheckCorpus(this matchStringOnly f, slice<any> _, slice<reflectꓸType> _) {
     return default!;
 }
 
@@ -1952,10 +1952,10 @@ public static void ΔMain(Func<@string, @string, (bool, error)> matchString, sli
     void StartTestLog(io.Writer _);
     error StopTestLog();
     error WriteProfileTo(@string _, io.Writer _, nint _);
-    error CoordinateFuzzing(time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflect.Type> _, @string _, @string _);
+    error CoordinateFuzzing(time.Duration _, int64 _, time.Duration _, int64 _, nint _, slice<corpusEntry> _, slice<reflectꓸType> _, @string _, @string _);
     error RunFuzzWorker(Func<corpusEntry, error> _);
-    (slice<corpusEntry>, error) ReadCorpus(@string _, slice<reflect.Type> _);
-    error CheckCorpus(slice<any> _, slice<reflect.Type> _);
+    (slice<corpusEntry>, error) ReadCorpus(@string _, slice<reflectꓸType> _);
+    error CheckCorpus(slice<any> _, slice<reflectꓸType> _);
     void ResetCoverage();
     void SnapshotCoverage();
     (@string mode, Func<@string, @string, (string, error)> tearDown, Func<float64> snapcov) InitRuntimeCoverage();
@@ -2467,7 +2467,7 @@ internal static slice<@string> runningList() {
     running.Range(
     var listʗ2 = list;
     (any k, any v) => {
-        listʗ2 = append(listʗ2, fmt.Sprintf("%s (%v)"u8, k._<@string>(), highPrecisionTimeSince(v._<highPrecisionTime>()).Round(time.Second)));
+        listʗ2 = append(listʗ2, fmt.Sprintf("%s (%v)"u8, k._<@string>(), highPrecisionTimeSince(v._<highPrecisionTime>()).Round(time.ΔSecond)));
         return true;
     });
     slices.Sort(list);

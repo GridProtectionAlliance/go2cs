@@ -13,7 +13,7 @@
             "args": [
                 //"-var=false",
                 //"-uco=false",
-                //"-stdlib",
+                "-stdlib",
                 "-comments",
                 "-go2cspath=C:\\Projects\\gpa\\go2cs\\src",
                 //"-tree",
@@ -52,7 +52,7 @@
                 //"..\\Tests\\Behavioral\\AnyKeyMap",
                 //"..\\Tests\\Behavioral\\Constraints",
                 //"..\\Tests\\Behavioral\\TypeInference",
-                "..\\Tests\\Behavioral\\GenericTypeInference",
+                //"..\\Tests\\Behavioral\\GenericTypeInference",
                 //"..\\Tests\\Behavioral\\GenericTypeDecl",
                 //"..\\Tests\\Behavioral\\GenericFuncDecl",
                 //"..\\Tests\\Behavioral\\GenericTypeInstantiation",

@@ -30,7 +30,7 @@ internal static void initBenchmarkFlags() {
 
 internal static ж<@string> matchBenchmarks;
 internal static ж<bool> benchmarkMemory;
-internal static durationOrCountFlag benchTime = new durationOrCountFlag(d: 1 * time.Second);   // changed during test of testing package
+internal static durationOrCountFlag benchTime = new durationOrCountFlag(d: 1 * time.ΔSecond);   // changed during test of testing package
 
 [GoType] partial struct durationOrCountFlag {
     internal time_package.Duration d;

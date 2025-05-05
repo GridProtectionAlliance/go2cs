@@ -30,7 +30,7 @@ internal static void initFuzzFlags() {
 
 internal static ж<@string> matchFuzz;
 internal static durationOrCountFlag fuzzDuration;
-internal static durationOrCountFlag minimizeDuration = new durationOrCountFlag(d: 60 * time.Second, allowZero: true);
+internal static durationOrCountFlag minimizeDuration = new durationOrCountFlag(d: 60 * time.ΔSecond, allowZero: true);
 internal static ж<@string> fuzzCacheDir;
 internal static ж<bool> isFuzzWorker;
 internal static @string corpusDir = "testdata/fuzz"u8;
@@ -76,7 +76,7 @@ internal static readonly UntypedInt fuzzWorkerExitCode = 70;
     internal bool fuzzCalled;
 }
 
-public static TB _ = (ж<F>)(default!);
+internal static TB _ = (ж<F>)(default!);
 
 // corpusEntry is an alias to the same type as internal/fuzz.CorpusEntry.
 // We use a type alias because we don't want to export this type, and we can't
@@ -166,7 +166,7 @@ public static TB _ = (ж<F>)(default!);
 }
 
 // supportedTypes represents all of the supported types which can be fuzzed.
-internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, bool>{
+internal static map<reflectꓸType, bool> supportedTypes = new map<reflectꓸType, bool>{
     [reflect.TypeOf((slice<byte>)(""))] = true,
     [reflect.TypeOf(((@string)""u8))] = true,
     [reflect.TypeOf(((bool)false))] = true,
@@ -222,7 +222,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
     }
     f.Helper();
     // ff should be in the form func(*testing.T, ...interface{})
-    ref var fn = ref heap<reflect_package.Value>(out var Ꮡfn);
+    ref var fn = ref heap<reflect_package.ΔValue>(out var Ꮡfn);
     fn = reflect.ValueOf(ff);
     var fnType = fn.Type();
     if (fnType.Kind() != reflect.Func) {
@@ -235,7 +235,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
         throw panic("testing: fuzz target must not return a value");
     }
     // Save the types of the function to compare against the corpus.
-    slice<reflect.Type> types = default!;
+    slice<reflectꓸType> types = default!;
     for (nint i = 1; i < fnType.NumIn(); i++) {
         var t = fnType.In(i);
         if (!supportedTypes[t]) {
@@ -327,7 +327,7 @@ internal static map<reflect.Type, bool> supportedTypes = new map<reflect.Type, b
         var eʗ1 = e;
         var fnʗ2 = fn;
         (ж<T> t) => {
-            var args = new reflect.Value[]{reflect.ValueOf(tΔ1)}.slice();
+            var args = new reflectꓸValue[]{reflect.ValueOf(tΔ1)}.slice();
             foreach (var (_, v) in eʗ1.Values) {
                 args = append(args, reflect.ValueOf(v));
             }

@@ -191,7 +191,7 @@ public static ж<Type> TypeFor<T>()
     public uint16 Mcount;  // number of methods
     public uint16 Xcount;  // number of exported methods
     public uint32 Moff;  // offset from this uncommontype to [mcount]Method
-    public uint32 _;  // unused
+    internal uint32 _;  // unused
 }
 
 [GoRecv] public static unsafe slice<Method> Methods(this ref UncommonType t) {

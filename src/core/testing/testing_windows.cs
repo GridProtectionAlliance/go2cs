@@ -58,7 +58,7 @@ internal static time.Duration sub(this highPrecisionTime a, highPrecisionTime b)
     if (queryPerformanceFrequency == 0) {
         queryPerformanceFrequency = windows.QueryPerformanceFrequency();
     }
-    var (hi, lo) = bits.Mul64(((uint64)delta), ((uint64)time.Second) / ((uint64)time.Nanosecond));
+    var (hi, lo) = bits.Mul64(((uint64)delta), ((uint64)time.ΔSecond) / ((uint64)time.ΔNanosecond));
     var (quo, _) = bits.Div64(hi, lo, ((uint64)queryPerformanceFrequency));
     return ((time.Duration)quo);
 }
