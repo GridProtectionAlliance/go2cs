@@ -28,6 +28,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
+		if targetTypeName == "@string" {
+			// Check if it is a generic type parameter - Go will have already
+			// validated constraint, so we can just cast to string directly
+			if _, ok := v.getType(arg, false).(*types.TypeParam); ok {
+				return fmt.Sprintf("new %s(%s)", targetTypeName, expr)
+			}
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)
