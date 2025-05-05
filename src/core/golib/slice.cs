@@ -51,6 +51,12 @@ public interface ISlice : IArray
 public interface ISlice<T> : IArray<T>, ISlice
 {
     ISlice<T> Append(params T[] elems);
+
+    ISlice<T> this[Range range] { get; }
+
+    ISlice<T> Slice(int start, int length);
+
+    ISlice<T> Slice(nint start, nint length);
 }
 
 // A ref struct option exists for slices that would be restricted to stack-only usage, however, this prevents
@@ -199,6 +205,11 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     public slice<T> Slice(int start, int length)
     {
         return m_array.slice(start, start + length, Capacity);
+    }
+
+    public slice<T> Slice(nint start, nint length)
+    {
+        return Slice((int)start, (int)length);
     }
 
     public nint IndexOf(in T item)
@@ -420,6 +431,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     {
         return Append(elems);
     }
+
+    ISlice<T> ISlice<T>.this[Range range] => this[range];
+
+    ISlice<T> ISlice<T>.Slice(int start, int length) => Slice(start, length);
+
+    ISlice<T> ISlice<T>.Slice(nint start, nint length) => Slice(start, length);
 
     Array IArray.Source => Source;
 

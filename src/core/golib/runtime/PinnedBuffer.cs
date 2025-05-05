@@ -127,6 +127,12 @@ internal class PinnedBuffer : IArray<byte>, IDisposable
         }
     }
 
+    public slice<byte> this[Range range] => ToSpan()[range];
+
+    public slice<byte> Slice(int start, int length) => ToSpan().Slice(start, length);
+
+    public slice<byte> Slice(nint start, nint length) => ToSpan().Slice((int)start, (int)length);
+
     public unsafe Span<byte> ToSpan()
     {
         return new Span<byte>(Pointer, m_len);

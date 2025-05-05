@@ -86,6 +86,8 @@ public readonly struct @string :
 
     public @string(in slice<rune> value) : this(value.ToSpan()) { }
 
+    public @string(in IArray<byte> value) : this(value.Source) { }
+
     public @string(string? value)
     {
         m_value = Encoding.UTF8.GetBytes(value ?? "");

@@ -30,7 +30,19 @@ internal static class ISliceTypeTemplate
                 }
                     
                 public ref {{targetTypeName}} this[nint index] => ref m_value[index];
+        
+                public slice<{{targetTypeName}}> this[Range range] => ToSpan()[range];
                 
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[Range range] => this[range];
+                
+                public slice<{{targetTypeName}}> Slice(int start, int length) => ToSpan().Slice(start, length);
+                
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(int start, int length) => Slice(start, length);
+                
+                public slice<{{targetTypeName}}> Slice(nint start, nint length) => ToSpan().Slice((int)start, (int)length);
+                
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => Slice(start, length);
+        
                 public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 
                 public Span<{{targetTypeName}}> ToSpan() => m_value.ToSpan();
