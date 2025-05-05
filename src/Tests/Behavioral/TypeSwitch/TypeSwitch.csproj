@@ -99,6 +99,8 @@
     <Compile Include="*.cs" />
     <!-- Remove test files from current folder -->
     <Compile Remove="*._test.cs" />
+    <!--Remove all sub-folders -->
+    <None Remove="**/**/*" />
   </ItemGroup>
 
   <ItemGroup>

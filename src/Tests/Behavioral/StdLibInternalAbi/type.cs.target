@@ -156,7 +156,7 @@ public static ж<Type> TypeFor<T>()
     public uint16 Mcount;
     public uint16 Xcount;
     public uint32 Moff;
-    public uint32 _;
+    internal uint32 _;
 }
 
 [GoRecv] public static unsafe slice<Method> Methods(this ref UncommonType t) {
