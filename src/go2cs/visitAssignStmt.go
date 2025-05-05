@@ -33,6 +33,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	lhsTypeIsInt := make([]bool, lhsLen)
 	anyTypeIsInt := false
 
+	// Ensure that the correct type is used for unsafe.Pointer, we do this since unsafe.Pointer
+	// in converted Go code is usually cast to uintptr in C# - in these cases we need to ensure
+	// that the type specifically @unsafe.Pointer in C# and not uintptr when using var
+	lhsTypeIsUnsafePointer := make([]bool, lhsLen)
+	anyTypeIsUnsafePointer := false
+
 	// Check if rhs is a call with a tuple result
 	var tupleResult bool
 
@@ -114,6 +120,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if !anyTypeIsInt && lhsTypeIsInt[i] {
 				anyTypeIsInt = true
 			}
+
+			lhsTypeIsUnsafePointer[i] = typeName == "unsafe.Pointer"
+
+			if !anyTypeIsUnsafePointer && lhsTypeIsUnsafePointer[i] {
+				anyTypeIsUnsafePointer = true
+			}
 		}
 	}
 
@@ -155,7 +167,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		assignStmt.Tok == token.SHR_ASSIGN ||
 		assignStmt.Tok == token.AND_NOT_ASSIGN
 
-	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt {
+	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
 		leftExprs := HashSet[string]{}
 
 		// Handle LHS
@@ -311,7 +323,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
-		for i := 0; i < lhsLen; i++ {
+		for i := range lhsLen {
 			lhs := lhsExprs[i]
 
 			var rhs ast.Expr
@@ -416,7 +428,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							format.heapTypeDeclTarget.WriteString(heapTypeDecl)
 						}
 					} else {
-						if v.options.preferVarDecl && !lhsTypeIsInt[i] {
+						if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
 							isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
 
 							if !isDiscarded {

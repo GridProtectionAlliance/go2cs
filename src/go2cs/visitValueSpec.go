@@ -136,10 +136,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
-						headTypeDecl := v.convertToHeapTypeDecl(ident, true)
+						heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
-						if len(headTypeDecl) > 0 {
-							v.writeOutputLn(headTypeDecl)
+						if len(heapTypeDecl) > 0 {
+							v.writeOutputLn(heapTypeDecl)
 							v.targetFile.WriteString(v.newline)
 							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
 						} else {
