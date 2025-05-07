@@ -50,8 +50,20 @@ internal abstract class TemplateBase
         if (!string.IsNullOrWhiteSpace(PackageNamespace) && !PackageNamespace.Equals("go"))
             m_usings.Add("using go;");
 
-        if (m_usings.Contains("using global::go;") && m_usings.Contains("using go;"))
-            m_usings.Remove("using global::go;");
+        // Remove any duplicate usings that are prefixed with global::
+        HashSet<string> duplicateUsings = [];
+
+        foreach (string usingStmt in m_usings)
+        {
+            //                        012345678901234
+            if (usingStmt.StartsWith("using global::"))
+            {
+                if (m_usings.Contains($"using {usingStmt[14..]}"))
+                    duplicateUsings.Add(usingStmt);
+            }
+        }
+
+        m_usings.ExceptWith(duplicateUsings);
 
         return $"{TemplateHeader}{TemplateBody}{TemplateFooter}";
     }
