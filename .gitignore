@@ -338,16 +338,27 @@ rsrc_windows_amd64.syso
 !src/core/debug/
 !src/core/debug/*
 
-# But do ignore any debug folders in subdirectories
+# But do ignore any debug/bin/obj folders in subdirectories
 src/core/debug/**/[Dd]ebug/
+src/core/debug/**/[Bb]in/
+src/core/debug/**/[Oo]bj/
 
 # Don't ignore the debug folder in src/core/runtime
 !src/core/runtime/debug/
 !src/core/runtime/debug/*
 
-# But do ignore any debug folders in subdirectories
+# But do ignore any debug/bin/obj folders in subdirectories
 src/core/runtime/debug/**/[Dd]ebug/
+src/core/runtime/debug/**/[Bb]in/
+src/core/runtime/debug/**/[Oo]bj/
+
 
 # Don't ignore the log folder in src/core
 !src/core/log/
 !src/core/log/*
+
+# But do ignore any debug/bin/obj folders in subdirectories
+src/core/log/**/[Dd]ebug/
+src/core/log/**/[Bb]in/
+src/core/log/**/[Oo]bj/
+
