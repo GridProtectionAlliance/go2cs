@@ -53,6 +53,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)
 
+			if csIDName == "_" {
+				if v.inFunction {
+					csIDName = v.getTempVarName("_")
+				} else {
+					csIDName = getGlobalTempVarName("_") + CapturedVarMarker
+				}
+			}
+
 			context := DefaultBasicLitContext()
 			context.u8StringOK = !isInterfaceType
 
@@ -202,6 +210,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 		for i, ident := range valueSpec.Names {
 			goIDName := v.getIdentName(ident)
 			csIDName := getSanitizedIdentifier(goIDName)
+
+			if csIDName == "_" {
+				if v.inFunction {
+					csIDName = v.getTempVarName("_")
+				} else {
+					csIDName = getGlobalTempVarName("_") + CapturedVarMarker
+				}
+			}
 
 			c := v.info.ObjectOf(ident).(*types.Const)
 			goTypeName := v.getTypeName(c.Type(), false)

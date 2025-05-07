@@ -223,6 +223,7 @@ var indirectImplicitConversions map[string]HashSet[string]
 var numericConversions map[string]map[string]string
 var indirectNumericConversions map[string]map[string]string
 var nameCollisions map[string]bool
+var globalTempVarCount map[string]int
 var initFuncCounter int
 var usesUnsafeCode bool
 var packageLock = sync.Mutex{}
@@ -472,6 +473,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		numericConversions = make(map[string]map[string]string)
 		indirectNumericConversions = make(map[string]map[string]string)
 		nameCollisions = make(map[string]bool)
+		globalTempVarCount = make(map[string]int)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -2273,6 +2275,18 @@ func (v *Visitor) typeExists(name string) bool {
 	}
 
 	return false
+}
+
+func getGlobalTempVarName(varPrefix string) string {
+	if globalTempVarCount == nil {
+		globalTempVarCount = make(map[string]int)
+	}
+
+	count := globalTempVarCount[varPrefix]
+	count++
+	globalTempVarCount[varPrefix] = count
+
+	return fmt.Sprintf("%s%s%d", varPrefix, TempVarMarker, count)
 }
 
 func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
