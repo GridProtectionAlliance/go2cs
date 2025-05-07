@@ -144,6 +144,7 @@ func (c *StdLibConverter) scanStdLib() error {
 	// Set the target platform in the environment if specified
 	if c.options.targetPlatform != "" {
 		targetParts := strings.Split(c.options.targetPlatform, "/")
+
 		if len(targetParts) == 2 {
 			loadConfig.Env = append(loadConfig.Env, fmt.Sprintf("GOOS=%s", targetParts[0]))
 			loadConfig.Env = append(loadConfig.Env, fmt.Sprintf("GOARCH=%s", targetParts[1]))
@@ -151,8 +152,10 @@ func (c *StdLibConverter) scanStdLib() error {
 	}
 
 	fmt.Println("Loading standard library packages (this may take a while)...")
+
 	// Load "std" pattern to get all standard library packages
 	pkgs, err := packages.Load(loadConfig, "std")
+
 	if err != nil {
 		return fmt.Errorf("failed to load standard library packages: %w", err)
 	}

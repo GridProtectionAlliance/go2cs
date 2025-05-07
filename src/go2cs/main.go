@@ -357,9 +357,11 @@ Examples:
 	if *parallelProcCmd > 1 {
 		// Limit to 4 parallel processes
 		parallelCount := *parallelProcCmd
+
 		if parallelCount > 4 {
 			parallelCount = 4
 		}
+
 		os.Setenv("GO2CS_PARALLEL", strconv.Itoa(parallelCount))
 	}
 
@@ -519,7 +521,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		if len(files) == 0 {
-			showWarning("No valid Go source files found for conversion in input path \"%s\"", packageInputPath)
+			showMessage("Skipping conversion: no target Go source files found for conversion in input path \"%s\"", packageInputPath)
 			continue
 		}
 
@@ -1208,9 +1210,19 @@ func (v *Visitor) getPrintedNode(node ast.Node) string {
 	return result.String()
 }
 
+func showMessage(format string, a ...interface{}) {
+	message := fmt.Sprintf(format, a...)
+	os.Stdout.WriteString(fmt.Sprintf("INFO: %s\n", message))
+}
+
+func (v *Visitor) showMessage(format string, a ...interface{}) {
+	message := fmt.Sprintf(format, a...)
+	showMessage("%s in \"%s\"", message, getShortFileName(v.file))
+}
+
 func showWarning(format string, a ...interface{}) {
 	message := fmt.Sprintf(format, a...)
-	println(fmt.Sprintf("WARNING: %s", message))
+	os.Stderr.WriteString(fmt.Sprintf("WARNING: %s\n", message))
 }
 
 func (v *Visitor) showWarning(format string, a ...interface{}) {
