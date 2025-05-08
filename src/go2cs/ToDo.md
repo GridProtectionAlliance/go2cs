@@ -67,18 +67,14 @@ xx) Complete code comment conversions, this may be predicated on the following:
 
 ## For C# code operations:
 
-01) ~~Restructure T4 templates for Roslyn type inputs (or simplified versions) since using code will only be source generators~~
-    ~~1) This will involve dropping unused code from go2cs.Common~~
-02) Update source generators to accommodate remaining GoType attribute implementations, e.g.:
+01) Update source generators to accommodate remaining GoType attribute implementations, e.g.:
     1) ~~Struct embedding (inheritance)~~
     2) ~~Struct interface implementations~~
     3) ~~Interface inheritance~~
     4) map type definitions (IMap implementation)
     5) channel type definitions (IChannel implementation)
     6) other...
-03) ~~Remove current C# version of go2cs - determine if any should remain as proxy to Go version~~
-    ~~1) Remove related dependencies, e.g., Antlr / command line parsing code~~
-04) ~~Restructure behavioral tests:~~
+02) ~~Restructure behavioral tests:~~
     1) ~~Mode to compare raw code to target file, ignoring comments~~
        ~~1) Set this up soon to better handle regression testing of go2cs changes~~
     2) Future tests can be setup to compare with comments once go2c2 has better support
