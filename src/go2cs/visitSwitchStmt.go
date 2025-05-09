@@ -194,7 +194,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 					if i == caseClauseCount-1 {
 						if hasFallthroughs {
-							if caseFallsThrough && caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil {
+							if caseFallsThrough {
 								v.targetFile.WriteRune(')')
 							}
 
