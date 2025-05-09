@@ -180,8 +180,8 @@ var keywords = NewHashSet([]string{
 // Note that "_" is used for type assertion functions in go2cs converted C# code, but it is not
 // a valid method name in Go, so it is not included in the reserved list.
 var reserved = NewHashSet([]string{
-	"AreEqual", "array", "channel", "defer\u01C3", "Equals", "Finalize", "GetGoTypeName", "GetHashCode",
-	"GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
+	"AreEqual", "array", "channel", "defer\u01C3", "EmptyStruct", "Equals", "Finalize", "GetGoTypeName",
+	"GetHashCode", "GetType", "GoFunc", "GoFuncRoot", "GoImplement", "GoImplementAttribute", "GoImplicitConv",
 	"GoImplicitConvAttribute", "GoPackage", "GoPackageAttribute", "GoRecv", "GoRecvAttribute",
 	"GoTestMatchingConsoleOutput", "GoTestMatchingConsoleOutputAttribute", "GoTag", "GoTagAttribute",
 	"GoTypeAlias", "GoTypeAliasAttribute", "GoType", "GoTypeAttribute", "GoUntyped", "go\u01C3",
@@ -2008,40 +2008,58 @@ func (v *Visitor) findPromotedFieldPath(sourceStruct *types.Struct, targetFieldN
 	return "" // Field not found in any embedded struct
 }
 
+func isEmptyStruct(structType *ast.StructType) bool {
+	if structType == nil {
+		return false
+	}
+
+	// Empty struct has no fields
+	return len(structType.Fields.List) == 0
+}
+
+func isEmptyStructType(structType *types.Struct) bool {
+	if structType == nil {
+		return false
+	}
+
+	// Empty struct has no fields
+	return structType.NumFields() == 0
+}
+
 func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type) {
 	if starExpr, ok := expr.(*ast.StarExpr); ok {
-		if structType, ok := starExpr.X.(*ast.StructType); ok {
+		if structType, ok := starExpr.X.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(starExpr.X, false)
 		}
 	} else if compositeLit, ok := expr.(*ast.CompositeLit); ok {
-		if structType, ok := compositeLit.Type.(*ast.StructType); ok {
+		if structType, ok := compositeLit.Type.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(compositeLit.Type, false)
 		}
 	} else if arrayType, ok := expr.(*ast.ArrayType); ok {
-		if structType, ok := arrayType.Elt.(*ast.StructType); ok {
+		if structType, ok := arrayType.Elt.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(arrayType.Elt, false)
 		}
 	} else if indexExpr, ok := expr.(*ast.IndexExpr); ok {
-		if structType, ok := indexExpr.X.(*ast.StructType); ok {
+		if structType, ok := indexExpr.X.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(indexExpr.X, false)
 		}
 	} else if sliceExpr, ok := expr.(*ast.SliceExpr); ok {
-		if structType, ok := sliceExpr.X.(*ast.StructType); ok {
+		if structType, ok := sliceExpr.X.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(sliceExpr.X, false)
 		}
 	} else if callExpr, ok := expr.(*ast.CallExpr); ok {
-		if structType, ok := callExpr.Fun.(*ast.StructType); ok {
+		if structType, ok := callExpr.Fun.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(callExpr.Fun, false)
 		}
 	} else if typeAssertExpr, ok := expr.(*ast.TypeAssertExpr); ok {
-		if structType, ok := typeAssertExpr.Type.(*ast.StructType); ok {
+		if structType, ok := typeAssertExpr.Type.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(typeAssertExpr.Type, false)
 		}
 	} else if selectorExpr, ok := expr.(*ast.SelectorExpr); ok {
-		if structType, ok := selectorExpr.X.(*ast.StructType); ok {
+		if structType, ok := selectorExpr.X.(*ast.StructType); ok && !isEmptyStruct(structType) {
 			return structType, v.getType(selectorExpr.X, false)
 		}
-	} else if structType, ok := expr.(*ast.StructType); ok {
+	} else if structType, ok := expr.(*ast.StructType); ok && !isEmptyStruct(structType) {
 		return structType, v.getType(expr, false)
 	}
 
@@ -2347,6 +2365,23 @@ func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
 }
 
 func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
+
+	if chanType, ok := expr.(*ast.ChanType); ok {
+		// Check if the channel value is an anonymous struct
+		if structType, exprType := v.extractStructType(chanType.Value); structType != nil && !v.liftedTypeExists(structType) {
+			v.indentLevel++
+			v.visitStructType(structType, exprType, "channel", nil, true, nil)
+			v.indentLevel--
+		}
+
+		// Check if the channel value is an anonymous interface
+		if interfaceType, exprType := v.extractInterfaceType(chanType.Value); interfaceType != nil && !v.liftedTypeExists(interfaceType) {
+			v.indentLevel++
+			v.visitInterfaceType(interfaceType, exprType, "channel", nil, true, nil)
+			v.indentLevel--
+		}
+	}
+
 	return v.getTypeName(v.getType(expr, underlying), underlying)
 }
 
@@ -2376,9 +2411,9 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	if !isUnderlying {
-		if _, ok := t.(*types.Struct); ok {
+		if structType, ok := t.(*types.Struct); ok && !isEmptyStructType(structType) {
 			v.showWarning("Unresolved dynamic struct type: %s", t.String())
-		} else if iface, ok := t.(*types.Interface); ok && !iface.Empty() {
+		} else if interfaceType, ok := t.(*types.Interface); ok && !interfaceType.Empty() {
 			v.showWarning("Unresolved dynamic interface type: %s", t.String())
 		}
 	}
@@ -2656,6 +2691,8 @@ func convertToCSFullTypeName(typeName string) string {
 		return RootNamespace + ".@string"
 	case "interface{}":
 		return "any"
+	case "struct{}":
+		return RootNamespace + ".EmptyStruct"
 	default:
 		if strings.Contains(typeName, PackageSuffix) {
 			parts := strings.Split(typeName, ".")
