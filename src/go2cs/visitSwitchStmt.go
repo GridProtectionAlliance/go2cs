@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"slices"
 )
 
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
@@ -350,8 +351,94 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	}
 }
 
+func (v *Visitor) containsUntypedExpr(expr ast.Expr) bool {
+	// First check the type information directly
+	if t := v.info.TypeOf(expr); t != nil {
+		if basic, ok := t.Underlying().(*types.Basic); ok {
+			isUntyped := basic.Info()&types.IsUntyped != 0
+			if isUntyped {
+				return true
+			}
+		}
+	}
+
+	// Handle identifiers specifically (including references to untyped constants)
+	if ident, ok := expr.(*ast.Ident); ok {
+		// Check if this identifier refers to a constant
+		if obj := v.info.ObjectOf(ident); obj != nil {
+			// Check if it's a constant
+			if cnst, ok := obj.(*types.Const); ok {
+				// Check if the constant has an untyped type
+				if basic, ok := cnst.Type().(*types.Basic); ok {
+					isUntyped := basic.Info()&types.IsUntyped != 0
+					return isUntyped
+				}
+			}
+		}
+
+		// Also check type-and-value information
+		if tv, ok := v.info.Types[ident]; ok {
+			if tv.IsValue() && tv.Value != nil && tv.Type != nil {
+				if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
+					isUntyped := basic.Info()&types.IsUntyped != 0
+					return isUntyped
+				}
+			}
+		}
+	}
+
+	// Recursive checking for compound expressions
+	switch e := expr.(type) {
+	case *ast.BinaryExpr:
+		return v.containsUntypedExpr(e.X) || v.containsUntypedExpr(e.Y)
+	case *ast.UnaryExpr:
+		return v.containsUntypedExpr(e.X)
+	case *ast.StarExpr:
+		return v.containsUntypedExpr(e.X)
+	case *ast.ParenExpr:
+		return v.containsUntypedExpr(e.X)
+	case *ast.SelectorExpr:
+		return v.containsUntypedExpr(e.X)
+	case *ast.IndexExpr:
+		return v.containsUntypedExpr(e.X) || v.containsUntypedExpr(e.Index)
+	case *ast.SliceExpr:
+		untyped := v.containsUntypedExpr(e.X)
+
+		if e.Low != nil {
+			untyped = untyped || v.containsUntypedExpr(e.Low)
+		}
+
+		if e.High != nil {
+			untyped = untyped || v.containsUntypedExpr(e.High)
+		}
+
+		if e.Max != nil {
+			untyped = untyped || v.containsUntypedExpr(e.Max)
+		}
+
+		return untyped
+	case *ast.CallExpr:
+		return slices.ContainsFunc(e.Args, v.containsUntypedExpr)
+	case *ast.CompositeLit:
+		if e.Type != nil && v.containsUntypedExpr(e.Type) {
+			return true
+		}
+
+		return slices.ContainsFunc(e.Elts, v.containsUntypedExpr)
+	case *ast.KeyValueExpr:
+		return v.containsUntypedExpr(e.Key) || v.containsUntypedExpr(e.Value)
+	}
+
+	return false
+}
+
 func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseClause, inferExprTarget bool) bool {
 	usePattenMatch := true
+
+	// Verify that all expressions are not untyped (do not pattern match with implicitly type conversions)
+	if slices.ContainsFunc(caseClause.List, v.containsUntypedExpr) {
+		return false
+	}
 
 	if inferExprTarget {
 		// Verify that all expressions are non-call values

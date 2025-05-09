@@ -104,8 +104,10 @@
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\internal\\fuzz",
                 //"C:\\Program Files\\Go\\src\\sync\\atomic",
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\sync\\atomic",
-                "C:\\Program Files\\Go\\src\\runtime",
-                "C:\\Projects\\gpa\\go2cs\\src\\core\\runtime",
+                //"C:\\Program Files\\Go\\src\\runtime",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\runtime",
+                "C:\\Program Files\\Go\\src\\unicode\\utf8",
+                "C:\\Projects\\gpa\\go2cs\\src\\core\\unicode\\utf8",
             ]
         }
     ]
