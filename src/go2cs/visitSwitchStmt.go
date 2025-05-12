@@ -36,8 +36,8 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 		// Check if all case clauses are constant values
 		for _, expr := range caseClause.List {
-			// Check if the expression is a function call or a non-value type
-			if !v.isNonCallValue(expr) {
+			// Check if the expression is a function call, a non-value type or is an untyped expression
+			if !v.isNonCallValue(expr) || v.containsUntypedExpr(expr) {
 				allConst = false
 				break
 			}
