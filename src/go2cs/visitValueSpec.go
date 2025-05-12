@@ -290,8 +290,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			}
 
 			if c.Val().Kind() == constant.Int {
-				// Check if const integer value will exceed int64 limits
-				if _, err := strconv.ParseInt(constVal, 0, 64); err != nil {
+				// Check if const integer value will exceed uint64 limits
+				if _, err := strconv.ParseUint(constVal, 0, 64); err != nil {
 					writeUntypedConst()
 				}
 			}
