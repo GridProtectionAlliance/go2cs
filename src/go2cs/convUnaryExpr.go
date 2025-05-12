@@ -145,5 +145,9 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		}
 	}
 
+	if unaryExpr.Op == token.XOR {
+		return "~" + v.convExpr(unaryExpr.X, nil)
+	}
+
 	return unaryExpr.Op.String() + v.convExpr(unaryExpr.X, nil)
 }
