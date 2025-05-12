@@ -20,6 +20,10 @@ internal static class IArrayTypeTemplate
                 }
                     
                 public ref {{targetTypeName}} this[nint index] => ref val[index];
+            
+                public ref {{targetTypeName}} this[int index] => ref val[(nint)index];
+            
+                public ref {{targetTypeName}} this[ulong index] => ref val[(nint)index];
                 
                 public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 
