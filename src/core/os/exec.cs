@@ -27,10 +27,8 @@ internal static readonly processMode modeHandle = 1;
 
 internal static readonly processStatus statusOK = 0;
 internal static readonly processStatus statusDone = /* 1 << 62 */ 4611686018427387904;
-internal static readonly GoUntyped statusReleased = /* 1 << 63 */
-    GoUntyped.Parse("9223372036854775808");
-internal static readonly GoUntyped processStatusMask = /* 0x3 << 62 */
-    GoUntyped.Parse("13835058055282163712");
+internal static readonly processStatus statusReleased = /* 1 << 63 */ 9223372036854775808;
+internal static readonly UntypedInt processStatusMask = /* 0x3 << 62 */ 13835058055282163712;
 
 // Process stores the information about a process created by [StartProcess].
 [GoType] partial struct Process {

@@ -229,7 +229,7 @@ internal static void finishsweep_m() {
     // shouldn't be any spans left to sweep, so this should finish
     // instantly. If GC was forced before the concurrent sweep
     // finished, there may be spans to sweep.
-    while (sweepone() != ^((uintptr)0)) {
+    while (sweepone() != ~((uintptr)0)) {
     }
     // Make sure there aren't any outstanding sweepers left.
     // At this point, with the world stopped, it means one of two
@@ -284,7 +284,7 @@ internal static void bgsweep(channel<nint> c) {
         // the proportional sweeper and having spans ready to go for allocation.
         static readonly UntypedInt sweepBatchSize = 10;
         nint nSwept = 0;
-        while (sweepone() != ^((uintptr)0)) {
+        while (sweepone() != ~((uintptr)0)) {
             nSwept++;
             if (nSwept % sweepBatchSize == 0) {
                 goschedIfBusy();
@@ -350,10 +350,10 @@ internal static uintptr sweepone() {
     var sl = Δsweep.active.begin();
     if (!sl.valid) {
         (~(~gp).m).locks--;
-        return ^((uintptr)0);
+        return ~((uintptr)0);
     }
     // Find a span to sweep.
-    var npages = ^((uintptr)0);
+    var npages = ~((uintptr)0);
     bool noMoreWork = default!;
     while (ᐧ) {
         var s = mheap_.nextSpanForSweep();
@@ -915,7 +915,7 @@ retry:
     }
     var pagesTarget = ((int64)(mheap_.sweepPagesPerByte * ((float64)newHeapLive))) - ((int64)callerSweepPages);
     while (pagesTarget > ((int64)(mheap_.pagesSwept.Load() - sweptBasis))) {
-        if (sweepone() == ^((uintptr)0)) {
+        if (sweepone() == ~((uintptr)0)) {
             mheap_.sweepPagesPerByte = 0;
             break;
         }

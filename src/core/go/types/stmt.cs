@@ -971,7 +971,7 @@ L:
             check.softErrorf(sValue, InvalidIterVar, "range over %s permits only one iteration variable"u8, Ꮡx);
             break;
         }
-        case {} when sExtra is != default!: {
+        case {} when sExtra != default!: {
             check.softErrorf(sExtra, InvalidIterVar, "range clause permits at most two iteration variables"u8);
             break;
         }}
@@ -1157,7 +1157,7 @@ internal static (ΔType key, ΔType val, @string cause, bool ok) rangeKeyVal(ΔT
         case {} when typ.Params().Len() is != 1: {
             return bad("func must be func(yield func(...) bool): wrong argument count"u8);
         }
-        case {} when toSig(typ.Params().At(0).Type()) is nil: {
+        case {} when toSig(typ.Params().At(0).Type()) == nil: {
             return bad("func must be func(yield func(...) bool): argument is not func"u8);
         }
         case {} when typ.Results().Len() is != 0: {

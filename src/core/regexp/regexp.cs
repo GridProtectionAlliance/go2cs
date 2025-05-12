@@ -376,7 +376,8 @@ internal static @string quote(@string s) {
     return -1;
 }
 
-internal const rune endOfText = -1;
+internal static readonly GoUntyped endOfText = /* -1 */
+    GoUntyped.Parse("-1");
 
 // input abstracts different representations of the input text. It provides
 // one-character lookahead.

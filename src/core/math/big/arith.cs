@@ -18,8 +18,7 @@ internal static readonly UntypedInt _S = /* _W / 8 */ 8; // word size in bytes
 internal static readonly UntypedInt _W = /* bits.UintSize */ 64; // word size in bits
 internal static readonly GoUntyped _B = /* 1 << _W */    // digit base
     GoUntyped.Parse("18446744073709551616");
-internal static readonly GoUntyped _M = /* _B - 1 */     // digit mask
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly UntypedInt _M = /* _B - 1 */ 18446744073709551615; // digit mask
 
 // Many of the loops in this file are of the form
 //   for i := 0; i < len(z) && i < len(x) && i < len(y); i++
@@ -300,7 +299,7 @@ internal static (Word q, Word r) divWW(Word x1, Word x0, Word y, Word m) {
 // reciprocalWord return the reciprocal of the divisor. rec = floor(( _B^2 - 1 ) / u - _B). u = d1 << nlz(d1).
 internal static Word reciprocalWord(Word d1) {
     nuint u = ((nuint)(d1 << (int)(nlz(d1))));
-    nuint x1 = ^u;
+    nuint x1 = ~u;
     nuint x0 = ((nuint)_M);
     var (rec, Δ_) = bits.Div(x1, x0, u);
     // (_B^2-1)/U-_B = (_B*(_M-C)+_M)/U

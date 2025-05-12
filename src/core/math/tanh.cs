@@ -84,7 +84,7 @@ internal static float64 tanh(float64 x) {
     static readonly UntypedFloat MAXLOG = /* 8.8029691931113054295988e+01 */ 88.0297;       // log(2**127)
     var z = Abs(x);
     switch (ᐧ) {
-    case {} when z is > 0.5F * MAXLOG: {
+    case {} when z > 0.5F * MAXLOG: {
         if (x < 0) {
             return -1;
         }

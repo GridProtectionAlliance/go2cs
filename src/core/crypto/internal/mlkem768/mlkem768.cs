@@ -192,39 +192,39 @@ internal static ж<DecapsulationKey> kemKeyGen(ж<DecapsulationKey> Ꮡdk, ж<ar
             // Note that this is consistent with Kyber round 3, rather than with
             // the initial draft of FIPS 203, because NIST signaled that the
             // change was involuntary and will be reverted.
-            A[i * k + j] = sampleNTT(ρ, j, i);
+            A.val[i * k + j] = sampleNTT(ρ, j, i);
         }
     }
     byte N = default!;
     var s = Ꮡ(dk.s);
-    /* for i := range s {
-	s[i] = ntt(samplePolyCBD(σ, N))
-	N++
-} */
+    foreach (var (i, _) in s.val) {
+        s.val[i] = ntt(samplePolyCBD(σ, N));
+        N++;
+    }
     var e = new slice<nttElement>(k);
     foreach (var (i, _) in e) {
         e[i] = ntt(samplePolyCBD(σ, N));
         N++;
     }
     var t = Ꮡ(dk.t);
-    /* for i := range t {
-	t[i] = e[i]
-	for j := range s {
-		t[i] = polyAdd(t[i], nttMul(A[i*k+j], s[j]))
-	}
-} */
-    // t = A ◦ s + e
+    foreach (var (i, _) in t.val) {
+        // t = A ◦ s + e
+        t.val[i] = e[i];
+        foreach (var (j, _) in s.val) {
+            t.val[i] = polyAdd(t.val[i], nttMul(A.val[i * k + j], s.val[j]));
+        }
+    }
     // dkPKE ← ByteEncode₁₂(s)
     // ekPKE ← ByteEncode₁₂(t) || ρ
     // ek ← ekPKE
     // dk ← dkPKE || ek || H(ek) || z
     var dkB = dk.dk[..0];
-    /* for i := range s {
-	dkB = polyByteEncode(dkB, s[i])
-} */
-    /* for i := range t {
-	dkB = polyByteEncode(dkB, t[i])
-} */
+    foreach (var (i, _) in s.val) {
+        dkB = polyByteEncode(dkB, s.val[i]);
+    }
+    foreach (var (i, _) in t.val) {
+        dkB = polyByteEncode(dkB, t.val[i]);
+    }
     dkB = append(dkB, ρ.ꓸꓸꓸ);
     var H = sha3.New256();
     H.Write(dkB[(int)(decryptionKeySize)..]);

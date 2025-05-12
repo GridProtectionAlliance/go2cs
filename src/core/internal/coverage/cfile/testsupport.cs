@@ -90,7 +90,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     // hash (just in case there are multiple instrumented executables
     // in play). See issue #57924 for more on this.
     @string hashstring = fmt.Sprintf("%x"u8, finalHash);
-    var importpaths = new map<@string, struct{}>();
+    var importpaths = new map<@string, EmptyStruct>();
     foreach (var (_, p) in podlist) {
         if (!strings.Contains(p.MetaFile, hashstring)) {
             continue;
@@ -145,7 +145,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
 }
 
 // processPod reads coverage counter data for a specific pod.
-[GoRecv] internal static error processPod(this ref tstate ts, pods.Pod p, map<@string, struct{}> importpaths) => func((defer, _) => {
+[GoRecv] internal static error processPod(this ref tstate ts, pods.Pod p, processPod_importpaths importpaths) => func((defer, _) => {
     // Open meta-data file
     (f, err) = os.Open(p.MetaFile);
     if (err != default!) {
@@ -270,7 +270,7 @@ public static error ProcessCoverTestDir(@string dir, @string cfile, @string cm, 
     internal uint32 fcn;
 }
 
-[GoRecv] internal static error readAuxMetaFiles(this ref tstate ts, @string metafiles, map<@string, struct{}> importpaths) {
+[GoRecv] internal static error readAuxMetaFiles(this ref tstate ts, @string metafiles, map<@string, EmptyStruct> importpaths) {
     // Unmarshal the information on available aux metafiles into
     // a MetaFileCollection struct.
     ref var mfc = ref heap(new @internal.coverage_package.MetaFileCollection(), out var Ꮡmfc);

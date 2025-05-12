@@ -287,7 +287,7 @@ internal static gcControllerState gcController;
 
 [GoRecv] internal static void init(this ref gcControllerState c, int32 gcPercent, int64 memoryLimit) {
     c.heapMinimum = defaultHeapMinimum;
-    c.triggered = ^((uint64)0);
+    c.triggered = ~((uint64)0);
     c.setGCPercent(gcPercent);
     c.setMemoryLimit(memoryLimit);
     c.commit(true);
@@ -723,7 +723,7 @@ internal static gcControllerState gcController;
     c.heapScan.Store(((uint64)c.heapScanWork.Load()));
     c.lastHeapScan = ((uint64)c.heapScanWork.Load());
     c.lastStackScan.Store(((uint64)c.stackScanWork.Load()));
-    c.triggered = ^((uint64)0);
+    c.triggered = ~((uint64)0);
     // Reset triggered.
     // heapLive was updated, so emit a trace event.
     var Δtrace = traceAcquire();
@@ -847,7 +847,7 @@ internal static gcControllerState gcController;
             // push the goal back in such a manner that it could cause us to exceed
             // the memory limit.
             static readonly UntypedInt minRunway = /* 64 << 10 */ 65536;
-            if (c.triggered != ^((uint64)0) && goal < c.triggered + minRunway) {
+            if (c.triggered != ~((uint64)0) && goal < c.triggered + minRunway) {
                 goal = c.triggered + minRunway;
             }
         }
@@ -1075,7 +1075,7 @@ internal static readonly UntypedInt maxTriggerRatioNum = 61; // ~0.95
     // Compute the next GC goal, which is when the allocated heap
     // has grown by GOGC/100 over where it started the last cycle,
     // plus additional runway for non-heap sources of GC work.
-    var gcPercentHeapGoal = ^((uint64)0);
+    var gcPercentHeapGoal = ~((uint64)0);
     {
         var gcPercent = c.gcPercent.Load(); if (gcPercent >= 0) {
             gcPercentHeapGoal = c.heapMarked + (c.heapMarked + c.lastStackScan.Load() + c.globalsScan.Load()) * ((uint64)gcPercent) / 100;
@@ -1227,7 +1227,7 @@ internal static int64 readGOMEMLIMIT() {
 [GoRecv] internal static bool addIdleMarkWorker(this ref gcControllerState c) {
     while (ᐧ) {
         var old = c.idleMarkWorkers.Load();
-        var (n, max) = (((int32)((uint64)(old & ((uint64)(^((uint32)0)))))), ((int32)(old >> (int)(32))));
+        var (n, max) = (((int32)((uint64)(old & ((uint64)(~((uint32)0)))))), ((int32)(old >> (int)(32))));
         if (n >= max) {
             // See the comment on idleMarkWorkers for why
             // n > max is tolerated.
@@ -1254,7 +1254,7 @@ internal static int64 readGOMEMLIMIT() {
 //go:nosplit
 [GoRecv] internal static bool needIdleMarkWorker(this ref gcControllerState c) {
     var Δp = c.idleMarkWorkers.Load();
-    var (n, max) = (((int32)((uint64)(Δp & ((uint64)(^((uint32)0)))))), ((int32)(Δp >> (int)(32))));
+    var (n, max) = (((int32)((uint64)(Δp & ((uint64)(~((uint32)0)))))), ((int32)(Δp >> (int)(32))));
     return n < max;
 }
 
@@ -1262,7 +1262,7 @@ internal static int64 readGOMEMLIMIT() {
 [GoRecv] internal static void removeIdleMarkWorker(this ref gcControllerState c) {
     while (ᐧ) {
         var old = c.idleMarkWorkers.Load();
-        var (n, max) = (((int32)((uint64)(old & ((uint64)(^((uint32)0)))))), ((int32)(old >> (int)(32))));
+        var (n, max) = (((int32)((uint64)(old & ((uint64)(~((uint32)0)))))), ((int32)(old >> (int)(32))));
         if (n - 1 < 0) {
             print("n=", n, " max=", max, "\n");
             @throw("negative idle mark workers"u8);
@@ -1282,7 +1282,7 @@ internal static int64 readGOMEMLIMIT() {
 [GoRecv] internal static void setMaxIdleMarkWorkers(this ref gcControllerState c, int32 max) {
     while (ᐧ) {
         var old = c.idleMarkWorkers.Load();
-        var n = ((int32)((uint64)(old & ((uint64)(^((uint32)0))))));
+        var n = ((int32)((uint64)(old & ((uint64)(~((uint32)0))))));
         if (n < 0) {
             print("n=", n, " max=", max, "\n");
             @throw("negative idle mark workers"u8);

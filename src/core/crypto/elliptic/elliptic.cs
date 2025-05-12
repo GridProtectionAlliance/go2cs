@@ -143,7 +143,7 @@ public static slice<byte> MarshalCompressed(Curve curve, ж<bigꓸInt> Ꮡx, ж<
 }
 
 // Assert that the known curves implement unmarshaler.
-internal static slice<unmarshaler> _ = new unmarshaler[]{~p224, ~p256, ~p384, ~p521}.slice();
+internal static slice<unmarshaler> _ᴛ1ʗ = new unmarshaler[]{~p224, ~p256, ~p384, ~p521}.slice();
 
 // Unmarshal converts a point, serialized by [Marshal], into an x, y pair. It is
 // an error if the point is not in uncompressed form, is not on the curve, or is

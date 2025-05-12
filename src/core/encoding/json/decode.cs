@@ -384,12 +384,11 @@ Switch:
 // reads the following byte ahead. If v is invalid, the value is discarded.
 // The first byte of the value has been read already.
 [GoRecv] internal static error value(this ref decodeState d, reflectꓸValue v) {
-    switch (d.opcode) {
-    default: {
+    var exprᴛ1 = d.opcode;
+    { /* default: */
         throw panic(phasePanicMsg);
-        break;
     }
-    case scanBeginArray: {
+    else if (exprᴛ1 == scanBeginArray) {
         if (v.IsValid()){
             {
                 var err = d.Δarray(v); if (err != default!) {
@@ -400,9 +399,8 @@ Switch:
             d.skip();
         }
         d.scanNext();
-        break;
     }
-    case scanBeginObject: {
+    else if (exprᴛ1 == scanBeginObject) {
         if (v.IsValid()){
             {
                 var err = d.@object(v); if (err != default!) {
@@ -413,9 +411,8 @@ Switch:
             d.skip();
         }
         d.scanNext();
-        break;
     }
-    case scanBeginLiteral: {
+    else if (exprᴛ1 == scanBeginLiteral) {
         nint start = d.readIndex();
         d.rescanLiteral();
         if (v.IsValid()) {
@@ -426,8 +423,7 @@ Switch:
                 }
             }
         }
-        break;
-    }}
+    }
 
     return default!;
 }
@@ -440,17 +436,15 @@ Switch:
 // If it finds anything other than a quoted string literal or null,
 // valueQuoted returns unquotedValue{}.
 [GoRecv] internal static any valueQuoted(this ref decodeState d) {
-    switch (d.opcode) {
-    default: {
+    var exprᴛ1 = d.opcode;
+    { /* default: */
         throw panic(phasePanicMsg);
-        break;
     }
-    case scanBeginArray or scanBeginObject: {
+    else if (exprᴛ1 == scanBeginArray || exprᴛ1 == scanBeginObject) {
         d.skip();
         d.scanNext();
-        break;
     }
-    case scanBeginLiteral: {
+    else if (exprᴛ1 == scanBeginLiteral) {
         var v = d.literalInterface();
         switch (v.type()) {
         case default! : {
@@ -460,8 +454,7 @@ Switch:
             return v;
         }}
 
-        break;
-    }}
+    }
 
     return new unquotedValue(nil);
 }
@@ -1112,25 +1105,21 @@ internal static reflectꓸType numberType = reflect.TypeFor<Number>();
 [GoRecv] internal static any /*val*/ valueInterface(this ref decodeState d) {
     any val = default!;
 
-    switch (d.opcode) {
-    default: {
+    var exprᴛ1 = d.opcode;
+    { /* default: */
         throw panic(phasePanicMsg);
-        break;
     }
-    case scanBeginArray: {
+    else if (exprᴛ1 == scanBeginArray) {
         val = d.arrayInterface();
         d.scanNext();
-        break;
     }
-    case scanBeginObject: {
+    else if (exprᴛ1 == scanBeginObject) {
         val = d.objectInterface();
         d.scanNext();
-        break;
     }
-    case scanBeginLiteral: {
+    else if (exprᴛ1 == scanBeginLiteral) {
         val = d.literalInterface();
-        break;
-    }}
+    }
 
     return val;
 }

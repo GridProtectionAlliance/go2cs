@@ -377,7 +377,7 @@ public static (ΔType, error) Instantiate(ж<Context> Ꮡctxt, ΔType orig, slic
         if (cause != nil) {
             @string detail = default!;
             switch (ᐧ) {
-            case {} when alt is != default!: {
+            case {} when alt != default!: {
                 detail = check.sprintf("possibly missing ~ for %s in %s"u8, alt, T);
                 break;
             }

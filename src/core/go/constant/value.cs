@@ -266,7 +266,7 @@ internal static @string String(this floatVal x) {
     {
         var am = math.Abs(m);
         switch (ᐧ) {
-        case {} when am is < 1 - 0.5e-6F: {
+        case {} when am < 1 - 0.5e-6F: {
             m *= 10;
             e--;
             break;
@@ -893,8 +893,7 @@ public static nint Sign(Value x) {
 
 // ----------------------------------------------------------------------------
 // Support for assembling/disassembling numeric values
-internal static readonly GoUntyped _m = /* ^big.Word(0) */
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly big.Word _m = /* ^big.Word(0) */ 18446744073709551615;
 internal static readonly big.Word _log = /* _m>>8&1 + _m>>16&1 + _m>>32&1 */ 3;
 internal static readonly UntypedInt wordSize = /* 1 << _log */ 8;
 

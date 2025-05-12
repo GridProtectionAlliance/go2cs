@@ -150,12 +150,12 @@ internal static uintptr f64hash(@unsafe.Pointer Δp, uintptr h) {
 
 internal static uintptr c64hash(@unsafe.Pointer Δp, uintptr h) {
     var x = (ж<array<float32>>)(uintptr)(Δp);
-    return f32hash(new @unsafe.Pointer(Ꮡ(x[1])), f32hash(new @unsafe.Pointer(Ꮡ(x[0])), h));
+    return f32hash(new @unsafe.Pointer(Ꮡ(x.val[1])), f32hash(new @unsafe.Pointer(Ꮡ(x.val[0])), h));
 }
 
 internal static uintptr c128hash(@unsafe.Pointer Δp, uintptr h) {
     var x = (ж<array<float64>>)(uintptr)(Δp);
-    return f64hash(new @unsafe.Pointer(Ꮡ(x[1])), f64hash(new @unsafe.Pointer(Ꮡ(x[0])), h));
+    return f64hash(new @unsafe.Pointer(Ꮡ(x.val[1])), f64hash(new @unsafe.Pointer(Ꮡ(x.val[0])), h));
 }
 
 internal static uintptr interhash(@unsafe.Pointer Δp, uintptr h) {
@@ -548,26 +548,26 @@ internal static void initAlgAES() {
     useAeshash = true;
     // Initialize with random data so hash collisions will be hard to engineer.
     var key = (ж<array<uint64>>)(uintptr)(new @unsafe.Pointer(Ꮡ(aeskeysched)));
-    /* for i := range key {
-	key[i] = bootstrapRand()
-} */
+    foreach (var (i, _) in key.val) {
+        key.val[i] = bootstrapRand();
+    }
 }
 
 // Note: These routines perform the read with a native endianness.
 internal static uint32 readUnaligned32(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return (uint32)((uint32)((uint32)(((uint32)q[3]) | ((uint32)q[2]) << (int)(8)) | ((uint32)q[1]) << (int)(16)) | ((uint32)q[0]) << (int)(24));
+        return (uint32)((uint32)((uint32)(((uint32)q.val[3]) | ((uint32)q.val[2]) << (int)(8)) | ((uint32)q.val[1]) << (int)(16)) | ((uint32)q.val[0]) << (int)(24));
     }
-    return (uint32)((uint32)((uint32)(((uint32)q[0]) | ((uint32)q[1]) << (int)(8)) | ((uint32)q[2]) << (int)(16)) | ((uint32)q[3]) << (int)(24));
+    return (uint32)((uint32)((uint32)(((uint32)q.val[0]) | ((uint32)q.val[1]) << (int)(8)) | ((uint32)q.val[2]) << (int)(16)) | ((uint32)q.val[3]) << (int)(24));
 }
 
 internal static uint64 readUnaligned64(@unsafe.Pointer Δp) {
     var q = (ж<array<byte>>)(uintptr)(Δp);
     if (goarch.BigEndian) {
-        return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)q[7]) | ((uint64)q[6]) << (int)(8)) | ((uint64)q[5]) << (int)(16)) | ((uint64)q[4]) << (int)(24)) | ((uint64)q[3]) << (int)(32)) | ((uint64)q[2]) << (int)(40)) | ((uint64)q[1]) << (int)(48)) | ((uint64)q[0]) << (int)(56));
+        return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)q.val[7]) | ((uint64)q.val[6]) << (int)(8)) | ((uint64)q.val[5]) << (int)(16)) | ((uint64)q.val[4]) << (int)(24)) | ((uint64)q.val[3]) << (int)(32)) | ((uint64)q.val[2]) << (int)(40)) | ((uint64)q.val[1]) << (int)(48)) | ((uint64)q.val[0]) << (int)(56));
     }
-    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)q[0]) | ((uint64)q[1]) << (int)(8)) | ((uint64)q[2]) << (int)(16)) | ((uint64)q[3]) << (int)(24)) | ((uint64)q[4]) << (int)(32)) | ((uint64)q[5]) << (int)(40)) | ((uint64)q[6]) << (int)(48)) | ((uint64)q[7]) << (int)(56));
+    return (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(((uint64)q.val[0]) | ((uint64)q.val[1]) << (int)(8)) | ((uint64)q.val[2]) << (int)(16)) | ((uint64)q.val[3]) << (int)(24)) | ((uint64)q.val[4]) << (int)(32)) | ((uint64)q.val[5]) << (int)(40)) | ((uint64)q.val[6]) << (int)(48)) | ((uint64)q.val[7]) << (int)(56));
 }
 
 } // end runtime_package

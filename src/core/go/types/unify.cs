@@ -180,7 +180,7 @@ internal static void Swap(this typeParamsById s, nint i, nint j) {
         case {} when hx.val != default! && hy.val != default!: {
             return false;
         }
-        case {} when hx.val is != default!: {
+        case {} when hx.val != default!: {
             u.setHandle(Ꮡy, // Both type parameters already share the same handle. Nothing to do.
  // Both type parameters have (possibly different) inferred types. Cannot join.
  // Only type parameter x has an inferred type. Use handle of x.
@@ -381,7 +381,7 @@ internal static ж<Interface> /*i*/ asInterface(ΔType x) {
             return u.nify(u.at(px), // both x and y have an inferred type - they must match
  u.at(py), mode, Ꮡp);
         }
-        case {} when px is != nil: {
+        case {} when px != nil: {
             {
                 var xΔ2 = u.at(px); if (xΔ2 != default!) {
                     // x is a type parameter, y is not

@@ -76,7 +76,7 @@ internal static readonly UntypedInt fuzzWorkerExitCode = 70;
     internal bool fuzzCalled;
 }
 
-internal static TB _ = (ж<F>)(default!);
+internal static TB _ᴛ1ʗ = (ж<F>)(default!);
 
 // corpusEntry is an alias to the same type as internal/fuzz.CorpusEntry.
 // We use a type alias because we don't want to export this type, and we can't
@@ -106,7 +106,7 @@ internal static TB _ = (ж<F>)(default!);
     f.mu.Lock();
     defer(f.mu.Unlock);
     if (f.helperPCs == default!) {
-        f.helperPCs = new map<uintptr, struct{}>();
+        f.helperPCs = new map<uintptr, EmptyStruct>();
     }
     // repeating code from callerName here to save walking a stack frame
     array<uintptr> pc = new(1);

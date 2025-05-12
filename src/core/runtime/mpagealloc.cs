@@ -305,14 +305,14 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     if (l2 == nil) {
         return default!;
     }
-    return Ꮡ(l2[ci.l2()]);
+    return Ꮡ(l2.val[ci.l2()]);
 }
 
 // chunkOf returns the chunk at the given chunk index.
 //
 // The chunk index must be valid or this method may throw.
 [GoRecv] internal static ж<pallocData> chunkOf(this ref pageAlloc Δp, chunkIdx ci) {
-    return Ꮡ(Δp.chunks[ci.l1()][ci.l2()]);
+    return Ꮡ(Δp.chunks[ci.l1()].val[ci.l2()]);
 }
 
 // grow sets up the metadata for the address range [base, base+size).
@@ -566,7 +566,7 @@ internal static (nint, nint) blockAlignSummaryRange(nint level, nint lo, nint hi
     // If we're not in a test, validate first by checking mheap_.arenas.
     // This is a fast path which is only safe to use outside of testing.
     arenaIdx ai = arenaIndex(addr.addr());
-    if (Δp.test || mheap_.arenas[ai.l1()] == nil || mheap_.arenas[ai.l1()][ai.l2()] == nil) {
+    if (Δp.test || mheap_.arenas[ai.l1()] == nil || mheap_.arenas[ai.l1()].val[ai.l2()] == nil) {
         var (vAddr, ok) = Δp.inUse.findAddrGreaterEqual(addr.addr());
         if (ok){
             return new offAddr(vAddr);
@@ -789,7 +789,7 @@ break_nextLevel:;
     // is what the final level represents.
     chunkIdx ci = ((chunkIdx)i);
     var (j, searchIdx) = Δp.chunkOf(ci).find(npages, 0);
-    if (j == ^((nuint)0)) {
+    if (j == ~((nuint)0)) {
         // We couldn't find any space in this chunk despite the summaries telling
         // us it should be there. There's likely a bug, so dump some state and throw.
         var sum = Δp.summary[len(Δp.summary) - 1][i];
@@ -837,7 +837,7 @@ break_nextLevel:;
         {
             nuint max = Δp.summary[len(Δp.summary) - 1][i].max(); if (max >= ((nuint)npages)) {
                 var (j, searchIdx) = Δp.chunkOf(i).find(npages, chunkPageIndex(Δp.searchAddr.addr()));
-                if (j == ^((nuint)0)) {
+                if (j == ~((nuint)0)) {
                     print("runtime: max = ", max, ", npages = ", npages, "\n");
                     print("runtime: searchIdx = ", chunkPageIndex(Δp.searchAddr.addr()), ", p.searchAddr = ", ((Δhex)Δp.searchAddr.addr()), "\n");
                     @throw("bad summary data"u8);

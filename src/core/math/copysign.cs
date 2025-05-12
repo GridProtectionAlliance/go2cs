@@ -8,8 +8,7 @@ partial class math_package {
 // Copysign returns a value with the magnitude of f
 // and the sign of sign.
 public static float64 Copysign(float64 f, float64 sign) {
-    GoUntyped signBit = /* 1 << 63 */
-            GoUntyped.Parse("9223372036854775808");
+    static readonly UntypedInt signBit = /* 1 << 63 */ 9223372036854775808;
     return Float64frombits((uint64)((uint64)(Float64bits(f) & ~signBit) | (uint64)(Float64bits(sign) & signBit)));
 }
 

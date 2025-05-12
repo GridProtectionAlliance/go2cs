@@ -30,8 +30,7 @@ public static readonly ΔClass LRI = 21; // LeftToRightIsolate
 public static readonly ΔClass RLI = 22; // RightToLeftIsolate
 public static readonly ΔClass FSI = 23; // FirstStrongIsolate
 public static readonly ΔClass PDI = 24; // PopDirectionalIsolate
-internal static readonly GoUntyped unknownClass = /* ^Class(0) */
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly ΔClass unknownClass = /* ^Class(0) */ 18446744073709551615;
 
 // A trie entry has the following bits:
 // 7..5  XOR mask for brackets

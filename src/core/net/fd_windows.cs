@@ -84,7 +84,7 @@ internal static (ж<netFD>, error) newFD(syscallꓸHandle sysfd, nint family, ni
                     fd.pfd.SetWriteDeadline(deadline);
                 }
             }
-            var done = new channel<struct{}>(1);
+            var done = new channel<EmptyStruct>(1);
             var stop = context.AfterFunc(ctx, 
             var aLongTimeAgoʗ1 = aLongTimeAgo;
             var doneʗ1 = done;

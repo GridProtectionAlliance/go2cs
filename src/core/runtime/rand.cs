@@ -44,7 +44,7 @@ internal static void randinit() {
     var seed = ᏑglobalRand.of(globalRandᴛ1.Ꮡseed);
     if (startupRand != default!){
         foreach (var (i, c) in startupRand) {
-            seed[i % len(seed)] ^= (byte)(c);
+            seed.val[i % len(seed)] ^= (byte)(c);
         }
         clear(startupRand);
         startupRand = default!;
@@ -211,10 +211,10 @@ internal static uint32 cheaprand() {
     // This generator passes the SmallCrush suite, part of TestU01 framework:
     // http://simul.iro.umontreal.ca/testu01/tu01.html
     var t = (ж<array<uint32>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~mp).cheaprand)));
-    var (s1, s0) = (t[0], t[1]);
+    var (s1, s0) = (t.val[0], t.val[1]);
     s1 ^= (uint32)(s1 << (int)(17));
     s1 = (uint32)((uint32)((uint32)(s1 ^ s0) ^ s1 >> (int)(7)) ^ s0 >> (int)(16));
-    (t[0], t[1]) = (s0, s1);
+    (t.val[0], t.val[1]) = (s0, s1);
     return s0 + s1;
 }
 

@@ -13,7 +13,7 @@
             "args": [
                 //"-var=false",
                 //"-uco=false",
-                //"-stdlib",
+                "-stdlib",
                 "-comments",
                 "-go2cspath=C:\\Projects\\gpa\\go2cs\\src",
                 //"-tree",
@@ -106,8 +106,10 @@
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\sync\\atomic",
                 //"C:\\Program Files\\Go\\src\\runtime",
                 //"C:\\Projects\\gpa\\go2cs\\src\\core\\runtime",
-                "C:\\Program Files\\Go\\src\\unicode\\utf8",
-                "C:\\Projects\\gpa\\go2cs\\src\\core\\unicode\\utf8",
+                //"C:\\Program Files\\Go\\src\\unicode\\utf8",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\unicode\\utf8",
+                //"C:\\Program Files\\Go\\src\\hash\\crc64",
+                //"C:\\Projects\\gpa\\go2cs\\src\\core\\hash\\crc64",
             ]
         }
     ]

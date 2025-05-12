@@ -124,7 +124,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
             }
             var r = ev.Range();
             var matchᴛ2 = false;
-            if (handleMarkAssist(r))) {
+            if (handleMarkAssist(r)) {
                 if (!states[ev.Goroutine()].Executing()) {
                     // This range is active back to the start of the trace. We're failing to account
                     // for this since we just found out about it now. Fix up the mutator utilization.
@@ -169,7 +169,7 @@ public static slice<slice<MutatorUtil>> MutatorUtilizationV2(slice<ΔEvent> even
 
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ2 == EventRangeBegin)) { matchᴛ1 = true;
             var r = ev.Range();
             if (handleSTW(r)){
                 // After accounting for the portion we missed, this just acts like the

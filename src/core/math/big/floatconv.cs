@@ -93,7 +93,7 @@ internal static Float floatZero;
             exp5 = d;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
             exp2 += d;
         }
         else if (exprᴛ1 is 8) { matchᴛ1 = true;
@@ -118,7 +118,7 @@ internal static Float floatZero;
         exp5 += exp;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2) {
+    if (fallthrough || !matchᴛ2 && exprᴛ2 is 2)) {
         exp2 += exp;
     }
     else { /* default: */

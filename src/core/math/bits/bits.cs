@@ -171,8 +171,7 @@ public static nint OnesCount64(uint64 x) {
     // Per "Hacker's Delight", the first line can be simplified
     // more, but it saves at best one instruction, so we leave
     // it alone for clarity.
-    GoUntyped m = /* 1<<64 - 1 */
-            GoUntyped.Parse("18446744073709551615");
+    static readonly UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
     x = (uint64)(x >> (int)(1) & ((uint64)(m0 & m))) + (uint64)(x & ((uint64)(m0 & m)));
     x = (uint64)(x >> (int)(2) & ((uint64)(m1 & m))) + (uint64)(x & ((uint64)(m1 & m)));
     x = (uint64)((x >> (int)(4) + x) & ((uint64)(m2 & m)));
@@ -266,8 +265,7 @@ public static uint32 Reverse32(uint32 x) {
 
 // Reverse64 returns the value of x with its bits in reversed order.
 public static uint64 Reverse64(uint64 x) {
-    GoUntyped m = /* 1<<64 - 1 */
-            GoUntyped.Parse("18446744073709551615");
+    static readonly UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
     x = (uint64)((uint64)(x >> (int)(1) & ((uint64)(m0 & m))) | (uint64)(x & ((uint64)(m0 & m))) << (int)(1));
     x = (uint64)((uint64)(x >> (int)(2) & ((uint64)(m1 & m))) | (uint64)(x & ((uint64)(m1 & m))) << (int)(2));
     x = (uint64)((uint64)(x >> (int)(4) & ((uint64)(m2 & m))) | (uint64)(x & ((uint64)(m2 & m))) << (int)(4));
@@ -306,8 +304,7 @@ public static uint32 ReverseBytes32(uint32 x) {
 //
 // This function's execution time does not depend on the inputs.
 public static uint64 ReverseBytes64(uint64 x) {
-    GoUntyped m = /* 1<<64 - 1 */
-            GoUntyped.Parse("18446744073709551615");
+    static readonly UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
     x = (uint64)((uint64)(x >> (int)(8) & ((uint64)(m3 & m))) | (uint64)(x & ((uint64)(m3 & m))) << (int)(8));
     x = (uint64)((uint64)(x >> (int)(16) & ((uint64)(m4 & m))) | (uint64)(x & ((uint64)(m4 & m))) << (int)(16));
     return (uint64)(x >> (int)(32) | x << (int)(32));
@@ -457,7 +454,7 @@ public static (uint32 diff, uint32 borrowOut) Sub32(uint32 x, uint32 y, uint32 b
     // bit of y is set (^x & y) or if they are the same (^(x ^ y)) and a borrow
     // from the lower place happens. If that borrow happens, the result will be
     // 1 - 1 - 1 = 0 - 0 - 1 = 1 (& diff).
-    borrowOut = ((uint32)(((uint32)(^x & y)) | ((uint32)(^((uint32)(x ^ y)) & diff)))) >> (int)(31);
+    borrowOut = ((uint32)(((uint32)(~x & y)) | ((uint32)(~((uint32)(x ^ y)) & diff)))) >> (int)(31);
     return (diff, borrowOut);
 }
 
@@ -472,7 +469,7 @@ public static (uint64 diff, uint64 borrowOut) Sub64(uint64 x, uint64 y, uint64 b
 
     diff = x - y - borrow;
     // See Sub32 for the bit logic.
-    borrowOut = ((uint64)(((uint64)(^x & y)) | ((uint64)(^((uint64)(x ^ y)) & diff)))) >> (int)(63);
+    borrowOut = ((uint64)(((uint64)(~x & y)) | ((uint64)(~((uint64)(x ^ y)) & diff)))) >> (int)(63);
     return (diff, borrowOut);
 }
 

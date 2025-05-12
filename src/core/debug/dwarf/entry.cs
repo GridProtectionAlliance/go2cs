@@ -1079,7 +1079,7 @@ public static @string GoString(this Class i) {
         if (low == 0 && high == 0) {
             break;
         }
-        if (low == ^((uint64)0) >> (int)(((nuint)((8 - u.addrsize()) * 8)))){
+        if (low == ~((uint64)0) >> (int)(((nuint)((8 - u.addrsize()) * 8)))){
             @base = high;
         } else {
             ret = append(ret, new uint64[]{@base + low, @base + high}.array());
@@ -1105,23 +1105,22 @@ public static @string GoString(this Class i) {
     buf.skip(((nint)ranges));
     while (ᐧ) {
         var opcode = buf.uint8();
-        switch (opcode) {
-        case rleEndOfList: {
+        var exprᴛ1 = opcode;
+        if (exprᴛ1 == rleEndOfList) {
             if (buf.err != default!) {
                 return (default!, buf.err);
             }
             return (ret, default!);
         }
-        case rleBaseAddressx: {
+        if (exprᴛ1 == rleBaseAddressx) {
             var baseIdx = buf.@uint();
             error err = default!;
             (@base, err) = d.debugAddr(~u, ((uint64)addrBase), baseIdx);
             if (err != default!) {
                 return (default!, err);
             }
-            break;
         }
-        case rleStartxEndx: {
+        if (exprᴛ1 == rleStartxEndx) {
             var startIdx = buf.@uint();
             var endIdx = buf.@uint();
             var (start, err) = d.debugAddr(~u, ((uint64)addrBase), startIdx);
@@ -1133,9 +1132,8 @@ public static @string GoString(this Class i) {
                 return (default!, err);
             }
             ret = append(ret, new uint64[]{start, end}.array());
-            break;
         }
-        case rleStartxLength: {
+        else if (exprᴛ1 == rleStartxLength) {
             var startIdx = buf.@uint();
             var len = buf.@uint();
             var (start, err) = d.debugAddr(~u, ((uint64)addrBase), startIdx);
@@ -1143,30 +1141,25 @@ public static @string GoString(this Class i) {
                 return (default!, err);
             }
             ret = append(ret, new uint64[]{start, start + len}.array());
-            break;
         }
-        case rleOffsetPair: {
+        else if (exprᴛ1 == rleOffsetPair) {
             var off1 = buf.@uint();
             var off2 = buf.@uint();
             ret = append(ret, new uint64[]{@base + off1, @base + off2}.array());
-            break;
         }
-        case rleBaseAddress: {
+        else if (exprᴛ1 == rleBaseAddress) {
             @base = buf.addr();
-            break;
         }
-        case rleStartEnd: {
+        else if (exprᴛ1 == rleStartEnd) {
             var start = buf.addr();
             var end = buf.addr();
             ret = append(ret, new uint64[]{start, end}.array());
-            break;
         }
-        case rleStartLength: {
+        else if (exprᴛ1 == rleStartLength) {
             var start = buf.addr();
             var len = buf.@uint();
             ret = append(ret, new uint64[]{start, start + len}.array());
-            break;
-        }}
+        }
 
     }
 }

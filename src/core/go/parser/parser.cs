@@ -365,7 +365,7 @@ internal static void decNestLev(ж<parser> Ꮡp) {
  "';'"u8);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == token.SEMICOLON) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == token.SEMICOLON)) {
             if (p.lit == ";"u8){
                 // explicit semicolon
                 p.next();
@@ -2325,7 +2325,7 @@ internal static bool isTypeSwitchAssert(ast.Expr x) {
  "expected ':=', found '='"u8);
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == token.DEFINE) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && exprᴛ1 == token.DEFINE)) { matchᴛ1 = true;
                 return true;
             }
 

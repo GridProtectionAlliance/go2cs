@@ -68,7 +68,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         sbits += 8;
         while (cbits >= 8) {
             var idx = ((byte)(cur >> (int)((cbits - 8))));
-            n = (~n).children[idx];
+            n = (~n).children.val[idx];
             if (n == nil) {
                 return ErrInvalidHuffman;
             }
@@ -86,7 +86,7 @@ internal static error huffmanDecode(ж<bytes.Buffer> Ꮡbuf, nint maxLen, slice<
         }
     }
     while (cbits > 0) {
-        n = (~n).children[((byte)(cur << (int)((8 - cbits))))];
+        n = (~n).children.val[((byte)(cur << (int)((8 - cbits))))];
         if (n == nil) {
             return ErrInvalidHuffman;
         }
@@ -150,18 +150,18 @@ internal static void buildRootHuffmanNode() {
         while (codeLen > 8) {
             codeLen -= 8;
             var i = ((uint8)(code >> (int)(codeLen)));
-            if ((~cur).children[i] == nil) {
-                (~cur).children[i] = newInternalNode();
+            if ((~cur).children.val[i] == nil) {
+                (~cur).children.val[i] = newInternalNode();
             }
-            cur = (~cur).children[i];
+            cur = (~cur).children.val[i];
         }
         var shift = 8 - codeLen;
         nint start = ((nint)((uint8)(code << (int)(shift))));
         nint end = ((nint)(1 << (int)(shift)));
-        leaves[sym].sym = ((byte)sym);
-        leaves[sym].codeLen = codeLen;
+        leaves.val[sym].sym = ((byte)sym);
+        leaves.val[sym].codeLen = codeLen;
         for (nint i = start; i < start + end; i++) {
-            (~cur).children[i] = Ꮡ(leaves[sym]);
+            (~cur).children.val[i] = Ꮡ(leaves.val[sym]);
         }
     }
 }

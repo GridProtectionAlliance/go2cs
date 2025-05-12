@@ -232,16 +232,15 @@ internal static (byte, error) readByte(io.ByteReader r) {
         if (errΔ1 != default!) {
             return fmt.Errorf("gif: reading frames: %v"u8, errΔ1);
         }
-        switch (c) {
-        case sExtension: {
+        var exprᴛ1 = c;
+        if (exprᴛ1 == sExtension) {
             {
                 errΔ1 = d.readExtension(); if (errΔ1 != default!) {
                     return errΔ1;
                 }
             }
-            break;
         }
-        case sImageDescriptor: {
+        if (exprᴛ1 == sImageDescriptor) {
             {
                 errΔ1 = d.readImageDescriptor(keepAllFrames); if (errΔ1 != default!) {
                     return errΔ1;
@@ -250,17 +249,16 @@ internal static (byte, error) readByte(io.ByteReader r) {
             if (!keepAllFrames && len(d.image) == 1) {
                 return default!;
             }
-            break;
         }
-        case sTrailer: {
+        if (exprᴛ1 == sTrailer) {
             if (len(d.image) == 0) {
                 return fmt.Errorf("gif: missing image data"u8);
             }
             return default!;
         }
-        default: {
+        { /* default: */
             return fmt.Errorf("gif: unknown block type: 0x%.2x"u8, c);
-        }}
+        }
 
     }
 }
@@ -312,29 +310,27 @@ internal static (byte, error) readByte(io.ByteReader r) {
         return fmt.Errorf("gif: reading extension: %v"u8, err);
     }
     nint size = 0;
-    switch (extension) {
-    case eText: {
+    var exprᴛ1 = extension;
+    if (exprᴛ1 == eText) {
         size = 13;
-        break;
     }
-    case eGraphicControl: {
+    else if (exprᴛ1 == eGraphicControl) {
         return d.readGraphicControl();
     }
-    case eComment: {
+    if (exprᴛ1 == eComment) {
     }
-    case eApplication: {
+    if (exprᴛ1 == eApplication) {
         var (b, errΔ2) = readByte(d.r);
         if (errΔ2 != default!) {
             // nothing to do but read the data.
             return fmt.Errorf("gif: reading extension: %v"u8, errΔ2);
         }
         size = ((nint)b);
-        break;
     }
-    default: {
+    else { /* default: */
         return fmt.Errorf("gif: unknown extension 0x%.2x"u8, // The spec requires size be 11, but Adobe sometimes uses 10.
  extension);
-    }}
+    }
 
     if (size > 0) {
         {

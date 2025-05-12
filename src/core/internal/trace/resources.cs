@@ -11,19 +11,22 @@ partial class trace_package {
 
 // NoThread indicates that the relevant events don't correspond to any
 // thread in particular.
-public static readonly ThreadID NoThread = /* ThreadID(-1) */ -1;
+public static readonly GoUntyped NoThread = /* ThreadID(-1) */
+    GoUntyped.Parse("-1");
 
 [GoType("num:int64")] partial struct ProcID;
 
 // NoProc indicates that the relevant events don't correspond to any
 // P in particular.
-public static readonly ProcID NoProc = /* ProcID(-1) */ -1;
+public static readonly GoUntyped NoProc = /* ProcID(-1) */
+    GoUntyped.Parse("-1");
 
 [GoType("num:int64")] partial struct GoID;
 
 // NoGoroutine indicates that the relevant events don't correspond to any
 // goroutine in particular.
-public static readonly GoID NoGoroutine = /* GoID(-1) */ -1;
+public static readonly GoUntyped NoGoroutine = /* GoID(-1) */
+    GoUntyped.Parse("-1");
 
 [GoType("num:uint8")] partial struct GoState;
 

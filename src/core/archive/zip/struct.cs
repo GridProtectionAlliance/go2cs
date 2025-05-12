@@ -218,7 +218,8 @@ public static (ж<FileHeader>, error) FileInfoHeader(fs.FileInfo fi) {
 // timeZone returns a *time.Location based on the provided offset.
 // If the offset is non-sensible, then this uses an offset of zero.
 internal static ж<timeꓸLocation> timeZone(time.Duration offset) {
-    static readonly time.Duration minOffset = /* -12 * time.Hour */ -43200000000000; // E.g., Baker island at -12:00
+    GoUntyped minOffset = /* -12 * time.Hour */ // E.g., Baker island at -12:00
+            GoUntyped.Parse("-43200000000000");
     static readonly time.Duration maxOffset = /* +14 * time.Hour */ 50400000000000; // E.g., Line island at +14:00
     static readonly time.Duration offsetAlias = /* 15 * time.Minute */ 900000000000; // E.g., Nepal at +5:45
     offset = offset.Round(offsetAlias);
@@ -295,15 +296,13 @@ internal static readonly UntypedInt msdosReadOnly = /* 0x01 */ 1;
 [GoRecv] public static fs.FileMode /*mode*/ Mode(this ref FileHeader h) {
     fs.FileMode mode = default!;
 
-    switch (h.CreatorVersion >> (int)(8)) {
-    case creatorUnix or creatorMacOSX: {
+    var exprᴛ1 = h.CreatorVersion >> (int)(8);
+    if (exprᴛ1 == creatorUnix || exprᴛ1 == creatorMacOSX) {
         mode = unixModeToFileMode(h.ExternalAttrs >> (int)(16));
-        break;
     }
-    case creatorNTFS or creatorVFAT or creatorFAT: {
+    else if (exprᴛ1 == creatorNTFS || exprᴛ1 == creatorVFAT || exprᴛ1 == creatorFAT) {
         mode = msdosModeToFileMode(h.ExternalAttrs);
-        break;
-    }}
+    }
 
     if (len(h.Name) > 0 && h.Name[len(h.Name) - 1] == (rune)'/') {
         mode |= (fs.FileMode)(fs.ModeDir);
@@ -386,34 +385,27 @@ internal static uint32 fileModeToUnixMode(fs.FileMode mode) {
 
 internal static fs.FileMode unixModeToFileMode(uint32 m) {
     var mode = ((fs.FileMode)((uint32)(m & 511)));
-    switch ((uint32)(m & s_IFMT)) {
-    case s_IFBLK: {
+    var exprᴛ1 = (uint32)(m & s_IFMT);
+    if (exprᴛ1 == s_IFBLK) {
         mode |= (fs.FileMode)(fs.ModeDevice);
-        break;
     }
-    case s_IFCHR: {
+    else if (exprᴛ1 == s_IFCHR) {
         mode |= (fs.FileMode)((fs.FileMode)(fs.ModeDevice | fs.ModeCharDevice));
-        break;
     }
-    case s_IFDIR: {
+    else if (exprᴛ1 == s_IFDIR) {
         mode |= (fs.FileMode)(fs.ModeDir);
-        break;
     }
-    case s_IFIFO: {
+    else if (exprᴛ1 == s_IFIFO) {
         mode |= (fs.FileMode)(fs.ModeNamedPipe);
-        break;
     }
-    case s_IFLNK: {
+    else if (exprᴛ1 == s_IFLNK) {
         mode |= (fs.FileMode)(fs.ModeSymlink);
-        break;
     }
-    case s_IFREG: {
-        break;
+    else if (exprᴛ1 == s_IFREG) {
     }
-    case s_IFSOCK: {
+    else if (exprᴛ1 == s_IFSOCK) {
         mode |= (fs.FileMode)(fs.ModeSocket);
-        break;
-    }}
+    }
 
     // nothing to do
     if ((uint32)(m & s_ISGID) != 0) {

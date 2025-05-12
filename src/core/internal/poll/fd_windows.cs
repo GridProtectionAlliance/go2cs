@@ -1132,8 +1132,8 @@ internal static int32 sockaddrInet4ToRaw(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<s
     var raw = (ж<syscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
     raw.val.Family = syscall.AF_INET;
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~raw).Port)));
-    p[0] = ((byte)(sa.Port >> (int)(8)));
-    p[1] = ((byte)sa.Port);
+    p.val[0] = ((byte)(sa.Port >> (int)(8)));
+    p.val[1] = ((byte)sa.Port);
     raw.val.Addr = sa.Addr;
     return ((int32)@unsafe.Sizeof(raw.val));
 }
@@ -1146,8 +1146,8 @@ internal static int32 sockaddrInet6ToRaw(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<s
     var raw = (ж<syscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
     raw.val.Family = syscall.AF_INET6;
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~raw).Port)));
-    p[0] = ((byte)(sa.Port >> (int)(8)));
-    p[1] = ((byte)sa.Port);
+    p.val[0] = ((byte)(sa.Port >> (int)(8)));
+    p.val[1] = ((byte)sa.Port);
     raw.val.Scope_id = sa.ZoneId;
     raw.val.Addr = sa.Addr;
     return ((int32)@unsafe.Sizeof(raw.val));
@@ -1159,7 +1159,7 @@ internal static void rawToSockaddrInet4(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<sy
 
     var pp = (ж<syscall.RawSockaddrInet4>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-    sa.Port = ((nint)p[0]) << (int)(8) + ((nint)p[1]);
+    sa.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
     sa.Addr = pp.val.Addr;
 }
 
@@ -1169,7 +1169,7 @@ internal static void rawToSockaddrInet6(ж<syscall.RawSockaddrAny> Ꮡrsa, ж<sy
 
     var pp = (ж<syscall.RawSockaddrInet6>)(uintptr)(new @unsafe.Pointer(Ꮡrsa));
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-    sa.Port = ((nint)p[0]) << (int)(8) + ((nint)p[1]);
+    sa.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
     sa.ZoneId = pp.val.Scope_id;
     sa.Addr = pp.val.Addr;
 }

@@ -261,7 +261,7 @@ internal static void runfinq() {
 
                 fingStatus.Or(fingRunningFinalizer);
                 reflectcall(nil, new @unsafe.Pointer((~f).fn), frame, ((uint32)framesz), ((uint32)framesz), ((uint32)framesz), Ꮡregs);
-                fingStatus.And(^fingRunningFinalizer);
+                fingStatus.And(~fingRunningFinalizer);
                 // Drop finalizer queue heap references
                 // before hiding them from markroot.
                 // This also ensures these will be

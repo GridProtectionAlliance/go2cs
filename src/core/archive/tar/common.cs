@@ -451,26 +451,24 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     // Check for header-only types.
     @string whyOnlyPAX = default!;
     @string whyOnlyGNU = default!;
-    switch (h.Typeflag) {
-    case TypeReg or TypeChar or TypeBlock or TypeFifo or TypeGNUSparse: {
+    var exprᴛ1 = h.Typeflag;
+    if (exprᴛ1 == TypeReg || exprᴛ1 == TypeChar || exprᴛ1 == TypeBlock || exprᴛ1 == TypeFifo || exprᴛ1 == TypeGNUSparse) {
         if (strings.HasSuffix(h.Name, // Exclude TypeLink and TypeSymlink, since they may reference directories.
  "/"u8)) {
             return (FormatUnknown, default!, new headerError{"filename may not have trailing slash"});
         }
-        break;
     }
-    case TypeXHeader or TypeGNULongName or TypeGNULongLink: {
+    if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeGNULongName || exprᴛ1 == TypeGNULongLink) {
         return (FormatUnknown, default!, new headerError{"cannot manually encode TypeXHeader, TypeGNULongName, or TypeGNULongLink headers"});
     }
-    case TypeXGlobalHeader: {
+    if (exprᴛ1 == TypeXGlobalHeader) {
         var h2 = new Header(Name: h.Name, Typeflag: h.Typeflag, Xattrs: h.Xattrs, PAXRecords: h.PAXRecords, Format: h.Format);
         if (!reflect.DeepEqual(h, h2)) {
             return (FormatUnknown, default!, new headerError{"only PAXRecords should be set for TypeXGlobalHeader"});
         }
         whyOnlyPAX = "only PAX supports TypeXGlobalHeader"u8;
         format.mayOnlyBe(FormatPAX);
-        break;
-    }}
+    }
 
     if (!isHeaderOnlyType(h.Typeflag) && h.Size < 0) {
         return (FormatUnknown, default!, new headerError{"negative size on header-only type"});
@@ -493,7 +491,7 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
                     continue;
                     break;
                 }
-                case {} when h.Typeflag is TypeXGlobalHeader: {
+                case {} when h.Typeflag == TypeXGlobalHeader: {
                     paxHdrs[k] = v;
                     break;
                 }
@@ -549,14 +547,14 @@ internal static (Format format, map<@string, @string> paxHdrs, error err) allowe
     }
     // Set union of formats allowed and format wanted
     if (format == FormatUnknown) {
-        var exprᴛ1 = h.Format;
-        if (exprᴛ1 == FormatUSTAR) {
+        var exprᴛ2 = h.Format;
+        if (exprᴛ2 == FormatUSTAR) {
             err = new headerError{"Format specifies USTAR", whyNoUSTAR, whyOnlyPAX, whyOnlyGNU};
         }
-        else if (exprᴛ1 == FormatPAX) {
+        else if (exprᴛ2 == FormatPAX) {
             err = new headerError{"Format specifies PAX", whyNoPAX, whyOnlyGNU};
         }
-        else if (exprᴛ1 == FormatGNU) {
+        else if (exprᴛ2 == FormatGNU) {
             err = new headerError{"Format specifies GNU", whyNoGNU, whyOnlyPAX};
         }
         else { /* default: */
@@ -642,28 +640,23 @@ internal static fs.FileMode /*mode*/ Mode(this headerFileInfo fi) {
         }
     }
 
-    switch (fi.h.Typeflag) {
-    case TypeSymlink: {
+    var exprᴛ2 = fi.h.Typeflag;
+    if (exprᴛ2 == TypeSymlink) {
         mode |= (fs.FileMode)(fs.ModeSymlink);
-        break;
     }
-    case TypeChar: {
+    else if (exprᴛ2 == TypeChar) {
         mode |= (fs.FileMode)(fs.ModeDevice);
         mode |= (fs.FileMode)(fs.ModeCharDevice);
-        break;
     }
-    case TypeBlock: {
+    else if (exprᴛ2 == TypeBlock) {
         mode |= (fs.FileMode)(fs.ModeDevice);
-        break;
     }
-    case TypeDir: {
+    else if (exprᴛ2 == TypeDir) {
         mode |= (fs.FileMode)(fs.ModeDir);
-        break;
     }
-    case TypeFifo: {
+    else if (exprᴛ2 == TypeFifo) {
         mode |= (fs.FileMode)(fs.ModeNamedPipe);
-        break;
-    }}
+    }
 
     return mode;
 }
@@ -820,13 +813,13 @@ public static (ж<Header>, error) FileInfoHeader(fs.FileInfo fi, @string link) {
 // isHeaderOnlyType checks if the given type flag is of the type that has no
 // data section even if a size is specified.
 internal static bool isHeaderOnlyType(byte flag) {
-    switch (flag) {
-    case TypeLink or TypeSymlink or TypeChar or TypeBlock or TypeDir or TypeFifo: {
+    var exprᴛ1 = flag;
+    if (exprᴛ1 == TypeLink || exprᴛ1 == TypeSymlink || exprᴛ1 == TypeChar || exprᴛ1 == TypeBlock || exprᴛ1 == TypeDir || exprᴛ1 == TypeFifo) {
         return true;
     }
-    default: {
+    { /* default: */
         return false;
-    }}
+    }
 
 }
 

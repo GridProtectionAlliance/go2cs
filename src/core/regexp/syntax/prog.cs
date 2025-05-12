@@ -187,7 +187,7 @@ Loop:
             flag |= (EmptyOp)(((EmptyOp)(~i).Arg));
         }
         else if (exprᴛ1 == InstFail) {
-            return ^((EmptyOp)0);
+            return ~((EmptyOp)0);
         }
         if (exprᴛ1 == InstCapture || exprᴛ1 == InstNop) {
         }
@@ -204,7 +204,8 @@ break_Loop:;
     return flag;
 }
 
-internal static readonly UntypedInt noMatch = -1;
+internal static readonly GoUntyped noMatch = /* -1 */
+    GoUntyped.Parse("-1");
 
 // MatchRune reports whether the instruction matches (and consumes) r.
 // It should only be called when i.Op == [InstRune].

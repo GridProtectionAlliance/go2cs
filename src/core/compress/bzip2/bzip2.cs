@@ -164,19 +164,18 @@ internal static readonly UntypedInt bzip2FinalMagic = /* 0x177245385090 */ 25779
         }
         // Find next block.
         var br = Ꮡ(bz2.br);
-        switch (br.ReadBits64(48)) {
-        default: {
+        var exprᴛ1 = br.ReadBits64(48);
+        { /* default: */
             return (0, ((StructuralError)"bad magic value found"u8));
         }
-        case bzip2BlockMagic: {
+        if (exprᴛ1 == bzip2BlockMagic) {
             var err = bz2.readBlock();
             if (err != default!) {
                 // Start of block.
                 return (0, err);
             }
-            break;
         }
-        case bzip2FinalMagic: {
+        if (exprᴛ1 == bzip2FinalMagic) {
             var wantFileCRC = ((uint32)br.ReadBits64(32));
             if ((~br).err != default!) {
                 // Check end-of-file CRC.
@@ -218,8 +217,7 @@ internal static readonly UntypedInt bzip2FinalMagic = /* 0x177245385090 */ 25779
                     return (0, errΔ1);
                 }
             }
-            break;
-        }}
+        }
 
     }
 }
@@ -468,11 +466,11 @@ internal static array<uint32> crctab;
 // updateCRC updates the crc value to incorporate the data in b.
 // The initial value is 0.
 internal static uint32 updateCRC(uint32 val, slice<byte> b) {
-    var crc = ^val;
+    var crc = ~val;
     foreach (var (_, v) in b) {
         crc = (uint32)(crctab[(byte)(((byte)(crc >> (int)(24))) ^ v)] ^ (crc << (int)(8)));
     }
-    return ^crc;
+    return ~crc;
 }
 
 } // end bzip2_package

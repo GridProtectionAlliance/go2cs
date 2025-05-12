@@ -13,8 +13,7 @@ partial class runtime_package {
 
 internal static readonly UntypedInt _DWORD_MAX = /* 0xffffffff */ 4294967295;
 
-internal static readonly GoUntyped _INVALID_HANDLE_VALUE = /* ^uintptr(0) */
-    GoUntyped.Parse("18446744073709551615");
+internal const uintptr _INVALID_HANDLE_VALUE = /* ^uintptr(0) */ 18446744073709551615;
 
 // Sources are used to identify the event that created an overlapped entry.
 // The source values are arbitrary. There is no risk of collision with user
@@ -207,8 +206,8 @@ internal static (gList, int32) netpoll(int64 delay) {
     var delta = ((int32)0);
     for (nint i = 0; i < n; i++) {
         var e = Ꮡentries.at<overlappedEntry>(i);
-        switch (unpackNetpollSource((~e).key)) {
-        case netpollSourceReady: {
+        var exprᴛ1 = unpackNetpollSource((~e).key);
+        if (exprᴛ1 == netpollSourceReady) {
             var op = pollOperationFromOverlappedEntry(e);
             if (op == nil) {
                 // Entry from outside the Go runtime and internal/poll, ignore.
@@ -221,25 +220,21 @@ internal static (gList, int32) netpoll(int64 delay) {
                 @throw("runtime: netpoll failed"u8);
             }
             delta += netpollready(ᏑtoRun, (~op).pd, mode);
-            break;
         }
-        case netpollSourceBreak: {
+        else if (exprᴛ1 == netpollSourceBreak) {
             netpollWakeSig.Store(0);
             if (delay == 0) {
                 // Forward the notification to the blocked poller.
                 netpollBreak();
             }
-            break;
         }
-        case netpollSourceTimer: {
-            break;
+        else if (exprᴛ1 == netpollSourceTimer) {
         }
-        default: {
+        else { /* default: */
             println("runtime: GetQueuedCompletionStatusEx returned net_op with invalid key=", // TODO: We could avoid calling NtCancelWaitCompletionPacket for expired wait completion packets.
  (~e).key);
             @throw("runtime: netpoll failed"u8);
-            break;
-        }}
+        }
 
     }
     return (toRun, delta);
@@ -264,10 +259,10 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
     var errno = stdcall2(_NtCancelWaitCompletionPacket, mp.waitIocpHandle, 1);
     var exprᴛ1 = errno;
     var matchᴛ1 = false;
-    if (exprᴛ1 is STATUS_CANCELLED) { matchᴛ1 = true;
+    if (exprᴛ1 == STATUS_CANCELLED) { matchᴛ1 = true;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is STATUS_SUCCESS) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == STATUS_SUCCESS)) { matchᴛ1 = true;
         ref var dt = ref heap<int64>(out var Ꮡdt);
         dt = -delay / 100;
         if (stdcall6(_SetWaitableTimer, // STATUS_CANCELLED is returned when the associated timer has already expired,
@@ -285,7 +280,7 @@ internal static bool /*signaled*/ netpollQueueTimer(int64 delay) {
             }
         }
     }
-    else if (exprᴛ1 is STATUS_PENDING) {
+    else if (exprᴛ1 == STATUS_PENDING) {
     }
     else { /* default: */
         println("runtime: NtCancelWaitCompletionPacket failed; errno=", // STATUS_PENDING is returned if the wait operation can't be canceled yet.

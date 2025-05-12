@@ -57,7 +57,7 @@ internal static basepointTablePrecompᴛ1 basepointTablePrecomp;
     // Accumulate the odd components first
     v.Set(NewIdentityPoint());
     for (nint i = 1; i < 64; i += 2) {
-        basepointTable[i / 2].SelectInto(multiple, digits[i]);
+        basepointTable.val[i / 2].SelectInto(multiple, digits[i]);
         tmp1.AddAffine(v, multiple);
         v.fromP1xP1(tmp1);
     }
@@ -82,7 +82,7 @@ internal static basepointTablePrecompᴛ1 basepointTablePrecomp;
     // now v = 16*(odd components)
     // Accumulate the even components
     for (nint i = 0; i < 64; i += 2) {
-        basepointTable[i / 2].SelectInto(multiple, digits[i]);
+        basepointTable.val[i / 2].SelectInto(multiple, digits[i]);
         tmp1.AddAffine(v, multiple);
         v.fromP1xP1(tmp1);
     }

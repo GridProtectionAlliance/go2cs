@@ -29,7 +29,7 @@ public static partial class cpu_package
         internal static ref bool ᏑHasVFPv4(ref ARMᴛ1 instance) => ref instance.HasVFPv4;
         internal static ref bool ᏑHasIDIVA(ref ARMᴛ1 instance) => ref instance.HasIDIVA;
         internal static ref bool ᏑHasV7Atomics(ref ARMᴛ1 instance) => ref instance.HasV7Atomics;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref ARMᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref ARMᴛ1 instance) => ref instance.__;
         
         // Constructors
         public ARMᴛ1(NilType _)
@@ -38,16 +38,16 @@ public static partial class cpu_package
             this.HasVFPv4 = default!;
             this.HasIDIVA = default!;
             this.HasV7Atomics = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public ARMᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasVFPv4 = default!, bool HasIDIVA = default!, bool HasV7Atomics = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public ARMᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasVFPv4 = default!, bool HasIDIVA = default!, bool HasV7Atomics = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasVFPv4 = HasVFPv4;
             this.HasIDIVA = HasIDIVA;
             this.HasV7Atomics = HasV7Atomics;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'ARMᴛ1' instances
@@ -56,7 +56,7 @@ public static partial class cpu_package
             HasVFPv4 == other.HasVFPv4 &&
             HasIDIVA == other.HasIDIVA &&
             HasV7Atomics == other.HasV7Atomics &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is ARMᴛ1 other && Equals(other);
         
@@ -65,7 +65,7 @@ public static partial class cpu_package
             HasVFPv4,
             HasIDIVA,
             HasV7Atomics,
-            _);
+            __);
         
         public static bool operator ==(ARMᴛ1 left, ARMᴛ1 right) => left.Equals(right);
         
@@ -88,7 +88,7 @@ public static partial class cpu_package
             HasVFPv4.ToString(),
             HasIDIVA.ToString(),
             HasV7Atomics.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

@@ -70,17 +70,15 @@ internal static void sysUsedOS(@unsafe.Pointer v, uintptr n) {
         }
         if (small < 4096) {
             var errno = getlasterror();
-            switch (errno) {
-            case _ERROR_NOT_ENOUGH_MEMORY or _ERROR_COMMITMENT_LIMIT: {
+            var exprᴛ1 = errno;
+            if (exprᴛ1 == _ERROR_NOT_ENOUGH_MEMORY || exprᴛ1 == _ERROR_COMMITMENT_LIMIT) {
                 print("runtime: VirtualAlloc of ", n, " bytes failed with errno=", errno, "\n");
                 @throw("out of memory"u8);
-                break;
             }
-            default: {
+            else { /* default: */
                 print("runtime: VirtualAlloc of ", small, " bytes failed with errno=", errno, "\n");
                 @throw("runtime: failed to commit pages"u8);
-                break;
-            }}
+            }
 
         }
         v = (uintptr)add(v.val, small);

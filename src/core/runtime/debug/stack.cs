@@ -51,7 +51,7 @@ public static slice<byte> Stack() {
 public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
     ref var f = ref Ꮡf.val;
 
-    var fd = ^((uintptr)0);
+    var fd = ~((uintptr)0);
     if (f != nil) {
         // The runtime will write to this file descriptor from
         // low-level routines during a panic, possibly without
@@ -87,7 +87,7 @@ public static error SetCrashOutput(ж<os.File> Ꮡf, CrashOptions opts) {
         fd = ((uintptr)fd2);
     }
     {
-        var prev = runtime_setCrashFD(fd); if (prev != ^((uintptr)0)) {
+        var prev = runtime_setCrashFD(fd); if (prev != ~((uintptr)0)) {
             // We use NewFile+Close because it is portable
             // unlike syscall.Close, whose parameter type varies.
             os.NewFile(prev, ""u8).Close();

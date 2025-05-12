@@ -20,7 +20,7 @@ internal static nsswitchConfig nssConfig;
     internal sync_package.Once initOnce; // guards init of nsswitchConfig
     // ch is used as a semaphore that only allows one lookup at a
     // time to recheck nsswitch.conf
-    internal channel<struct{}> ch; // guards lastChecked and modTime
+    internal channel<EmptyStruct> ch; // guards lastChecked and modTime
     internal time_package.Time lastChecked;     // last time nsswitch.conf was checked
     internal sync_package.Mutex mu; // protects nssConf
     internal ж<nssConf> nssConf;
@@ -38,7 +38,7 @@ internal static ж<nssConf> getSystemNSS() {
 [GoRecv] internal static void init(this ref nsswitchConfig conf) {
     conf.nssConf = parseNSSConfFile("/etc/nsswitch.conf"u8);
     conf.lastChecked = time.Now();
-    conf.ch = new channel<struct{}>(1);
+    conf.ch = new channel<EmptyStruct>(1);
 }
 
 // tryUpdate tries to update conf.

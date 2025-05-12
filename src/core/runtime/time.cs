@@ -1035,7 +1035,7 @@ Redo:
         // doesn't support Add or CompareAndSwap.
         // We only set bits with t locked.
         var v = t.isSending.Load();
-        nint i = sys.TrailingZeros8(^v);
+        nint i = sys.TrailingZeros8(~v);
         if (i == 8) {
             @throw("too many concurrent timer firings"u8);
         }
@@ -1082,7 +1082,7 @@ Redo:
     f(arg, seq, delay);
     if (!async && t.isChan) {
         // We are no longer sending a value.
-        t.isSending.And(^isSendingClear);
+        t.isSending.And(~isSendingClear);
         unlock(Ꮡ(t.sendLock));
     }
     if (ts != nil) {

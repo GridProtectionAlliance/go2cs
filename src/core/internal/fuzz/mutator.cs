@@ -334,8 +334,7 @@ internal static slice<int8> interesting8 = new int8[]{-128, -1, 0, 1, 16, 32, 64
 internal static slice<int16> interesting16 = new int16[]{-32768, -129, 128, 255, 256, 512, 1000, 1024, 4096, 32767}.slice();
 internal static slice<int32> interesting32 = new int32[]{-(nint)2147483648L, -100663046, -32769, 32768, 65535, 65536, 100663045, 2147483647}.slice();
 
-internal static readonly GoUntyped maxUint = /* uint64(^uint(0)) */
-    GoUntyped.Parse("18446744073709551615");
+internal const uint64 maxUint = /* uint64(^uint(0)) */ 18446744073709551615;
 internal const int64 maxInt = /* int64(maxUint >> 1) */ 9223372036854775807;
 
 [GoInit] internal static void init() {

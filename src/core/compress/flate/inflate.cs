@@ -389,12 +389,12 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
                 }
             }
         }
-        f.codebits[codeOrder[i]] = ((nint)((uint32)(f.b & 7)));
+        f.codebits.val[codeOrder[i]] = ((nint)((uint32)(f.b & 7)));
         f.b >>= (UntypedInt)(3);
         f.nb -= 3;
     }
     for (nint i = nclen; i < len(codeOrder); i++) {
-        f.codebits[codeOrder[i]] = 0;
+        f.codebits.val[codeOrder[i]] = 0;
     }
     if (!f.h1.init(f.codebits[0..])) {
         return ((CorruptInputError)f.roffset);
@@ -408,7 +408,7 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
         }
         if (x < 16) {
             // Actual length.
-            f.bits[i] = x;
+            f.bits.val[i] = x;
             i++;
             continue;
         }
@@ -426,7 +426,7 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
             if (i == 0) {
                 return ((CorruptInputError)f.roffset);
             }
-            b = f.bits[i - 1];
+            b = f.bits.val[i - 1];
             break;
         }
         case 17: {
@@ -456,7 +456,7 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
             return ((CorruptInputError)f.roffset);
         }
         for (nint j = 0; j < rep; j++) {
-            f.bits[i] = b;
+            f.bits.val[i] = b;
             i++;
         }
     }
@@ -467,8 +467,8 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
     // for the HLIT tree to the length of the EOB marker since we know that
     // every block must terminate with one. This preserves the property that
     // we never read any extra bytes after the end of the DEFLATE stream.
-    if (f.h1.min < f.bits[endBlockMarker]) {
-        f.h1.min = f.bits[endBlockMarker];
+    if (f.h1.min < f.bits.val[endBlockMarker]) {
+        f.h1.min = f.bits.val[endBlockMarker];
     }
     return default!;
 }
@@ -480,15 +480,13 @@ internal static array<nint> codeOrder = new nint[]{16, 17, 18, 0, 8, 7, 9, 6, 10
 [GoRecv] internal static void huffmanBlock(this ref decompressor f) {
     static readonly UntypedInt stateInit = iota; // Zero value must be stateInit
     static readonly UntypedInt stateDict = 1;
-    switch (f.stepState) {
-    case stateInit: {
+    var exprᴛ1 = f.stepState;
+    if (exprᴛ1 == stateInit) {
         goto readLiteral;
-        break;
     }
-    case stateDict: {
+    else if (exprᴛ1 == stateDict) {
         goto copyHistory;
-        break;
-    }}
+    }
 
 readLiteral:
     {
@@ -546,7 +544,7 @@ readLiteral:
             n = 5;
             break;
         }
-        case {} when v is < maxNumLit: {
+        case {} when v < maxNumLit: {
             length = 258;
             n = 0;
             break;
@@ -596,7 +594,7 @@ readLiteral:
             dist++;
             break;
         }
-        case {} when dist is < maxNumDist: {
+        case {} when dist < maxNumDist: {
             nuint nb = ((nuint)(dist - 2)) >> (int)(1);
             nint extra = ((nint)(dist & 1)) << (int)(nb);
             while (f.nb < nb) {
@@ -661,7 +659,7 @@ copyHistory:
     }
     nint n = (nint)(((nint)f.buf[0]) | ((nint)f.buf[1]) << (int)(8));
     nint nn = (nint)(((nint)f.buf[2]) | ((nint)f.buf[3]) << (int)(8));
-    if (((uint16)nn) != ((uint16)(^n))) {
+    if (((uint16)nn) != ((uint16)(~n))) {
         f.err = ((CorruptInputError)f.roffset);
         return;
     }

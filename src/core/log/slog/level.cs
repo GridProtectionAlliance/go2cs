@@ -38,7 +38,8 @@ partial class slog_package {
 // Level range. OpenTelemetry also has the names TRACE and FATAL, which slog
 // does not. But those OpenTelemetry levels can still be represented as slog
 // Levels by using the appropriate integers.
-public static readonly ΔLevel LevelDebug = -4;
+public static readonly GoUntyped LevelDebug = /* -4 */
+    GoUntyped.Parse("-4");
 
 public static readonly ΔLevel LevelInfo = 0;
 

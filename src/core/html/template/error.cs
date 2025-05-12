@@ -71,7 +71,7 @@ public static readonly ErrorCode ErrJSTemplate = 12;
 
 [GoRecv] public static @string Error(this ref ΔError e) {
     switch (ᐧ) {
-    case {} when e.Node is != default!: {
+    case {} when e.Node != default!: {
         var (loc, _) = ((ж<parse.Tree>)(default!)).val.ErrorContext(e.Node);
         return fmt.Sprintf("html/template:%s: %s"u8, loc, e.Description);
     }

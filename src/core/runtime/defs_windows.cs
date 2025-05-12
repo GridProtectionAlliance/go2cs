@@ -34,7 +34,8 @@ internal static readonly UntypedInt _EXCEPTION_INT_DIVIDE_BY_ZERO = /* 0xc000009
 internal static readonly UntypedInt _EXCEPTION_INT_OVERFLOW = /* 0xc0000095 */ 3221225621;
 internal static readonly UntypedInt _INFINITE = /* 0xffffffff */ 4294967295;
 internal static readonly UntypedInt _WAIT_TIMEOUT = /* 0x102 */ 258;
-internal static readonly UntypedInt _EXCEPTION_CONTINUE_EXECUTION = /* -0x1 */ -1;
+internal static readonly GoUntyped _EXCEPTION_CONTINUE_EXECUTION = /* -0x1 */
+    GoUntyped.Parse("-1");
 internal static readonly UntypedInt _EXCEPTION_CONTINUE_SEARCH = /* 0x0 */ 0;
 internal static readonly UntypedInt _EXCEPTION_CONTINUE_SEARCH_SEH = /* 0x1 */ 1;
 

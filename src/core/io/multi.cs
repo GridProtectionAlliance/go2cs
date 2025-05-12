@@ -86,7 +86,7 @@ internal static (nint, error) Read(this eofReader _, slice<byte> _) {
     return (sum, default!);
 }
 
-internal static WriterTo _ = (ж<multiReader>)(default!);
+internal static WriterTo _ᴛ1ʗ = (ж<multiReader>)(default!);
 
 // MultiReader returns a Reader that's the logical concatenation of
 // the provided input readers. They're read sequentially. Once all
@@ -121,7 +121,7 @@ public static Reader MultiReader(params ꓸꓸꓸReader readersʗp) {
     return (len(p), default!);
 }
 
-internal static StringWriter _ = (ж<multiWriter>)(default!);
+internal static StringWriter _ᴛ2ʗ = (ж<multiWriter>)(default!);
 
 [GoRecv] internal static (nint n, error err) WriteString(this ref multiWriter t, @string s) {
     nint n = default!;

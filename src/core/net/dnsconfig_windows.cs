@@ -15,7 +15,7 @@ internal static ж<dnsConfig> /*conf*/ dnsReadConfig(@string ignoredFilename) =>
 
     conf = Ꮡ(new dnsConfig(
         ndots: 1,
-        timeout: 5 * time.Second,
+        timeout: 5 * time.ΔSecond,
         attempts: 2
     ));
     var defaultNSʗ1 = defaultNS;

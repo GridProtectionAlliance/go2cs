@@ -316,8 +316,8 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
         return scanSkipSpace;
     }
     nint ps = s.parseState[n - 1];
-    switch (ps) {
-    case parseObjectKey: {
+    var exprᴛ1 = ps;
+    if (exprᴛ1 == parseObjectKey) {
         if (c == (rune)':') {
             s.parseState[n - 1] = parseObjectValue;
             s.step = stateBeginValue;
@@ -325,7 +325,7 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
         }
         return s.error(c, "after object key"u8);
     }
-    case parseObjectValue: {
+    if (exprᴛ1 == parseObjectValue) {
         if (c == (rune)',') {
             s.parseState[n - 1] = parseObjectKey;
             s.step = stateBeginString;
@@ -337,7 +337,7 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
         }
         return s.error(c, "after object key:value pair"u8);
     }
-    case parseArrayValue: {
+    if (exprᴛ1 == parseArrayValue) {
         if (c == (rune)',') {
             s.step = stateBeginValue;
             return scanArrayValue;
@@ -347,7 +347,7 @@ internal static nint stateEndValue(ж<scanner> Ꮡs, byte c) {
             return scanEndArray;
         }
         return s.error(c, "after array element"u8);
-    }}
+    }
 
     return s.error(c, ""u8);
 }

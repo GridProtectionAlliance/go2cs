@@ -42,7 +42,7 @@ internal static readonly UntypedInt workerSharedMemSize = /* 100 << 20 */ 104857
     internal ж<workerClient> client; // used to communicate with worker process
     internal error waitErr;         // last error returned by wait, set before termC is closed.
     internal bool interrupted;          // true after stop interrupts a running worker.
-    internal channel<struct{}> termC; // closed by wait when worker process terminates
+    internal channel<EmptyStruct> termC; // closed by wait when worker process terminates
 }
 
 internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir, @string binPath, slice<@string> args, slice<@string> env) {
@@ -380,7 +380,7 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir,
     // After this, w.client owns fuzzInW and fuzzOutR, so w.client.Close must be
     // called later by stop.
     w.cmd = cmd;
-    w.termC = new channel<struct{}>(1);
+    w.termC = new channel<EmptyStruct>(1);
     var comm = new workerComm(fuzzIn: fuzzInW, fuzzOut: fuzzOutR, memMu: w.memMu);
     var m = newMutator();
     w.client = newWorkerClient(comm, m);
@@ -422,7 +422,7 @@ internal static (ж<worker>, error) newWorker(ж<coordinator> Ꮡc, @string dir,
     // Worker still running.
     // Tell the worker to stop by closing fuzz_in. It won't actually stop until it
     // finishes with earlier calls.
-    var closeC = new channel<struct{}>(1);
+    var closeC = new channel<EmptyStruct>(1);
     var closeCʗ1 = closeC;
     goǃ(() => {
         w.client.Close();
@@ -657,15 +657,15 @@ public static error RunFuzzWorker(context.Context ctx, Func<CorpusEntry, error> 
         }
         any resp = default!;
         switch (ᐧ) {
-        case {} when c.Fuzz is != nil: {
+        case {} when c.Fuzz != nil: {
             resp = ws.fuzz(ctx, c.Fuzz.val);
             break;
         }
-        case {} when c.Minimize is != nil: {
+        case {} when c.Minimize != nil: {
             resp = ws.minimize(ctx, c.Minimize.val);
             break;
         }
-        case {} when c.Ping is != nil: {
+        case {} when c.Ping != nil: {
             resp = ws.ping(ctx, c.Ping.val);
             break;
         }
@@ -1240,7 +1240,7 @@ internal static error errSharedMemClosed = errors.New("internal error: shared me
             return (0, ctxErr);
         }
     }
-    var done = new channel<struct{}>(1);
+    var done = new channel<EmptyStruct>(1);
     // This goroutine may stay blocked after Read returns because the underlying
     // read is blocked.
     nint n = default!;

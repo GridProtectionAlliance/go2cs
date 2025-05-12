@@ -799,13 +799,13 @@ internal static void putCopyBuf(slice<byte> b) {
 }
 
 internal static ж<sync.Pool> bufioWriterPool(nint size) {
-    switch (size) {
-    case 2 << (int)(10): {
+    var exprᴛ1 = size;
+    if (exprᴛ1 == 2 << (int)(10)) {
         return Ꮡ(bufioWriter2kPool);
     }
-    case 4 << (int)(10): {
+    if (exprᴛ1 == 4 << (int)(10)) {
         return Ꮡ(bufioWriter4kPool);
-    }}
+    }
 
     return default!;
 }
@@ -1433,7 +1433,7 @@ internal static void Write(this extraHeader h, ж<bufio.Writer> Ꮡw) {
                 }
                 break;
             }
-            case {} when bdy.unreadDataSizeLocked() is >= maxPostHandlerReadBytes: {
+            case {} when bdy.unreadDataSizeLocked() >= maxPostHandlerReadBytes: {
                 tooBig = true;
                 break;
             }
@@ -1809,7 +1809,7 @@ internal static time.Duration rstAvoidanceDelay = 500 * time.Millisecond;
     error CloseWrite();
 }
 
-internal static closeWriter _ = (ж<net.TCPConn>)(default!);
+internal static closeWriter _ᴛ4ʗ = (ж<net.TCPConn>)(default!);
 
 // closeWriteAndWait flushes any outstanding data and sends a FIN packet (if
 // client is connected via TCP), signaling that we're done. We then
@@ -3019,8 +3019,8 @@ public static error ServeTLS(net.Listener l, ΔHandler handler, @string certFile
     internal sync_package.Once nextProtoOnce; // guards setupHTTP2_* init
     internal error nextProtoErr;     // result of http2.ConfigureServer if used
     internal sync_package.Mutex mu;
-    internal map<ж<net.Listener>, struct{}> listeners;
-    internal map<ж<conn>, struct{}> activeConn;
+    internal map<ж<net.Listener>, EmptyStruct> listeners;
+    internal map<ж<conn>, EmptyStruct> activeConn;
     internal slice<Action> onShutdown;
     internal sync_package.WaitGroup listenerGroup;
 }
@@ -3435,7 +3435,7 @@ public static error ErrServerClosed = errors.New("http: Server closed"u8);
     s.mu.Lock();
     defer(s.mu.Unlock);
     if (s.listeners == default!) {
-        s.listeners = new map<ж<net.Listener>, struct{}>();
+        s.listeners = new map<ж<net.Listener>, EmptyStruct>();
     }
     if (add){
         if (s.shuttingDown()) {
@@ -3459,7 +3459,7 @@ public static error ErrServerClosed = errors.New("http: Server closed"u8);
     s.mu.Lock();
     defer(s.mu.Unlock);
     if (s.activeConn == default!) {
-        s.activeConn = new map<ж<conn>, struct{}>();
+        s.activeConn = new map<ж<conn>, EmptyStruct>();
     }
     if (add){
         s.activeConn[c] = new trackConn_s();
@@ -3682,7 +3682,7 @@ public static error ErrHandlerTimeout = errors.New("http: Handler timeout"u8);
         defer(cancelCtxʗ1);
     }
     r = r.WithContext(ctx);
-    var done = new channel<struct{}>(1);
+    var done = new channel<EmptyStruct>(1);
     var tw = Ꮡ(new timeoutWriter(
         w: w,
         h: new ΔHeader(),
@@ -3757,7 +3757,7 @@ public static error ErrHandlerTimeout = errors.New("http: Handler timeout"u8);
     internal nint code;
 }
 
-internal static Pusher _ = (ж<timeoutWriter>)(default!);
+internal static Pusher _ᴛ6ʗ = (ж<timeoutWriter>)(default!);
 
 // Push implements the [Pusher] interface.
 [GoRecv] internal static error Push(this ref timeoutWriter tw, @string target, ж<PushOptions> Ꮡopts) {
@@ -3790,7 +3790,7 @@ internal static Pusher _ = (ж<timeoutWriter>)(default!);
 [GoRecv] internal static void writeHeaderLocked(this ref timeoutWriter tw, nint code) {
     checkWriteHeaderCode(code);
     switch (ᐧ) {
-    case {} when tw.err is != default!: {
+    case {} when tw.err != default!: {
         return;
     }
     case {} when tw.wroteHeader: {

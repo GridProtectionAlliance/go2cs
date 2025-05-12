@@ -174,7 +174,7 @@ internal static bool match(this lazyFlag f, syntax.EmptyOp op) {
 // If so, m.matchcap holds the submatch information.
 [GoRecv] internal static bool match(this ref machine m, input i, nint pos) {
     var startCond = m.re.cond;
-    if (startCond == ^((syntax.EmptyOp)0)) {
+    if (startCond == ~((syntax.EmptyOp)0)) {
         // impossible
         return false;
     }
@@ -426,7 +426,7 @@ internal static void freeOnePassMachine(ж<onePassMachine> Ꮡm) {
 // doOnePass implements r.doExecute using the one-pass execution engine.
 [GoRecv] internal static slice<nint> doOnePass(this ref Regexp re, io.RuneReader ir, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     var startCond = re.cond;
-    if (startCond == ^((syntax.EmptyOp)0)) {
+    if (startCond == ~((syntax.EmptyOp)0)) {
         // impossible
         return default!;
     }

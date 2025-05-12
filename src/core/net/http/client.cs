@@ -402,7 +402,7 @@ internal static (Action stopTimer, Func<bool> didTimeout) setRequestCancel(ж<Re
     if (timeBeforeContextDeadline(deadline, oldCtx)) {
         (req.ctx, cancelCtx) = context.WithDeadline(oldCtx, deadline);
     }
-    var cancel = new channel<struct{}>(1);
+    var cancel = new channel<EmptyStruct>(1);
     req.Cancel = cancel;
     var doCancel = 
     var cancelʗ1 = cancel;
@@ -415,7 +415,7 @@ internal static (Action stopTimer, Func<bool> didTimeout) setRequestCancel(ж<Re
             }
         }
     };
-    var stopTimerCh = new channel<struct{}>(1);
+    var stopTimerCh = new channel<EmptyStruct>(1);
     ref var once = ref heap(new sync_package.Once(), out var Ꮡonce);
     stopTimer = 
     var cancelCtxʗ1 = cancelCtx;

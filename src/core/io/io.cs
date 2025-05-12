@@ -573,22 +573,19 @@ internal static error errWhence = errors.New("Seek: invalid whence"u8);
 internal static error errOffset = errors.New("Seek: invalid offset"u8);
 
 [GoRecv] public static (int64, error) Seek(this ref SectionReader s, int64 offset, nint whence) {
-    switch (whence) {
-    default: {
+    var exprᴛ1 = whence;
+    { /* default: */
         return (0, errWhence);
     }
-    case SeekStart: {
+    if (exprᴛ1 == SeekStart) {
         offset += s.@base;
-        break;
     }
-    case SeekCurrent: {
+    else if (exprᴛ1 == SeekCurrent) {
         offset += s.off;
-        break;
     }
-    case SeekEnd: {
+    else if (exprᴛ1 == SeekEnd) {
         offset += s.limit;
-        break;
-    }}
+    }
 
     if (offset < s.@base) {
         return (0, errOffset);
@@ -669,18 +666,16 @@ public static ж<OffsetWriter> NewOffsetWriter(WriterAt w, int64 off) {
 }
 
 [GoRecv] public static (int64, error) Seek(this ref OffsetWriter o, int64 offset, nint whence) {
-    switch (whence) {
-    default: {
+    var exprᴛ1 = whence;
+    { /* default: */
         return (0, errWhence);
     }
-    case SeekStart: {
+    if (exprᴛ1 == SeekStart) {
         offset += o.@base;
-        break;
     }
-    case SeekCurrent: {
+    else if (exprᴛ1 == SeekCurrent) {
         offset += o.off;
-        break;
-    }}
+    }
 
     if (offset < o.@base) {
         return (0, errOffset);
@@ -727,7 +722,7 @@ public static Writer Discard = new discard(nil);
 
 // discard implements ReaderFrom as an optimization so Copy to
 // io.Discard can avoid doing unnecessary work.
-internal static ReaderFrom _ = new discard(nil);
+internal static ReaderFrom _ᴛ3ʗ = new discard(nil);
 
 internal static (nint, error) Write(this discard _, slice<byte> p) {
     return (len(p), default!);

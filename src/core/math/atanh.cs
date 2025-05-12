@@ -63,7 +63,7 @@ internal static float64 atanh(float64 x) {
     case {} when x is 1: {
         return Inf(1);
     }
-    case {} when x is -1: {
+    case {} when x == -1: {
         return Inf(-1);
     }}
 
@@ -74,7 +74,7 @@ internal static float64 atanh(float64 x) {
     }
     float64 temp = default!;
     switch (ᐧ) {
-    case {} when x is < NearZero: {
+    case {} when x < NearZero: {
         temp = x;
         break;
     }

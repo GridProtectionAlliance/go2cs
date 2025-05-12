@@ -29,7 +29,8 @@ partial class base64_package {
 }
 
 public const rune StdPadding = /* '=' */ 61; // Standard padding character
-public const rune NoPadding = -1;  // No padding
+public static readonly GoUntyped NoPadding = /* -1 */            // No padding
+    GoUntyped.Parse("-1");
 
 internal static readonly @string decodeMapInitialize = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
 internal static readonly UntypedInt invalidIndex = /* '\xff' */ 255;
@@ -58,7 +59,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
             throw panic("encoding alphabet contains newline character");
             break;
         }
-        case {} when (~e).decodeMap[encoder[i]] is != invalidIndex: {
+        case {} when (~e).decodeMap[encoder[i]] != invalidIndex: {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
@@ -383,7 +384,7 @@ public static @string Error(this CorruptInputError e) {
         dbuf[2] = 0;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3)) {
         dst[1] = dbuf[1];
         if (enc.strict && dbuf[2] != 0) {
             return (si, 0, ((CorruptInputError)(si - 1)));
@@ -391,7 +392,7 @@ public static @string Error(this CorruptInputError e) {
         dbuf[1] = 0;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
         dst[0] = dbuf[0];
         if (enc.strict && (dbuf[1] != 0 || dbuf[2] != 0)) {
             return (si, 0, ((CorruptInputError)(si - 2)));

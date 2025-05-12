@@ -106,9 +106,12 @@ public static readonly UntypedInt STARTF_USESTDHANDLES = /* 0x00000100 */ 256;
 public static readonly UntypedInt STARTF_USESHOWWINDOW = /* 0x00000001 */ 1;
 public static readonly UntypedInt DUPLICATE_CLOSE_SOURCE = /* 0x00000001 */ 1;
 public static readonly UntypedInt DUPLICATE_SAME_ACCESS = /* 0x00000002 */ 2;
-public static readonly UntypedInt STD_INPUT_HANDLE = -10;
-public static readonly UntypedInt STD_OUTPUT_HANDLE = -11;
-public static readonly UntypedInt STD_ERROR_HANDLE = -12;
+public static readonly GoUntyped STD_INPUT_HANDLE = /* -10 */
+    GoUntyped.Parse("-10");
+public static readonly GoUntyped STD_OUTPUT_HANDLE = /* -11 */
+    GoUntyped.Parse("-11");
+public static readonly GoUntyped STD_ERROR_HANDLE = /* -12 */
+    GoUntyped.Parse("-12");
 public static readonly UntypedInt FILE_BEGIN = 0;
 public static readonly UntypedInt FILE_CURRENT = 1;
 public static readonly UntypedInt FILE_END = 2;

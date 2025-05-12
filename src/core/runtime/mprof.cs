@@ -289,7 +289,7 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
     h ^= (uintptr)(h >> (int)(11));
     nint i = ((nint)(h % buckHashSize));
     // first check optimistically, without the lock
-    for (var b = (ж<bucket>)(uintptr)(bh[i].Load()); b != nil; b = b.val.next) {
+    for (var b = (ж<bucket>)(uintptr)(bh.val[i].Load()); b != nil; b = b.val.next) {
         if ((~b).typ == typ && (~b).hash == h && (~b).size == size && eqslice(b.stk(), stk)) {
             return b;
         }
@@ -299,7 +299,7 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
     }
     @lock(Ꮡ(profInsertLock));
     // check again under the insertion lock
-    for (var b = (ж<bucket>)(uintptr)(bh[i].Load()); b != nil; b = b.val.next) {
+    for (var b = (ж<bucket>)(uintptr)(bh.val[i].Load()); b != nil; b = b.val.next) {
         if ((~b).typ == typ && (~b).hash == h && (~b).size == size && eqslice(b.stk(), stk)) {
             unlock(Ꮡ(profInsertLock));
             return b;
@@ -319,9 +319,9 @@ internal static ж<bucket> stkbucket(bucketType typ, uintptr size, slice<uintptr
     } else {
         allnext = Ꮡ(bbuckets);
     }
-    b.val.next = (ж<bucket>)(uintptr)(bh[i].Load());
+    b.val.next = (ж<bucket>)(uintptr)(bh.val[i].Load());
     b.val.allnext = (ж<bucket>)(uintptr)(allnext.Load());
-    bh[i].StoreNoWB(new @unsafe.Pointer(b));
+    bh.val[i].StoreNoWB(new @unsafe.Pointer(b));
     allnext.StoreNoWB(new @unsafe.Pointer(b));
     unlock(Ꮡ(profInsertLock));
     return b;
@@ -1606,7 +1606,7 @@ internal static void doRecordGoroutineProfile(ж<g> Ꮡgp1, slice<uintptr> pcbuf
     var offsetʗ2 = offset;
     var pcbufʗ2 = pcbuf;
     () => {
-        saveg(^((uintptr)0), ^((uintptr)0), Ꮡgp1, Ꮡ(goroutineProfileʗ2.records, offsetʗ2), pcbufʗ2);
+        saveg(~((uintptr)0), ~((uintptr)0), Ꮡgp1, Ꮡ(goroutineProfileʗ2.records, offsetʗ2), pcbufʗ2);
     });
     if (goroutineProfile.labels != default!) {
         goroutineProfile.labels[offset] = gp1.labels;
@@ -1671,7 +1671,7 @@ internal static (nint n, bool ok) goroutineProfileWithLabelsSync(slice<profilere
             var pcbufʗ10 = pcbuf;
             var rʗ10 = r;
             () => {
-                saveg(^((uintptr)0), ^((uintptr)0), gp1, Ꮡ(rʗ10, 0), pcbufʗ10);
+                saveg(~((uintptr)0), ~((uintptr)0), gp1, Ꮡ(rʗ10, 0), pcbufʗ10);
             });
             if (labels != default!) {
                 lbl[0] = gp1.val.labels;

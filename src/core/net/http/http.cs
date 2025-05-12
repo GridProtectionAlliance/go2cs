@@ -123,8 +123,8 @@ internal static (int64, error) WriteTo(this noBody _, io.Writer _) {
     return (0, default!);
 }
 
-internal static io.WriterTo _ = NoBody;
-internal static io.ReadCloser _ = NoBody;
+internal static io.WriterTo _ᴛ2ʗ = NoBody;
+internal static io.ReadCloser _ᴛ3ʗ = NoBody;
 
 // PushOptions describes options for [Pusher.Push].
 [GoType] partial struct PushOptions {

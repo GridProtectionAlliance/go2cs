@@ -191,7 +191,8 @@ public static (nint n, error err) Fscanf(io.Reader r, @string format, params ꓸ
     internal error err;
 }
 
-internal static readonly UntypedInt eof = -1;
+internal static readonly GoUntyped eof = /* -1 */
+    GoUntyped.Parse("-1");
 
 // ss is the internal implementation of ScanState.
 [GoType] partial struct ss {
@@ -398,7 +399,7 @@ internal static bool notSpace(rune r) {
 
     if (r.peekRune >= 0) {
         rr = r.peekRune;
-        r.peekRune = ^r.peekRune;
+        r.peekRune = ~r.peekRune;
         size = utf8.RuneLen(rr);
         return (rr, size, err);
     }
@@ -412,7 +413,7 @@ internal static bool notSpace(rune r) {
         size = 1;
         // Known to be 1.
         // Flip the bits of the rune so it's available to UnreadRune.
-        r.peekRune = ^rr;
+        r.peekRune = ~rr;
         return (rr, size, err);
     }
     nint n = default!;
@@ -433,7 +434,7 @@ internal static bool notSpace(rune r) {
         r.pending += n - size;
     }
     // Flip the bits of the rune so it's available to UnreadRune.
-    r.peekRune = ^rr;
+    r.peekRune = ~rr;
     return (rr, size, err);
 }
 
@@ -442,7 +443,7 @@ internal static bool notSpace(rune r) {
         return errors.New("fmt: scanning called UnreadRune with no rune available"u8);
     }
     // Reverse bit flip of previously read rune to obtain valid >=0 state.
-    r.peekRune = ^r.peekRune;
+    r.peekRune = ~r.peekRune;
     return default!;
 }
 

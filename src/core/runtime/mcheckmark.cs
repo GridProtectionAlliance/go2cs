@@ -40,7 +40,7 @@ internal static void startCheckmarks() {
     assertWorldStopped();
     // Clear all checkmarks.
     foreach (var (_, ai) in mheap_.allArenas) {
-        var arena = mheap_.arenas[ai.l1()][ai.l2()];
+        var arena = mheap_.arenas[ai.l1()].val[ai.l2()];
         var bitmap = arena.val.checkmarks;
         if (bitmap == nil){
             // Allocate bitmap on first use.
@@ -77,12 +77,12 @@ internal static bool setCheckmark(uintptr obj, uintptr @base, uintptr off, markB
         // Dump the source (base) object
         gcDumpObject("base"u8, @base, off);
         // Dump the object
-        gcDumpObject("obj"u8, obj, ^((uintptr)0));
+        gcDumpObject("obj"u8, obj, ~((uintptr)0));
         (~getg()).m.val.traceback = 2;
         @throw("checkmark found unmarked object"u8);
     }
     arenaIdx ai = arenaIndex(obj);
-    var arena = mheap_.arenas[ai.l1()][ai.l2()];
+    var arena = mheap_.arenas[ai.l1()].val[ai.l2()];
     var arenaWord = (obj / heapArenaBytes / 8) % ((uintptr)len((~(~arena).checkmarks).b));
     var mask = ((byte)(1 << (int)(((obj / heapArenaBytes) % 8))));
     var bytep = Ꮡ(~(~arena).checkmarks).b.at<uint8>(arenaWord);

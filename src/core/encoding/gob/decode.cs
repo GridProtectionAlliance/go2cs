@@ -182,7 +182,7 @@ internal static (uint64 x, nint width, error err) decodeUintReader(io.Reader r, 
 [GoRecv] internal static int64 decodeInt(this ref decoderState state) {
     var x = state.decodeUint();
     if ((uint64)(x & 1) != 0) {
-        return ^((int64)(x >> (int)(1)));
+        return ~((int64)(x >> (int)(1)));
     }
     return ((int64)(x >> (int)(1)));
 }
@@ -872,19 +872,16 @@ internal static reflectꓸValue decodeIntoValue(ж<decoderState> Ꮡstate, decOp
     state.b.Drop(n);
     error err = default!;
     // We know it's one of these.
-    switch (ut.externalDec) {
-    case xGob: {
+    var exprᴛ1 = ut.externalDec;
+    if (exprᴛ1 == xGob) {
         err = value.Interface()._<GobDecoder>().GobDecode(b);
-        break;
     }
-    case xBinary: {
+    else if (exprᴛ1 == xBinary) {
         err = value.Interface()._<encoding.BinaryUnmarshaler>().UnmarshalBinary(b);
-        break;
     }
-    case xText: {
+    else if (exprᴛ1 == xText) {
         err = value.Interface()._<encoding.TextUnmarshaler>().UnmarshalText(b);
-        break;
-    }}
+    }
 
     if (err != default!) {
         error_(err);
@@ -1082,11 +1079,11 @@ internal static nint maxIgnoreNestingDepth = 10000;
         // Special cases
         var wire = dec.wireType[wireId];
         switch (ᐧ) {
-        case {} when wire is nil: {
+        case {} when wire == nil: {
             errorf("bad data: undefined type %s"u8, wireId.@string());
             break;
         }
-        case {} when (~wire).ArrayT is != nil: {
+        case {} when (~wire).ArrayT != nil: {
             var elemId = (~wire).ArrayT.val.Elem;
             var elemOp = dec.decIgnoreOpFor(elemId, inProgress);
             op = 
@@ -1097,7 +1094,7 @@ internal static nint maxIgnoreNestingDepth = 10000;
             };
             break;
         }
-        case {} when (~wire).MapT is != nil: {
+        case {} when (~wire).MapT != nil: {
             var keyId = dec.wireType[wireId].MapT.Key;
             var elemId = dec.wireType[wireId].MapT.Elem;
             var keyOp = dec.decIgnoreOpFor(keyId, inProgress);
@@ -1110,7 +1107,7 @@ internal static nint maxIgnoreNestingDepth = 10000;
             };
             break;
         }
-        case {} when (~wire).SliceT is != nil: {
+        case {} when (~wire).SliceT != nil: {
             var elemId = (~wire).SliceT.val.Elem;
             var elemOp = dec.decIgnoreOpFor(elemId, inProgress);
             op = 
@@ -1120,7 +1117,7 @@ internal static nint maxIgnoreNestingDepth = 10000;
             };
             break;
         }
-        case {} when (~wire).StructT is != nil: {
+        case {} when (~wire).StructT != nil: {
             (enginePtr, err) = dec.getIgnoreEnginePtr(wireId);
             if (err != default!) {
                 // Generate a closure that calls out to the engine for the nested type.

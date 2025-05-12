@@ -154,7 +154,7 @@ public static ж<Reader> NewReader(io.Reader r, Transformer t) {
             (r.dst1, n, err) = r.t.Transform(r.dst, r.src[(int)(r.src0)..(int)(r.src1)], AreEqual(r.err, io.EOF));
             r.src0 += n;
             switch (ᐧ) {
-            case {} when err is default!: {
+            case {} when err == default!: {
                 if (r.src0 != r.src1) {
                     r.err = errInconsistentByteCount;
                 }
@@ -490,7 +490,7 @@ public static Transformer Chain(params ꓸꓸꓸTransformer tʗp) {
  @in.src()));
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == default!) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == default!)) {
             if (i > low) {
                 // if i == low, we have depleted the bytes at index i or any lower levels.
                 // In that case we increase low and i. In all other cases we decrease i to

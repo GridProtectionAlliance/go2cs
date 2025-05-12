@@ -71,7 +71,7 @@ partial class textproto_package {
 [GoType] partial struct sequencer {
     internal sync_package.Mutex mu;
     internal nuint id;
-    internal map<nuint, channel<struct{}>> wait;
+    internal map<nuint, channel<EmptyStruct>> wait;
 }
 
 // Start waits until it is time for the event numbered id to begin.
@@ -83,9 +83,9 @@ partial class textproto_package {
         s.mu.Unlock();
         return;
     }
-    var c = new channel<struct{}>(1);
+    var c = new channel<EmptyStruct>(1);
     if (s.wait == default!) {
-        s.wait = new map<nuint, channel<struct{}>>();
+        s.wait = new map<nuint, channel<EmptyStruct>>();
     }
     s.wait[id] = c;
     s.mu.Unlock();
@@ -104,7 +104,7 @@ partial class textproto_package {
     id++;
     s.id = id;
     if (s.wait == default!) {
-        s.wait = new map<nuint, channel<struct{}>>();
+        s.wait = new map<nuint, channel<EmptyStruct>>();
     }
     var c = s.wait[id];
     var ok = s.wait[id];

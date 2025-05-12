@@ -497,7 +497,7 @@ public static error ErrRemoveArgument = errors.New("driver: remove argument from
 
 [GoType("num:int64")] partial struct ΔRowsAffected;
 
-internal static ΔRowsAffected _ = ((ΔRowsAffected)0);
+internal static ΔRowsAffected _ᴛ3ʗ = ((ΔRowsAffected)0);
 
 public static (int64, error) LastInsertId(this ΔRowsAffected _) {
     return (0, errors.New("LastInsertId is not supported by this driver"u8));
@@ -515,7 +515,7 @@ public static noRows ResultNoRows;
 [GoType] partial struct noRows {
 }
 
-internal static Result _ = new noRows(nil);
+internal static Result _ᴛ4ʗ = new noRows(nil);
 
 internal static (int64, error) LastInsertId(this noRows _) {
     return (0, errors.New("no LastInsertId available after DDL statement"u8));

@@ -611,21 +611,18 @@ partial class dwarf_package {
             err = new DecodeError(nameΔ2, (~e).Offset, "missing encoding attribute for "u8 + nameΔ2);
             goto Error;
         }
-        switch (enc) {
-        default: {
+        var exprᴛ3 = enc;
+        { /* default: */
             err = new DecodeError(nameΔ2, (~e).Offset, "unrecognized encoding attribute value");
             goto Error;
-            break;
         }
-        case encAddress: {
+        else if (exprᴛ3 == encAddress) {
             typ = new AddrType();
-            break;
         }
-        case encBoolean: {
+        else if (exprᴛ3 == encBoolean) {
             typ = new BoolType();
-            break;
         }
-        case encComplexFloat: {
+        else if (exprᴛ3 == encComplexFloat) {
             typ = new ComplexType();
             if (nameΔ2 == "complex"u8) {
                 // clang writes out 'complex' instead of 'complex float' or 'complex double'.
@@ -645,28 +642,22 @@ partial class dwarf_package {
                 }
 
             }
-            break;
         }
-        case encFloat: {
+        else if (exprᴛ3 == encFloat) {
             typ = new FloatType();
-            break;
         }
-        case encSigned: {
+        else if (exprᴛ3 == encSigned) {
             typ = new IntType();
-            break;
         }
-        case encUnsigned: {
+        else if (exprᴛ3 == encUnsigned) {
             typ = new UintType();
-            break;
         }
-        case encSignedChar: {
+        else if (exprᴛ3 == encSignedChar) {
             typ = new CharType();
-            break;
         }
-        case encUnsignedChar: {
+        else if (exprᴛ3 == encUnsignedChar) {
             typ = new UcharType();
-            break;
-        }}
+        }
 
         typeCache[off] = typ;
         var t = typ._<readType_type>().Basic();
@@ -685,14 +676,14 @@ partial class dwarf_package {
         var t = @new<StructType>();
         typ = ~t;
         typeCache[off] = t;
-        var exprᴛ3 = (~e).Tag;
-        if (exprᴛ3 == TagClassType) {
+        var exprᴛ4 = (~e).Tag;
+        if (exprᴛ4 == TagClassType) {
             t.val.Kind = "class"u8;
         }
-        else if (exprᴛ3 == TagStructType) {
+        else if (exprᴛ4 == TagStructType) {
             t.val.Kind = "struct"u8;
         }
-        else if (exprᴛ3 == TagUnionType) {
+        else if (exprᴛ4 == TagUnionType) {
             t.val.Kind = "union"u8;
         }
 
@@ -788,14 +779,14 @@ partial class dwarf_package {
                 goto Error;
             }
         }
-        var exprᴛ4 = (~e).Tag;
-        if (exprᴛ4 == TagConstType) {
+        var exprᴛ5 = (~e).Tag;
+        if (exprᴛ5 == TagConstType) {
             t.val.Qual = "const"u8;
         }
-        else if (exprᴛ4 == TagRestrictType) {
+        else if (exprᴛ5 == TagRestrictType) {
             t.val.Qual = "restrict"u8;
         }
-        else if (exprᴛ4 == TagVolatileType) {
+        else if (exprᴛ5 == TagVolatileType) {
             t.val.Qual = "volatile"u8;
         }
 
@@ -865,18 +856,18 @@ partial class dwarf_package {
         t.val.ParamType = new slice<ΔType>(0, 8);
         for (var kid = next(); kid != nil; kid = next()) {
             ΔType tkidΔ1 = default!;
-            var exprᴛ5 = (~kid).Tag;
+            var exprᴛ6 = (~kid).Tag;
             { /* default: */
                 continue;
             }
-            else if (exprᴛ5 == TagFormalParameter) {
+            else if (exprᴛ6 == TagFormalParameter) {
                 {
                     tkidΔ1 = typeOf(kid); if (err != default!) {
                         goto Error;
                     }
                 }
             }
-            else if (exprᴛ5 == TagUnspecifiedParameters) {
+            else if (exprᴛ6 == TagUnspecifiedParameters) {
                 ᏑtkidΔ1 = new DotDotDotType(nil); tkidΔ1 = ref ᏑtkidΔ1.val;
             }
 

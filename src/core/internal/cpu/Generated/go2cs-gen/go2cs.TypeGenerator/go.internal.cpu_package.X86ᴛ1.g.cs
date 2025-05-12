@@ -46,7 +46,7 @@ public static partial class cpu_package
         internal static ref bool ᏑHasSSSE3(ref X86ᴛ1 instance) => ref instance.HasSSSE3;
         internal static ref bool ᏑHasSSE41(ref X86ᴛ1 instance) => ref instance.HasSSE41;
         internal static ref bool ᏑHasSSE42(ref X86ᴛ1 instance) => ref instance.HasSSE42;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref X86ᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref X86ᴛ1 instance) => ref instance.__;
         
         // Constructors
         public X86ᴛ1(NilType _)
@@ -72,10 +72,10 @@ public static partial class cpu_package
             this.HasSSSE3 = default!;
             this.HasSSE41 = default!;
             this.HasSSE42 = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public X86ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasAES = default!, bool HasADX = default!, bool HasAVX = default!, bool HasAVX2 = default!, bool HasAVX512F = default!, bool HasAVX512BW = default!, bool HasAVX512VL = default!, bool HasBMI1 = default!, bool HasBMI2 = default!, bool HasERMS = default!, bool HasFMA = default!, bool HasOSXSAVE = default!, bool HasPCLMULQDQ = default!, bool HasPOPCNT = default!, bool HasRDTSCP = default!, bool HasSHA = default!, bool HasSSE3 = default!, bool HasSSSE3 = default!, bool HasSSE41 = default!, bool HasSSE42 = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public X86ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasAES = default!, bool HasADX = default!, bool HasAVX = default!, bool HasAVX2 = default!, bool HasAVX512F = default!, bool HasAVX512BW = default!, bool HasAVX512VL = default!, bool HasBMI1 = default!, bool HasBMI2 = default!, bool HasERMS = default!, bool HasFMA = default!, bool HasOSXSAVE = default!, bool HasPCLMULQDQ = default!, bool HasPOPCNT = default!, bool HasRDTSCP = default!, bool HasSHA = default!, bool HasSSE3 = default!, bool HasSSSE3 = default!, bool HasSSE41 = default!, bool HasSSE42 = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasAES = HasAES;
@@ -98,7 +98,7 @@ public static partial class cpu_package
             this.HasSSSE3 = HasSSSE3;
             this.HasSSE41 = HasSSE41;
             this.HasSSE42 = HasSSE42;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'X86ᴛ1' instances
@@ -124,7 +124,7 @@ public static partial class cpu_package
             HasSSSE3 == other.HasSSSE3 &&
             HasSSE41 == other.HasSSE41 &&
             HasSSE42 == other.HasSSE42 &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is X86ᴛ1 other && Equals(other);
         
@@ -150,7 +150,7 @@ public static partial class cpu_package
             HasSSSE3,
             HasSSE41,
             HasSSE42,
-            _);
+            __);
         
         public static bool operator ==(X86ᴛ1 left, X86ᴛ1 right) => left.Equals(right);
         
@@ -190,7 +190,7 @@ public static partial class cpu_package
             HasSSSE3.ToString(),
             HasSSE41.ToString(),
             HasSSE42.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

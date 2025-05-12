@@ -40,19 +40,17 @@ public static ж<ΔRat> NewRat(int64 a, int64 b) {
     var bits = math.Float64bits(f);
     var mantissa = (uint64)(bits & (1 << (int)(52) - 1));
     nint exp = ((nint)((uint64)((bits >> (int)(52)) & expMask)));
-    switch (exp) {
-    case expMask: {
+    var exprᴛ1 = exp;
+    if (exprᴛ1 == expMask) {
         return default!;
     }
-    case 0: {
+    if (exprᴛ1 is 0) {
         exp -= 1022;
-        break;
     }
-    default: {
+    else { /* default: */
         mantissa |= (uint64)(1 << (int)(52));
         exp -= 1023;
-        break;
-    }}
+    }
 
     // non-finite
     // denormal
@@ -88,7 +86,8 @@ internal static (float32 f, bool exact) quotToFloat32(nat a, nat b) {
     static readonly UntypedInt Msize2 = /* Msize1 + 1 */ 25;
     static readonly UntypedInt Esize = /* Fsize - Msize1 */ 8;
     static readonly UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 127;
-    static readonly UntypedInt Emin = /* 1 - Ebias */ -126;
+    GoUntyped Emin = /* 1 - Ebias */
+            GoUntyped.Parse("-126");
     static readonly UntypedInt Emax = /* Ebias */ 127;
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
@@ -187,7 +186,8 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
     static readonly UntypedInt Msize2 = /* Msize1 + 1 */ 54;
     static readonly UntypedInt Esize = /* Fsize - Msize1 */ 11;
     static readonly UntypedInt Ebias = /* 1<<(Esize-1) - 1 */ 1023;
-    static readonly UntypedInt Emin = /* 1 - Ebias */ -1022;
+    GoUntyped Emin = /* 1 - Ebias */
+            GoUntyped.Parse("-1022");
     static readonly UntypedInt Emax = /* Ebias */ 1023;
     // TODO(adonovan): specialize common degenerate cases: 1.0, integers.
     nint alen = a.bitLen();
@@ -459,7 +459,7 @@ internal static (float64 f, bool exact) quotToFloat64(nat a, nat b) {
         z.a.neg = false;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0) {
+    if (fallthrough || !matchᴛ1 && len(z.b.abs) is 0)) {
         z.b.abs = z.b.abs.setWord(1);
     }
     else { /* default: */

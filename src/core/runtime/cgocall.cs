@@ -146,7 +146,7 @@ internal static int32 cgocall(@unsafe.Pointer fn, @unsafe.Pointer arg) {
     var mp = getg().val.m;
     (~mp).ncgocall++;
     // Reset traceback.
-    (~mp).cgoCallers[0] = 0;
+    (~mp).cgoCallers.val[0] = 0;
     // Announce we are entering a system call
     // so that the scheduler knows to create another
     // M to run goroutines while we are in the

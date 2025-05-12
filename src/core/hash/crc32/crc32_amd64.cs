@@ -63,8 +63,8 @@ internal static void archInitCastagnoli() {
     for (nint b = 0; b < 4; b++) {
         for (nint i = 0; i < 256; i++) {
             var val = ((uint32)i) << (int)(((uint32)(b * 8)));
-            castagnoliSSE42TableK1[b][i] = castagnoliSSE42(val, tmp[..(int)(castagnoliK1)]);
-            castagnoliSSE42TableK2[b][i] = castagnoliSSE42(val, tmp[..]);
+            castagnoliSSE42TableK1.val[b][i] = castagnoliSSE42(val, tmp[..(int)(castagnoliK1)]);
+            castagnoliSSE42TableK2.val[b][i] = castagnoliSSE42(val, tmp[..]);
         }
     }
 }
@@ -139,7 +139,7 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     //
     // We can compute tables corresponding to the four terms for all 8-bit
     // values.
-    crc = ^crc;
+    crc = ~crc;
     // If a buffer is long enough to use the optimization, process the first few
     // bytes to align the buffer to an 8 byte boundary (if necessary).
     if (len(p) >= castagnoliK1 * 3) {
@@ -178,7 +178,7 @@ internal static uint32 archUpdateCastagnoli(uint32 crc, slice<byte> p) {
     }
     // Use the simple implementation for what's left.
     crc = castagnoliSSE42(crc, p);
-    return ^crc;
+    return ~crc;
 }
 
 internal static bool archAvailableIEEE() {
@@ -202,7 +202,7 @@ internal static uint32 archUpdateIEEE(uint32 crc, slice<byte> p) {
     if (len(p) >= 64) {
         nint left = (nint)(len(p) & 15);
         nint @do = len(p) - left;
-        crc = ^ieeeCLMUL(^crc, p[..(int)(@do)]);
+        crc = ~ieeeCLMUL(~crc, p[..(int)(@do)]);
         p = p[(int)(@do)..];
     }
     if (len(p) == 0) {

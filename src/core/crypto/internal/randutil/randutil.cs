@@ -12,7 +12,7 @@ using sync = sync_package;
 partial class randutil_package {
 
 internal static sync.Once closedChanOnce;
-internal static channel<struct{}> closedChan;
+internal static channel<EmptyStruct> closedChan;
 
 // MaybeReadByte reads a single byte from r with ~50% probability. This is used
 // to ensure that callers do not depend on non-guaranteed behaviour, e.g.
@@ -24,7 +24,7 @@ public static void MaybeReadByte(io.Reader r) {
     closedChanOnce.Do(
     var closedChanʗ2 = closedChan;
     () => {
-        closedChanʗ2 = new channel<struct{}>(1);
+        closedChanʗ2 = new channel<EmptyStruct>(1);
         close(closedChanʗ2);
     });
     switch (select(ᐸꟷ(closedChan, ꓸꓸꓸ), ᐸꟷ(closedChan, ꓸꓸꓸ))) {

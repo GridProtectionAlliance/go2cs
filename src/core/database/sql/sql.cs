@@ -192,7 +192,7 @@ public static @string String(this IsolationLevel i) {
 
 }
 
-internal static IsolationLevel _ = LevelDefault;
+internal static IsolationLevel _ᴛ1ʗ = LevelDefault;
 
 // TxOptions holds the transaction options to be used in [DB.BeginTx].
 [GoType] partial struct TxOptions {
@@ -541,7 +541,7 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
     // maybeOpenNewConnections sends on the chan (one send per needed connection)
     // It is closed during db.Close(). The close tells the connectionOpener
     // goroutine to exit.
-    internal channel<struct{}> openerCh;
+    internal channel<EmptyStruct> openerCh;
     internal bool closed;
     internal sql.depSet dep;
     internal map<ж<driverConn>, @string> lastPut; // stacktrace of last conn's put; debug only
@@ -549,7 +549,7 @@ public static error ErrNoRows = errors.New("sql: no rows in result set"u8);
     internal nint maxOpen;                   // <= 0 means unlimited
     internal time_package.Duration maxLifetime;          // maximum amount of time a connection may be reused
     internal time_package.Duration maxIdleTime;          // maximum amount of time a connection may be idle before being closed
-    internal channel<struct{}> cleanerCh;
+    internal channel<EmptyStruct> cleanerCh;
     internal int64 waitCount; // Total number of connections waited for.
     internal int64 maxIdleClosed; // Total number of connections closed due to idle count.
     internal int64 maxIdleTimeClosed; // Total number of connections closed due to idle time.
@@ -844,7 +844,7 @@ public static ж<DB> OpenDB(driver.Connector c) {
     (ctx, cancel) = context.WithCancel(context.Background());
     var db = Ꮡ(new DB(
         connector: c,
-        openerCh: new channel<struct{}>(connectionRequestQueueSize),
+        openerCh: new channel<EmptyStruct>(connectionRequestQueueSize),
         lastPut: new map<ж<driverConn>, @string>(),
         stop: cancel
     ));
@@ -1116,7 +1116,7 @@ internal static readonly UntypedInt defaultMaxIdleConns = 2;
 // startCleanerLocked starts connectionCleaner if needed.
 [GoRecv] internal static void startCleanerLocked(this ref DB db) {
     if ((db.maxLifetime > 0 || db.maxIdleTime > 0) && db.numOpen > 0 && db.cleanerCh == default!) {
-        db.cleanerCh = new channel<struct{}>(1);
+        db.cleanerCh = new channel<EmptyStruct>(1);
         goǃ(db.connectionCleaner, db.shortestIdleTimeLocked());
     }
 }
@@ -2694,8 +2694,8 @@ internal static Action rollbackHook;
     context.Context txCtx();
 }
 
-internal static stmtConnGrabber _ = Ꮡ(new Tx(nil));
-internal static stmtConnGrabber _ = Ꮡ(new ΔConn(nil));
+internal static stmtConnGrabber _ᴛ2ʗ = Ꮡ(new Tx(nil));
+internal static stmtConnGrabber _ᴛ3ʗ = Ꮡ(new ΔConn(nil));
 
 // Stmt is a prepared statement.
 // A Stmt is safe for concurrent use by multiple goroutines.
@@ -3107,7 +3107,7 @@ internal static bool bypassRowsAwaitDone = false;
 // is also provided in txctx, to ensure Rows is closed if the Tx is closed.
 // The closectx is closed by an explicit call to rs.Close.
 [GoRecv] internal static void awaitDone(this ref Rows rs, context.Context ctx, context.Context txctx, context.Context closectx) {
-    /*<-*/channel<struct{}> txctxDone = default!;
+    /*<-*/channel<EmptyStruct> txctxDone = default!;
     if (txctx != default!) {
         txctxDone = txctx.Done();
     }

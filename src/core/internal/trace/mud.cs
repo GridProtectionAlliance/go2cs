@@ -74,7 +74,7 @@ internal static readonly UntypedInt mudDegree = 1024;
         (lb, lf) = (mudDegree - 1, 1);
     }
     if (l == r){
-        h[lb] += area;
+        h.val[lb] += area;
     } else {
         var (rbFloat, rf) = math.Modf(r * mudDegree);
         nint rb = ((nint)rbFloat);
@@ -82,13 +82,13 @@ internal static readonly UntypedInt mudDegree = 1024;
             (rb, rf) = (mudDegree - 1, 1);
         }
         if (lb == rb){
-            h[lb] += area;
+            h.val[lb] += area;
         } else {
             var perBucket = area / (r - l) / mudDegree;
-            h[lb] += perBucket * (1 - lf);
-            h[rb] += perBucket * rf;
+            h.val[lb] += perBucket * (1 - lf);
+            h.val[rb] += perBucket * rf;
             for (nint i = lb + 1; i < rb; i++) {
-                h[i] += perBucket;
+                h.val[i] += perBucket;
             }
         }
     }

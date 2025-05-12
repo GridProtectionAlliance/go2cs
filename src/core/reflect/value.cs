@@ -505,7 +505,7 @@ internal static slice<ΔValue> call(this ΔValue v, @string op, slice<ΔValue> @
                 storeRcvr(rcvr, ((@unsafe.Pointer)(ᏑregArgs.Ptrs.at<@unsafe.Pointer>(st.ireg))));
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg)) { matchᴛ1 = true;
                 storeRcvr(rcvr, ((@unsafe.Pointer)(ᏑregArgs.Ints.at<uintptr>(st.ireg))));
             }
             else if (exprᴛ1 == abiStepFloatReg) {
@@ -1005,7 +1005,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
  ((@unsafe.Pointer)(ᏑmethodRegs.Ptrs.at<@unsafe.Pointer>(st.ireg))));
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == abiStepIntReg)) { matchᴛ1 = true;
             storeRcvr(rcvr, ((@unsafe.Pointer)(ᏑmethodRegs.Ints.at<uintptr>(st.ireg))));
         }
         else if (exprᴛ1 == abiStepFloatReg) {
@@ -1058,7 +1058,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                         methodRegs.Ptrs[mStepΔ1.ireg] = ~(ж<@unsafe.Pointer>)(uintptr)(from);
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ2 && exprᴛ2 == abiStepIntReg) { matchᴛ2 = true;
+                    if (fallthrough || !matchᴛ2 && exprᴛ2 == abiStepIntReg)) { matchᴛ2 = true;
                         intToReg(ᏑmethodRegs, // Do the pointer copy directly so we get a write barrier.
  // We need to make sure this ends up in Ints, too.
  mStepΔ1.ireg, mStepΔ1.size, from);
@@ -1116,7 +1116,7 @@ internal static void callMethod(ж<methodValue> Ꮡctxt, @unsafe.Pointer frame, 
                 methodRegs.Ptrs[mStep.ireg] = (~valueRegs).Ptrs[vStep.ireg];
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ3 && exprᴛ4 == abiStepIntReg) { matchᴛ3 = true;
+            if (fallthrough || !matchᴛ3 && exprᴛ4 == abiStepIntReg)) { matchᴛ3 = true;
                 methodRegs.Ints[mStep.ireg] = (~valueRegs).Ints[vStep.ireg];
             }
             else if (exprᴛ4 == abiStepFloatReg) {
@@ -3209,7 +3209,7 @@ internal static partial (nint chosen, bool recvOK) rselect(slice<runtimeSelect> 
 [GoType("num:nint")] partial struct SelectDir;
 
 // NOTE: These values must match ../runtime/select.go:/selectDir.
-internal static readonly SelectDir _ = /* iota */ 0;
+internal static readonly SelectDir _ᴛ1ʗ = /* iota */ 0;
 public static readonly SelectDir SelectSend = 1; // case Chan <- Send
 public static readonly SelectDir SelectRecv = 2; // case <-Chan:
 public static readonly SelectDir SelectDefault = 3; // default

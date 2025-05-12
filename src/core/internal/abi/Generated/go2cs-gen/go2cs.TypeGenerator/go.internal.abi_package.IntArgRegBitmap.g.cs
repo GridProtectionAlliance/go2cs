@@ -37,6 +37,10 @@ public static partial class abi_package
         }
             
         public ref uint8 this[nint index] => ref val[index];
+    
+        public ref uint8 this[int index] => ref val[(nint)index];
+    
+        public ref uint8 this[ulong index] => ref val[(nint)index];
         
         public Span<uint8> ꓸꓸꓸ => ToSpan();
         

@@ -390,8 +390,8 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
     var ipAddressesʗ1 = ipAddresses;
     var urisʗ1 = uris;
     (nint tag, slice<byte> data) => {
-        switch (tag) {
-        case nameTypeEmail: {
+        var exprᴛ1 = tag;
+        if (exprᴛ1 == nameTypeEmail) {
             @string email = ((@string)data);
             {
                 var errΔ5 = isIA5String(email); if (errΔ5 != default!) {
@@ -399,9 +399,8 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                 }
             }
             emailAddressesʗ1 = append(emailAddressesʗ1, email);
-            break;
         }
-        case nameTypeDNS: {
+        else if (exprᴛ1 == nameTypeDNS) {
             @string name = ((@string)data);
             {
                 var errΔ6 = isIA5String(name); if (errΔ6 != default!) {
@@ -409,9 +408,8 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                 }
             }
             dnsNamesʗ1 = append(dnsNamesʗ1, ((@string)name));
-            break;
         }
-        case nameTypeURI: {
+        else if (exprᴛ1 == nameTypeURI) {
             @string uriStr = ((@string)data);
             {
                 var errΔ7 = isIA5String(uriStr); if (errΔ7 != default!) {
@@ -430,9 +428,8 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                 }
             }
             urisʗ1 = append(urisʗ1, uri);
-            break;
         }
-        case nameTypeIP: {
+        else if (exprᴛ1 == nameTypeIP) {
             switch (len(data)) {
             case net.IPv4len or net.IPv6len: {
                 ipAddressesʗ1 = append(ipAddressesʗ1, data);
@@ -442,8 +439,7 @@ internal static (slice<@string> dnsNames, slice<@string> emailAddresses, slice<n
                 return errors.New("x509: cannot parse IP address of length "u8 + strconv.Itoa(len(data)));
             }}
 
-            break;
-        }}
+        }
 
         return default!;
     });

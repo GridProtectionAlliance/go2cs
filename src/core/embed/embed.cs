@@ -201,8 +201,8 @@ internal static (@string dir, @string elem, bool isDir) split(@string name) {
     return (name[..(int)(i)], name[(int)(i + 1)..], isDir);
 }
 
-internal static fs.ReadDirFS _ = new FS(nil);
-internal static fs.ReadFileFS _ = new FS(nil);
+internal static fs.ReadDirFS _ᴛ1ʗ = new FS(nil);
+internal static fs.ReadFileFS _ᴛ2ʗ = new FS(nil);
 
 // A file is a single file in the FS.
 // It implements fs.FileInfo and fs.DirEntry.
@@ -214,8 +214,8 @@ internal static fs.ReadFileFS _ = new FS(nil);
     internal array<byte> hash = new(16); // truncated SHA256 hash
 }
 
-internal static fs.FileInfo _ = (ж<file>)(default!);
-internal static fs.DirEntry _ = (ж<file>)(default!);
+internal static fs.FileInfo _ᴛ3ʗ = (ж<file>)(default!);
+internal static fs.DirEntry _ᴛ4ʗ = (ж<file>)(default!);
 
 [GoRecv] internal static @string Name(this ref file f) {
     var (_, elem, _) = split(f.name);
@@ -365,8 +365,8 @@ public static (slice<byte>, error) ReadFile(this FS f, @string name) {
     internal int64 offset; // current read offset
 }
 
-internal static io.Seeker _ = (ж<openFile>)(default!);
-internal static io.ReaderAt _ = (ж<openFile>)(default!);
+internal static io.Seeker _ᴛ5ʗ = (ж<openFile>)(default!);
+internal static io.ReaderAt _ᴛ6ʗ = (ж<openFile>)(default!);
 
 [GoRecv] internal static error Close(this ref openFile f) {
     return default!;

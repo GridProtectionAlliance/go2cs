@@ -424,7 +424,7 @@ internal static error p521CheckOnCurve(ж<fiat.P521Element> Ꮡx, ж<fiat.P521El
     ref var i = ref heap<uint8>(out var Ꮡi);
     for (i = ((uint8)1); i < 16; i++) {
         nint cond = subtle.ConstantTimeByteEq(i, n);
-        p.Select(table[i - 1], Ꮡp, cond);
+        p.Select(table.val[i - 1], Ꮡp, cond);
     }
 }
 
@@ -486,10 +486,10 @@ internal static sync.Once p521GeneratorTableOnce;
         var @base = NewP521Point().SetGenerator();
         ref var i = ref heap<nint>(out var Ꮡi);
         for (i = 0; i < p521ElementLength * 2; i++) {
-            p521GeneratorTable[i][0] = NewP521Point().Set(@base);
+            p521GeneratorTable.val[i][0] = NewP521Point().Set(@base);
             ref var j = ref heap<nint>(out var Ꮡj);
             for (j = 1; j < 15; j++) {
-                p521GeneratorTable[i][j] = NewP521Point().Add(p521GeneratorTable[i][j - 1], @base);
+                p521GeneratorTable.val[i][j] = NewP521Point().Add(p521GeneratorTable.val[i][j - 1], @base);
             }
             @base.Double(@base);
             @base.Double(@base);
@@ -518,11 +518,11 @@ internal static sync.Once p521GeneratorTableOnce;
     nint tableIndex = len(tables) - 1;
     foreach (var (_, @byte) in scalar) {
         var windowValue = @byte >> (int)(4);
-        tables[tableIndex].Select(t, windowValue);
+        tables.val[tableIndex].Select(t, windowValue);
         p.Add(p, t);
         tableIndex--;
         windowValue = (byte)(@byte & 15);
-        tables[tableIndex].Select(t, windowValue);
+        tables.val[tableIndex].Select(t, windowValue);
         p.Add(p, t);
         tableIndex--;
     }

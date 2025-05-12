@@ -20,7 +20,7 @@ partial class netip_package {
 // mask6 returns a uint128 bitmask with the topmost n bits of a
 // 128-bit number.
 internal static uint128 mask6(nint n) {
-    return new uint128(^(^((uint64)0) >> (int)(n)), ^((uint64)0) << (int)((128 - n)));
+    return new uint128(~(~((uint64)0) >> (int)(n)), ~((uint64)0) << (int)((128 - n)));
 }
 
 // isZero reports whether u == 0.
@@ -49,7 +49,7 @@ internal static uint128 or(this uint128 u, uint128 m) {
 
 // not returns the bitwise NOT of u.
 internal static uint128 not(this uint128 u) {
-    return new uint128(^u.hi, ^u.lo);
+    return new uint128(~u.hi, ~u.lo);
 }
 
 // subOne returns u - 1.

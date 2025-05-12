@@ -64,7 +64,7 @@ public static readonly @event.Type EvExperimentalBatch = 49; // start of extra d
 public static readonly @event.Experiment AllocFree = /* 1 + iota */ 1;
 
 // Experimental events.
-internal static readonly @event.Type _ = /* 127 + iota */ 127;
+internal static readonly @event.Type _ᴛ1ʗ = /* 127 + iota */ 127;
 // Experimental events for AllocFree.
 
 public static readonly @event.Type EvSpan = 128; // heap span exists [timestamp, id, npages, type/class]

@@ -112,16 +112,16 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     // special-case nil
     if (isTypes2){
         if (x.mode == nilvalue) {
-            switch (x.typ) {
-            case default! or Typ[Invalid]: {
+            var exprᴛ1 = x.typ;
+            if (exprᴛ1 == default! || exprᴛ1 == Typ[Invalid]) {
                 return "nil (with invalid type)"u8;
             }
-            case Typ[UntypedNil]: {
+            if (exprᴛ1 is Typ[UntypedNil]) {
                 return "nil"u8;
             }
-            default: {
+            { /* default: */
                 return fmt.Sprintf("nil (of type %s)"u8, TypeString(x.typ, qf));
-            }}
+            }
 
         }
     } else {
@@ -135,14 +135,14 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     if (x.expr != default!){
         expr = ExprString(x.expr);
     } else {
-        var exprᴛ1 = x.mode;
-        if (exprᴛ1 == Δbuiltin) {
+        var exprᴛ2 = x.mode;
+        if (exprᴛ2 == Δbuiltin) {
             expr = predeclaredFuncs[x.id].name;
         }
-        else if (exprᴛ1 == typexpr) {
+        else if (exprᴛ2 == typexpr) {
             expr = TypeString(x.typ, qf);
         }
-        else if (exprᴛ1 == constant_) {
+        else if (exprᴛ2 == constant_) {
             expr = x.val.String();
         }
 
@@ -154,8 +154,8 @@ internal static @string operandString(ж<operand> Ꮡx, Qualifier qf) {
     }
     // <untyped kind>
     var hasType = false;
-    var exprᴛ2 = x.mode;
-    if (exprᴛ2 == invalid || exprᴛ2 == novalue || exprᴛ2 == Δbuiltin || exprᴛ2 == typexpr) {
+    var exprᴛ3 = x.mode;
+    if (exprᴛ3 == invalid || exprᴛ3 == novalue || exprᴛ3 == Δbuiltin || exprᴛ3 == typexpr) {
     }
     else { /* default: */
         if (x.typ != default!) {

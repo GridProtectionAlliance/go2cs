@@ -139,8 +139,10 @@ public static readonly UntypedInt SSUBTYP_DWMAC = /* 0xB0000 */ 720896; // DWARF
 
 public static readonly UntypedInt SYMESZ = 18;
 
-public static readonly UntypedInt N_DEBUG = -2;
-public static readonly UntypedInt N_ABS = -1;
+public static readonly GoUntyped N_DEBUG = /* -2 */
+    GoUntyped.Parse("-2");
+public static readonly GoUntyped N_ABS = /* -1 */
+    GoUntyped.Parse("-1");
 public static readonly UntypedInt N_UNDEF = 0;
 public static readonly UntypedInt SYM_V_INTERNAL = /* 0x1000 */ 4096;
 public static readonly UntypedInt SYM_V_HIDDEN = /* 0x2000 */ 8192;

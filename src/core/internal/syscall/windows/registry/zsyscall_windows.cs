@@ -7,7 +7,7 @@ using @unsafe = unsafe_package;
 
 partial class registry_package {
 
-internal static @unsafe.Pointer _;
+internal static @unsafe.Pointer _ᴛ1ʗ;
 
 // Do the interface allocations only once for common
 // Errno values.

@@ -398,29 +398,24 @@ partial class dwarf_package {
         }
 
         // .debug_line.dwo sections not yet supported.
-        switch (lf.lnct) {
-        case lnctPath: {
+        var exprᴛ2 = lf.lnct;
+        if (exprᴛ2 == lnctPath) {
             path = str;
-            break;
         }
-        case lnctDirectoryIndex: {
+        else if (exprᴛ2 == lnctDirectoryIndex) {
             if (val >= ((uint64)len(r.directories))) {
                 return ("", 0, 0, new DecodeError("line", r.buf.off, "directory index out of range"));
             }
             dir = r.directories[val];
-            break;
         }
-        case lnctTimestamp: {
+        else if (exprᴛ2 == lnctTimestamp) {
             mtime = val;
-            break;
         }
-        case lnctSize: {
+        else if (exprᴛ2 == lnctSize) {
             size = val;
-            break;
         }
-        case lnctMD5: {
-            break;
-        }}
+        else if (exprᴛ2 == lnctMD5) {
+        }
 
     }
     // Ignored.
@@ -541,19 +536,18 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
         r.state.Line += lineDelta;
         goto emit;
     }
-    switch (opcode) {
-    case 0: {
+    var exprᴛ1 = opcode;
+    if (exprᴛ1 is 0) {
         var length = ((Offset)r.buf.@uint());
         var startOff = r.buf.off;
         var opcodeΔ2 = r.buf.uint8();
-        switch (opcodeΔ2) {
-        case lneEndSequence: {
+        var exprᴛ2 = opcodeΔ2;
+        if (exprᴛ2 == lneEndSequence) {
             r.state.EndSequence = true;
             entry = r.state;
             r.resetState();
-            break;
         }
-        case lneSetAddress: {
+        else if (exprᴛ2 == lneSetAddress) {
             switch (r.addrsize) {
             case 1: {
                 r.state.Address = ((uint64)r.buf.uint8());
@@ -576,9 +570,8 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
                 break;
             }}
 
-            break;
         }
-        case lneDefineFile: {
+        else if (exprᴛ2 == lneDefineFile) {
             {
                 var (done, err) = r.readFileEntry(); if (err != default!){
                     // Extended opcode [DWARF2 6.2.5.3]
@@ -591,70 +584,55 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
                 }
             }
             r.updateFile();
-            break;
         }
-        case lneSetDiscriminator: {
+        else if (exprᴛ2 == lneSetDiscriminator) {
             r.state.Discriminator = ((nint)r.buf.@uint());
-            break;
-        }}
+        }
 
         r.buf.skip(((nint)(startOff + length - r.buf.off)));
         if (opcodeΔ2 == lneEndSequence) {
             // [DWARF4 6.2.5.3]
             return true;
         }
-        break;
     }
-    case lnsCopy: {
+    if (exprᴛ1 == lnsCopy) {
         goto emit;
-        break;
     }
-    case lnsAdvancePC: {
+    else if (exprᴛ1 == lnsAdvancePC) {
         r.advancePC(((nint)r.buf.@uint()));
-        break;
     }
-    case lnsAdvanceLine: {
+    else if (exprᴛ1 == lnsAdvanceLine) {
         r.state.Line += ((nint)r.buf.@int());
-        break;
     }
-    case lnsSetFile: {
+    else if (exprᴛ1 == lnsSetFile) {
         r.fileIndex = ((nint)r.buf.@uint());
         r.updateFile();
-        break;
     }
-    case lnsSetColumn: {
+    else if (exprᴛ1 == lnsSetColumn) {
         r.state.Column = ((nint)r.buf.@uint());
-        break;
     }
-    case lnsNegateStmt: {
+    else if (exprᴛ1 == lnsNegateStmt) {
         r.state.IsStmt = !r.state.IsStmt;
-        break;
     }
-    case lnsSetBasicBlock: {
+    else if (exprᴛ1 == lnsSetBasicBlock) {
         r.state.BasicBlock = true;
-        break;
     }
-    case lnsConstAddPC: {
+    else if (exprᴛ1 == lnsConstAddPC) {
         r.advancePC((255 - r.opcodeBase) / r.lineRange);
-        break;
     }
-    case lnsFixedAdvancePC: {
+    else if (exprᴛ1 == lnsFixedAdvancePC) {
         r.state.Address += ((uint64)r.buf.uint16());
-        break;
     }
-    case lnsSetPrologueEnd: {
+    else if (exprᴛ1 == lnsSetPrologueEnd) {
         r.state.PrologueEnd = true;
-        break;
     }
-    case lnsSetEpilogueBegin: {
+    else if (exprᴛ1 == lnsSetEpilogueBegin) {
         r.state.EpilogueBegin = true;
-        break;
     }
-    case lnsSetISA: {
+    else if (exprᴛ1 == lnsSetISA) {
         r.state.ISA = ((nint)r.buf.@uint());
-        break;
     }
-    default: {
+    else { /* default: */
         for (nint i = 0; i < r.opcodeLengths[opcode]; i++) {
             // Standard opcodes [DWARF2 6.2.5.2]
             // DWARF3 standard opcodes [DWARF3 6.2.5.2]
@@ -662,8 +640,7 @@ internal static map<nint, nint> knownOpcodeLengths = new map<nint, nint>{
             // arguments that the prologue says this opcode has.
             r.buf.@uint();
         }
-        break;
-    }}
+    }
 
     return false;
 emit:

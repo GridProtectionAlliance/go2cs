@@ -26,7 +26,8 @@ partial class base32_package {
 }
 
 public const rune StdPadding = /* '=' */ 61; // Standard padding character
-public const rune NoPadding = -1;  // No padding
+public static readonly GoUntyped NoPadding = /* -1 */            // No padding
+    GoUntyped.Parse("-1");
 
 internal static readonly @string decodeMapInitialize = "\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff\xff";
 internal static readonly UntypedInt invalidIndex = /* '\xff' */ 255;
@@ -55,7 +56,7 @@ public static ж<Encoding> NewEncoding(@string encoder) {
             throw panic("encoding alphabet contains newline character");
             break;
         }
-        case {} when (~e).decodeMap[encoder[i]] is != invalidIndex: {
+        case {} when (~e).decodeMap[encoder[i]] != invalidIndex: {
             throw panic("encoding alphabet includes duplicate symbols");
             break;
         }}
@@ -146,18 +147,18 @@ public static ж<Encoding> WithPadding(this Encoding enc, rune padding) {
         dst[di + 5] = enc.encode[(uint32)(val >> (int)(2) & 31)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3)) { matchᴛ1 = true;
         val |= (uint32)(((uint32)src[si + 2]) << (int)(8));
         dst[di + 4] = enc.encode[(uint32)(val >> (int)(7) & 31)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) {
         val |= (uint32)(((uint32)src[si + 1]) << (int)(16));
         dst[di + 3] = enc.encode[(uint32)(val >> (int)(12) & 31)];
         dst[di + 2] = enc.encode[(uint32)(val >> (int)(17) & 31)];
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1)) { matchᴛ1 = true;
         val |= (uint32)(((uint32)src[si + 0]) << (int)(24));
         dst[di + 1] = enc.encode[(uint32)(val >> (int)(22) & 31)];
         dst[di + 0] = enc.encode[(uint32)(val >> (int)(27) & 31)];
@@ -356,22 +357,22 @@ public static @string Error(this CorruptInputError e) {
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 7) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 7)) { matchᴛ1 = true;
             dst[dsti + 3] = (byte)((byte)(dbuf[4] << (int)(7) | dbuf[5] << (int)(2)) | dbuf[6] >> (int)(3));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5)) { matchᴛ1 = true;
             dst[dsti + 2] = (byte)(dbuf[3] << (int)(4) | dbuf[4] >> (int)(1));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4)) {
             dst[dsti + 1] = (byte)((byte)(dbuf[1] << (int)(6) | dbuf[2] << (int)(1)) | dbuf[3] >> (int)(4));
             n++;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) { matchᴛ1 = true;
             dst[dsti + 0] = (byte)(dbuf[0] << (int)(3) | dbuf[1] >> (int)(2));
             n++;
         }

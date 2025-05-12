@@ -744,7 +744,7 @@ public static ж<Func> FuncForPC(uintptr pc) {
     var sf = u.srcFunc(uf);
     var (file, line) = u.fileLine(uf);
     var fi = Ꮡ(new funcinl(
-        ones: ^((uint32)0),
+        ones: ~((uint32)0),
         entry: f.entry(), // entry of the real (the outermost) function.
 
         name: sf.name(),
@@ -842,7 +842,7 @@ internal static ж<Func> _Func(this ΔfuncInfo f) {
 
 // isInlined reports whether f should be re-interpreted as a *funcinl.
 [GoRecv] internal static bool isInlined(this ref _func f) {
-    return f.entryOff == ^((uint32)0);
+    return f.entryOff == ~((uint32)0);
 }
 
 // see comment for funcinl.ones
@@ -1048,8 +1048,8 @@ internal static (int32, uintptr) pcvalue(ΔfuncInfo f, uint32 off, uintptr targe
                 if ((~cache).inUse == 1) {
                     var e = Ꮡ(~cache).entries.at<array<pcvalueCacheEnt>>(ck);
                     var ci = cheaprandn(((uint32)len((~cache).entries[ck])));
-                    e[ci] = e[0];
-                    e[0] = new pcvalueCacheEnt(
+                    e.val[ci] = e.val[0];
+                    e.val[0] = new pcvalueCacheEnt(
                         targetpc: targetpc,
                         off: off,
                         val: val,
@@ -1115,7 +1115,7 @@ internal static @string funcfile(ΔfuncInfo f, int32 fileno) {
     // Make sure the cu index and file offset are valid
     {
         ref var fileoff = ref heap<uint32>(out var Ꮡfileoff);
-        fileoff = (~datap).cutab[f.cuOffset + ((uint32)fileno)]; if (fileoff != ^((uint32)0)) {
+        fileoff = (~datap).cutab[f.cuOffset + ((uint32)fileno)]; if (fileoff != ~((uint32)0)) {
             return gostringnocopy(Ꮡ((~datap).filetab, fileoff));
         }
     }
@@ -1236,7 +1236,7 @@ internal static @unsafe.Pointer funcdata(ΔfuncInfo f, uint8 i) {
     // Return off == ^uint32(0) ? 0 : f.datap.gofunc + uintptr(off), but without branches.
     // The compiler calculates mask on most architectures using conditional assignment.
     uintptr mask = default!;
-    if (off == ^((uint32)0)) {
+    if (off == ~((uint32)0)) {
         mask = 1;
     }
     mask--;

@@ -31,7 +31,7 @@ public static partial class cpu_package
         internal static ref bool ᏑIsPOWER8(ref PPC64ᴛ1 instance) => ref instance.IsPOWER8;
         internal static ref bool ᏑIsPOWER9(ref PPC64ᴛ1 instance) => ref instance.IsPOWER9;
         internal static ref bool ᏑIsPOWER10(ref PPC64ᴛ1 instance) => ref instance.IsPOWER10;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref PPC64ᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref PPC64ᴛ1 instance) => ref instance.__;
         
         // Constructors
         public PPC64ᴛ1(NilType _)
@@ -42,10 +42,10 @@ public static partial class cpu_package
             this.IsPOWER8 = default!;
             this.IsPOWER9 = default!;
             this.IsPOWER10 = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public PPC64ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasDARN = default!, bool HasSCV = default!, bool IsPOWER8 = default!, bool IsPOWER9 = default!, bool IsPOWER10 = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public PPC64ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasDARN = default!, bool HasSCV = default!, bool IsPOWER8 = default!, bool IsPOWER9 = default!, bool IsPOWER10 = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasDARN = HasDARN;
@@ -53,7 +53,7 @@ public static partial class cpu_package
             this.IsPOWER8 = IsPOWER8;
             this.IsPOWER9 = IsPOWER9;
             this.IsPOWER10 = IsPOWER10;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'PPC64ᴛ1' instances
@@ -64,7 +64,7 @@ public static partial class cpu_package
             IsPOWER8 == other.IsPOWER8 &&
             IsPOWER9 == other.IsPOWER9 &&
             IsPOWER10 == other.IsPOWER10 &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is PPC64ᴛ1 other && Equals(other);
         
@@ -75,7 +75,7 @@ public static partial class cpu_package
             IsPOWER8,
             IsPOWER9,
             IsPOWER10,
-            _);
+            __);
         
         public static bool operator ==(PPC64ᴛ1 left, PPC64ᴛ1 right) => left.Equals(right);
         
@@ -100,7 +100,7 @@ public static partial class cpu_package
             IsPOWER8.ToString(),
             IsPOWER9.ToString(),
             IsPOWER10.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

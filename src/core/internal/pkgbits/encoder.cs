@@ -82,25 +82,25 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     writeUint32(flags);
     // Write elemEndsEnds.
     uint32 sum = default!;
-    /* for _, elems := range &pw.elems {
-	sum += uint32(len(elems))
-	writeUint32(sum)
-} */
+    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
+        sum += ((uint32)len(elems));
+        writeUint32(sum);
+    }
     // Write elemEnds.
     sum = 0;
-    /* for _, elems := range &pw.elems {
-	for _, elem := range elems {
-		sum += uint32(len(elem))
-		writeUint32(sum)
-	}
-} */
+    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
+        foreach (var (Δ_, elem) in elems) {
+            sum += ((uint32)len(elem));
+            writeUint32(sum);
+        }
+    }
     // Write elemData.
-    /* for _, elems := range &pw.elems {
-	for _, elem := range elems {
-		_, err := io.WriteString(out, elem)
-		assert(err == nil)
-	}
-} */
+    foreach (var (Δ_, elems) in Ꮡ(pw.elems).val) {
+        foreach (var (Δ_, elem) in elems) {
+            var (Δ_, errΔ1) = io.WriteString(@out, elem);
+            assert(errΔ1 == default!);
+        }
+    }
     // Write fingerprint.
     copy(fingerprint[..], h.Sum(default!));
     var (Δ_, err) = out0.Write(fingerprint[..]);
@@ -202,7 +202,7 @@ public static PkgEncoder NewPkgEncoder(nint syncFrames) {
     // Zig-zag encode.
     var ux = ((uint64)x) << (int)(1);
     if (x < 0) {
-        ux = ^ux;
+        ux = ~ux;
     }
     w.rawUvarint(ux);
 }

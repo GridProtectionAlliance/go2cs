@@ -84,7 +84,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
     // move to the next frame, but that's both more awkward to use in a "for"
     // loop and is harder to implement because we have to do things differently
     // for the first frame.
-    u.initAt(^((uintptr)0), ^((uintptr)0), ^((uintptr)0), Ꮡgp, flags);
+    u.initAt(~((uintptr)0), ~((uintptr)0), ~((uintptr)0), Ꮡgp, flags);
 }
 
 [GoRecv] internal static void initAt(this ref unwinder u, uintptr pc0, uintptr sp0, uintptr lr0, ж<g> Ꮡgp, unwindFlags flags) {
@@ -109,7 +109,7 @@ internal static readonly unwindFlags unwindJumpStack = 8;
             @throw("cannot trace user goroutine on its own stack"u8);
         }
     }
-    if (pc0 == ^((uintptr)0) && sp0 == ^((uintptr)0)) {
+    if (pc0 == ~((uintptr)0) && sp0 == ~((uintptr)0)) {
         // Signal to fetch saved values from gp.
         if (gp.syscallsp != 0){
             pc0 = gp.syscallpc;
@@ -653,7 +653,7 @@ internal static void printArgs(ΔfuncInfo f, @unsafe.Pointer argp, uintptr pc) {
     // register arg spill slot index
 printloop:
     while (ᐧ) {
-        var o = Δp[pi];
+        var o = Δp.val[pi];
         pi++;
         switch (o) {
         case abi.TraceArgsEndSeq: {
@@ -683,7 +683,7 @@ printloop:
         }
         default: {
             printcomma();
-            var sz = Δp[pi];
+            var sz = Δp.val[pi];
             pi++;
             print1(o, sz, slotIdx);
             if (o >= startOffset) {
@@ -1233,7 +1233,7 @@ internal static void tracebackothers(ж<g> Ꮡme) {
     if (curgp != nil && curgp != Ꮡme) {
         print("\n");
         goroutineheader(curgp);
-        traceback(^((uintptr)0), ^((uintptr)0), 0, curgp);
+        traceback(~((uintptr)0), ~((uintptr)0), 0, curgp);
     }
     // We can't call locking forEachG here because this may be during fatal
     // throw/panic, where locking could be out-of-order or a direct
@@ -1254,7 +1254,7 @@ internal static void tracebackothers(ж<g> Ꮡme) {
             print("\tgoroutine running on other thread; stack unavailable\n");
             printcreatedby(gp);
         } else {
-            traceback(^((uintptr)0), ^((uintptr)0), 0, gp);
+            traceback(~((uintptr)0), ~((uintptr)0), 0, gp);
         }
     });
 }
@@ -1555,22 +1555,22 @@ internal static void printCgoTraceback(ж<ΔcgoCallers> Ꮡcallers) {
     ref var callers = ref Ꮡcallers.val;
 
     if (cgoSymbolizer == nil) {
-        /* for _, c := range callers {
-	if c == 0 {
-		break
-	}
-	print("non-Go function at pc=", hex(c), "\n")
-} */
+        foreach (var (_, c) in callers.val) {
+            if (c == 0) {
+                break;
+            }
+            print("non-Go function at pc=", ((Δhex)c), "\n");
+        }
         return;
     }
     var commitFrame = () => (true, false);
     ref var arg = ref heap(new cgoSymbolizerArg(), out var Ꮡarg);
-    /* for _, c := range callers {
-	if c == 0 {
-		break
-	}
-	printOneCgoTraceback(c, commitFrame, &arg)
-} */
+    foreach (var (_, c) in callers.val) {
+        if (c == 0) {
+            break;
+        }
+        printOneCgoTraceback(c, commitFrame, Ꮡarg);
+    }
     arg.pc = 0;
     callCgoSymbolizer(Ꮡarg);
 }

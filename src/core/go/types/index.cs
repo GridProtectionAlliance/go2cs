@@ -310,7 +310,7 @@ partial class types_package {
     foreach (var (i, expr) in new ast.Expr[]{e.Low, e.High, e.Max}.slice()) {
         var xΔ1 = ((int64)(-1));
         switch (ᐧ) {
-        case {} when expr is != default!: {
+        case {} when expr != default!: {
             var max = ((int64)(-1));
             if (length >= 0) {
                 // The "capacity" is only known statically for strings, arrays,

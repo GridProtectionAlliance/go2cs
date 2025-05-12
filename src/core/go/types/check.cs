@@ -344,7 +344,7 @@ public static ж<Checker> NewChecker(ж<Config> Ꮡconf, ж<token.FileSet> Ꮡfs
                 }
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 is name) {
+            if (fallthrough || !matchᴛ1 && exprᴛ1 is name)) {
                 check.files = append(check.files, file);
             }
             else { /* default: */

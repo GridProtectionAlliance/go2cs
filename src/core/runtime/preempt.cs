@@ -135,7 +135,7 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
                 dumpgstatus(Ꮡgp);
                 @throw("invalid g status"u8);
             }
-            else if (exprᴛ1 is _Gdead) { matchᴛ1 = true;
+            else if (exprᴛ1 == _Gdead) { matchᴛ1 = true;
                 return new suspendGState( // Nothing to suspend.
  //
  // preemptStop may need to be cleared, but
@@ -143,9 +143,9 @@ internal static suspendGState suspendG(ж<g> Ꮡgp) {
  // reuse. Instead, goexit0 clears it.
 dead: true);
             }
-            if (exprᴛ1 is _Gcopystack) { matchᴛ1 = true;
+            if (exprᴛ1 == _Gcopystack) { matchᴛ1 = true;
             }
-            if (exprᴛ1 is _Gpreempted) { matchᴛ1 = true;
+            if (exprᴛ1 == _Gpreempted) { matchᴛ1 = true;
                 if (!casGFromPreempted(Ꮡgp, // The stack is being copied. We need to wait
  // until this is done.
  // We (or someone else) suspended the G. Claim
@@ -158,7 +158,7 @@ dead: true);
                 s = _Gwaiting;
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && (exprᴛ1 is _Grunnable or _Gsyscall or _Gwaiting)) {
+            if (fallthrough || !matchᴛ1 && (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting)) {
                 if (!castogscanstatus(Ꮡgp, // We stopped the G, so we have to ready it later.
  // Claim goroutine by setting scan bit.
  // This may race with execution or readying of gp.
@@ -186,7 +186,7 @@ dead: true);
  // suspended and deschedule?
 g: gp, stopped: stopped);
             }
-            if (exprᴛ1 is _Grunning) { matchᴛ1 = true;
+            if (exprᴛ1 == _Grunning) { matchᴛ1 = true;
                 if (gp.preemptStop && gp.preempt && gp.stackguard0 == stackPreempt && asyncM == gp.m && (~asyncM).preemptGen.Load() == asyncGen) {
                     // Optimization: if there is already a pending preemption request
                     // (from the previous loop iteration), don't bother with the atomics.
@@ -256,16 +256,14 @@ internal static void resumeG(suspendGState state) {
     var gp = state.g;
     {
         var s = readgstatus(gp);
-        switch (s) {
-        default: {
+        var exprᴛ1 = s;
+        { /* default: */
             dumpgstatus(gp);
             @throw("unexpected g status"u8);
-            break;
         }
-        case (uint32)(_Grunnable | _Gscan) or (uint32)(_Gwaiting | _Gscan) or (uint32)(_Gsyscall | _Gscan): {
+        else if (exprᴛ1 == (uint32)(_Grunnable | _Gscan) || exprᴛ1 == (uint32)(_Gwaiting | _Gscan) || exprᴛ1 == (uint32)(_Gsyscall | _Gscan)) {
             casfrom_Gscanstatus(gp, s, (uint32)(s & ~_Gscan));
-            break;
-        }}
+        }
     }
 
     if (state.stopped) {
@@ -309,9 +307,9 @@ internal static void asyncPreempt2() {
 
 // asyncPreemptStack is the bytes of stack space required to inject an
 // asyncPreempt call.
-internal static uintptr asyncPreemptStack = ^((uintptr)0);
+internal static uintptr asyncPreemptStack = ~((uintptr)0);
 
-[GoInit] internal static void initΔ7() {
+[GoInit] internal static void initΔ3() {
     var f = findfunc(abi.FuncPCABI0(asyncPreempt));
     var total = funcMaxSPDelta(f);
     f = findfunc(abi.FuncPCABIInternal(asyncPreempt2));

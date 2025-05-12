@@ -574,19 +574,19 @@ internal static (encoder e, error err) makeBody(reflectꓸValue value, fieldPara
 
         }
         if (exprᴛ2 == reflect.ΔString) {
-            switch (@params.stringType) {
-            case TagIA5String: {
+            var exprᴛ3 = @params.stringType;
+            if (exprᴛ3 == TagIA5String) {
                 return makeIA5String(v.String());
             }
-            case TagPrintableString: {
+            if (exprᴛ3 == TagPrintableString) {
                 return makePrintableString(v.String());
             }
-            case TagNumericString: {
+            if (exprᴛ3 == TagNumericString) {
                 return makeNumericString(v.String());
             }
-            default: {
+            { /* default: */
                 return (makeUTF8String(v.String()), default!);
-            }}
+            }
 
         }
     }
@@ -643,8 +643,8 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
     if (@params.stringType != 0 && tag != TagPrintableString) {
         return (default!, new StructuralError("explicit string type given to non-string member"));
     }
-    switch (tag) {
-    case TagPrintableString: {
+    var exprᴛ1 = tag;
+    if (exprᴛ1 == TagPrintableString) {
         if (@params.stringType == 0){
             // This is a string without an explicit string type. We'll use
             // a PrintableString if the character set in the string is
@@ -661,14 +661,12 @@ internal static (encoder e, error err) makeField(reflectꓸValue v, fieldParamet
         } else {
             tag = @params.stringType;
         }
-        break;
     }
-    case TagUTCTime: {
+    else if (exprᴛ1 == TagUTCTime) {
         if (@params.timeType == TagGeneralizedTime || outsideUTCRange(v.Interface()._<time.Time>())) {
             tag = TagGeneralizedTime;
         }
-        break;
-    }}
+    }
 
     if (@params.set) {
         if (tag != TagSequence) {

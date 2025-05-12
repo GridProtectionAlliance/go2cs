@@ -195,8 +195,10 @@ internal static bool appendFlush(ж<reorderBuffer> Ꮡrb) {
 [GoType("num:nint")] partial struct insertErr;
 
 internal static readonly insertErr iSuccess = /* -iota */ 0;
-internal static readonly insertErr iShortDst = -1;
-internal static readonly insertErr iShortSrc = -2;
+internal static readonly GoUntyped iShortDst = /*  */
+    GoUntyped.Parse("-1");
+internal static readonly GoUntyped iShortSrc = /*  */
+    GoUntyped.Parse("-2");
 
 // insertFlush inserts the given rune in the buffer ordered by CCC.
 // If a decomposition with multiple segments are encountered, they leading
@@ -348,16 +350,16 @@ internal static bool isHangul(slice<byte> b) {
     }
     var b1 = b[1];
     switch (ᐧ) {
-    case {} when b0 is hangulBase0: {
+    case {} when b0 == hangulBase0: {
         return b1 >= hangulBase1;
     }
-    case {} when b0 is < hangulEnd0: {
+    case {} when b0 < hangulEnd0: {
         return true;
     }
-    case {} when b0 is > hangulEnd0: {
+    case {} when b0 > hangulEnd0: {
         return false;
     }
-    case {} when b1 is < hangulEnd1: {
+    case {} when b1 < hangulEnd1: {
         return true;
     }}
 
@@ -374,16 +376,16 @@ internal static bool isHangulString(@string b) {
     }
     var b1 = b[1];
     switch (ᐧ) {
-    case {} when b0 is hangulBase0: {
+    case {} when b0 == hangulBase0: {
         return b1 >= hangulBase1;
     }
-    case {} when b0 is < hangulEnd0: {
+    case {} when b0 < hangulEnd0: {
         return true;
     }
-    case {} when b0 is > hangulEnd0: {
+    case {} when b0 > hangulEnd0: {
         return false;
     }
-    case {} when b1 is < hangulEnd1: {
+    case {} when b1 < hangulEnd1: {
         return true;
     }}
 

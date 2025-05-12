@@ -321,7 +321,7 @@ internal static slice<@string> specNames(slice<ast.Spec> specs) {
         // should not happen, but be conservative
         @string name = ""u8;
         switch (ᐧ) {
-        case {} when (~s).Type is != default!: {
+        case {} when (~s).Type != default!: {
             {
                 var (nΔ2, imp) = baseTypeName((~s).Type); if (!imp) {
                     // a type is present; determine its name
@@ -979,7 +979,7 @@ internal static slice<ж<Func>> sortedFuncs(methodSet m, bool allMethods) {
     foreach (var (_, mΔ1) in m) {
         // determine which methods to include
         switch (ᐧ) {
-        case {} when (~mΔ1).Decl is nil: {
+        case {} when (~mΔ1).Decl == nil: {
             break;
         }
         case {} when (allMethods) || ((~mΔ1).Level == 0) || (!token.IsExported(removeStar((~mΔ1).Orig))): {

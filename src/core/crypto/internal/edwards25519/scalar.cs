@@ -266,7 +266,7 @@ internal static bool isReduced(slice<byte> s) {
     nonzero |= (uint64)(nonzero >> (int)(4));
     nonzero |= (uint64)(nonzero >> (int)(2));
     nonzero |= (uint64)(nonzero >> (int)(1));
-    return (nint)(((nint)(^nonzero)) & 1);
+    return (nint)(((nint)(~nonzero)) & 1);
 }
 
 // nonAdjacentForm computes a width-w non-adjacent form for this scalar.

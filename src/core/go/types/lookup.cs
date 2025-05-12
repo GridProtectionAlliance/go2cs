@@ -429,7 +429,7 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
                 // check if m is ambiguous, on *V, or on V with case-folding
                 if (obj == default!) {
                     switch (ᐧ) {
-                    case {} when index is != default!: {
+                    case {} when index != default!: {
                         state = ambigSel;
                         break;
                     }
@@ -483,8 +483,8 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
                 check.objDecl(~f, nil);
             }
         }
-        switch (state) {
-        case notFound: {
+        var exprᴛ1 = state;
+        if (exprᴛ1 == notFound) {
             switch (ᐧ) {
             case {} when isInterfacePtr(V): {
                 cause = "("u8 + check.interfacePtrError(V) + ")"u8;
@@ -499,19 +499,16 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
                 break;
             }}
 
-            break;
         }
-        case wrongName: {
+        else if (exprᴛ1 == wrongName) {
             @string fs = check.funcString(f, false);
             @string ms = check.funcString(m, false);
             cause = check.sprintf("(missing method %s)\n\t\thave %s\n\t\twant %s"u8, m.Name(), fs, ms);
-            break;
         }
-        case unexported: {
+        else if (exprᴛ1 == unexported) {
             cause = check.sprintf("(unexported method %s)"u8, m.Name());
-            break;
         }
-        case wrongSig: {
+        else if (exprᴛ1 == wrongSig) {
             @string fs = check.funcString(f, false);
             @string ms = check.funcString(m, false);
             if (fs == ms) {
@@ -531,24 +528,19 @@ public static (ж<Func> method, bool wrongType) MissingMethod(ΔType V, ж<Inter
                 break;
             }
             cause = check.sprintf("(wrong type for method %s)\n\t\thave %s\n\t\twant %s"u8, m.Name(), fs, ms);
-            break;
         }
-        case ambigSel: {
+        else if (exprᴛ1 == ambigSel) {
             cause = check.sprintf("(ambiguous selector %s.%s)"u8, V, m.Name());
-            break;
         }
-        case ptrRecv: {
+        else if (exprᴛ1 == ptrRecv) {
             cause = check.sprintf("(method %s has pointer receiver)"u8, m.Name());
-            break;
         }
-        case field: {
+        else if (exprᴛ1 == field) {
             cause = check.sprintf("(%s.%s is a field, not a method)"u8, V, m.Name());
-            break;
         }
-        default: {
+        else { /* default: */
             throw panic("unreachable");
-            break;
-        }}
+        }
 
     }
     return (m, state == wrongSig || state == ptrRecv);

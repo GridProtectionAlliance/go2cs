@@ -134,7 +134,7 @@ internal const bool stackTraceDebug = false;
     internal ж<stackObjectBuf> next;
 }
 
-[GoInit] internal static void initΔ6() {
+[GoInit] internal static void initΔ2() {
     if (@unsafe.Sizeof(new stackWorkBuf(nil)) > @unsafe.Sizeof(new workbuf(nil))) {
         throw panic("stackWorkBuf too big");
     }

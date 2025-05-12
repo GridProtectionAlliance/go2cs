@@ -60,7 +60,7 @@ internal static void lfnodeValidate(ж<lfnode> Ꮡnode) {
             @throw("lfstack node allocated from the heap"u8);
         }
     }
-    if (lfstackUnpack(lfstackPack(Ꮡnode, ^((uintptr)0))) != Ꮡnode) {
+    if (lfstackUnpack(lfstackPack(Ꮡnode, ~((uintptr)0))) != Ꮡnode) {
         printlock();
         println("runtime: bad lfnode address", ((Δhex)((uintptr)new @unsafe.Pointer(Ꮡnode))));
         @throw("bad lfnode address"u8);

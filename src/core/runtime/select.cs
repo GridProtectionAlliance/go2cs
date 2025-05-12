@@ -525,7 +525,7 @@ sclose:
 
 [GoType("num:nint")] partial struct selectDir;
 
-internal static readonly selectDir _ = /* iota */ 0;
+internal static readonly selectDir _ᴛ4ʗ = /* iota */ 0;
 internal static readonly selectDir selectSend = 1; // case Chan <- Send
 internal static readonly selectDir selectRecv = 2; // case <-Chan:
 internal static readonly selectDir selectDefault = 3; // default

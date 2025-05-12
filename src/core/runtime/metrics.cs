@@ -587,17 +587,17 @@ internal static statDepSet union(this statDepSet s, statDepSet b) {
 
 // empty returns true if there are no dependencies in the set.
 [GoRecv] internal static bool empty(this ref statDepSet s) {
-    /* for _, c := range s {
-	if c != 0 {
-		return false
-	}
-} */
+    foreach (var (_, c) in s.val) {
+        if (c != 0) {
+            return false;
+        }
+    }
     return true;
 }
 
 // has returns true if the set contains a given statDep.
 [GoRecv] internal static bool has(this ref statDepSet s, statDep d) {
-    return (uint64)(s[d / 64] & (1 << (int)((d % 64)))) != 0;
+    return (uint64)(s.val[d / 64] & (1 << (int)((d % 64)))) != 0;
 }
 
 // heapStatsAggregate represents memory stats obtained from the

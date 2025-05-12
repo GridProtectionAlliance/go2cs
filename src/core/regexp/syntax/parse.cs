@@ -909,7 +909,7 @@ internal static (ж<Regexp> _, error err) parse(@string s, Flags flags) => func(
             { /* default: */
                 throw panic(r);
             }
-            else if (exprᴛ1 is default!) {
+            else if (exprᴛ1 == default!) {
             }
             else if (exprᴛ1 == ErrLarge) {
                 Ꮡerr = new ΔError( // ok
@@ -1322,7 +1322,7 @@ Loop:
                 goto break_Loop;
             }
             sign = -1;
-            flags = ^flags;
+            flags = ~flags;
             sawFlag = false;
             break;
         }
@@ -1334,7 +1334,7 @@ Loop:
                 if (!sawFlag) {
                     goto break_Loop;
                 }
-                flags = ^flags;
+                flags = ~flags;
             }
             if (c == (rune)':') {
                 // Open new group
@@ -1587,7 +1587,7 @@ Switch:
         }
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'0') { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'0')) { matchᴛ1 = true;
         r = c - (rune)'0';
         for (nint i = 1; i < 3; i++) {
             // Consume up to three octal digits; already have one.

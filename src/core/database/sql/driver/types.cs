@@ -60,7 +60,7 @@ public static boolType Bool;
 [GoType] partial struct boolType {
 }
 
-internal static ValueConverter _ = new boolType(nil);
+internal static ValueConverter _ᴛ1ʗ = new boolType(nil);
 
 internal static @string String(this boolType _) {
     return "Bool"u8;
@@ -112,7 +112,7 @@ public static int32Type Int32;
 [GoType] partial struct int32Type {
 }
 
-internal static ValueConverter _ = new int32Type(nil);
+internal static ValueConverter _ᴛ2ʗ = new int32Type(nil);
 
 internal static (Value, error) ConvertValue(this int32Type _, any v) {
     var rv = reflect.ValueOf(v);
@@ -245,7 +245,7 @@ public static defaultConverter DefaultParameterConverter;
 [GoType] partial struct defaultConverter {
 }
 
-internal static ValueConverter _ = new defaultConverter(nil);
+internal static ValueConverter _ᴛ5ʗ = new defaultConverter(nil);
 
 internal static reflectꓸType valuerReflectType = reflect.TypeFor<Valuer>();
 

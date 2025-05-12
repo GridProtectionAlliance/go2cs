@@ -1212,17 +1212,16 @@ public static nint Jacobi(ж<ΔInt> Ꮡx, ж<ΔInt> Ꮡy) {
     ref var x = ref Ꮡx.val;
     ref var p = ref Ꮡp.val;
 
-    switch (Jacobi(Ꮡx, Ꮡp)) {
-    case -1: {
+    var exprᴛ1 = Jacobi(Ꮡx, Ꮡp);
+    if (exprᴛ1 == -1) {
         return default!;
     }
-    case 0: {
+    if (exprᴛ1 is 0) {
         return z.SetInt64(0);
     }
-    case 1: {
+    if (exprᴛ1 is 1) {
         break;
-        break;
-    }}
+    }
 
     // x is not a square mod p
     // sqrt(0) mod p = 0

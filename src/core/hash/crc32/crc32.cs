@@ -113,18 +113,18 @@ internal static void ieeeInit() {
 // MakeTable returns a [Table] constructed from the specified polynomial.
 // The contents of this [Table] must not be modified.
 public static ж<Table> MakeTable(uint32 poly) {
-    switch (poly) {
-    case IEEE: {
+    var exprᴛ1 = poly;
+    if (exprᴛ1 == IEEE) {
         ieeeOnce.Do(ieeeInit);
         return IEEETable;
     }
-    case Castagnoli: {
+    if (exprᴛ1 == Castagnoli) {
         castagnoliOnce.Do(castagnoliInit);
         return castagnoliTable;
     }
-    default: {
+    { /* default: */
         return simpleMakeTable(poly);
-    }}
+    }
 
 }
 
@@ -263,9 +263,9 @@ internal static uint32 tableSum(ж<Table> Ꮡt) {
     array<byte> a = new(1024);
     var b = a[..0];
     if (t != nil) {
-        /* for _, x := range t {
-	b = byteorder.BeAppendUint32(b, x)
-} */
+        foreach (var (_, x) in t.val) {
+            b = byteorder.BeAppendUint32(b, x);
+        }
     }
     return ChecksumIEEE(b);
 }

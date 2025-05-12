@@ -142,7 +142,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
     var ps = (uint32)(xs ^ ys);
     // product sign
     // normalize to 62nd bit
-    nuint is62zero = ((nuint)((uint64)((^pm1 >> (int)(62)) & 1)));
+    nuint is62zero = ((nuint)((uint64)((~pm1 >> (int)(62)) & 1)));
     (pm1, pm2) = shl(pm1, pm2, is62zero);
     pe -= ((int32)is62zero);
     // Swap addition operands so |p| >= |z|
@@ -162,7 +162,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         // Adding (pm1:pm2) + (zm1:zm2)
         (pm2, c) = bits.Add64(pm2, zm2, 0);
         (pm1, _) = bits.Add64(pm1, zm1, c);
-        pe -= ((int32)(^pm1 >> (int)(63)));
+        pe -= ((int32)(~pm1 >> (int)(63)));
         (pm1, m) = shrcompress(pm1, pm2, ((nuint)(64 + pm1 >> (int)(63))));
     } else {
         // Subtracting (pm1:pm2) - (zm1:zm2)
@@ -184,7 +184,7 @@ public static float64 FMA(float64 x, float64 y, float64 z) {
         m = (uint64)(m >> (int)(n) | nonzero((uint64)(m & (1 << (int)(n) - 1))));
         pe = 0;
     }
-    m = (uint64)(((m + 1 << (int)(9)) >> (int)(10)) & ^zero((uint64)(((uint64)(m & (1 << (int)(10) - 1))) ^ 1 << (int)(9))));
+    m = (uint64)(((m + 1 << (int)(9)) >> (int)(10)) & ~zero((uint64)(((uint64)(m & (1 << (int)(10) - 1))) ^ 1 << (int)(9))));
     pe &= (int32)(-((int32)nonzero(m)));
     return Float64frombits(((uint64)ps) << (int)(63) + ((uint64)pe) << (int)(52) + m);
 }

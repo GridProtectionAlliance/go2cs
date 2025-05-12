@@ -60,7 +60,7 @@ internal static float64 asinh(float64 x) {
     }
     float64 temp = default!;
     switch (ᐧ) {
-    case {} when x is > Large: {
+    case {} when x > Large: {
         temp = Log(x) + Ln2;
         break;
     }
@@ -68,7 +68,7 @@ internal static float64 asinh(float64 x) {
         temp = Log(2 * x + 1 / (Sqrt(x * x + 1) + x));
         break;
     }
-    case {} when x is < NearZero: {
+    case {} when x < NearZero: {
         temp = x;
         break;
     }

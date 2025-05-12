@@ -95,9 +95,9 @@ public static readonly QUICEventKind QUICStoreSession = 9;
     // secrets, Handshake data, Application write secret, Application data.
     internal array<QUICEvent> eventArr = new(8);
     internal bool started;
-    internal channel<struct{}> signalc; // handshake data is available to be read
-    internal channel<struct{}> blockedc; // handshake is waiting for data, closed when done
-    internal /*<-*/channel<struct{}> cancelc; // handshake has been canceled
+    internal channel<EmptyStruct> signalc; // handshake data is available to be read
+    internal channel<EmptyStruct> blockedc; // handshake is waiting for data, closed when done
+    internal /*<-*/channel<EmptyStruct> cancelc; // handshake has been canceled
     internal context_package.CancelFunc cancel;
     internal bool waitingForDrain;
     // readbuf is shared between HandleData and the handshake goroutine.
@@ -133,8 +133,8 @@ internal static ж<QUICConn> newQUICConn(ж<Conn> Ꮡconn, ж<QUICConfig> Ꮡcon
     ref var config = ref Ꮡconfig.val;
 
     conn.quic = Ꮡ(new quicState(
-        signalc: new channel<struct{}>(1),
-        blockedc: new channel<struct{}>(1),
+        signalc: new channel<EmptyStruct>(1),
+        blockedc: new channel<EmptyStruct>(1),
         enableSessionEvents: config.EnableSessionEvents
     ));
     conn.quic.events = conn.quic.eventArr[..0];

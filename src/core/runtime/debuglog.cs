@@ -373,7 +373,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
 [GoRecv] internal static void ensure(this ref debugLogWriter l, uint64 n) {
     while (l.write + n >= l.r.begin + ((uint64)len(l.data.b))) {
         // Consume record at begin.
-        if (l.r.skip() == ^((uint64)0)) {
+        if (l.r.skip() == ~((uint64)0)) {
             // Wrapped around within a record.
             //
             // TODO(austin): It would be better to just
@@ -441,7 +441,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
 [GoRecv] internal static void varint(this ref debugLogWriter l, int64 x) {
     uint64 u = default!;
     if (x < 0){
-        u = (uint64)((^((uint64)x) << (int)(1)) | 1);
+        u = (uint64)((~((uint64)x) << (int)(1)) | 1);
     } else {
         // complement i, bit 0 is 1
         u = (((uint64)x) << (int)(1));
@@ -478,7 +478,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
 [GoRecv] internal static uint64 skip(this ref debugLogReader r) {
     // Read size at pos.
     if (r.begin + debugLogHeaderSize > r.end) {
-        return ^((uint64)0);
+        return ~((uint64)0);
     }
     var size = ((uint64)r.readUint16LEAt(r.begin));
     if (size == 0) {
@@ -488,7 +488,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
         size = debugLogSyncSize;
     }
     if (r.begin + size > r.end) {
-        return ^((uint64)0);
+        return ~((uint64)0);
     }
     r.begin += size;
     return size;
@@ -516,14 +516,14 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
     var size = ((uint64)0);
     while (size == 0) {
         if (r.begin + debugLogHeaderSize > r.end) {
-            return ^((uint64)0);
+            return ~((uint64)0);
         }
         size = ((uint64)r.readUint16LEAt(r.begin));
         if (size != 0) {
             break;
         }
         if (r.begin + debugLogSyncSize > r.end) {
-            return ^((uint64)0);
+            return ~((uint64)0);
         }
         // Sync packet.
         r.tick = r.readUint64LEAt(r.begin + debugLogHeaderSize);
@@ -532,7 +532,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
     }
     // Peek tick delta.
     if (r.begin + size > r.end) {
-        return ^((uint64)0);
+        return ~((uint64)0);
     }
     var pos = r.begin + debugLogHeaderSize;
     uint64 u = default!;
@@ -545,7 +545,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
         }
     }
     if (pos > r.begin + size) {
-        return ^((uint64)0);
+        return ~((uint64)0);
     }
     return r.tick + u;
 }
@@ -587,7 +587,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
     if ((uint64)(u & 1) == 0){
         v = ((int64)(u >> (int)(1)));
     } else {
-        v = ^((int64)(u >> (int)(1)));
+        v = ~((int64)(u >> (int)(1)));
     }
     return v;
 }
@@ -595,36 +595,30 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
 [GoRecv] internal static bool printVal(this ref debugLogReader r) {
     var typ = r.data.b[r.begin % ((uint64)len(r.data.b))];
     r.begin++;
-    switch (typ) {
-    default: {
+    var exprᴛ1 = typ;
+    { /* default: */
         print("<unknown field type ", ((Δhex)typ), " pos ", r.begin - 1, " end ", r.end, ">\n");
         return false;
     }
-    case debugLogUnknown: {
+    if (exprᴛ1 == debugLogUnknown) {
         print("<unknown kind>");
-        break;
     }
-    case debugLogBoolTrue: {
+    else if (exprᴛ1 == debugLogBoolTrue) {
         print(true);
-        break;
     }
-    case debugLogBoolFalse: {
+    else if (exprᴛ1 == debugLogBoolFalse) {
         print(false);
-        break;
     }
-    case debugLogInt: {
+    else if (exprᴛ1 == debugLogInt) {
         print(r.varint());
-        break;
     }
-    case debugLogUint: {
+    else if (exprᴛ1 == debugLogUint) {
         print(r.uvarint());
-        break;
     }
-    case debugLogHex or debugLogPtr: {
+    else if (exprᴛ1 == debugLogHex || exprᴛ1 == debugLogPtr) {
         print(((Δhex)r.uvarint()));
-        break;
     }
-    case debugLogString: {
+    else if (exprᴛ1 == debugLogString) {
         var sl = r.uvarint();
         if (r.begin + sl > r.end) {
             r.begin = r.end;
@@ -640,9 +634,8 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
             sl -= ((uint64)len(b));
             gwrite(b);
         }
-        break;
     }
-    case debugLogConstString: {
+    else if (exprᴛ1 == debugLogConstString) {
         nint len = ((nint)r.uvarint());
         var ptr = ((uintptr)r.uvarint());
         ptr += firstmoduledata.etext;
@@ -655,17 +648,14 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
         );
         @string s = ~(ж<@string>)(uintptr)(new @unsafe.Pointer(Ꮡstr));
         print(s);
-        break;
     }
-    case debugLogStringOverflow: {
+    else if (exprᴛ1 == debugLogStringOverflow) {
         print("..(", r.uvarint(), " more bytes)..");
-        break;
     }
-    case debugLogPC: {
+    else if (exprᴛ1 == debugLogPC) {
         printDebugLogPC(((uintptr)r.uvarint()), false);
-        break;
     }
-    case debugLogTraceback: {
+    else if (exprᴛ1 == debugLogTraceback) {
         nint n = ((nint)r.uvarint());
         for (nint i = 0; i < n; i++) {
             print("\n\t");
@@ -675,8 +665,7 @@ internal static readonly UntypedInt debugLogSyncSize = /* debugLogHeaderSize + 2
             // TODO(austin): Expand inlined frames.
             printDebugLogPC(((uintptr)r.uvarint()), true);
         }
-        break;
-    }}
+    }
 
     return true;
 }
@@ -738,14 +727,14 @@ internal static unsafe void printDebugLog() {
     while (ᐧ) {
         // Find the next record.
         printDebugLog_best best = default!;
-        best.tick = ^((uint64)0);
+        best.tick = ~((uint64)0);
         foreach (var (i, _) in state) {
             if (state[i].nextTick < best.tick) {
                 best.tick = state[i].nextTick;
                 best.i = i;
             }
         }
-        if (best.tick == ^((uint64)0)) {
+        if (best.tick == ~((uint64)0)) {
             break;
         }
         // Print record.

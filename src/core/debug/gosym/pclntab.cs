@@ -222,35 +222,35 @@ internal static readonly UntypedInt go120magic = /* 0xfffffff1 */ 4294967281;
     var leMagic = binary.LittleEndian.Uint32(t.Data);
     var beMagic = binary.BigEndian.Uint32(t.Data);
     switch (ᐧ) {
-    case {} when leMagic is go12magic: {
+    case {} when leMagic == go12magic: {
         (t.binary, possibleVersion) = (binary.LittleEndian, ver12);
         break;
     }
-    case {} when beMagic is go12magic: {
+    case {} when beMagic == go12magic: {
         (t.binary, possibleVersion) = (binary.BigEndian, ver12);
         break;
     }
-    case {} when leMagic is go116magic: {
+    case {} when leMagic == go116magic: {
         (t.binary, possibleVersion) = (binary.LittleEndian, ver116);
         break;
     }
-    case {} when beMagic is go116magic: {
+    case {} when beMagic == go116magic: {
         (t.binary, possibleVersion) = (binary.BigEndian, ver116);
         break;
     }
-    case {} when leMagic is go118magic: {
+    case {} when leMagic == go118magic: {
         (t.binary, possibleVersion) = (binary.LittleEndian, ver118);
         break;
     }
-    case {} when beMagic is go118magic: {
+    case {} when beMagic == go118magic: {
         (t.binary, possibleVersion) = (binary.BigEndian, ver118);
         break;
     }
-    case {} when leMagic is go120magic: {
+    case {} when leMagic == go120magic: {
         (t.binary, possibleVersion) = (binary.LittleEndian, ver120);
         break;
     }
-    case {} when beMagic is go120magic: {
+    case {} when beMagic == go120magic: {
         (t.binary, possibleVersion) = (binary.BigEndian, ver120);
         break;
     }
@@ -536,7 +536,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
         return false;
     }
     if ((uint32)(uvdelta & 1) != 0){
-        uvdelta = ^(uvdelta >> (int)(1));
+        uvdelta = ~(uvdelta >> (int)(1));
     } else {
         uvdelta >>= (UntypedInt)(1);
     }
@@ -661,7 +661,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
     }
     var cuoff = f.cuOffset();
     {
-        var fnoff = t.binary.Uint32(t.cutab[(int)((cuoff + ((uint32)fno)) * 4)..]); if (fnoff != ^((uint32)0)) {
+        var fnoff = t.binary.Uint32(t.cutab[(int)((cuoff + ((uint32)fno)) * 4)..]); if (fnoff != ~((uint32)0)) {
             return t.stringFrom(t.filetab, fnoff);
         }
     }
@@ -692,7 +692,7 @@ internal static uint32 field(this ΔfuncData f, uint32 n) {
         var filetab = f.pcfile();
         var linetab = f.pcln();
         if (t.version == ver116 || t.version == ver118 || t.version == ver120) {
-            if (f.cuOffset() == ^((uint32)0)) {
+            if (f.cuOffset() == ~((uint32)0)) {
                 // skip functions without compilation unit (not real function, or linker generated)
                 continue;
             }

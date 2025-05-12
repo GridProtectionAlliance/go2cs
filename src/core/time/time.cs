@@ -158,8 +158,7 @@ partial class time_package {
     internal ж<ΔLocation> loc;
 }
 
-internal static readonly GoUntyped hasMonotonic = /* 1 << 63 */
-    GoUntyped.Parse("9223372036854775808");
+internal static readonly UntypedInt hasMonotonic = /* 1 << 63 */ 9223372036854775808;
 internal const int64 maxWall = /* wallToInternal + (1<<33 - 1) */ 68043243391; // year 2157
 internal const int64 minWall = /* wallToInternal */ 59453308800;        // year 1885
 internal static readonly UntypedInt nsecMask = /* 1<<30 - 1 */ 1073741823;
@@ -438,12 +437,15 @@ public static @string String(this ΔWeekday d) {
 //
 // All this is opaque to clients of the API and can be changed if a
 // better implementation presents itself.
-internal static readonly UntypedInt absoluteZeroYear = -292277022399;
+internal static readonly GoUntyped absoluteZeroYear = /* -292277022399 */
+    GoUntyped.Parse("-292277022399");
 internal static readonly UntypedInt internalYear = 1;
-internal const int64 absoluteToInternal = /* (absoluteZeroYear - internalYear) * 365.2425 * secondsPerDay */ -9223371966579724800;
+internal static readonly GoUntyped absoluteToInternal = /* (absoluteZeroYear - internalYear) * 365.2425 * secondsPerDay */
+    GoUntyped.Parse("-9223371966579724800");
 internal const int64 internalToAbsolute = /* -absoluteToInternal */ 9223371966579724800;
 internal const int64 unixToInternal = /* (1969*365 + 1969/4 - 1969/100 + 1969/400) * secondsPerDay */ 62135596800;
-internal const int64 internalToUnix = /* -unixToInternal */ -62135596800;
+internal static readonly GoUntyped internalToUnix = /* -unixToInternal */
+    GoUntyped.Parse("-62135596800");
 internal const int64 wallToInternal = /* (1884*365 + 1884/4 - 1884/100 + 1884/400) * secondsPerDay */ 59453308800;
 
 // IsZero reports whether t represents the zero time instant,
@@ -632,7 +634,8 @@ public static nint YearDay(this Time t) {
 
 [GoType("num:int64")] partial struct Duration;
 
-internal static readonly Duration minDuration = /* -1 << 63 */ -9223372036854775808;
+internal static readonly GoUntyped minDuration = /* -1 << 63 */
+    GoUntyped.Parse("-9223372036854775808");
 internal static readonly Duration maxDuration = /* 1<<63 - 1 */ 9223372036854775807;
 
 // Common durations. There is no definition for units of Day or larger
@@ -1088,11 +1091,11 @@ internal static (nint year, ΔMonth month, nint day, nint yday) absDate(uint64 a
     if (isLeap(year)) {
         // Leap year
         switch (ᐧ) {
-        case {} when day is > 31 + 29 - 1: {
+        case {} when day > 31 + 29 - 1: {
             day--;
             break;
         }
-        case {} when day is 31 + 29 - 1: {
+        case {} when day == 31 + 29 - 1: {
             month = February;
             day = 29;
             return (year, month, day, yday);

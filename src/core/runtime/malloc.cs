@@ -146,10 +146,8 @@ internal static readonly UntypedInt arenaL1Bits = /* 6 * (_64bit * goos.IsWindow
 internal static readonly UntypedInt arenaL2Bits = /* heapAddrBits - logHeapArenaBytes - arenaL1Bits */ 20;
 internal static readonly UntypedInt arenaL1Shift = /* arenaL2Bits */ 20;
 internal static readonly UntypedInt arenaBits = /* arenaL1Bits + arenaL2Bits */ 26;
-internal static readonly GoUntyped arenaBaseOffset = /* 0xffff800000000000*goarch.IsAmd64 + 0x0a00000000000000*goos.IsAix */
-    GoUntyped.Parse("18446603336221196288");
-internal static readonly GoUntyped arenaBaseOffsetUintptr = /* uintptr(arenaBaseOffset) */
-    GoUntyped.Parse("18446603336221196288");
+internal static readonly UntypedInt arenaBaseOffset = /* 0xffff800000000000*goarch.IsAmd64 + 0x0a00000000000000*goos.IsAix */ 18446603336221196288;
+internal const uintptr arenaBaseOffsetUintptr = /* uintptr(arenaBaseOffset) */ 18446603336221196288;
 internal static readonly UntypedInt _MaxGcproc = 32;
 internal const uintptr minLegalPointer = 4096;
 internal static readonly UntypedInt minHeapForMetadataHugePages = /* 1 << 30 */ 1073741824;
@@ -573,7 +571,7 @@ mapped:
             }
             atomic.StorepNoWB(((@unsafe.Pointer)(Ꮡ(h.arenas[ri.l1()]))), new @unsafe.Pointer(l2));
         }
-        if (l2[ri.l2()] != nil) {
+        if (l2.val[ri.l2()] != nil) {
             @throw("arena already initialized"u8);
         }
         ж<heapArena> r = default!;
@@ -610,7 +608,7 @@ mapped:
         // new heap arena becomes visible before the heap lock
         // is released (which shouldn't happen, but there's
         // little downside to this).
-        atomic.StorepNoWB(((@unsafe.Pointer)(Ꮡ(l2[ri.l2()]))), new @unsafe.Pointer(r));
+        atomic.StorepNoWB(((@unsafe.Pointer)(Ꮡ(l2.val[ri.l2()]))), new @unsafe.Pointer(r));
 continue_mapped:;
     }
 break_mapped:;
@@ -946,8 +944,8 @@ internal static @unsafe.Pointer mallocgc(uintptr size, ж<_type> Ꮡtyp, bool ne
                 (v, span, shouldhelpgc) = c.nextFree(tinySpanClass);
             }
             x = ((@unsafe.Pointer)v);
-            (ж<array<uint64>>)(uintptr)(x)[0] = 0;
-            (ж<array<uint64>>)(uintptr)(x)[1] = 0;
+            (ж<array<uint64>>)(uintptr)(x).val[0] = 0;
+            (ж<array<uint64>>)(uintptr)(x).val[1] = 0;
             // See if we need to replace the existing tiny block with the new one
             // based on amount of remaining free space.
             if (!raceenabled && (size < (~c).tinyoffset || (~c).tiny == 0)) {
@@ -1536,25 +1534,25 @@ internal static bool inPersistentAlloc(uintptr Δp) {
 // Refer to the implementation of the compiler-rt.
 internal static uintptr computeRZlog(uintptr userSize) {
     switch (ᐧ) {
-    case {} when userSize is <= (64 - 16): {
+    case {} when userSize <= (64 - 16): {
         return 16 << (int)(0);
     }
-    case {} when userSize is <= (128 - 32): {
+    case {} when userSize <= (128 - 32): {
         return 16 << (int)(1);
     }
-    case {} when userSize is <= (512 - 64): {
+    case {} when userSize <= (512 - 64): {
         return 16 << (int)(2);
     }
-    case {} when userSize is <= (4096 - 128): {
+    case {} when userSize <= (4096 - 128): {
         return 16 << (int)(3);
     }
-    case {} when userSize is <= (1 << (int)(14)) - 256: {
+    case {} when userSize <= (1 << (int)(14)) - 256: {
         return 16 << (int)(4);
     }
-    case {} when userSize is <= (1 << (int)(15)) - 512: {
+    case {} when userSize <= (1 << (int)(15)) - 512: {
         return 16 << (int)(5);
     }
-    case {} when userSize is <= (1 << (int)(16)) - 1024: {
+    case {} when userSize <= (1 << (int)(16)) - 1024: {
         return 16 << (int)(6);
     }
     default: {

@@ -176,14 +176,14 @@ internal static (slice<driver.NamedValue>, error) driverArgsConnLocked(driver.Co
         var checker = defaultCheckNamedValue;
         var nextCC = false;
         switch (ᐧ) {
-        case {} when nvc is != default!: {
+        case {} when nvc != default!: {
             nextCC = cci != default!;
             checker = 
             var nvcʗ1 = nvc;
             () => nvcʗ1.CheckNamedValue();
             break;
         }
-        case {} when cci is != default!: {
+        case {} when cci != default!: {
             checker = 
             var ccʗ1 = cc;
             () => ccʗ1.CheckNamedValue();

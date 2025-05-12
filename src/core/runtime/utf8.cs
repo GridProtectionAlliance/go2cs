@@ -105,21 +105,21 @@ internal static nint encoderune(slice<byte> Δp, rune r) {
     {
         var i = ((uint32)r);
         var matchᴛ1 = false;
-        if (i is <= rune1Max) { matchᴛ1 = true;
+        if (i <= rune1Max) { matchᴛ1 = true;
             Δp[0] = ((byte)r);
             return 1;
         }
-        if (i is <= rune2Max) { matchᴛ1 = true;
+        if (i <= rune2Max) { matchᴛ1 = true;
             _ = Δp[1];
             Δp[0] = (byte)(t2 | ((byte)(r >> (int)(6))));
             Δp[1] = (byte)(tx | (byte)(((byte)r) & maskx));
             return 2;
         }
-        if ((i > maxRune) || (surrogateMin <= i && i <= surrogateMax))) { matchᴛ1 = true;
+        if ((i > maxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
             r = runeError;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && i is <= rune3Max) {
+        if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             _ = Δp[2];
             Δp[0] = (byte)(t3 | ((byte)(r >> (int)(12))));
             Δp[1] = (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx));

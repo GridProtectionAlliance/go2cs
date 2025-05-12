@@ -38,14 +38,14 @@ public static (uint8, uint8, uint8) RGBToYCbCr(uint8 r, uint8 g, uint8 b) {
     if ((uint32)(((uint32)cb) & (nint)4278190080L) == 0){
         cb >>= (UntypedInt)(16);
     } else {
-        cb = ^(cb >> (int)(31));
+        cb = ~(cb >> (int)(31));
     }
     // Note that 32768 - 27440 - 5328 equals 0.
     var cr = 32768 * r1 - 27440 * g1 - 5328 * b1 + 257 << (int)(15);
     if ((uint32)(((uint32)cr) & (nint)4278190080L) == 0){
         cr >>= (UntypedInt)(16);
     } else {
-        cr = ^(cr >> (int)(31));
+        cr = ~(cr >> (int)(31));
     }
     return (((uint8)yy), ((uint8)cb), ((uint8)cr));
 }
@@ -128,19 +128,19 @@ public static (uint8, uint8, uint8) YCbCrToRGB(uint8 y, uint8 cb, uint8 cr) {
     if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
         r >>= (UntypedInt)(16);
     } else {
-        r = ^(r >> (int)(31));
+        r = ~(r >> (int)(31));
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
         g >>= (UntypedInt)(16);
     } else {
-        g = ^(g >> (int)(31));
+        g = ~(g >> (int)(31));
     }
     var b = yy1 + 116130 * cb1;
     if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
         b >>= (UntypedInt)(16);
     } else {
-        b = ^(b >> (int)(31));
+        b = ~(b >> (int)(31));
     }
     return (((uint8)r), ((uint8)g), ((uint8)b));
 }
@@ -197,19 +197,19 @@ public static (uint32, uint32, uint32, uint32) RGBA(this YCbCr c) {
     if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
         r >>= (UntypedInt)(8);
     } else {
-        r = (int32)(^(r >> (int)(31)) & 65535);
+        r = (int32)(~(r >> (int)(31)) & 65535);
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
         g >>= (UntypedInt)(8);
     } else {
-        g = (int32)(^(g >> (int)(31)) & 65535);
+        g = (int32)(~(g >> (int)(31)) & 65535);
     }
     var b = yy1 + 116130 * cb1;
     if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
         b >>= (UntypedInt)(8);
     } else {
-        b = (int32)(^(b >> (int)(31)) & 65535);
+        b = (int32)(~(b >> (int)(31)) & 65535);
     }
     return (((uint32)r), ((uint32)g), ((uint32)b), 65535);
 }
@@ -255,19 +255,19 @@ public static (uint32, uint32, uint32, uint32) RGBA(this NYCbCrA c) {
     if ((uint32)(((uint32)r) & (nint)4278190080L) == 0){
         r >>= (UntypedInt)(8);
     } else {
-        r = (int32)(^(r >> (int)(31)) & 65535);
+        r = (int32)(~(r >> (int)(31)) & 65535);
     }
     var g = yy1 - 22554 * cb1 - 46802 * cr1;
     if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
         g >>= (UntypedInt)(8);
     } else {
-        g = (int32)(^(g >> (int)(31)) & 65535);
+        g = (int32)(~(g >> (int)(31)) & 65535);
     }
     var b = yy1 + 116130 * cb1;
     if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
         b >>= (UntypedInt)(8);
     } else {
-        b = (int32)(^(b >> (int)(31)) & 65535);
+        b = (int32)(~(b >> (int)(31)) & 65535);
     }
     // The second part of this method applies the alpha.
     var a = ((uint32)c.A) * 257;

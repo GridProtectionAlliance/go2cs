@@ -427,7 +427,7 @@ public static slice<slice<byte>> Fields(slice<byte> s) {
         var r = s[i];
         setBits |= (byte)(r);
         nint isSpace = ((nint)asciiSpace[r]);
-        n += (nint)(wasSpace & ^isSpace);
+        n += (nint)(wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
     if (setBits >= utf8.RuneSelf) {
@@ -929,7 +929,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 
 // contains reports whether c is inside the set.
 [GoRecv] internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as[c / 32] & (1 << (int)((c % 32))))) != 0;
+    return ((uint32)(@as.val[c / 32] & (1 << (int)((c % 32))))) != 0;
 }
 
 // containsRune is a simplified version of strings.ContainsRune

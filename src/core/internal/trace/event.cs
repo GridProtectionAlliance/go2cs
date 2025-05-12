@@ -132,8 +132,7 @@ public static time.Duration Sub(this ΔTime t, ΔTime t0) {
 
 [GoType("num:uint64")] partial struct TaskID;
 
-public static readonly GoUntyped NoTask = /* TaskID(^uint64(0)) */
-    GoUntyped.Parse("18446744073709551615");
+public static readonly TaskID NoTask = /* TaskID(^uint64(0)) */ 18446744073709551615;
 public static readonly TaskID BackgroundTask = /* TaskID(0) */ 0;
 
 // Task provides details about a Task event.

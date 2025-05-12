@@ -126,7 +126,7 @@ internal static sync.Pool encBufferPool = new sync.Pool(
 [GoRecv] internal static void encodeInt(this ref encoderState state, int64 i) {
     uint64 x = default!;
     if (i < 0){
-        x = (uint64)(((uint64)(^i << (int)(1))) | 1);
+        x = (uint64)(((uint64)(~i << (int)(1))) | 1);
     } else {
         x = ((uint64)(i << (int)(1)));
     }
@@ -482,19 +482,16 @@ internal static void encodeReflectValue(ж<encoderState> Ꮡstate, reflectꓸVal
     slice<byte> data = default!;
     error err = default!;
     // We know it's one of these.
-    switch (ut.externalEnc) {
-    case xGob: {
+    var exprᴛ1 = ut.externalEnc;
+    if (exprᴛ1 == xGob) {
         (data, err) = v.Interface()._<GobEncoder>().GobEncode();
-        break;
     }
-    case xBinary: {
+    else if (exprᴛ1 == xBinary) {
         (data, err) = v.Interface()._<encoding.BinaryMarshaler>().MarshalBinary();
-        break;
     }
-    case xText: {
+    else if (exprᴛ1 == xText) {
         (data, err) = v.Interface()._<encoding.TextMarshaler>().MarshalText();
-        break;
-    }}
+    }
 
     if (err != default!) {
         error_(err);

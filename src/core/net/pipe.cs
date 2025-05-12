@@ -14,11 +14,11 @@ partial class net_package {
 [GoType] partial struct pipeDeadline {
     internal sync_package.Mutex mu; // Guards timer and cancel
     internal ж<time_package.Timer> timer;
-    internal channel<struct{}> cancel; // Must be non-nil
+    internal channel<EmptyStruct> cancel; // Must be non-nil
 }
 
 internal static pipeDeadline makePipeDeadline() {
-    return new pipeDeadline(cancel: new channel<struct{}>(1));
+    return new pipeDeadline(cancel: new channel<EmptyStruct>(1));
 }
 
 // set sets the point in time when the deadline will time out.
@@ -39,7 +39,7 @@ internal static pipeDeadline makePipeDeadline() {
     var closed = isClosedChan(d.cancel);
     if (t.IsZero()) {
         if (closed) {
-            d.cancel = new channel<struct{}>(1);
+            d.cancel = new channel<EmptyStruct>(1);
         }
         return;
     }
@@ -47,7 +47,7 @@ internal static pipeDeadline makePipeDeadline() {
     {
         var dur = time.Until(t); if (dur > 0) {
             if (closed) {
-                d.cancel = new channel<struct{}>(1);
+                d.cancel = new channel<EmptyStruct>(1);
             }
             d.timer = time.AfterFunc(dur, () => {
                 close(d.cancel);
@@ -62,13 +62,13 @@ internal static pipeDeadline makePipeDeadline() {
 });
 
 // wait returns a channel that is closed when the deadline is exceeded.
-[GoRecv] internal static channel<struct{}> wait(this ref pipeDeadline d) => func((defer, _) => {
+[GoRecv] internal static channel<EmptyStruct> wait(this ref pipeDeadline d) => func((defer, _) => {
     d.mu.Lock();
     defer(d.mu.Unlock);
     return d.cancel;
 });
 
-internal static bool isClosedChan(/*<-*/channel<struct{}> c) {
+internal static bool isClosedChan(/*<-*/channel<EmptyStruct> c) {
     switch (ᐧ) {
     case ᐧ when c.ꟷᐳ(out _): {
         return true;
@@ -100,8 +100,8 @@ internal static @string String(this pipeAddr _) {
     internal channel/*<-*/<slice<byte>> wrTx;
     internal /*<-*/channel<nint> wrRx;
     internal sync_package.Once once; // Protects closing localDone
-    internal channel<struct{}> localDone;
-    internal /*<-*/channel<struct{}> remoteDone;
+    internal channel<EmptyStruct> localDone;
+    internal /*<-*/channel<EmptyStruct> remoteDone;
     internal pipeDeadline readDeadline;
     internal pipeDeadline writeDeadline;
 }
@@ -116,8 +116,8 @@ public static (Conn, Conn) Pipe() {
     var cb2 = new channel<slice<byte>>(1);
     var cn1 = new channel<nint>(1);
     var cn2 = new channel<nint>(1);
-    var done1 = new channel<struct{}>(1);
-    var done2 = new channel<struct{}>(1);
+    var done1 = new channel<EmptyStruct>(1);
+    var done2 = new channel<EmptyStruct>(1);
     var p1 = Ꮡ(new pipe(
         rdRx: cb1, rdTx: cn1,
         wrTx: cb2, wrRx: cn2,

@@ -51,7 +51,8 @@ partial class bidi_package {
 // engine expects combining marks in visual order (e.g. to the left of their
 // base character in RTL runs) and that it adjusts the glyphs used to render
 // mirrored characters that are in RTL runs so that they render appropriately.
-internal static readonly level implicitLevel = -1;
+internal static readonly GoUntyped implicitLevel = /* -1 */
+    GoUntyped.Parse("-1");
 
 // in returns if x is equal to any of the values in set.
 internal static bool @in(this ΔClass c, params ꓸꓸꓸΔClass setʗp) {

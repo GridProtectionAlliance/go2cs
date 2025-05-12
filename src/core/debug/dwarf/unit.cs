@@ -93,12 +93,11 @@ partial class dwarf_package {
         if (vers < 5) {
             u.val.asize = ((nint)b.uint8());
         }
-        switch ((~u).utype) {
-        case utSkeleton or utSplitCompile: {
+        var exprᴛ1 = (~u).utype;
+        if (exprᴛ1 == utSkeleton || exprᴛ1 == utSplitCompile) {
             b.uint64();
-            break;
         }
-        case utType or utSplitType: {
+        else if (exprᴛ1 == utType || exprᴛ1 == utSplitType) {
             b.uint64();
             if ((~u).is64){
                 // unit ID
@@ -108,8 +107,7 @@ partial class dwarf_package {
             } else {
                 b.uint32();
             }
-            break;
-        }}
+        }
 
         u.val.off = b.off;
         u.val.data = b.bytes(((nint)(n - (b.off - dataOff))));

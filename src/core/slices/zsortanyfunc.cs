@@ -283,16 +283,16 @@ internal static (nint pivot, sortedHint hint) choosePivotCmpFunc<E>(slice<E> dat
         // Find the median among i, j, k and stores it into j.
         j = medianCmpFunc(data, i, j, k, Ꮡswaps, cmp);
     }
-    switch (swaps) {
-    case 0: {
+    var exprᴛ1 = swaps;
+    if (exprᴛ1 is 0) {
         return (j, increasingHint);
     }
-    case maxSwaps: {
+    if (exprᴛ1 == maxSwaps) {
         return (j, decreasingHint);
     }
-    default: {
+    { /* default: */
         return (j, unknownHint);
-    }}
+    }
 
 }
 

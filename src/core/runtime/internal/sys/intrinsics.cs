@@ -110,8 +110,7 @@ public static nint OnesCount64(uint64 x) {
     // Per "Hacker's Delight", the first line can be simplified
     // more, but it saves at best one instruction, so we leave
     // it alone for clarity.
-    GoUntyped m = /* 1<<64 - 1 */
-            GoUntyped.Parse("18446744073709551615");
+    static readonly UntypedInt m = /* 1<<64 - 1 */ 18446744073709551615;
     x = (uint64)(x >> (int)(1) & ((uint64)(m0 & m))) + (uint64)(x & ((uint64)(m0 & m)));
     x = (uint64)(x >> (int)(2) & ((uint64)(m1 & m))) + (uint64)(x & ((uint64)(m1 & m)));
     x = (uint64)((x >> (int)(4) + x) & ((uint64)(m2 & m)));

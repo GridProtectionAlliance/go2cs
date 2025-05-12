@@ -389,8 +389,7 @@ internal static @string gostringn(ж<byte> Ꮡp, nint l) {
     return s;
 }
 
-internal static readonly GoUntyped maxUint64 = /* ^uint64(0) */
-    GoUntyped.Parse("18446744073709551615");
+internal const uint64 maxUint64 = /* ^uint64(0) */ 18446744073709551615;
 internal const int64 maxInt64 = /* int64(maxUint64 >> 1) */ 9223372036854775807;
 
 // atoi64 parses an int64 from a string s.
@@ -567,7 +566,7 @@ internal static nint findnull(ж<byte> Ꮡs) {
     if (GOOS == "plan9"u8) {
         var Δp = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         nint l = 0;
-        while (Δp[l] != 0) {
+        while (Δp.val[l] != 0) {
             l++;
         }
         return l;
@@ -608,7 +607,7 @@ internal static nint findnullw(ж<uint16> Ꮡs) {
     }
     var Δp = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡs));
     nint l = 0;
-    while (Δp[l] != 0) {
+    while (Δp.val[l] != 0) {
         l++;
     }
     return l;
@@ -630,17 +629,17 @@ internal static @string gostringw(ж<uint16> Ꮡstrw) {
     array<byte> buf = new(8);
     var str = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡstrw));
     nint n1 = 0;
-    for (nint i = 0; str[i] != 0; i++) {
-        n1 += encoderune(buf[..], ((rune)str[i]));
+    for (nint i = 0; str.val[i] != 0; i++) {
+        n1 += encoderune(buf[..], ((rune)str.val[i]));
     }
     var (s, b) = rawstring(n1 + 4);
     nint n2 = 0;
-    for (nint i = 0; str[i] != 0; i++) {
+    for (nint i = 0; str.val[i] != 0; i++) {
         // check for race
         if (n2 >= n1) {
             break;
         }
-        n2 += encoderune(b[(int)(n2)..], ((rune)str[i]));
+        n2 += encoderune(b[(int)(n2)..], ((rune)str.val[i]));
     }
     b[n2] = 0;
     // for luck

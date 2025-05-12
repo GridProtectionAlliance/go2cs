@@ -12,8 +12,7 @@ using @internal;
 partial class runtime_package {
 
 internal static readonly UntypedInt traceStackSize = 128;
-internal static readonly GoUntyped logicalStackSentinel = /* ^uintptr(0) */
-    GoUntyped.Parse("18446744073709551615");
+internal const uintptr logicalStackSentinel = /* ^uintptr(0) */ 18446744073709551615;
 
 // traceStack captures a stack trace from a goroutine and registers it in the trace
 // stack table. It then returns its unique ID. If gp == nil, then traceStack will

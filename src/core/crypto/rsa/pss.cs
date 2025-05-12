@@ -118,7 +118,7 @@ internal static error emsaPSSVerify(slice<byte> mHash, slice<byte> em, nint emBi
     //     maskedDB are not all equal to zero, output "inconsistent" and
     //     stop.
     byte bitMask = 255 >> (int)((8 * emLen - emBits));
-    if ((byte)(em[0] & ^bitMask) != 0) {
+    if ((byte)(em[0] & ~bitMask) != 0) {
         return ErrVerification;
     }
     // 7.  Let dbMask = MGF(H, emLen - hLen - 1).
@@ -214,7 +214,8 @@ internal static (slice<byte>, error) signPSSWithSalt(ж<PrivateKey> Ꮡpriv, cry
 }
 
 public static readonly UntypedInt PSSSaltLengthAuto = 0;
-public static readonly UntypedInt PSSSaltLengthEqualsHash = -1;
+public static readonly GoUntyped PSSSaltLengthEqualsHash = /* -1 */
+    GoUntyped.Parse("-1");
 
 // PSSOptions contains options for creating and verifying PSS signatures.
 [GoType] partial struct PSSOptions {
@@ -272,26 +273,23 @@ public static (slice<byte>, error) SignPSS(io.Reader rand, ж<PrivateKey> Ꮡpri
         hash = opts.Hash;
     }
     nint saltLength = opts.saltLength();
-    switch (saltLength) {
-    case PSSSaltLengthAuto: {
+    var exprᴛ1 = saltLength;
+    if (exprᴛ1 == PSSSaltLengthAuto) {
         saltLength = (priv.N.BitLen() - 1 + 7) / 8 - 2 - hash.Size();
         if (saltLength < 0) {
             return (default!, ErrMessageTooLong);
         }
-        break;
     }
-    case PSSSaltLengthEqualsHash: {
+    if (exprᴛ1 == PSSSaltLengthEqualsHash) {
         saltLength = hash.Size();
-        break;
     }
-    default: {
+    else { /* default: */
         if (saltLength <= 0) {
             // If we get here saltLength is either > 0 or < -1, in the
             // latter case we fail out.
             return (default!, invalidSaltLenErr);
         }
-        break;
-    }}
+    }
 
     var salt = new slice<byte>(saltLength);
     {

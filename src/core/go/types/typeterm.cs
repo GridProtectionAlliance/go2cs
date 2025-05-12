@@ -20,10 +20,10 @@ partial class types_package {
 
 [GoRecv] internal static @string String(this ref term x) {
     switch (ᐧ) {
-    case {} when x is nil: {
+    case {} when x == nil: {
         return "∅"u8;
     }
-    case {} when x.typ is default!: {
+    case {} when x.typ == default!: {
         return "𝓤"u8;
     }
     case {} when x.tilde: {
@@ -61,16 +61,16 @@ partial class types_package {
     case {} when x == nil && y == nil: {
         return (default!, default!);
     }
-    case {} when x is nil: {
+    case {} when x == nil: {
         return (Ꮡy, default!);
     }
-    case {} when y is nil: {
+    case {} when y == nil: {
         return (unionꓸᏑx, default!);
     }
-    case {} when x.typ is default!: {
+    case {} when x.typ == default!: {
         return (unionꓸᏑx, default!);
     }
-    case {} when y.typ is default!: {
+    case {} when y.typ == default!: {
         return (Ꮡy, default!);
     }}
 
@@ -104,10 +104,10 @@ partial class types_package {
     case {} when x == nil || y == nil: {
         return default!;
     }
-    case {} when x.typ is default!: {
+    case {} when x.typ == default!: {
         return Ꮡy;
     }
-    case {} when y.typ is default!: {
+    case {} when y.typ == default!: {
         return intersectꓸᏑx;
     }}
 
@@ -134,10 +134,10 @@ partial class types_package {
 [GoRecv] internal static bool includes(this ref term x, ΔType t) {
     // easy cases
     switch (ᐧ) {
-    case {} when x is nil: {
+    case {} when x == nil: {
         return false;
     }
-    case {} when x.typ is default!: {
+    case {} when x.typ == default!: {
         return true;
     }}
 
@@ -157,16 +157,16 @@ partial class types_package {
 
     // easy cases
     switch (ᐧ) {
-    case {} when x is nil: {
+    case {} when x == nil: {
         return true;
     }
-    case {} when y is nil: {
+    case {} when y == nil: {
         return false;
     }
-    case {} when y.typ is default!: {
+    case {} when y.typ == default!: {
         return true;
     }
-    case {} when x.typ is default!: {
+    case {} when x.typ == default!: {
         return false;
     }}
 

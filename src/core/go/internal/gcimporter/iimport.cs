@@ -105,14 +105,12 @@ internal static (ж<types.Package> pkg, error err) iImportData(ж<token.FileSet>
     });
     var r = Ꮡ(new intReader(ᏑdataReader, path));
     version = ((int64)r.uint64());
-    switch (version) {
-    case iexportVersionGo1_18 or iexportVersionPosCol or iexportVersionGo1_11: {
-        break;
+    var exprᴛ1 = version;
+    if (exprᴛ1 == iexportVersionGo1_18 || exprᴛ1 == iexportVersionPosCol || exprᴛ1 == iexportVersionGo1_11) {
     }
-    default: {
+    else { /* default: */
         errorf("unknown iexport format version %d"u8, version);
-        break;
-    }}
+    }
 
     var sLen = r.uint64();
     var dLen = r.uint64();
@@ -532,7 +530,7 @@ internal static (bool signed, nuint maxBytes) intSize(ж<types.Basic> Ꮡb) {
         if (signed) {
              >>= (UntypedInt)(1);
             if ((byte)(n & 1) != 0) {
-                 = ^vΔ1;
+                 = ~vΔ1;
             }
         }
         x.SetInt64(vΔ1);

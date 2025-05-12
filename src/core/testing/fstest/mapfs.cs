@@ -22,9 +22,9 @@ partial class fstest_package {
     public any Sys;         // fs.FileInfo.Sys
 }
 
-internal static fs.FS _ = ((MapFS)default!);
+internal static fs.FS _ᴛ1ʗ = ((MapFS)default!);
 
-internal static fs.File _ = (ж<openMapFile>)(default!);
+internal static fs.File _ᴛ2ʗ = (ж<openMapFile>)(default!);
 
 // Open opens the named file.
 public static (fs.File, error) Open(this MapFS fsys, @string name) {

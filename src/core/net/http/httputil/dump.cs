@@ -158,7 +158,7 @@ public static (slice<byte>, error) DumpRequestOut(ж<http.Request> Ꮡreq, bool 
     // We need this channel to ensure that the reader
     // goroutine exits if t.RoundTrip returns an error.
     // See golang.org/issue/32571.
-    var quitReadCh = new channel<struct{}>(1);
+    var quitReadCh = new channel<EmptyStruct>(1);
     // Wait for the request before replying with a dummy response:
     var drʗ2 = dr;
     var prʗ2 = pr;

@@ -923,9 +923,9 @@ internal static void length_8_64(slice<byte> text, slice<int64> sa, nint numLMS)
                 code = 0;
             } else {
                 code = ((int64)(end - j));
-                if (code <= 64 / 8 && ^cx >= ((uint64)len(text))) {
+                if (code <= 64 / 8 && ~cx >= ((uint64)len(text))) {
                     // byte-only
-                    code = ((int64)(^cx));
+                    code = ((int64)(~cx));
                 }
             }
             // byte-only

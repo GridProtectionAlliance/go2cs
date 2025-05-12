@@ -103,7 +103,7 @@ partial class context_package {
     //
     // See https://blog.golang.org/pipelines for more examples of how to use
     // a Done channel for cancellation.
-    /*<-*/channel<struct{}> Done();
+    /*<-*/channel<EmptyStruct> Done();
     // If Done is not yet closed, Err returns nil.
     // If Done is closed, Err returns a non-nil error explaining why:
     // Canceled if the context was canceled
@@ -192,7 +192,7 @@ internal static (time.Time deadline, bool ok) Deadline(this emptyCtx _) {
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<struct{}> Done(this emptyCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done(this emptyCtx _) {
     return default!;
 }
 
@@ -399,7 +399,7 @@ internal static (ж<cancelCtx>, bool) parentCancelCtx(Context parent) {
     if (!ok) {
         return (default!, false);
     }
-    var (pdone, _) = (~p).done.Load()._<channel<struct{}>>(ᐧ);
+    var (pdone, _) = (~p).done.Load()._<channel<ΔEmptyStruct>>(ᐧ);
     if (pdone != done) {
         return (default!, false);
     }
@@ -429,11 +429,11 @@ internal static void removeChild(Context parent, canceler child) {
 // implementations are *cancelCtx and *timerCtx.
 [GoType] partial interface canceler {
     void cancel(bool removeFromParent, error err, error cause);
-    /*<-*/channel<struct{}> Done();
+    /*<-*/channel<EmptyStruct> Done();
 }
 
 // closedchan is a reusable closed channel.
-internal static channel<struct{}> closedchan = new channel<struct{}>(1);
+internal static channel<EmptyStruct> closedchan = new channel<EmptyStruct>(1);
 
 [GoInit] internal static void init() {
     close(closedchan);
@@ -445,7 +445,7 @@ internal static channel<struct{}> closedchan = new channel<struct{}>(1);
     public Context Context;
     internal sync_package.Mutex mu;            // protects following fields
     internal sync.atomic_package.Value done;          // of chan struct{}, created lazily, closed by first cancel call
-    internal map<canceler, struct{}> children; // set to nil by the first cancel call
+    internal map<canceler, EmptyStruct> children; // set to nil by the first cancel call
     internal error err;                 // set to non-nil by the first cancel call
     internal error cause;                 // set to non-nil by the first cancel call
 }
@@ -457,19 +457,19 @@ internal static channel<struct{}> closedchan = new channel<struct{}>(1);
     return value(c.Context, key);
 }
 
-[GoRecv] internal static /*<-*/channel<struct{}> Done(this ref cancelCtx c) => func((defer, _) => {
+[GoRecv] internal static /*<-*/channel<EmptyStruct> Done(this ref cancelCtx c) => func((defer, _) => {
     var d = c.done.Load();
     if (d != default!) {
-        return d._<channel<struct{}>>();
+        return d._<channel<ΔEmptyStruct>>();
     }
     c.mu.Lock();
     defer(c.mu.Unlock);
     d = c.done.Load();
     if (d == default!) {
-        d = new channel<struct{}>(1);
+        d = new channel<EmptyStruct>(1);
         c.done.Store(d);
     }
-    return d._<channel<struct{}>>();
+    return d._<channel<ΔEmptyStruct>>();
 });
 
 [GoRecv] internal static error Err(this ref cancelCtx c) {
@@ -508,7 +508,7 @@ internal static channel<struct{}> closedchan = new channel<struct{}>(1);
                 child.cancel(false, (~p).err, (~p).cause);
             } else {
                 if ((~p).children == default!) {
-                    p.val.children = new map<canceler, struct{}>();
+                    p.val.children = new map<canceler, EmptyStruct>();
                 }
                 (~p).children[child] = new propagateCancel_p();
             }
@@ -579,7 +579,7 @@ internal static @string contextName(Context c) {
     // already canceled
     c.err = err;
     c.cause = cause;
-    var (d, _) = c.done.Load()._<channel<struct{}>>(ᐧ);
+    var (d, _) = c.done.Load()._<channel<ΔEmptyStruct>>(ᐧ);
     if (d == default!){
         c.done.Store(closedchan);
     } else {
@@ -617,7 +617,7 @@ internal static (time.Time deadline, bool ok) Deadline(this withoutCancelCtx _) 
     return (deadline, ok);
 }
 
-internal static /*<-*/channel<struct{}> Done(this withoutCancelCtx _) {
+internal static /*<-*/channel<EmptyStruct> Done(this withoutCancelCtx _) {
     return default!;
 }
 

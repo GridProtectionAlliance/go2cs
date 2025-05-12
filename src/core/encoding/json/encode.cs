@@ -259,7 +259,7 @@ internal static readonly @string hex = "0123456789abcdef"u8;
     // startDetectingCyclesAfter, so that we skip the work if we're within a
     // reasonable amount of nested pointers deep.
     internal nuint ptrLevel;
-    internal map<any, struct{}> ptrSeen;
+    internal map<any, EmptyStruct> ptrSeen;
 }
 
 internal static readonly UntypedInt startDetectingCyclesAfter = 1000;
@@ -278,7 +278,7 @@ internal static ж<encodeState> newEncodeState() {
             return e;
         }
     }
-    return Ꮡ(new encodeState(ptrSeen: new map<any, struct{}>()));
+    return Ꮡ(new encodeState(ptrSeen: new map<any, EmptyStruct>()));
 }
 
 // jsonError is an error wrapper type for internal use only.

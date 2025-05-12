@@ -444,7 +444,7 @@ internal static userArenaStateᴛ1 userArenaState;
 
     var size = typ.Size_;
     if (cap > 0) {
-        if (size > ^((uintptr)0) / ((uintptr)cap)) {
+        if (size > ~((uintptr)0) / ((uintptr)cap)) {
             // Overflow.
             @throw("out of memory"u8);
         }
@@ -691,7 +691,7 @@ public static void flush(this ΔwriteUserArenaHeapBits h, ж<mspan> Ꮡs, uintpt
     if (h.valid != h.low) {
         var m = ((uintptr)1) << (int)(h.low) - 1;
         // don't clear existing bits below "low"
-        m |= (uintptr)(^(((uintptr)1) << (int)(h.valid) - 1));
+        m |= (uintptr)(~(((uintptr)1) << (int)(h.valid) - 1));
         // don't clear existing bits above "valid"
         bitmap[idx] = bswapIfBigEndian((uintptr)((uintptr)(bswapIfBigEndian(bitmap[idx]) & m) | h.mask));
     }

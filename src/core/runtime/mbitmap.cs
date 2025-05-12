@@ -429,7 +429,7 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
             }
             var dstx = ((ж<uintptr>)((@unsafe.Pointer)addrΔ1));
             var Δp = buf.get1();
-            Δp[0] = dstx.val;
+            Δp.val[0] = dstx.val;
         }
     } else {
         while (ᐧ) {
@@ -442,8 +442,8 @@ internal static void bulkBarrierPreWrite(uintptr dst, uintptr src, uintptr size,
             var dstx = ((ж<uintptr>)((@unsafe.Pointer)addr));
             var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + (addr - dst))));
             var Δp = buf.get2();
-            Δp[0] = dstx.val;
-            Δp[1] = srcx.val;
+            Δp.val[0] = dstx.val;
+            Δp.val[1] = srcx.val;
         }
     }
 }
@@ -493,7 +493,7 @@ internal static void bulkBarrierPreWriteSrcOnly(uintptr dst, uintptr src, uintpt
         }
         var srcx = ((ж<uintptr>)((@unsafe.Pointer)(addr - dst + src)));
         var Δp = buf.get1();
-        Δp[0] = srcx.val;
+        Δp.val[0] = srcx.val;
     }
 }
 
@@ -631,7 +631,7 @@ internal static slice<uintptr> heapBitsSlice(uintptr spanBase, uintptr spanSize)
         // Two writes.
         var bits0 = ptrBits - j;
         var bits1 = bits - bits0;
-        dst[i + 0] = (uintptr)((uintptr)(dst[i + 0] & (^((uintptr)0) >> (int)(bits0))) | (src << (int)(j)));
+        dst[i + 0] = (uintptr)((uintptr)(dst[i + 0] & (~((uintptr)0) >> (int)(bits0))) | (src << (int)(j)));
         dst[i + 1] = (uintptr)((uintptr)(dst[i + 1] & ~((1 << (int)(bits1)) - 1)) | (src >> (int)(bits0)));
     } else {
         // One write.
@@ -1036,15 +1036,15 @@ internal static ж<byte> subtract1(ж<byte> Ꮡp) {
 [GoRecv] internal static void refillAllocCache(this ref mspan s, uint16 whichByte) {
     var bytes = (ж<array<uint8>>)(uintptr)(new @unsafe.Pointer(s.allocBits.bytep(((uintptr)whichByte))));
     var aCache = ((uint64)0);
-    aCache |= (uint64)(((uint64)bytes[0]));
-    aCache |= (uint64)(((uint64)bytes[1]) << (int)((1 * 8)));
-    aCache |= (uint64)(((uint64)bytes[2]) << (int)((2 * 8)));
-    aCache |= (uint64)(((uint64)bytes[3]) << (int)((3 * 8)));
-    aCache |= (uint64)(((uint64)bytes[4]) << (int)((4 * 8)));
-    aCache |= (uint64)(((uint64)bytes[5]) << (int)((5 * 8)));
-    aCache |= (uint64)(((uint64)bytes[6]) << (int)((6 * 8)));
-    aCache |= (uint64)(((uint64)bytes[7]) << (int)((7 * 8)));
-    s.allocCache = ^aCache;
+    aCache |= (uint64)(((uint64)bytes.val[0]));
+    aCache |= (uint64)(((uint64)bytes.val[1]) << (int)((1 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[2]) << (int)((2 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[3]) << (int)((3 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[4]) << (int)((4 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[5]) << (int)((5 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[6]) << (int)((6 * 8)));
+    aCache |= (uint64)(((uint64)bytes.val[7]) << (int)((7 * 8)));
+    s.allocCache = ~aCache;
 }
 
 // nextFreeIndex returns the index of the next free object in s at
@@ -1174,7 +1174,7 @@ internal static void clearMarked(this markBits m) {
     // Might be racing with other updates, so use atomic update always.
     // We used to be clever here and use a non-atomic update in certain
     // cases, but it's not worth the risk.
-    atomic.And8(m.bytep, ^m.mask);
+    atomic.And8(m.bytep, ~m.mask);
 }
 
 // markBitsForSpan returns the markBits for the span base address base.
@@ -1201,8 +1201,7 @@ internal static markBits /*mbits*/ markBitsForSpan(uintptr @base) {
 
 // clobberdeadPtr is a special value that is used by the compiler to
 // clobber dead stack slots, when -clobberdead flag is set.
-internal static readonly GoUntyped clobberdeadPtr = /* uintptr(0xdeaddead | 0xdeaddead<<((^uintptr(0)>>63)*32)) */
-    GoUntyped.Parse("16045725885737590445");
+internal const uintptr clobberdeadPtr = /* uintptr(0xdeaddead | 0xdeaddead<<((^uintptr(0)>>63)*32)) */ 16045725885737590445;
 
 // badPointer throws bad pointer in heap panic.
 internal static void badPointer(ж<mspan> Ꮡs, uintptr Δp, uintptr refBase, uintptr refOff) {
@@ -1341,12 +1340,12 @@ internal static void bulkBarrierBitmap(uintptr dst, uintptr src, uintptr size, u
             var dstx = ((ж<uintptr>)((@unsafe.Pointer)(dst + i)));
             if (src == 0){
                 var Δp = buf.get1();
-                Δp[0] = dstx.val;
+                Δp.val[0] = dstx.val;
             } else {
                 var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + i)));
                 var Δp = buf.get2();
-                Δp[0] = dstx.val;
-                Δp[1] = srcx.val;
+                Δp.val[0] = dstx.val;
+                Δp.val[1] = srcx.val;
             }
         }
         mask <<= (UntypedInt)(1);
@@ -1401,8 +1400,8 @@ internal static void typeBitsBulkBarrier(ж<_type> Ꮡtyp, uintptr dst, uintptr 
             var dstx = ((ж<uintptr>)((@unsafe.Pointer)(dst + i)));
             var srcx = ((ж<uintptr>)((@unsafe.Pointer)(src + i)));
             var Δp = buf.get2();
-            Δp[0] = dstx.val;
-            Δp[1] = srcx.val;
+            Δp.val[0] = dstx.val;
+            Δp.val[1] = srcx.val;
         }
     }
 }

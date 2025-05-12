@@ -78,7 +78,7 @@ public static IPMask CIDRMask(nint ones, nint bits) {
             n -= 8;
             continue;
         }
-        m[i] = ^((byte)(255 >> (int)(n)));
+        m[i] = ~((byte)(255 >> (int)(n)));
         n = 0;
     }
     return m;
@@ -435,22 +435,20 @@ internal static (IP ip, IPMask m) networkNumberAndMask(ж<IPNet> Ꮡn) {
         }
     }
     m = n.Mask;
-    switch (len(m)) {
-    case IPv4len: {
+    var exprᴛ1 = len(m);
+    if (exprᴛ1 == IPv4len) {
         if (len(ip) != IPv4len) {
             return (default!, default!);
         }
-        break;
     }
-    case IPv6len: {
+    if (exprᴛ1 == IPv6len) {
         if (len(ip) == IPv4len) {
             m = m[12..];
         }
-        break;
     }
-    default: {
+    else { /* default: */
         return (default!, default!);
-    }}
+    }
 
     return (ip, m);
 }

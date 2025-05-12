@@ -93,7 +93,8 @@ public static ж<Float> NewFloat(float64 x) {
 // Exponent and precision limits.
 public static readonly UntypedInt MaxExp = /* math.MaxInt32 */ 2147483647; // largest supported exponent
 
-public static readonly UntypedInt MinExp = /* math.MinInt32 */ -2147483648; // smallest supported exponent
+public static readonly GoUntyped MinExp = /* math.MinInt32 */ // smallest supported exponent
+    GoUntyped.Parse("-2147483648");
 
 public static readonly UntypedInt MaxPrec = /* math.MaxUint32 */ 4294967295; // largest (theoretically) supported precision; likely memory-limited
 
@@ -143,7 +144,8 @@ public static readonly RoundingMode ToPositiveInf = 5;  // == IEEE 754-2008 roun
 //go:generate stringer -type=RoundingMode
 
 // Constants describing the [Accuracy] of a [Float].
-public static readonly Accuracy Below = -1;
+public static readonly GoUntyped Below = /* -1 */
+    GoUntyped.Parse("-1");
 
 public static readonly Accuracy Exact = 0;
 
@@ -377,8 +379,7 @@ internal static Accuracy makeAcc(bool above) {
     if (m == 0) {
         return "nonzero finite number with empty mantissa"u8;
     }
-    GoUntyped msb = /* 1 << (_W - 1) */
-            GoUntyped.Parse("9223372036854775808");
+    static readonly UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
     if ((Word)(x.mant[m - 1] & msb) == 0) {
         return fmt.Sprintf("msb not set in last word %#x of %s"u8, x.mant[m - 1], x.Text((rune)'p', 0));
     }
@@ -497,8 +498,7 @@ internal static Accuracy makeAcc(bool above) {
                 // adjust mantissa: divide by 2 to compensate for exponent adjustment
                 shrVU(z.mant, z.mant, 1);
                 // set msb == carry == 1 from the mantissa overflow above
-                GoUntyped msb = /* 1 << (_W - 1) */
-                                    GoUntyped.Parse("9223372036854775808");
+                static readonly UntypedInt msb = /* 1 << (_W - 1) */ 9223372036854775808;
                 z.mant[n - 1] |= (Word)(msb);
             }
         }
@@ -870,8 +870,10 @@ internal static uint64 msb64(nat x) {
         static readonly UntypedInt mbits = 23; //        mantissa size (excluding implicit msb)
         static readonly UntypedInt ebits = /* fbits - mbits - 1 */ 8; //     8  exponent size
         static readonly UntypedInt bias = /* 1<<(ebits-1) - 1 */ 127; //   127  exponent bias
-        static readonly UntypedInt dmin = /* 1 - bias - mbits */ -149; //  -149  smallest unbiased exponent (denormal)
-        static readonly UntypedInt emin = /* 1 - bias */ -126; //  -126  smallest unbiased exponent (normal)
+        GoUntyped dmin = /* 1 - bias - mbits */ //  -149  smallest unbiased exponent (denormal)
+                    GoUntyped.Parse("-149");
+        GoUntyped emin = /* 1 - bias */       //  -126  smallest unbiased exponent (normal)
+                    GoUntyped.Parse("-126");
         static readonly UntypedInt emax = /* bias */ 127; //   127  largest unbiased exponent (normal)
         var e = x.exp - 1;
         nint p = mbits + 1;
@@ -988,8 +990,10 @@ internal static uint64 msb64(nat x) {
         static readonly UntypedInt mbits = 52; //        mantissa size (excluding implicit msb)
         static readonly UntypedInt ebits = /* fbits - mbits - 1 */ 11; //    11  exponent size
         static readonly UntypedInt bias = /* 1<<(ebits-1) - 1 */ 1023; //  1023  exponent bias
-        static readonly UntypedInt dmin = /* 1 - bias - mbits */ -1074; // -1074  smallest unbiased exponent (denormal)
-        static readonly UntypedInt emin = /* 1 - bias */ -1022; // -1022  smallest unbiased exponent (normal)
+        GoUntyped dmin = /* 1 - bias - mbits */ // -1074  smallest unbiased exponent (denormal)
+                    GoUntyped.Parse("-1074");
+        GoUntyped emin = /* 1 - bias */       // -1022  smallest unbiased exponent (normal)
+                    GoUntyped.Parse("-1022");
         static readonly UntypedInt emax = /* bias */ 1023; //  1023  largest unbiased exponent (normal)
         var e = x.exp - 1;
         nint p = mbits + 1;
@@ -1732,13 +1736,13 @@ internal static void validateBinaryOperands(ж<Float> Ꮡx, ж<Float> Ꮡy) {
 
     // mx == my
     // only if |mx| == 1 we have to compare the mantissae
-    switch (mx) {
-    case -1: {
+    var exprᴛ1 = mx;
+    if (exprᴛ1 == -1) {
         return y.ucmp(x);
     }
-    case +1: {
+    if (exprᴛ1 == +1) {
         return x.ucmp(Ꮡy);
-    }}
+    }
 
     return 0;
 }

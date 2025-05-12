@@ -91,7 +91,7 @@ public static (uint64, nint) Uvarint(slice<byte> buf) {
 public static slice<byte> AppendVarint(slice<byte> buf, int64 x) {
     var ux = ((uint64)x) << (int)(1);
     if (x < 0) {
-        ux = ^ux;
+        ux = ~ux;
     }
     return AppendUvarint(buf, ux);
 }
@@ -101,7 +101,7 @@ public static slice<byte> AppendVarint(slice<byte> buf, int64 x) {
 public static nint PutVarint(slice<byte> buf, int64 x) {
     var ux = ((uint64)x) << (int)(1);
     if (x < 0) {
-        ux = ^ux;
+        ux = ~ux;
     }
     return PutUvarint(buf, ux);
 }
@@ -117,7 +117,7 @@ public static (int64, nint) Varint(slice<byte> buf) {
     // ok to continue in presence of error
     var x = ((int64)(ux >> (int)(1)));
     if ((uint64)(ux & 1) != 0) {
-        x = ^x;
+        x = ~x;
     }
     return (x, n);
 }
@@ -160,7 +160,7 @@ public static (int64, error) ReadVarint(io.ByteReader r) {
     // ok to continue in presence of error
     var x = ((int64)(ux >> (int)(1)));
     if ((uint64)(ux & 1) != 0) {
-        x = ^x;
+        x = ~x;
     }
     return (x, err);
 }

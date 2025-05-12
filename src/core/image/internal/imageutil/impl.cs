@@ -63,19 +63,19 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 if ((uint32)(((uint32)rΔ5) & (nint)4278190080L) == 0){
                     rΔ5 >>= (UntypedInt)(16);
                 } else {
-                    rΔ5 = ^(rΔ5 >> (int)(31));
+                    rΔ5 = ~(rΔ5 >> (int)(31));
                 }
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
                 if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
                     g >>= (UntypedInt)(16);
                 } else {
-                    g = ^(g >> (int)(31));
+                    g = ~(g >> (int)(31));
                 }
                 var b = yy1 + 116130 * cb1;
                 if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
                     b >>= (UntypedInt)(16);
                 } else {
-                    b = ^(b >> (int)(31));
+                    b = ~(b >> (int)(31));
                 }
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
@@ -114,19 +114,19 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 if ((uint32)(((uint32)rΔ6) & (nint)4278190080L) == 0){
                     rΔ6 >>= (UntypedInt)(16);
                 } else {
-                    rΔ6 = ^(rΔ6 >> (int)(31));
+                    rΔ6 = ~(rΔ6 >> (int)(31));
                 }
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
                 if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
                     g >>= (UntypedInt)(16);
                 } else {
-                    g = ^(g >> (int)(31));
+                    g = ~(g >> (int)(31));
                 }
                 var b = yy1 + 116130 * cb1;
                 if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
                     b >>= (UntypedInt)(16);
                 } else {
-                    b = ^(b >> (int)(31));
+                    b = ~(b >> (int)(31));
                 }
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
@@ -165,19 +165,19 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 if ((uint32)(((uint32)rΔ7) & (nint)4278190080L) == 0){
                     rΔ7 >>= (UntypedInt)(16);
                 } else {
-                    rΔ7 = ^(rΔ7 >> (int)(31));
+                    rΔ7 = ~(rΔ7 >> (int)(31));
                 }
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
                 if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
                     g >>= (UntypedInt)(16);
                 } else {
-                    g = ^(g >> (int)(31));
+                    g = ~(g >> (int)(31));
                 }
                 var b = yy1 + 116130 * cb1;
                 if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
                     b >>= (UntypedInt)(16);
                 } else {
-                    b = ^(b >> (int)(31));
+                    b = ~(b >> (int)(31));
                 }
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));
@@ -215,19 +215,19 @@ public static bool /*ok*/ DrawYCbCr(ж<imageꓸRGBA> Ꮡdst, image.Rectangle r, 
                 if ((uint32)(((uint32)rΔ8) & (nint)4278190080L) == 0){
                     rΔ8 >>= (UntypedInt)(16);
                 } else {
-                    rΔ8 = ^(rΔ8 >> (int)(31));
+                    rΔ8 = ~(rΔ8 >> (int)(31));
                 }
                 var g = yy1 - 22554 * cb1 - 46802 * cr1;
                 if ((uint32)(((uint32)g) & (nint)4278190080L) == 0){
                     g >>= (UntypedInt)(16);
                 } else {
-                    g = ^(g >> (int)(31));
+                    g = ~(g >> (int)(31));
                 }
                 var b = yy1 + 116130 * cb1;
                 if ((uint32)(((uint32)b) & (nint)4278190080L) == 0){
                     b >>= (UntypedInt)(16);
                 } else {
-                    b = ^(b >> (int)(31));
+                    b = ~(b >> (int)(31));
                 }
                 // use a temp slice to hint to the compiler that a single bounds check suffices
                 var rgba = dpix.slice(x, x + 4, len(dpix));

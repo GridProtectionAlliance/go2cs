@@ -66,7 +66,8 @@ internal static array<@string> rtPkgs = new @string[]{
 
 // NotHardCoded is a package pseudo-ID indicating that a given package
 // is not part of the runtime and doesn't require a hard-coded ID.
-public static readonly UntypedInt NotHardCoded = -1;
+public static readonly GoUntyped NotHardCoded = /* -1 */
+    GoUntyped.Parse("-1");
 
 // HardCodedPkgID returns the hard-coded ID for the specified package
 // path, or -1 if we don't use a hard-coded ID. Hard-coded IDs start

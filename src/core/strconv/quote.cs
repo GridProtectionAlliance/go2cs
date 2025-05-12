@@ -109,16 +109,16 @@ internal static slice<byte> appendEscapedRune(slice<byte> buf, rune r, byte quot
     }
     default: {
         var matchᴛ1 = false;
-        if (r < (rune)' ' || r == 127)) { matchᴛ1 = true;
+        if (r < (rune)' ' || r == 127) { matchᴛ1 = true;
             buf = append(buf, @"\x"u8.ꓸꓸꓸ);
             buf = append(buf, lowerhex[((byte)r) >> (int)(4)]);
             buf = append(buf, lowerhex[(byte)(((byte)r) & 15)]);
         }
-        else if (!utf8.ValidRune(r))) { matchᴛ1 = true;
+        else if (!utf8.ValidRune(r)) { matchᴛ1 = true;
             r = 65533;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && r is < 65536) {
+        if (fallthrough || !matchᴛ1 && r is < 65536)) {
             buf = append(buf, @"\u"u8.ꓸꓸꓸ);
             for (nint s = 12; s >= 0; s -= 4) {
                 buf = append(buf, lowerhex[(rune)(r >> (int)(((nuint)s)) & 15)]);

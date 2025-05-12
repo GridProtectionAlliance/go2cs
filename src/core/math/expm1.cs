@@ -223,7 +223,7 @@ internal static float64 expm1(float64 x) {
     e = (x * (e - c) - c);
     e -= hxs;
     switch (ᐧ) {
-    case {} when k is -1: {
+    case {} when k == -1: {
         return 0.5F * (x - e) - 0.5F;
     }
     case {} when k is 1: {

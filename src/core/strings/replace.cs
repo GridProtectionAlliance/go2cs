@@ -451,11 +451,11 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     slice<byte> buf = default!;           // lazily allocated
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
-        if (r[b] != b) {
+        if (r.val[b] != b) {
             if (buf == default!) {
                 buf = slice<byte>(s);
             }
-            buf[i] = r[b];
+            buf[i] = r.val[b];
         }
     }
     if (buf == default!) {
@@ -472,7 +472,7 @@ internal static ж<singleStringReplacer> makeSingleStringReplacer(@string patter
     nint last = 0;
     for (nint i = 0; i < len(s); i++) {
         var b = s[i];
-        if (r[b] == b) {
+        if (r.val[b] == b) {
             continue;
         }
         if (last != i) {

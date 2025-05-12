@@ -309,7 +309,7 @@ internal static slice<byte> /*next*/ nextDecomposed(ж<Iter> Ꮡi) {
                         i.next = nextCGJDecompose;
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 == ssStarter) { matchᴛ1 = true;
+                    if (fallthrough || !matchᴛ1 && exprᴛ1 == ssStarter)) { matchᴛ1 = true;
                         if (outp > 0) {
                             copy(i.buf[(int)(outp)..], d);
                             return i.buf[..(int)(p)];

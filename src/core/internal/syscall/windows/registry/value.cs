@@ -102,13 +102,12 @@ public static unsafe (@string val, uint32 valtype, error err) GetStringValue(thi
     if (err2 != default!) {
         return ("", typ, err2);
     }
-    switch (typ) {
-    case SZ or EXPAND_SZ: {
-        break;
+    var exprᴛ1 = typ;
+    if (exprᴛ1 == SZ || exprᴛ1 == EXPAND_SZ) {
     }
-    default: {
+    else { /* default: */
         return ("", typ, ErrUnexpectedType);
-    }}
+    }
 
     if (len(data) == 0) {
         return ("", typ, default!);
@@ -240,22 +239,22 @@ public static (uint64 val, uint32 valtype, error err) GetIntegerValue(this Key k
     if (err2 != default!) {
         return (0, typ, err2);
     }
-    switch (typ) {
-    case DWORD: {
+    var exprᴛ1 = typ;
+    if (exprᴛ1 == DWORD) {
         if (len(data) != 4) {
             return (0, typ, errors.New("DWORD value is not 4 bytes long"u8));
         }
         return (((uint64)(~(ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))))), DWORD, default!);
     }
-    case QWORD: {
+    if (exprᴛ1 == QWORD) {
         if (len(data) != 8) {
             return (0, typ, errors.New("QWORD value is not 8 bytes long"u8));
         }
         return (~(ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡ(data, 0))), QWORD, default!);
     }
-    default: {
+    { /* default: */
         return (0, typ, ErrUnexpectedType);
-    }}
+    }
 
 }
 

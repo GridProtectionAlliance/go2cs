@@ -308,12 +308,12 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
         if (x <= 0.9F){
             lgamma = -Log(x);
             switch (ᐧ) {
-            case {} when x is >= (Ymin - 1 + 0.27F): {
+            case {} when x >= (Ymin - 1 + 0.27F): {
                 y = 1 - x;
                 i = 0;
                 break;
             }
-            case {} when x is >= (Ymin - 1 - 0.27F): {
+            case {} when x >= (Ymin - 1 - 0.27F): {
                 y = x - (Tc - 1);
                 i = 1;
                 break;
@@ -330,12 +330,12 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             // 0 < x < 0.2316
             lgamma = 0;
             switch (ᐧ) {
-            case {} when x is >= (Ymin + 0.27F): {
+            case {} when x >= (Ymin + 0.27F): {
                 y = 2 - x;
                 i = 0;
                 break;
             }
-            case {} when x is >= (Ymin - 0.27F): {
+            case {} when x >= (Ymin - 0.27F): {
                 y = x - Tc;
                 i = 1;
                 break;
@@ -388,26 +388,26 @@ public static (float64 lgamma, nint sign) Lgamma(float64 x) {
             z *= (y + 6);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 6) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 6)) { matchᴛ1 = true;
             z *= (y + 5);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 5)) { matchᴛ1 = true;
             z *= (y + 4);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 4)) {
             z *= (y + 3);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 3)) { matchᴛ1 = true;
             z *= (y + 2);
             lgamma += Log(z);
         }
 
         break;
     }
-    case {} when x is < Two58: {
+    case {} when x < Two58: {
         var t = Log(x);
         var z = 1 / x;
         var y = z * z;

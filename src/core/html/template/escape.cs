@@ -236,7 +236,7 @@ internal static ж<godebug.Setting> debugAllowActionJSTmpl = godebug.New("jstmpl
             s = append(s, "_html_template_urlfilter"u8);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ2 == urlPartPreQuery) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ2 == urlPartPreQuery)) { matchᴛ1 = true;
             var exprᴛ3 = c.state;
             if (exprᴛ3 == stateCSSDqStr || exprᴛ3 == stateCSSSqStr) {
                 s = append(s, "_html_template_cssescaper"u8);

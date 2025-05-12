@@ -321,13 +321,13 @@ internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
     foreach (var (i, t) in list) {
         @string s = default!;
         var matchᴛ1 = false;
-        if (t is default!) { matchᴛ1 = true;
+        if (t == default!) { matchᴛ1 = true;
             fallthrough = true;
         }
         if (fallthrough || !matchᴛ1 && (!isValid(t))) { matchᴛ1 = true;
             s = "unknown type"u8;
         }
-        else if (isUntyped(t))) {
+        else if (isUntyped(t)) {
             if (isNumeric(t)){
                 // should not happen but be cautious
                 // Do not imply a specific type requirement:
@@ -341,7 +341,7 @@ internal static slice<ΔType> /*res*/ varTypes(slice<ж<Var>> list) {
                 s = strings.Replace(t._<Basic.val>().name, "untyped "u8, ""u8, -1);
             }
         }
-        else if (variadic && i == len(list) - 1)) { matchᴛ1 = true;
+        else if (variadic && i == len(list) - 1) { matchᴛ1 = true;
             s = check.sprintf("...%s"u8, t._<Slice.val>().elem);
         }
 

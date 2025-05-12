@@ -622,8 +622,8 @@ internal static nint bitLen(nuint n) {
     var mLimbs = m.nat.limbs[..(int)(n)];
     var aLimbs = a.limbs[..(int)(n)];
     var bLimbs = b.limbs[..(int)(n)];
-    switch (n) {
-    default: {
+    var exprᴛ1 = n;
+    { /* default: */
         var T = new slice<nuint>(0, // Attempt to use a stack-allocated backing array.
  preallocLimbs * 2);
         if (cap(T) < n * 2) {
@@ -679,9 +679,8 @@ internal static nint bitLen(nuint n) {
  // highly undesirable (see https://go.dev/issue/13907).
  T[(int)(n)..]);
         x.maybeSubtractModulus(((choice)cΔ4), Ꮡm);
-        break;
     }
-    case 1024 / _W: {
+    else if (exprᴛ1 == 1024 / _W) {
 // The following specialized cases follow the exact same algorithm, but
 // optimized for the sizes most used in RSA. addMulVVW is implemented in
 // assembly with loop unrolling depending on the architecture and bounds
@@ -699,9 +698,8 @@ internal static nint bitLen(nuint n) {
         }
         copy((~x.reset(n)).limbs, T[(int)(n)..]);
         x.maybeSubtractModulus(((choice)cΔ5), Ꮡm);
-        break;
     }
-    case 1536 / _W: {
+    else if (exprᴛ1 == 1536 / _W) {
         static readonly UntypedInt n = /* 1536 / _W */ 24; // compiler hint
         var T = new slice<nuint>(n * 2);
         nuint cΔ6 = default!;
@@ -715,9 +713,8 @@ internal static nint bitLen(nuint n) {
         }
         copy((~x.reset(n)).limbs, T[(int)(n)..]);
         x.maybeSubtractModulus(((choice)cΔ6), Ꮡm);
-        break;
     }
-    case 2048 / _W: {
+    else if (exprᴛ1 == 2048 / _W) {
         static readonly UntypedInt n = /* 2048 / _W */ 32; // compiler hint
         var T = new slice<nuint>(n * 2);
         nuint c = default!;
@@ -731,8 +728,7 @@ internal static nint bitLen(nuint n) {
         }
         copy((~x.reset(n)).limbs, T[(int)(n)..]);
         x.maybeSubtractModulus(((choice)c), Ꮡm);
-        break;
-    }}
+    }
 
     return montgomeryMulꓸᏑx;
 }

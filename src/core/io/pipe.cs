@@ -40,7 +40,7 @@ public static error ErrClosedPipe = errors.New("io: read/write on closed pipe"u8
     internal channel<slice<byte>> wrCh;
     internal channel<nint> rdCh;
     internal sync_package.Once once; // Protects closing done
-    internal channel<struct{}> done;
+    internal channel<EmptyStruct> done;
     internal onceError rerr;
     internal onceError werr;
 }
@@ -222,7 +222,7 @@ public static (ж<PipeReader>, ж<PipeWriter>) Pipe() {
     var pw = Ꮡ(new PipeWriter(r: new PipeReader(pipe: new pipe(
         wrCh: new channel<slice<byte>>(1),
         rdCh: new channel<nint>(1),
-        done: new channel<struct{}>(1)
+        done: new channel<EmptyStruct>(1)
     )
     )
     ));

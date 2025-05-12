@@ -117,7 +117,7 @@ internal static stdFunction _WerGetFlags;
 internal static stdFunction _WerSetFlags;
 internal static stdFunction _WriteConsoleW;
 internal static stdFunction _WriteFile;
-internal static stdFunction _;
+internal static stdFunction _ᴛ1ʗ;
 internal static stdFunction _ProcessPrng;
 internal static stdFunction _NtCreateWaitCompletionPacket;
 internal static stdFunction _NtAssociateWaitCompletionPacket;
@@ -126,7 +126,7 @@ internal static stdFunction _RtlGetCurrentPeb;
 internal static stdFunction _RtlGetVersion;
 internal static stdFunction _timeBeginPeriod;
 internal static stdFunction _timeEndPeriod;
-internal static stdFunction _;
+internal static stdFunction _ᴛ3ʗ;
 
 internal static array<uint16> bcryptprimitivesdll = new uint16[]{(rune)'b', (rune)'c', (rune)'r', (rune)'y', (rune)'p', (rune)'t', (rune)'p', (rune)'r', (rune)'i', (rune)'m', (rune)'i', (rune)'t', (rune)'i', (rune)'v', (rune)'e', (rune)'s', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();
 internal static array<uint16> ntdlldll = new uint16[]{(rune)'n', (rune)'t', (rune)'d', (rune)'l', (rune)'l', (rune)'.', (rune)'d', (rune)'l', (rune)'l', 0}.array();
@@ -336,10 +336,8 @@ internal static uintptr getPageSize() {
     return ((uintptr)info.dwpagesize);
 }
 
-internal static readonly GoUntyped currentProcess = /* ^uintptr(0) */ // -1 = current process
-    GoUntyped.Parse("18446744073709551615");
-internal static readonly GoUntyped currentThread = /* ^uintptr(1) */ // -2 = current thread
-    GoUntyped.Parse("18446744073709551614");
+internal const uintptr currentProcess = /* ^uintptr(0) */ 18446744073709551615; // -1 = current process
+internal const uintptr currentThread = /* ^uintptr(1) */ 18446744073709551614; // -2 = current thread
 
 // in sys_windows_386.s and sys_windows_amd64.s:
 internal static partial uint32 getlasterror();
@@ -530,10 +528,8 @@ internal static void exit(int32 code) {
 //
 //go:nosplit
 internal static unsafe int32 write1(uintptr fd, @unsafe.Pointer buf, int32 n) {
-    GoUntyped _STD_OUTPUT_HANDLE = /* ^uintptr(10) */ // -11
-            GoUntyped.Parse("18446744073709551605");
-    GoUntyped _STD_ERROR_HANDLE = /* ^uintptr(11) */ // -12
-            GoUntyped.Parse("18446744073709551604");
+    const uintptr _STD_OUTPUT_HANDLE = /* ^uintptr(10) */ 18446744073709551605; // -11
+    const uintptr _STD_ERROR_HANDLE = /* ^uintptr(11) */ 18446744073709551604; // -12
     uintptr handle = default!;
     switch (fd) {
     case 1: {
@@ -654,33 +650,30 @@ internal static int32 semasleep(int64 ns) {
             }
         }
     }
-    switch (result) {
-    case _WAIT_OBJECT_0: {
+    var exprᴛ1 = result;
+    if (exprᴛ1 == _WAIT_OBJECT_0) {
         return 0;
     }
-    case _WAIT_TIMEOUT: {
+    if (exprᴛ1 == _WAIT_TIMEOUT) {
         return -1;
     }
-    case _WAIT_ABANDONED: {
+    if (exprᴛ1 == _WAIT_ABANDONED) {
         systemstack(() => {
             @throw("runtime.semasleep wait_abandoned"u8);
         });
-        break;
     }
-    case _WAIT_FAILED: {
+    else if (exprᴛ1 == _WAIT_FAILED) {
         systemstack(() => {
             print("runtime: waitforsingleobject wait_failed; errno=", getlasterror(), "\n");
             @throw("runtime.semasleep wait_failed"u8);
         });
-        break;
     }
-    default: {
+    else { /* default: */
         systemstack(() => {
             print("runtime: waitforsingleobject unexpected; result=", result, "\n");
             @throw("runtime.semasleep unexpected"u8);
         });
-        break;
-    }}
+    }
 
     return -1;
 }
@@ -1075,18 +1068,16 @@ internal static void usleep(uint32 us) {
 
 internal static uintptr ctrlHandler(uint32 _type) {
     uint32 s = default!;
-    switch (_type) {
-    case _CTRL_C_EVENT or _CTRL_BREAK_EVENT: {
+    var exprᴛ1 = _type;
+    if (exprᴛ1 == _CTRL_C_EVENT || exprᴛ1 == _CTRL_BREAK_EVENT) {
         s = _SIGINT;
-        break;
     }
-    case _CTRL_CLOSE_EVENT or _CTRL_LOGOFF_EVENT or _CTRL_SHUTDOWN_EVENT: {
+    else if (exprᴛ1 == _CTRL_CLOSE_EVENT || exprᴛ1 == _CTRL_LOGOFF_EVENT || exprᴛ1 == _CTRL_SHUTDOWN_EVENT) {
         s = _SIGTERM;
-        break;
     }
-    default: {
+    else { /* default: */
         return 0;
-    }}
+    }
 
     if (sigsend(s)) {
         if (s == _SIGTERM) {
@@ -1201,7 +1192,7 @@ internal static void setProcessCPUProfiler(int32 hz) {
 internal static void setThreadCPUProfiler(int32 hz) {
     var ms = ((int32)0);
     ref var due = ref heap<int64>(out var Ꮡdue);
-    due = ^((int64)(^((uint64)(1 << (int)(63)))));
+    due = ~((int64)(~((uint64)(1 << (int)(63)))));
     if (hz > 0) {
         ms = 1000 / hz;
         if (ms == 0) {

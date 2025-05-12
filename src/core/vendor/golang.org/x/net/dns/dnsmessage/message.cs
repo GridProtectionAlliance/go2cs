@@ -1121,16 +1121,16 @@ internal static map<section, @string> sectionNames = new map<section, @string>{
     // Validate the lengths. It is very unlikely that anyone will try to
     // pack more than 65535 of any particular type, but it is possible and
     // we should fail gracefully.
-    if (len(m.Questions) > ((nint)(^((uint16)0)))) {
+    if (len(m.Questions) > ((nint)(~((uint16)0)))) {
         return (default!, errTooManyQuestions);
     }
-    if (len(m.Answers) > ((nint)(^((uint16)0)))) {
+    if (len(m.Answers) > ((nint)(~((uint16)0)))) {
         return (default!, errTooManyAnswers);
     }
-    if (len(m.Authorities) > ((nint)(^((uint16)0)))) {
+    if (len(m.Authorities) > ((nint)(~((uint16)0)))) {
         return (default!, errTooManyAuthorities);
     }
-    if (len(m.Additionals) > ((nint)(^((uint16)0)))) {
+    if (len(m.Additionals) > ((nint)(~((uint16)0)))) {
         return (default!, errTooManyAdditionals);
     }
     Δheader h = default!;
@@ -1356,7 +1356,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
         err = errTooManyAdditionals;
     }
 
-    if (count.val == ^((uint16)0)) {
+    if (count.val == ~((uint16)0)) {
         return err;
     }
     count.val++;
@@ -1845,7 +1845,7 @@ public static Builder NewBuilder(slice<byte> buf, Header h) {
 // preLen is the length that msg was before the ResourceBody was packed.
 [GoRecv] internal static error fixLen(this ref ResourceHeader h, slice<byte> msg, nint lenOff, nint preLen) {
     nint conLen = len(msg) - preLen;
-    if (conLen > ((nint)(^((uint16)0)))) {
+    if (conLen > ((nint)(~((uint16)0)))) {
         return errResTooLong;
     }
     // Fill in the length now that we know how long the content is.
@@ -2133,7 +2133,7 @@ public static @string String(this Name n) {
             // Miss. Add the suffix to the compression table if the
             // offset can be stored in the available 14 bits.
             nint newPtr = len(msg) - compressionOff;
-            if (newPtr <= ((nint)(^((uint16)0) >> (int)(2)))) {
+            if (newPtr <= ((nint)(~((uint16)0) >> (int)(2)))) {
                 if (nameAsStr == ""u8) {
                     // allocate n.Data on the heap once, to avoid allocating it
                     // multiple times (for next labels).

@@ -100,8 +100,8 @@ public static ж<Reader> NewReader(io.Reader r) {
         }
         format.mayOnlyBe((~hdr).Format);
         // Check for PAX/GNU special headers and files.
-        switch ((~hdr).Typeflag) {
-        case TypeXHeader or TypeXGlobalHeader: {
+        var exprᴛ1 = (~hdr).Typeflag;
+        if (exprᴛ1 == TypeXHeader || exprᴛ1 == TypeXGlobalHeader) {
             format.mayOnlyBe(FormatPAX);
             (paxHdrs, err) = parsePAX(~tr);
             if (err != default!) {
@@ -118,9 +118,8 @@ public static ж<Reader> NewReader(io.Reader r) {
                 )), default!);
             }
             continue;
-            break;
         }
-        case TypeGNULongName or TypeGNULongLink: {
+        else if (exprᴛ1 == TypeGNULongName || exprᴛ1 == TypeGNULongLink) {
             format.mayOnlyBe(FormatGNU);
             (realname, errΔ6) = readSpecialFile(~tr);
             if (errΔ6 != default!) {
@@ -128,20 +127,17 @@ public static ж<Reader> NewReader(io.Reader r) {
                 return (default!, errΔ6);
             }
             parser p = default!;
-            switch ((~hdr).Typeflag) {
-            case TypeGNULongName: {
+            var exprᴛ2 = (~hdr).Typeflag;
+            if (exprᴛ2 == TypeGNULongName) {
                 gnuLongName = p.parseString(realname);
-                break;
             }
-            case TypeGNULongLink: {
+            else if (exprᴛ2 == TypeGNULongLink) {
                 gnuLongLink = p.parseString(realname);
-                break;
-            }}
+            }
 
             continue;
-            break;
         }
-        default: {
+        else { /* default: */
             {
                 var errΔ7 = mergePAX(hdr, // This is a meta header affecting the next header
  // The old GNU sparse format is handled here since it is technically
@@ -184,7 +180,7 @@ public static ж<Reader> NewReader(io.Reader r) {
             }
             hdr.val.Format = format;
             return (hdr, default!);
-        }}
+        }
 
     }
 }
@@ -826,7 +822,7 @@ internal static int64 physicalRemaining(this regFileReader fr) {
     case {} when err is io.EOF: {
         return (n, errMissData);
     }
-    case {} when err is != default!: {
+    case {} when err != default!: {
         return (n, err);
     }
     case {} when sr.logicalRemaining() == 0 && sr.physicalRemaining() > 0: {
@@ -898,7 +894,7 @@ internal static int64 physicalRemaining(this regFileReader fr) {
     case {} when err is io.EOF: {
         return (n, errMissData);
     }
-    case {} when err is != default!: {
+    case {} when err != default!: {
         return (n, err);
     }
     case {} when sr.logicalRemaining() == 0 && sr.physicalRemaining() > 0: {

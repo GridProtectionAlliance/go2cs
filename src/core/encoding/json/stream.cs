@@ -96,13 +96,12 @@ Input:
         for (; scanp < len(dec.buf); scanp++) {
             var c = dec.buf[scanp];
             dec.scan.bytes++;
-            switch (dec.scan.step(Ꮡ(dec.scan), c)) {
-            case scanEnd: {
+            var exprᴛ1 = dec.scan.step(Ꮡ(dec.scan), c);
+            if (exprᴛ1 == scanEnd) {
                 dec.scan.bytes--;
                 goto break_Input;
-                break;
             }
-            case scanEndObject or scanEndArray: {
+            else if (exprᴛ1 == scanEndObject || exprᴛ1 == scanEndArray) {
                 if (stateEndValue(Ꮡ(dec.scan), // scanEnd is delayed one byte so we decrement
  // the scanner bytes count by 1 to ensure that
  // this value is correct in the next call of Decode.
@@ -113,12 +112,11 @@ Input:
                     scanp++;
                     goto break_Input;
                 }
-                break;
             }
-            case scanError: {
+            else if (exprᴛ1 == scanError) {
                 dec.err = dec.scan.err;
                 return (0, dec.scan.err);
-            }}
+            }
 
         }
         // Did the last read have an error?
@@ -268,9 +266,9 @@ public static (slice<byte>, error) MarshalJSON(this RawMessage m) {
     return default!;
 }
 
-internal static Marshaler _ = ((ж<RawMessage>)default!);
+internal static Marshaler _ᴛ1ʗ = ((ж<RawMessage>)default!);
 
-internal static Unmarshaler _ = ((ж<RawMessage>)default!);
+internal static Unmarshaler _ᴛ2ʗ = ((ж<RawMessage>)default!);
 
 [GoType("any")] partial struct ΔToken;
 
@@ -289,8 +287,8 @@ internal static readonly UntypedInt tokenObjectComma = 8;
     // Note: Not calling peek before switch, to avoid
     // putting peek into the standard Decode path.
     // peek is only called when using the Token API.
-    switch (dec.tokenState) {
-    case tokenArrayComma: {
+    var exprᴛ1 = dec.tokenState;
+    if (exprᴛ1 == tokenArrayComma) {
         var (c, err) = dec.peek();
         if (err != default!) {
             return err;
@@ -300,9 +298,8 @@ internal static readonly UntypedInt tokenObjectComma = 8;
         }
         dec.scanp++;
         dec.tokenState = tokenArrayValue;
-        break;
     }
-    case tokenObjectColon: {
+    else if (exprᴛ1 == tokenObjectColon) {
         var (c, err) = dec.peek();
         if (err != default!) {
             return err;
@@ -312,31 +309,28 @@ internal static readonly UntypedInt tokenObjectComma = 8;
         }
         dec.scanp++;
         dec.tokenState = tokenObjectValue;
-        break;
-    }}
+    }
 
     return default!;
 }
 
 [GoRecv] internal static bool tokenValueAllowed(this ref Decoder dec) {
-    switch (dec.tokenState) {
-    case tokenTopValue or tokenArrayStart or tokenArrayValue or tokenObjectValue: {
+    var exprᴛ1 = dec.tokenState;
+    if (exprᴛ1 == tokenTopValue || exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
         return true;
-    }}
+    }
 
     return false;
 }
 
 [GoRecv] internal static void tokenValueEnd(this ref Decoder dec) {
-    switch (dec.tokenState) {
-    case tokenArrayStart or tokenArrayValue: {
+    var exprᴛ1 = dec.tokenState;
+    if (exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue) {
         dec.tokenState = tokenArrayComma;
-        break;
     }
-    case tokenObjectValue: {
+    else if (exprᴛ1 == tokenObjectValue) {
         dec.tokenState = tokenObjectComma;
-        break;
-    }}
+    }
 
 }
 
@@ -457,31 +451,25 @@ public static @string String(this Delim d) {
 
 [GoRecv] internal static (ΔToken, error) tokenError(this ref Decoder dec, byte c) {
     @string context = default!;
-    switch (dec.tokenState) {
-    case tokenTopValue: {
+    var exprᴛ1 = dec.tokenState;
+    if (exprᴛ1 == tokenTopValue) {
         context = " looking for beginning of value"u8;
-        break;
     }
-    case tokenArrayStart or tokenArrayValue or tokenObjectValue: {
+    else if (exprᴛ1 == tokenArrayStart || exprᴛ1 == tokenArrayValue || exprᴛ1 == tokenObjectValue) {
         context = " looking for beginning of value"u8;
-        break;
     }
-    case tokenArrayComma: {
+    else if (exprᴛ1 == tokenArrayComma) {
         context = " after array element"u8;
-        break;
     }
-    case tokenObjectKey: {
+    else if (exprᴛ1 == tokenObjectKey) {
         context = " looking for beginning of object key string"u8;
-        break;
     }
-    case tokenObjectColon: {
+    else if (exprᴛ1 == tokenObjectColon) {
         context = " after object key"u8;
-        break;
     }
-    case tokenObjectComma: {
+    else if (exprᴛ1 == tokenObjectComma) {
         context = " after object key:value pair"u8;
-        break;
-    }}
+    }
 
     return (default!, new SyntaxError("invalid character "u8 + quoteChar(c) + context, dec.InputOffset()));
 }

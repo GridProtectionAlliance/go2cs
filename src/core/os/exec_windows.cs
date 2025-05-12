@@ -68,7 +68,7 @@ partial class os_package {
     defer(p.handleTransientRelease);
     if (AreEqual(sig, ΔKill)) {
         ref var terminationHandle = ref heap(new syscall_package.ΔHandle(), out var ᏑterminationHandle);
-        var e = syscall.DuplicateHandle(^((syscallꓸHandle)0), ((syscallꓸHandle)handle), ^((syscallꓸHandle)0), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
+        var e = syscall.DuplicateHandle(~((syscallꓸHandle)0), ((syscallꓸHandle)handle), ~((syscallꓸHandle)0), ᏑterminationHandle, syscall.PROCESS_TERMINATE, false, 0);
         if (e != default!) {
             return NewSyscallError("DuplicateHandle"u8, e);
         }

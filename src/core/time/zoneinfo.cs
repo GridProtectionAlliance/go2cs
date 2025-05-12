@@ -60,7 +60,8 @@ partial class time_package {
 
 // alpha and omega are the beginning and end of time for zone
 // transitions.
-internal static readonly UntypedInt alpha = /* -1 << 63 */ -9223372036854775808; // math.MinInt64
+internal static readonly GoUntyped alpha = /* -1 << 63 */ // math.MinInt64
+    GoUntyped.Parse("-9223372036854775808");
 
 internal static readonly UntypedInt omega = /* 1<<63 - 1 */ 9223372036854775807; // math.MaxInt64
 

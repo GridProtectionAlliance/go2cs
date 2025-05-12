@@ -114,7 +114,7 @@ internal static error errBadCount = errors.New("invalid message length"u8);
 internal static int64 toInt(uint64 x) {
     var i = ((int64)(x >> (int)(1)));
     if ((uint64)(x & 1) != 0) {
-        i = ^i;
+        i = ~i;
     }
     return i;
 }

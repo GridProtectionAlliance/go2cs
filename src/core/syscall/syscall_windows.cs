@@ -20,8 +20,7 @@ partial class syscall_package {
 
 [GoType("num:uintptr")] partial struct ΔHandle;
 
-public static readonly GoUntyped InvalidHandle = /* ^Handle(0) */
-    GoUntyped.Parse("18446744073709551615");
+public static readonly ΔHandle InvalidHandle = /* ^Handle(0) */ 18446744073709551615;
 
 // StringToUTF16 returns the UTF-16 encoding of the UTF-8 string s,
 // with a terminating NUL added. If s contains a NUL byte this
@@ -66,11 +65,11 @@ public static @string UTF16ToString(slice<uint16> s) {
             break;
         }
         switch (ᐧ) {
-        case {} when v is <= rune1Max: {
+        case {} when v <= rune1Max: {
             maxLen += 1;
             break;
         }
-        case {} when v is <= rune2Max: {
+        case {} when v <= rune2Max: {
             maxLen += 2;
             break;
         }
@@ -346,19 +345,16 @@ public static (ΔHandle fd, error err) Open(@string path, nint mode, uint32 perm
         return (InvalidHandle, err);
     }
     uint32 access = default!;
-    switch ((nint)(mode & ((nint)((UntypedInt)(O_RDONLY | O_WRONLY) | O_RDWR)))) {
-    case O_RDONLY: {
+    var exprᴛ1 = (nint)(mode & ((nint)((UntypedInt)(O_RDONLY | O_WRONLY) | O_RDWR)));
+    if (exprᴛ1 == O_RDONLY) {
         access = GENERIC_READ;
-        break;
     }
-    case O_WRONLY: {
+    else if (exprᴛ1 == O_WRONLY) {
         access = GENERIC_WRITE;
-        break;
     }
-    case O_RDWR: {
+    else if (exprᴛ1 == O_RDWR) {
         access = (uint32)(GENERIC_READ | GENERIC_WRITE);
-        break;
-    }}
+    }
 
     if ((nint)(mode & O_CREAT) != 0) {
         access |= (uint32)(GENERIC_WRITE);
@@ -408,8 +404,8 @@ public static (ΔHandle fd, error err) Open(@string path, nint mode, uint32 perm
             // change the file permissions.
             // Avoid that to preserve the Unix semantics.
             var (h, e) = CreateFile(pathp, access, sharemode, sa, TRUNCATE_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-            var exprᴛ1 = e;
-            if (exprᴛ1 == ERROR_FILE_NOT_FOUND || exprᴛ1 == _ERROR_BAD_NETPATH || exprᴛ1 == ERROR_PATH_NOT_FOUND) {
+            var exprᴛ2 = e;
+            if (exprᴛ2 == ERROR_FILE_NOT_FOUND || exprᴛ2 == _ERROR_BAD_NETPATH || exprᴛ2 == ERROR_PATH_NOT_FOUND) {
             }
             else { /* default: */
                 return (h, e);
@@ -746,7 +742,8 @@ public static error /*err*/ Utimes(@string path, slice<Timeval> tv) => func((def
 });
 
 // This matches the value in os/file_windows.go.
-internal static readonly UntypedInt _UTIME_OMIT = -1;
+internal static readonly GoUntyped _UTIME_OMIT = /* -1 */
+    GoUntyped.Parse("-1");
 
 public static error /*err*/ UtimesNano(@string path, slice<Timespec> ts) => func((defer, _) => {
     error err = default!;
@@ -892,8 +889,8 @@ public static bool SocketDisableIPv6;
     }
     sa.raw.Family = AF_INET;
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡsa.raw.of(RawSockaddrInet4.ᏑPort)));
-    p[0] = ((byte)(sa.Port >> (int)(8)));
-    p[1] = ((byte)sa.Port);
+    p.val[0] = ((byte)(sa.Port >> (int)(8)));
+    p.val[1] = ((byte)sa.Port);
     sa.raw.Addr = sa.Addr;
     return (new @unsafe.Pointer(Ꮡ(sa.raw)), ((int32)@unsafe.Sizeof(sa.raw)), default!);
 }
@@ -911,8 +908,8 @@ public static bool SocketDisableIPv6;
     }
     sa.raw.Family = AF_INET6;
     var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡsa.raw.of(RawSockaddrInet6.ᏑPort)));
-    p[0] = ((byte)(sa.Port >> (int)(8)));
-    p[1] = ((byte)sa.Port);
+    p.val[0] = ((byte)(sa.Port >> (int)(8)));
+    p.val[1] = ((byte)sa.Port);
     sa.raw.Scope_id = sa.ZoneId;
     sa.raw.Addr = sa.Addr;
     return (new @unsafe.Pointer(Ꮡ(sa.raw)), ((int32)@unsafe.Sizeof(sa.raw)), default!);
@@ -956,8 +953,8 @@ public static bool SocketDisableIPv6;
 }
 
 [GoRecv] public static (ΔSockaddr, error) Sockaddr(this ref RawSockaddrAny rsa) {
-    switch (rsa.Addr.Family) {
-    case AF_UNIX: {
+    var exprᴛ1 = rsa.Addr.Family;
+    if (exprᴛ1 == AF_UNIX) {
         var pp = (ж<RawSockaddrUnix>)(uintptr)(@unsafe.Pointer.FromRef(ref rsa));
         var sa = @new<SockaddrUnix>();
         if ((~pp).Path[0] == 0) {
@@ -980,23 +977,23 @@ public static bool SocketDisableIPv6;
         sa.val.Name = ((@string)@unsafe.Slice((ж<byte>)(uintptr)(new @unsafe.Pointer(Ꮡ(~pp).Path.at<int8>(0))), n));
         return (~sa, default!);
     }
-    case AF_INET: {
+    if (exprᴛ1 == AF_INET) {
         var pp = (ж<RawSockaddrInet4>)(uintptr)(@unsafe.Pointer.FromRef(ref rsa));
         var sa = @new<SockaddrInet4>();
         var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-        sa.val.Port = ((nint)p[0]) << (int)(8) + ((nint)p[1]);
+        sa.val.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
         sa.val.Addr = pp.val.Addr;
         return (~sa, default!);
     }
-    case AF_INET6: {
+    if (exprᴛ1 == AF_INET6) {
         var pp = (ж<RawSockaddrInet6>)(uintptr)(@unsafe.Pointer.FromRef(ref rsa));
         var sa = @new<SockaddrInet6>();
         var p = (ж<array<byte>>)(uintptr)(new @unsafe.Pointer(Ꮡ((~pp).Port)));
-        sa.val.Port = ((nint)p[0]) << (int)(8) + ((nint)p[1]);
+        sa.val.Port = ((nint)p.val[0]) << (int)(8) + ((nint)p.val[1]);
         sa.val.ZoneId = pp.val.Scope_id;
         sa.val.Addr = pp.val.Addr;
         return (~sa, default!);
-    }}
+    }
 
     return (default!, EAFNOSUPPORT);
 }
@@ -1602,8 +1599,8 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) => fun
     }
     var rdb = (ж<reparseDataBuffer>)(uintptr)(new @unsafe.Pointer(Ꮡ(rdbbuf, 0)));
     @string s = default!;
-    switch ((~rdb).ReparseTag) {
-    case IO_REPARSE_TAG_SYMLINK: {
+    var exprᴛ1 = (~rdb).ReparseTag;
+    if (exprᴛ1 == IO_REPARSE_TAG_SYMLINK) {
         var data = (ж<symbolicLinkReparseBuffer>)(uintptr)(new @unsafe.Pointer(Ꮡ((~rdb).reparseBuffer)));
         var p = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡ(~data).PathBuffer.at<uint16>(0)));
         s = UTF16ToString(p[(int)((~data).SubstituteNameOffset / 2)..(int)(((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2)]);
@@ -1625,9 +1622,8 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) => fun
             } else {
             }
         }
-        break;
     }
-    case _IO_REPARSE_TAG_MOUNT_POINT: {
+    else if (exprᴛ1 == _IO_REPARSE_TAG_MOUNT_POINT) {
         var data = (ж<mountPointReparseBuffer>)(uintptr)(new @unsafe.Pointer(Ꮡ((~rdb).reparseBuffer)));
         var p = (ж<array<uint16>>)(uintptr)(new @unsafe.Pointer(Ꮡ(~data).PathBuffer.at<uint16>(0)));
         s = UTF16ToString(p[(int)((~data).SubstituteNameOffset / 2)..(int)(((~data).SubstituteNameOffset + (~data).SubstituteNameLength) / 2)]);
@@ -1641,11 +1637,10 @@ public static (nint n, error err) Readlink(@string path, slice<byte> buf) => fun
             s = s[4..];
         } else {
         }
-        break;
     }
-    default: {
+    else { /* default: */
         return (-1, ENOENT);
-    }}
+    }
 
     // unexpected; do nothing
     // the path is not a symlink or junction but another type of reparse

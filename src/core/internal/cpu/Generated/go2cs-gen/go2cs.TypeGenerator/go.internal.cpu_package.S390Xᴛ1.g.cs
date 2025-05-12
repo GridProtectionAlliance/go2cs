@@ -47,7 +47,7 @@ public static partial class cpu_package
         internal static ref bool ᏑHasKDSA(ref S390Xᴛ1 instance) => ref instance.HasKDSA;
         internal static ref bool ᏑHasECDSA(ref S390Xᴛ1 instance) => ref instance.HasECDSA;
         internal static ref bool ᏑHasEDDSA(ref S390Xᴛ1 instance) => ref instance.HasEDDSA;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref S390Xᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref S390Xᴛ1 instance) => ref instance.__;
         
         // Constructors
         public S390Xᴛ1(NilType _)
@@ -74,10 +74,10 @@ public static partial class cpu_package
             this.HasKDSA = default!;
             this.HasECDSA = default!;
             this.HasEDDSA = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public S390Xᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasZARCH = default!, bool HasSTFLE = default!, bool HasLDISP = default!, bool HasEIMM = default!, bool HasDFP = default!, bool HasETF3EH = default!, bool HasMSA = default!, bool HasAES = default!, bool HasAESCBC = default!, bool HasAESCTR = default!, bool HasAESGCM = default!, bool HasGHASH = default!, bool HasSHA1 = default!, bool HasSHA256 = default!, bool HasSHA512 = default!, bool HasSHA3 = default!, bool HasVX = default!, bool HasVXE = default!, bool HasKDSA = default!, bool HasECDSA = default!, bool HasEDDSA = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public S390Xᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasZARCH = default!, bool HasSTFLE = default!, bool HasLDISP = default!, bool HasEIMM = default!, bool HasDFP = default!, bool HasETF3EH = default!, bool HasMSA = default!, bool HasAES = default!, bool HasAESCBC = default!, bool HasAESCTR = default!, bool HasAESGCM = default!, bool HasGHASH = default!, bool HasSHA1 = default!, bool HasSHA256 = default!, bool HasSHA512 = default!, bool HasSHA3 = default!, bool HasVX = default!, bool HasVXE = default!, bool HasKDSA = default!, bool HasECDSA = default!, bool HasEDDSA = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasZARCH = HasZARCH;
@@ -101,7 +101,7 @@ public static partial class cpu_package
             this.HasKDSA = HasKDSA;
             this.HasECDSA = HasECDSA;
             this.HasEDDSA = HasEDDSA;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'S390Xᴛ1' instances
@@ -128,7 +128,7 @@ public static partial class cpu_package
             HasKDSA == other.HasKDSA &&
             HasECDSA == other.HasECDSA &&
             HasEDDSA == other.HasEDDSA &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is S390Xᴛ1 other && Equals(other);
         
@@ -155,7 +155,7 @@ public static partial class cpu_package
             HasKDSA,
             HasECDSA,
             HasEDDSA,
-            _);
+            __);
         
         public static bool operator ==(S390Xᴛ1 left, S390Xᴛ1 right) => left.Equals(right);
         
@@ -196,7 +196,7 @@ public static partial class cpu_package
             HasKDSA.ToString(),
             HasECDSA.ToString(),
             HasEDDSA.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

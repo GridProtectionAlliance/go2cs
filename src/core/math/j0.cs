@@ -378,8 +378,8 @@ internal static float64 pzero(float64 x) {
         q = Ꮡ(p0S2);
     }
     var z = 1 / (x * x);
-    var r = p[0] + z * (p[1] + z * (p[2] + z * (p[3] + z * (p[4] + z * p[5]))));
-    var s = 1 + z * (q[0] + z * (q[1] + z * (q[2] + z * (q[3] + z * q[4]))));
+    var r = p.val[0] + z * (p.val[1] + z * (p.val[2] + z * (p.val[3] + z * (p.val[4] + z * p.val[5]))));
+    var s = 1 + z * (q.val[0] + z * (q.val[1] + z * (q.val[2] + z * (q.val[3] + z * q.val[4]))));
     return 1 + r / s;
 }
 
@@ -535,8 +535,8 @@ internal static float64 qzero(float64 x) {
         q = Ꮡ(q0S2);
     }
     var z = 1 / (x * x);
-    var r = p[0] + z * (p[1] + z * (p[2] + z * (p[3] + z * (p[4] + z * p[5]))));
-    var s = 1 + z * (q[0] + z * (q[1] + z * (q[2] + z * (q[3] + z * (q[4] + z * q[5])))));
+    var r = p.val[0] + z * (p.val[1] + z * (p.val[2] + z * (p.val[3] + z * (p.val[4] + z * p.val[5]))));
+    var s = 1 + z * (q.val[0] + z * (q.val[1] + z * (q.val[2] + z * (q.val[3] + z * (q.val[4] + z * q.val[5])))));
     return (-0.125F + r / s) / x;
 }
 

@@ -345,7 +345,7 @@ internal static map<@string, ж<methodType>> suitableMethods(reflectꓸType typ,
 
 [GoType("dyn")] partial struct Δtype {
 }
-internal static struct{} invalidRequest = new Δtype();
+internal static EmptyStruct invalidRequest = new Δtype();
 
 [GoRecv] public static void sendResponse(this ref Server server, ж<sync.Mutex> Ꮡsending, ж<Request> Ꮡreq, any reply, ServerCodec codec, @string errmsg) {
     ref var sending = ref Ꮡsending.val;

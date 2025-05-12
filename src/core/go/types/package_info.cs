@@ -221,7 +221,6 @@ using static go.go.types_package;
 [assembly: GoImplicitConv<ast.StructType, ж<ast.StructType>>(Indirect = true)]
 [assembly: GoImplicitConv<ast.TypeSpec, ж<ast.TypeSpec>>(Indirect = true)]
 [assembly: GoImplicitConv<ast.UnaryExpr, ж<ast.UnaryExpr>>(Indirect = true)]
-[assembly: GoImplicitConv<atPos, token.Pos>(Inverted = false, ValueType = "token.Pos")]
 [assembly: GoImplicitConv<atPos, tokenꓸPos>(Inverted = false, ValueType = "tokenꓸPos")]
 [assembly: GoImplicitConv<block, ж<block>>(Indirect = true)]
 [assembly: GoImplicitConv<declInfo, ж<declInfo>>(Indirect = true)]

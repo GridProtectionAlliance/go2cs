@@ -305,7 +305,7 @@ collect:
             foreach (var (_, tl) in (~md).typelinks) {
                 var t = (ж<_type>)(uintptr)(((@unsafe.Pointer)((~md).types + ((uintptr)tl))));
                 foreach (var (_, candidate) in typehash[(~t).Hash]) {
-                    var seen = new map<_typePair, struct{}>{};
+                    var seen = new map<_typePair, EmptyStruct>{};
                     if (typesEqual(t, candidate, seen)) {
                         t = candidate;
                         break;
@@ -344,7 +344,7 @@ internal static Δrtype toRType(ж<abi.Type> Ꮡt) {
 // back into earlier ones.
 //
 // Only typelinksinit needs this function.
-internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, map<_typePair, struct{}> seen) {
+internal static bool typesEqual(ж<_type> Ꮡt, ж<_type> Ꮡv, typesEqual_seen seen) {
     ref var t = ref Ꮡt.val;
     ref var v = ref Ꮡv.val;
 

@@ -58,7 +58,7 @@ internal static float64 acosh(float64 x) {
     case {} when x is 1: {
         return 0;
     }
-    case {} when x is >= Large: {
+    case {} when x >= Large: {
         return Log(x) + Ln2;
     }
     case {} when x is > 2: {

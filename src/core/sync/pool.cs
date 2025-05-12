@@ -87,7 +87,7 @@ internal static array<uint64> poolRaceHash;
 // Instead, we hash the pointer to get an index into poolRaceHash.
 // See discussion on golang.org/cl/31589.
 internal static @unsafe.Pointer poolRaceAddr(any x) {
-    var ptr = ((uintptr)(ж<array<@unsafe.Pointer>>)(uintptr)(new @unsafe.Pointer(Ꮡ(x)))[1]);
+    var ptr = ((uintptr)(ж<array<@unsafe.Pointer>>)(uintptr)(new @unsafe.Pointer(Ꮡ(x))).val[1]);
     var h = ((uint32)((((uint64)((uint32)ptr)) * (nint)2246822507L) >> (int)(16)));
     return new @unsafe.Pointer(ᏑpoolRaceHash.at<uint64>(h % ((uint32)len(poolRaceHash))));
 }

@@ -243,7 +243,7 @@ internal static ж<_TypeSet> computeInterfaceTypeSet(ж<Checker> Ꮡcheck, token
         {
             var other = seenʗ1.insert(~m);
             switch (ᐧ) {
-            case {} when other is default!: {
+            case {} when other == default!: {
                 allMethodsʗ1 = append(allMethodsʗ1, m);
                 mposʗ1[m] = posΔ2;
                 break;

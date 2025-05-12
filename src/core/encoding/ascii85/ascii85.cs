@@ -46,11 +46,11 @@ public static nint Encode(slice<byte> dst, slice<byte> src) {
             v |= (uint32)(((uint32)src[2]) << (int)(8));
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 2)) {
             v |= (uint32)(((uint32)src[1]) << (int)(16));
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && exprᴛ1 is 1)) { matchᴛ1 = true;
             v |= (uint32)(((uint32)src[0]) << (int)(24));
         }
 

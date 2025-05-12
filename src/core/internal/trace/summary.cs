@@ -423,7 +423,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
                 }
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ4 == GoNotExist) {
+            if (fallthrough || !matchᴛ1 && exprᴛ4 == GoNotExist)) {
                 gΔ8.finalize(ev.Time(), // "Forever" is like goroutine death.
  Ꮡev);
             }
@@ -650,7 +650,7 @@ ID: id, goroutineSummary: Ꮡ(new goroutineSummary(nil))));
 // RelatedGoroutinesV2 finds a set of goroutines related to goroutine goid for v2 traces.
 // The association is based on whether they have synchronized with each other in the Go
 // scheduler (one has unblocked another).
-public static map<GoID, struct{}> RelatedGoroutinesV2(slice<ΔEvent> events, GoID goid) {
+public static map<GoID, EmptyStruct> RelatedGoroutinesV2(slice<ΔEvent> events, GoID goid) {
     slice<unblockEdge> unblockEdges = default!;
     foreach (var (_, ev) in events) {
         if (ev.Goroutine() == NoGoroutine) {
@@ -675,11 +675,11 @@ public static map<GoID, struct{}> RelatedGoroutinesV2(slice<ΔEvent> events, GoI
     }
     // Compute the transitive closure of depth 2 of goroutines that have unblocked each other
     // (starting from goid).
-    var gmap = new map<GoID, struct{}>();
+    var gmap = new map<GoID, EmptyStruct>();
     gmap[goid] = new RelatedGoroutinesV2_gmap();
     for (nint i = 0; i < 2; i++) {
         // Copy the map.
-        var gmap1 = new map<GoID, struct{}>();
+        var gmap1 = new map<GoID, EmptyStruct>();
         foreach (var (g, _) in gmap) {
             gmap1[g] = new RelatedGoroutinesV2_gmap1();
         }

@@ -1603,7 +1603,7 @@ internal static slice<byte> binaryOnlyComment = slice<byte>("//go:binary-only-pa
     // If //go:build line is present, it controls.
     // Otherwise fall back to +build processing.
     switch (ᐧ) {
-    case {} when goBuild is != default!: {
+    case {} when goBuild != default!: {
         (x, errΔ3) = constraint.Parse(((@string)goBuild));
         if (errΔ3 != default!) {
             return (false, false, fmt.Errorf("parsing //go:build line: %v"u8, errΔ3));

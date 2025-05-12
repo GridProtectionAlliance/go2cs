@@ -55,7 +55,7 @@ internal static readonly UntypedInt semTabSize = 251;
 [GoRecv] internal static ж<semaRoot> rootFor(this ref semTable t, ж<uint32> Ꮡaddr) {
     ref var addr = ref Ꮡaddr.val;
 
-    return Ꮡt[(((uintptr)new @unsafe.Pointer(Ꮡaddr)) >> (int)(3)) % semTabSize].of(struct{root semaRoot; pad [40]byte}.Ꮡroot);
+    return Ꮡt.val[(((uintptr)new @unsafe.Pointer(Ꮡaddr)) >> (int)(3)) % semTabSize].of(struct{root semaRoot; pad [40]byte}.Ꮡroot);
 }
 
 // sync_runtime_Semacquire should be an internal detail,

@@ -13,8 +13,10 @@ partial class flate_package {
 public static readonly UntypedInt NoCompression = 0;
 public static readonly UntypedInt BestSpeed = 1;
 public static readonly UntypedInt BestCompression = 9;
-public static readonly UntypedInt DefaultCompression = -1;
-public static readonly UntypedInt HuffmanOnly = -2;
+public static readonly GoUntyped DefaultCompression = /* -1 */
+    GoUntyped.Parse("-1");
+public static readonly GoUntyped HuffmanOnly = /* -2 */
+    GoUntyped.Parse("-2");
 
 internal static readonly UntypedInt logWindowSize = 15;
 internal static readonly UntypedInt windowSize = /* 1 << logWindowSize */ 32768;
@@ -547,17 +549,17 @@ break_Loop:;
 
     d.w = newHuffmanBitWriter(w);
     var matchᴛ1 = false;
-    if (level is NoCompression) { matchᴛ1 = true;
+    if (level == NoCompression) { matchᴛ1 = true;
         d.window = new slice<byte>(maxStoreBlockSize);
         d.fill = () => (ж<compressor>).fillStore();
         d.step = () => (ж<compressor>).store();
     }
-    else if (level is HuffmanOnly) { matchᴛ1 = true;
+    else if (level == HuffmanOnly) { matchᴛ1 = true;
         d.window = new slice<byte>(maxStoreBlockSize);
         d.fill = () => (ж<compressor>).fillStore();
         d.step = () => (ж<compressor>).storeHuff();
     }
-    else if (level is BestSpeed) { matchᴛ1 = true;
+    else if (level == BestSpeed) { matchᴛ1 = true;
         d.compressionLevel = levels[level];
         d.window = new slice<byte>(maxStoreBlockSize);
         d.fill = () => (ж<compressor>).fillStore();
@@ -565,7 +567,7 @@ break_Loop:;
         d.bestSpeed = newDeflateFast();
         d.tokens = new slice<token>(maxStoreBlockSize);
     }
-    else if (level is DefaultCompression) { matchᴛ1 = true;
+    else if (level == DefaultCompression) { matchᴛ1 = true;
         level = 6;
         fallthrough = true;
     }
@@ -586,18 +588,16 @@ break_Loop:;
     d.w.reset(w);
     d.sync = false;
     d.err = default!;
-    switch (d.compressionLevel.level) {
-    case NoCompression: {
+    var exprᴛ1 = d.compressionLevel.level;
+    if (exprᴛ1 == NoCompression) {
         d.windowEnd = 0;
-        break;
     }
-    case BestSpeed: {
+    else if (exprᴛ1 == BestSpeed) {
         d.windowEnd = 0;
         d.tokens = d.tokens[..0];
         d.bestSpeed.reset();
-        break;
     }
-    default: {
+    else { /* default: */
         d.chainHead = -1;
         foreach (var (i, _) in d.hashHead) {
             d.hashHead[i] = 0;
@@ -612,8 +612,7 @@ break_Loop:;
         d.length = minMatchLength - 1;
         d.offset = 0;
         d.maxInsertIndex = 0;
-        break;
-    }}
+    }
 
 }
 

@@ -43,7 +43,7 @@ internal static readonly traceExperiment traceNoExperiment = /* iota */ 0;
 internal static readonly traceExperiment traceExperimentAllocFree = 1;
 
 // Experimental events.
-internal static readonly traceEv _ = /* 127 + iota */ 127;
+internal static readonly traceEv _ᴛ2ʗ = /* 127 + iota */ 127;
 // Experimental events for ExperimentAllocFree.
 
 internal static readonly traceEv traceEvSpan = 128; // heap span exists [timestamp, id, npages, type/class]

@@ -48,7 +48,7 @@ internal static uint32 b32(bool b) {
 
 // For testing *Pointer[T]'s methods can be inlined.
 // Keep in sync with cmd/compile/internal/test/inl_test.go:TestIntendedInlining.
-internal static ж<Pointer<nint>> _ = Ꮡ(new Pointer<nint>(nil));
+internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 
 // A Pointer is an atomic pointer of type *T. The zero value is a nil *T.
 [GoType] partial struct Pointer<T>

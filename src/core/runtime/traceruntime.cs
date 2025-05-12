@@ -589,7 +589,7 @@ internal static void HeapAlloc(this traceLocker tl, uint64 live) {
 // HeapGoal reads the current heap goal and emits a HeapGoal event.
 internal static void HeapGoal(this traceLocker tl) {
     var heapGoal = gcController.heapGoal();
-    if (heapGoal == ^((uint64)0)) {
+    if (heapGoal == ~((uint64)0)) {
         // Heap-based triggering is disabled.
         heapGoal = 0;
     }

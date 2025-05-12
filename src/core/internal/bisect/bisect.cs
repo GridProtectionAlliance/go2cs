@@ -763,8 +763,7 @@ public static uint64 Hash(params ꓸꓸꓸany dataʗp) {
 // FNV-1a implementation. See Go's hash/fnv/fnv.go.
 // Copied here for simplicity (can handle integers more directly)
 // and to avoid importing hash/fnv.
-internal static readonly GoUntyped offset64 = /* 14695981039346656037 */
-    GoUntyped.Parse("14695981039346656037");
+internal const uint64 offset64 = 14695981039346656037;
 internal const uint64 prime64 = 1099511628211;
 
 internal static uint64 fnv(uint64 h, byte x) {
@@ -835,17 +834,17 @@ internal static uint64 fnvUint32(uint64 h, uint32 x) {
     var cache = Ꮡ(d.recent[((nuint)h) % ((nuint)len(d.recent))]);
     ref var i = ref heap<nint>(out var Ꮡi);
     for (i = 0; i < len(cache); i++) {
-        if (atomic.LoadUint64(Ꮡ(cache[i])) == h) {
+        if (atomic.LoadUint64(Ꮡ(cache.val[i])) == h) {
             return true;
         }
     }
     // Compute index in set to evict as hash of current set.
     ref var ch = ref heap<uint64>(out var Ꮡch);
     ch = offset64;
-    /* for _, x := range cache {
-	ch = fnvUint64(ch, x)
-} */
-    atomic.StoreUint64(Ꮡ(cache[((nuint)ch) % ((nuint)len(cache))]), h);
+    foreach (var (_, x) in cache.val) {
+        ch = fnvUint64(ch, x);
+    }
+    atomic.StoreUint64(Ꮡ(cache.val[((nuint)ch) % ((nuint)len(cache))]), h);
     return false;
 }
 

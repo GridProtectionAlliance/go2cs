@@ -111,10 +111,10 @@ internal static float64 exp(float64 x) {
     case {} when IsInf(x, -1): {
         return 0;
     }
-    case {} when x is > Overflow: {
+    case {} when x > Overflow: {
         return Inf(1);
     }
-    case {} when x is < Underflow: {
+    case {} when x < Underflow: {
         return 0;
     }
     case {} when -NearZero < x && x < NearZero: {
@@ -162,10 +162,10 @@ internal static float64 exp2(float64 x) {
     case {} when IsInf(x, -1): {
         return 0;
     }
-    case {} when x is > Overflow: {
+    case {} when x > Overflow: {
         return Inf(1);
     }
-    case {} when x is < Underflow: {
+    case {} when x < Underflow: {
         return 0;
     }}
 

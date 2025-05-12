@@ -361,7 +361,7 @@ public static (@string importPath, bool ok) DefaultLookupPackage(@string name) {
 
 [GoType("num:nint")] partial struct spanKind;
 
-internal static readonly spanKind _ = /* iota */ 0;
+internal static readonly spanKind _ᴛ1ʗ = /* iota */ 0;
 internal static readonly spanKind spanCode = 1;
 internal static readonly spanKind spanHeading = 2;
 internal static readonly spanKind spanList = 3;
@@ -1158,14 +1158,13 @@ internal static bool isPunct(byte c) {
     // so that the byte c can be tested with a shift and an and.
     // If c > 128, then 1<<c and 1<<(c-64) will both be zero,
     // and this function will return false.
-    GoUntyped mask = /* 0 |
+    static readonly UntypedInt mask = /* 0 |
 	1<<'.' |
 	1<<',' |
 	1<<':' |
 	1<<';' |
 	1<<'?' |
-	1<<'!' */
-            GoUntyped.Parse("10088151134830067712");
+	1<<'!' */ 10088151134830067712;
     return ((uint64)((uint64)((((uint64)1) << (int)(c)) & ((uint64)(mask & (1 << (int)(64) - 1)))) | (uint64)((((uint64)1) << (int)((c - 64))) & (mask >> (int)(64))))) != 0;
 }
 

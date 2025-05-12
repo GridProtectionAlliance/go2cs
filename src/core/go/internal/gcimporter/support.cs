@@ -30,7 +30,8 @@ internal static void errorf(@string format, params ꓸꓸꓸany argsʗp) {
 // deltaNewFile is a magic line delta offset indicating a new file.
 // We use -64 because it is rare; see issue 20080 and CL 41619.
 // -64 is the smallest int that fits in a single byte as a varint.
-internal static readonly UntypedInt deltaNewFile = -64;
+internal static readonly GoUntyped deltaNewFile = /* -64 */
+    GoUntyped.Parse("-64");
 
 // Synthesize a token.Pos
 [GoType] partial struct fakeFileSet {

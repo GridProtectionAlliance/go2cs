@@ -132,10 +132,10 @@ public static (ж<File>, error) Open(@string name) {
 
 internal static (uint32, error) parseMagic(slice<byte> magic) {
     var m = binary.BigEndian.Uint32(magic);
-    switch (m) {
-    case Magic386 or MagicAMD64 or MagicARM: {
+    var exprᴛ1 = m;
+    if (exprᴛ1 == Magic386 || exprᴛ1 == MagicAMD64 || exprᴛ1 == MagicARM) {
         return (m, default!);
-    }}
+    }
 
     return (0, new formatError(0, "bad magic number", magic));
 }

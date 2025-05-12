@@ -65,9 +65,9 @@ using static go.image_package;
 [assembly: GoImplement<image.color_package.NRGBA64, image.color_package.Color>]
 [assembly: GoImplement<image.color_package.NYCbCrA, image.color_package.Color>]
 [assembly: GoImplement<image.color_package.Palette, image.color_package.Model>]
-[assembly: GoImplement<image.color_package.RGBA, image.color_package.Color>]
 [assembly: GoImplement<image.color_package.RGBA64, image.color_package.Color>]
 [assembly: GoImplement<image.color_package.YCbCr, image.color_package.Color>]
+[assembly: GoImplement<image.color_package.ΔRGBA, image.color_package.Color>]
 [assembly: GoImplement<ΔRGBA, Image>]
 // </InterfaceImplementations>
 

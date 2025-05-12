@@ -82,7 +82,7 @@ internal static float64 pow(float64 x, float64 y) {
     }
     case {} when IsInf(y, 0): {
         switch (ᐧ) {
-        case {} when x is -1: {
+        case {} when x == -1: {
             return 1;
         }
         case {} when (Abs(x) < 1) == IsInf(y, 1): {
@@ -111,7 +111,7 @@ internal static float64 pow(float64 x, float64 y) {
     case {} when y is 0.5F: {
         return Sqrt(x);
     }
-    case {} when y is -0.5F: {
+    case {} when y == -0.5F: {
         return 1 / Sqrt(x);
     }}
 
@@ -124,7 +124,7 @@ internal static float64 pow(float64 x, float64 y) {
         // yi is a large even int that will lead to overflow (or underflow to 0)
         // for all x except -1 (x == 1 was handled earlier)
         switch (ᐧ) {
-        case {} when x is -1: {
+        case {} when x == -1: {
             return 1;
         }
         case {} when (Abs(x) < 1) is (y > 0): {

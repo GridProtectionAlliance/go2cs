@@ -1305,8 +1305,8 @@ internal static slice<byte> aNewline = slice<byte>("\n");
             b = (rune)'\t';
         }
         // convert to htab
-        switch (p.state) {
-        case inSpace: {
+        var exprᴛ1 = p.state;
+        if (exprᴛ1 == inSpace) {
             switch (b) {
             case (rune)'\t' or (rune)' ': {
                 p.space = append(p.space, b);
@@ -1330,18 +1330,16 @@ internal static slice<byte> aNewline = slice<byte>("\n");
                 break;
             }}
 
-            break;
         }
-        case inEscape: {
+        else if (exprᴛ1 == inEscape) {
             if (b == tabwriter.Escape) {
                 // discard trailing space
                 // +1: skip tabwriter.Escape
                 (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
                 p.resetSpace();
             }
-            break;
         }
-        case inText: {
+        else if (exprᴛ1 == inText) {
             switch (b) {
             case (rune)'\t' or (rune)' ': {
                 (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
@@ -1364,12 +1362,10 @@ internal static slice<byte> aNewline = slice<byte>("\n");
                 break;
             }}
 
-            break;
         }
-        default: {
+        else { /* default: */
             throw panic("unreachable");
-            break;
-        }}
+        }
 
         // +1: skip tabwriter.Escape
         if (err != default!) {
@@ -1377,12 +1373,11 @@ internal static slice<byte> aNewline = slice<byte>("\n");
         }
     }
     nΔ1 = len(data);
-    switch (p.state) {
-    case inEscape or inText: {
+    var exprᴛ2 = p.state;
+    if (exprᴛ2 == inEscape || exprᴛ2 == inText) {
         (_, err) = p.output.Write(data[(int)(m)..(int)(nΔ1)]);
         p.resetSpace();
-        break;
-    }}
+    }
 
     return (nΔ1, err);
 }

@@ -596,7 +596,7 @@ internal static ж<mspan> spanOf(uintptr Δp) {
         // Should never happen if there's no L1.
         return default!;
     }
-    var ha = l2[ri.l2()];
+    var ha = l2.val[ri.l2()];
     if (ha == nil) {
         return default!;
     }
@@ -611,7 +611,7 @@ internal static ж<mspan> spanOf(uintptr Δp) {
 //go:nosplit
 internal static ж<mspan> spanOfUnchecked(uintptr Δp) {
     arenaIdx ai = arenaIndex(Δp);
-    return (~mheap_.arenas[ai.l1()][ai.l2()]).spans[(Δp / pageSize) % pagesPerArena];
+    return (~mheap_.arenas[ai.l1()].val[ai.l2()]).spans[(Δp / pageSize) % pagesPerArena];
 }
 
 // spanOfHeap is like spanOf, but returns nil if p does not point to a
@@ -641,7 +641,7 @@ internal static (ж<heapArena> arena, uintptr pageIdx, uint8 pageMask) pageIndex
     uint8 pageMask = default!;
 
     arenaIdx ai = arenaIndex(Δp);
-    arena = mheap_.arenas[ai.l1()][ai.l2()];
+    arena = mheap_.arenas[ai.l1()].val[ai.l2()];
     pageIdx = ((Δp / pageSize) / 8) % ((uintptr)len((~arena).pageInUse));
     pageMask = ((byte)(1 << (int)(((Δp / pageSize) % 8))));
     return (arena, pageIdx, pageMask);
@@ -769,7 +769,7 @@ internal static (ж<heapArena> arena, uintptr pageIdx, uint8 pageMask) pageIndex
     }
     while (n > 0) {
         arenaIdx ai = arenas[pageIdx / pagesPerArena];
-        var ha = h.arenas[ai.l1()][ai.l2()];
+        var ha = h.arenas[ai.l1()].val[ai.l2()];
         // Get a chunk of the bitmap to work on.
         nuint arenaPage = ((nuint)(pageIdx % pagesPerArena));
         var inUse = (~ha).pageInUse[(int)(arenaPage / 8)..];
@@ -891,12 +891,12 @@ internal static bool manual(this spanAllocType s) {
 
     var Δp = @base / pageSize;
     arenaIdx ai = arenaIndex(@base);
-    var ha = h.arenas[ai.l1()][ai.l2()];
+    var ha = h.arenas[ai.l1()].val[ai.l2()];
     for (var n = ((uintptr)0); n < npage; n++) {
         var i = (Δp + n) % pagesPerArena;
         if (i == 0) {
             ai = arenaIndex(@base + n * pageSize);
-            ha = h.arenas[ai.l1()][ai.l2()];
+            ha = h.arenas[ai.l1()].val[ai.l2()];
         }
         (~ha).spans[i] = s;
     }
@@ -917,7 +917,7 @@ internal static bool manual(this spanAllocType s) {
 
     while (npage > 0) {
         arenaIdx ai = arenaIndex(@base);
-        var ha = h.arenas[ai.l1()][ai.l2()];
+        var ha = h.arenas[ai.l1()].val[ai.l2()];
         var zeroedBase = atomic.Loaduintptr(Ꮡ((~ha).zeroedBase));
         var arenaBase = @base % heapArenaBytes;
         if (arenaBase < zeroedBase) {
@@ -1176,7 +1176,7 @@ HaveSpan:
         }
     }
     {
-        var goal = Δscavenge.gcPercentGoal.Load(); if (goal != ^((uint64)0) && growth > 0) {
+        var goal = Δscavenge.gcPercentGoal.Load(); if (goal != ~((uint64)0) && growth > 0) {
             // We just caused a heap growth, so scavenge down what will soon be used.
             // By scavenging inline we deal with the failure to allocate out of
             // memory fragments by scavenging the memory fragments that are least
@@ -1313,7 +1313,7 @@ HaveSpan:
         // Initialize mark and allocation structures.
         s.freeindex = 0;
         s.freeIndexForScan = 0;
-        s.allocCache = ^((uint64)0);
+        s.allocCache = ~((uint64)0);
         // all 1s indicating all free.
         s.gcmarkBits = newMarkBits(((uintptr)s.nelems));
         s.allocBits = newAllocBits(((uintptr)s.nelems));
@@ -1517,7 +1517,7 @@ HaveSpan:
         h.pagesInUse.Add(-s.npages);
         var (arena, pageIdx, pageMask) = pageIndexOf(s.@base());
         atomic.And8(Ꮡ(~arena).pageInUse.at<uint8>(pageIdx), // Clear in-use bit in arena page bitmap.
- ^pageMask);
+ ~pageMask);
     }
     else { /* default: */
         @throw("mheap.freeSpanLocked - invalid span state"u8);
@@ -1569,7 +1569,7 @@ HaveSpan:
     var gp = getg();
     (~(~gp).m).mallocing++;
     // Force scavenge everything.
-    var released = h.pages.scavenge(^((uintptr)0), default!, true);
+    var released = h.pages.scavenge(~((uintptr)0), default!, true);
     (~(~gp).m).mallocing--;
     if (debug.scavtrace > 0) {
         printScavTrace(0, released, true);
@@ -1729,7 +1729,7 @@ internal static void spanHasSpecials(ж<mspan> Ꮡs) {
     ref var arenaPage = ref heap<uintptr>(out var ᏑarenaPage);
     arenaPage = (s.@base() / pageSize) % pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
-    var ha = mheap_.arenas[ai.l1()][ai.l2()];
+    var ha = mheap_.arenas[ai.l1()].val[ai.l2()];
     atomic.Or8(Ꮡ(~ha).pageSpecials.at<uint8>(arenaPage / 8), ((uint8)1) << (int)((arenaPage % 8)));
 }
 
@@ -1740,8 +1740,8 @@ internal static void spanHasNoSpecials(ж<mspan> Ꮡs) {
     ref var arenaPage = ref heap<uintptr>(out var ᏑarenaPage);
     arenaPage = (s.@base() / pageSize) % pagesPerArena;
     arenaIdx ai = arenaIndex(s.@base());
-    var ha = mheap_.arenas[ai.l1()][ai.l2()];
-    atomic.And8(Ꮡ(~ha).pageSpecials.at<uint8>(arenaPage / 8), ^(((uint8)1) << (int)((arenaPage % 8))));
+    var ha = mheap_.arenas[ai.l1()].val[ai.l2()];
+    atomic.And8(Ꮡ(~ha).pageSpecials.at<uint8>(arenaPage / 8), ~(((uint8)1) << (int)((arenaPage % 8))));
 }
 
 // Adds the special record s to the list of special records for
@@ -2133,47 +2133,41 @@ internal static specialsIter newSpecialsIter(ж<mspan> Ꮡspan) {
 internal static void freeSpecial(ж<special> Ꮡs, @unsafe.Pointer Δp, uintptr size) {
     ref var s = ref Ꮡs.val;
 
-    switch (s.kind) {
-    case _KindSpecialFinalizer: {
+    var exprᴛ1 = s.kind;
+    if (exprᴛ1 == _KindSpecialFinalizer) {
         var sf = (ж<specialfinalizer>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         queuefinalizer(p.val, (~sf).fn, (~sf).nret, (~sf).fint, (~sf).ot);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         mheap_.specialfinalizeralloc.free(new @unsafe.Pointer(sf));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        break;
     }
-    case _KindSpecialWeakHandle: {
+    else if (exprᴛ1 == _KindSpecialWeakHandle) {
         var sw = (ж<specialWeakHandle>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         (~sw).handle.Store(0);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         mheap_.specialWeakHandleAlloc.free(new @unsafe.Pointer(Ꮡs));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        break;
     }
-    case _KindSpecialProfile: {
+    else if (exprᴛ1 == _KindSpecialProfile) {
         var sp = (ж<specialprofile>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         mProf_Free((~sp).b, size);
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         mheap_.specialprofilealloc.free(new @unsafe.Pointer(sp));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        break;
     }
-    case _KindSpecialReachable: {
+    else if (exprᴛ1 == _KindSpecialReachable) {
         var sp = (ж<specialReachable>)(uintptr)(new @unsafe.Pointer(Ꮡs));
         sp.val.done = true;
-        break;
     }
-    case _KindSpecialPinCounter: {
+    else if (exprᴛ1 == _KindSpecialPinCounter) {
         @lock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
         mheap_.specialPinCounterAlloc.free(new @unsafe.Pointer(Ꮡs));
         unlock(Ꮡmheap_.of(mheap.Ꮡspeciallock));
-        break;
     }
-    default: {
+    else { /* default: */
         @throw("bad special kind"u8);
         throw panic("not reached");
-        break;
-    }}
+    }
 
 }
 

@@ -418,19 +418,16 @@ public static readonly UntypedInt Escape = /* '\xff' */ 255;
 
 // Start escaped mode.
 [GoRecv] internal static void startEscape(this ref Writer b, byte ch) {
-    switch (ch) {
-    case Escape: {
+    var exprᴛ1 = ch;
+    if (exprᴛ1 == Escape) {
         b.endChar = Escape;
-        break;
     }
-    case (rune)'<': {
+    else if (exprᴛ1 is (rune)'<') {
         b.endChar = (rune)'>';
-        break;
     }
-    case (rune)'&': {
+    else if (exprᴛ1 is (rune)'&') {
         b.endChar = (rune)';';
-        break;
-    }}
+    }
 
 }
 
@@ -439,21 +436,18 @@ public static readonly UntypedInt Escape = /* '\xff' */ 255;
 // its width is assumed to be one. In all other cases, the width is the
 // unicode width of the text.
 [GoRecv] internal static void endEscape(this ref Writer b) {
-    switch (b.endChar) {
-    case Escape: {
+    var exprᴛ1 = b.endChar;
+    if (exprᴛ1 == Escape) {
         b.updateWidth();
         if ((nuint)(b.flags & StripEscape) == 0) {
             b.cell.width -= 2;
         }
-        break;
     }
-    case (rune)'>': {
-        break;
+    else if (exprᴛ1 is (rune)'>') {
     }
-    case (rune)';': {
+    else if (exprᴛ1 is (rune)';') {
         b.cell.width++;
-        break;
-    }}
+    }
 
     // don't count the Escape chars
     // tag of zero width
@@ -542,8 +536,8 @@ internal static slice<byte> hbar = slice<byte>("---\n");
     foreach (var (i, ch) in buf) {
         if (b.endChar == 0){
             // outside escape
-            switch (ch) {
-            case (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f': {
+            var exprᴛ1 = ch;
+            if (exprᴛ1 is (rune)'\t' or (rune)'\v' or (rune)'\n' or (rune)'\f') {
                 b.append(buf[(int)(n)..(int)(i)]);
                 b.updateWidth();
                 n = i + 1;
@@ -566,9 +560,8 @@ internal static slice<byte> hbar = slice<byte>("---\n");
                         }
                     }
                 }
-                break;
             }
-            case Escape: {
+            else if (exprᴛ1 == Escape) {
                 b.append(buf[(int)(n)..(int)(i)]);
                 b.updateWidth();
                 n = i;
@@ -577,9 +570,8 @@ internal static slice<byte> hbar = slice<byte>("---\n");
                     n++;
                 }
                 b.startEscape(Escape);
-                break;
             }
-            case (rune)'<' or (rune)'&': {
+            else if (exprᴛ1 is (rune)'<' or (rune)'&') {
                 if ((nuint)(b.flags & FilterHTML) != 0) {
                     // strip Escape
                     // possibly an html tag/entity
@@ -589,8 +581,7 @@ internal static slice<byte> hbar = slice<byte>("---\n");
                     n = i;
                     b.startEscape(ch);
                 }
-                break;
-            }}
+            }
 
         } else {
             // inside escape

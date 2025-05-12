@@ -440,9 +440,9 @@ internal static error readDirectoryHeader(ж<File> Ꮡf, io.Reader r) {
     // Some ZIP writers use UTF-8 encoding without setting the UTF-8 flag.
     // Since it is impossible to always distinguish valid UTF-8 from some
     // other encoding (e.g., GBK or Shift-JIS), we trust the flag.
-    var needUSize = f.UncompressedSize == ^((uint32)0);
-    var needCSize = f.CompressedSize == ^((uint32)0);
-    var needHeaderOffset = f.headerOffset == ((int64)(^((uint32)0)));
+    var needUSize = f.UncompressedSize == ~((uint32)0);
+    var needCSize = f.CompressedSize == ~((uint32)0);
+    var needHeaderOffset = f.headerOffset == ((int64)(~((uint32)0)));
     // Best effort to find what we need.
     // Other zip authors might not even follow the basic format,
     // and we'll just ignore the Extra content in that case.
@@ -456,8 +456,8 @@ parseExtras:
             break;
         }
         var fieldBuf = extra.sub(fieldSize);
-        switch (fieldTag) {
-        case zip64ExtraID: {
+        var exprᴛ1 = fieldTag;
+        if (exprᴛ1 == zip64ExtraID) {
             f.zip64 = true;
             if (needUSize) {
                 // update directory values from the zip64 extra block.
@@ -484,9 +484,8 @@ parseExtras:
                 }
                 f.headerOffset = ((int64)fieldBuf.uint64());
             }
-            break;
         }
-        case ntfsExtraID: {
+        else if (exprᴛ1 == ntfsExtraID) {
             if (len(fieldBuf) < 4) {
                 goto continue_parseExtras;
             }
@@ -512,9 +511,8 @@ parseExtras:
                 var epoch = time.Date(1601, time.January, 1, 0, 0, 0, 0, time.ΔUTC);
                 modified = time.Unix(epoch.Unix() + secs, nsecs);
             }
-            break;
         }
-        case unixExtraID or infoZipUnixExtraID: {
+        else if (exprᴛ1 == unixExtraID || exprᴛ1 == infoZipUnixExtraID) {
             if (len(fieldBuf) < 8) {
                 goto continue_parseExtras;
             }
@@ -523,17 +521,15 @@ parseExtras:
             modified = time.Unix(ts, // AcTime (ignored)
  // ModTime since Unix epoch
  0);
-            break;
         }
-        case extTimeExtraID: {
+        else if (exprᴛ1 == extTimeExtraID) {
             if (len(fieldBuf) < 5 || (uint8)(fieldBuf.uint8() & 1) == 0) {
                 goto continue_parseExtras;
             }
             var ts = ((int64)fieldBuf.uint32());
             modified = time.Unix(ts, // ModTime since Unix epoch
  0);
-            break;
-        }}
+        }
 
 continue_parseExtras:;
     }

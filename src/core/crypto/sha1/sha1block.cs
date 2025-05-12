@@ -33,14 +33,14 @@ internal static void blockGeneric(ж<digest> Ꮡdig, slice<byte> p) {
         // the choice of K (_K0, _K1, etc).
         nint i = 0;
         for (; i < 16; i++) {
-            var f = (uint32)((uint32)(b & c) | (uint32)((^b) & d));
+            var f = (uint32)((uint32)(b & c) | (uint32)((~b) & d));
             var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 15)] + _K0;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }
         for (; i < 20; i++) {
             var tmp = (uint32)((uint32)((uint32)(w[(nint)((i - 3) & 15)] ^ w[(nint)((i - 8) & 15)]) ^ w[(nint)((i - 14) & 15)]) ^ w[(nint)((i) & 15)]);
             w[(nint)(i & 15)] = bits.RotateLeft32(tmp, 1);
-            var f = (uint32)((uint32)(b & c) | (uint32)((^b) & d));
+            var f = (uint32)((uint32)(b & c) | (uint32)((~b) & d));
             var t = bits.RotateLeft32(a, 5) + f + e + w[(nint)(i & 15)] + _K0;
             (a, b, c, d, e) = (t, a, bits.RotateLeft32(b, 30), c, d);
         }

@@ -66,8 +66,7 @@ internal static readonly UntypedInt intSize = /* 32 << (^uint(0) >> 63) */ 64;
 // IntSize is the size in bits of an int or uint value.
 public static readonly UntypedInt IntSize = /* intSize */ 64;
 
-internal static readonly GoUntyped maxUint64 = /* 1<<64 - 1 */
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly UntypedInt maxUint64 = /* 1<<64 - 1 */ 18446744073709551615;
 
 // ParseUint is like [ParseInt] but for unsigned numbers.
 //

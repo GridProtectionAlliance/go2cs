@@ -41,7 +41,7 @@ internal static void traceStartReadCPU() {
     }
     // Spin up the logger goroutine.
     Δtrace.cpuSleep = newWakeableSleep();
-    var done = new channel<struct{}>(1);
+    var done = new channel<EmptyStruct>(1);
     var doneʗ1 = done;
     var traceʗ1 = Δtrace;
     goǃ(() => {
@@ -137,7 +137,7 @@ internal static bool traceReadCPU(uintptr gen) {
         var ppid = data[2] >> (int)(1);
         {
             var hasP = ((uint64)(data[2] & 1)) != 0; if (!hasP) {
-                ppid = ^((uint64)0);
+                ppid = ~((uint64)0);
             }
         }
         var goid = data[3];

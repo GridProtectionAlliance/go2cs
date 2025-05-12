@@ -97,14 +97,13 @@ public static (ж<File>, error) NewFile(io.ReaderAt r) {
             return (default!, errΔ2);
         }
     }
-    switch ((~f).FileHeader.Machine) {
-    case IMAGE_FILE_MACHINE_AMD64 or IMAGE_FILE_MACHINE_ARM64 or IMAGE_FILE_MACHINE_ARMNT or IMAGE_FILE_MACHINE_I386 or IMAGE_FILE_MACHINE_RISCV32 or IMAGE_FILE_MACHINE_RISCV64 or IMAGE_FILE_MACHINE_RISCV128 or IMAGE_FILE_MACHINE_UNKNOWN: {
-        break;
+    var exprᴛ1 = (~f).FileHeader.Machine;
+    if (exprᴛ1 == IMAGE_FILE_MACHINE_AMD64 || exprᴛ1 == IMAGE_FILE_MACHINE_ARM64 || exprᴛ1 == IMAGE_FILE_MACHINE_ARMNT || exprᴛ1 == IMAGE_FILE_MACHINE_I386 || exprᴛ1 == IMAGE_FILE_MACHINE_RISCV32 || exprᴛ1 == IMAGE_FILE_MACHINE_RISCV64 || exprᴛ1 == IMAGE_FILE_MACHINE_RISCV128 || exprᴛ1 == IMAGE_FILE_MACHINE_UNKNOWN) {
     }
-    default: {
+    else { /* default: */
         return (default!, fmt.Errorf("unrecognized PE machine: %#x"u8, // ok
  (~f).FileHeader.Machine));
-    }}
+    }
 
     error errΔ3 = default!;
     // Read string table.

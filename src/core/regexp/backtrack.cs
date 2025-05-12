@@ -307,7 +307,7 @@ Skip:
 // backtrack runs a backtracking search of prog on the input starting at pos.
 [GoRecv] internal static slice<nint> backtrack(this ref Regexp re, slice<byte> ib, @string @is, nint pos, nint ncap, slice<nint> dstCap) {
     var startCond = re.cond;
-    if (startCond == ^((syntax.EmptyOp)0)) {
+    if (startCond == ~((syntax.EmptyOp)0)) {
         // impossible
         return default!;
     }

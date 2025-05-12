@@ -278,7 +278,7 @@ internal static mstats memstats;
     public array<struct{Size uint32; Mallocs uint64; Frees uint64}> BySize = new(61);
 }
 
-[GoInit] internal static void initΔ2() {
+[GoInit] internal static void initΔ4() {
     {
         var offset = @unsafe.Offsetof(memstats.GetType(), "heapStats"); if (offset % 8 != 0) {
             println(offset);

@@ -510,7 +510,7 @@ break_loop:;
 
     var qt = Ꮡ(d.quant[d.comp[compIndex].tq]);
     for (nint zig = 0; zig < blockSize; zig++) {
-        b[unzig[zig]] *= qt[zig];
+        b[unzig[zig]] *= qt.val[zig];
     }
     idct(Ꮡb);
     var dst = slice<byte>(default!);

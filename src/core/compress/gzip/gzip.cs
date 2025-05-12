@@ -21,9 +21,11 @@ public static readonly UntypedInt BestSpeed = /* flate.BestSpeed */ 1;
 
 public static readonly UntypedInt BestCompression = /* flate.BestCompression */ 9;
 
-public static readonly UntypedInt DefaultCompression = /* flate.DefaultCompression */ -1;
+public static readonly GoUntyped DefaultCompression = /* flate.DefaultCompression */
+    GoUntyped.Parse("-1");
 
-public static readonly UntypedInt HuffmanOnly = /* flate.HuffmanOnly */ -2;
+public static readonly GoUntyped HuffmanOnly = /* flate.HuffmanOnly */
+    GoUntyped.Parse("-2");
 
 // A Writer is an io.WriteCloser.
 // Writes to a Writer are compressed and written to w.

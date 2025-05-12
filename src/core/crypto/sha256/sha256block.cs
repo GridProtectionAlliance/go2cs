@@ -99,7 +99,7 @@ internal static void blockGeneric(ж<digest> Ꮡdig, slice<byte> p) {
         }
         var (a, b, c, d, e, f, g, h) = (h0, h1, h2, h3, h4, h5, h6, h7);
         for (nint i = 0; i < 64; i++) {
-            var t1 = h + ((uint32)((uint32)((bits.RotateLeft32(e, -6)) ^ (bits.RotateLeft32(e, -11))) ^ (bits.RotateLeft32(e, -25)))) + ((uint32)(((uint32)(e & f)) ^ ((uint32)(^e & g)))) + _K[i] + w[i];
+            var t1 = h + ((uint32)((uint32)((bits.RotateLeft32(e, -6)) ^ (bits.RotateLeft32(e, -11))) ^ (bits.RotateLeft32(e, -25)))) + ((uint32)(((uint32)(e & f)) ^ ((uint32)(~e & g)))) + _K[i] + w[i];
             var t2 = ((uint32)((uint32)((bits.RotateLeft32(a, -2)) ^ (bits.RotateLeft32(a, -13))) ^ (bits.RotateLeft32(a, -22)))) + ((uint32)((uint32)(((uint32)(a & b)) ^ ((uint32)(a & c))) ^ ((uint32)(b & c))));
             h = g;
             g = f;

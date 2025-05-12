@@ -438,7 +438,7 @@ public static void GC() {
     // complete the cycle and because runtime.GC() is often used
     // as part of tests and benchmarks to get the system into a
     // relatively stable and isolated state.
-    while (work.cycles.Load() == n + 1 && sweepone() != ^((uintptr)0)) {
+    while (work.cycles.Load() == n + 1 && sweepone() != ~((uintptr)0)) {
         Gosched();
     }
     // Callers may assume that the heap profile reflects the
@@ -566,7 +566,7 @@ internal static void gcStart(gcTrigger trigger) {
     //
     // We check the transition condition continuously here in case
     // this G gets delayed in to the next GC cycle.
-    while (trigger.test() && sweepone() != ^((uintptr)0)) {
+    while (trigger.test() && sweepone() != ~((uintptr)0)) {
     }
     // Perform GC initialization and the sweep termination
     // transition.
@@ -1145,7 +1145,7 @@ internal static void gcBgMarkStartWorkers() {
     // TODO(prattmic): cleanup gcStart to use a more explicit "in gcStart"
     // check for bailing.
     var mp = acquirem();
-    var ready = new channel<struct{}>(1);
+    var ready = new channel<EmptyStruct>(1);
     releasem(mp);
     while (gcBgMarkWorkerCount < gomaxprocs) {
         var mpΔ1 = acquirem();
@@ -1178,8 +1178,8 @@ internal static void gcBgMarkPrepare() {
     // of workers, almost all of which are "waiting". While a
     // worker is working it decrements nwait. If nproc == nwait,
     // there are no workers.
-    work.nproc = ^((uint32)0);
-    work.nwait = ^((uint32)0);
+    work.nproc = ~((uint32)0);
+    work.nwait = ~((uint32)0);
 }
 
 // gcBgMarkWorkerNode is an entry in the gcBgMarkWorkerPool. It points to a single
@@ -1198,7 +1198,7 @@ internal static void gcBgMarkPrepare() {
 [GoType("dyn")] partial struct gcBgMarkWorker_type {
 }
 
-internal static void gcBgMarkWorker(channel<struct{}> ready) {
+internal static void gcBgMarkWorker(channel<EmptyStruct> ready) {
     var gp = getg();
     // We pass node to a gopark unlock function, so it can't be on
     // the stack (see gopark). Prevent deadlock from recursively
@@ -1484,7 +1484,7 @@ internal static bool gcSweep(gcMode mode) {
             (~pp).mcache.prepareForSweep();
         }
         // Sweep all spans eagerly.
-        while (sweepone() != ^((uintptr)0)) {
+        while (sweepone() != ~((uintptr)0)) {
         }
         // Free workbufs eagerly.
         prepareFreeWorkbufs();
@@ -1530,7 +1530,7 @@ internal static void gcResetMarkState() {
     var arenas = mheap_.allArenas;
     unlock(Ꮡmheap_.of(mheap.Ꮡlock));
     foreach (var (_, ai) in arenas) {
-        var ha = mheap_.arenas[ai.l1()][ai.l2()];
+        var ha = mheap_.arenas[ai.l1()].val[ai.l2()];
         clear((~ha).pageMarks[..]);
     }
     work.bytesMarked = 0;
@@ -1542,7 +1542,7 @@ internal static Action poolcleanup;
 
 internal static slice<@unsafe.Pointer> boringCaches;         // for crypto/internal/boring
 
-internal static channel<struct{}> uniqueMapCleanup; // for unique
+internal static channel<EmptyStruct> uniqueMapCleanup; // for unique
 
 // sync_runtime_registerPoolCleanup should be an internal detail,
 // but widely used packages access it using linkname.
@@ -1566,7 +1566,7 @@ internal static void boring_registerCache(@unsafe.Pointer Δp) {
 //go:linkname unique_runtime_registerUniqueMapCleanup unique.runtime_registerUniqueMapCleanup
 internal static void unique_runtime_registerUniqueMapCleanup(Action f) {
     // Start the goroutine in the runtime so it's counted as a system goroutine.
-    uniqueMapCleanup = new channel<struct{}>(1);
+    uniqueMapCleanup = new channel<EmptyStruct>(1);
     var uniqueMapCleanupʗ2 = uniqueMapCleanup;
     goǃ((Action cleanup) => {
         while (ᐧ) {

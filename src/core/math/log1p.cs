@@ -121,7 +121,7 @@ internal static float64 log1p(float64 x) {
     case {} when x < -1 || IsNaN(x): {
         return NaN();
     }
-    case {} when x is -1: {
+    case {} when x == -1: {
         return Inf(-1);
     }
     case {} when IsInf(x, // includes -Inf

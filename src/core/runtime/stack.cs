@@ -86,19 +86,14 @@ internal const bool debugCheckBP = false;
 
 internal static nint stackPoisonCopy = 0; // fill stack that should not be accessed with garbage, to detect bad dereferences during copy
 
-internal static readonly GoUntyped uintptrMask = /* 1<<(8*goarch.PtrSize) - 1 */
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly UntypedInt uintptrMask = /* 1<<(8*goarch.PtrSize) - 1 */ 18446744073709551615;
 // The values below can be stored to g.stackguard0 to force
 // the next stack check to fail.
 // These are all larger than any real SP.
-internal static readonly GoUntyped stackPreempt = /* uintptrMask & -1314 */
-    GoUntyped.Parse("18446744073709550302");
-internal static readonly GoUntyped stackFork = /* uintptrMask & -1234 */
-    GoUntyped.Parse("18446744073709550382");
-internal static readonly GoUntyped stackForceMove = /* uintptrMask & -275 */
-    GoUntyped.Parse("18446744073709551341");
-internal static readonly GoUntyped stackPoisonMin = /* uintptrMask & -4096 */
-    GoUntyped.Parse("18446744073709547520");
+internal static readonly UntypedInt stackPreempt = /* uintptrMask & -1314 */ 18446744073709550302;
+internal static readonly UntypedInt stackFork = /* uintptrMask & -1234 */ 18446744073709550382;
+internal static readonly UntypedInt stackForceMove = /* uintptrMask & -275 */ 18446744073709551341;
+internal static readonly UntypedInt stackPoisonMin = /* uintptrMask & -4096 */ 18446744073709547520;
 
 // Global pool of spans that have free stacks.
 // Stacks are assigned an order according to size.

@@ -125,7 +125,7 @@ internal static readonly mptcpStatus mptcpDisabled = 2;
     // cancellation.
     //
     // Deprecated: Use DialContext instead.
-    public /*<-*/channel<struct{}> Cancel;
+    public /*<-*/channel<EmptyStruct> Cancel;
     // If Control is not nil, it is called after creating the network
     // connection but before actually dialing.
     //
@@ -553,7 +553,7 @@ public static (Conn, error) DialTimeout(@string network, @string address, time.D
     if (len(fallbacks) == 0) {
         return sd.dialSerial(ctx, primaries);
     }
-    var returned = new channel<struct{}>(1);
+    var returned = new channel<EmptyStruct>(1);
     deferǃ(close, returned, defer);
     var results = new channel<dialResult>(1);
     // unbuffered

@@ -99,8 +99,7 @@ internal static readonly UntypedInt timeHistTotalBuckets = /* timeHistNumBuckets
 }
 
 internal static readonly UntypedInt fInf = /* 0x7FF0000000000000 */ 9218868437227405312;
-internal static readonly GoUntyped fNegInf = /* 0xFFF0000000000000 */
-    GoUntyped.Parse("18442240474082181120");
+internal static readonly UntypedInt fNegInf = /* 0xFFF0000000000000 */ 18442240474082181120;
 
 internal static float64 float64Inf() {
     ref var inf = ref heap<uint64>(out var Ꮡinf);

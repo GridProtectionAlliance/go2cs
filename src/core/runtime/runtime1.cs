@@ -255,28 +255,28 @@ internal static void check() {
     if (m[0] != 255 || m[1] != 1 || m[2] != 255 || m[3] != 255) {
         @throw("atomicand8"u8);
     }
-    ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡj))).val = ^((uint64)0);
+    ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡj))).val = ~((uint64)0);
     if (j == j) {
         @throw("float64nan"u8);
     }
     if (!(j != j)) {
         @throw("float64nan1"u8);
     }
-    ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡj1))).val = ^((uint64)1);
+    ((ж<uint64>)(uintptr)(new @unsafe.Pointer(Ꮡj1))).val = ~((uint64)1);
     if (j == j1) {
         @throw("float64nan2"u8);
     }
     if (!(j != j1)) {
         @throw("float64nan3"u8);
     }
-    ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡi))).val = ^((uint32)0);
+    ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡi))).val = ~((uint32)0);
     if (i == i) {
         @throw("float32nan"u8);
     }
     if (i == i) {
         @throw("float32nan1"u8);
     }
-    ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡi1))).val = ^((uint32)1);
+    ((ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡi1))).val = ~((uint32)1);
     if (i == i1) {
         @throw("float32nan2"u8);
     }

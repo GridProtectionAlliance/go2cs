@@ -94,22 +94,19 @@ internal static bool sigsend(uint32 s) {
     // Notify receiver that queue has new bit.
 Send:
     while (ᐧ) {
-        switch (sig.state.Load()) {
-        default: {
+        var exprᴛ1 = sig.state.Load();
+        { /* default: */
             @throw("sigsend: inconsistent state"u8);
-            break;
         }
-        case sigIdle: {
+        else if (exprᴛ1 == sigIdle) {
             if (sig.state.CompareAndSwap(sigIdle, sigSending)) {
                 goto break_Send;
             }
-            break;
         }
-        case sigSending: {
+        else if (exprᴛ1 == sigSending) {
             goto break_Send;
-            break;
         }
-        case sigReceiving: {
+        else if (exprᴛ1 == sigReceiving) {
             if (sig.state.CompareAndSwap(sigReceiving, // notification already pending
  sigIdle)) {
                 if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
@@ -119,8 +116,7 @@ Send:
                 notewakeup(Ꮡsig.of(sigᴛ1.Ꮡnote));
                 goto break_Send;
             }
-            break;
-        }}
+        }
 
 continue_Send:;
     }
@@ -145,12 +141,11 @@ internal static uint32 signal_recv() {
         // Wait for updates to be available from signal sender.
 Receive:
         while (ᐧ) {
-            switch (sig.state.Load()) {
-            default: {
+            var exprᴛ1 = sig.state.Load();
+            { /* default: */
                 @throw("signal_recv: inconsistent state"u8);
-                break;
             }
-            case sigIdle: {
+            else if (exprᴛ1 == sigIdle) {
                 if (sig.state.CompareAndSwap(sigIdle, sigReceiving)) {
                     if (GOOS == "darwin"u8 || GOOS == "ios"u8) {
                         sigNoteSleep(Ꮡsig.of(sigᴛ1.Ꮡnote));
@@ -160,14 +155,12 @@ Receive:
                     noteclear(Ꮡsig.of(sigᴛ1.Ꮡnote));
                     goto break_Receive;
                 }
-                break;
             }
-            case sigSending: {
+            else if (exprᴛ1 == sigSending) {
                 if (sig.state.CompareAndSwap(sigSending, sigIdle)) {
                     goto break_Receive;
                 }
-                break;
-            }}
+            }
 
 continue_Receive:;
         }

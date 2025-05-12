@@ -294,7 +294,7 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     var paddingLen = payload[len(payload) - 1];
     nuint t = ((nuint)(len(payload) - 1)) - ((nuint)paddingLen);
     // if len(payload) >= (paddingLen - 1) then the MSB of t is zero
-    good = ((byte)(((int32)(^t)) >> (int)(31)));
+    good = ((byte)(((int32)(~t)) >> (int)(31)));
     // The maximum possible padding length plus the actual length field
     nint toCheck = 256;
     // The length of the padded data is public, so we can use an if here
@@ -304,7 +304,7 @@ internal static (nint toRemove, byte good) extractPadding(slice<byte> payload) {
     for (nint i = 0; i < toCheck; i++) {
         nuint tΔ1 = ((nuint)paddingLen) - ((nuint)i);
         // if i <= paddingLen then the MSB of t is zero
-        var mask = ((byte)(((int32)(^tΔ1)) >> (int)(31)));
+        var mask = ((byte)(((int32)(~tΔ1)) >> (int)(31)));
         var b = payload[len(payload) - 1 - i];
         good &= ~(byte)((byte)((byte)(mask & paddingLen) ^ (byte)(mask & b)));
     }
@@ -736,16 +736,16 @@ public static @string Error(this RecordHeaderError e) {
         if (c.vers == VersionTLS13) {
             return c.@in.setErrorLocked(new net.OpError(Op: "remote error"u8, Err: ((alert)data[1])));
         }
-        switch (data[0]) {
-        case alertLevelWarning: {
+        var exprᴛ2 = data[0];
+        if (exprᴛ2 == alertLevelWarning) {
             return c.retryReadRecord(expectChangeCipherSpec);
         }
-        case alertLevelError: {
+        if (exprᴛ2 == alertLevelError) {
             return c.@in.setErrorLocked(new net.OpError(Op: "remote error"u8, Err: ((alert)data[1])));
         }
-        default: {
+        { /* default: */
             return c.@in.setErrorLocked(c.sendAlert(alertUnexpectedMessage));
-        }}
+        }
 
     }
     if (exprᴛ1 == recordTypeChangeCipherSpec) {
@@ -916,7 +916,7 @@ internal static readonly UntypedInt recordSizeBoostThreshold = /* 128 * 1024 */ 
         }
         case cbcMode ciph: {
             nint blockSize = ciph.BlockSize();
-            payloadBytes = ((nint)(payloadBytes & ^(blockSize - 1))) - 1;
+            payloadBytes = ((nint)(payloadBytes & ~(blockSize - 1))) - 1;
             payloadBytes -= c.@out.mac.Size();
             break;
         }
@@ -1567,7 +1567,7 @@ internal static error errEarlyCloseWrite = errors.New("tls: CloseWrite called be
         //
         // The interrupter goroutine waits for the input context to be done and
         // closes the connection if this happens before the function returns.
-        var done = new channel<struct{}>(1);
+        var done = new channel<EmptyStruct>(1);
         var interruptRes = new channel<error>(1);
         var doneʗ1 = done;
         var interruptResʗ1 = interruptRes;

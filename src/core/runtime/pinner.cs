@@ -258,7 +258,7 @@ internal static bool setPinned(@unsafe.Pointer ptr, bool pin) {
     if (val){
         atomic.Or8(v.bytep, mask);
     } else {
-        atomic.And8(v.bytep, ^mask);
+        atomic.And8(v.bytep, ~mask);
     }
 }
 

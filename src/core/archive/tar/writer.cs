@@ -585,7 +585,7 @@ internal static (@string prefix, @string suffix, bool ok) splitUSTARPath(@string
         fw.nb -= ((int64)n);
     }
     switch (ᐧ) {
-    case {} when err is != default!: {
+    case {} when err != default!: {
         return (n, err);
     }
     case {} when overwrite: {
@@ -656,7 +656,7 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
     case {} when err is ErrWriteTooLong: {
         return (n, errMissData);
     }
-    case {} when err is != default!: {
+    case {} when err != default!: {
         return (n, err);
     }
     case {} when sw.logicalRemaining() == 0 && sw.physicalRemaining() > 0: {
@@ -731,7 +731,7 @@ internal static int64 physicalRemaining(this regFileWriter fw) {
     case {} when err is ErrWriteTooLong: {
         return (n, errMissData);
     }
-    case {} when err is != default!: {
+    case {} when err != default!: {
         return (n, err);
     }
     case {} when sw.logicalRemaining() == 0 && sw.physicalRemaining() > 0: {

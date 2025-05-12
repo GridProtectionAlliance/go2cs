@@ -19,11 +19,9 @@ partial class crc64_package {
 public static readonly UntypedInt ΔSize = 8;
 
 // Predefined polynomials.
-public static readonly GoUntyped ISO = /* 0xD800000000000000 */
-    GoUntyped.Parse("15564440312192434176");
+public static readonly UntypedInt ISO = /* 0xD800000000000000 */ 15564440312192434176;
 
-public static readonly GoUntyped ECMA = /* 0xC96C5795D7870F42 */
-    GoUntyped.Parse("14514072000185962306");
+public static readonly UntypedInt ECMA = /* 0xC96C5795D7870F42 */ 14514072000185962306;
 
 [GoType("[256]uint64")] partial struct Table;
 
@@ -44,16 +42,16 @@ internal static void buildSlicing8Tables() {
 // The contents of this [Table] must not be modified.
 public static ж<Table> MakeTable(uint64 poly) {
     buildSlicing8TablesOnce();
-    switch (poly) {
-    case ISO: {
-        return Ꮡ(slicing8TableISO[0]);
+    var exprᴛ1 = poly;
+    if (exprᴛ1 == ISO) {
+        return Ꮡ(slicing8TableISO.val[0]);
     }
-    case ECMA: {
-        return Ꮡ(slicing8TableECMA[0]);
+    if (exprᴛ1 == ECMA) {
+        return Ꮡ(slicing8TableECMA.val[0]);
     }
-    default: {
+    { /* default: */
         return makeTable(poly);
-    }}
+    }
 
 }
 
@@ -68,7 +66,7 @@ internal static ж<Table> makeTable(uint64 poly) {
                 crc >>= (UntypedInt)(1);
             }
         }
-        t[i] = crc;
+        t.val[i] = crc;
     }
     return t;
 }
@@ -146,14 +144,14 @@ internal static uint64 update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
     ref var tab = ref Ꮡtab.val;
 
     buildSlicing8TablesOnce();
-    crc = ^crc;
+    crc = ~crc;
     // Table comparison is somewhat expensive, so avoid it for small sizes
     while (len(p) >= 64) {
         ж<array<Table>> helperTable = default!;
-        if (tab == slicing8TableECMA[0]){
+        if (tab == slicing8TableECMA.val[0]){
             helperTable = slicing8TableECMA;
         } else 
-        if (tab == slicing8TableISO[0]){
+        if (tab == slicing8TableISO.val[0]){
             helperTable = slicing8TableISO;
         } else 
         if (len(p) >= 2048){
@@ -167,7 +165,7 @@ internal static uint64 update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
         // Update using slicing-by-8
         while (len(p) > 8) {
             crc ^= (uint64)(byteorder.LeUint64(p));
-            crc = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(helperTable[7][(uint64)(crc & 255)] ^ helperTable[6][(uint64)((crc >> (int)(8)) & 255)]) ^ helperTable[5][(uint64)((crc >> (int)(16)) & 255)]) ^ helperTable[4][(uint64)((crc >> (int)(24)) & 255)]) ^ helperTable[3][(uint64)((crc >> (int)(32)) & 255)]) ^ helperTable[2][(uint64)((crc >> (int)(40)) & 255)]) ^ helperTable[1][(uint64)((crc >> (int)(48)) & 255)]) ^ helperTable[0][crc >> (int)(56)]);
+            crc = (uint64)((uint64)((uint64)((uint64)((uint64)((uint64)((uint64)(helperTable.val[7][(uint64)(crc & 255)] ^ helperTable.val[6][(uint64)((crc >> (int)(8)) & 255)]) ^ helperTable.val[5][(uint64)((crc >> (int)(16)) & 255)]) ^ helperTable.val[4][(uint64)((crc >> (int)(24)) & 255)]) ^ helperTable.val[3][(uint64)((crc >> (int)(32)) & 255)]) ^ helperTable.val[2][(uint64)((crc >> (int)(40)) & 255)]) ^ helperTable.val[1][(uint64)((crc >> (int)(48)) & 255)]) ^ helperTable.val[0][crc >> (int)(56)]);
             p = p[8..];
         }
     }
@@ -175,7 +173,7 @@ internal static uint64 update(uint64 crc, ж<Table> Ꮡtab, slice<byte> p) {
     foreach (var (_, v) in p) {
         crc = (uint64)(tab[(byte)(((byte)crc) ^ v)] ^ (crc >> (int)(8)));
     }
-    return ^crc;
+    return ~crc;
 }
 
 // Update returns the result of adding the bytes in p to the crc.
@@ -217,9 +215,9 @@ internal static uint64 tableSum(ж<Table> Ꮡt) {
     array<byte> a = new(2048);
     var b = a[..0];
     if (t != nil) {
-        /* for _, x := range t {
-	b = byteorder.BeAppendUint64(b, x)
-} */
+        foreach (var (_, x) in t.val) {
+            b = byteorder.BeAppendUint64(b, x);
+        }
     }
     return Checksum(b, MakeTable(ISO));
 }

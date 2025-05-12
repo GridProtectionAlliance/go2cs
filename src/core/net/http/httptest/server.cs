@@ -264,7 +264,7 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
 [GoRecv] public static void CloseClientConnections(this ref Server s) => func((defer, _) => {
     s.mu.Lock();
     nint nconn = len(s.conns);
-    var ch = new channel<struct{}>(nconn);
+    var ch = new channel<EmptyStruct>(nconn);
     foreach (var (c, _) in s.conns) {
         goǃ(s.closeConnChan, c, ch);
     }
@@ -401,7 +401,7 @@ public static ж<Server> NewTLSServer(httpꓸHandler handler) {
 
 // closeConnChan is like closeConn, but takes an optional channel to receive a value
 // when the goroutine closing c is done.
-[GoRecv] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<struct{}> done) {
+[GoRecv] internal static void closeConnChan(this ref Server s, net.Conn c, channel/*<-*/<EmptyStruct> done) {
     c.Close();
     if (done != default!) {
         done.ᐸꟷ(new closeConnChan_type());

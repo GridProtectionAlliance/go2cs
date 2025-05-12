@@ -139,7 +139,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // that the allocator will assist the background scavenger in the face of a memory
     // limit, so we'll be safe even if we stop the scavenger when we shouldn't have.
     if (mappedReady <= memoryLimitGoal){
-        Δscavenge.memoryLimitGoal.Store(^((uint64)0));
+        Δscavenge.memoryLimitGoal.Store(~((uint64)0));
     } else {
         Δscavenge.memoryLimitGoal.Store(memoryLimitGoal);
     }
@@ -149,7 +149,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // information about the heap yet) so this is fine, and avoids a fault
     // or garbage data later.
     if (lastHeapGoal == 0) {
-        Δscavenge.gcPercentGoal.Store(^((uint64)0));
+        Δscavenge.gcPercentGoal.Store(~((uint64)0));
         return;
     }
     // Compute our scavenging goal.
@@ -179,7 +179,7 @@ internal static void gcPaceScavenger(int64 memoryLimit, uint64 heapGoal, uint64 
     // that we don't need the background scavenger for maintaining a memory overhead
     // proportional to the heap goal.
     if (heapRetainedNow <= gcPercentGoal || heapRetainedNow - gcPercentGoal < ((uint64)physPageSize)){
-        Δscavenge.gcPercentGoal.Store(^((uint64)0));
+        Δscavenge.gcPercentGoal.Store(~((uint64)0));
     } else {
         Δscavenge.gcPercentGoal.Store(gcPercentGoal);
     }
@@ -722,7 +722,7 @@ internal static void printScavTrace(uintptr releasedBg, uintptr releasedEager, b
 //
 // m must be a power of 2 <= maxPagesPerPhysPage.
 internal static uint64 fillAligned(uint64 x, nuint m) {
-    var apply = (uint64 x, uint64 c) => ^((uint64)(((uint64)((((uint64)(xΔ1 & c)) + c) | xΔ1)) | c));
+    var apply = (uint64 x, uint64 c) => ~((uint64)(((uint64)((((uint64)(xΔ1 & c)) + c) | xΔ1)) | c));
     // Transform x to contain a 1 bit at the top of each m-aligned
     // group of m zero bits.
     switch (m) {
@@ -767,7 +767,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     // set each group to have all the bits set except
     // the top bit, so just OR with the original
     // result to set all the bits.
-    return ^((uint64)((x - (x >> (int)((m - 1)))) | x));
+    return ~((uint64)((x - (x >> (int)((m - 1)))) | x));
 }
 
 // findScavengeCandidate returns a start index and a size for this pallocData
@@ -814,7 +814,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     for (; i >= 0; i--) {
         // 1s are scavenged OR non-free => 0s are unscavenged AND free
         var xΔ1 = fillAligned((uint64)(m.scavenged[i] | m.pallocBits[i]), ((nuint)minimum));
-        if (xΔ1 != ^((uint64)0)) {
+        if (xΔ1 != ~((uint64)0)) {
             break;
         }
     }
@@ -826,7 +826,7 @@ internal static uint64 fillAligned(uint64 x, nuint m) {
     // extend further. Loop until we find the extent of it.
     // 1s are scavenged OR non-free => 0s are unscavenged AND free
     var x = fillAligned((uint64)(m.scavenged[i] | m.pallocBits[i]), ((nuint)minimum));
-    nuint z1 = ((nuint)sys.LeadingZeros64(^x));
+    nuint z1 = ((nuint)sys.LeadingZeros64(~x));
     nuint run = ((nuint)0);
     nuint end = ((nuint)i) * 64 + (64 - z1);
     if (x << (int)(z1) != 0){

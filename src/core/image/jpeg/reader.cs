@@ -304,22 +304,19 @@ internal static FormatError errMissingFF00 = ((FormatError)"missing 0xff00 seque
     if (d.nComp != 0) {
         return ((FormatError)"multiple SOF markers"u8);
     }
-    switch (n) {
-    case 6 + 3 * 1: {
+    var exprᴛ1 = n;
+    if (exprᴛ1 == 6 + 3 * 1) {
         d.nComp = 1;
-        break;
     }
-    case 6 + 3 * 3: {
+    else if (exprᴛ1 == 6 + 3 * 3) {
         d.nComp = 3;
-        break;
     }
-    case 6 + 3 * 4: {
+    else if (exprᴛ1 == 6 + 3 * 4) {
         d.nComp = 4;
-        break;
     }
-    default: {
+    else { /* default: */
         return ((UnsupportedError)"number of components"u8);
-    }}
+    }
 
     // Grayscale image.
     // YCbCr or RGB image.
@@ -641,56 +638,49 @@ break_loop:;
         if (n < 0) {
             return (default!, ((FormatError)"short segment length"u8));
         }
-        switch (marker) {
-        case sof0Marker or sof1Marker or sof2Marker: {
+        var exprᴛ1 = marker;
+        if (exprᴛ1 == sof0Marker || exprᴛ1 == sof1Marker || exprᴛ1 == sof2Marker) {
             d.baseline = marker == sof0Marker;
             d.progressive = marker == sof2Marker;
             err = d.processSOF(n);
             if (configOnly && d.jfif) {
                 return (default!, err);
             }
-            break;
         }
-        case dhtMarker: {
+        if (exprᴛ1 == dhtMarker) {
             if (configOnly){
                 err = d.ignore(n);
             } else {
                 err = d.processDHT(n);
             }
-            break;
         }
-        case dqtMarker: {
+        else if (exprᴛ1 == dqtMarker) {
             if (configOnly){
                 err = d.ignore(n);
             } else {
                 err = d.processDQT(n);
             }
-            break;
         }
-        case sosMarker: {
+        else if (exprᴛ1 == sosMarker) {
             if (configOnly) {
                 return (default!, default!);
             }
             err = d.processSOS(n);
-            break;
         }
-        case driMarker: {
+        else if (exprᴛ1 == driMarker) {
             if (configOnly){
                 err = d.ignore(n);
             } else {
                 err = d.processDRI(n);
             }
-            break;
         }
-        case app0Marker: {
+        else if (exprᴛ1 == app0Marker) {
             err = d.processApp0Marker(n);
-            break;
         }
-        case app14Marker: {
+        else if (exprᴛ1 == app14Marker) {
             err = d.processApp14Marker(n);
-            break;
         }
-        default: {
+        else { /* default: */
             if (app0Marker <= marker && marker <= app15Marker || marker == comMarker){
                 err = d.ignore(n);
             } else 
@@ -700,8 +690,7 @@ break_loop:;
             } else {
                 err = ((UnsupportedError)"unknown marker"u8);
             }
-            break;
-        }}
+        }
 
         if (err != default!) {
             return (default!, err);

@@ -115,7 +115,7 @@ internal static traceWriter refill(this traceWriter w, traceExperiment exp) {
     w.traceBuf.link = default!;
     w.traceBuf.pos = 0;
     // Tolerate a nil mp.
-    var mID = ^((uint64)0);
+    var mID = ~((uint64)0);
     if (w.mp != nil) {
         mID = ((uint64)w.mp.procid);
     }

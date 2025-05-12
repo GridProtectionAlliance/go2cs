@@ -13,8 +13,7 @@ partial class rand_package {
  */
 internal static readonly UntypedInt rngLen = 607;
 internal static readonly UntypedInt rngTap = 273;
-internal static readonly GoUntyped rngMax = /* 1 << 63 */
-    GoUntyped.Parse("9223372036854775808");
+internal static readonly UntypedInt rngMax = /* 1 << 63 */ 9223372036854775808;
 internal static readonly UntypedInt rngMask = /* rngMax - 1 */ 9223372036854775807;
 internal static readonly UntypedInt int32max = /* (1 << 31) - 1 */ 2147483647;
 

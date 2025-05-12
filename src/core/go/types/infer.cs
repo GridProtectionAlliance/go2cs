@@ -236,7 +236,7 @@ internal const bool enableReverseTypeInference = true; // disable for debugging
             if (core != nil){
                 // A type parameter can be unified with its core type in two cases.
                 switch (ᐧ) {
-                case {} when tx is != default!: {
+                case {} when tx != default!: {
                     if (!u.unify(tx, // The corresponding type argument tx is known. There are 2 cases:
  // 1) If the core type has a tilde, per spec requirement for tilde
  //    elements, the core type is an underlying (literal) type.

@@ -135,12 +135,12 @@ internal const uintptr pageCachePages = /* 8 * unsafe.Sizeof(pageCache{}.cache) 
         // Fast path: there's free pages at or near the searchAddr address.
         chunk = Δp.chunkOf(ci);
         var (j, _) = chunk.find(1, chunkPageIndex(Δp.searchAddr.addr()));
-        if (j == ^((nuint)0)) {
+        if (j == ~((nuint)0)) {
             @throw("bad summary data"u8);
         }
         c = new pageCache(
             @base: chunkBase(ci) + alignDown(((uintptr)j), 64) * pageSize,
-            cache: ^chunk.pages64(j),
+            cache: ~chunk.pages64(j),
             scav: (~chunk).scavenged.block64(j)
         );
     } else {
@@ -157,7 +157,7 @@ internal const uintptr pageCachePages = /* 8 * unsafe.Sizeof(pageCache{}.cache) 
         chunk = Δp.chunkOf(ci);
         c = new pageCache(
             @base: alignDown(addr, 64 * pageSize),
-            cache: ^chunk.pages64(chunkPageIndex(addr)),
+            cache: ~chunk.pages64(chunkPageIndex(addr)),
             scav: (~chunk).scavenged.block64(chunkPageIndex(addr))
         );
     }

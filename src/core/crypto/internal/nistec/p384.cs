@@ -424,7 +424,7 @@ internal static error p384CheckOnCurve(ж<fiat.P384Element> Ꮡx, ж<fiat.P384El
     ref var i = ref heap<uint8>(out var Ꮡi);
     for (i = ((uint8)1); i < 16; i++) {
         nint cond = subtle.ConstantTimeByteEq(i, n);
-        p.Select(table[i - 1], Ꮡp, cond);
+        p.Select(table.val[i - 1], Ꮡp, cond);
     }
 }
 
@@ -486,10 +486,10 @@ internal static sync.Once p384GeneratorTableOnce;
         var @base = NewP384Point().SetGenerator();
         ref var i = ref heap<nint>(out var Ꮡi);
         for (i = 0; i < p384ElementLength * 2; i++) {
-            p384GeneratorTable[i][0] = NewP384Point().Set(@base);
+            p384GeneratorTable.val[i][0] = NewP384Point().Set(@base);
             ref var j = ref heap<nint>(out var Ꮡj);
             for (j = 1; j < 15; j++) {
-                p384GeneratorTable[i][j] = NewP384Point().Add(p384GeneratorTable[i][j - 1], @base);
+                p384GeneratorTable.val[i][j] = NewP384Point().Add(p384GeneratorTable.val[i][j - 1], @base);
             }
             @base.Double(@base);
             @base.Double(@base);
@@ -518,11 +518,11 @@ internal static sync.Once p384GeneratorTableOnce;
     nint tableIndex = len(tables) - 1;
     foreach (var (_, @byte) in scalar) {
         var windowValue = @byte >> (int)(4);
-        tables[tableIndex].Select(t, windowValue);
+        tables.val[tableIndex].Select(t, windowValue);
         p.Add(p, t);
         tableIndex--;
         windowValue = (byte)(@byte & 15);
-        tables[tableIndex].Select(t, windowValue);
+        tables.val[tableIndex].Select(t, windowValue);
         p.Add(p, t);
         tableIndex--;
     }

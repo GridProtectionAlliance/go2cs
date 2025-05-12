@@ -26,7 +26,8 @@ internal static readonly UntypedInt smallBufferSize = 64;
 
 // Don't use iota for these, as the values need to correspond with the
 // names and comments, which is easier to see when being explicit.
-internal static readonly readOp opRead = -1;   // Any other read operation.
+internal static readonly GoUntyped opRead = /* -1 */               // Any other read operation.
+    GoUntyped.Parse("-1");
 
 internal static readonly readOp opInvalid = 0; // Non-read operation.
 

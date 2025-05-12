@@ -350,19 +350,19 @@ public static nint RuneLen(rune r) {
     case {} when r is < 0: {
         return -1;
     }
-    case {} when r is <= rune1Max: {
+    case {} when r <= rune1Max: {
         return 1;
     }
-    case {} when r is <= rune2Max: {
+    case {} when r <= rune2Max: {
         return 2;
     }
     case {} when surrogateMin <= r && r <= surrogateMax: {
         return -1;
     }
-    case {} when r is <= rune3Max: {
+    case {} when r <= rune3Max: {
         return 3;
     }
-    case {} when r is <= MaxRune: {
+    case {} when r <= MaxRune: {
         return 4;
     }}
 
@@ -377,21 +377,21 @@ public static nint EncodeRune(slice<byte> p, rune r) {
     {
         var i = ((uint32)r);
         var matchᴛ1 = false;
-        if (i is <= rune1Max) { matchᴛ1 = true;
+        if (i <= rune1Max) { matchᴛ1 = true;
             p[0] = ((byte)r);
             return 1;
         }
-        if (i is <= rune2Max) { matchᴛ1 = true;
+        if (i <= rune2Max) { matchᴛ1 = true;
             _ = p[1];
             p[0] = (byte)(t2 | ((byte)(r >> (int)(6))));
             p[1] = (byte)(tx | (byte)(((byte)r) & maskx));
             return 2;
         }
-        if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax))) { matchᴛ1 = true;
+        if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
             r = RuneError;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && i is <= rune3Max) {
+        if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             _ = p[2];
             p[0] = (byte)(t3 | ((byte)(r >> (int)(12))));
             p[1] = (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx));
@@ -430,14 +430,14 @@ internal static slice<byte> appendRuneNonASCII(slice<byte> p, rune r) {
     {
         var i = ((uint32)r);
         var matchᴛ1 = false;
-        if (i is <= rune2Max) { matchᴛ1 = true;
+        if (i <= rune2Max) { matchᴛ1 = true;
             return append(p, (byte)(t2 | ((byte)(r >> (int)(6)))), (byte)(tx | (byte)(((byte)r) & maskx)));
         }
-        if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax))) { matchᴛ1 = true;
+        if ((i > MaxRune) || (surrogateMin <= i && i <= surrogateMax)) { matchᴛ1 = true;
             r = RuneError;
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && i is <= rune3Max) {
+        if (fallthrough || !matchᴛ1 && (i <= rune3Max)) {
             return append(p, (byte)(t3 | ((byte)(r >> (int)(12)))), (byte)(tx | (byte)(((byte)(r >> (int)(6))) & maskx)), (byte)(tx | (byte)(((byte)r) & maskx)));
         }
         { /* default: */

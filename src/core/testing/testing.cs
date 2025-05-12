@@ -603,8 +603,8 @@ internal static readonly UntypedInt maxStackLen = 50;
     internal bool failed;                 // Test or benchmark has failed.
     internal bool skipped;                 // Test or benchmark has been skipped.
     internal bool done;                 // Test is finished and all subtests have completed.
-    internal map<uintptr, struct{}> helperPCs; // functions to be skipped when writing file/line info
-    internal map<@string, struct{}> helperNames; // helperPCs converted to function names
+    internal map<uintptr, EmptyStruct> helperPCs; // functions to be skipped when writing file/line info
+    internal map<@string, EmptyStruct> helperNames; // helperPCs converted to function names
     internal slice<Action> cleanups;        // optional functions to be called at the end of the test
     internal @string cleanupName;              // Name of the cleanup function.
     internal slice<uintptr> cleanupPc;       // The stack trace at the point where Cleanup was called.
@@ -754,7 +754,7 @@ public static bool Verbose() {
         }
         // If more helper PCs have been added since we last did the conversion
         if (c.helperNames == default!) {
-            c.helperNames = new map<@string, struct{}>();
+            c.helperNames = new map<@string, EmptyStruct>();
             foreach (var (pcΔ1, _) in c.helperPCs) {
                 c.helperNames[pcToName(pcΔ1)] = new frameSkip_c();
             }
@@ -915,9 +915,9 @@ internal static @string fmtDuration(time.Duration d) {
     void @private();
 }
 
-internal static TB _ = (ж<T>)(default!);
+internal static TB _ᴛ2ʗ = (ж<T>)(default!);
 
-internal static TB _ = (ж<B>)(default!);
+internal static TB _ᴛ3ʗ = (ж<B>)(default!);
 
 // T is a type passed to Test functions to manage test state and support formatted test logs.
 //
@@ -1167,7 +1167,7 @@ internal static TB _ = (ж<B>)(default!);
     c.mu.Lock();
     defer(c.mu.Unlock);
     if (c.helperPCs == default!) {
-        c.helperPCs = new map<uintptr, struct{}>();
+        c.helperPCs = new map<uintptr, EmptyStruct>();
     }
     // repeating code from callerName here to save walking a stack frame
     array<uintptr> pc = new(1);

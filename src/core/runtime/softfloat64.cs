@@ -10,14 +10,15 @@ partial class runtime_package {
 
 internal const nuint mantbits64 = 52;
 internal const nuint expbits64 = 11;
-internal static readonly UntypedInt bias64 = /* -1<<(expbits64-1) + 1 */ -1023;
+internal static readonly GoUntyped bias64 = /* -1<<(expbits64-1) + 1 */
+    GoUntyped.Parse("-1023");
 internal const uint64 nan64 = /* (1<<expbits64-1)<<mantbits64 + 1<<(mantbits64-1) */ 9221120237041090560;                                            // quiet NaN, 0 payload
 internal const uint64 inf64 = /* (1<<expbits64 - 1) << mantbits64 */ 9218868437227405312;
-internal static readonly GoUntyped neg64 = /* 1 << (expbits64 + mantbits64) */
-    GoUntyped.Parse("9223372036854775808");
+internal const uint64 neg64 = /* 1 << (expbits64 + mantbits64) */ 9223372036854775808;
 internal const nuint mantbits32 = 23;
 internal const nuint expbits32 = 8;
-internal static readonly UntypedInt bias32 = /* -1<<(expbits32-1) + 1 */ -127;
+internal static readonly GoUntyped bias32 = /* -1<<(expbits32-1) + 1 */
+    GoUntyped.Parse("-127");
 internal const uint32 nan32 = /* (1<<expbits32-1)<<mantbits32 + 1<<(mantbits32-1) */ 2143289344;                                            // quiet NaN, 0 payload
 internal const uint32 inf32 = /* (1<<expbits32 - 1) << mantbits32 */ 2139095040;
 internal const uint32 neg32 = /* 1 << (expbits32 + mantbits32) */ 2147483648;
@@ -32,8 +33,8 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
     sign = (uint64)(f & (1 << (int)((mantbits64 + expbits64))));
     mant = (uint64)(f & (1 << (int)(mantbits64) - 1));
     exp = (nint)(((nint)(f >> (int)(mantbits64))) & (1 << (int)(expbits64) - 1));
-    switch (exp) {
-    case 1 << (int)(expbits64) - 1: {
+    var exprᴛ1 = exp;
+    if (exprᴛ1 == 1 << (int)(expbits64) - 1) {
         if (mant != 0) {
             nan = true;
             return (sign, mant, exp, inf, nan);
@@ -41,7 +42,7 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
         inf = true;
         return (sign, mant, exp, inf, nan);
     }
-    case 0: {
+    if (exprᴛ1 is 0) {
         if (mant != 0) {
             // denormalized
             exp += bias64 + 1;
@@ -50,13 +51,11 @@ internal static (uint64 sign, uint64 mant, nint exp, bool inf, bool nan) funpack
                 exp--;
             }
         }
-        break;
     }
-    default: {
+    else { /* default: */
         mant |= (uint64)(1 << (int)(mantbits64));
         exp += bias64;
-        break;
-    }}
+    }
 
     // add implicit top bit
     return (sign, mant, exp, inf, nan);
@@ -72,8 +71,8 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
     sign = (uint32)(f & (1 << (int)((mantbits32 + expbits32))));
     mant = (uint32)(f & (1 << (int)(mantbits32) - 1));
     exp = (nint)(((nint)(f >> (int)(mantbits32))) & (1 << (int)(expbits32) - 1));
-    switch (exp) {
-    case 1 << (int)(expbits32) - 1: {
+    var exprᴛ1 = exp;
+    if (exprᴛ1 == 1 << (int)(expbits32) - 1) {
         if (mant != 0) {
             nan = true;
             return (sign, mant, exp, inf, nan);
@@ -81,7 +80,7 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
         inf = true;
         return (sign, mant, exp, inf, nan);
     }
-    case 0: {
+    if (exprᴛ1 is 0) {
         if (mant != 0) {
             // denormalized
             exp += bias32 + 1;
@@ -90,13 +89,11 @@ internal static (uint32 sign, uint32 mant, nint exp, bool inf, bool nan) funpack
                 exp--;
             }
         }
-        break;
     }
-    default: {
+    else { /* default: */
         mant |= (uint32)(1 << (int)(mantbits32));
         exp += bias32;
-        break;
-    }}
+    }
 
     // add implicit top bit
     return (sign, mant, exp, inf, nan);
@@ -417,7 +414,7 @@ internal static (int64 val, bool ok) f64toint(uint64 f) {
     case {} when (fi) || (fn): {
         return (0, false);
     }
-    case {} when fe is < -1: {
+    case {} when fe < -1: {
         return (0, false);
     }
     case {} when fe is > 63: {

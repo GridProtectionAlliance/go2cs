@@ -31,7 +31,8 @@ partial class errors_package {
 // "_DuplicateDecl" or "_InvalidSliceExpr". For brevity, naming follows the
 // convention that "bad" implies a problem with syntax, and "invalid" implies a
 // problem with types.
-public static readonly Code InvalidSyntaxTree = -1;
+public static readonly GoUntyped InvalidSyntaxTree = /* -1 */
+    GoUntyped.Parse("-1");
 
 internal static readonly Code Δ_ = /* iota */ 0;
 public static readonly Code Test = 1;

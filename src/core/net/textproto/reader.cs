@@ -377,8 +377,8 @@ internal static (nint code, bool continued, @string message, error err) parseCod
             }
             break;
         }
-        switch (d.state) {
-        case stateBeginLine: {
+        var exprᴛ1 = d.state;
+        if (exprᴛ1 == stateBeginLine) {
             if (c == (rune)'.') {
                 d.state = stateDot;
                 continue;
@@ -388,9 +388,8 @@ internal static (nint code, bool continued, @string message, error err) parseCod
                 continue;
             }
             d.state = stateData;
-            break;
         }
-        case stateDot: {
+        else if (exprᴛ1 == stateDot) {
             if (c == (rune)'\r') {
                 d.state = stateDotCR;
                 continue;
@@ -400,9 +399,8 @@ internal static (nint code, bool continued, @string message, error err) parseCod
                 continue;
             }
             d.state = stateData;
-            break;
         }
-        case stateDotCR: {
+        else if (exprᴛ1 == stateDotCR) {
             if (c == (rune)'\n') {
                 d.state = stateEOF;
                 continue;
@@ -410,9 +408,8 @@ internal static (nint code, bool continued, @string message, error err) parseCod
             br.UnreadByte();
             c = (rune)'\r';
             d.state = stateData;
-            break;
         }
-        case stateCR: {
+        else if (exprᴛ1 == stateCR) {
             if (c == (rune)'\n') {
                 // Not part of .\r\n.
                 // Consume leading dot and emit saved \r.
@@ -422,9 +419,8 @@ internal static (nint code, bool continued, @string message, error err) parseCod
             br.UnreadByte();
             c = (rune)'\r';
             d.state = stateData;
-            break;
         }
-        case stateData: {
+        else if (exprᴛ1 == stateData) {
             if (c == (rune)'\r') {
                 // Not part of \r\n. Emit saved \r
                 d.state = stateCR;
@@ -433,8 +429,7 @@ internal static (nint code, bool continued, @string message, error err) parseCod
             if (c == (rune)'\n') {
                 d.state = stateBeginLine;
             }
-            break;
-        }}
+        }
 
         b[n] = c;
         n++;

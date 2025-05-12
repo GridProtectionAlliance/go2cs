@@ -13,22 +13,22 @@ partial struct pageBits;
 
 // get returns the value of the i'th bit in the bitmap.
 [GoRecv] internal static nuint get(this ref pageBits b, nuint i) {
-    return ((nuint)((uint64)((b[i / 64] >> (int)((i % 64))) & 1)));
+    return ((nuint)((uint64)((b.val[i / 64] >> (int)((i % 64))) & 1)));
 }
 
 // block64 returns the 64-bit aligned block of bits containing the i'th bit.
 [GoRecv] internal static uint64 block64(this ref pageBits b, nuint i) {
-    return b[i / 64];
+    return b.val[i / 64];
 }
 
 // set sets bit i of pageBits.
 [GoRecv] internal static void set(this ref pageBits b, nuint i) {
-    b[i / 64] |= (uint64)(1 << (int)((i % 64)));
+    b.val[i / 64] |= (uint64)(1 << (int)((i % 64)));
 }
 
 // setRange sets bits in the range [i, i+n).
 [GoRecv] internal static void setRange(this ref pageBits b, nuint i, nuint n) {
-    _ = b[i / 64];
+    _ = b.val[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
         b.set(i);
@@ -37,40 +37,40 @@ partial struct pageBits;
     // Set bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b[i / 64] |= (uint64)(((((uint64)1) << (int)(n)) - 1) << (int)((i % 64)));
+        b.val[i / 64] |= (uint64)(((((uint64)1) << (int)(n)) - 1) << (int)((i % 64)));
         return;
     }
-    _ = b[j / 64];
+    _ = b.val[j / 64];
     // Set leading bits.
-    b[i / 64] |= (uint64)(^((uint64)0) << (int)((i % 64)));
+    b.val[i / 64] |= (uint64)(~((uint64)0) << (int)((i % 64)));
     for (nuint k = i / 64 + 1; k < j / 64; k++) {
-        b[k] = ^((uint64)0);
+        b.val[k] = ~((uint64)0);
     }
     // Set trailing bits.
-    b[j / 64] |= (uint64)((((uint64)1) << (int)((j % 64 + 1))) - 1);
+    b.val[j / 64] |= (uint64)((((uint64)1) << (int)((j % 64 + 1))) - 1);
 }
 
 // setAll sets all the bits of b.
 [GoRecv] internal static void setAll(this ref pageBits b) {
-    /* for i := range b {
-	b[i] = ^uint64(0)
-} */
+    foreach (var (i, _) in b.val) {
+        b.val[i] = ~((uint64)0);
+    }
 }
 
 // setBlock64 sets the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
 [GoRecv] internal static void setBlock64(this ref pageBits b, nuint i, uint64 v) {
-    b[i / 64] |= (uint64)(v);
+    b.val[i / 64] |= (uint64)(v);
 }
 
 // clear clears bit i of pageBits.
 [GoRecv] internal static void clear(this ref pageBits b, nuint i) {
-    b[i / 64] &= ~(uint64)(1 << (int)((i % 64)));
+    b.val[i / 64] &= ~(uint64)(1 << (int)((i % 64)));
 }
 
 // clearRange clears bits in the range [i, i+n).
 [GoRecv] internal static void clearRange(this ref pageBits b, nuint i, nuint n) {
-    _ = b[i / 64];
+    _ = b.val[i / 64];
     if (n == 1) {
         // Fast path for the n == 1 case.
         b.clear(i);
@@ -79,15 +79,15 @@ partial struct pageBits;
     // Clear bits [i, j].
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        b[i / 64] &= ~(uint64)(((((uint64)1) << (int)(n)) - 1) << (int)((i % 64)));
+        b.val[i / 64] &= ~(uint64)(((((uint64)1) << (int)(n)) - 1) << (int)((i % 64)));
         return;
     }
-    _ = b[j / 64];
+    _ = b.val[j / 64];
     // Clear leading bits.
-    b[i / 64] &= ~(uint64)(^((uint64)0) << (int)((i % 64)));
+    b.val[i / 64] &= ~(uint64)(~((uint64)0) << (int)((i % 64)));
     clear(b[(int)(i / 64 + 1)..(int)(j / 64)]);
     // Clear trailing bits.
-    b[j / 64] &= ~(uint64)((((uint64)1) << (int)((j % 64 + 1))) - 1);
+    b.val[j / 64] &= ~(uint64)((((uint64)1) << (int)((j % 64 + 1))) - 1);
 }
 
 // clearAll frees all the bits of b.
@@ -98,7 +98,7 @@ partial struct pageBits;
 // clearBlock64 clears the 64-bit aligned block of bits containing the i'th bit that
 // are set in v.
 [GoRecv] internal static void clearBlock64(this ref pageBits b, nuint i, uint64 v) {
-    b[i / 64] &= ~(uint64)(v);
+    b.val[i / 64] &= ~(uint64)(v);
 }
 
 // popcntRange counts the number of set bits in the
@@ -107,19 +107,19 @@ partial struct pageBits;
     nuint s = default!;
 
     if (n == 1) {
-        return ((nuint)((uint64)((b[i / 64] >> (int)((i % 64))) & 1)));
+        return ((nuint)((uint64)((b.val[i / 64] >> (int)((i % 64))) & 1)));
     }
-    _ = b[i / 64];
+    _ = b.val[i / 64];
     nuint j = i + n - 1;
     if (i / 64 == j / 64) {
-        return ((nuint)sys.OnesCount64((uint64)((b[i / 64] >> (int)((i % 64))) & ((1 << (int)(n)) - 1))));
+        return ((nuint)sys.OnesCount64((uint64)((b.val[i / 64] >> (int)((i % 64))) & ((1 << (int)(n)) - 1))));
     }
-    _ = b[j / 64];
-    s += ((nuint)sys.OnesCount64(b[i / 64] >> (int)((i % 64))));
+    _ = b.val[j / 64];
+    s += ((nuint)sys.OnesCount64(b.val[i / 64] >> (int)((i % 64))));
     for (nuint k = i / 64 + 1; k < j / 64; k++) {
-        s += ((nuint)sys.OnesCount64(b[k]));
+        s += ((nuint)sys.OnesCount64(b.val[k]));
     }
-    s += ((nuint)sys.OnesCount64((uint64)(b[j / 64] & ((1 << (int)((j % 64 + 1))) - 1))));
+    s += ((nuint)sys.OnesCount64((uint64)(b.val[j / 64] & ((1 << (int)((j % 64 + 1))) - 1))));
     return s;
 }
 
@@ -130,11 +130,10 @@ partial struct pageBits;
     nuint start = default!;
     nuint most = default!;
     nuint cur = default!;
-    GoUntyped notSetYet = /* ^uint(0) */ // sentinel for start value
-            GoUntyped.Parse("18446744073709551615");
+    const nuint notSetYet = /* ^uint(0) */ 18446744073709551615; // sentinel for start value
     start = notSetYet;
     for (nint i = 0; i < len(b); i++) {
-        var x = b[i];
+        var x = b.val[i];
         if (x == 0) {
             cur += 64;
             continue;
@@ -164,7 +163,7 @@ partial struct pageBits;
     // All uint64s must be nonzero, or we would have aborted above.
 outer:
     for (nint i = 0; i < len(b); i++) {
-        var x = b[i];
+        var x = b.val[i];
         // Look inside this uint64. We have a pattern like
         // 000000 1xxxxx1 000000
         // We need to look inside the 1xxxxx1 for any contiguous
@@ -205,7 +204,7 @@ outer:
                 k *= 2;
             }
             // The length of the lowest-order zero run is an increment to our maximum.
-            nuint j = ((nuint)sys.TrailingZeros64(^x));
+            nuint j = ((nuint)sys.TrailingZeros64(~x));
             // count contiguous trailing ones
             x >>= (nuint)((nuint)(j & 63));
             // remove trailing ones
@@ -253,16 +252,16 @@ break_outer:;
 //
 // See find for an explanation of the searchIdx parameter.
 [GoRecv] internal static nuint find1(this ref pallocBits b, nuint searchIdx) {
-    _ = b[0];
+    _ = b.val[0];
     // lift nil check out of loop
     for (nuint i = searchIdx / 64; i < ((nuint)len(b)); i++) {
-        var x = b[i];
-        if (^x == 0) {
+        var x = b.val[i];
+        if (~x == 0) {
             continue;
         }
-        return i * 64 + ((nuint)sys.TrailingZeros64(^x));
+        return i * 64 + ((nuint)sys.TrailingZeros64(~x));
     }
-    return ^((nuint)0);
+    return ~((nuint)0);
 }
 
 // findSmallN is a helper for find which searches for npages contiguous free pages
@@ -277,32 +276,32 @@ break_outer:;
 // crosses at most one aligned 64-bit boundary in the bits.
 [GoRecv] internal static (nuint, nuint) findSmallN(this ref pallocBits b, uintptr npages, nuint searchIdx) {
     nuint end = ((nuint)0);
-    nuint newSearchIdx = ^((nuint)0);
+    nuint newSearchIdx = ~((nuint)0);
     for (nuint i = searchIdx / 64; i < ((nuint)len(b)); i++) {
-        var bi = b[i];
-        if (^bi == 0) {
+        var bi = b.val[i];
+        if (~bi == 0) {
             end = 0;
             continue;
         }
         // First see if we can pack our allocation in the trailing
         // zeros plus the end of the last 64 bits.
-        if (newSearchIdx == ^((nuint)0)) {
+        if (newSearchIdx == ~((nuint)0)) {
             // The new searchIdx is going to be at these 64 bits after any
             // 1s we file, so count trailing 1s.
-            newSearchIdx = i * 64 + ((nuint)sys.TrailingZeros64(^bi));
+            newSearchIdx = i * 64 + ((nuint)sys.TrailingZeros64(~bi));
         }
         nuint start = ((nuint)sys.TrailingZeros64(bi));
         if (end + start >= ((nuint)npages)) {
             return (i * 64 - end, newSearchIdx);
         }
         // Next, check the interior of the 64-bit chunk.
-        nuint j = findBitRange64(^bi, ((nuint)npages));
+        nuint j = findBitRange64(~bi, ((nuint)npages));
         if (j < 64) {
             return (i * 64 + j, newSearchIdx);
         }
         end = ((nuint)sys.LeadingZeros64(bi));
     }
-    return (^((nuint)0), newSearchIdx);
+    return (~((nuint)0), newSearchIdx);
 }
 
 // findLargeN is a helper for find which searches for npages contiguous free pages
@@ -316,19 +315,19 @@ break_outer:;
 // findLargeN assumes npages > 64, where any such run of free pages
 // crosses at least one aligned 64-bit boundary in the bits.
 [GoRecv] internal static (nuint, nuint) findLargeN(this ref pallocBits b, uintptr npages, nuint searchIdx) {
-    nuint start = ^((nuint)0);
+    nuint start = ~((nuint)0);
     nuint size = ((nuint)0);
-    nuint newSearchIdx = ^((nuint)0);
+    nuint newSearchIdx = ~((nuint)0);
     for (nuint i = searchIdx / 64; i < ((nuint)len(b)); i++) {
-        var x = b[i];
-        if (x == ^((uint64)0)) {
+        var x = b.val[i];
+        if (x == ~((uint64)0)) {
             size = 0;
             continue;
         }
-        if (newSearchIdx == ^((nuint)0)) {
+        if (newSearchIdx == ~((nuint)0)) {
             // The new searchIdx is going to be at these 64 bits after any
             // 1s we file, so count trailing 1s.
-            newSearchIdx = i * 64 + ((nuint)sys.TrailingZeros64(^x));
+            newSearchIdx = i * 64 + ((nuint)sys.TrailingZeros64(~x));
         }
         if (size == 0) {
             size = ((nuint)sys.LeadingZeros64(x));
@@ -347,7 +346,7 @@ break_outer:;
         size += 64;
     }
     if (size < ((nuint)npages)) {
-        return (^((nuint)0), newSearchIdx);
+        return (~((nuint)0), newSearchIdx);
     }
     return (start, newSearchIdx);
 }

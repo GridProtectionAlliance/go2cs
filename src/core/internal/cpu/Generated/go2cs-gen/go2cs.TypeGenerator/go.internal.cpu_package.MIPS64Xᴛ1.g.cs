@@ -27,35 +27,35 @@ public static partial class cpu_package
         // Field References
         public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref MIPS64Xᴛ1 instance) => ref instance._;
         internal static ref bool ᏑHasMSA(ref MIPS64Xᴛ1 instance) => ref instance.HasMSA;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref MIPS64Xᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref MIPS64Xᴛ1 instance) => ref instance.__;
         
         // Constructors
         public MIPS64Xᴛ1(NilType _)
         {
             this._ = default!;
             this.HasMSA = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public MIPS64Xᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasMSA = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public MIPS64Xᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasMSA = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasMSA = HasMSA;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'MIPS64Xᴛ1' instances
         public bool Equals(MIPS64Xᴛ1 other) =>
             _ == other._ &&
             HasMSA == other.HasMSA &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is MIPS64Xᴛ1 other && Equals(other);
         
         public override int GetHashCode() => runtime.HashCode.Combine(
             _,
             HasMSA,
-            _);
+            __);
         
         public static bool operator ==(MIPS64Xᴛ1 left, MIPS64Xᴛ1 right) => left.Equals(right);
         
@@ -76,7 +76,7 @@ public static partial class cpu_package
         [
             _.ToString(),
             HasMSA.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

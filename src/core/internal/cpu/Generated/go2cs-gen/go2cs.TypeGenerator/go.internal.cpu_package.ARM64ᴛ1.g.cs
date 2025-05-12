@@ -35,7 +35,7 @@ public static partial class cpu_package
         internal static ref bool ᏑHasATOMICS(ref ARM64ᴛ1 instance) => ref instance.HasATOMICS;
         internal static ref bool ᏑHasCPUID(ref ARM64ᴛ1 instance) => ref instance.HasCPUID;
         internal static ref bool ᏑIsNeoverse(ref ARM64ᴛ1 instance) => ref instance.IsNeoverse;
-        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ_(ref ARM64ᴛ1 instance) => ref instance._;
+        public static ref global::go.@internal.cpu_package.CacheLinePad Ꮡ__(ref ARM64ᴛ1 instance) => ref instance.__;
         
         // Constructors
         public ARM64ᴛ1(NilType _)
@@ -50,10 +50,10 @@ public static partial class cpu_package
             this.HasATOMICS = default!;
             this.HasCPUID = default!;
             this.IsNeoverse = default!;
-            this._ = default!;
+            this.__ = default!;
         }
 
-        public ARM64ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasAES = default!, bool HasPMULL = default!, bool HasSHA1 = default!, bool HasSHA2 = default!, bool HasSHA512 = default!, bool HasCRC32 = default!, bool HasATOMICS = default!, bool HasCPUID = default!, bool IsNeoverse = default!, global::go.@internal.cpu_package.CacheLinePad _ = default!)
+        public ARM64ᴛ1(global::go.@internal.cpu_package.CacheLinePad _ = default!, bool HasAES = default!, bool HasPMULL = default!, bool HasSHA1 = default!, bool HasSHA2 = default!, bool HasSHA512 = default!, bool HasCRC32 = default!, bool HasATOMICS = default!, bool HasCPUID = default!, bool IsNeoverse = default!, global::go.@internal.cpu_package.CacheLinePad __ = default!)
         {
             this._ = _;
             this.HasAES = HasAES;
@@ -65,7 +65,7 @@ public static partial class cpu_package
             this.HasATOMICS = HasATOMICS;
             this.HasCPUID = HasCPUID;
             this.IsNeoverse = IsNeoverse;
-            this._ = _;
+            this.__ = __;
         }
         
         // Handle comparisons between struct 'ARM64ᴛ1' instances
@@ -80,7 +80,7 @@ public static partial class cpu_package
             HasATOMICS == other.HasATOMICS &&
             HasCPUID == other.HasCPUID &&
             IsNeoverse == other.IsNeoverse &&
-            _ == other._;
+            __ == other.__;
         
         public override bool Equals(object? obj) => obj is ARM64ᴛ1 other && Equals(other);
         
@@ -95,7 +95,7 @@ public static partial class cpu_package
             HasATOMICS,
             HasCPUID,
             IsNeoverse,
-            _);
+            __);
         
         public static bool operator ==(ARM64ᴛ1 left, ARM64ᴛ1 right) => left.Equals(right);
         
@@ -124,7 +124,7 @@ public static partial class cpu_package
             HasATOMICS.ToString(),
             HasCPUID.ToString(),
             IsNeoverse.ToString(),
-            _.ToString()
+            __.ToString()
         ]), "}");
     }
 }

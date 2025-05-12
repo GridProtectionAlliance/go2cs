@@ -138,7 +138,7 @@ partial struct timedEventArgs;
     }
     // Find the range of IDs.
     var maxID = ((EI)0);
-    var minID = ^((EI)0);
+    var minID = ~((EI)0);
     foreach (var (id, _) in d.sparse) {
         if (id > maxID) {
             maxID = id;

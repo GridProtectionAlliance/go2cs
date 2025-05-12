@@ -352,7 +352,7 @@ public static slice<@string> Fields(@string s) {
         var r = s[i];
         setBits |= (byte)(r);
         nint isSpace = ((nint)asciiSpace[r]);
-        n += (nint)(wasSpace & ^isSpace);
+        n += (nint)(wasSpace & ~isSpace);
         wasSpace = isSpace;
     }
     if (setBits >= utf8.RuneSelf) {
@@ -418,7 +418,7 @@ public static slice<@string> FieldsFunc(@string s, Func<rune, bool> f) {
                 // Set start to a negative value.
                 // Note: using -1 here consistently and reproducibly
                 // slows down this code by a several percent on amd64.
-                start = ^start;
+                start = ~start;
             }
         } else {
             if (start < 0) {
@@ -918,7 +918,7 @@ internal static (asciiSet @as, bool ok) makeASCIISet(@string chars) {
 
 // contains reports whether c is inside the set.
 [GoRecv] internal static bool contains(this ref asciiSet @as, byte c) {
-    return ((uint32)(@as[c / 32] & (1 << (int)((c % 32))))) != 0;
+    return ((uint32)(@as.val[c / 32] & (1 << (int)((c % 32))))) != 0;
 }
 
 // Trim returns a slice of the string s with all leading and

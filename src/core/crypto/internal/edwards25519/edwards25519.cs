@@ -78,7 +78,7 @@ internal static void checkInitialized(params ꓸꓸꓸж<Point> pointsʗp) {
 internal static ж<Point> identity = @new<Point>().SetBytes(new byte[]{
     1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}.slice());
-internal static error _;
+internal static error _ᴛ1ʗ;
 
 // NewIdentityPoint returns a new Point set to the identity.
 public static ж<Point> NewIdentityPoint() {
@@ -92,7 +92,7 @@ internal static ж<Point> generator = @new<Point>().SetBytes(new byte[]{
     102, 102, 102, 102, 102, 102, 102, 102,
     102, 102, 102, 102, 102, 102, 102, 102,
     102, 102, 102, 102, 102, 102, 102, 102}.slice());
-internal static error _;
+internal static error _ᴛ2ʗ;
 
 // NewGeneratorPoint returns a new Point set to the canonical generator.
 public static ж<Point> NewGeneratorPoint() {
@@ -252,7 +252,7 @@ internal static ж<field.Element> d = @new<field.Element>().SetBytes(new byte[]{
     171, 216, 65, 65, 77, 10, 112, 0,
     152, 232, 121, 119, 121, 64, 199, 140,
     115, 254, 111, 43, 238, 108, 3, 82}.slice());
-internal static error _;
+internal static error _ᴛ3ʗ;
 
 internal static ж<field.Element> d2 = @new<field.Element>().Add(d, d);
 

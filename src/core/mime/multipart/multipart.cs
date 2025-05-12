@@ -245,16 +245,16 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     if (total == 0) {
         // At beginning of body, allow dashBoundary.
         if (bytes.HasPrefix(buf, dashBoundary)) {
-            switch (matchAfterPrefix(buf, dashBoundary, readErr)) {
-            case -1: {
+            var exprᴛ1 = matchAfterPrefix(buf, dashBoundary, readErr);
+            if (exprᴛ1 == -1) {
                 return (len(dashBoundary), default!);
             }
-            case 0: {
+            if (exprᴛ1 is 0) {
                 return (0, default!);
             }
-            case +1: {
+            if (exprᴛ1 == +1) {
                 return (0, io.EOF);
-            }}
+            }
 
         }
         if (bytes.HasPrefix(dashBoundary, buf)) {
@@ -264,16 +264,16 @@ internal static (nint, error) scanUntilBoundary(slice<byte> buf, slice<byte> das
     // Search for "\n--boundary".
     {
         nint iΔ1 = bytes.Index(buf, nlDashBoundary); if (iΔ1 >= 0) {
-            switch (matchAfterPrefix(buf[(int)(iΔ1)..], nlDashBoundary, readErr)) {
-            case -1: {
+            var exprᴛ2 = matchAfterPrefix(buf[(int)(iΔ1)..], nlDashBoundary, readErr);
+            if (exprᴛ2 == -1) {
                 return (iΔ1 + len(nlDashBoundary), default!);
             }
-            case 0: {
+            if (exprᴛ2 is 0) {
                 return (iΔ1, default!);
             }
-            case +1: {
+            if (exprᴛ2 == +1) {
                 return (iΔ1, io.EOF);
-            }}
+            }
 
         }
     }

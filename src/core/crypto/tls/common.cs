@@ -39,25 +39,25 @@ public static readonly UntypedInt VersionSSL30 = /* 0x0300 */ 768;
 // (e.g. "TLS 1.3"), or a fallback representation of the value if the
 // version is not implemented by this package.
 public static @string VersionName(uint16 version) {
-    switch (version) {
-    case VersionSSL30: {
+    var exprᴛ1 = version;
+    if (exprᴛ1 == VersionSSL30) {
         return "SSLv3"u8;
     }
-    case VersionTLS10: {
+    if (exprᴛ1 == VersionTLS10) {
         return "TLS 1.0"u8;
     }
-    case VersionTLS11: {
+    if (exprᴛ1 == VersionTLS11) {
         return "TLS 1.1"u8;
     }
-    case VersionTLS12: {
+    if (exprᴛ1 == VersionTLS12) {
         return "TLS 1.2"u8;
     }
-    case VersionTLS13: {
+    if (exprᴛ1 == VersionTLS13) {
         return "TLS 1.3"u8;
     }
-    default: {
+    { /* default: */
         return fmt.Sprintf("0x%04X"u8, version);
-    }}
+    }
 
 }
 

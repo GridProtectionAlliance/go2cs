@@ -144,7 +144,7 @@ public static readonly @string DateOnly = "2006-01-02"u8;
 
 public static readonly @string TimeOnly = "15:04:05"u8;
 
-internal static readonly UntypedInt _ = iota;
+internal static readonly UntypedInt _ᴛ1ʗ = iota;
 internal static readonly UntypedInt stdLongMonth = /* iota + stdNeedDate */ 257; // "January"
 internal static readonly UntypedInt stdMonth = 258;                    // "Jan"
 internal static readonly UntypedInt stdNumMonth = 259;                 // "1"
@@ -644,16 +644,14 @@ public static @string GoString(this Time t) {
     buf = append(buf, ", "u8.ꓸꓸꓸ);
     {
         var loc = t.Location();
-        switch (loc) {
-        case ΔUTC or default!: {
+        var exprᴛ1 = loc;
+        if (exprᴛ1 == ΔUTC || exprᴛ1 == default!) {
             buf = append(buf, "time.UTC"u8.ꓸꓸꓸ);
-            break;
         }
-        case ΔLocal: {
+        else if (exprᴛ1 is ΔLocal) {
             buf = append(buf, "time.Local"u8.ꓸꓸꓸ);
-            break;
         }
-        default: {
+        else { /* default: */
             buf = append(buf, // there are several options for how we could display this, none of
  // which are great:
  //
@@ -672,8 +670,7 @@ public static @string GoString(this Time t) {
  @"time.Location("u8.ꓸꓸꓸ);
             buf = append(buf, quote((~loc).name).ꓸꓸꓸ);
             buf = append(buf, (rune)')');
-            break;
-        }}
+        }
     }
 
     buf = append(buf, (rune)')');
@@ -747,61 +744,50 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
         if (hour < 0 && (nint)(std & stdNeedClock) != 0) {
             (hour, min, sec) = absClock(abs);
         }
-        switch ((nint)(std & stdMask)) {
-        case stdYear: {
+        var exprᴛ1 = (nint)(std & stdMask);
+        if (exprᴛ1 == stdYear) {
             nint y = year;
             if (y < 0) {
                 y = -y;
             }
             b = appendInt(b, y % 100, 2);
-            break;
         }
-        case stdLongYear: {
+        else if (exprᴛ1 == stdLongYear) {
             b = appendInt(b, year, 4);
-            break;
         }
-        case stdMonth: {
+        else if (exprᴛ1 == stdMonth) {
             b = append(b, month.String()[..3].ꓸꓸꓸ);
-            break;
         }
-        case stdLongMonth: {
+        else if (exprᴛ1 == stdLongMonth) {
             @string m = month.String();
             b = append(b, m.ꓸꓸꓸ);
-            break;
         }
-        case stdNumMonth: {
+        else if (exprᴛ1 == stdNumMonth) {
             b = appendInt(b, ((nint)month), 0);
-            break;
         }
-        case stdZeroMonth: {
+        else if (exprᴛ1 == stdZeroMonth) {
             b = appendInt(b, ((nint)month), 2);
-            break;
         }
-        case stdWeekDay: {
+        else if (exprᴛ1 == stdWeekDay) {
             b = append(b, absWeekday(abs).String()[..3].ꓸꓸꓸ);
-            break;
         }
-        case stdLongWeekDay: {
+        else if (exprᴛ1 == stdLongWeekDay) {
             @string s = absWeekday(abs).String();
             b = append(b, s.ꓸꓸꓸ);
-            break;
         }
-        case stdDay: {
+        else if (exprᴛ1 == stdDay) {
             b = appendInt(b, day, 0);
-            break;
         }
-        case stdUnderDay: {
+        else if (exprᴛ1 == stdUnderDay) {
             if (day < 10) {
                 b = append(b, (rune)' ');
             }
             b = appendInt(b, day, 0);
-            break;
         }
-        case stdZeroDay: {
+        else if (exprᴛ1 == stdZeroDay) {
             b = appendInt(b, day, 2);
-            break;
         }
-        case stdUnderYearDay: {
+        else if (exprᴛ1 == stdUnderYearDay) {
             if (yday < 100) {
                 b = append(b, (rune)' ');
                 if (yday < 10) {
@@ -809,67 +795,56 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
                 }
             }
             b = appendInt(b, yday, 0);
-            break;
         }
-        case stdZeroYearDay: {
+        else if (exprᴛ1 == stdZeroYearDay) {
             b = appendInt(b, yday, 3);
-            break;
         }
-        case stdHour: {
+        else if (exprᴛ1 == stdHour) {
             b = appendInt(b, hour, 2);
-            break;
         }
-        case stdHour12: {
+        else if (exprᴛ1 == stdHour12) {
             nint hr = hour % 12;
             if (hr == 0) {
                 // Noon is 12PM, midnight is 12AM.
                 hr = 12;
             }
             b = appendInt(b, hr, 0);
-            break;
         }
-        case stdZeroHour12: {
+        else if (exprᴛ1 == stdZeroHour12) {
             nint hr = hour % 12;
             if (hr == 0) {
                 // Noon is 12PM, midnight is 12AM.
                 hr = 12;
             }
             b = appendInt(b, hr, 2);
-            break;
         }
-        case stdMinute: {
+        else if (exprᴛ1 == stdMinute) {
             b = appendInt(b, min, 0);
-            break;
         }
-        case stdZeroMinute: {
+        else if (exprᴛ1 == stdZeroMinute) {
             b = appendInt(b, min, 2);
-            break;
         }
-        case stdSecond: {
+        else if (exprᴛ1 == stdSecond) {
             b = appendInt(b, sec, 0);
-            break;
         }
-        case stdZeroSecond: {
+        else if (exprᴛ1 == stdZeroSecond) {
             b = appendInt(b, sec, 2);
-            break;
         }
-        case stdPM: {
+        else if (exprᴛ1 == stdPM) {
             if (hour >= 12){
                 b = append(b, "PM"u8.ꓸꓸꓸ);
             } else {
                 b = append(b, "AM"u8.ꓸꓸꓸ);
             }
-            break;
         }
-        case stdpm: {
+        else if (exprᴛ1 == stdpm) {
             if (hour >= 12){
                 b = append(b, "pm"u8.ꓸꓸꓸ);
             } else {
                 b = append(b, "am"u8.ꓸꓸꓸ);
             }
-            break;
         }
-        case stdISO8601TZ or stdISO8601ColonTZ or stdISO8601SecondsTZ or stdISO8601ShortTZ or stdISO8601ColonSecondsTZ or stdNumTZ or stdNumColonTZ or stdNumSecondsTz or stdNumShortTZ or stdNumColonSecondsTZ: {
+        else if (exprᴛ1 == stdISO8601TZ || exprᴛ1 == stdISO8601ColonTZ || exprᴛ1 == stdISO8601SecondsTZ || exprᴛ1 == stdISO8601ShortTZ || exprᴛ1 == stdISO8601ColonSecondsTZ || exprᴛ1 == stdNumTZ || exprᴛ1 == stdNumColonTZ || exprᴛ1 == stdNumSecondsTz || exprᴛ1 == stdNumShortTZ || exprᴛ1 == stdNumColonSecondsTZ) {
             if (offset == 0 && (std == stdISO8601TZ || std == stdISO8601ColonTZ || std == stdISO8601SecondsTZ || std == stdISO8601ShortTZ || std == stdISO8601ColonSecondsTZ)) {
                 // Ugly special case. We cheat and take the "Z" variants
                 // to mean "the time zone as formatted for ISO 8601".
@@ -900,9 +875,8 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
                 }
                 b = appendInt(b, absoffset % 60, 2);
             }
-            break;
         }
-        case stdTZ: {
+        else if (exprᴛ1 == stdTZ) {
             if (name != ""u8) {
                 b = append(b, name.ꓸꓸꓸ);
                 break;
@@ -919,12 +893,10 @@ internal static slice<byte> appendFormat(this Time t, slice<byte> b, @string lay
             }
             b = appendInt(b, zone / 60, 2);
             b = appendInt(b, zone % 60, 2);
-            break;
         }
-        case stdFracSecond0 or stdFracSecond9: {
+        else if (exprᴛ1 == stdFracSecond0 || exprᴛ1 == stdFracSecond9) {
             b = appendNano(b, t.Nanosecond(), std);
-            break;
-        }}
+        }
 
     }
     return b;
@@ -1199,7 +1171,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
         @string hold = value;
         var exprᴛ1 = (nint)(std & stdMask);
         var matchᴛ1 = false;
-        if (exprᴛ1 is stdYear) { matchᴛ1 = true;
+        if (exprᴛ1 == stdYear) { matchᴛ1 = true;
             if (len(value) < 2) {
                 err = errBad;
                 break;
@@ -1216,7 +1188,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                 year += 2000;
             }
         }
-        else if (exprᴛ1 is stdLongYear) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdLongYear) { matchᴛ1 = true;
             if (len(value) < 4 || !isDigit(value, 0)) {
                 err = errBad;
                 break;
@@ -1224,34 +1196,34 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             (p, value) = (value[0..4], value[4..]);
             (year, err) = atoi(p);
         }
-        else if (exprᴛ1 is stdMonth) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdMonth) { matchᴛ1 = true;
             (month, value, err) = lookup(shortMonthNames, value);
             month++;
         }
-        else if (exprᴛ1 is stdLongMonth) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdLongMonth) { matchᴛ1 = true;
             (month, value, err) = lookup(longMonthNames, value);
             month++;
         }
-        else if (exprᴛ1 is stdNumMonth or stdZeroMonth) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdNumMonth || exprᴛ1 == stdZeroMonth) { matchᴛ1 = true;
             (month, value, err) = getnum(value, std == stdZeroMonth);
             if (err == default! && (month <= 0 || 12 < month)) {
                 rangeErrString = "month"u8;
             }
         }
-        else if (exprᴛ1 is stdWeekDay) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdWeekDay) { matchᴛ1 = true;
             (_, value, err) = lookup(shortDayNames, // Ignore weekday except for error checking.
  value);
         }
-        else if (exprᴛ1 is stdLongWeekDay) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdLongWeekDay) { matchᴛ1 = true;
             (_, value, err) = lookup(longDayNames, value);
         }
-        else if (exprᴛ1 is stdDay or stdUnderDay or stdZeroDay) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdDay || exprᴛ1 == stdUnderDay || exprᴛ1 == stdZeroDay) { matchᴛ1 = true;
             if (std == stdUnderDay && len(value) > 0 && value[0] == (rune)' ') {
                 value = value[1..];
             }
             (day, value, err) = getnum(value, std == stdZeroDay);
         }
-        else if (exprᴛ1 is stdUnderYearDay or stdZeroYearDay) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdUnderYearDay || exprᴛ1 == stdZeroYearDay) { matchᴛ1 = true;
             for (nint i = 0; i < 2; i++) {
                 // Note that we allow any one- or two-digit day here.
                 // The month, day, year combination is validated after we've completed parsing.
@@ -1261,7 +1233,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
             (yday, value, err) = getnum3(value, std == stdZeroYearDay);
         }
-        else if (exprᴛ1 is stdHour) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdHour) { matchᴛ1 = true;
             (hour, value, err) = getnum(value, // Note that we allow any one-, two-, or three-digit year-day here.
  // The year-day, year combination is validated after we've completed parsing.
  false);
@@ -1269,19 +1241,19 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                 rangeErrString = "hour"u8;
             }
         }
-        else if (exprᴛ1 is stdHour12 or stdZeroHour12) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdHour12 || exprᴛ1 == stdZeroHour12) { matchᴛ1 = true;
             (hour, value, err) = getnum(value, std == stdZeroHour12);
             if (hourΔ1 < 0 || 12 < hourΔ1) {
                 rangeErrString = "hour"u8;
             }
         }
-        else if (exprᴛ1 is stdMinute or stdZeroMinute) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdMinute || exprᴛ1 == stdZeroMinute) { matchᴛ1 = true;
             (min, value, err) = getnum(value, std == stdZeroMinute);
             if (minΔ1 < 0 || 60 <= minΔ1) {
                 rangeErrString = "minute"u8;
             }
         }
-        else if (exprᴛ1 is stdSecond or stdZeroSecond) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdSecond || exprᴛ1 == stdZeroSecond) { matchᴛ1 = true;
             (sec, value, err) = getnum(value, std == stdZeroSecond);
             if (err != default!) {
                 break;
@@ -1307,7 +1279,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
                 value = value[(int)(n)..];
             }
         }
-        else if (exprᴛ1 is stdPM) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdPM) { matchᴛ1 = true;
             if (len(value) < 2) {
                 err = errBad;
                 break;
@@ -1325,7 +1297,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
 
         }
-        else if (exprᴛ1 is stdpm) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdpm) { matchᴛ1 = true;
             if (len(value) < 2) {
                 err = errBad;
                 break;
@@ -1343,7 +1315,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
 
         }
-        else if (exprᴛ1 is stdISO8601TZ or stdISO8601ShortTZ or stdISO8601ColonTZ or stdISO8601SecondsTZ or stdISO8601ColonSecondsTZ) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdISO8601TZ || exprᴛ1 == stdISO8601ShortTZ || exprᴛ1 == stdISO8601ColonTZ || exprᴛ1 == stdISO8601SecondsTZ || exprᴛ1 == stdISO8601ColonSecondsTZ) { matchᴛ1 = true;
             if (len(value) >= 1 && value[0] == (rune)'Z') {
                 value = value[1..];
                 z = ΔUTC;
@@ -1351,7 +1323,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is stdNumTZ or stdNumShortTZ or stdNumColonTZ or stdNumSecondsTz or stdNumColonSecondsTZ)) { matchᴛ1 = true;
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 == stdNumTZ || exprᴛ1 == stdNumShortTZ || exprᴛ1 == stdNumColonTZ || exprᴛ1 == stdNumSecondsTz || exprᴛ1 == stdNumColonSecondsTZ)) { matchᴛ1 = true;
             @string sign = default!;
             @string hourΔ2 = default!;
             @string minΔ2 = default!;
@@ -1435,7 +1407,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }}
 
         }
-        else if (exprᴛ1 is stdTZ) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdTZ) { matchᴛ1 = true;
             if (len(value) >= 3 && value[0..3] == "UTC") {
                 // offset is in seconds
                 // Does it look like a time zone?
@@ -1450,7 +1422,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             }
             (zoneName, value) = (value[..(int)(n)], value[(int)(n)..]);
         }
-        else if (exprᴛ1 is stdFracSecond0) {
+        else if (exprᴛ1 == stdFracSecond0) {
             nint ndigit = 1 + digitsLen(std);
             if (len(value) < ndigit) {
                 // stdFracSecond0 requires the exact number of digits as specified in
@@ -1461,7 +1433,7 @@ internal static (Time, error) parse(@string layout, @string value, ж<ΔLocation
             (nsec, rangeErrString, err) = parseNanoseconds(value, ndigit);
             value = value[(int)(ndigit)..];
         }
-        else if (exprᴛ1 is stdFracSecond9) { matchᴛ1 = true;
+        else if (exprᴛ1 == stdFracSecond9) { matchᴛ1 = true;
             if (len(value) < 2 || !commaOrPeriod(value[0]) || value[1] < (rune)'0' || (rune)'9' < value[1]) {
                 // Fractional second omitted.
                 break;

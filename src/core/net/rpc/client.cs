@@ -111,7 +111,7 @@ public static error ErrShutdown = errors.New("connection is shut down"u8);
         delete(client.pending, seq);
         client.mutex.Unlock();
         switch (ᐧ) {
-        case {} when call is nil: {
+        case {} when call == nil: {
             err = client.codec.ReadResponseBody(default!);
             if (err != default!) {
                 // We've got no pending call. That usually means that

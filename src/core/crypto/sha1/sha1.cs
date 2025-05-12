@@ -205,7 +205,7 @@ public static hash.Hash New() {
         var mask = ((byte)(((int8)(i - nx)) >> (int)(7)));
         // 0x00 after the end of data
         // if we reached the end of the data, replace with 0x80 or 0x00
-        d.x[i] = (byte)(((byte)(^mask & separator)) | ((byte)(mask & d.x[i])));
+        d.x[i] = (byte)(((byte)(~mask & separator)) | ((byte)(mask & d.x[i])));
         // zero the separator once used
         separator &= (byte)(mask);
         if (i >= 56) {
@@ -234,10 +234,10 @@ public static hash.Hash New() {
     // compress, and only keep the digest if we actually needed the second block
     block(d, d.x[..]);
     foreach (var (i, s) in d.h) {
-        digest[i * 4] |= (byte)((byte)(^mask1b & ((byte)(s >> (int)(24)))));
-        digest[i * 4 + 1] |= (byte)((byte)(^mask1b & ((byte)(s >> (int)(16)))));
-        digest[i * 4 + 2] |= (byte)((byte)(^mask1b & ((byte)(s >> (int)(8)))));
-        digest[i * 4 + 3] |= (byte)((byte)(^mask1b & ((byte)s)));
+        digest[i * 4] |= (byte)((byte)(~mask1b & ((byte)(s >> (int)(24)))));
+        digest[i * 4 + 1] |= (byte)((byte)(~mask1b & ((byte)(s >> (int)(16)))));
+        digest[i * 4 + 2] |= (byte)((byte)(~mask1b & ((byte)(s >> (int)(8)))));
+        digest[i * 4 + 3] |= (byte)((byte)(~mask1b & ((byte)s)));
     }
     return digest;
 }

@@ -300,7 +300,7 @@ internal static ж<Element> feOne = Ꮡ(new Element(1, 0, 0, 0, 0));
 
 // mask64Bits returns 0xffffffff if cond is 1, and 0 otherwise.
 internal static uint64 mask64Bits(nint cond) {
-    return ^(((uint64)cond) - 1);
+    return ~(((uint64)cond) - 1);
 }
 
 // Select sets v to a if cond == 1, and to b if cond == 0.
@@ -309,11 +309,11 @@ internal static uint64 mask64Bits(nint cond) {
     ref var b = ref Ꮡb.val;
 
     var m = mask64Bits(cond);
-    v.l0 = (uint64)(((uint64)(m & a.l0)) | ((uint64)(^m & b.l0)));
-    v.l1 = (uint64)(((uint64)(m & a.l1)) | ((uint64)(^m & b.l1)));
-    v.l2 = (uint64)(((uint64)(m & a.l2)) | ((uint64)(^m & b.l2)));
-    v.l3 = (uint64)(((uint64)(m & a.l3)) | ((uint64)(^m & b.l3)));
-    v.l4 = (uint64)(((uint64)(m & a.l4)) | ((uint64)(^m & b.l4)));
+    v.l0 = (uint64)(((uint64)(m & a.l0)) | ((uint64)(~m & b.l0)));
+    v.l1 = (uint64)(((uint64)(m & a.l1)) | ((uint64)(~m & b.l1)));
+    v.l2 = (uint64)(((uint64)(m & a.l2)) | ((uint64)(~m & b.l2)));
+    v.l3 = (uint64)(((uint64)(m & a.l3)) | ((uint64)(~m & b.l3)));
+    v.l4 = (uint64)(((uint64)(m & a.l4)) | ((uint64)(~m & b.l4)));
     return SelectꓸᏑv;
 }
 

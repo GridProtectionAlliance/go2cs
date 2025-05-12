@@ -7,14 +7,12 @@ partial class math_package {
 
 internal static readonly UntypedInt uvnan = /* 0x7FF8000000000001 */ 9221120237041090561;
 internal static readonly UntypedInt uvinf = /* 0x7FF0000000000000 */ 9218868437227405312;
-internal static readonly GoUntyped uvneginf = /* 0xFFF0000000000000 */
-    GoUntyped.Parse("18442240474082181120");
+internal static readonly UntypedInt uvneginf = /* 0xFFF0000000000000 */ 18442240474082181120;
 internal static readonly UntypedInt uvone = /* 0x3FF0000000000000 */ 4607182418800017408;
 internal static readonly UntypedInt mask = /* 0x7FF */ 2047;
 internal static readonly UntypedInt shift = /* 64 - 11 - 1 */ 52;
 internal static readonly UntypedInt bias = 1023;
-internal static readonly GoUntyped signMask = /* 1 << 63 */
-    GoUntyped.Parse("9223372036854775808");
+internal static readonly UntypedInt signMask = /* 1 << 63 */ 9223372036854775808;
 internal static readonly UntypedInt fracMask = /* 1<<shift - 1 */ 4503599627370495;
 
 // Inf returns positive infinity if sign >= 0, negative infinity if sign < 0.

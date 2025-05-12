@@ -83,23 +83,32 @@ public static readonly UntypedInt SkipComments = /* 1 << -skipComment */ 512; //
 public static readonly UntypedInt GoTokens = /* ScanIdents | ScanFloats | ScanChars | ScanStrings | ScanRawStrings | ScanComments | SkipComments */ 1012;
 
 // The result of Scan is one of these tokens or a Unicode character.
-public static readonly UntypedInt EOF = /* -(iota + 1) */ -1;
+public static readonly GoUntyped EOF = /* -(iota + 1) */
+    GoUntyped.Parse("-1");
 
-public static readonly UntypedInt Ident = -2;
+public static readonly GoUntyped Ident = /*  */
+    GoUntyped.Parse("-2");
 
-public static readonly UntypedInt Int = -3;
+public static readonly GoUntyped Int = /*  */
+    GoUntyped.Parse("-3");
 
-public static readonly UntypedInt Float = -4;
+public static readonly GoUntyped Float = /*  */
+    GoUntyped.Parse("-4");
 
-public static readonly UntypedInt Char = -5;
+public static readonly GoUntyped Char = /*  */
+    GoUntyped.Parse("-5");
 
-public static readonly UntypedInt ΔString = -6;
+public static readonly GoUntyped ΔString = /*  */
+    GoUntyped.Parse("-6");
 
-public static readonly UntypedInt RawString = -7;
+public static readonly GoUntyped RawString = /*  */
+    GoUntyped.Parse("-7");
 
-public static readonly UntypedInt Comment = -8;
+public static readonly GoUntyped Comment = /*  */
+    GoUntyped.Parse("-8");
 
-internal static readonly UntypedInt skipComment = -9;
+internal static readonly GoUntyped skipComment = /*  */
+    GoUntyped.Parse("-9");
 
 internal static map<rune, @string> tokenString = new map<rune, @string>{
     [EOF] = "EOF"u8,
@@ -767,35 +776,31 @@ break_redo:;
         break;
     }
     default: {
-        switch (ch) {
-        case EOF: {
-            break;
+        var exprᴛ1 = ch;
+        if (exprᴛ1 == EOF) {
             break;
         }
-        case (rune)'"': {
+        else if (exprᴛ1 is (rune)'"') {
             if ((nuint)(s.Mode & ScanStrings) != 0) {
                 s.scanString((rune)'"');
                 tok = ΔString;
             }
             ch = s.next();
-            break;
         }
-        case (rune)'\'': {
+        else if (exprᴛ1 is (rune)'\'') {
             if ((nuint)(s.Mode & ScanChars) != 0) {
                 s.scanChar();
                 tok = Char;
             }
             ch = s.next();
-            break;
         }
-        case (rune)'.': {
+        else if (exprᴛ1 is (rune)'.') {
             ch = s.next();
             if (isDecimal(ch) && (nuint)(s.Mode & ScanFloats) != 0) {
                 (tok, ch) = s.scanNumber(ch, true);
             }
-            break;
         }
-        case (rune)'/': {
+        else if (exprᴛ1 is (rune)'/') {
             ch = s.next();
             if ((ch == (rune)'/' || ch == (rune)'*') && (nuint)(s.Mode & ScanComments) != 0) {
                 if ((nuint)(s.Mode & SkipComments) != 0) {
@@ -807,20 +812,17 @@ break_redo:;
                 ch = s.scanComment(ch);
                 tok = Comment;
             }
-            break;
         }
-        case (rune)'`': {
+        else if (exprᴛ1 is (rune)'`') {
             if ((nuint)(s.Mode & ScanRawStrings) != 0) {
                 s.scanRawString();
                 tok = RawString;
             }
             ch = s.next();
-            break;
         }
-        default: {
+        else { /* default: */
             ch = s.next();
-            break;
-        }}
+        }
 
         break;
     }}

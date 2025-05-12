@@ -228,7 +228,7 @@ internal static (nint valid, slice<byte> em, nint index, error err) decryptPKCS1
     // The PS padding must be at least 8 bytes long, and it starts two
     // bytes into em.
     nint validPS = subtle.ConstantTimeLessOrEq(2 + 8, index);
-    valid = (nint)((nint)((nint)(firstByteIsZero & secondByteIsTwo) & ((nint)(^lookingForIndex & 1))) & validPS);
+    valid = (nint)((nint)((nint)(firstByteIsZero & secondByteIsTwo) & ((nint)(~lookingForIndex & 1))) & validPS);
     index = subtle.ConstantTimeSelect(valid, index + 1, 0);
     return (valid, em, index, default!);
 }

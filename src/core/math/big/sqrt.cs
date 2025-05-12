@@ -64,18 +64,15 @@ internal static ж<Float> three() {
     //   √( z)·2**(½b)     if b is even
     //   √(2z)·2**(⌊½b⌋)   if b > 0 is odd
     //   √(½z)·2**(⌈½b⌉)   if b < 0 is odd
-    switch (b % 2) {
-    case 0: {
-        break;
+    var exprᴛ1 = b % 2;
+    if (exprᴛ1 is 0) {
     }
-    case 1: {
+    else if (exprᴛ1 is 1) {
         z.exp++;
-        break;
     }
-    case -1: {
+    else if (exprᴛ1 == -1) {
         z.exp--;
-        break;
-    }}
+    }
 
     // nothing to do
     // 0.25 <= z < 2.0

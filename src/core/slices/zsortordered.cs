@@ -285,16 +285,16 @@ internal static (nint pivot, sortedHint hint) choosePivotOrdered<E>(slice<E> dat
         // Find the median among i, j, k and stores it into j.
         j = medianOrdered(data, i, j, k, Ꮡswaps);
     }
-    switch (swaps) {
-    case 0: {
+    var exprᴛ1 = swaps;
+    if (exprᴛ1 is 0) {
         return (j, increasingHint);
     }
-    case maxSwaps: {
+    if (exprᴛ1 == maxSwaps) {
         return (j, decreasingHint);
     }
-    default: {
+    { /* default: */
         return (j, unknownHint);
-    }}
+    }
 
 }
 

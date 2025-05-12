@@ -10,13 +10,10 @@ using math;
 
 partial class zstd_package {
 
-internal static readonly GoUntyped xxhPrime64c1 = /* 0x9e3779b185ebca87 */
-    GoUntyped.Parse("11400714785074694791");
-internal static readonly GoUntyped xxhPrime64c2 = /* 0xc2b2ae3d27d4eb4f */
-    GoUntyped.Parse("14029467366897019727");
+internal static readonly UntypedInt xxhPrime64c1 = /* 0x9e3779b185ebca87 */ 11400714785074694791;
+internal static readonly UntypedInt xxhPrime64c2 = /* 0xc2b2ae3d27d4eb4f */ 14029467366897019727;
 internal static readonly UntypedInt xxhPrime64c3 = /* 0x165667b19e3779f9 */ 1609587929392839161;
-internal static readonly GoUntyped xxhPrime64c4 = /* 0x85ebca77c2b2ae63 */
-    GoUntyped.Parse("9650029242287828579");
+internal static readonly UntypedInt xxhPrime64c4 = /* 0x85ebca77c2b2ae63 */ 9650029242287828579;
 internal static readonly UntypedInt xxhPrime64c5 = /* 0x27d4eb2f165667c5 */ 2870177450012600261;
 
 // xxhash64 is the state of a xxHash-64 checksum.

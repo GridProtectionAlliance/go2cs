@@ -44,7 +44,8 @@ public delegate void ErrorHandler(tokenꓸPosition pos, @string msg);
 }
 
 internal static readonly UntypedInt bom = /* 0xFEFF */ 65279; // byte order mark, only permitted as very first character
-internal static readonly UntypedInt eof = -1; // end of file
+internal static readonly GoUntyped eof = /* -1 */  // end of file
+    GoUntyped.Parse("-1");
 
 // Read the next Unicode char into s.ch.
 // s.ch < 0 means end-of-file.
@@ -868,8 +869,8 @@ scanAgain:
         }
         default: {
             s.next();
-            switch (ch) {
-            case eof: {
+            var exprᴛ2 = ch;
+            if (exprᴛ2 == eof) {
                 if (s.insertSemi) {
                     // always make progress
                     s.insertSemi = false;
@@ -877,39 +878,34 @@ scanAgain:
                     return (pos, token.SEMICOLON, "\n");
                 }
                 tok = token.EOF;
-                break;
             }
-            case (rune)'\n': {
+            else if (exprᴛ2 is (rune)'\n') {
                 s.insertSemi = false;
                 return (pos, token.SEMICOLON, "\n");
             }
-            case (rune)'"': {
+            if (exprᴛ2 is (rune)'"') {
                 insertSemi = true;
                 tok = token.STRING;
                 lit = s.scanString();
-                break;
             }
-            case (rune)'\'': {
+            else if (exprᴛ2 is (rune)'\'') {
                 insertSemi = true;
                 tok = token.CHAR;
                 lit = s.scanRune();
-                break;
             }
-            case (rune)'`': {
+            else if (exprᴛ2 is (rune)'`') {
                 insertSemi = true;
                 tok = token.STRING;
                 lit = s.scanRawString();
-                break;
             }
-            case (rune)':': {
+            else if (exprᴛ2 is (rune)':') {
                 tok = s.switch2(token.COLON, // we only reach here if s.insertSemi was
  // set in the first place and exited early
  // from s.skipWhitespace()
  // newline consumed
  token.DEFINE);
-                break;
             }
-            case (rune)'.': {
+            else if (exprᴛ2 is (rune)'.') {
                 tok = token.PERIOD;
                 if (s.ch == (rune)'.' && s.peek() == (rune)'.') {
                     // fractions starting with a '.' are handled by outer switch
@@ -918,63 +914,51 @@ scanAgain:
                     // consume last '.'
                     tok = token.ELLIPSIS;
                 }
-                break;
             }
-            case (rune)',': {
+            else if (exprᴛ2 is (rune)',') {
                 tok = token.COMMA;
-                break;
             }
-            case (rune)';': {
+            else if (exprᴛ2 is (rune)';') {
                 tok = token.SEMICOLON;
                 lit = ";"u8;
-                break;
             }
-            case (rune)'(': {
+            else if (exprᴛ2 is (rune)'(') {
                 tok = token.LPAREN;
-                break;
             }
-            case (rune)')': {
+            else if (exprᴛ2 is (rune)')') {
                 insertSemi = true;
                 tok = token.RPAREN;
-                break;
             }
-            case (rune)'[': {
+            else if (exprᴛ2 is (rune)'[') {
                 tok = token.LBRACK;
-                break;
             }
-            case (rune)']': {
+            else if (exprᴛ2 is (rune)']') {
                 insertSemi = true;
                 tok = token.RBRACK;
-                break;
             }
-            case (rune)'{': {
+            else if (exprᴛ2 is (rune)'{') {
                 tok = token.LBRACE;
-                break;
             }
-            case (rune)'}': {
+            else if (exprᴛ2 is (rune)'}') {
                 insertSemi = true;
                 tok = token.RBRACE;
-                break;
             }
-            case (rune)'+': {
+            else if (exprᴛ2 is (rune)'+') {
                 tok = s.switch3(token.ADD, token.ADD_ASSIGN, (rune)'+', token.INC);
                 if (tok == token.INC) {
                     insertSemi = true;
                 }
-                break;
             }
-            case (rune)'-': {
+            else if (exprᴛ2 is (rune)'-') {
                 tok = s.switch3(token.SUB, token.SUB_ASSIGN, (rune)'-', token.DEC);
                 if (tok == token.DEC) {
                     insertSemi = true;
                 }
-                break;
             }
-            case (rune)'*': {
+            else if (exprᴛ2 is (rune)'*') {
                 tok = s.switch2(token.MUL, token.MUL_ASSIGN);
-                break;
             }
-            case (rune)'/': {
+            else if (exprᴛ2 is (rune)'/') {
                 if (s.ch == (rune)'/' || s.ch == (rune)'*'){
                     // comment
                     var (comment, nlOffset) = s.scanComment();
@@ -997,55 +981,45 @@ scanAgain:
                     // division
                     tok = s.switch2(token.QUO, token.QUO_ASSIGN);
                 }
-                break;
             }
-            case (rune)'%': {
+            else if (exprᴛ2 is (rune)'%') {
                 tok = s.switch2(token.REM, token.REM_ASSIGN);
-                break;
             }
-            case (rune)'^': {
+            else if (exprᴛ2 is (rune)'^') {
                 tok = s.switch2(token.XOR, token.XOR_ASSIGN);
-                break;
             }
-            case (rune)'<': {
+            else if (exprᴛ2 is (rune)'<') {
                 if (s.ch == (rune)'-'){
                     s.next();
                     tok = token.ARROW;
                 } else {
                     tok = s.switch4(token.LSS, token.LEQ, (rune)'<', token.SHL, token.SHL_ASSIGN);
                 }
-                break;
             }
-            case (rune)'>': {
+            else if (exprᴛ2 is (rune)'>') {
                 tok = s.switch4(token.GTR, token.GEQ, (rune)'>', token.SHR, token.SHR_ASSIGN);
-                break;
             }
-            case (rune)'=': {
+            else if (exprᴛ2 is (rune)'=') {
                 tok = s.switch2(token.ASSIGN, token.EQL);
-                break;
             }
-            case (rune)'!': {
+            else if (exprᴛ2 is (rune)'!') {
                 tok = s.switch2(token.NOT, token.NEQ);
-                break;
             }
-            case (rune)'&': {
+            else if (exprᴛ2 is (rune)'&') {
                 if (s.ch == (rune)'^'){
                     s.next();
                     tok = s.switch2(token.AND_NOT, token.AND_NOT_ASSIGN);
                 } else {
                     tok = s.switch3(token.AND, token.AND_ASSIGN, (rune)'&', token.LAND);
                 }
-                break;
             }
-            case (rune)'|': {
+            else if (exprᴛ2 is (rune)'|') {
                 tok = s.switch3(token.OR, token.OR_ASSIGN, (rune)'|', token.LOR);
-                break;
             }
-            case (rune)'~': {
+            else if (exprᴛ2 is (rune)'~') {
                 tok = token.TILDE;
-                break;
             }
-            default: {
+            else { /* default: */
                 if (ch != bom) {
                     // next reports unexpected BOMs - don't repeat
                     // Report an informative error for U+201[CD] quotation
@@ -1059,8 +1033,7 @@ scanAgain:
                 insertSemi = s.insertSemi;
                 tok = token.ILLEGAL;
                 lit = ((@string)ch);
-                break;
-            }}
+            }
 
             break;
         }}

@@ -95,32 +95,32 @@ internal static bool isgoexception(ж<exceptionrecord> Ꮡinfo, ж<context> Ꮡr
         return false;
     }
     // Go will only handle some exceptions.
-    switch (info.exceptioncode) {
-    default: {
+    var exprᴛ1 = info.exceptioncode;
+    { /* default: */
         return false;
     }
-    case _EXCEPTION_ACCESS_VIOLATION: {
+    if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION) {
     }
-    case _EXCEPTION_IN_PAGE_ERROR: {
+    if (exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
     }
-    case _EXCEPTION_INT_DIVIDE_BY_ZERO: {
+    if (exprᴛ1 == _EXCEPTION_INT_DIVIDE_BY_ZERO) {
     }
-    case _EXCEPTION_INT_OVERFLOW: {
+    if (exprᴛ1 == _EXCEPTION_INT_OVERFLOW) {
     }
-    case _EXCEPTION_FLT_DENORMAL_OPERAND: {
+    if (exprᴛ1 == _EXCEPTION_FLT_DENORMAL_OPERAND) {
     }
-    case _EXCEPTION_FLT_DIVIDE_BY_ZERO: {
+    if (exprᴛ1 == _EXCEPTION_FLT_DIVIDE_BY_ZERO) {
     }
-    case _EXCEPTION_FLT_INEXACT_RESULT: {
+    if (exprᴛ1 == _EXCEPTION_FLT_INEXACT_RESULT) {
     }
-    case _EXCEPTION_FLT_OVERFLOW: {
+    if (exprᴛ1 == _EXCEPTION_FLT_OVERFLOW) {
     }
-    case _EXCEPTION_FLT_UNDERFLOW: {
+    if (exprᴛ1 == _EXCEPTION_FLT_UNDERFLOW) {
     }
-    case _EXCEPTION_BREAKPOINT: {
+    if (exprᴛ1 == _EXCEPTION_BREAKPOINT) {
     }
-    case _EXCEPTION_ILLEGAL_INSTRUCTION: {
-    }}
+    if (exprᴛ1 == _EXCEPTION_ILLEGAL_INSTRUCTION) {
+    }
 
     // breakpoint arrives this way on arm64
     return true;
@@ -160,23 +160,19 @@ internal static int32 sigtrampgo(ж<exceptionpointers> Ꮡep, nint kind) {
         return _EXCEPTION_CONTINUE_SEARCH;
     }
     Func<ж<exceptionrecord>, ж<runtime.context>, ж<runtime.g>, int32> fn = default!;
-    switch (kind) {
-    case callbackVEH: {
+    var exprᴛ1 = kind;
+    if (exprᴛ1 == callbackVEH) {
         fn = exceptionhandler;
-        break;
     }
-    case callbackFirstVCH: {
+    else if (exprᴛ1 == callbackFirstVCH) {
         fn = firstcontinuehandler;
-        break;
     }
-    case callbackLastVCH: {
+    else if (exprᴛ1 == callbackLastVCH) {
         fn = lastcontinuehandler;
-        break;
     }
-    default: {
+    else { /* default: */
         @throw("unknown sigtramp callback"u8);
-        break;
-    }}
+    }
 
     // Check if we are running on g0 stack, and if we are,
     // call fn directly instead of creating the closure.
@@ -429,8 +425,8 @@ internal static void sigpanic() {
     if (!canpanic()) {
         @throw("unexpected signal during runtime execution"u8);
     }
-    switch ((~gp).sig) {
-    case _EXCEPTION_ACCESS_VIOLATION or _EXCEPTION_IN_PAGE_ERROR: {
+    var exprᴛ1 = (~gp).sig;
+    if (exprᴛ1 == _EXCEPTION_ACCESS_VIOLATION || exprᴛ1 == _EXCEPTION_IN_PAGE_ERROR) {
         if ((~gp).sigcode1 < 4096) {
             panicmem();
         }
@@ -446,20 +442,16 @@ internal static void sigpanic() {
             print("unexpected fault address ", ((Δhex)(~gp).sigcode1), "\n");
         }
         @throw("fault"u8);
-        break;
     }
-    case _EXCEPTION_INT_DIVIDE_BY_ZERO: {
+    else if (exprᴛ1 == _EXCEPTION_INT_DIVIDE_BY_ZERO) {
         panicdivide();
-        break;
     }
-    case _EXCEPTION_INT_OVERFLOW: {
+    else if (exprᴛ1 == _EXCEPTION_INT_OVERFLOW) {
         panicoverflow();
-        break;
     }
-    case _EXCEPTION_FLT_DENORMAL_OPERAND or _EXCEPTION_FLT_DIVIDE_BY_ZERO or _EXCEPTION_FLT_INEXACT_RESULT or _EXCEPTION_FLT_OVERFLOW or _EXCEPTION_FLT_UNDERFLOW: {
+    else if (exprᴛ1 == _EXCEPTION_FLT_DENORMAL_OPERAND || exprᴛ1 == _EXCEPTION_FLT_DIVIDE_BY_ZERO || exprᴛ1 == _EXCEPTION_FLT_INEXACT_RESULT || exprᴛ1 == _EXCEPTION_FLT_OVERFLOW || exprᴛ1 == _EXCEPTION_FLT_UNDERFLOW) {
         panicfloat();
-        break;
-    }}
+    }
 
     @throw("fault"u8);
 }

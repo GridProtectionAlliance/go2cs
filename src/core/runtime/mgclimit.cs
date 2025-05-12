@@ -207,14 +207,14 @@ internal static readonly UntypedFloat gcCPULimiterUpdatePeriod = 1e+07; // 10ms
             if (exprᴛ1 == limiterEventIdleMarkWork) { matchᴛ1 = true;
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventIdle) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventIdle)) { matchᴛ1 = true;
                 idleTime += duration;
                 sched.idleTime.Add(duration);
             }
             else if (exprᴛ1 == limiterEventMarkAssist) { matchᴛ1 = true;
                 fallthrough = true;
             }
-            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist) { matchᴛ1 = true;
+            if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist)) { matchᴛ1 = true;
                 assistTime += duration;
             }
             else if (exprᴛ1 == limiterEventNone) {
@@ -345,8 +345,7 @@ internal static readonly UntypedInt limiterEventBits = 3;
 
 // limiterEventTypeMask is a mask for the bits in p.limiterEventStart that represent
 // the event type. The rest of the bits of that field represent a timestamp.
-internal static readonly GoUntyped limiterEventTypeMask = /* uint64((1<<limiterEventBits)-1) << (64 - limiterEventBits) */
-    GoUntyped.Parse("16140901064495857664");
+internal const uint64 limiterEventTypeMask = /* uint64((1<<limiterEventBits)-1) << (64 - limiterEventBits) */ 16140901064495857664;
 
 internal static readonly limiterEventStamp limiterEventStampNone = /* limiterEventStamp(0) */ 0;
 
@@ -469,7 +468,7 @@ internal static limiterEventType typ(this limiterEventStamp s) {
     else if (exprᴛ1 == limiterEventMarkAssist) { matchᴛ1 = true;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist) {
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == limiterEventScavengeAssist)) {
         gcCPULimiter.addAssistTime(duration);
     }
     else { /* default: */

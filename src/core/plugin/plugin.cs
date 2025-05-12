@@ -71,7 +71,7 @@ partial class plugin_package {
 [GoType] partial struct Plugin {
     internal @string pluginpath;
     internal @string err;       // set if plugin failed to load
-    internal channel<struct{}> loaded; // closed when loaded
+    internal channel<EmptyStruct> loaded; // closed when loaded
     internal map<@string, any> syms;
 }
 

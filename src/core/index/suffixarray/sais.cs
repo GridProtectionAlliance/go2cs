@@ -557,9 +557,9 @@ internal static void length_8_32(slice<byte> text, slice<int32> sa, nint numLMS)
                 code = 0;
             } else {
                 code = ((int32)(end - j));
-                if (code <= 32 / 8 && ^cx >= ((uint32)len(text))) {
+                if (code <= 32 / 8 && ~cx >= ((uint32)len(text))) {
                     // byte-only
-                    code = ((int32)(^cx));
+                    code = ((int32)(~cx));
                 }
             }
             // byte-only

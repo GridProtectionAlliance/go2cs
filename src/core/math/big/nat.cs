@@ -1004,8 +1004,7 @@ internal static nat expNN(this nat z, nat x, nat y, nat m, bool slow) {
     nuint shift = nlz(v) + 1;
     v <<= (nuint)(shift);
     nat q = default!;
-    GoUntyped mask = /* 1 << (_W - 1) */
-            GoUntyped.Parse("9223372036854775808");
+    static readonly UntypedInt mask = /* 1 << (_W - 1) */ 9223372036854775808;
     // We walk through the bits of the exponent one by one. Each time we
     // see a bit, we square, thus doubling the power. If the bit is a one,
     // we also multiply by x, thus adding one to the power.
@@ -1133,7 +1132,7 @@ internal static nat expNNWindowed(this nat z, nat x, nat y, nuint logM) {
     nint i = len(y) - 1;
     nint mtop = ((nint)((logM - 2) / _W));
     // -2 because the top word of N bits is the (N-1)/W'th word.
-    Word mmask = ^((Word)0);
+    Word mmask = ~((Word)0);
     {
         nuint mbits = (nuint)((logM - 1) & (_W - 1)); if (mbits != 0) {
             mmask = (1 << (int)(mbits)) - 1;
@@ -1391,7 +1390,7 @@ internal static nat subMod2N(this nat z, nat x, nat y, nuint n) {
         z = append(z, 0);
     }
     foreach (var (i, _) in z) {
-        z[i] = ^z[i];
+        z[i] = ~z[i];
     }
     z = z.trunc(z, n);
     return z.add(z, natOne);

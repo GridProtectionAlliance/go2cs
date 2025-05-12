@@ -54,9 +54,12 @@ partial class png_package {
 [GoType("num:nint")] partial struct CompressionLevel;
 
 public static readonly CompressionLevel DefaultCompression = 0;
-public static readonly CompressionLevel NoCompression = -1;
-public static readonly CompressionLevel BestSpeed = -2;
-public static readonly CompressionLevel BestCompression = -3;
+public static readonly GoUntyped NoCompression = /* -1 */
+    GoUntyped.Parse("-1");
+public static readonly GoUntyped BestSpeed = /* -2 */
+    GoUntyped.Parse("-2");
+public static readonly GoUntyped BestCompression = /* -3 */
+    GoUntyped.Parse("-3");
 
 // Positive CompressionLevel values are reserved to mean a numeric zlib
 // compression level, although that is not implemented yet.
@@ -125,57 +128,47 @@ internal static nint abs8(uint8 d) {
     binary.BigEndian.PutUint32(e.tmp[0..4], ((uint32)b.Dx()));
     binary.BigEndian.PutUint32(e.tmp[4..8], ((uint32)b.Dy()));
     // Set bit depth and color type.
-    switch (e.cb) {
-    case cbG8: {
+    var exprᴛ1 = e.cb;
+    if (exprᴛ1 == cbG8) {
         e.tmp[8] = 8;
         e.tmp[9] = ctGrayscale;
-        break;
     }
-    case cbTC8: {
+    else if (exprᴛ1 == cbTC8) {
         e.tmp[8] = 8;
         e.tmp[9] = ctTrueColor;
-        break;
     }
-    case cbP8: {
+    else if (exprᴛ1 == cbP8) {
         e.tmp[8] = 8;
         e.tmp[9] = ctPaletted;
-        break;
     }
-    case cbP4: {
+    else if (exprᴛ1 == cbP4) {
         e.tmp[8] = 4;
         e.tmp[9] = ctPaletted;
-        break;
     }
-    case cbP2: {
+    else if (exprᴛ1 == cbP2) {
         e.tmp[8] = 2;
         e.tmp[9] = ctPaletted;
-        break;
     }
-    case cbP1: {
+    else if (exprᴛ1 == cbP1) {
         e.tmp[8] = 1;
         e.tmp[9] = ctPaletted;
-        break;
     }
-    case cbTCA8: {
+    else if (exprᴛ1 == cbTCA8) {
         e.tmp[8] = 8;
         e.tmp[9] = ctTrueColorAlpha;
-        break;
     }
-    case cbG16: {
+    else if (exprᴛ1 == cbG16) {
         e.tmp[8] = 16;
         e.tmp[9] = ctGrayscale;
-        break;
     }
-    case cbTC16: {
+    else if (exprᴛ1 == cbTC16) {
         e.tmp[8] = 16;
         e.tmp[9] = ctTrueColor;
-        break;
     }
-    case cbTCA16: {
+    else if (exprᴛ1 == cbTCA16) {
         e.tmp[8] = 16;
         e.tmp[9] = ctTrueColorAlpha;
-        break;
-    }}
+    }
 
     e.tmp[10] = 0;
     // default compression method
@@ -324,47 +317,37 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     }
     defer(e.zw.Close);
     nint bitsPerPixel = 0;
-    switch (cb) {
-    case cbG8: {
+    var exprᴛ1 = cb;
+    if (exprᴛ1 == cbG8) {
         bitsPerPixel = 8;
-        break;
     }
-    case cbTC8: {
+    else if (exprᴛ1 == cbTC8) {
         bitsPerPixel = 24;
-        break;
     }
-    case cbP8: {
+    else if (exprᴛ1 == cbP8) {
         bitsPerPixel = 8;
-        break;
     }
-    case cbP4: {
+    else if (exprᴛ1 == cbP4) {
         bitsPerPixel = 4;
-        break;
     }
-    case cbP2: {
+    else if (exprᴛ1 == cbP2) {
         bitsPerPixel = 2;
-        break;
     }
-    case cbP1: {
+    else if (exprᴛ1 == cbP1) {
         bitsPerPixel = 1;
-        break;
     }
-    case cbTCA8: {
+    else if (exprᴛ1 == cbTCA8) {
         bitsPerPixel = 32;
-        break;
     }
-    case cbTC16: {
+    else if (exprᴛ1 == cbTC16) {
         bitsPerPixel = 48;
-        break;
     }
-    case cbTCA16: {
+    else if (exprᴛ1 == cbTCA16) {
         bitsPerPixel = 64;
-        break;
     }
-    case cbG16: {
+    else if (exprᴛ1 == cbG16) {
         bitsPerPixel = 16;
-        break;
-    }}
+    }
 
     // cr[*] and pr are the bytes for the current and previous row.
     // cr[0] is unfiltered (or equivalently, filtered with the ftNone filter).
@@ -397,8 +380,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
     for (nint y = b.Min.Y; y < b.Max.Y; y++) {
         // Convert from colors to bytes.
         nint i = 1;
-        switch (cb) {
-        case cbG8: {
+        var exprᴛ2 = cb;
+        if (exprᴛ2 == cbG8) {
             if (gray != nil){
                 nint offset = (y - b.Min.Y) * (~gray).Stride;
                 copy(cr[0][1..], (~gray).Pix[(int)(offset)..(int)(offset + b.Dx())]);
@@ -409,9 +392,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                     i++;
                 }
             }
-            break;
         }
-        case cbTC8: {
+        else if (exprᴛ2 == cbTC8) {
             var cr0 = cr[0];
             nint stride = 0;
             var pix = slice<byte>(default!);
@@ -440,9 +422,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                     i += 3;
                 }
             }
-            break;
         }
-        case cbP8: {
+        else if (exprᴛ2 == cbP8) {
             if (paletted != nil){
                 nint offset = (y - b.Min.Y) * (~paletted).Stride;
                 copy(cr[0][1..], (~paletted).Pix[(int)(offset)..(int)(offset + b.Dx())]);
@@ -453,9 +434,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                     i += 1;
                 }
             }
-            break;
         }
-        case cbP4 or cbP2 or cbP1: {
+        else if (exprᴛ2 == cbP4 || exprᴛ2 == cbP2 || exprᴛ2 == cbP1) {
             var pi = m._<image.PalettedImage>();
             uint8 a = default!;
             nint c = default!;
@@ -477,9 +457,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 }
                 cr[0][i] = a;
             }
-            break;
         }
-        case cbTCA8: {
+        else if (exprᴛ2 == cbTCA8) {
             if (nrgba != nil){
                 nint offset = (y - b.Min.Y) * (~nrgba).Stride;
                 copy(cr[0][1..], (~nrgba).Pix[(int)(offset)..(int)(offset + b.Dx() * 4)]);
@@ -490,13 +469,13 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 for (; len(src) >= 4; (dst, src) = (dst[4..], src[4..])) {
                     var d = (ж<array<byte>>)(dst);
                     var s = (ж<array<byte>>)(src);
-                    if (s[3] == 0){
-                        d[0] = 0;
-                        d[1] = 0;
-                        d[2] = 0;
-                        d[3] = 0;
+                    if (s.val[3] == 0){
+                        d.val[0] = 0;
+                        d.val[1] = 0;
+                        d.val[2] = 0;
+                        d.val[3] = 0;
                     } else 
-                    if (s[3] == 255){
+                    if (s.val[3] == 255){
                         copy(d[..], s[..]);
                     } else {
                         // This code does the same as color.NRGBAModel.Convert(
@@ -508,11 +487,11 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                         // combined with the division-by-a, converts from
                         // alpha-premultiplied to non-alpha-premultiplied).
                         static readonly UntypedInt m = /* 0x101 * 0xffff */ 16842495;
-                        var a = ((uint32)s[3]) * 257;
-                        d[0] = ((uint8)((((uint32)s[0]) * m / a) >> (int)(8)));
-                        d[1] = ((uint8)((((uint32)s[1]) * m / a) >> (int)(8)));
-                        d[2] = ((uint8)((((uint32)s[2]) * m / a) >> (int)(8)));
-                        d[3] = s[3];
+                        var a = ((uint32)s.val[3]) * 257;
+                        d.val[0] = ((uint8)((((uint32)s.val[0]) * m / a) >> (int)(8)));
+                        d.val[1] = ((uint8)((((uint32)s.val[1]) * m / a) >> (int)(8)));
+                        d.val[2] = ((uint8)((((uint32)s.val[2]) * m / a) >> (int)(8)));
+                        d.val[3] = s.val[3];
                     }
                 }
             } else {
@@ -526,18 +505,16 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                     i += 4;
                 }
             }
-            break;
         }
-        case cbG16: {
+        else if (exprᴛ2 == cbG16) {
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 var c = color.Gray16Model.Convert(m.At(x, y))._<color.Gray16>();
                 cr[0][i + 0] = ((uint8)(c.Y >> (int)(8)));
                 cr[0][i + 1] = ((uint8)c.Y);
                 i += 2;
             }
-            break;
         }
-        case cbTC16: {
+        else if (exprᴛ2 == cbTC16) {
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 // We have previously verified that the alpha value is fully opaque.
                 var (r, g, bΔ4, _) = m.At(x, y).RGBA();
@@ -549,9 +526,8 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 cr[0][i + 5] = ((uint8)bΔ4);
                 i += 6;
             }
-            break;
         }
-        case cbTCA16: {
+        else if (exprᴛ2 == cbTCA16) {
             for (nint x = b.Min.X; x < b.Max.X; x++) {
                 // Convert from image.Image (which is alpha-premultiplied) to PNG's non-alpha-premultiplied.
                 var c = color.NRGBA64Model.Convert(m.At(x, y))._<color.NRGBA64>();
@@ -565,8 +541,7 @@ internal static nint filter(ж<array<slice<byte>>> Ꮡcr, slice<byte> pr, nint b
                 cr[0][i + 7] = ((uint8)c.A);
                 i += 8;
             }
-            break;
-        }}
+        }
 
         // Apply the filter.
         // Skip filter for NoCompression and paletted images (cbP8) as

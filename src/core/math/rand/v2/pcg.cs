@@ -94,8 +94,7 @@ internal static error errUnmarshalPCG = errors.New("invalid PCG encoding"u8);
     // DXSM "double xorshift multiply"
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L1015
     // https://github.com/imneme/pcg-cpp/blob/428802d1a5/include/pcg_random.hpp#L176
-    GoUntyped cheapMul = /* 0xda942042e4dd58b5 */
-            GoUntyped.Parse("15750249268501108917");
+    static readonly UntypedInt cheapMul = /* 0xda942042e4dd58b5 */ 15750249268501108917;
     hi ^= (uint64)(hi >> (int)(32));
     hi *= cheapMul;
     hi ^= (uint64)(hi >> (int)(48));

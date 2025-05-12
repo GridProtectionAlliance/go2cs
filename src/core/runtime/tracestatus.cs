@@ -56,17 +56,16 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
         return w;
     }
     traceProcStatus status = default!;
-    switch (pp.status) {
-    case _Pidle or _Pgcstop: {
+    var exprᴛ1 = pp.status;
+    if (exprᴛ1 == _Pidle || exprᴛ1 == _Pgcstop) {
         status = traceProcIdle;
         if (pp.status == _Pgcstop && inSTW) {
             // N.B. a P that is running and currently has the world stopped will be
             // in _Pgcstop, but we model it as running in the tracer.
             status = traceProcRunning;
         }
-        break;
     }
-    case _Prunning: {
+    else if (exprᴛ1 == _Prunning) {
         status = traceProcRunning;
         if (w.mp.p.ptr() == Ꮡpp && w.mp.curg != nil && (uint32)(readgstatus(w.mp.curg) & ~_Gscan) == _Gsyscall) {
             // There's a short window wherein the goroutine may have entered _Gsyscall
@@ -75,16 +74,13 @@ internal static traceWriter writeProcStatusForP(this traceWriter w, ж<Δp> Ꮡp
             // so we need to emit a status that matches. See #64318.
             status = traceProcSyscall;
         }
-        break;
     }
-    case _Psyscall: {
+    else if (exprᴛ1 == _Psyscall) {
         status = traceProcSyscall;
-        break;
     }
-    default: {
+    else { /* default: */
         @throw("attempt to trace invalid or unsupported P status"u8);
-        break;
-    }}
+    }
 
     w = w.writeProcStatus(((uint64)pp.id), status, pp.trace.inSweep);
     return w;
@@ -115,20 +111,17 @@ internal static traceWriter writeProcStatus(this traceWriter w, uint64 pid, trac
 internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason wr) {
     // N.B. Ignore the _Gscan bit. We don't model it in the tracer.
     traceGoStatus tgs = default!;
-    switch ((uint32)(status & ~_Gscan)) {
-    case _Grunnable: {
+    var exprᴛ1 = (uint32)(status & ~_Gscan);
+    if (exprᴛ1 == _Grunnable) {
         tgs = traceGoRunnable;
-        break;
     }
-    case _Grunning or _Gcopystack: {
+    else if (exprᴛ1 == _Grunning || exprᴛ1 == _Gcopystack) {
         tgs = traceGoRunning;
-        break;
     }
-    case _Gsyscall: {
+    else if (exprᴛ1 == _Gsyscall) {
         tgs = traceGoSyscall;
-        break;
     }
-    case _Gwaiting or _Gpreempted: {
+    else if (exprᴛ1 == _Gwaiting || exprᴛ1 == _Gpreempted) {
         tgs = traceGoWaiting;
         if (status == _Gwaiting && wr.isWaitingForGC()) {
             // There are a number of cases where a G might end up in
@@ -139,16 +132,13 @@ internal static traceGoStatus goStatusToTraceGoStatus(uint32 status, waitReason 
             // the final trace as if they're running, not blocked.
             tgs = traceGoRunning;
         }
-        break;
     }
-    case _Gdead: {
+    else if (exprᴛ1 == _Gdead) {
         @throw("tried to trace dead goroutine"u8);
-        break;
     }
-    default: {
+    else { /* default: */
         @throw("tried to trace goroutine with invalid or unsupported status"u8);
-        break;
-    }}
+    }
 
     return tgs;
 }

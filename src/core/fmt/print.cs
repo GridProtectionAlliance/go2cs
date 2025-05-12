@@ -458,7 +458,7 @@ internal static (nint num, bool isnum, nint newi) parsenum(@string s, nint start
     p.buf.writeRune(verb);
     p.buf.writeByte((rune)'(');
     switch (ᐧ) {
-    case {} when p.arg is != default!: {
+    case {} when p.arg != default!: {
         p.buf.writeString(reflect.TypeOf(p.arg).String());
         p.buf.writeByte((rune)'=');
         p.printArg(p.arg, (rune)'v');
@@ -1330,7 +1330,7 @@ simpleFormat:
                         p.wrappedErrs = append(p.wrappedErrs, argNum);
                         fallthrough = true;
                     }
-                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'v') { matchᴛ1 = true;
+                    if (fallthrough || !matchᴛ1 && exprᴛ1 is (rune)'v')) { matchᴛ1 = true;
                         p.fmt.sharpV = p.fmt.sharp;
                         p.fmt.sharp = false;
                         p.fmt.plusV = p.fmt.plus;
@@ -1422,10 +1422,10 @@ break_simpleFormat:;
         if (verb is (rune)'%') { matchᴛ2 = true;
             p.buf.writeByte((rune)'%');
         }
-        else if (!p.goodArgNum)) { matchᴛ2 = true;
+        else if (!p.goodArgNum) { matchᴛ2 = true;
             p.badArgNum(verb);
         }
-        else if (argNum >= len(a))) { matchᴛ2 = true;
+        else if (argNum >= len(a)) { matchᴛ2 = true;
             p.missingArg(verb);
         }
         else if (verb is (rune)'w') { matchᴛ2 = true;
@@ -1434,7 +1434,7 @@ break_simpleFormat:;
  argNum);
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ2 && verb is (rune)'v') { matchᴛ2 = true;
+        if (fallthrough || !matchᴛ2 && verb is (rune)'v')) { matchᴛ2 = true;
             p.fmt.sharpV = p.fmt.sharp;
             p.fmt.sharp = false;
             p.fmt.plusV = p.fmt.plus;

@@ -288,7 +288,7 @@ internal static void os_beforeExit(nint exitCode) {
     }
 }
 
-[GoInit] internal static void initΔ3() {
+[GoInit] internal static void initΔ6() {
     var exithook.Gosched = Gosched;
     var exithook.Goid = () => (~getg()).goid;
     var exithook.Throw = @throw;
@@ -299,7 +299,7 @@ internal static void runExitHooks(nint code) {
 }
 
 // start forcegc helper goroutine
-[GoInit] internal static void initΔ4() {
+[GoInit] internal static void initΔ7() {
     goǃ(forcegchelper);
 }
 
@@ -771,7 +771,7 @@ internal static void schedinit() {
         (gp.val.racectx, raceprocctx0) = raceinit();
     }
     sched.maxmcount = 10000;
-    crashFD.Store(^((uintptr)0));
+    crashFD.Store(~((uintptr)0));
     // The world starts stopped.
     worldStopped();
     ticks.init();
@@ -1076,19 +1076,17 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
 
     var success = false;
     // Check that transition is valid.
-    switch (oldval) {
-    default: {
+    var exprᴛ1 = oldval;
+    { /* default: */
         print("runtime: casfrom_Gscanstatus bad oldval gp=", gp, ", oldval=", ((Δhex)oldval), ", newval=", ((Δhex)newval), "\n");
         dumpgstatus(Ꮡgp);
         @throw("casfrom_Gscanstatus:top gp->status is not in scan state"u8);
-        break;
     }
-    case _Gscanrunnable or _Gscanwaiting or _Gscanrunning or _Gscansyscall or _Gscanpreempted: {
+    else if (exprᴛ1 == _Gscanrunnable || exprᴛ1 == _Gscanwaiting || exprᴛ1 == _Gscanrunning || exprᴛ1 == _Gscansyscall || exprᴛ1 == _Gscanpreempted) {
         if (newval == (uint32)(oldval & ~_Gscan)) {
             success = gp.atomicstatus.CompareAndSwap(oldval, newval);
         }
-        break;
-    }}
+    }
 
     if (!success) {
         print("runtime: casfrom_Gscanstatus failed gp=", gp, ", oldval=", ((Δhex)oldval), ", newval=", ((Δhex)newval), "\n");
@@ -1103,8 +1101,8 @@ internal static void casfrom_Gscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newv
 internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     ref var gp = ref Ꮡgp.val;
 
-    switch (oldval) {
-    case _Grunnable or _Grunning or _Gwaiting or _Gsyscall: {
+    var exprᴛ1 = oldval;
+    if (exprᴛ1 == _Grunnable || exprᴛ1 == _Grunning || exprᴛ1 == _Gwaiting || exprᴛ1 == _Gsyscall) {
         if (newval == (uint32)(oldval | _Gscan)) {
             var r = gp.atomicstatus.CompareAndSwap(oldval, newval);
             if (r) {
@@ -1112,8 +1110,7 @@ internal static bool castogscanstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval)
             }
             return r;
         }
-        break;
-    }}
+    }
 
     print("runtime: castogscanstatus oldval=", ((Δhex)oldval), " newval=", ((Δhex)newval), "\n");
     @throw("castogscanstatus"u8);
@@ -1178,14 +1175,13 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
     // Currently:
     // - Time spent in runnable.
     // - Time spent blocked on a sync.Mutex or sync.RWMutex.
-    switch (oldval) {
-    case _Grunnable: {
+    var exprᴛ1 = oldval;
+    if (exprᴛ1 == _Grunnable) {
         var now = nanotime();
         gp.runnableTime += now - gp.trackingStamp;
         gp.trackingStamp = 0;
-        break;
     }
-    case _Gwaiting: {
+    else if (exprᴛ1 == _Gwaiting) {
         if (!gp.waitreason.isMutexWait()) {
             // We transitioned out of runnable, so measure how much
             // time we spent in this state and add it to
@@ -1196,35 +1192,31 @@ internal static void casgstatus(ж<g> Ꮡgp, uint32 oldval, uint32 newval) {
         var now = nanotime();
         sched.totalMutexWaitTime.Add((now - gp.trackingStamp) * gTrackingPeriod);
         gp.trackingStamp = 0;
-        break;
-    }}
+    }
 
     // Blocking on a lock, measure it. Note that because we're
     // sampling, we have to multiply by our sampling period to get
     // a more representative estimate of the absolute value.
     // gTrackingPeriod also represents an accurate sampling period
     // because we can only enter this state from _Grunning.
-    switch (newval) {
-    case _Gwaiting: {
+    var exprᴛ2 = newval;
+    if (exprᴛ2 == _Gwaiting) {
         if (!gp.waitreason.isMutexWait()) {
             // Not blocking on a lock.
             break;
         }
         var now = nanotime();
         gp.trackingStamp = now;
-        break;
     }
-    case _Grunnable: {
+    else if (exprᴛ2 == _Grunnable) {
         var now = nanotime();
         gp.trackingStamp = now;
-        break;
     }
-    case _Grunning: {
+    else if (exprᴛ2 == _Grunning) {
         gp.tracking = false;
         sched.timeToRun.record(gp.runnableTime);
         gp.runnableTime = 0;
-        break;
-    }}
+    }
 
 }
 
@@ -4826,7 +4818,7 @@ internal static ж<g> malg(int32 stacksize) {
             newgʗ2.val.stack = @stackalloc(((uint32)stacksize));
         });
         newg.val.stackguard0 = (~newg).stack.lo + stackGuard;
-        newg.val.stackguard1 = ^((uintptr)0);
+        newg.val.stackguard1 = ~((uintptr)0);
         // Clear the bottom word of the stack. We record g
         // there on gsignal stack during VDSO on ARM and ARM64.
         ((ж<uintptr>)(uintptr)(((@unsafe.Pointer)(~newg).stack.lo))).val = 0;
@@ -5830,17 +5822,15 @@ internal static void checkdead() {
             return;
         }
         var s = readgstatus(gp);
-        switch ((uint32)(s & ~_Gscan)) {
-        case _Gwaiting or _Gpreempted: {
+        var exprᴛ2 = (uint32)(s & ~_Gscan);
+        if (exprᴛ2 == _Gwaiting || exprᴛ2 == _Gpreempted) {
             grunning++;
-            break;
         }
-        case _Grunnable or _Grunning or _Gsyscall: {
+        else if (exprᴛ2 == _Grunnable || exprᴛ2 == _Grunning || exprᴛ2 == _Gsyscall) {
             print("runtime: checkdead: find g ", (~gp).goid, " in status ", s, "\n");
             unlock(Ꮡschedʗ2.of(schedt.Ꮡlock));
             @throw("checkdead: runnable g"u8);
-            break;
-        }}
+        }
 
     });
     if (grunning == 0) {
@@ -6453,7 +6443,7 @@ internal static void clear(this pMask Δp, int32 id) {
     ref var word = ref heap<int32>(out var Ꮡword);
     word = id / 32;
     var mask = ((uint32)1) << (int)((id % 32));
-    atomic.And(Ꮡ(Δp, word), ^mask);
+    atomic.And(Ꮡ(Δp, word), ~mask);
 }
 
 // pidleput puts p on the _Pidle list. now must be a relatively recent call

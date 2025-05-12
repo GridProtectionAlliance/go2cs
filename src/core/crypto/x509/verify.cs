@@ -557,8 +557,8 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
             var err = forEachSAN(sanCert.getSANExtension(), 
             var comparisonCountʗ1 = comparisonCount;
             (nint tag, slice<byte> data) => {
-                switch (tag) {
-                case nameTypeEmail: {
+                var exprᴛ1 = tag;
+                if (exprᴛ1 == nameTypeEmail) {
                     @string name = ((@string)data);
                     var (mailbox, ok) = parseRFC2821Mailbox(name);
                     if (!ok) {
@@ -571,9 +571,8 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                             return errΔ6;
                         }
                     }
-                    break;
                 }
-                case nameTypeDNS: {
+                if (exprᴛ1 == nameTypeDNS) {
                     @string name = ((@string)data);
                     {
                         var (_, ok) = domainToReverseLabels(name); if (!ok) {
@@ -587,9 +586,8 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                             return errΔ7;
                         }
                     }
-                    break;
                 }
-                case nameTypeURI: {
+                if (exprᴛ1 == nameTypeURI) {
                     @string name = ((@string)data);
                     (uri, errΔ8) = url.Parse(name);
                     if (errΔ8 != default!) {
@@ -602,9 +600,8 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                             return errΔ9;
                         }
                     }
-                    break;
                 }
-                case nameTypeIP: {
+                if (exprᴛ1 == nameTypeIP) {
                     var ip = ((net.IP)data);
                     {
                         nint l = len(ip); if (l != net.IPv4len && l != net.IPv6len) {
@@ -618,11 +615,9 @@ internal static (bool, error) matchDomainConstraint(@string domain, @string cons
                             return errΔ10;
                         }
                     }
-                    break;
                 }
-                default: {
-                    break;
-                }}
+                { /* default: */
+                }
 
                 // Unknown SAN types are ignored.
                 return default!;
@@ -899,17 +894,15 @@ internal static readonly UntypedInt maxChainSignatureChecks = 100;
                 }
             }
         }
-        switch (certType) {
-        case rootCertificate: {
+        var exprᴛ1 = certType;
+        if (exprᴛ1 == rootCertificate) {
             chainsʗ1 = append(chainsʗ1, appendToFreshChain(currentChainʗ1, candidate.cert));
-            break;
         }
-        case intermediateCertificate: {
+        else if (exprᴛ1 == intermediateCertificate) {
             slice<slice<ж<Certificate>>> childChains = default!;
             (childChains, err) = candidate.cert.buildChains(appendToFreshChain(currentChainʗ1, candidate.cert), ᏑsigChecks, Ꮡopts);
             chainsʗ1 = append(chainsʗ1, childChains.ꓸꓸꓸ);
-            break;
-        }}
+        }
 
     };
     foreach (var (_, root) in opts.Roots.findPotentialParents(c)) {
@@ -1116,7 +1109,8 @@ NextCert:
                 goto continue_NextCert;
             }
         }
-        static readonly ExtKeyUsage invalidUsage = -1;
+        GoUntyped invalidUsage = /* -1 */
+                    GoUntyped.Parse("-1");
 NextRequestedUsage:
         foreach (var (iΔ1, requestedUsage) in usages) {
             if (requestedUsage == invalidUsage) {

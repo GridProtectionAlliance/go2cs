@@ -78,8 +78,7 @@ internal static readonly UntypedInt iterator = 1; // there may be an iterator us
 internal static readonly UntypedInt oldIterator = 2; // there may be an iterator using oldbuckets
 internal static readonly UntypedInt hashWriting = 4; // a goroutine is writing to the map
 internal static readonly UntypedInt ΔsameSizeGrow = 8; // the current map growth is to a new map of the same size
-internal static readonly GoUntyped noCheck = /* 1<<(8*goarch.PtrSize) - 1 */
-    GoUntyped.Parse("18446744073709551615");
+internal static readonly UntypedInt noCheck = /* 1<<(8*goarch.PtrSize) - 1 */ 18446744073709551615;
 
 // isEmpty reports whether the given tophash array entry represents an empty bucket entry.
 internal static bool isEmpty(uint8 x) {

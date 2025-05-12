@@ -157,7 +157,7 @@ internal static (ж<bigꓸInt>, error) parseBigInt(slice<byte> bytes) {
         // This is a negative number.
         var notBytes = new slice<byte>(len(bytes));
         foreach (var (i, _) in notBytes) {
-            notBytes[i] = ^bytes[i];
+            notBytes[i] = ~bytes[i];
         }
         ret.SetBytes(notBytes);
         ret.Add(ret, bigOne);
@@ -640,15 +640,13 @@ internal static (reflectꓸValue ret, error err) parseSequenceOf(slice<byte> byt
         if (err != default!) {
             return (ret, err);
         }
-        switch (t.tag) {
-        case TagIA5String or TagGeneralString or TagT61String or TagUTF8String or TagNumericString or TagBMPString: {
+        var exprᴛ1 = t.tag;
+        if (exprᴛ1 == TagIA5String || exprᴛ1 == TagGeneralString || exprᴛ1 == TagT61String || exprᴛ1 == TagUTF8String || exprᴛ1 == TagNumericString || exprᴛ1 == TagBMPString) {
             t.tag = TagPrintableString;
-            break;
         }
-        case TagGeneralizedTime or TagUTCTime: {
+        else if (exprᴛ1 == TagGeneralizedTime || exprᴛ1 == TagUTCTime) {
             t.tag = TagUTCTime;
-            break;
-        }}
+        }
 
         // We pretend that various other string types are
         // PRINTABLE STRINGs so that a sequence of them can be
@@ -723,58 +721,45 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             any result = default!;
             if (!t.isCompound && t.@class == ClassUniversal) {
                 var innerBytesΔ1 = bytes[(int)(offset)..(int)(offset + t.length)];
-                switch (t.tag) {
-                case TagPrintableString: {
+                var exprᴛ1 = t.tag;
+                if (exprᴛ1 == TagPrintableString) {
                     (result, err) = parsePrintableString(innerBytesΔ1);
-                    break;
                 }
-                case TagNumericString: {
+                else if (exprᴛ1 == TagNumericString) {
                     (result, err) = parseNumericString(innerBytesΔ1);
-                    break;
                 }
-                case TagIA5String: {
+                else if (exprᴛ1 == TagIA5String) {
                     (result, err) = parseIA5String(innerBytesΔ1);
-                    break;
                 }
-                case TagT61String: {
+                else if (exprᴛ1 == TagT61String) {
                     (result, err) = parseT61String(innerBytesΔ1);
-                    break;
                 }
-                case TagUTF8String: {
+                else if (exprᴛ1 == TagUTF8String) {
                     (result, err) = parseUTF8String(innerBytesΔ1);
-                    break;
                 }
-                case TagInteger: {
+                else if (exprᴛ1 == TagInteger) {
                     (result, err) = parseInt64(innerBytesΔ1);
-                    break;
                 }
-                case TagBitString: {
+                else if (exprᴛ1 == TagBitString) {
                     (result, err) = parseBitString(innerBytesΔ1);
-                    break;
                 }
-                case TagOID: {
+                else if (exprᴛ1 == TagOID) {
                     (result, err) = parseObjectIdentifier(innerBytesΔ1);
-                    break;
                 }
-                case TagUTCTime: {
+                else if (exprᴛ1 == TagUTCTime) {
                     (result, err) = parseUTCTime(innerBytesΔ1);
-                    break;
                 }
-                case TagGeneralizedTime: {
+                else if (exprᴛ1 == TagGeneralizedTime) {
                     (result, err) = parseGeneralizedTime(innerBytesΔ1);
-                    break;
                 }
-                case TagOctetString: {
+                else if (exprᴛ1 == TagOctetString) {
                     result = innerBytesΔ1;
-                    break;
                 }
-                case TagBMPString: {
+                else if (exprᴛ1 == TagBMPString) {
                     (result, err) = parseBMPString(innerBytesΔ1);
-                    break;
                 }
-                default: {
-                    break;
-                }}
+                else { /* default: */
+                }
 
             }
             // If we don't know how to handle the type, we just leave Value as nil.
@@ -840,11 +825,10 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     // wire, we change the universal type to match.
     if (universalTag == TagPrintableString) {
         if (t.@class == ClassUniversal){
-            switch (t.tag) {
-            case TagIA5String or TagGeneralString or TagT61String or TagUTF8String or TagNumericString or TagBMPString: {
+            var exprᴛ2 = t.tag;
+            if (exprᴛ2 == TagIA5String || exprᴛ2 == TagGeneralString || exprᴛ2 == TagT61String || exprᴛ2 == TagUTF8String || exprᴛ2 == TagNumericString || exprᴛ2 == TagBMPString) {
                 universalTag = t.tag;
-                break;
-            }}
+            }
 
         } else 
         if (@params.stringType != 0) {
@@ -938,8 +922,8 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
     }}
     {
         var val = v;
-        var exprᴛ1 = val.Kind();
-        if (exprᴛ1 == reflect.ΔBool) {
+        var exprᴛ3 = val.Kind();
+        if (exprᴛ3 == reflect.ΔBool) {
             var (parsedBool, err1) = parseBool(innerBytes);
             if (err1 == default!) {
                 val.SetBool(parsedBool);
@@ -947,7 +931,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             err = err1;
             return (offset, err);
         }
-        if (exprᴛ1 == reflect.ΔInt || exprᴛ1 == reflect.Int32 || exprᴛ1 == reflect.Int64) {
+        if (exprᴛ3 == reflect.ΔInt || exprᴛ3 == reflect.Int32 || exprᴛ3 == reflect.Int64) {
             if (val.Type().Size() == 4){
                 var (parsedInt, err1) = parseInt32(innerBytes);
                 if (err1 == default!) {
@@ -963,7 +947,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             }
             return (offset, err);
         }
-        if (exprᴛ1 == reflect.Struct) {
+        if (exprᴛ3 == reflect.Struct) {
             var structType = fieldType;
             for (nint i = 0; i < structType.NumField(); i++) {
                 // TODO(dfc) Add support for the remaining integer types
@@ -989,7 +973,7 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             }
             return (offset, err);
         }
-        if (exprᴛ1 == reflect.ΔSlice) {
+        if (exprᴛ3 == reflect.ΔSlice) {
             var sliceType = fieldType;
             if (sliceType.Elem().Kind() == reflect.Uint8) {
                 // We allow extra bytes at the end of the SEQUENCE because
@@ -1006,45 +990,37 @@ internal static (nint offset, error err) parseField(reflectꓸValue v, slice<byt
             err = err1;
             return (offset, err);
         }
-        if (exprᴛ1 == reflect.ΔString) {
+        if (exprᴛ3 == reflect.ΔString) {
             @string vΔ2 = default!;
-            switch (universalTag) {
-            case TagPrintableString: {
+            var exprᴛ4 = universalTag;
+            if (exprᴛ4 == TagPrintableString) {
                 (vΔ2, err) = parsePrintableString(innerBytes);
-                break;
             }
-            case TagNumericString: {
+            else if (exprᴛ4 == TagNumericString) {
                 (vΔ2, err) = parseNumericString(innerBytes);
-                break;
             }
-            case TagIA5String: {
+            else if (exprᴛ4 == TagIA5String) {
                 (vΔ2, err) = parseIA5String(innerBytes);
-                break;
             }
-            case TagT61String: {
+            else if (exprᴛ4 == TagT61String) {
                 (vΔ2, err) = parseT61String(innerBytes);
-                break;
             }
-            case TagUTF8String: {
+            else if (exprᴛ4 == TagUTF8String) {
                 (vΔ2, err) = parseUTF8String(innerBytes);
-                break;
             }
-            case TagGeneralString: {
+            else if (exprᴛ4 == TagGeneralString) {
                 (vΔ2, err) = parseT61String(innerBytes);
-                break;
             }
-            case TagBMPString: {
+            else if (exprᴛ4 == TagBMPString) {
                 (vΔ2, err) = parseBMPString(innerBytes);
-                break;
             }
-            default: {
+            else { /* default: */
                 err = new SyntaxError( // GeneralString is specified in ISO-2022/ECMA-35,
  // A brief review suggests that it includes structures
  // that allow the encoding to change midstring and
  // such. We give up and pass it as an 8-bit string.
 fmt.Sprintf("internal error: unknown string type %d"u8, universalTag));
-                break;
-            }}
+            }
 
             if (err == default!) {
                 val.SetString(vΔ2);

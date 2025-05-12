@@ -86,20 +86,19 @@ internal static slice<byte> serverFinishedLabel = slice<byte>("server finished")
 internal static (Action<slice<byte>, slice<byte>, slice<byte>, slice<byte>>, crypto.Hash) prfAndHashForVersion(uint16 version, ж<cipherSuite> Ꮡsuite) {
     ref var suite = ref Ꮡsuite.val;
 
-    switch (version) {
-    case VersionTLS10 or VersionTLS11: {
+    var exprᴛ1 = version;
+    if (exprᴛ1 == VersionTLS10 || exprᴛ1 == VersionTLS11) {
         return (prf10, ((crypto.Hash)0));
     }
-    case VersionTLS12: {
+    if (exprᴛ1 == VersionTLS12) {
         if ((nint)(suite.flags & suiteSHA384) != 0) {
             return (prf12(sha512.New384), crypto.SHA384);
         }
         return (prf12(sha256.New), crypto.SHA256);
     }
-    default: {
+    { /* default: */
         throw panic("unknown version");
-        break;
-    }}
+    }
 
 }
 

@@ -91,7 +91,8 @@ internal static map<@string, itemType> key = new map<@string, itemType>{
     ["with"u8] = itemWith
 };
 
-internal static readonly UntypedInt eof = -1;
+internal static readonly GoUntyped eof = /* -1 */
+    GoUntyped.Parse("-1");
 
 // Trimming spaces.
 // If the action begins "{{- " rather than "{{", then all space/tab/newlines
@@ -415,10 +416,10 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
     {
         var r = l.next();
         var matchᴛ1 = false;
-        if (r is eof) { matchᴛ1 = true;
+        if (r == eof) { matchᴛ1 = true;
             return l.errorf("unclosed action"u8);
         }
-        if (isSpace(r))) { matchᴛ1 = true;
+        if (isSpace(r)) { matchᴛ1 = true;
             l.backup();
             return lexSpace;
         }
@@ -461,7 +462,7 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
             l.backup();
             return lexNumber;
         }
-        if (isAlphaNumeric(r))) { matchᴛ1 = true;
+        if (isAlphaNumeric(r)) { matchᴛ1 = true;
             l.backup();
             return lexIdentifier;
         }
@@ -477,7 +478,7 @@ internal static stateFn lexInsideAction(ж<lexer> Ꮡl) {
             }
             return l.emit(itemRightParen);
         }
-        if (r <= unicode.MaxASCII && unicode.IsPrint(r))) {
+        if (r <= unicode.MaxASCII && unicode.IsPrint(r)) {
             return l.emit(itemChar);
         }
         { /* default: */
@@ -614,10 +615,10 @@ internal static stateFn lexFieldOrVariable(ж<lexer> Ꮡl, itemType typ) {
     if (isSpace(r)) {
         return true;
     }
-    switch (r) {
-    case eof or (rune)'.' or (rune)',' or (rune)'|' or (rune)':' or (rune)')' or (rune)'(': {
+    var exprᴛ1 = r;
+    if (exprᴛ1 == eof || exprᴛ1 == (rune)'.' || exprᴛ1 == (rune)',' || exprᴛ1 == (rune)'|' || exprᴛ1 == (rune)':' || exprᴛ1 == (rune)')' || exprᴛ1 == (rune)'(') {
         return true;
-    }}
+    }
 
     return strings.HasPrefix(l.input[(int)(l.pos)..], l.rightDelim);
 }
@@ -639,7 +640,7 @@ Loop:
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is eof or (rune)'\n')) {
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
             return l.errorf("unterminated character constant"u8);
         }
         if (exprᴛ1 is (rune)'\'') { matchᴛ1 = true;
@@ -729,7 +730,7 @@ Loop:
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && (exprᴛ1 is eof or (rune)'\n')) {
+        if (fallthrough || !matchᴛ1 && (exprᴛ1 == eof || exprᴛ1 == (rune)'\n')) {
             return l.errorf("unterminated quoted string"u8);
         }
         if (exprᴛ1 is (rune)'"') { matchᴛ1 = true;
@@ -748,14 +749,13 @@ internal static stateFn lexRawQuote(ж<lexer> Ꮡl) {
 
 Loop:
     while (ᐧ) {
-        switch (l.next()) {
-        case eof: {
+        var exprᴛ1 = l.next();
+        if (exprᴛ1 == eof) {
             return l.errorf("unterminated raw quoted string"u8);
         }
-        case (rune)'`': {
+        if (exprᴛ1 is (rune)'`') {
             goto break_Loop;
-            break;
-        }}
+        }
 
 continue_Loop:;
     }

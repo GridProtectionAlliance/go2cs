@@ -474,7 +474,7 @@ internal static ast.Node node(this ΔfuncDecl d) {
                         inherited = false;
                         break;
                     }
-                    case {} when last is nil: {
+                    case {} when last == nil: {
                         last = @new<ast.ValueSpec>();
                         inherited = false;
                         break;

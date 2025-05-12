@@ -730,25 +730,25 @@ internal static typeId bootstrapType(@string name, any e) {
         return unknown;
     }
     switch (ᐧ) {
-    case {} when w.ArrayT is != nil: {
+    case {} when w.ArrayT != nil: {
         return w.ArrayT.Name;
     }
-    case {} when w.SliceT is != nil: {
+    case {} when w.SliceT != nil: {
         return w.SliceT.Name;
     }
-    case {} when w.StructT is != nil: {
+    case {} when w.StructT != nil: {
         return w.StructT.Name;
     }
-    case {} when w.MapT is != nil: {
+    case {} when w.MapT != nil: {
         return w.MapT.Name;
     }
-    case {} when w.GobEncoderT is != nil: {
+    case {} when w.GobEncoderT != nil: {
         return w.GobEncoderT.Name;
     }
-    case {} when w.BinaryMarshalerT is != nil: {
+    case {} when w.BinaryMarshalerT != nil: {
         return w.BinaryMarshalerT.Name;
     }
-    case {} when w.TextMarshalerT is != nil: {
+    case {} when w.TextMarshalerT != nil: {
         return w.TextMarshalerT.Name;
     }}
 
@@ -826,39 +826,36 @@ internal static (ж<typeInfo>, error) buildTypeInfo(ж<userTypeInfo> Ꮡut, refl
             return (default!, errΔ1);
         }
         var gt = userType.id().gobType()._<gobEncoderType.val>();
-        switch (ut.externalEnc) {
-        case xGob: {
+        var exprᴛ1 = ut.externalEnc;
+        if (exprᴛ1 == xGob) {
             (~info).wire.GobEncoderT = gt;
-            break;
         }
-        case xBinary: {
+        else if (exprᴛ1 == xBinary) {
             (~info).wire.BinaryMarshalerT = gt;
-            break;
         }
-        case xText: {
+        else if (exprᴛ1 == xText) {
             (~info).wire.TextMarshalerT = gt;
-            break;
-        }}
+        }
 
         rt = ut.user;
     } else {
         var t = (~info).id.gobType();
         {
             var typ = rt;
-            var exprᴛ1 = typ.Kind();
-            if (exprᴛ1 == reflect.Array) {
+            var exprᴛ2 = typ.Kind();
+            if (exprᴛ2 == reflect.Array) {
                 (~info).wire.ArrayT = t._<arrayType.val>();
             }
-            else if (exprᴛ1 == reflect.Map) {
+            else if (exprᴛ2 == reflect.Map) {
                 (~info).wire.MapT = t._<mapType.val>();
             }
-            else if (exprᴛ1 == reflect.ΔSlice) {
+            else if (exprᴛ2 == reflect.ΔSlice) {
                 if (typ.Elem().Kind() != reflect.Uint8) {
                     // []byte == []uint8 is a special case handled separately
                     (~info).wire.SliceT = t._<sliceType.val>();
                 }
             }
-            else if (exprᴛ1 == reflect.Struct) {
+            else if (exprᴛ2 == reflect.Struct) {
                 (~info).wire.StructT = t._<structType.val>();
             }
         }

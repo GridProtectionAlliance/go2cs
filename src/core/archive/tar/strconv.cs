@@ -130,7 +130,7 @@ internal static bool fitsInBase256(nint n, int64 x) {
             return 0;
         }
         if (inv == 255) {
-            return ^((int64)x);
+            return ~((int64)x);
         }
         return ((int64)x);
     }

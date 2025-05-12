@@ -10,7 +10,7 @@ partial class tar_package {
 [GoType("num:nint")] partial struct Format;
 
 // Constants to identify various tar formats.
-internal static readonly Format _ = /* (1 << iota) / 4 */ 0;           // Sequence of 0, 0, 1, 2, 4, 8, etc...
+internal static readonly Format _ᴛ1ʗ = /* (1 << iota) / 4 */ 0;     // Sequence of 0, 0, 1, 2, 4, 8, etc...
 
 public static readonly Format FormatUnknown = 0;
 
@@ -198,14 +198,14 @@ partial struct block;
     int64 unsigned = default!;
     int64 signed = default!;
 
-    /* for i, c := range b {
-	if 148 <= i && i < 156 {
-		c = ' '
-	}
-	unsigned += int64(c)
-	signed += int64(int8(c))
-} */
-    // Treat the checksum field itself as all spaces.
+    foreach (var (i, c) in b.val) {
+        if (148 <= i && i < 156) {
+            c = (rune)' ';
+        }
+        // Treat the checksum field itself as all spaces.
+        unsigned += ((int64)c);
+        signed += ((int64)((int8)c));
+    }
     return (unsigned, signed);
 }
 

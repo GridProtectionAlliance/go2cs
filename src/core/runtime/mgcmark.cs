@@ -140,14 +140,14 @@ internal static int64 markroot(ж<gcWork> Ꮡgcw, uint32 i, bool flushBgCredit) 
         }
         break;
     }
-    case {} when i is fixedRootFinalizers: {
+    case {} when i == fixedRootFinalizers: {
         for (var fb = allfin; fb != nil; fb = fb.val.alllink) {
             var cnt = ((uintptr)atomic.Load(Ꮡ((~fb).cnt)));
             scanblock(((uintptr)new @unsafe.Pointer(Ꮡ(~fb).fin.at<finalizer>(0))), cnt * @unsafe.Sizeof((~fb).fin[0]), Ꮡfinptrmask.at<byte>(0), Ꮡgcw, nil);
         }
         break;
     }
-    case {} when i is fixedRootFreeGStacks: {
+    case {} when i == fixedRootFreeGStacks: {
         systemstack(markrootFreeGStacks);
         break;
     }
@@ -296,7 +296,7 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
     var sg = mheap_.sweepgen;
     // Find the arena and page index into that arena for this shard.
     arenaIdx ai = mheap_.markArenas[shard / (pagesPerArena / pagesPerSpanRoot)];
-    var ha = mheap_.arenas[ai.l1()][ai.l2()];
+    var ha = mheap_.arenas[ai.l1()].val[ai.l2()];
     nuint arenaPage = ((nuint)(((uintptr)shard) * pagesPerSpanRoot % pagesPerArena));
     // Construct slice of bitmap which we'll iterate over.
     var specialsbits = (~ha).pageSpecials[(int)(arenaPage / 8)..];
@@ -338,8 +338,8 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
             // removed from the list while we're traversing it.
             @lock(Ꮡ((~s).speciallock));
             for (var sp = s.val.specials; sp != nil; sp = sp.val.next) {
-                switch ((~sp).kind) {
-                case _KindSpecialFinalizer: {
+                var exprᴛ1 = (~sp).kind;
+                if (exprᴛ1 == _KindSpecialFinalizer) {
                     var spf = (ж<specialfinalizer>)(uintptr)(new @unsafe.Pointer(sp));
                     var Δp = s.@base() + ((uintptr)(~spf).special.offset) / (~s).elemsize * (~s).elemsize;
                     if (!(~s).spanclass.noscan()) {
@@ -353,14 +353,12 @@ internal static void markrootSpans(ж<gcWork> Ꮡgcw, nint shard) {
                     }
                     scanblock(((uintptr)((@unsafe.Pointer)(Ꮡ((~spf).fn)))), // The special itself is a root.
  goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
-                    break;
                 }
-                case _KindSpecialWeakHandle: {
+                else if (exprᴛ1 == _KindSpecialWeakHandle) {
                     var spw = (ж<specialWeakHandle>)(uintptr)(new @unsafe.Pointer(sp));
                     scanblock(((uintptr)((@unsafe.Pointer)(Ꮡ((~spw).handle)))), // The special itself is a root.
  goarch.PtrSize, Ꮡoneptrmask.at<uint8>(0), Ꮡgcw, nil);
-                    break;
-                }}
+                }
 
             }
             unlock(Ꮡ((~s).speciallock));
@@ -768,23 +766,20 @@ internal static int64 scanstack(ж<g> Ꮡgp, ж<gcWork> Ꮡgcw) {
         print("runtime:scanstack: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", ((Δhex)readgstatus(Ꮡgp)), "\n");
         @throw("scanstack - bad status"u8);
     }
-    switch ((uint32)(readgstatus(Ꮡgp) & ~_Gscan)) {
-    default: {
+    var exprᴛ1 = (uint32)(readgstatus(Ꮡgp) & ~_Gscan);
+    { /* default: */
         print("runtime: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
         @throw("mark - bad status"u8);
-        break;
     }
-    case _Gdead: {
+    else if (exprᴛ1 == _Gdead) {
         return 0;
     }
-    case _Grunning: {
+    if (exprᴛ1 == _Grunning) {
         print("runtime: gp=", gp, ", goid=", gp.goid, ", gp->atomicstatus=", readgstatus(Ꮡgp), "\n");
         @throw("scanstack: goroutine not stopped"u8);
-        break;
     }
-    case _Grunnable or _Gsyscall or _Gwaiting: {
-        break;
-    }}
+    else if (exprᴛ1 == _Grunnable || exprᴛ1 == _Gsyscall || exprᴛ1 == _Gwaiting) {
+    }
 
     // ok
     if (Ꮡgp == getg()) {
@@ -1542,7 +1537,7 @@ internal static void greyobject(uintptr obj, uintptr @base, uintptr off, ж<mspa
         if (debug.gccheckmark > 0 && span.isFree(objIndex)) {
             print("runtime: marking free object ", ((Δhex)obj), " found at *(", ((Δhex)@base), "+", ((Δhex)off), ")\n");
             gcDumpObject("base"u8, @base, off);
-            gcDumpObject("obj"u8, obj, ^((uintptr)0));
+            gcDumpObject("obj"u8, obj, ~((uintptr)0));
             (~getg()).m.val.traceback = 2;
             @throw("marking free object"u8);
         }

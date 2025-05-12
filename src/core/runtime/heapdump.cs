@@ -416,19 +416,16 @@ internal static void dumpgs() {
     // goroutines & stacks
     forEachG((ж<g> gp) => {
         var status = readgstatus(gp);
-        switch (status) {
-        default: {
+        var exprᴛ2 = status;
+        { /* default: */
             print("runtime: unexpected G.status ", ((Δhex)status), "\n");
             @throw("dumpgs in STW - bad status"u8);
-            break;
         }
-        case _Gdead: {
-            break;
+        else if (exprᴛ2 == _Gdead) {
         }
-        case _Grunnable or _Gsyscall or _Gwaiting: {
+        else if (exprᴛ2 == _Grunnable || exprᴛ2 == _Gsyscall || exprᴛ2 == _Gwaiting) {
             dumpgoroutine(gp);
-            break;
-        }}
+        }
 
     });
 }
@@ -529,18 +526,18 @@ internal static void dumpparams() {
         if (mheap_.arenas[i1] == nil) {
             continue;
         }
-        /* for i, ha := range mheap_.arenas[i1] {
-	if ha == nil {
-		continue
-	}
-	base := arenaBase(arenaIdx(i1)<<arenaL1Shift | arenaIdx(i))
-	if arenaStart == 0 || base < arenaStart {
-		arenaStart = base
-	}
-	if base+heapArenaBytes > arenaEnd {
-		arenaEnd = base + heapArenaBytes
-	}
-} */
+        foreach (var (i, ha) in mheap_.arenas[i1].val) {
+            if (ha == nil) {
+                continue;
+            }
+            var @base = arenaBase((arenaIdx)(((arenaIdx)i1) << (int)(arenaL1Shift) | ((arenaIdx)i)));
+            if (arenaStart == 0 || @base < arenaStart) {
+                arenaStart = @base;
+            }
+            if (@base + heapArenaBytes > arenaEnd) {
+                arenaEnd = @base + heapArenaBytes;
+            }
+        }
     }
     dumpint(((uint64)arenaStart));
     dumpint(((uint64)arenaEnd));
@@ -621,7 +618,7 @@ internal static void dumpmemprof_callback(ж<bucket> Ꮡb, uintptr nstk, ж<uint
     dumpint(((uint64)size));
     dumpint(((uint64)nstk));
     for (var i = ((uintptr)0); i < nstk; i++) {
-        var pc = stk[i];
+        var pc = stk.val[i];
         var f = findfunc(pc);
         if (!f.valid()){
             array<byte> bufΔ1 = new(64);

@@ -70,19 +70,19 @@ partial class types_package {
         }
     }
     if (structLit){
-        switch (e) {
-        case missing: {
+        var exprᴛ1 = e;
+        if (exprᴛ1 == missing) {
             return check.sprintf("unknown field %s in struct literal of type %s"u8, sel, typ);
         }
-        case misspelled: {
+        if (exprᴛ1 == misspelled) {
             return check.sprintf("unknown field %s in struct literal of type %s, but does have %s"u8, sel, typ, alt);
         }
-        case unexported: {
+        if (exprᴛ1 == unexported) {
             return check.sprintf("unknown field %s in struct literal of type %s, but does have unexported %s"u8, sel, typ, alt);
         }
-        case inaccessible: {
+        if (exprᴛ1 == inaccessible) {
             return check.sprintf("cannot refer to unexported field %s in struct literal of type %s"u8, alt, typ);
-        }}
+        }
 
     } else {
         @string what = "object"u8;
@@ -96,19 +96,19 @@ partial class types_package {
             break;
         }}
 
-        switch (e) {
-        case missing: {
+        var exprᴛ2 = e;
+        if (exprᴛ2 == missing) {
             return check.sprintf("type %s has no field or method %s"u8, typ, sel);
         }
-        case misspelled: {
+        if (exprᴛ2 == misspelled) {
             return check.sprintf("type %s has no field or method %s, but does have %s %s"u8, typ, sel, what, alt);
         }
-        case unexported: {
+        if (exprᴛ2 == unexported) {
             return check.sprintf("type %s has no field or method %s, but does have unexported %s %s"u8, typ, sel, what, alt);
         }
-        case inaccessible: {
+        if (exprᴛ2 == inaccessible) {
             return check.sprintf("cannot refer to unexported %s %s"u8, what, alt);
-        }}
+        }
 
     }
     throw panic("unreachable");

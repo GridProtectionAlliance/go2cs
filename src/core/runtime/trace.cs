@@ -81,7 +81,7 @@ partial class runtime_package {
     internal @internal.runtime.atomic_package.Uint32 signalLock;             // protects use of the following member, only usable in signal handlers
     internal atomic.Pointer<profBuf> cpuLogWrite = new(2); // copy of cpuLogRead for use in signal handlers, set without signalLock
     internal ж<wakeableSleep> cpuSleep;
-    internal /*<-*/channel<struct{}> cpuLogDone;
+    internal /*<-*/channel<EmptyStruct> cpuLogDone;
     internal array<ж<traceBuf>> cpuBuf = new(2);
     internal @internal.runtime.atomic_package.Pointer reader; // goroutine that called ReadTrace, or nil
     // Fast mappings from enumerations to string IDs that are prepopulated
@@ -640,7 +640,7 @@ internal static void traceAdvance(bool stopTrace) {
 }
 
 internal static uintptr traceNextGen(uintptr gen) {
-    if (gen == ^((uintptr)0)) {
+    if (gen == ~((uintptr)0)) {
         // gen is used both %2 and %3 and we want both patterns to continue when we loop around.
         // ^uint32(0) and ^uint64(0) are both odd and multiples of 3. Therefore the next generation
         // we want is even and one more than a multiple of 3. The smallest such number is 4.
@@ -870,7 +870,7 @@ internal static traceAdvancerState traceAdvancer;
 
 [GoType] partial struct traceAdvancerState {
     internal ж<wakeableSleep> timer;
-    internal channel<struct{}> done;
+    internal channel<EmptyStruct> done;
 }
 
 [GoType("dyn")] partial struct start_type {
@@ -879,7 +879,7 @@ internal static traceAdvancerState traceAdvancer;
 // start starts a new traceAdvancer.
 [GoRecv] internal static void start(this ref traceAdvancerState s) {
     // Start a goroutine to periodically advance the trace generation.
-    s.done = new channel<struct{}>(1);
+    s.done = new channel<EmptyStruct>(1);
     s.timer = newWakeableSleep();
     var debugʗ1 = debug;
     goǃ(() => {
@@ -914,14 +914,14 @@ internal static readonly UntypedFloat defaultTraceAdvancePeriod = 1e+09; // 1 se
     internal ж<timer> timer;
     // lock protects access to wakeup, but not send/recv on it.
     internal mutex @lock;
-    internal channel<struct{}> wakeup;
+    internal channel<EmptyStruct> wakeup;
 }
 
 // newWakeableSleep initializes a new wakeableSleep and returns it.
 internal static ж<wakeableSleep> newWakeableSleep() {
     var s = @new<wakeableSleep>();
     lockInit(Ꮡ((~s).@lock), lockRankWakeableSleep);
-    s.val.wakeup = new channel<struct{}>(1);
+    s.val.wakeup = new channel<EmptyStruct>(1);
     s.val.timer = @new<timer>();
     var f = (any s, uintptr _, int64 _) => {
         sΔ1._<wakeableSleep.val>().wake();

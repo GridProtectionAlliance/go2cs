@@ -92,7 +92,7 @@ internal static bool valid(this inlineFrame uf) {
         uf.pc = 0;
         return uf;
     }
-    var parentPc = u.inlTree[uf.index].parentPc;
+    var parentPc = u.inlTree.val[uf.index].parentPc;
     return u.resolveInternal(u.f.entry() + ((uintptr)parentPc));
 }
 
@@ -116,7 +116,7 @@ internal static bool valid(this inlineFrame uf) {
     if (uf.index < 0) {
         return u.f.srcFunc();
     }
-    var t = Ꮡ(u.inlTree[uf.index]);
+    var t = Ꮡ(u.inlTree.val[uf.index]);
     return new ΔsrcFunc(
         u.f.datap,
         (~t).nameOff,

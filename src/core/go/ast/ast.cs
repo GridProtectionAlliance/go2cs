@@ -69,12 +69,12 @@ partial class ast_package {
     public @string Text;   // comment text (excluding '\n' for //-style comments)
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref Comment c) {
+[GoRecv] public static token.Pos Pos(this ref Comment c) {
     return c.Slash;
 }
 
-[GoRecv] public static tokenꓸPos End(this ref Comment c) {
-    return ((tokenꓸPos)(((nint)c.Slash) + len(c.Text)));
+[GoRecv] public static token.Pos End(this ref Comment c) {
+    return ((token.Pos)(((nint)c.Slash) + len(c.Text)));
 }
 
 // A CommentGroup represents a sequence of comments
@@ -83,7 +83,7 @@ partial class ast_package {
     public slice<ж<Comment>> List; // len(List) > 0
 }
 
-[GoRecv] public static tokenꓸPos Pos(this ref CommentGroup g) {
+[GoRecv] public static token.Pos Pos(this ref CommentGroup g) {
     return g.List[0].Pos();
 }
 

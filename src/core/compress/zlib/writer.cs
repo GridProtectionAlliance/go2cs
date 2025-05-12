@@ -22,9 +22,11 @@ public static readonly UntypedInt BestSpeed = /* flate.BestSpeed */ 1;
 
 public static readonly UntypedInt BestCompression = /* flate.BestCompression */ 9;
 
-public static readonly UntypedInt DefaultCompression = /* flate.DefaultCompression */ -1;
+public static readonly GoUntyped DefaultCompression = /* flate.DefaultCompression */
+    GoUntyped.Parse("-1");
 
-public static readonly UntypedInt HuffmanOnly = /* flate.HuffmanOnly */ -2;
+public static readonly GoUntyped HuffmanOnly = /* flate.HuffmanOnly */
+    GoUntyped.Parse("-2");
 
 // A Writer takes data written to it and writes the compressed
 // form of that data to an underlying writer (see NewWriter).
@@ -105,27 +107,22 @@ public static (ж<Writer>, error) NewWriterLevelDict(io.Writer w, nint level, sl
     // 0=fastest, 1=fast, 2=default, 3=best.
     // The next bit, FDICT, is set if a dictionary is given.
     // The final five FCHECK bits form a mod-31 checksum.
-    switch (z.level) {
-    case -2 or 0 or 1: {
+    var exprᴛ1 = z.level;
+    if (exprᴛ1 == -2 || exprᴛ1 == 0 || exprᴛ1 == 1) {
         z.scratch[1] = 0 << (int)(6);
-        break;
     }
-    case 2 or 3 or 4 or 5: {
+    else if (exprᴛ1 is 2 or 3 or 4 or 5) {
         z.scratch[1] = 1 << (int)(6);
-        break;
     }
-    case 6 or -1: {
+    else if (exprᴛ1 == 6 || exprᴛ1 == -1) {
         z.scratch[1] = 2 << (int)(6);
-        break;
     }
-    case 7 or 8 or 9: {
+    else if (exprᴛ1 is 7 or 8 or 9) {
         z.scratch[1] = 3 << (int)(6);
-        break;
     }
-    default: {
+    else { /* default: */
         throw panic("unreachable");
-        break;
-    }}
+    }
 
     if (z.dict != default!) {
         z.scratch[1] |= (byte)(1 << (int)(5));

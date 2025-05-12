@@ -41,12 +41,12 @@ partial class trace_package {
     internal @internal.trace.@internal.oldtrace_package.Trace trace;
     internal ж<evTable> evt;
     internal bool preInit;
-    internal map<GoID, struct{}> createdPreInit;
+    internal map<GoID, EmptyStruct> createdPreInit;
     internal @internal.trace.@internal.oldtrace_package.Events events;
     internal slice<ΔEvent> extra;
     internal array<ΔEvent> extraArr = new(3);
     internal trace.taskState tasks;
-    internal map<ProcID, struct{}> seenProcs;
+    internal map<ProcID, EmptyStruct> seenProcs;
     internal ΔTime lastTs;
     internal trace.ThreadID procMs;
     internal uint64 lastStwReason;
@@ -88,12 +88,12 @@ internal static readonly UntypedInt sLast = 29;
 [GoRecv] internal static error init(this ref oldTraceConverter it, oldtrace.Trace pr) {
     it.trace = pr;
     it.preInit = true;
-    it.createdPreInit = new map<GoID, struct{}>();
+    it.createdPreInit = new map<GoID, EmptyStruct>();
     it.evt = Ꮡ(new evTable(pcs: new map<uint64, frame>()));
     it.events = pr.Events;
     it.extra = it.extraArr[..0];
     it.tasks = new trace.taskState();
-    it.seenProcs = new map<ProcID, struct{}>();
+    it.seenProcs = new map<ProcID, EmptyStruct>();
     it.procMs = new trace.ThreadID();
     it.lastTs = -1;
     var evt = it.evt;
@@ -280,7 +280,7 @@ internal static error errSkip = errors.New("skip event"u8);
                     @base: new baseEvent(
                         typ: go122.EvGoStatus,
                         time: ((ΔTime)ev.Ts),
-                        args: new timedEventArgs{((uint64)gid), ^((uint64)0), ((uint64)go122.GoRunnable)}
+                        args: new timedEventArgs{((uint64)gid), ~((uint64)0), ((uint64)go122.GoRunnable)}
                     )
                 ));
             }
@@ -345,7 +345,7 @@ internal static error errSkip = errors.New("skip event"u8);
     else if (exprᴛ1 == oldtrace.EvGoStart) {
         if (it.preInit){
             mappedType = go122.EvGoStatus;
-            mappedArgs = new timedEventArgs{ev.Args[0], ^((uint64)0), ((uint64)go122.GoRunning)};
+            mappedArgs = new timedEventArgs{ev.Args[0], ~((uint64)0), ((uint64)go122.GoRunning)};
             delete(it.createdPreInit, ((GoID)ev.Args[0]));
         } else {
             mappedType = go122.EvGoStart;
@@ -486,7 +486,7 @@ internal static error errSkip = errors.New("skip event"u8);
     }
     if (exprᴛ1 == oldtrace.EvGoWaiting) {
         mappedType = go122.EvGoStatus;
-        mappedArgs = new timedEventArgs{ev.Args[0], ^((uint64)0), ((uint64)go122.GoWaiting)};
+        mappedArgs = new timedEventArgs{ev.Args[0], ~((uint64)0), ((uint64)go122.GoWaiting)};
         delete(it.createdPreInit, ((GoID)ev.Args[0]));
     }
     else if (exprᴛ1 == oldtrace.EvGoInSyscall) {
@@ -494,7 +494,7 @@ internal static error errSkip = errors.New("skip event"u8);
         mappedArgs = new timedEventArgs{ // In the new tracer, GoStatus with GoSyscall knows what thread the
  // syscall is on. In the old tracer, EvGoInSyscall doesn't contain that
  // information and all we can do here is specify NoThread.
-ev.Args[0], ^((uint64)0), ((uint64)go122.GoSyscall)};
+ev.Args[0], ~((uint64)0), ((uint64)go122.GoSyscall)};
         delete(it.createdPreInit, ((GoID)ev.Args[0]));
     }
     else if (exprᴛ1 == oldtrace.EvHeapAlloc) {
@@ -562,7 +562,7 @@ ev.Args[0], ev.Args[2], ((uint64)ev.StkID)};
  // they have the arguments stack, M, P, G.
  //
  // In Go 1.21, CPU samples did not have Ms.
-((uint64)ev.StkID), ^((uint64)0), ((uint64)ev.P), ev.G};
+((uint64)ev.StkID), ~((uint64)0), ((uint64)ev.P), ev.G};
     }
     else { /* default: */
         return (new ΔEvent(nil), fmt.Errorf("unexpected event type %v"u8, ev.Type));

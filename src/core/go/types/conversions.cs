@@ -23,7 +23,7 @@ partial class types_package {
         {
             var (t, _) = under(T)._<Basic.val>(ᐧ);
             switch (ᐧ) {
-            case {} when t is nil: {
+            case {} when t == nil: {
                 break;
             }
             case {} when representableConst(x.val, // nothing to do
@@ -291,7 +291,7 @@ partial class types_package {
             });
         });
     }
-    case {} when Vp is != nil: {
+    case {} when Vp != nil: {
         ref var xΔ3 = ref heap<operand>(out var ᏑxΔ3);
         xΔ3 = x;
         return Vp.@is(
@@ -311,7 +311,7 @@ partial class types_package {
             return true;
         });
     }
-    case {} when Tp is != nil: {
+    case {} when Tp != nil: {
         return Tp.@is(
         var Tpʗ14 = Tp;
         var errorfʗ17 = errorf;

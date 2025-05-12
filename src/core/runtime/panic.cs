@@ -1190,11 +1190,11 @@ internal static void recovery(ж<g> Ꮡgp) {
     // N.B. It's fine to not set anything for platforms that don't
     // support frame pointers, since nothing consumes them.
     switch (ᐧ) {
-    case {} when goarch.IsAmd64 is != 0: {
+    case {} when goarch.IsAmd64 != 0: {
         gp.sched.bp = fp - 2 * goarch.PtrSize;
         break;
     }
-    case {} when goarch.IsArm64 is != 0: {
+    case {} when goarch.IsArm64 != 0: {
         gp.sched.bp = sp - goarch.PtrSize;
         break;
     }}

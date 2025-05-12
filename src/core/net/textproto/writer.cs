@@ -77,7 +77,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
         var c = b[n];
         var exprᴛ1 = d.state;
         var matchᴛ1 = false;
-        if (exprᴛ1 is wstateBegin or wstateBeginLine) { matchᴛ1 = true;
+        if (exprᴛ1 == wstateBegin || exprᴛ1 == wstateBeginLine) { matchᴛ1 = true;
             d.state = wstateData;
             if (c == (rune)'.') {
                 // escape leading dot
@@ -85,7 +85,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
             }
             fallthrough = true;
         }
-        if (fallthrough || !matchᴛ1 && exprᴛ1 is wstateData) {
+        if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateData)) {
             if (c == (rune)'\r') {
                 d.state = wstateCR;
             }
@@ -94,7 +94,7 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
                 d.state = wstateBeginLine;
             }
         }
-        else if (exprᴛ1 is wstateCR) { matchᴛ1 = true;
+        else if (exprᴛ1 == wstateCR) { matchᴛ1 = true;
             d.state = wstateData;
             if (c == (rune)'\n') {
                 d.state = wstateBeginLine;
@@ -121,11 +121,11 @@ internal static readonly UntypedInt wstateData = 3; // writing data in middle of
     { /* default: */
         bw.WriteByte((rune)'\r');
     }
-    else if (exprᴛ1 is wstateCR) {
+    else if (exprᴛ1 == wstateCR) {
         bw.WriteByte((rune)'\n');
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 is wstateBeginLine) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == wstateBeginLine)) { matchᴛ1 = true;
         bw.Write(dotcrnl);
     }
 

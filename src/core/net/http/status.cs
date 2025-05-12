@@ -47,7 +47,7 @@ public static readonly UntypedInt StatusNotModified = 304; // RFC 9110, 15.4.5
 
 public static readonly UntypedInt StatusUseProxy = 305; // RFC 9110, 15.4.6
 
-internal static readonly UntypedInt _ = 306; // RFC 9110, 15.4.7 (Unused)
+internal static readonly UntypedInt _ᴛ1ʗ = 306; // RFC 9110, 15.4.7 (Unused)
 
 public static readonly UntypedInt StatusTemporaryRedirect = 307; // RFC 9110, 15.4.8
 
@@ -136,196 +136,196 @@ public static readonly UntypedInt StatusNetworkAuthenticationRequired = 511; // 
 // StatusText returns a text for the HTTP status code. It returns the empty
 // string if the code is unknown.
 public static @string StatusText(nint code) {
-    switch (code) {
-    case StatusContinue: {
+    var exprᴛ1 = code;
+    if (exprᴛ1 == StatusContinue) {
         return "Continue"u8;
     }
-    case StatusSwitchingProtocols: {
+    if (exprᴛ1 == StatusSwitchingProtocols) {
         return "Switching Protocols"u8;
     }
-    case StatusProcessing: {
+    if (exprᴛ1 == StatusProcessing) {
         return "Processing"u8;
     }
-    case StatusEarlyHints: {
+    if (exprᴛ1 == StatusEarlyHints) {
         return "Early Hints"u8;
     }
-    case StatusOK: {
+    if (exprᴛ1 == StatusOK) {
         return "OK"u8;
     }
-    case StatusCreated: {
+    if (exprᴛ1 == StatusCreated) {
         return "Created"u8;
     }
-    case StatusAccepted: {
+    if (exprᴛ1 == StatusAccepted) {
         return "Accepted"u8;
     }
-    case StatusNonAuthoritativeInfo: {
+    if (exprᴛ1 == StatusNonAuthoritativeInfo) {
         return "Non-Authoritative Information"u8;
     }
-    case StatusNoContent: {
+    if (exprᴛ1 == StatusNoContent) {
         return "No Content"u8;
     }
-    case StatusResetContent: {
+    if (exprᴛ1 == StatusResetContent) {
         return "Reset Content"u8;
     }
-    case StatusPartialContent: {
+    if (exprᴛ1 == StatusPartialContent) {
         return "Partial Content"u8;
     }
-    case StatusMultiStatus: {
+    if (exprᴛ1 == StatusMultiStatus) {
         return "Multi-Status"u8;
     }
-    case StatusAlreadyReported: {
+    if (exprᴛ1 == StatusAlreadyReported) {
         return "Already Reported"u8;
     }
-    case StatusIMUsed: {
+    if (exprᴛ1 == StatusIMUsed) {
         return "IM Used"u8;
     }
-    case StatusMultipleChoices: {
+    if (exprᴛ1 == StatusMultipleChoices) {
         return "Multiple Choices"u8;
     }
-    case StatusMovedPermanently: {
+    if (exprᴛ1 == StatusMovedPermanently) {
         return "Moved Permanently"u8;
     }
-    case StatusFound: {
+    if (exprᴛ1 == StatusFound) {
         return "Found"u8;
     }
-    case StatusSeeOther: {
+    if (exprᴛ1 == StatusSeeOther) {
         return "See Other"u8;
     }
-    case StatusNotModified: {
+    if (exprᴛ1 == StatusNotModified) {
         return "Not Modified"u8;
     }
-    case StatusUseProxy: {
+    if (exprᴛ1 == StatusUseProxy) {
         return "Use Proxy"u8;
     }
-    case StatusTemporaryRedirect: {
+    if (exprᴛ1 == StatusTemporaryRedirect) {
         return "Temporary Redirect"u8;
     }
-    case StatusPermanentRedirect: {
+    if (exprᴛ1 == StatusPermanentRedirect) {
         return "Permanent Redirect"u8;
     }
-    case StatusBadRequest: {
+    if (exprᴛ1 == StatusBadRequest) {
         return "Bad Request"u8;
     }
-    case StatusUnauthorized: {
+    if (exprᴛ1 == StatusUnauthorized) {
         return "Unauthorized"u8;
     }
-    case StatusPaymentRequired: {
+    if (exprᴛ1 == StatusPaymentRequired) {
         return "Payment Required"u8;
     }
-    case StatusForbidden: {
+    if (exprᴛ1 == StatusForbidden) {
         return "Forbidden"u8;
     }
-    case StatusNotFound: {
+    if (exprᴛ1 == StatusNotFound) {
         return "Not Found"u8;
     }
-    case StatusMethodNotAllowed: {
+    if (exprᴛ1 == StatusMethodNotAllowed) {
         return "Method Not Allowed"u8;
     }
-    case StatusNotAcceptable: {
+    if (exprᴛ1 == StatusNotAcceptable) {
         return "Not Acceptable"u8;
     }
-    case StatusProxyAuthRequired: {
+    if (exprᴛ1 == StatusProxyAuthRequired) {
         return "Proxy Authentication Required"u8;
     }
-    case StatusRequestTimeout: {
+    if (exprᴛ1 == StatusRequestTimeout) {
         return "Request Timeout"u8;
     }
-    case StatusConflict: {
+    if (exprᴛ1 == StatusConflict) {
         return "Conflict"u8;
     }
-    case StatusGone: {
+    if (exprᴛ1 == StatusGone) {
         return "Gone"u8;
     }
-    case StatusLengthRequired: {
+    if (exprᴛ1 == StatusLengthRequired) {
         return "Length Required"u8;
     }
-    case StatusPreconditionFailed: {
+    if (exprᴛ1 == StatusPreconditionFailed) {
         return "Precondition Failed"u8;
     }
-    case StatusRequestEntityTooLarge: {
+    if (exprᴛ1 == StatusRequestEntityTooLarge) {
         return "Request Entity Too Large"u8;
     }
-    case StatusRequestURITooLong: {
+    if (exprᴛ1 == StatusRequestURITooLong) {
         return "Request URI Too Long"u8;
     }
-    case StatusUnsupportedMediaType: {
+    if (exprᴛ1 == StatusUnsupportedMediaType) {
         return "Unsupported Media Type"u8;
     }
-    case StatusRequestedRangeNotSatisfiable: {
+    if (exprᴛ1 == StatusRequestedRangeNotSatisfiable) {
         return "Requested Range Not Satisfiable"u8;
     }
-    case StatusExpectationFailed: {
+    if (exprᴛ1 == StatusExpectationFailed) {
         return "Expectation Failed"u8;
     }
-    case StatusTeapot: {
+    if (exprᴛ1 == StatusTeapot) {
         return "I'm a teapot"u8;
     }
-    case StatusMisdirectedRequest: {
+    if (exprᴛ1 == StatusMisdirectedRequest) {
         return "Misdirected Request"u8;
     }
-    case StatusUnprocessableEntity: {
+    if (exprᴛ1 == StatusUnprocessableEntity) {
         return "Unprocessable Entity"u8;
     }
-    case StatusLocked: {
+    if (exprᴛ1 == StatusLocked) {
         return "Locked"u8;
     }
-    case StatusFailedDependency: {
+    if (exprᴛ1 == StatusFailedDependency) {
         return "Failed Dependency"u8;
     }
-    case StatusTooEarly: {
+    if (exprᴛ1 == StatusTooEarly) {
         return "Too Early"u8;
     }
-    case StatusUpgradeRequired: {
+    if (exprᴛ1 == StatusUpgradeRequired) {
         return "Upgrade Required"u8;
     }
-    case StatusPreconditionRequired: {
+    if (exprᴛ1 == StatusPreconditionRequired) {
         return "Precondition Required"u8;
     }
-    case StatusTooManyRequests: {
+    if (exprᴛ1 == StatusTooManyRequests) {
         return "Too Many Requests"u8;
     }
-    case StatusRequestHeaderFieldsTooLarge: {
+    if (exprᴛ1 == StatusRequestHeaderFieldsTooLarge) {
         return "Request Header Fields Too Large"u8;
     }
-    case StatusUnavailableForLegalReasons: {
+    if (exprᴛ1 == StatusUnavailableForLegalReasons) {
         return "Unavailable For Legal Reasons"u8;
     }
-    case StatusInternalServerError: {
+    if (exprᴛ1 == StatusInternalServerError) {
         return "Internal Server Error"u8;
     }
-    case StatusNotImplemented: {
+    if (exprᴛ1 == StatusNotImplemented) {
         return "Not Implemented"u8;
     }
-    case StatusBadGateway: {
+    if (exprᴛ1 == StatusBadGateway) {
         return "Bad Gateway"u8;
     }
-    case StatusServiceUnavailable: {
+    if (exprᴛ1 == StatusServiceUnavailable) {
         return "Service Unavailable"u8;
     }
-    case StatusGatewayTimeout: {
+    if (exprᴛ1 == StatusGatewayTimeout) {
         return "Gateway Timeout"u8;
     }
-    case StatusHTTPVersionNotSupported: {
+    if (exprᴛ1 == StatusHTTPVersionNotSupported) {
         return "HTTP Version Not Supported"u8;
     }
-    case StatusVariantAlsoNegotiates: {
+    if (exprᴛ1 == StatusVariantAlsoNegotiates) {
         return "Variant Also Negotiates"u8;
     }
-    case StatusInsufficientStorage: {
+    if (exprᴛ1 == StatusInsufficientStorage) {
         return "Insufficient Storage"u8;
     }
-    case StatusLoopDetected: {
+    if (exprᴛ1 == StatusLoopDetected) {
         return "Loop Detected"u8;
     }
-    case StatusNotExtended: {
+    if (exprᴛ1 == StatusNotExtended) {
         return "Not Extended"u8;
     }
-    case StatusNetworkAuthenticationRequired: {
+    if (exprᴛ1 == StatusNetworkAuthenticationRequired) {
         return "Network Authentication Required"u8;
     }
-    default: {
+    { /* default: */
         return ""u8;
-    }}
+    }
 
 }
 

@@ -244,7 +244,7 @@ internal static void writeErrData(ж<byte> Ꮡdata, int32 n) {
     var gp = getg();
     if (gp != nil && (~(~gp).m).dying > 0 || gp == nil && panicking.Load() > 0) {
         {
-            var fd = crashFD.Load(); if (fd != ^((uintptr)0)) {
+            var fd = crashFD.Load(); if (fd != ~((uintptr)0)) {
                 write(fd, new @unsafe.Pointer(Ꮡdata), n);
             }
         }
@@ -267,7 +267,7 @@ internal static uintptr setCrashFD(uintptr fd) {
     // is generally nicer to have all of the crash output go to the same
     // place rather than getting split across two different FDs.
     if (panicking.Load() > 0) {
-        return ^((uintptr)0);
+        return ~((uintptr)0);
     }
     var old = crashFD.Swap(fd);
     // If we are panicking, don't return the old FD to runtime/debug for
@@ -292,7 +292,7 @@ internal static uintptr setCrashFD(uintptr fd) {
     // startpanic_m. If gp == nil, we read panicking.Load() > 0, so an Add
     // must have happened-before.
     if (panicking.Load() > 0) {
-        return ^((uintptr)0);
+        return ~((uintptr)0);
     }
     return old;
 }

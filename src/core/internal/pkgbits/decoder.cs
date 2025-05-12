@@ -278,7 +278,7 @@ internal static error overflow = errors.New("pkgbits: readUvarint overflows a 64
     // Zig-zag decode.
     var x = ((int64)(ux >> (int)(1)));
     if ((uint64)(ux & 1) != 0) {
-        x = ^x;
+        x = ~x;
     }
     return x;
 }

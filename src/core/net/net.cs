@@ -522,7 +522,7 @@ internal static error mapErr(error err) {
 
 internal static time.Time aLongTimeAgo = time.Unix(1, 0);
 internal static time.Time noDeadline = new time.Time(nil);
-internal static channel<struct{}> noCancel = (channel<struct{}>)(default!);
+internal static channel<EmptyStruct> noCancel = (channel<EmptyStruct>)(default!);
 
 [GoType] partial interface timeout {
     bool Timeout();
@@ -868,7 +868,7 @@ internal static (int64 n, error err) genericWriteTo(ж<TCPConn> Ꮡc, io.Writer 
 // is resolving many DNS names in separate goroutines but the DNS
 // server is not responding. Then the many lookups each use a different
 // thread, and the system or the program runs out of threads.
-internal static channel<struct{}> threadLimit;
+internal static channel<EmptyStruct> threadLimit;
 
 internal static sync.Once threadOnce;
 
@@ -879,7 +879,7 @@ internal static error acquireThread(context.Context ctx) {
     threadOnce.Do(
     var threadLimitʗ2 = threadLimit;
     () => {
-        threadLimitʗ2 = new channel<struct{}>(concurrentThreadsLimit());
+        threadLimitʗ2 = new channel<EmptyStruct>(concurrentThreadsLimit());
     });
     switch (select(threadLimit.ᐸꟷ(new acquireThread_type(), ꓸꓸꓸ), ᐸꟷ(ctx.Done(), ꓸꓸꓸ))) {
     case 0: {
@@ -904,8 +904,8 @@ internal static void releaseThread() {
 
 [GoType("[]byte")] partial struct Buffers;
 
-internal static io.WriterTo _ = ((ж<Buffers>)default!);
-internal static io.Reader _ = ((ж<Buffers>)default!);
+internal static io.WriterTo _ᴛ1ʗ = ((ж<Buffers>)default!);
+internal static io.Reader _ᴛ2ʗ = ((ж<Buffers>)default!);
 
 // WriteTo writes contents of the buffers to w.
 //

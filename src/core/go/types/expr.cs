@@ -1318,7 +1318,7 @@ internal static ж<target> newTarget(ΔType typ, @string desc) {
         ΔType typ = default!;
         ΔType baseΔ1 = default!;
         switch (ᐧ) {
-        case {} when (~e).Type is != default!: {
+        case {} when (~e).Type != default!: {
             {
                 var (atyp, _) = (~e).Type._<ж<ast.ArrayType>>(ᐧ); if (atyp != nil && (~atyp).Len != default!) {
                     // composite literal type present - use it
@@ -1340,7 +1340,7 @@ internal static ж<target> newTarget(ΔType typ, @string desc) {
              = typ;
             break;
         }
-        case {} when hint is != default!: {
+        case {} when hint != default!: {
             typ = hint;
             (, _) = deref(coreType(typ));
             if (baseΔ1 == default!) {
@@ -1771,7 +1771,7 @@ internal static any keyVal(constant.Value x) {
         x = f;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == constant.Float) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == constant.Float)) { matchᴛ1 = true;
         var i = constant.ToInt(x);
         if (i.Kind() != constant.Int) {
             var (v, _) = constant.Float64Val(x);
@@ -1780,7 +1780,7 @@ internal static any keyVal(constant.Value x) {
         x = i;
         fallthrough = true;
     }
-    if (fallthrough || !matchᴛ1 && exprᴛ1 == constant.Int) { matchᴛ1 = true;
+    if (fallthrough || !matchᴛ1 && exprᴛ1 == constant.Int)) { matchᴛ1 = true;
         {
             var (v, ok) = constant.Int64Val(x); if (ok) {
                 return v;
