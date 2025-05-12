@@ -9,9 +9,15 @@ import (
 
 func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 	v.targetFile.WriteString(v.newline)
+	var ptrDeref string
 
 	rangeExpr := v.convExpr(rangeStmt.X, nil)
 	rangeType := v.getExprType(rangeStmt.X)
+
+	if ptrType, ok := rangeType.(*types.Pointer); ok {
+		rangeType = ptrType.Elem()
+		ptrDeref = ".val"
+	}
 
 	// Get the underlying type if it's a named type
 	if named, ok := rangeType.(*types.Named); ok {
@@ -175,45 +181,46 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
 			}
 
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline
 			}
 		} else {
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
 		}
 	} else if isChan {
 		if v.options.preferVarDecl {
 			keyType = "var "
 		}
 
-		v.writeOutput("foreach (%s%s in %s)", keyType, keyExpr, rangeExpr)
+		v.writeOutput("foreach (%s%s in %s%s)", keyType, keyExpr, rangeExpr, ptrDeref)
 	} else if isInt {
 		if untypedInt {
-			rangeExpr = fmt.Sprintf("@int(%s)", rangeExpr)
+			rangeExpr = fmt.Sprintf("@int(%s%s)", rangeExpr, ptrDeref)
+			ptrDeref = ""
 		}
 
 		if v.options.preferVarDecl {
 			keyType = "var "
 		}
 
-		v.writeOutput("foreach (%s%s in range(%s))", keyType, keyExpr, rangeExpr)
+		v.writeOutput("foreach (%s%s in range(%s%s))", keyType, keyExpr, rangeExpr, ptrDeref)
 	} else if yieldFunc > -1 {
 		if yieldFunc == 0 {
 			if v.options.preferVarDecl {
 				keyType = "var "
 			}
 
-			v.writeOutput("foreach (object %s in range(%s))", keyExpr, rangeExpr)
+			v.writeOutput("foreach (object %s in range(%s%s))", keyExpr, rangeExpr, ptrDeref)
 		} else if yieldFunc == 1 {
 			if v.options.preferVarDecl {
 				keyType = "var "
 			}
 
-			v.writeOutput("foreach (%s%s in range(%s))", keyType, keyExpr, rangeExpr)
+			v.writeOutput("foreach (%s%s in range(%s%s))", keyType, keyExpr, rangeExpr, ptrDeref)
 		} else {
-			v.writeOutput("foreach (%s(%s%s, %s%s) in range(%s))", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in range(%s%s))", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
 		}
 	} else {
 		// Handle slice, array, and map types
@@ -252,13 +259,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
 			}
 
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline
 			}
 		} else {
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
 		}
 	}
 
