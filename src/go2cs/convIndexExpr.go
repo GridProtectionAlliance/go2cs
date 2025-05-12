@@ -8,6 +8,7 @@ import (
 
 func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr) string {
 	var contexts []ExprContext
+	var ptrDeref string
 
 	if typeAndVal, ok := v.info.Types[indexExpr.X]; ok {
 		// Check if the type is a map and its key is an empty interface
@@ -17,6 +18,12 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr) string {
 				context := DefaultBasicLitContext()
 				context.u8StringOK = false
 				contexts = []ExprContext{context}
+			}
+		} else if _, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
+			ident := getIdentifier(indexExpr.X)
+
+			if ident == nil || !v.identIsParameter(ident) {
+				ptrDeref = ".val"
 			}
 		}
 	}
@@ -31,10 +38,10 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr) string {
 			contexts = []ExprContext{context}
 		}
 
-		return fmt.Sprintf("%s<%s>", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, contexts))
+		return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, nil), ptrDeref, v.convExpr(indexExpr.Index, contexts))
 	}
 
-	return fmt.Sprintf("%s[%s]", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, contexts))
+	return fmt.Sprintf("%s%s[%s]", v.convExpr(indexExpr.X, nil), ptrDeref, v.convExpr(indexExpr.Index, contexts))
 }
 
 func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {
