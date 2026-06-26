@@ -58,6 +58,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]
+    public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]

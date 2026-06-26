@@ -421,6 +421,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		// First check if this variable name conflicts with a function name
 		if v.isFunctionNameInScope(varName) {
 			adjustedName = getShadowedVarName(varName)
+		} else if v.shadowsCalledBuiltin(varName) {
+			// A local named like a Go built-in (e.g. `len := len(buf)` in hash/maphash)
+			// is fine in Go — the built-in call still resolves to the predeclared function.
+			// But in C# the built-in is a `using static go.builtin` method, so a same-named
+			// local shadows it and the call `len(...)` binds to the (non-invocable) local
+			// (CS0149 / CS0841). Rename the local so the built-in call stays valid.
+			adjustedName = getShadowedVarName(varName)
 		} else if funcLevelVar, exists := functionLevelDecls[varName]; exists {
 			needsShadowing := false
 
@@ -1603,6 +1610,51 @@ func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
 }
 
 // Check if a name conflicts with any function in scope
+// shadowsCalledBuiltin reports whether a local variable declared as name would shadow a
+// Go built-in function that is actually *called* within the current function. Go permits
+// this (the built-in stays resolvable as the predeclared identifier), but in C# the
+// built-in is a `using static go.builtin` method that a same-named local would shadow,
+// breaking the call. Detecting an actual call (rather than any local matching a built-in
+// name) keeps the rename — and thus golden churn — limited to the cases that need it.
+func (v *Visitor) shadowsCalledBuiltin(name string) bool {
+	// Only built-in functions can be shadowed this way (not predeclared types/consts like
+	// int, true, nil): a built-in resolves to *types.Builtin in the universe scope.
+	if obj := types.Universe.Lookup(name); obj == nil {
+		return false
+	} else if _, ok := obj.(*types.Builtin); !ok {
+		return false
+	}
+
+	if v.currentFuncDecl == nil {
+		return false
+	}
+
+	var found bool
+
+	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		callExpr, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		if ident, ok := callExpr.Fun.(*ast.Ident); ok && ident.Name == name {
+			if _, isBuiltin := v.info.Uses[ident].(*types.Builtin); isBuiltin {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
 func (v *Visitor) isFunctionNameInScope(name string) bool {
 	// Check package scope for the name
 	obj := v.pkg.Scope().Lookup(name)
