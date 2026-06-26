@@ -1,162 +1,151 @@
 ![go2cs](images/go2cs-small.png)
-# Golang to C# Converter
 
-Converts source code developed using the Go programming language (see [Go Language Specification](https://golang.org/ref/spec)) to the C# programming language (see [C# Language Specification](https://github.com/dotnet/csharplang/blob/master/spec/README.md)).
+# go2cs — Go to C# Converter
+
+Convert source code written in the [Go programming language](https://golang.org/ref/spec) into
+[C#](https://learn.microsoft.com/dotnet/csharp/). The generated C# is designed to be both *behaviorally*
+and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
+easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
 ![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
 
-> **⚠️ This README is partly historical.** The current converter (the "go2cs2" generation) is **written in
-> Go** using `go/ast`/`go/types` — it is **not** the older C#/ANTLR4 engine that parts of this document still
-> describe. The old `src/gocore` and `src/go-src-converted` paths have also changed. For the authoritative,
-> up-to-date architecture, layout, and build/test workflow, see [`/CLAUDE.md`](../CLAUDE.md) and the docs it
-> links: [`Architecture.md`](Architecture.md), [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md),
-> [`Roadmap.md`](Roadmap.md).
+## Why go2cs
 
-## News
+Go provides a lot of high-level functionality from its compiler and runtime — slices, maps, channels,
+goroutines, `defer`/`panic`/`recover`, multiple return values, struct embedding, and interface
+duck-typing. go2cs maps each of these onto idiomatic C#, keeping the machinery out of sight (in a small
+runtime library and compile-time source generators) so the converted code stays close to the original Go.
 
-* Project has been updated to use .NET 7.0 / C# 11
+- **Reads like Go.** Receiver methods become extension methods, multiple returns become tuples, struct
+  embedding becomes promoted fields — the shape of the code is preserved.
+- **Runs like Go.** Conversions prioritize behavioral equivalence first (e.g. a `goroutine` runs on the
+  thread pool rather than being rewritten into `async`).
+- **Managed first.** Output targets portable managed C#; native interop is a last resort, not the default.
 
-* String literals are encoded using UTF-8 (C# `u8` string suffix) which uses `ReadOnlySpan<byte>` ref struct. This should make Go strings faster since strings do not have to be converted to UTF8 from UTF16. Also added an experimental [`sstring`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/sstring.cs) which is a ref struct implementation of a Go string.
+## Example
 
-* Code conversions now better match original Go code styling
+Given this Go:
 
-* Recent example usages of `go2cs` allow the use of [Golang](https://golang.org/ref/spec) as the scripting language for the [Unity](https://unity.com/) and [Godot](https://godotengine.org/) game engine platforms. See the [GoUnity](https://github.com/ritchiecarroll/GoUnity) and [GodotGo](https://github.com/ritchiecarroll/GodotGo) projects.
+```go
+type Person struct {
+    name string
+    age  int32
+}
 
-## Goals
-
-* Convert Go code into C# so that Go code can be directly used within .NET ecosystem.
-  * This is the primary goal of `go2cs`.
-* Convert Go code into behaviorally and visually similar C# code -- see [conversion strategies](ConversionStrategies.md).
-  * Code conversions focus first on making sure C# code runs as behaviorally similar to Go code as possible. This means, for now, leaving out things like code conversions into `async` functions. Instead conversions make things operate the way they do in Go, e.g., simply running a function on the current thread or running it in on the thread pool when using a [`goroutine`](https://golang.org/ref/spec#Go_statements).
-  * C# conversions attempt to make code visually similar to original Go code to make it easier to identity corresponding functionality. As Go is a minimalist language, it provides high-level functionality provided by the compiler, often much more than C# does. As such, converted C# code will have more visible code than Go for equivalent functionality, however much of this code will be behind the scenes in separate files using partial class functionality.
-* Convert Go units test to C# and verify results are the same (TBD).
-  * For most unit tests defined in Go, it should be possible to create an equivalent converted C# unit test. In many cases it may also be possible to successfully compare "outputs" of both unit tests as an additional validation test.
-* Convert Go code into managed C# code.
-  * Conversion always tries to target managed code, this way code is more portable. If there is no possible way for managed code to accomplish a specific task, an option always exists to create a [native interop library](https://docs.microsoft.com/en-us/dotnet/standard/native-interop/pinvoke) that works on multiple platforms, i.e., importing code from a `.dll`/`.so`/`.dylib`. Even so, the philosophy is to always attempt to use managed code, i.e., not to lean towards native code libraries, regardless of possible performance implications. Simple first.
-
-## Project Status
-
-> **Current status (2026-06):** The converter is the Go-based "go2cs2" engine (`src/go2cs/`). The repo is
-> organized as a **green baseline** + a **work-in-progress full conversion**: `src/go2cs.sln` (runtime
-> `golib` + a small hand-finished stdlib baseline in `src/core` + the behavioral test suite) **builds and
-> the suite passes**, while `src/go-src-converted.sln` holds the full ~301-package stdlib auto-conversion
-> that does not all compile yet. For the authoritative overview see [`/CLAUDE.md`](../CLAUDE.md) and
-> [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md); the plan ahead is in [`Roadmap.md`](Roadmap.md).
-
-### Automated Code Conversion of Go Standard Library
-
-A few initial conversions of the full Go source code have been completed. **Note (current state):** the
-full standard-library auto-conversion now targets `src/go-src-converted/`, and the converter that produces
-it is the Go-based "go2cs2" engine (`src/go2cs/`), **not** the [ANTLR4 Golang grammar](https://github.com/antlr/grammars-v4/tree/master/golang)
-referenced historically below. "Conversion success" means the transpiler ran without failing — it does
-**not** mean the emitted C# compiles. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md).
-The historical examples below illustrate output quality:
-
-* [errors/errors.go](https://github.com/golang/go/blob/master/src/errors/errors.go) => [errors/errors.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/errors/errors.cs)
-* [fmt/format.go](https://github.com/golang/go/blob/master/src/fmt/format.go) => [fmt/format.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/fmt/format.cs)
-* [compress/gzip/gunzip.go](https://github.com/golang/go/blob/master/src/compress/gzip/gunzip.go) => [compress/gzip/gunzip.cs](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/go-src-converted/compress/gzip/gunzip.cs)
-
-Not all converted standard library code will compile yet in C# yet - work remaining to _properly_ parse and convert all Go source library files, with its many use cases and edge cases, can be inferred by examining the warnings in the [`build log`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go-src-converted/build.log) for this initial conversion. This log should help lay out a road map of remaining tasks.
-
-Note that go2cs simple conversions currently depend on a small subset of the Go source library — the
-curated **baseline** stdlib, now located at `src/core/<pkg>` (formerly `src/gocore`), that was manually
-finished. The hand-written runtime it builds on is `src/core/golib`. As the project progresses, there will be a merger of automatically converted code and manually converted code. For example, the [`builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs) Go library functions will always require some special attention since many of its features are implemented outside normal Go code, such as with assembly routines.
-
-A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
-
-### Recent Activity
-Converted code now targets **.NET 9.0** and the latest C#. Conversions use file-scoped namespaces and
-reduced indentation to better match original Go code, with command-line options to control code styling.
-
-Work to improve conversions progresses by walking through the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral)
-projects — each is a Go↔C# equivalence case (transpile, compile, run-and-compare-output, and a byte-for-byte
-`.cs.target` golden comparison). Iterating these simple use cases improves overall conversion quality; the
-behavioral suite is currently green.
-
-Sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
-![go2cs](images/HeadToHead-Small.png)
-Currently converted code will not execute with latest release of Try .NET (see [posted issue](https://github.com/dotnet/try/issues/859)). Will be watching for an update.
-
-As releases are made for updated `go2cs` executables, this will also include updates to pre-converted [Go Standard Library libraries for reference from NuGet](https://www.nuget.org/packages?q=%22package+in+.NET+for+use+with+go2cs%22).
-
-## Testing
-
-Before attempting conversions it is important that Go coding environment is already properly setup, especially `GOPATH` environmental variable. See [Getting Started](https://golang.org/doc/install) with Go.
-
-> The command examples in this section reflect the **older** CLI. For the current Go converter's flags
-> (`-stdlib`, `-go2cspath`, …) and the current build/test workflow, see [`/CLAUDE.md`](../CLAUDE.md).
-
-Current Go to C# code conversions reference compiled assemblies of the go2cs core library code from the configured `GOPATH`, specifically `%GOPATH%\src\go2cs\`. Run the `deploy-core.bat` script located in the `go2cs\src` folder to handle copying source to target path and then building needed debug and release assemblies.
-
-Once a compiled version of the current go2cs core library has been deployed, you can test conversions. For example:
-
-```Shell
-go2cs -o -i C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue
+func (p Person) IsAdult() bool {
+    return p.age >= 18
+}
 ```
 
-This will convert Go code to C#. You can then build and run both the Go and C# versions and compare results.
+go2cs produces this C#:
 
-> **Debugging with Visual Studio:** After running the `deploy-core.bat` script you can run conversion code from within Visual Studio by right-clicking on the go2cs project, selecting "Properties" then clicking on the "Debug" tab. In the "Application arguments:" text box you can enter the command line test parameters, e.g., `-o -i -h C:\Projects\go2cs\src\Tests\Behavioral\ArrayPassByValue`. When the active solution configuration targets "Debug" you can run the go2cs project to convert Go code, then run converted code.
+```csharp
+[GoType] partial struct Person {
+    internal @string name;
+    internal int32 age;
+}
 
-> **Debugging Note:** Keep in mind that you have local `core` source code and a copy of the source in the `GOPATH`. Compiled versions of converted code will reference the `core` code copy in the `GOPATH` folder. If you encounter an exception in `core` while debugging, Visual Studio will be displaying the code in the `GOPATH` folder. Any code changes you make might make will then be in the `GOPATH` folder instead of your local folder and be lost at the next run of the `deploy-core.bat` script.
+public static bool IsAdult(this Person p) {
+    return p.age >= 18;
+}
+```
 
-## Installation
+## Features
 
-> There is an [experimental release](https://github.com/GridProtectionAlliance/go2cs/releases) available, however, for latest updates you can compile the source code to produce a `go2cs` executable.
+Converted constructs include:
 
-Copy the `go2cs` executable into the `%GOBIN%` or `%GOPATH%\bin` path. The `go2cs` can compile as a standalone executable for your target platform with no external dependencies using Visual Studio, see [publish profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Properties/PublishProfiles).
+- Slices, arrays, maps, and strings (UTF-8 backed)
+- Channels and goroutines
+- `defer` / `panic` / `recover`
+- Multiple return values and named results
+- Structs, struct embedding (field promotion), and interface implementation
+- Generics (Go 1.18+ type parameters and constraints)
+- Pointers, type assertions, type switches, `iota`, and the built-ins (`append`, `len`, `cap`, `make`, …)
+
+## Requirements
+
+- **[.NET 9.0 SDK](https://dotnet.microsoft.com/download)** — to build and run the converted C#.
+- **[Go 1.23+](https://go.dev/dl/)** — the converter is a Go program, and it uses the Go toolchain to load
+  and type-check the source being converted. Make sure your Go environment is set up (`GOROOT`/`GOPATH`)
+  and the source you want to convert already builds with `go build`.
+
+## Installing the converter
+
+Build the `go2cs` executable from source and place it on your `PATH` (e.g. in `%GOBIN%` or `%GOPATH%\bin`):
+
+```shell
+cd src/go2cs
+go build -o go2cs .
+```
+
+Go produces a self-contained native binary. To target another platform, use Go's standard cross-compilation
+(`GOOS`/`GOARCH`); matching per-platform [profiles](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/profiles)
+are included.
 
 ## Usage
 
-> Before posting an issue for usage related questions consider using the [go2cs discussions forum](https://github.com/GridProtectionAlliance/go2cs/discussions).
+```shell
+go2cs [options] <input_dir> [output_dir]
+```
 
-1. Make sure source  application already compiles with Go (e.g., `go build`) before starting conversion. That means any needed dependencies should already be downloaded and available, e.g., with `go get`.
+Examples:
 
-2. Execute `go2cs` specifying the Go source path or specific file name to convert. For example:
- * Convert a single Go file: `go2cs -l Main.go`
- * Convert a Go project: `go2cs MyProject`
- * Convert Go Standard Library: `go2cs -s -r C:\\Go\src\\`
+```shell
+go2cs example.go                       # convert a single file
+go2cs package_dir                      # convert a package
+go2cs -indent 2 -var=false example.go conv/example.cs
+go2cs -stdlib                          # convert the entire Go standard library
+go2cs -stdlib fmt strings io           # convert specific standard library packages
+```
 
-### Command Line Options
+### Common options
 
 | Option | Description |
-|:------:|:------------|
-| -l | (Default: false) Set to only convert local files in source path. Default is to recursively convert all encountered "import" packages. |
-| -o | (Default: false) Set to overwrite, i.e., reconvert, any existing local converted files. |
-| -i | (Default: false) Set to overwrite, i.e., reconvert, any existing files from imported packages. |
-| -h | (Default: false) Set to exclude header conversion comments which include original source file path and conversion time. |
-| -t | (Default: false) Set to show syntax tree of parsed source file. |
-| -e | (Default: $.^) Regular expression to exclude certain files from conversion, e.g., "^.+\_test\\.go$". Defaults to exclude none. |
-| -s | (Default: false) Set to convert needed packages from Go standard library files found in "%GOROOT%\\src". |
-| -r | (Default: false) Set to recursively convert source files in subdirectories when a Go source path is specified. |
-| -m | (Default: false) Set to force update of pre-scan metadata. |
-| -u | (Default: false) Set to only update pre-scan metadata and skip conversion operations. |
-| -g | (Default: %GOPATH%\\src\\go2cs) Target path for converted Go standard library source files. |
-| -c | (Default: false) Set to target legacy compatible code, e.g., block scoped namespaces. Required for code sets prior to C# 10. |
-| -a | (Default: false) Set to use ANSI brace style, i.e., start brace on new line, instead of K&R / Go brace style. |
-| -k | (Default: false) Set to skip check for "+build ignore" directive and attempt conversion anyway. |
-| -C | (Default: false) Set to convert CGO files, i.e., skip check for \"+build cgo\" directive or import "C" and attempt conversion anyway. |
-| -O | (Default: false) Set to convert Go OS targeted files, i.e., skip check for OS target file name suffixes and attempt conversion anyway. |
-| -A | (Default: false) Set to convert Go architecture targeted files, i.e., skip check for architecture target file name suffixes attempt conversion anyway. |
-| &#8209;&#8209;help | Display this help screen. |
-| &#8209;&#8209;version | Display version information. |
-| value 0 | Required. Go source path or file name to convert. |
-| value 1 | Target path for converted files. If not specified, all files (except for Go standard library files) will be converted to source path. |
+|:--|:--|
+| `-stdlib` | Convert the Go standard library (optionally followed by specific package names). |
+| `-go2cspath <dir>` | Output root for converted standard-library code (defaults to `~/go2cs`). |
+| `-goroot` / `-gopath` | Override the detected Go root / path. |
+| `-parallel <1-4>` | Number of packages to convert in parallel. |
+| `-platforms <os/arch>` | Target platform for build-tagged files (defaults to the host). |
+| `-indent <n>` | Spaces per indent level (default 4). |
+| `-var` | Prefer `var` declarations where the type is obvious (default on). |
+| `-uco` | Emit channel operators instead of method calls (default on). |
+| `-comments` | Carry source comments into the output. |
+| `-cgo` | Also convert cgo-targeted files. |
 
-### Future Options
+The converted C# references a small hand-written runtime library (`golib`, published as the **`go.lib`**
+NuGet package) plus a set of Roslyn source generators that supply Go semantics at compile time.
 
-A new command line option to prefer explicit types over `var` would be handy, e.g., specifying `-x` would request explicit type definitions; otherwise, without applying setting, conversion would default to using `var` where possible.
+## Project layout
 
-If converted code ever gets manually updated, e.g., where a new `import` is added, a command line option that would "rescan" the imports in a project and augment the project file to make sure all the needed imports are referenced could be handy.
+| Path | Contents |
+|:--|:--|
+| `src/go2cs/` | The converter (written in Go, using `go/ast` + `go/types`). |
+| `src/core/golib/` | The C# runtime library (`slice`, `map`, `channel`, `@string`, built-ins, type aliases). |
+| `src/gen/go2cs-gen/` | Roslyn source generators (interface implementation, receiver overloads, struct embedding). |
+| `src/core/` | A compiling subset of the converted Go standard library used by the tests. |
+| `src/go-src-converted/` | Work-in-progress full conversion of the Go standard library. |
+| `src/Tests/Behavioral/` | Per-feature Go↔C# equivalence tests (transpile, compile, run-and-compare). |
+| `src/Examples/` | Sample conversions. |
+
+Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
+[`Architecture.md`](Architecture.md), [`ConversionStrategies.md`](ConversionStrategies.md), and
+[`Roadmap.md`](Roadmap.md) for details.
+
+## Status
+
+The converter builds idiomatic C# for the full range of Go language features, validated by an extensive
+behavioral test suite. A curated subset of the Go standard library converts and compiles today; converting
+the *entire* standard library cleanly is ongoing work — see the [roadmap](Roadmap.md).
 
 ## C# to Go?
 
-If you were looking to "go" in the other direction, a full _code based_ conversion from C# to Go is currently not an option. Even for the most simple projects, automating the conversion would end up being a herculean task with so many restrictions that it would likely not be worth the effort. However, for using compiled .NET code from within your Go applications you have options:
+A full code-based conversion from C# to Go is not offered (it would require so many restrictions as to be
+impractical). To call compiled .NET code *from* Go instead, see
+[go-dotnet](https://github.com/matiasinsaurralde/go-dotnet) (CLR hosting for .NET Core) or
+[embedding Mono via cgo](https://www.mono-project.com/docs/advanced/embedding/) for traditional .NET.
 
-1. For newer [.NET Core](https://docs.microsoft.com/en-us/dotnet/core/) applications, I would suggest trying the following project from Matias Insaurralde: https://github.com/matiasinsaurralde/go-dotnet -- this codes uses the [CLR Hosting API](https://blogs.msdn.microsoft.com/msdnforum/2010/07/09/use-clr4-hosting-api-to-invoke-net-assembly-from-native-c/) which allows you to directly use .NET based functions from within your Go applications.
+## License
 
-2. For traditional .NET applications, a similar option would be to use [cgo](https://golang.org/cmd/cgo/) to fully self-host [Mono](https://www.mono-project.com/) in your Go application, see: http://www.mono-project.com/docs/advanced/embedding/.
-
-## Background
-
-For more background information, see [here](Background.md).
+go2cs is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the `LICENSE` and
+`NOTICE` files. For more background, see [`Background.md`](Background.md).
