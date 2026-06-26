@@ -121,8 +121,12 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
 2. **Make the Go↔C# output match** so `OutputComparisonTests` passes. Mind known runtime limitations — e.g.
    `Ꮡ(value)` (address of a non-boxed value) currently boxes a *copy*, so don't write through a
    `&global.field` pointer and then read the *original* global; read back through the same pointer.
-3. **Register in the solution** under the `/tests/behavioral/target-projects/` folder in `src/go2cs.slnx`
-   (alphabetical).
+3. **Register in the solution** — add a `<Project Path="Tests/Behavioral/<Name>/<Name>.csproj" />` line under
+   the `/tests/behavioral/target-projects/` folder in `src/go2cs.slnx` (alphabetical). **Then verify it
+   stuck:** `grep "<Name>/<Name>.csproj" src/go2cs.slnx` and `dotnet restore src/go2cs.slnx`. If Visual Studio
+   has the `.slnx` open it can rewrite/reformat the file and silently drop an external edit — re-add and
+   re-verify if so. Note the tests pass even when the project is *missing* from the solution (the harness
+   builds each `.csproj` by path, not via the solution), so this check is the only thing that catches it.
 4. **Transpile once** (`go2cs.exe src/Tests/Behavioral/<Name>`, no `-comments` — behavioral goldens omit
    them) to generate the `.cs` + `package_info.cs`. For output comparison, add `[GoTestMatchingConsoleOutput]`
    to the generated `package_info.cs` class (a hand-added attribute the converter preserves).
