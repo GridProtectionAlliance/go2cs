@@ -329,11 +329,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.replaceMarker(functionUnsafeMarker, "")
 	}
 
-	// A nil body means the Go function is implemented externally (assembly or
-	// cgo). go2cs has no asm/cgo backend yet, so emit a non-partial throwing
-	// stub instead of an accessibility-modified partial method (which C# rejects
-	// with CS8795 unless a hand-written implementing half is supplied).
-	v.replaceMarker(functionPartialMarker, "")
+	// A nil body means the Go function is implemented externally (assembly or cgo):
+	// emit a `partial` declaration. Its implementation is supplied either by a
+	// hand-written companion (e.g. sync/atomic's doc_impl.cs) or, when none exists, by
+	// the PartialStubGenerator (go2cs-gen), which emits a throwing default so the code
+	// still compiles.
+	if funcDecl.Body == nil {
+		v.replaceMarker(functionPartialMarker, " partial")
+	} else {
+		v.replaceMarker(functionPartialMarker, "")
+	}
 
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
@@ -383,9 +388,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	if useFuncExecutionContext {
 		v.writeOutputLn(");")
 	} else if signatureOnly {
-		// External (assembly/cgo) function with no Go body: emit a throwing stub
-		// so the package compiles until an asm/cgo backend exists.
-		v.writeOutputLn(" => throw new NotImplementedException(\"%s: external (assembly or cgo) function is not implemented\");", goFunctionName)
+		// Bodyless (assembly/cgo) function: emit a `partial` declaration; the body is
+		// supplied by a hand-written companion or the PartialStubGenerator.
+		v.writeOutputLn(";")
 	} else {
 		v.targetFile.WriteString(v.newline)
 	}

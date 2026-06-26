@@ -204,17 +204,25 @@ was classified as a public member and drove the public ctor. Fix in `StructTypeT
 exclude blank/underscore-prefixed fields (never exported in Go) from the public constructor. All CS0051
 in `sync/atomic` cleared; behavioral green (232/232 + the new test). Guarded by `UnexportedEmbeddedMarker`.
 
+### Phase 3 iteration 7 — asm-function companion source generator (2026-06-26)
+
+Resolves the iteration-6 follow-up. Bodyless (asm/cgo) Go functions are once again emitted by the converter
+as `partial` *declarations* (reverting iteration-1's non-partial throwing stub). A new **`PartialStubGenerator`**
+(`go2cs-gen`) emits a throwing `partial` *implementation* for every bodyless `partial` method that has **no**
+other implementing part in the compilation (`IMethodSymbol.PartialImplementationPart is null`). So:
+- packages that ship a hand-written companion (`sync/atomic`'s `doc_impl.cs`, real `Interlocked` bodies) use
+  those bodies — the generator detects the impl and skips them; and
+- companion-less packages (`crypto/internal/boring/sig`, `crypto/subtle`, …) get a generated throwing stub,
+  so they compile instead of CS8795/CS0111.
+
+**`sync/atomic` now compiles clean** — the second full-conversion stdlib package to go green (after
+`internal/cpu`). `sig` compiles too. Behavioral suite stays green (the generator is a no-op for the tests —
+none contain asm functions; zero behavioral `.cs` changed). Not behaviorally testable (Go rejects a bodyless
+function without an `.s` file), so verified via the full-conversion packages compiling.
+
 ### Next defects (work queue)
-- **`sync/atomic` asm-function companion (CS0111/CS0759)** — the remaining blocker. `sync/atomic` ships a
-  hand-written `doc_impl.cs` companion that provides the real `Interlocked`-based bodies via `partial`
-  methods, expecting the converter to emit `partial` *declarations* for the bodyless (asm) functions in
-  `doc.go`. The iteration-1 asm-stub fix instead emits a non-partial throwing stub, which now collides with
-  the companion (duplicate member + orphaned partial impl). Proper fix: let the **source generator** emit a
-  throwing `partial` implementation only for bodyless `partial` declarations that have **no** other
-  implementation in the compilation — so companion packages (sync/atomic) use their hand-written bodies while
-  companion-less packages (e.g. `crypto/internal/boring/sig`) still get a stub. Revert the converter's
-  asm-stub to a plain `partial` declaration once that generator exists.
-- **Promote `internal/cpu`** toward the baseline, or confirm it builds within the full `go-src-converted.sln`.
+- **Promote `internal/cpu` and `sync/atomic`** toward the baseline, or confirm they build within the full
+  `go-src-converted.sln` alongside their dependents.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
 
 ## Progress tracking
