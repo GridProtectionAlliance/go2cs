@@ -103,14 +103,47 @@ Each verified by rebuild + reconvert + compile:
 3. **Promote, don't fork.** When a full package compiles cleanly and matches behavior, promote it toward the
    baseline; `golib`'s hand-written core stays shared and never auto-overwritten. Track promotions here.
 
+### Phase 3 iteration 1 — converter fixes landed (2026-06-25)
+
+Measurement workflow used (no wholesale commit of `go-src-converted`; it stays regenerable):
+reconvert the stdlib to a temp dir (`go2cs -stdlib -go2cspath <tmp>`, output lands in `<tmp>/core/<pkg>`),
+overlay the fresh `.cs` onto `src/go-src-converted/<pkg>` (keeping the relocated csprojs, or regenerating
+them and rewriting `$(go2csPath)core\` → `$(go2csPath)go-src-converted\` except `core\golib`), then
+`dotnet build src/go-src-converted.sln` and bucket. Single packages build with
+`-p:go2csPath=<repo>\src\` so the `$(go2csPath)` golib ref resolves outside the solution.
+
+Four converter defects fixed (each verified by reconvert + compile of an affected package; **behavioral
+suite stays green: 216/216**):
+
+| Defect | Symptom (top error class) | Fix |
+|---|---|---|
+| Variadic of a **type parameter** (`func Or[T any](v ...T)`) emitted a namespace-level `using ꓸꓸꓸT = Span<T>` alias — `T` out of scope | CS0246 `'T' not found` | `visitFuncDecl.go`: when the variadic element is a `*types.TypeParam`, emit `params Span<T>` inline (C# 13 params-collections) instead of the alias. |
+| Go built-in **`comparable`** constraint emitted as bare `comparable` (golib's type is generic `comparable<T>`) | CS0305 `requires 1 type argument` | `main.go` `getGenericDefinition`: special-case `comparable` → `comparable<T>`. |
+| **Bodyless** (assembly/cgo) funcs emitted as accessibility-modified `partial` methods with no implementing half | CS8795 (49) — biggest cluster | `visitFuncDecl.go`: emit a non-partial throwing stub (`=> throw new NotImplementedException(...)`) until an asm/cgo backend exists. |
+| **Filename build-constraint over-exclusion**: `isFileNameCompatible` treated *any* unknown `_word` suffix (e.g. `bits_tables.go`, `bits_errors.go`) as a failing platform tag, silently dropping the file → missing symbols | CS0103 (`pop8tab`/`ntz8tab`/`divideError`…) | `directiveOperations.go`: only a trailing recognized `_GOOS`, `_GOARCH`, or `_GOOS_GOARCH` constrains the build (full GOOS/GOARCH name tables added); descriptive suffixes impose no constraint. |
+
+The filename fix is the highest-impact: a full reconvert went from **1472 → 1660 emitted `.cs` files** (~188
+previously-dropped stdlib source files now converted). That raises the raw error count (144 → 224) because
+newly-included files surface their own latent defects — so **track packages-compiling, not error count**,
+this phase.
+
+### Next defects (work queue, by owning file after the above)
+- **`internal/cpu/cpu_x86.cs`** owns ~140 of the current syntax errors from one bug: taking the **address of
+  a field of an anonymous-struct package global** (`&cpu.X86.HasADX`) mangles to
+  `ᏑX86.of(cpu.CacheLinePad}.ᏑHasADX)` (struct type leaks into the expression, stray `}`). High-value single fix.
+- **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
+  constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
+- Remaining buckets after a fresh reconvert: CS1022/CS1002/CS1001/CS1026/CS1003 (syntax, mostly the cpu_x86
+  cluster), CS0234 (missing namespace members), CS0029/CS0266 (conversions).
+
 ## Progress tracking
 
 | Metric | Source | Status |
 |---|---|---|
 | Baseline + tests build clean | `dotnet build src/go2cs.sln` | ✅ 79 / 79 |
 | Behavioral suite passing | `BehavioralTests` (MSTest) | ✅ 216 tests |
-| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — trending → 301 |
-| Full-conversion error count | build-error buckets | ◻ Phase 3 — trending → 0 |
+| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — trending → 301 (iter 1 landed 4 converter fixes) |
+| Full-conversion error count | build-error buckets | ◻ Phase 3 — next: `internal/cpu` address-of-field defect |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)
 

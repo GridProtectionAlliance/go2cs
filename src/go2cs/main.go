@@ -2235,6 +2235,10 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					// Handle special case for string and []byte types
 					if constraintExpr == "string" || constraintExpr == "[]byte" || constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
 						typeConstraint = "ISlice<byte>"
+					} else if constraintExpr == "comparable" {
+						// The Go built-in `comparable` constraint maps to golib's generic
+						// `comparable<T>` interface (self-referential CRTP form).
+						typeConstraint = fmt.Sprintf("comparable<%s>", typeParamNames[i])
 					}
 				}
 

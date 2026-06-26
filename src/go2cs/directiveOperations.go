@@ -324,75 +324,61 @@ func isFileNameCompatible(filename string, evaluator *BuildConstraintEvaluator) 
 		base = strings.TrimSuffix(base, "_test")
 	}
 
-	// Get the parts after the last non-empty element before any _test suffix
 	parts := strings.Split(base, "_")
+	n := len(parts)
 
-	// If we only have a single part or just a _test suffix, there's no build constraint
-	if len(parts) <= 1 || (len(parts) == 2 && isTest && parts[1] == "") {
+	// A trailing GOOS/GOARCH suffix only acts as a build constraint when the
+	// final one or two underscore-delimited components are recognized GOOS
+	// and/or GOARCH names (matching go/build's goodOSArchFile). Descriptive
+	// suffixes like "_tables" or "_errors" are part of the filename and impose
+	// no constraint, so files such as bits_tables.go must not be excluded.
+	if n < 2 {
 		return true
 	}
 
-	// Handle operating system constraints
-	osConstraints := []string{}
-	archConstraints := []string{}
+	last := parts[n-1]
 
-	// Parse the file name parts to extract OS and arch constraints
-	// Skip the first part as it's the base name
-	for i := 1; i < len(parts); i++ {
-		part := parts[i]
-		if part == "" {
-			continue
-		}
-
-		// Handle common OS and architecture identifiers
-		// First check if it's an architecture
-		switch part {
-		case "386", "amd64", "arm", "arm64", "ppc64", "ppc64le", "mips", "mipsle",
-			"mips64", "mips64le", "s390x", "wasm":
-			archConstraints = append(archConstraints, part)
-		// Then check if it's an OS
-		case "linux", "darwin", "windows", "freebsd", "netbsd", "openbsd",
-			"android", "ios", "js", "solaris", "plan9", "aix":
-			osConstraints = append(osConstraints, part)
-		// Handle less common constraints directly
-		default:
-			// Check if this constraint is allowed
-			if !evaluator.allowedPlatforms[part] {
-				return false
-			}
+	// name_GOOS_GOARCH.go: second-to-last is a GOOS and last is a GOARCH; both must match.
+	if n >= 3 {
+		secondLast := parts[n-2]
+		if isKnownGOOS(secondLast) && isKnownGOARCH(last) {
+			return evaluator.allowedPlatforms[secondLast] && evaluator.allowedPlatforms[last]
 		}
 	}
 
-	// If we have OS constraints, at least one must match
-	if len(osConstraints) > 0 {
-		osMatch := false
-		for _, os := range osConstraints {
-			if evaluator.allowedPlatforms[os] {
-				osMatch = true
-				break
-			}
-		}
-		if !osMatch {
-			return false
-		}
+	// name_GOARCH.go
+	if isKnownGOARCH(last) {
+		return evaluator.allowedPlatforms[last]
 	}
 
-	// If we have architecture constraints, at least one must match
-	if len(archConstraints) > 0 {
-		archMatch := false
-		for _, arch := range archConstraints {
-			if evaluator.allowedPlatforms[arch] {
-				archMatch = true
-				break
-			}
-		}
-		if !archMatch {
-			return false
-		}
+	// name_GOOS.go
+	if isKnownGOOS(last) {
+		return evaluator.allowedPlatforms[last]
 	}
 
+	// Trailing component is neither a GOOS nor a GOARCH: not a platform constraint.
 	return true
 }
+
+// knownGOOS lists the recognized Go target operating systems (go/build/syslist.go).
+var knownGOOS = map[string]bool{
+	"aix": true, "android": true, "darwin": true, "dragonfly": true,
+	"freebsd": true, "hurd": true, "illumos": true, "ios": true, "js": true,
+	"linux": true, "nacl": true, "netbsd": true, "openbsd": true, "plan9": true,
+	"solaris": true, "wasip1": true, "windows": true, "zos": true,
+}
+
+// knownGOARCH lists the recognized Go target architectures (go/build/syslist.go).
+var knownGOARCH = map[string]bool{
+	"386": true, "amd64": true, "amd64p32": true, "arm": true, "armbe": true,
+	"arm64": true, "arm64be": true, "loong64": true, "mips": true, "mipsle": true,
+	"mips64": true, "mips64le": true, "mips64p32": true, "mips64p32le": true,
+	"ppc": true, "ppc64": true, "ppc64le": true, "riscv": true, "riscv64": true,
+	"s390": true, "s390x": true, "sparc": true, "sparc64": true, "wasm": true,
+}
+
+func isKnownGOOS(s string) bool   { return knownGOOS[s] }
+func isKnownGOARCH(s string) bool { return knownGOARCH[s] }
 
 // Modified CheckBuildConstraints that handles both directives and filename constraints
 func CheckBuildConstraints(filename string, targetPlatform string) (bool, error) {

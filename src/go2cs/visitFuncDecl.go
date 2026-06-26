@@ -286,8 +286,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					if sliceType, ok := param.Type().(*types.Slice); ok {
 						typeName := v.getCSTypeName(sliceType.Elem())
 
-						updatedSignature.WriteString(EllipsisOperator + typeName)
-						v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+						if _, isTypeParam := sliceType.Elem().(*types.TypeParam); isTypeParam {
+							// A type parameter is not in scope for a namespace-level using
+							// alias, so emit the span type inline (C# 13 params collections).
+							updatedSignature.WriteString("Span<" + typeName + ">")
+						} else {
+							updatedSignature.WriteString(EllipsisOperator + typeName)
+							v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+						}
 					} else {
 						updatedSignature.WriteString("object[]")
 					}
@@ -323,11 +329,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.replaceMarker(functionUnsafeMarker, "")
 	}
 
-	if funcDecl.Body == nil {
-		v.replaceMarker(functionPartialMarker, " partial")
-	} else {
-		v.replaceMarker(functionPartialMarker, "")
-	}
+	// A nil body means the Go function is implemented externally (assembly or
+	// cgo). go2cs has no asm/cgo backend yet, so emit a non-partial throwing
+	// stub instead of an accessibility-modified partial method (which C# rejects
+	// with CS8795 unless a hand-written implementing half is supplied).
+	v.replaceMarker(functionPartialMarker, "")
 
 	v.replaceMarker(functionParametersMarker, parameterSignature)
 
@@ -377,7 +383,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	if useFuncExecutionContext {
 		v.writeOutputLn(");")
 	} else if signatureOnly {
-		v.writeOutputLn(";")
+		// External (assembly/cgo) function with no Go body: emit a throwing stub
+		// so the package compiles until an asm/cgo backend exists.
+		v.writeOutputLn(" => throw new NotImplementedException(\"%s: external (assembly or cgo) function is not implemented\");", goFunctionName)
 	} else {
 		v.targetFile.WriteString(v.newline)
 	}
@@ -461,8 +469,14 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			if sliceType, ok := param.Type().(*types.Slice); ok {
 				typeName := v.getCSTypeName(sliceType.Elem())
 
-				result.WriteString(EllipsisOperator + typeName)
-				v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+				if _, isTypeParam := sliceType.Elem().(*types.TypeParam); isTypeParam {
+					// A type parameter is not in scope for a namespace-level using
+					// alias, so emit the span type inline (C# 13 params collections).
+					result.WriteString("Span<" + typeName + ">")
+				} else {
+					result.WriteString(EllipsisOperator + typeName)
+					v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+				}
 			} else {
 				result.WriteString("object[]")
 			}
