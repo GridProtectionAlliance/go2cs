@@ -40,6 +40,28 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
 4. **Exit criterion.** Baseline `src/core` builds clean **and** all 59 `src/Tests/Behavioral` projects pass.
    The converter-improvement loop is restored.
 
+### Phase 2 findings (measured 2026-06-25)
+
+- **`fmt`'s closure is 57 packages** — the *full* `fmt` pulls in the entire runtime substrate
+  (`runtime`, `syscall`, `os`, `reflect`, and a deep `internal/*` tree), unlike the old 36-line stub `fmt`.
+- **Baseline build status: 18 / 57 compile clean** out of the box (built in place in `go-src-converted`
+  against current `golib`). The pipeline works; failures are concentrated converter defects, not intractability.
+- **Prioritized converter-defect roadmap** (own-errors across a probe of failing leaf/mid packages):
+  | Count | Code | Meaning | Status |
+  |---|---|---|---|
+  | 48 | CS0106 | invalid modifier (`static readonly` on a function-local named-type const) | **FIXED** — `visitValueSpec.go`, verified math/bits 16→0 |
+  | 20 | CS1002 | `;` expected | open (syntax cluster) |
+  | 18 | CS1519 | invalid token in member declaration | open (syntax cluster) |
+  | 18 | CS1026 | `)` expected | open (syntax cluster) |
+  | 18 | CS1003 | syntax error, X expected | open (syntax cluster) |
+  | 18 | CS0051 | inconsistent accessibility (param type less accessible) | open |
+  | — | CS0103 | missing package-level lookup tables (e.g. `ntz8tab`/`pop8tab` in math/bits) | open |
+- **Converter-improvement loop (proven end-to-end):** edit `src/go2cs/*.go` → `go build` (Go 1.23.1) →
+  `go2cs -stdlib -go2cspath <out> <pkg>` (needs `GOROOT` stdlib source, present) → `dotnet build`.
+- **Retarget detail:** the stdlib converter writes to **`<go2cspath>/core/<pkg>`** (hardcoded `core` subdir).
+  To regenerate cleanly into `src/go-src-converted` we must either make that subdir name configurable or
+  convert to a temp dir and move. Batch several converter fixes, then do one wholesale reconvert + re-measure.
+
 ## Phase 3 — Drive the full conversion to compile (the ultimate goal)
 
 1. **Build-error roadmap.** Convert + `dotnet build` `src/go-src-converted/`, capture `build.log`; bucket
