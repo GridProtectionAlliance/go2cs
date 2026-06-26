@@ -228,6 +228,15 @@ var initFuncCounter int
 var usesUnsafeCode bool
 var packageLock = sync.Mutex{}
 
+// packageDynamicTypeNames maps a lifted (anonymous struct/interface) type's
+// structural signature (`types.Type.String()`) to its generated C# type name,
+// shared across all files in a package. Per-file visitors lift these types into
+// their own `liftedTypeMap`, but cross-file references (e.g. taking the address
+// of a field of a package-global anonymous-struct var declared in another file)
+// can't see that per-file map. This package-level registry, resolved after the
+// concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
+var packageDynamicTypeNames map[string]string
+
 func main() {
 	var goRoot, goPath, go2csPath string
 	var err error
@@ -474,6 +483,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		indirectNumericConversions = make(map[string]map[string]string)
 		nameCollisions = make(map[string]bool)
 		globalTempVarCount = make(map[string]int)
+		packageDynamicTypeNames = make(map[string]string)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -546,6 +556,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
 		var concurrentTasks sync.WaitGroup
+		var outputFileNames []string
 
 		for _, fileEntry := range files {
 			concurrentTasks.Add(1)
@@ -600,11 +611,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 				packageLock.Lock()
 				projectImports.UnionWithSet(visitor.importQueue)
+				outputFileNames = append(outputFileNames, outputFileName)
 				packageLock.Unlock()
 			}(fileEntry)
 		}
 
 		concurrentTasks.Wait()
+
+		// Resolve any deferred cross-file dynamic (anonymous struct) type references
+		// now that every file's lifted names are registered in the shared registry.
+		resolveDynamicTypeMarkers(outputFileNames)
 
 		// Write project file with correct output type and unsafe code settings
 		err = writeProjectFile(projectFileName, projectFileContents, packageOutputPath, packageTypes, options)

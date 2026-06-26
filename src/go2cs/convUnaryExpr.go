@@ -8,6 +8,31 @@ import (
 	"strings"
 )
 
+// isHeapBoxedExpr reports whether the expression refers to a variable that the
+// converter has given a heap-boxed pointer companion (the "Ꮡname" form) — i.e. it
+// escapes to the heap and is not an inherently heap-allocated type. Package-level
+// value vars and non-escaping locals return false (their address must be taken via
+// the Ꮡ(value) constructor form). Mirrors the escape check in convUnaryExpr.
+func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
+	ident := getIdentifier(expr)
+
+	if ident == nil {
+		return false
+	}
+
+	obj := v.info.Defs[ident]
+
+	if obj == nil {
+		obj = v.info.Uses[ident]
+	}
+
+	if obj == nil {
+		return false
+	}
+
+	return v.identEscapesHeap[obj] && !isInherentlyHeapAllocatedType(v.getIdentType(ident))
+}
+
 func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
@@ -48,8 +73,23 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// For a receiver reference to a structure field, we use the "Ꮡ(StructType.Field)" syntax
 					return fmt.Sprintf("%s(%s.%s)", AddressPrefix, v.convExpr(selectorExpr.X, nil), removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
 				} else {
-					// For a structure field, we use the "ж.of(StructType.ᏑField)" syntax
-					return fmt.Sprintf("%s%s.of(%s.%s%s)", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.getExprTypeName(selectorExpr.X, false), AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+					// For a structure field, we use the "ж.of(StructType.ᏑField)" syntax.
+					// dynamicStructTypeName resolves anonymous struct types lifted in
+					// another file of the package (e.g. `&cpu.X86.HasADX`).
+					structExpr := v.convExpr(selectorExpr.X, nil)
+					typeName := v.dynamicStructTypeName(selectorExpr.X)
+					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+
+					if v.isHeapBoxedExpr(selectorExpr.X) {
+						// The operand already has a heap-boxed pointer companion (e.g. an
+						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)".
+						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, structExpr, fieldRef)
+					}
+
+					// The operand is an addressable value with no pointer companion (e.g.
+					// a package-global struct var): construct the pointer on the fly with
+					// the "Ꮡ(value).of(...)" call form (mirrors the whole-value case below).
+					return fmt.Sprintf("%s(%s).of(%s)", AddressPrefix, structExpr, fieldRef)
 				}
 			}
 		}

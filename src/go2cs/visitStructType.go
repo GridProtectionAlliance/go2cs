@@ -32,7 +32,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 		structTypeName = v.getUniqueLiftedTypeName(name)
 		v.liftedTypeMap[identType] = structTypeName
-		v.liftedTypeMap[v.getType(structType, false)] = structTypeName
+		structSignatureType := v.getType(structType, false)
+		v.liftedTypeMap[structSignatureType] = structTypeName
+
+		// Package-level lifted structs are shared across the package so other files
+		// can resolve cross-file references to this anonymous type (function-local
+		// lifts are file/function-scoped and stay out of the shared registry).
+		if !v.inFunction && structSignatureType != nil {
+			registerDynamicTypeName(structSignatureType.String(), structTypeName)
+		}
 	} else {
 		structTypeName = name
 	}

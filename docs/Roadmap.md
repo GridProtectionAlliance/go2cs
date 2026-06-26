@@ -128,14 +128,31 @@ previously-dropped stdlib source files now converted). That raises the raw error
 newly-included files surface their own latent defects — so **track packages-compiling, not error count**,
 this phase.
 
-### Next defects (work queue, by owning file after the above)
-- **`internal/cpu/cpu_x86.cs`** owns ~140 of the current syntax errors from one bug: taking the **address of
-  a field of an anonymous-struct package global** (`&cpu.X86.HasADX`) mangles to
-  `ᏑX86.of(cpu.CacheLinePad}.ᏑHasADX)` (struct type leaks into the expression, stray `}`). High-value single fix.
+### Phase 3 iteration 2 — `internal/cpu` address-of-field (2026-06-25)
+
+`internal/cpu/cpu_x86.cs` owned ~140 of the syntax errors, all from `&cpu.X86.HasADX` (address of a field
+of the anonymous-struct package global `X86`). Two stacked bugs, both fixed; **behavioral suite stays green
+216/216**:
+
+| Bug | Symptom | Fix |
+|---|---|---|
+| The anonymous struct type of `X86` is lifted to `X86ᴛ1` while visiting `cpu.go`, but `liftedTypeMap` is **per-file** (each file gets its own concurrent `Visitor`), so `cpu_x86.go` couldn't resolve it — `getExprTypeName` fell back to the raw struct text, mangled to `cpu.CacheLinePad}` | syntax errors (`)`/`;` expected …) | New **package-level shared registry** (`packageDynamicTypeNames`, signature→C# name) populated by `visitStructType` for package-level lifts; `convUnaryExpr` emits a marker for unresolved anonymous structs, resolved after the file-visit barrier (`dynamicTypeOperations.go`, `main.go`). Race-free: resolution runs post-`Wait()`. |
+| With the name fixed, `&X86.HasADX` emitted `ᏑX86.of(…)` (identifier form), assuming a heap-boxed pointer companion — but a package-global value var has none | CS0103 `ᏑX86 does not exist` | `convUnaryExpr`: choose the address-of form by escape state — `isHeapBoxedExpr` (mirrors the existing escape check) → `Ꮡvar.of(…)` for escaping locals, else the constructor form `Ꮡ(value).of(…)` (consistent with the existing whole-value `&global` path). |
+
+Result: `internal/cpu` went **~140 → 8 errors**. Caveat: `Ꮡ(value)` heap-allocates a *copy* (golib
+`Ꮡ<T>(in T)`), so `&global.field` currently points into a copy — a pre-existing whole-category limitation
+(`&global` already did this on line 124); the proper fix is **boxed companions for package-global vars whose
+address is taken** (future work).
+
+### Next defects (work queue)
+- **Address-of-global correctness** (above): generate a heap-boxed `Ꮡvar` companion for package-global vars
+  whose address (or field address) is taken, so `&global`/`&global.field` reference the original, not a copy.
+- **`internal/cpu`** remaining 8: large untyped constant typed as `(nint)` where a `uint32` arg is expected
+  (`cpuid(0x80000000, 0)` → `cpuid((nint)2147483648L, 0)` → CS1503); a ref-struct (`ReadOnlySpan<byte>`) used
+  as a tuple element (CS9244); `slice<byte> != string` comparison (CS0019).
 - **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
   constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
-- Remaining buckets after a fresh reconvert: CS1022/CS1002/CS1001/CS1026/CS1003 (syntax, mostly the cpu_x86
-  cluster), CS0234 (missing namespace members), CS0029/CS0266 (conversions).
+- Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
 
 ## Progress tracking
 
@@ -143,8 +160,8 @@ this phase.
 |---|---|---|
 | Baseline + tests build clean | `dotnet build src/go2cs.sln` | ✅ 79 / 79 |
 | Behavioral suite passing | `BehavioralTests` (MSTest) | ✅ 216 tests |
-| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — trending → 301 (iter 1 landed 4 converter fixes) |
-| Full-conversion error count | build-error buckets | ◻ Phase 3 — next: `internal/cpu` address-of-field defect |
+| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — iters 1–2: 5 converter fixes; `internal/cpu` ~140→8 errors |
+| Full-conversion error count | build-error buckets | ◻ Phase 3 — next: address-of-global correctness; re-bucket after reconvert |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)
 
