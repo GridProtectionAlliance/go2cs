@@ -374,7 +374,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				}
 
 				if v.inFunction {
-					v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constVal)
+					// C# locals cannot be declared "static readonly"; for named
+					// (custom) types "const" is also invalid, so emit a plain local
+					// variable. Primitive/string consts can still use "const" locally.
+					if isNamedType {
+						v.writeOutput("%s %s =%s %s;", csTypeName, csIDName, orgExpr, constVal)
+					} else {
+						v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constVal)
+					}
 				} else {
 					v.writeOutput("%s %s %s %s =%s %s;", access, constExpr, csTypeName, csIDName, orgExpr, constVal)
 				}
