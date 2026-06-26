@@ -78,3 +78,10 @@ xx) Complete code comment conversions, this may be predicated on the following:
     1) ~~Mode to compare raw code to target file, ignoring comments~~
        ~~1) Set this up soon to better handle regression testing of go2cs changes~~
     2) Future tests can be setup to compare with comments once go2c2 has better support
+03) Convert and RUN the stdlib's own `_test.go` suites as the ultimate correctness gate
+    (Go `go test` output vs converted C# test output). If a converted package passes its own
+    upstream tests, its runtime semantics are validated against the hardest spec available — the
+    thesis being that once the stdlib converts/compiles/passes-its-own-tests, almost any Go program
+    will. Needs: opt-in stdlib-test emit mode (today `*._test.cs` is excluded), a `testing.T/B` shim
+    (or convert `testing`), and a per-package go-test-vs-c#-test diff. Start with already-compiling
+    leaves (strconv, math/bits, unicode/utf8). See docs/Roadmap.md "ultimate correctness gate".

@@ -334,6 +334,22 @@ stages:
   `go-src-converted.sln` alongside their dependents.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
 
+### The ultimate correctness gate — convert and run the stdlib's own tests (TODO)
+The behavioral suite proves *our* hand-written programs convert correctly; it does not prove the
+*converted stdlib behaves like Go*. The strongest possible gate is to **convert each stdlib package's
+own `_test.go` files and run them** (Go `go test` output vs the converted C# test output). Go's standard
+library ships an enormous, adversarial, edge-case-rich test suite — if a converted package passes its own
+upstream tests, its runtime semantics are validated against the hardest available spec. The thesis: once
+the **stdlib converts, compiles, and passes its own tests**, almost *any* Go program will convert and
+work, because nearly everything bottoms out on stdlib + the runtime substrate. Sketch of the work:
+- Teach the converter/test-harness to also emit the package's `*_test.go` as a runnable C# test target
+  (today behavioral tests deliberately exclude `*._test.cs`; this would add an opt-in stdlib-test mode).
+- Map Go's `testing.T`/`testing.B` onto a thin C# shim (or convert `testing` itself).
+- Drive per-package: convert pkg + its tests → `go test ./pkg` vs the converted run → diff. Promote a
+  package to "validated" only when its own tests pass, not merely when it compiles.
+- Start with leaf packages that already compile (e.g. `strconv`, `math/bits`, `unicode/utf8`) where the
+  test dependency closure is small, then work up.
+
 ## Progress tracking
 
 | Metric | Source | Status |
