@@ -283,16 +283,28 @@ stages:
   instantiated **cross-package** generics, else a boxed `atomic.Pointer[Config]` emits `new …Pointer()` with
   no `<Config>`). Validated by the **`GenericReceiverFieldAddress`** behavioral test (a generic `Box[T]`
   with `Set`/`Get` taking `&b.v`, exercised for `int` and `string`); behavioral suite green, zero churn.
-- **`atomic.Pointer[T]` — still NOT promotable, but now for a *different*, deeper reason.** With the receiver
-  capture fixed, `Pointer[T]` compiles and the field is correctly aliased, but it **NREs at runtime**: its
-  value is stored through `unsafe.Pointer` as a raw `uintptr` (`(ж<T>)(uintptr)(LoadPointer(…))` /
-  `new @unsafe.Pointer(Ꮡval)`), and golib's `ж<T>↔uintptr` operators (`ж.cs:449-458`) take a `fixed`-pinned
-  address that **dangles after a GC move** (`uintptr(ж)` returns `&value.val` from a closed `fixed` block;
-  `ж(uintptr)` does `*(T*)value`). Storing a managed reference as a raw address is the real blocker — it needs
-  `unsafe.Pointer` to hold a managed `ж<T>` (a handle/object), not a numeric address. **This is a golib
-  representation problem, independent of the converter receiver-capture work just completed.** The scalar
-  typed types (`Int32/64`, `Uint32/64/ptr`, `Bool`) do **not** hit this (they store plain values), so they
-  remain fully functional.
+- **`sync/atomic` PROMOTED to `core` — first stdlib package migrated.** `src/core/sync/atomic` is now in the
+  green baseline (`go2cs.slnx`, `/core/` folder), referencing `core/unsafe` + `core/golib`. Scalar typed
+  types are the converter output as-is; `Pointer[T]` is **hand-rewritten** in the promoted (hand-owned) copy.
+  - **The `unsafe.Pointer` finding (why the rewrite, not a global fix).** `unsafe.Pointer` is a type **alias
+    to `nuint`** (`[assembly:GoTypeAlias("@unsafeꓸPointer","nuint")]`) — a raw number — used across **171
+    files / ~1522 `ж↔uintptr` sites** in the full conversion, almost all *legitimately* numeric (pointer
+    arithmetic, syscall, reflect). In .NET a managed reference **cannot** be stored as a number and survive a
+    GC move (CLR rule), so golib's `ж↔uintptr` operators (`ж.cs:449-458`) can't round-trip a managed `ж<T>`:
+    the zero case NREs (`*(T*)0`) and a real case dangles (a `fixed`-pin address read after the block closes).
+    A *global* `unsafe.Pointer` redesign would be reckless (huge blast radius, breaks the correct numeric
+    uses), so the contained fix lives in the one type that stores a managed pointer.
+  - **The managed `Pointer<T>` (`core/sync/atomic/type.cs`).** Field `v` is a managed `ж<T>` (not
+    `@unsafe.Pointer`); `Load`/`Store` use `Volatile.Read/Write`, `Swap`/`CompareAndSwap` use
+    `Interlocked.Exchange`/`CompareExchange<ж<T>>`. A `nilCanon` helper collapses an explicit nil-`ж` to
+    `null` so reference-based CAS treats every nil pointer as equal (matching Go's `nil == nil`). No
+    `unsafe.Pointer`, GC-safe, nil-safe.
+  - **Validated** end to end: `atomic.Pointer[int]`/`[Config]` Load/Store/Swap/CAS + the scalar API all match
+    Go. Guarded by the **`AtomicValues`** behavioral test (scalar `Int32` + generic `Pointer[int]`, both
+    paths). Solution builds green; behavioral suite green (zero churn).
+  - **csproj gotcha:** `core/sync/sync.csproj` had no subfolder exclusion (it never had one); adding
+    `core/sync/atomic` made it swallow atomic's generated files (`CS0579`). Fixed by mirroring `math.csproj`'s
+    `<Compile Remove="rand\**" />` pattern → `<Compile Remove="atomic\**" />`.
 - ~~Promote `internal/cpu` and `sync/atomic`~~ — atomic gated on the `unsafe.Pointer`/`ж` representation
   above (scalars work, `Pointer[T]` runtime-broken); cpu gated on asm `cpuid`.
 - Confirm `internal/cpu` / `sync/atomic` build within the full

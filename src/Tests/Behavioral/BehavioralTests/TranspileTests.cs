@@ -48,6 +48,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
+    public void CheckAtomicValues() => CheckTarget("AtomicValues");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]

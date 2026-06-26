@@ -25,7 +25,7 @@ build scripts still reference it (see *Known staleness* below).
 | **Converter** | `src/go2cs/*.go` (~67 files) | Go | Parses Go with `go/ast`/`go/types`, emits C#. |
 | **Runtime library (`golib`)** | `src/core/golib/` | C# | Hand-written Go semantics: `slice<T>`, `map<K,V>`, `channel<T>`, `@string`, `array<T>`, `builtin` (`append`/`len`/`make`/`panic`/`recover`…), `ж<T>` heap box, `nil`, type aliases. **Shared by everything; never auto-overwritten.** |
 | **Source generators** | `src/gen/go2cs-gen/` | C# (Roslyn) | Compile-time Go semantics: `ImplementGenerator` (interface impl), `RecvGenerator` (pointer-receiver overloads), `ImplicitConvGenerator` (type-alias conversions), `TypeGenerator` (struct embedding/promotion). Referenced as an **analyzer** by every converted project. |
-| **Baseline stdlib** | `src/core/<pkg>` | C# (converted) | Small hand-finished stdlib subset (errors, fmt, io, math, math/rand, sort, strings, sync, time, unsafe, a few internal/*) — **compiles**; the test loop builds against this. Restored from the old stub (`3426298eb`). |
+| **Baseline stdlib** | `src/core/<pkg>` | C# (converted) | Small hand-finished stdlib subset (errors, fmt, io, math, math/rand, sort, strings, sync, **sync/atomic**, time, unsafe, a few internal/*) — **compiles**; the test loop builds against this. Restored from the old stub (`3426298eb`); `sync/atomic` promoted from the full conversion (2026-06-26, first migrated package). |
 | **Full auto-conversion (WIP)** | `src/go-src-converted/` | C# (converted) | Whole Go stdlib (~301 projects) auto-output. Does **not** all compile yet. Its own `src/go-src-converted.sln`. |
 | **Behavioral tests** | `src/Tests/Behavioral/` (59 test projects + `BehavioralTests` runner) | Go + C# | Per-feature Go↔C# equivalence (arrays, channels, defer, generics, interfaces…). |
 | **Examples** | `src/Examples/` | Go + C# | Hand-converted Tour-of-Go / go101 / misc samples. |
@@ -183,9 +183,12 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
 
 ## Current state & known issues
 
-- **Baseline is green:** `src/go2cs.slnx` builds 79/79 and the behavioral suite passes (216 tests). The
+- **Baseline is green:** `src/go2cs.slnx` builds clean and the behavioral suite passes. The
   separation is done — `src/core` (stub baseline + `golib`) vs `src/go-src-converted` (full WIP). The
-  converter-improvement loop is restored.
+  converter-improvement loop is restored. **`sync/atomic` was promoted into `core` (2026-06-26)** — the first
+  full-conversion package migrated to the baseline (scalar types are converter output; `Pointer[T]` is
+  hand-rewritten with a managed slot + `Interlocked`, since `unsafe.Pointer`=`nuint` can't hold a managed
+  reference across a GC — see [`docs/Roadmap.md`](docs/Roadmap.md)).
 - **Phase 3 in progress:** drive `src/go-src-converted` (the full ~301-package conversion) toward compiling,
   bottom-up by converter-defect frequency; promote packages into the baseline as they go green. See
   [`docs/Roadmap.md`](docs/Roadmap.md) for the iteration log. **Iteration 1 (2026-06-25)** landed 4 converter

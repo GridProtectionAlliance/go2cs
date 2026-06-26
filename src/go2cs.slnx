@@ -24,6 +24,7 @@
     <Project Path="core/sort/sort.csproj" />
     <Project Path="core/strings/strings.csproj" />
     <Project Path="core/sync/sync.csproj" />
+    <Project Path="core/sync/atomic/sync.atomic.csproj" />
     <Project Path="core/time/time.csproj" />
     <Project Path="core/unsafe/unsafe.csproj" />
   </Folder>
@@ -56,6 +57,7 @@
     <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/AtomicValues/AtomicValues.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
     <Project Path="Tests/Behavioral/ChannelSendToClosed/ChannelSendToClosed.csproj" />

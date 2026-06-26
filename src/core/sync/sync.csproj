@@ -27,6 +27,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- atomic is its own project (core/sync/atomic); exclude it from this package's build -->
+    <Compile Remove="atomic\**" />
+    <EmbeddedResource Remove="atomic\**" />
+    <None Remove="atomic\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="..\go2cs.ico" Pack="true" PackagePath="" Visible="false" />
     <None Include="..\go2cs.png" Pack="true" PackagePath="" Visible="false" />
   </ItemGroup>
