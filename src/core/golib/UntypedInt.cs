@@ -47,7 +47,7 @@ public readonly struct UntypedInt : IEquatable<UntypedInt>
     /// </summary>
     public UntypedInt(uint64 value)
     {
-        m_value = CastFrom(value)
+        m_value = CastFrom(value);
     }
 
     // Perform bitwise cast from T to int64
