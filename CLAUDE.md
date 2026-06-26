@@ -108,6 +108,15 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   `dotnet test` on `BehavioralTests.csproj` directly breaks because `$(go2csPath)` (→ `$(SolutionDir)`)
   has no solution context, so the `core\golib` ref fails to resolve. The baseline solution is now an
   **`.slnx`** (`src/go2cs.slnx`); `src/go-src-converted.sln` is still classic `.sln`.
+- **When iterating on regression work, use FILTERED + `--no-build` tests — don't run the full suite each
+  time.** The full `dotnet test go2cs.slnx` rebuilds all ~81 projects first and can take 10+ min or hang
+  under Visual Studio lock contention. Instead, from `src/Tests/Behavioral/BehavioralTests`, run
+  `dotnet test --no-build -c Debug --filter "FullyQualifiedName~<Name>"` — that reuses the existing test
+  assembly and runs just that project's 4 phases (Transpile/Compile/TargetComparison/OutputComparison) in
+  seconds. `--no-build` is valid as long as the `*Tests.cs` files haven't changed (`git status` them).
+  Reserve a single full-suite run for final confirmation. Faster still for a pure no-regression check:
+  re-transpile every behavioral dir and `git status` the `.cs` — byte-identical generated code ⟹ identical
+  compile+output ⟹ identical results, with no compile/run at all.
 
 ### Adding a regression test when a converter defect is fixed
 When a meaningful converter bug is fixed, lock it in with a behavioral test so later changes can't silently
@@ -136,9 +145,12 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
    `.cs.target` golden. It only emits an `OutputComparison` test for projects whose `package_info.cs` has
    `[GoTestMatchingConsoleOutput]`. Afterward, `git status` should show only your new project + four
    `+3`-line test-class diffs (no other `.target` churn).
-6. **Verify:** `dotnet test src/go2cs.slnx --filter "FullyQualifiedName~<Name>"` → 4 green (Transpile,
-   Compile, TargetComparison, OutputComparison). If the Go source uses multi-line string literals, mark the
-   `.cs`/`.cs.target` `-text` in `.gitattributes` (autocrlf gotcha above).
+6. **Verify (filtered, fast):** from `src/Tests/Behavioral/BehavioralTests`, run
+   `dotnet test --no-build -c Debug --filter "FullyQualifiedName~<Name>"` → 4 green (Transpile, Compile,
+   TargetComparison, OutputComparison) in seconds. Avoid the full `dotnet test go2cs.slnx` while iterating —
+   it rebuilds everything and can hang under VS lock contention (see the filtered-tests note above). If the
+   Go source uses multi-line string literals, mark the `.cs`/`.cs.target` `-text` in `.gitattributes`
+   (autocrlf gotcha above).
 
 ### Phase 3 mechanics — measuring/iterating the full conversion (`src/go-src-converted`)
 - **The on-disk `go-src-converted` is stale** (last bulk conversion 2025-05-11); it predates current
