@@ -41,6 +41,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	signature := currentFuncType.Signature()
 	v.currentFuncSignature = signature
 
+	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
+	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for
+	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
+	directBoxReceiver := packageDirectBoxReceiverMethods != nil && packageDirectBoxReceiverMethods[currentFuncType]
+
 	// Analyze function variables for reassignments and redeclarations (variable shadows)
 	v.performVariableAnalysis(funcDecl, signature)
 
@@ -213,8 +218,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
 			if pointerType, ok := param.Type().(*types.Pointer); ok {
-				if i == 0 && funcDecl.Recv != nil {
-					// Skip receiver parameter
+				if i == 0 && funcDecl.Recv != nil && !directBoxReceiver {
+					// Skip receiver parameter (direct-ж receivers get the deref below, so
+					// the box parameter `Ꮡx` resolves to the value `x` in the body).
 					continue
 				}
 
@@ -269,9 +275,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// Update function access to match receiver type
 					functionAccess = getAccess(recvTypeName)
 
-					updatedSignature.WriteString(recvTypeName)
-					updatedSignature.WriteRune(' ')
-					updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+					if directBoxReceiver {
+						// Direct-ж: emit the box itself (`ж<Box<T>> Ꮡb`) as the receiver. The
+						// deref `ref var b = ref Ꮡb.val;` is emitted above so the body's value
+						// references still read as `b`, while `&b.field` uses the box `Ꮡb`.
+						updatedSignature.WriteString(v.getCSTypeName(param.Type()))
+						updatedSignature.WriteRune(' ')
+						updatedSignature.WriteString(AddressPrefix + param.Name())
+					} else {
+						updatedSignature.WriteString(recvTypeName)
+						updatedSignature.WriteRune(' ')
+						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+					}
+
 					continue
 				}
 

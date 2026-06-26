@@ -271,11 +271,30 @@ stages:
   by the validation test. **Result: `sync/atomic`'s scalar typed types (`Int32/64`, `Uint32/64/ptr`, `Bool`)
   now work end to end** — `var i atomic.Int32; i.Store(10); i.Add(5); i.Load()` → 15, CAS/Swap/etc. all match
   Go. Guarded by the self-contained `ReceiverFieldAddress` behavioral test (no `go-src-converted` dependency).
-- **Remaining gap — generic receivers.** `atomic.Pointer[T]` still uses the copy form (the static-`ThreadLocal`
-  capture can't hold `T`). The fix is the **direct-`ж`-receiver model** (box as a parameter, not a
-  `ThreadLocal`): puts `T` in scope and removes the init issue, at the cost of rewriting `x` → `Ꮡx.val` in the
-  method body. This is the last blocker before `sync/atomic` is fully promotable.
-- ~~Promote `internal/cpu` and `sync/atomic`~~ — gated on the above (atomic) / asm `cpuid` (cpu).
+- **Generic receivers (direct-`ж`) — DONE.** Generic capture-mode receivers (`atomic.Pointer[T]`) are now
+  emitted with the heap box **as the receiver** (`this ж<Box<T>> Ꮡx` + `ref var x = ref Ꮡx.val;`), and
+  `&x.field` field-refs through the box parameter (`Ꮡx.of(Box<T>.ᏑField)`) — `T` stays in scope, no static
+  field needed. `[GoRecv]` is suppressed automatically (the signature is `this ж<…>`, not `this ref …`, so
+  `RecvGenerator` skips it and there is no duplicate overload). Value calls heap-box and route through the ж
+  overload (the Stage-B escape/routing already handles this once the generic methods are included). Converter
+  changes: `captureModeOperations.go` (new `packageDirectBoxReceiverMethods`, keyed by `*types.Func.Origin()`
+  so instantiated call sites match), `visitFuncDecl.go` (un-skip the receiver deref + emit `ж<T>` receiver),
+  `convUnaryExpr.go` (generic branch → `Ꮡx.of(...)`), and `main.go` `getFullTypeName` (append type args for
+  instantiated **cross-package** generics, else a boxed `atomic.Pointer[Config]` emits `new …Pointer()` with
+  no `<Config>`). Validated by the **`GenericReceiverFieldAddress`** behavioral test (a generic `Box[T]`
+  with `Set`/`Get` taking `&b.v`, exercised for `int` and `string`); behavioral suite green, zero churn.
+- **`atomic.Pointer[T]` — still NOT promotable, but now for a *different*, deeper reason.** With the receiver
+  capture fixed, `Pointer[T]` compiles and the field is correctly aliased, but it **NREs at runtime**: its
+  value is stored through `unsafe.Pointer` as a raw `uintptr` (`(ж<T>)(uintptr)(LoadPointer(…))` /
+  `new @unsafe.Pointer(Ꮡval)`), and golib's `ж<T>↔uintptr` operators (`ж.cs:449-458`) take a `fixed`-pinned
+  address that **dangles after a GC move** (`uintptr(ж)` returns `&value.val` from a closed `fixed` block;
+  `ж(uintptr)` does `*(T*)value`). Storing a managed reference as a raw address is the real blocker — it needs
+  `unsafe.Pointer` to hold a managed `ж<T>` (a handle/object), not a numeric address. **This is a golib
+  representation problem, independent of the converter receiver-capture work just completed.** The scalar
+  typed types (`Int32/64`, `Uint32/64/ptr`, `Bool`) do **not** hit this (they store plain values), so they
+  remain fully functional.
+- ~~Promote `internal/cpu` and `sync/atomic`~~ — atomic gated on the `unsafe.Pointer`/`ж` representation
+  above (scalars work, `Pointer[T]` runtime-broken); cpu gated on asm `cpuid`.
 - Confirm `internal/cpu` / `sync/atomic` build within the full
   `go-src-converted.sln` alongside their dependents.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.

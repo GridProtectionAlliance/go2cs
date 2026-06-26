@@ -63,40 +63,45 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static ж<T> Load<T>(this ref Pointer<T> x)
+public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx)
     where T : new()
 {
-    return (ж<T>)(uintptr)(LoadPointer(Ꮡ(x.v)));
+    ref var x = ref Ꮡx.val;
+
+    return (ж<T>)(uintptr)(LoadPointer(Ꮡx.of(Pointer<T>.Ꮡv)));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store<T>(this ref Pointer<T> x, ж<T> Ꮡval)
+public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡval)
     where T : new()
 {
+    ref var x = ref Ꮡx.val;
     ref var val = ref Ꮡval.val;
 
-    StorePointer(Ꮡ(x.v), new @unsafe.Pointer(Ꮡval));
+    StorePointer(Ꮡx.of(Pointer<T>.Ꮡv), new @unsafe.Pointer(Ꮡval));
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static ж<T> /*old*/ Swap<T>(this ref Pointer<T> x, ж<T> Ꮡnew)
+public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡnew)
     where T : new()
 {
     ж<T> old = default!;
 
+    ref var x = ref Ꮡx.val;
     ref var @new = ref Ꮡnew.val;
-    return (ж<T>)(uintptr)(SwapPointer(Ꮡ(x.v), new @unsafe.Pointer(Ꮡnew)));
+    return (ж<T>)(uintptr)(SwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), new @unsafe.Pointer(Ꮡnew)));
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap<T>(this ref Pointer<T> x, ж<T> Ꮡold, ж<T> Ꮡnew)
+public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡold, ж<T> Ꮡnew)
     where T : new()
 {
     bool swapped = default!;
 
+    ref var x = ref Ꮡx.val;
     ref var old = ref Ꮡold.val;
     ref var @new = ref Ꮡnew.val;
-    return CompareAndSwapPointer(Ꮡ(x.v), new @unsafe.Pointer(Ꮡold), new @unsafe.Pointer(Ꮡnew));
+    return CompareAndSwapPointer(Ꮡx.of(Pointer<T>.Ꮡv), new @unsafe.Pointer(Ꮡold), new @unsafe.Pointer(Ꮡnew));
 }
 
 // An Int32 is an atomic int32. The zero value is zero.

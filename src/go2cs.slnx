@@ -75,6 +75,7 @@
     <Project Path="Tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
     <Project Path="Tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />
     <Project Path="Tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
+    <Project Path="Tests/Behavioral/GenericReceiverFieldAddress/GenericReceiverFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/GenericStructFields/GenericStructFields.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeAssertions/GenericTypeAssertions.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeDecl/GenericTypeDecl.csproj" />

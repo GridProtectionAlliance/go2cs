@@ -107,6 +107,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
 
     [TestMethod]
+    public void CheckGenericReceiverFieldAddress() => CheckTarget("GenericReceiverFieldAddress");
+
+    [TestMethod]
     public void CheckGenericStructFields() => CheckTarget("GenericStructFields");
 
     [TestMethod]

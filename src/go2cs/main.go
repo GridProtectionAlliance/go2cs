@@ -486,6 +486,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDynamicTypeNames = make(map[string]string)
 		packageAddressedGlobals = make(map[types.Object]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
+		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -2535,7 +2536,23 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg.Name() != packageName {
-			return getSanitizedImport(pkg.Path()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
+			baseName := getSanitizedImport(pkg.Path()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
+
+			// Append type arguments for an instantiated cross-package generic type (e.g.
+			// atomic.Pointer[Config]). The qualified-name form above omits them, whereas the
+			// local fall-through path keeps them via t.String(); without this, a boxed value
+			// of such a type emits `new sync.atomic_package.Pointer()` (missing <Config>).
+			if typeArgs := named.TypeArgs(); typeArgs != nil && typeArgs.Len() > 0 {
+				args := make([]string, typeArgs.Len())
+
+				for i := 0; i < typeArgs.Len(); i++ {
+					args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+				}
+
+				return baseName + "[" + strings.Join(args, ", ") + "]"
+			}
+
+			return baseName
 		}
 	}
 
