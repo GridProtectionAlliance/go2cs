@@ -247,10 +247,28 @@ address / capture machinery needs a substantial rework (likely replacing the sta
 with something that works for value calls and generic receivers). `internal/cpu` likewise isn't promotable
 (asm `cpuid` is a stub). Promotion stays **pull/validation-driven**; this gate correctly blocked it.
 
-### Next defects (work queue)
-- **Receiver-field address / capture rework** — make `&recv.field` reference the real field for value calls
-  and generic receivers. This is the unlock for `sync/atomic`'s typed types and any pointer-receiver method
-  that takes the address of its own field.
+### Receiver-field address / capture rework — staged (2026-06-26)
+
+Making `&recv.field` reference the real receiver field (the `sync/atomic` typed-type unlock). Split into two
+stages:
+
+- **Stage A — DONE (commit `36363ef16`, behavioral green 236/236).** `convUnaryExpr` emits the captured-box
+  field-ref form (`<capturedName>.of(Type.ᏑField)`) for `&recv.field` on a non-generic pointer receiver (the
+  detection must run *before* the struct-field gate, since the receiver's selector type is a pointer). The
+  captured-receiver field name is made unique per receiver type (`<Method>_<RecvType>ꓸᏑx`) so it doesn't
+  collide across overloaded same-named methods (`Int32.Add`, `Int64.Add`, …) — coordinated in the converter
+  (`getCapturedReceiverName`) and the generator (`ReceiverMethodTemplate`).
+- **Stage B — TODO (the hard part).** The captured form only works when the method is called via the `ж`
+  (pointer) overload, which sets up the captured receiver. A value-receiver call (`var i atomic.Int32;
+  i.Store(10)`) routes through the `ref` overload and the capture is never initialized. Needed: (1) a
+  **pre-pass** to identify "capture-mode" methods (those taking `&recv.field`), (2) **escape analysis** to
+  heap-box a value var when a capture-mode method is called on it, and (3) **call-site routing** to invoke
+  such calls through the `ж` overload (`Ꮡi.Store(10)`) — exactly how an explicit `&i` is already boxed.
+  Two known sub-issues remain: generic receivers (`atomic.Pointer[T]`) and the static-`ThreadLocal` capture
+  field. **Promising alternative:** give capture-mode methods a `ж<T>` receiver **directly** (the box is a
+  parameter, not a static `ThreadLocal`) — this puts `T` in scope for generic receivers and removes the
+  init-order problem, at the cost of rewriting `x` → `Ꮡx.val` in the method body. The escape/call-routing is
+  required either way.
 - ~~Promote `internal/cpu` and `sync/atomic`~~ — gated on the above (atomic) / asm `cpuid` (cpu).
 - Confirm `internal/cpu` / `sync/atomic` build within the full
   `go-src-converted.sln` alongside their dependents.
