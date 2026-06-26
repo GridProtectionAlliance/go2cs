@@ -1,6 +1,15 @@
 // Copyright 2022 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
+using go;
+
+// Hand-finished conversion. Pointer<T> below is rewritten to store its value as a managed ж<T>
+// (using Volatile/Interlocked) rather than an unsafe.Pointer: unsafe.Pointer is an alias for nuint
+// and the CLR cannot hold a managed reference as a number across a GC move. This module marker is
+// detected by containsManualConversionMarker (go2cs/directiveOperations.go); when set, go2cs skips
+// re-converting this file so the manual edits are preserved on any future stdlib reconversion.
+[module: GoManualConversion]
+
 namespace go.sync;
 
 using @unsafe = unsafe_package;
