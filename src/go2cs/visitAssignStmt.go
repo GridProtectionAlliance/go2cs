@@ -268,6 +268,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// Reassigning the direct-ж receiver to a pointer value (`r = r.prev`, a ring walk):
+			// emit the box `Ꮡr` on the LHS so the pointer-reassignment path below repoints the box
+			// and re-aliases the value var (`Ꮡr = r.prev; r = ref Ꮡr.val;`). The deref'd value var
+			// alone cannot be repointed at a different node.
+			if i < rhsLen && v.exprIsCurrentDirectBoxReceiver(lhsExprs[i]) && isPointer(v.getExprType(rhsExprs[i])) {
+				context.isPointer = true
+			}
+
 			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
 			leftExprs.Add(lhsExpr)
 

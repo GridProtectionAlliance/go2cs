@@ -35,6 +35,7 @@ var packageDirectBoxReceiverMethods map[*types.Func]bool
 // objects are interned, so call-site lookups match.
 func collectCaptureModeMethods(pkg *packages.Package) {
 	visited := map[*packages.Package]bool{}
+	captureModeCandidates = nil
 
 	var scan func(p *packages.Package)
 
@@ -55,6 +56,27 @@ func collectCaptureModeMethods(pkg *packages.Package) {
 	}
 
 	scan(pkg)
+
+	// Transitive fixpoint: a method that calls a direct-ж method on its own receiver must itself
+	// become direct-ж (so it has a receiver box `Ꮡrecv` to route the call through). Repeat until
+	// stable, since the callee may only have been marked direct-ж in an earlier pass.
+	for changed := true; changed; {
+		changed = false
+
+		for _, candidate := range captureModeCandidates {
+			origin := candidate.funcObj.Origin()
+
+			if packageDirectBoxReceiverMethods[origin] {
+				continue
+			}
+
+			if bodyCallsDirectBoxMethodOnReceiver(candidate.body, candidate.recvName, candidate.info) {
+				packageCaptureModeMethods[origin] = true
+				packageDirectBoxReceiverMethods[origin] = true
+				changed = true
+			}
+		}
+	}
 }
 
 // scanFileForCaptureModeMethods marks the file's capture-mode methods in the shared set.
@@ -96,6 +118,15 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
+		// Record every pointer-receiver candidate for the transitive fixpoint below (a method
+		// that calls a direct-ж method on its receiver must itself become direct-ж).
+		captureModeCandidates = append(captureModeCandidates, &captureCandidate{
+			funcObj:  funcObj,
+			body:     funcDecl.Body,
+			recvName: recvName,
+			info:     info,
+		})
+
 		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
@@ -112,6 +143,56 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 
 		return true
 	})
+}
+
+// captureCandidate is a pointer-receiver method recorded for the transitive direct-ж fixpoint.
+type captureCandidate struct {
+	funcObj  *types.Func
+	body     *ast.BlockStmt
+	recvName string
+	info     *types.Info
+}
+
+// captureModeCandidates holds every pointer-receiver method seen while scanning the package and
+// its imports, used by the transitive fixpoint in collectCaptureModeMethods.
+var captureModeCandidates []*captureCandidate
+
+// bodyCallsDirectBoxMethodOnReceiver reports whether the body calls a direct-ж method on the
+// receiver itself (`recvName.someDirectBoxMethod(...)`). The caller must then also be direct-ж so
+// it has a receiver box `Ꮡrecv` to route the call through (the callee's ж overload needs it).
+func bodyCallsDirectBoxMethodOnReceiver(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		callExpr, ok := node.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		recvIdent, ok := selectorExpr.X.(*ast.Ident)
+
+		if !ok || recvIdent.Name != recvName {
+			return true
+		}
+
+		if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
+			if packageDirectBoxReceiverMethods[funcObj.Origin()] {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
 }
 
 // bodyReturnsReceiver reports whether the body returns the receiver itself (`return recvName`).
@@ -141,25 +222,35 @@ func bodyReturnsReceiver(body *ast.BlockStmt, recvName string) bool {
 }
 
 // bodyUsesReceiverAsPointerValue reports whether the body uses the receiver itself as a bare
-// pointer value on the RHS of an assignment (`recvField = recvName`, `x := recvName`). Such a
-// method needs the real receiver box (the pointer is copied/stored), which the direct-ж receiver
-// supplies as `Ꮡrecv` — without it a value-ref receiver (`this ref T recv`) has no pointer to
-// hand out, and `recv` (a T value) cannot be assigned to a *T field. The selector-`X` position
-// (`recvName.field`, a value field access) is not a bare RHS ident, so it is naturally excluded.
+// pointer value: on the RHS of an assignment (`recvField = recvName`, `x := recvName`), or as an
+// operand of a pointer ==/!= comparison (`p != recvName`). Such a method needs the real receiver
+// box (the pointer is copied/stored/compared), which the direct-ж receiver supplies as `Ꮡrecv` —
+// without it a value-ref receiver (`this ref T recv`) has no pointer to hand out, and `recv`
+// (a T value) cannot be assigned to a *T field or compared with a ж<T>. The selector-`X` position
+// (`recvName.field`, a value field access) is not a bare ident, so it is naturally excluded.
 func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string) bool {
 	found := false
 
 	ast.Inspect(body, func(node ast.Node) bool {
-		assignStmt, ok := node.(*ast.AssignStmt)
+		switch n := node.(type) {
+		case *ast.AssignStmt:
+			for _, rhs := range n.Rhs {
+				if ident, ok := rhs.(*ast.Ident); ok && ident.Name == recvName {
+					found = true
+					return false
+				}
+			}
+		case *ast.BinaryExpr:
+			if n.Op == token.EQL || n.Op == token.NEQ {
+				if ident, ok := n.X.(*ast.Ident); ok && ident.Name == recvName {
+					found = true
+					return false
+				}
 
-		if !ok {
-			return true
-		}
-
-		for _, rhs := range assignStmt.Rhs {
-			if ident, ok := rhs.(*ast.Ident); ok && ident.Name == recvName {
-				found = true
-				return false
+				if ident, ok := n.Y.(*ast.Ident); ok && ident.Name == recvName {
+					found = true
+					return false
+				}
 			}
 		}
 
@@ -216,6 +307,37 @@ func isDirectBoxReceiverMethod(funcDecl *ast.FuncDecl, info *types.Info) bool {
 	funcObj, _ := info.Defs[funcDecl.Name].(*types.Func)
 
 	return funcObj != nil && packageDirectBoxReceiverMethods[funcObj.Origin()]
+}
+
+// exprIsCurrentDirectBoxReceiver reports whether expr is the bare receiver identifier of the
+// current method when that method is direct-ж — i.e. its receiver box `Ꮡrecv` is in scope. Used
+// to route `recv.method()` (a direct-ж method called on the receiver) through that box.
+func (v *Visitor) exprIsCurrentDirectBoxReceiver(expr ast.Expr) bool {
+	ident, ok := expr.(*ast.Ident)
+
+	if !ok || v.currentFuncDecl == nil {
+		return false
+	}
+
+	isPtrRecv, recvName := v.isPointerReceiver()
+
+	return isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
+}
+
+// exprIsDerefdPointerParam reports whether expr is a pointer-typed parameter. Such a parameter is
+// emitted deref'd to a value alias (`ref var p = ref Ꮡp.val`) with the box `Ꮡp` as the actual
+// parameter, so a direct-ж method called on it must route through `Ꮡp` (a pointer *local* holds
+// the box directly and needs no routing).
+func (v *Visitor) exprIsDerefdPointerParam(expr ast.Expr) bool {
+	ident, ok := expr.(*ast.Ident)
+
+	if !ok || !v.identIsParameter(ident) {
+		return false
+	}
+
+	_, isPtr := v.getIdentType(ident).(*types.Pointer)
+
+	return isPtr
 }
 
 // bodyCallsCaptureModeMethodOn reports whether the body calls a capture-mode method with

@@ -148,6 +148,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

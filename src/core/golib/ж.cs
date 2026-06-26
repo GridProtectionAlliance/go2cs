@@ -337,19 +337,44 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (ReferenceEquals(this, other))
             return true;
 
-        if (IsReferenceType)
-        {
-            if (IsNull && other.IsNull)
-                return true;
+        // A nil pointer compares equal only to another nil pointer.
+        if (IsNull || other.IsNull)
+            return IsNull && other.IsNull;
 
-            if (IsNull || other.IsNull)
+        // Go pointer comparison is by identity — the same storage location — NOT by the pointed-to
+        // value. A value-comparison fallback is both wrong (two distinct addresses that happen to
+        // hold equal values are not equal pointers in Go) and unsound: it infinitely recurses for a
+        // self-referential struct, one whose fields include a ж<T> back to its own type (e.g.
+        // container/ring's `Ring.next *Ring`), since the struct's own Equals compares those fields.
+
+        // Pointer into a struct field (`Ꮡx.of(T.ᏑField)`): same source object and field accessor.
+        if (m_structFieldRef is not null || other.m_structFieldRef is not null)
+        {
+            if (m_structFieldRef is null || other.m_structFieldRef is null)
                 return false;
 
-            if (ReferenceEquals(m_val, other.m_val))
-                return true;
+            (object source1, FieldRefFunc<T> fieldRef1) = m_structFieldRef.Value;
+            (object source2, FieldRefFunc<T> fieldRef2) = other.m_structFieldRef.Value;
+
+            return ReferenceEquals(source1, source2) && fieldRef1.Equals(fieldRef2);
         }
 
-        return m_val!.Equals(other.m_val);
+        // Pointer into an array/slice element: same backing array and same index.
+        if (m_arrayIndexRef is not null || other.m_arrayIndexRef is not null)
+        {
+            if (m_arrayIndexRef is null || other.m_arrayIndexRef is null)
+                return false;
+
+            (IArray array1, int index1) = m_arrayIndexRef.Value;
+            (IArray array2, int index2) = other.m_arrayIndexRef.Value;
+
+            return ReferenceEquals(array1, array2) && index1 == index2;
+        }
+
+        // Two standard heap pointers, each a distinct allocation: equal only if they wrap the same
+        // reference-type object (the ReferenceEquals(this, other) check above already handled the
+        // same-box case, so distinct value-type allocations are distinct addresses → not equal).
+        return IsReferenceType && ReferenceEquals(m_val, other.m_val);
     }
 
     /// <inheritdoc />
@@ -361,8 +386,23 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        // ReSharper disable once NonReadonlyMemberInGetHashCode
-        return m_val?.GetHashCode() ?? 0;
+        // Identity-based hash, consistent with the identity Equals above. Hashing m_val directly
+        // would recurse for a self-referential struct (its hash includes its ж<T> fields), so hash
+        // by the referenced storage instead.
+        if (IsNull)
+            return 0;
+
+        if (m_structFieldRef is not null)
+            return RuntimeHelpers.GetHashCode(m_structFieldRef.Value.Item1);
+
+        if (m_arrayIndexRef is not null)
+            return System.HashCode.Combine(RuntimeHelpers.GetHashCode(m_arrayIndexRef.Value.Item1), m_arrayIndexRef.Value.Item2);
+
+        // Standard heap pointer: a reference-type value uses the wrapped object's identity (equal
+        // pointers share it); a value-type box uses this box's own identity.
+        return IsReferenceType && m_val is not null
+            ? RuntimeHelpers.GetHashCode(m_val)
+            : RuntimeHelpers.GetHashCode(this);
     }
 
     // WISH: Would be super cool if this operator supported "ref" return, like:

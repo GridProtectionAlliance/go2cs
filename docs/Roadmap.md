@@ -429,6 +429,35 @@ container/ring 12→8 errors, container/list 25→~10 (and the remainder are now
   receiver `r` (CS0019). The comparison must emit `Ꮡr`; extend the receiver-as-pointer-value detection/emission to
   binary (==/!=) operands, not just assignment RHS.
 
+### Phase 3 iteration 12 — container/ring + list COMPILE AND RUN; `ж<T>` identity equality (2026-06-26)
+
+Finished the `ж<T>` self-referential-pointer model — **container/ring and container/list both compile clean**, and
+(crucially) **run correctly**. Four converter pieces + one runtime fix; zero existing behavioral goldens changed:
+- **A-variant** (`captureModeOperations.go`): `bodyUsesReceiverAsPointerValue` also fires when the receiver is an
+  operand of a `==`/`!=` comparison (`p != r`). `convBinaryExpr` already sets isPointer on comparison operands, so
+  `convIdent` then emits `Ꮡr`. (ring 8→6)
+- **C — transitive direct-ж** (`captureModeOperations.go` + `convSelectorExpr.go`): a method calling a direct-ж
+  method on its receiver (`return r.init()`) must itself be direct-ж. New candidate list + **fixpoint** over
+  `bodyCallsDirectBoxMethodOnReceiver` (repeat until stable — the callee may only be marked in a later pass). The
+  call routes through the box: `convSelectorExpr` now boxes the receiver for `exprIsCurrentDirectBoxReceiver` and
+  for a deref'd pointer **parameter** (`exprIsDerefdPointerParam`, e.g. `Link`'s `s.Prev()`). (ring 6→2)
+- **D — reassign the receiver pointer** (`visitAssignStmt.go`): `r = r.prev` on a direct-ж receiver emits the box on
+  the LHS (`exprIsCurrentDirectBoxReceiver` + RHS-is-pointer), so the existing pointer-reassignment path produces
+  `Ꮡr = r.prev; r = ref Ꮡr.val;` (repoint + re-alias). (ring 2→0 — **container/ring compiles clean**)
+- **E — chained selector through a pointer field** (`convSelectorExpr.go`): `e.list.root` / `p.next.prev` (an
+  intermediate pointer field) wasn't dereferenced — the receiver/param skip-deref check used `getIdentifier(X)`,
+  which digs to the *root* of the chain (`e`), so it wrongly skipped derefing `e.list`. Now it only skips when `X`
+  is *directly* the receiver/param ident. (list 10→0 — **container/list compiles clean**)
+- **golib `ж<T>` identity equality** (`ж.cs`): the **runtime correctness gate**. The new `RingPointerMethods` test
+  *compiled* but *stack-overflowed* — `ж<T>.Equals` did pointed-to-**value** comparison, but Go pointer comparison is
+  **identity**; value comparison infinitely recurses on a self-referential struct (`Ring.next *Ring`). Rewrote
+  `Equals`/`GetHashCode` to compare by referenced storage (same box, same struct-field source+accessor, or same
+  array+index), never the value. Correct Go semantics and recursion-free.
+
+Guarded by the **`RingPointerMethods`** behavioral test (a full mini-ring exercising A/A-variant/B/C/D/E — build,
+walk, Len, Move±, Prev — output matches Go). The golib change touches all pointer equality; validated by the full
+suite. **Both container packages now compile *and* run** — closing out the general pointer-as-value problems.
+
 ### Phase 3 — earlier note: the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/

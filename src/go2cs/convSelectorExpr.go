@@ -49,8 +49,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
 			if ptrType, isPtrType := exprType.(*types.Pointer); isPtrType {
-				// Check if the expression is an intra-function identifier (could be a receiver or parameter)
-				if exprIdent := getIdentifier(selectorExpr.X); v.inFunction && exprIdent != nil {
+				// Check if the expression is *directly* an intra-function identifier (the
+				// receiver or a parameter) — a value-ref receiver/param accesses its fields
+				// without a deref. Use a direct type assertion, NOT getIdentifier (which digs
+				// to the root of a selector chain): for `e.list.root` the X is `e.list` (a
+				// pointer field), which must be dereferenced even though the chain roots at `e`.
+				if exprIdent, isIdent := selectorExpr.X.(*ast.Ident); v.inFunction && isIdent {
 					if obj := v.info.ObjectOf(exprIdent); obj != nil {
 						// Check if it's a receiver or parameter pointer variable
 						if selVar, ok := obj.(*types.Var); ok {
@@ -102,7 +106,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// `&recv.field` — e.g. `var i atomic.Int32; i.Store(10)` → `Ꮡi.Store(10)`. The
 	// receiver is heap-boxed by escape analysis (see collectCaptureModeMethods), so its
 	// "Ꮡname" companion exists.
-	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && v.isHeapBoxedExpr(selectorExpr.X) {
+	// The receiver may be a heap-boxed value var (escape analysis), the current method's own
+	// direct-ж receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() {
+	// return r.init() }` — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
+	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
+	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X)) {
 		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
 	}
 
