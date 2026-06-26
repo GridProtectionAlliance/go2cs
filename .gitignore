@@ -362,3 +362,29 @@ src/core/log/**/[Dd]ebug/
 src/core/log/**/[Bb]in/
 src/core/log/**/[Oo]bj/
 
+# -- Same exclusions, mirrored for the full auto-conversion tree (src/go-src-converted) --
+# The Go stdlib has packages named "debug" and "log" that collide with the
+# Visual Studio [Dd]ebug/ and [Ll]og/ ignore rules; un-ignore the package source
+# but still ignore any build (Debug/bin/obj) folders nested under them.
+
+# Don't ignore the debug folder in src/go-src-converted
+!src/go-src-converted/debug/
+!src/go-src-converted/debug/*
+src/go-src-converted/debug/**/[Dd]ebug/
+src/go-src-converted/debug/**/[Bb]in/
+src/go-src-converted/debug/**/[Oo]bj/
+
+# Don't ignore the debug folder in src/go-src-converted/runtime
+!src/go-src-converted/runtime/debug/
+!src/go-src-converted/runtime/debug/*
+src/go-src-converted/runtime/debug/**/[Dd]ebug/
+src/go-src-converted/runtime/debug/**/[Bb]in/
+src/go-src-converted/runtime/debug/**/[Oo]bj/
+
+# Don't ignore the log folder in src/go-src-converted
+!src/go-src-converted/log/
+!src/go-src-converted/log/*
+src/go-src-converted/log/**/[Dd]ebug/
+src/go-src-converted/log/**/[Bb]in/
+src/go-src-converted/log/**/[Oo]bj/
+
