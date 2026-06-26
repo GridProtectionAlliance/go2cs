@@ -20,7 +20,6 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = true
 	v.capturedVarCount = nil
 	v.tempVarCount = nil
-	v.captureReceiver = false
 	v.useUnsafeFunc = false
 
 	goFunctionName := funcDecl.Name.Name
@@ -361,11 +360,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	if isModuleInitializer {
 		v.replaceMarker(functionAttributeMarker, "[GoInit] ")
 	} else if strings.HasPrefix(parameterSignature, "this ref ") {
-		if v.captureReceiver {
-			v.replaceMarker(functionAttributeMarker, "[GoRecv(\"capture\")] ")
-		} else {
-			v.replaceMarker(functionAttributeMarker, "[GoRecv] ")
-		}
+		v.replaceMarker(functionAttributeMarker, "[GoRecv] ")
 	} else {
 		v.replaceMarker(functionAttributeMarker, "")
 	}

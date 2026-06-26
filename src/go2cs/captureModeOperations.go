@@ -96,7 +96,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -112,6 +112,32 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 
 		return true
 	})
+}
+
+// bodyReturnsReceiver reports whether the body returns the receiver itself (`return recvName`).
+// Such a method also needs the real receiver box (it returns the pointer), which the direct-ж
+// receiver supplies as `Ꮡrecv` — see visitReturnStmt.
+func bodyReturnsReceiver(body *ast.BlockStmt, recvName string) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		returnStmt, ok := node.(*ast.ReturnStmt)
+
+		if !ok {
+			return true
+		}
+
+		for _, result := range returnStmt.Results {
+			if ident, ok := result.(*ast.Ident); ok && ident.Name == recvName {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
 }
 
 // bodyTakesReceiverFieldAddress reports whether the body contains `&recvName.field`.

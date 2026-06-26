@@ -196,8 +196,10 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
     return 0;
 }
 
-[GoRecv("capture")] public static ж<Type> Common(this ref Type t) {
-    return Common_TypeꓸᏑt;
+public static ж<Type> Common(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.val;
+
+    return Ꮡt;
 }
 
 [GoType("num:nint")] partial struct ΔChanDir;

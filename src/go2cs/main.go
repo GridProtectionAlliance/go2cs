@@ -111,7 +111,6 @@ type Visitor struct {
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool
-	captureReceiver      bool
 	useUnsafeFunc        bool
 	capturedVarCount     map[string]int
 	tempVarCount         map[string]int
@@ -1653,38 +1652,6 @@ func (v *Visitor) isPointerReceiver() (bool, string) {
 	}
 
 	return true, recvName
-}
-
-func (v *Visitor) getCapturedReceiverName(recvName string) string {
-	if !v.inFunction {
-		return ""
-	}
-
-	// Include the receiver's (generics-stripped) type name so the captured-receiver
-	// field is unique across overloaded same-named methods on different receiver types
-	// (e.g. Int32.Add, Int64.Add, … all named "Add"). Must match the name the
-	// RecvGenerator emits for the capture field.
-	recvTypeName := ""
-
-	if v.currentFuncSignature != nil {
-		if recv := v.currentFuncSignature.Recv(); recv != nil {
-			recvType := recv.Type()
-
-			if pointer, ok := recvType.(*types.Pointer); ok {
-				recvType = pointer.Elem()
-			}
-
-			recvTypeName = v.getTypeName(recvType, false)
-
-			// Drop type parameters (Go renders them as `Name[T]`) to match the
-			// RecvGenerator's GetSimpleName(receiverType).
-			if index := strings.IndexAny(recvTypeName, "[<"); index >= 0 {
-				recvTypeName = recvTypeName[:index]
-			}
-		}
-	}
-
-	return fmt.Sprintf("%s_%s%s%s%s", v.currentFuncName, recvTypeName, TypeAliasDot, AddressPrefix, recvName)
 }
 
 func paramsAreInterfaces(paramTypes *types.Tuple, andNotEmptyInterface bool) []bool {

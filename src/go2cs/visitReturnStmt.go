@@ -18,15 +18,12 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				if ident.Name == recvName {
 					recvIndex = i
 
-					if isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
-						// Direct-ж: the receiver box is the parameter `Ꮡrecv`, so return it
-						// directly. Keeps a method that both takes `&recv.field` and returns the
-						// receiver consistent (no static ThreadLocal capture, which races).
-						capturedRecvName = AddressPrefix + recvName
-					} else {
-						v.captureReceiver = true
-						capturedRecvName = v.getCapturedReceiverName(recvName)
-					}
+					// Direct-ж: the receiver box is the parameter `Ꮡrecv`, so return it
+					// directly. A method that returns its receiver is marked direct-box by the
+					// pre-pass (bodyReturnsReceiver → packageDirectBoxReceiverMethods), so it is
+					// emitted with the `ж<T> Ꮡrecv` receiver. This replaces the old static
+					// ThreadLocal capture, which raced across threads for distinct receivers.
+					capturedRecvName = AddressPrefix + recvName
 
 					break
 				}

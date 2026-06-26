@@ -295,9 +295,17 @@ stages:
   Re-ran the stress test → "no race observed". `core/sync/atomic/type.cs` scalars re-emitted to direct-`ж`
   (the file is `GoManualConversion`, so re-emitted by hand from a reconvert, keeping the managed `Pointer<T>`).
   Guarded by the `AtomicValues` test; only the `ReceiverFieldAddress` golden changed (intended, still correct).
-  **Remaining instance:** the *return-receiver* capture (`func (t *T) Common() *T { return t }` in
-  `internal/abi`) still uses the racy ThreadLocal — same fix applies (detect `return recv` in the pre-pass)
-  but it touches baseline `internal/abi`, so deferred as a separate, lower-stakes follow-up.
+- **Return-receiver capture converted too, and the ThreadLocal mechanism DELETED.** The other capture trigger
+  — `func (t *T) Common() *T { return t }` (`internal/abi`) — now also emits direct-`ж` (`captureModeOperations.go`
+  `bodyReturnsReceiver` marks it direct-box; `visitReturnStmt.go` returns `Ꮡrecv`). With **both** triggers on
+  direct-`ж`, nothing emits `[GoRecv("capture")]` anymore, so the whole racy mechanism is dead and was removed:
+  converter (`captureReceiver` field, `getCapturedReceiverName`, the `[GoRecv("capture")]` emission) and
+  generator (`ReceiverMethodTemplate`'s `CapturePointer`/`CaptureName`/`CaptureDeclarations`/`CaptureOperation`
+  + the `ThreadLocal` `using`, and `RecvGenerator`'s now-unused `Options` arg) — ~55 lines gone, generated `ж`
+  overloads are now a clean deref+delegate. Baseline `core/internal/abi/type.cs` `Common` surgically updated to
+  direct-`ж` (promotion overloads regenerate correctly); `StdLibInternalAbi` golden updated. Full solution green;
+  32/32 capture-affected behavioral phases pass; stress test still "no race observed". There is now **one** way
+  a pointer-receiver method captures its box (the `ж<T>` parameter) — no thread-local, no shared state.
 - **`sync/atomic` PROMOTED to `core` — first stdlib package migrated.** `src/core/sync/atomic` is now in the
   green baseline (`go2cs.slnx`, `/core/` folder), referencing `core/unsafe` + `core/golib`. Scalar typed
   types are the converter output as-is; `Pointer[T]` is **hand-rewritten** in the promoted (hand-owned) copy.

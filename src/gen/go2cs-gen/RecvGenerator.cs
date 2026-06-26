@@ -73,20 +73,6 @@ public class RecvGenerator : ISourceGenerator
 
             foreach (AttributeSyntax attribute in attributes)
             {
-                string options = string.Empty;
-
-                // Get the attribute's argument values
-                (string _, string value)[] arguments = attribute.GetArgumentValues();
-
-                // Get the attribute's first constructor argument value, the options string
-                if (arguments.Length > 0)
-                {
-                    string value = arguments[0].value;
-
-                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
-                        options = value[1..^1].Trim();
-                }
-
                 MethodInfo method = methodSyntax.GetMethodInfo(context.Compilation);
 
                 // Only process methods with a reference receiver to create
@@ -100,7 +86,6 @@ public class RecvGenerator : ISourceGenerator
                     PackageName = packageName,
                     Scope = scope,
                     Method = method,
-                    Options = options,
                     UsingStatements = usingStatements
                 }
                 .Generate();
