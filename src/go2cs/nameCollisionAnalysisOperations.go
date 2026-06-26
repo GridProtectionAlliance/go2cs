@@ -31,6 +31,15 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 					for _, spec := range node.Specs {
 						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
 							for _, name := range valueSpec.Names {
+								// The blank identifier is a discard, never referenced, and the
+								// value-spec visitor gives each blank a unique name — so a `_`
+								// const/var must not be treated as colliding with a `func _()`
+								// (a common stringer compile-time assertion). Otherwise every
+								// `_` is Δ-prefixed to the same `Δ_` and they collide (CS0102).
+								if name.Name == "_" {
+									continue
+								}
+
 								namedElementNames[name.Name] = false
 							}
 						}

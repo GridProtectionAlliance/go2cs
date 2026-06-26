@@ -55,6 +55,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]

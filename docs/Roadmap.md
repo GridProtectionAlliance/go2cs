@@ -355,6 +355,21 @@ suite green throughout; zero existing goldens changed by any):
 | **Empty/spread variadic-of-pointer call** — `In(r)` (no trailing args) panicked the converter (`Args[i]` indexed past end); `f(slice...)` emitted `Ꮡslice` (element address-of applied to the spread slice) | converter panic → dropped file; CS0103 | `convCallExpr.go`: guard the element-pointer arg treatment with `paramHasArg` (empty call) and `!(hasSpreadOperator && last param)` (spread). |
 
 The last two ship together with the `VariadicPointerParam` behavioral test (args/empty/single/spread calls).
+
+### Phase 3 iteration 9 — blank-identifier collision (CS0102) (2026-06-26)
+
+A package declaring blank `_` constants (skipping `iota` values) **and** a blank `func _()` (the stringer
+compile-time-assertion idiom — e.g. `internal/types/errors`) emitted multiple `internal static readonly … Δ_`
+fields that collided: CS0102 "already contains a definition for 'Δ_'". Root cause: `performNameCollisionAnalysis`
+recorded `_` in both the named-element set (the blank consts) and the method-name set (`func _()`), flagged it
+as a const↔method collision, and `getSanitizedIdentifier` Δ-prefixed every `_` to the same `Δ_` — defeating
+the value-spec visitor's per-blank unique naming (`_ᴛNʗ`). Fix (`nameCollisionAnalysisOperations.go`): exclude
+the blank identifier from collision analysis (it is a discard, never referenced, and already gets unique names).
+internal/types/errors CS0102 4→0 (remaining: a `strconv` project-ref, separate). Guarded by `BlankIdentifierCollision`;
+behavioral suite green, zero existing goldens changed. **Found-but-deferred:** a bare discard `_ = expr` *inside*
+a `func _()` emits `_ = …` which binds to the method group → CS1656 ("cannot assign to '_'") — a separate edge
+case (real stringer asserts use `_ = x[C-C]`); not hit by internal/types/errors' actual body.
+
 **Next defect:** the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/

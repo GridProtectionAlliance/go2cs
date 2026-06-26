@@ -51,6 +51,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
+
+    [TestMethod]
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]
