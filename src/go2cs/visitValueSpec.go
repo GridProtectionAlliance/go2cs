@@ -290,8 +290,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			}
 
 			if c.Val().Kind() == constant.Int {
-				// Check if const integer value will exceed uint64 limits
-				if _, err := strconv.ParseUint(constVal, 0, 64); err != nil {
+				// Use an untyped (BigInteger) const only when the value fits in
+				// neither uint64 nor int64. ParseUint alone rejects negatives, which
+				// would wrongly promote ordinary negative consts (e.g. -1) to GoUntyped.
+				_, errUint := strconv.ParseUint(constVal, 0, 64)
+				_, errInt := strconv.ParseInt(constVal, 0, 64)
+				if errUint != nil && errInt != nil {
 					writeUntypedConst()
 				}
 			}

@@ -135,7 +135,7 @@ internal static void Main() {
         nint iΔ1 = 1;
         var exprᴛ2 = getNext();
         var matchᴛ1 = false;
-        if (exprᴛ2 is -1) { matchᴛ1 = true;
+        if (exprᴛ2 == -1) { matchᴛ1 = true;
             fmt.Println("negative");
         }
         else if (exprᴛ2 is 0) { matchᴛ1 = true;
@@ -159,7 +159,7 @@ internal static void Main() {
     {
         var next = getNext();
         var matchᴛ2 = false;
-        if (next is <= -1) { matchᴛ2 = true;
+        if (next <= -1) { matchᴛ2 = true;
             fmt.Println("negative");
             var exprᴛ4 = getNext();
             var matchᴛ3 = false;

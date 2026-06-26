@@ -194,7 +194,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 					if i == caseClauseCount-1 {
 						if hasFallthroughs {
-							if caseFallsThrough {
+							// Only close the wrapping paren when it was actually opened above
+							// (same guard as the matching '(' write). Otherwise a fallthrough
+							// case with a single pattern-matched value emits an unbalanced ')'.
+							if caseFallsThrough && (caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil) {
 								v.targetFile.WriteRune(')')
 							}
 

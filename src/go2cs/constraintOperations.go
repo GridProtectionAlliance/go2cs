@@ -160,6 +160,13 @@ var orderedOperatorTypes = NewHashSet([]ConstraintType{
 func getOperatorSet(constraintTypes HashSet[ConstraintType]) HashSet[OperatorSet] {
 	operatorSet := HashSet[OperatorSet]{}
 
+	// An empty constraint type set (e.g. a slice or map constraint) supports no
+	// lifted operators. Without this guard the empty set would count as a subset
+	// of every operator-type set below and incorrectly gain all operators.
+	if constraintTypes.IsEmpty() {
+		return operatorSet
+	}
+
 	if constraintTypes.IsSubsetOfSet(comparableOperatorTypes) {
 		operatorSet.Add(ComparableOperators)
 	}
@@ -582,8 +589,11 @@ func getConstraintTypeSet(constraintTypes []types.Type) HashSet[ConstraintType] 
 		case *types.Pointer:
 			constraintTypeSet.Add(Pointer)
 		case *types.Array:
-		case *types.Slice:
+			// Arrays are comparable in Go when their element type is comparable.
 			constraintTypeSet.Add(Array)
+		case *types.Slice:
+			// Slices are not comparable in Go (only against nil), so they
+			// contribute no operator-bearing constraint type.
 		case *types.Chan:
 			constraintTypeSet.Add(Channel)
 		case *types.Struct:
