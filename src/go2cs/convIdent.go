@@ -19,7 +19,10 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	if context.isPointer {
 		// Check if the identifier is an unsafe pointer
 		if basic, ok := v.getIdentType(ident).(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
-			return fmt.Sprintf("%s.val", v.getIdentName(ident))
+			// Sanitize the name so a C# keyword identifier (e.g. an `unsafe.Pointer`
+			// parameter named `new`, as in internal/runtime/atomic) is escaped to `@new`
+			// rather than emitted bare, which C# parses as the `new` operator (CS1526).
+			return fmt.Sprintf("%s.val", getSanitizedIdentifier(v.getIdentName(ident)))
 		}
 
 		// A direct-ж method's receiver used as a bare pointer value (e.g. `recv.field = recv`):

@@ -249,6 +249,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]
+    public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

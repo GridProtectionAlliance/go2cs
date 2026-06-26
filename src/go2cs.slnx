@@ -124,6 +124,7 @@
     <Project Path="Tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
     <Project Path="Tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />
     <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
+    <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
     <Project Path="Tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
   </Folder>
