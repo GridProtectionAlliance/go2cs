@@ -7,8 +7,6 @@ Convert source code written in the [Go programming language](https://golang.org/
 and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
 easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
-![CodeQL](https://github.com/GridProtectionAlliance/go2cs/workflows/CodeQL/badge.svg)
-
 ## Why go2cs
 
 Go provides a lot of high-level functionality from its compiler and runtime — slices, maps, channels,

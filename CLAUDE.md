@@ -1,7 +1,7 @@
 # CLAUDE.md — go2cs orientation
 
 > Canonical orientation for any Claude/AI task working in this repo. This file is **authoritative**;
-> where it disagrees with `docs/README.md` or the `.bat`/`.cmd` build scripts, those are **stale** —
+> where it disagrees with `docs/README.md` or the `.bat`/`.cmd` build scripts, those are considered **stale** —
 > trust this file and the source. See companion docs: [`docs/Architecture.md`](docs/Architecture.md),
 > [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md), [`docs/Roadmap.md`](docs/Roadmap.md).
 

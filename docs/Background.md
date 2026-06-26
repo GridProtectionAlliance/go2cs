@@ -14,6 +14,6 @@ For this project, the philosophy taken for converted code is to produce code tha
 
 If you are looking for a more _binary_ integration, you might consider using native compiled Go code directly within your .NET application. One option would be would be [exporting Go functions](https://golang.org/cmd/cgo/#hdr-C_references_to_Go) as C code, including the C code exports in a DLL and then [importing the functions](https://msdn.microsoft.com/en-us/library/system.runtime.interopservices.dllimportattribute%28v=vs.110%29.aspx) in C#.
 
-## ANTLR4 Grammar
+~~## ANTLR4 Grammar~~
 
-Go code is converted using ANTLR. Several improvements have been made to the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang). Even so, initial attempts to convert all the Go Standard Library code still finds that the grammar needs some more work. If you update the grammar file [in this project](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.
+~~Go code is converted using ANTLR. Several improvements have been made to the [Golang ANTLR4 grammar](https://github.com/antlr/grammars-v4/tree/master/golang). Even so, initial attempts to convert all the Go Standard Library code still finds that the grammar needs some more work. If you update the grammar file [in this project](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/go2cs/Parser), please kindly make a PR to update the original grammar on the [ANTLR site](https://github.com/antlr/grammars-v4) as well.~~
