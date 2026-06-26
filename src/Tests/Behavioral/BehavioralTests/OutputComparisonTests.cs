@@ -133,6 +133,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]

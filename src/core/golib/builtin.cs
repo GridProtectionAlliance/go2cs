@@ -668,6 +668,46 @@ public static class builtin
     }
 
     /// <summary>
+    /// Returns the smallest value among its ordered arguments (the Go 1.21 <c>min</c> built-in).
+    /// </summary>
+    /// <param name="x">First value (Go requires at least one argument).</param>
+    /// <param name="rest">Remaining values to compare.</param>
+    /// <returns>The minimum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
+    /// <remarks>For floating-point arguments this follows <see cref="IComparable{T}"/> ordering, which
+    /// sorts NaN below all other values — matching Go's <c>min</c> (which yields NaN if any argument is NaN).</remarks>
+    public static T min<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
+    {
+        T result = x;
+
+        foreach (T value in rest)
+        {
+            if (value.CompareTo(result) < 0)
+                result = value;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Returns the largest value among its ordered arguments (the Go 1.21 <c>max</c> built-in).
+    /// </summary>
+    /// <param name="x">First value (Go requires at least one argument).</param>
+    /// <param name="rest">Remaining values to compare.</param>
+    /// <returns>The maximum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
+    public static T max<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
+    {
+        T result = x;
+
+        foreach (T value in rest)
+        {
+            if (value.CompareTo(result) > 0)
+                result = value;
+        }
+
+        return result;
+    }
+
+    /// <summary>
     /// Gets the imaginary part of the complex number <paramref name="c"/>.
     /// </summary>
     /// <param name="c">Complex number.</param>

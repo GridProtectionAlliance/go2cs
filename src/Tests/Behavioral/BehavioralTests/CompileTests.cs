@@ -165,6 +165,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
