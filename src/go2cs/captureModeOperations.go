@@ -96,7 +96,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -129,6 +129,35 @@ func bodyReturnsReceiver(body *ast.BlockStmt, recvName string) bool {
 
 		for _, result := range returnStmt.Results {
 			if ident, ok := result.(*ast.Ident); ok && ident.Name == recvName {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyUsesReceiverAsPointerValue reports whether the body uses the receiver itself as a bare
+// pointer value on the RHS of an assignment (`recvField = recvName`, `x := recvName`). Such a
+// method needs the real receiver box (the pointer is copied/stored), which the direct-ж receiver
+// supplies as `Ꮡrecv` — without it a value-ref receiver (`this ref T recv`) has no pointer to
+// hand out, and `recv` (a T value) cannot be assigned to a *T field. The selector-`X` position
+// (`recvName.field`, a value field access) is not a bare RHS ident, so it is naturally excluded.
+func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		assignStmt, ok := node.(*ast.AssignStmt)
+
+		if !ok {
+			return true
+		}
+
+		for _, rhs := range assignStmt.Rhs {
+			if ident, ok := rhs.(*ast.Ident); ok && ident.Name == recvName {
 				found = true
 				return false
 			}

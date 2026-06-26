@@ -403,6 +403,32 @@ arithmetic/shift-count coercions); a handful of 1–2-error leaves.
 CS0051/52 (exported field of an unexported type), internal/runtime/atomic CS1526 (`new` without `()`), and the
 deferred CS1656 (bare `_ = expr` discard inside a `func _()`).
 
+### Phase 3 iteration 11 — `ж<T>` sub-problem A: receiver as a pointer value (2026-06-26)
+
+A method that uses its pointer receiver as a bare *value* — `func (r *ring) initSelf() { r.next = r }` (assign the
+receiver to a pointer field) — emitted `n.next = n`: a value-ref receiver (`this ref ring r`) has no box, so a
+ring value was assigned to a `ж<ring>` field (didn't compile; would point into a copy). Fix, two parts:
+- `captureModeOperations.go`: a third direct-ж trigger `bodyUsesReceiverAsPointerValue` (the receiver appears as a
+  bare RHS identifier of an assignment) — alongside the existing `&recv.field` and `return recv` triggers — so such
+  methods get the box-as-receiver form `this ж<ring> Ꮡr`.
+- `convIdent.go`: when the receiver of a direct-ж method is used as a pointer value (its RHS context sets isPointer
+  via iteration-10's `rhsPointerCopyContext`), emit the receiver box `Ꮡr` (the value-ref path has no box).
+
+Validated by `ReceiverPointerValue` (self-link, cross-link, pointer-walk; mutating through the self-link proves the
+field points at the real receiver — 42/42/3/2). Suite green 264/264, zero existing goldens changed. **Payoff:**
+container/ring 12→8 errors, container/list 25→~10 (and the remainder are now *different*, narrower defects).
+
+**Remaining `ж<T>` sub-problems** (the still-failing ring/list errors, each a distinct mechanism — follow-up work):
+- **C — transitive direct-ж.** A method calling a direct-ж method on its (value) receiver, e.g. `Next`/`Prev`:
+  `return r.init()` where `init` is direct-ж → `r` (a `ref Ring` value) can't call the `ж<Ring>` overload (CS1929).
+  The caller must itself become direct-ж; needs a fixpoint over `bodyCallsDirectBoxMethodOnReceiver`.
+- **D — reassign the receiver pointer.** `Move`'s `r = r.prev` / `r = r.next` walks the ring by repointing the
+  receiver. With a direct-ж receiver `r` is `ref var r = ref Ꮡr.val` (a value alias) → assigning a `ж<Ring>` to it
+  is CS0029. Needs `Ꮡr = r.prev; r = ref Ꮡr.val` (repoint the box, re-alias) — the receiver-pointer-reassignment case.
+- **A-variant — receiver in a comparison.** `Len`/`Do`'s `for (… p != r; …)` compares a `ж<Ring>` to the value
+  receiver `r` (CS0019). The comparison must emit `Ꮡr`; extend the receiver-as-pointer-value detection/emission to
+  binary (==/!=) operands, not just assignment RHS.
+
 ### Phase 3 — earlier note: the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/

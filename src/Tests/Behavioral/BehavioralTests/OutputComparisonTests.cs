@@ -145,6 +145,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckReceiverFieldAddress() => CheckTarget("ReceiverFieldAddress");
 
     [TestMethod]
+    public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

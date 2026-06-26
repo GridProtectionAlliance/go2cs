@@ -22,6 +22,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 			return fmt.Sprintf("%s.val", v.getIdentName(ident))
 		}
 
+		// A direct-ж method's receiver used as a bare pointer value (e.g. `recv.field = recv`):
+		// the receiver box is the parameter `Ꮡrecv`, so emit that. A value-ref receiver
+		// (`this ref T recv`) has no box and its deref'd value cannot stand in for the pointer
+		// — this is why such methods are marked direct-ж (see packageDirectBoxReceiverMethods).
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@")
+		}
+
 		var identEscapesHeap bool
 		obj := v.info.ObjectOf(ident)
 

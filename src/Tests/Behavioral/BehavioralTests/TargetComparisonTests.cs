@@ -182,6 +182,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReceiverFieldAddress() => CheckTarget("ReceiverFieldAddress");
 
     [TestMethod]
+    public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
