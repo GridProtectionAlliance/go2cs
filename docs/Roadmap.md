@@ -194,11 +194,27 @@ so addressed anonymous-struct globals (`&S.field`) now work too. Behavioral gree
 changed (no behavioral test had an anonymous-struct global). Guarded by an extension to the `AnonymousStructs`
 test (a package-global anonymous-struct var, read and mutated through a field pointer).
 
+### Phase 3 iteration 6 — TypeGenerator CS0051 (unexported embedded marker) (2026-06-26)
+
+A public struct embedding an unexported marker type as a blank field (`_ noCopy`, the
+`sync/atomic.Bool` pattern) made the **`TypeGenerator`** (Roslyn) emit `public Bool(noCopy _)` —
+a public constructor whose parameter type `noCopy` is `internal` → CS0051. Root cause:
+`GetScope("_")` returns `"public"` (the `firstChar == '_'` rule), so the blank embedded field
+was classified as a public member and drove the public ctor. Fix in `StructTypeTemplate.PublicStructMembers`:
+exclude blank/underscore-prefixed fields (never exported in Go) from the public constructor. All CS0051
+in `sync/atomic` cleared; behavioral green (232/232 + the new test). Guarded by `UnexportedEmbeddedMarker`.
+
 ### Next defects (work queue)
-- **Promote `internal/cpu`** toward the baseline (now that it compiles), or first confirm it builds within the
-  full `go-src-converted.sln` alongside its dependents.
-- **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
-  constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
+- **`sync/atomic` asm-function companion (CS0111/CS0759)** — the remaining blocker. `sync/atomic` ships a
+  hand-written `doc_impl.cs` companion that provides the real `Interlocked`-based bodies via `partial`
+  methods, expecting the converter to emit `partial` *declarations* for the bodyless (asm) functions in
+  `doc.go`. The iteration-1 asm-stub fix instead emits a non-partial throwing stub, which now collides with
+  the companion (duplicate member + orphaned partial impl). Proper fix: let the **source generator** emit a
+  throwing `partial` implementation only for bodyless `partial` declarations that have **no** other
+  implementation in the compilation — so companion packages (sync/atomic) use their hand-written bodies while
+  companion-less packages (e.g. `crypto/internal/boring/sig`) still get a stub. Revert the converter's
+  asm-stub to a plain `partial` declaration once that generator exists.
+- **Promote `internal/cpu`** toward the baseline, or confirm it builds within the full `go-src-converted.sln`.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
 
 ## Progress tracking

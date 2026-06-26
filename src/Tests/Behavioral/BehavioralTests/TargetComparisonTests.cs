@@ -218,6 +218,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTypeSwitch() => CheckTarget("TypeSwitch");
 
     [TestMethod]
+    public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]

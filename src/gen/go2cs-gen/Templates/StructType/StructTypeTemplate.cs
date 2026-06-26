@@ -22,8 +22,16 @@ internal class StructTypeTemplate : TemplateBase
     public string NonGenericStructName => m_nonGenericStructName ??= GetSimpleName(StructName, true);
 
     private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)>? m_publicStructMembers;
-    private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> PublicStructMembers => 
-        m_publicStructMembers ??= StructMembers.Where(item => GetScope(GetSimpleName(item.memberName)) == "public").ToList();
+    private List<(string typeName, string memberName, bool isReferenceType, bool isPromotedStruct)> PublicStructMembers =>
+        m_publicStructMembers ??= StructMembers.Where(item =>
+        {
+            string simpleName = GetSimpleName(item.memberName);
+
+            // Blank/underscore fields (e.g. an embedded unexported marker like `_ noCopy`)
+            // are not exported and must not drive a public constructor — their type can be
+            // less accessible than the struct, which makes a public ctor invalid (CS0051).
+            return !simpleName.StartsWith("_") && GetScope(simpleName) == "public";
+        }).ToList();
 
     public override string TemplateBody =>
         $$"""
