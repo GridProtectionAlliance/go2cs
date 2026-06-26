@@ -397,3 +397,4 @@ src/go-src-converted/log/**/[Oo]bj/
 
 # GitHub Copilot custom instructions file (may be auto-created by Visual Studio)
 .github/copilot-instructions.md
+src/.github/copilot-instructions.md
