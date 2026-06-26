@@ -38,6 +38,9 @@ internal static void Main() {
     fmt.Println(First(10, 20, 30));
     fmt.Println(First(1.5F, 2.5F));
     fmt.Println(Count(1, 2, 3, 4));
+    @string s1 = "go"u8;
+    @string s2 = "2cs"u8;
+    fmt.Println(First(s1, s2));
 }
 
 } // end main_package

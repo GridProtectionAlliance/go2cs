@@ -28,10 +28,16 @@ func Or[T comparable](vals ...T) T {
 }
 
 func main() {
-	// Instantiate the variadic generics with value types (int, float64). Reference
-	// types like string are avoided here because go2cs adds a `new()` constraint to
-	// generic type parameters and string has no parameterless constructor.
+	// Instantiate the variadic generics across several element types.
 	fmt.Println(First(10, 20, 30))
 	fmt.Println(First(1.5, 2.5))
 	fmt.Println(Count(1, 2, 3, 4))
+
+	// Strings work too: a Go `string` maps to golib's `@string`, which is a *struct*
+	// with a parameterless constructor, so it satisfies the `new()` constraint go2cs
+	// adds to generic type parameters (unlike .NET's reference-type `System.String`).
+	// Pass string-typed values rather than bare literals — a string literal converts
+	// to a .NET string, which would fail the `new()` constraint.
+	var s1, s2 string = "go", "2cs"
+	fmt.Println(First(s1, s2))
 }
