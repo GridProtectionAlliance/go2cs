@@ -108,7 +108,7 @@ go2cs -stdlib fmt strings io           # convert specific standard library packa
 | `-indent <n>` | Spaces per indent level (default 4). |
 | `-var` | Prefer `var` declarations where the type is obvious (default on). |
 | `-uco` | Emit channel operators instead of method calls (default on). |
-| `-comments` | Carry source comments into the output. |
+| `-comments` | Carry source comments into the output (best effort, see [go/ast comment status](https://github.com/golang/go/issues/20744)). |
 | `-cgo` | Also convert cgo-targeted files. |
 
 The converted C# references a small hand-written runtime library (`golib`, published as the **`go.lib`**
