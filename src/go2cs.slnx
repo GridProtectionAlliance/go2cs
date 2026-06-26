@@ -1,0 +1,123 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/core/">
+    <File Path="deploy-core.bat" />
+    <File Path="graphs/package_dependencies.dot" />
+    <File Path="graphs/package_dependencies.png" />
+    <File Path="reports/conversion_report.html" />
+    <File Path="stdlib_conversion_progress.txt" />
+    <Project Path="core/errors/errors.csproj" />
+    <Project Path="core/fmt/fmt.csproj" />
+    <Project Path="core/go2cs/go2cs.shproj" />
+    <Project Path="core/golib/golib.csproj" />
+    <Project Path="core/internal/abi/internal.abi.csproj" />
+    <Project Path="core/internal/goarch/internal.goarch.csproj" />
+    <Project Path="core/internal/reflectlite/internal.reflectlite.csproj" />
+    <Project Path="core/internal/unsafeheader/internal.unsafeheader.csproj" />
+    <Project Path="core/io/io.csproj" />
+    <Project Path="core/math/math.csproj" />
+    <Project Path="core/math/rand/math.rand.csproj" />
+    <Project Path="core/sort/sort.csproj" />
+    <Project Path="core/strings/strings.csproj" />
+    <Project Path="core/sync/sync.csproj" />
+    <Project Path="core/time/time.csproj" />
+    <Project Path="core/unsafe/unsafe.csproj" />
+  </Folder>
+  <Folder Name="/docs/">
+    <File Path="../.gitattributes" />
+    <File Path="../.gitignore" />
+    <File Path="../CLAUDE.md" />
+    <File Path="../docs/Architecture.md" />
+    <File Path="../docs/Background.md" />
+    <File Path="../docs/Baseline-vs-FullConversion.md" />
+    <File Path="../docs/CNAME" />
+    <File Path="../docs/coding-style.md" />
+    <File Path="../docs/ConversionStrategies.md" />
+    <File Path="../docs/README.md" />
+    <File Path="../docs/Roadmap.md" />
+    <File Path="../docs/SECURITY.md" />
+    <File Path="../LICENSE" />
+    <File Path="../NOTICE" />
+  </Folder>
+  <Folder Name="/go2cs/">
+    <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
+    <Project Path="go2cs-src.shproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+  <Folder Name="/tests/behavioral/">
+    <Project Path="Tests/Behavioral/BehavioralTests/BehavioralTests.csproj" />
+  </Folder>
+  <Folder Name="/tests/behavioral/target-projects/">
+    <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
+    <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
+    <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
+    <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
+    <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
+    <Project Path="Tests/Behavioral/ChannelSendToClosed/ChannelSendToClosed.csproj" />
+    <Project Path="Tests/Behavioral/ChannelSendToNil/ChannelSendToNil.csproj" />
+    <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
+    <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
+    <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
+    <Project Path="Tests/Behavioral/DeferEvalParam/DeferEvalParam.csproj" />
+    <Project Path="Tests/Behavioral/DeferEvalParamFunc/DeferEvalParamFunc.csproj" />
+    <Project Path="Tests/Behavioral/DeferLambdaParam/DeferLambdaParam.csproj" />
+    <Project Path="Tests/Behavioral/DeferSimple/DeferSimple.csproj" />
+    <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
+    <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
+    <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
+    <Project Path="Tests/Behavioral/GenericCompositeLiterals/GenericCompositeLiterals.csproj" />
+    <Project Path="Tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
+    <Project Path="Tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />
+    <Project Path="Tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
+    <Project Path="Tests/Behavioral/GenericStructFields/GenericStructFields.csproj" />
+    <Project Path="Tests/Behavioral/GenericTypeAssertions/GenericTypeAssertions.csproj" />
+    <Project Path="Tests/Behavioral/GenericTypeDecl/GenericTypeDecl.csproj" />
+    <Project Path="Tests/Behavioral/GenericTypeInference/GenericTypeInference.csproj" />
+    <Project Path="Tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.csproj" />
+    <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
+    <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />
+    <Project Path="Tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
+    <Project Path="Tests/Behavioral/InterfaceImplementation/InterfaceImplementation.csproj" />
+    <Project Path="Tests/Behavioral/InterfaceInheritance/InterfaceInheritance.csproj" />
+    <Project Path="Tests/Behavioral/InterfaceIntraFunction/InterfaceIntraFunction.csproj" />
+    <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
+    <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
+    <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
+    <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
+    <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
+    <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
+    <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
+    <Project Path="Tests/Behavioral/Solitaire/Solitaire.csproj" />
+    <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />
+    <Project Path="Tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
+    <Project Path="Tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />
+    <Project Path="Tests/Behavioral/StringPassByValue/StringPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.csproj" />
+    <Project Path="Tests/Behavioral/StructPromotion/StructPromotion.csproj" />
+    <Project Path="Tests/Behavioral/StructPromotionWithInterface/StructPromotionWithInterface.csproj" />
+    <Project Path="Tests/Behavioral/StructWithDelegate/StructWithDelegate.csproj" />
+    <Project Path="Tests/Behavioral/StructWithPointer/StructWithPointer.csproj" />
+    <Project Path="Tests/Behavioral/TypeAssert/TypeAssert.csproj" />
+    <Project Path="Tests/Behavioral/TypeConversion/TypeConversion.csproj" />
+    <Project Path="Tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
+    <Project Path="Tests/Behavioral/TypeConversionReturnType/TypeConversionReturnType.csproj" />
+    <Project Path="Tests/Behavioral/TypeInference/TypeInference.csproj" />
+    <Project Path="Tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
+    <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
+    <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
+  </Folder>
+  <Folder Name="/tests/library/">
+    <Project Path="Tests/ChannelTests/ChannelTests.csproj" />
+  </Folder>
+  <Folder Name="/utilities/">
+    <File Path="set-version.ps1" />
+    <Project Path="Utilities/GenGoFuncRefInstances/GenGoFuncRefInstances.csproj" />
+    <Project Path="Utilities/QuickTest/QuickTest.csproj" />
+    <Project Path="Utilities/UpdateTestTargets/UpdateTestTargets.csproj" />
+  </Folder>
+</Solution>
