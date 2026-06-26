@@ -94,6 +94,7 @@
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
+    <Project Path="Tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/Solitaire/Solitaire.csproj" />
     <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />

@@ -162,6 +162,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]
+    public void CheckReceiverFieldAddress() => CheckTarget("ReceiverFieldAddress");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]

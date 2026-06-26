@@ -162,6 +162,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]
+    public void CheckReceiverFieldAddress() => CheckTarget("ReceiverFieldAddress");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]

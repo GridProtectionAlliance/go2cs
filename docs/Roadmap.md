@@ -258,17 +258,23 @@ stages:
   captured-receiver field name is made unique per receiver type (`<Method>_<RecvType>ꓸᏑx`) so it doesn't
   collide across overloaded same-named methods (`Int32.Add`, `Int64.Add`, …) — coordinated in the converter
   (`getCapturedReceiverName`) and the generator (`ReceiverMethodTemplate`).
-- **Stage B — TODO (the hard part).** The captured form only works when the method is called via the `ж`
-  (pointer) overload, which sets up the captured receiver. A value-receiver call (`var i atomic.Int32;
-  i.Store(10)`) routes through the `ref` overload and the capture is never initialized. Needed: (1) a
-  **pre-pass** to identify "capture-mode" methods (those taking `&recv.field`), (2) **escape analysis** to
-  heap-box a value var when a capture-mode method is called on it, and (3) **call-site routing** to invoke
-  such calls through the `ж` overload (`Ꮡi.Store(10)`) — exactly how an explicit `&i` is already boxed.
-  Two known sub-issues remain: generic receivers (`atomic.Pointer[T]`) and the static-`ThreadLocal` capture
-  field. **Promising alternative:** give capture-mode methods a `ж<T>` receiver **directly** (the box is a
-  parameter, not a static `ThreadLocal`) — this puts `T` in scope for generic receivers and removes the
-  init-order problem, at the cost of rewriting `x` → `Ꮡx.val` in the method body. The escape/call-routing is
-  required either way.
+- **Stage B — DONE (commit `9aeaf29e2`, behavioral green 236/236).** Value-receiver calls of capture-mode
+  methods now route through the `ж` overload so the captured form references the real field:
+  - `captureModeOperations.go` — a pre-pass (`collectCaptureModeMethods`) scans the package **and its
+    transitive imports** (`LoadAllSyntax` provides dep ASTs) for non-generic pointer-receiver methods taking
+    `&recv.field`, keyed by the interned `*types.Func` so cross-package call sites match;
+  - `escapeAnalysisOperations.go` — a value var on which a capture-mode method is called is marked escaping
+    (heap-boxed), so its `Ꮡname` companion exists;
+  - `convSelectorExpr.go` — the call is routed through the `ж` overload (`Ꮡi.Store(10)`).
+  Also fixed an **inverted `CompareAndSwap`** in the hand-written `sync/atomic` companion (`doc_impl.cs`):
+  `Interlocked.CompareExchange` returns the original, so a swap succeeded iff `== old` (was `!= old`) — found
+  by the validation test. **Result: `sync/atomic`'s scalar typed types (`Int32/64`, `Uint32/64/ptr`, `Bool`)
+  now work end to end** — `var i atomic.Int32; i.Store(10); i.Add(5); i.Load()` → 15, CAS/Swap/etc. all match
+  Go. Guarded by the self-contained `ReceiverFieldAddress` behavioral test (no `go-src-converted` dependency).
+- **Remaining gap — generic receivers.** `atomic.Pointer[T]` still uses the copy form (the static-`ThreadLocal`
+  capture can't hold `T`). The fix is the **direct-`ж`-receiver model** (box as a parameter, not a
+  `ThreadLocal`): puts `T` in scope and removes the init issue, at the cost of rewriting `x` → `Ꮡx.val` in the
+  method body. This is the last blocker before `sync/atomic` is fully promotable.
 - ~~Promote `internal/cpu` and `sync/atomic`~~ — gated on the above (atomic) / asm `cpuid` (cpu).
 - Confirm `internal/cpu` / `sync/atomic` build within the full
   `go-src-converted.sln` alongside their dependents.
