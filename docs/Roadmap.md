@@ -106,7 +106,8 @@ Each verified by rebuild + reconvert + compile:
 ### Phase 3 iteration 1 — converter fixes landed (2026-06-25)
 
 Measurement workflow used (no wholesale commit of `go-src-converted`; it stays regenerable):
-reconvert the stdlib to a temp dir (`go2cs -stdlib -go2cspath <tmp>`, output lands in `<tmp>/core/<pkg>`),
+reconvert the stdlib to a temp dir (`go2cs -stdlib -comments -go2cspath <tmp>` — always `-comments` so the
+Go authors' BSD license header survives; output lands in `<tmp>/core/<pkg>`),
 overlay the fresh `.cs` onto `src/go-src-converted/<pkg>` (keeping the relocated csprojs, or regenerating
 them and rewriting `$(go2csPath)core\` → `$(go2csPath)go-src-converted\` except `core\golib`), then
 `dotnet build src/go-src-converted.sln` and bucket. Single packages build with

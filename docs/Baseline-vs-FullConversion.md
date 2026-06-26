@@ -74,11 +74,15 @@ Current Go converter (authoritative flags in `src/go2cs/main.go`):
 
 ```
 # Whole stdlib into the separate target:
-go2cs -stdlib -go2cspath <repo>/src/go-src-converted
+go2cs -stdlib -comments -go2cspath <repo>/src/go-src-converted
 
 # Specific packages only (used when greening a closure bottom-up):
-go2cs -stdlib -go2cspath <repo>/src/go-src-converted fmt strings io sort time
+go2cs -stdlib -comments -go2cspath <repo>/src/go-src-converted fmt strings io sort time
 ```
+
+> **Always pass `-comments` for stdlib conversion.** It defaults off, but the converted C# is a derivative
+> work — the per-file `// Copyright … The Go Authors … BSD-style license` header **must be preserved**, and
+> the Go doc-comments keep the output readable. Without the flag, headers and comments are stripped.
 
 `-parallel 1..4` controls concurrency; output `.csproj` references are generated from detected imports.
 

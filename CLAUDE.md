@@ -73,6 +73,11 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   - `-goroot` / `-gopath`, `-parallel 1..4`, `-platforms os/arch`, `-indent 4`, `-var` (default on),
     `-uco` (channel operators, default on), `-comments`, `-cgo`, `-tree`, `-csproj <tmpl>`, `-debug`.
   - Single project/file: `go2cs package_dir` or `go2cs example.go [out.cs]`.
+  - **Always pass `-comments` when converting the Go stdlib.** It defaults **off**, but the converted C#
+    is a derivative work: the per-file `// Copyright … The Go Authors … BSD-style license` header **must be
+    preserved** (license requirement), and the Go doc-comments are what make the output readable. Without
+    it the header and all comments are stripped. (Behavioral-test goldens were captured *without* comments,
+    so don't flip the default — pass the flag on stdlib `-stdlib` runs.)
 - **Converted C# projects:** standard `dotnet build` (target **net9.0**, C# latest). Each converted
   `.csproj` references `golib`, the `go2cs-gen` analyzer, and the stdlib packages it imports. The
   `$(go2csPath)` MSBuild property resolves to `$(SolutionDir)` in Debug builds (so refs point at
@@ -99,15 +104,47 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
 - **testhost lock gotcha:** a stray `testhost`/`vstest.console` from a prior run can lock
   `BehavioralTests.dll` → next build fails with `MSB3027` ("file locked by testhost"). Kill it (and
   `dotnet build-server shutdown` frees bin/obj locks) before rebuilding — not a real compile error.
+- **Run the behavioral suite via the solution, not the project:** `dotnet test src/go2cs.slnx`. Running
+  `dotnet test` on `BehavioralTests.csproj` directly breaks because `$(go2csPath)` (→ `$(SolutionDir)`)
+  has no solution context, so the `core\golib` ref fails to resolve. The baseline solution is now an
+  **`.slnx`** (`src/go2cs.slnx`); `src/go-src-converted.sln` is still classic `.sln`.
+
+### Phase 3 mechanics — measuring/iterating the full conversion (`src/go-src-converted`)
+- **The on-disk `go-src-converted` is stale** (last bulk conversion 2025-05-11); it predates current
+  converter fixes. To measure the *current* converter you must reconvert — building the committed tree
+  measures old output.
+- **Reconvert → overlay → build → bucket (the measurement loop):**
+  1. `go2cs.exe -stdlib -comments -parallel 4 -go2cspath <tmp>` → output lands in **`<tmp>/core/<pkg>`**
+     (the `core` subdir is hardcoded; `-go2cspath` is the *output* root, unrelated to the MSBuild
+     `$(go2csPath)`). Full stdlib ≈ 3–4 min (per-file work is sub-second; the cost is `go/packages`
+     loading the whole type graph, so **batch** — don't invoke per package).
+  2. Overlay the fresh `.cs` onto `src/go-src-converted/<pkg>` (keep the relocated csprojs).
+  3. Build single packages with **`dotnet build <pkg>.csproj -p:go2csPath=H:\Projects\go2cs\src\`** (note
+     trailing `\`) so `core\golib` resolves outside the solution; or build the whole `go-src-converted.sln`.
+  4. Bucket: `dotnet build … -clp:ErrorsOnly` then group by `error CS####`. Errors shown are *own-errors*
+     of leaf-most failures — dependents of a failed project are skipped, not errored.
+- **csproj layout/relocation:** the converter emits inter-package refs as `$(go2csPath)core\<pkg>\…` and
+  the golib ref as `$(go2csPath)core\golib\…`. The 2026-06-25 relocation rewrote **`core\` → `go-src-converted\`
+  for all stdlib refs *except* `core\golib`** (golib stays shared in `src/core/golib`). A fresh wholesale
+  reconvert must re-apply that rewrite to the generated csprojs.
+- **Metric:** measure **packages-compiling**, not raw error count. Fixing file-inclusion bugs (e.g. the
+  filename build-constraint fix) *raises* the error count because newly-included files surface their own
+  latent defects — that's progress, not regression.
+- **Don't commit `go-src-converted` regens casually.** It's regenerable; the unit of work is the
+  **converter fix**. Keep the tree restorable (overlay into a branch or restore with `git checkout HEAD --`
+  + remove untracked) so a converter-fix commit isn't buried under thousands of generated-file changes.
 
 ## Current state & known issues
 
-- **Baseline is green:** `src/go2cs.sln` builds 79/79 and the behavioral suite passes (216 tests). The
+- **Baseline is green:** `src/go2cs.slnx` builds 79/79 and the behavioral suite passes (216 tests). The
   separation is done — `src/core` (stub baseline + `golib`) vs `src/go-src-converted` (full WIP). The
   converter-improvement loop is restored.
-- **Next (Phase 3):** drive `src/go-src-converted` (the full ~301-package conversion) toward compiling,
+- **Phase 3 in progress:** drive `src/go-src-converted` (the full ~301-package conversion) toward compiling,
   bottom-up by converter-defect frequency; promote packages into the baseline as they go green. See
-  [`docs/Roadmap.md`](docs/Roadmap.md).
+  [`docs/Roadmap.md`](docs/Roadmap.md) for the iteration log. **Iteration 1 (2026-06-25)** landed 4 converter
+  fixes (variadic type-param, `comparable<T>`, asm/cgo throwing stubs, filename build-constraint
+  over-exclusion — the last un-dropped ~188 stdlib files). **Next defect:** `internal/cpu/cpu_x86.cs`
+  address-of-a-field-of-an-anonymous-struct-global mangling (~140 errors from one bug).
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).
 
