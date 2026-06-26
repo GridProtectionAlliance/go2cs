@@ -393,3 +393,4 @@ src/go-src-converted/log/**/[Dd]ebug/
 src/go-src-converted/log/**/[Bb]in/
 src/go-src-converted/log/**/[Oo]bj/
 
+/src/go2cs/go2cs.exe
