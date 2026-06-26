@@ -9,6 +9,14 @@ partial class main_package {
     public nint Age;
 }
 
+
+[GoType("dyn")] partial struct settingsᴛ1 {
+    public bool Verbose;
+    public nint Retries;
+}
+internal static ж<settingsᴛ1> Ꮡsettings = new(new settingsᴛ1(Verbose: true, Retries: 3));
+internal static ref settingsᴛ1 settings => ref Ꮡsettings.val;
+
 [GoType("dyn")] partial struct processAnonymousStruct_data {
     public @string Name;
     public nint Age;
@@ -51,6 +59,11 @@ internal static void Main() {
     processAnonymousStruct(new main_data(Name: "Charlie"u8, Age: 40));
     processAnonymousStruct(anonPerson);
     processAnonymousStruct(new processAnonymousStruct_data(namedPerson.Name, namedPerson.Age));
+    fmt.Println("\n=== Package-Global Anonymous Struct ===");
+    fmt.Printf("settings: Verbose=%t Retries=%d\n"u8, settings.Verbose, settings.Retries);
+    var pRetries = Ꮡsettings.of(settingsᴛ1.ᏑRetries);
+    pRetries.val = 5;
+    fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.val, settings.Retries);
 }
 
 } // end main_package

@@ -9,6 +9,15 @@ type Person struct {
 	Age  int
 }
 
+// settings is a package-global var whose type is inferred from an anonymous-struct
+// composite literal. Its declaration must use the lifted named type, not raw
+// `struct{…}` text. Taking the address of a field also exercises that such a global
+// is heap-boxed so the pointer aliases the original (not a copy).
+var settings = struct {
+	Verbose bool
+	Retries int
+}{Verbose: true, Retries: 3}
+
 // Function that takes an anonymous struct as a parameter
 func processAnonymousStruct(data struct {
 	Name string
@@ -62,4 +71,13 @@ func main() {
 	// This works because the function parameter is a structural specification
 	// not a nominal type requirement!
 	processAnonymousStruct(namedPerson)
+
+	// Package-global anonymous-struct var: read its fields, then mutate one through a
+	// pointer to a field and confirm the global itself changed (the pointer aliases it).
+	fmt.Println("\n=== Package-Global Anonymous Struct ===")
+	fmt.Printf("settings: Verbose=%t Retries=%d\n", settings.Verbose, settings.Retries)
+
+	pRetries := &settings.Retries
+	*pRetries = 5
+	fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n", *pRetries, settings.Retries)
 }

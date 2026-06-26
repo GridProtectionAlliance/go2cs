@@ -178,16 +178,25 @@ backing **address-taken** package-global vars with a heap box, so the pointer re
 `internal/cpu` still compiles clean and now mutates the real `X86`. Behavioral green; `GlobalStructFieldPointers`
 strengthened to assert the global itself is mutated (would print `false/0` before the fix).
 
-**Known limitations (separate follow-ups):** (1) an anonymous-struct global with a *composite-literal
-initializer* (`var S = struct{…}{…}`) still emits the raw `struct{…}` text as its declaration type — a
-**pre-existing** bug (independent of address-of), so such a global can't yet be boxed. (2) Cross-package
-`&otherPkg.ExportedGlobal` isn't boxed (only globals addressed within their own package are detected).
+**Known limitation:** cross-package `&otherPkg.ExportedGlobal` isn't boxed (only globals addressed within
+their own package are detected).
+
+### Phase 3 iteration 5 — anonymous-struct global declarations (2026-06-26)
+
+A package-global var whose type is inferred from an anonymous-struct composite literal
+(`var S = struct{…}{…}`) emitted the raw `struct{…}` text as its C# declaration type
+(`public static struct{A int; B int} S = new Δtype(…);`) — invalid C#. The value was lifted to a named type
+but the declaration wasn't (the lifting happened inside the composite literal, *after* the declaration type
+name was resolved). Fix in `visitValueSpec`: for a package global with an inferred anonymous-struct type, lift
+the struct with the var name **before** resolving the declaration type (mirroring the explicit-type path), so
+both the declaration and the value share one lifted name (`Sᴛ1`). This also unblocks **boxing** such globals,
+so addressed anonymous-struct globals (`&S.field`) now work too. Behavioral green; zero existing goldens
+changed (no behavioral test had an anonymous-struct global). Guarded by an extension to the `AnonymousStructs`
+test (a package-global anonymous-struct var, read and mutated through a field pointer).
 
 ### Next defects (work queue)
 - **Promote `internal/cpu`** toward the baseline (now that it compiles), or first confirm it builds within the
   full `go-src-converted.sln` alongside its dependents.
-- **Anonymous-struct global declarations** (`var S = struct{…}{…}`): use the lifted type name, not the raw
-  `struct{…}` text — pre-existing, and currently blocks boxing such globals.
 - **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
   constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.

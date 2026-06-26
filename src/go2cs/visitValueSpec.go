@@ -145,6 +145,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						v.targetFile.WriteString(v.newline)
 					}
 
+					// A package-global var whose type is inferred from an anonymous-struct
+					// composite literal: lift the struct with the var name up front so the
+					// declaration type resolves to that lifted name (and the composite
+					// literal reuses it) instead of emitting raw `struct{…}` text. Mirrors
+					// the explicit-type path used for uninitialized vars.
+					if !v.inFunction && valueSpec.Type == nil {
+						if compositeLit, ok := valueSpec.Values[i].(*ast.CompositeLit); ok {
+							if subStructType, exprType := v.extractStructType(compositeLit.Type); subStructType != nil && !v.liftedTypeExists(subStructType) {
+								v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
+							}
+						}
+					}
+
 					csTypeName := v.getCSTypeName(def.Type())
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
