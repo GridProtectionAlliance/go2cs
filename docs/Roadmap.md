@@ -159,11 +159,35 @@ and the whole solution rebuilds clean against the changed golib:
 
 Guarded by the `StringSliceAndUnsignedConst` behavioral test.
 
+### Phase 3 iteration 4 — address-of-global correctness (2026-06-26)
+
+`Ꮡ(value)` heap-allocates a **copy**, so `&global` / `&global.field` pointed into a copy — mutations never
+reached the global (e.g. `internal/cpu.doinit` set feature flags on a throwaway copy of `X86`). Fixed by
+backing **address-taken** package-global vars with a heap box, so the pointer references the original:
+
+- New `globalAddressOperations.go`: a synchronous **pre-pass** (`collectAddressedGlobals`) scans all files for
+  `&g` / `&g.field` / `&g[i]` rooted at a package-level var → `packageAddressedGlobals` (cross-file, since the
+  global may be declared in one file and addressed in another).
+- `visitValueSpec`: an addressed global is emitted as a box + ref-property —
+  `static ж<T> ᏑG = new(default(T)); static ref T G => ref ᏑG.val;` — instead of `static T G;`. Reads/writes of
+  `G` are unchanged (the ref-property forwards to the box). Only address-taken globals are boxed; everything
+  else keeps the plain field, so the blast radius is tiny (only `GlobalStructFieldPointers` re-transpiled).
+- `convUnaryExpr` / `isHeapBoxedExpr`: for an addressed global, emit the identifier form `ᏑG` (the box) rather
+  than `Ꮡ(G)` (a copy). `&X86.HasADX` → `ᏑX86.of(X86ᴛ1.ᏑHasADX)`.
+
+`internal/cpu` still compiles clean and now mutates the real `X86`. Behavioral green; `GlobalStructFieldPointers`
+strengthened to assert the global itself is mutated (would print `false/0` before the fix).
+
+**Known limitations (separate follow-ups):** (1) an anonymous-struct global with a *composite-literal
+initializer* (`var S = struct{…}{…}`) still emits the raw `struct{…}` text as its declaration type — a
+**pre-existing** bug (independent of address-of), so such a global can't yet be boxed. (2) Cross-package
+`&otherPkg.ExportedGlobal` isn't boxed (only globals addressed within their own package are detected).
+
 ### Next defects (work queue)
 - **Promote `internal/cpu`** toward the baseline (now that it compiles), or first confirm it builds within the
   full `go-src-converted.sln` alongside its dependents.
-- **Address-of-global correctness**: generate a heap-boxed `Ꮡvar` companion for package-global vars whose
-  address (or field address) is taken, so `&global`/`&global.field` reference the original, not a copy.
+- **Anonymous-struct global declarations** (`var S = struct{…}{…}`): use the lifted type name, not the raw
+  `struct{…}` text — pre-existing, and currently blocks boxing such globals.
 - **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
   constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.

@@ -20,6 +20,12 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 		return false
 	}
 
+	// A package-level var whose address is taken is backed by a heap box (the
+	// "Ꮡname" companion), same as an escaping local.
+	if v.isAddressedGlobal(ident) {
+		return true
+	}
+
 	obj := v.info.Defs[ident]
 
 	if obj == nil {
@@ -153,6 +159,12 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 
 		if obj != nil {
 			escapesHeap = v.identEscapesHeap[obj]
+		}
+
+		// A package-level var whose address is taken is backed by a heap box, so its
+		// "Ꮡname" companion already exists — reference it directly rather than boxing a copy.
+		if v.isAddressedGlobal(ident) {
+			return AddressPrefix + v.convExpr(unaryExpr.X, nil)
 		}
 
 		if escapesHeap && !isInherentlyHeapAllocatedType(v.getIdentType(ident)) {

@@ -122,7 +122,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation += token.Pos(len(access) + 6)
-						v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
+
+						if v.isAddressedGlobal(ident) {
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "")
+						} else {
+							v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
+						}
 					}
 
 					v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation-token.Pos(len(csTypeName)))
@@ -157,7 +162,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					} else {
 						access := getAccess(goIDName)
 						typeLenDeviation -= token.Pos(len(access) + 9)
-						v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+
+						if v.isAddressedGlobal(ident) {
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+						} else {
+							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+						}
 					}
 
 					v.writeComment(valueSpec.Comment, valueSpec.Values[i].End()-typeLenDeviation)

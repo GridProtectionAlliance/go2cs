@@ -8,7 +8,8 @@ partial class main_package {
     public bool HasWide;
     public nint Level;
 }
-public static Featuresᴛ1 Features;
+public static ж<Featuresᴛ1> ᏑFeatures = new(default(Featuresᴛ1));
+public static ref Featuresᴛ1 Features => ref ᏑFeatures.val;
 
 [GoType] partial struct option {
     internal @string name;

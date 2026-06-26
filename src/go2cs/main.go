@@ -484,6 +484,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		nameCollisions = make(map[string]bool)
 		globalTempVarCount = make(map[string]int)
 		packageDynamicTypeNames = make(map[string]string)
+		packageAddressedGlobals = make(map[types.Object]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -554,6 +555,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 
 		// Perform escape analysis for each file
 		performEscapeAnalysis(files, fset, packageTypes, info)
+
+		// Find package-level vars whose address is taken (cross-file) so their
+		// declarations can be emitted as heap boxes that &global references directly.
+		collectAddressedGlobals(files, packageTypes, info)
 
 		var concurrentTasks sync.WaitGroup
 		var outputFileNames []string

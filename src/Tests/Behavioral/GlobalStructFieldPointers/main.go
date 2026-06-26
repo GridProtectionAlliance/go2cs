@@ -26,4 +26,10 @@ func main() {
 	level := &Features.Level
 	*level = 3
 	fmt.Printf("level=%d\n", *level)
+
+	// The pointers must alias the ORIGINAL global, not a copy: reading the global's
+	// fields directly must reflect the writes made through the pointers above. (Before
+	// the address-of-global fix, &Features.X boxed a copy and these read zero/false.)
+	fmt.Printf("global: HasFast=%t HasWide=%t Level=%d\n",
+		Features.HasFast, Features.HasWide, Features.Level)
 }
