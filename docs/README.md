@@ -36,6 +36,13 @@ Converts source code developed using the Go programming language (see [Go Langua
 
 ## Project Status
 
+> **Current status (2026-06):** The converter is the Go-based "go2cs2" engine (`src/go2cs/`). The repo is
+> organized as a **green baseline** + a **work-in-progress full conversion**: `src/go2cs.sln` (runtime
+> `golib` + a small hand-finished stdlib baseline in `src/core` + the behavioral test suite) **builds and
+> the suite passes**, while `src/go-src-converted.sln` holds the full ~301-package stdlib auto-conversion
+> that does not all compile yet. For the authoritative overview see [`/CLAUDE.md`](../CLAUDE.md) and
+> [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md); the plan ahead is in [`Roadmap.md`](Roadmap.md).
+
 ### Automated Code Conversion of Go Standard Library
 
 A few initial conversions of the full Go source code have been completed. **Note (current state):** the
@@ -58,9 +65,13 @@ finished. The hand-written runtime it builds on is `src/core/golib`. As the proj
 A strategy to automate conversion of native system calls in Go code, i.e., a function declaration without a body that provides a signature for a native external function, is to create a [`partial method`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/keywords/partial-method) in C# for the native call. A manually created file that implements the partial method can now be added that will exist along side the auto-converted files and not be overwritten during conversion.
 
 ### Recent Activity
-Converted code now targets .NET 6.0 and C# 10.0. Recent updates use file-scoped namespaces, reduced indentation to better match original Go code and new command line options to control code styling and allow older C# versions.
+Converted code now targets **.NET 9.0** and the latest C#. Conversions use file-scoped namespaces and
+reduced indentation to better match original Go code, with command-line options to control code styling.
 
-Currently, work to improve code conversions is progressing by walking through each of the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) projects. Iterating through each of these simple use cases improves overall automated code conversion quality.
+Work to improve conversions progresses by walking through the [behavioral testing](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral)
+projects — each is a Go↔C# equivalence case (transpile, compile, run-and-compare-output, and a byte-for-byte
+`.cs.target` golden comparison). Iterating these simple use cases improves overall conversion quality; the
+behavioral suite is currently green.
 
 Sets of common Go sample code have been manually converted to C# using the current [C# Go Library](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/). As an example, all relevant code samples from the "[Tour of Go](https://tour.golang.org/welcome/1)" have been converted to C#, [see converted code](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/). Ultimately would like to see this in head-to-head mode using [Try .NET](https://github.com/dotnet/try), for example:
 ![go2cs](images/HeadToHead-Small.png)

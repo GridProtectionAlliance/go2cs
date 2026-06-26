@@ -3,24 +3,40 @@
 Companion to [`/CLAUDE.md`](../CLAUDE.md). The path from "loop stalled" to "full Go stdlib converts and
 compiles." Sequenced **green the loop first**, then drive the full conversion.
 
-## Phase 0 — Documentation (done / in progress)
+> **Status (2026-06-25): Phases 0–2 done — baseline is green.** `go2cs.sln` builds 79/79; behavioral suite
+> passes (216 tests). Phase 3 (the full conversion) is the remaining work.
+
+## Phase 0 — Documentation ✅ done
 
 Orientation docs so any task starts informed: [`/CLAUDE.md`](../CLAUDE.md),
 [`Architecture.md`](Architecture.md), [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md),
-this file; plus a refresh of the stale `README.md`.
+this file; plus a refresh of `README.md`.
 
-## Phase 1 — Restore the separation (repo surgery)
+## Phase 1 — Restore the separation (repo surgery) ✅ done
 
-Goal: `src/core` = curated/compiling baseline; `src/go-src-converted/` = full WIP; `golib` shared.
+Goal: `src/core` = compiling baseline; `src/go-src-converted/` = full WIP; `golib` shared.
 
-1. **Tag the full-conversion work** so it is never lost: `git tag full-conversion-2025-05 cc14584c7`.
-2. **Relocate** the auto-generated stdlib package dirs out of `src/core` into `src/go-src-converted/`
-   (`git mv`); keep `src/core/golib` in place.
-3. **Retarget** all `-stdlib` runs to `-go2cspath …/src/go-src-converted`; update `convert-gosrc.*` and
-   fix `deploy-core.bat` (`gocore`→`core`).
-4. **Reference worktree** for the old baseline: `git worktree add ../go2cs-stub-ref 3426298eb`.
+- Tagged the full conversion (`full-conversion-2025-05` → `cc14584c7`).
+- Relocated the auto-generated stdlib out of `src/core` into `src/go-src-converted/` (2604-file rename);
+  rewrote csproj/sln refs; added `.gitignore` rules for the Go `debug`/`log` package name collisions.
+- Scoped `src/go2cs.sln` to the baseline; added `src/go-src-converted.sln` for the WIP.
+- Fixed `deploy-core.bat` (`gocore`→`core`). `convert-gosrc.*` retarget still pending.
 
-## Phase 2 — Green the loop (establish the minimal compiling baseline)
+## Phase 2 — Green the loop ✅ done (via stub restore)
+
+**Outcome:** rather than green the full `fmt` closure bottom-up (57 packages incl `runtime`/`syscall`/`os`),
+we **restored the old hand-finished stub** (`3426298eb`) into `src/core` — it compiles cleanly against
+today's `golib`, so the test loop went green immediately. Plus several converter fixes (below). The
+57-package-closure analysis below is retained as context for **Phase 3** (the full conversion).
+
+### How the baseline-restore path worked
+
+The behavioral tests reference `golib` + the `go2cs-gen` analyzer + a few stdlib projects (`fmt` mostly,
+plus `time`/`unsafe`/`strings`/`sort`/`math/rand`/`io`). The **stub** `fmt` is a minimal proxy with a tiny
+closure (errors, io, strings, sync, math, …) — it avoids the runtime substrate, which is why restoring it
+is the fast path to green. Restored 14 packages; excluded the stub `testing` (drifted, unused by tests).
+
+### The full-`fmt`-closure path (NOT taken for the baseline; relevant to Phase 3)
 
 The behavioral tests reference `golib` (all 59) + the `go2cs-gen` analyzer (all) + a few stdlib projects:
 `fmt` (55 tests), `time` (5), `unsafe` (3), `strings` (1), `sort` (1), `math/rand` (1), `io` (1).
@@ -57,10 +73,24 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
   | 18 | CS0051 | inconsistent accessibility (param type less accessible) | open |
   | — | CS0103 | missing package-level lookup tables (e.g. `ntz8tab`/`pop8tab` in math/bits) | open |
 - **Converter-improvement loop (proven end-to-end):** edit `src/go2cs/*.go` → `go build` (Go 1.23.1) →
-  `go2cs -stdlib -go2cspath <out> <pkg>` (needs `GOROOT` stdlib source, present) → `dotnet build`.
+  re-transpile → `dotnet build`. (For behavioral tests the harness runs this loop itself — see
+  [`/CLAUDE.md`](../CLAUDE.md) "Test-harness mechanics".)
 - **Retarget detail:** the stdlib converter writes to **`<go2cspath>/core/<pkg>`** (hardcoded `core` subdir).
-  To regenerate cleanly into `src/go-src-converted` we must either make that subdir name configurable or
-  convert to a temp dir and move. Batch several converter fixes, then do one wholesale reconvert + re-measure.
+  To regenerate cleanly into `src/go-src-converted`, point `-go2cspath` accordingly or convert to a temp dir
+  and move. Batch several converter fixes, then do one wholesale reconvert + re-measure.
+
+### Converter fixes landed (2026-06-25)
+
+Each verified by rebuild + reconvert + compile:
+- `golib/UntypedInt` missing semicolon (CS1002) — blocked the whole runtime.
+- `static readonly` on a function-local named-type const → emit a plain local (CS0106) — `visitValueSpec.go`.
+- Multi-line type-constraint unions rendered with only the first line commented → collapse to one comment
+  line (`visitInterfaceType.go`).
+- `~[]E` slice constraint wrongly given `IEqualityOperators` — `*Slice`/`*Array` cases were backwards and an
+  empty constraint-type set counted as a subset of every operator set (`constraintOperations.go`).
+- Switch fallthrough case with a single pattern value emitted an unbalanced `)` (`visitSwitchStmt.go`).
+- Negative typed const (`int8 = -1`) promoted to `GoUntyped` because the range check used `ParseUint`
+  (rejects negatives) → also try `ParseInt` (`visitValueSpec.go`).
 
 ## Phase 3 — Drive the full conversion to compile (the ultimate goal)
 
@@ -75,14 +105,12 @@ more). So "green the loop" means **green `fmt`'s closure**, bottom-up.
 
 ## Progress tracking
 
-| Metric | Source | Target |
+| Metric | Source | Status |
 |---|---|---|
-| Baseline builds clean | `dotnet build src/core` | ✅ green |
-| Behavioral tests passing | `src/Tests/Behavioral/*` | 59 / 59 |
-| Full packages compiling | `src/go-src-converted/build.log` | trending → 305 |
-| Full-conversion error count | `build.log` buckets | trending → 0 |
-
-*(Fill in counts as phases progress.)*
+| Baseline + tests build clean | `dotnet build src/go2cs.sln` | ✅ 79 / 79 |
+| Behavioral suite passing | `BehavioralTests` (MSTest) | ✅ 216 tests |
+| Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — trending → 301 |
+| Full-conversion error count | build-error buckets | ◻ Phase 3 — trending → 0 |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)
 

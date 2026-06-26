@@ -33,17 +33,28 @@ and **never referenced together** by a single project.
 | `ba6fef6c9` | 2025-03-08 | `src/gocore` renamed → `src/core` (path change only). |
 | **`3426298eb`** | 2025-05-05 01:51 | **Last clean baseline.** Stub compiles; tests green. |
 | `6ca1c45b7` | 2025-05-05 01:59 | "Initial standard library conversion" — full stdlib written **on top of** `src/core`, overwriting the hand-finished packages (2,359 files, +508k lines). |
-| `cc14584c7` | 2025-05-11 | Current `master`; further full-conversion fixes. |
+| `cc14584c7` | 2025-05-11 | Full-conversion work; tagged `full-conversion-2025-05`. |
+| 2026-06-25 | 2026-06-25 | **Separation restored:** full conversion relocated to `src/go-src-converted/`; old stub restored into `src/core`; converter fixes; green baseline. |
 
 The mistake was writing the full conversion **into the same directory** as the baseline instead of a
 separate one. "All 305 packages converted successfully" meant the **transpiler did not crash** — not that
-the emitted C# compiles. `docs/README.md` already states converted stdlib doesn't all compile yet. The
-overwrite therefore replaced *compiling* `fmt`/`time`/etc. with *large machine-generated* versions, which
-is what stalled the test loop.
+the emitted C# compiles. The overwrite replaced *compiling* `fmt`/`time`/etc. with *large machine-generated*
+versions, which stalled the test loop.
 
-Note: the project was **originally designed** with this separation — the retired README still documents a
-`src/gocore` (manual subset) + `src/go-src-converted` (full auto-output) split, and `convert-gosrc.cmd`
-already writes to a `go-src-converted/` folder. Restoring the separation realigns with the original design.
+The project was **originally designed** with this separation (`gocore` manual subset + `go-src-converted`
+full auto-output), so restoring it realigns with the original design.
+
+## How it was resolved (2026-06-25)
+
+- Relocated the full conversion out of `src/core` into **`src/go-src-converted/`** (a 2604-file git rename);
+  rewrote inter-package `csproj` refs and `go2cs.sln` paths; added `.gitignore` rules for the Go `debug`/
+  `log` packages that collide with the VS `[Dd]ebug/`/`[Ll]og/` patterns.
+- **Restored the old hand-finished stub from `3426298eb` into `src/core`.** Key finding: it **compiles
+  cleanly against today's `golib`** — the feared API drift did not materialize, so it gave a green baseline
+  immediately. Restored 14 packages; excluded the stub `testing` (drifted, 400 errors, referenced by no test).
+- Scoped **`src/go2cs.sln`** to the baseline + tests; added **`src/go-src-converted.sln`** for the 301 WIP
+  projects.
+- Result: `go2cs.sln` builds 79/79; behavioral suite green (216 tests).
 
 ## The contract (rules going forward)
 
@@ -71,20 +82,22 @@ go2cs -stdlib -go2cspath <repo>/src/go-src-converted fmt strings io sort time
 
 `-parallel 1..4` controls concurrency; output `.csproj` references are generated from detected imports.
 
-## Recovering the old baseline as reference (not a verbatim restore)
+> **Note on the `<go2cspath>/core` subdir:** the stdlib converter writes packages to `<go2cspath>/core/<pkg>`
+> (a hardcoded `core` subdir). To regenerate cleanly into `src/go-src-converted` you must either point
+> `-go2cspath` so that subdir lands there, or convert to a temp dir and move. Don't let it overwrite the
+> baseline `src/core` packages.
 
-`golib`'s API has drifted since 2025-05 (e.g. `rune` aligned to `System.Text.Rune`), so the old stub will
-not compile as-is against today's runtime. Use it as a **reference** for how each package was hand-finished:
+## The old stub as a fallback / reference
+
+The last clean stub (`3426298eb`) is the source of today's baseline. To inspect or recover individual files:
 
 ```
 git worktree add ../go2cs-stub-ref 3426298eb      # browse the last clean baseline
-# or, per file:
-git show 3426298eb:src/core/fmt/print.cs
+git show 3426298eb:src/core/fmt/print.cs          # or per file
 ```
 
-## Stale tooling to fix as part of restoring separation
+## Stale tooling
 
-- `src/deploy-core.bat` — XCOPYs `gocore\*.*`; update to `core`.
-- `src/convert-gosrc.cmd` / `convert-gosrc.bat` — invoke a retired `net6.0` C# `go2cs.exe` with old flags
-  (`-s -r -e -g`); update to the Go converter's `-stdlib -go2cspath …` form.
-- `docs/README.md` — references the retired ANTLR4 engine and the old directory layout.
+- **Fixed:** `src/deploy-core.bat` (`gocore`→`core`); `docs/README.md` (banner + corrected references).
+- **Still stale:** `src/convert-gosrc.cmd` / `convert-gosrc.bat` invoke a retired `net6.0` C# `go2cs.exe`
+  with old flags (`-s -r -e -g`); update to the Go converter's `-stdlib -go2cspath …` form.
