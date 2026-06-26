@@ -8,6 +8,49 @@ import (
 	"strings"
 )
 
+// rhsPointerCopyContext returns an IdentContext that forces the pointer (box) form when the
+// assignment RHS is a plain pointer-typed identifier — a Go pointer copy (`r := p` / `r = p`
+// where p is *T). A deref'd pointer parameter then emits its box `Ꮡp` so the target is a
+// ж<T> (the rest of the converter already treats such a target as a pointer via `.val`/`~`).
+// A pointer *local* holds the pointer directly, so convIdent returns it unchanged. Returns
+// nil when rhs is not a plain non-nil pointer identifier (callers append nothing).
+func (v *Visitor) rhsPointerCopyContext(rhs ast.Expr) ExprContext {
+	rhsIdent, isIdent := rhs.(*ast.Ident)
+
+	if !isIdent || rhsIdent.Name == "nil" {
+		return nil
+	}
+
+	if _, isPtr := v.getIdentType(rhsIdent).(*types.Pointer); !isPtr {
+		return nil
+	}
+
+	ptrContext := DefaultIdentContext()
+	ptrContext.isPointer = true
+
+	return ptrContext
+}
+
+// appendRhsPtrContext returns base with a pointer-copy IdentContext appended when rhs is a
+// plain pointer identifier and the target is not an interface. A fresh slice is returned so
+// the caller's backing array (often shared between LHS and RHS conversion) is not mutated.
+func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr, lhsIsInterface bool) []ExprContext {
+	if lhsIsInterface {
+		return base
+	}
+
+	ptrContext := v.rhsPointerCopyContext(rhs)
+
+	if ptrContext == nil {
+		return base
+	}
+
+	out := make([]ExprContext, len(base), len(base)+1)
+	copy(out, base)
+
+	return append(out, ptrContext)
+}
+
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
@@ -259,6 +302,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			contexts := []ExprContext{lambdaContext}
 
+			// A plain pointer-typed identifier on the RHS is a pointer copy (Go `r := p` /
+			// `r = p` where p is *T): emit its pointer form so the target is a ж<T>, not a
+			// copy of the pointed-to value. For a deref'd pointer parameter this yields the
+			// box `Ꮡp` (without this it emits the value alias `p`, and the target — which the
+			// rest of the converter treats as a pointer via `.val`/`~` — fails to compile).
+			// A pointer *local* already holds the pointer directly, so convIdent returns it
+			// unchanged. Skip interface targets (handled by the interface-cast path).
+			if i < lhsLen && !lhsTypeIsInterface[i] {
+				if ptrCtx := v.rhsPointerCopyContext(rhs); ptrCtx != nil {
+					contexts = append(contexts, ptrCtx)
+				}
+			}
+
 			// A u8 string literal is a ReadOnlySpan<byte> (ref struct) and cannot be
 			// a ValueTuple element, so suppress the u8 form for string literals in a
 			// multi-value (tuple) assignment, e.g. `field, env = env, ""`.
@@ -472,7 +528,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString(v.convExpr(lhs, contexts))
 				result.WriteString(operator)
 
-				rhsExpr := v.convExpr(rhs, contexts)
+				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
 
 				if lhsTypeIsInterface[i] {
 					result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
@@ -486,7 +542,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, contexts)
+					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
@@ -531,7 +587,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, contexts)
+					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
 

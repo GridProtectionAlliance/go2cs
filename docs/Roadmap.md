@@ -370,7 +370,40 @@ behavioral suite green, zero existing goldens changed. **Found-but-deferred:** a
 a `func _()` emits `_ = …` which binds to the method group → CS1656 ("cannot assign to '_'") — a separate edge
 case (real stringer asserts use `_ = x[C-C]`); not hit by internal/types/errors' actual body.
 
-**Next defect:** the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
+### Phase 3 iteration 10 — accurate re-bucket + pointer-copy fix (2026-06-26)
+
+**Measurement-methodology finding (important):** the committed `go-src-converted` csprojs are stale and lack
+inter-package `ProjectReference`s that the *current* converter emits correctly. Overlaying fresh `.cs` onto those
+stale csprojs inflated the bucket with phantom CS0246 "package not found". Regenerating the csprojs from the fresh
+conversion (with the documented `core\`→`go-src-converted\` rewrite, golib excepted) dropped the total **95→79**
+and CS0246 **23→5**. **So the measurement loop must regenerate csprojs, not keep the committed ones** — there is no
+converter csproj-emission defect. Reusable overlay script: `scratchpad/overlay.sh`.
+
+True own-defect leaders after the rewrite: container/list (25) + ring (12) = the `ж<T>` model; internal/chacha8rand
+(7, mostly the same `ж<T>` pattern — `State.Init64`/`Refill` on a value needing the box); math/bits (4, unsigned-
+arithmetic/shift-count coercions); a handful of 1–2-error leaves.
+
+**The `ж<T>` model split into two sub-problems** (converter derefs a pointer param/receiver to a value alias
+`ref var x = ref Ꮡx.val`, losing pointer identity when Go uses it *as* a pointer):
+- **Sub-problem B — DONE (this iteration).** `r := p` / `r = p` (pointer copy of a *T parameter) emitted `var r = p`
+  (a copy of the pointed-to value); the converter already treats the walked target as a pointer (`r.val`/`~r`), so
+  it miscompiled. Fix (`visitAssignStmt.go`): a plain pointer-typed identifier on an assignment RHS now gets the
+  pointer (box) form — `var r = Ꮡp` — via a new `rhsPointerCopyContext`/`appendRhsPtrContext` helper applied in both
+  the declare/reassign branch and the per-variable (escaping-var) branch. A pointer *local* already holds the pointer
+  directly, so it is unchanged → **zero existing behavioral goldens changed**; suite green 260/260. Guarded by the
+  `PointerCopyWalk` behavioral test (copy-then-walk, for-init copy, explicit local seed).
+- **Sub-problem A — TODO (the harder half).** Using the *receiver* as a pointer value — `func (n *node) selfLink() {
+  n.next = n }` — still emits `n.next = n` (a value-ref receiver `this ref node n` has no box). Needs the receiver
+  direct-`ж` mechanism (extend `captureModeOperations` so "receiver used as a bare pointer value" — assigned to a
+  pointer field, stored, compared — triggers a `this ж<T> Ꮡn` receiver, like the existing `&recv.field`/`return recv`
+  triggers). container/ring & list need **both** A and B to fully compile; B lands alone as a correctness fix.
+
+**Other queued leaf defects** (from the 79-error bucket): plugin CS0553 (ImplicitConvGenerator emits illegal
+`object↔T` conversions), runtime/internal/math CS0133/0266 (`const MaxUintptr` ulong→nuint not const), unicode
+CS0051/52 (exported field of an unexported type), internal/runtime/atomic CS1526 (`new` without `()`), and the
+deferred CS1656 (bare `_ = expr` discard inside a `func _()`).
+
+### Phase 3 — earlier note: the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/
 CS0029/CS1929 cluster), blocking both container packages.

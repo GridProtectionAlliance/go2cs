@@ -168,6 +168,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
+    public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
