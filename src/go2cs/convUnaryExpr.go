@@ -65,6 +65,35 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			}
 		}
 
+		// Address of a field of the pointer receiver: &x.field. The receiver is a
+		// pointer, so the selector target's type is a pointer (not a struct) and the
+		// struct-field handling below would miss it. Taking `Ꮡ(x.field)` would box a
+		// copy (the ж(in T) ctor copies), so writes through the pointer would be lost
+		// — e.g. sync/atomic's `func (x *Int32) Store(v) { StoreInt32(&x.v, v) }`.
+		// Capture the receiver pointer and use the field-ref form so the pointer
+		// aliases the real field. The captured-receiver field is a static ThreadLocal
+		// on the (non-generic) package class, so it cannot hold a generic receiver's
+		// type parameter (atomic.Pointer[T]); those fall through to the prior behavior.
+		if isRecvPointer {
+			if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
+				if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName {
+					recvType := recv.Type()
+
+					if pointer, ok := recvType.(*types.Pointer); ok {
+						recvType = pointer.Elem()
+					}
+
+					if named, ok := recvType.(*types.Named); ok && named.TypeParams().Len() == 0 {
+						v.captureReceiver = true
+
+						fieldRef := fmt.Sprintf("%s.%s%s", convertToCSTypeName(v.getTypeName(recvType, false)), AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+
+						return fmt.Sprintf("%s.of(%s)", v.getCapturedReceiverName(recvName), fieldRef)
+					}
+				}
+			}
+		}
+
 		// Check if the unary expression is an address of a structure field
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			if _, ok := v.getType(selectorExpr.X, true).(*types.Struct); ok {

@@ -21,6 +21,12 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string? m_receiverParamType;
     private string ReceiverParamType => m_receiverParamType ??= $"{PointerPrefix}<{Method.Parameters.First().type}>";
 
+    // Base name for the captured-receiver field, qualified by the receiver type so it is
+    // unique across overloaded same-named methods on different receiver types (e.g.
+    // Int32.Add, Int64.Add, …). Must match the converter's getCapturedReceiverName.
+    private string? m_captureName;
+    private string CaptureName => m_captureName ??= $"{Method.Name}_{GetSimpleName(Method.Parameters.First().type)}";
+
     public override string Generate()
     {
         const string ThreadingUsing = "using System.Threading;";
@@ -44,9 +50,9 @@ internal class ReceiverMethodTemplate : TemplateBase
 
     private string CaptureDeclarations => !CapturePointer ? "" :
         $"""
-            private static ThreadLocal<{ReceiverParamType}>? {Method.Name}{CapturedVarMarker}{ReceiverParamName};
-            private static {ReceiverParamType} {Method.Name}{TypeAliasDot}{AddressPrefix}{ReceiverParamName} => {Method.Name}{CapturedVarMarker}{ReceiverParamName}?.Value ??
-                throw new NullReferenceException("Receiver target \"{Method.Name}{TypeAliasDot}{AddressPrefix}{ReceiverParamName}\" is not initialized");
+            private static ThreadLocal<{ReceiverParamType}>? {CaptureName}{CapturedVarMarker}{ReceiverParamName};
+            private static {ReceiverParamType} {CaptureName}{TypeAliasDot}{AddressPrefix}{ReceiverParamName} => {CaptureName}{CapturedVarMarker}{ReceiverParamName}?.Value ??
+                throw new NullReferenceException("Receiver target \"{CaptureName}{TypeAliasDot}{AddressPrefix}{ReceiverParamName}\" is not initialized");
         
         
         """;
@@ -54,7 +60,7 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string CaptureOperation => !CapturePointer ? "" :
         $"""
     
-                {Method.Name}{CapturedVarMarker}{ReceiverParamName} = new ThreadLocal<{ReceiverParamType}>(() => {AddressPrefix}{ReceiverParamName});
+                {CaptureName}{CapturedVarMarker}{ReceiverParamName} = new ThreadLocal<{ReceiverParamType}>(() => {AddressPrefix}{ReceiverParamName});
         """;
 
     private string DeclParams

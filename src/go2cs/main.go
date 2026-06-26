@@ -1653,7 +1653,31 @@ func (v *Visitor) getCapturedReceiverName(recvName string) string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s%s%s%s", v.currentFuncName, TypeAliasDot, AddressPrefix, recvName)
+	// Include the receiver's (generics-stripped) type name so the captured-receiver
+	// field is unique across overloaded same-named methods on different receiver types
+	// (e.g. Int32.Add, Int64.Add, … all named "Add"). Must match the name the
+	// RecvGenerator emits for the capture field.
+	recvTypeName := ""
+
+	if v.currentFuncSignature != nil {
+		if recv := v.currentFuncSignature.Recv(); recv != nil {
+			recvType := recv.Type()
+
+			if pointer, ok := recvType.(*types.Pointer); ok {
+				recvType = pointer.Elem()
+			}
+
+			recvTypeName = v.getTypeName(recvType, false)
+
+			// Drop type parameters (Go renders them as `Name[T]`) to match the
+			// RecvGenerator's GetSimpleName(receiverType).
+			if index := strings.IndexAny(recvTypeName, "[<"); index >= 0 {
+				recvTypeName = recvTypeName[:index]
+			}
+		}
+	}
+
+	return fmt.Sprintf("%s_%s%s%s%s", v.currentFuncName, recvTypeName, TypeAliasDot, AddressPrefix, recvName)
 }
 
 func paramsAreInterfaces(paramTypes *types.Tuple, andNotEmptyInterface bool) []bool {
