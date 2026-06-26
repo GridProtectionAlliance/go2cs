@@ -117,6 +117,10 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   Reserve a single full-suite run for final confirmation. Faster still for a pure no-regression check:
   re-transpile every behavioral dir and `git status` the `.cs` — byte-identical generated code ⟹ identical
   compile+output ⟹ identical results, with no compile/run at all.
+- **Cap build/test commands at ~3 min (180s).** A clean full suite (`dotnet test --no-build`) runs in
+  **~2.3 min / 228 green**; materially longer means the test host has hung under lock contention, not real
+  work — stop and clear it rather than waiting 10–20 min. (Raise the ceiling later only if the suite
+  legitimately grows.)
 
 ### Adding a regression test when a converter defect is fixed
 When a meaningful converter bug is fixed, lock it in with a behavioral test so later changes can't silently
