@@ -97,6 +97,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
 
     [TestMethod]
+    public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]

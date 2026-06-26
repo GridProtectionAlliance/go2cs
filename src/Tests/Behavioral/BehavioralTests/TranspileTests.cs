@@ -117,6 +117,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
 
     [TestMethod]
+    public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]

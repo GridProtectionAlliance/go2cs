@@ -109,6 +109,33 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   has no solution context, so the `core\golib` ref fails to resolve. The baseline solution is now an
   **`.slnx`** (`src/go2cs.slnx`); `src/go-src-converted.sln` is still classic `.sln`.
 
+### Adding a regression test when a converter defect is fixed
+When a meaningful converter bug is fixed, lock it in with a behavioral test so later changes can't silently
+reintroduce it. **Prefer extending an existing behavioral project** if one already covers a similar
+construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructFieldPointers`, which guards the
+`&cpu.X86.HasADX` cross-file address-of-field fix). To add one:
+1. **New folder** `src/Tests/Behavioral/<Name>/` with a Go program that *exercises the specific construct*
+   (multiple `.go` files are fine and run as one package — needed to reproduce cross-file bugs). Include a
+   `go.mod` (`module go2cs/<Name>`), and copy `go2cs.ico` + a `<Name>.csproj` from a sibling test (adjust
+   `AssemblyName`; keep the `golib`/`fmt` refs the program needs). Verify it with `go run .` first.
+2. **Make the Go↔C# output match** so `OutputComparisonTests` passes. Mind known runtime limitations — e.g.
+   `Ꮡ(value)` (address of a non-boxed value) currently boxes a *copy*, so don't write through a
+   `&global.field` pointer and then read the *original* global; read back through the same pointer.
+3. **Register in the solution** under the `/tests/behavioral/target-projects/` folder in `src/go2cs.slnx`
+   (alphabetical).
+4. **Transpile once** (`go2cs.exe src/Tests/Behavioral/<Name>`, no `-comments` — behavioral goldens omit
+   them) to generate the `.cs` + `package_info.cs`. For output comparison, add `[GoTestMatchingConsoleOutput]`
+   to the generated `package_info.cs` class (a hand-added attribute the converter preserves).
+5. **Generate tests + goldens:** run the **`UpdateTestTargets`** utility **with `--createTargetFiles`** (from
+   its `bin/Debug/net9.0`). It scans every `Tests/Behavioral/*` folder, rewrites the `// <TestMethods>`
+   blocks in all four `*Tests.cs` classes (adding `Check<Name>()`), and copies each transpiled `.cs` to a
+   `.cs.target` golden. It only emits an `OutputComparison` test for projects whose `package_info.cs` has
+   `[GoTestMatchingConsoleOutput]`. Afterward, `git status` should show only your new project + four
+   `+3`-line test-class diffs (no other `.target` churn).
+6. **Verify:** `dotnet test src/go2cs.slnx --filter "FullyQualifiedName~<Name>"` → 4 green (Transpile,
+   Compile, TargetComparison, OutputComparison). If the Go source uses multi-line string literals, mark the
+   `.cs`/`.cs.target` `-text` in `.gitattributes` (autocrlf gotcha above).
+
 ### Phase 3 mechanics — measuring/iterating the full conversion (`src/go-src-converted`)
 - **The on-disk `go-src-converted` is stale** (last bulk conversion 2025-05-11); it predates current
   converter fixes. To measure the *current* converter you must reconvert — building the committed tree

@@ -79,6 +79,7 @@
     <Project Path="Tests/Behavioral/GenericTypeDecl/GenericTypeDecl.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeInference/GenericTypeInference.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.csproj" />
+    <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />
     <Project Path="Tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
