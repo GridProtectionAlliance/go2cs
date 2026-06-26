@@ -236,6 +236,9 @@ public class A1_TranspileTests : BehavioralTestBase
     [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
+    [TestMethod]
+    public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)

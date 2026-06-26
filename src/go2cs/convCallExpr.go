@@ -143,7 +143,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if !isEmpty {
 					callExprContext.interfaceTypes[i] = paramType
 				}
-			} else if isPointer(paramType) {
+			} else if paramHasArg && isPointer(paramType) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
+				// paramHasArg guards Args[i]: a variadic pointer parameter called with no
+				// trailing arguments (e.g. `In(r)` for `In(r rune, ...*RangeTable)`) has no
+				// arg at the variadic index, so indexing Args[i] would panic.
+				//
+				// getParameterType returns the variadic *element* type, so isPointer is true
+				// for `...*T`. When the call spreads a slice into the variadic (`f(s...)`), the
+				// argument is the whole slice, not a single element pointer, so the element
+				// address-of treatment (which would emit `Ꮡs`) must be skipped.
 				ident := getIdentifier(callExpr.Args[i])
 
 				if !v.isPointer(ident) || v.identIsParameter(ident) {

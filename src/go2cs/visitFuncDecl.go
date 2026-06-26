@@ -301,9 +301,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					if sliceType, ok := param.Type().(*types.Slice); ok {
 						typeName := v.getCSTypeName(sliceType.Elem())
 
-						if _, isTypeParam := sliceType.Elem().(*types.TypeParam); isTypeParam {
-							// A type parameter is not in scope for a namespace-level using
-							// alias, so emit the span type inline (C# 13 params collections).
+						_, isTypeParam := sliceType.Elem().(*types.TypeParam)
+
+						if isTypeParam || strings.Contains(typeName, "<") {
+							// A type parameter is not in scope for a namespace-level using alias,
+							// and a generic/pointer element type (e.g. ж<RangeTable>) would produce
+							// an invalid alias identifier (it contains '<'/'>'); emit the span type
+							// inline instead (C# 13 params collections).
 							updatedSignature.WriteString("Span<" + typeName + ">")
 						} else {
 							updatedSignature.WriteString(EllipsisOperator + typeName)
@@ -485,9 +489,13 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			if sliceType, ok := param.Type().(*types.Slice); ok {
 				typeName := v.getCSTypeName(sliceType.Elem())
 
-				if _, isTypeParam := sliceType.Elem().(*types.TypeParam); isTypeParam {
-					// A type parameter is not in scope for a namespace-level using
-					// alias, so emit the span type inline (C# 13 params collections).
+				_, isTypeParam := sliceType.Elem().(*types.TypeParam)
+
+				if isTypeParam || strings.Contains(typeName, "<") {
+					// A type parameter is not in scope for a namespace-level using alias,
+					// and a generic/pointer element type (e.g. ж<RangeTable>) would produce
+					// an invalid alias identifier (it contains '<'/'>'); emit the span type
+					// inline instead (C# 13 params collections).
 					result.WriteString("Span<" + typeName + ">")
 				} else {
 					result.WriteString(EllipsisOperator + typeName)

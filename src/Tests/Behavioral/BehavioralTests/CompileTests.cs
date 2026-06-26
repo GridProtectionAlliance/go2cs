@@ -236,6 +236,9 @@ public class B2_CompileTests : BehavioralTestBase
     [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
+    [TestMethod]
+    public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)
