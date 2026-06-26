@@ -152,7 +152,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 			result.WriteString(v.newline)
 		} else if method.Type != nil {
 			if isConstraint, methodCount := v.isTypeConstraint(method.Type); isConstraint {
-				result.WriteString(fmt.Sprintf("%s//  Type constraints: %s%s", innerIndent, v.getPrintedNode(method.Type), v.newline))
+				// Collapse multi-line constraint unions (e.g. "~int | ... | ~string" spanning
+				// several source lines) onto a single comment line; otherwise the continuation
+				// lines are emitted as raw, uncompilable C# inside the interface body.
+				constraintText := strings.Join(strings.Fields(v.getPrintedNode(method.Type)), " ")
+				result.WriteString(fmt.Sprintf("%s//  Type constraints: %s%s", innerIndent, constraintText, v.newline))
 				typeConstraints.UnionWithSet(v.getConstraintTypeSetFromExpr(method.Type))
 				operatorSets = getOperatorSet(typeConstraints)
 				result.WriteString(fmt.Sprintf("%s// Derived operators: %s%s", innerIndent, getOperatorSetAsString(operatorSets), v.newline))
