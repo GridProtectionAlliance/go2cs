@@ -12,7 +12,7 @@ public static readonly UntypedInt Z = 3;
 
 public static readonly UntypedInt A1 = iota;
 public static readonly UntypedInt B = /* iota * 100 */ 0;
-internal static readonly UntypedInt _ = 1;
+internal static readonly UntypedInt _ᴛ1ʗ = 1;
 public static readonly UntypedInt D = 100;
 public static readonly UntypedInt E211 = 2;
 public static readonly UntypedInt F = 200;

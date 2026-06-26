@@ -34,8 +34,7 @@ public static readonly FuncID FuncID_systemstack = 20;
 public static readonly FuncID FuncID_systemstack_switch = 21;
 public static readonly FuncID FuncIDWrapper = 22;
 
-public static readonly GoUntyped ArgsSizeUnknown = /* -0x80000000 */
-    GoUntyped.Parse("-2147483648");
+public static readonly UntypedInt ArgsSizeUnknown = /* -0x80000000 */ -2147483648;
 
 public static readonly UntypedInt PCDATA_UnsafePoint = 0;
 public static readonly UntypedInt PCDATA_StackMapIndex = 1;
@@ -50,16 +49,11 @@ public static readonly UntypedInt FUNCDATA_ArgInfo = 5;
 public static readonly UntypedInt FUNCDATA_ArgLiveInfo = 6;
 public static readonly UntypedInt FUNCDATA_WrapInfo = 7;
 
-public static readonly GoUntyped UnsafePointSafe = /* -1 */
-    GoUntyped.Parse("-1");
-public static readonly GoUntyped UnsafePointUnsafe = /* -2 */
-    GoUntyped.Parse("-2");
-public static readonly GoUntyped UnsafePointRestart1 = /* -3 */
-    GoUntyped.Parse("-3");
-public static readonly GoUntyped UnsafePointRestart2 = /* -4 */
-    GoUntyped.Parse("-4");
-public static readonly GoUntyped UnsafePointRestartAtEntry = /* -5 */
-    GoUntyped.Parse("-5");
+public static readonly UntypedInt UnsafePointSafe = -1;
+public static readonly UntypedInt UnsafePointUnsafe = -2;
+public static readonly UntypedInt UnsafePointRestart1 = -3;
+public static readonly UntypedInt UnsafePointRestart2 = -4;
+public static readonly UntypedInt UnsafePointRestartAtEntry = -5;
 
 public static readonly UntypedInt MINFUNC = 16;
 

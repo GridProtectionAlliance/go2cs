@@ -1,0 +1,12 @@
+# go2cs behavioral TargetComparison tests compare transpiled C# to .cs.target
+# golden files BYTE-FOR-BYTE (TargetComparisonTests.FileMatch). The converter
+# preserves the Go source's LF inside multi-line string literals, so these files
+# legitimately contain mixed CRLF/LF. With core.autocrlf=true git would rewrite
+# those LFs to CRLF on checkout and break the byte comparison. Mark the affected
+# projects' transpiled output and goldens as binary so their exact bytes survive.
+src/Tests/Behavioral/Solitaire/*.cs            -text
+src/Tests/Behavioral/Solitaire/*.cs.target     -text
+src/Tests/Behavioral/SortArrayType/*.cs        -text
+src/Tests/Behavioral/SortArrayType/*.cs.target -text
+src/Tests/Behavioral/StdLibInternalAbi/*.cs        -text
+src/Tests/Behavioral/StdLibInternalAbi/*.cs.target -text
