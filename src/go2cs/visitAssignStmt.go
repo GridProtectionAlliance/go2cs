@@ -102,6 +102,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 		} else if _, ok := rhsExprs[0].(*ast.TypeAssertExpr); ok {
 			tupleResult = lhsLen > 1
+		} else if indexExpr, ok := rhsExprs[0].(*ast.IndexExpr); ok && lhsLen > 1 {
+			// Comma-ok map access: `v, ok := m[k]`. Detecting it as a tuple result routes
+			// the RHS through golib's two-value map indexer `m[key, ꟷ]` (see convIndexExpr).
+			if _, isMap := v.getType(indexExpr.X, true).(*types.Map); isMap {
+				tupleResult = true
+			}
 		}
 	}
 
@@ -361,6 +367,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				tupleResultContext := DefaultUnaryExprContext()
 				tupleResultContext.isTupleResult = tupleResult
 				contexts = append(contexts, tupleResultContext)
+
+				// A comma-ok map access (`v, ok := m[k]`) reaches convIndexExpr, which
+				// needs the tuple-result flag to emit the two-value indexer `m[key, ꟷ]`.
+				indexResultContext := DefaultIndexExprContext()
+				indexResultContext.isTupleResult = true
+				contexts = append(contexts, indexResultContext)
 			}
 
 			rhsExpr := v.convExpr(rhs, contexts)

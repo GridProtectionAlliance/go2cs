@@ -6,13 +6,27 @@ import (
 	"go/types"
 )
 
-func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr) string {
+func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprContext) string {
 	var contexts []ExprContext
 	var ptrDeref string
 
 	if typeAndVal, ok := v.info.Types[indexExpr.X]; ok {
 		// Check if the type is a map and its key is an empty interface
 		if mapType, isMap := typeAndVal.Type.(*types.Map); isMap {
+			// Comma-ok map access (`v, ok := m[k]`): use golib's two-value indexer
+			// `m[key, ꟷ]`, which returns `(value, present)`.
+			if context.isTupleResult {
+				keyContexts := []ExprContext{}
+
+				if types.Identical(mapType.Key(), types.NewInterfaceType(nil, nil)) {
+					basicLitContext := DefaultBasicLitContext()
+					basicLitContext.u8StringOK = false
+					keyContexts = append(keyContexts, basicLitContext)
+				}
+
+				return fmt.Sprintf("%s[%s, %s]", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, keyContexts), OverloadDiscriminator)
+			}
+
 			// Check if the key type is an empty interface
 			if types.Identical(mapType.Key(), types.NewInterfaceType(nil, nil)) {
 				context := DefaultBasicLitContext()

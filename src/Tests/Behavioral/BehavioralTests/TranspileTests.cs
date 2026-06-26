@@ -165,6 +165,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
+    public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
+
+    [TestMethod]
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]

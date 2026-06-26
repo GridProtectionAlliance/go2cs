@@ -133,6 +133,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
+    public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
+
+    [TestMethod]
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]

@@ -129,6 +129,22 @@ func (c UnaryExprContext) getDefault() StmtContext {
 	return DefaultUnaryExprContext()
 }
 
+type IndexExprContext struct {
+	// isTupleResult marks a map index used in comma-ok form (`v, ok := m[k]`), so it is
+	// emitted via golib's two-value indexer `m[key, ꟷ]` (returning `(value, present)`).
+	isTupleResult bool
+}
+
+func DefaultIndexExprContext() IndexExprContext {
+	return IndexExprContext{
+		isTupleResult: false,
+	}
+}
+
+func (c IndexExprContext) getDefault() StmtContext {
+	return DefaultIndexExprContext()
+}
+
 type IdentContext struct {
 	isPointer bool
 	isType    bool
@@ -242,7 +258,8 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		context := getExprContext[IdentContext](contexts)
 		return v.convIdent(exprType, context)
 	case *ast.IndexExpr:
-		return v.convIndexExpr(exprType)
+		context := getExprContext[IndexExprContext](contexts)
+		return v.convIndexExpr(exprType, context)
 	case *ast.IndexListExpr:
 		return v.convIndexListExpr(exprType)
 	case *ast.KeyValueExpr:
