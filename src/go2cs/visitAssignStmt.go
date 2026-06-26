@@ -167,6 +167,21 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		assignStmt.Tok == token.SHR_ASSIGN ||
 		assignStmt.Tok == token.AND_NOT_ASSIGN
 
+	// A for-loop init clause is a single `;`-free clause: multiple declarations of differing
+	// types cannot be emitted as `;`-separated decls (the `;` terminates the clause), and the
+	// combined `var (a, b) = ...` form is unavailable when the types differ (mixed int/pointer,
+	// etc.). Detect a multi-variable, all-new for-init that does not need any heap box so it can
+	// be emitted as a single tuple-deconstruction declaration `(nint i, var e) = (..., ...)`.
+	forInitTupleDecl := format.forInit && lhsLen > 1 && lhsLen == rhsLen && reassignedCount == 0
+	if forInitTupleDecl {
+		for i := range lhsLen {
+			if ident := getIdentifier(lhsExprs[i]); ident == nil || ident.Name == "_" || v.convertToHeapTypeDecl(ident, false) != "" {
+				forInitTupleDecl = false
+				break
+			}
+		}
+	}
+
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
 		leftExprs := HashSet[string]{}
 
@@ -330,6 +345,69 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 		}
 
+	} else if forInitTupleDecl {
+		// Emit a single tuple-deconstruction declaration with per-element types:
+		// `(nint i, var e) = (other.Len(), other.Front())`.
+		lambdaContext := DefaultLambdaContext()
+		lambdaContext.isAssignment = true
+
+		result.WriteRune('(')
+
+		for i := range lhsLen {
+			if i > 0 {
+				result.WriteString(", ")
+			}
+
+			ident := getIdentifier(lhsExprs[i])
+
+			if lhsTypeIsString[i] {
+				result.WriteString("@string ")
+			} else if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
+				result.WriteString("var ")
+			} else {
+				lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
+				result.WriteString(lhsType)
+				result.WriteRune(' ')
+			}
+
+			context := DefaultIdentContext()
+
+			if (!v.isPointer(ident) || v.identIsParameter(ident)) && i < rhsLen {
+				if unaryExpr, ok := rhsExprs[i].(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
+					context.isPointer = true
+				}
+			}
+
+			result.WriteString(v.convExpr(lhsExprs[i], []ExprContext{context, lambdaContext}))
+		}
+
+		result.WriteString(") = (")
+
+		for i, rhs := range rhsExprs {
+			if i > 0 {
+				result.WriteString(", ")
+			}
+
+			contexts := []ExprContext{lambdaContext}
+
+			// A u8 string literal is a ReadOnlySpan<byte> (ref struct) and cannot be a
+			// ValueTuple element, so suppress the u8 form for string literals here.
+			basicLitContext := DefaultBasicLitContext()
+			basicLitContext.u8StringOK = false
+			contexts = append(contexts, basicLitContext)
+
+			rhsExpr := v.convExpr(rhs, contexts)
+
+			if i < lhsLen && lhsTypeIsInterface[i] {
+				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
+			} else {
+				result.WriteString(rhsExpr)
+			}
+		}
+
+		result.WriteRune(')')
+
+		// No trailing semicolon: visitForStmt appends "; " after the init clause.
 	} else {
 		// Some variables are declared and some are reassigned, or one of the types is a string or integer
 		for i := range lhsLen {

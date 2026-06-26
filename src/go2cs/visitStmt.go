@@ -14,6 +14,7 @@ type FormattingContext struct {
 	useNewLine         bool
 	includeSemiColon   bool
 	useIndent          bool
+	forInit            bool // statement is the init clause of a for-loop (single `;`-free clause)
 	heapTypeDeclTarget *strings.Builder
 }
 
@@ -22,6 +23,7 @@ func DefaultFormattingContext() FormattingContext {
 		useNewLine:         true,
 		includeSemiColon:   true,
 		useIndent:          true,
+		forInit:            false,
 		heapTypeDeclTarget: nil,
 	}
 }

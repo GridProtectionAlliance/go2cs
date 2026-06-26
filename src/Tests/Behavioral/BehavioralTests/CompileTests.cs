@@ -93,6 +93,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
+    public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
+
+    [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]

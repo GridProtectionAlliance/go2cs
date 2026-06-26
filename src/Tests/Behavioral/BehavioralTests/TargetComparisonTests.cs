@@ -95,6 +95,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
+    public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
+
+    [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]

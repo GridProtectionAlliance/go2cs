@@ -44,7 +44,11 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			//   - assignment
 			//   - increment / decrement statement
 			//   - send statement (source code):
-			v.visitStmt(forStmt.Init, contexts)
+			// Flag the init clause so a multi-variable mixed-type `:=` is emitted as a single
+			// tuple-deconstruction declaration (a for-init clause cannot hold `;`-separated decls).
+			initFormat := format
+			initFormat.forInit = true
+			v.visitStmt(forStmt.Init, []StmtContext{initFormat})
 		}
 
 		// Replace the marker with any heap allocations for the for loop

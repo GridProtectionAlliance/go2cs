@@ -79,6 +79,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]
+    public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
+
+    [TestMethod]
     public void CheckGenericCompositeLiterals() => CheckTarget("GenericCompositeLiterals");
 
     [TestMethod]

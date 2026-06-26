@@ -72,6 +72,7 @@
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
+    <Project Path="Tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
     <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="Tests/Behavioral/GenericCompositeLiterals/GenericCompositeLiterals.csproj" />
     <Project Path="Tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
