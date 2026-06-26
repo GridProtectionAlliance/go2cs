@@ -131,7 +131,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 					for j := i; j <= lastArg; j++ {
 						if v.isStringType(callExpr.Args[j]) {
-							callExprContext.atStringArgOK[j] = true
+							callExprContext.useGoStringArg[j] = true
 						}
 					}
 				}
