@@ -73,6 +73,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
+
+    [TestMethod]
     public void CheckGenericCompositeLiterals() => CheckTarget("GenericCompositeLiterals");
 
     [TestMethod]
@@ -95,6 +98,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
+    public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");

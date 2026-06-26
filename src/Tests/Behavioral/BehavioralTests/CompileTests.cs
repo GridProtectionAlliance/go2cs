@@ -84,6 +84,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
+
+    [TestMethod]
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
@@ -115,6 +118,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
+    public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");

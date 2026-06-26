@@ -86,6 +86,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
+    public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
+
+    [TestMethod]
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
@@ -117,6 +120,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckGenericTypeInstantiation() => CheckTarget("GenericTypeInstantiation");
+
+    [TestMethod]
+    public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
