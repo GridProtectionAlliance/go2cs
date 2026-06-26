@@ -60,34 +60,50 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     }
 
     /// <inheritdoc />
-    public int Count => m_map.Count;
+    public int Count => m_map?.Count ?? 0;
 
     public TValue this[TKey key]
     {
-        get => m_map.TryGetValue(key, out TValue? value) ? value : default!;
-        set => m_map[key] = value;
+        // Reading from a nil map yields the zero value in Go, so route through the
+        // null-safe TryGetValue rather than dereferencing m_map directly.
+        get => TryGetValue(key, out TValue? value) ? value : default!;
+        set
+        {
+            // Writing to a nil map panics in Go ("assignment to entry in nil map").
+            if (m_map is null)
+                throw new PanicException("assignment to entry in nil map");
+
+            m_map[key] = value;
+        }
     }
 
     public (TValue, bool) this[TKey key, bool _]
     {
-        get => m_map.TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
+        // Comma-ok read of a nil (or absent) key yields (zero, false).
+        get => TryGetValue(key, out TValue? value) ? (value!, true) : (default!, false);
     }
 
     /// <inheritdoc />
     public void Add(TKey key, TValue value)
     {
+        // Adding to a nil map panics in Go, the same as an index assignment.
+        if (m_map is null)
+            throw new PanicException("assignment to entry in nil map");
+
         m_map.Add(key, value);
     }
 
     /// <inheritdoc />
     public bool Remove(TKey key)
     {
-        return m_map.Remove(key);
+        // delete() on a nil map is a no-op in Go (no panic).
+        return m_map?.Remove(key) ?? false;
     }
 
     public void Clear()
     {
-        m_map.Clear();
+        // clear() on a nil map is a no-op in Go.
+        m_map?.Clear();
     }
 
     /// <inheritdoc />
@@ -103,12 +119,17 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     /// <inheritdoc />
     public bool ContainsKey(TKey key)
     {
-        return m_map.ContainsKey(key);
+        // A nil map contains no keys.
+        return m_map?.ContainsKey(key) ?? false;
     }
 
     public bool Equals(map<TKey, TValue> other)
     {
-        return m_map.Equals(other.m_map);
+        // Go maps are reference types: `m == nil` is true only for the nil map, and two
+        // map values are equal only when they share the same backing store. Comparing by
+        // reference identity captures both (and is null-safe — two nil maps share a null
+        // backing store and so compare equal, while a nil map differs from an empty one).
+        return ReferenceEquals(m_map, other.m_map);
     }
 
     /// <inheritdoc />
@@ -126,7 +147,8 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     /// <inheritdoc />
     public override int GetHashCode()
     {
-        return m_map.GetHashCode();
+        // Reference-based hash, consistent with the identity Equals above; a nil map hashes to 0.
+        return m_map?.GetHashCode() ?? 0;
     }
 
     #region [ Operators ]
@@ -177,7 +199,8 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     // map<T> to nil comparisons
     public static bool operator ==(map<TKey, TValue> map, NilType _)
     {
-        return map.Count == 0;
+        // A map is nil only when it has no backing store — an empty but allocated map is not nil.
+        return map.m_map is null;
     }
 
     public static bool operator !=(map<TKey, TValue> map, NilType nil)
@@ -245,12 +268,13 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
 
     IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
     {
-        return ((IEnumerable<KeyValuePair<TKey, TValue>>)m_map)?.GetEnumerator()!;
+        // Ranging over a nil map performs zero iterations in Go.
+        return (m_map ?? Enumerable.Empty<KeyValuePair<TKey, TValue>>()).GetEnumerator();
     }
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return ((IEnumerable)m_map)?.GetEnumerator()!;
+        return ((IEnumerable)(m_map ?? Enumerable.Empty<KeyValuePair<TKey, TValue>>())).GetEnumerator();
     }
 
     #endregion
