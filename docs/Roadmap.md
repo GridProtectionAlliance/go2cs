@@ -458,6 +458,27 @@ Guarded by the **`RingPointerMethods`** behavioral test (a full mini-ring exerci
 walk, Len, Move±, Prev — output matches Go). The golib change touches all pointer equality; validated by the full
 suite. **Both container packages now compile *and* run** — closing out the general pointer-as-value problems.
 
+### Phase 3 iteration 13 — leaf-defect sweep: 5 fixes, 3 leaves greened (2026-06-26)
+
+Fresh full reconvert + regenerated-csproj overlay + `go-src-converted.sln` build re-bucketed the leaves: the
+`ж<T>` work had cleared the big clusters, leaving **39 errors across 17 of 304 projects** (down from last
+session's 79). Five fixes landed (each its own commit; all behavioral-green, zero existing-golden churn except
+the one intended re-baseline noted):
+
+| Fix | Defect | Greens | Commit |
+|---|---|---|---|
+| **`min`/`max` built-ins** (golib `builtin.cs`) | Go 1.21 `min`/`max` emitted verbatim but golib had no such methods → CS0103. Added generic `min`/`max` constrained to `IComparable<T>` (numeric primitives + `@string`). No converter change. | **crypto/subtle** (+ unblocks ~dozens that use the built-ins) | `daddd953d` |
+| **unsafe.Pointer keyword sanitization** (`convIdent.go`) | The `name.val` deref form for an `unsafe.Pointer` ident used the raw Go name, so a param named `new` (C# keyword) emitted `new.val` → CS1526. Now sanitized to `@new.val`. | (internal/runtime/atomic syntax; pkg has deeper latent ж issues) | `175e0dfd3` |
+| **unsigned unary-minus + shift precedence + shift-assign count** (`convUnaryExpr`/`convBinaryExpr`/`visitAssignStmt`) | `x & -x` → CS0023 (now `(T)0 - x`); Go `x>>4 + x` / `1<<15 - 1` re-associated in C# (shift binds looser) → now shift exprs parenthesized; `y <<= s` cast count to RHS type → CS0019 (now `(int)`). | **math/bits 4→1**; corrected a *latent* `1<<15-1`→`1<<14` miscompile in the StdLibInternalAbi golden (re-baselined) | `9089b9c4b` |
+| **builtin-shadowing local rename** (`variableAnalysisOperations.go`) | `len := len(buf)` — a local named like a *called* built-in shadows the `using static` method → CS0149/CS0841. Renames the local (`lenΔ1`) when that built-in is actually called in the function; built-in call stays `len`. | **hash/maphash** | `e87705650` |
+| **comma-ok map access** (`convIndexExpr`/`convExpr`/`visitAssignStmt`) | `v, ok := m[k]` (+ blank, if-init, reassign forms) wasn't detected as a tuple result → indexed twice, value assigned to `ok` (CS0029). Now routed through golib's two-value indexer `m[key, ꟷ]` via a new `IndexExprContext.isTupleResult`. **High-value correctness fix** (every comma-ok map read was wrong; no behavioral test had covered it). | **internal/coverage/rtcov** | `92d832204` |
+
+Guarded by new behavioral tests: `MinMaxBuiltin`, `UnsafePointerKeywordParam`, `ShiftPrecedenceUnsigned`,
+`BuiltinShadowLocal`, `MapCommaOk`. **Leaf packages greened this iteration: crypto/subtle, hash/maphash,
+internal/coverage/rtcov.** Found-but-deferred: reading a **nil map** NREs instead of yielding zero/false (golib
+nil-map representation gap — a chip was filed). math/bits' last error is a local untyped `const` (`1<<32`) typed
+`UntypedInt`/BigInteger in uint64 arithmetic — context-typing untyped local consts is a larger follow-up.
+
 ### Phase 3 — earlier note: the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/
