@@ -142,6 +142,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]
+    public void CheckStringSliceAndUnsignedConst() => CheckTarget("StringSliceAndUnsignedConst");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]

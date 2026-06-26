@@ -121,7 +121,10 @@ public readonly struct @string :
 
     public byte this[ulong index] => this[(nint)index];
     
-    public slice<byte> this[Range range] => new(m_value, range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length));
+    // Slicing a Go string yields a string (e.g. `s[a:b]`), so the range indexer
+    // returns @string. Returning slice<byte> here would break string comparisons
+    // (slice<byte> != string) and put a ref-struct-convertible value into tuples.
+    public @string this[Range range] => new(new slice<byte>(m_value, range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length)));
 
     public slice<byte> Slice(int start, int length)
     {

@@ -180,6 +180,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]
+    public void CheckStringSliceAndUnsignedConst() => CheckTarget("StringSliceAndUnsignedConst");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]

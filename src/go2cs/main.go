@@ -2366,6 +2366,19 @@ func (v *Visitor) liftedTypeExists(expr ast.Expr) bool {
 	return false
 }
 
+// isUnsignedType reports whether the expression's contextual type is an unsigned
+// integer. An untyped constant adopts its target type (e.g. a uint32 argument), so
+// this drives correct C# literal suffixing for values outside the int32 range.
+func (v *Visitor) isUnsignedType(expr ast.Expr) bool {
+	if tv, ok := v.info.Types[expr]; ok && tv.Type != nil {
+		if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
+			return basic.Info()&types.IsUnsigned != 0
+		}
+	}
+
+	return false
+}
+
 func (v *Visitor) getType(expr ast.Expr, underlying bool) types.Type {
 	if expr == nil {
 		return nil

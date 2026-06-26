@@ -100,6 +100,7 @@
     <Project Path="Tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />
     <Project Path="Tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />
     <Project Path="Tests/Behavioral/StringPassByValue/StringPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/StringSliceAndUnsignedConst/StringSliceAndUnsignedConst.csproj" />
     <Project Path="Tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.csproj" />
     <Project Path="Tests/Behavioral/StructPromotion/StructPromotion.csproj" />
     <Project Path="Tests/Behavioral/StructPromotionWithInterface/StructPromotionWithInterface.csproj" />

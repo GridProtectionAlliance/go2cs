@@ -244,6 +244,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			contexts := []ExprContext{lambdaContext}
 
+			// A u8 string literal is a ReadOnlySpan<byte> (ref struct) and cannot be
+			// a ValueTuple element, so suppress the u8 form for string literals in a
+			// multi-value (tuple) assignment, e.g. `field, env = env, ""`.
+			if rhsLen > 1 {
+				basicLitContext := DefaultBasicLitContext()
+				basicLitContext.u8StringOK = false
+				contexts = append(contexts, basicLitContext)
+			}
+
 			if selectorExpr, ok := rhs.(*ast.SelectorExpr); ok {
 				if v.isMethodValue(selectorExpr, false) {
 					v.enterLambdaConversion(selectorExpr)

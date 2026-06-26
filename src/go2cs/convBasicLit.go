@@ -54,9 +54,22 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			value = strconv.FormatInt(intval, 10)
 
 			if intval > math.MaxInt32 || intval < math.MinInt32 {
-				result.WriteString("(nint)")
-				result.WriteString(value)
-				result.WriteRune('L')
+				// A value outside int32 used in an unsigned context (e.g. 0x80000000
+				// passed to a uint32 parameter) must emit an unsigned C# literal — a
+				// signed (nint)…L does not convert to uint/uint32.
+				if intval >= 0 && v.isUnsignedType(basicLit) {
+					result.WriteString(value)
+
+					if intval > math.MaxUint32 {
+						result.WriteString("UL")
+					} else {
+						result.WriteRune('U')
+					}
+				} else {
+					result.WriteString("(nint)")
+					result.WriteString(value)
+					result.WriteRune('L')
+				}
 			} else {
 				result.WriteString(value)
 			}

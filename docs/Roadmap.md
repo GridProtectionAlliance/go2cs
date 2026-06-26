@@ -144,12 +144,26 @@ Result: `internal/cpu` went **~140 → 8 errors**. Caveat: `Ꮡ(value)` heap-all
 (`&global` already did this on line 124); the proper fix is **boxed companions for package-global vars whose
 address is taken** (future work).
 
+### Phase 3 iteration 3 — `internal/cpu` compiles clean (2026-06-26)
+
+The remaining 8 `internal/cpu` errors are fixed — **`internal/cpu` is the first full-conversion stdlib
+package to compile clean** (was the ~140-error blocker). Three general fixes, all behavioral-green (228/228);
+re-transpiling all 61 behavioral projects left every golden byte-identical (no converter-output regression),
+and the whole solution rebuilds clean against the changed golib:
+
+| Defect | Symptom | Fix |
+|---|---|---|
+| Large untyped constant typed by value-range as `(nint)…L` even in an unsigned context (`cpuid(0x80000000, 0)`) | CS1503 `nint → uint` (×6) | `convBasicLit`: in the `> int32` branch, if the literal's contextual type is unsigned (`isUnsignedType` via `info.Types`), emit an unsigned C# literal (`2147483648U` / `…UL`). |
+| Slicing an `@string` returned `slice<byte>`, so `field[:4] != "cpu."` was `slice<byte> != string` | CS0019 | **golib**: `@string this[Range]` now returns `@string` (Go string slicing yields a string). Runtime-only — no `.cs` change. |
+| Empty-string literal in a tuple assignment emitted `""u8` (a `ReadOnlySpan<byte>` ref struct) — illegal as a ValueTuple element | CS9244 | `visitAssignStmt`: suppress the u8 form for string literals in a multi-value (tuple) RHS (`field, env = env, ""`). |
+
+Guarded by the `StringSliceAndUnsignedConst` behavioral test.
+
 ### Next defects (work queue)
-- **Address-of-global correctness** (above): generate a heap-boxed `Ꮡvar` companion for package-global vars
-  whose address (or field address) is taken, so `&global`/`&global.field` reference the original, not a copy.
-- **`internal/cpu`** remaining 8: large untyped constant typed as `(nint)` where a `uint32` arg is expected
-  (`cpuid(0x80000000, 0)` → `cpuid((nint)2147483648L, 0)` → CS1503); a ref-struct (`ReadOnlySpan<byte>`) used
-  as a tuple element (CS9244); `slice<byte> != string` comparison (CS0019).
+- **Promote `internal/cpu`** toward the baseline (now that it compiles), or first confirm it builds within the
+  full `go-src-converted.sln` alongside its dependents.
+- **Address-of-global correctness**: generate a heap-boxed `Ꮡvar` companion for package-global vars whose
+  address (or field address) is taken, so `&global`/`&global.field` reference the original, not a copy.
 - **`sync/atomic`** — CS0051 inconsistent accessibility: the **`TypeGenerator`** (Roslyn) emits a `public`
   constructor taking an unexported embedded marker type (`noCopy`/`align64`). Generator-side fix, not the converter.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
