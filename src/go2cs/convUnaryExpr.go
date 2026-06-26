@@ -233,5 +233,14 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		return "~" + v.convExpr(unaryExpr.X, nil)
 	}
 
+	if unaryExpr.Op == token.SUB && v.isUnsignedType(unaryExpr.X) {
+		// C# forbids unary minus on an unsigned operand (CS0023). Go's `-x` on an
+		// unsigned value is two's-complement negation that wraps mod 2^N (e.g. the
+		// `x & -x` lowest-set-bit idiom in math/bits). `(T)0 - x` has identical
+		// wrap-around semantics and keeps the unsigned type T.
+		typeName := convertToCSTypeName(v.getTypeName(v.getType(unaryExpr.X, false), false))
+		return fmt.Sprintf("((%s)0 - %s)", typeName, v.convExpr(unaryExpr.X, nil))
+	}
+
 	return unaryExpr.Op.String() + v.convExpr(unaryExpr.X, nil)
 }

@@ -49,6 +49,12 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {
 			rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)
+
+			// Go's shift operators bind at the multiplicative level (tighter than `+`/`-`),
+			// but C#'s `<<`/`>>` bind looser than the additive operators. So Go's
+			// `x>>4 + x` (meaning `(x>>4) + x`) would re-associate in C# as `x >> (4 + x)`.
+			// Parenthesize the shift so the original grouping is preserved in every context.
+			return fmt.Sprintf("(%s %s %s)", leftOperand, binaryOp, rightOperand)
 		}
 
 		bitwiseOp := binaryOp == "&" || binaryOp == "|" || binaryOp == "^" || binaryOp == "&^"

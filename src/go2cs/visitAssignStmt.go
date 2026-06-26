@@ -368,10 +368,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			var binaryTypeName string
 
 			if bitwiseAssignOp {
-				binaryType := v.info.Types[rhs].Type
+				if assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN {
+					// The shift count in a C# compound shift-assignment must be `int`;
+					// casting it to the RHS's own (possibly unsigned or native-width)
+					// type — e.g. `y <<= (nuint)s` — is rejected with CS0019.
+					binaryTypeName = "int"
+				} else {
+					binaryType := v.info.Types[rhs].Type
 
-				if binaryType != nil {
-					binaryTypeName = convertToCSTypeName(v.getTypeName(binaryType, false))
+					if binaryType != nil {
+						binaryTypeName = convertToCSTypeName(v.getTypeName(binaryType, false))
+					}
 				}
 			}
 

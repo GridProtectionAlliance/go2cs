@@ -461,7 +461,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static nint NumOut(this ref ΔFuncType t) {
-    return ((nint)((uint16)(t.OutCount & (1 << (int)(15) - 1))));
+    return ((nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1))));
 }
 
 [GoRecv] public static ж<Type> Out(this ref ΔFuncType t, nint i) {
@@ -492,7 +492,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & (1 << (int)(15))) != 0;
+    return (uint16)(t.OutCount & ((1 << (int)(15)))) != 0;
 }
 
 [GoType] partial struct PtrType {
@@ -529,22 +529,22 @@ public static ж<byte> Data(this ΔName n, nint off) {
 }
 
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(0))) != 0;
+    return (byte)((n.Bytes.val) & ((1 << (int)(0)))) != 0;
 }
 
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(1))) != 0;
+    return (byte)((n.Bytes.val) & ((1 << (int)(1)))) != 0;
 }
 
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.val) & (1 << (int)(3))) != 0;
+    return (byte)((n.Bytes.val) & ((1 << (int)(3)))) != 0;
 }
 
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.DataChecked(off + i, "read varint"u8).val;
-        v += ((nint)((byte)(x & 127))) << (int)((7 * i));
+        v += (((nint)((byte)(x & 127))) << (int)((7 * i)));
         if ((byte)(x & 128) == 0) {
             return (i + 1, v);
         }
@@ -562,7 +562,7 @@ public static bool IsBlank(this ΔName n) {
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
         var b = ((byte)((nint)(n & 127)));
-        n >>= (UntypedInt)(7);
+        n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
             return i + 1;
@@ -589,10 +589,10 @@ public static @string Tag(this ΔName n) {
 }
 
 public static ΔName NewName(@string n, @string tag, bool exported, bool embedded) {
-    if (len(n) >= 1 << (int)(29)) {
+    if (len(n) >= (1 << (int)(29))) {
         throw panic("abi.NewName: name too long: " + n[..1024] + "...");
     }
-    if (len(tag) >= 1 << (int)(29)) {
+    if (len(tag) >= (1 << (int)(29))) {
         throw panic("abi.NewName: tag too long: " + tag[..1024] + "...");
     }
     array<byte> nameLen = new(10);
@@ -602,14 +602,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)(1 << (int)(0));
+        bits |= (byte)((1 << (int)(0)));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)(1 << (int)(1));
+        bits |= (byte)((1 << (int)(1)));
     }
     if (embedded) {
-        bits |= (byte)(1 << (int)(3));
+        bits |= (byte)((1 << (int)(3)));
     }
     var b = new slice<byte>(l);
     b[0] = bits;
