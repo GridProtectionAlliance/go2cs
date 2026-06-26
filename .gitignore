@@ -334,6 +334,11 @@ rsrc_windows_amd64.syso
 
 # -- go2cs specific exclusions --
 
+# Roslyn source-generator output (EmitCompilerGeneratedFiles writes these to
+# each project's Generated/ folder). They are regenerated on every build and
+# must not be tracked.
+*.g.cs
+
 # Don't ignore the debug folder in src/core
 !src/core/debug/
 !src/core/debug/*
