@@ -1,15 +1,9 @@
 // Copyright 2014 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
-
-using System.Threading;
-using go;
-
-[module: GoManualConversion]
-
 namespace go.sync;
 
-//using @unsafe = unsafe_package;
+using @unsafe = unsafe_package;
 
 partial class atomic_package {
 
@@ -22,25 +16,20 @@ partial class atomic_package {
     internal any v;
 }
 
-/*
 // efaceWords is interface{} internal representation.
 [GoType] partial struct efaceWords {
     internal @unsafe.Pointer typ;
     internal @unsafe.Pointer data;
 }
-*/
 
 // Load returns the value set by the most recent Store.
 // It returns nil if there has been no call to Store for this Value.
 [GoRecv] public static any /*val*/ Load(this ref Value v) {
-    return v.v == nil ? nil : Volatile.Read(ref v.v);
-
-    /*
     any val = default!;
 
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
-    if (typ == nil || typ.val == new @unsafe.Pointer(Ꮡ(firstStoreInProgress))) {
+    if (typ == nil || typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
         // First store not yet completed.
         return default!;
     }
@@ -49,30 +38,18 @@ partial class atomic_package {
     vlp.val.typ = typ;
     vlp.val.data = data;
     return val;
-    */
 }
 
-//internal static byte firstStoreInProgress;
+internal static ж<byte> ᏑfirstStoreInProgress = new(default(byte));
+internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val;
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
 // Store of an inconsistent type panics, as does Store(nil).
 [GoRecv] public static void Store(this ref Value v, any val) {
-    if (val == nil) {
+    if (val == default!) {
         throw panic("sync/atomic: store of nil value into Value");
     }
-
-    if (val is string valStr) {
-        val = new @string(valStr);
-    }
-
-    if (v.v != nil && v.v.GetType() != val.GetType()) {
-        throw panic("sync/atomic: store of inconsistently typed value into Value");
-    }
-    
-    Volatile.Write(ref v.v, val);
-
-    /*
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
     while (ᐧ) {
@@ -82,7 +59,7 @@ partial class atomic_package {
             // Disable preemption so that other goroutines can use
             // active spin wait to wait for completion.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(Ꮡ(firstStoreInProgress)))) {
+            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
@@ -92,7 +69,7 @@ partial class atomic_package {
             runtime_procUnpin();
             return;
         }
-        if (typ.val == new @unsafe.Pointer(Ꮡ(firstStoreInProgress))) {
+        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
@@ -105,7 +82,6 @@ partial class atomic_package {
         StorePointer(Ꮡ((~vp).data), (~vlp).data);
         return;
     }
-    */
 }
 
 // Swap stores new into Value and returns the previous value. It returns nil if
@@ -114,23 +90,11 @@ partial class atomic_package {
 // All calls to Swap for a given Value must use values of the same concrete
 // type. Swap of an inconsistent type panics, as does Swap(nil).
 [GoRecv] public static any /*old*/ Swap(this ref Value v, any @new) {
-    if (@new == nil) {
-        throw panic("sync/atomic: swap of nil value into Value");
-    }
-
-    if (@new is string newStr) {
-        @new = new @string(newStr);
-    }
-
-    if (v.v != nil && v.v.GetType() != @new.GetType()) {
-        throw panic("sync/atomic: swap of inconsistently typed value into Value");
-    }
-
-    return Interlocked.Exchange(ref v.v, @new);
-
-    /*
     any old = default!;
 
+    if (@new == default!) {
+        throw panic("sync/atomic: swap of nil value into Value");
+    }
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     var np = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(@new)));
     while (ᐧ) {
@@ -141,7 +105,7 @@ partial class atomic_package {
             // active spin wait to wait for completion; and so that
             // GC does not see the fake type accidentally.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(Ꮡ(firstStoreInProgress)))) {
+            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
@@ -151,7 +115,7 @@ partial class atomic_package {
             runtime_procUnpin();
             return default!;
         }
-        if (typ.val == new @unsafe.Pointer(Ꮡ(firstStoreInProgress))) {
+        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
@@ -165,7 +129,6 @@ partial class atomic_package {
         (op.val.typ, op.val.data) = (np.val.typ, (uintptr)SwapPointer(Ꮡ((~vp).data), (~np).data));
         return old;
     }
-    */
 }
 
 // CompareAndSwap executes the compare-and-swap operation for the [Value].
@@ -174,31 +137,11 @@ partial class atomic_package {
 // concrete type. CompareAndSwap of an inconsistent type panics, as does
 // CompareAndSwap(old, nil).
 [GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Value v, any old, any @new) {
-    if (@new == nil) {
-        throw panic("sync/atomic: compare and swap of nil value into Value");
-    }
-
-    if (@new is string newStr) {
-        @new = new @string(newStr);
-    }
-
-    if (old is string oldStr) {
-        old = new @string(oldStr);
-    }
-
-    if (old != nil && @new.GetType() != old.GetType()) {
-        throw panic("sync/atomic: compare and swap of inconsistently typed values");
-    }
-
-    if (v.v != nil && v.v.GetType() != @new.GetType()) {
-        throw panic("sync/atomic: compare and swap of inconsistently typed value into Value");
-    }
-
-    return Interlocked.CompareExchange(ref v.v, @new, old) != old;
-
-    /*
     bool swapped = default!;
 
+    if (@new == default!) {
+        throw panic("sync/atomic: compare and swap of nil value into Value");
+    }
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     var np = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(@new)));
     var op = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(old)));
@@ -216,7 +159,7 @@ partial class atomic_package {
             // active spin wait to wait for completion; and so that
             // GC does not see the fake type accidentally.
             runtime_procPin();
-            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(Ꮡ(firstStoreInProgress)))) {
+            if (!CompareAndSwapPointer(Ꮡ((~vp).typ), nil, new @unsafe.Pointer(ᏑfirstStoreInProgress))) {
                 runtime_procUnpin();
                 continue;
             }
@@ -226,7 +169,7 @@ partial class atomic_package {
             runtime_procUnpin();
             return true;
         }
-        if (typ.val == new @unsafe.Pointer(Ꮡ(firstStoreInProgress))) {
+        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
@@ -250,14 +193,11 @@ partial class atomic_package {
         }
         return CompareAndSwapPointer(Ꮡ((~vp).data), data, (~np).data);
     }
-    */
 }
 
-/*
 // Disable/enable preemption, implemented in runtime.
 internal static partial nint runtime_procPin();
 
 internal static partial void runtime_procUnpin();
-*/
 
 } // end atomic_package

@@ -97,6 +97,15 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// Route a capture-mode method called on a heap-boxed value receiver through the ж
+	// (pointer) overload, which sets up the receiver box the method needs for
+	// `&recv.field` — e.g. `var i atomic.Int32; i.Store(10)` → `Ꮡi.Store(10)`. The
+	// receiver is heap-boxed by escape analysis (see collectCaptureModeMethods), so its
+	// "Ꮡname" companion exists.
+	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && v.isHeapBoxedExpr(selectorExpr.X) {
+		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
+	}
+
 	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
 }
 

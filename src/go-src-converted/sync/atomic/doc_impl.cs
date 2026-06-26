@@ -38,32 +38,32 @@ partial class atomic_package
 
     public static partial bool /*swapped*/ CompareAndSwapInt32(ж<int32> addr, int32 old, int32 @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapInt64(ж<int64> addr, int64 old, int64 @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapUint32(ж<uint32> addr, uint32 old, uint32 @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapUint64(ж<uint64> addr, uint64 old, uint64 @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapUintptr(ж<uintptr> addr, uintptr old, uintptr @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapPointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer old, @unsafe.Pointer @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) != old;
+        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
     }
 
     public static partial int32 /*new*/ AddInt32(ж<int32> addr, int32 delta)

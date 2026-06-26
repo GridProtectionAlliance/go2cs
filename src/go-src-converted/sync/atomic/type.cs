@@ -15,27 +15,27 @@ partial class atomic_package {
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static bool Load(this ref Bool x) {
-    return LoadUint32(Ꮡ(x.v)) != 0;
+[GoRecv("capture")] public static bool Load(this ref Bool x) {
+    return LoadUint32(Load_BoolꓸᏑx.of(Bool.Ꮡv)) != 0;
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Bool x, bool val) {
-    StoreUint32(Ꮡ(x.v), b32(val));
+[GoRecv("capture")] public static void Store(this ref Bool x, bool val) {
+    StoreUint32(Store_BoolꓸᏑx.of(Bool.Ꮡv), b32(val));
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static bool /*old*/ Swap(this ref Bool x, bool @new) {
+[GoRecv("capture")] public static bool /*old*/ Swap(this ref Bool x, bool @new) {
     bool old = default!;
 
-    return SwapUint32(Ꮡ(x.v), b32(@new)) != 0;
+    return SwapUint32(Swap_BoolꓸᏑx.of(Bool.Ꮡv), b32(@new)) != 0;
 }
 
 // CompareAndSwap executes the compare-and-swap operation for the boolean value x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Bool x, bool old, bool @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Bool x, bool old, bool @new) {
     bool swapped = default!;
 
-    return CompareAndSwapUint32(Ꮡ(x.v), b32(old), b32(@new));
+    return CompareAndSwapUint32(CompareAndSwap_BoolꓸᏑx.of(Bool.Ꮡv), b32(old), b32(@new));
 }
 
 // b32 returns a uint32 0 or 1 representing b.
@@ -106,50 +106,50 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static int32 Load(this ref Int32 x) {
-    return LoadInt32(Ꮡ(x.v));
+[GoRecv("capture")] public static int32 Load(this ref Int32 x) {
+    return LoadInt32(Load_Int32ꓸᏑx.of(Int32.Ꮡv));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Int32 x, int32 val) {
-    StoreInt32(Ꮡ(x.v), val);
+[GoRecv("capture")] public static void Store(this ref Int32 x, int32 val) {
+    StoreInt32(Store_Int32ꓸᏑx.of(Int32.Ꮡv), val);
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static int32 /*old*/ Swap(this ref Int32 x, int32 @new) {
+[GoRecv("capture")] public static int32 /*old*/ Swap(this ref Int32 x, int32 @new) {
     int32 old = default!;
 
-    return SwapInt32(Ꮡ(x.v), @new);
+    return SwapInt32(Swap_Int32ꓸᏑx.of(Int32.Ꮡv), @new);
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Int32 x, int32 old, int32 @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Int32 x, int32 old, int32 @new) {
     bool swapped = default!;
 
-    return CompareAndSwapInt32(Ꮡ(x.v), old, @new);
+    return CompareAndSwapInt32(CompareAndSwap_Int32ꓸᏑx.of(Int32.Ꮡv), old, @new);
 }
 
 // Add atomically adds delta to x and returns the new value.
-[GoRecv] public static int32 /*new*/ Add(this ref Int32 x, int32 delta) {
+[GoRecv("capture")] public static int32 /*new*/ Add(this ref Int32 x, int32 delta) {
     int32 @new = default!;
 
-    return AddInt32(Ꮡ(x.v), delta);
+    return AddInt32(Add_Int32ꓸᏑx.of(Int32.Ꮡv), delta);
 }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static int32 /*old*/ And(this ref Int32 x, int32 mask) {
+[GoRecv("capture")] public static int32 /*old*/ And(this ref Int32 x, int32 mask) {
     int32 old = default!;
 
-    return AndInt32(Ꮡ(x.v), mask);
+    return AndInt32(And_Int32ꓸᏑx.of(Int32.Ꮡv), mask);
 }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static int32 /*old*/ Or(this ref Int32 x, int32 mask) {
+[GoRecv("capture")] public static int32 /*old*/ Or(this ref Int32 x, int32 mask) {
     int32 old = default!;
 
-    return OrInt32(Ꮡ(x.v), mask);
+    return OrInt32(Or_Int32ꓸᏑx.of(Int32.Ꮡv), mask);
 }
 
 // An Int64 is an atomic int64. The zero value is zero.
@@ -160,50 +160,50 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static int64 Load(this ref Int64 x) {
-    return LoadInt64(Ꮡ(x.v));
+[GoRecv("capture")] public static int64 Load(this ref Int64 x) {
+    return LoadInt64(Load_Int64ꓸᏑx.of(Int64.Ꮡv));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Int64 x, int64 val) {
-    StoreInt64(Ꮡ(x.v), val);
+[GoRecv("capture")] public static void Store(this ref Int64 x, int64 val) {
+    StoreInt64(Store_Int64ꓸᏑx.of(Int64.Ꮡv), val);
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static int64 /*old*/ Swap(this ref Int64 x, int64 @new) {
+[GoRecv("capture")] public static int64 /*old*/ Swap(this ref Int64 x, int64 @new) {
     int64 old = default!;
 
-    return SwapInt64(Ꮡ(x.v), @new);
+    return SwapInt64(Swap_Int64ꓸᏑx.of(Int64.Ꮡv), @new);
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Int64 x, int64 old, int64 @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Int64 x, int64 old, int64 @new) {
     bool swapped = default!;
 
-    return CompareAndSwapInt64(Ꮡ(x.v), old, @new);
+    return CompareAndSwapInt64(CompareAndSwap_Int64ꓸᏑx.of(Int64.Ꮡv), old, @new);
 }
 
 // Add atomically adds delta to x and returns the new value.
-[GoRecv] public static int64 /*new*/ Add(this ref Int64 x, int64 delta) {
+[GoRecv("capture")] public static int64 /*new*/ Add(this ref Int64 x, int64 delta) {
     int64 @new = default!;
 
-    return AddInt64(Ꮡ(x.v), delta);
+    return AddInt64(Add_Int64ꓸᏑx.of(Int64.Ꮡv), delta);
 }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static int64 /*old*/ And(this ref Int64 x, int64 mask) {
+[GoRecv("capture")] public static int64 /*old*/ And(this ref Int64 x, int64 mask) {
     int64 old = default!;
 
-    return AndInt64(Ꮡ(x.v), mask);
+    return AndInt64(And_Int64ꓸᏑx.of(Int64.Ꮡv), mask);
 }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static int64 /*old*/ Or(this ref Int64 x, int64 mask) {
+[GoRecv("capture")] public static int64 /*old*/ Or(this ref Int64 x, int64 mask) {
     int64 old = default!;
 
-    return OrInt64(Ꮡ(x.v), mask);
+    return OrInt64(Or_Int64ꓸᏑx.of(Int64.Ꮡv), mask);
 }
 
 // A Uint32 is an atomic uint32. The zero value is zero.
@@ -213,50 +213,50 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static uint32 Load(this ref Uint32 x) {
-    return LoadUint32(Ꮡ(x.v));
+[GoRecv("capture")] public static uint32 Load(this ref Uint32 x) {
+    return LoadUint32(Load_Uint32ꓸᏑx.of(Uint32.Ꮡv));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Uint32 x, uint32 val) {
-    StoreUint32(Ꮡ(x.v), val);
+[GoRecv("capture")] public static void Store(this ref Uint32 x, uint32 val) {
+    StoreUint32(Store_Uint32ꓸᏑx.of(Uint32.Ꮡv), val);
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static uint32 /*old*/ Swap(this ref Uint32 x, uint32 @new) {
+[GoRecv("capture")] public static uint32 /*old*/ Swap(this ref Uint32 x, uint32 @new) {
     uint32 old = default!;
 
-    return SwapUint32(Ꮡ(x.v), @new);
+    return SwapUint32(Swap_Uint32ꓸᏑx.of(Uint32.Ꮡv), @new);
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Uint32 x, uint32 old, uint32 @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Uint32 x, uint32 old, uint32 @new) {
     bool swapped = default!;
 
-    return CompareAndSwapUint32(Ꮡ(x.v), old, @new);
+    return CompareAndSwapUint32(CompareAndSwap_Uint32ꓸᏑx.of(Uint32.Ꮡv), old, @new);
 }
 
 // Add atomically adds delta to x and returns the new value.
-[GoRecv] public static uint32 /*new*/ Add(this ref Uint32 x, uint32 delta) {
+[GoRecv("capture")] public static uint32 /*new*/ Add(this ref Uint32 x, uint32 delta) {
     uint32 @new = default!;
 
-    return AddUint32(Ꮡ(x.v), delta);
+    return AddUint32(Add_Uint32ꓸᏑx.of(Uint32.Ꮡv), delta);
 }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static uint32 /*old*/ And(this ref Uint32 x, uint32 mask) {
+[GoRecv("capture")] public static uint32 /*old*/ And(this ref Uint32 x, uint32 mask) {
     uint32 old = default!;
 
-    return AndUint32(Ꮡ(x.v), mask);
+    return AndUint32(And_Uint32ꓸᏑx.of(Uint32.Ꮡv), mask);
 }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static uint32 /*old*/ Or(this ref Uint32 x, uint32 mask) {
+[GoRecv("capture")] public static uint32 /*old*/ Or(this ref Uint32 x, uint32 mask) {
     uint32 old = default!;
 
-    return OrUint32(Ꮡ(x.v), mask);
+    return OrUint32(Or_Uint32ꓸᏑx.of(Uint32.Ꮡv), mask);
 }
 
 // A Uint64 is an atomic uint64. The zero value is zero.
@@ -267,50 +267,50 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static uint64 Load(this ref Uint64 x) {
-    return LoadUint64(Ꮡ(x.v));
+[GoRecv("capture")] public static uint64 Load(this ref Uint64 x) {
+    return LoadUint64(Load_Uint64ꓸᏑx.of(Uint64.Ꮡv));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Uint64 x, uint64 val) {
-    StoreUint64(Ꮡ(x.v), val);
+[GoRecv("capture")] public static void Store(this ref Uint64 x, uint64 val) {
+    StoreUint64(Store_Uint64ꓸᏑx.of(Uint64.Ꮡv), val);
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static uint64 /*old*/ Swap(this ref Uint64 x, uint64 @new) {
+[GoRecv("capture")] public static uint64 /*old*/ Swap(this ref Uint64 x, uint64 @new) {
     uint64 old = default!;
 
-    return SwapUint64(Ꮡ(x.v), @new);
+    return SwapUint64(Swap_Uint64ꓸᏑx.of(Uint64.Ꮡv), @new);
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Uint64 x, uint64 old, uint64 @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Uint64 x, uint64 old, uint64 @new) {
     bool swapped = default!;
 
-    return CompareAndSwapUint64(Ꮡ(x.v), old, @new);
+    return CompareAndSwapUint64(CompareAndSwap_Uint64ꓸᏑx.of(Uint64.Ꮡv), old, @new);
 }
 
 // Add atomically adds delta to x and returns the new value.
-[GoRecv] public static uint64 /*new*/ Add(this ref Uint64 x, uint64 delta) {
+[GoRecv("capture")] public static uint64 /*new*/ Add(this ref Uint64 x, uint64 delta) {
     uint64 @new = default!;
 
-    return AddUint64(Ꮡ(x.v), delta);
+    return AddUint64(Add_Uint64ꓸᏑx.of(Uint64.Ꮡv), delta);
 }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static uint64 /*old*/ And(this ref Uint64 x, uint64 mask) {
+[GoRecv("capture")] public static uint64 /*old*/ And(this ref Uint64 x, uint64 mask) {
     uint64 old = default!;
 
-    return AndUint64(Ꮡ(x.v), mask);
+    return AndUint64(And_Uint64ꓸᏑx.of(Uint64.Ꮡv), mask);
 }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static uint64 /*old*/ Or(this ref Uint64 x, uint64 mask) {
+[GoRecv("capture")] public static uint64 /*old*/ Or(this ref Uint64 x, uint64 mask) {
     uint64 old = default!;
 
-    return OrUint64(Ꮡ(x.v), mask);
+    return OrUint64(Or_Uint64ꓸᏑx.of(Uint64.Ꮡv), mask);
 }
 
 // A Uintptr is an atomic uintptr. The zero value is zero.
@@ -320,50 +320,50 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 }
 
 // Load atomically loads and returns the value stored in x.
-[GoRecv] public static uintptr Load(this ref Uintptr x) {
-    return LoadUintptr(Ꮡ(x.v));
+[GoRecv("capture")] public static uintptr Load(this ref Uintptr x) {
+    return LoadUintptr(Load_UintptrꓸᏑx.of(Uintptr.Ꮡv));
 }
 
 // Store atomically stores val into x.
-[GoRecv] public static void Store(this ref Uintptr x, uintptr val) {
-    StoreUintptr(Ꮡ(x.v), val);
+[GoRecv("capture")] public static void Store(this ref Uintptr x, uintptr val) {
+    StoreUintptr(Store_UintptrꓸᏑx.of(Uintptr.Ꮡv), val);
 }
 
 // Swap atomically stores new into x and returns the previous value.
-[GoRecv] public static uintptr /*old*/ Swap(this ref Uintptr x, uintptr @new) {
+[GoRecv("capture")] public static uintptr /*old*/ Swap(this ref Uintptr x, uintptr @new) {
     uintptr old = default!;
 
-    return SwapUintptr(Ꮡ(x.v), @new);
+    return SwapUintptr(Swap_UintptrꓸᏑx.of(Uintptr.Ꮡv), @new);
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-[GoRecv] public static bool /*swapped*/ CompareAndSwap(this ref Uintptr x, uintptr old, uintptr @new) {
+[GoRecv("capture")] public static bool /*swapped*/ CompareAndSwap(this ref Uintptr x, uintptr old, uintptr @new) {
     bool swapped = default!;
 
-    return CompareAndSwapUintptr(Ꮡ(x.v), old, @new);
+    return CompareAndSwapUintptr(CompareAndSwap_UintptrꓸᏑx.of(Uintptr.Ꮡv), old, @new);
 }
 
 // Add atomically adds delta to x and returns the new value.
-[GoRecv] public static uintptr /*new*/ Add(this ref Uintptr x, uintptr delta) {
+[GoRecv("capture")] public static uintptr /*new*/ Add(this ref Uintptr x, uintptr delta) {
     uintptr @new = default!;
 
-    return AddUintptr(Ꮡ(x.v), delta);
+    return AddUintptr(Add_UintptrꓸᏑx.of(Uintptr.Ꮡv), delta);
 }
 
 // And atomically performs a bitwise AND operation on x using the bitmask
 // provided as mask and returns the old value.
-[GoRecv] public static uintptr /*old*/ And(this ref Uintptr x, uintptr mask) {
+[GoRecv("capture")] public static uintptr /*old*/ And(this ref Uintptr x, uintptr mask) {
     uintptr old = default!;
 
-    return AndUintptr(Ꮡ(x.v), mask);
+    return AndUintptr(And_UintptrꓸᏑx.of(Uintptr.Ꮡv), mask);
 }
 
 // Or atomically performs a bitwise OR operation on x using the bitmask
 // provided as mask and returns the updated value after the OR operation.
-[GoRecv] public static uintptr /*old*/ Or(this ref Uintptr x, uintptr mask) {
+[GoRecv("capture")] public static uintptr /*old*/ Or(this ref Uintptr x, uintptr mask) {
     uintptr old = default!;
 
-    return OrUintptr(Ꮡ(x.v), mask);
+    return OrUintptr(Or_UintptrꓸᏑx.of(Uintptr.Ꮡv), mask);
 }
 
 // noCopy may be added to structs which must not be copied

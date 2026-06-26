@@ -416,6 +416,14 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 
 	ast.Inspect(parentBlock, inspectFunc)
 
+	// A value var on which a capture-mode pointer-receiver method is called (e.g.
+	// `var i atomic.Int32; i.Store(10)`) must be heap-boxed so the call can be routed
+	// through the ж overload — the only path that sets up the receiver box the method
+	// needs for `&recv.field`.
+	if !escapes && v.bodyCallsCaptureModeMethodOn(ident, parentBlock) {
+		escapes = true
+	}
+
 	v.identEscapesHeap[identObj] = escapes
 }
 

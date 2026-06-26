@@ -485,6 +485,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		globalTempVarCount = make(map[string]int)
 		packageDynamicTypeNames = make(map[string]string)
 		packageAddressedGlobals = make(map[types.Object]bool)
+		packageCaptureModeMethods = make(map[*types.Func]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
 
@@ -554,6 +555,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		}
 
 		// Perform escape analysis for each file
+		// Identify capture-mode methods (those taking &recv.field) — across the package
+		// and its imports — before escape analysis, so a value var on which one is
+		// called can be marked as escaping (and the call routed through the ж overload).
+		collectCaptureModeMethods(pkg)
+
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
 		// Find package-level vars whose address is taken (cross-file) so their
