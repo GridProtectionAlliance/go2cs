@@ -220,8 +220,39 @@ other implementing part in the compilation (`IMethodSymbol.PartialImplementation
 none contain asm functions; zero behavioral `.cs` changed). Not behaviorally testable (Go rejects a bodyless
 function without an `.s` file), so verified via the full-conversion packages compiling.
 
+### Phase 3 — promotion gate finding: `sync/atomic` typed API is broken (2026-06-26)
+
+A behavioral validation test (atomic ops, Go-vs-C# output, referencing `go-src-converted/sync/atomic`)
+was written as the gate before promoting `sync/atomic` to the baseline. **It failed, and that is the
+point — "compiles" ≠ "correct".** The package-level functions (`atomic.AddInt32(&n, 3)`) work, but the
+**typed atomic types are broken**: `var i atomic.Int32; i.Store(10); i.Add(5); i.Load()` yields `0` in C#
+instead of `15` (Go).
+
+Root cause: a method like `func (x *Int32) Store(v) { StoreInt32(&x.v, v) }` converts `&x.v` (address of a
+field of the **pointer receiver**) to `Ꮡ(x.v)`, which **boxes a copy** (the `ж(in T)` ctor copies), so the
+atomic op never touches the real field. Attempting the fix uncovered a deep stack of issues in the
+**receiver-capture mechanism**, which is the only way to get a non-copying pointer to a receiver field:
+1. `&recv.field` must use the captured receiver box (`Ꮡx.of(Type.ᏑField)`), not `Ꮡ(x.field)` — and the
+   detection has to run *before* the struct-field gate (a pointer receiver's selector type is a pointer).
+2. The capture field name (`<Method>ꓸᏑx`) **collides** across overloaded same-named methods on different
+   receiver types (`Int32.Add`, `Int64.Add`, …) — needs the receiver type in the name (converter + generator).
+3. The capture field is a **static `ThreadLocal`** on the (non-generic) package class, so it **cannot hold a
+   generic receiver's `T`** (`atomic.Pointer[T]`).
+4. Even fixed, the `ThreadLocal` is only initialized when the method is called via the `ж` (pointer) overload;
+   a value-receiver-style call (`i.Store(10)`) routes through the `ref` overload and the capture is **never
+   initialized** (runtime "Receiver target … is not initialized").
+
+**Conclusion:** `sync/atomic` is **not promotable** — its primary API doesn't work, and the receiver-field
+address / capture machinery needs a substantial rework (likely replacing the static-`ThreadLocal` capture
+with something that works for value calls and generic receivers). `internal/cpu` likewise isn't promotable
+(asm `cpuid` is a stub). Promotion stays **pull/validation-driven**; this gate correctly blocked it.
+
 ### Next defects (work queue)
-- **Promote `internal/cpu` and `sync/atomic`** toward the baseline, or confirm they build within the full
+- **Receiver-field address / capture rework** — make `&recv.field` reference the real field for value calls
+  and generic receivers. This is the unlock for `sync/atomic`'s typed types and any pointer-receiver method
+  that takes the address of its own field.
+- ~~Promote `internal/cpu` and `sync/atomic`~~ — gated on the above (atomic) / asm `cpuid` (cpu).
+- Confirm `internal/cpu` / `sync/atomic` build within the full
   `go-src-converted.sln` alongside their dependents.
 - Re-bucket after a fresh full reconvert to find the next highest-frequency converter defect.
 
