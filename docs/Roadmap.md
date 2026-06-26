@@ -283,6 +283,21 @@ stages:
   instantiated **cross-package** generics, else a boxed `atomic.Pointer[Config]` emits `new …Pointer()` with
   no `<Config>`). Validated by the **`GenericReceiverFieldAddress`** behavioral test (a generic `Box[T]`
   with `Set`/`Get` taking `&b.v`, exercised for `int` and `string`); behavioral suite green, zero churn.
+- **Direct-`ж` extended to ALL field-address capture methods — fixes a concurrency bug.** The non-generic
+  capture path used a static `ThreadLocal<ж<T>>` field reassigned per call (`new ThreadLocal<…>(() => Ꮡx)`),
+  which is a **shared static** — concurrent calls on *distinct* receivers race on that field, so e.g.
+  `u0.Load()` can return `u6`'s value (proven by an 8-thread stress test: each thread Loads its own
+  `atomic.Uint32`, sees another's). Broken precisely for the concurrent types atomics exist for, and invisible
+  to the single-threaded behavioral suite. Fix: `captureModeOperations.go` now marks *every* `&recv.field`
+  capture method (generic **and** non-generic) direct-`ж`, so the box is the receiver parameter — no shared
+  state, and alloc-free. `convUnaryExpr.go` always emits `Ꮡx.of(...)`; `visitReturnStmt.go` returns `Ꮡrecv`
+  for a direct-box method (keeps a method that both takes `&recv.field` and returns the receiver consistent).
+  Re-ran the stress test → "no race observed". `core/sync/atomic/type.cs` scalars re-emitted to direct-`ж`
+  (the file is `GoManualConversion`, so re-emitted by hand from a reconvert, keeping the managed `Pointer<T>`).
+  Guarded by the `AtomicValues` test; only the `ReceiverFieldAddress` golden changed (intended, still correct).
+  **Remaining instance:** the *return-receiver* capture (`func (t *T) Common() *T { return t }` in
+  `internal/abi`) still uses the racy ThreadLocal — same fix applies (detect `return recv` in the pre-pass)
+  but it touches baseline `internal/abi`, so deferred as a separate, lower-stakes follow-up.
 - **`sync/atomic` PROMOTED to `core` — first stdlib package migrated.** `src/core/sync/atomic` is now in the
   green baseline (`go2cs.slnx`, `/core/` folder), referencing `core/unsafe` + `core/golib`. Scalar typed
   types are the converter output as-is; `Pointer[T]` is **hand-rewritten** in the promoted (hand-owned) copy.

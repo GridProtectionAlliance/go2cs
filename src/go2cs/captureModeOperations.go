@@ -19,12 +19,13 @@ import (
 // boxed and the call routed through the ж overload.
 var packageCaptureModeMethods map[*types.Func]bool
 
-// packageDirectBoxReceiverMethods holds the subset of capture-mode methods whose receiver
-// is generic (e.g. atomic.Pointer[T]). A static ThreadLocal capture cannot hold the
-// receiver's type parameter, so these are emitted with the box AS the receiver directly
-// (`this ж<T> Ꮡx` + `ref var x = ref Ꮡx.val;`) and `&x.field` references the parameter box
-// (`Ꮡx.of(Type.ᏑField)`) — putting T in scope without a static field. Non-generic
-// capture-mode methods continue to use the ThreadLocal capture (see convUnaryExpr).
+// packageDirectBoxReceiverMethods holds the field-address capture-mode methods that are
+// emitted with the box AS the receiver directly (`this ж<T> Ꮡx` + `ref var x = ref Ꮡx.val;`),
+// where `&x.field` references the parameter box (`Ꮡx.of(Type.ᏑField)`). This replaces the
+// static-ThreadLocal capture for ALL such methods (generic and non-generic): the ThreadLocal
+// is a shared static reassigned per call and races across threads for distinct receivers —
+// broken for concurrent types like sync/atomic — whereas the box parameter has no shared state
+// (and avoids a per-call ThreadLocal allocation). For generics it also puts T in scope.
 var packageDirectBoxReceiverMethods map[*types.Func]bool
 
 // collectCaptureModeMethods records every non-generic pointer-receiver method whose body
@@ -91,9 +92,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			return true
 		}
 
-		named, ok := pointer.Elem().(*types.Named)
-
-		if !ok {
+		if _, ok := pointer.Elem().(*types.Named); !ok {
 			return true
 		}
 
@@ -102,11 +101,13 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
 
-			// A generic receiver cannot be captured by the static ThreadLocal; emit it with
-			// the box as the receiver directly (direct-ж).
-			if named.TypeParams().Len() > 0 {
-				packageDirectBoxReceiverMethods[origin] = true
-			}
+			// All field-address capture methods use the direct-ж receiver — the box is passed
+			// AS the receiver parameter (`this ж<T> Ꮡx`), not stashed in a static ThreadLocal.
+			// The ThreadLocal capture is a shared static reassigned per call, which races across
+			// threads for distinct receivers (broken for concurrent types like sync/atomic); the
+			// direct-ж form has no shared state and is also alloc-free. Applies to generic AND
+			// non-generic receivers.
+			packageDirectBoxReceiverMethods[origin] = true
 		}
 
 		return true

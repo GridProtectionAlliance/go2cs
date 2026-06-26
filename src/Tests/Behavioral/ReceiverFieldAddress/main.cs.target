@@ -15,12 +15,16 @@ internal static int32 bump(ж<int32> Ꮡp, int32 delta) {
     return p;
 }
 
-[GoRecv("capture")] public static int32 Add(this ref Counter c, int32 delta) {
-    return bump(Add_CounterꓸᏑc.of(Counter.Ꮡn), delta);
+public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
+    ref var c = ref Ꮡc.val;
+
+    return bump(Ꮡc.of(Counter.Ꮡn), delta);
 }
 
-[GoRecv("capture")] public static void Set(this ref Counter c, int32 v) {
-    (Set_CounterꓸᏑc.of(Counter.Ꮡn)).val = v;
+public static void Set(this ж<Counter> Ꮡc, int32 v) {
+    ref var c = ref Ꮡc.val;
+
+    (Ꮡc.of(Counter.Ꮡn)).val = v;
 }
 
 [GoRecv] public static int32 Get(this ref Counter c) {

@@ -16,9 +16,18 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		for i, result := range returnStmt.Results {
 			if ident, ok := result.(*ast.Ident); ok {
 				if ident.Name == recvName {
-					v.captureReceiver = true
 					recvIndex = i
-					capturedRecvName = v.getCapturedReceiverName(recvName)
+
+					if isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+						// Direct-ж: the receiver box is the parameter `Ꮡrecv`, so return it
+						// directly. Keeps a method that both takes `&recv.field` and returns the
+						// receiver consistent (no static ThreadLocal capture, which races).
+						capturedRecvName = AddressPrefix + recvName
+					} else {
+						v.captureReceiver = true
+						capturedRecvName = v.getCapturedReceiverName(recvName)
+					}
+
 					break
 				}
 			}

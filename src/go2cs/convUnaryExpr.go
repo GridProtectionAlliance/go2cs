@@ -70,11 +70,11 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		// struct-field handling below would miss it. Taking `Ꮡ(x.field)` would box a
 		// copy (the ж(in T) ctor copies), so writes through the pointer would be lost
 		// — e.g. sync/atomic's `func (x *Int32) Store(v) { StoreInt32(&x.v, v) }`.
-		// Capture the receiver pointer and use the field-ref form so the pointer
-		// aliases the real field. Non-generic receivers capture into a static ThreadLocal
-		// on the package class; a generic receiver (atomic.Pointer[T]) cannot — the
-		// ThreadLocal can't hold its type parameter — so it is emitted with the box as the
-		// receiver directly and field-refs through that parameter (direct-ж).
+		// Use the field-ref form so the pointer aliases the real field. The method is emitted
+		// with the box AS its receiver (`this ж<T> Ꮡx`, see packageDirectBoxReceiverMethods),
+		// so we field-ref through that parameter box (direct-ж). This replaces the older static
+		// ThreadLocal capture, which is a shared static reassigned per call and races across
+		// threads for distinct receivers — broken for concurrent types like sync/atomic.
 		if isRecvPointer {
 			if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 				if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName {
@@ -84,19 +84,13 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						recvType = pointer.Elem()
 					}
 
-					if named, ok := recvType.(*types.Named); ok {
+					if _, ok := recvType.(*types.Named); ok {
 						fieldRef := fmt.Sprintf("%s.%s%s", convertToCSTypeName(v.getTypeName(recvType, false)), AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
 
-						if named.TypeParams().Len() == 0 {
-							// Non-generic: capture the receiver pointer into a static
-							// ThreadLocal and field-ref through it.
-							v.captureReceiver = true
-							return fmt.Sprintf("%s.of(%s)", v.getCapturedReceiverName(recvName), fieldRef)
-						}
-
-						// Generic (direct-ж): the receiver box itself is the parameter `Ꮡx`
-						// (see packageDirectBoxReceiverMethods), so field-ref through it
-						// directly — the receiver's type parameter is in scope.
+						// Direct-ж: the receiver box is the parameter `Ꮡx` (see
+						// packageDirectBoxReceiverMethods), so field-ref through it directly. No
+						// static ThreadLocal — that form races across threads for distinct
+						// receivers (broken for concurrent types like sync/atomic).
 						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, recvName, fieldRef)
 					}
 				}
