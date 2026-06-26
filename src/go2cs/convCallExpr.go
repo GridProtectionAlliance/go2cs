@@ -114,6 +114,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
+			// A Go string passed to a generic type-parameter parameter must be cast to
+			// golib's `@string` (a struct). Without a target type, a bare string literal
+			// converts to a .NET `System.String`, so C# infers the type argument as
+			// `string` — which fails the `new()` constraint go2cs adds to type parameters
+			// (and mismatches `@string` args). e.g. `First("A", "B")` for `func First[T any](v ...T)`.
+			if paramHasArg {
+				if _, isTypeParam := paramType.(*types.TypeParam); isTypeParam {
+					// A variadic type parameter receives every trailing argument, so flag
+					// all of them (the loop only iterates the declared parameters).
+					lastArg := i
+
+					if funcSignature.Variadic() && i == params.Len()-1 {
+						lastArg = len(callExpr.Args) - 1
+					}
+
+					for j := i; j <= lastArg; j++ {
+						if v.isStringType(callExpr.Args[j]) {
+							callExprContext.atStringArgOK[j] = true
+						}
+					}
+				}
+			}
+
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
 				callExprContext.u8StringArgOK[i] = false
 

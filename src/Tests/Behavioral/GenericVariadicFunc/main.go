@@ -36,8 +36,12 @@ func main() {
 	// Strings work too: a Go `string` maps to golib's `@string`, which is a *struct*
 	// with a parameterless constructor, so it satisfies the `new()` constraint go2cs
 	// adds to generic type parameters (unlike .NET's reference-type `System.String`).
-	// Pass string-typed values rather than bare literals — a string literal converts
-	// to a .NET string, which would fail the `new()` constraint.
 	var s1, s2 string = "go", "2cs"
 	fmt.Println(First(s1, s2))
+
+	// Bare string literals also work: go2cs casts a string argument passed to a
+	// generic type parameter to `@string` (e.g. `First("A", "B")` becomes
+	// `First((@string)"A", (@string)"B")`). Without the cast the literal would be a
+	// .NET string and C# would infer the type argument as `string`, failing `new()`.
+	fmt.Println(First("A", "B", "C"))
 }

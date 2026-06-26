@@ -127,7 +127,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			strVal = replaceOctalChars(strVal)
 		}
 
-		if context.sourceIsRuneArray {
+		if context.sourceIsRuneArray || context.castToAtString {
 			result.WriteString("(@string)")
 		}
 

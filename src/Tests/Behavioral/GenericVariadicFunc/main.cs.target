@@ -41,6 +41,7 @@ internal static void Main() {
     @string s1 = "go"u8;
     @string s2 = "2cs"u8;
     fmt.Println(First(s1, s2));
+    fmt.Println(First((@string)"A", (@string)"B", (@string)"C"));
 }
 
 } // end main_package

@@ -21,6 +21,7 @@ type ExprContext interface {
 
 type CallExprContext struct {
 	u8StringArgOK      map[int]bool
+	atStringArgOK      map[int]bool
 	argTypeIsPtr       map[int]bool
 	interfaceTypes     map[int]types.Type
 	hasSpreadOperator  bool
@@ -36,6 +37,7 @@ type CallExprContext struct {
 func DefaultCallExprContext() *CallExprContext {
 	return &CallExprContext{
 		u8StringArgOK:      make(map[int]bool),
+		atStringArgOK:      make(map[int]bool),
 		argTypeIsPtr:       make(map[int]bool),
 		interfaceTypes:     make(map[int]types.Type),
 		hasSpreadOperator:  false,
@@ -56,12 +58,14 @@ func (c CallExprContext) getDefault() StmtContext {
 type BasicLitContext struct {
 	u8StringOK        bool
 	sourceIsRuneArray bool
+	castToAtString    bool
 }
 
 func DefaultBasicLitContext() BasicLitContext {
 	return BasicLitContext{
 		u8StringOK:        true,
 		sourceIsRuneArray: false,
+		castToAtString:    false,
 	}
 }
 
