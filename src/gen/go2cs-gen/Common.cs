@@ -146,6 +146,10 @@ public static class Common
             .GetRoot()
             .DescendantNodes()
             .OfType<UsingDirectiveSyntax>()
+            // Skip `global using` directives: they are already in scope in every file of the
+            // compilation (including generated ones), so re-emitting them as file-local `using`
+            // here would collide with the original global alias (CS1537 "appeared previously").
+            .Where(directive => directive.GlobalKeyword.IsKind(SyntaxKind.None))
             .Select(directive =>
             {
                 if (directive.Name is null)
