@@ -116,7 +116,18 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		hasDefer, hasRecover := v.funcBodyDeferRecover(funcLit.Body)
 		result.WriteString(v.iifeParamNames(sig) + " => " + wrapIIFEFuncContext(body, hasDefer, hasRecover))
 	} else {
-		result.WriteString("(" + parameterSignature + ") => " + body)
+		// A function literal that itself uses defer/recover needs its own func() execution
+		// context so its deferred code runs (and recovers) when the literal is invoked — e.g. an
+		// assigned closure `f := func(){ defer … }` or a goroutine body. A deferred-call target is
+		// the exception: its recover() belongs to the enclosing function, which is already wrapped.
+		inner := body
+
+		if !context.deferCall {
+			hasDefer, hasRecover := v.funcBodyDeferRecover(funcLit.Body)
+			inner = wrapIIFEFuncContext(body, hasDefer, hasRecover)
+		}
+
+		result.WriteString("(" + parameterSignature + ") => " + inner)
 	}
 
 	return result.String()

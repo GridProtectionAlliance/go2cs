@@ -14,6 +14,7 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 	lambdaContext := DefaultLambdaContext()
 	lambdaContext.deferOrGoCall = true
+	lambdaContext.deferCall = true
 	paramCount := len(deferStmt.Call.Args)
 
 	var renderLambdaParams bool

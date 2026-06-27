@@ -69,6 +69,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckChannelSendToNil() => CheckTarget("ChannelSendToNil");
 
     [TestMethod]
+    public void CheckClosureDefer() => CheckTarget("ClosureDefer");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]

@@ -71,6 +71,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckChannelSendToNil() => CheckTarget("ChannelSendToNil");
 
     [TestMethod]
+    public void CheckClosureDefer() => CheckTarget("ClosureDefer");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]

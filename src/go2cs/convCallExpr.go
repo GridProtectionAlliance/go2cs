@@ -240,6 +240,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	lambdaContext.isCallExpr = true
 	lambdaContext.isPointerCast = context.isPointerCast
 	lambdaContext.deferredDecls = context.deferredDecls
+	// A deferred call target (`defer func(){…}()`) is a function literal whose recover() binds to
+	// the enclosing function; pass that through so convFuncLit does not give it its own wrapper.
+	lambdaContext.deferCall = context.deferCall
 
 	var typeParamExpr string
 	resultType := v.info.TypeOf(callExpr)

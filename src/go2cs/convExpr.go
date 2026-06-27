@@ -104,10 +104,14 @@ type LambdaContext struct {
 	// must not bind to the enclosing function's wrapper). See convCallExpr / convFuncLit.
 	isIIFE bool
 	// deferOrGoCall marks a call that is the target of a defer/go statement. Such a
-	// `defer func(){…}()` / `go func(){…}()` literal must NOT be treated as an IIFE: the
-	// deferred/goroutine body is inlined by visitDeferStmt/visitGoStmt, and its recover()
-	// recovers the *enclosing* function, so it must not get its own func() wrapper.
+	// `defer func(){…}()` / `go func(){…}()` literal must NOT be treated as an IIFE — the
+	// deferred/goroutine body is inlined by visitDeferStmt/visitGoStmt.
 	deferOrGoCall bool
+	// deferCall marks specifically a defer-statement target. A deferred closure's recover()
+	// recovers the *enclosing* function (which is itself wrapped, since it contains the defer
+	// statement), so the closure must NOT get its own func() execution context. (A goroutine or
+	// assigned closure is independent and does get one when it uses defer/recover.)
+	deferCall bool
 }
 
 func DefaultLambdaContext() LambdaContext {
