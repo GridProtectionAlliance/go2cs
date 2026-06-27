@@ -5,8 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct CaseRange {
-    public uint32 Lo;
-    public uint32 Hi;
+    public uint32 Lo, Hi;
 }
 
 [GoType("[]CaseRange")] partial struct SpecialCase;

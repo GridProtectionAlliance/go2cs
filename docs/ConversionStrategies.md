@@ -441,7 +441,7 @@ Go structs are converted to C# `struct` types and used on the stack to optimize 
 
 The generator also chooses the access modifier from the Go name (exported → `public`, unexported → `internal`), except where the converter emits an explicit modifier — for instance, an unexported type used as the type of an *exported* field is published as `public` to satisfy C# accessibility (the converter emits `public partial struct …` and the generator honors that explicit modifier).
 
-A combined Go field declaration — `x, y int` — currently emits one C# field per name (`internal nint x;` / `internal nint y;`) rather than the combined `internal nint x, y;`. Matching the Go source's line grouping (combined → one line) is a pending readability improvement.
+A combined Go field declaration — `x, y int` — emits a single combined C# line (`internal nint x, y;`) so the output mirrors the Go source's line grouping. The combined form is only used when every name in the group shares the same emitted type and access modifier and none needs per-name special handling; otherwise the converter falls back to one line per name. The fallback applies when any of these hold: a blank field `_` (renamed per occurrence — `_`, `__`, …), a name equal to the enclosing struct type (renamed with the `Δ` collision marker), a per-field array initializer (` = new(N)`), or a mix of exported and unexported names in the same group (`X, y int` → `public nint X;` / `internal nint y;`). Field comments and tags attach to the whole Go field, so they never diverge within a group.
 
 C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `[GoType("dyn")] partial struct settingsᴛ1`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this).
 
@@ -472,8 +472,7 @@ func describe() Stringer {
 }
 
 [GoType] partial struct point {
-    internal nint x;
-    internal nint y;
+    internal nint x, y;
 }
 
 [GoRecv] internal static @string String(this ref point p) {

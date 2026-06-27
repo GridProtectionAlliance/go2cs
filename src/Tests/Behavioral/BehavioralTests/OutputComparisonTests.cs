@@ -76,6 +76,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]

@@ -81,6 +81,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]

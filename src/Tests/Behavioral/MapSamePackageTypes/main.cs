@@ -5,8 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 [GoType] partial struct OSArch {
-    internal @string os;
-    internal @string arch;
+    internal @string os, arch;
 }
 
 [GoType] partial struct info {

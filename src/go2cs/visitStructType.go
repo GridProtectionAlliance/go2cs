@@ -274,25 +274,60 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
 			target.WriteString(v.newline)
 		} else {
-			for _, ident := range field.Names {
-				fieldName := getCoreSanitizedIdentifier(ident.Name)
+			// Match the Go source's line grouping for readability: when a single Go field
+			// declaration groups multiple names (`x, y int`), emit one combined C# line
+			// (`internal nint x, y;`). This is only safe when every name shares the same
+			// access modifier and emitted type and none needs per-name special handling —
+			// blank `_` (renamed per occurrence), a name colliding with the struct type
+			// (Δ-marker rename), or a per-field array initializer (` = new(N)`). The names in
+			// one field group already share field.Type/Tag/Comment, so only access and the
+			// per-name renames can diverge. When any apply, fall back to one line per name.
+			canCombine := len(field.Names) > 1 && arrayInitializer == ""
 
-				if fieldName == "_" {
-					for range prevNameDiscardedCount {
-						fieldName = fieldName + "_"
+			if canCombine {
+				groupAccess := getAccess(field.Names[0].Name)
+
+				for _, ident := range field.Names {
+					fieldName := getCoreSanitizedIdentifier(ident.Name)
+
+					if fieldName == "_" || fieldName == structTypeName || getAccess(ident.Name) != groupAccess {
+						canCombine = false
+						break
 					}
+				}
+			}
 
-					prevNameDiscardedCount++
-				} else if fieldName == structTypeName {
-					// C# forbids a member sharing its enclosing type's name (CS0542), so rename a
-					// field whose name equals the struct type with the disambiguation marker. Field
-					// accesses are renamed to match (see convSelectorExpr / convIdent).
-					fieldName = typeCollidingFieldName(fieldName)
+			if canCombine {
+				fieldNames := make([]string, len(field.Names))
+
+				for i, ident := range field.Names {
+					fieldNames[i] = getCoreSanitizedIdentifier(ident.Name)
 				}
 
-				v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, fieldName, arrayInitializer)
+				v.writeString(target, "%s %s %s;", getAccess(field.Names[0].Name), csFullTypeName, strings.Join(fieldNames, ", "))
 				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
 				target.WriteString(v.newline)
+			} else {
+				for _, ident := range field.Names {
+					fieldName := getCoreSanitizedIdentifier(ident.Name)
+
+					if fieldName == "_" {
+						for range prevNameDiscardedCount {
+							fieldName = fieldName + "_"
+						}
+
+						prevNameDiscardedCount++
+					} else if fieldName == structTypeName {
+						// C# forbids a member sharing its enclosing type's name (CS0542), so rename a
+						// field whose name equals the struct type with the disambiguation marker. Field
+						// accesses are renamed to match (see convSelectorExpr / convIdent).
+						fieldName = typeCollidingFieldName(fieldName)
+					}
+
+					v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, fieldName, arrayInitializer)
+					v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+					target.WriteString(v.newline)
+				}
 			}
 		}
 	}
