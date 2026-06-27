@@ -213,6 +213,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
+    public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
+
+    [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]

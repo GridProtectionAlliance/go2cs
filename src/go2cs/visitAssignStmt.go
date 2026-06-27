@@ -234,8 +234,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	if tupleResult || lhsLen == reassignedCount || lhsLen == declaredCount && !anyTypeIsString && !anyTypeIsInt && !anyTypeIsUnsafePointer {
 		leftExprs := HashSet[string]{}
 
+		// Go's partial redeclaration `a, b := f()` reuses any already-declared LHS variable and
+		// declares only the new ones. A single blanket `var` prefix would re-declare the reused
+		// variable (CS0136, and its earlier uses become "before declaration" CS0841), so for a
+		// mixed declared/reassigned tuple, emit `var` per newly-declared element instead.
+		mixedDeclare := declaredCount > 0 && reassignedCount > 0
+
 		// Handle LHS
-		if declaredCount > 0 {
+		if declaredCount > 0 && !mixedDeclare {
 			if declaredCount > 1 || v.options.preferVarDecl {
 				isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
 
@@ -284,6 +290,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
 			leftExprs.Add(lhsExpr)
+
+			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple.
+			if mixedDeclare && ident != nil && ident.Name != "_" && !v.isReassignment(ident) {
+				result.WriteString("var ")
+			}
 
 			result.WriteString(lhsExpr)
 		}

@@ -170,6 +170,15 @@ the equivalent C# code operates as follows:
 (x, y) = (y, x + y);
 ```
 
+Go's **partial redeclaration** — `a, b := f()` where `a` already exists in the same scope — reuses `a` (assigns it) and declares only the new names. A blanket `var (a, b)` would re-declare the reused variable, so the converter emits `var` per *newly-declared* element only:
+
+```go
+frac, e := normalize(frac)   // frac is the existing parameter; e is new
+```
+```csharp
+(frac, var e) = normalize(frac);
+```
+
 ## Short Variable Redeclaration (Shadowing)
 
 When using Go's short variable declaration syntax, e.g., `x := 2`, a variable can be redeclared in a lesser (nested) scope. The inner declaration "shadows" the outer one: the inner instance is manipulated while the outer value is preserved, and once the inner scope ends the outer variable still holds its original value.

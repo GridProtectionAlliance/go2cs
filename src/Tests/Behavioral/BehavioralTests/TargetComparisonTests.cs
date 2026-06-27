@@ -215,6 +215,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]
+    public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
+
+    [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
