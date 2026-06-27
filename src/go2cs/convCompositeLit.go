@@ -68,6 +68,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var needsInterfaceCast bool
 	var isEmpty bool
 	var definedLen int
+	var namedArrayComposite bool
 
 	// Check composite lit elements against struct fields
 	checkStructFields := func(structType *types.Struct) {
@@ -118,6 +119,25 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	case *types.Named:
 		if structType, ok := t.Underlying().(*types.Struct); ok {
 			checkStructFields(structType)
+		} else if arrayType, ok := t.Underlying().(*types.Array); ok {
+			// A named array type (e.g. `type d [3]rune`) lowers to a struct wrapping
+			// array<T>; its composite literal cannot use C# collection-initializer braces
+			// (no Add). Emit the underlying array literal wrapped in the named ctor:
+			// `new d(new rune[]{...}.array())`.
+			elementType = arrayType.Elem()
+			callContext.keyValueSource = ArraySource
+			arrayTypeContext.compositeInitializer = true
+			compositeSuffix = ".array()"
+			definedLen = int(arrayType.Len())
+			namedArrayComposite = true
+		} else if sliceType, ok := t.Underlying().(*types.Slice); ok {
+			// A named slice type (e.g. `type s []int`) lowers to a struct wrapping
+			// slice<T>; same treatment, with the slice constructor form.
+			elementType = sliceType.Elem()
+			callContext.keyValueSource = ArraySource
+			arrayTypeContext.compositeInitializer = true
+			compositeSuffix = ".slice()"
+			namedArrayComposite = true
 		}
 	case *types.Struct:
 		checkStructFields(t)
@@ -210,7 +230,18 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	contexts := []ExprContext{arrayTypeContext, identContext}
 
-	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, v.convExpr(compositeLit.Type, contexts), lbracePrefix, lbrace))
+	typeRender := v.convExpr(compositeLit.Type, contexts)
+
+	if namedArrayComposite {
+		// Wrap the underlying array/slice literal in the named type's constructor:
+		// `new d(new rune[]{...}.array())`. The element literal and its `.array()`/
+		// `.slice()` suffix render via the ArraySource path below; close the ctor here.
+		csElementType := convertToCSTypeName(v.getTypeName(elementType, false))
+		typeRender = fmt.Sprintf("%s(new %s[]", typeRender, csElementType)
+		compositeSuffix += ")"
+	}
+
+	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
