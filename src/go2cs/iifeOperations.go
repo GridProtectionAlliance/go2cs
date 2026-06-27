@@ -169,6 +169,60 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	return "Func<" + strings.Join(typeArgs, ", ") + ">"
 }
 
+// namedResultName returns the C# identifier the body uses for a named result parameter
+// (honoring shadow-renames recorded by variable analysis).
+func (v *Visitor) namedResultName(param *types.Var) string {
+	if ident := v.getVarIdent(param); ident != nil {
+		return getSanitizedIdentifier(v.getIdentName(ident))
+	}
+
+	return getSanitizedIdentifier(param.Name())
+}
+
+// detectNamedReturnDefer reports whether a function with the given signature needs the
+// named-return-defer handling: it uses defer/recover AND all of its results are named. When so,
+// it returns the result identifiers in order (used to declare them outside the func() wrapper
+// and to return them after it runs, so deferred code — including recover — can mutate them).
+func (v *Visitor) detectNamedReturnDefer(sig *types.Signature, hasDefer, hasRecover bool) (bool, []string) {
+	if !(hasDefer || hasRecover) || sig == nil || sig.Results() == nil {
+		return false, nil
+	}
+
+	results := sig.Results()
+
+	if results.Len() == 0 {
+		return false, nil
+	}
+
+	names := make([]string, 0, results.Len())
+
+	for i := range results.Len() {
+		param := results.At(i)
+
+		if param.Name() == "" || isDiscardedVar(param.Name()) {
+			return false, nil
+		}
+
+		names = append(names, v.namedResultName(param))
+	}
+
+	return true, names
+}
+
+// namedReturnDeclLines renders the `Type name = default!;` declarations for a signature's named
+// results, each on its own line at the given indent level.
+func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int) string {
+	results := sig.Results()
+	decls := strings.Builder{}
+
+	for i := range results.Len() {
+		param := results.At(i)
+		decls.WriteString(fmt.Sprintf("%s%s%s %s = default!;", v.newline, v.indent(indentLevel), v.getCSTypeName(param.Type()), v.namedResultName(param)))
+	}
+
+	return decls.String()
+}
+
 // wrapIIFEDeferContext wraps an IIFE lambda body in a `func((defer, recover) => …)` execution
 // context when the literal uses defer/recover, so it runs with its own scope. Both parameters
 // are named (the func() built-in takes both); unused-parameter warnings are suppressed.

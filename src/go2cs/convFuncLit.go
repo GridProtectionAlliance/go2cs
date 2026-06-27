@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/types"
 	"strings"
@@ -11,15 +12,26 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
 	}
 
-	// A function literal is emitted as its own C# lambda with normal return handling. The
-	// enclosing function's namedReturnDeferMode (which rewrites `return e` into a named-result
-	// assignment) must not leak into it — otherwise the closure's `return expr` would be
-	// rewritten against the OUTER function's named results. Suppress it for the literal's body
-	// and restore it afterward.
+	litSig, _ := v.info.TypeOf(funcLit).(*types.Signature)
+
+	// Does THIS literal need its own func() execution context, and additionally the
+	// named-return-defer handling (named results that deferred code, including recover, mutates)?
+	// A deferred-call target is excluded — its defer/recover belong to the enclosing function.
+	var litHasDefer, litHasRecover, litNamedDefer bool
+	var litNamedNames []string
+
+	if litSig != nil && !context.deferCall {
+		litHasDefer, litHasRecover = v.funcBodyDeferRecover(funcLit.Body)
+		litNamedDefer, litNamedNames = v.detectNamedReturnDefer(litSig, litHasDefer, litHasRecover)
+	}
+
+	// A function literal's body is converted with ITS OWN namedReturnDeferMode, not the enclosing
+	// function's (which must not leak in — otherwise the closure's `return expr` would be rewritten
+	// against the OUTER named results). Save/restore around the body conversion.
 	savedNamedReturnDeferMode := v.namedReturnDeferMode
 	savedNamedReturnNames := v.namedReturnNames
-	v.namedReturnDeferMode = false
-	v.namedReturnNames = nil
+	v.namedReturnDeferMode = litNamedDefer
+	v.namedReturnNames = litNamedNames
 
 	defer func() {
 		v.namedReturnDeferMode = savedNamedReturnDeferMode
@@ -79,13 +91,25 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	blockStatementContext := DefaultBlockStmtContext()
 	blockStatementContext.format.useNewLine = false
 
+	// In namedReturnDefer mode the literal's body sits inside an extra block + func() wrapper, so
+	// indent it one level deeper.
+	if litNamedDefer {
+		v.indentLevel++
+	}
+
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
 
+	if litNamedDefer {
+		v.indentLevel--
+	}
+
 	// An IIFE keeps a block body (it may need a func() wrapper and reads more like the Go
-	// source); other single-return literals collapse to an expression-bodied lambda.
-	if v.firstStatementIsReturn && !context.isIIFE {
+	// source); other single-return literals collapse to an expression-bodied lambda. A
+	// namedReturnDefer literal always keeps a block (it returns its named results after the
+	// func() wrapper).
+	if v.firstStatementIsReturn && !context.isIIFE && !litNamedDefer {
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(body, "return ")
 
@@ -107,26 +131,38 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		body = strings.TrimSpace(body)
 	}
 
-	if context.isIIFE {
-		// Immediately-invoked function literal: emit `paramNames => BODY` (names only — the
-		// delegate-cast in convCallExpr supplies the types). BODY runs inside a
-		// `func((defer, recover) => …)` execution context only when the literal itself uses
-		// defer/recover, so it has its own scope without forcing one on every IIFE.
-		sig := v.info.TypeOf(funcLit).(*types.Signature)
-		hasDefer, hasRecover := v.funcBodyDeferRecover(funcLit.Body)
-		result.WriteString(v.iifeParamNames(sig) + " => " + wrapIIFEFuncContext(body, hasDefer, hasRecover))
-	} else {
-		// A function literal that itself uses defer/recover needs its own func() execution
-		// context so its deferred code runs (and recovers) when the literal is invoked — e.g. an
-		// assigned closure `f := func(){ defer … }` or a goroutine body. A deferred-call target is
-		// the exception: its recover() belongs to the enclosing function, which is already wrapped.
-		inner := body
+	// Build the lambda body (what follows `=>`). A function literal that uses defer/recover gets
+	// its own `func((defer, recover) => …)` execution context (so its deferred code runs and
+	// recovers when invoked); when it also has named results that deferred code mutates, the
+	// named results are declared outside that wrapper and returned after it. A deferred-call
+	// target is the exception (its defer/recover belong to the already-wrapped enclosing function).
+	var inner string
 
-		if !context.deferCall {
-			hasDefer, hasRecover := v.funcBodyDeferRecover(funcLit.Body)
-			inner = wrapIIFEFuncContext(body, hasDefer, hasRecover)
+	switch {
+	case litNamedDefer:
+		// `{ T r = default!; func((defer, recover) => <body>); return r; }`
+		returnExpr := strings.Join(litNamedNames, ", ")
+
+		if len(litNamedNames) > 1 {
+			returnExpr = "(" + returnExpr + ")"
 		}
 
+		inner = fmt.Sprintf("{%s%s%sfunc((defer, recover) => %s);%s%sreturn %s;%s%s}",
+			v.namedReturnDeclLines(litSig, v.indentLevel+1),
+			v.newline, v.indent(v.indentLevel+1), body,
+			v.newline, v.indent(v.indentLevel+1), returnExpr,
+			v.newline, v.indent(v.indentLevel))
+	case litHasDefer || litHasRecover:
+		inner = wrapIIFEFuncContext(body, litHasDefer, litHasRecover)
+	default:
+		inner = body
+	}
+
+	if context.isIIFE {
+		// Immediately-invoked function literal: emit `paramNames => BODY` (names only — the
+		// delegate-cast in convCallExpr supplies the types).
+		result.WriteString(v.iifeParamNames(litSig) + " => " + inner)
+	} else {
 		result.WriteString("(" + parameterSignature + ") => " + inner)
 	}
 

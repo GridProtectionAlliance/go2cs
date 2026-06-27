@@ -38,6 +38,26 @@ func main() {
 	divPrint(20, 4) // 5
 	divPrint(1, 0)  // closure recovered: runtime error: integer divide by zero
 
+	// (2b) closure with a NAMED return that a deferred recover sets (recover-sets-result).
+	safeDiv := func(a, b int) (result int) {
+		defer func() {
+			if r := recover(); r != nil {
+				result = -1
+			}
+		}()
+		return a / b
+	}
+	fmt.Println(safeDiv(20, 4)) // 5
+	fmt.Println(safeDiv(1, 0))  // -1
+
+	// (2c) closure with a NAMED return that a plain defer modifies after the body returns.
+	counted := func() (n int) {
+		defer func() { n++ }()
+		n = 10
+		return n
+	}
+	fmt.Println(counted()) // 11
+
 	// (3) closure returned from a function still defers correctly when called later.
 	greet := makeGreeter("go2cs")
 	greet() // hi go2cs \n bye go2cs

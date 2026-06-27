@@ -61,32 +61,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.namedReturnDeferMode = false
 	v.namedReturnNames = nil
 
-	if (v.hasDefer || v.hasRecover) && funcDecl.Body != nil && signature.Results() != nil {
-		results := signature.Results()
-		names := make([]string, 0, results.Len())
-		allNamed := results.Len() > 0
-
-		for i := range results.Len() {
-			param := results.At(i)
-
-			if param.Name() == "" || isDiscardedVar(param.Name()) {
-				allNamed = false
-				break
-			}
-
-			ident := v.getVarIdent(param)
-
-			if ident != nil {
-				names = append(names, getSanitizedIdentifier(v.getIdentName(ident)))
-			} else {
-				names = append(names, getSanitizedIdentifier(param.Name()))
-			}
-		}
-
-		if allNamed {
-			v.namedReturnDeferMode = true
-			v.namedReturnNames = names
-		}
+	if funcDecl.Body != nil {
+		v.namedReturnDeferMode, v.namedReturnNames = v.detectNamedReturnDefer(signature, v.hasDefer, v.hasRecover)
 	}
 
 	// Collect parameter names from the function declaration

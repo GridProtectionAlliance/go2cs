@@ -29,6 +29,34 @@ internal static void Main() {
     });
     divPrint(20, 4);
     divPrint(1, 0);
+    var safeDiv = (nint a, nint b) => {
+        nint result = default!;
+        func((defer, recover) => {
+            defer(() => {
+                {
+                    var r = recover(); if (r != default!) {
+                        result = -1;
+                    }
+                }
+            });
+            result = a / b; return;
+        });
+        return result;
+    };
+    fmt.Println(safeDiv(20, 4));
+    fmt.Println(safeDiv(1, 0));
+    var counted = () => {
+        nint n = default!;
+        func((defer, recover) => {
+            defer(() => {
+                n++;
+            });
+            n = 10;
+            return;
+        });
+        return n;
+    };
+    fmt.Println(counted());
     var greet = makeGreeter("go2cs"u8);
     greet();
     var run = (Action fn) => {
