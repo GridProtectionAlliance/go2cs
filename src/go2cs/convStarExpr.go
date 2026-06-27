@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) string {
@@ -16,6 +17,14 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 			if _, ok := starExpr.X.(*ast.StarExpr); ok {
 				return v.convExpr(starExpr.X, nil) + ".val"
 			}
+		}
+
+		// A pointer parameter is dereferenced in the function body via a `ref var p = ref
+		// Ꮡp.val` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
+		// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
+		// the heap box parameter directly (`Ꮡp.val`), which is a capturable reference type.
+		if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
+			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + ".val"
 		}
 
 		// Prefer to use local reference instead of dereferencing a pointer

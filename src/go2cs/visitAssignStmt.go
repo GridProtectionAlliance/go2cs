@@ -419,7 +419,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 		if len(leftExprs) > 0 && operator == " = " {
 			for _, leftExpr := range leftExprs.Keys() {
-				if strings.HasPrefix(leftExpr, AddressPrefix) {
+				// Only a bare pointer-box reassignment (`Ꮡp = …`) needs the deref ref-local
+				// re-aliased (`p = ref Ꮡp.val`). A write *through* the box (`Ꮡp.val = …`, emitted
+				// for `*p = …` inside a lambda — see convStarExpr) has member access and must not
+				// trigger this; it is a plain value assignment.
+				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") {
 					// This is a special case for pointer reassignments which should be extended
 					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.val`
 					derefExpr := getSanitizedIdentifier(leftExpr[len(AddressPrefix):])
