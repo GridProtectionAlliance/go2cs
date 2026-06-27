@@ -1,0 +1,33 @@
+<Project>
+
+  <!--
+    Pins $(go2csPath) for every project in the full-conversion tree (src\go-src-converted\)
+    to the repository's src root — this file's parent directory.
+
+    Why this is needed:
+      The shared runtime (core\golib) and the source generators (gen\go2cs-gen) live under
+      src\, NOT under go-src-converted\. Each converted .csproj references them via
+      $(go2csPath)core\golib\... and $(go2csPath)gen\go2cs-gen\... (an Analyzer reference),
+      where $(go2csPath) otherwise defaults to $(SolutionDir). For go-src-converted.sln that
+      SolutionDir is go-src-converted\ — where neither golib nor the generator exists — so the
+      references dangle and the build fails with a flood of "type 'slice<>' / 'GoType' could not
+      be found" errors that look like real defects but are pure reference-resolution noise.
+
+      Setting go2csPath here (computed relative to this file, so it is machine-independent) makes
+      golib and the analyzers always resolve to LIVE SOURCE: a full-stdlib build picks up the
+      latest runtime and generator changes with no per-invocation -p:go2csPath flag, and with no
+      risk of binding to a stale DLL or NuGet package.
+
+    Notes:
+      * An explicit command-line -p:go2csPath=... still wins (a global property overrides
+        Directory.Build.props), so existing documented build commands keep working unchanged.
+      * golib remains the single shared runtime at src\core\golib; the inter-package refs that
+        were relocated to $(go2csPath)go-src-converted\<pkg> also resolve correctly under this
+        root. This only fixes PATH RESOLUTION — it does not change WHAT is referenced, so the
+        baseline/full namespace separation is unaffected.
+  -->
+  <PropertyGroup Condition="'$(go2csPath)' == ''">
+    <go2csPath>$([MSBuild]::EnsureTrailingSlash($([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..'))))</go2csPath>
+  </PropertyGroup>
+
+</Project>
