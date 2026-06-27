@@ -253,6 +253,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
 
     [TestMethod]
+    public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

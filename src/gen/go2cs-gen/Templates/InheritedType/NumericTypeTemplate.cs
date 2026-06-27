@@ -3,7 +3,7 @@
 internal static class NumericTypeTemplate
 {
     private static bool IsUnsignedType(string typeName) =>
-        typeName is "uint8" or "uint16" or "uint32" or "uint64" or "byte" or "rune" or "uintptr";
+        typeName is "uint8" or "uint16" or "uint32" or "uint64" or "byte" or "rune" or "uintptr" or "nuint" or "uint";
 
     public static string Generate(string typeName, string targetTypeName) =>
         $$"""
