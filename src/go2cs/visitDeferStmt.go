@@ -13,6 +13,7 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	defer v.exitLambdaConversion()
 
 	lambdaContext := DefaultLambdaContext()
+	lambdaContext.deferOrGoCall = true
 	paramCount := len(deferStmt.Call.Args)
 
 	var renderLambdaParams bool

@@ -105,7 +105,15 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		body = strings.TrimSpace(body)
 	}
 
-	result.WriteString("(" + parameterSignature + ") => " + body)
+	if context.isIIFE {
+		// Immediately-invoked, no-arg function literal: emit the func() execution context so it
+		// runs immediately with its own defer/recover scope (the call's `()` is omitted by
+		// convCallExpr). The body's `defer(…)`/`recover()` bind to these parameters, not the
+		// enclosing function's wrapper.
+		result.WriteString("func((defer, recover) => " + body + ")")
+	} else {
+		result.WriteString("(" + parameterSignature + ") => " + body)
+	}
 
 	return result.String()
 }

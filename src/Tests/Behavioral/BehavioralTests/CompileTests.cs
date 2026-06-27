@@ -150,6 +150,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]
+    public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
+
+    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]

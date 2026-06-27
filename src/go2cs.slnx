@@ -91,6 +91,7 @@
     <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />
+    <Project Path="Tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
     <Project Path="Tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="Tests/Behavioral/InterfaceImplementation/InterfaceImplementation.csproj" />
     <Project Path="Tests/Behavioral/InterfaceInheritance/InterfaceInheritance.csproj" />

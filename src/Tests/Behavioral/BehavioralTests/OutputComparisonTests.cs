@@ -124,6 +124,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]

@@ -98,6 +98,16 @@ type LambdaContext struct {
 	isPointerCast bool
 	deferredDecls *strings.Builder
 	callArgs      []string
+	// isIIFE marks an immediately-invoked, no-argument function literal — emitted as a
+	// `func((defer, recover) => body)` execution-context call so it runs with its OWN
+	// defer/recover scope (a bare C# lambda cannot be invoked directly, and an inner defer
+	// must not bind to the enclosing function's wrapper). See convCallExpr / convFuncLit.
+	isIIFE bool
+	// deferOrGoCall marks a call that is the target of a defer/go statement. Such a
+	// `defer func(){…}()` / `go func(){…}()` literal must NOT be treated as an IIFE: the
+	// deferred/goroutine body is inlined by visitDeferStmt/visitGoStmt, and its recover()
+	// recovers the *enclosing* function, so it must not get its own func() wrapper.
+	deferOrGoCall bool
 }
 
 func DefaultLambdaContext() LambdaContext {
@@ -108,6 +118,7 @@ func DefaultLambdaContext() LambdaContext {
 		isPointerCast: false,
 		deferredDecls: nil,
 		callArgs:      nil,
+		isIIFE:        false,
 	}
 }
 

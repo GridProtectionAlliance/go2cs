@@ -12,6 +12,7 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	defer v.exitLambdaConversion()
 
 	lambdaContext := DefaultLambdaContext()
+	lambdaContext.deferOrGoCall = true
 	paramCount := len(goStmt.Call.Args)
 
 	var renderLambdaParams bool

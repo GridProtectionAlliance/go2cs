@@ -10,6 +10,17 @@ import (
 )
 
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
+	// Immediately-invoked, no-argument function literal (IIFE): `func(){ … }()`. A bare C#
+	// lambda cannot be invoked directly (CS0149), and the literal may use defer/recover that
+	// must be scoped to itself. Emit it as a `func((defer, recover) => body)` execution-context
+	// call, which both wraps (its own defer/recover scope) and runs immediately — so no trailing
+	// call `()` is appended. (Argument-taking IIFEs are handled by the normal call path.)
+	if funcLit, ok := callExpr.Fun.(*ast.FuncLit); ok && len(callExpr.Args) == 0 && !context.deferOrGoCall {
+		iifeContext := DefaultLambdaContext()
+		iifeContext.isIIFE = true
+		return v.convFuncLit(funcLit, iifeContext)
+	}
+
 	funcType := v.getType(callExpr.Fun, false)
 
 	// Check if the call is a type conversion
