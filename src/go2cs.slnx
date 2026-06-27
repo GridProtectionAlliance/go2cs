@@ -102,6 +102,7 @@
     <Project Path="Tests/Behavioral/InterfaceIntraFunction/InterfaceIntraFunction.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
+    <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
     <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />

@@ -356,6 +356,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				constHandled = true
 			}
 
+			// A native-sized integer constant (nint/nuint, incl. the uintptr alias) whose value
+			// does not fit a C# constant of that type — e.g. `uintptr MaxUintptr = ^uintptr(0)`
+			// = 0xFFFFFFFFFFFFFFFF, a ulong literal needing a non-constant nuint conversion
+			// (CS0133/CS0266) — must be emitted as `static readonly` with an unchecked cast
+			// rather than `const`. Small native-int consts (e.g. `const nint iota = 0`) are fine.
+			nativeIntConst := false
+
+			if c.Val().Kind() == constant.Int && (csTypeName == "nint" || csTypeName == "nuint" || csTypeName == "uintptr") {
+				if _, errInt := strconv.ParseInt(constVal, 0, 64); errInt != nil {
+					nativeIntConst = true
+				}
+			}
+
 			if !constHandled {
 				if i > 0 {
 					v.targetFile.WriteString(v.newline)
@@ -393,9 +406,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				}
 
 				var constExpr string
+				constValExpr := constVal
 
 				if isNamedType {
 					constExpr = "static readonly"
+				} else if nativeIntConst {
+					constExpr = "static readonly"
+					constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)
 				} else {
 					constExpr = "const"
 				}
@@ -404,13 +421,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// C# locals cannot be declared "static readonly"; for named
 					// (custom) types "const" is also invalid, so emit a plain local
 					// variable. Primitive/string consts can still use "const" locally.
-					if isNamedType {
-						v.writeOutput("%s %s =%s %s;", csTypeName, csIDName, orgExpr, constVal)
+					if isNamedType || nativeIntConst {
+						v.writeOutput("%s %s =%s %s;", csTypeName, csIDName, orgExpr, constValExpr)
 					} else {
-						v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constVal)
+						v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constValExpr)
 					}
 				} else {
-					v.writeOutput("%s %s %s %s =%s %s;", access, constExpr, csTypeName, csIDName, orgExpr, constVal)
+					v.writeOutput("%s %s %s %s =%s %s;", access, constExpr, csTypeName, csIDName, orgExpr, constValExpr)
 				}
 
 				v.writeComment(valueSpec.Comment, tokEnd+typeLenDeviation+1)

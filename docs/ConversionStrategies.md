@@ -71,6 +71,12 @@ internal static readonly UntypedInt win = 100;
 public static readonly UntypedInt N = /* 11 + 1 */ 12;
 ```
 
+A native-sized integer constant (`nint`/`nuint`, including the `uintptr` alias) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as `static readonly` with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
+
+```csharp
+public static readonly uintptr MaxUintptr = /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
+```
+
 See [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
 ## Handling "int" and "uint" Types

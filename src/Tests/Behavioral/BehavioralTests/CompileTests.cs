@@ -183,6 +183,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
+    public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
