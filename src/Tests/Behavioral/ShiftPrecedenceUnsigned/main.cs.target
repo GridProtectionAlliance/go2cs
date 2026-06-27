@@ -16,7 +16,7 @@ internal static void Main() {
     uint64 x = 256;
     fmt.Println((x >> (int)(4)) + x);
     fmt.Println((1 << (int)(15)) - 1);
-    fmt.Println(x - (1 << (int)(4)));
+    fmt.Println(x - (uint64)(1 << (int)(4)));
     nuint s = 3;
     uint64 y = 1;
     y <<= (int)(s);

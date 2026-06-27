@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
@@ -54,7 +55,25 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			// but C#'s `<<`/`>>` bind looser than the additive operators. So Go's
 			// `x>>4 + x` (meaning `(x>>4) + x`) would re-associate in C# as `x >> (4 + x)`.
 			// Parenthesize the shift so the original grouping is preserved in every context.
-			return fmt.Sprintf("(%s %s %s)", leftOperand, binaryOp, rightOperand)
+			shiftExpr := fmt.Sprintf("(%s %s %s)", leftOperand, binaryOp, rightOperand)
+
+			// When the shifted (left) operand is an untyped constant — `1 << k` — Go gives the
+			// whole shift the type it assumes from context (e.g. uintptr when compared with a
+			// uintptr), but the bare C# literal makes the result `int`, which then can't compare
+			// or combine with the typed operand (CS0034). Cast the shift to its resolved type.
+			if v.isUntypedNumericConstArg(binaryExpr.X) {
+				if shiftType := v.info.Types[binaryExpr].Type; shiftType != nil {
+					if basic, ok := shiftType.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUntyped == 0 {
+						shiftCSType := convertToCSTypeName(v.getTypeName(shiftType, false))
+
+						if shiftCSType != "int" && shiftCSType != "nint" {
+							shiftExpr = fmt.Sprintf("(%s)%s", shiftCSType, shiftExpr)
+						}
+					}
+				}
+			}
+
+			return shiftExpr
 		}
 
 		bitwiseOp := binaryOp == "&" || binaryOp == "|" || binaryOp == "^" || binaryOp == "&^"

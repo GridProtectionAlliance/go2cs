@@ -492,7 +492,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
-    return (uint16)(t.OutCount & ((1 << (int)(15)))) != 0;
+    return (uint16)(t.OutCount & ((uint16)(1 << (int)(15)))) != 0;
 }
 
 [GoType] partial struct PtrType {
@@ -529,15 +529,15 @@ public static ж<byte> Data(this ΔName n, nint off) {
 }
 
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((1 << (int)(0)))) != 0;
+    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(0)))) != 0;
 }
 
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((1 << (int)(1)))) != 0;
+    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(1)))) != 0;
 }
 
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((1 << (int)(3)))) != 0;
+    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(3)))) != 0;
 }
 
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
@@ -602,14 +602,14 @@ public static ΔName NewName(@string n, @string tag, bool exported, bool embedde
     byte bits = default!;
     nint l = 1 + nameLenLen + len(n);
     if (exported) {
-        bits |= (byte)((1 << (int)(0)));
+        bits |= (byte)((byte)(1 << (int)(0)));
     }
     if (len(tag) > 0) {
         l += tagLenLen + len(tag);
-        bits |= (byte)((1 << (int)(1)));
+        bits |= (byte)((byte)(1 << (int)(1)));
     }
     if (embedded) {
-        bits |= (byte)((1 << (int)(3)));
+        bits |= (byte)((byte)(1 << (int)(3)));
     }
     var b = new slice<byte>(l);
     b[0] = bits;
