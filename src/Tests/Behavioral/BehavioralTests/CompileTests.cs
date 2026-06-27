@@ -312,6 +312,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
 
     [TestMethod]
+    public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

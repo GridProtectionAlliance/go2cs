@@ -35,7 +35,7 @@ partial class main_package {
     }
     var offset = ((uintptr)0);
     if (BigEndian) {
-        offset = PtrSize - argSize;
+        offset = (uintptr)PtrSize - argSize;
     }
     return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints[reg])))) + offset));
 }

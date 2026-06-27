@@ -312,6 +312,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
 
     [TestMethod]
+    public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

@@ -314,6 +314,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
 
     [TestMethod]
+    public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

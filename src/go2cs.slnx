@@ -145,6 +145,7 @@
     <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
     <Project Path="Tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
+    <Project Path="Tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />
     <Project Path="Tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
   </Folder>

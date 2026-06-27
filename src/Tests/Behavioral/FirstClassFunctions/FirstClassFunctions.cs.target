@@ -70,7 +70,7 @@ internal static (slice<nint>, nint) roundRobin(slice<strategy> strategies) {
             }
         }
     }
-    nint gamesPerStrategy = gamesPerSeries * (len(strategies) - 1);
+    nint gamesPerStrategy = (nint)gamesPerSeries * (len(strategies) - 1);
     return (wins, gamesPerStrategy);
 }
 

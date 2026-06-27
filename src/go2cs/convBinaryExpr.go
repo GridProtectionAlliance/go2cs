@@ -3,8 +3,48 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 )
+
+// isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
+// untyped numeric constant — which the converter emits as a golib `Untyped*` wrapper. It is false
+// for literals (those render as ordinary C# literals and follow normal numeric promotion rules).
+func (v *Visitor) isUntypedNamedConstRef(expr ast.Expr) bool {
+	var sel *ast.Ident
+
+	switch e := expr.(type) {
+	case *ast.Ident:
+		sel = e
+	case *ast.SelectorExpr:
+		sel = e.Sel
+	default:
+		return false
+	}
+
+	if constObj, ok := v.info.ObjectOf(sel).(*types.Const); ok {
+		if basic, ok := constObj.Type().(*types.Basic); ok {
+			return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
+		}
+	}
+
+	return false
+}
+
+// concreteNumericCSType returns the C# type name for a concrete (non-untyped) numeric type, or "".
+func (v *Visitor) concreteNumericCSType(t types.Type) string {
+	if t == nil {
+		return ""
+	}
+
+	if basic, ok := t.Underlying().(*types.Basic); ok {
+		if basic.Info()&types.IsNumeric != 0 && basic.Info()&types.IsUntyped == 0 {
+			return convertToCSTypeName(v.getTypeName(t, false))
+		}
+	}
+
+	return ""
+}
 
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
 	lhsType := v.getExprType(binaryExpr.X)
@@ -94,6 +134,26 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			}
 
 			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
+		}
+
+		// When one operand of an arithmetic op is a reference to a *named* untyped numeric constant
+		// (emitted as the golib `UntypedInt`/`UntypedFloat` wrapper) and the other is a concrete
+		// numeric type, the wrapper's bidirectional implicit conversions make the result resolve to
+		// the wrong type — e.g. `q1 * two32` (ulong * UntypedInt) yields `int` (CS0029). Cast the
+		// untyped-const operand to the concrete operand's type. Bare literals are not wrapped and
+		// follow normal C# rules, so this targets named consts only (e.g. `const two32 = 1<<32`).
+		// Comparisons resolve fine through the implicit conversion, so only arithmetic is cast.
+		switch binaryExpr.Op {
+		case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
+			if v.isUntypedNamedConstRef(binaryExpr.X) {
+				if tn := v.concreteNumericCSType(rhsType); tn != "" {
+					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
+				}
+			} else if v.isUntypedNamedConstRef(binaryExpr.Y) {
+				if tn := v.concreteNumericCSType(lhsType); tn != "" {
+					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
+				}
+			}
 		}
 
 		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
