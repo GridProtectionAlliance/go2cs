@@ -155,6 +155,14 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
    it rebuilds everything and can hang under VS lock contention (see the filtered-tests note above). If the
    Go source uses multi-line string literals, mark the `.cs`/`.cs.target` `-text` in `.gitattributes`
    (autocrlf gotcha above).
+7. **Record the conversion decision (keep the strategy doc living).** Any time an *important or non-obvious*
+   conversion decision is made — a new emitted form, a runtime/generator behavior, a deliberate trade-off,
+   or a changed mapping of a Go construct to C# — add or update the matching section in
+   [`docs/ConversionStrategies.md`](docs/ConversionStrategies.md) **in the same change** so that living
+   document keeps matching reality. Verify every C# snippet against the actual `.cs.target` golden (it is the
+   authoritative record of emitted forms — e.g. `u8` format strings, `throw panic(...)`, `ж<T>`/`Ꮡ`). Skip
+   only for pure bug-fixes that restore an already-documented behavior. (This rule is not limited to the
+   regression-test flow — it applies to *any* commit that lands a notable conversion decision.)
 
 ### Phase 3 mechanics — measuring/iterating the full conversion (`src/go-src-converted`)
 - **The on-disk `go-src-converted` is stale** (last bulk conversion 2025-05-11); it predates current
@@ -166,8 +174,11 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
      `$(go2csPath)`). Full stdlib ≈ 3–4 min (per-file work is sub-second; the cost is `go/packages`
      loading the whole type graph, so **batch** — don't invoke per package).
   2. Overlay the fresh `.cs` onto `src/go-src-converted/<pkg>` (keep the relocated csprojs).
-  3. Build single packages with **`dotnet build <pkg>.csproj -p:go2csPath=H:\Projects\go2cs\src\`** (note
-     trailing `\`) so `core\golib` resolves outside the solution; or build the whole `go-src-converted.sln`.
+  3. Build single packages with **`dotnet build <pkg>.csproj -c Debug`** — `src/go-src-converted/Directory.Build.props`
+     now pins `$(go2csPath)` to the src root, so `core\golib` + the `go2cs-gen` analyzer resolve to live source
+     with **no `-p:go2csPath` flag**; or build the whole `go-src-converted.sln`. (If you ever do pass the flag
+     explicitly, use forward slashes — `-p:go2csPath=H:/Projects/go2cs/src/` — a trailing `\` escapes the
+     closing quote and mangles the path into phantom golib-not-found errors.)
   4. Bucket: `dotnet build … -clp:ErrorsOnly` then group by `error CS####`. Errors shown are *own-errors*
      of leaf-most failures — dependents of a failed project are skipped, not errored.
 - **csproj layout/relocation:** the converter emits inter-package refs as `$(go2csPath)core\<pkg>\…` and
