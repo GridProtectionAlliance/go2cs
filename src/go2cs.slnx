@@ -114,6 +114,7 @@
     <Project Path="Tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
     <Project Path="Tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
+    <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
     <Project Path="Tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
     <Project Path="Tests/Behavioral/Solitaire/Solitaire.csproj" />
     <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />

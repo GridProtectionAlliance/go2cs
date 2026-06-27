@@ -221,6 +221,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
+    public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]

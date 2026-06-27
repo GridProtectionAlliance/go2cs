@@ -181,6 +181,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
+    public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]

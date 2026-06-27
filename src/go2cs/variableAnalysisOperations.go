@@ -396,15 +396,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	}
 
 	lookupVar := func(varName string) *types.Var {
-		// First check if it's a function-level declaration
-		if varObj, exists := functionLevelDecls[varName]; exists {
-			return varObj
-		}
-		// Then check scope stack
+		// Check the scope stack first, innermost outward: a variable declared in a nested block
+		// shadows a function-level declaration of the same name, so the inner (shadow-renamed)
+		// object must win — otherwise a reassignment like `x += 1` inside the block would resolve
+		// to the outer variable's name.
 		for i := len(v.scopeStack) - 1; i >= 0; i-- {
 			if varObj, exists := v.scopeStack[i][varName]; exists {
 				return varObj
 			}
+		}
+		// Fall back to the function-level declaration.
+		if varObj, exists := functionLevelDecls[varName]; exists {
+			return varObj
 		}
 		return nil
 	}
