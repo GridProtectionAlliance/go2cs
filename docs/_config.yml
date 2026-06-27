@@ -1,4 +1,5 @@
-theme: jekyll-theme-cayman
+#theme: jekyll-theme-cayman
+remote_theme: lewismiddleton/cayman-dark
 title: go2cs
 description: Golang to C# Converter
 github:
