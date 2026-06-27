@@ -79,17 +79,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	blockStatementContext := DefaultBlockStmtContext()
 	blockStatementContext.format.useNewLine = false
 
-	// An argument-taking IIFE injects its parameter-binding locals at the top of the body and
-	// must keep a block (the decls have nowhere to live in an expression-bodied lambda).
-	if context.iifeArgDecls != "" {
-		blockStatementContext.innerPrefix = context.iifeArgDecls
-	}
-
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
 
-	if v.firstStatementIsReturn && context.iifeArgDecls == "" {
+	// An IIFE keeps a block body (it may need a func() wrapper and reads more like the Go
+	// source); other single-return literals collapse to an expression-bodied lambda.
+	if v.firstStatementIsReturn && !context.isIIFE {
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(body, "return ")
 
@@ -112,11 +108,13 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	}
 
 	if context.isIIFE {
-		// Immediately-invoked, no-arg function literal: emit the func() execution context so it
-		// runs immediately with its own defer/recover scope (the call's `()` is omitted by
-		// convCallExpr). The body's `defer(…)`/`recover()` bind to these parameters, not the
-		// enclosing function's wrapper.
-		result.WriteString("func((defer, recover) => " + body + ")")
+		// Immediately-invoked function literal: emit `paramNames => BODY` (names only — the
+		// delegate-cast in convCallExpr supplies the types). BODY runs inside a
+		// `func((defer, recover) => …)` execution context only when the literal itself uses
+		// defer/recover, so it has its own scope without forcing one on every IIFE.
+		sig := v.info.TypeOf(funcLit).(*types.Signature)
+		hasDefer, hasRecover := v.funcBodyDeferRecover(funcLit.Body)
+		result.WriteString(v.iifeParamNames(sig) + " => " + wrapIIFEFuncContext(body, hasDefer, hasRecover))
 	} else {
 		result.WriteString("(" + parameterSignature + ") => " + body)
 	}

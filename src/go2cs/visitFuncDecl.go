@@ -46,8 +46,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	directBoxReceiver := packageDirectBoxReceiverMethods != nil && packageDirectBoxReceiverMethods[currentFuncType]
 
 	// Analyze function variables for reassignments and redeclarations (variable shadows).
-	// This also walks the whole body, so v.hasDefer / v.hasRecover are known afterward.
 	v.performVariableAnalysis(funcDecl, signature)
+
+	// Scope defer/recover to THIS function's own body: a `defer`/`recover` inside a nested
+	// function literal (an IIFE or closure) belongs to that literal, not to this function, so it
+	// must not force a func() execution context here. (performVariableAnalysis sets hasDefer/
+	// hasRecover by walking everything, including nested literals.)
+	v.hasDefer, v.hasRecover = v.funcBodyDeferRecover(funcDecl.Body)
 
 	// A function with named return values that also uses defer/recover needs the named
 	// returns declared outside the func() wrapper and returned after it (see the field doc on

@@ -4,13 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() => func((defer, recover) => {
-    func((defer, recover) => {
+internal static void Main() {
+    ((Action)(() => {
         fmt.Println("a");
-    });
-    nint x = func((defer, recover) => 6 * 7);
+    }))();
+    nint x = ((Func<nint>)(() => {
+        return 6 * 7;
+    }))();
     fmt.Println(x);
-    func((defer, recover) => {
+    ((Action)(() => func((defer, recover) => {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -19,38 +21,36 @@ internal static void Main() => func((defer, recover) => {
             }
         });
         throw panic("boom");
-    });
+    })))();
     fmt.Println("after recover");
-    nint total = 10 + func((defer, recover) => {
+    nint total = 10 + ((Func<nint>)(() => {
         nint sum = 0;
         for (nint i = 1; i <= 4; i++) {
             sum += i;
         }
         return sum;
-    });
+    }))();
     fmt.Println(total);
-    nint y = func((defer, recover) => func((defer, recover) => 5) * 2);
+    nint y = ((Func<nint>)(() => {
+        return ((Func<nint>)(() => {
+            return 5;
+        }))() * 2;
+    }))();
     fmt.Println(y);
-    func((defer, recover) => {
-        nint n = 7;
+    ((Action<nint>)(n => {
         fmt.Println("n =", n);
-    });
-    nint tri = func((defer, recover) => {
-        nint a = 1;
-        nint b = 2;
-        nint c = 3;
+    }))(7);
+    nint tri = ((Func<nint, nint, nint, nint>)((a, b, c) => {
         return a + b + c;
-    });
+    }))(1, 2, 3);
     fmt.Println(tri);
     for (nint k = 0; k < 3; k++) {
-        func((defer, recover) => {
-            nint xΔ1 = k;
+        ((Action<nint>)(xΔ1 => {
             fmt.Print(xΔ1, " ");
-        });
+        }))(k);
     }
     fmt.Println();
-    func((defer, recover) => {
-        @string label = "scope"u8;
+    ((Action<@string>)(label => func((defer, recover) => {
         defer(() => {
             {
                 var r = recover(); if (r != default!) {
@@ -59,17 +59,16 @@ internal static void Main() => func((defer, recover) => {
             }
         });
         throw panic("argboom");
-    });
+    })))("scope");
     fmt.Println("after arg recover");
     nint calls = 0;
     var bump = () => {
         calls++;
         return 99;
     };
-    func((defer, recover) => {
-        _ = bump();
+    ((Action<nint>)(_ => {
         fmt.Println("ignored arg; calls =", calls);
-    });
-});
+    }))(bump());
+}
 
 } // end main_package
