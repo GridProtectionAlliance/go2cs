@@ -15,10 +15,46 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// must be scoped to itself. Emit it as a `func((defer, recover) => body)` execution-context
 	// call, which both wraps (its own defer/recover scope) and runs immediately — so no trailing
 	// call `()` is appended. (Argument-taking IIFEs are handled by the normal call path.)
-	if funcLit, ok := callExpr.Fun.(*ast.FuncLit); ok && len(callExpr.Args) == 0 && !context.deferOrGoCall {
+	if funcLit, ok := callExpr.Fun.(*ast.FuncLit); ok && !context.deferOrGoCall {
 		iifeContext := DefaultLambdaContext()
 		iifeContext.isIIFE = true
-		return v.convFuncLit(funcLit, iifeContext)
+
+		if len(callExpr.Args) == 0 {
+			return v.convFuncLit(funcLit, iifeContext)
+		}
+
+		// Argument-taking IIFE: bind the arguments to the literal's parameters as locals at the
+		// top of the func() wrapper body (`T p = arg;`). The func() wrapper takes only
+		// (defer, recover), so the parameters cannot be lambda parameters. Skip variadic and
+		// argument/parameter-count mismatches (rare for an IIFE) — those fall through to the
+		// normal call path.
+		if sig, ok := v.info.TypeOf(funcLit).(*types.Signature); ok && !sig.Variadic() && sig.Params().Len() == len(callExpr.Args) {
+			decls := strings.Builder{}
+
+			for i := range sig.Params().Len() {
+				param := sig.Params().At(i)
+				argExpr := v.convExpr(callExpr.Args[i], nil)
+
+				// Blank parameter `_` discards the argument; still evaluate it for side effects.
+				if isDiscardedVar(param.Name()) {
+					decls.WriteString(fmt.Sprintf("%s%s_ = %s;", v.newline, v.indent(v.indentLevel+1), argExpr))
+					continue
+				}
+
+				// Use the name the body actually references — the parameter may have been
+				// shadow-renamed by variable analysis (e.g. `x` → `xΔ1`).
+				paramName := param.Name()
+
+				if adjusted, ok := v.varNames[param]; ok {
+					paramName = adjusted
+				}
+
+				decls.WriteString(fmt.Sprintf("%s%s%s %s = %s;", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), getSanitizedIdentifier(paramName), argExpr))
+			}
+
+			iifeContext.iifeArgDecls = decls.String()
+			return v.convFuncLit(funcLit, iifeContext)
+		}
 	}
 
 	funcType := v.getType(callExpr.Fun, false)

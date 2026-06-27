@@ -108,6 +108,10 @@ type LambdaContext struct {
 	// deferred/goroutine body is inlined by visitDeferStmt/visitGoStmt, and its recover()
 	// recovers the *enclosing* function, so it must not get its own func() wrapper.
 	deferOrGoCall bool
+	// iifeArgDecls holds the parameter-binding local declarations for an argument-taking IIFE
+	// (`func(p T){…}(arg)`). They are injected at the top of the func() wrapper body — `T p =
+	// arg;` — so the literal runs with its arguments bound as locals (and a forced block body).
+	iifeArgDecls string
 }
 
 func DefaultLambdaContext() LambdaContext {

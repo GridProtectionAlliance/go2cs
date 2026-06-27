@@ -79,11 +79,17 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	blockStatementContext := DefaultBlockStmtContext()
 	blockStatementContext.format.useNewLine = false
 
+	// An argument-taking IIFE injects its parameter-binding locals at the top of the body and
+	// must keep a block (the decls have nowhere to live in an expression-bodied lambda).
+	if context.iifeArgDecls != "" {
+		blockStatementContext.innerPrefix = context.iifeArgDecls
+	}
+
 	v.pushBlock()
 	v.visitBlockStmt(funcLit.Body, blockStatementContext)
 	body := v.popBlockAppend(false)
 
-	if v.firstStatementIsReturn {
+	if v.firstStatementIsReturn && context.iifeArgDecls == "" {
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(body, "return ")
 

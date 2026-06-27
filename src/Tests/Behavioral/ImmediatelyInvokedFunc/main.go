@@ -48,4 +48,41 @@ func main() {
 		return func() int { return 5 }() * 2
 	}()
 	fmt.Println(y) // 10
+
+	// (6) argument-taking IIFE: arguments are bound as locals.
+	func(n int) {
+		fmt.Println("n =", n)
+	}(7)
+
+	// (7) multi-argument, value-returning IIFE.
+	tri := func(a, b, c int) int {
+		return a + b + c
+	}(1, 2, 3)
+	fmt.Println(tri) // 6
+
+	// (8) the loop-capture idiom: each iteration binds its own copy of k.
+	for k := 0; k < 3; k++ {
+		func(x int) {
+			fmt.Print(x, " ")
+		}(k)
+	}
+	fmt.Println() // 0 1 2
+
+	// (9) argument-taking IIFE that recovers in its own scope.
+	func(label string) {
+		defer func() {
+			if r := recover(); r != nil {
+				fmt.Println(label, "recovered:", r)
+			}
+		}()
+		panic("argboom")
+	}("scope")
+	fmt.Println("after arg recover")
+
+	// (10) blank parameter discards its argument (still evaluated).
+	calls := 0
+	bump := func() int { calls++; return 99 }
+	func(_ int) {
+		fmt.Println("ignored arg; calls =", calls)
+	}(bump())
 }
