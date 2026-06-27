@@ -263,15 +263,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			return false
 
 		case *ast.DeclStmt:
-			if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
-				for _, spec := range genDecl.Specs {
-					if valueSpec, ok := spec.(*ast.ValueSpec); ok {
-						for _, ident := range valueSpec.Names {
-							if obj := v.info.Defs[ident]; obj != nil {
-								if varObj, ok := obj.(*types.Var); ok {
-									// For declarations, always record the original position
-									functionLevelDecls[ident.Name] = varObj
-									declaredPos[varObj] = ident.Pos()
+			// Only a `var` declaration that is directly in the function body is a function-level
+			// declaration. Without this gate a NESTED `var z` would be recorded as the package's
+			// function-level `z`, masking the real one (a later `z := …`) — then neither gets the
+			// shadow rename and both emit `z`, colliding in C# (CS0136). Mirrors the AssignStmt etc.
+			if isFunctionLevelNode(n, funcDecl.Body) {
+				if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
+					for _, spec := range genDecl.Specs {
+						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+							for _, ident := range valueSpec.Names {
+								if obj := v.info.Defs[ident]; obj != nil {
+									if varObj, ok := obj.(*types.Var); ok {
+										if _, exists := functionLevelDecls[ident.Name]; !exists {
+											functionLevelDecls[ident.Name] = varObj
+											declaredPos[varObj] = ident.Pos()
+										}
+									}
 								}
 							}
 						}

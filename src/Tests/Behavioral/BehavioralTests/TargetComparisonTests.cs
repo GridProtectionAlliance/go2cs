@@ -212,6 +212,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

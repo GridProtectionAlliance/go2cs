@@ -111,6 +111,7 @@
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
+    <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
