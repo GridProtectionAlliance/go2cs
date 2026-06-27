@@ -165,14 +165,19 @@ type IdentContext struct {
 	isType    bool
 	isMethod  bool
 	ident     *ast.Ident
+	// fieldCollidesWithType marks a struct-field selector whose name equals its enclosing
+	// struct's type name. C# forbids a member sharing the enclosing type's name (CS0542), so
+	// the field is emitted with the disambiguation marker (matching its renamed declaration).
+	fieldCollidesWithType bool
 }
 
 func DefaultIdentContext() IdentContext {
 	return IdentContext{
-		isPointer: false,
-		isType:    false,
-		isMethod:  false,
-		ident:     nil,
+		isPointer:             false,
+		isType:                false,
+		isMethod:              false,
+		ident:                 nil,
+		fieldCollidesWithType: false,
 	}
 }
 

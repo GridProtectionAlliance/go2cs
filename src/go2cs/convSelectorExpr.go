@@ -6,6 +6,44 @@ import (
 	"go/types"
 )
 
+// typeCollidingFieldName renames a struct field whose C# name would equal its enclosing
+// struct's type name (C# forbids it — CS0542) by prefixing the disambiguation marker.
+func typeCollidingFieldName(name string) string {
+	return ShadowVarMarker + name
+}
+
+// fieldCollidesWithType reports whether a field selector's name equals the C# type name of the
+// struct it belongs to (`type Node struct{ Node *Node }` → field `Node` in struct `Node`).
+func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
+	xType := v.info.TypeOf(x)
+
+	if xType == nil {
+		return false
+	}
+
+	if ptr, ok := xType.Underlying().(*types.Pointer); ok {
+		xType = ptr.Elem()
+	}
+
+	named, ok := xType.(*types.Named)
+
+	if !ok {
+		return false
+	}
+
+	// Only a package-level named type keeps its Go name as the C# type name. A function-local
+	// (or otherwise lifted) type is emitted under a qualified name (e.g. `Uncommon_u`), so its
+	// field does not collide in C# even when the Go field and type names match — and
+	// visitStructType only renames the field declaration in the package-level case.
+	obj := named.Obj()
+
+	if obj.Pkg() == nil || obj.Parent() != obj.Pkg().Scope() {
+		return false
+	}
+
+	return getSanitizedIdentifier(sel.Name) == getSanitizedIdentifier(obj.Name())
+}
+
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
 	// Check if this is a method value being used in an assignment
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
@@ -13,11 +51,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		if ident, ok := selectorExpr.X.(*ast.Ident); ok {
 			if v.isPackageIdentifier(ident) {
 				// This is a package selector (like fmt.Println) -- no need for lambda
-				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 			}
 		}
 
-		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
 	// Check if an expression contains an explicit dereference at any level
@@ -40,11 +78,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			if callExpr, ok := selectorExpr.X.(*ast.CallExpr); ok {
 				// Check if the call expressions is a parenthesized expression
 				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
-					return fmt.Sprintf("(%s).val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+					return fmt.Sprintf("(%s).val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 				}
 			}
 
-			return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+			return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 		}
 
 		if selection, ok := v.info.Selections[selectorExpr]; ok && selection.Kind() == types.FieldVal {
@@ -60,7 +98,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						if selVar, ok := obj.(*types.Var); ok {
 							// If it's a receiver, skip dereferencing
 							if v.currentFuncSignature.Recv() == selVar {
-								return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+								return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 							}
 
 							// Check if it's a function parameter
@@ -69,7 +107,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							for i := range params.Len() {
 								// It's a function parameter, skip dereferencing
 								if params.At(i) == selVar {
-									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+									return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								}
 							}
 						}
@@ -88,9 +126,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									// If the field belongs to the struct, automatically dereference the pointer
 									if context.isAssignment {
 										// Left-hand side of assignment cannot use pointer dereference operator
-										return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+										return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 									} else {
-										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext()))
+										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 									}
 								}
 							}
@@ -111,14 +149,21 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// return r.init() }` — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
 	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X)) {
-		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
+		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
-	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, getSelIdentContext())))
+	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 }
 
-func getSelIdentContext() IdentContext {
+func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContext {
 	context := DefaultIdentContext()
 	context.isMethod = true
+
+	// Flag a field selector whose name collides with its enclosing struct's type name so the
+	// access is renamed to match the renamed field declaration (CS0542).
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.FieldVal {
+		context.fieldCollidesWithType = v.fieldCollidesWithType(selectorExpr.Sel, selectorExpr.X)
+	}
+
 	return context
 }

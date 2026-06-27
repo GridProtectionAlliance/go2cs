@@ -277,6 +277,11 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					}
 
 					prevNameDiscardedCount++
+				} else if fieldName == structTypeName {
+					// C# forbids a member sharing its enclosing type's name (CS0542), so rename a
+					// field whose name equals the struct type with the disambiguation marker. Field
+					// accesses are renamed to match (see convSelectorExpr / convIdent).
+					fieldName = typeCollidingFieldName(fieldName)
 				}
 
 				v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, fieldName, arrayInitializer)

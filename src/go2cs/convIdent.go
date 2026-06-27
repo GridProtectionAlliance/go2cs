@@ -54,7 +54,15 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	}
 
 	if context.isMethod {
-		return getSanitizedFunctionName(v.getIdentName(ident))
+		name := getSanitizedFunctionName(v.getIdentName(ident))
+
+		// A field whose name equals its enclosing struct's type name is renamed with the
+		// disambiguation marker (CS0542); match the renamed declaration at the access site.
+		if context.fieldCollidesWithType {
+			name = typeCollidingFieldName(name)
+		}
+
+		return name
 	}
 
 	return getSanitizedIdentifier(v.getIdentName(ident))
