@@ -50,6 +50,16 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	}
 
 	if context.isType {
+		// A reference to a function-local (lifted) named type must use the lifted C# name
+		// (`makePoint_point`), not the bare Go name — e.g. a composite literal `point{…}` or a
+		// cast `point(x)`. Only lifted/anonymous types are in liftedTypeMap, so package-level
+		// types are unaffected.
+		if identType := v.getIdentType(ident); identType != nil {
+			if liftedName, ok := v.liftedTypeMap[identType]; ok {
+				return liftedName
+			}
+		}
+
 		return convertToCSTypeName(v.getIdentName(ident))
 	}
 

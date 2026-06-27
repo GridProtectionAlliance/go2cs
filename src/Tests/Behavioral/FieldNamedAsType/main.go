@@ -18,6 +18,18 @@ type Node struct {
 	value int
 }
 
+// A function-local type is lifted to a qualified C# name (localCollision_u). Its same-named
+// field is NOT renamed (no C# collision), and a composite literal of it must use the lifted
+// name, not the bare Go name `u`.
+func localCollision() int {
+	type u struct {
+		u int
+	}
+	a := u{u: 9}
+	b := u{4}
+	return a.u + b.u
+}
+
 func main() {
 	root := Node{value: 1}
 	a := Node{value: 2}
@@ -32,4 +44,5 @@ func main() {
 	fmt.Println(root.Node.Node.value)     // 3   (chained read)
 	fmt.Println(len(root.Nodes))     // 2
 	fmt.Println(root.Nodes[1].value) // 3
+	fmt.Println(localCollision())    // 13 (9 + 4)
 }
