@@ -981,6 +981,32 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					reassignVar,
 				)
 				processor.processAssignStmt(assign)
+
+				// The type-switch guard (`x := x.(type)`) declares an implicit variable per
+				// case clause (recorded in info.Implicits, NOT info.Defs), so processAssignStmt
+				// above never sees it. If the guard name shadows an enclosing variable (e.g. a
+				// parameter), C# `case T x:` collides with it (CS0136). Rename the guard — and
+				// every per-case implicit var so body references follow — with the shadow marker.
+				if assign.Tok == token.DEFINE && len(assign.Lhs) == 1 {
+					if lhsIdent, ok := assign.Lhs[0].(*ast.Ident); ok && !isDiscardedVar(lhsIdent.Name) {
+						guardName := lhsIdent.Name
+
+						if v.isFunctionNameInScope(guardName) || v.shadowsCalledBuiltin(guardName) || isDeclaredInOuterScopes(guardName, false) {
+							adjustedName := getShadowedVarName(guardName)
+							v.identNames[lhsIdent] = adjustedName
+
+							for _, stmt := range node.Body.List {
+								if caseClause, ok := stmt.(*ast.CaseClause); ok {
+									if implicitObj := v.info.Implicits[caseClause]; implicitObj != nil {
+										if implicitVar, ok := implicitObj.(*types.Var); ok {
+											v.varNames[implicitVar] = adjustedName
+										}
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 
 			// Add handling for identifiers within type switch assign
