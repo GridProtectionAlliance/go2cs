@@ -91,24 +91,33 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			result.WriteString(value)
 		}
 	case token.FLOAT:
-		result.WriteString(value)
-
 		// The C# suffix must reflect the literal's resolved type, not merely whether the value
 		// fits in float32. A Go untyped float constant defaults to float64, so emitting `F`
 		// (float32) whenever it fits corrupts inferred types — `z := 1.0` would become a float32,
 		// and subsequent float64 arithmetic on it fails (CS0266). Emit `F` only when go/types
 		// resolves the literal as float32; otherwise `D` (double, matching Go's float64 default).
+		// And when an integer-valued float constant is used in an integer context — `math.Inf(1.0)`,
+		// where Inf takes an int — emit the integer form (`1`), not `1.0D` (which is CS1503).
 		isFloat32 := false
+		intForm := ""
 
 		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
-			if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.Float32 {
-				isFloat32 = true
+			if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
+				if basic.Info()&types.IsInteger != 0 && tv.Value != nil {
+					intForm = tv.Value.ExactString()
+				} else if basic.Kind() == types.Float32 {
+					isFloat32 = true
+				}
 			}
 		}
 
-		if isFloat32 {
+		if intForm != "" {
+			result.WriteString(intForm)
+		} else if isFloat32 {
+			result.WriteString(value)
 			result.WriteRune('F')
 		} else {
+			result.WriteString(value)
 			result.WriteRune('D')
 		}
 	case token.IMAG:

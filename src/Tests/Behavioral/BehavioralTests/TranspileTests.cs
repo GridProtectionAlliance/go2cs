@@ -120,6 +120,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFirstClassFunctions() => CheckTarget("FirstClassFunctions");
 
     [TestMethod]
+    public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
+
+    [TestMethod]
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]

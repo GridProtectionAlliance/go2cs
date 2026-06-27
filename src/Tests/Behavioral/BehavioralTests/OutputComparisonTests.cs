@@ -106,6 +106,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]
+    public void CheckFloatConstIntContext() => CheckTarget("FloatConstIntContext");
+
+    [TestMethod]
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]

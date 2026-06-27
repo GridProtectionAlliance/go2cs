@@ -233,6 +233,20 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		return "~" + v.convExpr(unaryExpr.X, nil)
 	}
 
+	// A negated integer-valued float constant used in an integer context — `math.Inf(-1.0)`,
+	// where Inf takes an int — must emit the integer form (`-1`), not `-1.0D` (CS1503). The
+	// inner literal alone looks like a float (the conversion happens at the unary level), so this
+	// mirrors the convBasicLit FLOAT case but keyed off the unary expression's resolved type.
+	if unaryExpr.Op == token.SUB {
+		if lit, ok := unaryExpr.X.(*ast.BasicLit); ok && lit.Kind == token.FLOAT {
+			if tv, ok := v.info.Types[unaryExpr]; ok && tv.Type != nil && tv.Value != nil {
+				if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+					return tv.Value.ExactString()
+				}
+			}
+		}
+	}
+
 	if unaryExpr.Op == token.SUB && v.isUnsignedType(unaryExpr.X) {
 		// C# forbids unary minus on an unsigned operand (CS0023). Go's `-x` on an
 		// unsigned value is two's-complement negation that wraps mod 2^N (e.g. the
