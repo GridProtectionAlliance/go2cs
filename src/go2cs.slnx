@@ -58,6 +58,7 @@
     <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
     <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />
+    <Project Path="Tests/Behavioral/BitwiseUntypedConst/BitwiseUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />

@@ -59,6 +59,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
 
     [TestMethod]
+    public void CheckBitwiseUntypedConst() => CheckTarget("BitwiseUntypedConst");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

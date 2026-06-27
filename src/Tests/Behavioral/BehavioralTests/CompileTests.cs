@@ -57,6 +57,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
 
     [TestMethod]
+    public void CheckBitwiseUntypedConst() => CheckTarget("BitwiseUntypedConst");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

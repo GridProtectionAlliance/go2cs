@@ -57,6 +57,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
 
     [TestMethod]
+    public void CheckBitwiseUntypedConst() => CheckTarget("BitwiseUntypedConst");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

@@ -195,6 +195,20 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 				binaryTypeName = convertToCSTypeName(v.getTypeName(binaryType, false))
 			}
 
+			// A named untyped-const operand (UntypedInt wrapper) resolves to `int` under a
+			// bitwise operator — including the `~` of `&^` — which breaks a wider context
+			// (`Float64bits(f) &^ signBit`, ulong, signBit=1<<63 → `ulong & int`, CS0019). Cast
+			// such an operand to the bitwise result type so its width is preserved.
+			if binaryTypeName != "" {
+				if v.isUntypedNamedConstRef(binaryExpr.X) {
+					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
+				}
+
+				if v.isUntypedNamedConstRef(binaryExpr.Y) {
+					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
+				}
+			}
+
 			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
 		}
 
