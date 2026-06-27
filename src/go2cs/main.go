@@ -822,14 +822,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Add new interface implementations to package info file (hashset ensures uniqueness)
 			for interfaceName, implementations := range interfaceImplementations {
 				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", implementation, interfaceName))
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", rootQualifySubNamespaceTypeRefs(implementation), rootQualifySubNamespaceTypeRefs(interfaceName)))
 				}
 			}
 
 			// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 			for interfaceName, implementations := range promotedInterfaceImplementations {
 				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", implementation, interfaceName))
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", rootQualifySubNamespaceTypeRefs(implementation), rootQualifySubNamespaceTypeRefs(interfaceName)))
 				}
 			}
 
@@ -1754,6 +1754,31 @@ func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr 
 	return v.convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)
 }
 
+// isLocalImplType reports whether the impl type for an interface implementation (GoImplement) is
+// declared in the package currently being converted. A GoImplement attribute is realized by the
+// partial-struct generator, which can only add an interface to a type defined in the SAME assembly;
+// an impl type imported from another package must therefore NOT be recorded here. That relationship
+// is already established in the impl type's own package (e.g. color.RGBA's `Color` implementation
+// lives in the image/color assembly), so re-emitting it in a consumer such as image/color/palette
+// only generates a broken cross-assembly partial (CS1929/CS0034). Pointer types are unwrapped, and
+// lifted/anonymous types (always local) are treated as local.
+func (v *Visitor) isLocalImplType(t types.Type) bool {
+	if _, ok := v.liftedTypeMap[t]; ok {
+		return true
+	}
+
+	if pointer, ok := t.(*types.Pointer); ok {
+		return v.isLocalImplType(pointer.Elem())
+	}
+
+	if named, ok := t.(*types.Named); ok {
+		pkg := named.Obj().Pkg()
+		return pkg != nil && pkg == v.pkg
+	}
+
+	return false
+}
+
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
@@ -1774,7 +1799,8 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	if interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
 		interfaceTypeName != "any" &&
-		!strings.Contains(targetTypeName, "interface{") {
+		!strings.Contains(targetTypeName, "interface{") &&
+		v.isLocalImplType(targetType) {
 
 		packageLock.Lock()
 

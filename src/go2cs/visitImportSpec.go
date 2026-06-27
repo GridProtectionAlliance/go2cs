@@ -4,8 +4,43 @@ import (
 	"fmt"
 	"go/ast"
 	"log"
+	"regexp"
 	"strings"
 )
+
+// packageQualifiedNameRegex matches a dotted qualified identifier. Segments may contain Unicode
+// letters/digits the converter uses in generated names (e.g. Δ, ꓸ, ᴛ), so the class is Unicode-aware.
+var packageQualifiedNameRegex = regexp.MustCompile(`[\p{L}_][\p{L}\p{N}_]*(?:\.[\p{L}_][\p{L}\p{N}_]*)*`)
+
+// rootQualifySubNamespaceTypeRefs prefixes the root namespace ("go.") onto package-qualified type
+// references that live in a sub-namespace (e.g. image.color_package.ΔRGBA -> go.image.color_package.ΔRGBA).
+// Assembly-level GoImplement attributes are emitted before the file's namespace with only `using go;`
+// in scope; that directive imports the TYPES of namespace `go` (so a top-level `io_package.Writer`
+// resolves unqualified) but NOT its nested namespaces, so a multi-segment package class such as
+// `image.color_package` cannot be found and yields CS0246. References whose `_package` class is the
+// first segment (single-segment packages such as io/fmt/sort) and references already rooted at "go."
+// are returned unchanged, so single-segment GoImplements — every behavioral-test case — emit
+// byte-identically (no golden churn).
+func rootQualifySubNamespaceTypeRefs(name string) string {
+	return packageQualifiedNameRegex.ReplaceAllStringFunc(name, func(match string) string {
+		if strings.HasPrefix(match, RootNamespace+".") {
+			return match
+		}
+
+		for i, seg := range strings.Split(match, ".") {
+			if strings.HasSuffix(seg, PackageSuffix) {
+				// Only a sub-namespace package class (not the leading segment) needs rooting.
+				if i > 0 {
+					return RootNamespace + "." + match
+				}
+
+				break
+			}
+		}
+
+		return match
+	})
+}
 
 func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGroup) {
 	v.currentImportPath = strings.Trim(importSpec.Path.Value, "\"")
