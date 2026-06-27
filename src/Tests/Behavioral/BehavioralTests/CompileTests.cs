@@ -216,6 +216,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

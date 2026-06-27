@@ -84,7 +84,11 @@ func isWideShiftType(csType string) bool {
 	return false
 }
 
-// concreteNumericCSType returns the C# type name for a concrete (non-untyped) numeric type, or "".
+// concreteNumericCSType returns the C# name of a concrete (non-untyped) numeric type's UNDERLYING
+// basic type, or "". The underlying (e.g. `uint8` for a named `Tag uint8`) is used so an
+// untyped-const cast is `(uint8)c`, not `(Tag)c`: an UntypedInt wrapper converts to the basic type
+// in one step, then the basic type converts to the named type implicitly — `(Tag)c` would need two
+// user-defined conversions and is rejected (CS0030). Basic types are their own underlying.
 func (v *Visitor) concreteNumericCSType(t types.Type) string {
 	if t == nil {
 		return ""
@@ -92,7 +96,7 @@ func (v *Visitor) concreteNumericCSType(t types.Type) string {
 
 	if basic, ok := t.Underlying().(*types.Basic); ok {
 		if basic.Info()&types.IsNumeric != 0 && basic.Info()&types.IsUntyped == 0 {
-			return convertToCSTypeName(v.getTypeName(t, false))
+			return convertToCSTypeName(v.getTypeName(t.Underlying(), false))
 		}
 	}
 
@@ -198,14 +202,15 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			// A named untyped-const operand (UntypedInt wrapper) resolves to `int` under a
 			// bitwise operator — including the `~` of `&^` — which breaks a wider context
 			// (`Float64bits(f) &^ signBit`, ulong, signBit=1<<63 → `ulong & int`, CS0019). Cast
-			// such an operand to the bitwise result type so its width is preserved.
-			if binaryTypeName != "" {
+			// such an operand to the result's UNDERLYING basic type so its width is preserved (the
+			// underlying, not the named type — see concreteNumericCSType; `(Tag)c` would be CS0030).
+			if operandCast := v.concreteNumericCSType(binaryType); operandCast != "" {
 				if v.isUntypedNamedConstRef(binaryExpr.X) {
-					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
+					leftOperand = fmt.Sprintf("(%s)%s", operandCast, leftOperand)
 				}
 
 				if v.isUntypedNamedConstRef(binaryExpr.Y) {
-					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
+					rightOperand = fmt.Sprintf("(%s)%s", operandCast, rightOperand)
 				}
 			}
 

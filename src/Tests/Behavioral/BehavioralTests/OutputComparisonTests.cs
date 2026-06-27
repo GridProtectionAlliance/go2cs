@@ -184,6 +184,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
