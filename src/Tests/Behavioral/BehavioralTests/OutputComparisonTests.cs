@@ -49,6 +49,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]

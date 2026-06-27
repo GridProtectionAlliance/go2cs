@@ -228,6 +228,32 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return fmt.Sprintf("@new<%s>()", typeName)
 		}
 
+		// Handle append: an untyped-constant variadic element (e.g. `append(buf, replacementChar)`)
+		// makes C# overload resolution ambiguous — the `append<T>(ISlice, params T[])` overload
+		// infers T from the element (the untyped wrapper) while the `slice<T>` overloads infer T
+		// from the slice. Cast such elements to the slice's element type, matching Go's implicit
+		// conversion and the already-working explicitly-converted element pattern (`uint16(r)`).
+		if ident.Name == "append" && len(callExpr.Args) >= 2 && !callExpr.Ellipsis.IsValid() {
+			if sliceType := v.info.TypeOf(callExpr.Args[0]); sliceType != nil {
+				if sliceUnder, ok := sliceType.Underlying().(*types.Slice); ok {
+					// Only numeric element types are affected (the wrong-element-type overload
+					// selection is a numeric-conversion artifact); skip otherwise.
+					if elemBasic, ok := sliceUnder.Elem().Underlying().(*types.Basic); ok && elemBasic.Info()&types.IsNumeric != 0 {
+						elemCSType := convertToCSTypeName(v.getTypeName(sliceUnder.Elem(), false))
+
+						for i := 1; i < len(callExpr.Args); i++ {
+							if v.isUntypedNumericConstArg(callExpr.Args[i]) {
+								if callExprContext.castArgToType == nil {
+									callExprContext.castArgToType = make(map[int]string)
+								}
+								callExprContext.castArgToType[i] = elemCSType
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// Handle panic call as a special case
 		if ident.Name == "panic" {
 			context := DefaultBasicLitContext()
@@ -510,6 +536,27 @@ func isAliasedNumericType(targetType types.Type) bool {
 	} else if namedType, ok := targetType.(*types.Named); ok {
 		underlyingType := namedType.Underlying()
 		return isNumericType(underlyingType)
+	}
+
+	return false
+}
+
+// isUntypedNumericConstArg reports whether the argument is an untyped numeric constant — a
+// numeric literal, or a named const declared without a type. In C# these render either as a
+// bare `int`/`double` literal or a golib `Untyped*` wrapper, neither of which is the slice's
+// element type; that is what makes `append`'s overload resolution pick the wrong element type
+// (the `ISlice` overload infers T from the element, yielding e.g. `slice<int>`).
+func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
+	switch a := arg.(type) {
+	case *ast.BasicLit:
+		// Literals are untyped constants; numeric kinds only (avoid string/append-string).
+		return a.Kind == token.INT || a.Kind == token.FLOAT || a.Kind == token.CHAR || a.Kind == token.IMAG
+	case *ast.Ident:
+		if constObj, ok := v.info.Uses[a].(*types.Const); ok {
+			if basic, ok := constObj.Type().(*types.Basic); ok {
+				return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
+			}
+		}
 	}
 
 	return false

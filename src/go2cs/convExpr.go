@@ -32,6 +32,7 @@ type CallExprContext struct {
 	sourceIsTypeParams bool
 	callArgs           []string
 	replacementArgs    []string
+	castArgToType      map[int]string
 }
 
 func DefaultCallExprContext() *CallExprContext {
@@ -48,6 +49,7 @@ func DefaultCallExprContext() *CallExprContext {
 		sourceIsTypeParams: false,
 		callArgs:           nil,
 		replacementArgs:    nil,
+		castArgToType:      nil,
 	}
 }
 

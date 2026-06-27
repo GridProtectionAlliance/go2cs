@@ -47,6 +47,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]

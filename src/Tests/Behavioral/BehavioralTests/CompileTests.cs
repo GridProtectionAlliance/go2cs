@@ -45,6 +45,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]

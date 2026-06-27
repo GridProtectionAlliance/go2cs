@@ -56,6 +56,7 @@
     <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
+    <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />

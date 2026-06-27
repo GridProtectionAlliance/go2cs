@@ -87,6 +87,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			resultExpr = strings.ReplaceAll(replacementArgs[i], DynamicCastArgMarker, resultExpr)
 		}
 
+		// Apply an explicit per-argument cast when requested (e.g. an untyped-constant element
+		// of an `append` call cast to the slice's element type to avoid C# overload ambiguity).
+		if callContext != nil && callContext.castArgToType != nil {
+			if castType, ok := callContext.castArgToType[i]; ok && len(castType) > 0 {
+				resultExpr = fmt.Sprintf("(%s)(%s)", castType, resultExpr)
+			}
+		}
+
 		arg := &strings.Builder{}
 
 		arg.WriteString(resultExpr)
