@@ -45,4 +45,12 @@ func main() {
 	fmt.Println(y) // 8
 	y >>= s
 	fmt.Println(y) // 1
+
+	// (4) wide untyped-constant shift that overflows a C# int. `1<<63` in a uint64 context
+	// must shift in uint64 — a bare `int` `1<<63` overflows to a negative value, and the
+	// subsequent (uint64) cast of that negative constant is rejected (CS0221).
+	var hi uint64 = 0xFFFFFFFFFFFFFFFF
+	fmt.Println(hi &^ (1 << 63)) // clear the high bit -> 0x7FFFFFFFFFFFFFFF
+	var u uint32 = 0xFFFFFFFF
+	fmt.Println(u &^ (1 << 31)) // clear bit 31 -> 0x7FFFFFFF
 }

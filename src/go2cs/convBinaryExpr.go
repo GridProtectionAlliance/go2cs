@@ -71,6 +71,19 @@ func (v *Visitor) isBigIntegerBackedConstRef(expr ast.Expr) bool {
 	return false
 }
 
+// isWideShiftType reports whether a C# integer type does NOT promote to `int` when used as the
+// left operand of a shift — i.e. the shift is performed in that type's own width. For these,
+// shifting a bare `1` (an `int` literal) overflows before any result cast, so the operand must be
+// cast instead. Narrower types (uint16/byte/…) promote to `int`, so a result cast suffices.
+func isWideShiftType(csType string) bool {
+	switch csType {
+	case "uint32", "uint64", "int64", "nuint":
+		return true
+	}
+
+	return false
+}
+
 // concreteNumericCSType returns the C# type name for a concrete (non-untyped) numeric type, or "".
 func (v *Visitor) concreteNumericCSType(t types.Type) string {
 	if t == nil {
@@ -140,13 +153,22 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			// When the shifted (left) operand is an untyped constant — `1 << k` — Go gives the
 			// whole shift the type it assumes from context (e.g. uintptr when compared with a
 			// uintptr), but the bare C# literal makes the result `int`, which then can't compare
-			// or combine with the typed operand (CS0034). Cast the shift to its resolved type.
+			// or combine with the typed operand (CS0034). Re-type the shift to its resolved type.
 			if v.isUntypedNumericConstArg(binaryExpr.X) {
 				if shiftType := v.info.Types[binaryExpr].Type; shiftType != nil {
 					if basic, ok := shiftType.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUntyped == 0 {
 						shiftCSType := convertToCSTypeName(v.getTypeName(shiftType, false))
 
-						if shiftCSType != "int" && shiftCSType != "nint" {
+						if isWideShiftType(shiftCSType) {
+							// A type that does not promote to `int` in a C# shift (uint/ulong/long/
+							// nuint). Cast the LEFT operand so the shift is performed in that type —
+							// casting the result would not help, as `1 << 63` already overflowed
+							// `int` to a negative value before the cast (e.g. `(uint64)(1 << 63)`
+							// → CS0221). `((uint64)1) << 63` shifts in uint64.
+							shiftExpr = fmt.Sprintf("((%s)%s %s %s)", shiftCSType, leftOperand, binaryOp, rightOperand)
+						} else if shiftCSType != "int" && shiftCSType != "nint" {
+							// A narrow type (uint16/byte/…) promotes to `int` in the shift, so the
+							// computation is correct; just re-type the result.
 							shiftExpr = fmt.Sprintf("(%s)%s", shiftCSType, shiftExpr)
 						}
 					}
