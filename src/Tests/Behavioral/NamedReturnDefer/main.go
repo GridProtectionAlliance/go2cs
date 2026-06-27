@@ -36,6 +36,20 @@ func swapAndBump() (a int, b int) {
 	return a, b
 }
 
+func double(n int) int { return n * 2 }
+
+// explicit return whose operands are NOT just the named results, so the assignment is kept:
+// `return double(x), "v=" + ...` must run double()/the concatenation, not collapse to a
+// self-assignment. Also exercises a non-terminal (early) return that keeps its `return;`.
+func compute(x int) (out int, label string) {
+	defer func() { out += 1000 }() // proves the named result is returned post-defer
+	if x < 0 {
+		out, label = -1, "neg"
+		return out, label // early return of the named results (mid-body): keeps `return;`
+	}
+	return double(x), fmt.Sprintf("v=%d", x)
+}
+
 // recover sets the named returns on panic; normal path leaves them.
 func guarded(boom bool) (code int, msg string) {
 	defer func() {
@@ -57,7 +71,12 @@ func main() {
 	fmt.Println(incrBare()) // 11 (1, then defer x+=10)
 
 	a, b := swapAndBump()
-	fmt.Println(a, b) // 102 1  (1,2 -> swap -> 2,1 -> a+=100 -> 102,1)
+	fmt.Println(a, b) // 102 1
+
+	o1, l1 := compute(3)
+	fmt.Println(o1, l1) // 1006 v=3   (double(3)=6, then defer +1000)
+	o2, l2 := compute(-5)
+	fmt.Println(o2, l2) // 999 neg    (-1, then defer +1000)  (1,2 -> swap -> 2,1 -> a+=100 -> 102,1)
 
 	c1, m1 := guarded(false)
 	fmt.Println(c1, m1) // 0 ok

@@ -191,7 +191,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	if funcDecl.Body != nil {
 		blockContext.format.useNewLine = len(constraints) > 0
+
+		// In namedReturnDeferMode the func() wrapper is nested inside an extra block body, so
+		// the lambda body sits one level deeper. Bump the indent across the body visit so the
+		// statements (and the closing `}` that the `);` attaches to) align under `func(…`.
+		if v.namedReturnDeferMode {
+			v.indentLevel++
+		}
+
 		v.visitBlockStmt(funcDecl.Body, blockContext)
+
+		if v.namedReturnDeferMode {
+			v.indentLevel--
+		}
 	}
 
 	signatureOnly := funcDecl.Body == nil

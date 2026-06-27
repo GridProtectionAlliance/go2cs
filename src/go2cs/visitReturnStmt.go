@@ -61,6 +61,21 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	// explicit return whose results are not simply the named results themselves).
 	namedDeferAssign := namedDefer && returnStmt.Results != nil && !explicitIsNamed
 
+	// A namedReturnDefer return that is the last statement of the function body is terminal: the
+	// void func() wrapper simply falls off its end, so the trailing `return;` is redundant. A
+	// terminal naked/collapsed return contributes no statement at all; a terminal assignment
+	// return emits just the assignment (no `return;`).
+	isTerminalReturn := false
+
+	if namedDefer && v.currentFuncDecl != nil && v.currentFuncDecl.Body != nil {
+		list := v.currentFuncDecl.Body.List
+		isTerminalReturn = len(list) > 0 && list[len(list)-1] == returnStmt
+	}
+
+	if isTerminalReturn && !namedDeferAssign {
+		return
+	}
+
 	result.WriteString(DeferredDeclsMarker)
 	result.WriteString(v.indent(v.indentLevel))
 
@@ -194,11 +209,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	result.WriteRune(';')
 
-	// In namedReturnDeferMode an explicit return assigned the named result params above; follow it
-	// with a bare `return;` out of the void func() wrapper (the named results are returned after
-	// the defers run). A naked return — or an explicit return of exactly the named results —
-	// already produced just `return;`.
-	if namedDeferAssign {
+	// In namedReturnDeferMode a non-terminal explicit return assigned the named result params
+	// above; follow it with a bare `return;` to exit the void func() wrapper. A terminal return
+	// needs none (the wrapper falls off its end), and a naked/collapsed return already produced
+	// just `return;`.
+	if namedDeferAssign && !isTerminalReturn {
 		result.WriteString(" return;")
 	}
 
