@@ -1,0 +1,71 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+internal static (nint result, bool recovered) safeDiv(nint a, nint b) {
+    nint result = default!;
+    bool recovered = default!;
+    func((defer, recover) => {
+        defer(() => {
+            {
+                var r = recover(); if (r != default!) {
+                    fmt.Println("  recovered:", r);
+                    (result, recovered) = (-1, true);
+                }
+            }
+        });
+        result = a / b;
+        (result, recovered) = (result, false);
+    });
+    return (result, recovered);
+}
+
+internal static (nint result, bool recovered) safeMod(nint a, nint b) {
+    nint result = default!;
+    bool recovered = default!;
+    func((defer, recover) => {
+        defer(() => {
+            {
+                var r = recover(); if (r != default!) {
+                    (result, recovered) = (-2, true);
+                }
+            }
+        });
+        result = a % b;
+        (result, recovered) = (result, false);
+    });
+    return (result, recovered);
+}
+
+internal static nint divide(nint a, nint b) {
+    return a / b;
+}
+
+internal static bool /*ok*/ outerGuard(nint a, nint b) {
+    bool ok = default!;
+    func((defer, recover) => {
+        defer(() => {
+            if (recover() != default!) {
+                ok = false;
+            }
+        });
+        divide(a, b);
+        ok = true;
+    });
+    return ok;
+}
+
+internal static void Main() {
+    var (q, rec) = safeDiv(10, 2);
+    fmt.Println(q, rec);
+    var (q2, rec2) = safeDiv(7, 0);
+    fmt.Println(q2, rec2);
+    var (m, mrec) = safeMod(9, 0);
+    fmt.Println(m, mrec);
+    fmt.Println(outerGuard(4, 2));
+    fmt.Println(outerGuard(4, 0));
+}
+
+} // end main_package

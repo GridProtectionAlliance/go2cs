@@ -60,6 +60,12 @@ public static class builtin
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             Exception? ex = e.ExceptionObject as Exception;
+
+            // Report a .NET exception that maps to a Go runtime panic (e.g. an unrecovered integer
+            // divide by zero) with Go's "panic: runtime error: …" form rather than the raw .NET message.
+            if (ex is not null && RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
+                ex = panic;
+
             Console.WriteLine($"{(ex is PanicException ? "panic: " : "")}{ex?.Message ?? $"unhandled exception: {e.ExceptionObject}"}");
             Environment.Exit(0);
         }

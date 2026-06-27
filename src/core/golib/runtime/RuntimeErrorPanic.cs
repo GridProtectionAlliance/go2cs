@@ -44,4 +44,36 @@ public static class RuntimeErrorPanic
     {
         return new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
     }
+
+    private const string IntegerDivideByZeroMessage = $"{RuntimeErrorMessage}integer divide by zero";
+    public static PanicException IntegerDivideByZero()
+    {
+        return new PanicException(IntegerDivideByZeroMessage);
+    }
+
+    /// <summary>
+    /// Converts a .NET exception that corresponds to a Go runtime panic into a <see cref="PanicException"/>,
+    /// so it can be recovered with <c>recover()</c> and reported like a Go panic. Returns <c>false</c>
+    /// (leaving the exception to propagate unchanged) for exceptions that are not Go runtime panics.
+    /// </summary>
+    /// <param name="ex">Exception to inspect.</param>
+    /// <param name="panic">Resulting panic when the exception maps to a Go runtime panic.</param>
+    /// <returns><c>true</c> if <paramref name="ex"/> is (or maps to) a Go panic; otherwise <c>false</c>.</returns>
+    public static bool TryAsPanic(Exception ex, [NotNullWhen(true)] out PanicException? panic)
+    {
+        switch (ex)
+        {
+            case PanicException panicException:
+                panic = panicException;
+                return true;
+            case DivideByZeroException:
+                // Go: integer division or modulo by zero panics with a runtime error. .NET raises
+                // DivideByZeroException for the same operation; map it so recover() behaves like Go.
+                panic = IntegerDivideByZero();
+                return true;
+            default:
+                panic = null;
+                return false;
+        }
+    }
 }

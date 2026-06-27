@@ -28,6 +28,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using go.runtime;
 
 namespace go;
 
@@ -93,9 +94,12 @@ public class GoFunc<T> : GoFuncRoot
             if (m_function is not null)
                 result = m_function(HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -167,9 +171,12 @@ public sealed class GoFunc<TRef1, T> : GoFunc<T>
         {
             result = m_function(ref ref1, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -217,9 +224,12 @@ public sealed class GoFunc<TRef1, TRef2, T> : GoFunc<T>
         {
             result = m_function(ref ref1, ref ref2, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -263,9 +273,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, T> : GoFunc<T>
         {
             result = m_function(ref ref1, ref ref2, ref ref3, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -309,9 +322,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, T> : GoFunc<T>
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -355,9 +371,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, T> : GoFunc<T>
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -401,9 +420,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, T> : GoFunc
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -447,9 +469,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, T> :
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -493,9 +518,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -539,9 +567,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -585,9 +616,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -631,9 +665,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -677,9 +714,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -723,9 +763,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -769,9 +812,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -815,9 +861,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {
@@ -861,9 +910,12 @@ public sealed class GoFunc<TRef1, TRef2, TRef3, TRef4, TRef5, TRef6, TRef7, TRef
         {
             result = m_function(ref ref1, ref ref2, ref ref3, ref ref4, ref ref5, ref ref6, ref ref7, ref ref8, ref ref9, ref ref10, ref ref11, ref ref12, ref ref13, ref ref14, ref ref15, ref ref16, HandleDefer, HandleRecover);
         }
-        catch (PanicException ex)
+        catch (Exception ex) when (RuntimeErrorPanic.TryAsPanic(ex, out PanicException? panic))
         {
-            CapturedPanic.Value = ex;
+            // Captures Go panics — explicit panic() calls and .NET exceptions that map to Go
+            // runtime panics (e.g. integer divide by zero) — so recover() can observe them.
+            // Non-panic exceptions fail the filter and propagate unchanged.
+            CapturedPanic.Value = panic;
         }
         finally
         {

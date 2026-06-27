@@ -90,6 +90,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeferSimple() => CheckTarget("DeferSimple");
 
     [TestMethod]
+    public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

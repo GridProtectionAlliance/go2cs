@@ -79,6 +79,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
 
     [TestMethod]
+    public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]

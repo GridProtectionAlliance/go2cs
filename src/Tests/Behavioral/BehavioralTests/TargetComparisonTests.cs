@@ -92,6 +92,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferSimple() => CheckTarget("DeferSimple");
 
     [TestMethod]
+    public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
