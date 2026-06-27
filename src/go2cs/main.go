@@ -2487,8 +2487,11 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
-	// Remove package path, if any, from the type name
-	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
+	// Remove the current package's path prefix from the type name. Use ReplaceAll, not a
+	// single replace: a composite type (e.g. map[K]V) can name two current-package types, and
+	// stripping only the first leaves a self-qualified one (which then also trips the slash
+	// handling below for slash-bearing package paths like internal/platform → CS0246).
+	typeName = strings.ReplaceAll(typeName, packagePathPrefix, "")
 	slashIndex := strings.LastIndex(typeName, "/")
 
 	if slashIndex != -1 {
@@ -2552,8 +2555,9 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	typeName := strings.ReplaceAll(t.String(), "..", "")
 	packagePathPrefix := v.pkg.Path() + "."
 
-	// Remove package path, if any, from the type name
-	typeName = strings.Replace(typeName, packagePathPrefix, "", 1)
+	// Remove the current package's path prefix from the type name (ReplaceAll so a composite
+	// type naming two current-package types doesn't keep a self-qualified one — see getTypeName).
+	typeName = strings.ReplaceAll(typeName, packagePathPrefix, "")
 	slashIndex := strings.LastIndex(typeName, "/")
 
 	if slashIndex != -1 {

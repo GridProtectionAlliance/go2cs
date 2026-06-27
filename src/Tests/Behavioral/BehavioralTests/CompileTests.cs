@@ -186,6 +186,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
+    public void CheckMapSamePackageTypes() => CheckTarget("MapSamePackageTypes");
+
+    [TestMethod]
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]

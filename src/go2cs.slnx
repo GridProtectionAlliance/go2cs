@@ -103,6 +103,7 @@
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
+    <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="Tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
