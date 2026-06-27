@@ -1,18 +1,33 @@
 # Conversion Strategies
 
-> Strategies updated on 03/03/2022 -- see [Manual Tour of Go Conversion Takeaways](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/Manual%20Tour%20of%20Go%20Conversion%20Takeaways.txt) for more background on current decisions. This is considered a living document, as more use cases and conversions are completed, these strategies will be updated as needed.
+> **Updated 2026-06-27 for the "go2cs2" generation of the converter.** This is a living
+> document; as more use cases are converted these strategies are refined. The current converter
+> is written in **Go** (using the official `go/ast` + `go/types` toolchain, under `src/go2cs/`)
+> and emits C# that leans on two things the visible code does not show in full: a hand-written
+> runtime library, **`golib`** (`src/core/golib/`), and a set of **Roslyn source generators**
+> (`src/gen/go2cs-gen/`) that synthesize the Go semantics which cannot be written directly in C#.
+> Notes that previously referenced the retired ANTLR4/C# converter or the old `gocore` library
+> have been updated to reflect this. See also [`Architecture.md`](Architecture.md) and
+> [`../CLAUDE.md`](../CLAUDE.md).
+
+The guiding goal: the generated C# should be both *behaviorally* and *visually* similar to the
+original Go, so that a Go developer can read the output and follow it. The runtime library and
+the generators exist to keep the visible converted code close to the Go original.
 
 ## Topics
 
 * [Package Conversion](#package-conversion)
+* [Compiled Library versus Source Code](#compiled-library-versus-source-code)
 * [Constant Values](#constant-values)
 * [Handling "int" and "uint" Types](#handling-int-and-uint-types)
+* [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types)
 * [The "nil" Value](#the-nil-value)
 * [Empty Interface](#empty-interface)
 * [Inline Assignment Order of Operations](#inline-assignment-order-of-operations)
 * [Short Variable Redeclaration (Shadowing)](#short-variable-redeclaration-shadowing)
 * [Return Tuples](#return-tuples)
-* [Slices](#slices)
+* [Slices and Arrays](#slices-and-arrays)
+* [Maps and Channels](#maps-and-channels)
 * [Type Aliasing](#type-aliasing)
 * [Delegates to Value Receiver Instances](#delegates-to-value-receiver-instances)
 * [Defer / Panic / Recover](#defer--panic--recover)
@@ -24,262 +39,207 @@
 * [Pointers](#pointers)
 * [Implicit Pointer Dereferencing](#implicit-pointer-dereferencing)
 * [Break / Continue Labels](#break--continue-labels)
+* [Source Generators](#source-generators)
 * [Examples](#examples)
 
 ## Package Conversion
-Although a Go package more traditionally parallels a C# namespace, Go includes referenceable functions directly from within a package root, for example, the `Println` function in the `fmt` package is called like: `fmt.Println("Hello, world")`. For C#, only type declarations, e.g., `class`, `struct`, `enum`, etc., are allowed in a namespace, functions exist as part of a `class` or `struct`. Described from a C# perspective, all Go functions are [`static`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members), i.e., the functions exist separately from an instance of a type. Go supports the notion of a receiver function which allows a function to be targeted to an instance of a type (paralleling the operation of a C# extension function), but this is still a static function.
+Although a Go package more traditionally parallels a C# namespace, Go includes referenceable functions directly from within a package root, for example, the `Println` function in the `fmt` package is called like: `fmt.Println("Hello, world")`. For C#, only type declarations, e.g., `class`, `struct`, `enum`, etc., are allowed in a namespace; functions exist as part of a `class` or `struct`. Described from a C# perspective, all Go functions are [`static`](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/static-classes-and-static-class-members), i.e., the functions exist separately from an instance of a type. Go supports the notion of a receiver function which allows a function to be targeted to an instance of a type (paralleling the operation of a C# extension function), but this is still a static function.
 
-As such, the conversion strategy for a Go package is to convert them into static C# partial classes, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`.
+As such, the conversion strategy for a Go package is to convert it into a static C# partial class, e.g.: `public static partial class fmt_package`. Using a partial class allows all functions within separate files to be available with a single import, e.g.: `using fmt = go.fmt_package;`. The receiver functions are emitted as extension methods on that partial class (decorated with `[GoRecv]`, see [Source Generators](#source-generators)).
 
-So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are simply converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`.
+So that Go packages are more readily usable in C# applications, all converted code is in a root `go` namespace. Package paths are simply converted to namespaces, so a Go import like `import "unicode/utf8"` becomes a C# using like `using utf8 = go.unicode.utf8_package;`. Each package also emits a `package_info.cs` carrying a `[GoPackage]` assembly attribute plus the package-wide global `using` aliases (Go's built-in types, exported type aliases, etc.).
 
-Go projects that contain a `main` function are converted into a standard C# executable project, i.e., `<OutputType>Exe</OutputType>`. The conversion process will automatically reference and convert needed external projects as library projects, i.e., `<OutputType>Library</OutputType>` per any defined encountered `import` statements, recursively. In this manner an executable with packages compiled as project referenced assemblies can be created. To create a single executable, like the original Go counterpart, a [self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained) will be created.
-
+Go projects that contain a `main` function are converted into a standard C# executable project, i.e., `<OutputType>Exe</OutputType>`. The conversion process can reference and convert needed external projects as library projects, i.e., `<OutputType>Library</OutputType>`, per any encountered `import` statements. In this manner an executable with packages compiled as project-referenced assemblies can be created. To create a single executable, like the original Go counterpart, a [self-contained executable](https://docs.microsoft.com/en-us/dotnet/core/deploying/#publish-self-contained) can be produced.
 
 ## Compiled Library versus Source Code
 
-One big difference between Go and many other languages is the notion of _source availability_. Traditionally programming languages have depended on the notion of a using a pre-compiled library. There were multiple reasons for this, e.g., not needing to spend time recompiling the library before use and also being able to protect the original source code as intellectual property. Go was born in an era when computing was faster and open source code was prolific, as such it relies on the fact that it has access to all source at compile time, including library code. Go takes advantage of this and creates some interesting optimizations, especially as it relates to when a structure escapes the stack to the heap. Keeping structures off the heap when possible means that they do not need to be tracked for garbage collection and the Go compiler manages this optimization automatically. The interesting thing with this optimization is that for a given use of a library as source code, an application structure may not escape to the heap depending on use, i.e., the path of the structure through code does not escape and can be contained to the stack. This level of optimization is only possible when all source is compiled together.
+One big difference between Go and many other languages is the notion of _source availability_. Traditionally programming languages have depended on using a pre-compiled library — both to avoid recompiling the library and to protect source as intellectual property. Go was born in an era of faster computing and prolific open source; it relies on having access to all source at compile time, including library code. Go takes advantage of this to make interesting optimizations, especially around when a structure escapes the stack to the heap. Keeping structures off the heap means they do not need to be tracked for garbage collection, and the Go compiler manages this automatically. The interesting consequence is that, for a given use of a library as source, an application structure may or may not escape to the heap depending on how it flows through the code — an optimization only possible when all source is compiled together.
 
-Given that this is a complex optimization operation, the initial implementation of the Go to C# conversion will assume that structures can escape the heap except in all but the most simple to detect cases. Future conversions will need to include a switch that allows optimizations targeted for a compiled library or an application. A compiled reusable library will need very safe escape optimizations where as a standalone application can be more aggressive with its optimizations.
-
-A long term plan is to provide ability to use compiled library reference packages that have already been converted, e.g., from NuGet, as this fits the code consumption model that most C# developers are accustomed to and for which existing .NET development tools are functionally designed. See existing [`go2cs NuGet libraries`](https://www.nuget.org/packages?q=go2cs). Automating Go library conversions using packages will require an intermediate repository of original Go package name / location mapped to published NuGet package reference. A web site has been reserved for this purpose, i.e., http://nugetgo.net/ - for the moment, this just redirects to the go2cs GitHub site.
+Because this is a complex optimization, the converter currently assumes structures can escape to the heap except in the simplest-to-detect cases (see [Pointers](#pointers)). A future option could distinguish optimizations targeted at a compiled library (very safe escape analysis) versus a standalone application (more aggressive). A longer-term plan is to allow already-converted packages to be referenced as compiled libraries (e.g., from NuGet), which fits the consumption model most C# developers are accustomed to; this requires a mapping from original Go package to published package reference plus an embedded manifest of each package's exported type aliases.
 
 ## Constant Values
-Go constants hold arbitrary-precision literals with expression support. Applying value to variables in Go happens at compile time, so C# conversion will need to support this operation. Ideally every numeric constant that can hold the value without overflowing should to be defined, see [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants). An additional run-time lazy initialized BigInteger can be provided for simpler library usage but use of constants should be encouraged for best performance.
+Go constants hold arbitrary-precision literals with expression support, and assignment of a constant to a variable happens at compile time. The converter preserves the constant value (and, in a comment, the original expression). A *typed* Go constant is emitted with its concrete C# type, e.g.:
+
+```csharp
+public const nint MaxRetries = 3;
+```
+
+An *untyped* Go constant is emitted using a golib "untyped" wrapper type — `UntypedInt`, `UntypedFloat`, or `UntypedComplex` — declared `static readonly` so it can hold a value that does not fit a single primitive and can implicitly adapt to whatever numeric type its use site requires (mirroring how an untyped Go constant takes its type from context):
+
+```csharp
+internal static readonly UntypedInt win = 100;
+public static readonly UntypedInt N = /* 11 + 1 */ 12;
+```
+
+See [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
 ## Handling "int" and "uint" Types
 
-In Go the `int` and `uint` types are sized according the platform build target, i.e., 32-bit or 64-bit. In C# `int` and `uint` types are always 32-bits and `long` and `ulong` types are always 64-bits. Before C# 9.0, this meant any encountered Go `int` or `uint` were simply be converted to a C# `long` or `ulong`. However, as of C# 9.0, new native types exist that act exactly like their Go counterparts, specifically [`nint` and `nuint`](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-9#performance-and-interop). Code in main branch has been updated to use `nint` and `nuint`.
+In Go the `int` and `uint` types are sized according to the platform build target, i.e., 32-bit or 64-bit. C#'s `int`/`uint` are always 32-bit and `long`/`ulong` are always 64-bit. As of C# 9.0, native-sized integer types exist that behave exactly like their Go counterparts: [`nint` and `nuint`](https://docs.microsoft.com/en-us/dotnet/csharp/whats-new/csharp-9#performance-and-interop). The converter maps Go `int` → `nint` and Go `uint` → `nuint`; `uintptr` also maps to `nuint`. The fixed-width Go types (`int8/16/32/64`, `uint8/16/32/64`, `byte`, `rune`) are kept as readable C# aliases of the same name (e.g. `global using uint16 = System.UInt16;`).
 
-Note that one sticking point with the strategy of using a `nint` is that not all C# indexing constructs currently accept a `nint`, so in some places a ~~down-~~cast from `nint` to `int` is needed. For example, although explicit indexers in C# support a `nint`, [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) currently only works with an `int`, this means range operation indices will need to be cast to `int`. FYI, [issue is being discussed](https://github.com/dotnet/runtime/issues/28070) for future C# runtime updates.
+> One sticking point: not all C# indexing constructs accept a `nint`. Explicit indexers support `nint`, but [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) (the `Index`/`Range` syntax) currently only works with `int`, so range-operation indices are cast to `int` where needed. (The earlier strategy of compiling to `long`/`ulong`, or of custom `@int`/`@uint` structs selected by a `TARGET32BIT` directive, has been superseded by `nint`/`nuint`.)
 
-~~Although an option exists to create custom `@int` and `@uint` structures that are compiled to 32-bit or 64-bit lengths based on a selected target build platform, e.g., using a `#ifdef TARGET32BIT` directive, and be implicitly castable to C# integer types, the current thinking is to only target 64-bit platforms for conversion. It seems that 64-bit deployments are likely the most common use case and this helps keeps things simple for now. This means any encountered Go `int` or `uint` will simply be converted to a C# `long` or `ulong`.~~
+## Untyped Constants and Named Numeric Types
 
-~~Later, an option could be added to the conversion tool that would allow for 32-bit build targets where any encountered Go `int` or `uint` would be converted to a C# `int` or `uint`. This option would mean pre-compiled library packages would need to include a 32-bit build as well, so there will be cascading consequences to consider.~~
+This area is where Go's flexible numeric model meets C#'s stricter one, and it has a few moving parts worth calling out.
+
+**Untyped constants.** As noted under [Constant Values](#constant-values), an untyped Go constant becomes a golib `UntypedInt`/`UntypedFloat`/`UntypedComplex`. These wrappers define implicit conversions to **and from** every numeric type so the value can slot into whatever context uses it, just like an untyped Go constant. The trade-off is that mixing an `UntypedInt` directly into heavily-typed arithmetic (e.g. `someUint64 * untypedConst`) can become ambiguous to C#'s overload resolution, since the wrapper is convertible in either direction. Context-typing of untyped *local* constants (emitting them with the concrete type their use demands instead of the wrapper) is an area of ongoing refinement.
+
+**Named numeric types.** A Go type definition over a numeric base — `type Celsius float64`, `type level int`, `type Flags uint` — is emitted as a partial struct carrying a `num:` `[GoType]` attribute, and the `TypeGenerator` source generator fills in the body:
+
+```csharp
+[GoType("num:nint")]  partial struct level;   // type level int
+[GoType("num:nuint")] partial struct Flags;   // type Flags uint
+[GoType("num:float64")] partial struct Celsius; // type Celsius float64
+```
+
+The generated struct wraps the underlying value and implements the comparison and arithmetic operators plus implicit conversions to/from the underlying type, so the named type is a distinct C# type that still behaves like its base.
+
+**Unsigned underlying types and unary minus.** Go permits unary minus on an unsigned value (it wraps: `-x == 0 - x`). C# does **not** allow the unary `-` operator on unsigned operands. So the generator's `IsUnsignedType` check *omits* the unary negation operator for unsigned underlying types (`uint8/16/32/64`, `byte`, `uintptr`, and the native `nuint`/`uint`). Go's unary minus on such a value is instead lowered by the converter to the equivalent subtraction-from-zero form:
+
+```go
+var b Flags = 2
+_ = -b            // Go: unsigned unary minus (wraps)
+```
+```csharp
+Flags b = 2;
+_ = ((Flags)0 - b);   // C#: lowered to (T)0 - x
+```
+
+This keeps the generated numeric struct compilable (a `(T)(-value.m_value)` body over `nuint` is a CS0023 error) while preserving Go's wrap-around semantics. The same `(T)0 - x` lowering is used for unsigned unary minus on built-in unsigned values.
 
 ## The "nil" Value
-In Go `nil` is the equivalent of C# `null`. Where possible converted code will use the [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/NilType.cs#L33) with a default instance called `nil` that equals `null` defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/builtin.cs#L75). Generally the `NilType` will work properly for compares, but cannot be used during assignments (no overloads or operators exist for this operation) - so assignments to heap based elements, like an interface, will convert to `null`.
+In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses the golib [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/NilType.cs) with a default instance called `nil` (defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs)). `NilType` provides comparison operators so `x == nil` / `x != nil` work across the runtime types (slices, maps, channels, pointers, interfaces), each of which defines what "nil" means for it (e.g. a `map<K,V>` whose backing dictionary is null is the nil map: reads return the zero value, `len` is 0, ranging yields nothing, and a write panics — matching Go).
 
 ## Empty Interface
-In Go all objects are said to implement an interface with no methods, this is called the `EmptyInterface`. This operates fundamentally like .NET's `System.Object` class, consequently any time the `EmptyInterface` is encountered during conversion, it is simply replaced with `object`. If there are type specific semantic use cases where this does not work, this strategy may need to be reevaluated.
+In Go, every type satisfies the method-less interface `interface{}`, now spelled `any`. This operates fundamentally like .NET's `System.Object`, so the converter maps the Go empty interface to `any` (a global alias for `object`). For example, a Go `func(i interface{})` becomes `void f(any i)`, and a `map[any]string` becomes `map<any, @string>`.
 
 ## Inline Assignment Order of Operations
-All right-hand operands in assignment expressions in Go are evaluated before assignment to left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). As an example, for the following Go code:
+All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 
 ```go
 x, y = y, x+y
 ```
 the equivalent C# code operates as follows:
 ```csharp
-(x, y) = (y, x+y)
+(x, y) = (y, x + y);
 ```
-See working examples:
-* [Go Inline Assignment](https://play.golang.org/p/bOhOvo1s846)
-* [C# Inline Assignment](https://dotnetfiddle.net/HfIpjz)
-
-~~Old conversion strategy:<br/>~~
-~~`var _y1 = x+y;`<br/>~~
-~~`x = y;`<br/>~~
-~~`y = _y1;`~~
 
 ## Short Variable Redeclaration (Shadowing)
 
-When using Go short variable declaration syntax, e.g., `x := 2`, as long as variable result type does not change, the variable can be redeclared. This is different than simply reusing the same variable when the redeclaration occurs in a lesser scope of the outer variable. In these cases the original value is "shadowed" with its current value held on the stack while the new variable instance is manipulated. Once the redeclared variable instance goes out of scope, the higher scoped variable will have its original value. Current thinking (and implementation) is that C# code conversions will handle this by holding on to previous value and restoring it's original value when shadowed usage is complete, for example, the following Go code:
+When using Go's short variable declaration syntax, e.g., `x := 2`, a variable can be redeclared in a lesser (nested) scope. The inner declaration "shadows" the outer one: the inner instance is manipulated while the outer value is preserved, and once the inner scope ends the outer variable still holds its original value.
+
+C# forbids a local (or a lambda parameter) from shadowing an enclosing local of the same name (CS0136). So rather than the older save/restore approach, the converter **renames** the shadowing inner variable with a `Δ` disambiguation suffix (`x` → `xΔ1`, `xΔ2`, …) and rewrites all references within that scope to the renamed identifier. The outer variable is untouched, so its value is naturally preserved. For example:
+
+```go
+func sumWithLenLocal(buf []int) int {
+    total := 0
+    len := len(buf)       // a local named like the built-in, shadowing it
+    for i := 0; i < len; i++ {
+        total += i
+    }
+    return total + len
+}
+```
+
+converts to:
+
+```csharp
+internal static nint sumWithLenLocal(slice<nint> buf) {
+    nint total = 0;
+    nint lenΔ1 = len(buf);          // renamed; the built-in call stays `len(...)`
+    for (nint i = 0; i < lenΔ1; i++) {
+        total += i;
+    }
+    return total + lenΔ1;
+}
+```
+
+The same `Δ` mechanism handles a local shadowing a called built-in (as above), a nested-block variable shadowing a function-level one, and an IIFE/closure parameter colliding with an outer local.
+
+## Return Tuples
+Many Go functions return either a single value or a "value, ok"/"value, error" tuple, where only the declared return arity selects the behavior. You cannot differentiate C# overloads by return type alone, so the runtime types expose a second overload distinguished by an extra discard argument. For map access, the "comma-ok" read routes through a two-value indexer using the discard sentinel `ꟷ`:
+
+```csharp
+var v1 = m["Answer"];            // single value: zero value if the key is absent
+var (v2, ok) = m["Answer", ꟷ];   // comma-ok: (value, present?)
+```
+
+These two forms can behave differently — case in point, [type assertions](https://golang.org/ref/spec#Type_assertions): the single-value form panics on failure, while the comma-ok form returns safely with a boolean success result. Type assertions convert similarly, through a generated `_<T>()` accessor:
+
+```csharp
+var t = i._<MyType>();              // panics on failure
+var (t, ok) = i._<MyType>(ᐧ);       // comma-ok, safe
+```
+
+The types that support these tuple-returns are defined in the [`golib`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/core/golib) library; ordinary user-code tuple returns convert as normal C# tuples without special handling.
+
+## Slices and Arrays
+Go slices and arrays are converted to the golib [`slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/slice.cs) and [`array<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/array.cs) structures. A `make`-style allocation uses a constructor; a composite literal builds a C# array and projects it with the `.slice()` / `.array()` extension:
 
 ```go
 package main
 
 import "fmt"
 
-func f(y int) {
-    fmt.Print(y)
-}
-
 func main() {
-    i := -1
-
-    fmt.Println("i =", i)
-
-    for i := 0; i < 5; i++ {
-        f(i)
-
-        for i := 12; i < 15; i++ {
-            f(i)
-        }
-        fmt.Println()
-    }
-
-    fmt.Println("i =", i)
+    primes := [6]int{2, 3, 5, 7, 11, 13}   // array literal
+    nums := []int{10, 20, 30}              // slice literal
+    buf := make([]byte, 4)                 // make
+    fmt.Println(primes[0], nums[2], len(buf))
 }
 ```
 
-would be converted to C# as:
+converts to:
 
 ```csharp
-using fmt = go.fmt_package;
-
-namespace go
-{
-    public static partial class main_package
-    {
-        private static void f(nint y) {
-            fmt.Print(y);
-        }
-
-        private static void Main() {
-            nint i = -1;
-
-            fmt.Println("i =", i);
-
-            {
-                nint i__prev1 = i;
-
-                for (i = 0; i < 5; i++) {
-                    f(i);
-
-                    {
-                        nint i__prev2 = i;
-
-                        for (i = 12; i < 15; i++) {
-                            f(i);
-                        }
-
-                        i = i__prev2;
-                    }
-                    fmt.Println();
-                }
-
-                i = i__prev1;
-            }
-
-            fmt.Println("i =", i);
-        }
-    }
+internal static void Main() {
+    var primes = new nint[]{2, 3, 5, 7, 11, 13}.array();
+    var nums = new nint[]{10, 20, 30}.slice();
+    var buf = new slice<byte>(4);
+    fmt.Println(primes[0], nums[2], len(buf));
 }
 ```
 
-## Return Tuples
-Many Go functions for built-in types return a tuple of "value and success" or just a "value" where only the declared return type determines which overload to use. You cannot differentiate C# overloads by return type only, so to accommodate similar functionality in C# an overload is defined that takes a bool parameter. The overload that includes the bool parameter returns the tuple style return value, the actual value of the boolean parameter is ignored. To make this easier to read, a boolean constant like `WithOK` is used, e.g.:
+A **named** slice/array type (`type d [3]rune`, `type s []int`) lowers to a struct wrapping `array<T>`/`slice<T>`; its composite literal cannot use C# collection-initializer braces (the lowered struct has no `Add`), so it is constructed through the underlying-collection constructor: `d{0, 32, 0}` → `new d(new rune[]{0, 32, 0}.array())`.
 
-```csharp
-var v1 = m["Answer"]; // Does not fail if value doesn't exist, just returns default value
-var (v2, ok) = m["Answer", WithOK];
-```
-
-Similarly functions returning an "value and error" tuple can operate in the same way:
-
-```csharp
-var n1 = r.Read(b);
-var (n2, err) = r.Read(b, WithErr);
-```
-
-A possible conversion option seems to exist by always returning the tuple and just ignoring the second value of the tuple, e.g.:
-
-```csharp
-var (n2, _) = r.Read(b);
-```
-
-However, these functions do seem to operate as separate overloads in Go such that the behavior of the function can change based on return type specified -- case in point: [type assertions](https://golang.org/ref/spec#Type_assertions). The single value return of a type assertion will cause a [`run-time panic`](https://golang.org/ref/spec#Run_time_panics) if the conversion fails, whereas the tuple return version always returns safely with a boolean success result as the second value.
-
-For an example, see [mutating-maps](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/mutating-maps/main_package.cs) under the "moretypes" section in the manual Tour of Go conversions.
-
-Currently these optional tuple returns are not allowed in user code, so common tuple handling for converted user code should work as normal without special handling. The types that support tuple-returns are defined the [`gocore`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/gocore) library.
-
-## Slices
-Conversion of Go slices is based on the [`slice<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) structure. For example, the following Go code using slice operations:
+## Maps and Channels
+Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 
 ```go
-package main
-
-import (
-    "fmt"
-    "strings"
-)
-
-func main() {
-    // Create a tic-tac-toe board.
-    board := [][]string{
-            []string{"_", "_", "_"},
-            []string{"_", "_", "_"},
-            []string{"_", "_", "_"},
-    }
-
-    // The players take turns.
-    board[0][0] = "X"
-    board[2][2] = "O"
-    board[1][2] = "X"
-    board[1][0] = "O"
-    board[0][2] = "X"
-
-    for i := 0; i < len(board); i++ {
-        fmt.Printf("%s\n", strings.Join(board[i], " "))
-    }
-}
+m := make(map[string]int)
+c := make(chan int, 3)
 ```
-
-would be converted to C# as:
-
 ```csharp
-using go;
-using fmt = go.fmt_package;
-using strings = go.strings_package;
-
-static class main_package
-{
-    static void Main() {
-        // Create a tic-tac-toe board.
-        var board = slice(new[]{
-                slice(new @string[]{"_", "_", "_"}),
-                slice(new @string[]{"_", "_", "_"}),
-                slice(new @string[]{"_", "_", "_"}),
-        });
-
-        // The players take turns.
-        board[0][0] = "X";
-        board[2][2] = "O";
-        board[1][2] = "X";
-        board[1][0] = "O";
-        board[0][2] = "X";
-
-        for (var i = 0; i < len(board); i++) {
-            fmt.Printf("%s\n", strings.Join(board[i], " "));
-        }
-    }
-}
+var m = new map<@string, nint>();
+var c = new channel<nint>(3);
 ```
+
+Map reads honor Go's nil-map and comma-ok semantics (see [The "nil" Value](#the-nil-value) and [Return Tuples](#return-tuples)).
 
 ## Type Aliasing
-Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition), these are a "type definition" and a "type alias declaration".
+Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition): a "type definition" and a "type alias declaration".
 
 ### Type Definitions
-For Go "type definitions" the aliased type becomes a new, distinct type, however the new type and the base type are said to share the same [underlying type](https://go101.org/article/type-system-overview.html#underlying-type). Since converted code is using structs, which do not allow for inheritance, and aliased type and all base types are considered equivalent, the conversion tool will need to define implicit conversion operators for all these types. This means defining implicit conversion operators for the alias type and for all underlying types down to the built-in or unnamed (non-defined) type. The implicit operators will allow for interchangeably using aliased type and its base types while maintaining type distinction.
-
-Also derived types will need to expose all properties of original type. Ideally new type will declare an "instance" of original type as a private property and just re-expose values. In the case of built-in types, e.g., [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) - each of the primary functions will need to implemented. Currently built-in types like [`slice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs) have an associated .NET interface defined, e.g., [`ISlice`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/slice.cs#L41) that can be implemented for this purpose - this way the new type definition will still be a distinct type but operate like the built-in base type.
-
-Note that aliased types operate similarly to type embedding when it comes to extension method function receivers, i.e., the aliased type supports the extension methods of the base types. Like with embedded types this is more tricky in C# because of duck-implemented interfaces (see [interface strategies](#interfaces)), but the solution is the same, i.e., creating proxy extension functions for the aliased type for each of the underlying type extensions.
+For a Go "type definition" the new type is a distinct type that shares an [underlying type](https://go101.org/article/type-system-overview.html#underlying-type) with its base. Because converted types are structs (no inheritance), the converter relies on the source generators (see [Source Generators](#source-generators)) to emit the bridging needed for these to be used interchangeably while remaining distinct: implicit conversion operators down to the underlying type (via `ImplicitConvGenerator` / `TypeGenerator`), and, where the base is a built-in like `slice`, the relevant interface (`ISlice<T>`, etc.) implementation. A named type also supports the extension methods (receiver functions) of its underlying types, which the generators surface as proxy/overload methods.
 
 ### Type Alias Declarations
-For Go "type alias declarations" generally <sup>[[1](#ref1)]</sup> match aliasing in C# implemented with the `using` keyword, for example, the following Go and C# code are equivalent:
+For a Go "type alias declaration" the alias matches C# aliasing implemented with the `using` keyword. Since the alias may be exported and referenced across files, the converter emits a **global** `using` (C# 10's [Global Using Directive](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/GlobalUsingDirective.md)) into the package's generated aliases. For example:
 
-Go type alias declaration:
 ```go
+type P = *bool
+type M = map[int]int
 type table = map[string]int
 ```
-
-Equivalent C# alias with `using`:
 ```csharp
-using table = go.map<@string, int>;
-````
-
-   > <small><a name="ref1"></a>[1] When using a type alias as an embedded type, Go is picky about structure matching. Weirdly, structures definitions are only considered a match when the embedded types both use the type alias, using the base type fails, see [example](https://play.golang.org/p/97lMNpTtPAy). However, this should not be a case the converter should have to consider because this is build error in Go.</small>
-
-Go does recognize the alias as a new type
-
-In Go, type alias declarations can be exported. To accommodate this type of exportable aliasing, the conversion tool will need to add the exported using statements to ~~all files needing the alias~~ a global usings file using the new [Global Using Directive](https://github.com/dotnet/csharplang/blob/main/proposals/csharp-10.0/GlobalUsingDirective.md) feature of C# 10. It should be easy enough to simply ensure aliases are declared any time type is imported, however, this creates an interesting situation for imported packages. If conversion tool is setup to use a package, e.g., from NuGet, instead of converting local code, there will need to be an embedded resource dictionary in the package assembly that will report all exported aliases so the conversion tool can add these to the global using file when package is encountered in a Go `import`.
+global using P = go.ж<bool>;
+global using M = go.map<nint, nint>;
+global using table = go.map<@string, nint>;
+```
 
 ## Delegates to Value Receiver Instances
 
-In Go a function is basically like any other value, as such a function can be assigned to a variable without using pointer syntax. When a value-based receiver function is assigned to a  variable, the variable value maintains its own copy of the target value for function execution. The result may come as a surprise to any non Go programmer, for example:
+In Go a function is a value; a value-receiver method can be assigned to a variable, and the variable captures **its own copy** of the receiver value at the moment of assignment. This surprises many non-Go programmers:
 
 ```go
 package main
@@ -295,65 +255,19 @@ func (d data) printName() {
 }
 
 func main() {
-    d := data { name: "James" }
-
+    d := data{name: "James"}
     f1 := d.printName
-
     f1()
     d.name = "Gretchen"
     f1()
 }
 ```
-Results in the following output ([run it on Go Playground](https://play.golang.org/p/d-A5re1dfs8)):
-```
-Name = James
-Name = James
-```
-
-This code, as implemented in C#, needs to "copy" the receiver target in order to operate in the same fashion:
-```csharp
-using fmt = go.fmt_package;
-
-public static partial class main_package {
-    public struct Data {
-      public string name;
-    }
-
-    public static void printName(this Data d) {
-        fmt.Println("Name =", d.name);
-    }
-
-    public static void Main() {
-        Data d = new Data { name = "James" };
-
-        // Not this: "Action f1 = () => d.printName();", but this:
-        Action f1 = CopyTarget(d, d => d.printName());
-
-        f1();
-        d.name = "Gretchen";
-        f1();
-    }
-
-      public static Action CopyTarget<T>(T target, Action<T> receiver) where T : struct =>
-            () => receiver(target);
-}
-```
+This prints `Name = James` twice ([run it](https://play.golang.org/p/d-A5re1dfs8)) — `f1` bound a copy of `d`, so the later mutation is not observed. To preserve this semantic, the converter copies the receiver value into the delegate's capture rather than capturing the variable by reference, so the delegate executes against the snapshot taken at assignment time.
 
 ## Defer / Panic / Recover
-Handling Go `defer / panic / recover` operations in C# requires that code conversions create a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/GoFunc.cs#L63).
-
-The function execution context is required in order to create a [defer](https://golang.org/ref/spec#Defer_statements) call stack and [panic](https://golang.org/pkg/builtin/#panic) / [recover](https://golang.org/pkg/builtin/#recover) exception handling. As an example, consider the following Go code:
+Handling Go `defer` / `panic` / `recover` requires that the converted function run inside a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs). The context provides the [`defer`](https://golang.org/ref/spec#Defer_statements) call stack and the [`recover`](https://golang.org/pkg/builtin/#recover) handling; `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in (a `using static go.builtin`). The body is emitted as a lambda taking two parameters, `defer` and `recover`:
 
 ```go
-package main
-
-import "fmt"
-
-func main() {
-    f()
-    fmt.Println("Returned normally from f.")
-}
-
 func f() {
     defer func() {
         if r := recover(); r != nil {
@@ -362,86 +276,54 @@ func f() {
     }()
     fmt.Println("Calling g.")
     g(0)
-    fmt.Println("Returned normally from g.")
 }
 
 func g(i int) {
     if i > 3 {
-        fmt.Println("Panicking!")
         panic(fmt.Sprintf("%v", i))
     }
     defer fmt.Println("Defer in g", i)
-    fmt.Println("Printing in g", i)
     g(i + 1)
 }
 ```
 
-The Go code gets converted into C# code like the following:
+converts to:
+
 ```csharp
-using fmt = go.fmt_package;
-
-public static partial class main_package
-{
-    private static void Main() {
-        f();
-        fmt.Println("Returned normally from f.");
-    }
-
-    private static void f() => func((defer, _, recover) => {
-        defer(() => {
-            {
-                var r = recover();
-
-                if (r != nil) {
-                    fmt.Println("Recovered in f", r);
-                }
+internal static void f() => func((defer, recover) => {
+    defer(() => {
+        {
+            var r = recover();
+            if (r != nil) {
+                fmt.Println("Recovered in f", r);
             }
-        });
-        fmt.Println("Calling g.");
-        g(0);
-        fmt.Println("Returned normally from g.");
-    });
-
-    private static void g(int i) => func((defer, panic, _) => {
-        if (i > 3) {
-            fmt.Println("Panicking!");
-            panic(fmt.Sprintf("%v", i));
         }
-        defer(() => fmt.Println("Defer in g", i));
-        fmt.Println("Printing in g", i);
-        g(i + 1);
     });
-}
+    fmt.Println("Calling g.");
+    g(0);
+});
+
+internal static void g(nint i) => func((defer, recover) => {
+    if (i > 3) {
+        throw panic(fmt.Sprintf("%v"u8, i));
+    }
+    defer(() => fmt.Println("Defer in g", i));
+    g(i + 1);
+});
 ```
 
-Certainly for functions that call `defer`, `panic` or `recover`, the Go function execution context is required. However, if the function does not _directly_ call the functions, nor _indirectly_ call the functions through a lambda, then you should be able to safely remove the wrapping function execution context. For example, in the converted C# code above the `main` function does not directly nor indirectly call `defer`, `panic` or `recover` so the function is safely simplified as follows:
+A function that neither directly nor indirectly (through a deferred lambda) uses `defer`/`panic`/`recover` skips the wrapper entirely — the converter scopes the wrapper per function, so e.g. a `main` that just calls `f()` is emitted as a plain method body. A value-returning function returns from inside the wrapper (`=> func((defer, recover) => { …; return x; })`). Two refinements worth noting:
 
-```csharp
-private static void main() {
-    f();
-    fmt.Println("Returned normally from f.");
-}
-```
+* **Named results + defer.** When a function has named return values *and* uses defer/recover, the named results are declared *outside* the wrapper (closure-captured), the wrapper runs as a `void` action, and the function returns the named results afterward — so the deferred "recover sets the result" idiom is observed.
+* **IIFEs.** An immediately-invoked function literal that itself uses defer/recover gets its own wrapper, rendered as a delegate-cast invocation (e.g. `((Func<int>)(() => func((defer, recover) => { … })))()`), so its `recover` scopes to the IIFE and not the enclosing function.
 
 ## Expression Switch Statements
-Go expression-based `switch` statements are very flexible. Case statements do not automatically fall-through, so no `break` operation is not required. When the Go `fallthrough` keyword is used, the next case expression is executed, bypassing expression evaluation. Based on work done with the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to simple `if / else if / else` statements is the logical best choice for most cases.
-
-If the original Go `case` statements all use constants and no `fallthough` keyword is being used, a traditional C# `switch` seems to work OK. I believe an unhandled edge case may exist here if "re-evaluation" of expression at each case value is required by the original Go code (even though depending on such behavior seems like a poor design choice) since in C# the value is read once and cached, then each case expression is compared to cached expression result.
-
-For cases with non-constant expressions and no `fallthough` keyword, a simple `if / else if /else` patten works fine, where final `else` is default case handler.
-
-For cases that use the `fallthough` keyword, all case expressions have to be converted to standalone `if` statements using a thread local flag to check fall-through state and `goto` statements to handle `break` style operations to exit to end of switch. When the  `fallthough` keyword is used, this the most complex conversion scenario -- and the least pretty.
-
-> FYI, toyed around with an experimental [`SwitchExpression<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/experimental/SwitchExpression.cs) class that used chained expressions and evaluated case statements as lambdas. This generally works like original Go `switch` even with `fallthrough` statements, but resultant code was often more noisy and certainly no cleaner than simple `if / else if / else` expansions. It also began to create burdening edge cases with lambda case expressions and captured variables that did not exist in original code.
+Go expression-based `switch` statements are flexible: cases do not fall through automatically (no `break` needed), and the `fallthrough` keyword runs the next case body bypassing its expression. Based on the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to `if / else if / else` is the best choice for most cases. When every case uses constants and there is no `fallthrough`, a traditional C# `switch` works. For cases that use `fallthrough`, the cases are expanded to standalone `if` statements with a local fall-through flag and `goto` to handle break-style exits — the most complex (and least pretty) scenario.
 
 ## Type Switch Statements
-In the case of Go type-based switch statements, the C# type-based pattern matching works well - even as a `switch` statement. For example, the following Go code using type-switch:
+For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
 
 ```go
-package main
-
-import "fmt"
-
 func do(i interface{}) {
     switch v := i.(type) {
     case int:
@@ -452,142 +334,124 @@ func do(i interface{}) {
         fmt.Printf("I don't know about type %T!\n", v)
     }
 }
-
-func main() {
-    do(21)
-    do("hello")
-    do(true)
-}
 ```
 
-would be converted to C# as:
+converts to:
 
 ```csharp
-using go;
-using fmt = go.fmt_package;
-
-static class main_package
-{
-    static void @do(object i) {
-        switch (i.type()) {
-            case int v:
-                fmt.Printf("Twice %v is %v\n", v, v*2);
-                break;
-            case @string v:
-                fmt.Printf("%q is %v bytes long\n", v, len(v));
-                break;
-            default: {
-                var v = i.type();
-                fmt.Printf("I don't know about type %T!\n", v);
-                break;
-            }
-        }
+internal static void @do(any i) {
+    switch (i.type()) {
+    case nint v: {
+        fmt.Printf("Twice %v is %v\n"u8, v, v * 2);
+        break;
     }
-
-    static void Main() {
-        @do(21);
-        @do("hello");
-        @do(true);
+    case @string v: {
+        fmt.Printf("%q is %v bytes long\n"u8, v, len(v));
+        break;
     }
+    default: {
+        var v = i.type();
+        fmt.Printf("I don't know about type %T!\n"u8, v);
+        break;
+    }}
 }
 ```
 
 ## Struct Types
-Go types are converted to C# [`record struct`](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-10.0/record-structs) types (available in C# 10) and used on the stack to optimize memory use and reduce the need for garbage collection. By using a `struct` instead of a `class`, converted C# code should better match original Go operation both from a memory and performance perspective. The `struct` types will be wrapped by a C# `class` that references the type value so that heap-allocated instances of the type can exist as needed, see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs), such as, when the type needs to leave the local stack.
-
-In Go, a struct can be declared inline. C# does not support inline or intra-function `struct` definitions, so these dynamic structure elements will either need to be named and declared external to the function, or defined as as a value tuple struct where applicable.
-
-A per-parent static class local dictionary of defined types will need to be used during conversion to track this. Each inline C# per static class local structure will need to be named with an index for uniqueness. See [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/moretypes/slice-literals) with inline `struct`. Since these dynamic structures exist without a name in Go code, they should be defined in a secondary partial class that is defined outside the mainline code.
-
-For named Go structure definitions within a function, since C# requires the structure to be defined "outside" the function, the intra-function structure name should include parent function name to prevent name collisions. For example, if a struct called `x` was declared within function `main`, the converted struct name would be `x__main`.
-
-The conversion code also needs to understand the structure "definition" for casting purposes, that is, if structure definitions match, they can be used interchangeably. For example, the following Go code which declares an intra-function structure and returns it as a dynamically declared structure is valid. One option (where possible) is just to use an implicit assignment operator for a matching value tuple for the the structure elements:
-
-```go
-package main
-
-import "fmt"
-
-type P = *bool
-type M = map[int]int
-
-func test() struct { string; *int; P; M } {
-    var x struct {
-        string // a defined non-pointer type
-        *int   // a non-defined pointer type
-        P      // an alias of a non-defined pointer type
-        M      // an alias of a non-defined type
-    }
-    x.string = "Go"
-    x.int = new(int)
-    x.P = new(bool)
-    x.M = make(M)
-    return x;
-}
-
-func main() {
-    x := test()
-    fmt.Println(x)
-}
-```
-
-## Struct Type Embedding
-Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" for extending type functionality instead of inheritance. Since converted Go structs use C# `struct` types and structures in C# do not support inheritance, the code conversion process has to manage equivalent field type embedding. This process adds fields of embedded types with the same name as the type. In Go, embedded type fields are flattened into a single set (selection shorthand), including nested types - so this too has to be managed by the conversion tool.
-
-Also, when a type is embedded in another type, the derived type supports the extension methods of the embedded types. This is more tricky in C# since interfaces are duck-implemented (see [interface strategies](#interfaces)) and the type implemented for the extension method will have no "direct" relation to the derived types save it simply exists as a field in another type. The Go compiler seems to create proxy extension functions for the derived type's embedded type methods, as such this is how the conversion tool will accommodate this functionality.
-
-This basically means that the proxied extension functions created for derived embedded type values will only be for those found during the conversion process, i.e., from a maintainability perspective these features end at conversion. If a new extension function is added in the C# code, the derived class will not automatically see it. Users will need to do one of the following: (1) maintain code in Go and reconvert, (2) manually add missing proxy extensions, or (3) move on without this Go coding construct in converted C# code, e.g., switching to explicitly implemented interfaces. That said, if things start converting very well in the future, one option could always be to continue direct coding in Go and use a [transpilation](https://en.wikipedia.org/wiki/Source-to-source_compiler) step to automatically convert the code to C# as a pre-build step.
-
-## Interfaces
-Go interfaces are not explicitly implemented. Instead, if extension-style functions exist that satisfy all defined interface methods, the class is said to implicitly implement the interface. To accommodate these duck-implemented interfaces, a generic class is created for each interface so that for a given type, interface extension methods can be looked up using reflection. To speed up this operation, as assemblies are loaded, extension methods are [cached in a dictionary](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/TypeExtensions.cs#L121) for quick lookup and any type-specific lookup operations are only done once statically during [type initialization](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L127). To make use of typed generic class any assignments to interface variables will be cast to generic type, for example, see equivalent C# code with [`As`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/error.cs#L50) function for handling Go duck-implemented interfaces:
+Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
 
 ```csharp
-Abser a;                          // Abser is an interface with methods
-var f = (MyFloat)(-math.Sqrt(2)); // MyFloat is a custom type
-a = Abser.As(f);                  // Succeeds only if MyFloat type implements Abser interface methods
+[GoType] partial struct Person {
+    public @string Name;
+    public nint Age;
+}
 ```
 
-For an example, see [interfaces](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/methods/interfaces) under the "methods" section in the manual Tour of Go conversions.
+The generator also chooses the access modifier from the Go name (exported → `public`), except where the converter emits an explicit modifier — for instance, an unexported type used as the type of an *exported* field is published as `public` to satisfy C# accessibility (the converter emits `public partial struct …` and the generator honors that explicit modifier).
+
+C# does not allow inline or intra-function type definitions, so these are "lifted" out of the function. A **named** local type is lifted with its enclosing function's name as a prefix to avoid collisions — a `type x struct{…}` declared in `main` becomes `main_x`. An **anonymous** struct (or an anonymous struct used as a field/value) is lifted to a synthesized name with a `ᴛ`*N* suffix and marked dynamic, e.g. `[GoType("dyn")] partial struct settingsᴛ1`. Struct "definitions" that match structurally remain usable interchangeably (the generator and implicit conversions handle this).
+
+## Struct Type Embedding
+Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand), including through nested embedding. Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
+
+## Interfaces
+Go interfaces are duck-typed: a type implements an interface simply by having the methods. The converter emits each **user-defined** interface as a partial interface with a `[GoType]` attribute, and the **`ImplementGenerator`** source generator discovers which concrete types satisfy it and emits the implementing glue plus the implicit conversions. As a result, assigning a concrete value to an interface variable is direct — no reflection lookup or `.As(...)` call is needed:
+
+```go
+type Stringer interface {
+    String() string
+}
+
+type point struct{ x, y int }
+
+func (p point) String() string {
+    return fmt.Sprintf("(%d, %d)", p.x, p.y)
+}
+
+func describe() Stringer {
+    return point{1, 2}    // point implements Stringer -> assignable directly
+}
+```
+```csharp
+[GoType] partial interface Stringer {
+    @string String();
+}
+
+[GoType] partial struct point {
+    public nint x, y;
+}
+
+[GoRecv] internal static @string String(this ref point p) {
+    return fmt.Sprintf("(%d, %d)"u8, p.x, p.y);
+}
+
+internal static Stringer describe() {
+    return new point(1, 2);   // implicit conversion emitted by ImplementGenerator
+}
+```
+
+The well-known built-in interfaces (`error`, `fmt.Stringer`, etc.) are hand-written in `golib`/the baseline rather than `[GoType]`-generated, but concrete types implement them the same duck-typed way. (Earlier strategies used a generic `As`/reflection mechanism; that has been superseded by the compile-time source generators.)
 
 ## Pointers
-~~Conversion of pointer types will use the C# `ref` keyword where possible. When this strategy does not work, a heap allocated instance of the base type will be created (see [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs)).~~
+Pointer conversions use the golib heap box [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) (read "zhe"). Taking the address of a value uses the address-of operator `Ꮡ` (e.g. `Ꮡx`); an escaping local is allocated via `heap(...)`, and addresses of a struct field or array element are taken through `.of(Type.ᏑField)` / `.at<T>(index)`:
 
-Pointer conversions have been updated to always use [`ptr<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/gocore/golib/ptr.cs) since the use of the C# `ref` keyword presents complications of needing to perform escape analysis of a pointer, e.g., when you pass a `ref` pointer to a function, it may call code expecting a heap allocated pointer.
+```csharp
+ref var a = ref heap(new array<@string>(2), out var Ꮡa);  // escaping local
+var p = Ꮡa.at<@string>(0);                                 // &a[0]
+var pField = Ꮡsettings.of(settingsᴛ1.ᏑRetries);            // &settings.Retries
+```
 
-This is a simplification of code conversion that could come with a performance penalty, i.e., unnecessary heap allocations when an address of a variable needs to be taken. Future conversion implementations can add an escape analysis step to see if source code will safely allow for simple `ref` style operations and use the stack allocated variable when heap allocations are determined to be not necessary, similar to the way [Go does this](https://golang.org/doc/faq#stack_or_heap) at compile time.
+Using `ж<T>` rather than the C# `ref` keyword avoids the escape-analysis complications of passing a `ref` into code that expects a heap-allocated pointer. This is a simplification that can cost an unnecessary heap allocation when an address is taken; a future escape-analysis pass could keep such values on the stack when it is provably safe, similar to how [Go does this](https://golang.org/doc/faq#stack_or_heap) at compile time.
 
-> C# unsafe pointers do not always work as a replacement for Go pointers since with C# (1) pointer types in structures cannot not refer to types that contain heap-allocated elements (e.g., arrays or slices that reference an array) as this would prevent pointer arithmetic for ambiguously sized elements, and (2) returning standard pointers to stack-allocated structures from a function is not allowed, instead you need to allocate the structure on the heap by creating a reference-type wrapper and then safely return a pointer to the reference. Since Go also supports unsafe pointer operations using the [`unsafe`](https://golang.org/pkg/unsafe/) package, conversion of this package will likely involve use of C# unsafe pointers.
+> Note: a package-level global whose address is taken is backed by a real heap box so that writes through `&global` (and `&global.field`) are observed, rather than mutating a copy.
 
 ## Implicit Pointer Dereferencing
-In Go, all pointer types are setup to automatically dereference. For example, the following `age` property assignments are equivalent in Go:
+In Go, pointer types automatically dereference; these `age` assignments are equivalent:
 ```go
-var s struct {age int}
+var s struct{ age int }
 var ps = &s
 (*ps).age = 20
 ps.age = 20
 ```
-This automatic dereferencing also applies to extension methods, in other words, an extension-style method for a non-pointer type will work for the type as well as a pointer to the type.
-
-In practice, conversions will handle implicit dereferencing of pointer parameters by using C# local `ref` variables, for example, the following Go code:
+This also applies to receiver methods — a value-receiver method works on the type *and* on a pointer to it. In practice, the converter handles implicit dereferencing of a pointer parameter by binding a `ref` local to the box's value. For example:
 ```go
 func PrintValPtr(ptr *int) {
-    fmt.Printf("Value available at *ptr = %d\n", *ptr )
-    *ptr++;
+    fmt.Printf("Value available at *ptr = %d\n", *ptr)
+    *ptr++
 }
 ```
 becomes:
 ```csharp
-public static void PrintValPtr(ptr<nint> _addr_ptr)
-{
-    ref nint ptr = ref _addr_ptr.val;
+public static void PrintValPtr(ж<nint> Ꮡptr) {
+    ref var ptr = ref Ꮡptr.val;
 
     fmt.Printf("Value available at *ptr = %d\n", ptr);
     ptr++;
 }
 ```
-## Break / Continue Labels
 
-In the case of break and continue labels, the Go language restricts the label to just before the enclosing operation, e.g., a `for` statement. Similar behavior can be implemented with a properly placed label and a `goto` command, for example:
+## Break / Continue Labels
+Go restricts a label to immediately precede the enclosing statement (e.g. a `for`). Equivalent behavior is produced with a placed label and a `goto`:
 
 ### Break Label
 ```go
@@ -598,28 +462,22 @@ OuterLoop:
             case nil:
                 state = Error
                 break OuterLoop
-            case item:
-                state = Found
-                break OuterLoop
             }
         }
     }
 ```
-becomes:
-```c#
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < m; j++) {
-            switch a[i][j] {
-            case null:
-                state = Error
-                goto break_OuterLoop;
-            case item:
-                state = Found
+becomes (the label is emitted as `break_OuterLoop:`):
+```csharp
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < m; j++) {
+            switch (a[i][j].type()) {
+            case nil:
+                state = Error;
                 goto break_OuterLoop;
             }
         }
     }
-break_OuterLoop:
+break_OuterLoop:;
 ```
 
 ### Continue Label
@@ -634,44 +492,52 @@ RowLoop:
         }
     }
 ```
-becomes:
-```c#
-    for (int y = 0; y < len(rows); y++) {
-        var row = rows[y];
-        for (int x = 0; x < len(row); x++) {
-            var data = row[x];
+becomes (`continue_RowLoop:` placed at the end of the loop body):
+```csharp
+    foreach (var (y, row) in rows) {
+        foreach (var (x, data) in row) {
             if (data == endOfRow) {
                 goto continue_RowLoop;
             }
             row[x] = data + bias(x, y);
+continue_RowLoop:;
         }
-continue_RowLoop:
     }
 ```
 
+## Source Generators
+Several Go semantics cannot be written directly in C#, so the converter emits compact, attributed partial declarations and lets a set of Roslyn source generators (`src/gen/go2cs-gen/`, referenced as an analyzer by every converted project) synthesize the rest at compile time. This keeps the visible converted code close to the Go original. The principal generators and attributes:
+
+* **`TypeGenerator`** — driven by `[GoType]`. Emits the body of a converted type: a struct's members and equality, a named numeric/slice/array/map/channel type's wrapper and operators (see [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) and [Slices and Arrays](#slices-and-arrays)), and struct-embedding field/method promotion.
+* **`ImplementGenerator`** — wires up Go's duck-typed [interfaces](#interfaces): finds the concrete types that satisfy each `[GoType] partial interface` and emits the implementation glue and implicit conversions.
+* **`RecvGenerator`** — emits pointer-receiver overloads for receiver methods (`[GoRecv]`), so a method written against a value (`this ref T`) is also callable through the pointer/box form.
+* **`ImplicitConvGenerator`** — emits the implicit conversion operators that let a [named type](#type-definitions) and its underlying types be used interchangeably.
+* **`PartialStubGenerator`** — emits a throwing `partial` implementation for any bodyless `partial` method that has no other implementing part (e.g. assembly/cgo functions with no convertible body), while leaving real hand-written companion implementations untouched.
+
+Common attributes the converter emits for the generators (and tooling) to consume: `[GoType]` (type bodies), `[GoRecv]` (receiver methods), `[GoTag]` (struct field tags), `[GoPackage]` (package info), and the test-only `[GoTestMatchingConsoleOutput]`.
+
 ## Examples
 
-* [Behavioral Tests](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral)
+* [Behavioral Tests](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Tests/Behavioral) — per-feature Go↔C# equivalence; the `.cs.target` goldens are current converter output and the most reliable reference for exact emitted forms.
 * [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions)
 * [Manual go101 Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20go101%20Conversions)
 * [Miscellaneous](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Miscellaneous)
-* Example excerpt of converted code from the Go [`errors`](https://github.com/pkg/errors/blob/master/errors.go#L102) package:
+* Example excerpt of converted code from the Go [`errors`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/errors/errors.cs) package:
 ```csharp
 public static partial class errors_package
 {
     // New returns an error that formats as the given text.
     // Each call to New returns a distinct error value even if the text is identical.
-    public static error New(@string text) =>
-        error.As(new errorString(text))!;
+    public static error New(@string text) {
+        return new errorString(text);
+    }
 
     // errorString is a trivial implementation of error.
-    private partial struct errorString {
+    [GoType] partial struct errorString {
         public @string s;
     }
 
-    private static @string Error(this ptr<errorString> _addr_e) {
-        ref errorString e = ref _addr_e.val;
-
+    [GoRecv] internal static @string Error(this ref errorString e) {
         return e.s;
     }
 }
