@@ -1,0 +1,34 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType] partial struct Box<T>
+    where T : new()
+{
+    internal T v;
+}
+
+[GoType] partial struct Pair<A, B>
+    where A : new()
+    where B : new()
+{
+    internal A a;
+    internal B b;
+}
+
+internal static void Main() {
+    Box<Box<nint>> nested = default!;
+    nested.v.v = 42;
+    fmt.Println(nested.v.v);
+    Pair<Box<nint>, Box<nint>> p = default!;
+    p.a.v = 7;
+    p.b.v = 8;
+    fmt.Println(p.a.v, p.b.v);
+    Box<Box<Box<nint>>> deep = default!;
+    deep.v.v.v = 99;
+    fmt.Println(deep.v.v.v);
+}
+
+} // end main_package

@@ -2730,12 +2730,30 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	// Find all types inside '<T1, T2>' type expressions and recurse into them for conversion
-	if strings.Contains(typeName, "<") {
-		start := strings.Index(typeName, "<")
-		end := strings.Index(typeName[start:], ">") + start
+	if start := strings.Index(typeName, "<"); start != -1 {
+		// Locate the matching closing '>' by bracket depth rather than the first '>' — the latter
+		// mis-handles nested generics (e.g. Pointer<node<K, V>> would stop at the inner '>',
+		// extract the unbalanced "node<K, V", and recurse into "node<K", slicing out of range).
+		depth := 0
+		end := -1
 
+		for i := start; i < len(typeName); i++ {
+			if typeName[i] == '<' {
+				depth++
+			} else if typeName[i] == '>' {
+				depth--
+
+				if depth == 0 {
+					end = i
+					break
+				}
+			}
+		}
+
+		// Only split when a matching '>' exists; otherwise the '<' is not a generic bracket (e.g.
+		// the '<-' of a directional channel inside a func type) and is handled by a later branch.
 		if end != -1 {
-			subTypes := strings.Split(typeName[start+1:end], ",")
+			subTypes := splitTopLevelTypes(typeName[start+1 : end])
 
 			for i := range subTypes {
 				subTypes[i] = strings.TrimSpace(convertToCSTypeName(subTypes[i]))
@@ -2871,6 +2889,32 @@ func splitMapKeyValue(typeStr string) (string, string) {
 
 	// If we didn't find a proper split, return original and empty
 	return typeStr, ""
+}
+
+// splitTopLevelTypes splits a comma-separated list of generic type arguments at the top bracket
+// level only, so commas nested inside an inner generic (e.g. the comma in `node<K, V>` within
+// `Pointer<node<K, V>>`) are not treated as argument separators.
+func splitTopLevelTypes(typeArgs string) []string {
+	var result []string
+
+	depth := 0
+	start := 0
+
+	for i := 0; i < len(typeArgs); i++ {
+		switch typeArgs[i] {
+		case '<':
+			depth++
+		case '>':
+			depth--
+		case ',':
+			if depth == 0 {
+				result = append(result, typeArgs[start:i])
+				start = i + 1
+			}
+		}
+	}
+
+	return append(result, typeArgs[start:])
 }
 
 func extractTypes(signature string) []string {
