@@ -233,6 +233,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPartialRedeclaration() => CheckTarget("PartialRedeclaration");
 
     [TestMethod]
+    public void CheckPointerArrayRange() => CheckTarget("PointerArrayRange");
+
+    [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
