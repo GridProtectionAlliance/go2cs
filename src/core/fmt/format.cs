@@ -32,7 +32,7 @@ namespace go;
 // This is a simple proxy for the fmt package for testing...
 public static partial class fmt_package
 {
-    [GeneratedRegex(@"\%(?:[0-9]*(?:\.[0-9]*)?)?(?<type>[vtbcdoOqxXUeEfFgGspT%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    [GeneratedRegex(@"\%(?:[0-9]*(?:\.[0-9]*)?)?(?<type>[vtbcdoOqxXUeEfFgGspTw%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
     private static partial Regex FormatExpr();
 
     private static readonly Regex s_formatExpr = FormatExpr();
@@ -124,6 +124,16 @@ public static partial class fmt_package
     public static string Sprintf(ReadOnlySpan<byte> format, params object[] args) =>
         Sprintf((@string)format, args);
 
+    // Temporary error implementation for the stub fmt.Errorf — formats the message via Sprintf
+    // and returns it as an error. NOTE: the `%w` verb is rendered like `%v`; error-chain
+    // wrapping (the Unwrap method that a real %w Errorf produces) is not implemented here.
+    // Full behavior arrives with stdlib fmt resolution.
+    private sealed class formatError(string message) : error
+    {
+        public @string Error() => message;
+        public override string ToString() => message;
+    }
+
     public static error Errorf(ReadOnlySpan<byte> format, params object[] args) =>
-        null!;
+        new formatError(Sprintf(format, args));
 }

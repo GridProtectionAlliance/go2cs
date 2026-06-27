@@ -72,6 +72,7 @@
     <Project Path="Tests/Behavioral/DeferLambdaParam/DeferLambdaParam.csproj" />
     <Project Path="Tests/Behavioral/DeferSimple/DeferSimple.csproj" />
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
+    <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />
