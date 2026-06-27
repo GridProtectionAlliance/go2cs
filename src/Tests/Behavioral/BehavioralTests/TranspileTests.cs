@@ -243,6 +243,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

@@ -493,6 +493,15 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 				break
 			}
 
+			// A relational/constant pattern (`x is <op> Y`) requires Y to be a C# compile-time
+			// constant. A variable (`case x == y`, y a parameter) or a const emitted as
+			// `static readonly` (untyped/named/cross-package) makes the pattern invalid (CS9135);
+			// fall back to a `when` guard for those.
+			if !v.isCSharpConstantExpr(binaryExpr.Y) {
+				usePattenMatch = false
+				break
+			}
+
 			// Check if all lhs expression targets are the same
 			if i == 0 {
 				firstExpr = v.convExpr(binaryExpr.X, nil)

@@ -1324,6 +1324,40 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 	return tv.IsValue() && !isStringLiteral(tv) && !isCallExpr
 }
 
+// isCSharpConstantExpr reports whether the expression renders as a C# compile-time constant, and
+// so may be used as the operand of a relational/constant pattern (`x is <op> Y`). Literals always
+// qualify; a const reference qualifies only when it is emitted as a C# `const` — i.e. a concrete
+// (non-untyped) basic type. A variable, or a const emitted as `static readonly` (untyped/named,
+// see visitValueSpec), does not, and the caller must use a `when` guard instead (avoids CS9135).
+func (v *Visitor) isCSharpConstantExpr(expr ast.Expr) bool {
+	switch e := expr.(type) {
+	case *ast.BasicLit:
+		return true
+	case *ast.ParenExpr:
+		return v.isCSharpConstantExpr(e.X)
+	case *ast.Ident:
+		return v.isCSharpConstObject(v.info.ObjectOf(e))
+	case *ast.SelectorExpr:
+		return v.isCSharpConstObject(v.info.ObjectOf(e.Sel))
+	}
+
+	return false
+}
+
+func (v *Visitor) isCSharpConstObject(obj types.Object) bool {
+	constObj, ok := obj.(*types.Const)
+
+	if !ok {
+		return false
+	}
+
+	basic, ok := constObj.Type().(*types.Basic)
+
+	// A named-type const, or an untyped const (emitted as an Untyped* wrapper / GoUntyped), is
+	// `static readonly`, not a C# `const`.
+	return ok && basic.Info()&types.IsUntyped == 0
+}
+
 // isStringType determines if an expression is either a string literal or a string variable
 func (v *Visitor) isStringType(expr ast.Expr) bool {
 	switch e := expr.(type) {

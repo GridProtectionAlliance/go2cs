@@ -122,6 +122,7 @@
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="Tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
+    <Project Path="Tests/Behavioral/RelationalPatternGuard/RelationalPatternGuard.csproj" />
     <Project Path="Tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
