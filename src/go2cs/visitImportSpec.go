@@ -17,7 +17,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.importQueue.Add(v.currentImportPath)
 	v.loadImportedTypeAliases(v.currentImportPath)
 
-	importPath := convertImportPathToNamespace(v.currentImportPath, PackageSuffix)
+	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(v.currentImportPath, PackageSuffix))
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())
 
@@ -49,6 +49,33 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())
 	v.packageImports.WriteString(v.newline)
+}
+
+// rootQualifyIfAmbiguous prefixes an imported namespace with the root namespace ("go.") when its
+// leading segment also appears in the current package's namespace path. Without this, C# relative
+// name resolution binds the leading segment to the closer (current-namespace) match instead of the
+// intended root-level one — e.g. a package in `go.runtime.@internal` importing `internal/goarch`
+// (namespace `@internal.goarch_package`) resolves `@internal` to `go.runtime.@internal`, not
+// `go.@internal` → CS0234. Non-colliding imports (the common case) are returned unchanged, so this
+// adds no churn for packages whose namespace does not nest under a colliding segment.
+func rootQualifyIfAmbiguous(ns string) string {
+	if ns == "" || strings.HasPrefix(ns, RootNamespace+".") {
+		return ns
+	}
+
+	firstSeg := ns
+
+	if dot := strings.Index(ns, "."); dot != -1 {
+		firstSeg = ns[:dot]
+	}
+
+	for _, seg := range strings.Split(packageNamespace, ".") {
+		if seg != RootNamespace && seg == firstSeg {
+			return RootNamespace + "." + ns
+		}
+	}
+
+	return ns
 }
 
 func convertImportPathToNamespace(importPath string, packageSuffix string) string {
