@@ -36,7 +36,7 @@ public static T Or<T>(params Span<T> valsʗp)
 
 internal static void Main() {
     fmt.Println(First(10, 20, 30));
-    fmt.Println(First(1.5F, 2.5F));
+    fmt.Println(First(1.5D, 2.5D));
     fmt.Println(Count(1, 2, 3, 4));
     @string s1 = "go"u8;
     @string s2 = "2cs"u8;

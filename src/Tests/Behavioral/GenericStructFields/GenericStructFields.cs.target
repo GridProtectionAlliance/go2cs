@@ -29,8 +29,8 @@ internal static void Main() {
             Error: default!
         ),
         FloatValues: new Result<float64>[]{
-            new(Value: 3.14F, Error: default!),
-            new(Value: 2.71F, Error: default!)
+            new(Value: 3.14D, Error: default!),
+            new(Value: 2.71D, Error: default!)
         }.slice(),
         Mappings: new map<@string, Result<bool>>{
             ["completed"u8] = new(Value: true, Error: default!),

@@ -61,7 +61,7 @@ internal static void Main() {
     fmt.Println(@unsafe.Offsetof(x.GetType(), "a"));
     fmt.Println(@unsafe.Offsetof(x.GetType(), "b"));
     fmt.Println(@unsafe.Offsetof(x.GetType(), "c"));
-    var i2 = Float64bits(9.5F);
+    var i2 = Float64bits(9.5D);
     var f2 = Float64frombits(i2);
     fmt.Println(i2);
     fmt.Println(f2);

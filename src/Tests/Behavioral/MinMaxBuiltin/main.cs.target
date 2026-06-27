@@ -10,8 +10,8 @@ internal static void Main() {
     fmt.Println(min(5, 2, 9, 1, 4));
     fmt.Println(max(5, 2, 9, 1, 4));
     fmt.Println(min(42));
-    fmt.Println(min(2.5F, 1.5F));
-    fmt.Println(max(2.5F, 1.5F));
+    fmt.Println(min(2.5D, 1.5D));
+    fmt.Println(max(2.5D, 1.5D));
     fmt.Println(min("banana", "apple", "cherry"));
     fmt.Println(max("banana", "apple", "cherry"));
     var x = new byte[]{1, 2, 3}.slice();

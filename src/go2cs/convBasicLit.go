@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"math"
 	"regexp"
 	"strconv"
@@ -92,7 +93,20 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 	case token.FLOAT:
 		result.WriteString(value)
 
-		if _, err := strconv.ParseFloat(value, 32); err == nil {
+		// The C# suffix must reflect the literal's resolved type, not merely whether the value
+		// fits in float32. A Go untyped float constant defaults to float64, so emitting `F`
+		// (float32) whenever it fits corrupts inferred types — `z := 1.0` would become a float32,
+		// and subsequent float64 arithmetic on it fails (CS0266). Emit `F` only when go/types
+		// resolves the literal as float32; otherwise `D` (double, matching Go's float64 default).
+		isFloat32 := false
+
+		if tv, ok := v.info.Types[basicLit]; ok && tv.Type != nil {
+			if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.Float32 {
+				isFloat32 = true
+			}
+		}
+
+		if isFloat32 {
 			result.WriteRune('F')
 		} else {
 			result.WriteRune('D')

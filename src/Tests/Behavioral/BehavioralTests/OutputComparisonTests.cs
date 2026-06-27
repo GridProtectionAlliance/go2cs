@@ -274,6 +274,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

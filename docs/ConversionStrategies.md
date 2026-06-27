@@ -71,6 +71,17 @@ internal static readonly UntypedInt win = 100;
 public static readonly UntypedInt N = /* 11 + 1 */ 12;
 ```
 
+A Go untyped *float* constant defaults to `float64`, so its C# literal carries the double suffix `D` — not `F` — regardless of whether the value happens to fit in `float32`. (Emitting `F` whenever the value fit would make `z := 1.0` a `float`, breaking later `float64` arithmetic with CS0266.) A literal in an explicit `float32` context keeps `F`:
+
+```go
+z := 1.0           // untyped float -> float64
+var f float32 = 2.5 // float32 context
+```
+```csharp
+var z = 1.0D;
+float32 f = 2.5F;
+```
+
 A native-sized integer constant (`nint`/`nuint`, including the `uintptr` alias) whose value does not fit a C# constant of that type — e.g. `const MaxUintptr = ^uintptr(0)` (= `0xFFFFFFFFFFFFFFFF`), a `ulong` literal that needs a *non-constant* `nuint` conversion — cannot be a C# `const` (CS0133/CS0266). It is emitted as `static readonly` with an `unchecked` cast instead (small native-int consts like `const nint iota = 0` stay `const`):
 
 ```csharp

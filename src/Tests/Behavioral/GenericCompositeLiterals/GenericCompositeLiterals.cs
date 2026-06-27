@@ -44,7 +44,7 @@ internal static void Main() {
     );
     fmt.Printf("String queue size: %d\n"u8, stringQueue.Size());
     Queue<float64> floatQueue = new Queue<float64>(
-        items: new float64[]{3.14F, 2.71F, 1.618F}.slice()
+        items: new float64[]{3.14D, 2.71D, 1.618D}.slice()
     );
     fmt.Printf("Float queue size: %d\n"u8, floatQueue.Size());
     var queues = new any[]{

@@ -24,8 +24,8 @@ internal static void Main() {
         @out += s;
     }
     fmt.Println(@out);
-    var total = 0.0F;
-    for ((nint i, var f) = (0, 0.5F); i < 4; (i, f) = (i + 1, f * 2)) {
+    var total = 0.0D;
+    for ((nint i, var f) = (0, 0.5D); i < 4; (i, f) = (i + 1, f * 2)) {
         total += f;
     }
     fmt.Println(total);

@@ -21,7 +21,7 @@ partial class main_package {
 }
 
 [GoRecv] public static float64 Time(this ref MyCustomError myErr) {
-    return 0.0F;
+    return 0.0D;
 }
 
 public static float64 Time(this MyError myErr) {

@@ -43,8 +43,8 @@ internal static void Main() {
     }.slice();
     fmt.Printf("Options count: %d\n"u8, len(options));
     var cache = new map<@string, Option<float64>>{
-        ["pi"u8] = NewOption<float64>(3.14159F),
-        ["e"u8] = NewOption<float64>(2.71828F),
+        ["pi"u8] = NewOption<float64>(3.14159D),
+        ["e"u8] = NewOption<float64>(2.71828D),
         ["phi"u8] = NewEmptyOption<float64>()
     };
     fmt.Printf("Cache size: %d\n"u8, len(cache));
