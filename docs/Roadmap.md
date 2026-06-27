@@ -1,10 +1,13 @@
 # go2cs Roadmap
 
-Companion to [`/CLAUDE.md`](../CLAUDE.md). The path from "loop stalled" to "full Go stdlib converts and
-compiles." Sequenced **green the loop first**, then drive the full conversion.
+Companion to [`/CLAUDE.md`](../CLAUDE.md). The path from "loop stalled" to a converted Go standard
+library that compiles, passes its upstream tests, and has working C# implementations for its
+assembly-backed declarations. Sequenced **green the loop first**, then compile, validate, and complete
+the full conversion.
 
-> **Status (2026-06-25): Phases 0–2 done — baseline is green.** `go2cs.sln` builds 79/79; behavioral suite
-> passes (216 tests). Phase 3 (the full conversion) is the remaining work.
+> **Status (2026-06-27): Phases 0–2 done — baseline is green.** Phase 3 is driving the full conversion
+> to compile. Phase 4 will convert and run Go's own package tests; Phase 5 will use those tests to prove
+> the C# implementations that replace assembly/cgo stubs.
 
 ## Phase 0 — Documentation ✅ done
 
@@ -92,7 +95,7 @@ Each verified by rebuild + reconvert + compile:
 - Negative typed const (`int8 = -1`) promoted to `GoUntyped` because the range check used `ParseUint`
   (rejects negatives) → also try `ParseInt` (`visitValueSpec.go`).
 
-## Phase 3 — Drive the full conversion to compile (the ultimate goal)
+## Phase 3 — Drive the full conversion to compile
 
 1. **Build-error roadmap.** Convert + `dotnet build` `src/go-src-converted/`, capture `build.log`; bucket
    compile errors by **frequency** and by **Go feature**. This is the prioritized work queue (the README
@@ -484,21 +487,127 @@ nil-map representation gap — a chip was filed). math/bits' last error is a loc
 pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/
 CS0029/CS1929 cluster), blocking both container packages.
 
-### The ultimate correctness gate — convert and run the stdlib's own tests (TODO)
-The behavioral suite proves *our* hand-written programs convert correctly; it does not prove the
-*converted stdlib behaves like Go*. The strongest possible gate is to **convert each stdlib package's
-own `_test.go` files and run them** (Go `go test` output vs the converted C# test output). Go's standard
-library ships an enormous, adversarial, edge-case-rich test suite — if a converted package passes its own
-upstream tests, its runtime semantics are validated against the hardest available spec. The thesis: once
-the **stdlib converts, compiles, and passes its own tests**, almost *any* Go program will convert and
-work, because nearly everything bottoms out on stdlib + the runtime substrate. Sketch of the work:
-- Teach the converter/test-harness to also emit the package's `*_test.go` as a runnable C# test target
-  (today behavioral tests deliberately exclude `*._test.cs`; this would add an opt-in stdlib-test mode).
-- Map Go's `testing.T`/`testing.B` onto a thin C# shim (or convert `testing` itself).
-- Drive per-package: convert pkg + its tests → `go test ./pkg` vs the converted run → diff. Promote a
-  package to "validated" only when its own tests pass, not merely when it compiles.
-- Start with leaf packages that already compile (e.g. `strconv`, `math/bits`, `unicode/utf8`) where the
-  test dependency closure is small, then work up.
+## Phase 4 — Convert and run Go package tests
+
+**Goal:** validate each compiling converted package against the same `_test.go` suite used by Go before
+assembly-backed implementations are attempted at scale. The detailed and authoritative design is
+[`TestingInfrastructureRequirements.md`](TestingInfrastructureRequirements.md); this section tracks the
+delivery sequence and exit gates.
+
+The behavioral suite proves individual converter/runtime constructs using hand-written fixtures. Phase 4
+adds the complementary whole-package gate: load Go's internal and external test-package variants, convert
+the eligible tests, compile them with the converted package sources, and compare their results with a clean
+`go test -json -count=1` run for the same source, build tags, GOOS, and GOARCH.
+
+### Phase 4A — colocated test projects and serial test core
+
+- Add an opt-in test conversion mode using `go/packages` with `Tests = true`; do not burden normal
+  production-only conversion.
+- Emit `x_test.go` as `x_test.cs` beside the other converted files, plus
+  `<package>.tests.csproj`, `package_test_info.cs`, a deterministic test manifest, and a generated package
+  test host.
+- Keep the production project test-free. The test project recompiles the production `.cs` sources with
+  the test sources instead of referencing the production DLL; this preserves same-package access to
+  unexported declarations and joins the same partial package class.
+- Support both `package p` and external `package p_test` tests in one isolated package executable,
+  including external self-import binding without a self-referencing project.
+- Add a hand-owned `go.testing` compatibility runtime for the initial bootstrap rather than depending on
+  the full converted `testing` package. Implement the serial core: pass/fail, `Error[f]`, `Fatal[f]`,
+  `FailNow`, logs, skips, helpers, cleanup, panic reporting, `TempDir`, `Setenv`, and `TestMain`/`M.Run`.
+- Run every package in a child process with a controlled environment, timeout, and isolated working tree
+  containing its relative fixtures and `testdata`.
+- Add end-to-end behavioral fixtures for discovery, same-package unexported access, external tests,
+  `TestMain`, failure/skip/panic/defer paths, cleanup order, build constraints, fixtures, and unsupported
+  capabilities.
+
+**Phase 4A exit:** all harness fixtures pass and at least one already-compiling leaf standard-library
+package is validated end to end.
+
+### Phase 4B — subtests, parallelism, and differential results
+
+- Implement `T.Run`, hierarchical names/filtering, duplicate subtest names, cleanup after child completion,
+  and `T.Parallel` with Go's parent/subtest barrier semantics.
+- Emit normalized package/test events and aggregate them into machine-readable output plus JUnit or TRX for
+  CI. Compare eligible test identity and terminal status with Go; do not byte-compare timings, paths, stack
+  formatting, or concurrent log interleaving.
+- Record every discovered test as included, platform-excluded, unsupported, or failed-to-convert. No omitted
+  test may silently count as a pass.
+- Detect stale manifests from source inputs, target options, converter revision, and hand-written companion
+  files; unchanged conversions must be byte-stable.
+
+**Phase 4B exit:** representative leaf packages using external tests, subtests/parallelism, and file fixtures
+validate reproducibly on the matched target platform.
+
+### Phase 4C — package coverage and CI scaling
+
+- Work bottom-up through the compiling package DAG, expanding the compatibility API from categorized real
+  failures rather than speculative reimplementation of all of `testing`.
+- Track each target/package as **validated**, **failing**, **conversion-blocked**,
+  **infrastructure-blocked**, or **not-applicable**.
+- Add batching, CI sharding, package-level timeouts, failure artifacts, and explicit flake diagnostics.
+- Keep benchmarks, active fuzzing, race-detector equivalence, and coverage-percentage equivalence outside
+  the initial correctness gate. Add examples and deterministic fuzz seed corpora later without delaying
+  Phase 5.
+
+**Phase 4 exit:** one documented command converts, builds, and runs a selected package's tests; the harness
+semantics are guarded end to end; every compiling package attempted is honestly classified; and at least
+three representative leaf packages are validated (including external-package and subtest/parallel cases).
+Only **validated** satisfies the default Phase 5 behavior gate.
+
+## Phase 5 — Implement assembly-backed declarations in C#
+
+**Goal:** replace the `PartialStubGenerator`'s throwing implementations for Go declarations backed by
+assembler, cgo, runtime/compiler intrinsics, or platform services with maintainable C# implementations,
+proved package by package by Phase 4.
+
+### Phase 5A — inventory and classify the external surface
+
+- Produce a deterministic inventory of every bodyless partial declaration and generated throwing stub,
+  including Go declaration/source, owning package, build constraints, target platforms, callers, and tests
+  that cover it.
+- Classify each member as: direct managed equivalent; .NET intrinsic/BCL primitive; platform interop;
+  runtime service; intentionally unsupported target; or dead for the selected target.
+- Prioritize bottom-up by dependency impact and test coverage. Start with leaf packages whose converted tests
+  already run, not merely the declarations that are easiest to translate.
+- Establish a per-package completion ledger linking declarations, implementation files, target support, test
+  evidence, and any reviewed waiver.
+
+### Phase 5B — declaration/implementation companion pattern
+
+- Keep the converter-owned bodyless declaration as a `partial` method. Supply the implementation in a
+  hand-owned companion such as `*_impl.cs`; when the Go source uses a declaration-oriented file, preserve
+  the corresponding converted `*_decl.cs` plus `*_impl.cs` pairing. The established
+  `sync/atomic` `doc.cs` + `doc_impl.cs` pattern is the model.
+- Never hand-edit regenerable declaration output. The `PartialStubGenerator` remains the safe compile-time
+  fallback and automatically disappears for a member once its real implementing part is present.
+- Prefer behaviorally equivalent managed code (`Interlocked`, `Volatile`, `BitOperations`, spans, BCL crypto,
+  etc.) over literal instruction-by-instruction assembly translation. Preserve Go overflow, alignment,
+  memory-ordering, pointer/GC, and platform semantics explicitly.
+- Keep platform implementations isolated by target and fail clearly for unsupported targets. Do not let a
+  generic throwing stub masquerade as completed platform support.
+- Add focused Go/C# behavioral fixtures when upstream tests do not directly exercise a declaration or an
+  important boundary condition.
+
+### Phase 5C — validate, promote, and close the stub inventory
+
+For each implemented package:
+
+1. reconvert production and tests from clean inputs;
+2. confirm the production and test projects compile without a generated stub for the implemented members;
+3. run the matched Go test baseline and converted C# suite;
+4. require all eligible relevant tests to pass, with no silent exclusions;
+5. run focused stress/edge tests for concurrency, atomics, unsafe pointers, cryptography, or platform calls
+   where ordinary unit tests are insufficient; and
+6. promote/update the baseline only after the evidence is recorded in the package ledger.
+
+Compilation alone is not completion. If a package's tests cannot yet run, it stays
+**infrastructure-blocked** or **conversion-blocked**; any platform-specific waiver must be explicit and
+reviewed.
+
+**Phase 5 exit:** for every supported target, the external-declaration inventory has no unexplained throwing
+stubs; each implemented member has a real companion or a documented target exclusion; all applicable
+packages are Phase 4 **validated**; and the full converted standard-library test run passes for the supported
+package/target matrix.
 
 ## Progress tracking
 
@@ -508,6 +617,8 @@ work, because nearly everything bottoms out on stdlib + the runtime substrate. S
 | Behavioral suite passing | `BehavioralTests` (MSTest) | ✅ 216 tests |
 | Full packages compiling | `src/go-src-converted.sln` | ◻ Phase 3 — iters 1–2: 5 converter fixes; `internal/cpu` ~140→8 errors |
 | Full-conversion error count | build-error buckets | ◻ Phase 3 — next: address-of-global correctness; re-bucket after reconvert |
+| Converted package tests | Per-package Phase 4 manifests/results | ◻ Phase 4 planned — requirements complete |
+| Assembly-backed implementations | Phase 5 external-declaration ledger | ◻ Phase 5 planned — gated by Phase 4 validation |
 
 ## Reference: open converter items (`src/go2cs/ToDo.md`)
 
