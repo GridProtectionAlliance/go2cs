@@ -542,6 +542,33 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 		case *ast.SelectorExpr:
 			obj = v.info.ObjectOf(funExpr.Sel)
 			targetExpr = nil
+		case *ast.ArrayType, *ast.MapType, *ast.ChanType:
+			// A composite type literal used as a conversion target whose argument is a
+			// named type with the *same* underlying shape — the `[]CaseRange(special)`
+			// pattern, where `special` is `type SpecialCase []CaseRange`. This lowers to
+			// a cast through the generated implicit operator: `((slice<CaseRange>)special)`.
+			// These type-literal targets have no associated types.Object, so resolve the
+			// target type directly from type info.
+			//
+			// Restricted to identical-underlying conversions so that element-decoding
+			// conversions like `[]rune(s)` / `[]byte(s)` (string source) keep their
+			// existing argument-rendering path (which casts the source to @string first).
+			if len(callExpr.Args) != 1 {
+				return false, ""
+			}
+
+			targetType := v.info.TypeOf(funExpr)
+			argType := v.info.TypeOf(callExpr.Args[0])
+
+			if targetType == nil || argType == nil {
+				return false, ""
+			}
+
+			if !types.Identical(targetType.Underlying(), argType.Underlying()) {
+				return false, ""
+			}
+
+			return types.ConvertibleTo(argType, targetType), v.getTypeName(targetType, false)
 		default:
 			return false, ""
 		}

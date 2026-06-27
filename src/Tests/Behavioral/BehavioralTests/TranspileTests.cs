@@ -195,6 +195,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
+    public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
