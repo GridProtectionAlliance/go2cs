@@ -38,6 +38,19 @@ func swapAndBump() (a int, b int) {
 
 func double(n int) int { return n * 2 }
 
+// A named-return + defer function containing value-returning closures. Each closure's own
+// `return expr` must be handled as a normal lambda return, NOT rewritten against the outer
+// named result `total` (the namedReturnDefer mode must not leak into nested func literals).
+// Also discards a closure call result (`_ = noisy()`).
+func closures(n int) (total int) {
+	defer func() { total += 1 }()
+	dbl := func(x int) int { return x * 2 } // closure's return must stay `=> x * 2`
+	noisy := func() int { return 99 }
+	_ = noisy() // discard a closure-call result
+	total = dbl(n)
+	return total
+}
+
 // explicit return whose operands are NOT just the named results, so the assignment is kept:
 // `return double(x), "v=" + ...` must run double()/the concatenation, not collapse to a
 // self-assignment. Also exercises a non-terminal (early) return that keeps its `return;`.
@@ -76,7 +89,9 @@ func main() {
 	o1, l1 := compute(3)
 	fmt.Println(o1, l1) // 1006 v=3   (double(3)=6, then defer +1000)
 	o2, l2 := compute(-5)
-	fmt.Println(o2, l2) // 999 neg    (-1, then defer +1000)  (1,2 -> swap -> 2,1 -> a+=100 -> 102,1)
+	fmt.Println(o2, l2) // 999 neg    (-1, then defer +1000)
+
+	fmt.Println(closures(5)) // 11   (dbl(5)=10, then defer +1)  (1,2 -> swap -> 2,1 -> a+=100 -> 102,1)
 
 	c1, m1 := guarded(false)
 	fmt.Println(c1, m1) // 0 ok

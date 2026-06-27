@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() => func((defer, _) => {
+internal static void Main() => func((defer, recover) => {
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), "First", defer);
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), "Second", defer);
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), "Third", defer);

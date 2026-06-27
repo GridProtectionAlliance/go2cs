@@ -6,7 +6,7 @@ partial class main_package {
 
 internal static nint /*x*/ incr() {
     nint x = default!;
-    func((defer, _) => {
+    func((defer, recover) => {
         defer(() => {
             x++;
         });
@@ -17,7 +17,7 @@ internal static nint /*x*/ incr() {
 
 internal static nint /*x*/ incrBare() {
     nint x = default!;
-    func((defer, _) => {
+    func((defer, recover) => {
         defer(() => {
             x += 10;
         });
@@ -29,7 +29,7 @@ internal static nint /*x*/ incrBare() {
 internal static (nint a, nint b) swapAndBump() {
     nint a = default!;
     nint b = default!;
-    func((defer, _) => {
+    func((defer, recover) => {
         defer(() => {
             (a, b) = (b, a);
             a += 100;
@@ -44,10 +44,24 @@ internal static nint @double(nint n) {
     return n * 2;
 }
 
+internal static nint /*total*/ closures(nint n) {
+    nint total = default!;
+    func((defer, recover) => {
+        defer(() => {
+            total += 1;
+        });
+        var dbl = (nint x) => x * 2;
+        var noisy = () => 99;
+        _ = noisy();
+        total = dbl(n);
+    });
+    return total;
+}
+
 internal static (nint @out, @string label) compute(nint x) {
     nint @out = default!;
     @string label = default!;
-    func((defer, _) => {
+    func((defer, recover) => {
         defer(() => {
             @out += 1000;
         });
@@ -90,6 +104,7 @@ internal static void Main() {
     fmt.Println(o1, l1);
     var (o2, l2) = compute(-5);
     fmt.Println(o2, l2);
+    fmt.Println(closures(5));
     var (c1, m1) = guarded(false);
     fmt.Println(c1, m1);
     var (c2, m2) = guarded(true);

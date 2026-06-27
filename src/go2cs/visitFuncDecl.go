@@ -438,19 +438,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	var funcExecutionContext string
 
 	if useFuncExecutionContext {
-		var deferParam, recoverParam string
-
-		if v.hasDefer {
-			deferParam = "defer"
-		} else {
-			deferParam = "_"
-		}
-
-		if v.hasRecover {
-			recoverParam = "recover"
-		} else {
-			recoverParam = "_"
-		}
+		// Always name the wrapper's two parameters by their roles, even when one is unused.
+		// Using `_` for an unused parameter is unsafe: a single `_` is a *named* C# lambda
+		// parameter (not a discard), so a `_ = expr` discard in the body would bind to it
+		// rather than discarding (e.g. `_ = call()` → CS0029). Unused-parameter warnings are
+		// already suppressed (IDE0060) for the converted projects.
+		deferParam := "defer"
+		recoverParam := "recover"
 
 		if v.namedReturnDeferMode {
 			// Open a block body, declare the named returns outside the wrapper (so defers/recover

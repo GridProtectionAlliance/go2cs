@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void setViaDefer(ж<nint> Ꮡp) => func((defer, _) => {
+internal static void setViaDefer(ж<nint> Ꮡp) => func((defer, recover) => {
     ref var p = ref Ꮡp.val;
 
     defer(() => {
@@ -22,7 +22,7 @@ internal static void bumpInClosure(ж<nint> Ꮡp) {
     add();
 }
 
-internal static void mixed(ж<nint> Ꮡp) => func((defer, _) => {
+internal static void mixed(ж<nint> Ꮡp) => func((defer, recover) => {
     ref var p = ref Ꮡp.val;
 
     p = 5;

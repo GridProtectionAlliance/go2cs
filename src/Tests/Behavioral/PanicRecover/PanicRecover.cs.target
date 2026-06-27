@@ -22,7 +22,7 @@ internal static void f() => func((defer, recover) => {
     fmt.Println("Returned normally from g.");
 });
 
-internal static void g(nint i) => func((defer, _) => {
+internal static void g(nint i) => func((defer, recover) => {
     if (i > 3) {
         fmt.Println("Panicking!");
         throw panic(fmt.Sprintf("%v"u8, i));

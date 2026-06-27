@@ -11,6 +11,21 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		v.currentFuncSignature = v.info.Types[funcLit].Type.(*types.Signature)
 	}
 
+	// A function literal is emitted as its own C# lambda with normal return handling. The
+	// enclosing function's namedReturnDeferMode (which rewrites `return e` into a named-result
+	// assignment) must not leak into it — otherwise the closure's `return expr` would be
+	// rewritten against the OUTER function's named results. Suppress it for the literal's body
+	// and restore it afterward.
+	savedNamedReturnDeferMode := v.namedReturnDeferMode
+	savedNamedReturnNames := v.namedReturnNames
+	v.namedReturnDeferMode = false
+	v.namedReturnNames = nil
+
+	defer func() {
+		v.namedReturnDeferMode = savedNamedReturnDeferMode
+		v.namedReturnNames = savedNamedReturnNames
+	}()
+
 	if v.lambdaCapture == nil {
 		v.lambdaCapture = newLambdaCapture()
 		v.capturedVarCount = make(map[string]int)

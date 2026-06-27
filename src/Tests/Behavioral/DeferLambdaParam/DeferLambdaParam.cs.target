@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static void Main() => func((defer, _) => {
+internal static void Main() => func((defer, recover) => {
     nint count = 1;
     deferǃ((nint cnt) => {
         fmt.Println("Deferred count (closure):", cnt);
