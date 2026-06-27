@@ -58,6 +58,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

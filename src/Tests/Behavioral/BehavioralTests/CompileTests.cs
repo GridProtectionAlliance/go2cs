@@ -54,6 +54,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

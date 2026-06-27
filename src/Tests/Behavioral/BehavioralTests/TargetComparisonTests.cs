@@ -56,6 +56,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
+
+    [TestMethod]
     public void CheckBlankIdentifierCollision() => CheckTarget("BlankIdentifierCollision");
 
     [TestMethod]

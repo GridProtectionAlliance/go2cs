@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
+	"strconv"
 )
 
 // isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
@@ -26,6 +28,44 @@ func (v *Visitor) isUntypedNamedConstRef(expr ast.Expr) bool {
 		if basic, ok := constObj.Type().(*types.Basic); ok {
 			return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
 		}
+	}
+
+	return false
+}
+
+// isBigIntegerBackedConstRef reports whether the expression references an untyped numeric constant
+// whose value does not fit int64/uint64 (or float64) and is therefore emitted as `GoUntyped`
+// (= System.Numerics.BigInteger). Such a constant has no implicit operator with the built-in
+// numeric types, so it must be cast even in comparisons.
+func (v *Visitor) isBigIntegerBackedConstRef(expr ast.Expr) bool {
+	if !v.isUntypedNamedConstRef(expr) {
+		return false
+	}
+
+	var sel *ast.Ident
+
+	switch e := expr.(type) {
+	case *ast.Ident:
+		sel = e
+	case *ast.SelectorExpr:
+		sel = e.Sel
+	}
+
+	constObj, ok := v.info.ObjectOf(sel).(*types.Const)
+
+	if !ok {
+		return false
+	}
+
+	switch constObj.Val().Kind() {
+	case constant.Int:
+		s := constObj.Val().ExactString()
+		_, errUint := strconv.ParseUint(s, 0, 64)
+		_, errInt := strconv.ParseInt(s, 0, 64)
+		return errUint != nil && errInt != nil
+	case constant.Float:
+		_, err := strconv.ParseFloat(constObj.Val().String(), 64)
+		return err != nil
 	}
 
 	return false
@@ -136,23 +176,34 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			return fmt.Sprintf("(%s)(%s%s%s)", binaryTypeName, leftOperand, binaryOp, rightOperand)
 		}
 
-		// When one operand of an arithmetic op is a reference to a *named* untyped numeric constant
-		// (emitted as the golib `UntypedInt`/`UntypedFloat` wrapper) and the other is a concrete
-		// numeric type, the wrapper's bidirectional implicit conversions make the result resolve to
-		// the wrong type — e.g. `q1 * two32` (ulong * UntypedInt) yields `int` (CS0029). Cast the
-		// untyped-const operand to the concrete operand's type. Bare literals are not wrapped and
-		// follow normal C# rules, so this targets named consts only (e.g. `const two32 = 1<<32`).
-		// Comparisons resolve fine through the implicit conversion, so only arithmetic is cast.
+		// When one operand is a reference to a *named* untyped numeric constant and the other is a
+		// concrete numeric type, the constant's emitted form may not interoperate with that type:
+		//   - Arithmetic: a wrapper (`UntypedInt`/`UntypedFloat`) has bidirectional implicit
+		//     conversions, so e.g. `q1 * two32` (ulong * UntypedInt) resolves to `int` (CS0029).
+		//   - Comparison: a value too large for int64/uint64 (or float64) is emitted as `GoUntyped`
+		//     (= BigInteger), which has no implicit operator with `double` etc. — `x > Two129`
+		//     yields CS0019. (Wrapper comparisons resolve via the implicit conversion, so those are
+		//     left alone to avoid redundant casts.)
+		// Cast the untyped-const operand to the concrete operand's type. Bare literals are not
+		// wrapped and follow normal C# rules, so this targets named consts only.
+		var castLeft, castRight bool
+
 		switch binaryExpr.Op {
 		case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
-			if v.isUntypedNamedConstRef(binaryExpr.X) {
-				if tn := v.concreteNumericCSType(rhsType); tn != "" {
-					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
-				}
-			} else if v.isUntypedNamedConstRef(binaryExpr.Y) {
-				if tn := v.concreteNumericCSType(lhsType); tn != "" {
-					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
-				}
+			castLeft = v.isUntypedNamedConstRef(binaryExpr.X)
+			castRight = !castLeft && v.isUntypedNamedConstRef(binaryExpr.Y)
+		case token.LSS, token.LEQ, token.GTR, token.GEQ, token.EQL, token.NEQ:
+			castLeft = v.isBigIntegerBackedConstRef(binaryExpr.X)
+			castRight = !castLeft && v.isBigIntegerBackedConstRef(binaryExpr.Y)
+		}
+
+		if castLeft {
+			if tn := v.concreteNumericCSType(rhsType); tn != "" {
+				leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
+			}
+		} else if castRight {
+			if tn := v.concreteNumericCSType(lhsType); tn != "" {
+				rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
 			}
 		}
 
