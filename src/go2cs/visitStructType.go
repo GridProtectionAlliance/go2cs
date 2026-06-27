@@ -76,7 +76,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		dynamic = "(\"dyn\")"
 	}
 
-	v.writeStringLn(target, "[GoType%s] partial struct %s%s%s{", dynamic, structTypeName, typeParams, constraints)
+	// Consume any pending publicized-type access modifier (an unexported type used as an
+	// exported field). Only the top-level type declaration carries it; nested/anonymous lifts do
+	// not, so read and clear before visiting fields (which may recurse into this function).
+	access := v.pendingTypeAccess
+	v.pendingTypeAccess = ""
+
+	v.writeStringLn(target, "[GoType%s] %spartial struct %s%s%s{", dynamic, access, structTypeName, typeParams, constraints)
 	v.indentLevel++
 
 	var prevNameDiscardedCount int

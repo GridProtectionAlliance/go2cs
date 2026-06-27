@@ -49,12 +49,17 @@ func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string
 		v.writeString(target, "[GoType(\"%s\")]", csTypeName)
 	}
 
+	// Consume any pending publicized-type access modifier (an unexported type used as an
+	// exported field — CS0051/CS0052).
+	access := v.pendingTypeAccess
+	v.pendingTypeAccess = ""
+
 	if strings.HasPrefix(name, PointerPrefix) {
 		// Handle pointer types
-		v.writeString(target, " partial class %s;", getSanitizedIdentifier(name))
+		v.writeString(target, " %spartial class %s;", access, getSanitizedIdentifier(name))
 		usesUnsafeCode = true
 	} else {
-		v.writeString(target, " partial struct %s;", getSanitizedIdentifier(name))
+		v.writeString(target, " %spartial struct %s;", access, getSanitizedIdentifier(name))
 	}
 
 	target.WriteString(v.newline)

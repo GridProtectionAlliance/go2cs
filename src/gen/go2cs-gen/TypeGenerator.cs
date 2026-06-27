@@ -85,8 +85,10 @@ public class TypeGenerator : ISourceGenerator
             string fullyQualifiedIdentifier = semanticModel.GetDeclaredSymbol(targetSyntax)?.ToDisplayString() ?? $"{packageNamespace}.{packageClassName}.{identifier}";
             
             // Since many types are referenced by assembly attributes outside namespace,
-            // "internal" scope is used so types can be referenced instead of "private"
-            string scope = GetScope(identifier);
+            // "internal" scope is used so types can be referenced instead of "private".
+            // An explicit modifier on the converter's partial declaration wins (e.g. an
+            // unexported type publicized because it is an exported field's type — CS0051/CS0052).
+            string scope = GetExplicitAccessModifier(targetSyntax) ?? GetScope(identifier);
 
             string[] usingStatements = GetFullyQualifiedUsingStatements(syntaxTree, semanticModel);
 

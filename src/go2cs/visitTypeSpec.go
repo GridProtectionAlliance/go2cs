@@ -70,6 +70,14 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		return
 	}
 
+	// An unexported type used as an exported struct field must be emitted as public (CS0051/
+	// CS0052). Set the access modifier for the type-kind emitter below to consume.
+	if v.isPublicizedType(typeSpec.Name) {
+		v.pendingTypeAccess = "public "
+	}
+
+	defer func() { v.pendingTypeAccess = "" }()
+
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
 		v.visitArrayType(typeSpecType, name, typeSpec.Comment)

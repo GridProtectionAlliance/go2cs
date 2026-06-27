@@ -211,4 +211,28 @@ public static class Common
         char firstChar = identifier[0];
         return char.IsUpper(firstChar) || firstChar == '_' ? "public" : "internal";
     }
+
+    // Returns the explicit C# access modifier on a type declaration (e.g. the converter-emitted
+    // `public partial struct d`), or null when none is present. This lets an explicit modifier
+    // from the converter override the name-based GetScope — e.g. an unexported type that the
+    // converter publicized because it is used as the type of an exported field (CS0051/CS0052).
+    public static string GetExplicitAccessModifier(BaseTypeDeclarationSyntax typeDeclaration)
+    {
+        foreach (SyntaxToken modifier in typeDeclaration.Modifiers)
+        {
+            switch (modifier.Kind())
+            {
+                case SyntaxKind.PublicKeyword:
+                    return "public";
+                case SyntaxKind.InternalKeyword:
+                    return "internal";
+                case SyntaxKind.PrivateKeyword:
+                    return "private";
+                case SyntaxKind.ProtectedKeyword:
+                    return "protected";
+            }
+        }
+
+        return null;
+    }
 }

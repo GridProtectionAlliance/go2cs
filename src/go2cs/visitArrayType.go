@@ -41,7 +41,10 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, name string, comment 
 			}
 		}
 
-		v.writeOutput("partial struct %s;", getSanitizedIdentifier(name))
+		access := v.pendingTypeAccess
+		v.pendingTypeAccess = ""
+
+		v.writeOutput("%spartial struct %s;", access, getSanitizedIdentifier(name))
 		v.writeComment(comment, arrayType.Elt.End()+typeLenDeviation)
 		v.targetFile.WriteString(v.newline)
 	} else {

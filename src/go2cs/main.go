@@ -111,6 +111,11 @@ type Visitor struct {
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool
+	// pendingTypeAccess carries an explicit C# access modifier ("public ") for the type
+	// declaration currently being emitted — set by visitTypeSpec for an unexported type that
+	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
+	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
+	pendingTypeAccess    string
 	// namedReturnDeferMode is set when the current function has named return values AND uses
 	// defer/recover. Such a function is emitted as a block body that declares the named returns
 	// *outside* the `func((defer, recover) => …)` wrapper (so deferred code, including recover,
@@ -492,6 +497,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		globalTempVarCount = make(map[string]int)
 		packageDynamicTypeNames = make(map[string]string)
 		packageAddressedGlobals = make(map[types.Object]bool)
+		packagePublicizedTypes = make(map[types.Object]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 		initFuncCounter = 0
@@ -573,6 +579,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)
+
+		// Find unexported types used as exported struct fields so they can be emitted as public
+		// (an exported field's type must be at least as accessible — CS0051/CS0052).
+		collectPublicizedTypes(packageTypes)
 
 		var concurrentTasks sync.WaitGroup
 		var outputFileNames []string
