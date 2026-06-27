@@ -22,11 +22,14 @@ const (
 
 // A blank function — the real-world trigger (go's stringer emits one as a compile-time
 // assertion). Its mere presence puts `_` in both the named-element and method-name sets,
-// which is what used to drive the spurious collision.
+// which is what used to drive the spurious collision. It is given a unique generated name so a
+// `_ = expr` discard in its body stays a discard rather than binding to the method group (CS1656).
 func _() {
 	if A+B+C < 0 {
 		panic("unreachable")
 	}
+	x := A
+	_ = x // a discard inside `func _()` — would bind to the method `_` without the rename
 }
 
 func main() {

@@ -25,6 +25,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	goFunctionName := funcDecl.Name.Name
 	csFunctionName := getSanitizedFunctionName(goFunctionName)
 
+	// A Go function named `_` (blank) is a compile-time-only construct — it is never callable, and
+	// a package may declare several. Emitting it literally as a method `_` makes a `_ = expr`
+	// discard in its body bind to the method group (CS1656). Give it a unique generated name so
+	// `_` remains a discard inside (and multiple blank funcs don't collide).
+	if goFunctionName == "_" && funcDecl.Recv == nil {
+		csFunctionName = getGlobalTempVarName("_")
+	}
+
 	v.currentFuncDecl = funcDecl
 	v.currentFuncName = csFunctionName
 	v.currentFuncPrefix = &strings.Builder{}

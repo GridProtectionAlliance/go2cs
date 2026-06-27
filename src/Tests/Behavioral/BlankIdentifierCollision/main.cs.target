@@ -12,10 +12,12 @@ public static readonly Code B = 2;
 internal static readonly Code _ᴛ2ʗ = 3;
 public static readonly Code C = 4;
 
-internal static void _() {
+internal static void _ᴛ3() {
     if (A + B + C < 0) {
         throw panic("unreachable");
     }
+    Code x = A;
+    _ = x;
 }
 
 internal static void Main() {
