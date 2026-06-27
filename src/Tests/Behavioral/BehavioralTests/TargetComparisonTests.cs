@@ -176,6 +176,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]
+    public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

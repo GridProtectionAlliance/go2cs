@@ -142,6 +142,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]
+    public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

@@ -34,15 +34,32 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	result := strings.Builder{}
 	deferredDecls := strings.Builder{}
 
+	// In namedReturnDeferMode a `return e1, e2` assigns the named result params and then returns
+	// (via the void func() wrapper); the wrapper's caller side emits the actual `return <named>`
+	// after the defers run. So here we emit `(named1, named2) = (e1, e2); return;` for an explicit
+	// return, or a bare `return;` for a naked return (the result params are already set).
+	namedDefer := v.namedReturnDeferMode
+
 	result.WriteString(DeferredDeclsMarker)
 	result.WriteString(v.indent(v.indentLevel))
-	result.WriteString("return")
+
+	if namedDefer && returnStmt.Results != nil {
+		if len(v.namedReturnNames) > 1 {
+			result.WriteString("(" + strings.Join(v.namedReturnNames, ", ") + ") = ")
+		} else if len(v.namedReturnNames) == 1 {
+			result.WriteString(v.namedReturnNames[0] + " = ")
+		}
+	} else {
+		result.WriteString("return")
+	}
 
 	signature := v.currentFuncSignature
 
 	if returnStmt.Results == nil {
-		// Check if result signature has named return values
-		if signature != nil {
+		// In namedReturnDeferMode a naked return is just `return;` — the result params are
+		// already assigned and are returned (post-defer) by the wrapper's caller side.
+		if signature != nil && !namedDefer {
+			// Check if result signature has named return values
 			results := &strings.Builder{}
 
 			for i := range signature.Results().Len() {
@@ -80,7 +97,11 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 			}
 		}
 	} else {
-		result.WriteRune(' ')
+		// In namedReturnDeferMode the LHS already ends with "= "; otherwise separate "return"
+		// from its operand with a space.
+		if !namedDefer {
+			result.WriteRune(' ')
+		}
 
 		basicLitContext := DefaultBasicLitContext()
 
@@ -149,6 +170,13 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	}
 
 	result.WriteRune(';')
+
+	// In namedReturnDeferMode an explicit return assigned the named result params above; follow it
+	// with a bare `return;` out of the void func() wrapper (the named results are returned after
+	// the defers run). A naked return already produced just `return;`.
+	if namedDefer && returnStmt.Results != nil {
+		result.WriteString(" return;")
+	}
 
 	if deferredDecls.Len() == 0 {
 		deferredDecls.WriteString(v.newline)

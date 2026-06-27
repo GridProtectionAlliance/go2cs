@@ -111,6 +111,14 @@ type Visitor struct {
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool
+	// namedReturnDeferMode is set when the current function has named return values AND uses
+	// defer/recover. Such a function is emitted as a block body that declares the named returns
+	// *outside* the `func((defer, recover) => …)` wrapper (so deferred code, including recover,
+	// mutates them by closure) and returns them *after* the wrapper runs — matching Go, where a
+	// `return` assigns the result params, runs the defers, then returns the (possibly-mutated)
+	// result params. namedReturnNames holds those result identifiers in order.
+	namedReturnDeferMode bool
+	namedReturnNames     []string
 	useUnsafeFunc        bool
 	capturedVarCount     map[string]int
 	tempVarCount         map[string]int

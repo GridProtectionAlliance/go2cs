@@ -45,8 +45,44 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	// the field-ref form `Ꮡx.of(Type.ᏑField)`. See packageDirectBoxReceiverMethods.
 	directBoxReceiver := packageDirectBoxReceiverMethods != nil && packageDirectBoxReceiverMethods[currentFuncType]
 
-	// Analyze function variables for reassignments and redeclarations (variable shadows)
+	// Analyze function variables for reassignments and redeclarations (variable shadows).
+	// This also walks the whole body, so v.hasDefer / v.hasRecover are known afterward.
 	v.performVariableAnalysis(funcDecl, signature)
+
+	// A function with named return values that also uses defer/recover needs the named
+	// returns declared outside the func() wrapper and returned after it (see the field doc on
+	// namedReturnDeferMode). Determine that here, before the body is emitted, so visitReturnStmt
+	// can route returns through the named result params.
+	v.namedReturnDeferMode = false
+	v.namedReturnNames = nil
+
+	if (v.hasDefer || v.hasRecover) && funcDecl.Body != nil && signature.Results() != nil {
+		results := signature.Results()
+		names := make([]string, 0, results.Len())
+		allNamed := results.Len() > 0
+
+		for i := range results.Len() {
+			param := results.At(i)
+
+			if param.Name() == "" || isDiscardedVar(param.Name()) {
+				allNamed = false
+				break
+			}
+
+			ident := v.getVarIdent(param)
+
+			if ident != nil {
+				names = append(names, getSanitizedIdentifier(v.getIdentName(ident)))
+			} else {
+				names = append(names, getSanitizedIdentifier(param.Name()))
+			}
+		}
+
+		if allNamed {
+			v.namedReturnDeferMode = true
+			v.namedReturnNames = names
+		}
+	}
 
 	// Collect parameter names from the function declaration
 	if v.paramNames == nil {
@@ -162,6 +198,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	useFuncExecutionContext := v.hasDefer || v.hasRecover
 	parameterSignature, receiverAccess := v.generateParametersSignature(signature, true)
 	blockPrefix := ""
+	// In namedReturnDeferMode this holds the named-return declarations, emitted outside the
+	// func() wrapper (see the exec-context assembly below).
+	namedReturnDeclsStr := ""
 
 	// If receiver access is not public, update function access to match
 	if len(receiverAccess) > 0 && receiverAccess != "public" {
@@ -173,9 +212,20 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		arrayClones := &strings.Builder{}
 		implicitPointers := &strings.Builder{}
 
+		// In namedReturnDeferMode the named-return declarations are emitted OUTSIDE the func()
+		// wrapper (so defers/recover mutate them by closure); collect them separately. Otherwise
+		// they go into the block prefix inside the wrapper as before.
+		namedReturnDecls := &strings.Builder{}
+
 		if funcDecl.Type.Results != nil && len(funcDecl.Type.Results.List) > 0 {
 			resultParams := signature.Results()
 			paramIndex := 0
+
+			resultDeclTarget := resultParameters
+
+			if v.namedReturnDeferMode {
+				resultDeclTarget = namedReturnDecls
+			}
 
 			for _, field := range funcDecl.Type.Results.List {
 				names := field.Names
@@ -195,9 +245,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						param := resultParams.At(paramIndex)
 						paramName := getSanitizedIdentifier(v.getIdentName(ident))
 
-						resultParameters.WriteString(v.newline)
+						resultDeclTarget.WriteString(v.newline)
 
-						v.writeString(resultParameters, "%s%s %s = default!;", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), paramName)
+						v.writeString(resultDeclTarget, "%s%s %s = default!;", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), paramName)
 
 						paramIndex++
 					}
@@ -238,6 +288,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					v.writeString(resultParameters, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
 				}
 			}
+		}
+
+		if namedReturnDecls.Len() > 0 {
+			namedReturnDeclsStr = namedReturnDecls.String()
 		}
 
 		if resultParameters.Len() > 0 {
@@ -386,7 +440,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			recoverParam = "_"
 		}
 
-		funcExecutionContext = fmt.Sprintf(" => func((%s, %s) =>", deferParam, recoverParam)
+		if v.namedReturnDeferMode {
+			// Open a block body, declare the named returns outside the wrapper (so defers/recover
+			// mutate them by closure), then open the void func() wrapper. The trailing
+			// `return <named>;` and block close are emitted after the body below.
+			funcExecutionContext = fmt.Sprintf(" {%s%s%sfunc((%s, %s) =>", namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), deferParam, recoverParam)
+		} else {
+			funcExecutionContext = fmt.Sprintf(" => func((%s, %s) =>", deferParam, recoverParam)
+		}
 	} else {
 		funcExecutionContext = ""
 	}
@@ -401,7 +462,27 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.replaceMarker(functionPrefixMarker, v.currentFuncPrefix.String())
 
 	if useFuncExecutionContext {
-		v.writeOutputLn(");")
+		if v.namedReturnDeferMode {
+			// Close the func(...) call (attaches to the lambda's `}` → `});`), then return the
+			// named results — which the deferred code / recover may have mutated — and close the
+			// block body opened in the exec-context above.
+			returnExpr := strings.Join(v.namedReturnNames, ", ")
+
+			if len(v.namedReturnNames) > 1 {
+				returnExpr = "(" + returnExpr + ")"
+			}
+
+			indentInner := v.indent(v.indentLevel + 1)
+			indentOuter := v.indent(v.indentLevel)
+			savedIndent := v.indentLevel
+			v.indentLevel = 0
+			v.writeOutputLn(");")
+			v.writeOutputLn("%sreturn %s;", indentInner, returnExpr)
+			v.writeOutputLn("%s}", indentOuter)
+			v.indentLevel = savedIndent
+		} else {
+			v.writeOutputLn(");")
+		}
 	} else if signatureOnly {
 		// Bodyless (assembly/cgo) function: emit a `partial` declaration; the body is
 		// supplied by a hand-written companion or the PartialStubGenerator.
