@@ -40,10 +40,31 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	// return, or a bare `return;` for a naked return (the result params are already set).
 	namedDefer := v.namedReturnDeferMode
 
+	// An explicit `return n1, n2` that returns exactly the named result identifiers (in order) is
+	// equivalent to a naked return — emitting the assignment would be a `(n1, n2) = (n1, n2)`
+	// self-assignment. Skip it. Only collapse when *every* result is a bare named-result ident:
+	// `return foo(), msg` must keep the assignment because foo() may have side effects.
+	explicitIsNamed := namedDefer && returnStmt.Results != nil && len(returnStmt.Results) == len(v.namedReturnNames)
+
+	if explicitIsNamed {
+		for i, expr := range returnStmt.Results {
+			ident, ok := expr.(*ast.Ident)
+
+			if !ok || getSanitizedIdentifier(v.getIdentName(ident)) != v.namedReturnNames[i] {
+				explicitIsNamed = false
+				break
+			}
+		}
+	}
+
+	// namedDeferAssign is true when we must emit the `(named) = (results); return;` form (an
+	// explicit return whose results are not simply the named results themselves).
+	namedDeferAssign := namedDefer && returnStmt.Results != nil && !explicitIsNamed
+
 	result.WriteString(DeferredDeclsMarker)
 	result.WriteString(v.indent(v.indentLevel))
 
-	if namedDefer && returnStmt.Results != nil {
+	if namedDeferAssign {
 		if len(v.namedReturnNames) > 1 {
 			result.WriteString("(" + strings.Join(v.namedReturnNames, ", ") + ") = ")
 		} else if len(v.namedReturnNames) == 1 {
@@ -55,7 +76,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	signature := v.currentFuncSignature
 
-	if returnStmt.Results == nil {
+	if returnStmt.Results == nil || explicitIsNamed {
+		// In namedReturnDeferMode a naked return — or an explicit return of exactly the named
+		// results — is just `return;` (the result params are already set). Otherwise:
 		// In namedReturnDeferMode a naked return is just `return;` — the result params are
 		// already assigned and are returned (post-defer) by the wrapper's caller side.
 		if signature != nil && !namedDefer {
@@ -173,8 +196,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 	// In namedReturnDeferMode an explicit return assigned the named result params above; follow it
 	// with a bare `return;` out of the void func() wrapper (the named results are returned after
-	// the defers run). A naked return already produced just `return;`.
-	if namedDefer && returnStmt.Results != nil {
+	// the defers run). A naked return — or an explicit return of exactly the named results —
+	// already produced just `return;`.
+	if namedDeferAssign {
 		result.WriteString(" return;")
 	}
 

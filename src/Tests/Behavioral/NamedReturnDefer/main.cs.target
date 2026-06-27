@@ -11,7 +11,7 @@ internal static nint /*x*/ incr() {
         x++;
     });
     x = 5;
-    x = x; return;
+    return;
 });
     return x;
 }
@@ -38,7 +38,7 @@ internal static (nint a, nint b) swapAndBump() {
     });
     a = 1;
     b = 2;
-    (a, b) = (a, b); return;
+    return;
 });
     return (a, b);
 }
@@ -60,7 +60,7 @@ internal static (nint code, @string msg) guarded(bool boom) {
     }
     code = 0;
     msg = "ok"u8;
-    (code, msg) = (code, msg); return;
+    return;
 });
     return (code, msg);
 }
