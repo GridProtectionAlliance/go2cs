@@ -300,6 +300,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]

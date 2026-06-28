@@ -343,7 +343,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	}
 
 	funcTypeName := v.getTypeName(funcType, true)
-	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune"
+	// A string-source element-decoding conversion — `[]rune("lit")` or `[]byte("lit")` — must cast
+	// the literal to golib's `@string` so the existing `@string`→`slice<rune>`/`slice<byte>`
+	// conversion applies. A bare string literal is a System.String, which has no such conversion
+	// (CS1503/CS1929). A string *variable* is already `@string`, so this only matters for literals;
+	// the cast fires only on STRING basic-literal args (see convBasicLit). The flag name predates
+	// the `[]byte` case.
+	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune" || funcTypeName == "[]byte"
 
 	if len(callExpr.Args) == 1 {
 		argTypeName := v.getExprTypeName(callExpr.Args[0], true)

@@ -302,6 +302,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]
