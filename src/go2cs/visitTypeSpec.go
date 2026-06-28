@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
@@ -48,6 +49,18 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			}
 
 			usePackagePrefix = true
+		}
+
+		// A type alias to a SAME-PACKAGE named type (`type alias = Inner`) must qualify the target
+		// with the package class — the `global using` sits at namespace scope, outside the class, so
+		// a bare `go.Inner` does not resolve (Inner is `go.main_package.Inner`). Cross-package targets
+		// already carry their own qualification, so only same-package named targets need this.
+		if !usePackagePrefix {
+			if named, ok := types.Unalias(typeSpecType).(*types.Named); ok {
+				if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg {
+					usePackagePrefix = true
+				}
+			}
 		}
 
 		var typeNamePrefix string

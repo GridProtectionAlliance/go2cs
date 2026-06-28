@@ -53,6 +53,7 @@
     <Project Path="Tests/Behavioral/BehavioralTests/BehavioralTests.csproj" />
   </Folder>
   <Folder Name="/tests/behavioral/target-projects/">
+    <Project Path="Tests/Behavioral/AliasStructComposite/AliasStructComposite.csproj" />
     <Project Path="Tests/Behavioral/AnonStructArrayElement/AnonStructArrayElement.csproj" />
     <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />

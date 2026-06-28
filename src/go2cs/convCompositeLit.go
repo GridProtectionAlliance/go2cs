@@ -157,14 +157,15 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	lbrace := "{"
 	rbrace := "}"
 
-	if named, ok := exprType.(*types.Named); ok {
-		if _, ok := named.Underlying().(*types.Struct); ok {
+	// A struct composite uses the constructor form `new T(field: v)`. Test the UNDERLYING type so
+	// this also covers a type ALIAS to a struct (`type name = abi.Name`, a *types.Alias in Go 1.22+,
+	// which is neither *types.Named nor *types.Struct) — otherwise it would wrongly keep the `{`
+	// object-initializer braces and emit the un-compilable Go form `new name{field: v}`.
+	if exprType != nil {
+		if _, ok := exprType.Underlying().(*types.Struct); ok {
 			lbrace = "("
 			rbrace = ")"
 		}
-	} else if _, ok := exprType.(*types.Struct); ok {
-		lbrace = "("
-		rbrace = ")"
 	}
 
 	if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].Pos(), compositeLit.Rbrace) {

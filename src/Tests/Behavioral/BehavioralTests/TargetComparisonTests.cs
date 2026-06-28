@@ -38,6 +38,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
