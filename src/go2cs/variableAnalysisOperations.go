@@ -202,6 +202,7 @@ func newLambdaCapture() *LambdaCapture {
 		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
 		pendingCaptures:   make(map[string]*CapturedVarInfo),
 		currentLambdaVars: make(map[string]string),
+		boxRefVars:        make(map[types.Object]bool),
 		detectingCaptures: true,
 	}
 }
@@ -1385,12 +1386,77 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// A heap-boxed local whose address is taken inside this lambda must be referenced through its
+	// box, not snapshot-copied: the value copy loses the box (writes through the captured `&m` are
+	// lost) and the copy declaration `var mʗ1 = m;` is invalid in expression position (a func
+	// literal passed as a call argument has no statement slot). Mark it box-ref and skip the
+	// snapshot — emission then renders `&m` as `Ꮡm` and value uses as `Ꮡm.val` (see convUnaryExpr
+	// / convIdent). The box `Ꮡm` is a plain local, captured by reference by the C# closure, which
+	// matches Go's capture-by-reference semantics.
+	if escapesToHeap && v.varAddressTakenInLambda(varObj) {
+		v.lambdaCapture.boxRefVars[varObj] = true
+		return
+	}
+
 	// Record the capture
 	if v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] == nil {
 		v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] = make(map[*ast.Ident]bool)
 	}
 
 	v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda][ident] = true
+}
+
+// varAddressTakenInLambda reports whether the address of varObj is taken inside the lambda currently
+// being analyzed, in a form that emission renders through the box (see lambdaBoxRefAddressForm):
+// the bare identifier (`&m`) or a value-struct field (`&m.field`). An element address (`&m[i]`) is
+// NOT matched — it keeps the existing snapshot path (no box-ref emission form for it). Emission then
+// renders every address/value form of the box-ref var consistently through the box `Ꮡm`.
+func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
+	lambda := v.lambdaCapture.currentLambda
+
+	if lambda == nil || varObj == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(lambda, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		unaryExpr, ok := n.(*ast.UnaryExpr)
+
+		if !ok || unaryExpr.Op != token.AND {
+			return true
+		}
+
+		// &m
+		if ident, ok := unaryExpr.X.(*ast.Ident); ok && v.info.ObjectOf(ident) == varObj {
+			found = true
+			return false
+		}
+
+		// &m.field where m is a value struct (matches the SelectorExpr case in lambdaBoxRefAddressForm)
+		if sel, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
+			if ident, ok := sel.X.(*ast.Ident); ok && v.info.ObjectOf(ident) == varObj {
+				if _, ok := v.getType(sel.X, true).(*types.Struct); ok {
+					found = true
+					return false
+				}
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// isLambdaBoxRefVar reports whether obj is a heap-boxed local marked for box-ref capture (its
+// address was taken inside a lambda). Emission references such a var through its box `Ꮡm`.
+func (v *Visitor) isLambdaBoxRefVar(obj types.Object) bool {
+	return v.lambdaCapture != nil && obj != nil && v.lambdaCapture.boxRefVars[obj]
 }
 
 // Helper to determine if an expression requires lambda conversion

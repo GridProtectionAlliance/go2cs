@@ -115,6 +115,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
+    public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]

@@ -66,6 +66,14 @@ type LambdaCapture struct {
 
 	currentLambdaVars map[string]string // Original var name to capture name tracking within current lambda
 
+	// boxRefVars holds heap-boxed local variables whose address is taken inside a lambda. Such a
+	// variable must NOT be snapshot-captured (the value copy loses the box, so writes through the
+	// captured `&m` are lost — and the copy declaration is invalid in expression position, e.g. a
+	// func literal passed as a call argument). Instead the lambda references the box directly: `&m`
+	// emits `Ꮡm` (a capturable reference) and value uses emit `Ꮡm.val` — the ref-local alias
+	// `ref var m = ref Ꮡm.val` itself can't be captured (CS8175). Keyed by the var's types.Object.
+	boxRefVars map[types.Object]bool
+
 	// Analysis phase tracking
 	analysisInLambda  bool     // Currently analyzing a lambda
 	currentLambda     ast.Node // Current lambda being analyzed

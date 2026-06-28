@@ -39,9 +39,54 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 	return v.identEscapesHeap[obj] && !isInherentlyHeapAllocatedType(v.getIdentType(ident))
 }
 
+// lambdaBoxRefAddressForm renders `&m` / `&m.field` when `m` is a heap-boxed local captured by-box
+// inside the lambda currently being converted (see LambdaCapture.boxRefVars). The address is taken
+// through the box `Ꮡm` — a capturable reference — rather than the uncapturable ref-local alias.
+// Returns ("", false) when the operand is not rooted at a box-ref var, so the caller falls through
+// to the normal address handling.
+func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, bool) {
+	if v.lambdaCapture == nil || !v.lambdaCapture.conversionInLambda {
+		return "", false
+	}
+
+	switch operand := unaryExpr.X.(type) {
+	case *ast.Ident:
+		// &m → Ꮡm
+		if v.isLambdaBoxRefVar(v.info.ObjectOf(operand)) {
+			return AddressPrefix + strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(operand)), "@"), true
+		}
+	case *ast.SelectorExpr:
+		// &m.field (value struct field) → Ꮡm.of(Type.ᏑField)
+		baseIdent, ok := operand.X.(*ast.Ident)
+
+		if !ok || !v.isLambdaBoxRefVar(v.info.ObjectOf(baseIdent)) {
+			return "", false
+		}
+
+		if _, ok := v.getType(operand.X, true).(*types.Struct); !ok {
+			return "", false
+		}
+
+		boxName := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(baseIdent)), "@")
+		typeName := v.dynamicStructTypeName(operand.X)
+		fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(operand.Sel, nil)))
+
+		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
+	}
+
+	return "", false
+}
+
 func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprContext) string {
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
+		// Inside a lambda, a captured heap-boxed local is referenced through its box (the ref-local
+		// alias `ref var m = ref Ꮡm.val` can't be captured — CS8175). Build address forms from the
+		// box name directly, bypassing the value-rewrite that renders the box as `Ꮡm.val`.
+		if boxForm, ok := v.lambdaBoxRefAddressForm(unaryExpr); ok {
+			return boxForm
+		}
+
 		// Since pointer-based receiver functions are converted to C# as ref-based
 		// extension functions, we handle these cases separately
 		var recv *types.Var
