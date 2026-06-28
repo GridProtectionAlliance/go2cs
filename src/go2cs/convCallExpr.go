@@ -534,6 +534,11 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 				argTypeName := v.getCSTypeName(argType)
 
 				if targetTypeName != argTypeName {
+					// The recorded conversion type names use cross-package import aliases (e.g.
+					// `abi.Type`); register them so package_info.cs can emit a resolving `global using`.
+					v.recordConversionPackageUsing(argType)
+					v.recordConversionPackageUsing(funcType)
+
 					// If both funcType and argType are distinct structs, track implicit conversions
 					packageLock.Lock()
 
@@ -652,6 +657,41 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 	}
 
 	return false
+}
+
+// recordConversionPackageUsing registers the import alias → C# namespace for any cross-package named
+// type referenced (directly, or through a pointer/slice/array/map/channel wrapper or a generic type
+// argument) by a recorded implicit conversion. The generated `[assembly: GoImplicitConv<…>]` lines in
+// package_info.cs use the alias form (e.g. `abi.Type`), but that file has no file-local `using abi =
+// …`; conversionPackageUsings drives a resolving `global using` there.
+func (v *Visitor) recordConversionPackageUsing(t types.Type) {
+	switch t := t.(type) {
+	case *types.Pointer:
+		v.recordConversionPackageUsing(t.Elem())
+	case *types.Slice:
+		v.recordConversionPackageUsing(t.Elem())
+	case *types.Array:
+		v.recordConversionPackageUsing(t.Elem())
+	case *types.Map:
+		v.recordConversionPackageUsing(t.Key())
+		v.recordConversionPackageUsing(t.Elem())
+	case *types.Chan:
+		v.recordConversionPackageUsing(t.Elem())
+	case *types.Named:
+		if obj := t.Obj(); obj != nil {
+			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
+				packageLock.Lock()
+				conversionPackageUsings[pkg.Name()] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
+				packageLock.Unlock()
+			}
+		}
+
+		if typeArgs := t.TypeArgs(); typeArgs != nil {
+			for i := 0; i < typeArgs.Len(); i++ {
+				v.recordConversionPackageUsing(typeArgs.At(i))
+			}
+		}
+	}
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

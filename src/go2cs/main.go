@@ -249,6 +249,13 @@ var interfaceInheritances map[string]HashSet[string]
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
 var indirectImplicitConversions map[string]HashSet[string]
+
+// conversionPackageUsings maps a cross-package import alias (e.g. "abi") to its C# namespace (e.g.
+// "@internal.abi_package") for every package referenced by a recorded implicit conversion. The
+// `[assembly: GoImplicitConv<abi.Type, ж<abi.Type>>]` lines in package_info.cs use these aliases, but
+// that file has no file-local `using abi = …`, so the aliases are emitted there as `global using`
+// directives. Keyed by alias; guarded by packageLock. See recordConversionPackageUsing.
+var conversionPackageUsings map[string]string
 var numericConversions map[string]map[string]string
 var indirectNumericConversions map[string]map[string]string
 var nameCollisions map[string]bool
@@ -508,6 +515,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		implicitConversions = make(map[string]HashSet[string])
 		invertedImplicitConversions = make(map[string]HashSet[string])
 		indirectImplicitConversions = make(map[string]HashSet[string])
+		conversionPackageUsings = make(map[string]string)
 		numericConversions = make(map[string]map[string]string)
 		indirectNumericConversions = make(map[string]map[string]string)
 		nameCollisions = make(map[string]bool)
@@ -735,6 +743,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				if !constImportedTypeAliases.Contains(alias) {
 					lines.Add(fmt.Sprintf("global using %s = %s;", strings.ReplaceAll(alias, ".", TypeAliasDot), typeName))
 				}
+			}
+
+			// Add package-qualifier aliases used by recorded GoImplicitConv attributes (e.g.
+			// `abi.Type`). package_info.cs has no file-local `using abi = …`; emit a FILE-LOCAL `using`
+			// (not `global` — that would clash with the per-file `using abi = …` other source files
+			// already declare, CS1537) resolving each alias to its `go`-rooted namespace.
+			for alias, namespace := range conversionPackageUsings {
+				lines.Add(fmt.Sprintf("using %s = %s.%s;", alias, RootNamespace, namespace))
 			}
 
 			// Sort lines
