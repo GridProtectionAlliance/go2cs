@@ -132,8 +132,11 @@ internal class StructTypeTemplate : TemplateBase
                     if (GetSimpleName(memberName) == "_")
                         continue;
 
+                    // The Ꮡ-prefixed accessor NAME must use the unescaped member name — a C#-keyword
+                    // field is escaped `@base`, but `Ꮡ@base` is invalid ('@' only leads). The member
+                    // ACCESS on the right keeps `@base`.
                     string typeScope = GetScope(GetSimpleName(typeName));
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
             }
 
