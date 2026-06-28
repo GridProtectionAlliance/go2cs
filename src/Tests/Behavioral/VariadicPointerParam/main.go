@@ -9,7 +9,10 @@
 // element: `params Span<ж<box>>` (mirroring the existing type-parameter special case).
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"unsafe"
+)
 
 type box struct {
 	v int
@@ -24,6 +27,13 @@ func total(bs ...*box) int {
 	return sum
 }
 
+// variadic of a qualified type — the C# element name `@unsafe.Pointer` contains a '.', which
+// (like '<' for pointer/generic elements) is invalid in a using-alias identifier, so it must also
+// emit the span type inline (`params Span<@unsafe.Pointer>`).
+func countPtrs(ps ...unsafe.Pointer) int {
+	return len(ps)
+}
+
 func main() {
 	a := &box{v: 1}
 	b := &box{v: 2}
@@ -36,4 +46,8 @@ func main() {
 	// call-site spread of a slice into the variadic
 	boxes := []*box{a, b, c, &box{v: 4}}
 	fmt.Println(total(boxes...)) // 10
+
+	// variadic of a qualified type
+	fmt.Println(countPtrs(unsafe.Pointer(a), unsafe.Pointer(b), unsafe.Pointer(c))) // 3
+	fmt.Println(countPtrs())                                                         // 0
 }

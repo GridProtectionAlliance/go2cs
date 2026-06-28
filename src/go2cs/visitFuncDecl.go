@@ -574,11 +574,11 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 				_, isTypeParam := sliceType.Elem().(*types.TypeParam)
 
-				if isTypeParam || strings.Contains(typeName, "<") {
-					// A type parameter is not in scope for a namespace-level using alias,
-					// and a generic/pointer element type (e.g. ж<RangeTable>) would produce
-					// an invalid alias identifier (it contains '<'/'>'); emit the span type
-					// inline instead (C# 13 params collections).
+				if isTypeParam || strings.ContainsAny(typeName, "<.") {
+					// A type parameter is not in scope for a namespace-level using alias, and a
+					// generic/pointer/qualified element type (e.g. ж<RangeTable>, @unsafe.Pointer)
+					// would produce an invalid alias identifier — a using-alias name cannot contain
+					// '<', '>' or '.'. Emit the span type inline instead (C# 13 params collections).
 					result.WriteString("Span<" + typeName + ">")
 				} else {
 					result.WriteString(EllipsisOperator + typeName)
