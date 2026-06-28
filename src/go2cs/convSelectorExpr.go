@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 )
 
@@ -139,14 +140,22 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A capture-mode method called on a value field of the current direct-ж receiver —
+	// `b.u.Load()` where the struct embeds an atomic-like type as a value field `u`. The callee's
+	// ж overload needs a `ж<FieldType>` aliasing the real field; emit it as `(&b.u).Load()`, which
+	// the `&recv.field` machinery in convUnaryExpr renders as `Ꮡb.of(Bool.Ꮡu)`. The enclosing
+	// method was marked direct-ж (so `Ꮡb` is in scope) by bodyCallsCaptureModeMethodOnReceiverField.
+	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && v.exprIsFieldOfDirectBoxReceiver(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
 	// Route a capture-mode method called on a heap-boxed value receiver through the ж
 	// (pointer) overload, which sets up the receiver box the method needs for
 	// `&recv.field` — e.g. `var i atomic.Int32; i.Store(10)` → `Ꮡi.Store(10)`. The
-	// receiver is heap-boxed by escape analysis (see collectCaptureModeMethods), so its
-	// "Ꮡname" companion exists.
-	// The receiver may be a heap-boxed value var (escape analysis), the current method's own
-	// direct-ж receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() {
-	// return r.init() }` — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
+	// receiver may be a heap-boxed value var (escape analysis), the current method's own direct-ж
+	// receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() { return r.init() }`
+	// — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
 	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X)) {
 		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))

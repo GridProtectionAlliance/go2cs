@@ -70,7 +70,8 @@ func collectCaptureModeMethods(pkg *packages.Package) {
 				continue
 			}
 
-			if bodyCallsDirectBoxMethodOnReceiver(candidate.body, candidate.recvName, candidate.info) {
+			if bodyCallsDirectBoxMethodOnReceiver(candidate.body, candidate.recvName, candidate.info) ||
+				bodyCallsCaptureModeMethodOnReceiverField(candidate.body, candidate.recvName, candidate.info) {
 				packageCaptureModeMethods[origin] = true
 				packageDirectBoxReceiverMethods[origin] = true
 				changed = true
@@ -177,6 +178,56 @@ func bodyCallsDirectBoxMethodOnReceiver(body *ast.BlockStmt, recvName string, in
 		}
 
 		recvIdent, ok := selectorExpr.X.(*ast.Ident)
+
+		if !ok || recvIdent.Name != recvName {
+			return true
+		}
+
+		if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
+			if packageDirectBoxReceiverMethods[funcObj.Origin()] {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyCallsCaptureModeMethodOnReceiverField reports whether the body calls a direct-ж
+// (capture-mode) method on a value field of the receiver (`recvName.field.someDirectBoxMethod(...)`)
+// — e.g. a struct embedding sync/atomic's Uint8 as a value field `u` and doing `b.u.Load()`. The
+// callee's ж overload needs a `ж<FieldType>`; the only way to produce one that aliases the real
+// field is `Ꮡrecv.of(RecvType.ᏑField)`, which requires the caller to itself be direct-ж so its
+// receiver box `Ꮡrecv` is in scope. So the caller must be marked direct-ж too (convSelectorExpr
+// then emits the field-address box form).
+func bodyCallsCaptureModeMethodOnReceiverField(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		callExpr, ok := node.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		// The call target must be `recvName.field.method` — a field selector rooted directly at
+		// the receiver. (A bare `recvName.method` is the receiver-direct case handled separately.)
+		fieldSel, ok := selectorExpr.X.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		recvIdent, ok := fieldSel.X.(*ast.Ident)
 
 		if !ok || recvIdent.Name != recvName {
 			return true
@@ -322,6 +373,34 @@ func (v *Visitor) exprIsCurrentDirectBoxReceiver(expr ast.Expr) bool {
 	isPtrRecv, recvName := v.isPointerReceiver()
 
 	return isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
+}
+
+// exprIsFieldOfDirectBoxReceiver reports whether expr is a value field accessed directly on the
+// current method's direct-ж receiver (`recv.field`). Such a field's address is the box
+// `Ꮡrecv.of(RecvType.ᏑField)`, so a capture-mode method called on it (`recv.field.Load()`) routes
+// through that field-address box. The receiver must already be direct-ж (so `Ꮡrecv` is in scope) —
+// the fixpoint marks any method making such a call direct-ж (see
+// bodyCallsCaptureModeMethodOnReceiverField).
+func (v *Visitor) exprIsFieldOfDirectBoxReceiver(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	// Must be a field selection (not a method value) and a value field (not already a pointer —
+	// a pointer field already carries its own box and routes normally).
+	selection, ok := v.info.Selections[sel]
+
+	if !ok || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+		return false
+	}
+
+	return v.exprIsCurrentDirectBoxReceiver(sel.X)
 }
 
 // exprIsDerefdPointerParam reports whether expr is a pointer-typed parameter. Such a parameter is

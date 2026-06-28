@@ -1,0 +1,76 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType] partial struct Counter {
+    internal int32 n;
+}
+
+internal static int32 bump(ж<int32> Ꮡp, int32 delta) {
+    ref var p = ref Ꮡp.val;
+
+    p += delta;
+    return p;
+}
+
+public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
+    ref var c = ref Ꮡc.val;
+
+    return bump(Ꮡc.of(Counter.Ꮡn), delta);
+}
+
+public static void Set(this ж<Counter> Ꮡc, int32 v) {
+    ref var c = ref Ꮡc.val;
+
+    (Ꮡc.of(Counter.Ꮡn)).val = v;
+}
+
+[GoRecv] public static int32 Get(this ref Counter c) {
+    return c.n;
+}
+
+[GoType] partial struct Flag {
+    internal Counter c;
+    internal @string label;
+}
+
+public static int32 Incr(this ж<Flag> Ꮡf) {
+    ref var f = ref Ꮡf.val;
+
+    return Ꮡf.of(Flag.Ꮡc).Add(1);
+}
+
+public static int32 AddN(this ж<Flag> Ꮡf, int32 d) {
+    ref var f = ref Ꮡf.val;
+
+    return Ꮡf.of(Flag.Ꮡc).Add(d);
+}
+
+public static void Reset(this ж<Flag> Ꮡf, int32 v) {
+    ref var f = ref Ꮡf.val;
+
+    Ꮡf.of(Flag.Ꮡc).Set(v);
+}
+
+[GoRecv] public static int32 Value(this ref Flag f) {
+    return f.c.Get();
+}
+
+[GoRecv] public static @string Label(this ref Flag f) {
+    return f.label;
+}
+
+internal static void Main() {
+    ref var fl = ref heap(new Flag(), out var Ꮡfl);
+    fl.label = "hits"u8;
+    Ꮡfl.Reset(10);
+    fmt.Println(fl.Label(), "start:", fl.Value());
+    fmt.Println("Incr:", Ꮡfl.Incr());
+    fmt.Println("Incr:", Ꮡfl.Incr());
+    fmt.Println("AddN 5:", Ꮡfl.AddN(5));
+    fmt.Println("final:", fl.Value());
+}
+
+} // end main_package

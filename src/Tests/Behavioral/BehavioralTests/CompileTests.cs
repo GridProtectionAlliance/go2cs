@@ -264,6 +264,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReceiverFieldAddress() => CheckTarget("ReceiverFieldAddress");
 
     [TestMethod]
+    public void CheckReceiverFieldMethodCall() => CheckTarget("ReceiverFieldMethodCall");
+
+    [TestMethod]
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]

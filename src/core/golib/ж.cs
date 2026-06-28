@@ -303,7 +303,13 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         ref TElem getFieldRef(object structPtr)
         {
             ж<T> typedPtr = (ж<T>)structPtr;
-            return ref fieldRefFunc(ref typedPtr.m_val!);
+
+            // Resolve the parent value through `val`, not `m_val` — when this pointer is itself a
+            // field reference (or array element) its real storage lives behind `val` and `m_val` is
+            // an empty default. This is the case for a nested `of()` chain, e.g.
+            // `Ꮡb.of(Bool.Ꮡu).of(Uint8.Ꮡvalue)` where the intermediate `ж<Uint8>` is a field ref —
+            // reading `m_val` would alias a throwaway copy and lose writes.
+            return ref fieldRefFunc(ref typedPtr.val);
         }
     }
 
