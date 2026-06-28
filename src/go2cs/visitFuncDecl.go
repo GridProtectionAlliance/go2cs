@@ -274,6 +274,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					continue
 				}
 
+				// An unnamed pointer parameter (`func(*T)`) is never referenced in the body, so it
+				// gets no deref alias; it is emitted in the signature with a synthetic name and no
+				// box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.val;`.
+				if param.Name() == "" {
+					continue
+				}
+
 				if v.options.preferVarDecl {
 					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name())
 				} else {
@@ -388,8 +395,17 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					updatedSignature.WriteRune(' ')
 
 					if _, ok := param.Type().(*types.Pointer); ok {
-						updatedSignature.WriteString(AddressPrefix)
-						updatedSignature.WriteString(param.Name())
+						// An unnamed pointer param is never referenced (no deref alias above), so
+						// emit a plain synthetic name without the box `Ꮡ` convention.
+						if param.Name() == "" {
+							updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
+						} else {
+							updatedSignature.WriteString(AddressPrefix)
+							updatedSignature.WriteString(param.Name())
+						}
+					} else if param.Name() == "" {
+						// Unnamed non-pointer param — synthesize a unique placeholder name.
+						updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
 					} else {
 						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
 					}
