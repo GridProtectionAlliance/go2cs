@@ -62,7 +62,9 @@ public class TypeGenerator : ISourceGenerator
     {
         if (context.SyntaxContextReceiver is not AttributeFinder<BaseTypeDeclarationSyntax> { HasAttributes: true } attributeFinder)
             return;
-            
+
+        HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
+
         foreach ((BaseTypeDeclarationSyntax targetSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = targetSyntax.SyntaxTree;
@@ -313,7 +315,7 @@ public class TypeGenerator : ISourceGenerator
                 }
 
                 // Add the source code to the compilation
-                context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs"), generatedSource);
+                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
             }
         }
     }

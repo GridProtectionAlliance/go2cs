@@ -201,6 +201,31 @@ public static class Common
         return new string(fileName.Replace("@", "").Select(c => InvalidChars.Contains(c) ? '_' : c).ToArray());
     }
 
+    // Roslyn requires every AddSource hintName within a generator to be unique, and it compares them
+    // CASE-INSENSITIVELY. Two Go types that differ only in case (e.g. exported `Pinner` and unexported
+    // `pinner`, both real, distinct C# types) therefore collide on `…pinner.g.cs` and the generator
+    // throws — suppressing ALL of its output. Disambiguate the later collisions with a numeric suffix;
+    // the hintName is only an internal file label, so any unique value is correct.
+    public static string GetUniqueHintName(HashSet<string> emitted, string hintName)
+    {
+        if (emitted.Add(hintName))
+            return hintName;
+
+        string baseName = hintName.EndsWith(".g.cs") ? hintName[..^5] : hintName;
+        string suffix = hintName.EndsWith(".g.cs") ? ".g.cs" : "";
+
+        int index = 1;
+        string candidate;
+
+        do
+        {
+            candidate = $"{baseName}.{index++}{suffix}";
+        }
+        while (!emitted.Add(candidate));
+
+        return candidate;
+    }
+
     public static string GetUnsanitizedIdentifier(string identifier)
     {
         return identifier.StartsWith("@") ? identifier[1..] : identifier;

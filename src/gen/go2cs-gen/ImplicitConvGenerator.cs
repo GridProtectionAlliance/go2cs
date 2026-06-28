@@ -60,6 +60,8 @@ public class ImplicitConvGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AssemblyAttributeFinder { HasAttributes: true } attributeFinder)
             return;
 
+        HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
@@ -78,7 +80,10 @@ public class ImplicitConvGenerator : ISourceGenerator
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
 
             if (sourceType.TypeKind != TypeKind.Struct)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, first generic type argument must be a struct.");
+                // Source is not a struct (e.g. a defined type over a non-struct underlying). This one
+                // conversion can't be generated; skip it rather than aborting ALL of this generator's
+                // output for the whole compilation.
+                continue;
 
             string sourceTypeName = sourceType.GetFullTypeName();
             string targetTypeName = targetType.GetFullTypeName();
@@ -96,7 +101,11 @@ public class ImplicitConvGenerator : ISourceGenerator
                 StructDeclarationSyntax? structDeclaration = GetStructDeclaration(syntaxContext, targetTypeName);
 
                 if (structDeclaration is null)
-                    throw new InvalidOperationException($"Unable to find struct declaration named \"{targetTypeName}\"");
+                    // The target type has no local struct declaration to enumerate members from — e.g. a
+                    // golib generic box such as `ж<Type>` produced by an embedded cross-package pointer.
+                    // Skip just this one conversion rather than throwing, which would suppress ALL of this
+                    // generator's output for the whole compilation.
+                    continue;
 
                 structMembers = structDeclaration
                     .GetStructMembers(context.Compilation, true)
@@ -125,7 +134,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs"), generatedSource);
+            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{sourceTypeName}-{targetTypeName}{(inverted ? "-inv" : "")}.g.cs")), generatedSource);
         }
     }
 
