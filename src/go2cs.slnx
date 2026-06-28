@@ -154,6 +154,7 @@
     <Project Path="Tests/Behavioral/StringLiteralSliceConversion/StringLiteralSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/StringPassByValue/StringPassByValue.csproj" />
     <Project Path="Tests/Behavioral/StringSliceAndUnsignedConst/StringSliceAndUnsignedConst.csproj" />
+    <Project Path="Tests/Behavioral/StringZeroValueConcat/StringZeroValueConcat.csproj" />
     <Project Path="Tests/Behavioral/StructPointerPromotionWithInterface/StructPointerPromotionWithInterface.csproj" />
     <Project Path="Tests/Behavioral/StructPromotion/StructPromotion.csproj" />
     <Project Path="Tests/Behavioral/StructPromotionWithInterface/StructPromotionWithInterface.csproj" />

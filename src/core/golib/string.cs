@@ -57,6 +57,11 @@ public readonly struct @string :
 {
     internal readonly byte[] m_value;
 
+    // Null-safe view of the backing bytes: `default(@string)` runs no constructor, so m_value is
+    // null; treat that zero value as Go's empty string ("") for all reads (length, index, concat,
+    // print, range) instead of throwing NRE. Mirrors the nil-map / nil-slice null-safe approach.
+    private byte[] Bytes => m_value ?? [];
+
     // If @string needs to match sizeof in Go, it would need to be 16 bytes,
     // in this case 8-byte length value would need to be added here:
     //      private readonly int64 m_length;
@@ -107,18 +112,18 @@ public readonly struct @string :
         m_value = Encoding.UTF8.GetBytes(value ?? "");
     }
 
-    public @string(@string value) : this(value.m_value) { }
+    public @string(@string value) : this(value.Bytes) { }
 
-    public int Length => m_value.Length;
+    public int Length => Bytes.Length;
 
     public byte this[int index]
     {
         get
         {
-            if (index < 0 || index >= m_value.Length)
-                throw RuntimeErrorPanic.IndexOutOfRange(index, m_value.Length);
+            if (index < 0 || index >= Bytes.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, Bytes.Length);
 
-            return m_value[index];
+            return Bytes[index];
         }
     }
 
@@ -126,10 +131,10 @@ public readonly struct @string :
     {
         get
         {
-            if (index < 0 || index >= m_value.Length)
-                throw RuntimeErrorPanic.IndexOutOfRange(index, m_value.Length);
+            if (index < 0 || index >= Bytes.Length)
+                throw RuntimeErrorPanic.IndexOutOfRange(index, Bytes.Length);
 
-            return m_value[index];
+            return Bytes[index];
         }
     }
 
@@ -138,42 +143,42 @@ public readonly struct @string :
     // Slicing a Go string yields a string (e.g. `s[a:b]`), so the range indexer
     // returns @string. Returning slice<byte> here would break string comparisons
     // (slice<byte> != string) and put a ref-struct-convertible value into tuples.
-    public @string this[Range range] => new(new slice<byte>(m_value, range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length)));
+    public @string this[Range range] => new(new slice<byte>(Bytes, range.Start.GetOffset(Bytes.Length), range.End.GetOffset(Bytes.Length)));
 
     // IByteSeq<byte> — models Go's `string | []byte` union constraint. The byte indexer
     // (this[nint]) implicitly implements IByteSeq<byte>.this[nint]; Length (int) and the
     // @string range indexer need explicit forms to match the interface's nint/IByteSeq types.
-    nint IByteSeq.Length => m_value.Length;
+    nint IByteSeq.Length => Bytes.Length;
 
     IByteSeq<byte> IByteSeq<byte>.this[Range range] => this[range];
 
     public slice<byte> Slice(int start, int length)
     {
-        return new slice<byte>(m_value, start, start + length);
+        return new slice<byte>(Bytes, start, start + length);
     }
 
     public slice<byte> Slice(nint start, nint length)
     {
-        return new slice<byte>(m_value, start, start + length);
+        return new slice<byte>(Bytes, start, start + length);
     }
 
     public Span<byte> ToSpan()
     {
-        return new Span<byte>(m_value);
+        return new Span<byte>(Bytes);
     }
 
     public Span<byte> ꓸꓸꓸ => ToSpan(); // Spread operator
 
-    internal PinnedBuffer buffer => new(m_value, Length);
+    internal PinnedBuffer buffer => new(Bytes, Length);
 
     public override string ToString()
     {
-        return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(m_value));
+        return Encoding.UTF8.GetString(new ReadOnlySpan<byte>(Bytes));
     }
 
     public bool Equals(@string other)
     {
-        return BytesAreEqual(m_value, other.m_value);
+        return BytesAreEqual(Bytes, other.Bytes);
     }
 
     public int CompareTo(@string other)
@@ -214,7 +219,7 @@ public readonly struct @string :
 
     public IEnumerator<(nint, rune)> GetEnumerator()
     {
-        return new RuneSpanEnumerator(m_value);
+        return new RuneSpanEnumerator(Bytes);
     }
 
     private class RuneSpanEnumerator(byte[] bytes) : IEnumerator<(nint, rune)>
@@ -265,7 +270,7 @@ public readonly struct @string :
     public rune[] ToRunes()
     {
         // Estimate the rune length (1 rune per byte as worst case)
-        int estimatedLength = m_value.Length;
+        int estimatedLength = Bytes.Length;
 
         Span<rune> runes = estimatedLength <= StackAllocThreshold / 4 ?
             stackalloc rune[estimatedLength] :
@@ -277,11 +282,11 @@ public readonly struct @string :
 
     private int DecodeRunes(Span<rune> runes)
     {
-        if (m_value.Length == 0)
+        if (Bytes.Length == 0)
             return 0;
 
         int index = 0;
-        ReadOnlySpan<byte> bytes = m_value;
+        ReadOnlySpan<byte> bytes = Bytes;
 
         while (!bytes.IsEmpty)
         {
@@ -332,7 +337,7 @@ public readonly struct @string :
 
     public static implicit operator slice<byte>(@string value)
     {
-        return new slice<byte>(value.m_value);
+        return new slice<byte>(value.Bytes);
     }
 
     public static implicit operator @string(slice<rune> value)
@@ -367,7 +372,7 @@ public readonly struct @string :
 
     public static implicit operator byte[](@string value)
     {
-        return value.m_value;
+        return value.Bytes;
     }
 
     public static implicit operator @string(byte[] value)
@@ -464,10 +469,10 @@ public readonly struct @string :
 
     public static @string operator +(@string a, @string b)
     {
-        byte[] bytes = new byte[a.m_value.Length + b.m_value.Length];
+        byte[] bytes = new byte[a.Bytes.Length + b.Bytes.Length];
 
-        Buffer.BlockCopy(a.m_value, 0, bytes, 0, a.m_value.Length);
-        Buffer.BlockCopy(b.m_value, 0, bytes, a.m_value.Length, b.m_value.Length);
+        Buffer.BlockCopy(a.Bytes, 0, bytes, 0, a.Bytes.Length);
+        Buffer.BlockCopy(b.Bytes, 0, bytes, a.Bytes.Length, b.Bytes.Length);
 
         return new @string(bytes);
     }
@@ -560,12 +565,12 @@ public readonly struct @string :
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return m_value.GetEnumerator();
+        return Bytes.GetEnumerator();
     }
 
     IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
     {
-        foreach (byte item in m_value)
+        foreach (byte item in Bytes)
             yield return item;
     }
 

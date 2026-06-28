@@ -301,6 +301,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStringSliceAndUnsignedConst() => CheckTarget("StringSliceAndUnsignedConst");
 
     [TestMethod]
+    public void CheckStringZeroValueConcat() => CheckTarget("StringZeroValueConcat");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]

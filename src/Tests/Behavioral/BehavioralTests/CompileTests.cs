@@ -339,6 +339,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStringSliceAndUnsignedConst() => CheckTarget("StringSliceAndUnsignedConst");
 
     [TestMethod]
+    public void CheckStringZeroValueConcat() => CheckTarget("StringZeroValueConcat");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]
