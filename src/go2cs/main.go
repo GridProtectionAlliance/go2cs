@@ -2570,6 +2570,28 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return name
 	}
 
+	// A cross-package INSTANTIATED generic (e.g. `internal/runtime/atomic.Pointer[func(string,
+	// string)]`) must be rendered structurally — `pkg.Name() + "." + Name[args…]` with each arg
+	// recursively named — rather than from t.String(). The string form keeps the full import path,
+	// and the slash-strip that would reduce it is skipped whenever the string contains '(' (to
+	// protect func types), so a func-type type-argument leaves the full path AND the pkg.Name()
+	// alias gets prepended → a doubled `atomic.@internal.runtime.atomic.Pointer` (CS0426).
+	if named, ok := t.(*types.Named); ok {
+		obj := named.Obj()
+
+		if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
+			if typeArgs := named.TypeArgs(); typeArgs != nil && typeArgs.Len() > 0 {
+				args := make([]string, typeArgs.Len())
+
+				for i := 0; i < typeArgs.Len(); i++ {
+					args[i] = v.getTypeName(typeArgs.At(i), false)
+				}
+
+				return fmt.Sprintf("%s.%s[%s]", pkg.Name(), obj.Name(), strings.Join(args, ", "))
+			}
+		}
+	}
+
 	var pkgPrefix string
 
 	if named, ok := t.(*types.Named); ok {
