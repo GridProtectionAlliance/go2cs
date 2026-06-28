@@ -263,7 +263,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			} else {
 				access := getAccess(goIDName)
 				typeLenDeviation += token.Pos(len(access) + 4)
-				v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, csValue)
+				if v.isAddressedGlobal(ident) {
+					// An addressed package var must be heap-boxed even when its initializer folds to
+					// a constant (runtime's `var uint16Eface any = uint16InterfacePtr(0)`, addressed
+					// via `efaceOf(&uint16Eface)`): convUnaryExpr emits the box form `Ꮡuint16Eface`,
+					// so without boxing here that identifier would not exist (CS0103).
+					v.writeAddressedGlobalDecl(access, csTypeName, csIDName, csValue)
+				} else {
+					v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, csValue)
+				}
 			}
 
 			v.writeComment(valueSpec.Comment, ident.End()+typeLenDeviation)
