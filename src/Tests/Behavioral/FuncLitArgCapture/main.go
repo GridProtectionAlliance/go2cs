@@ -79,4 +79,20 @@ func main() {
 		gPtr.x = gVal.x
 	})
 	fmt.Println("6:", e.x)
+
+	// 7. Func literal on an assignment RHS capturing a slice. The snapshot declaration
+	//    (`var valsʗ1 = vals;`) must hoist before the assignment, not emit in the RHS.
+	vals := []int{5}
+	adder := func(k int) int {
+		return k + vals[0]
+	}
+	fmt.Println("7:", adder(10))
+
+	// 8. Func literal inside a composite-literal element (itself an assignment RHS). The
+	//    capture decl must hoist out of the initializer to before the statement.
+	base := []int{3}
+	handlers := []func(int) int{
+		func(k int) int { return k + base[0] },
+	}
+	fmt.Println("8:", handlers[0](100))
 }

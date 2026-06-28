@@ -102,6 +102,15 @@ type Visitor struct {
 	liftedTypeMap      map[types.Type]string
 	subStructTypes     map[types.Type][]types.Type
 
+	// hoistedDecls, when non-nil, collects func-literal capture declarations that would otherwise
+	// be emitted inline (a `var mʗ1 = m;` statement) at the func literal's position — invalid C#
+	// when the literal sits in an expression slot (a call argument, an assignment RHS, a composite-
+	// literal element). The enclosing statement emitter (visitAssignStmt, …) sets this to a buffer,
+	// converts its expressions, then writes the collected decls before the statement. convFuncLit
+	// consults it (after context.deferredDecls, which go/defer/return thread explicitly). Save and
+	// restore around nested statements so an inner statement's decls don't leak to the outer buffer.
+	hoistedDecls *strings.Builder
+
 	// ImportSpec variables
 	currentImportPath     string
 	packageImports        *strings.Builder

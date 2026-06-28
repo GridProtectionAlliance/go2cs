@@ -438,13 +438,21 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		result = fmt.Sprintf("%s%s(%s)", constructType, funcName, expr)
 	}
 
-	// Check each argument for implicit conversions
+	// Check each argument for implicit conversions. This re-converts each arg purely for its
+	// side-effects (recording implicit conversions); the result is discarded. Suppress capture-decl
+	// hoisting during it so a func-literal arg's decls (already emitted by the real conversion
+	// above) are not written a second time into the hoist buffer.
+	savedHoist := v.hoistedDecls
+	v.hoistedDecls = nil
+
 	for _, arg := range callExpr.Args {
 		argType := v.getType(arg, false)
 		argTypeName := convertToCSTypeName(v.getTypeName(argType, false))
 
 		v.checkForImplicitConversion(funcType, arg, argTypeName)
 	}
+
+	v.hoistedDecls = savedHoist
 
 	return result
 }

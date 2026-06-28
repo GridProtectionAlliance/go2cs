@@ -76,10 +76,16 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	result := strings.Builder{}
 
 	if decls := v.generateCaptureDeclarations(); decls != "" {
-		if context.deferredDecls == nil {
-			result.WriteString(decls)
-		} else {
+		switch {
+		case context.deferredDecls != nil:
+			// go/defer/return thread an explicit builder for their own hoisting.
 			context.deferredDecls.WriteString(strings.TrimRight(decls, " "))
+		case v.hoistedDecls != nil:
+			// The enclosing statement (assignment RHS, composite-literal element, call argument)
+			// hoists these decls to a valid position before the statement.
+			v.hoistedDecls.WriteString(strings.TrimRight(decls, " "))
+		default:
+			result.WriteString(decls)
 		}
 	}
 

@@ -54,6 +54,20 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr, lhsIsInt
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
+	// A func literal on the RHS (or inside a composite-literal element of it) emits its captured-
+	// variable snapshot declarations inline at the literal's position — invalid C# in an expression
+	// slot. For a standalone statement, collect them in a buffer and write them before the statement.
+	// Save/restore so a nested statement's hoisted decls don't leak into this buffer.
+	savedHoist := v.hoistedDecls
+	var hoistBuf *strings.Builder
+
+	if format.useNewLine {
+		hoistBuf = &strings.Builder{}
+		v.hoistedDecls = hoistBuf
+	}
+
+	defer func() { v.hoistedDecls = savedHoist }()
+
 	lhsExprs := assignStmt.Lhs
 	rhsExprs := assignStmt.Rhs
 
@@ -647,7 +661,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
-	if format.useNewLine {
+	if hoistBuf != nil && hoistBuf.Len() > 0 {
+		// The hoisted decls carry their own leading newline + per-line indentation.
+		v.targetFile.WriteString(hoistBuf.String())
+	} else if format.useNewLine {
 		v.targetFile.WriteString(v.newline)
 	}
 

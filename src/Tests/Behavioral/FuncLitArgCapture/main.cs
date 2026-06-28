@@ -61,6 +61,16 @@ internal static void Main() {
         gPtr.val.x = gValʗ2.x;
     });
     fmt.Println("6:", e.x);
+    var vals = new nint[]{5}.slice();
+    var valsʗ1 = vals;
+    var adder = (nint k) => k + valsʗ1[0];
+    fmt.Println("7:", adder(10));
+    var @base = new nint[]{3}.slice();
+        var baseʗ1 = @base;
+    var handlers = new Func<nint, nint>[]{
+        (nint k) => k + baseʗ1[0]
+    }.slice();
+    fmt.Println("8:", handlers[0](100));
 }
 
 } // end main_package
