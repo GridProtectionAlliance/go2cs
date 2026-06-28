@@ -67,6 +67,26 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 		}
 	}
 
+	// When the switch lowers to an if/else-if chain (non-constant cases on a tagged switch, no
+	// fallthrough), the `default` clause becomes the trailing `else`. Go allows `default` in any
+	// position, but in the chain a leading/middle default emits a bare `{ /* default: */ … }`
+	// followed by `else if` (CS8641 "else cannot start a statement"). Move the single default
+	// clause to the end so it is the final else. Only for this path: the C# `switch` branches
+	// accept `default` anywhere, and fallthrough is source-order-sensitive (left untouched).
+	if !hasFallthroughs && !allConst && switchStmt.Tag != nil {
+		for i, caseClause := range caseClauses {
+			if caseClause.List == nil && i != len(caseClauses)-1 {
+				reordered := make([]*ast.CaseClause, 0, len(caseClauses))
+				reordered = append(reordered, caseClauses[:i]...)
+				reordered = append(reordered, caseClauses[i+1:]...)
+				reordered = append(reordered, caseClause)
+				caseClauses = reordered
+				caseHasFallthroughStmt = make([]bool, len(caseClauses)) // all-false (no fallthroughs here)
+				break
+			}
+		}
+	}
+
 	if switchStmt.Init != nil {
 		// Any declared variable will be scoped to switch statement, so create a sub-block for it
 		v.targetFile.WriteString(v.newline)

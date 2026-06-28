@@ -292,6 +292,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStructWithDelegate() => CheckTarget("StructWithDelegate");
 
     [TestMethod]
+    public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

@@ -152,6 +152,7 @@
     <Project Path="Tests/Behavioral/StructPromotionWithInterface/StructPromotionWithInterface.csproj" />
     <Project Path="Tests/Behavioral/StructWithDelegate/StructWithDelegate.csproj" />
     <Project Path="Tests/Behavioral/StructWithPointer/StructWithPointer.csproj" />
+    <Project Path="Tests/Behavioral/SwitchDefaultOrder/SwitchDefaultOrder.csproj" />
     <Project Path="Tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="Tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="Tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />

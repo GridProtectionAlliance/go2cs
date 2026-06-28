@@ -1,0 +1,51 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType("num:nint")] partial struct bucketType;
+
+internal static readonly bucketType memProfile = /* iota */ 0;
+internal static readonly bucketType blockProfile = 1;
+internal static readonly bucketType mutexProfile = 2;
+
+internal static @string size(bucketType typ) {
+    @string s = default!;
+    var exprᴛ1 = typ;
+    if (exprᴛ1 == memProfile) {
+        s = "mem"u8;
+    }
+    else if (exprᴛ1 == blockProfile || exprᴛ1 == mutexProfile) {
+        s = "block-or-mutex"u8;
+    }
+    else { /* default: */
+        s = "invalid"u8;
+    }
+
+    return s;
+}
+
+internal static nint mid(bucketType typ) {
+    var exprᴛ1 = typ;
+    if (exprᴛ1 == memProfile) {
+        return 1;
+    }
+    if (exprᴛ1 == blockProfile) {
+        return 2;
+    }
+    { /* default: */
+        return -1;
+    }
+
+}
+
+internal static void Main() {
+    fmt.Println(size(memProfile));
+    fmt.Println(size(blockProfile));
+    fmt.Println(size(mutexProfile));
+    fmt.Println(size(99));
+    fmt.Println(mid(memProfile), mid(blockProfile), mid(99));
+}
+
+} // end main_package

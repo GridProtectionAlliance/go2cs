@@ -335,6 +335,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

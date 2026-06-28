@@ -333,6 +333,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]
