@@ -105,7 +105,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.DeferStmt:
 		v.visitDeferStmt(stmtType)
 	case *ast.ExprStmt:
-		v.visitExprStmt(stmtType)
+		format := getStmtContext[FormattingContext](contexts)
+		v.visitExprStmt(stmtType, format)
 	case *ast.ForStmt:
 		target := getStmtContext[LabeledStmtContext](contexts)
 		v.visitForStmt(stmtType, target)

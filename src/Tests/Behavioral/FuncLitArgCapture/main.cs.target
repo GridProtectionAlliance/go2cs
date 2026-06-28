@@ -49,16 +49,16 @@ internal static void Main() {
     fmt.Println("4:", d.x);
     ref var e = ref heap(new box(), out var Ꮡe);
     var pe = Ꮡe;
-    var peʗ2 = pe;
+    var peʗ1 = pe;
     run(() => {
-        peʗ2.val.x = 11;
-        peʗ2.val.y = (~peʗ2).x + 1;
+        peʗ1.val.x = 11;
+        peʗ1.val.y = (~peʗ1).x + 1;
     });
     fmt.Println("5:", e.x, e.y);
     gPtr = Ꮡe;
-    var gValʗ2 = gVal;
+    var gValʗ1 = gVal;
     run(() => {
-        gPtr.val.x = gValʗ2.x;
+        gPtr.val.x = gValʗ1.x;
     });
     fmt.Println("6:", e.x);
     var vals = new nint[]{5}.slice();

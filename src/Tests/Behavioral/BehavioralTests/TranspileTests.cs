@@ -129,6 +129,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
+    public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
+
+    [TestMethod]
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]

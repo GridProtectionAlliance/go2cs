@@ -383,8 +383,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 	funcName := v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
 
-	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases
-	if len(constructType) == 0 && len(callExpr.Args) == 1 {
+	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases. Gate on funcName before
+	// converting the argument: this re-converts the single arg purely to reshape it for the
+	// unsafe.* helpers, and doing it unconditionally would re-run a func-literal argument's capture
+	// generation (a side effect), duplicating its hoisted decls for an ordinary single-arg call.
+	if len(constructType) == 0 && len(callExpr.Args) == 1 &&
+		(funcName == "@unsafe.Offsetof" || funcName == "@unsafe.Alignof" || funcName == "@unsafe.Sizeof") {
 		argExpr := v.convExpr(callExpr.Args[0], nil)
 		argParts := strings.Split(argExpr, ".")
 

@@ -5,25 +5,44 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitExprStmt(exprStmt *ast.ExprStmt) {
+func (v *Visitor) visitExprStmt(exprStmt *ast.ExprStmt, format FormattingContext) {
 	if exprStmt.X == nil {
 		return
 	}
 
-	// A func literal passed as a call argument (`systemstack(func(){ …&m… })`) captures variables
-	// whose snapshot declarations (`var mʗ1 = m;`) are statements — invalid inside an argument list.
-	// Thread a deferredDecls builder so convFuncLit hoists them here, emitted before the statement.
-	lambdaContext := DefaultLambdaContext()
-	lambdaContext.deferredDecls = &strings.Builder{}
+	// A func literal passed as a call argument (`systemstack(func(){ …&m… })`, pervasive in
+	// runtime) captures variables whose snapshot declarations (`var mʗ1 = m;`) are statements —
+	// invalid inside an argument list. For a standalone statement, collect them in a buffer and
+	// write them before the statement. A for-loop init/post clause (useNewLine == false) is not a
+	// standalone statement slot, so it does not hoist. Save/restore guards nesting.
+	savedHoist := v.hoistedDecls
+	var hoistBuf *strings.Builder
 
-	expr := v.convExpr(exprStmt.X, []ExprContext{lambdaContext})
+	if format.useNewLine {
+		hoistBuf = &strings.Builder{}
+		v.hoistedDecls = hoistBuf
+	}
 
-	if lambdaContext.deferredDecls.Len() > 0 {
-		// The hoisted decls already carry their own leading newline + indentation per line.
-		v.targetFile.WriteString(lambdaContext.deferredDecls.String())
-	} else {
+	defer func() { v.hoistedDecls = savedHoist }()
+
+	expr := v.convExpr(exprStmt.X, nil)
+
+	if hoistBuf != nil && hoistBuf.Len() > 0 {
+		// The hoisted decls carry their own leading newline + per-line indentation.
+		v.targetFile.WriteString(hoistBuf.String())
+	} else if format.useNewLine {
 		v.targetFile.WriteString(v.newline)
 	}
 
-	v.writeOutput("%s;", expr)
+	if format.useIndent {
+		v.targetFile.WriteString(v.indent(v.indentLevel))
+	}
+
+	v.targetFile.WriteString(expr)
+
+	// A for-loop init/post clause is `;`-free (the for-syntax supplies the separators); a standalone
+	// expression statement is terminated with a semicolon.
+	if format.includeSemiColon {
+		v.targetFile.WriteString(";")
+	}
 }
