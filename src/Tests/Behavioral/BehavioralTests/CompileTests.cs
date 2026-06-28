@@ -237,6 +237,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]
+    public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
+
+    [TestMethod]
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]

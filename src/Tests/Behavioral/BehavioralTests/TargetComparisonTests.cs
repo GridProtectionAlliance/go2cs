@@ -239,6 +239,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]
+    public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
+
+    [TestMethod]
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]

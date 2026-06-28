@@ -120,6 +120,7 @@
     <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="Tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
+    <Project Path="Tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />

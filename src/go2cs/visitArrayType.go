@@ -17,7 +17,37 @@ func (v *Visitor) visitArrayType(arrayType *ast.ArrayType, identType types.Type,
 	// its leading identifier (`atomic`), mangling the GoType and the generated array element.
 	var csTypeName, goTypeName string
 
-	if ident := getIdentifier(arrayType.Elt); ident != nil && isSimpleIdentExpr(arrayType.Elt) {
+	// An anonymous-struct (or -interface) element of a NAMED array/slice type — `type semTable
+	// [N]struct{…}` (runtime/sema) — must be lifted to a named type, otherwise the GoType
+	// attribute and any `&t[i].field` (which emits `.of(ElemType.ᏑField)`) reference a raw,
+	// un-compilable `struct{…}`. Lift it (named after the array type) and use the lifted name.
+	if structType, ok := arrayType.Elt.(*ast.StructType); ok && !isEmptyStruct(structType) {
+		eltType := v.info.TypeOf(arrayType.Elt)
+
+		if !v.liftedTypeExists(structType) {
+			liftedName := v.visitStructType(structType, eltType, name, nil, true, nil)
+			csTypeName = liftedName
+			goTypeName = liftedName
+		} else if ln, ok := v.liftedTypeMap[eltType]; ok {
+			csTypeName = ln
+			goTypeName = ln
+		}
+	} else if interfaceType, ok := arrayType.Elt.(*ast.InterfaceType); ok && !interfaceType.Incomplete && len(interfaceType.Methods.List) > 0 {
+		eltType := v.info.TypeOf(arrayType.Elt)
+
+		if !v.liftedTypeExists(interfaceType) {
+			liftedName := v.visitInterfaceType(interfaceType, eltType, name, nil, true, nil)
+			csTypeName = liftedName
+			goTypeName = liftedName
+		} else if ln, ok := v.liftedTypeMap[eltType]; ok {
+			csTypeName = ln
+			goTypeName = ln
+		}
+	}
+
+	if csTypeName != "" {
+		// element already resolved to a lifted name above
+	} else if ident := getIdentifier(arrayType.Elt); ident != nil && isSimpleIdentExpr(arrayType.Elt) {
 		goTypeName = ident.Name
 		csTypeName = convertToCSTypeName(goTypeName)
 	} else if eltType := v.info.TypeOf(arrayType.Elt); eltType != nil {

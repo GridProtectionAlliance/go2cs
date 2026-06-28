@@ -237,6 +237,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]
+    public void CheckNamedArrayAnonElement() => CheckTarget("NamedArrayAnonElement");
+
+    [TestMethod]
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]
