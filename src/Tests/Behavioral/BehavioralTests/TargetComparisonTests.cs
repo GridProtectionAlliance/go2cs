@@ -299,6 +299,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
+    public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]

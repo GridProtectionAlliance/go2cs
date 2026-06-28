@@ -52,7 +52,8 @@ public readonly struct @string :
     IEnumerable<char>, 
     ICloneable, 
     IComparisonOperators<@string, @string, bool>,
-    IAdditionOperators<@string, @string, @string>
+    IAdditionOperators<@string, @string, @string>,
+    IByteSeq<byte>
 {
     internal readonly byte[] m_value;
 
@@ -87,6 +88,19 @@ public readonly struct @string :
     public @string(in slice<rune> value) : this(value.ToSpan()) { }
 
     public @string(in IArray<byte> value) : this(value.Source) { }
+
+    // From a `string | []byte`-constrained byte sequence (IByteSeq<byte>): a generic body slices
+    // such a value and wraps the result in @string (e.g. `string(s[a:b])` in bytealg's Rabin-Karp).
+    // A concrete slice<byte>/@string argument still prefers its own more-specific constructor.
+    public @string(IByteSeq<byte> value)
+    {
+        byte[] bytes = new byte[value.Length];
+
+        for (nint i = 0; i < value.Length; i++)
+            bytes[i] = value[i];
+
+        m_value = bytes;
+    }
 
     public @string(string? value)
     {
@@ -125,6 +139,13 @@ public readonly struct @string :
     // returns @string. Returning slice<byte> here would break string comparisons
     // (slice<byte> != string) and put a ref-struct-convertible value into tuples.
     public @string this[Range range] => new(new slice<byte>(m_value, range.Start.GetOffset(m_value.Length), range.End.GetOffset(m_value.Length)));
+
+    // IByteSeq<byte> — models Go's `string | []byte` union constraint. The byte indexer
+    // (this[nint]) implicitly implements IByteSeq<byte>.this[nint]; Length (int) and the
+    // @string range indexer need explicit forms to match the interface's nint/IByteSeq types.
+    nint IByteSeq.Length => m_value.Length;
+
+    IByteSeq<byte> IByteSeq<byte>.this[Range range] => this[range];
 
     public slice<byte> Slice(int start, int length)
     {

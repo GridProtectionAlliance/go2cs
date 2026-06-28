@@ -69,7 +69,7 @@ public interface ISlice<T> : IArray<T>, ISlice
 // option in the future, at least for slices that are private and used with internal package functions only.
 
 [Serializable]
-public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, IByteSeq<T>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -433,6 +433,13 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     ISlice<T> ISlice<T>.this[Range range] => this[range];
+
+    // IByteSeq<T> — models Go's `string | []byte` union constraint. Length implicitly implements
+    // IByteSeq.Length; the element indexer needs an explicit by-value form (slice<T>'s is ref T),
+    // and the range indexer an explicit IByteSeq<T> form (slice<T>'s returns slice<T>).
+    T IByteSeq<T>.this[nint index] => this[index];
+
+    IByteSeq<T> IByteSeq<T>.this[Range range] => this[range];
 
     ISlice<T> ISlice<T>.Slice(int start, int length) => Slice(start, length);
 

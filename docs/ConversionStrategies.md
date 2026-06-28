@@ -313,6 +313,21 @@ var c = new channel<nint>(3);
 
 Map reads honor Go's nil-map and comma-ok semantics (see [The "nil" Value](#the-nil-value) and [Return Tuples](#return-tuples)).
 
+## Generic Constraints
+A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
+
+### The `string | []byte` union
+C# generic constraints are conjunctive ("and"), so they cannot express Go's `string | []byte` union directly. The two members share no operators (the union is neither comparable nor additive), so a conforming body may only use the read operations common to both — indexing, `len`, and sub-slicing. These are captured by the golib read-only byte-sequence interface [`IByteSeq<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/IByteSeq.cs), which both `@string` (as `IByteSeq<byte>`) and `slice<T>` implement; the converter emits it for the union and suppresses the (spurious) lifted operator constraints:
+```go
+func HashStr[T string | []byte](sep T) uint32 { /* uses sep[i], len(sep) */ }
+```
+```csharp
+public static uint32 HashStr<T>(T sep)
+    where T : /* string | []byte */ IByteSeq<byte>, new()
+{ /* … */ }
+```
+A sub-slice of a constrained value is itself an `IByteSeq<byte>`, and Go's `string(s[lo:hi])` becomes `new @string(s[lo..hi])` via an `@string(IByteSeq<byte>)` constructor. `len` resolves through a generic `len<T>(IByteSeq<T>)` overload that is dispreferred for concrete `slice<byte>`/`@string` arguments, so existing call sites keep their specific overloads (no ambiguity). The behavioral test `StringByteUnionConstraint` exercises both the `string` and `[]byte` instantiations.
+
 ## Type Aliasing
 Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition): a "type definition" and a "type alias declaration".
 

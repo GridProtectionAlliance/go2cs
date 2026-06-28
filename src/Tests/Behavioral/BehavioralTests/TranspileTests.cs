@@ -297,6 +297,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStdLibInternalAbi() => CheckTarget("StdLibInternalAbi");
 
     [TestMethod]
+    public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
+
+    [TestMethod]
     public void CheckStringPassByValue() => CheckTarget("StringPassByValue");
 
     [TestMethod]

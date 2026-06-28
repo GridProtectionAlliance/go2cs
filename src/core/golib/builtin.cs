@@ -814,6 +814,21 @@ public static class builtin
     }
 
     /// <summary>
+    /// Gets the length of the byte sequence <paramref name="seq"/> (a `string | []byte`-constrained value).
+    /// </summary>
+    /// <param name="seq">Target byte sequence.</param>
+    /// <returns>The length of the <paramref name="seq"/>.</returns>
+    /// <remarks>
+    /// Generic so it is only selected for an IByteSeq-constrained type parameter — overload resolution
+    /// prefers the non-generic len overloads for a concrete slice/string, avoiding ambiguity with
+    /// len(ISlice)/len(@string) when the argument also implements those interfaces.
+    /// </remarks>
+    public static nint len<T>(IByteSeq<T> seq)
+    {
+        return seq.Length;
+    }
+
+    /// <summary>
     /// Gets the length of the <paramref name="slice"/>.
     /// </summary>
     /// <param name="slice">Target slice pointer.</param>

@@ -115,7 +115,7 @@ type Visitor struct {
 	// declaration currently being emitted — set by visitTypeSpec for an unexported type that
 	// must be publicized (used as an exported struct field; see packagePublicizedTypes), and
 	// consumed (read and cleared) by the type-kind emitter (visitArrayType/visitStructType/…).
-	pendingTypeAccess    string
+	pendingTypeAccess string
 	// namedReturnDeferMode is set when the current function has named return values AND uses
 	// defer/recover. Such a function is emitted as a block body that declares the named returns
 	// *outside* the `func((defer, recover) => …)` wrapper (so deferred code, including recover,
@@ -2302,6 +2302,9 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 				constraintName = strings.TrimPrefix(strings.TrimSpace(constraintName), "~")
 				constraintExpr := strings.ReplaceAll(constraintName, " ", "")
 				var typeConstraint string
+				// `string | []byte` union members share no operators, so suppress the spurious lifted
+				// operator constraints (IAddition/IComparison/...) for it; set in the union branch below.
+				suppressLiftedConstraints := false
 
 				// Check for common Go types, e.g., slice, map, channel, etc.
 				if strings.HasPrefix(constraintExpr, "[]") {
@@ -2330,7 +2333,13 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					typeConstraint = originalConstraint
 				} else {
 					// Handle special case for string and []byte types
-					if constraintExpr == "string" || constraintExpr == "[]byte" || constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
+					if constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
+						// Go's `string | []byte` union — emit the read-only byte-sequence interface
+						// both @string and slice<byte> implement (IByteSeq<byte>); C# cannot express
+						// the "or" directly. See golib IByteSeq.
+						typeConstraint = "IByteSeq<byte>"
+						suppressLiftedConstraints = true
+					} else if constraintExpr == "string" || constraintExpr == "[]byte" {
 						typeConstraint = "ISlice<byte>"
 					} else if constraintExpr == "comparable" {
 						// The Go built-in `comparable` constraint maps to golib's generic
@@ -2347,6 +2356,11 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					// it does for structs. For partial methods, all constraint defintions are forced
 					// to match, so there is no current benefit to declaring a partial method here.
 					liftedConstraints := v.getLiftedConstraints(constraint, typeParamNames[i])
+
+					// The `string | []byte` union has no common operators; drop the spurious lifted set.
+					if suppressLiftedConstraints {
+						liftedConstraints = ""
+					}
 
 					if len(liftedConstraints) > 0 {
 						if len(typeConstraint) == 0 {
