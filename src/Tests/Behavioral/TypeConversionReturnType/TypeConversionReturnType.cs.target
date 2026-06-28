@@ -9,14 +9,14 @@ partial class main_package {
 
 [GoType("dyn")] partial struct test_R0 {
     internal @string @string;
-    public ж<nint> @int;
+    internal ж<nint> @int;
     public P P;
     public M M;
 }
 
 [GoType("dyn")] partial struct test_x {
     internal @string @string;
-    public ж<nint> @int;
+    internal ж<nint> @int;
     public P P;
     public M M;
 }

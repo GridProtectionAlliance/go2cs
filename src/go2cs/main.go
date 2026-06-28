@@ -1544,6 +1544,11 @@ func getSanitizedFunctionName(funcName string) string {
 func getAccess(name string) string {
 	name = strings.TrimPrefix(name, "ref ")
 
+	// Strip a pointer marker so accessibility is judged by the pointed-to type's name, not the '*'
+	// (which is neither lowercase nor '_', so an embedded `*unexported` field would wrongly read as
+	// exported → a `public` accessor for an internal type, causing CS0053/CS8799).
+	name = strings.TrimPrefix(name, "*")
+
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
