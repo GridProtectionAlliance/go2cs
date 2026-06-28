@@ -95,4 +95,13 @@ func main() {
 		func(k int) int { return k + base[0] },
 	}
 	fmt.Println("8:", handlers[0](100))
+
+	// 9. Typed var DECLARATION whose initializer is a capturing func literal (runtime
+	//    tracestack.go does `var skipOrAdd func(uintptr) bool = func(){…}`). The capture decl
+	//    must hoist out of the declaration's initializer (visitValueSpec), not emit inline.
+	seed := []int{2}
+	var mul func(int) int = func(k int) int {
+		return k * seed[0]
+	}
+	fmt.Println("9:", mul(21))
 }

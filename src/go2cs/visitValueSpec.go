@@ -186,15 +186,30 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {
+						// A func-literal initializer (`var f T = func(){ …capture… }`) emits its
+						// captured-variable snapshot decls inline; collect them in the hoist buffer
+						// and write them on their own line(s) before this declaration.
+						hoistBuf := &strings.Builder{}
+						savedHoist := v.hoistedDecls
+						v.hoistedDecls = hoistBuf
+						valExpr := v.convExpr(valueSpec.Values[i], []ExprContext{context})
+						v.hoistedDecls = savedHoist
+
+						if hoistBuf.Len() > 0 {
+							// The decls carry their own leading newline + per-line indentation;
+							// writeOutput below re-indents the declaration line that follows.
+							v.targetFile.WriteString(strings.TrimRight(hoistBuf.String(), " \t"))
+						}
+
 						heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 						if len(heapTypeDecl) > 0 {
 							v.writeOutputLn(heapTypeDecl)
 							v.targetFile.WriteString(v.newline)
-							v.writeOutput("%s = %s;", csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+							v.writeOutput("%s = %s;", csIDName, valExpr)
 						} else {
 							// Following declarations must use explicit type, do not use `v.options.preferVarDecl` for these:
-							v.writeOutput("%s %s = %s;", csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+							v.writeOutput("%s %s = %s;", csTypeName, csIDName, valExpr)
 						}
 					} else {
 						access := getAccess(goIDName)

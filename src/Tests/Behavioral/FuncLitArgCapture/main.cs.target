@@ -71,6 +71,11 @@ internal static void Main() {
         (nint k) => k + baseʗ1[0]
     }.slice();
     fmt.Println("8:", handlers[0](100));
+    var seed = new nint[]{2}.slice();
+
+    var seedʗ1 = seed;
+    Func<nint, nint> mul = (nint k) => k * seedʗ1[0];
+    fmt.Println("9:", mul(21));
 }
 
 } // end main_package
