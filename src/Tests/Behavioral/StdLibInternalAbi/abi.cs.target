@@ -37,7 +37,7 @@ partial class main_package {
     if (BigEndian) {
         offset = (uintptr)PtrSize - argSize;
     }
-    return ((@unsafe.Pointer)(((uintptr)((@unsafe.Pointer)(Ꮡ(r.Ints[reg])))) + offset));
+    return ((@unsafe.Pointer)(((uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(r.Ints[reg])).val)) + offset));
 }
 
 [GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */

@@ -50,6 +50,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
+		// unsafe.Pointer(ptr) where ptr is a Go pointer (`*T`, emitted as the managed box `ж<T>`).
+		// A managed box has no conversion to the numeric Pointer (`ж<uintptr>`), so a plain cast is
+		// CS0030 — e.g. `unsafe.Pointer(&u.value)` → `(@unsafe.Pointer)(Ꮡu.of(…))`. Pin the
+		// pointed-to storage instead via the golib helper: `@unsafe.Pointer.FromRef(ref (box).val)`.
+		// (`uintptr`/`unsafe.Pointer` args are not boxes and keep the implicit-cast path below; only
+		// a genuine pointer arg needs this.) The numeric address is not GC-stable — the same caveat
+		// that applies to every unsafe.Pointer-as-uintptr use; the atomic intrinsics consuming it are
+		// asm stubs, so this is purely about producing compilable C#.
+		if targetTypeName == "@unsafe.Pointer" {
+			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
+				return fmt.Sprintf("@unsafe.Pointer.FromRef(ref (%s).val)", expr)
+			}
+		}
+
 		if targetTypeName == "@string" {
 			// Check if it is a generic type parameter - Go will have already
 			// validated constraint, so we can just cast to string directly
