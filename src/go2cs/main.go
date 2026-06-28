@@ -1549,6 +1549,12 @@ func getAccess(name string) string {
 	// exported → a `public` accessor for an internal type, causing CS0053/CS8799).
 	name = strings.TrimPrefix(name, "*")
 
+	// Strip the Δ collision/reserved-word rename prefix so accessibility tracks the ORIGINAL Go
+	// name's exported-ness. Δ (a Greek capital) is not lowercase, so a Δ-renamed unexported type
+	// (e.g. `p_gFree` → `Δp_gFree`) would otherwise read as exported → a `public` promoted method
+	// whose unexported parameter types are less accessible (CS0051).
+	name = strings.TrimPrefix(name, ShadowVarMarker)
+
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
