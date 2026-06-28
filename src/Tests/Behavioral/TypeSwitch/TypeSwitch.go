@@ -11,6 +11,9 @@ func main() {
 	// type corresponding to its clause.
 	whatAmI := func(i interface{}) {
 		switch t := i.(type) {
+		case nil:
+			// A nil interface matches `case nil` — emitted as the C# `case null:` pattern.
+			fmt.Println("I'm nil")
 		case bool:
 			fmt.Println("I'm a bool")
 		case int, int64, uint64:
@@ -24,4 +27,5 @@ func main() {
 	whatAmI(int64(2))
 	whatAmI(uint64(2))
 	whatAmI("hey")
+	whatAmI(nil)
 }

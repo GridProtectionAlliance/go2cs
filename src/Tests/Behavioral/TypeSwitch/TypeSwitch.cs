@@ -7,6 +7,10 @@ partial class main_package {
 internal static void Main() {
     var whatAmI = (any i) => {
         switch (i.type()) {
+        case null: {
+            fmt.Println("I'm nil");
+            break;
+        }
         case bool t: {
             fmt.Println("I'm a bool");
             break;
@@ -38,6 +42,7 @@ internal static void Main() {
     whatAmI(((int64)2));
     whatAmI(((uint64)2));
     whatAmI("hey");
+    whatAmI(default!);
 }
 
 } // end main_package
