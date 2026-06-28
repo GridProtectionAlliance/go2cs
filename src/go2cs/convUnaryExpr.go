@@ -267,13 +267,15 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 
 		// A package-level var whose address is taken is backed by a heap box, so its
 		// "Ꮡname" companion already exists — reference it directly rather than boxing a copy.
+		// Strip a leading '@' keyword-escape: the box name is `Ꮡ`+raw (e.g. `Ꮡbase`), since
+		// `Ꮡ@base` is not a valid identifier (a '@' is only valid as a leading prefix).
 		if v.isAddressedGlobal(ident) {
-			return AddressPrefix + v.convExpr(unaryExpr.X, nil)
+			return AddressPrefix + strings.TrimPrefix(v.convExpr(unaryExpr.X, nil), "@")
 		}
 
 		if escapesHeap && !isInherentlyHeapAllocatedType(v.getIdentType(ident)) {
 			// If the variables escapes to heap, existing pointer reference should exist
-			return AddressPrefix + v.convExpr(unaryExpr.X, nil)
+			return AddressPrefix + strings.TrimPrefix(v.convExpr(unaryExpr.X, nil), "@")
 		}
 
 		// Otherwise, call the address of function to get a pointer reference

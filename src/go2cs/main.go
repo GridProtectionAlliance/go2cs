@@ -3080,6 +3080,11 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		return ""
 	}
 
+	// The local's name is sanitized (a C# keyword such as `base`/`as`/`event` becomes `@base`…),
+	// matching how it is referenced elsewhere. The box keeps the raw name with the Ꮡ prefix
+	// (`Ꮡbase` is already a valid identifier and is how its address is emitted everywhere).
+	varName := getSanitizedIdentifier(csIDName)
+
 	// Handle array types
 	if strings.HasPrefix(goTypeName, "[") {
 		arrayLen := strings.Split(goTypeName[1:], "]")[0]
@@ -3089,34 +3094,34 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 
 		if v.options.preferVarDecl {
 			if createNew {
-				return fmt.Sprintf("ref var %s = ref heap(new array<%s>(%s), out var %s%s);", csIDName, arrayType, arrayLen, AddressPrefix, csIDName)
+				return fmt.Sprintf("ref var %s = ref heap(new array<%s>(%s), out var %s%s);", varName, arrayType, arrayLen, AddressPrefix, csIDName)
 			}
 
-			return fmt.Sprintf("ref var %s = ref heap<array<%s>>(out var %s%s);", csIDName, arrayType, AddressPrefix, csIDName)
+			return fmt.Sprintf("ref var %s = ref heap<array<%s>>(out var %s%s);", varName, arrayType, AddressPrefix, csIDName)
 		}
 
 		if createNew {
-			return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out %s<array<%s>> %s%s);", arrayType, csIDName, arrayType, arrayLen, PointerPrefix, arrayType, AddressPrefix, csIDName)
+			return fmt.Sprintf("ref array<%s> %s = ref heap(new array<%s>(%s), out %s<array<%s>> %s%s);", arrayType, varName, arrayType, arrayLen, PointerPrefix, arrayType, AddressPrefix, csIDName)
 		}
 
-		return fmt.Sprintf("ref array<%s> %s = ref heap<array<%s>>(out %s%s);", arrayType, csIDName, arrayType, AddressPrefix, csIDName)
+		return fmt.Sprintf("ref array<%s> %s = ref heap<array<%s>>(out %s%s);", arrayType, varName, arrayType, AddressPrefix, csIDName)
 	}
 
 	csTypeName := convertToCSTypeName(goTypeName)
 
 	if v.options.preferVarDecl {
 		if createNew {
-			return fmt.Sprintf("ref var %s = ref heap(new %s(), out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
+			return fmt.Sprintf("ref var %s = ref heap(new %s(), out var %s%s);", varName, csTypeName, AddressPrefix, csIDName)
 		}
 
-		return fmt.Sprintf("ref var %s = ref heap<%s>(out var %s%s);", csIDName, csTypeName, AddressPrefix, csIDName)
+		return fmt.Sprintf("ref var %s = ref heap<%s>(out var %s%s);", varName, csTypeName, AddressPrefix, csIDName)
 	}
 
 	if createNew {
-		return fmt.Sprintf("ref %s %s = ref heap(out %s<%s> %s%s);", csTypeName, csIDName, PointerPrefix, csTypeName, AddressPrefix, csIDName)
+		return fmt.Sprintf("ref %s %s = ref heap(out %s<%s> %s%s);", csTypeName, varName, PointerPrefix, csTypeName, AddressPrefix, csIDName)
 	}
 
-	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, csIDName, csTypeName, AddressPrefix, csIDName)
+	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, varName, csTypeName, AddressPrefix, csIDName)
 }
 
 // isInherentlyHeapAllocatedType checks if the type is inherently heap allocated,

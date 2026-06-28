@@ -195,6 +195,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

@@ -197,6 +197,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
+    public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

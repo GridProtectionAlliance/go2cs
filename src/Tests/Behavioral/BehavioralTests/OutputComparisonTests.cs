@@ -172,6 +172,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
+
+    [TestMethod]
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]
