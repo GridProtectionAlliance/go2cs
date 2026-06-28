@@ -403,7 +403,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			nativeIntConst := false
 
 			if c.Val().Kind() == constant.Int && (csTypeName == "nint" || csTypeName == "nuint" || csTypeName == "uintptr") {
-				if _, errInt := strconv.ParseInt(constVal, 0, 64); errInt != nil {
+				// A C# constant of a native-int type only accepts an int-range literal; a value
+				// beyond int32 (e.g. runtime/alg's `uintptr c0 = 33054211828000289`) has no
+				// implicit/constant conversion to nint/nuint (CS0133/CS0266), so it must be emitted
+				// as `static readonly` with an unchecked cast rather than `const`.
+				if _, errInt := strconv.ParseInt(constVal, 0, 32); errInt != nil {
 					nativeIntConst = true
 				}
 			}
@@ -454,6 +458,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)
 				} else {
 					constExpr = "const"
+
+					// A float32 const initialized from a (double) literal needs an `f` suffix —
+					// `const float hashLoad = 6.5` is CS0664 without it. Applied to the emitted value
+					// only (constVal is still used above for the doc-comment elision check).
+					if c.Val().Kind() == constant.Float && csTypeName == "float32" {
+						constValExpr += "f"
+					}
 				}
 
 				if v.inFunction {

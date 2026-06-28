@@ -5,7 +5,7 @@ using sort = sort_package;
 
 partial class main_package {
 
-internal const float32 w = 1;
+internal const float32 w = 1f;
 internal static readonly UntypedInt _addr_X = 1;
 public static readonly UntypedInt Y = 2;
 public static readonly UntypedInt Z = 3;
