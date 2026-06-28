@@ -4,39 +4,29 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Box<T>
-    where T : new()
-{
+[GoType] partial struct Box<T> {
     internal T v;
 }
 
-internal static void setT<T>(ж<T> Ꮡp, T val)
-    where T : new()
-{
+internal static void setT<T>(ж<T> Ꮡp, T val) {
     ref var p = ref Ꮡp.val;
 
     p = val;
 }
 
-internal static T getT<T>(ж<T> Ꮡp)
-    where T : new()
-{
+internal static T getT<T>(ж<T> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
     return p;
 }
 
-public static void Set<T>(this ж<Box<T>> Ꮡb, T val)
-    where T : new()
-{
+public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
     ref var b = ref Ꮡb.val;
 
     setT(Ꮡb.of(Box<T>.Ꮡv), val);
 }
 
-public static T Get<T>(this ж<Box<T>> Ꮡb)
-    where T : new()
-{
+public static T Get<T>(this ж<Box<T>> Ꮡb) {
     ref var b = ref Ꮡb.val;
 
     return getT(Ꮡb.of(Box<T>.Ꮡv));

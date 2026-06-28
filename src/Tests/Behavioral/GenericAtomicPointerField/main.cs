@@ -6,23 +6,17 @@ using sync;
 
 partial class main_package {
 
-[GoType] partial struct entry<V>
-    where V : new()
-{
+[GoType] partial struct entry<V> {
     internal ж<V> key;
     internal sync.atomic_package.Pointer<V> v;
     internal ж<entry<V>> next;
 }
 
-[GoType] partial struct Cache<V>
-    where V : new()
-{
+[GoType] partial struct Cache<V> {
     internal sync.atomic_package.Pointer<entry<V>> head;
 }
 
-public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval)
-    where V : new()
-{
+public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
     ref var c = ref Ꮡc.val;
     ref var key = ref Ꮡkey.val;
     ref var val = ref Ꮡval.val;
@@ -33,9 +27,7 @@ public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval)
     Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
 }
 
-public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey)
-    where V : new()
-{
+public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     ref var c = ref Ꮡc.val;
     ref var key = ref Ꮡkey.val;
 

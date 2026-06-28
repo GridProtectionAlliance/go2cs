@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Box<T>
-    where T : new()
-{
+[GoType] partial struct Box<T> {
     public T Value;
 }
 

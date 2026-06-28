@@ -4,17 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Box<T>
-    where T : new()
-{
+[GoType] partial struct Box<T> {
     internal T v;
 }
 
-[GoType("[3]Box<T>")] partial struct table<T>
-    where T : new();
+[GoType("[3]Box<T>")] partial struct table<T>;
 
-[GoType("[2]T")] partial struct vec<T>
-    where T : new();
+[GoType("[2]T")] partial struct vec<T>;
 
 internal static void Main() {
     table<nint> t = default!;

@@ -4,25 +4,19 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Option<T>
-    where T : new()
-{
+[GoType] partial struct Option<T> {
     internal T value;
     internal bool valid;
 }
 
-public static Option<T> NewOption<T>(T value)
-    where T : new()
-{
+public static Option<T> NewOption<T>(T value) {
     return new Option<T>(
         value: value,
         valid: true
     );
 }
 
-public static Option<T> NewEmptyOption<T>()
-    where T : new()
-{
+public static Option<T> NewEmptyOption<T>() {
     T zero = default!;
     return new Option<T>(
         value: zero,

@@ -1074,9 +1074,14 @@ public static class builtin
     /// Creates a heap allocated pointer reference to a new zero value instance of type.
     /// </summary>
     /// <returns>Pointer to heap allocated zero value of provided type.</returns>
-    public static ж<T> @new<T>() where T : new()
+    public static ж<T> @new<T>()
     {
-        return new ж<T>(new T());
+        // No `where T : new()` bound: an unconstrained Go type parameter no longer carries one (so a
+        // delegate/func type arg like `atomic.Pointer[func()]` is legal). Construct the zero value the
+        // way Go's `new(T)` does: a value type is zero-initialized via its parameterless ctor (running
+        // any field initializers, e.g. fixed-size array fields); a reference/delegate type is null.
+        T value = typeof(T).IsValueType ? Activator.CreateInstance<T>() : default!;
+        return new ж<T>(value);
     }
 
     /// <summary>

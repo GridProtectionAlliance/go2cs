@@ -43,10 +43,7 @@ public static T Min<T>(T a, T b)
     return b;
 }
 
-public static U Convert<T, U>(T value, Func<T, U> converter)
-    where T : new()
-    where U : new()
-{
+public static U Convert<T, U>(T value, Func<T, U> converter) {
     return converter(value);
 }
 

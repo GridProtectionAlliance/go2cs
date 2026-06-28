@@ -4,17 +4,13 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-public static T First<T>(params Span<T> valsʗp)
-    where T : new()
-{
+public static T First<T>(params Span<T> valsʗp) {
     var vals = valsʗp.slice();
 
     return vals[0];
 }
 
-public static nint Count<T>(params Span<T> valsʗp)
-    where T : new()
-{
+public static nint Count<T>(params Span<T> valsʗp) {
     var vals = valsʗp.slice();
 
     return len(vals);

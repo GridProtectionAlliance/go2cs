@@ -4,9 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-public static (T, T) Swap<T>(T a, T b)
-    where T : new()
-{
+public static (T, T) Swap<T>(T a, T b) {
     return (b, a);
 }
 

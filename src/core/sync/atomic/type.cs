@@ -67,9 +67,7 @@ internal static uint32 b32(bool b) {
 internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 
 // A Pointer is an atomic pointer of type *T. The zero value is a nil *T.
-[GoType] partial struct Pointer<T>
-    where T : new()
-{
+[GoType] partial struct Pointer<T>{
     // Mention *T in a field to disallow conversion between Pointer types.
     // See go.dev/issue/56603 for more details.
     // Use *T, not T, to avoid spurious recursive type definition errors.
@@ -85,43 +83,33 @@ internal static ж<Pointer<nint>> _ᴛ1ʗ = Ꮡ(new Pointer<nint>(nil));
 
 // nilCanon canonicalizes a nil pointer to null so the reference comparison in CompareAndSwap
 // treats all nil *T values as equal.
-private static ж<T> nilCanon<T>(ж<T> p)
-    where T : new()
-{
+private static ж<T> nilCanon<T>(ж<T> p){
     return p is null || p.IsNull ? default! : p;
 }
 
 // Load atomically loads and returns the value stored in x.
-public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx)
-    where T : new()
-{
+public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx){
     ref var x = ref Ꮡx.val;
 
     return Volatile.Read(ref x.v);
 }
 
 // Store atomically stores val into x.
-public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡval)
-    where T : new()
-{
+public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡval){
     ref var x = ref Ꮡx.val;
 
     Volatile.Write(ref x.v, nilCanon(Ꮡval));
 }
 
 // Swap atomically stores new into x and returns the previous value.
-public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡnew)
-    where T : new()
-{
+public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡnew){
     ref var x = ref Ꮡx.val;
 
     return Interlocked.Exchange(ref x.v, nilCanon(Ꮡnew));
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
-public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡold, ж<T> Ꮡnew)
-    where T : new()
-{
+public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡold, ж<T> Ꮡnew){
     ref var x = ref Ꮡx.val;
 
     ж<T> old = nilCanon(Ꮡold);

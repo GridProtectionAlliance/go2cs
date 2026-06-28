@@ -2325,8 +2325,13 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 		}
 
 		if len(constraintName) == 0 || constraintName == "any" || constraintName == "interface{}" {
-			// At a minimum, generic type must implement 'ISupportMake' to be constructable, e.g., with `make`
-			constraintName = "new()"
+			// An unconstrained (`any`) type parameter gets NO C# constraint. Previously `new()` was
+			// added (so `@new<T>`/`make` could construct it, and to force `@string` over `System.String`
+			// for generic string args). But `new()` rejects a delegate/func type argument — Go's
+			// `atomic.Pointer[func()]` is valid yet `Pointer<Action>` failed CS0310 — and it is no
+			// longer required: golib `@new<T>` constructs via the runtime (no new() bound), and string
+			// literals are cast to `@string` at generic call sites. Leave it unconstrained.
+			constraintName = ""
 		} else {
 			var iface *types.Interface
 
@@ -2428,6 +2433,12 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 			} else {
 				v.showWarning("@getGenericDefinition - constraint `%s` on `%s` is not an interface", constraintName, srcType.String())
 			}
+		}
+
+		// An unconstrained type parameter emits no `where` clause at all (the type-param name still
+		// appears in the `<…>` list above).
+		if len(constraintName) == 0 {
+			continue
 		}
 
 		constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], constraintName))

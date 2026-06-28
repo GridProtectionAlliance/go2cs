@@ -4,21 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Queue<T>
-    where T : new()
-{
+[GoType] partial struct Queue<T> {
     internal slice<T> items;
 }
 
-[GoRecv] public static void Enqueue<T>(this ref Queue<T> q, T item)
-    where T : new()
-{
+[GoRecv] public static void Enqueue<T>(this ref Queue<T> q, T item) {
     q.items = append(q.items, item);
 }
 
-[GoRecv] public static (T, bool) Dequeue<T>(this ref Queue<T> q)
-    where T : new()
-{
+[GoRecv] public static (T, bool) Dequeue<T>(this ref Queue<T> q) {
     T zero = default!;
     if (len(q.items) == 0) {
         return (zero, false);
@@ -28,9 +22,7 @@ partial class main_package {
     return (item, true);
 }
 
-[GoRecv] public static nint Size<T>(this ref Queue<T> q)
-    where T : new()
-{
+[GoRecv] public static nint Size<T>(this ref Queue<T> q) {
     return len(q.items);
 }
 

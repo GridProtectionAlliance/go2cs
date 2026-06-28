@@ -4,16 +4,11 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType] partial struct Box<T>
-    where T : new()
-{
+[GoType] partial struct Box<T> {
     internal T v;
 }
 
-[GoType] partial struct Pair<A, B>
-    where A : new()
-    where B : new()
-{
+[GoType] partial struct Pair<A, B> {
     internal A a;
     internal B b;
 }
