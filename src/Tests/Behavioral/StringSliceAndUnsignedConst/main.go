@@ -7,9 +7,23 @@ import "fmt"
 // C# literal (2147483648U); a signed (nint)…L would not convert to uint.
 func takesUint32(v uint32) uint32 { return v }
 
+// big mirrors runtime/alg.go's c0/c1: a uintptr const whose value exceeds int32
+// range must be emitted as `static readonly` with an unchecked cast — a C# `const`
+// of a native-int type cannot hold such a value (CS0133/CS0266).
+const big uintptr = 33054211828000289
+
+// hashLoad mirrors runtime/stubs.go's `const hashLoad = float32(loadFactorNum) /
+// float32(loadFactorDen)`: a float32 const folded from a (double) division needs an
+// 'f' suffix in C# or it is CS0664 (double cannot implicitly convert to float).
+const hashLoad float32 = float32(13) / float32(2)
+
 func main() {
 	// 1. Large unsigned constant adopting its parameter type.
 	fmt.Println(takesUint32(0x80000000))
+
+	// 1b. Native-int const beyond int32, and a float32 const folded from a division.
+	fmt.Println(big)
+	fmt.Println(hashLoad)
 
 	env := "cpu.feature=on"
 

@@ -8,8 +8,14 @@ internal static uint32 takesUint32(uint32 v) {
     return v;
 }
 
+internal static readonly uintptr big = unchecked((uintptr)33054211828000289);
+
+internal const float32 hashLoad = /* float32(13) / float32(2) */ 6.5f;
+
 internal static void Main() {
     fmt.Println(takesUint32(2147483648U));
+    fmt.Println(big);
+    fmt.Println(hashLoad);
     @string env = "cpu.feature=on"u8;
     fmt.Println(env[..4] == "cpu.");
     @string field = default!;
