@@ -127,6 +127,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericFuncDecl() => CheckTarget("GenericFuncDecl");
 
     [TestMethod]
+    public void CheckGenericNamedArrayType() => CheckTarget("GenericNamedArrayType");
+
+    [TestMethod]
     public void CheckGenericReceiverFieldAddress() => CheckTarget("GenericReceiverFieldAddress");
 
     [TestMethod]

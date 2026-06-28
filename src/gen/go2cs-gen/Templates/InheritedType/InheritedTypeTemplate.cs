@@ -59,6 +59,18 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string Nullable => ReadOnlyValue ? "" : "?";
 
+    // A C# constructor name must not carry the type's generic parameters (e.g. the constructor for
+    // a generic named array type `vec<T>` is `vec(...)`, not `vec<T>(...)`). Non-generic types have
+    // no '<' so ConstructorName equals ObjectName — emitting byte-identical output.
+    private string ConstructorName
+    {
+        get
+        {
+            int angle = ObjectName.IndexOf('<');
+            return angle < 0 ? ObjectName : ObjectName.Substring(0, angle);
+        }
+    }
+
     public override string TemplateBody =>
         $$"""
             [{{GeneratedCodeAttribute}}]
@@ -68,9 +80,9 @@ internal class InheritedTypeTemplate : TemplateBase
                 private {{ReadOnly}}{{TypeName}}{{Nullable}} m_value;
                 {{InterfaceImplementation}}
                 
-                public {{ObjectName}}({{TypeName}} value) => m_value = value;
+                public {{ConstructorName}}({{TypeName}} value) => m_value = value;
 
-                public {{ObjectName}}(NilType _) => m_value = default!;
+                public {{ConstructorName}}(NilType _) => m_value = default!;
 
                 public {{TypeName}} val => {{ValueGetter}};
                 

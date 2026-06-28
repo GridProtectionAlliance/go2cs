@@ -80,7 +80,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 	switch typeSpecType := typeSpec.Type.(type) {
 	case *ast.ArrayType:
-		v.visitArrayType(typeSpecType, name, typeSpec.Comment)
+		v.visitArrayType(typeSpecType, identType, name, typeSpec.Comment)
 	case *ast.ChanType:
 		v.visitChanType(typeSpecType)
 	case *ast.FuncType:

@@ -1,0 +1,30 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType] partial struct Box<T>
+    where T : new()
+{
+    internal T v;
+}
+
+[GoType("[3]Box<T>")] partial struct table<T>
+    where T : new();
+
+[GoType("[2]T")] partial struct vec<T>
+    where T : new();
+
+internal static void Main() {
+    table<nint> t = default!;
+    t[0].v = 5;
+    t[2].v = 9;
+    fmt.Println(t[0].v, t[2].v, len(t));
+    vec<nint> u = default!;
+    u[0] = 7;
+    u[1] = 8;
+    fmt.Println(u[0], u[1], len(u));
+}
+
+} // end main_package
