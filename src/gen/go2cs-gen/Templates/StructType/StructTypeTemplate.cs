@@ -300,9 +300,9 @@ internal class StructTypeTemplate : TemplateBase
 
     private IEnumerable<string> CompareList => StructMembers.Select(member => $"{member.memberName} == other.{member.memberName}");
 
-    public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" : 
-        $"""                    
-        runtime.HashCode.Combine(
+    public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" :
+        $"""
+        global::go.runtime.HashCode.Combine(
                     {ParamList})
         """;
 
