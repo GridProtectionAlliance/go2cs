@@ -67,23 +67,44 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 		}
 	}
 
-	// When the switch lowers to an if/else-if chain (non-constant cases on a tagged switch, no
-	// fallthrough), the `default` clause becomes the trailing `else`. Go allows `default` in any
-	// position, but in the chain a leading/middle default emits a bare `{ /* default: */ … }`
-	// followed by `else if` (CS8641 "else cannot start a statement"). Move the single default
-	// clause to the end so it is the final else. Only for this path: the C# `switch` branches
-	// accept `default` anywhere, and fallthrough is source-order-sensitive (left untouched).
-	if !hasFallthroughs && !allConst && switchStmt.Tag != nil {
+	// When the switch lowers to an if/else-if chain (non-constant cases on a tagged switch), the
+	// `default` clause becomes the trailing `else`. Go allows `default` in any position, but in the
+	// chain a leading/middle default emits a bare `{ /* default: */ … }` followed by `else if`
+	// (CS8641 "else cannot start a statement"). Move the single default clause to the end. This is
+	// safe even when the switch has fallthroughs, AS LONG AS the default itself does not participate
+	// in fallthrough — the preceding clause must not fall through into it and it must not fall
+	// through out (those are source-order-sensitive); removing a fallthrough-independent default
+	// preserves every other clause's fallthrough link. The C# `switch` branches accept `default`
+	// anywhere, so this is only for the if/else-chain path.
+	if !allConst && switchStmt.Tag != nil {
 		for i, caseClause := range caseClauses {
-			if caseClause.List == nil && i != len(caseClauses)-1 {
-				reordered := make([]*ast.CaseClause, 0, len(caseClauses))
-				reordered = append(reordered, caseClauses[:i]...)
-				reordered = append(reordered, caseClauses[i+1:]...)
-				reordered = append(reordered, caseClause)
-				caseClauses = reordered
-				caseHasFallthroughStmt = make([]bool, len(caseClauses)) // all-false (no fallthroughs here)
-				break
+			if caseClause.List != nil || i == len(caseClauses)-1 {
+				continue
 			}
+
+			fallsIntoDefault := i > 0 && caseHasFallthroughStmt[i-1]
+
+			if fallsIntoDefault || caseHasFallthroughStmt[i] {
+				break // default participates in fallthrough — keep source order
+			}
+
+			reorderedClauses := make([]*ast.CaseClause, 0, len(caseClauses))
+			reorderedFlags := make([]bool, 0, len(caseClauses))
+
+			for j := range caseClauses {
+				if j == i {
+					continue
+				}
+
+				reorderedClauses = append(reorderedClauses, caseClauses[j])
+				reorderedFlags = append(reorderedFlags, caseHasFallthroughStmt[j])
+			}
+
+			reorderedClauses = append(reorderedClauses, caseClause)
+			reorderedFlags = append(reorderedFlags, caseHasFallthroughStmt[i])
+			caseClauses = reorderedClauses
+			caseHasFallthroughStmt = reorderedFlags
+			break
 		}
 	}
 

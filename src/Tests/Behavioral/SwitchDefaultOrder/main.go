@@ -40,10 +40,30 @@ func mid(typ bucketType) int {
 	}
 }
 
+// A switch WITH fallthrough among the cases AND `default` listed first. Reordering the default
+// to the trailing else is still safe because the (terminal) default does not participate in
+// fallthrough. The runtime package does this (preempt.go's suspendG g-status switch).
+func withFallthrough(typ bucketType) int {
+	n := 0
+	switch typ {
+	default:
+		return -1
+	case memProfile:
+		n = 1
+		fallthrough
+	case blockProfile:
+		n += 10
+	case mutexProfile:
+		n = 100
+	}
+	return n
+}
+
 func main() {
 	fmt.Println(size(memProfile))
 	fmt.Println(size(blockProfile))
 	fmt.Println(size(mutexProfile))
 	fmt.Println(size(99))
 	fmt.Println(mid(memProfile), mid(blockProfile), mid(99))
+	fmt.Println(withFallthrough(memProfile), withFallthrough(blockProfile), withFallthrough(mutexProfile), withFallthrough(99))
 }
