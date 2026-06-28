@@ -14,6 +14,12 @@ internal class ReceiverMethodTemplate : TemplateBase
     private string? m_receiverParamName;
     private string ReceiverParamName => m_receiverParamName ??= Method.Parameters.First().name;
 
+    // The heap-box parameter/local name (`Ꮡx`). Built from the UNescaped receiver name: a C#-keyword
+    // receiver is escaped as `@enum`, but `Ꮡ@enum` is invalid ('@' is only valid as a leading prefix).
+    // The `Ꮡ` prefix already yields a distinct, valid identifier, so strip the '@' → `Ꮡenum`.
+    private string? m_receiverBoxName;
+    private string ReceiverBoxName => m_receiverBoxName ??= $"{AddressPrefix}{GetUnsanitizedIdentifier(ReceiverParamName)}";
+
     private string? m_receiverParamType;
     private string ReceiverParamType => m_receiverParamType ??= $"{PointerPrefix}<{Method.Parameters.First().type}>";
 
@@ -22,7 +28,7 @@ internal class ReceiverMethodTemplate : TemplateBase
             [{{GeneratedCodeAttribute}}]
             {{TargetScope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
             {
-                ref var {{ReceiverParamName}} = ref {{AddressPrefix}}{{ReceiverParamName}}.val;
+                ref var {{ReceiverParamName}} = ref {{ReceiverBoxName}}.val;
                 {{ReturnStatement}}{{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
             }
         """;
@@ -38,7 +44,7 @@ internal class ReceiverMethodTemplate : TemplateBase
             {
                 if (first)
                 {
-                    result.Add($"this {PointerPrefix}<{type}> {AddressPrefix}{name}");
+                    result.Add($"this {PointerPrefix}<{type}> {ReceiverBoxName}");
                     first = false;
                 }
                 else
