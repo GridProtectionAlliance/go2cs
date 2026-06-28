@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/types"
+	"strings"
 )
 
 func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
@@ -107,7 +108,31 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ParenExpr:
 		v.targetFile.WriteString(v.convParenExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.SelectorExpr:
-		v.targetFile.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
+		// A DEFINED type over a cross-package named type (`type stdFunction unsafe.Pointer`,
+		// `type goroutineProfileStateHolder atomic.Uint32`). Emit an inherited `[GoType]` wrapper of
+		// the NAMED type (go2cs-gen's InheritedTypeTemplate wraps a plain type-name definition);
+		// writing the bare selector text alone is an orphan type reference (CS1585). Use the named
+		// type, not its underlying (which may expose unexported cross-package fields → CS0246).
+		if rhsType := v.info.TypeOf(typeSpecType); rhsType != nil {
+			csName := convertToCSTypeName(v.getFullTypeName(rhsType, false))
+
+			// The GoType attribute is consumed by the generated `<X>.g.cs`, which has no file-local
+			// `using` aliases. unsafe.Pointer (a *types.Basic, a C# keyword) renders via the
+			// `@unsafe` alias; rewrite it to the alias-free package class so it resolves there.
+			csName = strings.ReplaceAll(csName, "@unsafe.", "unsafe_package.")
+
+			access := v.pendingTypeAccess
+			v.pendingTypeAccess = ""
+
+			if !v.inFunction {
+				v.targetFile.WriteString(v.newline)
+			}
+
+			v.writeOutput("[GoType(\"%s\")] %spartial struct %s;", csName, access, getSanitizedIdentifier(name))
+			v.targetFile.WriteString(v.newline)
+		} else {
+			v.targetFile.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
+		}
 	case *ast.StarExpr:
 		v.targetFile.WriteString(v.convStarExpr(typeSpecType, DefaultStarExprContext()))
 	case *ast.StructType:
