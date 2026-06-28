@@ -120,6 +120,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					v.visitInterfaceType(interfaceType, exprType, params.At(i).Name(), nil, true, nil)
 					v.indentLevel--
 				}
+
+				// A deferred/go method-value call routes its args through deferǃ(Action<T>, T arg, …),
+				// where T must unify from BOTH the method parameter and the argument. An untyped numeric
+				// constant (e.g. `0`) renders as C# int and won't unify with a wider concrete parameter
+				// (e.g. atomic.Uint64.Store(ulong)) — cast it to the parameter type. Only the method-value
+				// form (no rendered lambda params) is affected; the lambda form passes args into a lambda.
+				if context.callArgs != nil && !context.renderParams {
+					deferParamType := params.At(i).Type()
+					if basic, ok := deferParamType.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
+						if v.isUntypedNumericConstArg(callExpr.Args[i]) {
+							if callExprContext.castArgToType == nil {
+								callExprContext.castArgToType = make(map[int]string)
+							}
+							callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(deferParamType, false))
+						}
+					}
+				}
 			}
 
 			callExprContext.u8StringArgOK[i] = true

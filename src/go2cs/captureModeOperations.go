@@ -335,6 +335,36 @@ func bodyTakesReceiverFieldAddress(body *ast.BlockStmt, recvName string) bool {
 	return found
 }
 
+// captureModeMethodValueReceiver returns the receiver identifier of a deferred/go call whose
+// target is a capture-mode method value on a heap-boxed or addressed-global receiver — e.g.
+// `defer locked.Store(0)` where `locked` is a (boxed) atomic. Such a receiver must NOT be
+// snapshot-captured into a value copy: the box (`Ꮡlocked`) is the stable defer-time receiver
+// (matching Go's `&locked`) and is accessible directly in the lambda, while a value copy has no
+// box and cannot call the ж-overload (CS1929/CS0103). Returns nil when no such receiver applies.
+func (v *Visitor) captureModeMethodValueReceiver(call *ast.CallExpr) *ast.Ident {
+	if call == nil {
+		return nil
+	}
+
+	sel, ok := call.Fun.(*ast.SelectorExpr)
+
+	if !ok {
+		return nil
+	}
+
+	recvIdent, ok := sel.X.(*ast.Ident)
+
+	if !ok || !v.isCaptureModeMethod(sel) {
+		return nil
+	}
+
+	if v.isHeapBoxedExpr(recvIdent) || v.isAddressedGlobal(recvIdent) {
+		return recvIdent
+	}
+
+	return nil
+}
+
 // isCaptureModeMethod reports whether the selector calls a package capture-mode method.
 func (v *Visitor) isCaptureModeMethod(selectorExpr *ast.SelectorExpr) bool {
 	if packageCaptureModeMethods == nil {

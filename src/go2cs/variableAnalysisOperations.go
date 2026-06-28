@@ -737,9 +737,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// Create capture set for this statement
 			v.lambdaCapture.stmtCaptures[node] = make(map[*ast.Ident]bool)
 
-			// Process function expression
+			// Process function expression. Skip the receiver of a capture-mode method value on a
+			// boxed/addressed receiver (`defer locked.Store(0)`): its box is used directly, not a copy.
+			skipRecv := v.captureModeMethodValueReceiver(node.Call)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
 				if id, ok := n.(*ast.Ident); ok {
+					if id == skipRecv {
+						return true
+					}
 					v.processPotentialCapture(id)
 					// If it was captured, associate it with this statement
 					if _, exists := v.lambdaCapture.capturedVars[id]; exists {
@@ -783,9 +788,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// Create capture set for this statement
 			v.lambdaCapture.stmtCaptures[node] = make(map[*ast.Ident]bool)
 
-			// Process function expression
+			// Process function expression. Skip the receiver of a capture-mode method value on a
+			// boxed/addressed receiver (`defer locked.Store(0)`): its box is used directly, not a copy.
+			skipRecv := v.captureModeMethodValueReceiver(node.Call)
 			ast.Inspect(node.Call.Fun, func(n ast.Node) bool {
 				if id, ok := n.(*ast.Ident); ok {
+					if id == skipRecv {
+						return true
+					}
 					v.processPotentialCapture(id)
 					// If it was captured, associate it with this statement
 					if _, exists := v.lambdaCapture.capturedVars[id]; exists {

@@ -98,6 +98,7 @@
     <Project Path="Tests/Behavioral/GenericTypeInference/GenericTypeInference.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.csproj" />
     <Project Path="Tests/Behavioral/GenericVariadicFunc/GenericVariadicFunc.csproj" />
+    <Project Path="Tests/Behavioral/GlobalAtomicDefer/GlobalAtomicDefer.csproj" />
     <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />

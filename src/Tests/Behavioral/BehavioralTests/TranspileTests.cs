@@ -171,6 +171,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
+    public void CheckGlobalAtomicDefer() => CheckTarget("GlobalAtomicDefer");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]

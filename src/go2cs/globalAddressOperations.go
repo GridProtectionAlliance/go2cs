@@ -17,39 +17,77 @@ import (
 var packageAddressedGlobals map[types.Object]bool
 
 // collectAddressedGlobals scans every file for address-of expressions rooted at a
-// package-level var and records those vars in packageAddressedGlobals.
+// package-level var and records those vars in packageAddressedGlobals. It also records a
+// package-level value var on which a capture-mode method is called (`var locked atomic.Int32;
+// locked.CompareAndSwap(...)`) — such a method needs the receiver box (`Ꮡlocked`), which the
+// heap-box backing supplies and convSelectorExpr routes the call through, exactly as for an
+// explicitly address-taken global. Runs after collectCaptureModeMethods, so the capture-mode
+// set is populated.
 func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.Info) {
 	for _, fileEntry := range files {
 		ast.Inspect(fileEntry.file, func(n ast.Node) bool {
-			unaryExpr, ok := n.(*ast.UnaryExpr)
-
-			if !ok || unaryExpr.Op != token.AND {
-				return true
-			}
-
-			// Peel field selectors and index expressions down to the root operand,
-			// e.g. &G.X or &G[i] both make G escape.
-			root := unaryExpr.X
-
-			for {
-				switch expr := root.(type) {
-				case *ast.SelectorExpr:
-					root = expr.X
-					continue
-				case *ast.IndexExpr:
-					root = expr.X
-					continue
-				case *ast.ParenExpr:
-					root = expr.X
-					continue
+			switch node := n.(type) {
+			case *ast.UnaryExpr:
+				if node.Op != token.AND {
+					return true
 				}
 
-				break
-			}
+				// Peel field selectors and index expressions down to the root operand,
+				// e.g. &G.X or &G[i] both make G escape.
+				root := node.X
 
-			if ident, ok := root.(*ast.Ident); ok {
-				if varObj, ok := info.Uses[ident].(*types.Var); ok && varObj.Parent() == pkg.Scope() {
-					packageAddressedGlobals[varObj] = true
+				for {
+					switch expr := root.(type) {
+					case *ast.SelectorExpr:
+						root = expr.X
+						continue
+					case *ast.IndexExpr:
+						root = expr.X
+						continue
+					case *ast.ParenExpr:
+						root = expr.X
+						continue
+					}
+
+					break
+				}
+
+				if ident, ok := root.(*ast.Ident); ok {
+					if varObj, ok := info.Uses[ident].(*types.Var); ok && varObj.Parent() == pkg.Scope() {
+						packageAddressedGlobals[varObj] = true
+					}
+				}
+
+			case *ast.CallExpr:
+				// A capture-mode method called on a package-level value global needs that
+				// global heap-boxed so the receiver box exists (and the call routes through it).
+				selectorExpr, ok := node.Fun.(*ast.SelectorExpr)
+
+				if !ok {
+					return true
+				}
+
+				ident, ok := selectorExpr.X.(*ast.Ident)
+
+				if !ok {
+					return true
+				}
+
+				varObj, ok := info.Uses[ident].(*types.Var)
+
+				if !ok || varObj.Parent() != pkg.Scope() {
+					return true
+				}
+
+				// A pointer global already carries its box; only value globals need boxing.
+				if _, isPtr := varObj.Type().(*types.Pointer); isPtr {
+					return true
+				}
+
+				if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
+					if packageCaptureModeMethods != nil && packageCaptureModeMethods[funcObj.Origin()] {
+						packageAddressedGlobals[varObj] = true
+					}
 				}
 			}
 
