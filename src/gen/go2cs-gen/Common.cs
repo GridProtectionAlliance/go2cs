@@ -234,7 +234,15 @@ public static class Common
     public static string GetScope(string identifier)
     {
         char firstChar = identifier[0];
-        return char.IsUpper(firstChar) || firstChar == '_' ? "public" : "internal";
+
+        // A '_'-prefixed Go identifier (other than the bare blank '_') is unexported → internal,
+        // matching the converter's getAccess. Treating any '_' lead as public made a generated
+        // promoted accessor for an embedded `*_func` public while the converter's `internal partial
+        // ref` declaration was internal (CS8799).
+        if (firstChar == '_')
+            return identifier.Length == 1 ? "public" : "internal";
+
+        return char.IsUpper(firstChar) ? "public" : "internal";
     }
 
     // Returns the explicit C# access modifier on a type declaration (e.g. the converter-emitted
