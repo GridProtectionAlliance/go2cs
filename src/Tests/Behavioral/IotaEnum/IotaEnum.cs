@@ -119,9 +119,7 @@ public static ж<Type> TypeOf(any a) {
     return (ж<Type>)(uintptr)(NoEscape(new @unsafe.Pointer(eface.Type)));
 }
 
-public static ж<Type> TypeFor<T>()
-    where T : new()
-{
+public static ж<Type> TypeFor<T>() {
     T v = default!;
     {
         var t = TypeOf(v); if (t != nil) {
