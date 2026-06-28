@@ -129,6 +129,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	for i, lhs := range lhsExprs {
 		ident := getIdentifier(lhs)
 
+		// A selector LHS (`pkg.Var = …`, `x.field = …`) is always an assignment to existing
+		// storage, never a declaration. getIdentifier would return its BASE ident (e.g. the
+		// package name `sub`), which — not being a local reassignment — would wrongly be counted
+		// as a new declaration and later prefixed with `var`. Treat it as the struct-member case.
+		if _, ok := lhs.(*ast.SelectorExpr); ok {
+			ident = nil
+		}
+
 		if ident == nil {
 			// Check if lhs is a struct member
 			if selectorExpr, ok := lhs.(*ast.SelectorExpr); ok {
@@ -548,6 +556,12 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			contexts := []ExprContext{lambdaContext}
 			ident := getIdentifier(lhs)
+
+			// A selector LHS is a plain assignment to existing storage, not a declaration — force
+			// the `ident == nil` path so it is never prefixed with `var` (see the counting loop).
+			if _, ok := lhs.(*ast.SelectorExpr); ok {
+				ident = nil
+			}
 
 			if selectorExpr, ok := rhs.(*ast.SelectorExpr); ok {
 				if v.isMethodValue(selectorExpr, false) {
