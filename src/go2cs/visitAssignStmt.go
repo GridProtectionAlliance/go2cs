@@ -200,6 +200,50 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 	}
 
+	// Lift an anonymous-struct composite-literal RHS up front (named after the LHS var) when the
+	// local escapes to the heap. The heap declaration (`ref var x = ref heap<T>(…)`) renders its
+	// box type explicitly via convertToHeapTypeDecl, which runs BEFORE the RHS composite would
+	// normally trigger the lift — so without this the box type emits a raw, un-compilable
+	// `struct{…}` (e.g. runtime/mpagealloc's `firstFree := struct{…}{…}` whose address is taken).
+	// Mirrors convCompositeLit's lift; the liftedTypeExists guard makes the later one a no-op.
+	if assignStmt.Tok == token.DEFINE {
+		for i, lhs := range lhsExprs {
+			if i >= rhsLen {
+				break
+			}
+
+			lhsIdent := getIdentifier(lhs)
+
+			if lhsIdent == nil || isDiscardedVar(lhsIdent.Name) {
+				continue
+			}
+
+			if _, isSel := lhs.(*ast.SelectorExpr); isSel {
+				continue
+			}
+
+			obj := v.info.ObjectOf(lhsIdent)
+
+			if obj == nil || !v.identEscapesHeap[obj] {
+				continue
+			}
+
+			if compositeLit, ok := rhsExprs[i].(*ast.CompositeLit); ok {
+				if structType, exprType := v.extractStructType(compositeLit.Type); structType != nil && !v.liftedTypeExists(structType) {
+					var indentOffset int
+
+					if v.inFunction {
+						indentOffset = 1
+					}
+
+					v.indentLevel += indentOffset
+					v.visitStructType(structType, exprType, v.getIdentName(lhsIdent), nil, true, nil)
+					v.indentLevel -= indentOffset
+				}
+			}
+		}
+	}
+
 	// Map Go tokens to C# string equivalents
 	var operator string
 

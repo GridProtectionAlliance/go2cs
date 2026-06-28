@@ -31,6 +31,21 @@ internal static nint statsTotal() {
     return s.Total;
 }
 
+[GoType("dyn")] partial struct localHeapAnon_firstFree {
+    internal nint @base, bound;
+}
+
+internal static nint localHeapAnon() {
+    ref var firstFree = ref heap<localHeapAnon_firstFree>(out var ᏑfirstFree);
+    firstFree = new localHeapAnon_firstFree(
+        @base: 3,
+        bound: 7
+    );
+    var p = ᏑfirstFree;
+    p.val.bound = 10;
+    return firstFree.@base + firstFree.bound;
+}
+
 internal static void Main() {
     pool[0].item = 5;
     pool[1].item = 6;
@@ -42,6 +57,7 @@ internal static void Main() {
     fmt.Println(pool[0].item, pool[1].item);
     fmt.Println(nums[0], nums[2], addr[0], addr[1]);
     fmt.Println(statsTotal());
+    fmt.Println(localHeapAnon());
 }
 
 } // end main_package

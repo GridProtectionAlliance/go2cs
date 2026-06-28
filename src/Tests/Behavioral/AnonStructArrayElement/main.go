@@ -32,6 +32,23 @@ var addr [2]int
 // scalar field, independent of the (separate) zero-value array-element allocation.
 func statsTotal() int { s := Stats{Total: 42}; return s.Total }
 
+// An ESCAPING local whose type is an anonymous-struct composite literal (its address is taken, so
+// it is heap-boxed). The box declaration `ref var x = ref heap<T>(…)` renders its type explicitly,
+// which must resolve to the lifted name rather than a raw `struct{…}` — runtime's mpagealloc
+// `firstFree := struct{…}{…}` pattern (the local is used within the function, not passed to a
+// distinctly-lifted anonymous-struct parameter — that cross-context identity is a separate concern).
+func localHeapAnon() int {
+	firstFree := struct {
+		base, bound int
+	}{
+		base:  3,
+		bound: 7,
+	}
+	p := &firstFree
+	p.bound = 10
+	return firstFree.base + firstFree.bound
+}
+
 func main() {
 	pool[0].item = 5
 	pool[1].item = 6
@@ -47,4 +64,5 @@ func main() {
 	fmt.Println(pool[0].item, pool[1].item)
 	fmt.Println(nums[0], nums[2], addr[0], addr[1])
 	fmt.Println(statsTotal())
+	fmt.Println(localHeapAnon())
 }
