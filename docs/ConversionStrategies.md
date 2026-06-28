@@ -285,6 +285,20 @@ type table[T any] [3]atomic.Pointer[T]
     where T : new();
 ```
 
+A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
+
+```go
+type Pair[A any, B any] struct { a A; b B }
+var p Pair[int, string]
+p.b = "hi"
+```
+```csharp
+Pair<nint, @string> p = default!;
+p.b = "hi"u8;
+```
+
+This applies uniformly to every type-argument position — first, second-or-later, and nested (`Pair[int, Box[string]]` → `Pair<nint, Box<@string>>`). (The behavioral test `GenericStringTypeArg` guards these cases; `NestedGenericTypes` covers the nesting depth without string args.)
+
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 

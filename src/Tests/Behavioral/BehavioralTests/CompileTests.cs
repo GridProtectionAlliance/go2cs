@@ -150,6 +150,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericReceiverFieldAddress() => CheckTarget("GenericReceiverFieldAddress");
 
     [TestMethod]
+    public void CheckGenericStringTypeArg() => CheckTarget("GenericStringTypeArg");
+
+    [TestMethod]
     public void CheckGenericStructFields() => CheckTarget("GenericStructFields");
 
     [TestMethod]

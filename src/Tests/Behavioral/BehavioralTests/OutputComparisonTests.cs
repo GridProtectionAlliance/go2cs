@@ -133,6 +133,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGenericReceiverFieldAddress() => CheckTarget("GenericReceiverFieldAddress");
 
     [TestMethod]
+    public void CheckGenericStringTypeArg() => CheckTarget("GenericStringTypeArg");
+
+    [TestMethod]
     public void CheckGenericTypeAssertions() => CheckTarget("GenericTypeAssertions");
 
     [TestMethod]

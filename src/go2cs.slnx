@@ -91,6 +91,7 @@
     <Project Path="Tests/Behavioral/GenericFuncDecl/GenericFuncDecl.csproj" />
     <Project Path="Tests/Behavioral/GenericNamedArrayType/GenericNamedArrayType.csproj" />
     <Project Path="Tests/Behavioral/GenericReceiverFieldAddress/GenericReceiverFieldAddress.csproj" />
+    <Project Path="Tests/Behavioral/GenericStringTypeArg/GenericStringTypeArg.csproj" />
     <Project Path="Tests/Behavioral/GenericStructFields/GenericStructFields.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeAssertions/GenericTypeAssertions.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeDecl/GenericTypeDecl.csproj" />

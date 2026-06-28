@@ -2756,7 +2756,13 @@ func convertToCSFullTypeName(typeName string) string {
 			subTypes := splitTopLevelTypes(typeName[start+1 : end])
 
 			for i := range subTypes {
-				subTypes[i] = strings.TrimSpace(convertToCSTypeName(subTypes[i]))
+				// Trim BEFORE converting: splitTopLevelTypes keeps the ", " separator's space, so
+				// later args arrive as " string". The conversion switch matches the type name
+				// exactly (`case "string"`), so a leading space would miss it and fall through to
+				// the default named-type path — emitting C# `string` (System.String) instead of
+				// golib `@string`. That violates the generic `new()` constraint the converter adds
+				// (CS0310) and breaks string-literal assignment (CS0029).
+				subTypes[i] = convertToCSTypeName(strings.TrimSpace(subTypes[i]))
 			}
 
 			typeName = fmt.Sprintf("%s<%s>%s", typeName[:start], strings.Join(subTypes, ", "), typeName[end+1:])
