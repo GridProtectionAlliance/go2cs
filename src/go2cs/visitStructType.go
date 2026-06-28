@@ -164,6 +164,30 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			if structPrefix != nil {
 				structPrefix.WriteString(v.newline)
 			}
+		} else if arrayType, ok := field.Type.(*ast.ArrayType); ok && len(field.Names) > 0 {
+			// An array/slice field whose element is an anonymous struct/interface (e.g. runtime's
+			// `MemStats.BySize [61]struct{…}`): lift the element type so the field declaration
+			// resolves to a named type (`array<BySizeᴛ1>`) instead of a raw, un-compilable
+			// `struct{…}`. getTypeName resolves the array element through liftedTypeMap.
+			if subStructType, ok := arrayType.Elt.(*ast.StructType); ok && !v.liftedTypeExists(subStructType) {
+				subStructIdentType := v.getExprType(arrayType.Elt)
+				v.indentLevel += indentOffset
+				v.visitStructType(subStructType, subStructIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				v.indentLevel -= indentOffset
+
+				if structPrefix != nil {
+					structPrefix.WriteString(v.newline)
+				}
+			} else if interfaceType, ok := arrayType.Elt.(*ast.InterfaceType); ok && !v.liftedTypeExists(interfaceType) {
+				interfaceIdentType := v.getExprType(arrayType.Elt)
+				v.indentLevel += indentOffset
+				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
+				v.indentLevel -= indentOffset
+
+				if structPrefix != nil {
+					structPrefix.WriteString(v.newline)
+				}
+			}
 		}
 
 		fieldType := v.getType(field.Type, false)

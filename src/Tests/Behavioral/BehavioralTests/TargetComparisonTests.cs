@@ -38,6 +38,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]

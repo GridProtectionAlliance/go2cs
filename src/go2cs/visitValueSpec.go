@@ -123,8 +123,32 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						access := getAccess(goIDName)
 						typeLenDeviation += token.Pos(len(access) + 6)
 
+						// A fixed-size array global must be allocated (`new(N)`); the default
+						// `array<T>` value is empty, so indexing it NREs (e.g. runtime's stackpool).
+						// Locals already get this in the in-function branch above.
+						var arrayLenValue string
+
+						if arrayType, ok := valueSpecType.(*ast.ArrayType); ok && arrayType.Len != nil {
+							arrayLenValue = v.convExpr(arrayType.Len, nil)
+
+							if tv, ok := v.info.Types[arrayType.Len]; ok && tv.Value != nil {
+								intLength, _ := constant.Int64Val(tv.Value)
+								arrayLenValue = strconv.FormatInt(intLength, 10)
+							}
+						}
+
 						if v.isAddressedGlobal(ident) {
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, "")
+							// Box an N-sized array, not the empty default, so writes through the
+							// pointer (and indexing) hit real storage.
+							initExpr := ""
+
+							if len(arrayLenValue) > 0 {
+								initExpr = fmt.Sprintf("new %s(%s)", csTypeName, arrayLenValue)
+							}
+
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr)
+						} else if len(arrayLenValue) > 0 {
+							v.writeOutput("%s static %s %s = new(%s);", access, csTypeName, csIDName, arrayLenValue)
 						} else {
 							v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
 						}

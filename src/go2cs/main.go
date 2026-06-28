@@ -2578,6 +2578,27 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
+	// An array/slice whose element is an anonymous struct/interface that was lifted to a named type
+	// renders here as a raw `struct{…}`/`interface{…}` (liftedTypeMap is keyed by the element type,
+	// not the array/slice, so the whole-type lookup above missed it). Resolve the element to its
+	// lifted C# name so e.g. `[61]struct{…}` emits `array<BySizeᴛ1>`, not the un-compilable literal.
+	if strings.HasPrefix(typeName, "struct{") || strings.HasPrefix(typeName, "interface{") {
+		var elem types.Type
+
+		switch composite := t.(type) {
+		case *types.Array:
+			elem = composite.Elem()
+		case *types.Slice:
+			elem = composite.Elem()
+		}
+
+		if elem != nil {
+			if name, ok := v.liftedTypeMap[elem]; ok {
+				return prefix + name
+			}
+		}
+	}
+
 	// Remove the current package's path prefix from the type name. Use ReplaceAll, not a
 	// single replace: a composite type (e.g. map[K]V) can name two current-package types, and
 	// stripping only the first leaves a self-qualified one (which then also trips the slash
@@ -2607,6 +2628,20 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 	if name, ok := v.liftedTypeMap[t]; ok {
 		return name
+	}
+
+	// An array/slice whose element is a lifted anonymous struct/interface: liftedTypeMap is keyed by
+	// the element type, so resolve it here (the whole-composite lookup above missed it). Without this
+	// the element renders as a raw, un-compilable `struct{…}`. Mirrors the same fix in getTypeName.
+	switch composite := t.(type) {
+	case *types.Array:
+		if name, ok := v.liftedTypeMap[composite.Elem()]; ok {
+			return fmt.Sprintf("[%d]%s", composite.Len(), name)
+		}
+	case *types.Slice:
+		if name, ok := v.liftedTypeMap[composite.Elem()]; ok {
+			return "[]" + name
+		}
 	}
 
 	if named, ok := t.(*types.Named); ok {

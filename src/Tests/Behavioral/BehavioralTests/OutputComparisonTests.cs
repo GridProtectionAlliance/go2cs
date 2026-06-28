@@ -40,6 +40,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]

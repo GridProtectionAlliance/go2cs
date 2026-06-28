@@ -36,6 +36,9 @@ public class A1_TranspileTests : BehavioralTestBase
     // <TestMethods>
 
     [TestMethod]
+    public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
+
+    [TestMethod]
     public void CheckAnonymousInterfaces() => CheckTarget("AnonymousInterfaces");
 
     [TestMethod]
