@@ -9,7 +9,7 @@ partial class main_package {
     public nint Value;
 }
 
-public static ж<Ring> init(this ж<Ring> Ꮡr) {
+internal static ж<Ring> init(this ж<Ring> Ꮡr) {
     ref var r = ref Ꮡr.val;
 
     r.next = Ꮡr;

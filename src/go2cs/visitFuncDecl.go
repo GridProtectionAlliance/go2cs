@@ -326,8 +326,15 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					// Get receiver parameter type
 					recvTypeName := v.getRefParamTypeName(param.Type())
 
-					// Update function access to match receiver type
-					functionAccess = getAccess(recvTypeName)
+					// Method accessibility is the more restrictive of the receiver type and the method's
+					// own (Go) name: an unexported method on an exported type stays package-private
+					// (internal) -- otherwise a public method returning that method's own unexported
+					// types is CS0050 (inconsistent accessibility).
+					if getAccess(recvTypeName) == "public" && getAccess(goFunctionName) == "public" {
+						functionAccess = "public"
+					} else {
+						functionAccess = "internal"
+					}
 
 					if directBoxReceiver {
 						// Direct-ж: emit the box itself (`ж<Box<T>> Ꮡb`) as the receiver. The
