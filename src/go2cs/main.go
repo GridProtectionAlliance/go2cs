@@ -2467,11 +2467,20 @@ func getGlobalTempVarName(varPrefix string) string {
 }
 
 func (v *Visitor) getUniqueLiftedTypeName(typeName string) string {
-	typeName = getSanitizedIdentifier(removeSanitizationMarker(typeName))
+	// Recover the original Go name by stripping BOTH sanitization markers ('@' and the Δ collision
+	// rename) so the typeExists check below hits the real package scope (which holds the unsanitized
+	// name). The lift is often called with the already-sanitized name (e.g. `Δtrace`).
+	originalName := strings.TrimPrefix(removeSanitizationMarker(typeName), ShadowVarMarker)
+	typeName = getSanitizedIdentifier(originalName)
 	uniqueTypeName := typeName
 	count := 0
 
-	for v.liftedTypeNames.Contains(uniqueTypeName) || v.typeExists(uniqueTypeName) {
+	// typeExists looks names up in the Go package scope, which holds UNSANITIZED names. A lifted type
+	// named after a global var that is Δ-renamed (e.g. a `var trace struct{…}` whose anon type lifts
+	// to `trace`→`Δtrace`) would check the sanitized `Δtrace`, miss the `trace` var, and collide with
+	// it (a nested type + a property both named `Δtrace`, CS0102). Also test the original name so the
+	// first iteration forces a `ᴛ1` suffix in that case.
+	for v.liftedTypeNames.Contains(uniqueTypeName) || v.typeExists(uniqueTypeName) || (count == 0 && v.typeExists(originalName)) {
 		count++
 		uniqueTypeName = fmt.Sprintf("%s%s%d", typeName, TempVarMarker, count)
 	}
