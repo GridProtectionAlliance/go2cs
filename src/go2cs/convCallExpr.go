@@ -89,6 +89,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// u8 readonly spans cannot be used as arguments to functions that take interface parameters
 	callExprContext := DefaultCallExprContext()
 	callExprContext.callArgs = context.callArgs
+	// Hoist a func-literal argument's capture declarations to the enclosing statement (a
+	// `var mʗ1 = m;` statement is invalid inside an argument list). convExprList builds a
+	// LambdaContext from this builder for each argument so the func-literal arg's convFuncLit
+	// writes its decls here instead of inline.
+	callExprContext.deferredDecls = context.deferredDecls
 
 	// Check if the call is using the spread operator "..."
 	if callExpr.Ellipsis.IsValid() {

@@ -9,6 +9,10 @@ partial class main_package {
     internal nint y;
 }
 
+internal static ж<box> gPtr;
+
+internal static box gVal = new box(x: 7);
+
 internal static void run(Action f) {
     f();
 }
@@ -43,6 +47,20 @@ internal static void Main() {
     };
     f();
     fmt.Println("4:", d.x);
+    ref var e = ref heap(new box(), out var Ꮡe);
+    var pe = Ꮡe;
+    var peʗ2 = pe;
+    run(() => {
+        peʗ2.val.x = 11;
+        peʗ2.val.y = (~peʗ2).x + 1;
+    });
+    fmt.Println("5:", e.x, e.y);
+    gPtr = Ꮡe;
+    var gValʗ2 = gVal;
+    run(() => {
+        gPtr.val.x = gValʗ2.x;
+    });
+    fmt.Println("6:", e.x);
 }
 
 } // end main_package

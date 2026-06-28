@@ -73,7 +73,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			identContext.isType = callContext.sourceIsTypeParams
 		}
 
-		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, callContext}
+		// A func-literal argument needs a LambdaContext carrying the call's deferredDecls builder so
+		// its capture declarations hoist to the enclosing statement instead of emitting inline in
+		// the argument list (invalid C#). Harmless for non-func-literal args.
+		lambdaContext := DefaultLambdaContext()
+
+		if callContext != nil {
+			lambdaContext.deferredDecls = callContext.deferredDecls
+		}
+
+		contexts := []ExprContext{basicLitContext, identContext, keyValueContext, lambdaContext, callContext}
 
 		var resultExpr string
 

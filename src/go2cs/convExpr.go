@@ -33,6 +33,11 @@ type CallExprContext struct {
 	callArgs           []string
 	replacementArgs    []string
 	castArgToType      map[int]string
+	// deferredDecls hoists a func-literal argument's capture declarations out of the call's
+	// argument list (where a `var mʗ1 = m;` statement is invalid C#) up to the enclosing
+	// statement. Threaded from the statement emitter (visitExprStmt/visitAssignStmt) through
+	// convCallExpr → convExprList → the func-literal arg's convFuncLit. Nil when not hoisting.
+	deferredDecls *strings.Builder
 }
 
 func DefaultCallExprContext() *CallExprContext {
@@ -50,6 +55,7 @@ func DefaultCallExprContext() *CallExprContext {
 		callArgs:           nil,
 		replacementArgs:    nil,
 		castArgToType:      nil,
+		deferredDecls:      nil,
 	}
 }
 
