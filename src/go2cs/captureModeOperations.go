@@ -405,13 +405,14 @@ func (v *Visitor) exprIsCurrentDirectBoxReceiver(expr ast.Expr) bool {
 	return isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 }
 
-// exprIsFieldOfDirectBoxReceiver reports whether expr is a value field accessed directly on the
-// current method's direct-ж receiver (`recv.field`). Such a field's address is the box
-// `Ꮡrecv.of(RecvType.ᏑField)`, so a capture-mode method called on it (`recv.field.Load()`) routes
-// through that field-address box. The receiver must already be direct-ж (so `Ꮡrecv` is in scope) —
-// the fixpoint marks any method making such a call direct-ж (see
-// bodyCallsCaptureModeMethodOnReceiverField).
-func (v *Visitor) exprIsFieldOfDirectBoxReceiver(expr ast.Expr) bool {
+// exprIsCaptureModeFieldBase reports whether expr is a value field whose address can be taken as a
+// field box, so a capture-mode method called on it (`base.field.Load()`) routes through
+// `(&base.field)`. Two bases qualify: the current method's direct-ж receiver (`recv.field` → box
+// `Ꮡrecv.of(RecvType.ᏑField)`; the fixpoint marks such methods direct-ж via
+// bodyCallsCaptureModeMethodOnReceiverField), or any pointer expression (`e.field` where `e` is
+// `*T` → `e.of(T.ᏑField)`, since `e` is already the box). convUnaryExpr renders `&base.field`
+// to the matching form.
+func (v *Visitor) exprIsCaptureModeFieldBase(expr ast.Expr) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
 
 	if !ok {
@@ -430,7 +431,21 @@ func (v *Visitor) exprIsFieldOfDirectBoxReceiver(expr ast.Expr) bool {
 		return false
 	}
 
-	return v.exprIsCurrentDirectBoxReceiver(sel.X)
+	if v.exprIsCurrentDirectBoxReceiver(sel.X) {
+		return true
+	}
+
+	// A field of a pointer *variable* (`e.field`, e an *T identifier): `e` is the box, so
+	// `e.of(...)` works. Restricted to a bare identifier to match convUnaryExpr's `&e.field` form.
+	baseIdent, ok := sel.X.(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	_, isPtr := v.info.TypeOf(baseIdent).(*types.Pointer)
+
+	return isPtr
 }
 
 // exprIsDerefdPointerParam reports whether expr is a pointer-typed parameter. Such a parameter is

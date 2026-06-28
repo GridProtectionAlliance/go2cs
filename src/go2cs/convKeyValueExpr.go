@@ -3,10 +3,29 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 )
 
 func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyValueContext) string {
-	valueExpr := v.convExpr(keyValueExpr.Value, nil)
+	// For a struct field initializer whose field is a pointer type, the value must be emitted as a
+	// pointer (box) — e.g. a deref'd pointer parameter `val` used as `key: val` where `key` is `*V`
+	// needs `Ꮡval` (like the same value passed as a pointer call argument). Resolve the field from
+	// the key name so this works for keyed literals regardless of field order.
+	var valueContexts []ExprContext
+
+	if context.source == StructSource {
+		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok {
+			if fieldObj := v.info.Uses[keyIdent]; fieldObj != nil {
+				if _, isPtr := fieldObj.Type().(*types.Pointer); isPtr {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+					valueContexts = []ExprContext{identContext}
+				}
+			}
+		}
+	}
+
+	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
 
 	if context.ident != nil {
 		keySourceType := v.getIdentType(context.ident)

@@ -85,6 +85,7 @@
     <Project Path="Tests/Behavioral/FloatConstIntContext/FloatConstIntContext.csproj" />
     <Project Path="Tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
     <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
+    <Project Path="Tests/Behavioral/GenericAtomicPointerField/GenericAtomicPointerField.csproj" />
     <Project Path="Tests/Behavioral/GenericCompositeLiterals/GenericCompositeLiterals.csproj" />
     <Project Path="Tests/Behavioral/GenericCompositeType/GenericCompositeType.csproj" />
     <Project Path="Tests/Behavioral/GenericFuncCall/GenericFuncCall.csproj" />

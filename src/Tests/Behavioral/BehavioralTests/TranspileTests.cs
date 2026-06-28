@@ -132,6 +132,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
+
+    [TestMethod]
     public void CheckGenericCompositeLiterals() => CheckTarget("GenericCompositeLiterals");
 
     [TestMethod]

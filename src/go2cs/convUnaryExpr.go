@@ -97,6 +97,33 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			}
 		}
 
+		// Address of a field of a pointer *variable* that is not the receiver: `&e.v` where `e` is
+		// a `*entry` identifier. `e` is already the heap box, so field-ref through it directly —
+		// `e.of(Type.ᏑField)` — without the Ꮡ(value) copy form. Restricted to a bare identifier so a
+		// complex pointer expression (e.g. `&(*(*T)(unsafe.Pointer(x))).u`) keeps its existing form;
+		// the receiver case is handled above and a value-struct field falls through to the struct
+		// branch below.
+		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
+			if baseIdent, ok := selectorExpr.X.(*ast.Ident); ok {
+				if ptrType, ok := v.getType(baseIdent, false).(*types.Pointer); ok {
+					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
+						structExpr := v.convExpr(baseIdent, nil)
+
+						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.val`),
+						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* already
+						// holds the box directly, so it is used as-is.
+						if v.identIsParameter(baseIdent) {
+							structExpr = AddressPrefix + structExpr
+						}
+
+						typeName := convertToCSTypeName(v.getTypeName(ptrType.Elem(), false))
+						fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+						return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
+					}
+				}
+			}
+		}
+
 		// Check if the unary expression is an address of a structure field
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			if _, ok := v.getType(selectorExpr.X, true).(*types.Struct); ok {

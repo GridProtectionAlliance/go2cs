@@ -1,0 +1,71 @@
+namespace go;
+
+using fmt = fmt_package;
+using atomic = sync.atomic_package;
+using sync;
+
+partial class main_package {
+
+[GoType] partial struct entry<V>
+    where V : new()
+{
+    internal ж<V> key;
+    internal sync.atomic_package.Pointer<V> v;
+    internal ж<entry<V>> next;
+}
+
+[GoType] partial struct Cache<V>
+    where V : new()
+{
+    internal sync.atomic_package.Pointer<entry<V>> head;
+}
+
+public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval)
+    where V : new()
+{
+    ref var c = ref Ꮡc.val;
+    ref var key = ref Ꮡkey.val;
+    ref var val = ref Ꮡval.val;
+
+    var e = Ꮡ(new entry<V>(key: Ꮡkey));
+    e.of(entry<V>.Ꮡv).Store(Ꮡval);
+    e.val.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
+    Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
+}
+
+public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey)
+    where V : new()
+{
+    ref var c = ref Ꮡc.val;
+    ref var key = ref Ꮡkey.val;
+
+    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.val.next) {
+        if ((~e).key == Ꮡkey) {
+            return e.of(entry<V>.Ꮡv).Load();
+        }
+    }
+    return default!;
+}
+
+internal static void Main() {
+    ref var c = ref heap(new Cache<nint>(), out var Ꮡc);
+    ref var a = ref heap<nint>(out var Ꮡa);
+    a = 1;
+    ref var b = ref heap<nint>(out var Ꮡb);
+    b = 2;
+    ref var av = ref heap<nint>(out var Ꮡav);
+    av = 10;
+    ref var bv = ref heap<nint>(out var Ꮡbv);
+    bv = 20;
+    Ꮡc.Put(Ꮡa, Ꮡav);
+    Ꮡc.Put(Ꮡb, Ꮡbv);
+    fmt.Println("get a:", Ꮡc.Get(Ꮡa).val);
+    fmt.Println("get b:", Ꮡc.Get(Ꮡb).val);
+    ref var newAv = ref heap<nint>(out var ᏑnewAv);
+    newAv = 99;
+    Ꮡc.Put(Ꮡa, ᏑnewAv);
+    fmt.Println("get a again:", Ꮡc.Get(Ꮡa).val);
+    fmt.Println("missing:", Ꮡc.Get(@new<nint>()) == nil);
+}
+
+} // end main_package
