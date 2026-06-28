@@ -2604,10 +2604,18 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	// stripping only the first leaves a self-qualified one (which then also trips the slash
 	// handling below for slash-bearing package paths like internal/platform → CS0246).
 	typeName = strings.ReplaceAll(typeName, packagePathPrefix, "")
-	slashIndex := strings.LastIndex(typeName, "/")
 
-	if slashIndex != -1 {
-		typeName = typeName[slashIndex+1:]
+	// The slash-strip below reduces a remaining cross-package import path to its last segment
+	// (`internal/platform.Foo` → `platform.Foo`). It must NOT touch a composite type string whose
+	// slashes are inside it — e.g. a func type `func(go2cs/x/sub.Record)` would be butchered to
+	// `sub.Record)`. Such strings are converted structurally downstream (convertToCSFunc... +
+	// convertImportPathToNamespace handle their inner package paths), so skip the strip for them.
+	if !strings.HasPrefix(typeName, "func") && !strings.Contains(typeName, "(") {
+		slashIndex := strings.LastIndex(typeName, "/")
+
+		if slashIndex != -1 {
+			typeName = typeName[slashIndex+1:]
+		}
 	}
 
 	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
@@ -2684,10 +2692,15 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	// Remove the current package's path prefix from the type name (ReplaceAll so a composite
 	// type naming two current-package types doesn't keep a self-qualified one — see getTypeName).
 	typeName = strings.ReplaceAll(typeName, packagePathPrefix, "")
-	slashIndex := strings.LastIndex(typeName, "/")
 
-	if slashIndex != -1 {
-		typeName = typeName[slashIndex+1:]
+	// Skip the cross-package last-segment strip for composite/func type strings whose slashes are
+	// internal (e.g. `func(go2cs/x/sub.Record)`); they are converted structurally downstream.
+	if !strings.HasPrefix(typeName, "func") && !strings.Contains(typeName, "(") {
+		slashIndex := strings.LastIndex(typeName, "/")
+
+		if slashIndex != -1 {
+			typeName = typeName[slashIndex+1:]
+		}
 	}
 
 	return typeName
@@ -2727,6 +2740,18 @@ func (v *Visitor) getRefParamTypeName(t types.Type) string {
 }
 
 func (v *Visitor) getCSTypeName(t types.Type) string {
+	// Render a func type structurally as an Action/Func delegate. The string-based path mangles
+	// func types whose parameter/result types carry slash-bearing package paths (the slash-strip in
+	// getTypeName chops `func(*math/rand.Rand)` to `*math/rand.Rand)`), and emits Go field order for
+	// a named multi-result tuple. iifeDelegateType builds it from the signature using getCSTypeName
+	// per element (correct qualification; nameless tuple results). Simple func types render
+	// identically to the old path, so this is zero-churn for them.
+	// Only an ANONYMOUS func type (t itself is the signature) is expanded; a NAMED func type
+	// (`type Stringy func() string`, a *types.Named) keeps its delegate name via the normal path.
+	if sig, ok := t.(*types.Signature); ok {
+		return v.iifeDelegateType(sig)
+	}
+
 	return convertToCSTypeName(v.getTypeName(t, false))
 }
 
