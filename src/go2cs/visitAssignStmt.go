@@ -650,7 +650,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(rhsExpr)
 				}
 
-				result.WriteRune(';')
+				if format.includeSemiColon || i < lhsLen-1 {
+					result.WriteRune(';')
+				}
 			} else {
 				if v.isReassignment(ident) {
 					result.WriteString(v.convExpr(lhs, contexts))
@@ -664,14 +666,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						result.WriteString(rhsExpr)
 					}
 
-					result.WriteRune(';')
+					if format.includeSemiColon || i < lhsLen-1 {
+						result.WriteRune(';')
+					}
 				} else if lhsTypeIsString[i] {
 					// Handle string variables
 					result.WriteString("@string ")
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 					result.WriteString(v.convExpr(rhs, contexts))
-					result.WriteRune(';')
+					if format.includeSemiColon || i < lhsLen-1 {
+						result.WriteRune(';')
+					}
 				} else {
 					// Check if the variable needs to be allocated on the heap
 					heapTypeDecl := v.convertToHeapTypeDecl(ident, false)

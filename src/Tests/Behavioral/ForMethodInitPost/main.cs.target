@@ -34,6 +34,12 @@ internal static void Main() {
         count++;
     }
     fmt.Println(count);
+    @string @out = ""u8;
+    for (@string p = "abc"u8; p != ""u8; ) {
+        @out += p[..1];
+        p = p[1..];
+    }
+    fmt.Println(@out);
 }
 
 } // end main_package

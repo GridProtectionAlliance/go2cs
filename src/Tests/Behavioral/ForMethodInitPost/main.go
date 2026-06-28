@@ -27,4 +27,14 @@ func main() {
 		count++
 	}
 	fmt.Println(count)
+
+	// for-loop with a string `:=` init, a condition, and an EMPTY post clause (the body advances).
+	// The string init must not emit its own trailing `;` inside the for-header (runtime1.go
+	// parsegodebug does `for p := godebug; p != ""; { … }`).
+	out := ""
+	for p := "abc"; p != ""; {
+		out += p[:1]
+		p = p[1:]
+	}
+	fmt.Println(out)
 }
