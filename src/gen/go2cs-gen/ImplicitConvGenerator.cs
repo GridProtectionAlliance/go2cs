@@ -61,6 +61,7 @@ public class ImplicitConvGenerator : ISourceGenerator
             return;
 
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
+        HashSet<string> emittedConversions = new(StringComparer.Ordinal);
 
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
@@ -118,6 +119,13 @@ public class ImplicitConvGenerator : ISourceGenerator
                 structMembers = [];
                 targetTypeName = targetType.GetFullTypeName(true);
             }
+
+            // The emitted user-defined conversion operator's signature is (sourceTypeName,
+            // targetTypeName, inverted) — `direct` vs `indirect` only changes the body. The same
+            // pair can be recorded as BOTH a direct and an indirect conversion (e.g. `g` ↔ `ж<g>`),
+            // which would emit two identical operators (CS0557). Skip an exact-signature duplicate.
+            if (!emittedConversions.Add($"{sourceTypeName}->{targetTypeName}|{inverted}"))
+                continue;
 
             string generatedSource = new ImplicitConvTemplate
             {
