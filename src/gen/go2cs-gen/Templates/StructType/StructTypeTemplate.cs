@@ -110,6 +110,12 @@ internal class StructTypeTemplate : TemplateBase
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
                 {
+                    // A blank `_` field (padding / embedded unexported marker) is never promoted or
+                    // selectable in Go; emitting an accessor for it collides with the enclosing
+                    // struct's own `_` field (CS0102).
+                    if (GetSimpleName(memberName) == "_")
+                        continue;
+
                     string typeScope = GetScope(GetSimpleName(typeName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
@@ -121,6 +127,11 @@ internal class StructTypeTemplate : TemplateBase
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
                 {
+                    // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
+                    // enclosing struct's own `Ꮡ_` (CS0111).
+                    if (GetSimpleName(memberName) == "_")
+                        continue;
+
                     string typeScope = GetScope(GetSimpleName(typeName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{memberName}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
@@ -220,6 +231,11 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string typeName, string memberName, _, _) in StructMembers)
             {
+                // A blank `_` field is unaddressable in Go; a second `_` field (own + promoted, or
+                // multiple padding fields) would also make duplicate `Ꮡ_` accessors (CS0111).
+                if (GetSimpleName(memberName) == "_")
+                    continue;
+
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
