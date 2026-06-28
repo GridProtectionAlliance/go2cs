@@ -9,8 +9,22 @@ import (
 
 // Handles identity types in context of a TypeSpec
 func (v *Visitor) visitIdent(ident *ast.Ident, identType types.Type, name string, lifted bool) {
-	underlyingIdentType := v.getIdentType(ident).Underlying()
+	resolvedIdentType := v.getIdentType(ident)
+	underlyingIdentType := resolvedIdentType.Underlying()
+
+	// A defined type over a NAMED type whose underlying is a struct/array/etc. (`type winlibcall
+	// libcall`) must wrap the NAMED type, not its underlying — emitting the raw underlying
+	// (`struct{fn uintptr; …}`) produces invalid C#. Use the named type's name so go2cs-gen's
+	// InheritedTypeTemplate wraps a real type. Numeric/basic underlyings keep the `num:`/basic form
+	// (`type MyInt int` → `num:nint`), which is the visually-closer mapping.
 	goTypeName := underlyingIdentType.String()
+
+	if named, ok := resolvedIdentType.(*types.Named); ok {
+		if _, isBasic := underlyingIdentType.(*types.Basic); !isBasic {
+			goTypeName = v.getFullTypeName(named, false)
+		}
+	}
+
 	csTypeName := convertToCSTypeName(goTypeName)
 
 	var target *strings.Builder

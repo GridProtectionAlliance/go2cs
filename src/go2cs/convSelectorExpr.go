@@ -79,6 +79,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			if callExpr, ok := selectorExpr.X.(*ast.CallExpr); ok {
 				// Check if the call expressions is a parenthesized expression
 				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
+					// For a pointer-conversion-then-method like `(*atomic.Uint32)(c).Store(v)`, the
+					// converted X is a heap box `ж<T>`. Appending `.val` derefs it to a value, which
+					// is only right for a VALUE-receiver method; a POINTER-receiver method (`func
+					// (c *T) Store`) binds to the `ж<T>` overload, so the box itself is the receiver
+					// and `.val` must be omitted.
+					if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+						if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
+							if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
+								return fmt.Sprintf("(%s).%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+							}
+						}
+					}
+
 					return fmt.Sprintf("(%s).val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 				}
 			}

@@ -2999,11 +2999,15 @@ func splitTopLevelTypes(typeArgs string) []string {
 
 	for i := 0; i < len(typeArgs); i++ {
 		switch typeArgs[i] {
-		case '<':
+		case '<', '(', '[':
 			depth++
-		case '>':
+		case '>', ')', ']':
 			depth--
 		case ',':
+			// Only split on a comma at the outermost level. Besides nested generics (`<...>`), a
+			// type arg can itself be a func type whose parameter list carries commas — e.g.
+			// `Pointer[func(name, msg string)]`; track paren/bracket depth too so that inner comma
+			// is not mistaken for an argument separator (which would shred the func type).
 			if depth == 0 {
 				result = append(result, typeArgs[start:i])
 				start = i + 1

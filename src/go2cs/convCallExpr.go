@@ -37,6 +37,27 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// Check if the call is a type conversion
 	if ok, targetTypeName := v.isTypeConversion(callExpr); ok {
 		arg := callExpr.Args[0]
+
+		// `(*Base)(p)` reinterpreting a pointer to a DEFINED type as a pointer to its underlying
+		// named type — `(*atomic.Uint32)(c)` where `c` is `*counter` and `type counter atomic.Uint32`
+		// (runtime/mprof goroutineProfileStateHolder). C# has no `ж<counter> → ж<atomic.Uint32>`
+		// conversion (distinct generic instantiations); the inherited [GoType] wrapper only provides a
+		// VALUE conversion (counter → atomic.Uint32). Box that converted value so the pointer-receiver
+		// methods (Load/Store/…) resolve: `Ꮡ((atomic.Uint32)(c))`. Done before checkForImplicitConversion
+		// so it does not record a spurious counter→ж<atomic.Uint32> indirect conversion. (The address is
+		// of a copy — the atomic intrinsics behind it are asm stubs, so this is about compilable C#.)
+		if resultPtr, ok := v.info.TypeOf(callExpr).(*types.Pointer); ok {
+			if argPtr, ok := v.info.TypeOf(arg).(*types.Pointer); ok {
+				baseNamed, okBase := resultPtr.Elem().(*types.Named)
+				defNamed, okDef := argPtr.Elem().(*types.Named)
+
+				if okBase && okDef && baseNamed != defNamed && types.Identical(baseNamed.Underlying(), defNamed.Underlying()) {
+					baseName := convertToCSTypeName(v.getTypeName(baseNamed, false))
+					return fmt.Sprintf("%s((%s)(%s))", AddressPrefix, baseName, v.convExpr(arg, nil))
+				}
+			}
+		}
+
 		targetTypeName = convertToCSTypeName(targetTypeName)
 		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
@@ -381,7 +402,24 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
-	funcName := v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
+	funcName := ""
+
+	// A call through a dereferenced function pointer, `(*fp)(args)`. Converting the ParenExpr
+	// faithfully yields `(fp.val)(args)`, which C# parses as a CAST when the argument list is empty
+	// (`(fp.val)()` reads as "cast `()` to type `fp.val`" → CS1525). Emit the deref WITHOUT the
+	// wrapping parens (`fp.val(args)`) so it is unambiguously an invocation. Restricted to a starred
+	// VALUE operand; a starred type (`(*int)(x)`) is a conversion handled earlier.
+	if paren, ok := callExpr.Fun.(*ast.ParenExpr); ok {
+		if star, ok := paren.X.(*ast.StarExpr); ok {
+			if tv, ok := v.info.Types[star.X]; ok && tv.IsValue() {
+				funcName = v.convExpr(star, []ExprContext{lambdaContext})
+			}
+		}
+	}
+
+	if funcName == "" {
+		funcName = v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
+	}
 
 	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases. Gate on funcName before
 	// converting the argument: this re-converts the single arg purely to reshape it for the
@@ -634,6 +672,10 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 		case *ast.StarExpr:
 			if ident, ok := funExpr.X.(*ast.Ident); ok {
 				obj = v.info.ObjectOf(ident)
+				isPointer = true
+			} else if sel, ok := funExpr.X.(*ast.SelectorExpr); ok {
+				// A pointer conversion to a cross-package type: `(*atomic.Uint32)(p)`.
+				obj = v.info.ObjectOf(sel.Sel)
 				isPointer = true
 			}
 			targetExpr = nil

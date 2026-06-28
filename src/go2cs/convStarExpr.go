@@ -47,8 +47,16 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return baseExpr + ".val"
 	}
 
-	// In a parenthesis, we are applying a pointer cast operation
-	if context.inParenExpr {
+	// In a parenthesis, we are applying a pointer cast operation — but only when the starred
+	// operand denotes a TYPE (`(*int)(p)`, `(*MyType)(p)`). When it is a VALUE, e.g. a function
+	// pointer variable `newInc`, then `(*newInc)(args)` is a dereference-then-call of that pointer
+	// (`newInc.val(args)`), not a cast; let it fall through to the deref path below.
+	starXIsType := false
+	if tv, ok := v.info.Types[starExpr.X]; ok && tv.IsType() {
+		starXIsType = true
+	}
+
+	if context.inParenExpr && starXIsType {
 		// Check if the pointer target type is a struct or pointer to a struct
 		if structType, exprType := v.extractStructType(starExpr); structType != nil && !v.liftedTypeExists(structType) {
 			v.indentLevel++

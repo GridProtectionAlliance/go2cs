@@ -16,6 +16,53 @@ const FunctionParametersMarker = ">>MARKER:FUNC_%s_PARAMETERS<<"
 const FunctionExecContextMarker = ">>MARKER:FUNC_%s_EXEC_CONTEXT<<"
 const FunctionBlockPrefixMarker = ">>MARKER:FUNC_%s_BLOCK_PREFIX<<"
 
+// hasDuplicateBlankParams reports whether a parameter list has two or more blank (`_`) or unnamed
+// parameters. Go permits repeated blank params, but C# forbids duplicate parameter names (CS0100), so
+// such a list needs synthetic placeholder names. A LONE blank/unnamed param stays `_` (valid C# and
+// visually closer to the Go source).
+func hasDuplicateBlankParams(parameters *types.Tuple) bool {
+	if parameters == nil {
+		return false
+	}
+
+	count := 0
+
+	for i := 0; i < parameters.Len(); i++ {
+		if name := parameters.At(i).Name(); name == "" || name == "_" {
+			count++
+
+			if count >= 2 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// variadicElementType returns the C# element type name for a variadic parameter and whether it must
+// be emitted inline as `Span<T>` rather than via a `using ꓸꓸꓸT = Span<T>` alias. Both the alias and
+// the inline form sit at namespace scope, so a SAME-PACKAGE named element type must be qualified with
+// the package class — a bare nested name like `statDep` does not resolve there (CS0246). Qualifying it
+// introduces a '.', which (like a type parameter, or a generic/pointer/cross-package element whose
+// name already carries '<'/'.') also forces the inline form, since a using-alias identifier cannot
+// contain '<', '>' or '.'.
+func (v *Visitor) variadicElementType(elem types.Type) (typeName string, inline bool) {
+	typeName = v.getCSTypeName(elem)
+
+	if _, isTypeParam := elem.(*types.TypeParam); isTypeParam {
+		return typeName, true
+	}
+
+	if named, ok := elem.(*types.Named); ok {
+		if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && !strings.Contains(typeName, ".") {
+			typeName = fmt.Sprintf("%s%s.%s", packageName, PackageSuffix, typeName)
+		}
+	}
+
+	return typeName, strings.ContainsAny(typeName, "<.")
+}
+
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = true
 	v.capturedVarCount = nil
@@ -274,10 +321,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					continue
 				}
 
-				// An unnamed pointer parameter (`func(*T)`) is never referenced in the body, so it
-				// gets no deref alias; it is emitted in the signature with a synthetic name and no
-				// box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.val;`.
-				if param.Name() == "" {
+				// An unnamed (`func(*T)`) or blank (`_`) pointer parameter is never referenced in the
+				// body, so it gets no deref alias; it is emitted in the signature with a synthetic name
+				// and no box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.val;`.
+				if param.Name() == "" || param.Name() == "_" {
 					continue
 				}
 
@@ -323,6 +370,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			blockPrefix += implicitPointers.String()
 
 			updatedSignature := strings.Builder{}
+			dupBlankParams := hasDuplicateBlankParams(parameters)
 
 			for i := 0; i < parameters.Len(); i++ {
 				param := parameters.At(i)
@@ -368,15 +416,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 					// If parameter is a slice, convert it to a Span
 					if sliceType, ok := param.Type().(*types.Slice); ok {
-						typeName := v.getCSTypeName(sliceType.Elem())
+						typeName, inline := v.variadicElementType(sliceType.Elem())
 
-						_, isTypeParam := sliceType.Elem().(*types.TypeParam)
-
-						if isTypeParam || strings.Contains(typeName, "<") {
-							// A type parameter is not in scope for a namespace-level using alias,
-							// and a generic/pointer element type (e.g. ж<RangeTable>) would produce
-							// an invalid alias identifier (it contains '<'/'>'); emit the span type
-							// inline instead (C# 13 params collections).
+						if inline {
 							updatedSignature.WriteString("Span<" + typeName + ">")
 						} else {
 							updatedSignature.WriteString(EllipsisOperator + typeName)
@@ -395,17 +437,28 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					updatedSignature.WriteRune(' ')
 
 					if _, ok := param.Type().(*types.Pointer); ok {
-						// An unnamed pointer param is never referenced (no deref alias above), so
-						// emit a plain synthetic name without the box `Ꮡ` convention.
-						if param.Name() == "" {
-							updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
+						// An unnamed or blank (`_`) pointer param is never referenced (no deref alias
+						// above), so emit a plain name without the box `Ꮡ` convention — synthesized
+						// unique only when blanks would collide (else a lone `_` is kept).
+						if param.Name() == "" || param.Name() == "_" {
+							if dupBlankParams {
+								updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
+							} else {
+								updatedSignature.WriteString("_")
+							}
 						} else {
 							updatedSignature.WriteString(AddressPrefix)
 							updatedSignature.WriteString(param.Name())
 						}
-					} else if param.Name() == "" {
-						// Unnamed non-pointer param — synthesize a unique placeholder name.
-						updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
+					} else if param.Name() == "" || param.Name() == "_" {
+						// Unnamed or blank (`_`) non-pointer param — keep a lone `_`, but synthesize a
+						// unique placeholder when blanks would collide (Go allows repeated blank params;
+						// C# forbids duplicate parameter names — CS0100).
+						if dupBlankParams {
+							updatedSignature.WriteString(fmt.Sprintf("_Δp%d", i))
+						} else {
+							updatedSignature.WriteString("_")
+						}
 					} else {
 						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
 					}
@@ -551,6 +604,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 	result := strings.Builder{}
 	var receiverAccess string
+	dupBlankParams := hasDuplicateBlankParams(parameters)
 
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
@@ -586,15 +640,9 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			// If parameter is a slice, convert it to a Span
 			if sliceType, ok := param.Type().(*types.Slice); ok {
-				typeName := v.getCSTypeName(sliceType.Elem())
+				typeName, inline := v.variadicElementType(sliceType.Elem())
 
-				_, isTypeParam := sliceType.Elem().(*types.TypeParam)
-
-				if isTypeParam || strings.ContainsAny(typeName, "<.") {
-					// A type parameter is not in scope for a namespace-level using alias, and a
-					// generic/pointer/qualified element type (e.g. ж<RangeTable>, @unsafe.Pointer)
-					// would produce an invalid alias identifier — a using-alias name cannot contain
-					// '<', '>' or '.'. Emit the span type inline instead (C# 13 params collections).
+				if inline {
 					result.WriteString("Span<" + typeName + ">")
 				} else {
 					result.WriteString(EllipsisOperator + typeName)
@@ -614,8 +662,14 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			paramName := param.Name()
 
-			if paramName == "" {
-				paramName = "_"
+			// Keep a lone `_`, but synthesize a unique placeholder when blanks would collide
+			// (Go allows repeated blank params; C# forbids duplicate parameter names — CS0100).
+			if paramName == "" || paramName == "_" {
+				if dupBlankParams {
+					paramName = fmt.Sprintf("_Δp%d", i)
+				} else {
+					paramName = "_"
+				}
 			}
 
 			result.WriteString(getSanitizedIdentifier(paramName))
