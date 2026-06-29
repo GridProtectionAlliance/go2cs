@@ -15,12 +15,22 @@ import (
 // wrapper is present. Mirrors the runtime's trace fields `[2]atomic.Pointer[profBuf]` and
 // `[4]atomic.UnsafePointer`. (Element method calls on an array element are a separate,
 // independent matter — an indexed-element atomic receiver — so they are not exercised here.)
+//
+// Taking the address of a cross-package-typed element — `&x.c[i]` — emits the golib element-
+// address `…at<E>(i)`. Its element type E is rendered FULLY-QUALIFIED
+// (`at<sync.atomic_package.Int32>`), which resolves inside `namespace go;` without a file-local
+// `using atomic` alias — a file may index such a field without naming the element type, so it
+// would otherwise lack the alias (CS0246 in the runtime's tracecpu).
 type counters struct {
 	c [3]atomic.Int32
 	d [2]atomic.Uint64
 }
 
+func touch(p *atomic.Int32) {}
+
 func main() {
 	var x counters
+	touch(&x.c[0])
+	touch(&x.c[2])
 	fmt.Println(len(x.c), len(x.d))
 }

@@ -343,7 +343,14 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					return fmt.Sprintf("%s(%s[%s])", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
 				} else {
 					// For an indexed reference into an array, we use the "ж.at<T>(index)" syntax.
-					csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
+					// Render the element type FULLY-QUALIFIED (namespace-rooted) rather than via the
+					// file-local package alias: `.at<@internal.runtime.atomic_package.Pointer<…>>`
+					// resolves inside `namespace go;` without a `using <pkg>` alias, which the calling
+					// file may not import (a Go file can index an atomic-typed array field of a struct
+					// without ever naming the element type → no `using atomic` → CS0246). A current-
+					// package or basic element renders identically to the alias form (no churn).
+					goFullTypeName := v.getFullTypeName(exprType, false)
+					csTypeName := convertToCSTypeName(goFullTypeName[strings.Index(goFullTypeName, "]")+1:])
 
 					// An ANONYMOUS-struct element is lifted to a synthesized name keyed by the element
 					// EXPRESSION (e.g. `mheap.central[i]` → `mheap_central`), which neither the

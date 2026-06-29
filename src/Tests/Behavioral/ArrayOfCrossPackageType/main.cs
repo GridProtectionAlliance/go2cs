@@ -11,8 +11,15 @@ partial class main_package {
     internal array<sync.atomic_package.Uint64> d = new(2);
 }
 
+internal static void touch(ж<atomic.Int32> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+}
+
 internal static void Main() {
-    counters x = default!;
+    ref var x = ref heap(new counters(), out var Ꮡx);
+    touch(Ꮡx.of(counters.Ꮡc).at<sync.atomic_package.Int32>(0));
+    touch(Ꮡx.of(counters.Ꮡc).at<sync.atomic_package.Int32>(2));
     fmt.Println(len(x.c), len(x.d));
 }
 
