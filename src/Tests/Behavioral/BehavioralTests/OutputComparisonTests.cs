@@ -43,6 +43,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
+    public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]

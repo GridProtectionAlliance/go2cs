@@ -247,6 +247,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	// Map Go tokens to C# string equivalents
 	var operator string
 
+	// andNotUncheckedClose closes the `unchecked((Type)~` wrapper opened by the operator for a
+	// narrow/unsigned `&^=` (see the AND_NOT_ASSIGN case). The matching `)` is written immediately
+	// after the RHS at every operator-emission site (each statement uses exactly one of them).
+	andNotUncheckedClose := false
+
 	switch assignStmt.Tok {
 	case token.ADD_ASSIGN:
 		operator = " += "
@@ -269,8 +274,27 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	case token.SHR_ASSIGN:
 		operator = " >>= "
 	case token.AND_NOT_ASSIGN:
-		// C# doesn't have a direct AND NOT equivalent, so expand `&^=` to `&= ~`
+		// C# doesn't have a direct AND NOT equivalent, so expand `&^=` to `&= ~`. The `~` promotes
+		// its operand to `int`, and `int` is not implicitly convertible to a narrower or unsigned LHS
+		// type (byte/ushort/uint/ulong/…), so `flags &= ~X` is CS0266. Cast the complemented RHS back
+		// to the LHS type for those: `flags &= unchecked((uint8)~X)`. The cast is `unchecked` because
+		// for a CONSTANT operand `~X` folds to a negative `int` constant whose checked narrowing
+		// overflows (CS0221). Types that `int` widens to implicitly (int/int32/int64) need no cast.
 		operator = " &= ~"
+
+		if len(assignStmt.Lhs) == 1 {
+			if lhsType := v.info.TypeOf(assignStmt.Lhs[0]); lhsType != nil {
+				if basic, ok := lhsType.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+					switch basic.Kind() {
+					case types.Int, types.Int32, types.Int64:
+						// int widens to these implicitly; no cast needed
+					default:
+						operator = fmt.Sprintf(" &= unchecked((%s)~", convertToCSTypeName(v.getTypeName(lhsType, false)))
+						andNotUncheckedClose = true
+					}
+				}
+			}
+		}
 	default:
 		operator = " = "
 	}
@@ -484,6 +508,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if len(binaryTypeName) > 0 {
 				result.WriteRune(')')
 			}
+
+			if andNotUncheckedClose {
+				// Close the `unchecked((Type)~` wrapper opened by the narrow `&^=` operator.
+				result.WriteRune(')')
+			}
 		}
 
 		if rhsLen > 1 {
@@ -650,6 +679,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(rhsExpr)
 				}
 
+				if andNotUncheckedClose {
+					// Close the `unchecked((Type)~` wrapper opened by the narrow `&^=` operator.
+					result.WriteRune(')')
+				}
+
 				if format.includeSemiColon || i < lhsLen-1 {
 					result.WriteRune(';')
 				}
@@ -664,6 +698,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 					} else {
 						result.WriteString(rhsExpr)
+					}
+
+					if andNotUncheckedClose {
+						// Close the `unchecked((Type)~` wrapper opened by the narrow `&^=` operator.
+						result.WriteRune(')')
 					}
 
 					if format.includeSemiColon || i < lhsLen-1 {

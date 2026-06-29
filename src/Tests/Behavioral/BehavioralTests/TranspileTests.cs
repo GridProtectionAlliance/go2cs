@@ -39,6 +39,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAliasStructComposite() => CheckTarget("AliasStructComposite");
 
     [TestMethod]
+    public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]
