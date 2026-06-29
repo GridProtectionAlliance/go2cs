@@ -20,8 +20,21 @@ internal static void _ᴛ3() {
     _ = x;
 }
 
+internal static void multiBlank() {
+    nint a = 1;
+    nint b = 2;
+    nint c = 3;
+    nint d = 4;
+    _ = a;
+    _ = b;
+    _ = c;
+    _ = d;
+    fmt.Println("multiBlank ok");
+}
+
 internal static void Main() {
     fmt.Println(A, B, C);
+    multiBlank();
 }
 
 } // end main_package

@@ -859,7 +859,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						}
 					} else {
 						if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
-							isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
+							// A blank-identifier LHS is a C# discard, never a declaration — emit `_ = x;`
+							// with no `var`. Testing the current per-element `ident` (not just the
+							// single-LHS case) keeps each `_` in a split multi-assign like
+							// `_, _, _, _ = a, b, c, d` a discard, so they don't collide (CS0128).
+							isDiscarded := ident.Name == "_"
 
 							if !isDiscarded {
 								result.WriteString("var ")

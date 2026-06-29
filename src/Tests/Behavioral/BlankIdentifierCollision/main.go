@@ -32,6 +32,16 @@ func _() {
 	_ = x // a discard inside `func _()` — would bind to the method `_` without the rename
 }
 
+// A multi-blank discard assignment `_, _, _, _ = …` used to be split into four separate
+// `var _ = x;` declarations — the first declared `_`, the rest collided with it (CS0128
+// "A local variable named '_' is already defined"). Each blank LHS must stay a bare discard.
+func multiBlank() {
+	a, b, c, d := 1, 2, 3, 4
+	_, _, _, _ = a, b, c, d
+	fmt.Println("multiBlank ok")
+}
+
 func main() {
 	fmt.Println(A, B, C)
+	multiBlank()
 }
