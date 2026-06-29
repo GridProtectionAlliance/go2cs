@@ -361,6 +361,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
 
     [TestMethod]
+    public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]

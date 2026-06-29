@@ -125,6 +125,7 @@ type Visitor struct {
 	currentFuncName      string
 	currentFuncPrefix    *strings.Builder
 	paramNames           HashSet[string]
+	paramObjects         map[types.Object]bool
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool

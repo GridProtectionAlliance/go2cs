@@ -399,6 +399,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
 
     [TestMethod]
+    public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]

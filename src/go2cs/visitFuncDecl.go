@@ -127,9 +127,17 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		v.paramNames.Clear()
 	}
 
+	// Collect the parameter OBJECTS too, so identIsParameter can distinguish a real parameter from
+	// a local that merely SHADOWS a parameter's name (`func f(t *T){ { var t *T; … } }`).
+	v.paramObjects = map[types.Object]bool{}
+
 	for _, param := range funcDecl.Type.Params.List {
 		for _, name := range param.Names {
 			v.paramNames.Add(name.Name)
+
+			if obj := v.info.Defs[name]; obj != nil {
+				v.paramObjects[obj] = true
+			}
 		}
 	}
 
@@ -567,12 +575,20 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 // identIsParameter checks if the given identifier is a parameter in the current function.
 func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
-	if v.paramNames == nil {
+	if v.paramNames == nil || !v.paramNames.Contains(ident.Name) {
 		return false
 	}
 
-	// Check if the identifier's name is in the parameter names hash set
-	return v.paramNames.Contains(ident.Name)
+	// The name matches a parameter, but a local can SHADOW a parameter of the same name. Only the
+	// actual parameter object gets the deref-aliased box treatment (`Ꮡp`); a shadowing local that is
+	// already a pointer (`ж<T> tΔ2`) must keep its plain form, not get a spurious `&` (CS0103 on the
+	// undefined `ᏑtΔ2`). Verify the resolved object is genuinely a parameter; fall back to the name
+	// match when it cannot be resolved.
+	if obj := v.info.ObjectOf(ident); obj != nil && v.paramObjects != nil {
+		return v.paramObjects[obj]
+	}
+
+	return true
 }
 
 func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {
