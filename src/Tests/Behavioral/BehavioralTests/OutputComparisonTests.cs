@@ -64,6 +64,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]
+    public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]

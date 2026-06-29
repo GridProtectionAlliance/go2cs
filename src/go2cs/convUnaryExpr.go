@@ -8,6 +8,27 @@ import (
 	"strings"
 )
 
+// convArrayIndex emits an array/slice index expression for the golib `ж.at<T>(nint)`
+// element-address accessor. Go permits any integer type as an array/slice index and
+// converts it to `int` for the access; the `at` accessor takes `nint`, but C# has no
+// implicit nuint/uint/ulong→nint conversion, so a non-`int` index (e.g. a `uintptr`
+// loop var, or a `uint % 2` whose C# result type widens to `long`) must be narrowed
+// explicitly. An `int` index, or an untyped int constant (which renders as a plain int
+// literal), needs no cast. Mirrors Go's index-to-int conversion in the emitted C#.
+func (v *Visitor) convArrayIndex(index ast.Expr) string {
+	expr := v.convExpr(index, nil)
+
+	if basic, ok := v.getType(index, true).(*types.Basic); ok {
+		info := basic.Info()
+
+		if info&types.IsInteger != 0 && info&types.IsUntyped == 0 && basic.Kind() != types.Int {
+			return fmt.Sprintf("(nint)(%s)", expr)
+		}
+	}
+
+	return expr
+}
+
 // isHeapBoxedExpr reports whether the expression refers to a variable that the
 // converter has given a heap-boxed pointer companion (the "Ꮡname" form) — i.e. it
 // escapes to the heap and is not an inherently heap-allocated type. Package-level
@@ -275,10 +296,10 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// address recursively: `Ꮡtrace.of(…ᏑstackTab).at<T>(i)`.
 					if sel, ok := indexExpr.X.(*ast.SelectorExpr); ok && v.isHeapBoxedExpr(sel) {
 						arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
-						return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convExpr(indexExpr.Index, nil))
+						return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convArrayIndex(indexExpr.Index))
 					}
 
-					return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
+					return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convArrayIndex(indexExpr.Index))
 				}
 			}
 		}

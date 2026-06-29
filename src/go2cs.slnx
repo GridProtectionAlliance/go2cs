@@ -65,6 +65,7 @@
     <Project Path="Tests/Behavioral/BlankIdentifierCollision/BlankIdentifierCollision.csproj" />
     <Project Path="Tests/Behavioral/BuiltinShadowLocal/BuiltinShadowLocal.csproj" />
     <Project Path="Tests/Behavioral/ArrayPassByValue/ArrayPassByValue.csproj" />
+    <Project Path="Tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="Tests/Behavioral/AtomicValues/AtomicValues.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
