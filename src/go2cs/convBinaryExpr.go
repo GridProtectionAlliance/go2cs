@@ -181,19 +181,39 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			if v.isUntypedNumericConstArg(binaryExpr.X) {
 				if shiftType := v.info.Types[binaryExpr].Type; shiftType != nil {
 					if basic, ok := shiftType.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 && basic.Info()&types.IsUntyped == 0 {
-						shiftCSType := convertToCSTypeName(v.getTypeName(shiftType, false))
+						// Shift width is decided by the UNDERLYING basic type. For a NAMED numeric
+						// (`type arenaIdx uint`), the result is additionally wrapped to the named type
+						// *through* its underlying — `(arenaIdx)((nuint)1 << k)` — because the
+						// `[GoType]` conversion only accepts its exact underlying, never C# `int`
+						// (a bare `(arenaIdx)(1 << k)` is CS0030).
+						underlyingCS := v.getCSTypeName(basic)
+						resolvedCS := convertToCSTypeName(v.getTypeName(shiftType, false))
+						isNamed := resolvedCS != underlyingCS
 
-						if isWideShiftType(shiftCSType) {
+						if isWideShiftType(underlyingCS) {
 							// A type that does not promote to `int` in a C# shift (uint/ulong/long/
 							// nuint). Cast the LEFT operand so the shift is performed in that type —
 							// casting the result would not help, as `1 << 63` already overflowed
 							// `int` to a negative value before the cast (e.g. `(uint64)(1 << 63)`
 							// → CS0221). `((uint64)1) << 63` shifts in uint64.
-							shiftExpr = fmt.Sprintf("((%s)%s %s %s)", shiftCSType, leftOperand, binaryOp, rightOperand)
-						} else if shiftCSType != "int" && shiftCSType != "nint" {
+							shiftExpr = fmt.Sprintf("((%s)%s %s %s)", underlyingCS, leftOperand, binaryOp, rightOperand)
+
+							if isNamed {
+								shiftExpr = fmt.Sprintf("(%s)%s", resolvedCS, shiftExpr)
+							}
+						} else if underlyingCS != "int" && underlyingCS != "nint" {
 							// A narrow type (uint16/byte/…) promotes to `int` in the shift, so the
-							// computation is correct; just re-type the result.
-							shiftExpr = fmt.Sprintf("(%s)%s", shiftCSType, shiftExpr)
+							// computation is correct; just re-type the result (through the underlying
+							// for a named type).
+							shiftExpr = fmt.Sprintf("(%s)%s", underlyingCS, shiftExpr)
+
+							if isNamed {
+								shiftExpr = fmt.Sprintf("(%s)%s", resolvedCS, shiftExpr)
+							}
+						} else if isNamed {
+							// Underlying is `int`/`nint`; a named type over it still needs the cast
+							// routed through the underlying — `(arenaIdx)(nint)(1 << k)`.
+							shiftExpr = fmt.Sprintf("(%s)(%s)%s", resolvedCS, underlyingCS, shiftExpr)
 						}
 					}
 				}

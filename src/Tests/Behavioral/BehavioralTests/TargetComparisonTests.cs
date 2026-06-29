@@ -302,6 +302,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedNumericIntCast() => CheckTarget("NamedNumericIntCast");
 
     [TestMethod]
+    public void CheckNamedNumericShiftConv() => CheckTarget("NamedNumericShiftConv");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
