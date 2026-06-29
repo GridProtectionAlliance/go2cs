@@ -303,6 +303,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]

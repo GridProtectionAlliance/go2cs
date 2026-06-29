@@ -1497,6 +1497,21 @@ func getSanitizedIdentifier(identifier string) string {
 }
 
 func getCollisionAvoidanceIdentifier(identifier string) string {
+	// A type-vs-method name collision (a package-level type and a method sharing a name) is normally
+	// avoided by Δ-prefixing the TYPE here, while the METHOD keeps its core-sanitized name — so the
+	// nested type `Δfoo` and the extension method `foo` no longer collide. But when the colliding name
+	// is also a golib reserved word, the METHOD's core-sanitized name is ALSO Δ-prefixed
+	// (getCoreSanitizedIdentifier's reserved branch), so the plain Δ-prefix stops separating them: the
+	// nested type and the extension method would BOTH be `Δ<name>` and collide in C# (CS0102). Append a
+	// type marker so the TYPE gets a name distinct from the method. Example: runtime's `type slice` vs
+	// `func (*userArena) slice` — both reserved-renamed: TYPE → `Δsliceᴛ`, METHOD → `Δslice`. Only the
+	// type side is renamed; the method (and every method call site / go2cs-gen generated overload) is
+	// left as `Δslice`, which keeps the converter and the go2cs-gen generators — they compute method
+	// names independently — in sync. (Renaming the method instead desyncs them and cascades.)
+	if reserved.Contains(identifier) {
+		return ShadowVarMarker + identifier + TempVarMarker
+	}
+
 	return ShadowVarMarker + identifier
 }
 
