@@ -185,6 +185,25 @@ func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
 	return ok && v.isAddressedGlobal(ident)
 }
 
+// exprIsAlreadyBoxedPointerFieldOrElement reports whether expr is a field selector or an indexed
+// element whose OWN type is a Go pointer — so its C# value is already a `ж<T>` box (e.g.
+// cpuProfile's `log *profBuf`, accessed as `cpuprof.log`). A direct-ж (capture-mode) or
+// pointer-receiver method called on it binds to that box directly; taking its address via the
+// &-machinery would double-box to `ж<ж<T>>` (CS1929). A VALUE field/element (an atomic `Int32`, a
+// plain struct field) is NOT already a box and still needs the box machinery. This discriminates a
+// pointer FIELD of a boxed global (`cpuprof.log`, already a box) from a deref'd pointer PARAMETER
+// (`s` in `s.Prev()`, a value alias whose box is `Ꮡs`) — the latter is a bare ident, not a
+// selector/index, so it is correctly left to the box routing.
+func (v *Visitor) exprIsAlreadyBoxedPointerFieldOrElement(expr ast.Expr) bool {
+	switch expr.(type) {
+	case *ast.SelectorExpr, *ast.IndexExpr:
+		_, isPtr := v.info.TypeOf(expr).(*types.Pointer)
+		return isPtr
+	}
+
+	return false
+}
+
 // isPointerReceiverMethodCall reports whether the selector calls a method with a POINTER receiver
 // (`func (x *T) M()`), emitted as a `[GoRecv]` extension over `ref T` / a `ж<T>` overload. Such a
 // method needs an addressable receiver, so a value-returning `~` deref of a field receiver is an
@@ -359,7 +378,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() { return r.init() }`
 	// — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
-	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
+	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
 		// When the receiver base is itself a FIELD selector or an INDEX into a heap-boxed value —
 		// e.g. a boxed global's atomic field `ctrl.total.Add()`, or `trace.stackTab[i].dump()` where
 		// `trace` is an address-taken global — the box address must go through the &-machinery, which

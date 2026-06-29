@@ -289,6 +289,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerFieldOfBoxedGlobal() => CheckTarget("PointerFieldOfBoxedGlobal");
+
+    [TestMethod]
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]
