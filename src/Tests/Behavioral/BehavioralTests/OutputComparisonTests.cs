@@ -217,6 +217,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMapSamePackageTypes() => CheckTarget("MapSamePackageTypes");
 
     [TestMethod]
+    public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
+
+    [TestMethod]
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]

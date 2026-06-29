@@ -247,6 +247,17 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 				} else {
 					// For an indexed reference into an array, we use the "ж.at<T>(index)" syntax
 					csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
+
+					// When the array is a FIELD of a heap-boxed value — `&trace.stackTab[i]` where
+					// `trace` is an address-taken global — its address must go through the box-field
+					// accessor, not a naive `Ꮡ` prefix on `trace.stackTab` (which would bind to the box
+					// variable `Ꮡtrace`, whose value type has no `stackTab` → CS1061). Take the array's
+					// address recursively: `Ꮡtrace.of(…ᏑstackTab).at<T>(i)`.
+					if sel, ok := indexExpr.X.(*ast.SelectorExpr); ok && v.isHeapBoxedExpr(sel) {
+						arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
+						return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convExpr(indexExpr.Index, nil))
+					}
+
 					return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convExpr(indexExpr.Index, nil))
 				}
 			}

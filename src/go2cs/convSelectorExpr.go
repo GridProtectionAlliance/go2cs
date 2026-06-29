@@ -280,12 +280,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
 	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
-		// When the receiver base is itself a FIELD selector on a heap-boxed value — e.g. a boxed
-		// global's atomic field, `ctrl.total.Add()` where `ctrl` is an address-taken global — the
-		// box address must go through the &-machinery, which emits `Ꮡctrl.of(controller.Ꮡtotal)`.
-		// Naively prefixing `Ꮡ` to `ctrl.total` would instead yield `Ꮡctrl.total`, which binds to
-		// the box variable named `Ꮡctrl` (whose value type has no `total`) → CS1061.
-		if _, isSelectorBase := selectorExpr.X.(*ast.SelectorExpr); isSelectorBase {
+		// When the receiver base is itself a FIELD selector or an INDEX into a heap-boxed value —
+		// e.g. a boxed global's atomic field `ctrl.total.Add()`, or `trace.stackTab[i].dump()` where
+		// `trace` is an address-taken global — the box address must go through the &-machinery, which
+		// emits `Ꮡctrl.of(controller.Ꮡtotal)` / `Ꮡtrace.of(…ᏑstackTab).at<T>(i)`. Naively prefixing
+		// `Ꮡ` to `ctrl.total` / `trace.stackTab[i]` would instead bind to the box variable `Ꮡctrl` /
+		// `Ꮡtrace` (whose value type has no such member) → CS1061.
+		switch selectorExpr.X.(type) {
+		case *ast.SelectorExpr, *ast.IndexExpr:
 			fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 			return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 		}

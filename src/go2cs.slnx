@@ -123,6 +123,7 @@
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
+    <Project Path="Tests/Behavioral/MethodOnBoxedGlobalIndex/MethodOnBoxedGlobalIndex.csproj" />
     <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="Tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
