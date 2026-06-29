@@ -171,6 +171,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
+
+    [TestMethod]
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]

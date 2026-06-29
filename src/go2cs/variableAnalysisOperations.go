@@ -336,24 +336,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				}
 			}
 
-		case *ast.ForStmt:
-			if isFunctionLevelNode(n, funcDecl.Body) {
-				if init, ok := n.Init.(*ast.AssignStmt); ok && init.Tok == token.DEFINE {
-					for _, expr := range init.Lhs {
-						if ident, ok := expr.(*ast.Ident); ok {
-							if obj := v.info.Defs[ident]; obj != nil {
-								if varObj, ok := obj.(*types.Var); ok {
-									// Only add if not already declared
-									if _, exists := functionLevelDecls[ident.Name]; !exists {
-										functionLevelDecls[ident.Name] = varObj
-										declaredPos[varObj] = ident.Pos()
-									}
-								}
-							}
-						}
-					}
-				}
-			}
+		// NOTE: a `for init; …` loop's `:=` variable is scoped to the for statement, NOT to the
+		// function body — so it is deliberately NOT collected here. Recording it as the package's
+		// function-level decl (it is collected first, in source order) would mask the REAL
+		// function-level variable of the same name declared later (`for b := …{} … b := newBucket()`),
+		// defeating the shadow-rename for both → C# CS0136. The for-loop var's own shadowing of an
+		// enclosing variable is handled by the scope-stack pass (isDeclaredInOuterScopes). Same intent
+		// as the DeclStmt gate above. (Range `:=` vars are likewise not collected — the RangeStmt case
+		// only handles the `=` reuse of already-declared variables.)
 
 		case *ast.TypeSwitchStmt:
 			if isFunctionLevelNode(n, funcDecl.Body) {

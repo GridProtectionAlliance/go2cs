@@ -173,6 +173,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
+
+    [TestMethod]
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]

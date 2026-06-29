@@ -154,6 +154,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]
+    public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
+
+    [TestMethod]
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]

@@ -97,6 +97,7 @@
     <Project Path="Tests/Behavioral/FloatConstIntContext/FloatConstIntContext.csproj" />
     <Project Path="Tests/Behavioral/ForInitMixedTypes/ForInitMixedTypes.csproj" />
     <Project Path="Tests/Behavioral/ForMethodInitPost/ForMethodInitPost.csproj" />
+    <Project Path="Tests/Behavioral/ForVarMasksFuncLevel/ForVarMasksFuncLevel.csproj" />
     <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="Tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
     <Project Path="Tests/Behavioral/FuncTypeParam/FuncTypeParam.csproj" />
