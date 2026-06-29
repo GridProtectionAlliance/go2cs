@@ -228,6 +228,17 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	v.hasDefer = false
 	v.hasRecover = false
 
+	// blockDecls is kept index-aligned with v.scopeStack. For a genuine block scope it holds the
+	// full set of names declared *directly* in that block (pre-scanned when the scope is pushed),
+	// so a nested variable can be shadow-renamed when it collides with a same-named variable
+	// declared LATER in an enclosing block. C# CS0136 fires regardless of declaration order, but
+	// the scope stack alone only records declarations seen so far (backward), so a forward
+	// (later-in-source) declaration in an intermediate block would otherwise be missed. nil for
+	// non-block scopes (control-statement init scopes, parameter scopes, and the global scope at
+	// index 0). Generalizes the function-body-only forward detection (functionLevelDecls) to every
+	// block level.
+	blockDecls := []map[string]bool{nil}
+
 	// Reset all capture-related state at the start of each function
 	v.lambdaCapture = newLambdaCapture()
 	v.capturedVarCount = make(map[string]int)
@@ -393,6 +404,22 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		return false
 	}
 
+	// isForwardDeclaredInOuterBlocks reports whether varName is declared directly in any ENCLOSING
+	// block scope (every level except the current innermost at len-1), consulting the pre-scanned
+	// full name set so a declaration appearing LATER in that block is visible too. This complements
+	// isDeclaredInOuterScopes, which only sees declarations already pushed onto the scope stack
+	// (i.e. backward, in source order). Together they implement C#'s order-independent CS0136 rule
+	// across intermediate blocks, not just the function body. The innermost scope is excluded so a
+	// variable declared directly in the current block does not appear to shadow itself.
+	isForwardDeclaredInOuterBlocks := func(varName string) bool {
+		for i := len(blockDecls) - 2; i >= 1; i-- {
+			if names := blockDecls[i]; names != nil && names[varName] {
+				return true
+			}
+		}
+		return false
+	}
+
 	lookupVar := func(varName string) *types.Var {
 		// Check the scope stack first, innermost outward: a variable declared in a nested block
 		// shadows a function-level declaration of the same name, so the inner (shadow-renamed)
@@ -453,7 +480,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			} else {
 				adjustedName = varName
 			}
-		} else if isDeclaredInOuterScopes(varName, false) {
+		} else if isDeclaredInOuterScopes(varName, false) || isForwardDeclaredInOuterBlocks(varName) {
+			// The name collides with a variable in an enclosing block — either one already seen
+			// (isDeclaredInOuterScopes, backward) or one declared later in that block
+			// (isForwardDeclaredInOuterBlocks, forward). C# CS0136 forbids both regardless of order.
 			adjustedName = getShadowedVarName(varName)
 		} else {
 			adjustedName = varName
@@ -552,6 +582,57 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		}
 	}
 
+	// collectBlockLevelDecls returns the names of variables declared *directly* in the given block
+	// statement list: top-level `:=` short declarations and `var` declarations. Names declared in
+	// nested statements — including a control statement's own init `:=`, which is scoped to that
+	// statement rather than the block — are excluded, mirroring collectFunctionLevelDecls'
+	// direct-child gate. The result is order-independent, so forward (later-in-source) declarations
+	// are captured as well as backward ones.
+	collectBlockLevelDecls := func(list []ast.Stmt) map[string]bool {
+		names := make(map[string]bool)
+
+		for _, stmt := range list {
+			switch n := stmt.(type) {
+			case *ast.DeclStmt:
+				if genDecl, ok := n.Decl.(*ast.GenDecl); ok {
+					for _, spec := range genDecl.Specs {
+						if valueSpec, ok := spec.(*ast.ValueSpec); ok {
+							for _, ident := range valueSpec.Names {
+								if !isDiscardedVar(ident.Name) {
+									names[ident.Name] = true
+								}
+							}
+						}
+					}
+				}
+
+			case *ast.AssignStmt:
+				if n.Tok == token.DEFINE {
+					for _, expr := range n.Lhs {
+						if ident, ok := expr.(*ast.Ident); ok && !isDiscardedVar(ident.Name) {
+							names[ident.Name] = true
+						}
+					}
+				}
+			}
+		}
+
+		return names
+	}
+
+	// pushScope/popScope keep v.scopeStack and blockDecls index-aligned. Pass the block's
+	// pre-scanned forward-decl set (from collectBlockLevelDecls) for a genuine block scope; pass nil
+	// for non-block scopes (control-statement init scopes and parameter scopes).
+	pushScope := func(forward map[string]bool) {
+		v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+		blockDecls = append(blockDecls, forward)
+	}
+
+	popScope := func() {
+		v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+		blockDecls = blockDecls[:len(blockDecls)-1]
+	}
+
 	var visitNode func(n ast.Node)
 	initialBlock := true
 
@@ -562,8 +643,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				return
 			}
 
-			// Enter a new scope
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Enter a new scope, pre-scanning this block's direct declarations so a nested variable
+			// can detect a same-named variable declared later in this block (forward shadowing).
+			pushScope(collectBlockLevelDecls(node.List))
 
 			if initialBlock {
 				initialBlock = false
@@ -588,7 +670,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			// Exit the current scope
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.AssignStmt:
 			if node.Tok == token.DEFINE {
@@ -680,8 +762,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 		case *ast.FuncLit:
-			// Enter a new scope for the function literal
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Enter a new scope for the function literal (parameter scope; the body's own block
+			// scope is pushed when visitNode descends into node.Body).
+			pushScope(nil)
 			tracker := registry.get(FuncTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -718,7 +801,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			// Exit the function literal scope
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.GoStmt:
 			// Enter capture analysis context for goroutine
@@ -820,7 +903,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			v.lambdaCapture.currentLambda = nil
 
 		case *ast.IfStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Init scope (the body's own block scope is pushed when visitNode descends into it).
+			pushScope(nil)
 			tracker := registry.get(IfTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -878,10 +962,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.SwitchStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Init scope (case-clause bodies push their own block scopes below).
+			pushScope(nil)
 			tracker := registry.get(SwitchTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -917,8 +1002,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			for _, stmt := range node.Body.List {
 				if caseClause, ok := stmt.(*ast.CaseClause); ok {
-					// Enter a new scope
-					v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+					// Enter a new scope; a case body is an implicit block, so pre-scan its direct
+					// declarations for forward shadow detection.
+					pushScope(collectBlockLevelDecls(caseClause.Body))
 
 					// Visit the case body treating it as an implicit block
 					blockTracker := registry.get(BlockTracker)
@@ -933,7 +1019,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					blockTracker.exit()
 
 					// Exit the current scope
-					v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+					popScope()
 
 					// Ensure case clause identifiers in expressions are checked for shadowing
 					for _, expr := range caseClause.List {
@@ -954,10 +1040,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.TypeSwitchStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Init/guard scope (case bodies are handled within node.Body).
+			pushScope(nil)
 			tracker := registry.get(TypeSwitchTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -1037,10 +1124,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			visitNode(node.Body)
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.RangeStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Range variable scope (the body's own block scope is pushed when descending into it).
+			pushScope(nil)
 			tracker := registry.get(RangeTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -1109,10 +1197,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			visitNode(node.Body)
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.ForStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// For-loop init scope (the body's own block scope is pushed when descending into it).
+			pushScope(nil)
 			tracker := registry.get(ForTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -1143,10 +1232,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			visitNode(node.Body)
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.SelectStmt:
-			v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+			// Select scope (each comm-clause body pushes its own block scope below).
+			pushScope(nil)
 			tracker := registry.get(SelectTracker)
 			tracker.enter()
 
@@ -1168,8 +1258,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						tracker.processing = false
 					}
 
-					// Enter a new scope
-					v.scopeStack = append(v.scopeStack, make(map[string]*types.Var))
+					// Enter a new scope; a comm-clause body is an implicit block, so pre-scan its
+					// direct declarations for forward shadow detection.
+					pushScope(collectBlockLevelDecls(commClause.Body))
 
 					// Visit the case body treating it as an implicit block
 					blockTracker := registry.get(BlockTracker)
@@ -1184,12 +1275,12 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					blockTracker.exit()
 
 					// Exit the current scope
-					v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+					popScope()
 				}
 			}
 
 			tracker.exit()
-			v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
+			popScope()
 
 		case *ast.CallExpr:
 			if fun, ok := node.Fun.(*ast.Ident); ok {

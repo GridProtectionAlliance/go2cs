@@ -171,6 +171,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckForVariants() => CheckTarget("ForVariants");
 
     [TestMethod]
+    public void CheckForVarMasksBlockLevel() => CheckTarget("ForVarMasksBlockLevel");
+
+    [TestMethod]
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
