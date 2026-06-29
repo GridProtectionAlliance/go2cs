@@ -197,6 +197,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlobalAtomicDefer() => CheckTarget("GlobalAtomicDefer");
 
     [TestMethod]
+    public void CheckGlobalAtomicFieldMethod() => CheckTarget("GlobalAtomicFieldMethod");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]

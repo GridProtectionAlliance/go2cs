@@ -195,6 +195,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlobalAtomicDefer() => CheckTarget("GlobalAtomicDefer");
 
     [TestMethod]
+    public void CheckGlobalAtomicFieldMethod() => CheckTarget("GlobalAtomicFieldMethod");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
