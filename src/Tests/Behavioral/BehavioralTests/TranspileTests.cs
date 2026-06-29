@@ -459,6 +459,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
+
+    [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]

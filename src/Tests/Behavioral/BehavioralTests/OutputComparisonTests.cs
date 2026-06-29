@@ -418,6 +418,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
+
+    [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]

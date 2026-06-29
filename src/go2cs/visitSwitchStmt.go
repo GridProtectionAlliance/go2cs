@@ -42,6 +42,28 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				break
 			}
 
+			// A C# `switch` case label must be a compile-time constant. An identifier/selector label
+			// that resolves to anything other than a C# `const` — a plain variable, a struct field
+			// (`frame.fp`), a const emitted as `static readonly` (untyped/named/cross-package, e.g.
+			// `goarch.PtrSize`), or an address-of expression — is not, so a C# switch is invalid
+			// (CS9135). containsUntypedExpr/the *types.Named check above miss these because the label
+			// is typed to the switch tag's type in context. Force the if-else (==) form for them.
+			switch expr.(type) {
+			case *ast.Ident, *ast.SelectorExpr:
+				if !v.isCSharpConstantExpr(expr) {
+					allConst = false
+				}
+			case *ast.UnaryExpr:
+				// An address-of (`&frame.fp` → `Ꮡframe.val.fp`) is a runtime value, never a constant.
+				if expr.(*ast.UnaryExpr).Op == token.AND {
+					allConst = false
+				}
+			}
+
+			if !allConst {
+				break
+			}
+
 			tv, ok := v.info.Types[expr]
 
 			if !ok {
@@ -489,6 +511,22 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 		for _, expr := range caseClause.List {
 			if !v.isNonCallValue(expr) {
 				usePattenMatch = false
+				break
+			}
+
+			// A C# constant pattern (`tag is Y`) requires Y to be a compile-time constant. An
+			// identifier/selector case label that resolves to a const emitted as `static readonly`
+			// (untyped/named/cross-package, e.g. `goarch.PtrSize`) or to a plain variable is not, so
+			// the `is` form is invalid (CS9135/CS0150). Fall back to `==` equality for those. (Computed
+			// literal expressions like `a + b` remain valid constant patterns and are left untouched.)
+			switch expr.(type) {
+			case *ast.Ident, *ast.SelectorExpr:
+				if !v.isCSharpConstantExpr(expr) {
+					usePattenMatch = false
+				}
+			}
+
+			if !usePattenMatch {
 				break
 			}
 
