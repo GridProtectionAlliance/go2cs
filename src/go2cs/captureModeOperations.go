@@ -128,7 +128,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -306,6 +306,51 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string) bool {
 		}
 
 		return true
+	})
+
+	return found
+}
+
+// bodyCapturesReceiverInClosure reports whether the body references the receiver inside a function
+// literal (a closure) — e.g. runtime's `func (p *_panic) nextFrame() { … systemstack(func(){ … p.lr
+// … }) }`. The receiver is normally emitted as the deref'd ref-local alias `ref var p = ref Ꮡp.val`,
+// but a C# ref-local cannot be captured by a lambda (CS8175); inside the closure the receiver must
+// be referenced through its box `Ꮡp` (the convIdent/convUnaryExpr box-ref forms). That box only
+// exists when the method is direct-ж — the box passed AS the receiver param (`this ж<T> Ꮡp`). A
+// closure parameter that shadows the receiver name has a distinct object, so the `recv` identity
+// check excludes it (no false fire).
+func bodyCapturesReceiverInClosure(body *ast.BlockStmt, recvName string, recv *types.Var, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if found {
+			return false
+		}
+
+		funcLit, ok := node.(*ast.FuncLit)
+
+		if !ok {
+			return true
+		}
+
+		// Any reference to the receiver from within this closure (or a closure nested inside it —
+		// ast.Inspect recurses) means it is captured and must route through the box.
+		ast.Inspect(funcLit.Body, func(inner ast.Node) bool {
+			ident, ok := inner.(*ast.Ident)
+
+			if !ok || ident.Name != recvName {
+				return true
+			}
+
+			if recv != nil && info.ObjectOf(ident) != recv {
+				return true
+			}
+
+			found = true
+			return false
+		})
+
+		return !found
 	})
 
 	return found

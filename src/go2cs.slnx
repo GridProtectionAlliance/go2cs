@@ -155,6 +155,7 @@
     <Project Path="Tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
+    <Project Path="Tests/Behavioral/ReceiverCapturedInClosure/ReceiverCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />
     <Project Path="Tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
