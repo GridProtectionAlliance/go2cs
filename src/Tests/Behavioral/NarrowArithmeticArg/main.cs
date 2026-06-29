@@ -28,6 +28,13 @@ internal static void Main() {
     uint16 f = 10000;
     fmt.Println(takeU16((uint16)(e + f)));
     fmt.Println(takeU8((uint8)(a * 2 + b)));
+    var y = (uint8)(a + b);
+    fmt.Println(y);
+    y = (uint8)(y + 1);
+    fmt.Println(y);
+    array<uint8> arr = new(1);
+    arr[0] = (uint8)(a + b);
+    fmt.Println(arr[0]);
 }
 
 } // end main_package

@@ -478,6 +478,35 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
+			// Go narrow-integer (int8/uint8/int16/uint16) arithmetic wraps at the operand's own
+			// width, but C# promotes sub-int arithmetic to `int` — so a narrow-arithmetic RHS
+			// assigned to a narrow LHS needs a cast back to the LHS type, both to compile (CS0266)
+			// and to preserve Go's wrapping. Mirrors the call-argument narrow cast (convCallExpr).
+			// Gated on the RHS Go-type already matching the LHS (so the assignment is Go-valid
+			// without a conversion) and the RHS being an arithmetic expression; the existing
+			// bitwise-assign / `&^=` wrappers take precedence (their own cast already applies).
+			var narrowCastType string
+
+			if !bitwiseAssignOp && !andNotUncheckedClose && i < lhsLen && !lhsTypeIsInterface[i] {
+				switch rhs.(type) {
+				case *ast.BinaryExpr, *ast.UnaryExpr:
+					if lhsType := v.getType(lhsExprs[i], false); lhsType != nil {
+						if lhsBasic, ok := lhsType.Underlying().(*types.Basic); ok && isNarrowIntegerKind(lhsBasic.Kind()) {
+							if rhsType := v.getType(rhs, false); rhsType != nil && types.Identical(rhsType, lhsType) {
+								narrowCastType = convertToCSTypeName(v.getTypeName(lhsType, false))
+
+								// Avoid a double cast when another path already narrowed the RHS to the
+								// same type (e.g. a bitwise op with an untyped constant emits its own
+								// `(byte)(b | 128)`); `(byte)((byte)(…))` is harmless but churns goldens.
+								if strings.HasPrefix(rhsExpr, fmt.Sprintf("(%s)(", narrowCastType)) {
+									narrowCastType = ""
+								}
+							}
+						}
+					}
+				}
+			}
+
 			var binaryTypeName string
 
 			if bitwiseAssignOp {
@@ -499,10 +528,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString(fmt.Sprintf("(%s)(", binaryTypeName))
 			}
 
+			if len(narrowCastType) > 0 {
+				result.WriteString(fmt.Sprintf("(%s)(", narrowCastType))
+			}
+
 			if lhsTypeIsInterface[i] {
 				result.WriteString(v.convertExprToInterfaceType(lhsExprs[i], rhs, rhsExpr))
 			} else {
 				result.WriteString(rhsExpr)
+			}
+
+			if len(narrowCastType) > 0 {
+				result.WriteRune(')')
 			}
 
 			if len(binaryTypeName) > 0 {

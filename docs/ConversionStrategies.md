@@ -103,7 +103,9 @@ takeU8((uint8)(a + b));   // Go take(a + b), a/b uint8 → 44 (wraps), not 300
 takeU8((uint8)(~a));      // Go take(^a) → 55
 ```
 
-The cast is applied only when the argument's Go type already matches the parameter (so Go accepts it without a conversion) and the argument is an arithmetic (binary/unary) expression — a bare identifier is already the narrow type. (Guarded by the `NarrowArithmeticArg` behavioral test, which verifies the wrapped values match Go. Wider integer types — `int32`/`uint32` and up — are not promoted by C# and need no cast.)
+The same cast applies in the **assignment** context — a narrow-arithmetic value assigned to a narrow variable or array/slice element (`y := a + b; y = y + 1; arr[0] = a + b`) emits `(uint8)(a + b)` for the same two reasons. (A double cast is avoided when another path already narrowed the RHS, e.g. a bitwise op with an untyped constant emits its own `(byte)(b | 128)`.)
+
+The cast is applied only when the value's Go type already matches the target (parameter / LHS), so Go accepts it without a conversion, and only for an arithmetic (binary/unary) expression — a bare identifier is already the narrow type. (Guarded by the `NarrowArithmeticArg` behavioral test, which verifies the wrapped values match Go in both contexts. Wider integer types — `int32`/`uint32` and up — are not promoted by C# and need no cast. Still uncovered: an explicitly-typed `var x uint8 = a + b` declaration, which routes through the value-spec path, and a struct-field LHS — both follow-ups.)
 
 > One sticking point: not all C# indexing constructs accept a `nint`. Explicit indexers support `nint`, but [implicit index support](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support) (the `Index`/`Range` syntax) currently only works with `int`, so range-operation indices are cast to `int` where needed. (The earlier strategy of compiling to `long`/`ulong`, or of custom `@int`/`@uint` structs selected by a `TARGET32BIT` directive, has been superseded by `nint`/`nuint`.)
 
