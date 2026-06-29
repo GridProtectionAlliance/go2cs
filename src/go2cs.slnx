@@ -106,6 +106,7 @@
     <Project Path="Tests/Behavioral/GenericTypeInference/GenericTypeInference.csproj" />
     <Project Path="Tests/Behavioral/GenericTypeInstantiation/GenericTypeInstantiation.csproj" />
     <Project Path="Tests/Behavioral/GenericVariadicFunc/GenericVariadicFunc.csproj" />
+    <Project Path="Tests/Behavioral/GlobalCapturedInClosure/GlobalCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/GlobalArrayElementFieldAddress/GlobalArrayElementFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/GlobalAtomicDefer/GlobalAtomicDefer.csproj" />
     <Project Path="Tests/Behavioral/GlobalAtomicFieldMethod/GlobalAtomicFieldMethod.csproj" />

@@ -56,9 +56,8 @@ internal static void Main() {
     });
     fmt.Println("5:", e.x, e.y);
     gPtr = Ꮡe;
-    var gValʗ1 = gVal;
     run(() => {
-        gPtr.val.x = gValʗ1.x;
+        gPtr.val.x = gVal.x;
     });
     fmt.Println("6:", e.x);
     var vals = new nint[]{5}.slice();

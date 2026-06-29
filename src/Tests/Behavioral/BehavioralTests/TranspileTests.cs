@@ -204,6 +204,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlobalAtomicFieldMethod() => CheckTarget("GlobalAtomicFieldMethod");
 
     [TestMethod]
+    public void CheckGlobalCapturedInClosure() => CheckTarget("GlobalCapturedInClosure");
+
+    [TestMethod]
     public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
 
     [TestMethod]

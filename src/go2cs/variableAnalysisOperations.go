@@ -1751,6 +1751,14 @@ func (v *Visitor) shouldCapture(varObj *types.Var, ident *ast.Ident) bool {
 		return false
 	}
 
+	// A package-level global is a C# static field/property — a closure references it LIVE, so it is
+	// never snapshot-captured. A value snapshot (`var gʗ1 = g`) copies the struct (so `&gʗ1` has no
+	// box → CS0103, and writes through the global are lost), and is semantically wrong: Go reads/writes
+	// the live global from inside a closure. The static is always in scope, so no capture is needed.
+	if varObj.Pkg() != nil && varObj.Parent() == varObj.Pkg().Scope() {
+		return false
+	}
+
 	// Don't capture value types unless they need to escape
 	if _, ok := varObj.Type().Underlying().(*types.Basic); ok {
 		if escapes, exists := v.identEscapesHeap[varObj]; exists {

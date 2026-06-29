@@ -184,6 +184,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalAtomicFieldMethod() => CheckTarget("GlobalAtomicFieldMethod");
 
     [TestMethod]
+    public void CheckGlobalCapturedInClosure() => CheckTarget("GlobalCapturedInClosure");
+
+    [TestMethod]
     public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
 
     [TestMethod]
