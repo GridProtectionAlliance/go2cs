@@ -186,9 +186,12 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				result.WriteString(v.convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
 			} else {
 				if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
-					ident := getIdentifier(expr)
-
-					if ident != nil && v.identIsParameter(ident) {
+					// A deref-aliased pointer parameter returned WHOLE (`return p`) must yield its box
+					// `Ꮡp` (the value alias cannot bind the pointer result). Use a DIRECT ident check,
+					// not getIdentifier (which digs through a selector/index to the root): `return it.key`
+					// — a field of a pointer param — returns the FIELD value, so prefixing `Ꮡ` would
+					// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061).
+					if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
 						result.WriteString(AddressPrefix)
 						resultExpr = strings.TrimPrefix(resultExpr, "@")
 					}

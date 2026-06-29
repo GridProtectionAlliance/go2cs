@@ -411,6 +411,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]
+    public void CheckReturnPointerFieldOfParam() => CheckTarget("ReturnPointerFieldOfParam");
+
+    [TestMethod]
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
