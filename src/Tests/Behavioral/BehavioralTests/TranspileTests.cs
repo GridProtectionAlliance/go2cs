@@ -327,6 +327,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSortArrayType() => CheckTarget("SortArrayType");
 
     [TestMethod]
+    public void CheckSparseArrayNamedIntKey() => CheckTarget("SparseArrayNamedIntKey");
+
+    [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]

@@ -25,6 +25,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 	if callContext != nil {
 		keyValueContext.source = callContext.keyValueSource
 		keyValueContext.ident = callContext.keyValueIdent
+		keyValueContext.arrayBacked = callContext.keyValueArrayBacked
 		forceMultiLine = callContext.forceMultiLine
 		hasSpreadOperator = callContext.hasSpreadOperator
 		interfaceTypes = callContext.interfaceTypes

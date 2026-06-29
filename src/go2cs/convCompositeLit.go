@@ -176,6 +176,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	if callContext.keyValueSource == ArraySource && len(compositeLit.Elts) > 0 {
 		if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
 			callContext.keyValueSource = MapSource
+			// This is an indexed slice/array literal emitted as a SparseArray (int-indexed), NOT a
+			// real map — record it so a defined-integer-type key is cast to the int index type.
+			callContext.keyValueArrayBacked = true
 			maxKeyValue := 0
 
 			for _, elt := range compositeLit.Elts {

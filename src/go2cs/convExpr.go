@@ -20,19 +20,24 @@ type ExprContext interface {
 }
 
 type CallExprContext struct {
-	u8StringArgOK      map[int]bool
-	useGoStringArg     map[int]bool
-	argTypeIsPtr       map[int]bool
-	interfaceTypes     map[int]types.Type
-	hasSpreadOperator  bool
-	keyValueSource     KeyValueSource
-	keyValueIdent      *ast.Ident
-	forceMultiLine     bool
-	sourceIsRuneArray  bool
-	sourceIsTypeParams bool
-	callArgs           []string
-	replacementArgs    []string
-	castArgToType      map[int]string
+	u8StringArgOK     map[int]bool
+	useGoStringArg    map[int]bool
+	argTypeIsPtr      map[int]bool
+	interfaceTypes    map[int]types.Type
+	hasSpreadOperator bool
+	keyValueSource    KeyValueSource
+	keyValueIdent     *ast.Ident
+	// keyValueArrayBacked marks a keyed composite that is backed by a C# array/SparseArray (an
+	// indexed slice/array literal, `[]T{i: v}`), not a real map. Its indexer takes a Go `int`
+	// (nint), so a key whose Go type is a defined integer type must be cast to int (a `num:nint`
+	// key like runtime's `lockRank` cannot implicitly narrow to the indexer type otherwise).
+	keyValueArrayBacked bool
+	forceMultiLine      bool
+	sourceIsRuneArray   bool
+	sourceIsTypeParams  bool
+	callArgs            []string
+	replacementArgs     []string
+	castArgToType       map[int]string
 	// deferredDecls hoists a func-literal argument's capture declarations out of the call's
 	// argument list (where a `var mʗ1 = m;` statement is invalid C#) up to the enclosing
 	// statement. Threaded from the statement emitter (visitExprStmt/visitAssignStmt) through
@@ -42,20 +47,21 @@ type CallExprContext struct {
 
 func DefaultCallExprContext() *CallExprContext {
 	return &CallExprContext{
-		u8StringArgOK:      make(map[int]bool),
-		useGoStringArg:     make(map[int]bool),
-		argTypeIsPtr:       make(map[int]bool),
-		interfaceTypes:     make(map[int]types.Type),
-		hasSpreadOperator:  false,
-		keyValueSource:     StructSource,
-		keyValueIdent:      nil,
-		forceMultiLine:     false,
-		sourceIsRuneArray:  false,
-		sourceIsTypeParams: false,
-		callArgs:           nil,
-		replacementArgs:    nil,
-		castArgToType:      nil,
-		deferredDecls:      nil,
+		u8StringArgOK:       make(map[int]bool),
+		useGoStringArg:      make(map[int]bool),
+		argTypeIsPtr:        make(map[int]bool),
+		interfaceTypes:      make(map[int]types.Type),
+		hasSpreadOperator:   false,
+		keyValueSource:      StructSource,
+		keyValueIdent:       nil,
+		keyValueArrayBacked: false,
+		forceMultiLine:      false,
+		sourceIsRuneArray:   false,
+		sourceIsTypeParams:  false,
+		callArgs:            nil,
+		replacementArgs:     nil,
+		castArgToType:       nil,
+		deferredDecls:       nil,
 	}
 }
 
@@ -194,14 +200,16 @@ func (c IdentContext) getDefault() StmtContext {
 }
 
 type KeyValueContext struct {
-	source KeyValueSource
-	ident  *ast.Ident
+	source      KeyValueSource
+	ident       *ast.Ident
+	arrayBacked bool
 }
 
 func DefaultKeyValueContext() KeyValueContext {
 	return KeyValueContext{
-		source: StructSource,
-		ident:  nil,
+		source:      StructSource,
+		ident:       nil,
+		arrayBacked: false,
 	}
 }
 

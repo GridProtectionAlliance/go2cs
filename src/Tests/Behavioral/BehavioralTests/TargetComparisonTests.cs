@@ -329,6 +329,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSortArrayType() => CheckTarget("SortArrayType");
 
     [TestMethod]
+    public void CheckSparseArrayNamedIntKey() => CheckTarget("SparseArrayNamedIntKey");
+
+    [TestMethod]
     public void CheckSpreadOperator() => CheckTarget("SpreadOperator");
 
     [TestMethod]

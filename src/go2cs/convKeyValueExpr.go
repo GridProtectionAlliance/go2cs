@@ -42,12 +42,43 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		// Struct field initializer
 		return fmt.Sprintf("%s: %s", v.convExpr(keyValueExpr.Key, nil), valueExpr)
 	} else if context.source == MapSource {
-		// Map key/value initializer
-		return fmt.Sprintf("[%s] = %s", v.convExpr(keyValueExpr.Key, nil), valueExpr)
+		// Map key/value initializer — or, when array-backed, a SparseArray index initializer
+		return fmt.Sprintf("[%s] = %s", v.sparseArrayKey(keyValueExpr.Key, context), valueExpr)
 	} else if context.source == ArraySource {
 		// Sparse array initializer
-		return fmt.Sprintf("%s[%s] = %s", context.ident, v.convExpr(keyValueExpr.Key, nil), valueExpr)
+		return fmt.Sprintf("%s[%s] = %s", context.ident, v.sparseArrayKey(keyValueExpr.Key, context), valueExpr)
 	} else {
 		panic(fmt.Sprintf("Unexpected key/value source: %#v", context.source))
 	}
+}
+
+// sparseArrayKey converts a keyed-composite index expression. For an array-backed composite (a
+// `[]T{i: v}` slice/array literal emitted as a SparseArray, int-indexed) a key whose Go type is a
+// DEFINED integer type (e.g. runtime's `type lockRank int`, emitted `[GoType("num:nint")]`) is cast
+// to `int`: such a type does not implicitly narrow to the indexer's int parameter (CS1503). A plain
+// int/untyped-int key, or a real map key, is emitted unchanged.
+func (v *Visitor) sparseArrayKey(key ast.Expr, context KeyValueContext) string {
+	keyExpr := v.convExpr(key, nil)
+
+	if !context.arrayBacked {
+		return keyExpr
+	}
+
+	if keyType := v.info.TypeOf(key); keyType != nil {
+		if named, ok := keyType.(*types.Named); ok {
+			if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+				switch basic.Kind() {
+				case types.Int8, types.Uint8, types.Int16, types.Uint16, types.Int32:
+					// These widen implicitly to C# int (Int32), so the indexer accepts the
+					// defined type directly — no cast needed (keeps output minimal).
+				default:
+					// int/int64/uint/uint32/uint64/uintptr underlyings do NOT implicitly narrow
+					// to int32, so an explicit cast is required for the SparseArray int indexer.
+					return fmt.Sprintf("(int)%s", keyExpr)
+				}
+			}
+		}
+	}
+
+	return keyExpr
 }
