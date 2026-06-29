@@ -318,7 +318,14 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
     public ж<Telem> at<Telem>(nint index)
     {
-        if (m_val is not IArray<Telem> array)
+        // Read through `val`, not `m_val` — when this pointer is itself a field reference (from
+        // `of(...)`) or an array-element reference, the real array storage lives behind `val` and
+        // `m_val` is an empty default. Reading `m_val` would miss the array entirely (spurious "not
+        // an array" / null deref). This is the `Ꮡg.of(T.ᏑarrayField).at<E>(i)` form — the address of
+        // an element of an array FIELD of a boxed struct (a boxed global, a pointer param/local).
+        // `array<T>` is a readonly struct over a shared backing `T[]`, so the copy `val` yields still
+        // aliases the real elements (writes through the returned element pointer land).
+        if (val is not IArray<Telem> array)
             throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
         
         if (!array.IndexIsValid(index))

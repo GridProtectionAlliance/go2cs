@@ -326,6 +326,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerFieldArrayElementAddress() => CheckTarget("PointerFieldArrayElementAddress");
+
+    [TestMethod]
     public void CheckPointerFieldOfBoxedGlobal() => CheckTarget("PointerFieldOfBoxedGlobal");
 
     [TestMethod]

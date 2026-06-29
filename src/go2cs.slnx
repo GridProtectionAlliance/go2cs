@@ -149,6 +149,7 @@
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
     <Project Path="Tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="Tests/Behavioral/PointerCopyWalk/PointerCopyWalk.csproj" />
+    <Project Path="Tests/Behavioral/PointerFieldArrayElementAddress/PointerFieldArrayElementAddress.csproj" />
     <Project Path="Tests/Behavioral/PointerFieldOfBoxedGlobal/PointerFieldOfBoxedGlobal.csproj" />
     <Project Path="Tests/Behavioral/PointerParamCapturedInClosure/PointerParamCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />

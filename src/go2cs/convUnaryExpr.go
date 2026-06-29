@@ -336,13 +336,23 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					}
 
 					// When the array is a FIELD of a heap-boxed value — `&trace.stackTab[i]` where
-					// `trace` is an address-taken global — its address must go through the box-field
-					// accessor, not a naive `Ꮡ` prefix on `trace.stackTab` (which would bind to the box
-					// variable `Ꮡtrace`, whose value type has no `stackTab` → CS1061). Take the array's
-					// address recursively: `Ꮡtrace.of(…ᏑstackTab).at<T>(i)`.
-					if sel, ok := indexExpr.X.(*ast.SelectorExpr); ok && v.isHeapBoxedExpr(sel) {
-						arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
-						return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convArrayIndex(indexExpr.Index))
+					// `trace` is an address-taken global — or a field of a POINTER — `&mp.future[i]`
+					// where `mp` is a `*memRecord` — its address must go through the box-field accessor,
+					// not a naive `Ꮡ` prefix on `mp.future` (which binds to `Ꮡ(~mp)`, whose box value
+					// type has no `future` → CS1061). Take the array field's address recursively, which
+					// renders `mp.of(memRecord.Ꮡfuture)` / `Ꮡtrace.of(…ᏑstackTab)`, then index it with
+					// `.at<T>(i)`.
+					if sel, ok := indexExpr.X.(*ast.SelectorExpr); ok {
+						baseIsPointer := false
+
+						if baseType := v.info.TypeOf(sel.X); baseType != nil {
+							_, baseIsPointer = baseType.Underlying().(*types.Pointer)
+						}
+
+						if v.isHeapBoxedExpr(sel) || baseIsPointer {
+							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
+							return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convArrayIndex(indexExpr.Index))
+						}
 					}
 
 					return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convArrayIndex(indexExpr.Index))
