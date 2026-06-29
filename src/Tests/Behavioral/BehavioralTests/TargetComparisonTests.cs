@@ -200,6 +200,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlobalAtomicFieldMethod() => CheckTarget("GlobalAtomicFieldMethod");
 
     [TestMethod]
+    public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]

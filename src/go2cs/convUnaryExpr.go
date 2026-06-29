@@ -191,6 +191,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
 
 					if v.isHeapBoxedExpr(selectorExpr.X) {
+						// When the base is itself a nested field selector — `&work.sweepWaiters.lock`,
+						// a field of a field of a boxed global — recurse to build the base's address
+						// through `.of(...)` chaining: `Ꮡwork.of(workType.ᏑsweepWaiters).of(…Ꮡlock)`.
+						// Prefixing `Ꮡ` onto `work.sweepWaiters` instead would bind to the box variable
+						// `Ꮡwork` (whose value has no `sweepWaiters` member) → CS1061.
+						if _, baseIsSelector := selectorExpr.X.(*ast.SelectorExpr); baseIsSelector {
+							baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+							return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+						}
+
 						// The operand already has a heap-boxed pointer companion (e.g. an
 						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)".
 						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, structExpr, fieldRef)
