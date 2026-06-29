@@ -168,6 +168,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
+    public void CheckForInitShadowedUse() => CheckTarget("ForInitShadowedUse");
+
+    [TestMethod]
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]

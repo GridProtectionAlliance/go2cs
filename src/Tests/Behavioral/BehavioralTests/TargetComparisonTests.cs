@@ -170,6 +170,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckForInitMixedTypes() => CheckTarget("ForInitMixedTypes");
 
     [TestMethod]
+    public void CheckForInitShadowedUse() => CheckTarget("ForInitShadowedUse");
+
+    [TestMethod]
     public void CheckForMethodInitPost() => CheckTarget("ForMethodInitPost");
 
     [TestMethod]

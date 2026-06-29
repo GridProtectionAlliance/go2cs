@@ -1223,6 +1223,19 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			tracker.processing = false
 
+			// The for-loop init's RHS expressions reference variables from the ENCLOSING scope —
+			// e.g. a shadow-renamed local in `for i, x := 0, b.val(); …` (where an inner `b` was
+			// renamed `bΔ1`). processAssignStmt only processed the init's LHS (the newly declared
+			// loop vars), so traverse the RHS too, or those uses keep the raw name and resolve to the
+			// wrong/forward variable (CS0841 / wrong binding).
+			if node.Init != nil {
+				if init, ok := node.Init.(*ast.AssignStmt); ok {
+					for _, rhs := range init.Rhs {
+						visitNode(rhs)
+					}
+				}
+			}
+
 			if node.Cond != nil {
 				visitNode(node.Cond)
 			}
