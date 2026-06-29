@@ -357,6 +357,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
+
+    [TestMethod]
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]

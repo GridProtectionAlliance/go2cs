@@ -325,6 +325,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
+
+    [TestMethod]
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]

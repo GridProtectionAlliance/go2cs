@@ -461,6 +461,16 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				context.isPointer = true
 			}
 
+			// Reassigning a deref'd pointer PARAMETER to a new pointer value (`bits = addb(bits, n)`,
+			// a *byte memory walk in the runtime). Every named pointer param is deref-aliased to a
+			// value var (`ref var bits = ref Ꮡbits.val`), which cannot be repointed; emit the box
+			// `Ꮡbits` on the LHS so the pointer-reassignment path below repoints it and re-aliases the
+			// value var (`Ꮡbits = addb(Ꮡbits, n); bits = ref Ꮡbits.val;`). The RHS already references
+			// the box form. (The `&`-RHS case above is a subset; setting isPointer twice is harmless.)
+			if i < rhsLen && v.identIsParameter(ident) && v.isPointer(ident) && isPointer(v.getExprType(rhsExprs[i])) {
+				context.isPointer = true
+			}
+
 			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
 			leftExprs.Add(lhsExpr)
 

@@ -153,6 +153,7 @@
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />
     <Project Path="Tests/Behavioral/PartialRedeclaration/PartialRedeclaration.csproj" />
+    <Project Path="Tests/Behavioral/PointerParamWalk/PointerParamWalk.csproj" />
     <Project Path="Tests/Behavioral/PointerArrayRange/PointerArrayRange.csproj" />
     <Project Path="Tests/Behavioral/PointerCopyWalk/PointerCopyWalk.csproj" />
     <Project Path="Tests/Behavioral/PointerEmbeddingPromotion/PointerEmbeddingPromotion.csproj" />
