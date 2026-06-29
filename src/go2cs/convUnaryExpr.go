@@ -218,21 +218,27 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		}
 
 		// Address of a field of a pointer *variable* that is not the receiver: `&e.v` where `e` is
-		// a `*entry` identifier. `e` is already the heap box, so field-ref through it directly —
-		// `e.of(Type.ᏑField)` — without the Ꮡ(value) copy form. Restricted to a bare identifier so a
-		// complex pointer expression (e.g. `&(*(*T)(unsafe.Pointer(x))).u`) keeps its existing form;
-		// the receiver case is handled above and a value-struct field falls through to the struct
-		// branch below.
+		// a `*entry` identifier, OR `&o.h.wait` where `o.h` is a pointer-typed FIELD. The base is
+		// already a box `ж<T>`, so field-ref through it directly — `e.of(Type.ᏑField)` — without the
+		// `Ꮡ(value)` copy form (which boxes a COPY, so writes are lost — critical for an atomic field
+		// reached through a pointer chain, where the lost write silently corrupts behavior). Handled
+		// for a bare ident or a field selector; a more complex pointer expression (a deref of an
+		// `unsafe.Pointer` cast, an index, …) is neither, so it keeps the old form. The receiver case
+		// is handled above and a value-struct field falls through to the struct branch below.
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
-			if baseIdent, ok := selectorExpr.X.(*ast.Ident); ok {
-				if ptrType, ok := v.getType(baseIdent, false).(*types.Pointer); ok {
+			base := selectorExpr.X
+			_, baseIsIdent := base.(*ast.Ident)
+			_, baseIsSelector := base.(*ast.SelectorExpr)
+
+			if baseIsIdent || baseIsSelector {
+				if ptrType, ok := v.getType(base, false).(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
-						structExpr := v.convExpr(baseIdent, nil)
+						structExpr := v.convExpr(base, nil)
 
 						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.val`),
-						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* already
-						// holds the box directly, so it is used as-is.
-						if v.identIsParameter(baseIdent) {
+						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* or a
+						// pointer *field* already holds/yields the box directly, so it is used as-is.
+						if baseIdent, ok := base.(*ast.Ident); ok && v.identIsParameter(baseIdent) {
 							structExpr = AddressPrefix + structExpr
 						}
 

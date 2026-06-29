@@ -67,6 +67,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
+    public void CheckAtomicFieldThroughPointer() => CheckTarget("AtomicFieldThroughPointer");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]

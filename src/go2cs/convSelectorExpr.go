@@ -185,6 +185,50 @@ func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
 	return ok && v.isAddressedGlobal(ident)
 }
 
+// exprIsValueFieldOfPointer reports whether expr is a VALUE (non-pointer) struct field whose base is
+// a pointer-to-struct *field selector* (`o.h.wait`, `gp.m.mLockProfile`) — a pointer reached by
+// dereferencing another field. Such a pointer deref is an rvalue (`(~o.h)`), so the value field on it
+// is NOT addressable, and a pointer-receiver method called on it cannot bind ([GoRecv] ref / ж
+// overload, CS1510 / CS1929). Taking the field's address goes through the box-field accessor
+// (`o.h.of(holder.Ꮡwait)`, real storage), which the &-machinery renders. The base is intentionally
+// restricted to a SELECTOR: a bare ident base is the method's RECEIVER or a deref'd pointer PARAMETER
+// (both emitted as an addressable `ref`, so `f.c.Get()` binds directly — routing them through `&`
+// would emit `Ꮡf.of(…)`, but a value-ref receiver has no `Ꮡf` box → regression, the historical
+// ReceiverFieldMethodCall failure) or a pointer LOCAL (handled by exprIsPointerLocalField above). A
+// pointer FIELD is excluded (it is already a box — exprIsAlreadyBoxedPointerFieldOrElement).
+func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	if selection, ok := v.info.Selections[sel]; !ok || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	// The field itself must be a VALUE — a pointer field is already a box.
+	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+		return false
+	}
+
+	// The base must be a field SELECTOR (a pointer reached through another field) — not a bare
+	// ident (receiver / param / local, handled above) nor a complex expression (unsafe.Pointer cast
+	// deref, index), which keep their existing forms.
+	baseSel, ok := sel.X.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	if ptrType, ok := v.getType(baseSel, false).(*types.Pointer); ok {
+		_, ok := ptrType.Elem().Underlying().(*types.Struct)
+		return ok
+	}
+
+	return false
+}
+
 // exprIsAlreadyBoxedPointerFieldOrElement reports whether expr is a field selector or an indexed
 // element whose OWN type is a Go pointer — so its C# value is already a `ж<T>` box (e.g.
 // cpuProfile's `log *profBuf`, accessed as `cpuprof.log`). A direct-ж (capture-mode) or
@@ -426,6 +470,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// real field box `Ꮡglobal.of(T.Ꮡfield)`; the global is heap-boxed by collectAddressedGlobals'
 	// matching pointer-receiver-method-on-global-field handling.
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprFieldRootsAtAddressedGlobal(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A ж-only (pointer-receiver) method called on a VALUE field reached through a POINTER
+	// expression — `(~(~gp).m).mLockProfile.waitTime.Add(…)`, `sgp.g.selectDone.CompareAndSwap(…)`
+	// — where the base (`gp.m`, `sgp.g`) is a pointer field/chain and the field is a value (atomic)
+	// field. The `~`/`.` value access is an rvalue, so the [GoRecv] ref / ж overload cannot bind
+	// (CS1510 / CS1929). Route the receiver through the &-machinery, which field-refs the REAL
+	// storage as `gp.m.of(mType.ᏑmLockProfile).of(…ᏑwaitTime)` — never a `Ꮡ(value)` copy, which
+	// would silently lose the atomic write. (A pointer-LOCAL field is handled by the
+	// exprIsPointerLocalField branch above; this covers a pointer field/chain or pointer param.)
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsValueFieldOfPointer(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}

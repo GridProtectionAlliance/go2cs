@@ -63,6 +63,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
+    public void CheckAtomicFieldThroughPointer() => CheckTarget("AtomicFieldThroughPointer");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]

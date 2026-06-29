@@ -65,6 +65,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckArrayWideIndexAddress() => CheckTarget("ArrayWideIndexAddress");
 
     [TestMethod]
+    public void CheckAtomicFieldThroughPointer() => CheckTarget("AtomicFieldThroughPointer");
+
+    [TestMethod]
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
