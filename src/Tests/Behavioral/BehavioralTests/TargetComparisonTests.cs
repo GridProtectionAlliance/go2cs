@@ -59,6 +59,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
+    public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]

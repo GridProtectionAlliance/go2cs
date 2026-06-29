@@ -57,6 +57,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
+    public void CheckArrayOfCrossPackageType() => CheckTarget("ArrayOfCrossPackageType");
+
+    [TestMethod]
     public void CheckArrayPassByValue() => CheckTarget("ArrayPassByValue");
 
     [TestMethod]

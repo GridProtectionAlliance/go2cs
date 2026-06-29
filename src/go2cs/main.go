@@ -2765,18 +2765,17 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		return name
 	}
 
-	// An array/slice whose element is a lifted anonymous struct/interface: liftedTypeMap is keyed by
-	// the element type, so resolve it here (the whole-composite lookup above missed it). Without this
-	// the element renders as a raw, un-compilable `struct{…}`. Mirrors the same fix in getTypeName.
+	// An array/slice type is rendered structurally — the `[N]`/`[]` marker plus the recursively
+	// resolved element — rather than via t.String() below. t.String() yields a path-qualified string
+	// (`[2]internal/runtime/atomic.Pointer[…]`) whose cross-package slash-strip would also strip the
+	// leading `[N]` marker, dropping the array wrapper (`atomic.Pointer<…>` instead of
+	// `array<atomic.Pointer<…>>`). Recursing on the element also resolves a lifted anonymous
+	// struct/interface element (liftedTypeMap is keyed by the element) and a cross-package generic.
 	switch composite := t.(type) {
 	case *types.Array:
-		if name, ok := v.liftedTypeMap[composite.Elem()]; ok {
-			return fmt.Sprintf("[%d]%s", composite.Len(), name)
-		}
+		return fmt.Sprintf("[%d]%s", composite.Len(), v.getFullTypeName(composite.Elem(), isUnderlying))
 	case *types.Slice:
-		if name, ok := v.liftedTypeMap[composite.Elem()]; ok {
-			return "[]" + name
-		}
+		return "[]" + v.getFullTypeName(composite.Elem(), isUnderlying)
 	}
 
 	if named, ok := t.(*types.Named); ok {
