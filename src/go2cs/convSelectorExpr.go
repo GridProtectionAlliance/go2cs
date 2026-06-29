@@ -119,6 +119,54 @@ func (v *Visitor) exprIsPointerLocalField(expr ast.Expr) bool {
 	return true
 }
 
+// exprFieldRootsAtAddressedGlobal reports whether expr is a VALUE field selector (`global.field`,
+// possibly nested through further value fields) that roots at a package value global whose address
+// is taken (heap-boxed). Such a field's real address is `Ꮡglobal.of(T.Ꮡfield)`; a ж-only method
+// (e.g. an atomic `func (x *Uint32) Store`) called on it must route through that box, since a plain
+// value/ref of the field cannot bind the box receiver (CS1929). The walk bails at any pointer hop —
+// beyond a pointer the field already has a real address, and those forms (pointer locals/params,
+// the deref'd receiver) are handled by the boxed/local-field branches above and must not be
+// disturbed (routing a ref-accessible receiver field through `&` would need a `Ꮡrecv` box that a
+// non-direct-ж receiver lacks → CS0103). A pointer FIELD carries its own box and is excluded.
+func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	selection, ok := v.info.Selections[sel]
+
+	if !ok || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+		return false
+	}
+
+	base := sel.X
+
+	for {
+		if t := v.info.TypeOf(base); t != nil {
+			if _, isPtr := t.Underlying().(*types.Pointer); isPtr {
+				return false
+			}
+		}
+
+		if s, ok := base.(*ast.SelectorExpr); ok {
+			base = s.X
+			continue
+		}
+
+		break
+	}
+
+	ident, ok := base.(*ast.Ident)
+
+	return ok && v.isAddressedGlobal(ident)
+}
+
 // isPointerReceiverMethodCall reports whether the selector calls a method with a POINTER receiver
 // (`func (x *T) M()`), emitted as a `[GoRecv]` extension over `ref T` / a `ж<T>` overload. Such a
 // method needs an addressable receiver, so a value-returning `~` deref of a field receiver is an
@@ -315,6 +363,17 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// generated `ref`). Take the field's box address via the &-machinery so the call binds the `ж`
 	// overload: `c.of(coro.Ꮡgp).set(v)`.
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsPointerLocalField(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A ж-only (pointer-receiver) method called on a value field rooted at a package value global —
+	// `prof.signalLock.Store(…)`, `trace.seqlock.Load()`, `Δscavenge.gcPercentGoal.Store(…)` (the
+	// atomic-field-of-a-global pattern). The field's value `~`/`.` access is not a box, so the
+	// ж overload cannot bind (CS1929). Route the receiver through the &-machinery, which renders the
+	// real field box `Ꮡglobal.of(T.Ꮡfield)`; the global is heap-boxed by collectAddressedGlobals'
+	// matching pointer-receiver-method-on-global-field handling.
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprFieldRootsAtAddressedGlobal(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}

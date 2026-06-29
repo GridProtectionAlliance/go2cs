@@ -59,15 +59,39 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 				}
 
 			case *ast.CallExpr:
-				// A capture-mode method called on a package-level value global needs that
-				// global heap-boxed so the receiver box exists (and the call routes through it).
+				// A capture-mode / direct-ж method called on a package-level value global — directly
+				// (`var locked atomic.Int32; locked.CompareAndSwap(…)`) or on a value FIELD of one
+				// (`prof.signalLock.Store(…)`, `Δscavenge.gcPercentGoal.Store(…)`) — needs that global
+				// heap-boxed so the receiver box (`Ꮡprof` → `Ꮡprof.of(T.Ꮡfield)`) exists and the call
+				// routes through it. Such a method is emitted with only a `ж<T>` (box) receiver, so a
+				// plain value/ref of the field cannot bind it (CS1929).
 				selectorExpr, ok := node.Fun.(*ast.SelectorExpr)
 
 				if !ok {
 					return true
 				}
 
-				ident, ok := selectorExpr.X.(*ast.Ident)
+				// Peel value field selectors to the receiver root. Bail at a pointer hop: beyond a
+				// pointer the field address is already real (no global boxing needed), and that path
+				// is intentionally NOT handled here to avoid disturbing pointer-receiver/param fields.
+				recv := selectorExpr.X
+
+				for {
+					if t := info.TypeOf(recv); t != nil {
+						if _, isPtr := t.Underlying().(*types.Pointer); isPtr {
+							return true
+						}
+					}
+
+					if s, ok := recv.(*ast.SelectorExpr); ok {
+						recv = s.X
+						continue
+					}
+
+					break
+				}
+
+				ident, ok := recv.(*ast.Ident)
 
 				if !ok {
 					return true
@@ -84,10 +108,25 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 					return true
 				}
 
-				if funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && funcObj != nil {
-					if packageCaptureModeMethods != nil && packageCaptureModeMethods[funcObj.Origin()] {
-						packageAddressedGlobals[varObj] = true
+				funcObj, ok := info.ObjectOf(selectorExpr.Sel).(*types.Func)
+
+				if !ok || funcObj == nil {
+					return true
+				}
+
+				// Box for a capture-mode method (known same-package) OR any pointer-receiver method —
+				// the latter covers cross-package atomic methods (`func (x *Uint32) Store`), whose
+				// capture-mode status is not in this package's set but which are likewise ж-only.
+				shouldBox := packageCaptureModeMethods != nil && packageCaptureModeMethods[funcObj.Origin()]
+
+				if !shouldBox {
+					if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+						_, shouldBox = sig.Recv().Type().(*types.Pointer)
 					}
+				}
+
+				if shouldBox {
+					packageAddressedGlobals[varObj] = true
 				}
 			}
 

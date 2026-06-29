@@ -5,6 +5,15 @@ import (
 	"sync/atomic"
 )
 
+// A package-level VALUE global whose struct field is an atomic. Calling a pointer-receiver atomic
+// method on `gHolder.count` requires the global to be heap-boxed and the call routed through the
+// field box (`Ꮡ_gHolder.of(holder.Ꮡcount)`) — exercises the global-atomic-field path.
+type holder struct {
+	count atomic.Int64
+}
+
+var gHolder holder
+
 func main() {
 	// Scalar typed atomic value (receiver-capture / direct-box path).
 	var n atomic.Int32
@@ -28,4 +37,9 @@ func main() {
 	fmt.Println("ptr final:", *p.Load())                // 2
 	old := p.Swap(&a)
 	fmt.Println("ptr swap:", *old, *p.Load()) // 2 1
+
+	// Atomic field of a package-level value global (global-atomic-field box path).
+	gHolder.count.Store(42)
+	gHolder.count.Add(8)
+	fmt.Println("global field:", gHolder.count.Load()) // 50
 }

@@ -6,6 +6,13 @@ using sync;
 
 partial class main_package {
 
+[GoType] partial struct holder {
+    internal sync.atomic_package.Int64 count;
+}
+
+internal static ж<holder> ᏑgHolder = new(default(holder));
+internal static ref holder gHolder => ref ᏑgHolder.val;
+
 internal static void Main() {
     ref var n = ref heap(new sync.atomic_package.Int32(), out var Ꮡn);
     Ꮡn.Store(10);
@@ -28,6 +35,9 @@ internal static void Main() {
     fmt.Println("ptr final:", Ꮡp.Load().val);
     var old = Ꮡp.Swap(Ꮡa);
     fmt.Println("ptr swap:", old.val, Ꮡp.Load().val);
+    ᏑgHolder.of(holder.Ꮡcount).Store(42);
+    ᏑgHolder.of(holder.Ꮡcount).Add(8);
+    fmt.Println("global field:", ᏑgHolder.of(holder.Ꮡcount).Load());
 }
 
 } // end main_package
