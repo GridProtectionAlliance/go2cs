@@ -260,6 +260,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
+
+    [TestMethod]
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]

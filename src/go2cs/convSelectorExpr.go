@@ -79,6 +79,19 @@ func structFieldReachable(structType *types.Struct, name string) bool {
 }
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
+	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
+	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
+	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property
+	// (CS0131). Propagate the assignment context down to the base so inner pointer-field selectors
+	// emit `o.val.stack` instead of `(~o).stack`. Only set when assigning, so reads are unchanged.
+	var xContexts []ExprContext
+
+	if context.isAssignment {
+		assignContext := DefaultLambdaContext()
+		assignContext.isAssignment = true
+		xContexts = []ExprContext{assignContext}
+	}
+
 	// Check if this is a method value being used in an assignment
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
 		// Check if selector expression needs to be converted to a lambda function for assignment
@@ -174,7 +187,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								// If the field belongs to the struct, automatically dereference the pointer
 								if context.isAssignment {
 									// Left-hand side of assignment cannot use pointer dereference operator
-									return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+									return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								} else {
 									return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								}
@@ -207,7 +220,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
-	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 }
 
 func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContext {

@@ -226,6 +226,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
+
+    [TestMethod]
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]

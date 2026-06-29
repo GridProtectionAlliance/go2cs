@@ -258,6 +258,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
+
+    [TestMethod]
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]

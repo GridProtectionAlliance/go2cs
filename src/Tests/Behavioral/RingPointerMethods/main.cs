@@ -75,7 +75,7 @@ internal static ж<Ring> makeRing(nint count) {
         var e = Ꮡ(new Ring(Value: i));
         e.val.prev = p;
         e.val.next = p.val.next;
-        (~p).next.val.prev = e;
+        p.val.next.val.prev = e;
         p.val.next = e;
         p = e;
     }
