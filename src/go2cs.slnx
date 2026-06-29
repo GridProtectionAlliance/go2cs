@@ -137,6 +137,7 @@
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="Tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
+    <Project Path="Tests/Behavioral/NarrowArithmeticArg/NarrowArithmeticArg.csproj" />
     <Project Path="Tests/Behavioral/NestedFieldPointerAssign/NestedFieldPointerAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />

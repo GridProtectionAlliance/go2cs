@@ -9,6 +9,18 @@ import (
 	"strings"
 )
 
+// isNarrowIntegerKind reports whether the basic kind is a sub-`int`-width integer (int8/uint8/
+// int16/uint16). C# promotes arithmetic on these to `int`, whereas Go evaluates them at their own
+// width (with overflow wrapping), so a narrow-typed result needs an explicit cast back.
+func isNarrowIntegerKind(kind types.BasicKind) bool {
+	switch kind {
+	case types.Int8, types.Uint8, types.Int16, types.Uint16:
+		return true
+	}
+
+	return false
+}
+
 func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) string {
 	// Immediately-invoked, no-argument function literal (IIFE): `func(){ … }()`. A bare C#
 	// lambda cannot be invoked directly (CS0149), and the literal may use defer/recover that
@@ -224,6 +236,28 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					for j := i; j <= lastArg; j++ {
 						if v.isStringType(callExpr.Args[j]) {
 							callExprContext.useGoStringArg[j] = true
+						}
+					}
+				}
+			}
+
+			// A narrow-integer parameter (int8/uint8/int16/uint16) receiving a binary/unary arithmetic
+			// argument: Go evaluates `a+b`/`^a` at the operand's narrow width (with overflow wrapping),
+			// but C# promotes sub-int integer arithmetic to `int`, so the result needs an explicit cast
+			// back to the parameter type — both to compile (the implicit int→narrow conversion is
+			// rejected, CS1503) and to preserve Go's wrap semantics. Gated on the argument's Go type
+			// already matching the parameter (so Go accepts it without a conversion) and on it being an
+			// arithmetic expression (a bare ident/selector is already the narrow type).
+			if paramHasArg {
+				if paramBasic, ok := paramType.Underlying().(*types.Basic); ok && isNarrowIntegerKind(paramBasic.Kind()) {
+					switch callExpr.Args[i].(type) {
+					case *ast.BinaryExpr, *ast.UnaryExpr:
+						if argType := v.getType(callExpr.Args[i], false); argType != nil && types.Identical(argType, paramType) {
+							if callExprContext.castArgToType == nil {
+								callExprContext.castArgToType = make(map[int]string)
+							}
+
+							callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(paramType, false))
 						}
 					}
 				}

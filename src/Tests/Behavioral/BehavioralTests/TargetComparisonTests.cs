@@ -290,6 +290,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]

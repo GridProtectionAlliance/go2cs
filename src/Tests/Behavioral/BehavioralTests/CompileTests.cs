@@ -288,6 +288,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]
