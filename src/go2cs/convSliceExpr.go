@@ -39,6 +39,19 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		return fmt.Sprintf("new Span<%s>((%s*)%s, %s)", ptrType, csPtrType, string(identRunes[prefixLength:]), v.getRangeIndexer(sliceExpr.High))
 	}
 
+	// A slice of a POINTER-TO-ARRAY (`p[lo:hi:max]`, p of type `*[N]T`) auto-derefs in Go. The
+	// box `ж<array<T>>` has no slice/range members (its underlying `array<T>` does), so operate on
+	// the dereferenced array — `(~p).slice(…)` / `(~p)[..]` — instead of `p.slice(…)` (CS1929). The
+	// `(*[N]T)(ptr)` pointer-CAST form is handled by the Span path above (an explicit cast, not a
+	// pointer-to-array value), so it is unaffected.
+	if xType := v.getType(sliceExpr.X, false); xType != nil {
+		if ptr, ok := xType.Underlying().(*types.Pointer); ok {
+			if _, isArr := ptr.Elem().Underlying().(*types.Array); isArr {
+				ident = "(" + PointerDerefOp + ident + ")"
+			}
+		}
+	}
+
 	// sliceExpr[:] => sliceExpr[..]
 	if sliceExpr.Low == nil && sliceExpr.High == nil && !sliceExpr.Slice3 {
 		return ident + "[..]"
