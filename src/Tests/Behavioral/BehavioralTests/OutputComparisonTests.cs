@@ -400,6 +400,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
+    public void CheckUntypedNestedSliceComposite() => CheckTarget("UntypedNestedSliceComposite");
+
+    [TestMethod]
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]

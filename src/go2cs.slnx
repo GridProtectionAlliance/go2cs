@@ -183,6 +183,7 @@
     <Project Path="Tests/Behavioral/TypeSwitch/TypeSwitch.csproj" />
     <Project Path="Tests/Behavioral/TypeSwitchGuardShadow/TypeSwitchGuardShadow.csproj" />
     <Project Path="Tests/Behavioral/UnexportedEmbeddedMarker/UnexportedEmbeddedMarker.csproj" />
+    <Project Path="Tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
     <Project Path="Tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />

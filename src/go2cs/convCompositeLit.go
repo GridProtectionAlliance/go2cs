@@ -12,6 +12,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	result := &strings.Builder{}
 
 	if compositeLit.Type == nil {
+		// An untyped (type-inferred) composite literal — e.g. the inner `{lockRankSysmon, …}` of a
+		// `[][]lockRank{ key: {…} }`. The target-typed `new(…)` ctor form below is correct for a STRUCT
+		// element type (the struct ctor takes the field values), but a SLICE/ARRAY element type has no
+		// element-list ctor — `new slice<lockRank>(a, b, …)` is CS1729. Emit the element-array
+		// projection (`new lockRank[]{…}.slice()` / `.array()`) for those, matching the typed path.
+		if inferred := v.info.TypeOf(compositeLit); inferred != nil {
+			switch u := inferred.Underlying().(type) {
+			case *types.Slice:
+				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+			case *types.Array:
+				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+			}
+		}
+
 		rparenSuffix := ""
 
 		if len(compositeLit.Elts) > 0 && v.isLineFeedBetween(compositeLit.Elts[len(compositeLit.Elts)-1].End(), compositeLit.Rbrace) {
