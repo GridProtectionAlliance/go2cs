@@ -90,7 +90,7 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 
 		boxName := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(baseIdent)), "@")
 		typeName := v.dynamicStructTypeName(operand.X)
-		fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(operand.Sel, nil)))
+		fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
 		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
 	}
@@ -151,7 +151,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					}
 
 					if _, ok := recvType.(*types.Named); ok {
-						fieldRef := fmt.Sprintf("%s.%s%s", convertToCSTypeName(v.getTypeName(recvType, false)), AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+						fieldRef := fmt.Sprintf("%s.%s%s", convertToCSTypeName(v.getTypeName(recvType, false)), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 						// Direct-ж: the receiver box is the parameter `Ꮡx` (see
 						// packageDirectBoxReceiverMethods), so field-ref through it directly. No
@@ -183,7 +183,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 
 						typeName := convertToCSTypeName(v.getTypeName(ptrType.Elem(), false))
-						fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+						fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 						return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
 					}
 				}
@@ -209,7 +209,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// another file of the package (e.g. `&cpu.X86.HasADX`).
 					structExpr := v.convExpr(selectorExpr.X, nil)
 					typeName := v.dynamicStructTypeName(selectorExpr.X)
-					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
+					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 					if v.isHeapBoxedExpr(selectorExpr.X) {
 						// When the base is itself a nested field selector or an array/slice index —

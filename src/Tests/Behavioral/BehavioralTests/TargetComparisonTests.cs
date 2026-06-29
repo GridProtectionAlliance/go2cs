@@ -95,6 +95,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
+
+    [TestMethod]
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]

@@ -93,6 +93,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
+
+    [TestMethod]
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]

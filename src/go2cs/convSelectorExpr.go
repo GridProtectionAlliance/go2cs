@@ -45,6 +45,24 @@ func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
 	return getSanitizedIdentifier(sel.Name) == getSanitizedIdentifier(obj.Name())
 }
 
+// structFieldBoxName returns the member name for a struct field's box accessor (`Type.Ꮡ<member>`),
+// matching the field's DECLARED C# name (visitStructType uses getCoreSanitizedIdentifier plus the
+// type-colliding rename) and the TypeGenerator's `Ꮡ<member>` static. It deliberately does NOT apply
+// the package-level nameCollisions rename (the type-vs-method `Δ` prefix) that convExpr/convIdent
+// would: a struct field is struct-scoped, so a field named like a package type/method (`trace`,
+// `stack`, `p`) is declared unrenamed (`trace`) — emitting `ᏑΔtrace` here would not match the
+// generated `Ꮡtrace` static (CS0117). The leading '@' keyword-escape is stripped (`Ꮡ@base` is
+// invalid — '@' only leads; the generator strips it the same way via GetUnsanitizedIdentifier).
+func (v *Visitor) structFieldBoxName(sel *ast.Ident, structExpr ast.Expr) string {
+	name := getCoreSanitizedIdentifier(sel.Name)
+
+	if v.fieldCollidesWithType(sel, structExpr) {
+		name = typeCollidingFieldName(name)
+	}
+
+	return removeSanitizationMarker(name)
+}
+
 // structFieldReachable reports whether a field named `name` is reachable on the struct — either
 // as a direct field or promoted through an embedded (anonymous) field, including an embedded
 // pointer. The deref decision for a pointer's field selector must consider promoted fields too:
