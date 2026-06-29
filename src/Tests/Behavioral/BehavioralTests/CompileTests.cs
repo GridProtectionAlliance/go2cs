@@ -366,6 +366,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]
+    public void CheckRangeVarHeapBox() => CheckTarget("RangeVarHeapBox");
+
+    [TestMethod]
     public void CheckReceiverCapturedInClosure() => CheckTarget("ReceiverCapturedInClosure");
 
     [TestMethod]

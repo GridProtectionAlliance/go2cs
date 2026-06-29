@@ -111,6 +111,15 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 		valExpr = "_"
 	}
 
+	// A heap-boxed range variable (its address is taken, `for i := range s { p := &i }`) in a
+	// slice/array/map range must be boxed PER ITERATION (Go 1.22 per-iteration variable semantics:
+	// a stored `&i` must point to a DISTINCT box each pass). Its heap decl is therefore deferred
+	// into the loop body and the foreach iterates a temp var that is copied into the fresh box —
+	// rather than declaring the box once before the loop (which would also clash with the foreach's
+	// own re-declaration of the same name → CS0136). Captured here, emitted in the DEFINE branch.
+	var keyHeapDecl, valHeapDecl string
+	deferRangeVarBox := !isStr && !isChan && !isInt && yieldFunc <= -1
+
 	// If defining new variables, perform escape analysis on the key and value expressions
 	if !assignVars {
 		var wroteHeapTypeDecl bool
@@ -121,9 +130,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 				if len(heapTypeDecl) > 0 {
-					v.writeOutput(heapTypeDecl)
-					v.targetFile.WriteString(v.newline)
-					wroteHeapTypeDecl = true
+					if deferRangeVarBox {
+						keyHeapDecl = heapTypeDecl
+					} else {
+						v.writeOutput(heapTypeDecl)
+						v.targetFile.WriteString(v.newline)
+						wroteHeapTypeDecl = true
+					}
 				} else if !v.options.preferVarDecl {
 					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
 				}
@@ -136,9 +149,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 				heapTypeDecl := v.convertToHeapTypeDecl(ident, true)
 
 				if len(heapTypeDecl) > 0 {
-					v.writeOutput(heapTypeDecl)
-					v.targetFile.WriteString(v.newline)
-					wroteHeapTypeDecl = true
+					if deferRangeVarBox {
+						valHeapDecl = heapTypeDecl
+					} else {
+						v.writeOutput(heapTypeDecl)
+						v.targetFile.WriteString(v.newline)
+						wroteHeapTypeDecl = true
+					}
 				} else if !v.options.preferVarDecl {
 					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
 				}
@@ -267,6 +284,40 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
+
+			if innerPrefix != "" {
+				context.innerPrefix = innerPrefix + v.newline
+			}
+		} else if keyHeapDecl != "" || valHeapDecl != "" {
+			// A heap-boxed range var: iterate a temp and, per iteration, allocate a fresh box and
+			// copy the temp into it (Go 1.22 per-iteration semantics — a stored `&i` must point to a
+			// distinct box each pass). A non-heap-boxed companion var declares directly as before.
+			var innerPrefix, kExpr, vExpr string
+			bodyIndent := v.indent(v.indentLevel + 1)
+
+			if keyExpr == "_" {
+				kExpr = "_"
+			} else if keyHeapDecl != "" {
+				name := "i"
+				if isMap {
+					name = "k"
+				}
+				kExpr = v.getTempVarName(name)
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, keyHeapDecl, v.newline+bodyIndent, keyExpr, kExpr)
+			} else {
+				kExpr = keyExpr
+			}
+
+			if valExpr == "_" || valExpr == "" {
+				vExpr = "_"
+			} else if valHeapDecl != "" {
+				vExpr = v.getTempVarName("v")
+				innerPrefix += fmt.Sprintf("%s%s%s%s%s = %s;", v.newline, bodyIndent, valHeapDecl, v.newline+bodyIndent, valExpr, vExpr)
+			} else {
+				vExpr = valExpr
+			}
+
+			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, kExpr, valType, vExpr, rangeExpr, ptrDeref)
 
 			if innerPrefix != "" {
 				context.innerPrefix = innerPrefix + v.newline

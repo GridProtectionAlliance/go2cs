@@ -331,6 +331,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]
+    public void CheckRangeVarHeapBox() => CheckTarget("RangeVarHeapBox");
+
+    [TestMethod]
     public void CheckReceiverCapturedInClosure() => CheckTarget("ReceiverCapturedInClosure");
 
     [TestMethod]

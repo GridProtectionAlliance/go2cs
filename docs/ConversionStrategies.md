@@ -654,6 +654,25 @@ var p = Ꮡa.at<@string>(0);                                 // &a[0]
 var pField = Ꮡsettings.of(settingsᴛ1.ᏑRetries);            // &settings.Retries
 ```
 
+**A heap-boxed *range variable*** needs the box allocated **per iteration**. When a `for i := range s` (or `for _, f := range s`) variable has its address taken, it escapes — but the foreach already declares that name, so a single `ref var i = ref heap(…)` before the loop would clash (CS0136). The converter iterates a *temp* and, inside the body, allocates a fresh box each pass and copies the temp into it:
+
+```go
+for i := range s {
+    p := &i      // i escapes
+    use(p)
+}
+```
+```csharp
+foreach (var (iᴛ1, _) in s) {
+    ref var i = ref heap(new nint(), out var Ꮡi);   // a FRESH box each iteration
+    i = iᴛ1;
+    var p = Ꮡi;
+    use(p);
+}
+```
+
+The per-iteration box is required for Go 1.22 loop-variable semantics: each iteration's variable is distinct, so a stored `&i` must point to a different box each pass (`for i := range s { ptrs = append(ptrs, &i) }` yields `0 1 2`, not `2 2 2`). A non-escaping companion variable still declares directly in the foreach. (Guarded by the `RangeVarHeapBox` behavioral test — both a within-iteration `&i` and the stored-pointer distinctness case; runtime exercises it in `for i := range stackpool` and `for _, f := range s.Fields`.)
+
 The `at<T>(index)` element-address accessor takes a `nint` index. Go permits **any** integer type as an array/slice index and converts it to `int` for the access, but C# has no implicit `nuint`/`uint`/`ulong`→`nint` conversion, so a non-`int` index is narrowed explicitly to match Go's index-to-int conversion (CS1503 otherwise). An `int` index, or an untyped int constant (which renders as a plain int literal), is emitted as-is:
 
 ```csharp
