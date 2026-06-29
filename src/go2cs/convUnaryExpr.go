@@ -79,15 +79,23 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 	return v.identEscapesHeap[obj] && !isInherentlyHeapAllocatedType(v.getIdentType(ident))
 }
 
-// lambdaBoxBase returns the base name (without the `Ꮡ` prefix) of a lambda-captured box-ref var's
-// box. A deref-aliased pointer param/receiver's box keeps the RAW Go name (`Ꮡp`), so a
-// shadow-renamed one must reference it by the raw name — `Ꮡ`+the renamed value alias (`ᏑΔp`) is not
-// in scope (CS0103). Returns the raw name only when the shadow-aware form differs (a rename), so a
-// non-renamed / `@`-keyword-escaped var keeps its existing (already-raw) box name — no churn.
-func (v *Visitor) lambdaBoxBase(ident *ast.Ident) string {
+// boxBaseName returns the base name (without the `Ꮡ` prefix) of an address-taken var's heap box.
+// The box name tracks how the value alias was renamed, and the two rename kinds use DIFFERENT box
+// names:
+//   - A type-COLLISION rename prepends the marker (`p` colliding with type `p` → `Δp`), but its box
+//     keeps the RAW Go name — `ref var Δp = ref heap(new T(), out var Ꮡp)`. So a `&p` reference must
+//     use the raw `Ꮡp`; `Ꮡ`+the alias (`ᏑΔp`) is not in scope (CS0103).
+//   - A nested-scope SHADOW rename appends the marker + a counter (`i` → `iΔ1`, `iΔ2`), and its box
+//     keeps the SHADOW name — `ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`. So `&i` correctly uses
+//     `ᏑiΔ1` (the alias), and must be left unchanged.
+//
+// Only the collision form (the alias is exactly `Δ`+rawname) is rewritten to the raw name; every
+// other case (no rename, shadow rename, `@`-keyword escape) keeps the existing alias-derived box
+// name — no churn.
+func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 	base := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(ident)), "@")
 
-	if base != ident.Name {
+	if base == ShadowVarMarker+ident.Name {
 		return ident.Name
 	}
 
@@ -108,7 +116,7 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 	case *ast.Ident:
 		// &m → Ꮡm
 		if v.isLambdaBoxRefVar(v.info.ObjectOf(operand)) {
-			return AddressPrefix + v.lambdaBoxBase(operand), true
+			return AddressPrefix + v.boxBaseName(operand), true
 		}
 	case *ast.SelectorExpr:
 		// &m.field → Ꮡm.of(Type.ᏑField). The box `Ꮡm` is the `ж<T>` to field-ref through, whether
@@ -135,7 +143,7 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 			return "", false
 		}
 
-		boxName := v.lambdaBoxBase(baseIdent)
+		boxName := v.boxBaseName(baseIdent)
 		fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
 		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
@@ -392,8 +400,11 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		}
 
 		if escapesHeap && !isInherentlyHeapAllocatedType(v.getIdentType(ident)) {
-			// If the variables escapes to heap, existing pointer reference should exist
-			return AddressPrefix + strings.TrimPrefix(v.convExpr(unaryExpr.X, nil), "@")
+			// If the variable escapes to heap, its `Ꮡname` box already exists. The box keeps the
+			// RAW Go name (`ref var Δp = ref heap(new T(), out var Ꮡp)`), so reference it by the raw
+			// name — `convExpr` yields the shadow-renamed value alias (`Δp`), giving `ᏑΔp` which is
+			// not in scope (CS0103). boxBaseName is a no-op when nothing is shadow-renamed (no churn).
+			return AddressPrefix + v.boxBaseName(ident)
 		}
 
 		// Otherwise, call the address of function to get a pointer reference

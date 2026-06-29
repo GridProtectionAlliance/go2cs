@@ -43,9 +43,13 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		identType := v.getIdentType(ident)
 
 		// Check if the identifier is not already a pointer type or is a parameter or escapes heap,
-		// in these cases, we need to add the address operator to reference the pointer variable
+		// in these cases, we need to add the address operator to reference the pointer variable.
+		// The box keeps the RAW Go name (`Ꮡp`), even when the value alias is collision-renamed
+		// (`Δp`) — an escaping local is `ref var Δp = ref heap(new T(), out var Ꮡp)`, a deref'd
+		// pointer param `ref var Δp = ref Ꮡp.val` — so reference it by the raw name, not `ᏑΔp`
+		// (not in scope → CS0103). boxBaseName is a no-op when nothing is shadow-renamed (no churn).
 		if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
-			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@")
+			return AddressPrefix + v.boxBaseName(ident)
 		}
 	}
 
@@ -80,7 +84,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// deref the box directly (`Ꮡm.val`). The box `Ꮡm` is a capturable reference. Address uses
 	// (`&m`, `&m.field`) are rendered from the box name in convUnaryExpr, bypassing this rewrite.
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) {
-		return AddressPrefix + v.lambdaBoxBase(ident) + ".val"
+		return AddressPrefix + v.boxBaseName(ident) + ".val"
 	}
 
 	return getSanitizedIdentifier(v.getIdentName(ident))

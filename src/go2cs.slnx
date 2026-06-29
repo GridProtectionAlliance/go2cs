@@ -74,6 +74,7 @@
     <Project Path="Tests/Behavioral/ClosureDefer/ClosureDefer.csproj" />
     <Project Path="Tests/Behavioral/ClosureParamShadow/ClosureParamShadow.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
+    <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />

@@ -94,6 +94,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
+
+    [TestMethod]
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]

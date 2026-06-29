@@ -99,6 +99,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
+
+    [TestMethod]
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]

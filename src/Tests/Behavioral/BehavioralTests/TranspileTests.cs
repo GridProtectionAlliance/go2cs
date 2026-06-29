@@ -99,6 +99,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
+    public void CheckCollisionRenamedLocalBox() => CheckTarget("CollisionRenamedLocalBox");
+
+    [TestMethod]
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
