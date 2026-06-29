@@ -31,7 +31,12 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		}
 
 		identRunes := []rune(ident)
-		return fmt.Sprintf("new Span<%s>((%s*)%s, %s)", ptrType, csPtrType, string(identRunes[prefixLength:]), v.convExpr(sliceExpr.High, nil))
+
+		// The `Span<T>(T* ptr, int length)` constructor takes a C# `int` length; a Go `int`/`uint`
+		// bound is `nint`/`nuint`, which has no implicit conversion to `int` (CS1503). getRangeIndexer
+		// narrows it to `int` (through the underlying for a named numeric), and leaves an int literal
+		// as-is.
+		return fmt.Sprintf("new Span<%s>((%s*)%s, %s)", ptrType, csPtrType, string(identRunes[prefixLength:]), v.getRangeIndexer(sliceExpr.High))
 	}
 
 	// sliceExpr[:] => sliceExpr[..]
