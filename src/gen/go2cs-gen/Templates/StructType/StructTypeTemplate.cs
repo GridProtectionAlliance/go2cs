@@ -308,7 +308,12 @@ internal class StructTypeTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                string fieldScope = GetScope(GetSimpleName(typeName));
+                // The box-field accessor's accessibility must match the FIELD's, not the field type's:
+                // an EXPORTED field (`Fun`) is addressable cross-package, so `ᏑFun` must be `public`
+                // even when its type's simple name is lowercase (`array<nuint>` → GetScope would give
+                // `internal`, making `other.of(ITab.ᏑFun)` unreachable, CS0117). Derive the scope from
+                // the member name (its exportedness), as the field declaration itself does.
+                string fieldScope = GetScope(GetSimpleName(memberName));
                 result.Append($"{fieldScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{memberName};");
             }
 
