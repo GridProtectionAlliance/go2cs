@@ -88,6 +88,7 @@
     <Project Path="Tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
     <Project Path="Tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
+    <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />

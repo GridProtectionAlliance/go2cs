@@ -1,0 +1,21 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+internal static void Main() {
+    var s = new nint[]{10, 20, 30, 40}.slice();
+    uint32 i = 2;
+    var p = Ꮡ(s, (int)(i));
+    p.val = 99;
+    uintptr j = 0;
+    var q = Ꮡ(s, (int)(j));
+    q.val = 7;
+    nuint k = 3;
+    var r = Ꮡ(s, (int)(k));
+    r.val = 55;
+    fmt.Println(s[0], s[1], s[2], s[3]);
+}
+
+} // end main_package

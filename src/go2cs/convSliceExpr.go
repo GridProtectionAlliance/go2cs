@@ -87,6 +87,25 @@ func (v *Visitor) getRangeIndexer(expr ast.Expr) string {
 // basic), a direct `(int)(x)` is CS0030 — the generated struct only converts to its OWN underlying
 // basic — so it casts through the underlying first: `(int)(nuint)(x)`. A plain basic operand keeps
 // the bare `(int)(x)` form (no churn).
+// castElemAddrIndex converts an element-address index (`&arr[i]` → `Ꮡ(arr, i)`), casting it to
+// `int` only when its type does not already bind the golib `Ꮡ(IArray<T>, int)` / `(…, nint)`
+// overloads. Go `int` (→ C# nint) and the small integer types (int8/16/32, uint8/16, which
+// implicitly widen to `int`) bind directly and are left uncast to avoid churn; an unsigned
+// 32-bit-or-wider or 64-bit index (uint/uint32/uint64/uintptr/int64) does not implicitly convert
+// to `int`/`nint` (CS1503) and is cast (through its underlying for a named numeric).
+func (v *Visitor) castElemAddrIndex(expr ast.Expr) string {
+	converted := v.convExpr(expr, nil)
+
+	if basic, ok := v.getType(expr, false).Underlying().(*types.Basic); ok {
+		switch basic.Kind() {
+		case types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
+			return v.intCastOperand(expr, converted)
+		}
+	}
+
+	return converted
+}
+
 func (v *Visitor) intCastOperand(expr ast.Expr, converted string) string {
 	if named, ok := v.getType(expr, false).(*types.Named); ok {
 		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {

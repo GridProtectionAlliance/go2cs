@@ -141,6 +141,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
+
+    [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
 
     [TestMethod]
