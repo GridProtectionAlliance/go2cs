@@ -2705,11 +2705,13 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		}
 	}
 
-	// An array/slice whose element is an anonymous struct/interface that was lifted to a named type
-	// renders here as a raw `struct{…}`/`interface{…}` (liftedTypeMap is keyed by the element type,
-	// not the array/slice, so the whole-type lookup above missed it). Resolve the element to its
-	// lifted C# name so e.g. `[61]struct{…}` emits `array<BySizeᴛ1>`, not the un-compilable literal.
-	if strings.HasPrefix(typeName, "struct{") || strings.HasPrefix(typeName, "interface{") {
+	// An array/slice whose ELEMENT was lifted to a named type — an anonymous struct/interface
+	// (`[61]struct{…}` → `array<BySizeᴛ1>`) OR a function-LOCAL named type (`[]untracedG`, where
+	// `untracedG` is `type untracedG struct{…}` declared inside a func and lifted to
+	// `<func>_untracedG`). liftedTypeMap is keyed by the element type, so the whole-array lookup
+	// above missed it; the element keeps its raw/short name and fails to resolve (a raw `struct{…}`
+	// literal, or a CS0246 on the short local-type name). Resolve the element through liftedTypeMap.
+	if prefix != "" {
 		var elem types.Type
 
 		switch composite := t.(type) {

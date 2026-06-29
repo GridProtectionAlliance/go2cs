@@ -285,6 +285,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
 
     [TestMethod]
+    public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
