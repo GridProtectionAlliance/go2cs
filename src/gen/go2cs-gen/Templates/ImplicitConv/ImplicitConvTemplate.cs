@@ -39,7 +39,19 @@ internal class ImplicitConvTemplate : TemplateBase
             int gtIndex = LHTypeName.LastIndexOf('>');
 
             if (gtIndex > ltIndex)
-                return $"{AddressPrefix}(new {LHTypeName[(ltIndex + 1)..gtIndex]}({ParamList}))";
+            {
+                string innerType = LHTypeName[(ltIndex + 1)..gtIndex];
+
+                // Self-boxing (`T -> ж<T>`): the source value IS the boxed element type, so box it
+                // directly. Reconstructing it field-by-field would wrongly deref pointer fields
+                // (`src.f?.val`) whose target ctor parameter is itself a `ж<…>` pointer field — the
+                // value cannot bind the pointer parameter (CS1503). `Ꮡ(src)` boxes a copy of the
+                // whole struct, identical in effect but without the per-field deref.
+                if (innerType == RHTypeName)
+                    return $"{AddressPrefix}(src)";
+
+                return $"{AddressPrefix}(new {innerType}({ParamList}))";
+            }
 
             throw new FormatException($"Unexpected target type name \"{LHTypeName}\"");
         }
