@@ -1376,6 +1376,15 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// A deref'd pointer parameter or pointer receiver is a `ref var p = ref Ꮡp.val` alias, which a C#
+	// closure cannot capture (CS8175). Inside a lambda, reference it through its box `Ꮡp` instead —
+	// value uses become `Ꮡp.val`, address uses `Ꮡp` (see convIdent / convUnaryExpr). The box is a
+	// plain reference-typed parameter, captured by reference, matching Go's capture of the pointer.
+	if v.varIsDerefdPointerParam(varObj) {
+		v.lambdaCapture.boxRefVars[varObj] = true
+		return
+	}
+
 	// Check if variable needs capture due to:
 	// 1. Being a reference type that needs copying, OR
 	// 2. Having escaped to heap (being a ref in C#)
@@ -1451,6 +1460,38 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 	})
 
 	return found
+}
+
+// varIsDerefdPointerParam reports whether varObj is a pointer-typed parameter (or the pointer
+// receiver) of the current function. Such a parameter is emitted as the box `ж<T> Ꮡp` and aliased to
+// a value with `ref var p = ref Ꮡp.val`; the ref-local alias cannot be captured by a C# closure, so
+// inside a lambda it must be referenced through the box `Ꮡp` (rendered by the box-ref-var paths).
+func (v *Visitor) varIsDerefdPointerParam(varObj types.Object) bool {
+	if varObj == nil || v.currentFuncSignature == nil {
+		return false
+	}
+
+	if _, isVar := varObj.(*types.Var); !isVar {
+		return false
+	}
+
+	if _, isPtr := varObj.Type().Underlying().(*types.Pointer); !isPtr {
+		return false
+	}
+
+	if recv := v.currentFuncSignature.Recv(); recv == varObj {
+		return true
+	}
+
+	params := v.currentFuncSignature.Params()
+
+	for i := range params.Len() {
+		if params.At(i) == varObj {
+			return true
+		}
+	}
+
+	return false
 }
 
 // isLambdaBoxRefVar reports whether obj is a heap-boxed local marked for box-ref capture (its

@@ -302,6 +302,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]

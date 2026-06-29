@@ -268,6 +268,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]

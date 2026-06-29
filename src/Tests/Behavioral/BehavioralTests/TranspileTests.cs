@@ -300,6 +300,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
+
+    [TestMethod]
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
