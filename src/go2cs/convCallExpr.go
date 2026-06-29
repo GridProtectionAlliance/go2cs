@@ -522,6 +522,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		funcName = v.convExpr(callExpr.Fun, []ExprContext{lambdaContext})
 	}
 
+	// A Go built-in call (`clear(s)`, `len(s)`, …) whose name the package ALSO declares as a method
+	// shadows the using-static `go.builtin.<name>` (C# member lookup binds the package's own
+	// `<name>(this ref T)` extension first → CS1620/CS1503). Qualify it as `builtin.<name>` so it
+	// resolves to the golib built-in regardless of the same-class shadow.
+	if len(packageBuiltinShadows) > 0 {
+		if ident, ok := callExpr.Fun.(*ast.Ident); ok && funcName == ident.Name && packageBuiltinShadows[ident.Name] {
+			if _, isBuiltin := v.info.ObjectOf(ident).(*types.Builtin); isBuiltin {
+				funcName = "builtin." + funcName
+			}
+		}
+	}
+
 	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases. Gate on funcName before
 	// converting the argument: this re-converts the single arg purely to reshape it for the
 	// unsafe.* helpers, and doing it unconditionally would re-run a func-literal argument's capture

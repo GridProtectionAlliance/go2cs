@@ -674,6 +674,37 @@ public static class builtin
     }
 
     /// <summary>
+    /// Zeros all elements of a slice (the Go 1.21 <c>clear</c> built-in). The length and capacity are
+    /// unchanged; only the element values are reset to the zero value of T.
+    /// </summary>
+    /// <param name="slice">Target slice.</param>
+    public static void clear<T>(slice<T> slice)
+    {
+        for (nint i = 0; i < slice.Length; i++)
+            slice[i] = default!;
+    }
+
+    /// <summary>
+    /// Zeros all elements of a span — the Go 1.21 <c>clear</c> built-in applied to a slice backed by a
+    /// span (e.g. a <c>(*[N]T)(ptr)[:n]</c> unsafe array view).
+    /// </summary>
+    /// <param name="span">Target span.</param>
+    public static void clear<T>(Span<T> span)
+    {
+        span.Clear();
+    }
+
+    /// <summary>
+    /// Removes all entries from a map (the Go 1.21 <c>clear</c> built-in applied to a map). Clearing a
+    /// nil map is a no-op.
+    /// </summary>
+    /// <param name="map">Target map.</param>
+    public static void clear<TKey, TValue>(map<TKey, TValue> map) where TKey : notnull
+    {
+        map.Clear();
+    }
+
+    /// <summary>
     /// Returns the smallest value among its ordered arguments (the Go 1.21 <c>min</c> built-in).
     /// </summary>
     /// <param name="x">First value (Go requires at least one argument).</param>

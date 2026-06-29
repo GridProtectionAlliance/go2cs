@@ -260,6 +260,23 @@ var conversionPackageUsings map[string]string
 var numericConversions map[string]map[string]string
 var indirectNumericConversions map[string]map[string]string
 var nameCollisions map[string]bool
+
+// packageBuiltinShadows holds Go built-in names (`clear`, `len`, …) that the current package ALSO
+// declares as a method or function. In Go a method `func (x T) clear()` and the universe `clear`
+// built-in coexist (the method is only reached as `x.clear()`), but in C# the method is emitted as a
+// `clear(this ref T)` extension on the package's static class, which SHADOWS the using-static
+// `go.builtin.clear` for an unqualified free `clear(s)` call (C# member lookup stops at the class).
+// A built-in call whose name is in this set is therefore emitted qualified as `builtin.<name>(…)`.
+var packageBuiltinShadows map[string]bool
+
+// goBuiltinNames is the set of Go universe built-in function names that golib implements as static
+// methods on `go.builtin`. Used to detect a package method/function that shadows one of them.
+var goBuiltinNames = map[string]bool{
+	"append": true, "cap": true, "clear": true, "close": true, "complex": true,
+	"copy": true, "delete": true, "imag": true, "len": true, "make": true,
+	"max": true, "min": true, "new": true, "panic": true, "print": true,
+	"println": true, "real": true, "recover": true,
+}
 var globalTempVarCount map[string]int
 var initFuncCounter int
 var usesUnsafeCode bool

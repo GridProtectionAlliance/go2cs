@@ -88,6 +88,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckChannelReceiveFromClosed() => CheckTarget("ChannelReceiveFromClosed");
 
     [TestMethod]
+    public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
+
+    [TestMethod]
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]

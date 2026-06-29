@@ -93,6 +93,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckChannelSendToNil() => CheckTarget("ChannelSendToNil");
 
     [TestMethod]
+    public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
+
+    [TestMethod]
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]

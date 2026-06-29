@@ -72,6 +72,7 @@
     <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />
     <Project Path="Tests/Behavioral/ChannelSendToClosed/ChannelSendToClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelSendToNil/ChannelSendToNil.csproj" />
+    <Project Path="Tests/Behavioral/ClearBuiltinShadow/ClearBuiltinShadow.csproj" />
     <Project Path="Tests/Behavioral/ClosureDefer/ClosureDefer.csproj" />
     <Project Path="Tests/Behavioral/ClosureParamShadow/ClosureParamShadow.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />

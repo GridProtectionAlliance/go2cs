@@ -63,6 +63,17 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 		}
 	}
 
+	// A package method/function whose name is a Go built-in (`func (b *pageBits) clear()`) shadows
+	// the using-static `go.builtin.<name>` for an unqualified free call in C#, so such built-in calls
+	// must be emitted qualified (`builtin.<name>(…)`). Record which built-ins this package shadows.
+	packageBuiltinShadows = make(map[string]bool)
+
+	for name := range methodNames {
+		if goBuiltinNames[name] {
+			packageBuiltinShadows[name] = true
+		}
+	}
+
 	// Find collisions (names that appear in both sets)
 	for name, isType := range namedElementNames {
 		if methodNames[name] {
