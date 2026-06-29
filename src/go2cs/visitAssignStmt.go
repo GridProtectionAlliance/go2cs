@@ -51,6 +51,49 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr, lhsIsInt
 	return append(out, ptrContext)
 }
 
+// narrowArithmeticCastType returns the C# narrow-integer type a binary/unary arithmetic assignment
+// RHS must be cast to when its Go type matches a narrow-integer LHS (int8/uint8/int16/uint16), or
+// "" when no cast applies. Go evaluates such arithmetic at the operand's own width (wrapping); C#
+// promotes sub-int arithmetic to int, so the result needs a cast back to compile (CS0266) and to
+// preserve the wrap. The optional alreadyCast guard skips the cast when the converted RHS already
+// starts with `(type)(` — another path narrowed it (e.g. `(byte)(b | 128)`) — to avoid a double cast.
+func (v *Visitor) narrowArithmeticCastType(lhs, rhs ast.Expr, alreadyCast string) string {
+	return v.narrowArithmeticCastTypeFor(v.getType(lhs, false), rhs, alreadyCast)
+}
+
+// narrowArithmeticCastTypeFor is the type-keyed form of narrowArithmeticCastType — used where the
+// narrow target is a declared variable's type (a `var x uint8 = a + b` value-spec initializer)
+// rather than an LHS expression.
+func (v *Visitor) narrowArithmeticCastTypeFor(targetType types.Type, rhs ast.Expr, alreadyCast string) string {
+	switch rhs.(type) {
+	case *ast.BinaryExpr, *ast.UnaryExpr:
+	default:
+		return ""
+	}
+
+	if targetType == nil {
+		return ""
+	}
+
+	targetBasic, ok := targetType.Underlying().(*types.Basic)
+
+	if !ok || !isNarrowIntegerKind(targetBasic.Kind()) {
+		return ""
+	}
+
+	if rhsType := v.getType(rhs, false); rhsType == nil || !types.Identical(rhsType, targetType) {
+		return ""
+	}
+
+	castType := convertToCSTypeName(v.getTypeName(targetType, false))
+
+	if len(alreadyCast) > 0 && strings.HasPrefix(alreadyCast, fmt.Sprintf("(%s)(", castType)) {
+		return ""
+	}
+
+	return castType
+}
+
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
 	result := &strings.Builder{}
 
@@ -478,33 +521,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
-			// Go narrow-integer (int8/uint8/int16/uint16) arithmetic wraps at the operand's own
-			// width, but C# promotes sub-int arithmetic to `int` — so a narrow-arithmetic RHS
-			// assigned to a narrow LHS needs a cast back to the LHS type, both to compile (CS0266)
-			// and to preserve Go's wrapping. Mirrors the call-argument narrow cast (convCallExpr).
-			// Gated on the RHS Go-type already matching the LHS (so the assignment is Go-valid
-			// without a conversion) and the RHS being an arithmetic expression; the existing
-			// bitwise-assign / `&^=` wrappers take precedence (their own cast already applies).
+			// Narrow-integer arithmetic RHS assigned to a narrow LHS needs a cast back to the LHS
+			// type (see narrowArithmeticCastType). The existing bitwise-assign / `&^=` wrappers take
+			// precedence (their own cast already applies).
 			var narrowCastType string
 
 			if !bitwiseAssignOp && !andNotUncheckedClose && i < lhsLen && !lhsTypeIsInterface[i] {
-				switch rhs.(type) {
-				case *ast.BinaryExpr, *ast.UnaryExpr:
-					if lhsType := v.getType(lhsExprs[i], false); lhsType != nil {
-						if lhsBasic, ok := lhsType.Underlying().(*types.Basic); ok && isNarrowIntegerKind(lhsBasic.Kind()) {
-							if rhsType := v.getType(rhs, false); rhsType != nil && types.Identical(rhsType, lhsType) {
-								narrowCastType = convertToCSTypeName(v.getTypeName(lhsType, false))
-
-								// Avoid a double cast when another path already narrowed the RHS to the
-								// same type (e.g. a bitwise op with an untyped constant emits its own
-								// `(byte)(b | 128)`); `(byte)((byte)(…))` is harmless but churns goldens.
-								if strings.HasPrefix(rhsExpr, fmt.Sprintf("(%s)(", narrowCastType)) {
-									narrowCastType = ""
-								}
-							}
-						}
-					}
-				}
+				narrowCastType = v.narrowArithmeticCastType(lhsExprs[i], rhs, rhsExpr)
 			}
 
 			var binaryTypeName string
@@ -710,10 +733,27 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
 
+				// A narrow-integer arithmetic RHS assigned to a narrow struct-field LHS (a pure
+				// selector, e.g. `it.i = i + 1`) routes through this block (its base ident is nil'd in
+				// the counting loop), so it needs the same narrow cast as the var/element forms above.
+				var narrowCastType string
+
+				if !andNotUncheckedClose && !lhsTypeIsInterface[i] {
+					narrowCastType = v.narrowArithmeticCastType(lhs, rhs, rhsExpr)
+				}
+
+				if len(narrowCastType) > 0 {
+					result.WriteString(fmt.Sprintf("(%s)(", narrowCastType))
+				}
+
 				if lhsTypeIsInterface[i] {
 					result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
 				} else {
 					result.WriteString(rhsExpr)
+				}
+
+				if len(narrowCastType) > 0 {
+					result.WriteRune(')')
 				}
 
 				if andNotUncheckedClose {

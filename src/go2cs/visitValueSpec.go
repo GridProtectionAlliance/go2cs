@@ -195,6 +195,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						valExpr := v.convExpr(valueSpec.Values[i], []ExprContext{context})
 						v.hoistedDecls = savedHoist
 
+						// A narrow-integer arithmetic initializer (`var x uint8 = a + b`) needs the
+						// same cast back to the declared type as the assignment forms — Go wraps the
+						// arithmetic at the operand width, C# promotes it to int (CS0266 / lost wrap).
+						if narrowCast := v.narrowArithmeticCastTypeFor(def.Type(), valueSpec.Values[i], valExpr); len(narrowCast) > 0 {
+							valExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valExpr)
+						}
+
 						if hoistBuf.Len() > 0 {
 							// The decls carry their own leading newline + per-line indentation;
 							// writeOutput below re-indents the declaration line that follows.

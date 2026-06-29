@@ -16,6 +16,10 @@ internal static uint16 takeU16(uint16 x) {
     return x;
 }
 
+[GoType] partial struct box {
+    internal uint8 b;
+}
+
 internal static void Main() {
     uint8 a = 200;
     uint8 b = 100;
@@ -35,6 +39,11 @@ internal static void Main() {
     array<uint8> arr = new(1);
     arr[0] = (uint8)(a + b);
     fmt.Println(arr[0]);
+    box bx = default!;
+    bx.b = (uint8)(a + b);
+    fmt.Println(bx.b);
+    uint8 z = (uint8)(a + b);
+    fmt.Println(z);
 }
 
 } // end main_package
