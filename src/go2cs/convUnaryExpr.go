@@ -79,6 +79,21 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 	return v.identEscapesHeap[obj] && !isInherentlyHeapAllocatedType(v.getIdentType(ident))
 }
 
+// lambdaBoxBase returns the base name (without the `Ꮡ` prefix) of a lambda-captured box-ref var's
+// box. A deref-aliased pointer param/receiver's box keeps the RAW Go name (`Ꮡp`), so a
+// shadow-renamed one must reference it by the raw name — `Ꮡ`+the renamed value alias (`ᏑΔp`) is not
+// in scope (CS0103). Returns the raw name only when the shadow-aware form differs (a rename), so a
+// non-renamed / `@`-keyword-escaped var keeps its existing (already-raw) box name — no churn.
+func (v *Visitor) lambdaBoxBase(ident *ast.Ident) string {
+	base := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(ident)), "@")
+
+	if base != ident.Name {
+		return ident.Name
+	}
+
+	return base
+}
+
 // lambdaBoxRefAddressForm renders `&m` / `&m.field` when `m` is a heap-boxed local captured by-box
 // inside the lambda currently being converted (see LambdaCapture.boxRefVars). The address is taken
 // through the box `Ꮡm` — a capturable reference — rather than the uncapturable ref-local alias.
@@ -93,22 +108,34 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 	case *ast.Ident:
 		// &m → Ꮡm
 		if v.isLambdaBoxRefVar(v.info.ObjectOf(operand)) {
-			return AddressPrefix + strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(operand)), "@"), true
+			return AddressPrefix + v.lambdaBoxBase(operand), true
 		}
 	case *ast.SelectorExpr:
-		// &m.field (value struct field) → Ꮡm.of(Type.ᏑField)
+		// &m.field → Ꮡm.of(Type.ᏑField). The box `Ꮡm` is the `ж<T>` to field-ref through, whether
+		// `m` is a value struct (`Ꮡm` boxes the value) or a pointer-to-struct (`Ꮡm` *is* the Go
+		// pointer/`ж<T>`). Both emit the same `.of(...)` form; only the type-name source differs.
 		baseIdent, ok := operand.X.(*ast.Ident)
 
 		if !ok || !v.isLambdaBoxRefVar(v.info.ObjectOf(baseIdent)) {
 			return "", false
 		}
 
-		if _, ok := v.getType(operand.X, true).(*types.Struct); !ok {
+		var typeName string
+
+		switch t := v.getType(operand.X, true).(type) {
+		case *types.Struct:
+			typeName = v.dynamicStructTypeName(operand.X)
+		case *types.Pointer:
+			if _, ok := t.Elem().Underlying().(*types.Struct); !ok {
+				return "", false
+			}
+
+			typeName = convertToCSTypeName(v.getTypeName(t.Elem(), false))
+		default:
 			return "", false
 		}
 
-		boxName := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(baseIdent)), "@")
-		typeName := v.dynamicStructTypeName(operand.X)
+		boxName := v.lambdaBoxBase(baseIdent)
 		fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
 		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true

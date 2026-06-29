@@ -80,7 +80,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// deref the box directly (`Ꮡm.val`). The box `Ꮡm` is a capturable reference. Address uses
 	// (`&m`, `&m.field`) are rendered from the box name in convUnaryExpr, bypassing this rewrite.
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) {
-		return AddressPrefix + strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(ident)), "@") + ".val"
+		return AddressPrefix + v.lambdaBoxBase(ident) + ".val"
 	}
 
 	return getSanitizedIdentifier(v.getIdentName(ident))

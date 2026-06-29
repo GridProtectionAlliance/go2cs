@@ -37,9 +37,22 @@ internal static void bumpTwice(this ж<counter> Ꮡp) {
     Ꮡp.add(1);
 }
 
+internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
+    ref var Δp = ref Ꮡp.val;
+
+    var apply = () => {
+        Ꮡp.val.n += d;
+        addInt(Ꮡp.of(counter.Ꮡn), d);
+    };
+    apply();
+    return Δp.n;
+}
+
 internal static void Main() {
     var c = Ꮡ(new counter(n: 0));
     c.bumpTwice();
+    fmt.Println((~c).n);
+    fmt.Println(addInClosure(c, 5));
     fmt.Println((~c).n);
     Δp pv = default!;
     pv.id = 7;
