@@ -327,7 +327,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				} else {
 					ident := getIdentifier(callExpr.Args[i])
 
-					if !v.isPointer(ident) || v.identIsParameter(ident) {
+					// A deref-aliased pointer (a parameter, or the current method's direct-ж receiver)
+					// passed WHOLE as a pointer argument must be emitted as its box `Ꮡc`, not the value
+					// alias `c` (a value cannot bind a `ж<T>` parameter → CS1503). A direct-ж receiver
+					// is not an `identIsParameter`, so it needs the explicit receiver check — e.g.
+					// `func (c *mcache) prepareForSweep(){ … stackcache_clear(c) }` where `c` also takes
+					// a field address (making it direct-ж).
+					if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[i]) {
 						callExprContext.argTypeIsPtr[i] = true
 					}
 				}
