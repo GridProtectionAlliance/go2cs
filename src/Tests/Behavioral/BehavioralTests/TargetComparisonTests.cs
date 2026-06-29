@@ -353,6 +353,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

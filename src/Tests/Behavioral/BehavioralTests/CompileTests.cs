@@ -351,6 +351,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

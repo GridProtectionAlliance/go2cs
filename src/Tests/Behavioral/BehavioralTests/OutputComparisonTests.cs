@@ -316,6 +316,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

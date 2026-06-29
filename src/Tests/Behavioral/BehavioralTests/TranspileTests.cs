@@ -351,6 +351,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
+    public void CheckRenamedReceiverBox() => CheckTarget("RenamedReceiverBox");
+
+    [TestMethod]
     public void CheckReservedTypeMethodCollision() => CheckTarget("ReservedTypeMethodCollision");
 
     [TestMethod]

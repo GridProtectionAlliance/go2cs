@@ -372,7 +372,22 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 		}
 
-		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+		// The receiver box is `Ꮡ`+the RAW variable name — a deref-aliased pointer is declared
+		// `ref var <shadow-name> = ref Ꮡ<raw>.val` (the box keeps the raw name; visitFuncDecl /
+		// heap decls never shadow-rename the `Ꮡ` companion). convExpr returns the shadow-renamed
+		// VALUE alias, so for a collision-renamed var `p`→`Δp` it yields `ᏑΔp` — which is not in
+		// scope (the box is `Ꮡp`), CS0103. Build the box from the raw ident name to match.
+		recvExpr := v.convExpr(selectorExpr.X, nil)
+
+		// Use the raw Go name for the box base (a deref'd pointer param's box is `Ꮡ`+param.Name()),
+		// but only when this var is shadow-renamed (convExpr gave a name different from the box) and
+		// not lambda-captured (a closure reads the captured box by its own form). Restricting to that
+		// case keeps every already-correct accessor unchanged — no golden churn.
+		if ident, ok := selectorExpr.X.(*ast.Ident); ok && recvExpr != ident.Name {
+			recvExpr = ident.Name
+		}
+
+		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, recvExpr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
 	// A (non-capture) pointer-receiver method called on a FIELD of a pointer LOCAL — `c.gp.set(v)`
