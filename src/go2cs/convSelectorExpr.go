@@ -278,6 +278,57 @@ func (v *Visitor) exprIsAlreadyBoxedPointerFieldOrElement(expr ast.Expr) bool {
 	return false
 }
 
+// exprIsIndexedValueElement reports whether expr is an indexed element `container[i]` of an
+// ADDRESSABLE container (an array or slice — NOT a map, whose elements are not addressable) whose
+// element type is a VALUE (not already a pointer/box). A pointer-receiver / direct-ж method called
+// on such an element — `bh.val[i].Load()` (an array of atomic `UnsafePointer`) — operates on the
+// element VALUE, so the `[GoRecv] ref` / `ж` overload cannot bind (CS1510 / CS1929). The receiver
+// must be routed through the element's box via the &-machinery (`Ꮡ(slice, i)` / `…at<T>(i)`).
+func (v *Visitor) exprIsIndexedValueElement(expr ast.Expr) bool {
+	indexExpr, ok := expr.(*ast.IndexExpr)
+
+	if !ok {
+		return false
+	}
+
+	// A generic instantiation `Type[Arg]` is also an *ast.IndexExpr; require the indexed operand to
+	// be an array/slice VALUE so a type-instantiation (or a map index) is excluded.
+	containerType := v.getType(indexExpr.X, true)
+
+	if containerType == nil {
+		return false
+	}
+
+	var elem types.Type
+
+	switch container := containerType.Underlying().(type) {
+	case *types.Array:
+		elem = container.Elem()
+	case *types.Slice:
+		elem = container.Elem()
+	default:
+		return false
+	}
+
+	// A pointer element is already a box (exprIsAlreadyBoxedPointerFieldOrElement); only a value
+	// element needs the box machinery.
+	_, isPtr := elem.Underlying().(*types.Pointer)
+
+	return !isPtr
+}
+
+// selectorCallsDirectBoxMethod reports whether the selector calls a DIRECT-ж (box-receiver) method —
+// one emitted as `this ж<T>` (it takes the address of a field of its receiver, or otherwise needs
+// the box), rather than `[GoRecv] this ref T`. Only a direct-ж method requires its receiver be a
+// box; a `[GoRecv] ref` method binds to any addressable value directly. Used to decide whether an
+// indexed value element must be routed through its box for the call (an addressable element already
+// satisfies a `[GoRecv] ref` method, so routing it would be needless churn).
+func (v *Visitor) selectorCallsDirectBoxMethod(selectorExpr *ast.SelectorExpr) bool {
+	funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func)
+
+	return ok && funcObj != nil && packageDirectBoxReceiverMethods[funcObj.Origin()]
+}
+
 // isPointerReceiverMethodCall reports whether the selector calls a method with a POINTER receiver
 // (`func (x *T) M()`), emitted as a `[GoRecv]` extension over `ref T` / a `ж<T>` overload. Such a
 // method needs an addressable receiver, so a value-returning `~` deref of a field receiver is an
@@ -515,6 +566,16 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsValueFieldOfPointer(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A ж-only / pointer-receiver method called on a VALUE element of an addressable array/slice —
+	// `bh.val[i].Load()` (an array of atomic `UnsafePointer`). The element value is not a box, so the
+	// `[GoRecv] ref` / `ж` overload cannot bind (CS1510 / CS1929). Route the receiver through the
+	// element's box via the &-machinery, which renders the real element address (`Ꮡ(slice, i)` /
+	// `…at<T>(i)`) — never a `Ꮡ(value)` copy, which would lose an atomic write.
+	if context.isCallExpr && v.selectorCallsDirectBoxMethod(selectorExpr) && v.exprIsIndexedValueElement(selectorExpr.X) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) {
+		elemAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", elemAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
 	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))

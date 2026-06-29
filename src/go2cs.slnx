@@ -127,6 +127,7 @@
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />
     <Project Path="Tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
+    <Project Path="Tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
     <Project Path="Tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
     <Project Path="Tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="Tests/Behavioral/InterfaceImplementation/InterfaceImplementation.csproj" />

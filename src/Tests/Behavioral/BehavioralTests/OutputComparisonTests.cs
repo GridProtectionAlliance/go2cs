@@ -232,6 +232,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIncDecPointerField() => CheckTarget("IncDecPointerField");
 
     [TestMethod]
+    public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]

@@ -263,6 +263,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckIncDecPointerField() => CheckTarget("IncDecPointerField");
 
     [TestMethod]
+    public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
+
+    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
