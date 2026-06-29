@@ -1280,6 +1280,31 @@ func (v *Visitor) addRequiredUsing(usingName string) {
 	v.requiredUsings.Add(usingName)
 }
 
+// addMethodPackageNamespaceUsing ensures the file-local `using <namespace>;` for a cross-package
+// method's defining package is emitted, so its C# extension method (`Method(this ж<T>, …)`) is in
+// scope at the call site even when the file does not explicitly import that package. Mirrors the
+// namespace-using derivation in visitImportSpec's unaliased-import branch; a no-op for the current
+// package and for root-namespace (`go`) packages, whose extensions are already visible.
+func (v *Visitor) addMethodPackageNamespaceUsing(pkg *types.Package) {
+	if pkg == nil || pkg == v.pkg {
+		return
+	}
+
+	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(pkg.Path(), PackageSuffix))
+
+	lastDot := strings.LastIndex(importPath, ".")
+
+	if lastDot == -1 {
+		return
+	}
+
+	namespace := importPath[:lastDot]
+
+	if len(namespace) > 0 && packageNamespace != fmt.Sprintf("%s.%s", RootNamespace, namespace) {
+		v.addRequiredUsing(namespace)
+	}
+}
+
 func (v *Visitor) getPrintedNode(node ast.Node) string {
 	if node == nil {
 		return ""

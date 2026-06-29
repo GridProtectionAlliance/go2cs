@@ -142,6 +142,20 @@ func (v *Visitor) isPointerReceiverMethodCall(selectorExpr *ast.SelectorExpr) bo
 }
 
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
+	// A Go method becomes a C# extension method on the receiver box (`Method(this ж<T>, …)`) emitted in
+	// its DEFINING package's class. C# only finds an extension method when that class's NAMESPACE is in
+	// scope. For a method whose receiver type lives in a sub-namespace package (e.g. `internal/runtime/
+	// atomic` → `go.@internal.runtime`), a file that calls the method but does NOT import the package
+	// (legal in Go — calling a method on a value never requires importing the value's package) gets no
+	// `using @internal.runtime;`, so the extension method is invisible and the call mis-binds to a wrong
+	// promoted overload (CS1929). Register the method's package namespace here so the file-local `using`
+	// is emitted regardless of whether the package was explicitly imported.
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+		if obj := sel.Obj(); obj != nil {
+			v.addMethodPackageNamespaceUsing(obj.Pkg())
+		}
+	}
+
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
 	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
 	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property
