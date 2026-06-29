@@ -191,12 +191,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, removeSanitizationMarker(v.convExpr(selectorExpr.Sel, nil)))
 
 					if v.isHeapBoxedExpr(selectorExpr.X) {
-						// When the base is itself a nested field selector — `&work.sweepWaiters.lock`,
-						// a field of a field of a boxed global — recurse to build the base's address
-						// through `.of(...)` chaining: `Ꮡwork.of(workType.ᏑsweepWaiters).of(…Ꮡlock)`.
-						// Prefixing `Ꮡ` onto `work.sweepWaiters` instead would bind to the box variable
-						// `Ꮡwork` (whose value has no `sweepWaiters` member) → CS1061.
-						if _, baseIsSelector := selectorExpr.X.(*ast.SelectorExpr); baseIsSelector {
+						// When the base is itself a nested field selector or an array/slice index —
+						// `&work.sweepWaiters.lock` (field of a field) or `&stackpool[i].item.mu`
+						// (field of an indexed element) of a boxed global — recurse to build the base's
+						// address through `.of(...)` / `.at<T>(i)` chaining, e.g.
+						// `Ꮡwork.of(workType.ᏑsweepWaiters).of(…Ꮡlock)` /
+						// `Ꮡstackpool.at<T>(i).of(…Ꮡmu)`. Prefixing `Ꮡ` onto `work.sweepWaiters` /
+						// `stackpool[i]` instead binds to the box variable (`Ꮡwork` / `Ꮡstackpool`,
+						// whose value has no such member / no indexer) → CS1061 / CS0021.
+						switch selectorExpr.X.(type) {
+						case *ast.SelectorExpr, *ast.IndexExpr:
 							baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 							return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
 						}
@@ -245,8 +249,24 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// For a receiver reference to an array, we use the "Ꮡ(array[index])" syntax
 					return fmt.Sprintf("%s(%s[%s])", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
 				} else {
-					// For an indexed reference into an array, we use the "ж.at<T>(index)" syntax
+					// For an indexed reference into an array, we use the "ж.at<T>(index)" syntax.
 					csTypeName := convertToCSTypeName(typeName[strings.Index(typeName, "]")+1:])
+
+					// An ANONYMOUS-struct element is lifted to a synthesized name keyed by the element
+					// EXPRESSION (e.g. `mheap.central[i]` → `mheap_central`), which neither the
+					// array-type-name string-parse nor getCSTypeName(type) recovers — a complex element
+					// (e.g. a `pad [const]byte` field) renders as a raw/malformed `struct{…}` (invalid
+					// C# → masking parse error). Resolve it through dynamicStructTypeName(indexExpr),
+					// the same per-expression registry the `.of(…)` field path uses.
+					if arrayType, ok := exprType.Underlying().(*types.Array); ok {
+						if _, isStruct := arrayType.Elem().Underlying().(*types.Struct); isStruct {
+							if _, isNamed := arrayType.Elem().(*types.Named); !isNamed {
+								if lifted := v.dynamicStructTypeName(indexExpr); lifted != "" {
+									csTypeName = lifted
+								}
+							}
+						}
+					}
 
 					// When the array is a FIELD of a heap-boxed value — `&trace.stackTab[i]` where
 					// `trace` is an address-taken global — its address must go through the box-field

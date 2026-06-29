@@ -195,6 +195,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericVariadicFunc() => CheckTarget("GenericVariadicFunc");
 
     [TestMethod]
+    public void CheckGlobalArrayElementFieldAddress() => CheckTarget("GlobalArrayElementFieldAddress");
+
+    [TestMethod]
     public void CheckGlobalAtomicDefer() => CheckTarget("GlobalAtomicDefer");
 
     [TestMethod]
