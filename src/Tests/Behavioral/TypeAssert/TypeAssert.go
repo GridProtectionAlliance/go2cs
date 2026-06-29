@@ -2,6 +2,8 @@ package main
 
 import "fmt"
 
+type box struct{ n int }
+
 func main() {
 	// Safe assertions with 'ok'
 	safeAssertions()
@@ -9,7 +11,24 @@ func main() {
 	// Unsafe assertion with recover
 	assertionsWithPanic()
 
+	// Assertion to a POINTER type
+	pointerAssertion()
+
 	fmt.Println("Program completed after panic recovery")
+}
+
+// pointerAssertion asserts an interface to a POINTER type `*box`. The asserted type `*box` is a
+// type position, so it must render as the pointer type `ж<box>` (`arg._<ж<box>>()`), not as a
+// value deref `box.val` (CS0426 — `val` is not a member type of `box`).
+func pointerAssertion() {
+	var i any = &box{n: 7}
+
+	if b, ok := i.(*box); ok {
+		fmt.Println("Value is a *box:", b.n)
+	}
+
+	b := i.(*box)
+	fmt.Println("Pointer value:", b.n)
 }
 
 func safeAssertions() {

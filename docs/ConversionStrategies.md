@@ -341,6 +341,8 @@ var t = i._<MyType>();              // panics on failure
 var (t, ok) = i._<MyType>(ᐧ);       // comma-ok, safe
 ```
 
+The asserted type is a **type position**, so an assertion to a **pointer** type renders the pointer *type* `ж<T>`, not a value dereference: `i.(*box)` → `i._<ж<box>>()`. (The starred-operand-is-a-type case previously emitted the type form only inside a `(*T)(p)` cast; a non-parenthesized `*type` fell through to the value-deref path and emitted `box.val` — CS0426, since `val` is not a member type of `box`.) (Guarded by the `TypeAssert` behavioral test's `*box` assertion; runtime hit this in `netpoll.go`'s `arg.(*pollDesc)`.)
+
 The types that support these tuple-returns are defined in the [`golib`](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/core/golib) library; ordinary user-code tuple returns convert as normal C# tuples without special handling.
 
 ## Slices and Arrays

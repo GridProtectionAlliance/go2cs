@@ -4,10 +4,26 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+[GoType] partial struct box {
+    internal nint n;
+}
+
 internal static void Main() {
     safeAssertions();
     assertionsWithPanic();
+    pointerAssertion();
     fmt.Println("Program completed after panic recovery");
+}
+
+internal static void pointerAssertion() {
+    any i = Ꮡ(new box(n: 7));
+    {
+        var (bΔ1, ok) = i._<ж<box>>(ᐧ); if (ok) {
+            fmt.Println("Value is a *box:", (~bΔ1).n);
+        }
+    }
+    var b = i._<ж<box>>();
+    fmt.Println("Pointer value:", (~b).n);
 }
 
 internal static void safeAssertions() {

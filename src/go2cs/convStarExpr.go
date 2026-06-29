@@ -56,7 +56,11 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		starXIsType = true
 	}
 
-	if context.inParenExpr && starXIsType {
+	// When the starred operand denotes a TYPE, `*T` is the pointer TYPE `ж<T>` — in a `(*T)(p)`
+	// cast (inParenExpr) and equally in any other type position, e.g. a type assertion `x.(*T)`
+	// (which renders the asserted type via convStarExpr). A non-paren `*type` would otherwise fall
+	// through to the value-deref path and emit `T.val` (CS0426: `val` is not a member type of `T`).
+	if starXIsType {
 		// Check if the pointer target type is a struct or pointer to a struct
 		if structType, exprType := v.extractStructType(starExpr); structType != nil && !v.liftedTypeExists(structType) {
 			v.indentLevel++
