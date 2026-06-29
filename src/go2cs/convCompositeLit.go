@@ -25,6 +25,15 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
 				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+			case *types.Pointer:
+				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
+				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
+				// boxed struct constructor `Ꮡ(new T(field: val, …))`; a bare `new(…)` targets the box
+				// `ж<T>`, whose constructor has no such field params (CS1739).
+				if _, ok := u.Elem().Underlying().(*types.Struct); ok {
+					structName := v.getCSTypeName(u.Elem())
+					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+				}
 			}
 		}
 
