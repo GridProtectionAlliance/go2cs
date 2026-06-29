@@ -330,6 +330,18 @@ var rs = slice<rune>((@string)"héllo");
 
 The `@string` cast fires only on a string-literal argument; a string-variable conversion (`[]byte(s)`) needs no cast. (Guarded by the behavioral test `StringLiteralSliceConversion`.)
 
+### Converting a string literal to a named string type
+A Go conversion of a string **literal** to a named type whose underlying type is `string` — `errorString("…")` where `type errorString string` — needs the same `@string` intermediate. The literal renders as a `u8` `ReadOnlySpan<byte>`, which has no conversion to the named type, so a bare `(errorString)"…"u8` is CS0030. The converter routes it through `@string` (which converts implicitly from the `u8` span and to which the named type converts):
+
+```go
+return errorString("kaboom")
+```
+```csharp
+return ((errorString)(@string)"kaboom"u8);
+```
+
+This is the form the runtime uses for every `panic(errorString("…"))` / `plainError("…")`. (Guarded by the behavioral test `NamedStringConversion`.)
+
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 

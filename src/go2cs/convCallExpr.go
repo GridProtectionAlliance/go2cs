@@ -93,6 +93,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion of a string LITERAL to a named type whose underlying is `string`
+		// (e.g. `errorString("makeslice: len out of range")`, `type errorString string`): the
+		// literal renders as a `u8` ReadOnlySpan<byte>, which has no conversion to the named type
+		// (CS0030). Route it through `@string` — which has an implicit conversion FROM the u8 span
+		// and TO which the named type converts — `((errorString)(@string)"…"u8)`.
+		if basicLit, ok := arg.(*ast.BasicLit); ok && basicLit.Kind == token.STRING && targetTypeName != "@string" {
+			if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+				if basic, ok := named.Underlying().(*types.Basic); ok && basic.Kind() == types.String {
+					return fmt.Sprintf("((%s)(@string)%s)", targetTypeName, expr)
+				}
+			}
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)

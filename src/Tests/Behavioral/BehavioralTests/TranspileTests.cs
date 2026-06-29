@@ -261,6 +261,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
+
+    [TestMethod]
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]

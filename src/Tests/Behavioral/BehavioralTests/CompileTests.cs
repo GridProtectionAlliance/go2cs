@@ -261,6 +261,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]
+    public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
+
+    [TestMethod]
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
