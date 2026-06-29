@@ -144,6 +144,7 @@
     <Project Path="Tests/Behavioral/NamedNumericConversion/NamedNumericConversion.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericIntCast/NamedNumericIntCast.csproj" />
     <Project Path="Tests/Behavioral/NarrowArithmeticArg/NarrowArithmeticArg.csproj" />
+    <Project Path="Tests/Behavioral/NativeIntConstMask/NativeIntConstMask.csproj" />
     <Project Path="Tests/Behavioral/NestedEmbeddingPromotion/NestedEmbeddingPromotion.csproj" />
     <Project Path="Tests/Behavioral/NestedFieldPointerAssign/NestedFieldPointerAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />

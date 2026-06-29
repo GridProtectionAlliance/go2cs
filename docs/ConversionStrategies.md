@@ -181,6 +181,8 @@ uintptr u = 7;
 _ = u < (uintptr)(1 << (int)(8));
 ```
 
+A related case is a **computed constant mask under a native-int bitwise operator**. `i & ((1 << shift) - 1)` or `i &^ (blockSize - 1)`, where `i` is a `uintptr`/`uint` (C# `nuint`/`uintptr`) and `shift`/`blockSize` are native-int constants: the mask is a Go compile-time constant, but because the native const is emitted as a `static readonly` (not a C# `const`) the *expression* is not a C# constant, so it renders as a bare `int` — and `nuint & int` is CS0019 (no common type, and no implicit constant conversion since the operand is non-constant). The converter casts such a computed-constant operand to the native result type — `(uintptr)i & (uintptr)((1 << (int)shift) - 1)`. A bare literal (`x & 7`) is left alone (C#'s constant conversion fits it), and a named untyped-const reference is handled by the wrapper cast below. (Guarded by the `NativeIntConstMask` behavioral test; runtime exercises this in arena/page mask arithmetic such as `arenaIndex`/`alignDown`.)
+
 Similarly, when a *named* untyped numeric constant (emitted as the `UntypedInt`/`UntypedFloat` wrapper) is an operand of arithmetic with a concrete numeric type, the wrapper's bidirectional implicit conversions can make the result resolve to the wrong type (`a * two32`, `uint64 * UntypedInt`, yields `int` — CS0029). The named-const operand is cast to the concrete operand's type (comparisons resolve through the implicit conversion, so only arithmetic is cast):
 
 ```go

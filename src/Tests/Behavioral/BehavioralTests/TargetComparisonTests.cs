@@ -311,6 +311,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
+
+    [TestMethod]
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]

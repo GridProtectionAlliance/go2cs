@@ -9,6 +9,26 @@ import (
 	"strconv"
 )
 
+// isComputedConstOperand reports whether expr is a COMPUTED constant expression — one that carries a
+// constant Go value but is neither a bare literal nor a named-constant reference (a binary/unary
+// expression such as `(1 << k) - 1` or `^(pageSize - 1)`). Because it can involve a non-const native
+// value (e.g. a `(int)` cast), it emits as a non-constant C# expression and so does not benefit from
+// C#'s implicit constant conversion — under a native-int bitwise operator it must be cast explicitly.
+func (v *Visitor) isComputedConstOperand(expr ast.Expr) bool {
+	if tv, ok := v.info.Types[expr]; !ok || tv.Value == nil {
+		return false
+	}
+
+	// A literal or a (named-)constant reference is handled by C#'s constant conversion / the
+	// named-const-ref cast; only a computed expression needs this explicit cast.
+	switch expr.(type) {
+	case *ast.BasicLit, *ast.Ident, *ast.SelectorExpr:
+		return false
+	}
+
+	return true
+}
+
 // isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
 // untyped numeric constant — which the converter emits as a golib `Untyped*` wrapper. It is false
 // for literals (those render as ordinary C# literals and follow normal numeric promotion rules).
@@ -211,6 +231,22 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 
 				if v.isUntypedNamedConstRef(binaryExpr.Y) {
 					rightOperand = fmt.Sprintf("(%s)%s", operandCast, rightOperand)
+				}
+			}
+
+			// A computed untyped-constant operand — a mask like `(1 << k) - 1` or `~(pageSize - 1)`
+			// — in a bitwise op with a NATIVE-int result (`nuint`/`nint`/`uintptr`) is emitted as a
+			// bare C# `int` expression (it involves a non-const native value such as a cast, so it is
+			// not a C# compile-time constant), so `nuint & ((1<<k)-1)` is `nuint & int` → CS0019. Cast
+			// such an operand to the native result type. A bare literal is left alone (C#'s
+			// constant-conversion implicitly fits it), and a named untyped-const ref is handled above.
+			if binaryTypeName == "nuint" || binaryTypeName == "nint" || binaryTypeName == "uintptr" {
+				if v.isComputedConstOperand(binaryExpr.X) {
+					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
+				}
+
+				if v.isComputedConstOperand(binaryExpr.Y) {
+					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
 				}
 			}
 
