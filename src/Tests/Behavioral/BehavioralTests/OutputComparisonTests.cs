@@ -259,6 +259,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]

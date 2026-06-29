@@ -144,14 +144,43 @@ internal class StructTypeTemplate : TemplateBase
 
             IEnumerable<(string typeName, string memberName)> getStructMembers(string structTypeName)
             {
-                (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(structTypeName);
-                
-                if (structDecl is null)
-                    return [];
+                // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
+                // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
+                // every embedding level). e.g. stackWorkBuf embeds stackWorkBufHdr embeds workbufhdr,
+                // so stackWorkBuf.nobj must promote workbufhdr's nobj — but reading stackWorkBufHdr's
+                // DECLARED members alone misses it (nobj is a generated accessor on stackWorkBufHdr,
+                // not a declared field). The emitted accessor stays single-hop (`stackWorkBuf.nobj =>
+                // ref stackWorkBufHdr.nobj`), resolving through stackWorkBufHdr's own 1-level promotion.
+                List<(string typeName, string memberName)> collected = [];
+                HashSet<string> emittedNames = [];
 
-                return structDecl
-                    .GetStructMembers(compilation!, true)
-                    .Select(item => (item.typeName, item.memberName)) ?? [];
+                collect(structTypeName, []);
+
+                return collected;
+
+                void collect(string typeName, HashSet<string> seenTypes)
+                {
+                    // Go forbids embedding cycles, but guard anyway so a malformed input can't loop.
+                    if (!seenTypes.Add(typeName))
+                        return;
+
+                    (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
+
+                    if (structDecl is null)
+                        return;
+
+                    foreach ((string memberType, string memberName, _, _) in structDecl.GetStructMembers(compilation!, true))
+                    {
+                        // First (closest) declaration of a name wins, matching Go's promotion rules.
+                        if (emittedNames.Add(memberName))
+                            collected.Add((memberType, memberName));
+
+                        // An embedded struct field (Go embedding: the field name equals its type's
+                        // simple name) contributes its own members transitively.
+                        if (GetSimpleName(memberType) == memberName)
+                            collect(memberType, seenTypes);
+                    }
+                }
             }
         }
     }

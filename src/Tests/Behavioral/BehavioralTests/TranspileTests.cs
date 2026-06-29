@@ -291,6 +291,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]

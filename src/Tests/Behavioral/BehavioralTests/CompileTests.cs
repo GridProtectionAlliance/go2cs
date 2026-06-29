@@ -291,6 +291,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]
