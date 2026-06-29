@@ -255,6 +255,16 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     public bool IsNull => m_isNull || m_val is null;
 
     /// <summary>
+    /// Gets a flag indicating whether this is a nil <em>standard</em> pointer — a plain heap pointer
+    /// whose value is unset — as opposed to a struct-field or array-element reference (which resolve
+    /// through <see cref="val"/> without a null check). This is exactly the case for which the
+    /// <see cref="val"/> getter throws <see cref="RuntimeErrorPanic.NilPointerDereference"/>; the
+    /// nil-safe <see cref="PointerExtensions.DerefOrNil{T}"/> re-alias accessor uses it to avoid that
+    /// throw when re-aliasing a pointer parameter walked to a nil terminator.
+    /// </summary>
+    internal bool IsNilStandardPointer => m_structFieldRef is null && m_arrayIndexRef is null && IsNull;
+
+    /// <summary>
     /// Gets a pinned pointer to the value of type <typeparamref name="T"/>.
     /// </summary>
     internal PinnedBuffer PinnedBuffer
@@ -522,4 +532,52 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     }
 
     private static readonly bool IsReferenceType = default(T) is null;
+}
+
+/// <summary>
+/// Extension methods for <see cref="ж{T}"/> pointer references.
+/// </summary>
+public static class PointerExtensions
+{
+    /// <summary>
+    /// Nil-safe re-alias accessor: returns a reference to the pointed-to value, or to a shared
+    /// default(<typeparamref name="T"/>) slot when <paramref name="box"/> is a nil pointer
+    /// (a <c>null</c> reference or a nil standard pointer).
+    /// </summary>
+    /// <typeparam name="T">Pointed-to type.</typeparam>
+    /// <param name="box">Pointer reference, which may be <c>null</c>.</param>
+    /// <returns>
+    /// A <c>ref</c> to the value of <paramref name="box"/>, or to a shared default slot when it is nil.
+    /// </returns>
+    /// <remarks>
+    /// <para>
+    /// Converted code re-aliases a deref'd pointer parameter after repointing its box, e.g.
+    /// <c>Ꮡp = p.next; p = ref Ꮡp.DerefOrNil();</c>, when the parameter is walked to a nil terminator
+    /// (<c>for p != nil { …; p = p.next }</c>). On the final step the box becomes nil, and the plain
+    /// <see cref="ж{T}.val"/> getter would throw a nil-pointer dereference before the loop guard is
+    /// re-checked. This accessor instead yields a <c>ref</c> to a throwaway default slot — never read
+    /// while the box is nil (the <c>Ꮡp != nil</c> guard excludes it), so the value is harmless.
+    /// </para>
+    /// <para>
+    /// This is <em>not</em> a substitute for a genuine dereference: reading or writing <c>*p</c> on a
+    /// nil pointer (emitted as <c>~Ꮡp</c> / <c>Ꮡp.val</c>) still panics, preserving Go semantics. Only
+    /// the re-alias — which captures a reference without reading it — uses the nil-safe form. As an
+    /// extension method it tolerates a <c>null</c> receiver (a nil pointer field is a <c>null</c>
+    /// reference, not a nil box).
+    /// </para>
+    /// </remarks>
+    public static ref T DerefOrNil<T>(this ж<T>? box)
+    {
+        if (box is null || box.IsNilStandardPointer)
+            return ref NilSlot<T>.Slot;
+
+        return ref box.val;
+    }
+
+    // Per-T shared default slot returned by ref for a nil pointer. Never read while the pointer is
+    // nil (the converted loop guard excludes it), so the shared mutable storage is benign.
+    private static class NilSlot<T>
+    {
+        public static T Slot = default!;
+    }
 }

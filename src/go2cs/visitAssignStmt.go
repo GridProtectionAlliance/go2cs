@@ -643,8 +643,22 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") {
 					// This is a special case for pointer reassignments which should be extended
 					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.val`
-					derefExpr := getSanitizedIdentifier(leftExpr[len(AddressPrefix):])
-					result.WriteString(fmt.Sprintf(" %s = ref %s.val;", derefExpr, leftExpr))
+					boxBaseName := leftExpr[len(AddressPrefix):]
+					derefExpr := getSanitizedIdentifier(boxBaseName)
+
+					// A pointer PARAMETER walked to a nil terminator (`for p != nil { …; p = p.next }`)
+					// repoints its box to the nil terminator on the final step; re-aliasing through the
+					// plain `.val` getter would then throw a nil-pointer dereference (the loop guard has
+					// not yet re-checked). Use the nil-safe accessor so the re-alias yields a ref to
+					// default(T) that is never read while the box is nil. Other reassigned pointer boxes
+					// (non-nil-compared params, receivers, locals — never nil here) keep `.val`.
+					derefAccessor := "val"
+
+					if v.nilSafePtrParamNames.Contains(boxBaseName) {
+						derefAccessor = NilSafeDerefAccessor
+					}
+
+					result.WriteString(fmt.Sprintf(" %s = ref %s.%s;", derefExpr, leftExpr, derefAccessor))
 				}
 			}
 		}

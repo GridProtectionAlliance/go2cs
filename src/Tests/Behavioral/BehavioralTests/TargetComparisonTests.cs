@@ -386,6 +386,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerParamNilWalk() => CheckTarget("PointerParamNilWalk");
+
+    [TestMethod]
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]

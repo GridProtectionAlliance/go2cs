@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -140,6 +141,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 		}
 	}
+
+	// Identify pointer parameters that are compared with `==`/`!=` in the body (a nil-terminated
+	// walk: `for p != nil { …; p = p.next }`). Such a param's deref alias and pointer-reassignment
+	// re-alias must use the nil-safe accessor so re-aliasing to a nil box yields a ref to default(T)
+	// (never read while p is nil) instead of throwing a nil-pointer dereference (see comment on
+	// nilSafePtrParamNames). Run AFTER paramObjects is populated (identIsParameter relies on it).
+	v.collectNilSafePtrParams(funcDecl.Body)
 
 	// Loop through function results to check if any are structs
 	if funcDecl.Type.Results != nil {
@@ -336,10 +344,20 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					continue
 				}
 
+				// A pointer param walked to a nil terminator (`for p != nil { …; p = p.next }`) derefs
+				// through the nil-safe accessor so a nil argument (or, after the in-loop re-alias, a
+				// nil box) yields a ref to default(T) instead of throwing — the ref is never read while
+				// the box is nil (the `Ꮡp != nil` guard excludes it). Other pointer params keep `.val`.
+				derefAccessor := "val"
+
+				if v.nilSafePtrParamNames.Contains(param.Name()) {
+					derefAccessor = NilSafeDerefAccessor
+				}
+
 				if v.options.preferVarDecl {
-					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name())
+					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name(), derefAccessor)
 				} else {
-					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.val;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name())
+					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name(), derefAccessor)
 				}
 			}
 
@@ -589,6 +607,78 @@ func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 	}
 
 	return true
+}
+
+// collectNilSafePtrParams populates v.nilSafePtrParamNames with the raw names of the pointer
+// parameters that are BOTH compared with `==`/`!=` AND reassigned somewhere in body — the
+// nil-terminated-walk signature (`for p != nil { …; p = p.next }`). Only a reassigned param's box
+// can become nil mid-function (the reassignment repoints it to the terminator), so only such a
+// param needs the nil-safe deref/re-alias accessor; a param that is merely compared (never
+// repointed) keeps the plain `.val` form (zero golden churn). The set is reset each function.
+func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
+	if v.nilSafePtrParamNames == nil {
+		v.nilSafePtrParamNames = HashSet[string]{}
+	} else {
+		v.nilSafePtrParamNames.Clear()
+	}
+
+	if body == nil {
+		return
+	}
+
+	compared := HashSet[string]{}
+	reassigned := HashSet[string]{}
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.BinaryExpr:
+			if n.Op == token.EQL || n.Op == token.NEQ {
+				for _, operand := range []ast.Expr{n.X, n.Y} {
+					if ident, ok := operand.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
+						compared.Add(ident.Name)
+					}
+				}
+			}
+		case *ast.AssignStmt:
+			// A plain reassignment (`p = …`) repoints the param's box; `:=` (token.DEFINE) would
+			// shadow it with a new local, which is not a reassignment of the parameter.
+			if n.Tok != token.DEFINE {
+				for _, lhs := range n.Lhs {
+					if ident, ok := lhs.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
+						reassigned.Add(ident.Name)
+					}
+				}
+			}
+		}
+
+		return true
+	})
+
+	for _, name := range compared.Keys() {
+		if reassigned.Contains(name) {
+			v.nilSafePtrParamNames.Add(name)
+		}
+	}
+}
+
+// isDerefdPointerParamIdent reports whether ident resolves to a non-blank pointer (`*T`) PARAMETER
+// — one that is emitted as a deref alias `ref var p = ref Ꮡp.val` over its box `Ꮡp`. A pointer
+// LOCAL (which already holds the box directly) and an unsafe.Pointer param are excluded. Used both
+// to drive the box (`Ꮡp`) form in `==`/`!=` comparisons and to gate the nil-safe deref accessor.
+func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {
+	if ident == nil || ident.Name == "" || ident.Name == "_" || !v.identIsParameter(ident) {
+		return false
+	}
+
+	identType := v.getIdentType(ident)
+
+	if identType == nil {
+		return false
+	}
+
+	_, isPtr := identType.Underlying().(*types.Pointer)
+
+	return isPtr
 }
 
 func getParameters(signature *types.Signature, addRecv bool) *types.Tuple {

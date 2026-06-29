@@ -384,6 +384,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerParamNilWalk() => CheckTarget("PointerParamNilWalk");
+
+    [TestMethod]
     public void CheckPointerParamWalk() => CheckTarget("PointerParamWalk");
 
     [TestMethod]

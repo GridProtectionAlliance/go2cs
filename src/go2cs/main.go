@@ -126,6 +126,14 @@ type Visitor struct {
 	currentFuncPrefix    *strings.Builder
 	paramNames           HashSet[string]
 	paramObjects         map[types.Object]bool
+	// nilSafePtrParamNames holds the raw names of pointer PARAMETERS that are compared with `==`/
+	// `!=` (against nil or another pointer) anywhere in the current function body — i.e. params
+	// walked to a nil terminator (`for p != nil { …; p = p.next }`). For these, the deref-alias and
+	// any pointer-reassignment re-alias use the nil-safe `Ꮡp.DerefOrNil()` accessor instead of
+	// `Ꮡp.val`, so re-aliasing to a nil box yields a ref to default(T) (never read while p is nil)
+	// rather than throwing a nil-pointer dereference. Populated per function in visitFuncDecl;
+	// other (non-nil-compared) pointer params keep the plain `.val` form (zero golden churn).
+	nilSafePtrParamNames HashSet[string]
 	varNames             map[*types.Var]string
 	hasDefer             bool
 	hasRecover           bool
@@ -186,6 +194,13 @@ const TypeAliasDot = "\uA4F8"                 // Variants: ꓸ
 const ChannelLeftOp = "\u1438\uA7F7"          // Example: `ch.ᐸꟷ(val)` for `ch <- val`
 const ChannelRightOp = "\uA7F7\u1433"         // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 const PointerDerefOp = "~"                    // Example: `~ptr` for dereferencing a pointer
+
+// NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.val` to re-alias a
+// deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike
+// `.val` (which throws on a nil box), it returns a ref to a shared default(T) slot when the box is
+// nil — the ref is never read while the box is nil, so the standard `*p` panic semantics are
+// preserved (a genuine nil deref still uses `~`/`.val`). Includes `()` as it is a method call.
+const NilSafeDerefAccessor = "DerefOrNil()"
 
 var keywords = NewHashSet([]string{
 	// The following are all valid C# keywords and types, when encountered in Go code they should be
