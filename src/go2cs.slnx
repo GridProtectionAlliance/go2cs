@@ -136,6 +136,7 @@
     <Project Path="Tests/Behavioral/PointerCopyWalk/PointerCopyWalk.csproj" />
     <Project Path="Tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerToPointer/PointerToPointer.csproj" />
+    <Project Path="Tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="Tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />

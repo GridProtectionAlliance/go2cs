@@ -45,6 +45,39 @@ func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
 	return getSanitizedIdentifier(sel.Name) == getSanitizedIdentifier(obj.Name())
 }
 
+// structFieldReachable reports whether a field named `name` is reachable on the struct — either
+// as a direct field or promoted through an embedded (anonymous) field, including an embedded
+// pointer. The deref decision for a pointer's field selector must consider promoted fields too:
+// otherwise `x.PromotedField` on a `ж<T>` box is emitted without a deref, and the box has no such
+// member (CS1061). Go forbids embedding cycles, so the recursion terminates.
+func structFieldReachable(structType *types.Struct, name string) bool {
+	for i := range structType.NumFields() {
+		field := structType.Field(i)
+
+		if field.Name() == name {
+			return true
+		}
+
+		if !field.Embedded() {
+			continue
+		}
+
+		embType := field.Type()
+
+		if ptr, ok := embType.Underlying().(*types.Pointer); ok {
+			embType = ptr.Elem()
+		}
+
+		if embStruct, ok := embType.Underlying().(*types.Struct); ok {
+			if structFieldReachable(embStruct, name) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
 	// Check if this is a method value being used in an assignment
 	if v.isMethodValue(selectorExpr, context.isCallExpr) && context.isAssignment {
@@ -132,18 +165,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					// Check if the field belongs to the struct that the pointer points to, rather than
 					// to the pointer itself, if so, the pointer has been automatically dereferenced
 					if _, ok := obj.(*types.Var); ok {
-						// Make sure the field is not receiver target
+						// Make sure the field is not receiver target. The field may be a DIRECT member or
+						// PROMOTED through an embedded field — both auto-dereference the pointer in Go, so
+						// the check must recurse into embeds (a direct-fields-only check missed promoted
+						// fields → `x.PromotedField` on a `ж<T>` box without a deref → CS1061).
 						if structType, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
-							for i := range structType.NumFields() {
-								field := structType.Field(i)
-								if field.Name() == selectorExpr.Sel.Name {
-									// If the field belongs to the struct, automatically dereference the pointer
-									if context.isAssignment {
-										// Left-hand side of assignment cannot use pointer dereference operator
-										return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
-									} else {
-										return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
-									}
+							if structFieldReachable(structType, selectorExpr.Sel.Name) {
+								// If the field belongs to the struct, automatically dereference the pointer
+								if context.isAssignment {
+									// Left-hand side of assignment cannot use pointer dereference operator
+									return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+								} else {
+									return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								}
 							}
 						}

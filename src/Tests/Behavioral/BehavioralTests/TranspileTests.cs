@@ -285,6 +285,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]
