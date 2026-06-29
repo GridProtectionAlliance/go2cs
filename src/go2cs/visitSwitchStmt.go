@@ -8,6 +8,37 @@ import (
 	"slices"
 )
 
+// caseBodyHasSwitchBreak reports whether a switch case body contains a bare `break` that targets the
+// SWITCH itself — i.e. a `break` not enclosed by a nested loop/switch/select (which would catch it)
+// or a function literal. A Go `break` inside a switch case exits the switch; when the switch is
+// lowered to an `if / else if` chain (no enclosing C# switch), that `break` has no target (CS0139),
+// so such a case body is wrapped in a `do { … } while (false)` whose `break` exits the case.
+func caseBodyHasSwitchBreak(body []ast.Stmt) bool {
+	found := false
+
+	for _, stmt := range body {
+		ast.Inspect(stmt, func(n ast.Node) bool {
+			if found {
+				return false
+			}
+
+			switch node := n.(type) {
+			case *ast.ForStmt, *ast.RangeStmt, *ast.SwitchStmt, *ast.TypeSwitchStmt, *ast.SelectStmt, *ast.FuncLit:
+				return false // a nested loop/switch/select/closure catches its own breaks
+			case *ast.BranchStmt:
+				if node.Tok == token.BREAK && node.Label == nil {
+					found = true
+					return false
+				}
+			}
+
+			return true
+		})
+	}
+
+	return found
+}
+
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	var caseClauses []*ast.CaseClause
 	var caseHasFallthroughStmt []bool
@@ -280,8 +311,23 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 			v.indentLevel++
 
+			// A Go `break` targeting this (now if-else) switch has no C# target — wrap the body in a
+			// `do { … } while (false)` so the `break` exits the case. Only when such a break exists,
+			// to avoid disturbing every other case.
+			switchBreakWrap := caseBodyHasSwitchBreak(caseClause.Body)
+
+			if switchBreakWrap {
+				v.writeOutput("do {")
+				v.indentLevel++
+			}
+
 			for _, stmt := range caseClause.Body {
 				v.visitStmt(stmt, []StmtContext{})
+			}
+
+			if switchBreakWrap {
+				v.indentLevel--
+				v.writeOutput("%s} while (false);", v.newline)
 			}
 
 			v.targetFile.WriteString(v.newline)

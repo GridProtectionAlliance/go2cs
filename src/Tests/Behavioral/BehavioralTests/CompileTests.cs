@@ -486,6 +486,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSwitchBreakInCase() => CheckTarget("SwitchBreakInCase");
+
+    [TestMethod]
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
