@@ -4,6 +4,26 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+[GoType("[4]nint")] partial struct grid;
+
+[GoRecv] internal static nint firstTwo(this ref grid b) {
+    nint total = 0;
+    foreach (var (_, v) in b.val[..2]) {
+        total += v;
+    }
+    return total;
+}
+
+internal static nint sumParam(ж<grid> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+    nint total = 0;
+    foreach (var (_, v) in p.val[..]) {
+        total += v;
+    }
+    return total;
+}
+
 internal static void Main() {
     ref var arr = ref heap<array<nint>>(out var Ꮡarr);
     arr = new nint[]{10, 20, 30, 40, 50}.array();
@@ -20,6 +40,9 @@ internal static void Main() {
     fmt.Println(three, len(three), cap(three));
     full[0] = 99;
     fmt.Println(arr[0]);
+    ref var g = ref heap<grid>(out var Ꮡg);
+    g = new grid(new nint[]{2, 4, 6, 8}.array());
+    fmt.Println(g.firstTwo(), sumParam(Ꮡg));
 }
 
 } // end main_package

@@ -509,6 +509,29 @@ func (v *Visitor) exprIsDerefdPointerParam(expr ast.Expr) bool {
 	return isPtr
 }
 
+// exprIsDerefAliasedPointer reports whether expr is a bare identifier that is a deref-aliased
+// pointer — a pointer PARAMETER or a pointer RECEIVER, both emitted as the pointed-to value
+// (`ref T x`, with the box `Ꮡx` separate), not the box itself. A pointer LOCAL, by contrast, holds
+// the box directly. Callers that would otherwise deref a pointer (`~x`) must skip it for these,
+// since `x` is already the value (a `~` on it would deref a non-pointer → CS0023).
+func (v *Visitor) exprIsDerefAliasedPointer(expr ast.Expr) bool {
+	if v.exprIsDerefdPointerParam(expr) {
+		return true
+	}
+
+	ident, ok := expr.(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+		return true
+	}
+
+	return false
+}
+
 // bodyCallsCaptureModeMethodOn reports whether the body calls a capture-mode method with
 // the given identifier as the (value) receiver — meaning that identifier must be boxed.
 func (v *Visitor) bodyCallsCaptureModeMethodOn(ident *ast.Ident, body ast.Node) bool {

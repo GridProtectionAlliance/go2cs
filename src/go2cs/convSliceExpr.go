@@ -43,11 +43,26 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	// box `ж<array<T>>` has no slice/range members (its underlying `array<T>` does), so operate on
 	// the dereferenced array — `(~p).slice(…)` / `(~p)[..]` — instead of `p.slice(…)` (CS1929). The
 	// `(*[N]T)(ptr)` pointer-CAST form is handled by the Span path above (an explicit cast, not a
-	// pointer-to-array value), so it is unaffected.
+	// pointer-to-array value), so it is unaffected. A deref-aliased pointer PARAMETER or RECEIVER is
+	// EXCLUDED: it is emitted as the array value itself (`ref array<T> p` / `ref pageBits b`), which
+	// is sliced directly — a `~` on it would deref a non-pointer (CS0023). Only a pointer-to-array
+	// box (a local, a field, a call result) needs the `~`.
 	if xType := v.getType(sliceExpr.X, false); xType != nil {
 		if ptr, ok := xType.Underlying().(*types.Pointer); ok {
 			if _, isArr := ptr.Elem().Underlying().(*types.Array); isArr {
-				ident = "(" + PointerDerefOp + ident + ")"
+				if v.exprIsDerefAliasedPointer(sliceExpr.X) {
+					// A deref-aliased pointer PARAMETER/RECEIVER is the pointed-to value, not a box.
+					// For a NAMED array type (`*pageBits` → `ref pageBits b`) that value is the wrapper,
+					// which has no slice/range members — reach its underlying `array<T>` via `.val`
+					// (`b.val[..]`). For an ANONYMOUS array (`*[N]T` → `ref array<T> p`) the value IS the
+					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023).
+					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
+						ident += ".val"
+					}
+				} else {
+					// A pointer-to-array BOX (a local, field, or call result) is dereferenced first.
+					ident = "(" + PointerDerefOp + ident + ")"
+				}
 			}
 		}
 	}

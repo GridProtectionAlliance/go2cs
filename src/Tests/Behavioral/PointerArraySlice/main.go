@@ -6,7 +6,31 @@ import "fmt"
 // box `ж<array<T>>` has no slice/range members — its underlying `array<T>` does — so the
 // converter must operate on the dereferenced array: `(~p).slice(…)` / `(~p)[..]`, not
 // `p.slice(…)` (CS1929). Mirrors the runtime's select.go `cas1[:ncases:ncases]` and
-// mprof.go `stk[:n:n]`, where the operand is a `*[N]T`.
+// mprof.go `stk[:n:n]`, where the operand is a `*[N]T`. A deref-aliased pointer PARAMETER or
+// RECEIVER is the EXCEPTION — it is emitted as the array value itself, so it is sliced directly
+// (a `~` would deref a non-pointer, CS0023). See firstTwo (receiver) and sumParam (parameter).
+
+type grid [4]int
+
+// firstTwo slices the receiver (`b *grid`), which is emitted as the value `ref grid b` — `b[:2]`
+// must be `b[..2]`, not `(~b)[..2]`.
+func (b *grid) firstTwo() int {
+	total := 0
+	for _, v := range b[:2] {
+		total += v
+	}
+	return total
+}
+
+// sumParam slices the pointer parameter `p *grid` (deref-aliased), also directly: `p[:]` -> `p[..]`.
+func sumParam(p *grid) int {
+	total := 0
+	for _, v := range p[:] {
+		total += v
+	}
+	return total
+}
+
 func main() {
 	arr := [5]int{10, 20, 30, 40, 50}
 	p := &arr
@@ -26,4 +50,8 @@ func main() {
 	// A slice over the array pointer shares the array's backing storage.
 	full[0] = 99
 	fmt.Println(arr[0])
+
+	// Receiver and parameter forms: sliced directly (no `~`).
+	g := grid{2, 4, 6, 8}
+	fmt.Println(g.firstTwo(), sumParam(&g))
 }
