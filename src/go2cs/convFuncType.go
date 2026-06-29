@@ -81,7 +81,13 @@ func (v *Visitor) getSignature(funcType *ast.FuncType) *types.Signature {
 			params = append(params, types.NewVar(token.NoPos, nil, "_", paramType))
 		} else {
 			for _, paramName := range param.Names {
-				params = append(params, types.NewVar(token.NoPos, nil, paramName.Name, paramType))
+				// Use the shadow-renamed name for the parameter DECLARATION so it matches the body.
+				// A function-literal parameter that shadows an enclosing local is renamed (`gp`→`gpΔ1`)
+				// — C# forbids a lambda param shadowing an enclosing local (CS0136) — and the body's
+				// uses already resolve to that name; emitting the bare `gp` in the signature leaves the
+				// body's `gpΔ1` undeclared (CS0103). getIdentName returns the raw name when not renamed
+				// (a plain func type, or a non-shadowing param), so other signatures are unchanged.
+				params = append(params, types.NewVar(token.NoPos, nil, v.getIdentName(paramName), paramType))
 			}
 		}
 	}
