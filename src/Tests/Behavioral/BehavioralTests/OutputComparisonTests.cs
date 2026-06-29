@@ -298,6 +298,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerEmbeddingPromotion() => CheckTarget("PointerEmbeddingPromotion");
+
+    [TestMethod]
     public void CheckPointerFieldArrayElementAddress() => CheckTarget("PointerFieldArrayElementAddress");
 
     [TestMethod]

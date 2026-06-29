@@ -176,8 +176,11 @@ internal class StructTypeTemplate : TemplateBase
                             collected.Add((memberType, memberName));
 
                         // An embedded struct field (Go embedding: the field name equals its type's
-                        // simple name) contributes its own members transitively.
-                        if (GetSimpleName(memberType) == memberName)
+                        // simple name) contributes its own members transitively. A POINTER embed
+                        // (`*traceBuf` → field type `ж<traceBuf>`) is an embed too, so compare against
+                        // the dereferenced type name — `GetSimpleName` appends `.val` for a pointer,
+                        // which would never equal the bare field name.
+                        if (GetSimpleName(GeneratorExecutionContextExtensions.GetUnderlyingTypeName(memberType)) == memberName)
                             collect(memberType, seenTypes);
                     }
                 }
@@ -231,10 +234,12 @@ internal class StructTypeTemplate : TemplateBase
                         promotedStructMethods.Add(m);
                 }
 
-                // Recurse into nested embedded struct fields (field name == type simple name).
+                // Recurse into nested embedded struct fields (field name == type simple name). A
+                // POINTER embed (`*traceBuf` → `ж<traceBuf>`) is an embed too — compare against the
+                // dereferenced type name (`GetSimpleName` appends `.val` for a pointer).
                 foreach ((string memberType, string memberName, _, _) in decl.GetStructMembers(comp!, true))
                 {
-                    if (GetSimpleName(memberType) == memberName)
+                    if (GetSimpleName(GeneratorExecutionContextExtensions.GetUnderlyingTypeName(memberType)) == memberName)
                         collectPromotedMethods(memberType, seenTypes);
                 }
             }

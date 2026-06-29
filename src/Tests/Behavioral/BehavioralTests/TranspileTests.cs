@@ -330,6 +330,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]
+    public void CheckPointerEmbeddingPromotion() => CheckTarget("PointerEmbeddingPromotion");
+
+    [TestMethod]
     public void CheckPointerFieldArrayElementAddress() => CheckTarget("PointerFieldArrayElementAddress");
 
     [TestMethod]
