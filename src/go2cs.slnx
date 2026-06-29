@@ -186,6 +186,7 @@
     <Project Path="Tests/Behavioral/UntypedNestedSliceComposite/UntypedNestedSliceComposite.csproj" />
     <Project Path="Tests/Behavioral/UnnamedParams/UnnamedParams.csproj" />
     <Project Path="Tests/Behavioral/UnsafeOperations/UnsafeOperations.csproj" />
+    <Project Path="Tests/Behavioral/UnsafePointerArgPassing/UnsafePointerArgPassing.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
     <Project Path="Tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />

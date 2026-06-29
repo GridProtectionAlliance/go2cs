@@ -434,6 +434,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]
+    public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
+
+    [TestMethod]
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
 
     [TestMethod]

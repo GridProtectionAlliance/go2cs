@@ -432,6 +432,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]
+    public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
+
+    [TestMethod]
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
 
     [TestMethod]

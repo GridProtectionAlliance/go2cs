@@ -244,10 +244,35 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// for `...*T`. When the call spreads a slice into the variadic (`f(s...)`), the
 				// argument is the whole slice, not a single element pointer, so the element
 				// address-of treatment (which would emit `Ꮡs`) must be skipped.
-				ident := getIdentifier(callExpr.Args[i])
+				// An `unsafe.Pointer` argument passed to an `unsafe.Pointer` parameter is passed as the
+				// `@unsafe.Pointer` struct directly — NOT reduced to its inner `uintptr` via `.val`.
+				// `.val` (a uintptr) converts implicitly to BOTH the `@unsafe.Pointer` parameter AND any
+				// same-named method's `ж<T>` overload (golib has uintptr↔both), so the call goes
+				// ambiguous — e.g. `add(p, x)` between the free `add(@unsafe.Pointer,…)` and a
+				// `notInHeap.add(ж<…>,…)` extension (CS0121). The struct is an exact match for the
+				// parameter, so it disambiguates.
+				paramIsUnsafePtr := false
 
-				if !v.isPointer(ident) || v.identIsParameter(ident) {
-					callExprContext.argTypeIsPtr[i] = true
+				if basic, ok := paramType.Underlying().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
+					paramIsUnsafePtr = true
+				}
+
+				argIsUnsafePtr := false
+
+				if argType := v.getType(callExpr.Args[i], false); argType != nil {
+					if basic, ok := argType.Underlying().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
+						argIsUnsafePtr = true
+					}
+				}
+
+				if paramIsUnsafePtr && argIsUnsafePtr {
+					// pass the @unsafe.Pointer struct directly; no argTypeIsPtr / `.val`
+				} else {
+					ident := getIdentifier(callExpr.Args[i])
+
+					if !v.isPointer(ident) || v.identIsParameter(ident) {
+						callExprContext.argTypeIsPtr[i] = true
+					}
 				}
 			}
 		}
