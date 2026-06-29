@@ -432,6 +432,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStringZeroValueConcat() => CheckTarget("StringZeroValueConcat");
 
     [TestMethod]
+    public void CheckStructFieldNamedOther() => CheckTarget("StructFieldNamedOther");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]
