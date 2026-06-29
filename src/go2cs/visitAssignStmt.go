@@ -373,6 +373,35 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		// mixed declared/reassigned tuple, emit `var` per newly-declared element instead.
 		mixedDeclare := declaredCount > 0 && reassignedCount > 0
 
+		// A tuple element whose address is taken (`list, delta := netpoll(0); injectglist(&list)`)
+		// must be heap-boxed so its `Ꮡlist` companion exists — the combined `var (list, delta) = …`
+		// deconstruction cannot create it (a missing box → CS0103, and a `Ꮡ(value)` copy fallback
+		// would silently lose writes through the pointer). Emit each escaping element's heap decl
+		// (`ref var list = ref heap<gList>(out var Ꮡlist);`) first, then a mixed deconstruction-
+		// ASSIGNMENT: the escaping element is the pre-declared ref-local (so the deconstructed value
+		// lands in the box) and the rest declare with `var` — handled by the mixedDeclare path with a
+		// per-element `escaping` skip. Only when at least one element escapes; otherwise unchanged.
+		escaping := make([]bool, lhsLen)
+		escapingHeapDecls := ""
+
+		// Only a pure new-declaration tuple (`:=`, no reassigned element). Escaping elements are not
+		// counted in declaredCount (the heap-decl path owns them), so the gate is reassignedCount.
+		if assignStmt.Tok == token.DEFINE && reassignedCount == 0 && lhsLen > 1 {
+			for i := range lhsExprs {
+				if ident := getIdentifier(lhsExprs[i]); ident != nil {
+					if decl := v.convertToHeapTypeDecl(ident, false); decl != "" {
+						escaping[i] = true
+						escapingHeapDecls += decl + v.newline + v.indent(v.indentLevel)
+					}
+				}
+			}
+		}
+
+		if escapingHeapDecls != "" {
+			mixedDeclare = true
+			result.WriteString(escapingHeapDecls)
+		}
+
 		// Handle LHS
 		if declaredCount > 0 && !mixedDeclare {
 			if declaredCount > 1 || v.options.preferVarDecl {
@@ -424,8 +453,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			lhsExpr := v.convExpr(lhs, []ExprContext{context, lambdaContext})
 			leftExprs.Add(lhsExpr)
 
-			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple.
-			if mixedDeclare && ident != nil && ident.Name != "_" && !v.isReassignment(ident) {
+			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
+			// escaping element is already declared by its heap decl above, so it takes no `var`.
+			if mixedDeclare && ident != nil && ident.Name != "_" && !v.isReassignment(ident) && !escaping[i] {
 				result.WriteString("var ")
 			}
 

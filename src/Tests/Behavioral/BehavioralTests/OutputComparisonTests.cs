@@ -403,6 +403,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

@@ -239,6 +239,20 @@ frac, e := normalize(frac)   // frac is the existing parameter; e is new
 (frac, var e) = normalize(frac);
 ```
 
+The same per-element mechanism handles a destructured element whose **address is taken** (`list, delta := netpoll(0); injectglist(&list)`). Such a local must be heap-boxed so its `Ꮡlist` companion exists, but the combined `var (list, delta) = …` deconstruction cannot declare it as a `ref var … = ref heap(…)`. The converter emits the escaping element's heap declaration first, then a mixed deconstruction-assignment in which the escaping element is the pre-declared box ref-local and the rest declare with `var`:
+
+```go
+list, delta := netpoll(0)
+injectglist(&list)
+```
+```csharp
+ref var list = ref heap<gList>(out var Ꮡlist);
+(list, var delta) = netpoll(0);     // list is the box ref-local; delta is newly declared
+injectglist(Ꮡlist);                 // Ꮡlist now exists
+```
+
+Without this, `&list` emits `Ꮡlist` with no box (CS0103), and the `Ꮡ(value)` copy fallback would silently lose writes made through the pointer. (Guarded by the `TupleDestructureEscapingLocal` behavioral test — a mutate-through-pointer proves the real local is updated; runtime exercises it in the `netpoll` poll loops.)
+
 ## Short Variable Redeclaration (Shadowing)
 
 When using Go's short variable declaration syntax, e.g., `x := 2`, a variable can be redeclared in a lesser (nested) scope. The inner declaration "shadows" the outer one: the inner instance is manipulated while the outer value is preserved, and once the inner scope ends the outer variable still holds its original value.
