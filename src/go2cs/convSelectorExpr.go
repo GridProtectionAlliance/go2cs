@@ -212,27 +212,50 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 		return false
 	}
 
-	// Walk the base, peeling value-field selectors, until reaching a pointer-typed selector — the
-	// chain `o.h.wait` (base `o.h` is the pointer) or `gp.m.mLockProfile.waitTime` (base
-	// `gp.m.mLockProfile` is a value, peel to `gp.m`, the pointer). The chain MUST bottom out at a
-	// SELECTOR pointer, not a bare ident: an ident base is the method's receiver or a deref'd pointer
-	// parameter (both addressable `ref`s, bound directly) or a pointer local (handled above).
+	// Walk the base, peeling value-field selectors, until reaching the pointer the chain is rooted
+	// at — `o.h.wait` (base `o.h` is the pointer field) or `mp.mLockProfile.waitTime` (peel
+	// `mp.mLockProfile` to `mp`, a `*m` pointer local). The root may be a pointer-to-struct SELECTOR
+	// (always an rvalue deref) or a pointer-to-struct LOCAL identifier (the box is accessed via `~`,
+	// also an rvalue). It must NOT be the method's RECEIVER or a deref'd pointer PARAMETER: those are
+	// emitted as an addressable `ref`, so `f.c.Get()` binds directly and routing them through `&`
+	// would emit `Ꮡf.of(…)` with no `Ꮡf` box (the historical ReceiverFieldMethodCall regression).
 	base := sel.X
 
 	for {
-		baseSel, isSelector := base.(*ast.SelectorExpr)
+		switch b := base.(type) {
+		case *ast.SelectorExpr:
+			if ptrType, ok := v.getType(b, false).(*types.Pointer); ok {
+				_, ok := ptrType.Elem().Underlying().(*types.Struct)
+				return ok
+			}
 
-		if !isSelector {
+			// A value-field selector — peel to its own base and keep walking toward the root.
+			base = b.X
+		case *ast.Ident:
+			// Root identifier: route a pointer-to-struct LOCAL only (its box is dereferenced via `~`,
+			// an rvalue). A deref'd pointer parameter and the receiver are addressable refs.
+			ptrType, ok := v.getType(b, false).(*types.Pointer)
+
+			if !ok {
+				return false
+			}
+
+			if _, ok := ptrType.Elem().Underlying().(*types.Struct); !ok {
+				return false
+			}
+
+			if v.identIsParameter(b) {
+				return false
+			}
+
+			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && b.Name == recvName {
+				return false
+			}
+
+			return true
+		default:
 			return false
 		}
-
-		if ptrType, ok := v.getType(baseSel, false).(*types.Pointer); ok {
-			_, ok := ptrType.Elem().Underlying().(*types.Struct)
-			return ok
-		}
-
-		// A value-field selector — peel to its own base and keep walking toward the pointer root.
-		base = baseSel.X
 	}
 }
 

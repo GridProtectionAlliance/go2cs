@@ -30,14 +30,28 @@ type owner struct {
 }
 
 func bump(o *owner, d int64) {
-	o.h.wait.add(d)        // one level: o.h.of(holder.Ꮡwait)
+	o.h.wait.add(d)         // one level: o.h.of(holder.Ꮡwait)
 	o.deep.prof.wait.add(d) // two levels: o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait)
+}
+
+// The chain may also root at a pointer LOCAL (`mp`, a `*holder`) rather than a pointer field — its
+// box is dereferenced via `~`, also an rvalue, so it routes the same way: `mp.of(holder.Ꮡprof)…`.
+// (A deref'd pointer parameter or the receiver, both addressable refs, are excluded.) Mirrors
+// runtime's `mp := getg().m; mp.mLockProfile.waitTime.Load()`.
+func viaPointerLocal(o *owner, d int64) int64 {
+	mp := o.h // mp is a *holder pointer local
+	mp.prof.wait.add(d)
+	mp.prof.wait.add(d)
+	return mp.prof.wait.get()
 }
 
 func main() {
 	o := &owner{h: &holder{}, deep: &holder{}}
 	bump(o, 5)
 	bump(o, 5)
-	fmt.Println(o.h.wait.get())        // 10
+	fmt.Println(o.h.wait.get())         // 10
 	fmt.Println(o.deep.prof.wait.get()) // 10
+
+	o2 := &owner{h: &holder{}}
+	fmt.Println(viaPointerLocal(o2, 4)) // 8 (two adds of 4 through the pointer local)
 }
