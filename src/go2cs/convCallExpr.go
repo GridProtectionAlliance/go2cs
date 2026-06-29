@@ -118,6 +118,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion to a NAMED numeric type (`type arenaIdx uint`, `type traceArg uint64`) whose
+		// arg is not already exactly its underlying basic — `arenaIdx(1 << b)` (int arg),
+		// `traceArg(procs)` (int32 arg). The `[GoType]` conversion operator only converts between the
+		// named type and its EXACT underlying (`nuint` / `uint64`), so a plain `(arenaIdx)(intExpr)`
+		// is CS0030. Coerce through the underlying first — `((arenaIdx)(nuint)(1 << b))` — a numeric
+		// C# cast that is exactly Go's conversion semantics. Skipped when the arg is already the
+		// underlying basic (the existing cast already binds → no churn).
+		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+			if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
+				argType := v.info.TypeOf(arg)
+
+				if argType == nil || !types.Identical(argType.Underlying(), basic) {
+					underlyingCS := v.getCSTypeName(basic)
+
+					if v.needsParentheses(arg) {
+						return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+					}
+
+					return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, expr)
+				}
+			}
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)

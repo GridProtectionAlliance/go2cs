@@ -247,6 +247,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]
+    public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
