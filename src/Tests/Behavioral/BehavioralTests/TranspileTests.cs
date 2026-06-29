@@ -470,6 +470,9 @@ public class A1_TranspileTests : BehavioralTestBase
     [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
+    [TestMethod]
+    public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)

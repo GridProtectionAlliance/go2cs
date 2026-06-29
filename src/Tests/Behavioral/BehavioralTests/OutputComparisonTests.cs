@@ -426,6 +426,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
+    [TestMethod]
+    public void CheckVarNamedAsType() => CheckTarget("VarNamedAsType");
+
     // </TestMethods>
 
     private void CheckTarget(string targetProject)

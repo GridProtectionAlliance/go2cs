@@ -29,6 +29,25 @@ func (v *Visitor) convArrayIndex(index ast.Expr) string {
 	return expr
 }
 
+// boxAccessorType qualifies the struct type name in a box-field accessor (`Type.Ꮡfield`, used by
+// `receiver.of(Type.Ꮡfield)`) with its package class ONLY when it would otherwise be shadowed by
+// the `.of()` receiver variable of the same name — pervasive in runtime, where a local is routinely
+// named after its own type: `m := getg().m; &m.park` → `m.of(runtime_package.m.Ꮡpark)`; a bare
+// `m.Ꮡpark` binds to the variable `m` (a `ж<m>`), which has no `Ꮡpark` (CS1061). A converted struct
+// is nested in its package's static class, so the qualifier is that class (`runtime_package.m`) —
+// which a same-named local cannot shadow — not a bare `m` nor `go.m` (the struct is not a direct
+// member of the `go` namespace). Qualifying only on a collision keeps every other box accessor
+// unchanged (no golden churn, Go-like un-namespaced form preserved). A `Ꮡ`-prefixed receiver (`Ꮡx`)
+// can never equal a bare type name, so those never qualify; an already-qualified cross-package type
+// (contains '.') is returned unchanged.
+func boxAccessorType(typeName, receiver string) string {
+	if typeName == receiver && !strings.Contains(typeName, ".") {
+		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
+	}
+
+	return typeName
+}
+
 // isHeapBoxedExpr reports whether the expression refers to a variable that the
 // converter has given a heap-boxed pointer companion (the "Ꮡname" form) — i.e. it
 // escapes to the heap and is not an inherently heap-allocated type. Package-level
@@ -90,7 +109,7 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 
 		boxName := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(baseIdent)), "@")
 		typeName := v.dynamicStructTypeName(operand.X)
-		fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
+		fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(operand.Sel, operand.X))
 
 		return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxName, fieldRef), true
 	}
@@ -151,7 +170,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					}
 
 					if _, ok := recvType.(*types.Named); ok {
-						fieldRef := fmt.Sprintf("%s.%s%s", convertToCSTypeName(v.getTypeName(recvType, false)), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+						fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(convertToCSTypeName(v.getTypeName(recvType, false)), ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 						// Direct-ж: the receiver box is the parameter `Ꮡx` (see
 						// packageDirectBoxReceiverMethods), so field-ref through it directly. No
@@ -183,7 +202,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 
 						typeName := convertToCSTypeName(v.getTypeName(ptrType.Elem(), false))
-						fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+						fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, structExpr), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 						return fmt.Sprintf("%s.of(%s)", structExpr, fieldRef)
 					}
 				}
@@ -209,7 +228,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// another file of the package (e.g. `&cpu.X86.HasADX`).
 					structExpr := v.convExpr(selectorExpr.X, nil)
 					typeName := v.dynamicStructTypeName(selectorExpr.X)
-					fieldRef := fmt.Sprintf("%s.%s%s", typeName, AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
+					fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
 					if v.isHeapBoxedExpr(selectorExpr.X) {
 						// When the base is itself a nested field selector or an array/slice index —
