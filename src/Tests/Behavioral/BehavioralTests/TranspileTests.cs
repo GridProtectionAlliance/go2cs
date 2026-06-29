@@ -291,6 +291,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]
+    public void CheckNamedNumericIntCast() => CheckTarget("NamedNumericIntCast");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]

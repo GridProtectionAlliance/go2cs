@@ -146,7 +146,7 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 				}
 			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {
-			rightOperand = fmt.Sprintf("(int)(%s)", rightOperand)
+			rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)
 
 			// Go's shift operators bind at the multiplicative level (tighter than `+`/`-`),
 			// but C#'s `<<`/`>>` bind looser than the additive operators. So Go's

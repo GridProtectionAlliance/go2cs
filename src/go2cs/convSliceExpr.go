@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/ast"
 	"go/token"
+	"go/types"
 	"strings"
 )
 
@@ -73,7 +74,22 @@ func (v *Visitor) getRangeIndexer(expr ast.Expr) string {
 		return v.convExpr(expr, nil)
 	}
 
-	return fmt.Sprintf("(int)(%s)", v.convExpr(expr, nil))
+	return v.intCastOperand(expr, v.convExpr(expr, nil))
+}
+
+// intCastOperand wraps an already-converted expression in a C# `(int)` cast (for a slice bound, a
+// shift count, …). When the operand's Go type is a NAMED numeric type (a `[GoType]` struct over a
+// basic), a direct `(int)(x)` is CS0030 — the generated struct only converts to its OWN underlying
+// basic — so it casts through the underlying first: `(int)(nuint)(x)`. A plain basic operand keeps
+// the bare `(int)(x)` form (no churn).
+func (v *Visitor) intCastOperand(expr ast.Expr, converted string) string {
+	if named, ok := v.getType(expr, false).(*types.Named); ok {
+		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
+			return fmt.Sprintf("(int)(%s)(%s)", v.getCSTypeName(basic), converted)
+		}
+	}
+
+	return fmt.Sprintf("(int)(%s)", converted)
 }
 
 func isIntegerLiteral(expr ast.Expr) bool {
