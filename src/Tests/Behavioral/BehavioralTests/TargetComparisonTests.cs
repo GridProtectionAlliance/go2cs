@@ -467,6 +467,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]
+    public void CheckTupleMixedDeclareReassign() => CheckTarget("TupleMixedDeclareReassign");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

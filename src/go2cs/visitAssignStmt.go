@@ -215,6 +215,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				if obj != nil {
 					if !v.identEscapesHeap[obj] {
 						declaredCount++
+					} else if lhsLen > 1 && v.convertToHeapTypeDecl(ident, false) == "" {
+						// An escaping TUPLE element is excluded from declaredCount only when it actually
+						// gets a heap-type decl — the escaping-tuple path at the gate below owns its
+						// declaration (`ref var list = ref heap(…)`). An escaping element with NO heap
+						// decl (e.g. an already-pointer local that merely gets returned, so escape
+						// analysis flags it but convertToHeapTypeDecl yields nothing) is declared nowhere
+						// else, so it must still be counted to receive a `var`; otherwise the tuple emits
+						// `(pp, now) = …` with `pp` never declared (CS0103). Single-var (lhsLen==1)
+						// escaping declarations keep the original exclusion — they route to the
+						// capture-hoist emission path which relies on declaredCount staying 0.
+						declaredCount++
 					}
 				}
 			}

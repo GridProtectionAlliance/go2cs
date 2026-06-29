@@ -196,6 +196,7 @@
     <Project Path="Tests/Behavioral/SwitchDefaultOrder/SwitchDefaultOrder.csproj" />
     <Project Path="Tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
     <Project Path="Tests/Behavioral/TupleDestructureEscapingLocal/TupleDestructureEscapingLocal.csproj" />
+    <Project Path="Tests/Behavioral/TupleMixedDeclareReassign/TupleMixedDeclareReassign.csproj" />
     <Project Path="Tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="Tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="Tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
