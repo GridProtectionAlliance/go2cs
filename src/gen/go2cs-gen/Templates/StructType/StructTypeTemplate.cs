@@ -204,10 +204,42 @@ internal class StructTypeTemplate : TemplateBase
 
         foreach ((string promotedStructType, _, _, _) in promotedStructs)
         {
-            (structDecl, compilation) = Context.GetStructDeclaration(promotedStructType);
-            IEnumerable<MethodInfo>? promotedStructMethods = structDecl is null ?[] : structDecl.GetExtensionMethods(compilation!);
+            // Collect the embedded struct's methods TRANSITIVELY — its own plus those promoted into
+            // it from a deeper embedding level (Go promotes methods through every level). A 2+-level
+            // method (e.g. top.greet from inner, via top→mid→inner) is forwarded through the 1-level
+            // accessor `target.<promotedStruct>.greet()`, which exists by the embedded struct's own
+            // one-level promotion of that method. Closest declaration of a name wins (Go's rule).
+            List<MethodInfo> promotedStructMethods = [];
+            HashSet<string> promotedMethodNames = new(StringComparer.Ordinal);
 
-            foreach (MethodInfo method in promotedStructMethods ?? [])
+            collectPromotedMethods(promotedStructType, []);
+
+            void collectPromotedMethods(string typeName, HashSet<string> seenTypes)
+            {
+                // Go forbids embedding cycles, but guard anyway.
+                if (!seenTypes.Add(typeName))
+                    return;
+
+                (StructDeclarationSyntax? decl, Compilation? comp) = Context.GetStructDeclaration(typeName);
+
+                if (decl is null)
+                    return;
+
+                foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
+                {
+                    if (promotedMethodNames.Add(m.Name))
+                        promotedStructMethods.Add(m);
+                }
+
+                // Recurse into nested embedded struct fields (field name == type simple name).
+                foreach ((string memberType, string memberName, _, _) in decl.GetStructMembers(comp!, true))
+                {
+                    if (GetSimpleName(memberType) == memberName)
+                        collectPromotedMethods(memberType, seenTypes);
+                }
+            }
+
+            foreach (MethodInfo method in promotedStructMethods)
             {
                 if (structMethodNames.Contains(method.Name))
                 {

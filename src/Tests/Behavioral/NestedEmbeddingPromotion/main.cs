@@ -9,6 +9,10 @@ partial class main_package {
     internal nint p;
 }
 
+internal static @string describe(this inner i) {
+    return fmt.Sprintf("n=%d p=%d"u8, i.n, i.p);
+}
+
 [GoType] partial struct mid {
     internal partial ref inner inner { get; }
     internal nint m;
@@ -27,6 +31,7 @@ internal static void Main() {
     x.t = 3;
     fmt.Println(x.n, x.p, x.m, x.t);
     fmt.Println(x.inner.n, x.mid.m);
+    fmt.Println(x.describe());
     x.n = 42;
     fmt.Println(x.n, x.inner.n);
 }
