@@ -212,21 +212,28 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 		return false
 	}
 
-	// The base must be a field SELECTOR (a pointer reached through another field) — not a bare
-	// ident (receiver / param / local, handled above) nor a complex expression (unsafe.Pointer cast
-	// deref, index), which keep their existing forms.
-	baseSel, ok := sel.X.(*ast.SelectorExpr)
+	// Walk the base, peeling value-field selectors, until reaching a pointer-typed selector — the
+	// chain `o.h.wait` (base `o.h` is the pointer) or `gp.m.mLockProfile.waitTime` (base
+	// `gp.m.mLockProfile` is a value, peel to `gp.m`, the pointer). The chain MUST bottom out at a
+	// SELECTOR pointer, not a bare ident: an ident base is the method's receiver or a deref'd pointer
+	// parameter (both addressable `ref`s, bound directly) or a pointer local (handled above).
+	base := sel.X
 
-	if !ok {
-		return false
+	for {
+		baseSel, isSelector := base.(*ast.SelectorExpr)
+
+		if !isSelector {
+			return false
+		}
+
+		if ptrType, ok := v.getType(baseSel, false).(*types.Pointer); ok {
+			_, ok := ptrType.Elem().Underlying().(*types.Struct)
+			return ok
+		}
+
+		// A value-field selector — peel to its own base and keep walking toward the pointer root.
+		base = baseSel.X
 	}
-
-	if ptrType, ok := v.getType(baseSel, false).(*types.Pointer); ok {
-		_, ok := ptrType.Elem().Underlying().(*types.Struct)
-		return ok
-	}
-
-	return false
 }
 
 // exprIsAlreadyBoxedPointerFieldOrElement reports whether expr is a field selector or an indexed

@@ -271,6 +271,16 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					typeName := v.dynamicStructTypeName(selectorExpr.X)
 					fieldRef := fmt.Sprintf("%s.%s%s", boxAccessorType(typeName, ""), AddressPrefix, v.structFieldBoxName(selectorExpr.Sel, selectorExpr.X))
 
+					// When the base is itself a VALUE field reached through a pointer field —
+					// `&gp.m.mLockProfile.waitTime`, base `gp.m.mLockProfile` a value field of the
+					// pointer `gp.m` — recurse to take the base's address through the pointer
+					// (`gp.m.of(mType.ᏑmLockProfile)`), then field-ref this level: `.of(…ᏑwaitTime)`.
+					// The `Ꮡ(value)` fallback would copy the chain, losing writes (atomic corruption).
+					if v.exprIsValueFieldOfPointer(selectorExpr.X) {
+						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
+					}
+
 					if v.isHeapBoxedExpr(selectorExpr.X) {
 						// When the base is itself a nested field selector or an array/slice index —
 						// `&work.sweepWaiters.lock` (field of a field) or `&stackpool[i].item.mu`

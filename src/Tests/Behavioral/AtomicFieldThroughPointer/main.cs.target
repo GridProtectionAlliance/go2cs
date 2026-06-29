@@ -16,25 +16,33 @@ partial class main_package {
     return a.v;
 }
 
+[GoType] partial struct profile {
+    internal atom wait;
+}
+
 [GoType] partial struct holder {
     internal atom wait;
+    internal profile prof;
 }
 
 [GoType] partial struct owner {
     internal ж<holder> h;
+    internal ж<holder> deep;
 }
 
 internal static void bump(ж<owner> Ꮡo, int64 d) {
     ref var o = ref Ꮡo.val;
 
     o.h.of(holder.Ꮡwait).add(d);
+    o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);
 }
 
 internal static void Main() {
-    var o = Ꮡ(new owner(h: Ꮡ(new holder(nil))));
+    var o = Ꮡ(new owner(h: Ꮡ(new holder(nil)), deep: Ꮡ(new holder(nil))));
     bump(o, 5);
     bump(o, 5);
     fmt.Println((~o).h.of(holder.Ꮡwait).get());
+    fmt.Println((~o).deep.of(holder.Ꮡprof).of(profile.Ꮡwait).get());
 }
 
 } // end main_package
