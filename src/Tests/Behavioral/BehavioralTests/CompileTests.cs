@@ -429,6 +429,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckUnnamedParams() => CheckTarget("UnnamedParams");
 
     [TestMethod]
+    public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]

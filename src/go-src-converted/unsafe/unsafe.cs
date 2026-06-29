@@ -479,7 +479,11 @@ private static uintptr AlignofType([DynamicallyAccessedMembers(DynamicallyAccess
 // A constant len argument must be representable by a value of type int;
 // if it is an untyped constant it is given type int.
 // The rules for valid uses of Pointer still apply.
-public static ж<T> Add<T>(ж<T> ptr, nint len) {
+public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
+    // Go's len is of any integer type (the `IntegerType` constraint); reduce it to the pointer
+    // offset type. A signed/unsigned/native-width argument (e.g. a `uintptr`) thus all bind here.
+    int n = int.CreateTruncating(len);
+
     if (ptr == nil)
         return new ж<T>();
 
@@ -490,7 +494,7 @@ public static ж<T> Add<T>(ж<T> ptr, nint len) {
 
     (IArray array, int index) = arrayRef.Value;
 
-    return new ж<T>(array, index + (int)len);
+    return new ж<T>(array, index + n);
 }
 
 // The function Slice returns a slice whose underlying array starts at ptr
@@ -507,20 +511,23 @@ public static ж<T> Add<T>(ж<T> ptr, nint len) {
 // if it is an untyped constant it is given type int.
 // At run time, if len is negative, or if ptr is nil and len is not zero,
 // a run-time panic occurs.
-public static slice<T> Slice<T>(ж<T> ptr, nint len) {
-    if (len < 0)
+public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
+    // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
+    int n = int.CreateTruncating(len);
+
+    if (n < 0)
         throw panic("len is negative");
 
     if (ptr == nil)
     {
-        if (len == 0)
+        if (n == 0)
             return [];
 
         throw panic("ptr is nil and len is not zero");
     }
 
     fixed (T* pointer = &ptr.val)
-        return new slice<T>(new ReadOnlySpan<T>(pointer, (int)len));
+        return new slice<T>(new ReadOnlySpan<T>(pointer, n));
 }
 
 // SliceData returns a pointer to the underlying array of the argument
@@ -548,20 +555,23 @@ public static ж<T> SliceData<T>(slice<T> slice) {
 //
 // Since Go strings are immutable, the bytes passed to String
 // must not be modified as long as the returned string value exists.
-public static @string String(ж<byte> ptr, nint len) {
-    if (len < 0)
+public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
+    // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
+    int n = int.CreateTruncating(len);
+
+    if (n < 0)
         throw panic("len is negative");
 
     if (ptr == nil)
     {
-        if (len == 0)
+        if (n == 0)
             return [];
 
         throw panic("ptr is nil and len is not zero");
     }
 
     fixed (byte* pointer = &ptr.val)
-        return new @string(new ReadOnlySpan<byte>(pointer, (int)len));
+        return new @string(new ReadOnlySpan<byte>(pointer, n));
 }
 
 // StringData returns a pointer to the underlying bytes of str.

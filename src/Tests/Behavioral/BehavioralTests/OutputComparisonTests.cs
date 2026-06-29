@@ -385,6 +385,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckUnnamedParams() => CheckTarget("UnnamedParams");
 
     [TestMethod]
+    public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]

@@ -649,6 +649,8 @@ public static @unsafe.Pointer Load(this ж<UnsafePointer> Ꮡu) {
 ```
 > The resulting numeric address is **not GC-stable** — the same caveat that applies to every `unsafe.Pointer`-as-`uintptr` use; the runtime intrinsics that consume it (e.g. `Loadp`, `StorepNoWB`) are assembly stubs, so this conversion is about producing compilable C#, not GC-correct pointer arithmetic. (The reinterpret pattern `*(*U)(unsafe.Pointer(&x))` is handled separately and is not affected.)
 
+The unsafe builtins `unsafe.Add`, `unsafe.Slice`, and `unsafe.String` accept a length/offset of **any integer type** (Go's `IntegerType` constraint, which includes `uintptr`/`uint`). golib's implementations therefore take a generic `IBinaryInteger` length, truncated to the `int` offset — so `unsafe.Slice(p, uintptrLen)` binds without an explicit cast (a plain `nint` parameter rejected a `uintptr`/`uint` argument with CS1503). (Guarded by `UnsafeBuiltinIntegerLen`.)
+
 Passing an `unsafe.Pointer` **argument to an `unsafe.Pointer` parameter** keeps the `@unsafe.Pointer` struct value — `add(p, x)`, not `add(p.val, x)`. The struct is an exact match for the parameter. Passing its inner `uintptr` (`p.val`) instead would convert implicitly to *both* the `@unsafe.Pointer` parameter and any same-named method's `ж<T>` overload (golib defines `uintptr ↔ Pointer` and `uintptr ↔ ж<T>`), making the call ambiguous (CS0121) — e.g. the runtime free function `add(unsafe.Pointer, uintptr)` versus the `(*notInHeap).add(uintptr)` method's generated `ж<notInHeap>` extension. (Guarded by `UnsafePointerArgPassing`.)
 
 ## Implicit Pointer Dereferencing

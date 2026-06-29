@@ -431,6 +431,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnnamedParams() => CheckTarget("UnnamedParams");
 
     [TestMethod]
+    public void CheckUnsafeBuiltinIntegerLen() => CheckTarget("UnsafeBuiltinIntegerLen");
+
+    [TestMethod]
     public void CheckUnsafeOperations() => CheckTarget("UnsafeOperations");
 
     [TestMethod]
