@@ -78,6 +78,69 @@ func structFieldReachable(structType *types.Struct, name string) bool {
 	return false
 }
 
+// exprIsPointerLocalField reports whether expr is a field selector `base.field` whose base is a
+// pointer LOCAL (a `*T` variable that is neither a parameter nor the receiver). Such a local holds
+// the heap box `ж<T>` directly, so `base.field` reached through the value-returning `~` deref is an
+// rvalue; the field's address `&base.field` must instead go through the box accessor
+// `base.of(T.Ꮡfield)`. A pointer parameter and the receiver are deref-aliased to a value
+// (`ref var p = ref Ꮡp.val`), so their fields are already assignable — those are excluded (handled
+// by exprIsDerefdPointerParam / the receiver paths).
+func (v *Visitor) exprIsPointerLocalField(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	baseIdent, ok := sel.X.(*ast.Ident)
+
+	if !ok {
+		return false
+	}
+
+	baseType := v.info.TypeOf(baseIdent)
+
+	if baseType == nil {
+		return false
+	}
+
+	if _, isPtr := baseType.Underlying().(*types.Pointer); !isPtr {
+		return false
+	}
+
+	if v.identIsParameter(baseIdent) {
+		return false
+	}
+
+	if obj := v.info.ObjectOf(baseIdent); obj != nil && v.currentFuncSignature != nil && v.currentFuncSignature.Recv() == obj {
+		return false
+	}
+
+	return true
+}
+
+// isPointerReceiverMethodCall reports whether the selector calls a method with a POINTER receiver
+// (`func (x *T) M()`), emitted as a `[GoRecv]` extension over `ref T` / a `ж<T>` overload. Such a
+// method needs an addressable receiver, so a value-returning `~` deref of a field receiver is an
+// rvalue (CS1510 on the generated `ref`).
+func (v *Visitor) isPointerReceiverMethodCall(selectorExpr *ast.SelectorExpr) bool {
+	sel, ok := v.info.Selections[selectorExpr]
+
+	if !ok || sel.Kind() != types.MethodVal {
+		return false
+	}
+
+	sig, ok := sel.Obj().Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return false
+	}
+
+	_, isPtr := sig.Recv().Type().(*types.Pointer)
+
+	return isPtr
+}
+
 func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context LambdaContext) string {
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
 	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
@@ -216,7 +279,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() { return r.init() }`
 	// — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
-	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X)) {
+	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
 		// When the receiver base is itself a FIELD selector on a heap-boxed value — e.g. a boxed
 		// global's atomic field, `ctrl.total.Add()` where `ctrl` is an address-taken global — the
 		// box address must go through the &-machinery, which emits `Ꮡctrl.of(controller.Ꮡtotal)`.
@@ -228,6 +291,16 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 
 		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A (non-capture) pointer-receiver method called on a FIELD of a pointer LOCAL — `c.gp.set(v)`
+	// where `c` is a `*coro` local and `set` has a pointer receiver. The `[GoRecv]` method needs an
+	// addressable receiver, but the value `~` deref of the field is an rvalue (CS1510 on the
+	// generated `ref`). Take the field's box address via the &-machinery so the call binds the `ж`
+	// overload: `c.of(coro.Ꮡgp).set(v)`.
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsPointerLocalField(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
 	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))

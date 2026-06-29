@@ -300,6 +300,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerParamInClosure() => CheckTarget("PointerParamInClosure");
 
     [TestMethod]
+    public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
