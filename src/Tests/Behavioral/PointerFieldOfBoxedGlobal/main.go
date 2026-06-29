@@ -39,9 +39,25 @@ func run() {
 	cpuprof.log.push(cpuprof.count)
 }
 
+// The same defect occurs when the pointer field is reached through a pointer LOCAL rather than a
+// boxed global — `s := h.span; s.log.push(...)` where `s` is a `*cpuProfile` local. The local holds
+// the box directly, so the pointer field `s.log` is already a ж<profBuf>; the converter must read it
+// (`(~s).log.push(...)`), not take its address (`s.of(cpuProfile.Ꮡlog)` → ж<ж<profBuf>>). Mirrors
+// runtime's `mspan.sweep`, where `s := sl.mspan` then `s.gcmarkBits.bytep(...)`.
+type holder struct{ span *cpuProfile }
+
+func viaLocal(h *holder) int {
+	s := h.span // s is a pointer LOCAL (*cpuProfile)
+	s.log.push(10)
+	return s.log.sum()
+}
+
 func main() {
 	cpuprof.log = &profBuf{}
 	run()
 	fmt.Println(cpuprof.count)     // 1
 	fmt.Println(cpuprof.log.sum()) // 1 + 1 = 2
+
+	h := &holder{span: &cpuProfile{log: &profBuf{}}}
+	fmt.Println(viaLocal(h)) // 10
 }

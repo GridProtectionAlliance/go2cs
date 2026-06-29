@@ -414,7 +414,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// addressable receiver, but the value `~` deref of the field is an rvalue (CS1510 on the
 	// generated `ref`). Take the field's box address via the &-machinery so the call binds the `ж`
 	// overload: `c.of(coro.Ꮡgp).set(v)`.
-	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsPointerLocalField(selectorExpr.X) {
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsPointerLocalField(selectorExpr.X) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}

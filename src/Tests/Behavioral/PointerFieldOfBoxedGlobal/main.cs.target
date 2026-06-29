@@ -48,11 +48,25 @@ internal static void run() {
     cpuprof.log.push(cpuprof.count);
 }
 
+[GoType] partial struct holder {
+    internal ж<cpuProfile> span;
+}
+
+internal static nint viaLocal(ж<holder> Ꮡh) {
+    ref var h = ref Ꮡh.val;
+
+    var s = h.span;
+    (~s).log.push(10);
+    return (~s).log.sum();
+}
+
 internal static void Main() {
     cpuprof.log = Ꮡ(new profBuf(nil));
     run();
     fmt.Println(cpuprof.count);
     fmt.Println(cpuprof.log.sum());
+    var h = Ꮡ(new holder(span: Ꮡ(new cpuProfile(log: Ꮡ(new profBuf(nil))))));
+    fmt.Println(viaLocal(h));
 }
 
 } // end main_package
