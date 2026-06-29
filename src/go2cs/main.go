@@ -3214,7 +3214,16 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	if obj != nil {
 		escapesHeap := v.identEscapesHeap[obj]
 
-		if !escapesHeap || isInherentlyHeapAllocatedType(identType) {
+		// An inherently heap-allocated local (pointer/slice/map/chan/interface/func) is already a
+		// reference, so it normally needs no heap box. The exception is a local captured by a closure
+		// whose address is taken INSIDE that closure (a box-ref var): the closure references it through
+		// a shared box `Ꮡname` so that writes made through `&name` inside the closure reach the outer
+		// function's storage (`mToFlush := &node{…}; run(func(){ prev := &mToFlush; *prev = … })`). A
+		// `Ꮡ(name)` copy would box a throwaway snapshot and silently lose those writes. The box must be
+		// declared here; the closure already emits `Ꮡname`/`Ꮡname.val` references for it (CS0103 until
+		// it is declared). So emit the heap box for a box-ref var even when the type is inherently
+		// heap-allocated — the same-function `&ptr` case (no closure) stays a copy box (PointerToPointer).
+		if !escapesHeap || (isInherentlyHeapAllocatedType(identType) && !v.isLambdaBoxRefVar(obj)) {
 			return ""
 		}
 	}
@@ -3269,6 +3278,31 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	}
 
 	return fmt.Sprintf("ref %s %s = ref heap<%s>(out %s%s);", csTypeName, varName, csTypeName, AddressPrefix, csIDName)
+}
+
+// isBoxedPointerLocal reports whether ident is a box-ref LOCAL of an inherently heap-allocated type
+// (pointer/slice/map/chan/interface/func) — exactly the case convertToHeapTypeDecl heap-boxes as a
+// `ж<ж<T>>` because its address is taken inside a capturing closure. For such a box, `Ꮡm.val` reads the
+// HELD reference value (which may legitimately be nil), so emission must use `.ValueSlot` (no nil-deref
+// panic) rather than the strict `.val`. A deref'd pointer PARAMETER is excluded: its box wraps the
+// pointed-to value, so `Ꮡp.val` is a genuine dereference that must keep the strict nil check.
+func (v *Visitor) isBoxedPointerLocal(ident *ast.Ident) bool {
+	obj := v.info.ObjectOf(ident)
+
+	if obj == nil || !v.isLambdaBoxRefVar(obj) {
+		return false
+	}
+
+	// A deref'd pointer PARAMETER or RECEIVER is excluded: its box `Ꮡp` wraps the pointed-to value
+	// (a `ж<T>`), so `Ꮡp.val` is a genuine dereference that must keep the strict nil check. Only a
+	// pointer/slice/map/... LOCAL gets a box that wraps the pointer value itself (a `ж<ж<T>>`), where
+	// `.val` is a non-dereferencing read of the held value. (identIsParameter misses the receiver,
+	// which is not in the parameter list — varIsDerefdPointerParam covers both.)
+	if v.varIsDerefdPointerParam(obj) {
+		return false
+	}
+
+	return isInherentlyHeapAllocatedType(v.getIdentType(ident))
 }
 
 // isInherentlyHeapAllocatedType checks if the type is inherently heap allocated,

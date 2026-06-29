@@ -99,6 +99,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
 
     [TestMethod]
+    public void CheckClosureCapturedPointerAddress() => CheckTarget("ClosureCapturedPointerAddress");
+
+    [TestMethod]
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]

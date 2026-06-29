@@ -1078,7 +1078,11 @@ public static class builtin
     public static ref T heap<T>(out ж<T> pointer)
     {
         pointer = Ꮡ<T>(default!);
-        return ref pointer.val;
+        // ValueSlot, not val: the box was just allocated, so it is structurally a non-nil pointer —
+        // the val getter's nil-pointer-dereference check is always spurious here. For a value-type T
+        // this is identical to val; for a reference-type T (a heap-boxed pointer/slice/map local whose
+        // zero value is null) it avoids a spurious panic when establishing the ref-local alias.
+        return ref pointer.ValueSlot;
     }
 
     /// <summary>
@@ -1098,7 +1102,10 @@ public static class builtin
     public static ref T heap<T>(in T target, out ж<T> pointer)
     {
         pointer = Ꮡ(target);
-        return ref pointer.val;
+        // ValueSlot, not val: a freshly allocated box is structurally non-nil, so the val getter's
+        // nil-pointer-dereference check is spurious here (identical to val for a value-type T; avoids a
+        // spurious panic for a reference-type T whose target value is null).
+        return ref pointer.ValueSlot;
     }
 
     /// <summary>

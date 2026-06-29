@@ -99,6 +99,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
 
     [TestMethod]
+    public void CheckClosureCapturedPointerAddress() => CheckTarget("ClosureCapturedPointerAddress");
+
+    [TestMethod]
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]

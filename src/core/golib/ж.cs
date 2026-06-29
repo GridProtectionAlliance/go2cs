@@ -230,7 +230,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             {
                 if (IsNull)
                     throw RuntimeErrorPanic.NilPointerDereference();
-                
+
                 return ref m_val!;
             }
 
@@ -242,6 +242,46 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
             }
 
             // Get reference to array or slice element
+            (IArray array, int index) = m_arrayIndexRef!.Value;
+
+            if (array is IArray<T> typedArray)
+                return ref typedArray[index];
+
+            throw new InvalidOperationException("Cannot get reference to value, source is not a valid struct field, array or slice reference.");
+        }
+    }
+
+    /// <summary>
+    /// Gets a reference to the value slot WITHOUT the nil-pointer-dereference check that <see cref="val"/>
+    /// performs — identical to <see cref="val"/> except it never throws.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Used only where this box is a real heap allocation (created via <c>Ꮡ</c> / <c>heap</c>, so it is
+    /// structurally a non-nil pointer) AND its value is a <em>reference</em> type that may legitimately
+    /// be null — a heap-boxed pointer, slice, map, interface, or func <em>local</em> captured by a
+    /// closure (a <c>ж&lt;ж&lt;T&gt;&gt;</c>, etc.). There <c>.val</c> is a <em>read of the held value</em>,
+    /// not a dereference of this box, so it must not panic when the held value is null: in Go,
+    /// <c>*(&amp;p)</c> where <c>p</c> is a nil <c>*T</c>/slice/map yields the nil value, no dereference
+    /// happens. Unlike <see cref="PointerExtensions.DerefOrNil{T}"/> (which returns a throwaway slot for a
+    /// nil box, so writes are lost), this returns the <em>real</em> slot — reads and writes both persist,
+    /// which the captured local requires. A genuine nil-pointer dereference (<c>~Ꮡp</c> / <c>Ꮡp.val</c>)
+    /// still routes through the strict <see cref="val"/> and panics, preserving Go semantics.
+    /// </para>
+    /// </remarks>
+    public ref T ValueSlot
+    {
+        get
+        {
+            if (m_structFieldRef is null && m_arrayIndexRef is null)
+                return ref m_val!;
+
+            if (m_structFieldRef is not null)
+            {
+                (object source, FieldRefFunc<T> fieldRefFunc) = m_structFieldRef!.Value;
+                return ref fieldRefFunc(source);
+            }
+
             (IArray array, int index) = m_arrayIndexRef!.Value;
 
             if (array is IArray<T> typedArray)

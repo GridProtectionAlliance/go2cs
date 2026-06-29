@@ -84,7 +84,16 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// deref the box directly (`Ꮡm.val`). The box `Ꮡm` is a capturable reference. Address uses
 	// (`&m`, `&m.field`) are rendered from the box name in convUnaryExpr, bypassing this rewrite.
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) {
-		return AddressPrefix + v.boxBaseName(ident) + ".val"
+		// For a box-of-POINTER (or other inherently-heap) local — `Ꮡm` is a `ж<ж<T>>` — reading the box
+		// is reading the HELD pointer value, not a dereference of it, so it must use `.ValueSlot` (no
+		// nil-pointer-dereference check): in Go reading `*(&p)` for a nil `*T`/slice/map yields the nil
+		// value, no panic. The box of a value-struct local (`ж<box>`) or a deref'd pointer PARAMETER
+		// (`ж<pointed-to-T>`) is a genuine dereference, so it keeps the strict `.val`.
+		valAccessor := ".val"
+		if v.isBoxedPointerLocal(ident) {
+			valAccessor = ".ValueSlot"
+		}
+		return AddressPrefix + v.boxBaseName(ident) + valAccessor
 	}
 
 	return getSanitizedIdentifier(v.getIdentName(ident))
