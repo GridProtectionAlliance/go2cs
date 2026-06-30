@@ -232,15 +232,42 @@ public class TypeGenerator : ISourceGenerator
                     case StructDeclarationSyntax when !string.IsNullOrWhiteSpace(typeDefinition):
                         typeName = typeDefinition;
 
+                        // A defined type whose underlying is a STRUCT (`type winlibcall libcall`) exposes
+                        // the underlying struct's fields in Go (`w.fn`). Resolve the underlying struct
+                        // (same-package or a source-referenced package) and forward its members as get/set
+                        // properties over a MUTABLE m_value, so `box.val.fn = x` (a write through a
+                        // ж<T>.val ref) persists. Non-struct underlyings (a named type over an interface or
+                        // another named type) resolve to null and keep the plain wrapper (no churn).
+                        List<(string typeName, string memberName, bool isReferenceType, bool isProperty)>? forwardedMembers = null;
+                        bool mutableValue = false;
+
+                        (StructDeclarationSyntax? underlyingStruct, Compilation? underlyingCompilation) = context.GetStructDeclaration(typeDefinition);
+
+                        if (underlyingStruct is not null && underlyingCompilation is not null)
+                        {
+                            List<(string typeName, string memberName, bool isReferenceType, bool isProperty)> members = underlyingStruct.GetStructMembers(underlyingCompilation, false);
+
+                            // Only forward + go mutable when the underlying actually contributes fields.
+                            // An empty result (e.g. a named type over an array-typed named struct whose
+                            // members are generated, not declared) keeps the plain readonly wrapper — no ripple.
+                            if (members.Count > 0)
+                            {
+                                forwardedMembers = members;
+                                mutableValue = true;
+                            }
+                        }
+
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
                             PackageName = packageName,
                             ObjectName = identifier,
                             Scope = scope,
+                            ReadOnlyValue = !mutableValue,
                             TypeName = typeName,
                             TargetTypeName = typeName,
                             TypeClass = typeDefinition,
+                            ForwardedStructMembers = forwardedMembers,
                             UsingStatements = usingStatements
                         }
                         .Generate();

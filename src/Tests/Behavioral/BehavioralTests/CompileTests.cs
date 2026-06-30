@@ -342,6 +342,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]
+    public void CheckNamedTypeOverStruct() => CheckTarget("NamedTypeOverStruct");
+
+    [TestMethod]
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]

@@ -494,7 +494,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (value.IsNull)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        return value.m_val;
+        // Resolve through `val`, not the raw `m_val` field: for a struct-field reference (`Ꮡx.of(T.Ꮡf)`)
+        // or an array-element reference, the real storage lives behind `val` and `m_val` is an empty
+        // default — returning `m_val` would yield a zero-valued copy (so `(~(&x.field)).sub` read 0, e.g.
+        // a `c := &b.w; c.a` field-chain read). For a standard pointer `val` returns `m_val`, so this is
+        // identical there. Matches the IPointer<T>.operator ~ above, which already resolves via `val`.
+        return value.val;
     }
 
     static T IPointer<T>.operator ~(IPointer<T> value)
