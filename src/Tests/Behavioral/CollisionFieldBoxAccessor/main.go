@@ -47,4 +47,10 @@ func main() {
 	pid := &gm.id
 	*pid = 99
 	fmt.Println(gm.id) // 99
+
+	// A keyed composite literal whose field name is the collision identifier `mark`: the field
+	// name must be emitted unrenamed (`mark:`), matching the struct's declared field — a Δ-rename
+	// (`Δmark:`) is not a parameter of the generated constructor (CS1739).
+	h2 := holder{mark: 5, extra: 6}
+	fmt.Println(h2.mark, h2.extra) // 5 6
 }

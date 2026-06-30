@@ -39,8 +39,19 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	}
 
 	if context.source == StructSource {
-		// Struct field initializer
-		return fmt.Sprintf("%s: %s", v.convExpr(keyValueExpr.Key, nil), valueExpr)
+		// Struct field initializer. The key is a FIELD NAME, which is struct-scoped — it must use
+		// the field's DECLARED C# name (getCoreSanitizedIdentifier), NOT the package-level
+		// nameCollisions `Δ`-rename that convExpr/convIdent applies. A field named like a colliding
+		// package type/method (`type funcInfo` + `func (*Func) funcInfo()` → field `funcInfo` of
+		// `Frame`) is declared unrenamed (`funcInfo`), so a keyed literal `Frame{funcInfo: …}` must
+		// emit `funcInfo:`, not `ΔfuncInfo:` (which is not a parameter of the generated ctor → CS1739).
+		key := v.convExpr(keyValueExpr.Key, nil)
+
+		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok && nameCollisions[keyIdent.Name] {
+			key = removeSanitizationMarker(getCoreSanitizedIdentifier(keyIdent.Name))
+		}
+
+		return fmt.Sprintf("%s: %s", key, valueExpr)
 	} else if context.source == MapSource {
 		// Map key/value initializer — or, when array-backed, a SparseArray index initializer
 		return fmt.Sprintf("[%s] = %s", v.sparseArrayKey(keyValueExpr.Key, context), valueExpr)

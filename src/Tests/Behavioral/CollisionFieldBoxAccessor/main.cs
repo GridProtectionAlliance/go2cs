@@ -39,6 +39,8 @@ internal static void Main() {
     var pid = Ꮡgm.of(Δmark.Ꮡid);
     pid.val = 99;
     fmt.Println(gm.id);
+    var h2 = new holder(mark: 5, extra: 6);
+    fmt.Println(h2.mark, h2.extra);
 }
 
 } // end main_package
