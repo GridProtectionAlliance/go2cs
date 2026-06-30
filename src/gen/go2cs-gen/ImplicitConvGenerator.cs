@@ -44,6 +44,15 @@ public class ImplicitConvGenerator : ISourceGenerator
     private const string AttributeName = "GoImplicitConv";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TSource, TTarget>";
 
+    // Fully-qualified, keyword-escaped, special-types display format used to reference a FOREIGN named
+    // type unambiguously from a generated file (e.g. `global::go.@internal.abi_package.NameOff`) and to
+    // render an underlying basic as its C# keyword (`int`, `ulong`).
+    private static readonly SymbolDisplayFormat s_qualifiedFormat = new(
+        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes | SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
     public void Initialize(GeneratorInitializationContext context)
     {
 #if DEBUG_GENERATOR
@@ -120,6 +129,53 @@ public class ImplicitConvGenerator : ISourceGenerator
                 targetTypeName = targetType.GetFullTypeName(true);
             }
 
+            // Cross-package numeric conversion whose operator constructs a FOREIGN named-numeric type
+            // (declared in another assembly). Two ways this arises and both are broken by default:
+            //   • foreign SOURCE via a local alias (`GoImplicitConv<nameOff, Δhex>(Inverted = true)`,
+            //     where runtime's `nameOff` aliases `internal/abi.NameOff`): the operator is hosted in
+            //     `partial struct {sourceTypeName}` — a phantom LOCAL type, since a foreign type can't
+            //     be extended here (CS1729) — and constructs the foreign source.
+            //   • foreign TARGET via a qualified reference (`GoImplicitConv<Hx, pkg.Off>`): the host is
+            //     local, but the body still `new pkg.Off(...)`s a foreign type.
+            // In both, casting `src.val` straight to the foreign named type has no cross-assembly route
+            // (`ulong`→`NameOff` ⇒ CS0030). The constructed type is whichever side the operator builds
+            // via `new` (the LH type: source when inverted, else target). When it is foreign, construct
+            // it through its UNDERLYING basic — `new global::…NameOff((int)src.val)` — mirroring the
+            // converter's through-underlying inline cast; and if the default host (the source type) is
+            // itself foreign, relocate the operator into the LOCAL type so it can be declared at all.
+            string? hostTypeNameOverride = null, lhTypeNameOverride = null, rhTypeNameOverride = null, convExprOverride = null;
+
+            if (!string.IsNullOrWhiteSpace(valueType))
+            {
+                ITypeSymbol constructedType = inverted ? sourceType : targetType; // the type built via `new`
+                bool constructedIsForeign = !SymbolEqualityComparer.Default.Equals(constructedType.ContainingAssembly, context.Compilation.Assembly);
+
+                if (constructedIsForeign)
+                {
+                    string? constructedUnderlying = GetUnderlyingBasicName(constructedType);
+
+                    if (constructedUnderlying is not null)
+                    {
+                        string qualifiedConstructed = constructedType.ToDisplayString(s_qualifiedFormat);
+
+                        lhTypeNameOverride = qualifiedConstructed;
+                        convExprOverride = $"new {qualifiedConstructed}(({constructedUnderlying})src.val)";
+
+                        // The default host is the SOURCE type's partial struct. If that is itself
+                        // foreign it can't be extended here (CS1729 phantom); relocate into the LOCAL
+                        // target type and reference the param (RH) type fully-qualified.
+                        bool sourceIsForeign = !SymbolEqualityComparer.Default.Equals(sourceType.ContainingAssembly, context.Compilation.Assembly);
+                        bool targetIsLocal = SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly);
+
+                        if (sourceIsForeign && targetIsLocal)
+                        {
+                            hostTypeNameOverride = targetType.Name;
+                            rhTypeNameOverride = targetType.ToDisplayString(s_qualifiedFormat);
+                        }
+                    }
+                }
+            }
+
             // The emitted user-defined conversion operator's signature is (sourceTypeName,
             // targetTypeName, inverted) — `direct` vs `indirect` only changes the body. The same
             // pair can be recorded as BOTH a direct and an indirect conversion (e.g. `g` ↔ `ж<g>`),
@@ -137,7 +193,11 @@ public class ImplicitConvGenerator : ISourceGenerator
                 Indirect = indirect,
                 ValueType = valueType,
                 StructMembers = structMembers,
-                UsingStatements = usingStatements
+                UsingStatements = usingStatements,
+                HostTypeNameOverride = hostTypeNameOverride,
+                LHTypeNameOverride = lhTypeNameOverride,
+                RHTypeNameOverride = rhTypeNameOverride,
+                ConvExprOverride = convExprOverride
             }
             .Generate();
 
@@ -154,6 +214,15 @@ public class ImplicitConvGenerator : ISourceGenerator
     private static string? GetFirstClassName(CompilationUnitSyntax compilationUnit)
     {
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
+    }
+
+    // A generated named-numeric struct exposes its underlying basic value through a public `val`
+    // property (see InheritedTypeTemplate). That basic is the through-underlying cast target needed to
+    // construct a foreign named-numeric type cross-assembly. Returns null when no such property exists.
+    private static string? GetUnderlyingBasicName(ITypeSymbol type)
+    {
+        IPropertySymbol? valProperty = type.GetMembers("val").OfType<IPropertySymbol>().FirstOrDefault();
+        return valProperty?.Type.ToDisplayString(s_qualifiedFormat);
     }
 
     private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)

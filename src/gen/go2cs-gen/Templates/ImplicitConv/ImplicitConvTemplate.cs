@@ -16,17 +16,32 @@ internal class ImplicitConvTemplate : TemplateBase
     public required string? ValueType;
     public required List<(string typeName, string memberName)> StructMembers;
 
+    // Optional overrides for the cross-package numeric inverse case: the source named-numeric type is
+    // FOREIGN (declared in another assembly, e.g. `nameOff` aliasing `abi.NameOff`), so it can neither
+    // host the operator here (the default `partial struct {SourceTypeName}` would be a phantom local
+    // type → CS1729) nor be reached by a direct `ulong`→foreign-named cast (no cross-assembly route →
+    // CS0030). When set, the operator is hosted in the LOCAL type and constructs the foreign type
+    // through its underlying basic. Null preserves the default behavior byte-for-byte.
+    public string? HostTypeNameOverride = null;
+    public string? LHTypeNameOverride = null;
+    public string? RHTypeNameOverride = null;
+    public string? ConvExprOverride = null;
+
     public override string TemplateBody =>
         $$"""
-             partial struct {{SourceTypeName}}
+             partial struct {{HostTypeName}}
              {
-                 public static implicit operator {{LHTypeName}}({{RHTypeName}} src) => {{ConvExpr}};
+                 public static implicit operator {{LHTypeName}}({{RHTypeName}} src) => {{ConvExprValue}};
              }    
          """;
 
-    public string LHTypeName => Inverted ? SourceTypeName : TargetTypeName;
+    private string HostTypeName => HostTypeNameOverride ?? SourceTypeName;
 
-    public string RHTypeName => Inverted ? TargetTypeName : SourceTypeName;
+    public string LHTypeName => LHTypeNameOverride ?? (Inverted ? SourceTypeName : TargetTypeName);
+
+    public string RHTypeName => RHTypeNameOverride ?? (Inverted ? TargetTypeName : SourceTypeName);
+
+    private string ConvExprValue => ConvExprOverride ?? ConvExpr;
 
     private string ConvExpr
     {
