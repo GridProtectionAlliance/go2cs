@@ -552,7 +552,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         StringBuilder csOutput = new();
 
         stopwatch.Start();
-        int csExitCode = Exec(csExe, null, Path.GetDirectoryName(projPath), csOutputHandler);
+        int csExitCode = Exec(csExe, null, Path.GetDirectoryName(projPath), csOutputHandler, RunExecTimeoutMs);
         stopwatch.Stop();
 
         Assert.AreEqual(0, csExitCode, $"C# executable failed with exit code {csExitCode:N0}");
@@ -564,7 +564,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
         StringBuilder goOutput = new();
         
         stopwatch.Restart();
-        int goExitCode = Exec(goExe, null, Path.GetDirectoryName(projPath), goOutputHandler);
+        int goExitCode = Exec(goExe, null, Path.GetDirectoryName(projPath), goOutputHandler, RunExecTimeoutMs);
         stopwatch.Stop();
 
         Assert.AreEqual(0, goExitCode, $"Go executable failed with exit code {goExitCode:N0}");

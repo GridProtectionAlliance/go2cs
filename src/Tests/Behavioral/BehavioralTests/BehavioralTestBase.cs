@@ -56,6 +56,16 @@ public abstract class BehavioralTestBase
 
     protected static string TargetConfig { get; private set; } = "Release";
 
+    // Default timeout for build/transpile child processes (ms). Matches the ~3 min suite cap from
+    // CLAUDE.md; a child that exceeds this is treated as hung and killed (with its whole process tree)
+    // rather than blocking the suite forever via an unbounded WaitForExit.
+    protected const int DefaultExecTimeoutMs = 180_000;
+
+    // Tighter timeout for *running* a transpiled program. A deadlocked converted program (channel/
+    // goroutine hang, a process blocked on stdin) is the worst offender: it must fail one test fast,
+    // not wedge the run and leave an orphaned testhost holding a lock on BehavioralTests.dll.
+    protected const int RunExecTimeoutMs = 30_000;
+
     protected static string GetCSExecPath(string projPath, string targetProject)
     {
     #if USE_PUBLISH_PROFILES
@@ -109,12 +119,12 @@ public abstract class BehavioralTestBase
 
     public TestContext? TestContext { get; set; }
 
-    protected int Exec(string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null)
+    protected int Exec(string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs)
     {
-        return Exec(TestContext, application, arguments, workingDir, outputHandler);
+        return Exec(TestContext, application, arguments, workingDir, outputHandler, timeoutMs);
     }
 
-    protected static int Exec(TestContext? context, string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null)
+    protected static int Exec(TestContext? context, string application, string? arguments, string? workingDir = null, DataReceivedEventHandler? outputHandler = null, int timeoutMs = DefaultExecTimeoutMs)
     {
         ProcessStartInfo startInfo = new()
         {
@@ -126,6 +136,15 @@ public abstract class BehavioralTestBase
             RedirectStandardOutput = true,
             RedirectStandardError = true
         };
+
+        // Disable MSBuild node reuse for every child we spawn. Persistent MSBuild worker nodes left
+        // alive by in-test "dotnet build" calls are the root cause of the testhost/MSB3027 lock
+        // contention: they keep handles on target bin+obj (and on BehavioralTests.dll) across runs.
+        // Tearing them down on each child's exit removes the lingering lock-holders. Harmless for
+        // the go/go2cs/transpiled-exe children, which ignore these variables.
+        startInfo.EnvironmentVariables["MSBUILDDISABLENODEREUSE"] = "1";
+        startInfo.EnvironmentVariables["DOTNET_CLI_TELEMETRY_OPTOUT"] = "1";
+        startInfo.EnvironmentVariables["DOTNET_NOLOGO"] = "1";
 
         if (!string.IsNullOrWhiteSpace(workingDir))
             startInfo.WorkingDirectory = workingDir;
@@ -164,6 +183,28 @@ public abstract class BehavioralTestBase
         process.Start();
         process.BeginOutputReadLine();
         process.BeginErrorReadLine();
+
+        if (!process.WaitForExit(timeoutMs))
+        {
+            // Hung child: kill it and its entire descendant tree so nothing it spawned (MSBuild
+            // nodes, a deadlocked transpiled program) survives to lock files or keep testhost alive.
+            try
+            {
+                process.Kill(entireProcessTree: true);
+            }
+            catch
+            {
+                // Process may have exited in the race between the timeout and the kill; ignore.
+            }
+
+            // Allow the killed tree and async output handlers a brief window to drain.
+            process.WaitForExit(5000);
+
+            throw new TimeoutException($"Process \"{application} {arguments}\" in \"{workingDir ?? Directory.GetCurrentDirectory()}\" exceeded its {timeoutMs:N0} ms timeout and was terminated along with its child process tree.");
+        }
+
+        // Per Process docs: after a timed WaitForExit(int) returns true, call the parameterless
+        // overload so the asynchronous output/error handlers are guaranteed to finish before ExitCode.
         process.WaitForExit();
 
         return process.ExitCode;
@@ -239,7 +280,7 @@ public abstract class BehavioralTestBase
 
             // If matching console output, run once after compile to ensure any first run initialization steps are completed
             if (MatchConsoleOutput(targetProject))
-                Assert.AreEqual(0, exitCode = Exec(projExe, null, csExePath), $"Initial run of \"{targetProject}\" failed with exit code {exitCode:N0}");
+                Assert.AreEqual(0, exitCode = Exec(projExe, null, csExePath, timeoutMs: RunExecTimeoutMs), $"Initial run of \"{targetProject}\" failed with exit code {exitCode:N0}");
         }
     }
 
