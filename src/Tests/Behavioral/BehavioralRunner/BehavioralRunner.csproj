@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Standalone runner for the go2cs behavioral suite (Tier 3).
+
+    Deliberately dependency-free: it orchestrates external processes (go2cs.exe, dotnet build,
+    go build, the transpiled programs) and compares files. It references NO project (not even
+    golib) and is NOT hosted in testhost.exe, so editing/rebuilding it can never collide with a
+    lingering test host's lock on its own assembly (the self-lock failure mode that the MSTest
+    harness suffers from is structurally absent here).
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>BehavioralRunner</AssemblyName>
+    <RootNamespace>BehavioralRunner</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <!-- Not part of any solution build; invoked directly via run-behavioral.ps1 / dotnet run. -->
+  </PropertyGroup>
+
+</Project>

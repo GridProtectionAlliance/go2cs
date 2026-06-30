@@ -104,6 +104,26 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
 - **testhost lock gotcha:** a stray `testhost`/`vstest.console` from a prior run can lock
   `BehavioralTests.dll` → next build fails with `MSB3027` ("file locked by testhost"). Kill it (and
   `dotnet build-server shutdown` frees bin/obj locks) before rebuilding — not a real compile error.
+  **Root cause + mitigation (2026-06-30):** the MSTest `Exec()` used an unbounded `WaitForExit()`, so a
+  hung child (a deadlocked transpiled program, or a build blocked on a lock) hung the suite forever and
+  orphaned testhost. `Exec` now has a per-call timeout (180s build/transpile, 30s run) that kills the
+  whole child **process tree**, and disables MSBuild node reuse (`MSBUILDDISABLENODEREUSE=1`) so in-test
+  builds don't leave lock-holding worker nodes; `AssemblySetup.[AssemblyCleanup]` runs
+  `dotnet build-server shutdown`. Prefer **`src/Tests/Behavioral/run-behavioral-tests.ps1`** (clears stale
+  hosts *before* the build — the lock manifests at build time — and runs with `--blame-hang`) over a bare
+  `dotnet test`.
+- **Faster alternative to MSTest — the standalone runner `src/Tests/Behavioral/BehavioralRunner`
+  (2026-06-30).** A dependency-free console app that runs the same four phases over all **180** behavioral
+  projects (the "59" figures elsewhere in this doc are stale) but is **not** hosted in testhost, so the
+  self-lock failure mode above is structurally absent. It collapses the 180 per-project `dotnet build`
+  calls into one parallel MSBuild invocation (pre-building the ~10 shared `golib`/analyzer/`core/*` deps
+  sequentially first to avoid the parallel-build MSB3026/27 race, then fanning out). **Full cold run ≈2 min
+  / warm ≈80s, all 180 green** — at parity with MSTest. Drive it via **`run-behavioral.ps1 [--filter X]
+  [--phase transpile,compile,target,output] [--update-targets] [--list]`**. Only output-compared
+  (`[GoTestMatchingConsoleOutput]`) projects are `go build`- and stdout-compared, matching MSTest
+  (library-style projects like `Constraints` have no `package main`). For a pure converter no-regression
+  check with no compile/run at all, use **`check-no-regression.ps1`** (re-transpiles every behavioral dir
+  and `git status`es the `.cs`).
 - **Run the behavioral suite via the solution, not the project:** `dotnet test src/go2cs.slnx`. Running
   `dotnet test` on `BehavioralTests.csproj` directly breaks because `$(go2csPath)` (→ `$(SolutionDir)`)
   has no solution context, so the `core\golib` ref fails to resolve. The baseline solution is now an
