@@ -6,6 +6,10 @@ partial class main_package {
 
 internal static readonly UntypedInt two32 = /* 1 << 32 */ 4294967296;
 
+internal static int64 sum(int64 n) {
+    return n;
+}
+
 internal static void Main() {
     uint64 a = 100;
     uint64 b = 3;
@@ -13,6 +17,11 @@ internal static void Main() {
     fmt.Println((uint64)two32 * a);
     fmt.Println(a >= two32);
     fmt.Println(a - (uint64)two32 % a);
+    int64 c = 1099511627783L;
+    var d = ((int64)(9223372036854775807L));
+    fmt.Println(c);
+    fmt.Println(d);
+    fmt.Println(sum(12345000054321L));
 }
 
 } // end main_package

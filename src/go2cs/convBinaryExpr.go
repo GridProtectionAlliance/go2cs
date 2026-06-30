@@ -6,6 +6,7 @@ import (
 	"go/constant"
 	"go/token"
 	"go/types"
+	"math"
 	"strconv"
 )
 
@@ -123,7 +124,51 @@ func (v *Visitor) concreteNumericCSType(t types.Type) string {
 	return ""
 }
 
+// overflowingConstLiteral reports the folded literal form of a SIGNED compile-time integer constant
+// expression whose value falls OUTSIDE the C# int32 range, or "" otherwise. C# evaluates an operator
+// expression like `1 << 63` or `12345 * 1000000000` in int32 and overflows at compile time in checked
+// mode (CS0220), whereas Go evaluates the constant in its (64-bit) type; emitting the folded value
+// (`9223372036854775807L`) computes it correctly. Scope notes:
+//   - Restricted to SIGNED targets: an unsigned constant shift already emits with a width-cast operand
+//     (`(uint64)1 << 40`) from the named-numeric path, so folding it would needlessly lose the readable
+//     `1<<40` form. The signed builtin-int64 path is the one that lacks the width cast and overflows.
+//   - In-range constants return "" so ordinary constant arithmetic keeps its readable operator form;
+//     this only fires on the overflow cases.
+func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil || tv.Type == nil {
+		return ""
+	}
+
+	basic, ok := tv.Type.Underlying().(*types.Basic)
+
+	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUnsigned != 0 {
+		return ""
+	}
+
+	val := constant.ToInt(tv.Value)
+
+	if val.Kind() != constant.Int {
+		return ""
+	}
+
+	i, exact := constant.Int64Val(val)
+
+	if !exact || (i >= math.MinInt32 && i <= math.MaxInt32) {
+		return ""
+	}
+
+	return strconv.FormatInt(i, 10) + "L"
+}
+
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
+	// A constant operator expression whose value overflows int32 must emit as the folded 64-bit
+	// literal — C# would compute the operators in int32 and overflow at compile time (CS0220).
+	if lit := v.overflowingConstLiteral(binaryExpr); lit != "" {
+		return lit
+	}
+
 	lhsType := v.getExprType(binaryExpr.X)
 	rhsType := v.getExprType(binaryExpr.Y)
 
