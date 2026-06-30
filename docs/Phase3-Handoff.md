@@ -5,29 +5,25 @@
 > **zero errors**. This is the headline goal of the whole `go2cs` project. Read
 > [`CLAUDE.md`](../CLAUDE.md) first; this doc is the focused Phase-3 playbook.
 
-## Where things stand
+## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier.** As of 2026-06-28 it is at **~1357**
-  compile errors and dropping (8 converter root fixes landed this session). It is the bottom of the
-  dependency graph, so it gates the entire upper stdlib.
-- **The "2 errors" in older notes was a MEASUREMENT ARTIFACT — it has been resolved.** The
-  `Δslice` type-vs-method collision (CS0102 ×2) was a **declaration conflict in the all-encompassing
-  `partial class runtime_package`, which suppressed member-body semantic analysis for the whole
-  class** — masking ~1960 *real* latent errors. Fixing `Δslice` (commit `1d7ecaf41`: type-side `ᴛ`
-  suffix so the type `Δsliceᴛ` and method `Δslice` no longer collide) *unmasked* them. The earlier
-  "generator desync → CS8785 cascade" hypothesis was **wrong**: there is no CS8785 and all generated
-  companions are present. So the cascade-on-rename was simply unmasking, and the type-rename is the
-  correct keystone — **the documented `Δslice` blocker is solved.**
+- **`runtime` is the foundation and the current frontier — now at ~262 compile errors** (down from
+  952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
+  it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **"runtime is the only failing package" is misleading.** `dotnet build` **skips the dependents of
   a failed project** rather than erroring them. So while `runtime` fails, the entire upper stdlib
   (`bufio`, `bytes`, `strings`, `os`, the full `fmt`, `reflect`, …) is *not being compile-checked at
-  all*. The true remaining work is "the whole library."
-- A large body of converter / golib / generator fixes is committed (see `git log`; the
-  `go2cs-phase3-progress` memory has the iteration history and per-defect rationale). The
-  2026-06-28 session landed 8 root fixes (Δslice keystone, promoted-field deref, sparse-array
-  defined-int key cast, nested pointer-assignment LHS `.val`, boxed-global atomic-field via
-  &-machinery, nested boxed-global field address `.of()` chain, named-string-literal conversion via
-  `@string`), each with a regression test; runtime 2769 → 1357.
+  all*. The true remaining work is "the whole library"; expect the count to grow (un-skipping
+  dependents surfaces their own latent defects) once `runtime` greens — **that is progress** (the
+  metric is packages-compiling, not raw error count).
+- **The era of cheap contained converter one-offs is essentially over.** The campaign cleared a long
+  tail of isolated converter bugs (escape/box-naming, shadow-renames, collision-renames, narrow/native
+  numeric casts, labeled loops, type-switch dedup, range-var reassignment, blank discards, constant
+  overflow, shift-count casts, bitwise-operand casts…). The `git log` + the `go2cs-phase3-progress`
+  memory have the full per-defect history. **What remains in `runtime` is dominated by a handful of
+  ARCHITECTURAL features** (see *Current frontier*), not one-line emit fixes.
+- The `Δslice` "2 errors" blocker from older handoffs is **solved** and was a measurement artifact —
+  see the short historical note below; do not chase it.
 
 ## Core principle — ALL SHIPS RISE TOGETHER
 
@@ -71,84 +67,138 @@ Because dependents are skipped, work **bottom-up**: get the lowest packages gree
 layer becomes measurable. Concretely:
 
 ```bash
-# 1. Reconvert the whole stdlib (ALWAYS -comments; license headers are required).
+# 1. Reconvert the whole stdlib (ALWAYS -comments; license headers are required). Build the converter
+#    first if any src/go2cs/*.go changed: (cd src/go2cs && go build -o bin/go2cs.exe .)
 #    Use -parallel 1 for a DETERMINISTIC result when chasing a specific package; -parallel 4 is
 #    faster (~3.5 min) for broad sweeps. (Per-file work is sub-second; cost is the type graph load.)
-bin/go2cs.exe -stdlib -comments -parallel 1 -go2cspath scratchpad/recon   # writes scratchpad/recon/core/<pkg>
+bin/go2cs.exe -stdlib -comments -parallel 4 -go2cspath scratchpad/recon   # writes scratchpad/recon/core/<pkg>
 
 # 2. Overlay fresh .cs + regenerated .csproj onto src/go-src-converted (keeps golib shared in core).
 bash scratchpad/overlay.sh scratchpad/recon/core      # recreate overlay.sh from the measurement-loop memory
 
-# 3. Build a package (deps build first; a failed dep's dependents are SKIPPED):
-dotnet build src/go-src-converted/<pkg>/<pkg>.csproj -c Debug -clp:ErrorsOnly
+# 3. Build a package (deps build first; a failed dep's dependents are SKIPPED). RUN FROM THE REPO ROOT
+#    — go-src-converted/Directory.Build.props auto-resolves $(go2csPath); no -p flag needed:
+dotnet build src/go-src-converted/runtime/runtime.csproj -c Debug -clp:ErrorsOnly | tee scratchpad/build.log
 #    or the whole solution: dotnet build src/go-src-converted.sln -c Debug -clp:ErrorsOnly
 
-# 4. Bucket by error code, then by message/file, to find the highest-frequency ROOT defect.
+# 4. Bucket by error code, then by message/file, to find the highest-frequency ROOT defect:
+grep -oE 'error CS[0-9]+' scratchpad/build.log | sort | uniq -c | sort -rn
+# Verify the errors are actually IN runtime (full path), not a skipped dependent:
+grep -ciE 'go-src-converted[\\/]runtime[\\/]' scratchpad/build.log
 ```
 
 **Metric = packages-compiling, not raw error count.** Fixing a file-inclusion or a foundational
-defect often *raises* the error count by un-skipping dependents that then surface their own latent
-bugs — that is progress.
+defect often *raises* the count by un-skipping dependents that then surface their own latent bugs —
+that is progress.
 
-## The `Δslice` blocker is SOLVED — and the real lesson
+**⚠ The converter is NONDETERMINISTIC across reconverts** (Go map-iteration order) — raw counts
+fluctuate ±10 between two reconverts of the same source (init-func renumbering, alias-resolution
+order). **To attribute a delta to your fix, do NOT trust the raw count: cross-reference each error's
+`file:line` against the lines your change actually emits** (e.g. confirm zero errors land on the lines
+you touched). A clean fix can show a net +1 from noise while genuinely clearing −2.
 
-`runtime` declared **both** `type slice struct{…}` and `func (a *userArena) slice(…)`. Both
-reserved-renamed to `Δslice`, colliding as a nested type + a `[GoRecv]` extension method (CS0102 ×2).
-**The fix (commit `1d7ecaf41`):** when a collision name is also golib-reserved, the type-side
-collision-avoidance (`getCollisionAvoidanceIdentifier`) appends the `ᴛ` type marker, so the TYPE
-becomes `Δsliceᴛ` while the METHOD stays `Δslice`. Only the type is renamed — the method, its call
-sites, and the go2cs-gen-generated overload are untouched, so the converter and generators stay in
-sync (no need to coordinate the generators after all).
+## Historical: the `Δslice` blocker is SOLVED (don't chase it)
 
-**The important lesson for future blockers:** the old notes claimed renaming `slice` "catastrophically
-backfires to ~1964 unrelated errors / generator desync (CS8785)". That diagnosis was **wrong**. There
-is no CS8785 and all generated companions are present. The ~1964 errors are **real latent defects**
-that the CS0102 was *masking*: a declaration conflict in the single `partial class runtime_package`
-makes Roslyn suppress member-body semantic analysis for the entire class. So "fixing Δslice explodes
-the error count" was *unmasking*, i.e. **progress** (per the packages-compiling metric), not a
-cascade. When a foundational fix raises the count, inspect a sample of the "new" errors — if they are
-genuine converter defects unrelated to the fix (as `ᏑtΔ2` = `&t` on an already-pointer local was
-here), they were masked, not caused.
+Older handoffs said runtime was "at 2 errors" (the `Δslice` CS0102). That was a **measurement
+artifact**: a duplicate `Δslice` declaration in the single `partial class runtime_package` made
+Roslyn *suppress member-body analysis for the whole class*, masking ~1960 real latent errors. Fix
+(commit `1d7ecaf41`): the type-side collision-avoidance appends the `ᴛ` marker so the TYPE is
+`Δsliceᴛ` while the METHOD stays `Δslice` (converter + generators stay in sync). **Lesson that still
+applies:** when a foundational fix *raises* the count, sample the "new" errors — if they're genuine
+converter defects unrelated to your change, they were **masked, not caused** (unmasking = progress).
+The old "renaming slice causes a CS8785 generator-desync cascade" theory was simply wrong.
 
-## Current frontier — grind runtime's now-visible defects
+## Current frontier — the architectural core (the dominant mass)
 
-Re-bucket a fresh reconvert (`build_rt*.log`) and attack the highest-frequency *root*. As of the
-2026-06-28 handoff the open buckets are (see the `go2cs-phase3-progress` memory for specifics):
-- **CS0103 ~183** — `Ꮡmheap_ʗ1`/`Ꮡtraceʗ1` (closure-captured boxed global — hard); `gpΔ1`
-  defer-closure shadow-rename mismatch (lambda param `gp` but body refs renamed `gpΔ1`).
-- **CS1929 ~128** — `atomic.Uint32.Load()` on a VALUE (internal/runtime/atomic asm-stub
-  pointer-receiver methods not routed through the box); `.slice()` on `ж<array<…>>`.
-- **CS1503 ~110** — scattered `uint`↔`nint`↔`int` call-argument coercions.
-- **CS0030 ~92** — `unsafe.Pointer → ж<T>` needs the `(uintptr)` intermediate for a standalone
-  `(*T)(p)` whose source is `unsafe.Pointer` (a 4-line convCallExpr fix was prototyped — extend the
-  isPointerCast path — but the unsafe.Pointer area has interacting gaps that make a clean behavioral
-  test hard; the round-trip is a known runtime limitation).
-- **CS0266 ~35** — narrow-integer arithmetic promotes to `int` (`it.i = i+1` on uint8;
-  `return c+('a'-'A')`; **`&^=` on a narrow/unsigned LHS** needs `flags &= unchecked((uint8)~X)` —
-  characterized in memory, blocked only by the `operator` string being written at ~5 sites that each
-  need the matching `unchecked(…)` close-paren).
-- CS1510 ~81, CS1059 ~81, CS0121 ~54, CS0021 ~43.
+Re-bucket a fresh reconvert. As of 2026-06-30 the `runtime` buckets are (full history + per-defect
+characterization in the `go2cs-phase3-progress` memory):
 
-The remaining roots are progressively harder (closure-capture, internal/runtime/atomic method
-routing, scattered numeric coercion). Prefer **contained** roots; verify churn carefully; do NOT
-grind risky numeric/multi-site edits under fatigue (it has caused regressions before).
+**~150 of the 262 are the architectural core — these need FEATURE work (golib/generator design +
+full-suite behavioral validation), not one-line emit fixes:**
+
+- **CS0030 ~59 — `unsafe.Pointer`/pointer-conversion modeling.** `unsafe.Pointer → ж<T>` standalone
+  casts; **pointer-to-array conversion `ж<array<E>>` ↔ `ж<NamedArray>`** (the `(*[2]uint64)(x)`
+  family — the `ImplicitConvGenerator` gap; a cast-then-index precedence fix (CS0021) is PAIRED with
+  this and only testable once the conversion exists). The `unsafe.Pointer`=`nuint` round-trip is a
+  known runtime limitation; this area has interacting gaps that make isolated behavioral tests hard.
+- **CS1503 ~33 — `Span`/`IByteSeq`/argument coercions** + the `pallocBits`→IArray generator forwarding
+  (an attempted forwarding lost zero-value writes — reverted; needs a value-semantics design).
+- **CS1929 ~32 — pointer-deref-chain atomic receivers.** `mp.mLockProfile.waitTime.Load()`,
+  `sgp.g.selectDone.CompareAndSwap(…)`: the receiver is built with `(~mp)` (value-deref rvalue) but
+  the ж-only atomic overload needs `.val` (ref-deref). Needs the `~`-vs-`.val` deref-form distinction
+  extended to pointer-receiver-method receivers. **This is the delicate copy-vs-box deref area the
+  memory repeatedly warns regressed under fatigue — do with full churn validation.** (The global
+  value-field atomic case was already fixed via box-the-global + `Ꮡg.of(T.Ꮡfield)` routing.)
+- **CS1061 ~26 — TypeGenerator embedding promotion.** Concentrated in **2-level nested embedding**
+  (`stackWorkBuf` embeds `stackWorkBufHdr` which has `nobj`; `workbuf.obj`) and promoted fields on
+  `abi.Type` (`.Typ`/`.Itab`). Generator work (rebuild the analyzer + regen).
+
+**Smaller remaining contained-ish candidates (each has a SPECIFIC documented trap — read memory first):**
+
+- **CS8130 ~12 / CS0021 ~12** — `Span` deconstruction / range-over-Span; cast-then-index precedence
+  (paired with the CS0030 pointer-array conversion above).
+- **CS0029 ~11 — pointer-reassign nil-safe re-alias.** `gp = getg()` where `gp` is a deref-aliased
+  `*g` param (`ref var gp = ref Ꮡgp.val`) can't take a `ж<g>`. A box-reassign-then-realias
+  (`Ꮡgp = …; gp = ref Ꮡgp.val`) was implemented (−32!) but **REVERTED — it eagerly derefs the box, so
+  a nil reassignment NREs** (the behavioral test caught it; compile+churn looked clean). Blocked on a
+  nil-safe re-alias model (golib `ж<T>.val` nil handling). The canonical repro is documented.
+- **CS1510 ~9 — `unsafe.Pointer.FromRef(ref X.val)` non-lvalue** (`ref (Ꮡ(copy)).val`) — the
+  unsafe.Pointer/FromRef family.
+- **CS0266 ~9 — named-numeric arithmetic / `*byte` pointer-walk mis-typing** (`dst := span.heapBits()`
+  emitted as a value `byte` not a `ж<byte>` pointer). Fiddly multi-path.
+- **CS0121 ~6 — `add` overload collision.** The converted free function `add(unsafe.Pointer, uintptr)`
+  and the `RecvGenerator` companion `add(ж<notInHeap>, uintptr)` are both static `add` in
+  `runtime_package`; a call resolves ambiguously. Generator/naming concern.
+- **CS0103 ~6 — box-not-declared.** Mostly `unsafe.Pointer`-param-treated-as-box (`return Ꮡzero` for a
+  `zero unsafe.Pointer` param; `v.val =`/`Ꮡv` for a reassigned pointer param), plus the
+  **closure-captured-pointer box** (`ᏑmToFlush` in `traceAdvance`: a `*m` whose `&local` is taken
+  inside a `systemstack(func(){…})` — `convertToHeapTypeDecl` short-circuits boxing for inherently-heap
+  pointer types). A decl-side-only fix was tried + REVERTED (dead box, because plain `&pointerVar`
+  uses the `Ꮡ(copy)` copy-box, not the declared box — needs a COORDINATED decl+usage fix = the
+  pointer-to-pointer aliasing feature).
+- **CS0019 ~1 — `taggedPointer & ((1<<bits)-1)`** (NAMED `num:nuint` bitwise; the bare-native cases
+  are fixed). Casting to the underlying risks the `(Tag)c`-is-CS0030 + named-numeric operator-ambiguity
+  traps.
+- **CS0119 ~1 — Go method expression `(*timers).run`** emitted as `(ж<timers>).run` (invalid C#).
+  Unimplemented feature (method expression → C# delegate/static method group).
+- Tail: CS0841/CS0411/CS0136/CS0117/CS0149/CS0128 (≤4 each) — e.g. CS0128 `type.cs` `i`/`Ꮡi` is the
+  escape-HOISTED-for-var collision (two sibling boxed `for i` loops in a switch-case both hoisting
+  `ref var i = ref heap` to method scope); elusive to repro.
+- **Two latent large-literal bugs flagged this session (NOT yet a runtime error each):** a >int32
+  literal as a CALL ARG to a `uintptr` param (CS1503) and as a uintptr VAR INIT (CS0266) — same root
+  family as the bitwise-operand large-literal fix, different contexts.
+
+**Triage guidance:** the architectural core (CS0030/CS1503/CS1929/CS1061) is now the realistic path to
+zero — `unsafe.Pointer`/Span first, since it gates the largest buckets and many smaller ones. Within a
+"delicate" bucket, the safe sub-cases are often already done — re-check memory before assuming a whole
+bucket is off-limits. Do NOT grind risky numeric/pointer-reassign/deref-form edits under fatigue; the
+memory documents several that compiled + had zero churn yet were behaviorally wrong (nil-NRE, dead box,
+lost writes) and were correctly reverted. These need a **stable test host** for runtime validation.
 
 ## Gotchas (these cost real time — see CLAUDE.md + memory for more)
 
-- **Overlay file locks.** A killed/stray `dotnet`/`testhost` can leave a corrupt `unsafe.dll`
-  ("PE image doesn't contain managed metadata", CS0009) or a `Permission denied` on a `.cs` during
-  overlay, producing phantom cascades. Clear stale processes, `dotnet build-server shutdown`,
-  `rm -rf` the package's `obj/bin/Generated`, re-overlay, rebuild.
-- **Stale/partial overlays mask real errors.** A boxing bug in `iface.cs` was hidden for several
-  measurements by a partial overlay. Always re-overlay cleanly and clean `obj/bin/Generated` before
-  trusting a count.
-- **`getSanitizedFunctionName` is radioactive** — any change cascades through the generators (see
-  blocker). Treat converter↔generator name agreement as the invariant.
-- **Full `dotnet test` testhost hangs** intermittently in long sessions (environmental). Validate via
-  the baseline solution build + filtered behavioral batches (e.g. `--filter "FullyQualifiedName~CheckA…"`)
-  + the zero-churn re-transpile check. A fresh session/machine clears the hang.
-- **Commit messages:** use `git commit -F - <<'EOF'` heredocs — `-m "…"` with `$()`/backticks/parens
-  gets mangled by the shell.
+- **Run `dotnet build <pkg>.csproj` from the REPO ROOT.** A leftover `cd src/go2cs` (from building the
+  converter) makes the relative project path resolve wrong → `MSB1009 "project does not exist"` and a
+  **false 0-errors** reading. The working dir persists between Bash calls; many slips this session.
+- **New-test build when `*Tests.cs` changed.** `UpdateTestTargets --createTargetFiles` adds a
+  `Check<Name>()` to the four `*Tests.cs` for a NEW project, so `--no-build` is then stale. Build the
+  test assembly with the explicit property once — `dotnet build src/Tests/Behavioral/BehavioralTests/
+  BehavioralTests.csproj -c Debug -p:go2csPath=H:/Projects/go2cs/src/` (FORWARD slashes) — then
+  `dotnet test --no-build --filter`. Extending an EXISTING project leaves `*Tests.cs` untouched →
+  `--no-build` stays valid.
+- **`replace_all` on a func def does not touch its call sites** — rename both, or `go run` errors
+  "undefined: oldName".
+- **Full `dotnet test` testhost hangs** intermittently in long sessions (environmental; hung twice this
+  session — 0-byte output). Kill stale `testhost`/`vstest.console`/`dotnet`,
+  `dotnet build-server shutdown`, then re-run filtered. Validate via the baseline build + filtered
+  behavioral batches + the zero-churn re-transpile check.
+- **Reboots/compactions are survivable.** Converter edits and `scratchpad/recon` persist; just rebuild
+  `go2cs.exe` and re-overlay. `overlay.sh` itself dies with the session — recreate it from the
+  `go2cs-measurement-loop` memory.
+- **`getSanitizedFunctionName` / converter↔generator name agreement is the invariant** — any
+  name-shape change can cascade through the generators. Treat it as radioactive.
+- **Don't commit `go-src-converted` regens.** It's regenerable; the unit of work is the converter/golib/
+  generator fix. Restore with `git checkout HEAD -- src/go-src-converted && git clean -fdq -- src/go-src-converted`.
 
 ## Definition of done
 
