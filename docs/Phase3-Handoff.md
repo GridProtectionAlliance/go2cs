@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~261 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~243 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -170,14 +170,30 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
     multi-session** and should be done WITH the user's model, NOT via a raw-uintptr round-trip (which
     compiles-but-crashes — exactly the reverted-fix trap). Resume S1 as a dedicated managed-referent
     redesign session once the cheaper S2/S3 buckets are cleared.
-- [ ] **S2 — pointer-deref-chain receivers** *(CS1929 ~32 + CS1510 ~9 = ~41; bigger than first thought).*
-  `mp.mLockProfile.waitTime.Load()`, `sgp.g.selectDone.CompareAndSwap(…)` (CS1929), and `(~…).wbBuf.get2()`,
-  `(~getg()).schedlink.set(…)` (CS1510 — a `[GoRecv] ref` method called on a `~`-value-deref RVALUE
-  receiver, which is non-assignable). Both are the same root: the receiver is built with `(~x)` (value-deref
-  rvalue) but a `ref`/ж-only method needs `.val`/box (ref-deref). Extend the `~`-vs-`.val` deref-form
-  distinction to pointer-receiver-method receivers. **Delicate copy-vs-box deref area — the memory warns it
-  regressed under fatigue; validate every churn.** Tractable per the `cebbf51a8` family precedent (−23 once).
-  (The global value-field atomic case is already fixed via box-the-global + `Ꮡg.of(T.Ꮡfield)`.)
+- [~] **S2 — pointer-deref-chain receivers** *(main root landed 2026-06-30; sub-roots remain).* **What
+  landed:** `7f0075d4f` — a DIRECT-ж method on a value field-chain rooted at a deref-aliased pointer
+  PARAMETER or (direct-ж) RECEIVER now routes through the real nested box `Ꮡp.of(T.Ꮡf1).of(…Ꮡf2)`
+  (`Δp.scav.index.find()`, `mp.trace.seqlock.Load()`, `h.userArena.readyList.remove(s)`). Two coordinated
+  fixes: convUnaryExpr's `&`-machinery recurses through such a chain (+ uses the RAW box name `Ꮡp` not the
+  shadow-renamed `ᏑΔp`); convSelectorExpr routes via a new `exprIsValueFieldOfDerefdPointerRoot` GATED to
+  direct-ж (a `[GoRecv]` ref method binds directly — no churn). Runtime CS1929 32→16, total 261→243 (−18),
+  zero churn, full suite green. Test `FieldChainBoxReceiver` (write-through verified). **REMAINING S2
+  sub-roots (16 CS1929 + 9 CS1510 — each distinct, pick one per session):**
+  - **Transitive direct-ж propagation (CS1929 ~6: `scavengeIndex.free`×5 in `mpagealloc`, `mgcmark`
+    `limiterEvent.start`, `proc` `timers.take`).** The ENCLOSING method (`free(this ref pageAlloc Δp)`) is
+    `[GoRecv] ref` (no box `Ꮡp`), yet it calls a direct-ж method on a value field-chain of its receiver →
+    it must be PROMOTED to direct-ж (so `Ꮡp` exists). This is a **signature-changing capture-mode change**
+    (captureModeOperations.go) — high blast radius, do FRESH (the memory's repeatedly-flagged delicate area).
+  - **CS1510 ×9 — `[GoRecv] ref` method on a `~`-value-deref RVALUE receiver** (`(~getg()).schedlink.set(…)`,
+    `(~…).wbBuf.get2()`): the receiver root is a `~`-deref of a call/expr (not an ident param/receiver), so
+    the box routing above does not apply. Needs the receiver materialized to an addressable/box form.
+  - **Indexed-element atomic (CS1929 ×4: `mprof` `bh.val[i].Load()`/`.StoreNoWB()`).** Array element of
+    atomic `UnsafePointer` via a pointer — the `daca4f3a1`/`exprIsIndexedValueElement` area; check why it
+    isn't firing for `UnsafePointer`.
+  - **Embedding promotion (CS1929: `time` `timeTimer.modify/stop/reset` ×3 → needs `ж<timer>`; `type`
+    `Δrtype.Uncommon` → needs `ref abi.Type`).** Overlaps S3 (TypeGenerator embedding) — `timeTimer` embeds
+    `timer`, `Δrtype` embeds `abi.Type`.
+  - **iface `ж<ж<itabTableType>>.find` ×1** — double-box (a pointer field already a box, over-boxed).
 - [ ] **S3 — TypeGenerator 2-level embedding promotion** *(CS1061 ~26).* `stackWorkBuf` embeds
   `stackWorkBufHdr` which has `nobj`; `workbuf.obj`; promoted fields on `abi.Type` (`.Typ`/`.Itab`).
   Generator work — extend `TypeGenerator`'s promotion to nested (2-level) embedding, rebuild the
@@ -244,39 +260,39 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session tackles ONE queue item: S2 — pointer-deref-chain receivers (CS1929 ~32 + CS1510 ~9 = ~41
-of runtime's ~261 errors; the largest tractable bucket, and S1 last session moved CS1510 here).
+This session tackles ONE queue item: S3 — TypeGenerator embedding-promotion (CS1061 ~26, the top
+bucket now that S2's main root landed; runtime is at ~243).
 
-The defect (one root, two error codes):
-- CS1929: `mp.mLockProfile.waitTime.Load()`, `sgp.g.selectDone.CompareAndSwap(…)` — a ж-only atomic
-  method bound on a receiver built with `(~x)` (value-deref rvalue) where it needs `.val`/box (ref-deref).
-- CS1510: `(~…).wbBuf.get2()`, `(~getg()).schedlink.set(…)` — a `[GoRecv] ref` method called on a
-  `~`-value-deref RVALUE receiver (non-assignable variable). SAME root: a deref-chain receiver rendered
-  as a value-deref `~` rvalue instead of the ref/box form the ref/ж method needs.
-Extend the `~`-vs-`.val` deref-form distinction to pointer-receiver-method receivers along a deref chain.
-**Delicate copy-vs-box deref area — the memory (go2cs-phase3-progress) warns this regressed under fatigue;
-the cebbf51a8 atomic-deref family is the precedent (tractable, −23 once). Validate EVERY churn.** A green
-compile is necessary but NOT sufficient: an atomic mutation must PERSIST — gate with a behavioral test
-whose runtime output proves write-through (mirror AtomicFieldThroughPointer / IndexedElementDirectBoxMethod).
+The defect: a field/method promoted through Go struct EMBEDDING is missing on the C# wrapper. Examples
+(re-bucket to confirm/refresh): `stackWorkBuf` embeds `stackWorkBufHdr` which has `nobj` (`buf.nobj`);
+`workbuf.obj`; `Δrtype` (reflect) embeds `abi.Type` so `.Typ`/`.Itab`/`.Uncommon()` should promote;
+`timeTimer` embeds `timer` so its methods (`modify`/`stop`/`reset`) should be callable on `ж<timeTimer>`
+(these last two also show as CS1929 — embedding is the shared root). The `TypeGenerator` (a Roslyn source
+generator, src/gen/go2cs-gen/) promotes embedded fields/methods; the gap is **2-level (nested) embedding**
+and/or method promotion. This is GENERATOR work — extend TypeGenerator's promotion to nested embedding,
+rebuild the analyzer, regen.
 
 First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — and note overlay.sh now
-   restores the core manual files). Read the actual CS1929 + CS1510 sites to find the deref-chain shapes.
-2. Read the go2cs-phase3-progress memory's CS1929 atomic-deref-capture-mode notes (the cebbf51a8 family
-   remainder: field-of-receiver chains, value-call atomics, method-kind-in-predicate + transitive direct-ж)
-   and the documented copy-vs-box traps BEFORE editing.
-3. Implement per the Workflow (root fix + behavioral test via run-behavioral.ps1 --filter + zero churn
-   via check-no-regression.ps1 + ConversionStrategies.md + one focused commit per root fix).
+   restores the core manual files). Read the actual CS1061 sites — separate genuine embedding-promotion
+   misses from any unrelated CS1061.
+2. Read the go2cs-phase3-progress memory's TypeGenerator / promoted-field / embedding notes (and the
+   `winlibcall`/`pallocBits` named-type-over-struct forwarding findings, which are kin) BEFORE editing.
+3. Implement per the Workflow. A generator change → full-solution rebuild to validate; gate with a
+   behavioral test (2-level embedded field read + write-through) + zero churn via check-no-regression.ps1
+   + ConversionStrategies.md + one focused commit.
 
-NOTE on S1 (do NOT re-attempt casually): S1's remaining bulk (CS0030 ~50) is the project's
-explicitly-accepted memory-layout-dependent runtime-unsafe code (map/lfstack/guintptr/muintptr/…). The
-ONLY correct fix is the user's managed-referent model — hand-rewrite those runtime types to hold `ж<T>`
-directly (like the promoted atomic.Pointer<T>), a dedicated multi-session redesign. Do NOT "make it
-compile" via a raw uintptr round-trip — that compiles-but-crashes (the reverted-fix trap).
+NOTE — other open roots if S3 stalls (all characterized in the queue above):
+- S2 remainder (CS1929 ~16 + CS1510 ~9): transitive direct-ж PROMOTION for a `[GoRecv]` method calling a
+  direct-ж method on its receiver's field-chain (signature-changing capture-mode work, do FRESH);
+  `~`-deref-rooted CS1510; indexed-element atomic (mprof `bh.val[i]`).
+- S1 CS0030 bulk (~50): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix
+  is the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a
+  dedicated multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 
-Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off S2 with a result note,
-refresh the runtime count/date — then rewrite this "Next session prompt" block to point at S3
-(TypeGenerator 2-level embedding promotion, CS1061). Commit the doc update. Then stop and hand me the S3
+Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off S3 with a result note,
+refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
+unchecked item (re-bucket to pick the new top root). Commit the doc update. Then stop and hand me that
 prompt to kick off the following session.
 ```
 
