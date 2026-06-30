@@ -289,6 +289,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedNumericShiftConv() => CheckTarget("NamedNumericShiftConv");
 
     [TestMethod]
+    public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]

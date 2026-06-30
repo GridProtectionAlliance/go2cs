@@ -823,6 +823,18 @@ The unsafe builtins `unsafe.Add`, `unsafe.Slice`, and `unsafe.String` accept a l
 
 Passing an `unsafe.Pointer` **argument to an `unsafe.Pointer` parameter** keeps the `@unsafe.Pointer` struct value — `add(p, x)`, not `add(p.val, x)`. The struct is an exact match for the parameter. Passing its inner `uintptr` (`p.val`) instead would convert implicitly to *both* the `@unsafe.Pointer` parameter and any same-named method's `ж<T>` overload (golib defines `uintptr ↔ Pointer` and `uintptr ↔ ж<T>`), making the call ambiguous (CS0121) — e.g. the runtime free function `add(unsafe.Pointer, uintptr)` versus the `(*notInHeap).add(uintptr)` method's generated `ж<notInHeap>` extension. (Guarded by `UnsafePointerArgPassing`.)
 
+### Reinterpreting a pointer to a defined type with identical underlying — `(*Base)(p)`
+A Go conversion `(*Base)(p)` where `p` is a `*Def` and `Base`/`Def` share an *identical underlying* type (one is a defined type over the other, e.g. `type pinnerBits gcBits`, or both over the same type) reinterprets the pointer. C# has no conversion between the two distinct generic instantiations `ж<Def>` and `ж<Base>`; only the `[GoType]` wrapper's **value** conversion `Def ↔ Base` exists. So the converter performs the reinterpret on the value and re-boxes it:
+```go
+func (s *mspan) newPinnerBits() *pinnerBits { return (*pinnerBits)(newMarkBits(s.nelems * 2)) }   // newMarkBits returns *gcBits
+```
+```csharp
+internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
+    return Ꮡ((pinnerBits)(~newMarkBits(((uintptr)s.nelems) * 2)));   // deref the ж<gcBits> box, value-convert, re-box
+}
+```
+The argument is **dereferenced first** (`~box`) when it renders as a genuine pointer box — a call result, a local box, or a pointer field — because the value conversion operates on the underlying value, not on `ж<Def>` (a plain `(pinnerBits)(ж<gcBits>)` is `CS0030`). A deref-aliased pointer **parameter/receiver** already renders as the pointed-to value (`Δp`, not a box), so it value-converts directly with no `~` — the original `(*atomic.Uint32)(p)` receiver case (runtime/mprof `goroutineProfileStateHolder`). Both forms box a **copy** (`Ꮡ`): the shared underlying is the wrapped value, and a defined-over-struct wrapper holds it in a `readonly` field, so there is no write-through to lose; this matches the long-standing copy semantics of this branch (the runtime intrinsics behind these are assembly stubs). Both ships stay in managed `ж<>` land — no raw-address round-trip. (Guarded by `NamedPointerReinterpret`.)
+
 ## Implicit Pointer Dereferencing
 In Go, pointer types automatically dereference; these `age` assignments are equivalent:
 ```go

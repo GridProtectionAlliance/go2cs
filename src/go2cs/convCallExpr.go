@@ -65,7 +65,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 				if okBase && okDef && baseNamed != defNamed && types.Identical(baseNamed.Underlying(), defNamed.Underlying()) {
 					baseName := convertToCSTypeName(v.getTypeName(baseNamed, false))
-					return fmt.Sprintf("%s((%s)(%s))", AddressPrefix, baseName, v.convExpr(arg, nil))
+					argExpr := v.convExpr(arg, nil)
+
+					// The [GoType] VALUE conversion `(Base)(Def)` operates on the underlying VALUE. A
+					// deref-aliased pointer param/receiver already renders as that value (`Δp`), so it
+					// casts directly — the original `(*atomic.Uint32)(p)` case. But a genuine pointer
+					// expression — a call result (`newMarkBits(…)` returning `*gcBits`), a local box, a
+					// pointer field — renders as the box `ж<Def>`, which has no conversion to the Base
+					// VALUE (CS0030, runtime/pinner `(*pinnerBits)(newMarkBits(…))`). Dereference the box
+					// first so the value conversion binds. Both forms then box a COPY (`Ꮡ`), matching this
+					// branch's long-standing copy semantics (Base's underlying is the shared struct, and
+					// e.g. pinnerBits wraps it in a `readonly` field, so there is no write-through to lose).
+					if !v.exprIsDerefAliasedPointer(arg) {
+						argExpr = fmt.Sprintf("%s%s", PointerDerefOp, argExpr)
+					}
+
+					return fmt.Sprintf("%s((%s)(%s))", AddressPrefix, baseName, argExpr)
 				}
 			}
 		}

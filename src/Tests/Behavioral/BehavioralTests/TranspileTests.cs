@@ -324,6 +324,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedNumericShiftConv() => CheckTarget("NamedNumericShiftConv");
 
     [TestMethod]
+    public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
