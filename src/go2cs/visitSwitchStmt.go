@@ -317,6 +317,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			switchBreakWrap := caseBodyHasSwitchBreak(caseClause.Body)
 
 			if switchBreakWrap {
+				// Emit `do {` on its own properly-indented line. writeOutput prepends the indent then
+				// the text, so the leading newline must be written raw first — otherwise `do {` glues
+				// onto the preceding `) {` with the indent spaces between them (`) {        do {`).
+				v.targetFile.WriteString(v.newline)
 				v.writeOutput("do {")
 				v.indentLevel++
 			}
@@ -327,7 +331,11 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 			if switchBreakWrap {
 				v.indentLevel--
-				v.writeOutput("%s} while (false);", v.newline)
+				// Likewise close on its own indented line. A `"%s} while…"` format would emit the
+				// indent BEFORE the newline (trailing whitespace on the prior line) and drop the
+				// `} while (false);` to column 0; write the newline raw, then the indented text.
+				v.targetFile.WriteString(v.newline)
+				v.writeOutput("} while (false);")
 			}
 
 			v.targetFile.WriteString(v.newline)

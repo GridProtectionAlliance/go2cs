@@ -11,20 +11,22 @@ internal static readonly UntypedInt stateC = 2;
 internal static @string classify(nint n, bool flag) {
     @string result = "none"u8;
     var exprᴛ1 = n;
-    if (exprᴛ1 == stateA) {        do {
+    if (exprᴛ1 == stateA) {
+        do {
             if (flag) {
                 break;
             }
-            result = "a"u8;        
-} while (false);
+            result = "a"u8;
+        } while (false);
     }
-    else if (exprᴛ1 == stateB) {        do {
+    else if (exprᴛ1 == stateB) {
+        do {
             result = "b"u8;
             if (flag) {
                 break;
             }
-            result = "b-noflag"u8;        
-} while (false);
+            result = "b-noflag"u8;
+        } while (false);
     }
     else { /* default: */
         result = "other"u8;
