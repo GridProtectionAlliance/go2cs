@@ -289,6 +289,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]
+    public void CheckNamedNumericIncDec() => CheckTarget("NamedNumericIncDec");
+
+    [TestMethod]
     public void CheckNamedNumericIntCast() => CheckTarget("NamedNumericIntCast");
 
     [TestMethod]

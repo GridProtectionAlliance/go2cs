@@ -155,6 +155,7 @@
     <Project Path="Tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
     <Project Path="Tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericConversion/NamedNumericConversion.csproj" />
+    <Project Path="Tests/Behavioral/NamedNumericIncDec/NamedNumericIncDec.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericIntCast/NamedNumericIntCast.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericShiftConv/NamedNumericShiftConv.csproj" />
     <Project Path="Tests/Behavioral/NarrowArithmeticArg/NarrowArithmeticArg.csproj" />
