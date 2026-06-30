@@ -350,7 +350,7 @@ internal class StructTypeTemplate : TemplateBase
             // field lacking an initializer, so the empty body is sufficient and correct; a slice/map/etc.
             // field — which has no `= new(N)` initializer — stays its nil zero value, matching Go.)
             result.AppendLine();
-            result.AppendLine($"public {NonGenericStructName}()");
+            result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
             result.AppendLine($"{TypeElemIndent}{{");
             result.AppendLine($"{TypeElemIndent}}}");
 
