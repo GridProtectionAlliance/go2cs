@@ -337,8 +337,13 @@ OWN type (the map `map[_typePair]struct{}`) in the lifted-type registry, poisoni
 comma-ok + indexer. Fix: empty struct short-circuits to golib `EmptyStruct` before any lift. Test
 `EmptyStructMapSet`; zero churn. ALSO fixed a pre-existing suite-breaker (`61ce1157a`): the `4261cd21a`
 cast-paren beautify over-stripped `string()` conversions (`@string` is member-accessible — the variadic
-spread `string(r)...` rebound `.ꓸꓸꓸ` to the inner operand, CS1061 in UnsafeOperations). Both: full
-behavioral suite green (190 projects).
+spread `string(r)...` rebound `.ꓸꓸꓸ` to the inner operand, CS1061 in UnsafeOperations). AND re-baselined
+11 goldens stale since `4261cd21a` (`42e1fa600` — the cause of "green in the runner, 14 CheckTarget fail in
+VS": the runner had been transpiling with a STALE go2cs.exe). Full behavioral suite green (190 projects).
+FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner
+only rebuilds the exe when a `.go` is newer, so a committed converter change can false-green on a stale
+binary (VS rebuilds fresh and exposes it). After any emitted-form change run `run-behavioral.ps1
+--update-targets` (post fresh build) for ALL affected goldens.
 
 Recommended NEXT root (CONTAINED, one root spanning ~9 errors): **S2 `~`-deref-rooted receiver
 materialization (CS1510 ×9).** A `[GoRecv] ref` method invoked on a `~`-value-deref RVALUE receiver whose
