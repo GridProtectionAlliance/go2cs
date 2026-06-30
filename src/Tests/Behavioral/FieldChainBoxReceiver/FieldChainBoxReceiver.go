@@ -27,6 +27,16 @@ func (w *wrapper) bump() {
 	w.b.h.c.inc()
 }
 
+// mid/deep form a multi-level value field-chain rooted at a pointer receiver, with NO self()-return
+// and NO direct-ж call on the bare receiver — so the ONLY thing that can promote deep.bumpDeep to
+// direct-ж (giving it the receiver box Ꮡd) is the multi-level field-chain detection itself. This is
+// the exact shape of runtime's pageAlloc.free → p.scav.index.free(…). Without the promotion the call
+// cannot bind (CS1929); with it the call routes through the real nested box Ꮡd.of(deep.Ꮡmid).of(mid.Ꮡc).
+type mid struct{ c counter }
+type deep struct{ mid mid }
+
+func (d *deep) bumpDeep() { d.mid.c.inc() }
+
 func main() {
 	b := &box{}
 	viaParam(b)
@@ -38,4 +48,11 @@ func main() {
 	w.bump()
 	w.bump()
 	fmt.Println(w.b.h.c.n) // 3 — write-through the receiver-root box must persist
+
+	d := &deep{}
+	d.bumpDeep()
+	d.bumpDeep()
+	d.bumpDeep()
+	d.bumpDeep()
+	fmt.Println(d.mid.c.n) // 4 — write-through the multi-level receiver field-chain box must persist
 }

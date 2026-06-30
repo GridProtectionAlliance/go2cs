@@ -197,12 +197,15 @@ func bodyCallsDirectBoxMethodOnReceiver(body *ast.BlockStmt, recvName string, in
 }
 
 // bodyCallsCaptureModeMethodOnReceiverField reports whether the body calls a direct-ж
-// (capture-mode) method on a value field of the receiver (`recvName.field.someDirectBoxMethod(...)`)
-// — e.g. a struct embedding sync/atomic's Uint8 as a value field `u` and doing `b.u.Load()`. The
-// callee's ж overload needs a `ж<FieldType>`; the only way to produce one that aliases the real
-// field is `Ꮡrecv.of(RecvType.ᏑField)`, which requires the caller to itself be direct-ж so its
-// receiver box `Ꮡrecv` is in scope. So the caller must be marked direct-ж too (convSelectorExpr
-// then emits the field-address box form).
+// (capture-mode) method on a VALUE field-chain of the receiver (`recvName.f1.…fn.someDirectBoxMethod(...)`,
+// n>=1) — e.g. a struct embedding sync/atomic's Uint8 as a value field `u` and doing `b.u.Load()`, or
+// a deeper chain like `p.scav.index.free(…)` (root `p`, value fields `scav`→`index`). The callee's ж
+// overload needs a `ж<FieldType>`; the only way to produce one that aliases the real field is
+// `Ꮡrecv.of(RecvType.ᏑF1).of(…ᏑFn)`, which requires the caller to itself be direct-ж so its receiver
+// box `Ꮡrecv` is in scope. So the caller must be marked direct-ж too (convSelectorExpr then emits the
+// field-address box form via exprIsValueFieldOfDerefdPointerRoot). The chain must be all VALUE fields —
+// a pointer field mid-chain is already a box and roots elsewhere (exprIsValueFieldOfPointer's territory),
+// so it needs no caller box and must not trigger promotion.
 func bodyCallsCaptureModeMethodOnReceiverField(body *ast.BlockStmt, recvName string, info *types.Info) bool {
 	found := false
 
@@ -219,17 +222,9 @@ func bodyCallsCaptureModeMethodOnReceiverField(body *ast.BlockStmt, recvName str
 			return true
 		}
 
-		// The call target must be `recvName.field.method` — a field selector rooted directly at
+		// The call target must be `recvName.f1.…fn.method` — a value field-chain rooted directly at
 		// the receiver. (A bare `recvName.method` is the receiver-direct case handled separately.)
-		fieldSel, ok := selectorExpr.X.(*ast.SelectorExpr)
-
-		if !ok {
-			return true
-		}
-
-		recvIdent, ok := fieldSel.X.(*ast.Ident)
-
-		if !ok || recvIdent.Name != recvName {
+		if !selectorRootsAtReceiverValueFieldChain(selectorExpr.X, recvName, info) {
 			return true
 		}
 
@@ -244,6 +239,41 @@ func bodyCallsCaptureModeMethodOnReceiverField(body *ast.BlockStmt, recvName str
 	})
 
 	return found
+}
+
+// selectorRootsAtReceiverValueFieldChain reports whether expr is a VALUE struct-field selector chain
+// `recvName.f1.…fn` (n>=1) that roots at the receiver ident recvName, with every hop a VALUE
+// (non-pointer) field. This is the capture-mode pre-pass complement of convSelectorExpr's
+// exprIsValueFieldOfDerefdPointerRoot: a direct-ж method called on such a chain needs the real nested
+// field box `Ꮡrecv.of(T.ᏑF1).of(…ᏑFn)`, which only exists when the enclosing method is itself direct-ж.
+// A pointer field anywhere in the chain is already a box (and roots the call elsewhere), so it stops
+// the walk — that case must not promote the enclosing method.
+func selectorRootsAtReceiverValueFieldChain(expr ast.Expr, recvName string, info *types.Info) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	for {
+		// Each hop must be a value field selection (not a method/package ref, not a pointer field).
+		if selection, ok := info.Selections[sel]; !ok || selection.Kind() != types.FieldVal {
+			return false
+		}
+
+		if _, isPtr := info.TypeOf(sel).(*types.Pointer); isPtr {
+			return false
+		}
+
+		switch base := sel.X.(type) {
+		case *ast.SelectorExpr:
+			sel = base
+		case *ast.Ident:
+			return base.Name == recvName
+		default:
+			return false
+		}
+	}
 }
 
 // bodyReturnsReceiver reports whether the body returns the receiver itself (`return recvName`).

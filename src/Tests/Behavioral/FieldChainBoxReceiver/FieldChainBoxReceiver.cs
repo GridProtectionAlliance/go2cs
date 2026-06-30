@@ -51,6 +51,20 @@ internal static void bump(this ж<wrapper> Ꮡw) {
     Ꮡw.of(wrapper.Ꮡb).of(box.Ꮡh).of(holder.Ꮡc).inc();
 }
 
+[GoType] partial struct mid {
+    internal counter c;
+}
+
+[GoType] partial struct deep {
+    internal mid mid;
+}
+
+internal static void bumpDeep(this ж<deep> Ꮡd) {
+    ref var d = ref Ꮡd.val;
+
+    Ꮡd.of(deep.Ꮡmid).of(mid.Ꮡc).inc();
+}
+
 internal static void Main() {
     var b = Ꮡ(new box(nil));
     viaParam(b);
@@ -61,6 +75,12 @@ internal static void Main() {
     w.bump();
     w.bump();
     fmt.Println((~w).b.h.c.n);
+    var d = Ꮡ(new deep(nil));
+    d.bumpDeep();
+    d.bumpDeep();
+    d.bumpDeep();
+    d.bumpDeep();
+    fmt.Println((~d).mid.c.n);
 }
 
 } // end main_package
