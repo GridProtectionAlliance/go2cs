@@ -88,6 +88,7 @@
     <Project Path="Tests/Behavioral/DeferLambdaParam/DeferLambdaParam.csproj" />
     <Project Path="Tests/Behavioral/DeferSimple/DeferSimple.csproj" />
     <Project Path="Tests/Behavioral/DefinedTypeOverPkgType/DefinedTypeOverPkgType.csproj" />
+    <Project Path="Tests/Behavioral/DerefPointerToField/DerefPointerToField.csproj" />
     <Project Path="Tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />

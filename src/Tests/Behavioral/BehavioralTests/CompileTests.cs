@@ -141,6 +141,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
+
+    [TestMethod]
     public void CheckDirectBoxReceiverPassedWhole() => CheckTarget("DirectBoxReceiverPassedWhole");
 
     [TestMethod]

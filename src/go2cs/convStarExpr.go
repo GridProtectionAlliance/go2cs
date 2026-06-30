@@ -11,7 +11,16 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 
-	if ident != nil && v.identIsParameter(ident) {
+	// The parameter-deref shortcut below applies to `*p` (the whole parameter) and `**p` — where the
+	// operand denotes the parameter itself. It must NOT fire for `*p.field` (a deref of a pointer FIELD
+	// reached through the parameter): `getIdentifier` digs through the selector to the param root, but
+	// the operand `p.field` is a distinct lvalue that still needs its own dereference. Letting it take
+	// the shortcut returned the field pointer un-dereferenced (`gp.ancestors` instead of
+	// `gp.ancestors.val`), e.g. `for _, a := range *gp.ancestors` → a Span/slice mismatch (CS8130). A
+	// selector operand falls through to the selector handling below, which derefs via `.val`.
+	_, starXIsSelector := starExpr.X.(*ast.SelectorExpr)
+
+	if ident != nil && v.identIsParameter(ident) && !starXIsSelector {
 		// Check if the star expression is a pointer to pointer dereference
 		if v.isPointer(ident) {
 			if _, ok := starExpr.X.(*ast.StarExpr); ok {

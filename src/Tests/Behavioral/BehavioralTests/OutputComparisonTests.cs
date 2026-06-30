@@ -127,6 +127,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
+
+    [TestMethod]
     public void CheckDirectBoxReceiverPassedWhole() => CheckTarget("DirectBoxReceiverPassedWhole");
 
     [TestMethod]

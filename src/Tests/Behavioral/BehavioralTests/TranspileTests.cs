@@ -141,6 +141,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]
+    public void CheckDerefPointerToField() => CheckTarget("DerefPointerToField");
+
+    [TestMethod]
     public void CheckDirectBoxReceiverPassedWhole() => CheckTarget("DirectBoxReceiverPassedWhole");
 
     [TestMethod]
