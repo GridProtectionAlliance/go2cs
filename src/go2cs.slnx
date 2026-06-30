@@ -93,6 +93,7 @@
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
+    <Project Path="Tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />
     <Project Path="Tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />

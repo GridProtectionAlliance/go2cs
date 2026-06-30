@@ -247,8 +247,11 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.val`),
 						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* or a
 						// pointer *field* already holds/yields the box directly, so it is used as-is.
+						// The box keeps the RAW parameter name: a collision/shadow-renamed param `p`→`Δp`
+						// is `ref var Δp = ref Ꮡp.val`, so its box is `Ꮡp`, not `ᏑΔp` (CS0103). boxBaseName
+						// yields the raw name when shadow-renamed and the sanitized name otherwise (no churn).
 						if baseIdent, ok := base.(*ast.Ident); ok && v.identIsParameter(baseIdent) {
-							structExpr = AddressPrefix + structExpr
+							structExpr = AddressPrefix + v.boxBaseName(baseIdent)
 						}
 
 						typeName := convertToCSTypeName(v.getTypeName(ptrType.Elem(), false))
@@ -284,8 +287,13 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					// `&gp.m.mLockProfile.waitTime`, base `gp.m.mLockProfile` a value field of the
 					// pointer `gp.m` — recurse to take the base's address through the pointer
 					// (`gp.m.of(mType.ᏑmLockProfile)`), then field-ref this level: `.of(…ᏑwaitTime)`.
-					// The `Ꮡ(value)` fallback would copy the chain, losing writes (atomic corruption).
-					if v.exprIsValueFieldOfPointer(selectorExpr.X) {
+					// The same applies when the base is a value field-chain rooted at a deref-aliased
+					// pointer PARAMETER/RECEIVER — `&Δp.scav.index`, base `Δp.scav` rooted at the `*pageAlloc`
+					// receiver — recurse through its box `Ꮡp.of(pageAlloc.Ꮡscav)`, then `.of(…Ꮡindex)`.
+					// In both cases the `Ꮡ(value)` fallback would copy the chain, losing writes (atomic
+					// corruption). (The single-field root `&Δp.scav` is handled directly by the receiver /
+					// param-deref branches above; only the multi-level chain needs this recursion.)
+					if v.exprIsValueFieldOfPointer(selectorExpr.X) || v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) {
 						baseAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 						return fmt.Sprintf("%s.of(%s)", baseAddr, fieldRef)
 					}

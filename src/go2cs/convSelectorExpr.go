@@ -259,6 +259,79 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 	}
 }
 
+// exprIsValueFieldOfDerefdPointerRoot reports whether expr is a VALUE struct field whose selector
+// chain, after peeling value-field selectors, roots at a deref-aliased pointer PARAMETER or the
+// pointer RECEIVER — a bare ident emitted as `ref var x = ref Ꮡx.val`, whose box is `Ꮡx`. Examples:
+// `Δp.scav.index` (root `p`, a `*pageAlloc` receiver), `mp.trace.seqlock` (root `mp`, a `*m` param),
+// `h.userArena.readyList` (root `h`, a `*mheap` param).
+//
+// This is the deliberate COMPLEMENT of exprIsValueFieldOfPointer, which roots at a pointer FIELD/chain
+// or a pointer LOCAL and EXCLUDES the param/receiver root: a value field-chain on such a root is
+// addressable, so a `[GoRecv] ref` method binds on it directly and must be left alone. A DIRECT-ж
+// (box-receiver) method, however, needs the real nested field box `Ꮡx.of(T.Ꮡf1).of(…Ꮡf2)` (which the
+// &-machinery renders once it recurses through this root) — the value chain is not a box (CS1929).
+// Callers MUST therefore gate on a direct-ж method (selectorCallsDirectBoxMethod), so a `[GoRecv]` ref
+// method on the same chain keeps binding directly (no churn).
+func (v *Visitor) exprIsValueFieldOfDerefdPointerRoot(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	if selection, ok := v.info.Selections[sel]; !ok || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	// The field itself must be a VALUE — a pointer field is already a box.
+	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+		return false
+	}
+
+	base := sel.X
+
+	for {
+		switch b := base.(type) {
+		case *ast.SelectorExpr:
+			// A pointer field/chain mid-way is exprIsValueFieldOfPointer's territory, not this.
+			if _, ok := v.getType(b, false).(*types.Pointer); ok {
+				return false
+			}
+
+			// Keep peeling only through VALUE-field selectors.
+			if selection, ok := v.info.Selections[b]; !ok || selection.Kind() != types.FieldVal {
+				return false
+			}
+
+			base = b.X
+		case *ast.Ident:
+			// Root identifier: a deref-aliased pointer PARAMETER or the pointer RECEIVER (box `Ꮡx`).
+			// A pointer LOCAL is excluded — it is handled by exprIsValueFieldOfPointer / the
+			// exprIsPointerLocalField branch.
+			if _, ok := v.getType(b, false).(*types.Pointer); !ok {
+				return false
+			}
+
+			// The pointer RECEIVER has a box `Ꮡrecv` ONLY when the enclosing method is itself direct-ж
+			// (`this ж<T> Ꮡrecv`). A `[GoRecv] ref` receiver has no box, so routing through `Ꮡrecv`
+			// would be CS0103 — leave it (that would need transitive direct-ж propagation, a separate
+			// capture-mode concern). Checked before identIsParameter since the receiver is not a param.
+			if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && b.Name == recvName {
+				return isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
+			}
+
+			// A genuine pointer PARAMETER is always deref-aliased with a box `Ꮡp`.
+			if v.identIsParameter(b) {
+				return true
+			}
+
+			return false
+		default:
+			return false
+		}
+	}
+}
+
 // exprIsAlreadyBoxedPointerFieldOrElement reports whether expr is a field selector or an indexed
 // element whose OWN type is a Go pointer — so its C# value is already a `ж<T>` box (e.g.
 // cpuProfile's `log *profBuf`, accessed as `cpuprof.log`). A direct-ж (capture-mode) or
@@ -564,6 +637,20 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// would silently lose the atomic write. (A pointer-LOCAL field is handled by the
 	// exprIsPointerLocalField branch above; this covers a pointer field/chain or pointer param.)
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsValueFieldOfPointer(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A DIRECT-ж (box-receiver) method called on a VALUE field-chain rooted at a deref-aliased pointer
+	// PARAMETER/RECEIVER — `Δp.scav.index.find()`, `mp.trace.seqlock.Load()`, `h.userArena.readyList.remove(s)`.
+	// The value field-chain is not a box, so the ж overload cannot bind (CS1929). The param/receiver root
+	// has a box (`Ꮡp`/`Ꮡrecv`), so route the receiver through the &-machinery, which renders the real
+	// nested storage `Ꮡp.of(T.Ꮡf1).of(…Ꮡf2)` — never a `Ꮡ(value)` copy (which would silently lose an
+	// atomic write). GATED to direct-ж: a `[GoRecv] ref` method binds directly on the addressable value
+	// field-chain (the deref-alias root is a `ref`), so it is left untouched — rerouting it would churn
+	// working output (this is why exprIsValueFieldOfDerefdPointerRoot is the param/receiver complement of
+	// exprIsValueFieldOfPointer, which serves the broader isPointerReceiverMethodCall branch above).
+	if context.isCallExpr && v.selectorCallsDirectBoxMethod(selectorExpr) && v.exprIsValueFieldOfDerefdPointerRoot(selectorExpr.X) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
