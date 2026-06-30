@@ -22,6 +22,9 @@ internal static void mark(this tagger _) {
 internal static ж<holder> Ꮡh = new(default(holder));
 internal static ref holder h => ref Ꮡh.val;
 
+internal static ж<Δmark> Ꮡgm = new(default(Δmark));
+internal static ref Δmark gm => ref Ꮡgm.val;
+
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
     p.val = 42;
@@ -33,6 +36,9 @@ internal static void Main() {
     tagger t = default!;
     t.mark();
     fmt.Println(m.id);
+    var pid = Ꮡgm.of(Δmark.Ꮡid);
+    pid.val = 99;
+    fmt.Println(gm.id);
 }
 
 } // end main_package

@@ -21,6 +21,11 @@ type holder struct {
 
 var h holder
 
+// `gm` is a global whose TYPE is the collision type `mark` itself. Taking the address of one of
+// its fields routes through a box accessor whose OWNING type is `mark` — which must use the
+// Δ-renamed name (`Ꮡgm.of(Δmark.Ꮡid)`); a raw `mark.Ꮡid` binds to the `mark` method group (CS0119).
+var gm mark
+
 func main() {
 	// &global.field routes through the box-field accessor: Ꮡh.of(holder.Ꮡmark).
 	p := &h.mark
@@ -37,4 +42,9 @@ func main() {
 	var t tagger
 	t.mark()
 	fmt.Println(m.id) // 3
+
+	// Address of a field of a global whose type IS the collision type `mark`.
+	pid := &gm.id
+	*pid = 99
+	fmt.Println(gm.id) // 99
 }

@@ -41,6 +41,15 @@ func (v *Visitor) convArrayIndex(index ast.Expr) string {
 // can never equal a bare type name, so those never qualify; an already-qualified cross-package type
 // (contains '.') is returned unchanged.
 func boxAccessorType(typeName, receiver string) string {
+	// A type whose name collides with a same-package method/function (`type funcInfo` vs
+	// `func (f *Func) funcInfo()`) is declared Δ-renamed (`ΔfuncInfo`), since the package static
+	// method shadows the namespace type. The box accessor must use that renamed name too — a bare
+	// `funcInfo.Ꮡnfuncdata` binds to the method group (CS0119). Applies only to a bare same-package
+	// name; an already-qualified cross-package type (contains '.') is left alone.
+	if !strings.Contains(typeName, ".") && nameCollisions[typeName] {
+		typeName = getCollisionAvoidanceIdentifier(typeName)
+	}
+
 	if typeName == receiver && !strings.Contains(typeName, ".") {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
