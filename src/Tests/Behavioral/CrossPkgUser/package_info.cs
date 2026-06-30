@@ -10,10 +10,11 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
 // </ImportedTypeAliases>
 
 using go;
-using static go.crosspkglib_package;
+using static go.main_package;
 
 // For encountered type alias declarations, e.g., `type Table = map[string]int`,
 // go2cs code converter will generate a `global using` statement for the alias in
@@ -27,7 +28,6 @@ using static go.crosspkglib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
-[assembly: GoTypeAlias("Temperature", "go.crosspkglib_package.Celsius")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,7 +39,6 @@ using static go.crosspkglib_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Sensor, Labeled>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
@@ -47,7 +46,8 @@ using static go.crosspkglib_package;
 
 namespace go;
 
-[GoPackage("crosspkglib")]
-public static partial class crosspkglib_package
+[GoPackage("main")]
+[GoTestMatchingConsoleOutput]
+public static partial class main_package
 {
 }

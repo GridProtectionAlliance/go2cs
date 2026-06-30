@@ -1,8 +1,8 @@
-global using Temperature = go.crosspkglib_package.Celsius;
+global using Temperature = go.CrossPkgLib_package.Celsius;
 
 namespace go;
 
-partial class crosspkglib_package {
+partial class CrossPkgLib_package {
 
 [GoType("num:float64")] partial struct Celsius;
 
@@ -41,4 +41,4 @@ public static @string Describe(Labeled l) {
     return l.Label();
 }
 
-} // end crosspkglib_package
+} // end CrossPkgLib_package

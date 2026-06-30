@@ -1,10 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Library</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>go</RootNamespace>
-    <AssemblyName>crosspkglib</AssemblyName>
+    <AssemblyName>CrossPkgUser</AssemblyName>
     <Product>go2cs</Product>
     <Version>0.1.4</Version>
     <Description>$(AssemblyName) ($(TargetFramework) - $(Configuration))</Description>
@@ -105,6 +105,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(go2csPath)core\golib\golib.csproj" />
+    <ProjectReference Include="$(go2csPath)core\fmt\fmt.csproj" />
+    <ProjectReference Include="..\CrossPkgLib\CrossPkgLib.csproj" />
   </ItemGroup>
 
 </Project>

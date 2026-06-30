@@ -1,15 +1,15 @@
 // A shared library package for the cross-package import behavioral tests: importing another package
-// (a separate C# assembly) and using its exported surface. Uses a plain lowercase single-segment
-// module so dir == module == package name (the common Go layout), keeping the producer/consumer C#
-// namespace + class mapping aligned.
-package crosspkglib
+// (a separate C# assembly) and using its exported surface. Uses a non-go2cs single-segment module so
+// dir == module == package name, keeping the producer/consumer C# namespace + class mapping aligned
+// (a `go2cs/`-prefixed module would hit the asymmetric prefix strip and mismatch).
+package CrossPkgLib
 
 // Celsius is an exported named numeric type (Phase 1: plain exported type + function + method).
 type Celsius float64
 
 // Temperature is an exported package-level TYPE ALIAS over Celsius (Phase 2: the GoTypeAlias /
 // ImportedTypeAliases round-trip — the library records `[assembly: GoTypeAlias("Temperature", …)]`
-// in its package_info.cs, which a consumer parses to emit a `global using` for `crosspkglib.Temperature`).
+// in its package_info.cs, which a consumer parses to emit a `global using` for `CrossPkgLib.Temperature`).
 type Temperature = Celsius
 
 // Boiling returns a Celsius value.
