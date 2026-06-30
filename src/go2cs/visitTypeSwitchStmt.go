@@ -154,7 +154,11 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 
 				v.writeOutput("case ")
-				v.targetFile.WriteString(caseExpr)
+				// Trim the trailing space left when a concrete-type case carries no binding variable
+				// (`fmt.Sprintf("%s %s", typeName, "")` → `"uint32 "`), so the label reads `case uint32:`
+				// not `case uint32 :`. Trimmed only at emission — the stored caseExpr keeps the space the
+				// nint/nuint synthetic-case prefix detection above relies on.
+				v.targetFile.WriteString(strings.TrimRight(caseExpr, " "))
 				v.targetFile.WriteString(": {")
 				v.indentLevel++
 
