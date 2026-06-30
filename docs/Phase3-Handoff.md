@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~181 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~175 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -146,9 +146,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 (`runtime` = ~181; this session's fresh reconvert measured 199 raw,
-the cross-assembly named-numeric generator fix below cleared 6 → 181): CS0030 45, CS1503 28, CS1929 16,
-CS1061 16, CS0021 12, CS1510 9, CS0029 8, CS0121 6, CS0103 6:
+as items land. As of 2026-06-30 (`runtime` = ~175; the S2 multi-level receiver field-chain promotion below
+cleared the `scavengeIndex.free`×5 cluster, 181 → 175): CS0030 45, CS1503 28, CS1061 16, CS0021 12,
+CS1929 11, CS1510 9, CS0029 8, CS0121 6, CS0103 5:
 
 - [x] **Cross-assembly named-numeric implicit-conversion operators** *(landed 2026-06-30, `93bbf6ce5`).*
   A `GoImplicitConv` numeric operator whose body constructs a named-numeric declared in ANOTHER assembly
@@ -199,12 +199,21 @@ CS1061 16, CS0021 12, CS1510 9, CS0029 8, CS0121 6, CS0103 6:
   shadow-renamed `ᏑΔp`); convSelectorExpr routes via a new `exprIsValueFieldOfDerefdPointerRoot` GATED to
   direct-ж (a `[GoRecv]` ref method binds directly — no churn). Runtime CS1929 32→16, total 261→243 (−18),
   zero churn, full suite green. Test `FieldChainBoxReceiver` (write-through verified). **REMAINING S2
-  sub-roots (16 CS1929 + 9 CS1510 — each distinct, pick one per session):**
-  - **Transitive direct-ж propagation (CS1929 ~6: `scavengeIndex.free`×5 in `mpagealloc`, `mgcmark`
-    `limiterEvent.start`, `proc` `timers.take`).** The ENCLOSING method (`free(this ref pageAlloc Δp)`) is
-    `[GoRecv] ref` (no box `Ꮡp`), yet it calls a direct-ж method on a value field-chain of its receiver →
-    it must be PROMOTED to direct-ж (so `Ꮡp` exists). This is a **signature-changing capture-mode change**
-    (captureModeOperations.go) — high blast radius, do FRESH (the memory's repeatedly-flagged delicate area).
+  sub-roots (11 CS1929 + 9 CS1510 — each distinct, pick one per session):**
+  - [x] **Transitive direct-ж promotion via MULTI-LEVEL receiver field-chain** *(landed 2026-06-30,
+    `f7392e778`; cleared the `scavengeIndex.free`×5 cluster, CS1929 16→11, runtime 181→175).* The
+    capture-mode pre-pass's `bodyCallsCaptureModeMethodOnReceiverField` only matched a ONE-level field
+    (`recvName.field.method`), so `func (p *pageAlloc) free(){ p.scav.index.free(…) }` (a TWO-level value
+    field-chain) was never promoted to direct-ж — its `[GoRecv] ref` receiver has no box `Ꮡp` for the
+    routing. Fix (contained, converter-only): generalized the detection to walk the FULL value field-chain
+    `recvName.f1.…fn.method` (new `selectorRootsAtReceiverValueFieldChain`, value fields only — a pointer
+    hop stops the walk). The existing routing (`exprIsValueFieldOfDerefdPointerRoot`, already multi-level)
+    then binds `Ꮡp.of(pageAlloc.Ꮡscav).of(…Ꮡindex).free(…)`; the transitive fixpoint cascades the
+    promotion up to the caller (`mheap.freeSpanLocked` → `h.pages.free(…)`). Zero behavioral churn, full
+    suite green (186). Test `FieldChainBoxReceiver` extended with `deep.bumpDeep` (`d.mid.c.inc()`, no
+    other direct-ж trigger). The `limiterEvent.start`/`timers.take` cases originally grouped here are NOT
+    this shape — they are `(~ptrCall).field.method(…)` (deref-of-call root, the CS1510 receiver-
+    materialization family), still open.
   - **CS1510 ×9 — `[GoRecv] ref` method on a `~`-value-deref RVALUE receiver** (`(~getg()).schedlink.set(…)`,
     `(~…).wbBuf.get2()`): the receiver root is a `~`-deref of a call/expr (not an ident param/receiver), so
     the box routing above does not apply. Needs the receiver materialized to an addressable/box form.
@@ -297,56 +306,51 @@ CS1061 16, CS0021 12, CS1510 9, CS0029 8, CS0121 6, CS0103 6:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~181. Last session landed the cross-ASSEMBLY
-named-numeric implicit-conversion-operator fix (GENERATOR, ImplicitConvGenerator + ImplicitConvTemplate,
-`93bbf6ce5`, cleared 3×CS0030 + 3×CS1729): a `GoImplicitConv` numeric operator that constructs a
-named-numeric declared in ANOTHER assembly (runtime's `nameOff`/`typeOff`/`textOff` ↔ `Δhex`) now routes
-`new ForeignNamed((basic)src.val)` through the foreign type's underlying basic and relocates the host into
-the LOCAL type. NOTE: that bug was inherently cross-assembly, so no behavioral test could host it (the
-single-assembly harness can't import a foreign named numeric; a two-module test hits an unrelated converter
-namespace-mapping gap) — the runtime build was the guard. Most roots below ARE behavioral-testable.
+This session: re-bucket, then tackle ONE root. Runtime is at ~175. Last session landed the S2 transitive
+direct-ж PROMOTION via MULTI-LEVEL receiver field-chain (CONVERTER, captureModeOperations.go, cleared the
+`scavengeIndex.free`×5 cluster, CS1929 16→11, 181→175): the capture-mode pre-pass only promoted a method
+whose body called a direct-ж method on a ONE-level field of its receiver (`recv.field.m()`); it now walks
+the FULL value field-chain (`p.scav.index.free(…)`, new `selectorRootsAtReceiverValueFieldChain`, value
+fields only). The existing routing + transitive fixpoint did the rest (cascades up to `mheap.freeSpanLocked`).
+Test `FieldChainBoxReceiver` extended with `deep.bumpDeep`; zero churn, full suite green (186).
 
-Recommended NEXT root (highest impact, but DELICATE — fresh context is ideal): **S2 transitive direct-ж
-PROMOTION (CS1929 ~6–7).** `scavengeIndex.free` ×5 (mpagealloc.cs ~899–916), `limiterEvent.start`
-(mgcmark.cs:604), `timers.take` (proc). The error shape: `scavengeIndex does not contain 'free'; best
-overload free(ж<scavengeIndex>, …) requires receiver ж<scavengeIndex>`. The ENCLOSING method
-(`free(this ref pageAlloc Δp)`) is `[GoRecv] ref` so it has NO box `Ꮡp`, yet its body calls a DIRECT-ж
-method on a value field-chain of its own receiver (`Δp.scav.index.free(…)`) — which needs a real nested box
-to bind. The enclosing method must be PROMOTED to direct-ж (so `Ꮡp` exists), mirroring last-area S2 fix
-`7f0075d4f` but one level up. This is a SIGNATURE-CHANGING capture-mode change (captureModeOperations.go) —
-the repeatedly-flagged delicate, high-blast-radius area; reconvert + FULL behavioral suite after every
-step, and gate with a behavioral test (a `[GoRecv] ref` method calling a direct-ж method on its receiver's
-value field-chain, write-through verified). If it shows churn/regression you can't contain, REVERT and take
-the contained alternate instead.
+Recommended NEXT root (CONTAINED clean win): **Anonymous-map-param lifting (type.cs `typesEqual` `seen[tp,ꟷ]`,
+~4: 2 CS8130 at type.cs:355 + 2 CS0021 + 1 CS1503).** A `map[_typePair]struct{}` PARAMETER is lifted to a
+`[GoType("dyn")]` STRUCT instead of a map named type, so its comma-ok deconstruction (`(_, ok) = seen[tp]`)
+and two-arg indexer don't exist (CS8130 "cannot infer deconstruction var", CS0021 "no two-arg indexer").
+Param-type lifting (visitFuncDecl/convFuncType) only handles struct/interface (`extractStructType`/
+`extractInterfaceType`) — there is no map case, and `visitMapType` is a stub (a known ToDo in
+src/go2cs/ToDo.md). Implement `visitMapType` + lift an anonymous map param to `[GoType("map[K]V")]` so it
+emits as a golib `map<K,V>` (which has the comma-ok TryGetValue / indexer). Behavioral-testable SAME-package
+(a func taking an anonymous `map[K]struct{}` param, comma-ok lookup + len + iterate). Study how struct/iface
+params are lifted (search `extractStructType`, `GoType("dyn")`, the convFuncType param loop) and mirror for
+maps. Verify golib `map<K,V>` already exposes the needed surface (it does — used pervasively).
 
-CONTAINED alternate (safer clean win): **Anonymous-map-param lifting (type.cs `typesEqual` `seen[tp,ꟷ]`,
-~4: 2 CS8130 + 2 CS0021 + 1 CS1503).** A `map[_typePair]struct{}` PARAMETER is lifted to a `[GoType("dyn")]`
-STRUCT instead of a map named type, so its comma-ok index / two-arg indexer don't exist. Param-type lifting
-(visitFuncDecl/convFuncType) only handles struct/interface (`extractStructType`/`extractInterfaceType`) —
-no map case; `visitMapType` is a stub (a known ToDo). Lift an anonymous map param to `[GoType("map[K]V")]`.
-Behavioral-testable same-package (a func taking an anonymous `map[K]struct{}` param, comma-ok lookup).
+OTHER characterized roots (pick by fresh bucket if the above is already cleared by nondeterminism drift):
+- S2 remainder: `~`-deref-rooted CS1510 (~9, `(~getg()).schedlink.set(…)`, `(~…).wbBuf.get2()` —
+  receiver materialization: the receiver root is a `~`-deref of a CALL/expr, not an ident, so the box
+  routing doesn't apply; needs the receiver materialized to an addressable/box form). Also the
+  `(~ptrCall).field.method` CS1929 pair (`limiterEvent.start` mgcmark, `timers.take` proc) is this family.
+- S2 remainder: indexed-element atomic (mprof `bh.val[i].Load()`/`.StoreNoWB()`, CS1929 ×4 — array element
+  of atomic UnsafePointer via a pointer; check why `exprIsIndexedValueElement` isn't firing for UnsafePointer).
+- S3 remainder: `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (~4 CS1061: `.Str`/`.TFlag`/`.Kind_`/
+  `.Size_`) — needs metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves
+  source/same-package; `internal/abi` is a metadata-only DLL ref). Meatier generator extension.
+- S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
+- S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
+  the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
+  multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 
 First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
    src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
    internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
-   right). Confirm the CS1929 `scavengeIndex.free` cluster and read the enclosing method's `[GoRecv]` shape.
-2. For S2: study `7f0075d4f` (convUnaryExpr `&`-machinery + convSelectorExpr `exprIsValueFieldOfDerefdPointerRoot`)
-   and captureModeOperations.go; the promotion makes the enclosing `[GoRecv] ref` method direct-ж so `Ꮡp`
-   exists for the nested-box routing. For the alternate: implement `visitMapType` + map param lifting.
+   right). Confirm the CS8130/CS0021 cluster at type.cs `typesEqual` (`seen[tp,ꟷ]`).
+2. Implement `visitMapType` (src/go2cs/visitMapType.go is a stub) + the map case in param-type lifting
+   (convFuncType / visitFuncDecl, alongside extractStructType/extractInterfaceType). Lift an anonymous map
+   param to `[GoType("map[K]V")]` → golib `map<K,V>`.
 3. Implement per the Workflow; gate with a behavioral test + zero churn via check-no-regression.ps1 +
    ConversionStrategies.md + one focused commit.
-
-OTHER characterized roots (pick by fresh bucket):
-- S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
-  in TypeGenerator (`GetStructDeclaration` only resolves source/same-package); field-on-box deref-missing (~7,
-  several S1-tied).
-- S2 remainder: `~`-deref-rooted CS1510 (~9, `(~getg()).schedlink.set(…)` — receiver materialization);
-  indexed-element atomic (mprof `bh.val[i].Load()`, CS1929 ×4).
-- S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
-- S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
-  the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
-  multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 
 Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
 refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
