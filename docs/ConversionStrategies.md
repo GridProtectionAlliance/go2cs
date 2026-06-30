@@ -499,7 +499,22 @@ type table[T any] [3]atomic.Pointer[T]
     where T : new();
 ```
 
-An **anonymous array/slice field whose element type lives in a multi-segment-path package** — `cpuLogWrite [2]atomic.Pointer[profBuf]`, `children [4]atomic.UnsafePointer` (atomic = `internal/runtime/atomic`) — keeps its `array<…>` wrapper. The field's type name is built structurally from the `[N]`/`[]` marker plus the recursively resolved element, *not* from the type's package-qualified string: that string (`[2]internal/runtime/atomic.Pointer[…]`) goes through a cross-package last-segment strip that would also remove the leading `[2]`, collapsing the field to the bare element type (`atomic.Pointer<…> = new(2)`) whose array `new(2)` initializer then mis-binds the element constructor (CS1503). With the structural rendering the field stays `array<atomic.Pointer<profBuf>> = new(2)`. An array of a current-package or basic-typed element was unaffected (its string has no foreign path to strip). (Guarded by the `ArrayOfCrossPackageType` behavioral test — `[3]atomic.Int32` / `[2]atomic.Uint64` fields, a Compile + target guard; runtime's `trace`/`traceMap` structs hold these.)
+An **anonymous array/slice field whose element type lives in a multi-segment-path package** — `cpuLogWrite [2]atomic.Pointer[profBuf]`, `children [4]atomic.UnsafePointer` (atomic = `internal/runtime/atomic`) — keeps its `array<…>` wrapper. The field's type name is built structurally from the `[N]`/`[]` marker plus the recursively resolved element, *not* from the type's package-qualified string: that string (`[2]internal/runtime/atomic.Pointer[…]`) goes through a cross-package last-segment strip that would also remove the leading `[2]`, collapsing the field to the bare element type (`atomic.Pointer<…> = new(2)`) whose array `new(2)` initializer then mis-binds the element constructor (CS1503). With the structural rendering the field stays `array<atomic.Pointer<profBuf>> = new(2)`. An array of a current-package or basic-typed element was unaffected (its string has no foreign path to strip). (Guarded by the `ArrayOfCrossPackageType` behavioral test — `[3]atomic.Int32` / `[2]atomic.Uint64` fields; runtime's `trace`/`traceMap` structs hold these.)
+
+#### A struct's array fields get their fixed length from a generated parameterless constructor
+
+A Go `[N]T` array FIELD has a zero value of N zero elements — never nil. The converter emits the field
+with a length initializer — `internal array<atomic.Int32> c = new(3);` — but a C# struct field
+initializer only runs when an **explicitly declared** parameterless constructor is invoked; the implicit
+struct constructor that `new counters()` would otherwise use zeroes every field and SKIPS initializers,
+leaving the array's backing `T[]` null (an NPE on the first index or `len`). The `TypeGenerator`
+therefore emits an explicit `public S() { }` for every struct, so `new S()` runs the field initializers
+and each array field gets its `new(N)` backing. (C# 11 auto-defaults any field without an initializer, so
+the empty body suffices; a slice/map/chan field — which has no `new(N)` initializer — stays its nil zero
+value, matching Go.) This is generator-only and produces no golden churn (the `.g.cs` output is not a
+golden). It is what lets `ArrayOfCrossPackageType` run as an **output-compared** test (`len(x.c)` /
+`len(x.d)` print `3 2`); before the fix, indexing `&x.c[i]` threw a `NullReferenceException`, so the test
+was compile+target-only.
 
 #### Prefer the file-local package alias over the fully-qualified `_package` name
 
@@ -530,9 +545,8 @@ recursively-built field address `base.of(Type.Ꮡfield)` by retargeting its trai
 `.at(field, i)`, only when the field segment is parenthesis-free (a plain `Type.Ꮡfield` accessor, so the
 final `)` provably matches the last `.of(`); any other shape falls back to the explicit chained form.
 The combined overload is behaviorally identical to the chain (it literally forwards to it). (Guarded by
-`ArrayOfCrossPackageType` (Compile+target), `IndexedElementDirectBoxMethod` and
-`PointerFieldArrayElementAddress` (output-compared — the `.inc()`/`bump()` element writes verify
-runtime equivalence).)
+`ArrayOfCrossPackageType`, `IndexedElementDirectBoxMethod` and `PointerFieldArrayElementAddress` — all
+output-compared; the `.inc()`/`bump()` element writes verify runtime equivalence.)
 
 A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
 

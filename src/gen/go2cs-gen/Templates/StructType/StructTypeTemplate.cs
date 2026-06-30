@@ -342,6 +342,18 @@ internal class StructTypeTemplate : TemplateBase
 
             result.AppendLine($"{TypeElemIndent}}}");
 
+            // Parameterless constructor so C# RUNS the struct's field initializers — most importantly an
+            // array field's `= new(N)`, which gives a Go `[N]T` field its fixed length (its backing T[]).
+            // Without an EXPLICITLY declared parameterless constructor, `new S()` uses the implicit struct
+            // constructor, which zeroes every field and SKIPS field initializers — leaving an array field's
+            // backing null, so indexing/`len` on it throws NullReferenceException. (C# 11 auto-defaults any
+            // field lacking an initializer, so the empty body is sufficient and correct; a slice/map/etc.
+            // field — which has no `= new(N)` initializer — stays its nil zero value, matching Go.)
+            result.AppendLine();
+            result.AppendLine($"public {NonGenericStructName}()");
+            result.AppendLine($"{TypeElemIndent}{{");
+            result.AppendLine($"{TypeElemIndent}}}");
+
             // Generate exported constructor from public fields
             GenerateConstructor("public", PublicStructMembers, result);
 
