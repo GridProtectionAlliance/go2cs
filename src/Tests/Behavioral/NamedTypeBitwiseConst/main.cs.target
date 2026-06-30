@@ -20,8 +20,8 @@ public static Tag Context(this Tag t) {
 
 internal static void Main() {
     Tag t = 16;
-    fmt.Println(((uint8)t.Constructed()));
-    fmt.Println(((uint8)t.Context()));
+    fmt.Println((uint8)t.Constructed());
+    fmt.Println((uint8)t.Context());
 }
 
 } // end main_package

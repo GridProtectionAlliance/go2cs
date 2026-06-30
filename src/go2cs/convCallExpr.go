@@ -144,6 +144,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 				argType := v.info.TypeOf(arg)
 
+				// An IDENTITY conversion to the same named numeric type — `arenaIdx(x)` where x is
+				// already `arenaIdx` — is a Go no-op. This happens for an untyped-constant shift that
+				// adopts the target type from context (`arenaIdx(1 << bits)`, whose operand go/types
+				// already types as arenaIdx, so convExpr(arg) has emitted `((arenaIdx)((nuint)1 << b))`),
+				// and for a plain `arenaIdx(yArenaIdx)`. Wrapping the already-typed expr in another
+				// `((arenaIdx)…)` cast just doubles it; return the converted arg as-is.
+				if argType != nil && types.Identical(argType, named) {
+					return expr
+				}
+
 				if argType == nil || !types.Identical(argType.Underlying(), basic) {
 					underlyingCS := v.getCSTypeName(basic)
 					inner := expr
@@ -190,19 +200,43 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					if !types.Identical(argBasic, targetBasic) {
 						underlyingCS := v.getCSTypeName(argBasic)
 
+						// No outer parentheses: the conversion target is a BASIC C# type, whose result
+						// can never be the receiver of a postfix `.`/`[]`/invocation (basic types expose
+						// no Go-callable members and the converter emits none), so C# cast precedence —
+						// higher than every binary operator — already binds correctly in any surrounding
+						// context. `(ulong)(int)t.Str` parses as `(ulong)((int)(t.Str))` (postfix `.`
+						// binds before the cast). See the basic-target note at the general return below.
 						if v.needsParentheses(arg) {
-							return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+							return fmt.Sprintf("(%s)(%s)(%s)", targetTypeName, underlyingCS, expr)
 						}
 
-						return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, expr)
+						return fmt.Sprintf("(%s)(%s)%s", targetTypeName, underlyingCS, expr)
 					}
 				}
 			}
 		}
 
+		// A conversion to a BASIC C# type omits the outer parentheses around the whole cast: the
+		// result of `(uint64)x` / `(nint)y` can never be the receiver of a postfix `.`/`[]`/invocation
+		// (Go basic types expose no callable members and the converter emits none on them), and the C#
+		// cast operator outranks every binary operator, so `(uint64)x` binds correctly unparenthesized
+		// in any surrounding context (`f((uint64)a)`, `return (uint64)a;`, `(uint64)a << n`). This keeps
+		// the common `uint64(a)` → `(uint64)a` close to the Go source. A NAMED-type target keeps the
+		// outer parens — its result CAN be member-accessed (`Named(x).Method()`), which is parent-
+		// context-dependent and not decidable here, so the defensive wrap is retained.
+		_, targetIsBasic := v.info.TypeOf(callExpr).(*types.Basic)
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
+			if targetIsBasic {
+				return fmt.Sprintf("(%s)(%s)", targetTypeName, expr)
+			}
+
 			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)
+		}
+
+		if targetIsBasic {
+			return fmt.Sprintf("(%s)%s", targetTypeName, expr)
 		}
 
 		return fmt.Sprintf("((%s)%s)", targetTypeName, expr)

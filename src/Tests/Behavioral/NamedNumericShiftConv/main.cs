@@ -13,10 +13,10 @@ partial class main_package {
 internal static readonly UntypedInt bits = 6;
 
 internal static void Main() {
-    arenaIdx a = ((arenaIdx)((arenaIdx)((nuint)1 << (int)(bits))));
-    tag t = ((tag)((tag)(uint8)(1 << (int)(3))));
-    big b = ((big)((big)((uint64)1 << (int)(40))));
-    fmt.Println(((nuint)a), ((uint8)t), ((uint64)b));
+    arenaIdx a = (arenaIdx)((nuint)1 << (int)(bits));
+    tag t = (tag)(uint8)(1 << (int)(3));
+    big b = (big)((uint64)1 << (int)(40));
+    fmt.Println((nuint)a, (uint8)t, (uint64)b);
 }
 
 } // end main_package

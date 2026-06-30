@@ -21,7 +21,7 @@ internal static void consume(ж<atomic.Int32> Ꮡv, Action<ж<atomic.Int32>> sin
 internal static void Main() {
     ref var v = ref heap(new atomic.Int32(), out var Ꮡv);
     Ꮡv.Store(10);
-    nint n = apply(Ꮡv, (ж<atomic.Int32> x) => ((nint)x.Load()) + 5);
+    nint n = apply(Ꮡv, (ж<atomic.Int32> x) => (nint)x.Load() + 5);
     fmt.Println(n);
     consume(Ꮡv, (ж<atomic.Int32> x) => {
         x.Store(99);

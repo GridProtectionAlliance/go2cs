@@ -8,13 +8,13 @@ partial class main_package {
 internal static void Main() {
     var b = CrossPkgLib.Boiling();
     var r = b.Add(10);
-    fmt.Println(((float64)b));
-    fmt.Println(((float64)r));
+    fmt.Println((float64)b);
+    fmt.Println((float64)r);
     CrossPkgLibꓸTemperature t = CrossPkgLib.Freezing();
     t = t.Add(32);
-    fmt.Println(((float64)t));
+    fmt.Println((float64)t);
     var s = new CrossPkgLib.Sensor(Name: "kitchen"u8, Temp: CrossPkgLib.Boiling());
-    fmt.Println(s.Name, ((float64)s.Temp), s.Hot());
+    fmt.Println(s.Name, (float64)s.Temp, s.Hot());
     CrossPkgLib.Labeled l = s;
     fmt.Println(l.Label());
     fmt.Println(CrossPkgLib.Describe(s));

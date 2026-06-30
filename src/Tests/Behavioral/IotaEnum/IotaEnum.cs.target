@@ -50,7 +50,7 @@ public static readonly ΔKind Struct = 25;
 public static readonly ΔKind UnsafePointer = 26;
 
 public static @string String(this ΔKind k) {
-    if (((nint)(uint8)k) < len(kindNames)) {
+    if ((nint)(uint8)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
@@ -105,8 +105,8 @@ public static readonly TFlag TFlagRegularMemory = /* 1 << 3 */ 8;
 public static readonly TFlag TFlagUnrolledBitmap = /* 1 << 4 */ 16;
 
 public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
-    var x = ((uintptr)p);
-    return ((@unsafe.Pointer)((uintptr)(x ^ 0)));
+    var x = (uintptr)p;
+    return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
 [GoType] partial struct EmptyInterface {
@@ -185,7 +185,7 @@ public static ж<Type> TypeFor<T>() {
 }
 
 internal static void Main() {
-    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), ((nint)(uint8)Slice));
+    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), (nint)(uint8)Slice);
 }
 
 } // end main_package
