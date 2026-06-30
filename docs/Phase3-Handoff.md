@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~236 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~229 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -276,30 +276,35 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~236; S3 last session cleared the
-named-type-over-STRUCT forwarding (winlibcall) + the `~`-deref-of-field-ref-box golib bug. The recommended
-next root is the **range / comma-ok deconstruction over a named-over-builtin or Span source** (CS8130 ~10 +
-CS8183 ~5, which overlap on the same sites, + ~3 `Deconstruct` CS1061 — together ~15). But CONFIRM with a
-fresh bucket and pick the highest-impact tractable root (CS0030 58 is the deferred S1 architecture; skip it).
+This session: re-bucket, then tackle ONE root. Runtime is at ~229. Last session cleared the
+`*p.field` deref bug (the traceback `range *gp.ancestors` + latent `*p.ptrField` value reads, −7). Two
+sub-roots of the range/deconstruct cluster REMAIN; pick the highest-impact tractable one (CONFIRM with a
+fresh bucket; CS0030 58 is the deferred S1 architecture — skip it):
 
-The recommended defect (range/comma-ok deconstruction): the converter emits `foreach (var (i, _) in src)`
-or a comma-ok `src[k, ꟷ]` where `src` is a C# `Span<T>` (from an unsafe→Span conversion), a named-over-slice
-type (`printDebugLog_readState`), or a named-over-MAP type (`type.cs` `seen[tp, ꟷ]`). A Span yields elements
-(not `(index, element)` tuples) and a named-over-builtin doesn't expose the builtin's `Deconstruct`/indexer,
-so the deconstruction can't bind (CS8130 "cannot infer", CS8183, CS1061 `Deconstruct`). Index-only range over
-a Span needs the indexed `for (var i = 0; i < src.Length; i++)` form; a named-over-map comma-ok needs the
-underlying map's two-arg indexer forwarded (kin to last session's named-over-struct field forwarding — but the
-named-over-ARRAY `pallocBits`→IArray variant was REVERTED before: lazy array allocates on a throwaway copy →
-lost writes; it needs EAGER shared backing, so triage WITHIN this bucket).
+(A) **Span-range** (~6: `debuglog.cs` `printDebugLog` ×4, `os_windows.cs` ×2 — CS8130/CS8183). `state`/`b`
+are C# `Span<T>` (from the `(*[N]T)(ptr)[:n]` unsafe conversion at `convSliceExpr.go:39` → `new Span<T>(…)`),
+and `for i := range state` / `for _, x := range b` emit `foreach (var (i, _) in span)` — but a `Span<T>`
+yields elements, not `(index, element)` tuples (CS8130). This is the TANGLED one: visitRangeStmt keys off the
+Go type (`[]T` → slice foreach), but the C# representation is Span; the converter doesn't track that. The fix
+needs Span-variable TRACKING (record locals assigned a `new Span<T>(…)` in visitAssignStmt) + visitRangeStmt
+emitting the indexed `for (var i = 0; i < span.Length; i++)` form for a Span source (preserves Span aliasing —
+debuglog WRITES via `Ꮡ(state,i)`, so do NOT switch to a golib `slice<T>`, which COPIES via `.ToArray()` →
+lost writes). Moderate effort, new mechanism — design carefully.
+
+(B) **named-over-MAP comma-ok** (~2-3: `type.cs` `seen[tp, ꟷ]`, where `seen` is `typesEqual_seen` =
+`[GoType("map[…]struct{}")]`). `v, ok := seen[k]` emits `seen[tp, ꟷ]` (the golib two-arg comma-ok indexer)
+but the named-over-map wrapper doesn't expose it. KIN to last session's named-over-struct field forwarding
+(`winlibcall`) — forward the underlying map's indexer/`Deconstruct` onto the wrapper. Maps are REFERENCE types
+so there's no copy/eager-backing trap (unlike the REVERTED `pallocBits`→IArray named-over-ARRAY case). Likely
+the cleaner/smaller of the two.
 
 First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — overlay.sh restores the
-   core manual files). Read the actual CS8130/CS8183/CS1061 sites to separate the Span-range, named-slice,
-   and named-map sub-shapes.
+   core manual files). Read the actual CS8130/CS8183/CS1061 sites.
 2. Read the go2cs-phase3-progress memory's range-over-Span (CS8130) + named-type-forwarding notes (incl. the
    pallocBits IArray-forwarding REVERT) BEFORE editing.
-3. Implement per the Workflow. Converter or generator fix; gate with a behavioral test (range/comma-ok over
-   the matching source, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md
+3. Implement per the Workflow. Converter (A) or generator (B) fix; gate with a behavioral test (range/comma-ok
+   over the matching source, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md
    + one focused commit per root.
 
 NOTE — other open roots (all characterized in the queue above):
@@ -309,7 +314,7 @@ NOTE — other open roots (all characterized in the queue above):
 - S2 remainder (CS1929 ~16 + CS1510 ~9): transitive direct-ж PROMOTION for a `[GoRecv]` method calling a
   direct-ж method on its receiver's field-chain (signature-changing capture-mode work, do FRESH);
   `~`-deref-rooted CS1510; indexed-element atomic (mprof `bh.val[i]`).
-- S4 (CS0029 ~11) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
+- S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
 - S1 CS0030 bulk (~50): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
   the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
   multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
