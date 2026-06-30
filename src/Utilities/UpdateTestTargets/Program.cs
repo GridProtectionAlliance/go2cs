@@ -11,6 +11,12 @@ foreach (string testDir in behavioralTestDirs)
     if (testDir.EndsWith("Tests"))
         continue;
 
+    // Only real behavioral test projects (those containing Go source) are test targets. Utility folders
+    // that live under Tests\Behavioral but have no .go files -- e.g. BehavioralRunner -- are not tests
+    // and must not get phantom Check<Name>() methods injected.
+    if (Directory.GetFiles(testDir, "*.go").Length == 0)
+        continue;
+
     // Get last subdirectory name which is the test project name
     string[] dirParts = testDir.Split(Path.DirectorySeparatorChar);
     targetTests.Add(dirParts[^1]);

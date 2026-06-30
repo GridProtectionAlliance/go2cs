@@ -113,10 +113,12 @@ namespace BehavioralRunner
             s_go2csExe = Path.Combine(s_converterSrc, "bin", "go2cs.exe");
 
             // ----- discover projects -----
+            // A behavioral test project is a folder with both a .csproj and Go source. This naturally
+            // excludes the BehavioralTests (MSTest) runner and this BehavioralRunner utility (no .go),
+            // and any future utility folder, without brittle name checks.
             List<string> projects = Directory.GetDirectories(s_behavioralDir)
-                .Where(d => !string.Equals(Path.GetFileName(d), "BehavioralTests", StringComparison.OrdinalIgnoreCase))
-                .Where(d => !string.Equals(Path.GetFileName(d), "BehavioralRunner", StringComparison.OrdinalIgnoreCase))
                 .Where(d => Directory.GetFiles(d, "*.csproj").Length > 0)
+                .Where(d => Directory.GetFiles(d, "*.go").Length > 0)
                 .Select(Path.GetFileName)
                 .Where(n => filter is null || n!.Contains(filter, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
