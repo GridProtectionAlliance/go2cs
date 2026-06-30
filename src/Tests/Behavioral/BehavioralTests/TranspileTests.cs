@@ -411,6 +411,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRangeVarHeapBox() => CheckTarget("RangeVarHeapBox");
 
     [TestMethod]
+    public void CheckRangeVarReassign() => CheckTarget("RangeVarReassign");
+
+    [TestMethod]
     public void CheckReceiverCapturedInClosure() => CheckTarget("ReceiverCapturedInClosure");
 
     [TestMethod]

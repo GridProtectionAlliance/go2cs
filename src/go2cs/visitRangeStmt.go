@@ -7,6 +7,56 @@ import (
 	"go/types"
 )
 
+// rangeVarReassignedInBody reports whether the range key/value identifier is reassigned (via `=`,
+// `+=`, `-=`, `++`, …) anywhere in the loop body. Go lets a range variable be reassigned (it is a
+// per-iteration copy), but a C# `foreach` iteration variable is read-only (CS1656), so such a var
+// must be iterated through a temp and copied into a mutable local. A `:=` redeclaration shadows into
+// a new object, so it is not counted (the object identity check excludes it).
+func (v *Visitor) rangeVarReassignedInBody(expr ast.Expr, body *ast.BlockStmt) bool {
+	ident, ok := expr.(*ast.Ident)
+
+	if !ok || ident.Name == "_" {
+		return false
+	}
+
+	obj := v.info.ObjectOf(ident)
+
+	if obj == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(body, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		switch s := n.(type) {
+		case *ast.AssignStmt:
+			if s.Tok == token.DEFINE {
+				return true
+			}
+
+			for _, lhs := range s.Lhs {
+				if id, ok := lhs.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+					found = true
+					return false
+				}
+			}
+		case *ast.IncDecStmt:
+			if id, ok := s.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+				found = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
 func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtContext) {
 	v.targetFile.WriteString(v.newline)
 	var ptrDeref string
@@ -178,31 +228,45 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
 		}
 
-		if assignVars {
+		// A newly-DEFINED range var that is reassigned in the body must become a mutable local: a
+		// C# foreach iteration variable is read-only (CS1656). Iterate a temp and declare the var
+		// from it in the body (`foreach (var (_, rᴛ1) in s) { var r = rᴛ1; … }`).
+		keyReassigned := !assignVars && v.rangeVarReassignedInBody(rangeStmt.Key, rangeStmt.Body)
+		valReassigned := !assignVars && v.rangeVarReassignedInBody(rangeStmt.Value, rangeStmt.Body)
+
+		if assignVars || keyReassigned || valReassigned {
+			// `assignVars` copies into pre-existing vars (`r = rᴛ1;`); a reassigned DEFINE var is
+			// declared from the temp (`var r = rᴛ1;`).
 			var innerPrefix, tempKeyExpr, tempValExpr string
 
-			if keyExpr == "_" {
-				tempKeyExpr = "_"
+			if keyExpr == "_" || (!assignVars && !keyReassigned) {
+				tempKeyExpr = keyExpr
 			} else {
 				tempKeyExpr = v.getTempVarName("i")
+				decl := ""
 
 				if !v.options.preferVarDecl {
 					keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+				} else if !assignVars {
+					decl = "var "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), keyExpr, tempKeyExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), decl, keyExpr, tempKeyExpr)
 			}
 
-			if valExpr == "_" {
-				tempValExpr = "_"
+			if valExpr == "_" || (!assignVars && !valReassigned) {
+				tempValExpr = valExpr
 			} else {
 				tempValExpr = v.getTempVarName("r")
+				decl := ""
 
 				if !v.options.preferVarDecl {
 					valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+				} else if !assignVars {
+					decl = "var "
 				}
 
-				innerPrefix += fmt.Sprintf("%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), valExpr, tempValExpr)
+				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), decl, valExpr, tempValExpr)
 			}
 
 			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)

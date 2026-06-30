@@ -904,6 +904,28 @@ continue_RowLoop:;
 ```
 Both the `break_<label>`/`continue_<label>` labels are emitted for a labeled `for` **and** a labeled `range`/`foreach` loop (the label target is placed regardless of loop kind; a missing one is CS0159 "no such label"). Guarded by the `ForVariants` behavioral test (labeled `range` with nested `continue`/`break`).
 
+### Reassigned range variable
+A C# `foreach` iteration variable is **read-only**, but Go lets a `range` key/value variable be reassigned inside the body (it is a per-iteration copy). When the converter detects such a reassignment (`=`, `+=`, `-=`, `++`, …) of a newly-`:=`-defined range variable, it iterates a temp and declares the variable as a mutable local copy in the body, rather than binding it directly:
+
+```go
+for _, r := range s {  // r is a rune
+    if r >= 0x10000 {
+        r -= 0x10000   // reassigns the range variable — CS1656 on a foreach var
+        …
+    }
+}
+```
+```csharp
+foreach (var (_, rᴛ1) in s) {
+    var r = rᴛ1;       // mutable local copy
+    if (r >= 65536) {
+        r -= 65536;
+        …
+    }
+}
+```
+A range variable that is only *read* keeps binding directly to the `foreach` tuple (no temp, no churn). This reuses the same temp-var/`innerPrefix` machinery as the `for k, v = range` (re-assign-into-existing-vars) form. (Guarded by the `RangeVarReassign` behavioral test; runtime hits this in `os_windows`'s UTF-16 surrogate-pair encoder.)
+
 ## Source Generators
 Several Go semantics cannot be written directly in C#, so the converter emits compact, attributed partial declarations and lets a set of Roslyn source generators (`src/gen/go2cs-gen/`, referenced as an analyzer by every converted project) synthesize the rest at compile time. This keeps the visible converted code close to the Go original. The principal generators and attributes:
 
