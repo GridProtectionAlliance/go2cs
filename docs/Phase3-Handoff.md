@@ -5,11 +5,18 @@
 > **zero errors**. This is the headline goal of the whole `go2cs` project. Read
 > [`CLAUDE.md`](../CLAUDE.md) first; this doc is the focused Phase-3 playbook.
 
-## Where things stand (2026-06-30)
+## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~175 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~169 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
+- **Behavioral-suite hygiene note (2026-06-30):** the "reduce redundant cast parentheses" beautify
+  (`4261cd21a`) had over-stripped the outer parens of `string()` conversions, leaving the suite RED
+  (UnsafeOperations failed to compile — a variadic-spread `.ꓸꓸꓸ` rebound to the cast's inner operand,
+  CS1061). Fixed in `61ce1157a` (a `string` target keeps the wrap; `@string` is member-accessible —
+  see ConversionStrategies "Basic-target conversions"). The full behavioral suite is green again (190
+  projects); if a future "suite was green" claim conflicts with a fresh run, re-run it — beautify
+  commits have twice now landed without a full-suite re-run.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
   The user hand-finishes certain stdlib files in `src/core` marked `[module: GoManualConversion]` (the
   converter skips re-converting them) or named `*_impl.cs`. A fresh reconvert into an empty scratchpad
@@ -146,10 +153,24 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 (`runtime` = ~175; the S2 multi-level receiver field-chain promotion below
-cleared the `scavengeIndex.free`×5 cluster, 181 → 175): CS0030 45, CS1503 28, CS1061 16, CS0021 12,
-CS1929 11, CS1510 9, CS0029 8, CS0121 6, CS0103 5:
+as items land. As of 2026-06-30 late (`runtime` = ~169; the empty-struct-lift fix below cleared the
+type.cs `typesEqual` `seen[tp,ꟷ]` cluster, 175 → 169): CS0030 45, CS1503 24, CS1061 16, CS1929 11,
+CS0021 10, CS1510 9, CS0029 8, CS0121 6, CS0266 5, CS0103 5:
 
+- [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
+  cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
+  "anonymous-map-param lifting / implement `visitMapType`" diagnosis was **WRONG** — `visitMapType` is
+  still a stub and was never the issue. Real root: `convStructType` lifted EVERY `struct{}` composite to
+  a `[GoType("dyn")]` named type, including the EMPTY one. For `seen[k] = struct{}{}` the enclosing
+  assignment passes the LHS ident (`seen`) into the conversion context to name the lift — so the empty
+  struct was lifted to `typesEqual_seen` AND registered under `seen`'s OWN type, the map
+  `map[_typePair]struct{}`, in the lifted-type registry. That poisoned every later reference to the map
+  type: the parameter rendered as the phantom struct (not `map<_typePair, EmptyStruct>`), so comma-ok
+  deconstruction (CS8130) and the two-arg indexer (CS0021) vanished and real-map call sites mismatched
+  (CS1503). **Fix (converter-only, `convStructType.go`, +12 lines):** an empty struct short-circuits to
+  golib `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard `extractStructType` already
+  applies everywhere else. Behavioral test `EmptyStructMapSet`; zero golden churn; full suite green. See
+  ConversionStrategies.md "...empty struct `struct{}` is never lifted...".
 - [x] **Cross-assembly named-numeric implicit-conversion operators** *(landed 2026-06-30, `93bbf6ce5`).*
   A `GoImplicitConv` numeric operator whose body constructs a named-numeric declared in ANOTHER assembly
   was doubly broken: `(NameOff)src.val` (`ulong`→foreign `int32`-named) has no cross-assembly route C#
@@ -306,37 +327,39 @@ CS1929 11, CS1510 9, CS0029 8, CS0121 6, CS0103 5:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~175. Last session landed the S2 transitive
-direct-ж PROMOTION via MULTI-LEVEL receiver field-chain (CONVERTER, captureModeOperations.go, cleared the
-`scavengeIndex.free`×5 cluster, CS1929 16→11, 181→175): the capture-mode pre-pass only promoted a method
-whose body called a direct-ж method on a ONE-level field of its receiver (`recv.field.m()`); it now walks
-the FULL value field-chain (`p.scav.index.free(…)`, new `selectorRootsAtReceiverValueFieldChain`, value
-fields only). The existing routing + transitive fixpoint did the rest (cascades up to `mheap.freeSpanLocked`).
-Test `FieldChainBoxReceiver` extended with `deep.bumpDeep`; zero churn, full suite green (186).
+This session: re-bucket, then tackle ONE root. Runtime is at ~169. Last session landed the empty-struct-lift
+fix (CONVERTER, convStructType.go, +12 lines; cleared the type.cs `typesEqual` `seen[tp,ꟷ]` cluster —
+CS8130 ×2 + CS0021 ×2 + CS1503 — 175→169). NOTE the prior handoff's "implement visitMapType / anonymous-map-
+param lifting" diagnosis was WRONG: `visitMapType` is still a stub and was never the cause. Real root —
+convStructType lifted EVERY `struct{}` composite, including the EMPTY one; for `seen[k] = struct{}{}` the
+assignment passes the LHS ident `seen` as naming context, so the empty struct was registered under `seen`'s
+OWN type (the map `map[_typePair]struct{}`) in the lifted-type registry, poisoning the parameter signature +
+comma-ok + indexer. Fix: empty struct short-circuits to golib `EmptyStruct` before any lift. Test
+`EmptyStructMapSet`; zero churn. ALSO fixed a pre-existing suite-breaker (`61ce1157a`): the `4261cd21a`
+cast-paren beautify over-stripped `string()` conversions (`@string` is member-accessible — the variadic
+spread `string(r)...` rebound `.ꓸꓸꓸ` to the inner operand, CS1061 in UnsafeOperations). Both: full
+behavioral suite green (190 projects).
 
-Recommended NEXT root (CONTAINED clean win): **Anonymous-map-param lifting (type.cs `typesEqual` `seen[tp,ꟷ]`,
-~4: 2 CS8130 at type.cs:355 + 2 CS0021 + 1 CS1503).** A `map[_typePair]struct{}` PARAMETER is lifted to a
-`[GoType("dyn")]` STRUCT instead of a map named type, so its comma-ok deconstruction (`(_, ok) = seen[tp]`)
-and two-arg indexer don't exist (CS8130 "cannot infer deconstruction var", CS0021 "no two-arg indexer").
-Param-type lifting (visitFuncDecl/convFuncType) only handles struct/interface (`extractStructType`/
-`extractInterfaceType`) — there is no map case, and `visitMapType` is a stub (a known ToDo in
-src/go2cs/ToDo.md). Implement `visitMapType` + lift an anonymous map param to `[GoType("map[K]V")]` so it
-emits as a golib `map<K,V>` (which has the comma-ok TryGetValue / indexer). Behavioral-testable SAME-package
-(a func taking an anonymous `map[K]struct{}` param, comma-ok lookup + len + iterate). Study how struct/iface
-params are lifted (search `extractStructType`, `GoType("dyn")`, the convFuncType param loop) and mirror for
-maps. Verify golib `map<K,V>` already exposes the needed surface (it does — used pervasively).
+Recommended NEXT root (CONTAINED, one root spanning ~9 errors): **S2 `~`-deref-rooted receiver
+materialization (CS1510 ×9).** A `[GoRecv] ref` method invoked on a `~`-value-deref RVALUE receiver whose
+root is a CALL/expr, not an ident — `(~getg()).schedlink.set(…)`, `(~…).wbBuf.get2()` (files:
+atomic_pointer, debugcall, mgcmark, mgcscavenge, mpagealloc, mpagecache, mwbbuf, proc ×2). The box-routing
+the prior S2 fixes added (`Ꮡp.of(…)`) keys off an ident param/receiver root, so it doesn't apply here; the
+receiver must be MATERIALIZED to an addressable/box form (e.g. a temp `ref var` or a synthesized box) before
+the ref method binds. Behavioral-testable SAME-package (a pointer-returning call `(*T)`, then a ref-receiver
+method on a value field of its deref — `(~getCfg()).slot.set(x)`). Study the prior S2 routing
+(`exprIsValueFieldOfDerefdPointerRoot`, convSelectorExpr, the `Ꮡ`-box machinery in convUnaryExpr) and the
+`[GoRecv]` ref-overload binding; the gap is specifically the non-ident receiver root.
 
-OTHER characterized roots (pick by fresh bucket if the above is already cleared by nondeterminism drift):
-- S2 remainder: `~`-deref-rooted CS1510 (~9, `(~getg()).schedlink.set(…)`, `(~…).wbBuf.get2()` —
-  receiver materialization: the receiver root is a `~`-deref of a CALL/expr, not an ident, so the box
-  routing doesn't apply; needs the receiver materialized to an addressable/box form). Also the
-  `(~ptrCall).field.method` CS1929 pair (`limiterEvent.start` mgcmark, `timers.take` proc) is this family.
-- S2 remainder: indexed-element atomic (mprof `bh.val[i].Load()`/`.StoreNoWB()`, CS1929 ×4 — array element
-  of atomic UnsafePointer via a pointer; check why `exprIsIndexedValueElement` isn't firing for UnsafePointer).
-- S3 remainder: `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (~4 CS1061: `.Str`/`.TFlag`/`.Kind_`/
-  `.Size_`) — needs metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves
-  source/same-package; `internal/abi` is a metadata-only DLL ref). Meatier generator extension.
-- S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
+OTHER characterized roots (pick by fresh bucket if drift shifts the top):
+- S2 remainder: indexed-element atomic (mprof `bh.val[i].Load()`/`.StoreNoWB()`, CS1929 ×4 at mprof.cs
+  303/313/333/335 — array element of atomic UnsafePointer via a pointer; check why `exprIsIndexedValueElement`
+  isn't firing for UnsafePointer). Also `time` `timeTimer.modify/stop/reset` ×3 (CS1929, embedding promotion).
+- S3 remainder: `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (type.cs ×4 CS1061: `.Str`/`.TFlag`/
+  `.Kind_`/`.Size_`) — needs metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only
+  resolves source/same-package; `internal/abi` is a metadata-only DLL ref). Meatier generator extension.
+- S4 (CS0029 ~8: mgcstack ×2, mheap ×2, panic/proc/string/tracetime) pointer-reassign nil-safe re-alias
+  (a box-reassign was tried & REVERTED — NREs on nil).
 - S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
   the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
   multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
@@ -345,12 +368,10 @@ First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
    src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
    internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
-   right). Confirm the CS8130/CS0021 cluster at type.cs `typesEqual` (`seen[tp,ꟷ]`).
-2. Implement `visitMapType` (src/go2cs/visitMapType.go is a stub) + the map case in param-type lifting
-   (convFuncType / visitFuncDecl, alongside extractStructType/extractInterfaceType). Lift an anonymous map
-   param to `[GoType("map[K]V")]` → golib `map<K,V>`.
-3. Implement per the Workflow; gate with a behavioral test + zero churn via check-no-regression.ps1 +
-   ConversionStrategies.md + one focused commit.
+   right). Confirm the CS1510 ×9 cluster (`(~…).field.method(…)` ref-receiver on a deref'd call).
+2. Pick the CS1510 receiver-materialization root (or re-pick by fresh bucket). Implement per the Workflow;
+   gate with a behavioral test + zero churn via check-no-regression.ps1 + ConversionStrategies.md + one
+   focused commit.
 
 Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
 refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
