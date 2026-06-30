@@ -159,6 +159,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
+    public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
+
+    [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
 
     [TestMethod]

@@ -9,6 +9,18 @@ func (v *Visitor) convStructType(structType *ast.StructType, context IdentContex
 	var name string
 	var identType types.Type
 
+	// An empty struct (`struct{}`) is never lifted to a dynamic named type — it maps to the
+	// shared golib `EmptyStruct`. Lifting it would also be unsound here: when this StructType is
+	// the value of a `struct{}{}` composite assigned to a map element (`seen[tp] = struct{}{}`),
+	// the enclosing assignment passes the LHS ident (`seen`) as context, so visitStructType would
+	// both name the lift after the variable (`<func>_seen`) AND register the variable's own type
+	// (the *map*) in liftedTypeMap — poisoning every later reference to that map type (its
+	// parameter signature, indexers, comma-ok). extractStructType already excludes empty structs
+	// from lifting everywhere else; mirror that here.
+	if isEmptyStruct(structType) {
+		return convertToCSTypeName("struct{}")
+	}
+
 	t := v.getType(structType, false)
 
 	if liftedName, ok := v.liftedTypeMap[t]; ok {

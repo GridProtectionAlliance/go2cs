@@ -94,6 +94,7 @@
     <Project Path="Tests/Behavioral/DirectBoxReceiverPassedWhole/DirectBoxReceiverPassedWhole.csproj" />
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
+    <Project Path="Tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
