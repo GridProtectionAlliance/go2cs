@@ -39,8 +39,8 @@ internal static void Main() {
     };
     whatAmI(true);
     whatAmI(1);
-    whatAmI(((int64)2));
-    whatAmI(((uint64)2));
+    whatAmI((int64)2);
+    whatAmI((uint64)2);
     whatAmI("hey");
     whatAmI(default!);
     var classify = (any i) => {
@@ -62,7 +62,6 @@ internal static void Main() {
             break;
         }
         default: {
-
             fmt.Println("other");
             break;
         }}

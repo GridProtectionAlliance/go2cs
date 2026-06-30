@@ -76,10 +76,15 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		}
 
 		if caseClause.List == nil {
-			v.writeOutputLn("default: {")
+			// Emit `default: {` WITHOUT a trailing newline (mirroring the `case …: {` path below):
+			// each visited body statement supplies its own LEADING newline, so a trailing newline here
+			// would double up into a spurious blank line after the `{`.
+			v.writeOutput("default: {")
 			v.indentLevel++
 
 			if len(targetIdent) > 0 {
+				v.targetFile.WriteString(v.newline)
+
 				if v.options.preferVarDecl {
 					v.writeOutput("var")
 				} else {
