@@ -11,11 +11,11 @@ internal static void Main() {
         var r = rᴛ1;
 
         if (r < 65536){
-            @out = append(@out, ((uint16)r));
+            @out = append(@out, (uint16)r);
         } else {
             r -= 65536;
-            @out = append(@out, ((uint16)(55296 + ((r >> (int)(10))))));
-            @out = append(@out, ((uint16)(56320 + ((rune)(r & 1023)))));
+            @out = append(@out, (uint16)(55296 + ((r >> (int)(10)))));
+            @out = append(@out, (uint16)(56320 + ((rune)(r & 1023))));
         }
     }
     foreach (var (_, u) in @out) {

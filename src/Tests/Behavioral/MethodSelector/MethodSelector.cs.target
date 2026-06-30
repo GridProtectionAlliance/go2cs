@@ -7,7 +7,7 @@ partial class main_package {
 [GoType("num:nint")] partial struct Counter;
 
 public static @string String(this Counter c) {
-    return fmt.Sprint(((nint)c));
+    return fmt.Sprint((nint)c);
 }
 
 internal static void Main() {

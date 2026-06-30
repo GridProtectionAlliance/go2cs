@@ -10,11 +10,11 @@ partial class main_package {
 }
 
 [GoRecv] internal static void add(this ref counter c, uintptr d) {
-    c.n += ((nint)d);
+    c.n += (nint)d;
 }
 
 internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
-    return ((@unsafe.Pointer)(((uintptr)p) + x));
+    return (@unsafe.Pointer)((uintptr)p + x);
 }
 
 internal static void Main() {
@@ -23,8 +23,8 @@ internal static void Main() {
     @unsafe.Pointer p = new @unsafe.Pointer(Ꮡbase);
     @unsafe.Pointer q = (uintptr)add(p, 16);
     @unsafe.Pointer r = (uintptr)add(p, 0);
-    fmt.Println(((uintptr)q) - ((uintptr)p) == 16);
-    fmt.Println(((uintptr)r) == ((uintptr)p));
+    fmt.Println((uintptr)q - (uintptr)p == 16);
+    fmt.Println((uintptr)r == (uintptr)p);
     var c = Ꮡ(new counter(nil));
     c.add(3);
     c.add(4);
