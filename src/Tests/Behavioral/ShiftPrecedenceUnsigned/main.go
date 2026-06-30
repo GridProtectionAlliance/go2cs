@@ -46,6 +46,17 @@ func main() {
 	y >>= s
 	fmt.Println(y) // 1
 
+	// (3b) compound shift-assignment to a STRUCT FIELD (selector LHS) with an unsigned shift
+	// count — the count must still be cast to a C# `int` (`bf.cache >>= (int)n`), as the
+	// selector-LHS path is distinct from the simple-variable path above. (CS0019 otherwise.)
+	type bitfield struct{ cache uint64 }
+	bf := bitfield{cache: 0xFF}
+	var n uint = 4
+	bf.cache >>= n
+	fmt.Println(bf.cache) // 0xFF >> 4 = 15
+	bf.cache <<= n
+	fmt.Println(bf.cache) // 15 << 4 = 240
+
 	// (4) wide untyped-constant shift that overflows a C# int. `1<<63` in a uint64 context
 	// must shift in uint64 — a bare `int` `1<<63` overflows to a negative value, and the
 	// subsequent (uint64) cast of that negative constant is rejected (CS0221).

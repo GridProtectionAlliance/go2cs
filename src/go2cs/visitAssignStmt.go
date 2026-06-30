@@ -798,13 +798,23 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
 
+				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
+				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
+				// selector/pointer-field LHS routes through this block (its base ident is nil'd in the
+				// counting loop), so it needs the same `(int)` cast the simple-variable path applies.
+				shiftAssignCast := assignStmt.Tok == token.SHL_ASSIGN || assignStmt.Tok == token.SHR_ASSIGN
+
 				// A narrow-integer arithmetic RHS assigned to a narrow struct-field LHS (a pure
-				// selector, e.g. `it.i = i + 1`) routes through this block (its base ident is nil'd in
-				// the counting loop), so it needs the same narrow cast as the var/element forms above.
+				// selector, e.g. `it.i = i + 1`) routes through this block, so it needs the same narrow
+				// cast as the var/element forms above. A shift-assign uses the `(int)` cast instead.
 				var narrowCastType string
 
-				if !andNotUncheckedClose && !lhsTypeIsInterface[i] {
+				if !shiftAssignCast && !andNotUncheckedClose && !lhsTypeIsInterface[i] {
 					narrowCastType = v.narrowArithmeticCastType(lhs, rhs, rhsExpr)
+				}
+
+				if shiftAssignCast {
+					result.WriteString("(int)(")
 				}
 
 				if len(narrowCastType) > 0 {
@@ -818,6 +828,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 
 				if len(narrowCastType) > 0 {
+					result.WriteRune(')')
+				}
+
+				if shiftAssignCast {
 					result.WriteRune(')')
 				}
 
