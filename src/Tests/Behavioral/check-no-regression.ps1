@@ -41,16 +41,26 @@ try {
 }
 finally { Pop-Location }
 
-# 2. Re-transpile every behavioral project (a project dir is one that has a .csproj, excluding the
-#    BehavioralTests runner itself).
+# 2. Re-transpile every behavioral project. A test-target dir is defined by Go-source presence (a *.go
+#    file), not by a .csproj (cf. commit 2cbe71947). This naturally excludes the C# tooling dirs
+#    BehavioralTests (the MSTest runner) and BehavioralRunner (the standalone runner) — neither has Go
+#    source, so transpiling them just fails with "go: cannot find main module".
 $projects = Get-ChildItem -Path $behavioral -Directory |
-    Where-Object { $_.Name -ne "BehavioralTests" -and (Get-ChildItem $_.FullName -Filter *.csproj -File) }
+    Where-Object { Get-ChildItem $_.FullName -Filter *.go -File }
 
 Write-Host "==> transpiling $($projects.Count) behavioral projects..." -ForegroundColor Cyan
-foreach ($proj in $projects) {
-    & $go2csExe $proj.FullName | Out-Null
-    if ($LASTEXITCODE -ne 0) { Write-Host "    [transpile FAILED] $($proj.Name)" -ForegroundColor Red }
+# go2cs writes advisory WARNINGs to stderr (e.g. unsafe.Sizeof usage). Under $ErrorActionPreference='Stop'
+# native-command stderr surfaces as a terminating NativeCommandError and aborts the loop, so relax it here
+# and gate purely on the exit code; merge stderr into the pipeline so warnings are swallowed by Out-Null.
+$savedEAP = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+try {
+    foreach ($proj in $projects) {
+        & $go2csExe $proj.FullName 2>&1 | Out-Null
+        if ($LASTEXITCODE -ne 0) { Write-Host "    [transpile FAILED] $($proj.Name)" -ForegroundColor Red }
+    }
 }
+finally { $ErrorActionPreference = $savedEAP }
 
 # 3. Report any changed generated .cs under the behavioral tree.
 $changed = & git -C $repoRoot status --short -- "src/Tests/Behavioral/*.cs" |
