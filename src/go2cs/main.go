@@ -2894,6 +2894,58 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 	return typeName
 }
 
+// collectCrossPackagePaths gathers the import paths of every cross-package named type referenced
+// (recursively) by t — through pointers, arrays/slices, maps, channels and generic type arguments.
+// Used by getDisplayTypeName to decide whether the file-local package aliases for those packages
+// are all in scope.
+func (v *Visitor) collectCrossPackagePaths(t types.Type, paths HashSet[string]) {
+	switch tt := t.(type) {
+	case *types.Pointer:
+		v.collectCrossPackagePaths(tt.Elem(), paths)
+	case *types.Array:
+		v.collectCrossPackagePaths(tt.Elem(), paths)
+	case *types.Slice:
+		v.collectCrossPackagePaths(tt.Elem(), paths)
+	case *types.Chan:
+		v.collectCrossPackagePaths(tt.Elem(), paths)
+	case *types.Map:
+		v.collectCrossPackagePaths(tt.Key(), paths)
+		v.collectCrossPackagePaths(tt.Elem(), paths)
+	case *types.Named:
+		if pkg := tt.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			paths.Add(pkg.Path())
+		}
+
+		if typeArgs := tt.TypeArgs(); typeArgs != nil {
+			for i := 0; i < typeArgs.Len(); i++ {
+				v.collectCrossPackagePaths(typeArgs.At(i), paths)
+			}
+		}
+	}
+}
+
+// getDisplayTypeName resolves a type name for emission into the CURRENT source file's body, preferring
+// the readable file-local package alias (`atomic.Int32`, via getTypeName) over the fully-qualified
+// form (`sync.atomic_package.Int32`, via getFullTypeName) — but ONLY when every cross-package type it
+// references is imported in this file, so the alias is guaranteed in scope. When a referenced package
+// is not imported here (e.g. a file indexing an atomic-typed array field without ever naming the
+// element type → no `using atomic`), it falls back to the fully-qualified form, which resolves inside
+// `namespace go;` without an alias. This keeps the converted C# visually close to the Go source while
+// staying compilable. NOT for GoType attribute strings or other generator-consumed strings, which live
+// in alias-less generated files and must always use getFullTypeName.
+func (v *Visitor) getDisplayTypeName(t types.Type, isUnderlying bool) string {
+	paths := HashSet[string]{}
+	v.collectCrossPackagePaths(t, paths)
+
+	for _, path := range paths.Keys() {
+		if !v.importQueue.Contains(path) {
+			return v.getFullTypeName(t, isUnderlying)
+		}
+	}
+
+	return v.getTypeName(t, isUnderlying)
+}
+
 func getAliasedTypeName(typeName string) string {
 	packageLock.Lock()
 	alias, exists := importedTypeAliases[typeName]
@@ -3273,7 +3325,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		}
 	}
 
-	goTypeName := v.getFullTypeName(identType, false)
+	goTypeName := v.getDisplayTypeName(identType, false)
 	csIDName := v.getIdentName(ident)
 
 	// If identifier is discarded, return empty string

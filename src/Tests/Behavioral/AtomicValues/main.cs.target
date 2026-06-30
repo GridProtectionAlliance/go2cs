@@ -7,14 +7,14 @@ using sync;
 partial class main_package {
 
 [GoType] partial struct holder {
-    internal sync.atomic_package.Int64 count;
+    internal atomic.Int64 count;
 }
 
 internal static ж<holder> ᏑgHolder = new(default(holder));
 internal static ref holder gHolder => ref ᏑgHolder.val;
 
 internal static void Main() {
-    ref var n = ref heap(new sync.atomic_package.Int32(), out var Ꮡn);
+    ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
     Ꮡn.Store(10);
     fmt.Println("add:", Ꮡn.Add(5));
     fmt.Println("load:", Ꮡn.Load());
@@ -22,7 +22,7 @@ internal static void Main() {
     fmt.Println("cas ok:", Ꮡn.CompareAndSwap(100, 7));
     fmt.Println("cas no:", Ꮡn.CompareAndSwap(100, 8));
     fmt.Println("final:", Ꮡn.Load());
-    ref var p = ref heap(new sync.atomic_package.Pointer<nint>(), out var Ꮡp);
+    ref var p = ref heap(new atomic.Pointer<nint>(), out var Ꮡp);
     fmt.Println("ptr nil:", Ꮡp.Load() == nil);
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 1;

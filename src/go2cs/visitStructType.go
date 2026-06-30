@@ -194,6 +194,16 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		goTypeName := v.getTypeName(fieldType, false)
 		goFullTypeName := v.getFullTypeName(fieldType, false)
 		csFullTypeName := convertToCSTypeName(goFullTypeName)
+
+		// For the actual NAMED-field declaration, prefer the readable file-local package alias
+		// (`atomic.Int32` over `sync.atomic_package.Int32`) when this file imports the type's
+		// package — keeping the emitted field visually close to the Go source. The fully-qualified
+		// csFullTypeName is retained for promotion/interface registration below, which feeds
+		// generator-consumed strings that live in alias-less files. (Embedded fields keep the full
+		// form for their promoted accessors; only the named-field branch uses the display name.)
+		goDisplayTypeName := v.getDisplayTypeName(fieldType, false)
+		csDisplayTypeName := convertToCSTypeName(goDisplayTypeName)
+		displayLenDeviation := token.Pos(len(csDisplayTypeName) - len(goDisplayTypeName))
 		typeLenDeviation := token.Pos(len(csFullTypeName) - len(goFullTypeName))
 
 		var arrayInitializer string
@@ -328,8 +338,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					fieldNames[i] = getCoreSanitizedIdentifier(ident.Name)
 				}
 
-				v.writeString(target, "%s %s %s;", getAccess(field.Names[0].Name), csFullTypeName, strings.Join(fieldNames, ", "))
-				v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+				v.writeString(target, "%s %s %s;", getAccess(field.Names[0].Name), csDisplayTypeName, strings.Join(fieldNames, ", "))
+				v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
 				target.WriteString(v.newline)
 			} else {
 				for _, ident := range field.Names {
@@ -348,8 +358,8 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 						fieldName = typeCollidingFieldName(fieldName)
 					}
 
-					v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csFullTypeName, fieldName, arrayInitializer)
-					v.writeCommentString(target, field.Comment, field.Type.End()+typeLenDeviation)
+					v.writeString(target, "%s %s %s%s;", getAccess(ident.Name), csDisplayTypeName, fieldName, arrayInitializer)
+					v.writeCommentString(target, field.Comment, field.Type.End()+displayLenDeviation)
 					target.WriteString(v.newline)
 				}
 			}

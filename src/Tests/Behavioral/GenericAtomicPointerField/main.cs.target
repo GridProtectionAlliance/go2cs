@@ -8,12 +8,12 @@ partial class main_package {
 
 [GoType] partial struct entry<V> {
     internal ж<V> key;
-    internal sync.atomic_package.Pointer<V> v;
+    internal atomic.Pointer<V> v;
     internal ж<entry<V>> next;
 }
 
 [GoType] partial struct Cache<V> {
-    internal sync.atomic_package.Pointer<entry<V>> head;
+    internal atomic.Pointer<entry<V>> head;
 }
 
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {

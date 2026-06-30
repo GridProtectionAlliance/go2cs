@@ -21,7 +21,7 @@ internal static int32 lockUnlock(uint64 id) => func((defer, recover) => {
 });
 
 internal static int32 localAtomicDefer() => func((defer, recover) => {
-    ref var n = ref heap(new sync.atomic_package.Int32(), out var Ꮡn);
+    ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
     Ꮡn.Store(41);
     deferǃ(Ꮡn.Store, (int32)(0), defer);
     return Ꮡn.Load();

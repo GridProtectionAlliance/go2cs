@@ -7,7 +7,7 @@ using sync;
 partial class main_package {
 
 [GoType] partial struct controller {
-    internal sync.atomic_package.Int64 total;
+    internal atomic.Int64 total;
 }
 
 internal static ж<controller> Ꮡctrl = new(default(controller));

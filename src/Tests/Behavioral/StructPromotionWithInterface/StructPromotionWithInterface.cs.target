@@ -10,7 +10,7 @@ partial class main_package {
 }
 
 [GoType] partial struct MyError {
-    public time_package.Time When;
+    public time.Time When;
     public @string What;
 }
 
