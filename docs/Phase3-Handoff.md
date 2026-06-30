@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~243 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~236 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -194,10 +194,26 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
     `Δrtype.Uncommon` → needs `ref abi.Type`).** Overlaps S3 (TypeGenerator embedding) — `timeTimer` embeds
     `timer`, `Δrtype` embeds `abi.Type`.
   - **iface `ж<ж<itabTableType>>.find` ×1** — double-box (a pointer field already a box, over-boxed).
-- [ ] **S3 — TypeGenerator 2-level embedding promotion** *(CS1061 ~26).* `stackWorkBuf` embeds
-  `stackWorkBufHdr` which has `nobj`; `workbuf.obj`; promoted fields on `abi.Type` (`.Typ`/`.Itab`).
-  Generator work — extend `TypeGenerator`'s promotion to nested (2-level) embedding, rebuild the
-  analyzer, regen.
+- [~] **S3 — named-type/embedding member forwarding** *(CS1061 26→19; named-over-STRUCT done; remainder
+  characterized).* **What landed:** `e59b5865a` — a defined type over a STRUCT (`type winlibcall libcall`)
+  now forwards the underlying struct's fields as get/set properties over a MUTABLE `m_value`
+  (`TypeGenerator`+`InheritedTypeTemplate`), cleared the 7 `winlibcall` `fn/n/args/r1/r2/err` CS1061. PAIRED
+  golib fix: `ж<T>.operator ~` now returns `value.val` not `value.m_val` — `(~c).field` on a field-ref box
+  was reading a zero-valued copy (compiles-but-wrong; the winlibcall reads `(~c).n` returned 0). Runtime
+  243→236, full suite green, zero converter churn. Test `NamedTypeOverStruct`. **NOTE: 2-level struct
+  EMBEDDING promotion already works** (`stackWorkBuf`→`stackWorkBufHdr`→`workbufhdr.nobj`, transitive — see
+  ConversionStrategies "type embedding"). **REMAINING CS1061 (~19) — distinct roots:**
+  - **`Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type`** (`.Str`/`.TFlag`/`.Kind_`/`.Size_`, ~4). The
+    promotion uses `Context.GetStructDeclaration` (SYNTAX-based — same-package or source-referenced), which
+    does NOT resolve a METADATA-only referenced assembly (`internal/abi` built as a DLL). Needs
+    metadata-based member resolution (`INamedTypeSymbol.GetMembers()`) — a meatier generator extension.
+  - **field-on-box deref-missing (~7: arena/mbitmap/mheap/proc/symtab/trace/mwbbuf `box.field`)** — several
+    are S1-tied (`(ж<T>)(uintptr)(new @unsafe.Pointer(…)).field`) or `Ꮡ(~x).field` precedence; heterogeneous.
+  - **named-over-ARRAY/MAP member forwarding** = kin to the struct case just done, but the ARRAY case
+    (`pallocBits`→IArray, CS1503 ×5 + CS0021 indexer) was **tried & REVERTED** (lazy array allocates on a
+    throwaway copy → lost writes; needs EAGER shared backing). The MAP comma-ok case (`type.cs seen[tp,ꟷ]`,
+    CS0021/CS8130) may be easier (maps are reference types). Also the range/deconstruct CS8130 10 + CS8183 5
+    overlap here (`for i := range namedSliceOrSpan` / comma-ok over a named map).
 - [ ] **S4 — pointer-reassign nil-safe re-alias model** *(CS0029 ~11).* `gp = getg()` where `gp` is a
   deref-aliased `*g` param (`ref var gp = ref Ꮡgp.val`) can't take a `ж<g>`. A box-reassign-then-realias
   (`Ꮡgp = …; gp = ref Ꮡgp.val`) was implemented (−32!) but **REVERTED — it eagerly derefs the box, so a
@@ -260,37 +276,45 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session tackles ONE queue item: S3 — TypeGenerator embedding-promotion (CS1061 ~26, the top
-bucket now that S2's main root landed; runtime is at ~243).
+This session: re-bucket, then tackle ONE root. Runtime is at ~236; S3 last session cleared the
+named-type-over-STRUCT forwarding (winlibcall) + the `~`-deref-of-field-ref-box golib bug. The recommended
+next root is the **range / comma-ok deconstruction over a named-over-builtin or Span source** (CS8130 ~10 +
+CS8183 ~5, which overlap on the same sites, + ~3 `Deconstruct` CS1061 — together ~15). But CONFIRM with a
+fresh bucket and pick the highest-impact tractable root (CS0030 58 is the deferred S1 architecture; skip it).
 
-The defect: a field/method promoted through Go struct EMBEDDING is missing on the C# wrapper. Examples
-(re-bucket to confirm/refresh): `stackWorkBuf` embeds `stackWorkBufHdr` which has `nobj` (`buf.nobj`);
-`workbuf.obj`; `Δrtype` (reflect) embeds `abi.Type` so `.Typ`/`.Itab`/`.Uncommon()` should promote;
-`timeTimer` embeds `timer` so its methods (`modify`/`stop`/`reset`) should be callable on `ж<timeTimer>`
-(these last two also show as CS1929 — embedding is the shared root). The `TypeGenerator` (a Roslyn source
-generator, src/gen/go2cs-gen/) promotes embedded fields/methods; the gap is **2-level (nested) embedding**
-and/or method promotion. This is GENERATOR work — extend TypeGenerator's promotion to nested embedding,
-rebuild the analyzer, regen.
+The recommended defect (range/comma-ok deconstruction): the converter emits `foreach (var (i, _) in src)`
+or a comma-ok `src[k, ꟷ]` where `src` is a C# `Span<T>` (from an unsafe→Span conversion), a named-over-slice
+type (`printDebugLog_readState`), or a named-over-MAP type (`type.cs` `seen[tp, ꟷ]`). A Span yields elements
+(not `(index, element)` tuples) and a named-over-builtin doesn't expose the builtin's `Deconstruct`/indexer,
+so the deconstruction can't bind (CS8130 "cannot infer", CS8183, CS1061 `Deconstruct`). Index-only range over
+a Span needs the indexed `for (var i = 0; i < src.Length; i++)` form; a named-over-map comma-ok needs the
+underlying map's two-arg indexer forwarded (kin to last session's named-over-struct field forwarding — but the
+named-over-ARRAY `pallocBits`→IArray variant was REVERTED before: lazy array allocates on a throwaway copy →
+lost writes; it needs EAGER shared backing, so triage WITHIN this bucket).
 
 First steps:
-1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — and note overlay.sh now
-   restores the core manual files). Read the actual CS1061 sites — separate genuine embedding-promotion
-   misses from any unrelated CS1061.
-2. Read the go2cs-phase3-progress memory's TypeGenerator / promoted-field / embedding notes (and the
-   `winlibcall`/`pallocBits` named-type-over-struct forwarding findings, which are kin) BEFORE editing.
-3. Implement per the Workflow. A generator change → full-solution rebuild to validate; gate with a
-   behavioral test (2-level embedded field read + write-through) + zero churn via check-no-regression.ps1
-   + ConversionStrategies.md + one focused commit.
+1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — overlay.sh restores the
+   core manual files). Read the actual CS8130/CS8183/CS1061 sites to separate the Span-range, named-slice,
+   and named-map sub-shapes.
+2. Read the go2cs-phase3-progress memory's range-over-Span (CS8130) + named-type-forwarding notes (incl. the
+   pallocBits IArray-forwarding REVERT) BEFORE editing.
+3. Implement per the Workflow. Converter or generator fix; gate with a behavioral test (range/comma-ok over
+   the matching source, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md
+   + one focused commit per root.
 
-NOTE — other open roots if S3 stalls (all characterized in the queue above):
+NOTE — other open roots (all characterized in the queue above):
+- S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
+  in TypeGenerator (`GetStructDeclaration` only resolves source/same-package); field-on-box deref-missing (~7,
+  several S1-tied).
 - S2 remainder (CS1929 ~16 + CS1510 ~9): transitive direct-ж PROMOTION for a `[GoRecv]` method calling a
   direct-ж method on its receiver's field-chain (signature-changing capture-mode work, do FRESH);
   `~`-deref-rooted CS1510; indexed-element atomic (mprof `bh.val[i]`).
-- S1 CS0030 bulk (~50): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix
-  is the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a
-  dedicated multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
+- S4 (CS0029 ~11) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
+- S1 CS0030 bulk (~50): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
+  the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
+  multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 
-Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off S3 with a result note,
+Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
 refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
 unchecked item (re-bucket to pick the new top root). Commit the doc update. Then stop and hand me that
 prompt to kick off the following session.
