@@ -2,14 +2,19 @@ package main
 
 import "fmt"
 
-// A Go conversion to a NAMED numeric type — `traceArg(procs)`, `arenaIdx(x)` — where the argument is
-// not already the named type's underlying basic. The [GoType] conversion operator only converts
-// between the named type and its EXACT underlying (uint64 / uint), so a plain C# cast
-// `(traceArg)int32Expr` is CS0030. The converter coerces through the underlying first:
-// `((traceArg)(uint64)procs)`. When the argument IS already the underlying, no extra cast is added.
+// Conversions between a NAMED numeric type and a basic numeric type that route through the named
+// type's underlying. Two mirrored directions, both because the [GoType] wrapper only converts
+// between the named type and its EXACT underlying:
+//   - TO a named numeric (`traceArg(procs)`, `arenaIdx(x)`): a plain `(traceArg)int32Expr` is CS0030,
+//     so the converter coerces through the underlying first — `((traceArg)(uint64)procs)`.
+//   - FROM a named numeric to a DIFFERENT basic (`uint64(nameOff)`, `int(idx)`): a plain
+//     `(uint64)nameOff` is CS0030, so it routes through the underlying — `((uint64)(int32)nameOff)`.
+// When the basic IS already the named type's underlying, no extra cast is added.
 
 type traceArg uint64 // underlying uint64
 type arenaIdx uint   // underlying uint (C# nuint)
+type nameOff int32   // underlying int32
+type idx uint        // underlying uint (C# nuint)
 
 func main() {
 	var procs int32 = 5
@@ -29,6 +34,20 @@ func main() {
 	var u uint64 = 9
 	d := traceArg(u)
 	fmt.Println(uint64(d))
+
+	// FROM a named numeric to a DIFFERENT basic numeric (the mirror direction).
+	var s nameOff = 7
+	e := uint64(s) // nameOff(int32) -> uint64: ((uint64)(int32)s)
+	fmt.Println(e)
+
+	var i idx = 9
+	f := int(i) // idx(nuint) -> int: ((nint)(nuint)i)
+	fmt.Println(f)
+
+	// FROM a named numeric to its EXACT underlying basic — no extra cast.
+	var s2 nameOff = 13
+	h := int32(s2) // nameOff(int32) -> int32: ((int32)s2)
+	fmt.Println(h)
 }
 
 type traceGoStatus uint8

@@ -50,7 +50,7 @@ public static readonly ΔKind Struct = 25;
 public static readonly ΔKind UnsafePointer = 26;
 
 public static @string String(this ΔKind k) {
-    if (((nint)k) < len(kindNames)) {
+    if (((nint)(uint8)k) < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
@@ -185,7 +185,7 @@ public static ж<Type> TypeFor<T>() {
 }
 
 internal static void Main() {
-    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), ((nint)Slice));
+    fmt.Printf("Slice Kind Value: %s [%d]\n"u8, Slice.String(), ((nint)(uint8)Slice));
 }
 
 } // end main_package

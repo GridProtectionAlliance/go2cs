@@ -146,12 +146,56 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 				if argType == nil || !types.Identical(argType.Underlying(), basic) {
 					underlyingCS := v.getCSTypeName(basic)
+					inner := expr
 
-					if v.needsParentheses(arg) {
-						return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+					// When the arg is ITSELF a named numeric whose underlying differs from the target's
+					// underlying — `hex(off)` where `off` is `abi.NameOff` (int32) and `hex` is uint64 —
+					// the intermediate `(uint64)NameOff` cast is itself CS0030 (the [GoType] wrapper only
+					// converts NameOff↔int32). Unwrap the arg through ITS underlying first, so the chain
+					// is named→argUnderlying (operator) → targetUnderlying (numeric) → target (operator):
+					// `((hex)(uint64)(int32)off)`. (types.Unalias resolves the runtime's aliased offsets.)
+					if argNamed, ok := types.Unalias(argType).(*types.Named); ok {
+						if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 && !types.Identical(argBasic, basic) {
+							if v.needsParentheses(arg) {
+								inner = fmt.Sprintf("(%s)(%s)", v.getCSTypeName(argBasic), expr)
+							} else {
+								inner = fmt.Sprintf("(%s)%s", v.getCSTypeName(argBasic), expr)
+							}
+						}
 					}
 
-					return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, expr)
+					if v.needsParentheses(arg) {
+						return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, inner)
+					}
+
+					return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, inner)
+				}
+			}
+		}
+
+		// The MIRROR of the branch above: a conversion FROM a NAMED numeric type TO a DIFFERENT basic
+		// numeric type — `uint64(t.Str)` where `Str` is `abi.NameOff` (named int32), `int(idx)` where
+		// `idx` is a `num:nuint` named type. The named type's [GoType] wrapper only converts between it
+		// and its EXACT underlying (`NameOff ↔ int32`), so a plain `(ulong)NameOff` / `(nint)idx` is
+		// CS0030. Route through the underlying first — `((ulong)(int)t.Str)` / `((nint)(nuint)idx)` — the
+		// named→basic [GoType] operator followed by a numeric C# cast (exactly Go's conversion semantics).
+		// Skipped when the target basic IS the named type's underlying (the exact operator binds → no churn)
+		// and when the arg is not a named numeric (a plain basic→basic cast already works).
+		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsNumeric != 0 {
+			// types.Unalias resolves a Go type alias (`type nameOff = abi.NameOff`) to the named type it
+			// aliases — in Go 1.23 `TypeOf` returns a `*types.Alias`, so a bare `.(*types.Named)` would
+			// miss the runtime's aliased `abi` offset types (`nameOff`/`typeOff`/`textOff`).
+			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok {
+				if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 {
+					if !types.Identical(argBasic, targetBasic) {
+						underlyingCS := v.getCSTypeName(argBasic)
+
+						if v.needsParentheses(arg) {
+							return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+						}
+
+						return fmt.Sprintf("((%s)(%s)%s)", targetTypeName, underlyingCS, expr)
+					}
 				}
 			}
 		}

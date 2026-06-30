@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~197 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~187 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -28,7 +28,8 @@
 - **The era of cheap contained converter one-offs is essentially over.** The campaign cleared a long
   tail of isolated converter bugs (escape/box-naming, shadow-renames, collision-renames, narrow/native
   numeric casts, labeled loops, type-switch dedup, range-var reassignment, blank discards, constant
-  overflow, shift-count casts, bitwise-operand casts…). The `git log` + the `go2cs-phase3-progress`
+  overflow, shift-count casts, bitwise-operand casts, named-numeric `++`/`--`, named-numeric↔basic/named
+  conversion through the underlying…). The `git log` + the `go2cs-phase3-progress`
   memory have the full per-defect history. **What remains in `runtime` is dominated by a handful of
   ARCHITECTURAL features** (see *Current frontier*), not one-line emit fixes.
 - The `Δslice` "2 errors" blocker from older handoffs is **solved** and was a measurement artifact —
@@ -276,44 +277,40 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~197. Recent sessions added named-numeric
-`++`/`--` (CS0266 −7) and emitted a golib `slice<T>` for `(*[N]T)(ptr)[:n]` pointer-cast slices (the
-Span-range cluster, −25 cascade: debuglog/os_windows greened). The recommended next root is **named-numeric
-↔ basic numeric conversion through the underlying** — a CONTAINED sub-root WITHIN the big CS0030 bucket
-(the rest of CS0030 is the deferred S1 unsafe.Pointer architecture — skip THAT). CONFIRM with a fresh bucket.
+This session: re-bucket, then tackle ONE root. Runtime is at ~187. Last session landed named-numeric ↔
+basic/named conversion through the underlying (CONVERTER, convCallExpr.go, −10): both the "FROM a named
+numeric" direction (`uint64(NameOff)` → `((uint64)(int32)off)`, `int(idx)` → `((nint)(nuint)i)`) AND the
+"TO a named numeric" branch unwrapping a NAMED arg (`hex(NameOff)` → `((Δhex)(uint64)(int32)off)`). The
+KEY gotcha was Go type ALIASES: runtime's `nameOff`/`typeOff`/`textOff` are `type X = abi.NameOff` aliases,
+so `info.TypeOf(arg)` returns `*types.Alias` not `*types.Named` — must `types.Unalias` before the assertion.
 
-The recommended defect (named-numeric ↔ basic, ~8-9 CS0030): a Go conversion between a named numeric and a
-DIFFERENT basic numeric — `uint64(t.Str)` where `Str` is `abi.NameOff`/`TypeOff`/`TextOff` (named int32),
-`int64(taggedPointer)`, `long(traceTime)`, and the reverse `TypeOff(ulongExpr)` — emits a plain
-`(ulong)namedVal` / `(TypeOff)(ulong)` cast. The `[GoType]` wrapper only converts between the named type
-and its EXACT underlying (`NameOff ↔ int32`), so `(ulong)NameOff` is CS0030. The converter must route
-through the underlying: `(ulong)(int)namedVal` (named→basic) and `(TypeOff)(int)(ulong)` (basic→named) —
-exactly the mirror of the already-handled "converting TO a named numeric" path (convCallExpr.go ~128, the
-`NamedNumericConversion` fix) and the `(int)(nuint)(c)` `NamedNumericIntCast` cast. This is the SAME family,
-just the named→basic direction (and cross-package named types like `abi.NameOff`). Likely a convCallExpr
-conversion-handling fix. **Bonus kin (same root):** `int(c)` on a `num:nuint` named type (`idx`) emits
-`(nint)c` (CS0030) — the named→basic value conversion not going through the underlying; a fresh repro
-(`int(idx)`) reproduces it. Fixing the through-underlying routing should clear both.
+The recommended NEXT root is the **`Δhex` generator sub-root (3 CS0030)** — the GENERATOR analog of the
+fix just landed, now in `ImplicitConvGenerator`. The generated inverse conversion
+`go.runtime_package.{NameOff,TextOff,TypeOff}-go.runtime_package.Δhex-inv.g.cs` emits
+`public static implicit operator NameOff(Δhex src) => new NameOff((nameOff)src.val);` — `src.val` is the
+Δhex underlying (`ulong`), and `nameOff` aliases `abi.NameOff` (int32), so `(nameOff)src.val` = `(int32-
+named)(ulong)` is CS0030 (no ulong→NameOff route). It must go through the underlying: `(nameOff)(int32)
+src.val` — the same through-underlying routing, in the GENERATOR's emitted operator body. CONFIRM with a
+fresh bucket; this is a CONTAINED ImplicitConvGenerator fix (src/gen/go2cs-gen/), the cross-package-named-
+numeric implicit-conversion-operator case. (The 4th `Δhex` CS0030, mgc.cs `lfstack → Δhex`, is S1/unsafe-
+family — skip it.)
 
 First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh restores the core manual files). Read the
-   actual CS0030 `'<named>' to '<basic>'` sites (`type.cs` abi offsets, `tracetime.cs`, `tagptr_64bit.cs`),
-   and confirm with a `int(idx)` repro.
-2. Read the go2cs-phase3-progress memory's named-numeric-conversion notes (NamedNumericConversion /
-   NamedNumericIntCast — the through-underlying cast) BEFORE editing.
-3. Implement per the Workflow (convCallExpr conversion routing); gate with a behavioral test (named↔basic
-   both directions, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md +
-   one focused commit.
+   generated `*-Δhex-inv.g.cs` operator bodies and confirm the `(nameOff)(ulong)` → needs-`(int32)` shape.
+2. Find where ImplicitConvGenerator emits the `new T((underlying)src.val)` operator body (the numeric-
+   named inverse-conversion path) and route the inner cast through the SOURCE named type's underlying when
+   the two named types have different underlying basics (mirror of last session's converter fix).
+3. Implement per the Workflow; gate with a behavioral test (a named-numeric ↔ named-numeric implicit
+   conversion with DIFFERENT underlyings, exercising the generated operator) + zero churn via
+   check-no-regression.ps1 + ConversionStrategies.md + one focused commit.
 
 ALTERNATE roots if the above stalls (all characterized):
 - Anonymous-map-param lifting (type.cs `seen[tp,ꟷ]`, ~4: 2 CS8130 + 2 CS0021 + 1 CS1503). `typesEqual_seen`
   is a `map[_typePair]struct{}` PARAMETER lifted to a `[GoType("dyn")]` STRUCT instead of a map named type,
   so its comma-ok index / two-arg indexer don't exist. Param-type lifting (visitFuncDecl/convFuncType) only
   handles struct/interface (`extractStructType`/`extractInterfaceType`) — no map case; `visitMapType` is a
-  stub. Lift an anonymous map param to `[GoType("map[K]V")]`. (The Span-range cluster's other sub-root is
-  now DONE — `slice<T>` for pointer-cast slices.)
-
-NOTE — other open roots (all characterized in the queue above):
+  stub. Lift an anonymous map param to `[GoType("map[K]V")]`.
 - S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
   in TypeGenerator (`GetStructDeclaration` only resolves source/same-package); field-on-box deref-missing (~7,
   several S1-tied).
@@ -321,7 +318,7 @@ NOTE — other open roots (all characterized in the queue above):
   direct-ж method on its receiver's field-chain (signature-changing capture-mode work, do FRESH);
   `~`-deref-rooted CS1510; indexed-element atomic (mprof `bh.val[i]`).
 - S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
-- S1 CS0030 bulk (~50): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
+- S1 CS0030 bulk (~44): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
   the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
   multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 

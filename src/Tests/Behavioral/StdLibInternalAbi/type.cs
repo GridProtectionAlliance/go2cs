@@ -67,7 +67,7 @@ public static readonly TFlag TFlagUnrolledBitmap = /* 1 << 4 */ 16;
 [GoType("num:int32")] partial struct TextOff;
 
 public static @string String(this ΔKind k) {
-    if (((nint)k) < len(kindNames)) {
+    if (((nint)(uint8)k) < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
