@@ -26,7 +26,7 @@ internal static void inc(this ж<counter> Ꮡc) {
 internal static void bump(ж<holder> Ꮡh, nint i) {
     ref var h = ref Ꮡh.val;
 
-    Ꮡh.of(holder.Ꮡarr).at<counter>(i).inc();
+    Ꮡh.at(holder.Ꮡarr, i).inc();
 }
 
 internal static void Main() {

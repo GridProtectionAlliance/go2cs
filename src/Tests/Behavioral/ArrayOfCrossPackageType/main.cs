@@ -18,8 +18,8 @@ internal static void touch(ж<atomic.Int32> Ꮡp) {
 
 internal static void Main() {
     ref var x = ref heap(new counters(), out var Ꮡx);
-    touch(Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(0));
-    touch(Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(2));
+    touch(Ꮡx.at(counters.Ꮡc, 0));
+    touch(Ꮡx.at(counters.Ꮡc, 2));
     fmt.Println(len(x.c), len(x.d));
 }
 

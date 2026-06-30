@@ -403,7 +403,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 
 						if v.isHeapBoxedExpr(sel) || baseIsPointer {
 							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
-							return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convArrayIndex(indexExpr.Index))
+							index := v.convArrayIndex(indexExpr.Index)
+
+							// Combine the field-address `of(field)` with the element-address into a single
+							// `base.at(field, i)` call. The combined golib overload INFERS the element type
+							// from the field accessor, dropping the explicit `.at<E>(i)` type argument — so
+							// `Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(0)` becomes `Ꮡx.at(counters.Ꮡc, 0)`.
+							// arrayAddr is the recursively-rendered field address `base.of(Type.Ꮡfield)`;
+							// rewrite its trailing `.of(field)` only when the field segment is parenthesis-
+							// free (a plain `Type.Ꮡfield` accessor), so the final `)` provably matches the
+							// last `.of(`. Any other shape falls back to the explicit chained form.
+							if ofIndex := strings.LastIndex(arrayAddr, ".of("); ofIndex != -1 && strings.HasSuffix(arrayAddr, ")") {
+								field := arrayAddr[ofIndex+len(".of(") : len(arrayAddr)-1]
+
+								if !strings.ContainsAny(field, "()") {
+									base := arrayAddr[:ofIndex]
+									return fmt.Sprintf("%s.at(%s, %s)", base, field, index)
+								}
+							}
+
+							return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, index)
 						}
 					}
 

@@ -384,6 +384,28 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         return new ж<Telem>(array, (int)index);
     }
 
+    /// <summary>
+    /// Gets a pointer to the element at <paramref name="index"/> of an <see cref="array{T}"/> or
+    /// <see cref="slice{T}"/> FIELD of the pointed-to struct — the address of `x.field[index]`.
+    /// </summary>
+    /// <remarks>
+    /// Combines <see cref="of{TElem}(FieldRefFunc{T,TElem})"/> and <see cref="at{Telem}(nint)"/> into a
+    /// single call so the element type is INFERRED from the field accessor's return type, letting the
+    /// converter emit `Ꮡx.at(T.Ꮡfield, i)` instead of the noisier `Ꮡx.of(T.Ꮡfield).at&lt;E&gt;(i)`.
+    /// One overload per field-accessor shape (`ref T`/`object`) and collection kind (array/slice); each
+    /// just forwards to the existing `of(...).at&lt;TElem&gt;(index)`.
+    /// </remarks>
+    public ж<TElem> at<TElem>(FieldRefFunc<T, array<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
+
+    /// <inheritdoc cref="at{TElem}(FieldRefFunc{T,array{TElem}},nint)"/>
+    public ж<TElem> at<TElem>(FieldRefFunc<array<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
+
+    /// <inheritdoc cref="at{TElem}(FieldRefFunc{T,array{TElem}},nint)"/>
+    public ж<TElem> at<TElem>(FieldRefFunc<T, slice<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
+
+    /// <inheritdoc cref="at{TElem}(FieldRefFunc{T,array{TElem}},nint)"/>
+    public ж<TElem> at<TElem>(FieldRefFunc<slice<TElem>> fieldRefFunc, nint index) => of(fieldRefFunc).at<TElem>(index);
+
     /// <inheritdoc />
     public override string ToString()
     {

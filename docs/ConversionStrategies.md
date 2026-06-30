@@ -515,6 +515,25 @@ The fallback matters: a Go file may *index* an atomic-typed array field of a str
 
 It is **not** used for forms consumed by the source generators in alias-less generated files, which must stay fully-qualified: the `[GoType("…")]` attribute string (e.g. `[GoType("sync.atomic_package.Uint32")]`, `[GoType("[3]sync.atomic_package.Pointer<T>")]`), the `global using` type-alias declarations, and the promoted-interface/embedded-field registration keys. (Embedded fields keep the full form for their promoted accessors; only the named-field branch uses the display name. Struct-embedding promotion across packages re-derives member types from the Roslyn semantic model, not from the field's emitted text, so aliasing the field declaration is safe.) Guarded by `ArrayOfCrossPackageType`, `AtomicValues`, `FuncTypeParam`, `GenericAtomicPointerField`, `GlobalAtomicDefer`, `GlobalAtomicFieldMethod`, and `StructPromotionWithInterface`/`StructPointerPromotionWithInterface`.
 
+#### Combined field-element address `base.at(field, i)`
+
+The address of an element of an array/slice FIELD of a boxed value — `&x.c[i]` where `c` is an
+array field, or the implicit address taken to call a pointer-receiver method `x.c[i].inc()` — was
+rendered as a two-step chain `Ꮡx.of(counters.Ꮡc).at<atomic.Int32>(i)`: `of(field)` takes the field's
+address (a `ж<array<E>>`), then `at<E>(i)` takes the element's. The explicit `<E>` is needed because
+golib's standalone `at<TElem>(nint)` is generic in an element type unrelated to the pointer's `T`, so
+it cannot be inferred. golib adds combined overloads `ж<T>.at<TElem>(FieldRefFunc<…array<TElem>…>, nint
+index)` (one per field-accessor shape and array/slice kind, each forwarding to `of(field).at<TElem>(i)`)
+whose `TElem` IS inferred from the field accessor's return type. The converter then collapses the chain
+to `Ꮡx.at(counters.Ꮡc, i)` — dropping both the `.of(` step and the `<E>` type argument. It rewrites the
+recursively-built field address `base.of(Type.Ꮡfield)` by retargeting its trailing `.of(field)` to
+`.at(field, i)`, only when the field segment is parenthesis-free (a plain `Type.Ꮡfield` accessor, so the
+final `)` provably matches the last `.of(`); any other shape falls back to the explicit chained form.
+The combined overload is behaviorally identical to the chain (it literally forwards to it). (Guarded by
+`ArrayOfCrossPackageType` (Compile+target), `IndexedElementDirectBoxMethod` and
+`PointerFieldArrayElementAddress` (output-compared — the `.inc()`/`bump()` element writes verify
+runtime equivalence).)
+
 A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
 
 ```go

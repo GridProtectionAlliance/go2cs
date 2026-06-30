@@ -25,7 +25,7 @@ internal static void bump(ж<cycle> Ꮡc) {
 internal static void viaParam(ж<rec> Ꮡp, nint i) {
     ref var p = ref Ꮡp.val;
 
-    var c = Ꮡp.of(rec.Ꮡfuture).at<cycle>(i);
+    var c = Ꮡp.at(rec.Ꮡfuture, i);
     bump(c);
 }
 
@@ -33,7 +33,7 @@ internal static void viaLocal(ж<holder> Ꮡh, nint i) {
     ref var h = ref Ꮡh.val;
 
     var p = h.r;
-    var c = p.of(rec.Ꮡfuture).at<cycle>(i);
+    var c = p.at(rec.Ꮡfuture, i);
     bump(c);
 }
 
