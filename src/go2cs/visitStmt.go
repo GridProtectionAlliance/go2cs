@@ -120,7 +120,8 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 	case *ast.LabeledStmt:
 		v.visitLabeledStmt(stmtType)
 	case *ast.RangeStmt:
-		v.visitRangeStmt(stmtType)
+		target := getStmtContext[LabeledStmtContext](contexts)
+		v.visitRangeStmt(stmtType, target)
 	case *ast.ReturnStmt:
 		v.visitReturnStmt(stmtType)
 		v.lastStatementWasReturn = true

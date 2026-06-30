@@ -42,6 +42,22 @@ break_out:;
     fmt.Println();
     fmt.Println("i =", i);
     fmt.Println();
+    var nums = new nint[]{1, 2, 3, 4}.slice();
+scan:
+    foreach (var (_, n) in nums) {
+        foreach (var (_, m) in nums) {
+            if (n == m) {
+                goto continue_scan;
+            }
+            if (n + m > 5) {
+                goto break_scan;
+            }
+            fmt.Println("pair", n, m);
+        }
+continue_scan:;
+    }
+break_scan:;
+    fmt.Println();
     nint x = 99;
     fmt.Println("i before thread and", i, "x before thread", x);
     goǃ((ᴛ1, ᴛ2, ᴛ3, ᴛ4) => fmt.Println(ᴛ1, ᴛ2, ᴛ3, ᴛ4), "i from thread and", i, "x from thread", x);

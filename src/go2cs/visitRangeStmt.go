@@ -7,7 +7,7 @@ import (
 	"go/types"
 )
 
-func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
+func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtContext) {
 	v.targetFile.WriteString(v.newline)
 	var ptrDeref string
 
@@ -352,6 +352,15 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt) {
 	// 		}
 	// 	}
 	// }
+
+	// A labeled range loop carries the same `continue_<label>`/`break_<label>` targets a labeled
+	// `for` does: a Go `continue L`/`break L` from a nested loop emits `goto continue_L`/`goto break_L`,
+	// so the labels must exist — `continue_L:` at the end of the body, `break_L:` after the loop
+	// (otherwise CS0159 "no such label"). Mirrors visitForStmt.
+	if len(target.label) > 0 {
+		context.innerSuffix = fmt.Sprintf("%s%s:;", v.newline, getContinueLabelName(target.label))
+		context.outerSuffix = fmt.Sprintf("%s%s:;", v.newline, getBreakLabelName(target.label))
+	}
 
 	v.visitBlockStmt(rangeStmt.Body, context)
 }

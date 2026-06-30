@@ -52,6 +52,25 @@ out:
 	fmt.Println("i =", i)
 	fmt.Println()
 
+	// Labeled RANGE loop: a `continue scan`/`break scan` from a nested loop targets the
+	// outer labeled range loop. The converter emits `goto continue_scan`/`goto break_scan`,
+	// so the `continue_scan:`/`break_scan:` labels must be placed (regression for CS0159).
+	nums := []int{1, 2, 3, 4}
+scan:
+	for _, n := range nums {
+		for _, m := range nums {
+			if n == m {
+				continue scan
+			}
+			if n+m > 5 {
+				break scan
+			}
+			fmt.Println("pair", n, m)
+		}
+	}
+
+	fmt.Println()
+
 	x := 99
 	fmt.Println("i before thread and", i, "x before thread", x)
 	go fmt.Println("i from thread and", i, "x from thread", x)

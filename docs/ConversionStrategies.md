@@ -886,7 +886,7 @@ RowLoop:
         }
     }
 ```
-becomes (`continue_RowLoop:` placed at the end of the loop body):
+becomes (`continue_RowLoop:` placed at the end of the *labeled* loop's body — so `goto continue_RowLoop` from the inner loop lands there and the **outer** loop proceeds to its next iteration; `break_RowLoop:` would go after the outer loop):
 ```csharp
     foreach (var (y, row) in rows) {
         foreach (var (x, data) in row) {
@@ -894,10 +894,11 @@ becomes (`continue_RowLoop:` placed at the end of the loop body):
                 goto continue_RowLoop;
             }
             row[x] = data + bias(x, y);
-continue_RowLoop:;
         }
+continue_RowLoop:;
     }
 ```
+Both the `break_<label>`/`continue_<label>` labels are emitted for a labeled `for` **and** a labeled `range`/`foreach` loop (the label target is placed regardless of loop kind; a missing one is CS0159 "no such label"). Guarded by the `ForVariants` behavioral test (labeled `range` with nested `continue`/`break`).
 
 ## Source Generators
 Several Go semantics cannot be written directly in C#, so the converter emits compact, attributed partial declarations and lets a set of Roslyn source generators (`src/gen/go2cs-gen/`, referenced as an analyzer by every converted project) synthesize the rest at compile time. This keeps the visible converted code close to the Go original. The principal generators and attributes:
