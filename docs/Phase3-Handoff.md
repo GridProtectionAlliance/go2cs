@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~222 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~197 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -276,10 +276,11 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~222. Last session added named-numeric
-`++`/`--` operators (CS0266 −7). The recommended next root is **named-numeric ↔ basic numeric conversion
-through the underlying** — a CONTAINED sub-root WITHIN the big CS0030 bucket (the rest of CS0030 is the
-deferred S1 unsafe.Pointer architecture — skip THAT). CONFIRM with a fresh bucket.
+This session: re-bucket, then tackle ONE root. Runtime is at ~197. Recent sessions added named-numeric
+`++`/`--` (CS0266 −7) and emitted a golib `slice<T>` for `(*[N]T)(ptr)[:n]` pointer-cast slices (the
+Span-range cluster, −25 cascade: debuglog/os_windows greened). The recommended next root is **named-numeric
+↔ basic numeric conversion through the underlying** — a CONTAINED sub-root WITHIN the big CS0030 bucket
+(the rest of CS0030 is the deferred S1 unsafe.Pointer architecture — skip THAT). CONFIRM with a fresh bucket.
 
 The recommended defect (named-numeric ↔ basic, ~8-9 CS0030): a Go conversion between a named numeric and a
 DIFFERENT basic numeric — `uint64(t.Str)` where `Str` is `abi.NameOff`/`TypeOff`/`TextOff` (named int32),
@@ -305,10 +306,12 @@ First steps:
    one focused commit.
 
 ALTERNATE roots if the above stalls (all characterized):
-- Range/deconstruct cluster remainder: (A) Span-range (debuglog/os_windows `foreach (var (i,_) in span)` —
-  needs Span-VARIABLE tracking + indexed-for; do NOT switch to golib slice<T> which COPIES → lost writes);
-  (B) named-over-MAP comma-ok (type.cs `seen[tp,ꟷ]` — note `typesEqual_seen` is actually lifted as
-  `[GoType("dyn")]` STRUCT, not a map type — an anonymous-map-param-lifting bug; visitMapType is a stub).
+- Anonymous-map-param lifting (type.cs `seen[tp,ꟷ]`, ~4: 2 CS8130 + 2 CS0021 + 1 CS1503). `typesEqual_seen`
+  is a `map[_typePair]struct{}` PARAMETER lifted to a `[GoType("dyn")]` STRUCT instead of a map named type,
+  so its comma-ok index / two-arg indexer don't exist. Param-type lifting (visitFuncDecl/convFuncType) only
+  handles struct/interface (`extractStructType`/`extractInterfaceType`) — no map case; `visitMapType` is a
+  stub. Lift an anonymous map param to `[GoType("map[K]V")]`. (The Span-range cluster's other sub-root is
+  now DONE — `slice<T>` for pointer-cast slices.)
 
 NOTE — other open roots (all characterized in the queue above):
 - S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
