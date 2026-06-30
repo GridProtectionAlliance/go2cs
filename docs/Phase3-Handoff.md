@@ -369,21 +369,27 @@ newer, so a committed converter change false-greens on a stale binary (this is e
 goldens). After any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL
 affected goldens.
 
-Recommended NEXT root (CONTAINED, S2 remainder, ~4 errors, in-area + behavioral-testable): **indexed-element
-atomic via a pointer (CS1929 ×4, mprof.cs 303/313/333/335).** `bh.val[i].Load()` / `.StoreNoWB()` — an
-ARRAY/SLICE element of atomic `UnsafePointer` reached through a pointer — emits `bh.val[i].Load()`, but the
-element is a value (rvalue), so the pointer-receiver `Load`/`StoreNoWB` can't bind (CS1929). The existing
-`IndexedElementDirectBoxMethod` routing (convSelectorExpr line ~663, `exprIsIndexedValueElement` +
-`selectorCallsDirectBoxMethod`) already handles `bh.val[i].Load()` for SAME-package direct-ж methods — but
-`atomic.UnsafePointer.Load` is a CROSS-package atomic method, and `selectorCallsDirectBoxMethod` checks only
-the SAME-package `packageDirectBoxReceiverMethods` set, so the gate fails and it doesn't route. Likely fix:
-broaden the gate (or add a sibling) so a cross-package pointer-receiver atomic method on an indexed value
-element routes through the element box too — mirroring how the value-field-of-global path (line ~940) already
-treats "any pointer-receiver method whose package's capture-mode set is not locally available" as ж-only. The
-element box is `Ꮡ(slice,i)` / `box.of(T.Ꮡfield).at<E>(i)` — never a `Ꮡ(value)` copy (atomic write must land).
-Behavioral-testable SAME-package: an array/slice of `atomic.Uint32` (or a UnsafePointer-like) reached through a
-pointer field, `.Add`/`.Load` on `container[i]`, write-through verified (extend `IndexedElementDirectBoxMethod`
-or `AtomicValues`).
+⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
+ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
+`bh.val[i].Load()`/`.StoreNoWB()` where `bh` is `*buckhashArray` and `buckhashArray` is `[N]atomic.UnsafePointer`
+— a NAMED-over-array. The element box would be `bh.at<atomic.UnsafePointer>(i)`, but golib `ж<T>.at<TElem>`
+requires `val is IArray<TElem>`, which a named-over-array struct does NOT implement with eager shared backing (the
+REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost writes). AND the surrounding
+`(ж<bucket>)(uintptr)(bh.val[i].Load())` is the S1 runtime-unsafe managed-referent / unsafe.Pointer reinterpret
+(compile-ONLY goal). Needs the user's named-over-array eager-shared-backing model (multi-session S3-array + S1),
+NOT a contained tweak. Park it.
+
+Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
+named-over-array entangled before committing):
+- **S6 warm-up: CS0121 `add` overload collision** (mprof.cs 245/258/267) — a free func `add` vs a RecvGenerator
+  companion `add`, both static in `runtime_package` → ambiguous. A name-disambiguation fix, genuinely contained
+  (and these 3 are in mprof but unrelated to the entangled atomic lines). Read the S6 queue item + memory first.
+- **S2/S3 embedding: `time` `timeTimer.modify/stop/reset` (CS1929 ×3, time.cs 315/327/341)** — `timeTimer` embeds
+  `timer`; promoted pointer-receiver methods need a `ж<timer>`. TypeGenerator embedding area
+  (`PointerEmbeddingPromotion`/`NestedEmbeddingPromotion` tests). Verify it's same-package, not metadata-only.
+- **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
+  metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
+  `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
 
 OTHER characterized roots (pick by fresh bucket if drift shifts the top):
 - S2/S3 EMBEDDING promotion (CS1929 ×4): `time` `timeTimer.modify/stop/reset` (×3, `timeTimer` embeds `timer`
@@ -403,11 +409,11 @@ First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
    src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
    internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
-   right). Confirm the mprof CS1929 ×4 cluster (`bh.val[i].Load()` cross-package atomic on an indexed element).
-2. Pick the mprof indexed-element-atomic root (or re-pick by fresh bucket). Study the existing
-   `exprIsIndexedValueElement` / `selectorCallsDirectBoxMethod` routing and the cross-package-atomic ж-only
-   handling at convSelectorExpr ~940. Implement per the Workflow; gate with a behavioral test + zero churn via
-   check-no-regression.ps1 + ConversionStrategies.md + one focused commit.
+   right). Re-bucket; DO NOT re-pick the mprof indexed-element atomic (classified entangled above — park it).
+2. Pick the cleanest CONTAINED root from the candidates above (S6 `add`-overload warm-up, `time` embedding, or
+   `Δrtype` metadata) — VERIFY it isn't cross-package / named-over-array entangled before committing. Implement
+   per the Workflow; gate with a behavioral test + adversarial verify + zero churn via check-no-regression.ps1
+   + ConversionStrategies.md + one focused commit.
 
 Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
 refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
