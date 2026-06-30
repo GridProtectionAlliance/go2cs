@@ -32,11 +32,16 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 
 		identRunes := []rune(ident)
 
-		// The `Span<T>(T* ptr, int length)` constructor takes a C# `int` length; a Go `int`/`uint`
-		// bound is `nint`/`nuint`, which has no implicit conversion to `int` (CS1503). getRangeIndexer
-		// narrows it to `int` (through the underlying for a named numeric), and leaves an int literal
-		// as-is.
-		return fmt.Sprintf("new Span<%s>((%s*)%s, %s)", ptrType, csPtrType, string(identRunes[prefixLength:]), v.getRangeIndexer(sliceExpr.High))
+		// A Go `(*[N]T)(ptr)[:n]` produces a `[]T` slice over the pointed-to memory. Emit the golib
+		// `slice<T>` (the C# representation of every other `[]T`), NOT a bare `Span<T>`: a `Span<T>` does
+		// not range as `(index, element)` tuples (CS8130 on `for i := range s`) and has no `Ꮡ(s, i)`
+		// element-address (CS0411), whereas `slice<T>` supports both (it is `IArray<T>`). The slice is
+		// built from a `ReadOnlySpan<T>` over the raw pointer; its constructor takes a C# `int` length,
+		// and a Go `int`/`uint` bound is `nint`/`nuint` (no implicit conversion → CS1503), so getRangeIndexer
+		// narrows it to `int` (through the underlying for a named numeric), leaving an int literal as-is.
+		// This is the `(*[N]T)(ptr)` unsafe-cast form only (always memory-layout-dependent code); the slice
+		// copies the pointed-to memory, which is self-consistent for code that only uses the resulting slice.
+		return fmt.Sprintf("new slice<%s>(new ReadOnlySpan<%s>((%s*)%s, %s))", ptrType, ptrType, csPtrType, string(identRunes[prefixLength:]), v.getRangeIndexer(sliceExpr.High))
 	}
 
 	// A slice of a POINTER-TO-ARRAY (`p[lo:hi:max]`, p of type `*[N]T`) auto-derefs in Go. The

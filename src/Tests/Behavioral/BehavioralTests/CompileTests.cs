@@ -384,6 +384,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerArraySlice() => CheckTarget("PointerArraySlice");
 
     [TestMethod]
+    public void CheckPointerCastSliceRange() => CheckTarget("PointerCastSliceRange");
+
+    [TestMethod]
     public void CheckPointerCopyWalk() => CheckTarget("PointerCopyWalk");
 
     [TestMethod]

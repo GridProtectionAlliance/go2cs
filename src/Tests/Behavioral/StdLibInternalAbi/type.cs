@@ -161,14 +161,14 @@ public static ж<Type> TypeFor<T>() {
     if (t.Mcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), (int)(t.Mcount));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), (int)(t.Mcount)));
 }
 
 [GoRecv] public static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
     if (t.Xcount == 0) {
         return default!;
     }
-    return new Span<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), (int)(t.Xcount));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), (int)(t.Xcount)));
 }
 
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
@@ -474,7 +474,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     if (t.InCount == 0) {
         return default!;
     }
-    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), (int)(t.InCount));
+    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "t.inCount > 0"u8)), (int)(t.InCount)));
 }
 
 [GoRecv] public static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
@@ -486,7 +486,7 @@ public static readonly ΔChanDir InvalidDir = 0;
     if ((TFlag)(t.TFlag & TFlagUncommon) != 0) {
         uadd += @unsafe.Sizeof(new UncommonType(nil));
     }
-    return new Span<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), (int)(t.InCount + outCount));
+    return new slice<ж<Type>>(new ReadOnlySpan<ж<Type>>((Type**)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), uadd, "outCount > 0"u8)), (int)(t.InCount + outCount)));
 }
 
 [GoRecv] public static bool IsVariadic(this ref ΔFuncType t) {
