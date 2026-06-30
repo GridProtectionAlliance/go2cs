@@ -20,3 +20,30 @@ func Freezing() Temperature { return 0 }
 
 // Add is an exported method on the exported type.
 func (c Celsius) Add(d Celsius) Celsius { return c + d }
+
+// Sensor is an exported struct with exported fields and methods (Phase 3: cross-assembly struct
+// field access + method call).
+type Sensor struct {
+	Name string
+	Temp Celsius
+}
+
+// Hot reports whether the sensor reads above 50°C.
+func (s Sensor) Hot() bool { return s.Temp > 50 }
+
+// Label returns the sensor name; it also makes Sensor satisfy the Labeled interface.
+func (s Sensor) Label() string { return s.Name }
+
+// Labeled is an exported interface (Phase 3: cross-assembly interface satisfaction / duck typing —
+// Sensor implements it in this assembly and a consumer assigns a Sensor to a Labeled).
+type Labeled interface {
+	Label() string
+}
+
+// Interface-satisfaction assertion (idiomatic Go): records, in THIS package/assembly, that Sensor
+// implements Labeled — the impl glue can only be added to Sensor in its own assembly, so a consumer
+// in another assembly relies on the library having witnessed the satisfaction here.
+var _ Labeled = Sensor{}
+
+// Describe takes the interface, so the consumer can pass a Sensor across the assembly boundary.
+func Describe(l Labeled) string { return l.Label() }

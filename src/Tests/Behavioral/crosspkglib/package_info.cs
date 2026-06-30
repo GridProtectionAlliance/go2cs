@@ -39,6 +39,7 @@ using static go.crosspkglib_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Sensor, Labeled>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

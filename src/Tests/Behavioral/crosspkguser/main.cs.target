@@ -13,6 +13,11 @@ internal static void Main() {
     crosspkglibꓸTemperature t = crosspkglib.Freezing();
     t = t.Add(32);
     fmt.Println(((float64)t));
+    var s = new crosspkglib.Sensor(Name: "kitchen"u8, Temp: crosspkglib.Boiling());
+    fmt.Println(s.Name, ((float64)s.Temp), s.Hot());
+    crosspkglib.Labeled l = s;
+    fmt.Println(l.Label());
+    fmt.Println(crosspkglib.Describe(s));
 }
 
 } // end main_package

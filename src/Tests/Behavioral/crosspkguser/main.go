@@ -19,4 +19,13 @@ func main() {
 	var t crosspkglib.Temperature = crosspkglib.Freezing()
 	t = t.Add(32)
 	fmt.Println(float64(t))
+
+	// Phase 3: exported struct — field access + method call across the assembly boundary.
+	s := crosspkglib.Sensor{Name: "kitchen", Temp: crosspkglib.Boiling()}
+	fmt.Println(s.Name, float64(s.Temp), s.Hot())
+
+	// Phase 3: cross-assembly interface satisfaction — a Sensor (lib assembly) is a Labeled.
+	var l crosspkglib.Labeled = s
+	fmt.Println(l.Label())
+	fmt.Println(crosspkglib.Describe(s))
 }
