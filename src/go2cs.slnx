@@ -50,6 +50,7 @@
   </Folder>
   <Folder Name="/tests/" />
   <Folder Name="/tests/behavioral/">
+    <Project Path="Tests/Behavioral/BehavioralRunner/BehavioralRunner.csproj" />
     <Project Path="Tests/Behavioral/BehavioralTests/BehavioralTests.csproj" />
   </Folder>
   <Folder Name="/tests/behavioral/target-projects/">
