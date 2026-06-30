@@ -28,4 +28,32 @@ func main() {
 	whatAmI(uint64(2))
 	whatAmI("hey")
 	whatAmI(nil)
+
+	// A type switch listing BOTH `int` and `int32` (and `uint`/`uint32`): Go `int`/`uint` are
+	// matched by their native (nint/nuint) form, so the converter must NOT also synthesize a
+	// concrete `int32`/`uint32` case here — that would duplicate the explicit one (CS8120) and
+	// steal its values. Typed variables keep the dynamic types distinct (a Go `int` boxes as nint,
+	// a Go `int32` as int32). Mirrors runtime's printpanicval. Each value must hit its own clause.
+	classify := func(i interface{}) {
+		switch i.(type) {
+		case int:
+			fmt.Println("int")
+		case int32:
+			fmt.Println("int32")
+		case uint:
+			fmt.Println("uint")
+		case uint32:
+			fmt.Println("uint32")
+		default:
+			fmt.Println("other")
+		}
+	}
+	var a int = 1
+	var b int32 = 2
+	var c uint = 3
+	var d uint32 = 4
+	classify(a)
+	classify(b)
+	classify(c)
+	classify(d)
 }

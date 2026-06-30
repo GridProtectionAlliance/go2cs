@@ -43,6 +43,39 @@ internal static void Main() {
     whatAmI(((uint64)2));
     whatAmI("hey");
     whatAmI(default!);
+    var classify = (any i) => {
+        switch (i.type()) {
+        case nint : {
+            fmt.Println("int");
+            break;
+        }
+        case int32 : {
+            fmt.Println("int32");
+            break;
+        }
+        case nuint : {
+            fmt.Println("uint");
+            break;
+        }
+        case uint32 : {
+            fmt.Println("uint32");
+            break;
+        }
+        default: {
+
+            fmt.Println("other");
+            break;
+        }}
+
+    };
+    nint a = 1;
+    int32 b = 2;
+    nuint c = 3;
+    uint32 d = 4;
+    classify(a);
+    classify(b);
+    classify(c);
+    classify(d);
 }
 
 } // end main_package

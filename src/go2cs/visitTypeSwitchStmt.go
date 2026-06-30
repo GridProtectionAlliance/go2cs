@@ -49,6 +49,27 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 	identContext := DefaultIdentContext()
 	identContext.isType = true
 
+	// Go `int`/`uint` are matched in a type switch by BOTH their native (`nint`/`nuint`) and a
+	// synthetic concrete (`int32`/`uint32`) boxed form (added below). But if the SAME switch also
+	// has an explicit `case int32:`/`case uint32:` (or `case rune:` ≡ int32), the synthetic case
+	// would be emitted first and make the explicit one unreachable (CS8120) — and steal its values.
+	// Pre-collect the explicitly-listed concrete case types so the synthetic is skipped when it
+	// would duplicate one (runtime's printpanicval switches over int, int32, uint, uint32, …).
+	explicitCaseTypes := map[string]bool{}
+
+	for _, caseClause := range caseClauses {
+		for _, expr := range caseClause.List {
+			if ident, ok := expr.(*ast.Ident); ok {
+				switch ident.Name {
+				case "int32", "rune":
+					explicitCaseTypes["int32"] = true
+				case "uint32":
+					explicitCaseTypes["uint32"] = true
+				}
+			}
+		}
+	}
+
 	for i, caseClause := range caseClauses {
 		if i > 0 {
 			v.targetFile.WriteString(v.newline)
@@ -112,9 +133,13 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				caseExprs = append(caseExprs, caseExpr)
 
 				if strings.HasPrefix(caseExpr, "nint ") {
-					caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", targetIdent))
+					if !explicitCaseTypes["int32"] {
+						caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", targetIdent))
+					}
 				} else if strings.HasPrefix(caseExpr, "nuint ") {
-					caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", targetIdent))
+					if !explicitCaseTypes["uint32"] {
+						caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", targetIdent))
+					}
 				}
 			}
 
