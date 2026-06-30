@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~229 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~222 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -276,36 +276,39 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~229. Last session cleared the
-`*p.field` deref bug (the traceback `range *gp.ancestors` + latent `*p.ptrField` value reads, −7). Two
-sub-roots of the range/deconstruct cluster REMAIN; pick the highest-impact tractable one (CONFIRM with a
-fresh bucket; CS0030 58 is the deferred S1 architecture — skip it):
+This session: re-bucket, then tackle ONE root. Runtime is at ~222. Last session added named-numeric
+`++`/`--` operators (CS0266 −7). The recommended next root is **named-numeric ↔ basic numeric conversion
+through the underlying** — a CONTAINED sub-root WITHIN the big CS0030 bucket (the rest of CS0030 is the
+deferred S1 unsafe.Pointer architecture — skip THAT). CONFIRM with a fresh bucket.
 
-(A) **Span-range** (~6: `debuglog.cs` `printDebugLog` ×4, `os_windows.cs` ×2 — CS8130/CS8183). `state`/`b`
-are C# `Span<T>` (from the `(*[N]T)(ptr)[:n]` unsafe conversion at `convSliceExpr.go:39` → `new Span<T>(…)`),
-and `for i := range state` / `for _, x := range b` emit `foreach (var (i, _) in span)` — but a `Span<T>`
-yields elements, not `(index, element)` tuples (CS8130). This is the TANGLED one: visitRangeStmt keys off the
-Go type (`[]T` → slice foreach), but the C# representation is Span; the converter doesn't track that. The fix
-needs Span-variable TRACKING (record locals assigned a `new Span<T>(…)` in visitAssignStmt) + visitRangeStmt
-emitting the indexed `for (var i = 0; i < span.Length; i++)` form for a Span source (preserves Span aliasing —
-debuglog WRITES via `Ꮡ(state,i)`, so do NOT switch to a golib `slice<T>`, which COPIES via `.ToArray()` →
-lost writes). Moderate effort, new mechanism — design carefully.
-
-(B) **named-over-MAP comma-ok** (~2-3: `type.cs` `seen[tp, ꟷ]`, where `seen` is `typesEqual_seen` =
-`[GoType("map[…]struct{}")]`). `v, ok := seen[k]` emits `seen[tp, ꟷ]` (the golib two-arg comma-ok indexer)
-but the named-over-map wrapper doesn't expose it. KIN to last session's named-over-struct field forwarding
-(`winlibcall`) — forward the underlying map's indexer/`Deconstruct` onto the wrapper. Maps are REFERENCE types
-so there's no copy/eager-backing trap (unlike the REVERTED `pallocBits`→IArray named-over-ARRAY case). Likely
-the cleaner/smaller of the two.
+The recommended defect (named-numeric ↔ basic, ~8-9 CS0030): a Go conversion between a named numeric and a
+DIFFERENT basic numeric — `uint64(t.Str)` where `Str` is `abi.NameOff`/`TypeOff`/`TextOff` (named int32),
+`int64(taggedPointer)`, `long(traceTime)`, and the reverse `TypeOff(ulongExpr)` — emits a plain
+`(ulong)namedVal` / `(TypeOff)(ulong)` cast. The `[GoType]` wrapper only converts between the named type
+and its EXACT underlying (`NameOff ↔ int32`), so `(ulong)NameOff` is CS0030. The converter must route
+through the underlying: `(ulong)(int)namedVal` (named→basic) and `(TypeOff)(int)(ulong)` (basic→named) —
+exactly the mirror of the already-handled "converting TO a named numeric" path (convCallExpr.go ~128, the
+`NamedNumericConversion` fix) and the `(int)(nuint)(c)` `NamedNumericIntCast` cast. This is the SAME family,
+just the named→basic direction (and cross-package named types like `abi.NameOff`). Likely a convCallExpr
+conversion-handling fix. **Bonus kin (same root):** `int(c)` on a `num:nuint` named type (`idx`) emits
+`(nint)c` (CS0030) — the named→basic value conversion not going through the underlying; a fresh repro
+(`int(idx)`) reproduces it. Fixing the through-underlying routing should clear both.
 
 First steps:
-1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — overlay.sh restores the
-   core manual files). Read the actual CS8130/CS8183/CS1061 sites.
-2. Read the go2cs-phase3-progress memory's range-over-Span (CS8130) + named-type-forwarding notes (incl. the
-   pallocBits IArray-forwarding REVERT) BEFORE editing.
-3. Implement per the Workflow. Converter (A) or generator (B) fix; gate with a behavioral test (range/comma-ok
-   over the matching source, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md
-   + one focused commit per root.
+1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh restores the core manual files). Read the
+   actual CS0030 `'<named>' to '<basic>'` sites (`type.cs` abi offsets, `tracetime.cs`, `tagptr_64bit.cs`),
+   and confirm with a `int(idx)` repro.
+2. Read the go2cs-phase3-progress memory's named-numeric-conversion notes (NamedNumericConversion /
+   NamedNumericIntCast — the through-underlying cast) BEFORE editing.
+3. Implement per the Workflow (convCallExpr conversion routing); gate with a behavioral test (named↔basic
+   both directions, output-compared) + zero churn via check-no-regression.ps1 + ConversionStrategies.md +
+   one focused commit.
+
+ALTERNATE roots if the above stalls (all characterized):
+- Range/deconstruct cluster remainder: (A) Span-range (debuglog/os_windows `foreach (var (i,_) in span)` —
+  needs Span-VARIABLE tracking + indexed-for; do NOT switch to golib slice<T> which COPIES → lost writes);
+  (B) named-over-MAP comma-ok (type.cs `seen[tp,ꟷ]` — note `typesEqual_seen` is actually lifted as
+  `[GoType("dyn")]` STRUCT, not a map type — an anonymous-map-param-lifting bug; visitMapType is a stub).
 
 NOTE — other open roots (all characterized in the queue above):
 - S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
