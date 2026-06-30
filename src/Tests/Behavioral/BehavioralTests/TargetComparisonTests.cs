@@ -479,6 +479,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStringZeroValueConcat() => CheckTarget("StringZeroValueConcat");
 
     [TestMethod]
+    public void CheckStructFieldNamedOther() => CheckTarget("StructFieldNamedOther");
+
+    [TestMethod]
     public void CheckStructPointerPromotionWithInterface() => CheckTarget("StructPointerPromotionWithInterface");
 
     [TestMethod]

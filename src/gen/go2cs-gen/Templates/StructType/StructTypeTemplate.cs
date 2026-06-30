@@ -388,7 +388,11 @@ internal class StructTypeTemplate : TemplateBase
         string.Join(" &&\r\n            ", CompareList) :
         StructMembers.Count > 0 ? "false /* missing equality constraints */" : "true /* empty */";
 
-    private IEnumerable<string> CompareList => StructMembers.Select(member => $"{member.memberName} == other.{member.memberName}");
+    // Qualify the left operand with `this.` so a field whose name collides with the `Equals`
+    // parameter (`other`) compares the field-to-field, not parameter-to-field. e.g. a struct with
+    // a field literally named `other` would otherwise emit `other == other.other` — binding the
+    // left `other` to the parameter (CS0019). `this.other == other.other` is unambiguous.
+    private IEnumerable<string> CompareList => StructMembers.Select(member => $"this.{member.memberName} == other.{member.memberName}");
 
     public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" :
         $"""
