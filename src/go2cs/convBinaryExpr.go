@@ -354,7 +354,21 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
 				}
 
-				if v.isComputedConstOperand(binaryExpr.Y) || v.isLargeIntLiteralOperand(binaryExpr.Y) {
+				// The right operand of `&^` is complemented (the operator was rendered `& ~`); `~`
+				// promotes to `int`, so a CONSTANT operand `p &^ 15` becomes `nuint & ~15` =
+				// `nuint & (int)-16` → CS0019 (a negative `int` does not convert to an unsigned native
+				// type, even as a constant). Cast the complemented constant to the native type so the
+				// complement is performed in that width (`& ~(uintptr)15`). A non-constant native
+				// operand (`p &^ mask`) already complements correctly and is left alone.
+				yConst := false
+
+				if tv, ok := v.info.Types[binaryExpr.Y]; ok && tv.Value != nil {
+					yConst = true
+				}
+
+				andNotConst := binaryExpr.Op == token.AND_NOT && yConst
+
+				if v.isComputedConstOperand(binaryExpr.Y) || v.isLargeIntLiteralOperand(binaryExpr.Y) || andNotConst {
 					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
 				}
 			}

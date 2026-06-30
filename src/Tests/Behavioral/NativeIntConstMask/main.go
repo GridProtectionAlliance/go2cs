@@ -20,6 +20,11 @@ func align(i uintptr) uintptr { return i &^ (blockSize - 1) }   // round down to
 // cast to the native type or `nuint & nint` is CS0019. Mirrors runtime's `uintptrMask & 0x00ffffffffff`.
 func maskAddr(i uintptr) uintptr { return i & 0x00ffffffffff } // mirrors runtime's uintptrMask
 
+// `&^` with a small LITERAL operand: it is rendered `& ~15`, and `~15` promotes to a negative C#
+// `int` that cannot convert to an unsigned native type — `nuint & ~15` is CS0019. The complemented
+// constant is cast to the native type (`& ~(uintptr)15`). Mirrors runtime's `ptr &^ 15` 16-byte align.
+func alignSmall(i uintptr) uintptr { return i &^ 15 }
+
 func main() {
 	fmt.Println(uint64(low(0b1011)))   // 0b1011 & 0b111 = 0b011 = 3
 	fmt.Println(uint64(align(0b1011))) // 11 &^ 15 = 0
@@ -30,4 +35,5 @@ func main() {
 	addr <<= 47
 	addr |= 0xABCD
 	fmt.Println(uint64(maskAddr(addr))) // high bit beyond 40 is masked off, low bits kept
+	fmt.Println(uint64(alignSmall(27))) // 27 &^ 15 = 16
 }
