@@ -5,8 +5,8 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 public static @unsafe.Pointer NoEscape(@unsafe.Pointer p) {
-    var x = ((uintptr)p);
-    return ((@unsafe.Pointer)((uintptr)(x ^ 0)));
+    var x = (uintptr)p;
+    return (@unsafe.Pointer)((uintptr)(x ^ 0));
 }
 
 internal static bool alwaysFalse;

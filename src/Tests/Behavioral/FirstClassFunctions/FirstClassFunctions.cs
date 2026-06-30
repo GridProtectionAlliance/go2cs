@@ -84,7 +84,7 @@ internal static @string ratioString(params ꓸꓸꓸnint valsʗp) {
         if (s != ""u8) {
             s += ", "u8;
         }
-        var pct = 100 * ((float64)val) / ((float64)total);
+        var pct = 100 * (float64)val / (float64)total;
         s += fmt.Sprintf("%d/%d (%0.1f%%)"u8, val, total, pct);
     }
     return s;

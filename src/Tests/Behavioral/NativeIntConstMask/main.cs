@@ -25,14 +25,14 @@ internal static uintptr alignSmall(uintptr i) {
 }
 
 internal static void Main() {
-    fmt.Println(((uint64)low(11)));
-    fmt.Println(((uint64)align(11)));
-    fmt.Println(((uint64)align(27)));
+    fmt.Println((uint64)low(11));
+    fmt.Println((uint64)align(11));
+    fmt.Println((uint64)align(27));
     uintptr addr = 1;
     addr <<= (int)(47);
     addr |= (uintptr)(43981);
-    fmt.Println(((uint64)maskAddr(addr)));
-    fmt.Println(((uint64)alignSmall(27)));
+    fmt.Println((uint64)maskAddr(addr));
+    fmt.Println((uint64)alignSmall(27));
 }
 
 } // end main_package

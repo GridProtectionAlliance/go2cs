@@ -67,7 +67,7 @@ public static readonly TFlag TFlagUnrolledBitmap = /* 1 << 4 */ 16;
 [GoType("num:int32")] partial struct TextOff;
 
 public static @string String(this ΔKind k) {
-    if (((nint)(uint8)k) < len(kindNames)) {
+    if ((nint)(uint8)k < len(kindNames)) {
         return kindNames[k];
     }
     return kindNames[0];
@@ -139,7 +139,7 @@ public static ж<Type> TypeFor<T>() {
 }
 
 [GoRecv] public static slice<byte> GcSlice(this ref Type t, uintptr begin, uintptr end) {
-    return @unsafe.Slice(t.GCData, ((nint)end))[(int)(begin)..];
+    return @unsafe.Slice(t.GCData, (nint)end)[(int)(begin)..];
 }
 
 [GoType] partial struct Method {
@@ -161,18 +161,18 @@ public static ж<Type> TypeFor<T>() {
     if (t.Mcount == 0) {
         return default!;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.mcount > 0"u8)), (int)(t.Mcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.mcount > 0"u8)), (int)(t.Mcount)));
 }
 
 [GoRecv] public static unsafe slice<Method> ExportedMethods(this ref UncommonType t) {
     if (t.Xcount == 0) {
         return default!;
     }
-    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), ((uintptr)t.Moff), "t.xcount > 0"u8)), (int)(t.Xcount)));
+    return new slice<Method>(new ReadOnlySpan<Method>((Method*)(uintptr)(addChecked((uintptr)@unsafe.Pointer.FromRef(ref t), (uintptr)t.Moff, "t.xcount > 0"u8)), (int)(t.Xcount)));
 }
 
 internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string whySafe) {
-    return ((@unsafe.Pointer)(((uintptr)p) + x));
+    return (@unsafe.Pointer)((uintptr)p + x);
 }
 
 [GoType] partial struct Imethod {
@@ -189,7 +189,7 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 
 [GoRecv] public static nint Len(this ref Type t) {
     if (t.Kind() == Array) {
-        return ((nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Len);
+        return (nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Len;
     }
     return 0;
 }
@@ -367,11 +367,11 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static nint Align(this ref Type t) {
-    return ((nint)t.Align_);
+    return (nint)t.Align_;
 }
 
 [GoRecv] public static nint FieldAlign(this ref Type t) {
-    return ((nint)t.FieldAlign_);
+    return (nint)t.FieldAlign_;
 }
 
 [GoType] partial struct ΔInterfaceType {
@@ -455,11 +455,11 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static nint NumIn(this ref ΔFuncType t) {
-    return ((nint)t.InCount);
+    return (nint)t.InCount;
 }
 
 [GoRecv] public static nint NumOut(this ref ΔFuncType t) {
-    return ((nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1))));
+    return (nint)((uint16)(t.OutCount & ((1 << (int)(15)) - 1)));
 }
 
 [GoRecv] public static ж<Type> Out(this ref ΔFuncType t, nint i) {
@@ -478,7 +478,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 [GoRecv] public static unsafe slice<ж<Type>> OutSlice(this ref ΔFuncType t) {
-    var outCount = ((uint16)t.NumOut());
+    var outCount = (uint16)t.NumOut();
     if (outCount == 0) {
         return default!;
     }
@@ -519,11 +519,11 @@ public static readonly ΔChanDir InvalidDir = 0;
 }
 
 public static ж<byte> DataChecked(this ΔName n, nint off, @string whySafe) {
-    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), whySafe));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), (uintptr)off, whySafe));
 }
 
 public static ж<byte> Data(this ΔName n, nint off) {
-    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), ((uintptr)off), "the runtime doesn't need to give you a reason"u8));
+    return (ж<byte>)(uintptr)(addChecked(new @unsafe.Pointer(n.Bytes), (uintptr)off, "the runtime doesn't need to give you a reason"u8));
 }
 
 public static bool IsExported(this ΔName n) {
@@ -542,7 +542,7 @@ public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.DataChecked(off + i, "read varint"u8).val;
-        v += (((nint)((byte)(x & 127))) << (int)((7 * i)));
+        v += ((nint)((byte)(x & 127)) << (int)((7 * i)));
         if ((byte)(x & 128) == 0) {
             return (i + 1, v);
         }
@@ -559,7 +559,7 @@ public static bool IsBlank(this ΔName n) {
 
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = ((byte)((nint)(n & 127)));
+        var b = (byte)((nint)(n & 127));
         n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;

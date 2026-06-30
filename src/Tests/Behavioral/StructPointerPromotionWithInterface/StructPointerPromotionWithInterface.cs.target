@@ -25,7 +25,7 @@ partial class main_package {
 }
 
 public static float64 Time(this MyError myErr) {
-    return ((float64)myErr.When.Unix());
+    return (float64)myErr.When.Unix();
 }
 
 [GoType] partial struct Inner {

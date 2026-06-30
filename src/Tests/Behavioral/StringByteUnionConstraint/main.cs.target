@@ -9,7 +9,7 @@ internal static uint32 byteSum<T>(T s)
 {
     uint32 h = default!;
     for (nint i = 0; i < len(s); i++) {
-        h = h * 31 + ((uint32)s[i]);
+        h = h * 31 + (uint32)s[i];
     }
     return h;
 }

@@ -33,22 +33,22 @@ partial class main_package {
     if (argSize > PtrSize || argSize == 0 || (uintptr)(argSize & (argSize - 1)) != 0) {
         throw panic("invalid argSize");
     }
-    var offset = ((uintptr)0);
+    var offset = (uintptr)0;
     if (BigEndian) {
         offset = (uintptr)PtrSize - argSize;
     }
-    return ((@unsafe.Pointer)(((uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(r.Ints[reg])).val)) + offset));
+    return (@unsafe.Pointer)((uintptr)@unsafe.Pointer.FromRef(ref (Ꮡ(r.Ints[reg])).val) + offset);
 }
 
 [GoType("[2]uint8")] /* [(IntArgRegs + 7) / 8]uint8 */
 partial struct IntArgRegBitmap;
 
 [GoRecv] public static void Set(this ref IntArgRegBitmap b, nint i) {
-    b.val[i / 8] |= (uint8)((((uint8)1) << (int)((i % 8))));
+    b.val[i / 8] |= (uint8)(((uint8)1 << (int)((i % 8))));
 }
 
 [GoRecv] public static bool Get(this ref IntArgRegBitmap b, nint i) {
-    return (uint8)(b.val[i / 8] & ((((uint8)1) << (int)((i % 8))))) != 0;
+    return (uint8)(b.val[i / 8] & (((uint8)1 << (int)((i % 8))))) != 0;
 }
 
 } // end main_package

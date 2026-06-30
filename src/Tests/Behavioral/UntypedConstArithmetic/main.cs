@@ -18,7 +18,7 @@ internal static void Main() {
     fmt.Println(a >= two32);
     fmt.Println(a - (uint64)two32 % a);
     int64 c = 1099511627783L;
-    var d = ((int64)(9223372036854775807L));
+    var d = (int64)(9223372036854775807L);
     fmt.Println(c);
     fmt.Println(d);
     fmt.Println(sum(12345000054321L));
