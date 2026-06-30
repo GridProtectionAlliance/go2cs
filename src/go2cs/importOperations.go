@@ -197,9 +197,16 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 	for _, importPath := range importPaths {
 		pkg, err := build.Import(importPath, "", build.FindOnly)
 
-		// Handle error, e.g., package not found
+		// go/build (GOPATH-based) cannot resolve a LOCAL/USER module reached via a `replace`
+		// directive or otherwise outside GOPATH/GOROOT. Fall back to the module-aware go/packages
+		// dir captured at load time, treating its converted output as in-place (co-located with the
+		// Go source) — the common layout when converting a whole module tree.
 		if err != nil {
-			result[importPath] = PackageInfo{Err: err}
+			if info, ok := getLocalModulePackageInfo(importPath, options); ok {
+				result[importPath] = info
+			} else {
+				result[importPath] = PackageInfo{Err: err}
+			}
 			continue
 		}
 
@@ -214,9 +221,6 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 		} else {
 			targetDir = pathReplace(sourceDir, filepath.Join(options.goPath, "pkg"), "$(go2csPath)pkg")
 		}
-
-		// TODO: Check if the import path is a local package and handle it accordingly
-		//if build.IsLocalImport(importPath) {
 
 		importPathParts := strings.Split(importPath, "/")
 		packageName := strings.Join(importPathParts, ".")
@@ -235,6 +239,68 @@ func getImportPackageInfo(importPaths []string, options Options) map[string]Pack
 	}
 
 	return result
+}
+
+// getLocalModulePackageInfo resolves cross-package reference info for a LOCAL/USER module import that
+// go/build could not find, using the module-aware go/packages dir captured in importPackageDirs. The
+// converted output is treated as in-place (co-located with the Go source). The returned
+// ProjectReference is an ABSOLUTE path to the imported package's generated .csproj; writeProjectFile
+// rewrites it relative to the referencing project. RootPackageName/PackageName are the Go package name
+// (the identifier used to qualify references in code, and — for a single-segment module — the C# class
+// base `<name>_package`). Returns ok=false when the import is unknown to the loaded graph.
+func getLocalModulePackageInfo(importPath string, options Options) (PackageInfo, bool) {
+	meta, ok := importPackageDirs[importPath]
+
+	if !ok || meta.Dir == "" {
+		return PackageInfo{}, false
+	}
+
+	// Defense in depth: build.Import is pinned to the resolved GOROOT (see main), but if it still
+	// fails for a STDLIB package, the dir is under GOROOT/src — apply the stdlib `$(go2csPath)core`
+	// mapping rather than emitting a machine-specific absolute reference as if it were a user module.
+	goRootSrc := filepath.Join(options.goRoot, "src")
+
+	if isPathUnder(meta.Dir, goRootSrc) {
+		targetDir := pathReplace(meta.Dir, goRootSrc, "$(go2csPath)core")
+		packageName := strings.Join(strings.Split(importPath, "/"), ".")
+		projectReference := filepath.Join(strings.ReplaceAll(targetDir, "/", "\\"), "\\"+packageName+".csproj")
+		packageNameParts := strings.Split(packageName, ".")
+
+		return PackageInfo{
+			IsStdLib:         true,
+			PackageName:      packageName,
+			RootPackageName:  packageNameParts[len(packageNameParts)-1],
+			SourceDir:        meta.Dir,
+			TargetDir:        strings.ReplaceAll(targetDir, "$(go2csPath)", options.go2csPath+string(os.PathSeparator)),
+			ProjectReference: projectReference,
+		}, true
+	}
+
+	// A genuine LOCAL/USER module: its converted output is in-place (co-located with its Go source),
+	// and it generates `<projectName>.csproj` in its own directory. The absolute ProjectReference is
+	// rewritten relative to the referencing project by writeProjectFile.
+	libProjectName, _ := getProjectName(meta.Dir, options)
+	projectReference := filepath.Join(meta.Dir, libProjectName+".csproj")
+
+	return PackageInfo{
+		IsStdLib:         false,
+		PackageName:      meta.Name,
+		RootPackageName:  meta.Name,
+		SourceDir:        meta.Dir,
+		TargetDir:        meta.Dir,
+		ProjectReference: projectReference,
+	}, true
+}
+
+// isPathUnder reports whether path is the directory dir or nested within it (case-insensitive on
+// Windows), used to recognize a stdlib package by its location under GOROOT/src.
+func isPathUnder(path, dir string) bool {
+	rel, err := filepath.Rel(dir, path)
+	if err != nil {
+		return false
+	}
+
+	return rel != ".." && !strings.HasPrefix(rel, ".."+string(os.PathSeparator))
 }
 
 func pathReplace(subject string, search string, replace string) string {

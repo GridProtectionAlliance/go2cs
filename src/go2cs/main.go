@@ -257,6 +257,18 @@ var packageNamespace string
 var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var importedTypeAliases map[string]string
+
+// importPackageDirs maps a directly-imported package's import path to its on-disk source directory
+// and Go package name, captured from the MODULE-AWARE go/packages graph at load time. It is the
+// fallback resolver for cross-package references to a LOCAL/USER module (a `replace`d or co-located
+// module), which the legacy go/build (GOPATH-only) resolver in getImportPackageInfo cannot find.
+// Reset and repopulated per package.
+var importPackageDirs map[string]importedPackageMeta
+
+type importedPackageMeta struct {
+	Dir  string // package source directory (also the in-place converted-output directory)
+	Name string // Go package name (the identifier used to qualify references in code)
+}
 var constImportedTypeAliases HashSet[string]
 var parsedPackageInfoFiles HashSet[string]
 var interfaceImplementations map[string]HashSet[string]
@@ -370,6 +382,14 @@ func main() {
 	debugModeCmd := commandLine.Bool("debug", false, "Enable debug mode")
 
 	err = commandLine.Parse(os.Args[1:])
+
+	// Pin go/build's resolver to the converter's robustly-resolved GOROOT/GOPATH. build.Default is
+	// initialized at package-init from the start-up environment, which can be empty or stale in a
+	// child process (e.g. the behavioral runner Execs go2cs.exe with a sparse env) — leaving
+	// build.Import unable to find even stdlib packages like "fmt". Without this, getImportPackageInfo
+	// falls through to the local-module path and emits a machine-specific absolute GOROOT reference.
+	build.Default.GOROOT = *goRootCmd
+	build.Default.GOPATH = *goPathCmd
 
 	var inputFilePath string
 	var convertStdLib bool
@@ -565,6 +585,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		fset := pkg.Fset
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
+
+		// Capture the module-aware source dir + package name of every directly-imported package, so
+		// cross-package references to LOCAL/USER modules (which go/build cannot resolve) can be wired
+		// up — both their ProjectReference and their exported-type-alias package_info.cs.
+		importPackageDirs = make(map[string]importedPackageMeta)
+		for importPath, importedPkg := range pkg.Imports {
+			importPackageDirs[importPath] = importedPackageMeta{Dir: importedPkg.Dir, Name: importedPkg.Name}
+		}
 
 		packageInputPath := inputFilePath
 		packageOutputPath := outputFilePath
@@ -1108,11 +1136,28 @@ func writeProjectFile(projectFileName string, projectFileContents string, output
 	// Ensure project references are sorted so that the project file output is deterministic
 	references := make([]string, 0, len(packageInfoMap))
 
+	// References to converted stdlib packages are emitted as `$(go2csPath)core\...`; a LOCAL/USER
+	// module reference (getLocalModulePackageInfo) is an ABSOLUTE path, which is rewritten here
+	// relative to THIS project's directory so the generated .csproj is portable. projectDir is made
+	// absolute first — projectFileName can be relative (a relative output path), which would make
+	// filepath.Rel fail against the absolute reference and leave a machine-specific path behind.
+	projectDir := filepath.Dir(projectFileName)
+
+	if absDir, absErr := filepath.Abs(projectDir); absErr == nil {
+		projectDir = absDir
+	}
+
 	for _, info := range packageInfoMap {
 		reference := info.ProjectReference
 
 		if len(reference) == 0 {
 			continue
+		}
+
+		if filepath.IsAbs(reference) {
+			if rel, relErr := filepath.Rel(projectDir, reference); relErr == nil {
+				reference = rel
+			}
 		}
 
 		// Track project references

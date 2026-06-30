@@ -472,6 +472,7 @@ namespace BehavioralRunner
             foreach (string p in projects)
             {
                 string csproj = Path.Combine(s_behavioralDir, p, $"{p}.csproj");
+                string csprojDir = Path.GetDirectoryName(csproj)!;
 
                 foreach (string line in File.ReadLines(csproj))
                 {
@@ -483,7 +484,11 @@ namespace BehavioralRunner
                     if (end < 0) continue;
 
                     string raw = line[start..end].Replace("$(go2csPath)", s_srcRoot + Path.DirectorySeparatorChar);
-                    deps.Add(Path.GetFullPath(raw));
+
+                    // Resolve relative to the csproj's OWN directory (not the runner CWD) so a relative
+                    // cross-project ProjectReference (e.g. a cross-package test's `..\lib\lib.csproj`)
+                    // resolves correctly instead of producing a phantom path + MSB1009 warning.
+                    deps.Add(Path.GetFullPath(raw, csprojDir));
                 }
             }
 

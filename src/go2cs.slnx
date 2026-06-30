@@ -81,6 +81,8 @@
     <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
+    <Project Path="Tests/Behavioral/crosspkglib/crosspkglib.csproj" />
+    <Project Path="Tests/Behavioral/crosspkguser/crosspkguser.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
     <Project Path="Tests/Behavioral/DeferEvalParam/DeferEvalParam.csproj" />
