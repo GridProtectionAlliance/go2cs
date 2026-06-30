@@ -224,7 +224,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// the common `uint64(a)` → `(uint64)a` close to the Go source. A NAMED-type target keeps the
 		// outer parens — its result CAN be member-accessed (`Named(x).Method()`), which is parent-
 		// context-dependent and not decidable here, so the defensive wrap is retained.
-		_, targetIsBasic := v.info.TypeOf(callExpr).(*types.Basic)
+		//
+		// `string` is the exception among basic types: its C# representation is the golib `@string`
+		// STRUCT, which IS member-accessible — it exposes methods, an indexer, and is the receiver of
+		// the variadic-string spread `string(r)...` → `((@string)(rune)r).ꓸꓸꓸ`. Dropping the outer wrap
+		// there reparses `.ꓸꓸꓸ`/`[]`/`.Method()` against the cast's INNER operand (`(@string)(rune)r.ꓸꓸꓸ`
+		// binds `.ꓸꓸꓸ` to `r`, CS1061). So treat a `string` target like a named type and keep the wrap.
+		basicTarget, _ := v.info.TypeOf(callExpr).(*types.Basic)
+		targetIsBasic := basicTarget != nil && basicTarget.Kind() != types.String
 
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {

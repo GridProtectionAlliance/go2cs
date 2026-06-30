@@ -454,6 +454,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
+
+    [TestMethod]
     public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
 
     [TestMethod]

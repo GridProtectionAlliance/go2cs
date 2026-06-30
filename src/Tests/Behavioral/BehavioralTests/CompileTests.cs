@@ -498,6 +498,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
+
+    [TestMethod]
     public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
 
     [TestMethod]
