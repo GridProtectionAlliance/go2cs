@@ -7,9 +7,18 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~262 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~261 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
+- **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
+  The user hand-finishes certain stdlib files in `src/core` marked `[module: GoManualConversion]` (the
+  converter skips re-converting them) or named `*_impl.cs`. A fresh reconvert into an empty scratchpad
+  dir does NOT trigger the skip (it checks the destination file), so the overlay must re-copy them —
+  `overlay.sh` now does this after the cs/csproj copy. **The canonical unsafe.Pointer model is here:**
+  `core/sync/atomic/type.cs` stores `atomic.Pointer<T>` as a managed `ж<T>` (Volatile/Interlocked +
+  `nilCanon`), NOT a `nuint` round-trip; `reflectlite/value.cs` uses `object? m_target`. *Where Go
+  stores a managed pointer via `unsafe.Pointer`, the C# model holds the `ж<T>`/`object` DIRECTLY* — the
+  guiding principle for all S1 work (see the `go2cs-manual-conversions` memory).
 - **"runtime is the only failing package" is misleading.** `dotnet build` **skips the dependents of
   a failed project** rather than erroring them. So while `runtime` fails, the entire upper stdlib
   (`bufio`, `bytes`, `strings`, `os`, the full `fmt`, `reflect`, …) is *not being compile-checked at
@@ -137,20 +146,38 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
 as items land. As of 2026-06-30 (`runtime` = ~262):
 
-- [ ] **S1 — `unsafe.Pointer` / pointer-conversion modeling** *(the keystone: CS0030 ~59 + CS0021 ~12 +
-  CS1510 ~9 + part of CS1503; ~80 errors, gates the most).* `unsafe.Pointer → ж<T>` standalone casts;
-  **pointer-to-array conversion `ж<array<E>>` ↔ `ж<NamedArray>`** (the `(*[2]uint64)(x)` family — the
-  `ImplicitConvGenerator` gap); the **cast-then-index precedence** fix (`(*T)(p)[i]` → CS0021) is PAIRED
-  with the conversion and only testable once it exists; `unsafe.Pointer.FromRef(ref X.val)` non-lvalue
-  (CS1510). The `unsafe.Pointer`=`nuint` round-trip is a known runtime limitation; the gaps interact —
-  **design the model first** (how `ж<T>` / `unsafe.Pointer` / `Span<T>` interconvert), then wire converter
-  + golib + `ImplicitConvGenerator` together.
-- [ ] **S2 — pointer-deref-chain atomic receivers** *(CS1929 ~32).* `mp.mLockProfile.waitTime.Load()`,
-  `sgp.g.selectDone.CompareAndSwap(…)`: the receiver is built with `(~mp)` (value-deref rvalue) but the
-  ж-only atomic overload needs `.val` (ref-deref). Extend the `~`-vs-`.val` deref-form distinction to
-  pointer-receiver-method receivers. **Delicate copy-vs-box deref area — the memory warns it regressed
-  under fatigue; validate every churn.** (The global value-field atomic case is already fixed via
-  box-the-global + `Ꮡg.of(T.Ꮡfield)`.)
+- [~] **S1 — `unsafe.Pointer` / pointer-conversion modeling** *(re-characterized 2026-06-30; one contained
+  fix landed, the bulk is multi-session architectural).* **What landed:** `ef279eab3` — the
+  `(*Base)(p)` identical-underlying pointer reinterpret now derefs a genuine box arg before the value
+  conversion (runtime/pinner `(*pinnerBits)(newMarkBits(…))`); CS0030 59→58, runtime 262→261, zero churn,
+  test `NamedPointerReinterpret`. **CORRECTED CHARACTERIZATION (the original "~80, CS0030 59 + CS0021 12 +
+  CS1510 9" estimate over-counted S1):**
+  - **CS1510 ×9 is NOT S1 — it is S2** (ref-receiver method on a value-deref rvalue: `(~…).wbBuf.get2()`,
+    `(~getg()).schedlink.set(…)`). The `unsafe.Pointer.FromRef(ref X.val)` lines actually **compile** (a
+    minimal repro confirms `ref (rvalue).val` on a ref-returning property is legal). Moved to S2.
+  - **CS0021 splits:** only `malloc.cs` ×2 is the genuine S1 cast-then-index `(*[2]uint64)(x)[i]` (and it
+    compiles-but-CRASHES — `(ж<array<E>>)(uintptr)` does an immediate raw `*(array*)addr` deref of a
+    managed type; not runtime-testable). The rest (mgcscavenge/type/proc/traceback) is named-type-over-
+    array/map **indexer forwarding** = the S6/`pallocBits`/`winlibcall` family, not S1.
+  - **CS0030 bulk (~50: map ×16, iface, lfstack ×5, mstats/profbuf/mgcsweep, runtime2 guintptr/muintptr/
+    puintptr, gclinkptr) is the project's explicitly-accepted "memory-layout-dependent, will not work as
+    expected" runtime-unsafe code** (CLAUDE.md). These store a *managed pointer as a `uintptr`/`unsafe.Pointer`*,
+    which a raw round-trip cannot recover. The goal for them is **COMPILE-ONLY** (unblock dependents); a
+    correct runtime test is impossible by design. **The correct model is the user's managed-referent
+    approach** (hold `ж<T>` directly — see *Where things stand* + `go2cs-manual-conversions` memory): the
+    runtime `guintptr/muintptr/puintptr/gclinkptr/lfstack` types must be **hand-rewritten to hold managed
+    refs** (the same play as the promoted `atomic.Pointer<T>`), each a per-type effort. **This is genuinely
+    multi-session** and should be done WITH the user's model, NOT via a raw-uintptr round-trip (which
+    compiles-but-crashes — exactly the reverted-fix trap). Resume S1 as a dedicated managed-referent
+    redesign session once the cheaper S2/S3 buckets are cleared.
+- [ ] **S2 — pointer-deref-chain receivers** *(CS1929 ~32 + CS1510 ~9 = ~41; bigger than first thought).*
+  `mp.mLockProfile.waitTime.Load()`, `sgp.g.selectDone.CompareAndSwap(…)` (CS1929), and `(~…).wbBuf.get2()`,
+  `(~getg()).schedlink.set(…)` (CS1510 — a `[GoRecv] ref` method called on a `~`-value-deref RVALUE
+  receiver, which is non-assignable). Both are the same root: the receiver is built with `(~x)` (value-deref
+  rvalue) but a `ref`/ж-only method needs `.val`/box (ref-deref). Extend the `~`-vs-`.val` deref-form
+  distinction to pointer-receiver-method receivers. **Delicate copy-vs-box deref area — the memory warns it
+  regressed under fatigue; validate every churn.** Tractable per the `cebbf51a8` family precedent (−23 once).
+  (The global value-field atomic case is already fixed via box-the-global + `Ꮡg.of(T.Ꮡfield)`.)
 - [ ] **S3 — TypeGenerator 2-level embedding promotion** *(CS1061 ~26).* `stackWorkBuf` embeds
   `stackWorkBufHdr` which has `nobj`; `workbuf.obj`; promoted fields on `abi.Type` (`.Typ`/`.Itab`).
   Generator work — extend `TypeGenerator`'s promotion to nested (2-level) embedding, rebuild the
@@ -217,31 +244,39 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session tackles ONE queue item: S1 — unsafe.Pointer / pointer-conversion modeling (the keystone,
-~80 of runtime's ~262 errors: CS0030 ~59 + CS0021 ~12 + CS1510 ~9 + part of CS1503; it gates the most).
+This session tackles ONE queue item: S2 — pointer-deref-chain receivers (CS1929 ~32 + CS1510 ~9 = ~41
+of runtime's ~261 errors; the largest tractable bucket, and S1 last session moved CS1510 here).
 
-The work (design the model BEFORE editing — the gaps interact):
-- unsafe.Pointer <-> ж<T> <-> Span<T> interconversion. Decide how golib models these together. The
-  unsafe.Pointer = nuint round-trip is a known runtime limitation — work WITH it, don't fight it.
-- The pointer-to-array conversion ж<array<E>> <-> ж<NamedArray> (the (*[2]uint64)(x) family) is an
-  ImplicitConvGenerator gap — likely the linchpin; the cast-then-index precedence fix ((*T)(p)[i] ->
-  CS0021) is PAIRED with it and only becomes testable once the conversion exists.
-- unsafe.Pointer.FromRef(ref X.val) non-lvalue (CS1510) is in the same family.
-Fix each at its ROOT across converter / golib / go2cs-gen as needed (all ships rise — do NOT bend golib
-or the generators just to compile). A green compile is necessary but NOT sufficient: these have bitten
-us with compiles-but-wrong (lost writes, NRE) — the behavioral test AND its runtime output is the gate.
+The defect (one root, two error codes):
+- CS1929: `mp.mLockProfile.waitTime.Load()`, `sgp.g.selectDone.CompareAndSwap(…)` — a ж-only atomic
+  method bound on a receiver built with `(~x)` (value-deref rvalue) where it needs `.val`/box (ref-deref).
+- CS1510: `(~…).wbBuf.get2()`, `(~getg()).schedlink.set(…)` — a `[GoRecv] ref` method called on a
+  `~`-value-deref RVALUE receiver (non-assignable variable). SAME root: a deref-chain receiver rendered
+  as a value-deref `~` rvalue instead of the ref/box form the ref/ж method needs.
+Extend the `~`-vs-`.val` deref-form distinction to pointer-receiver-method receivers along a deref chain.
+**Delicate copy-vs-box deref area — the memory (go2cs-phase3-progress) warns this regressed under fatigue;
+the cebbf51a8 atomic-deref family is the precedent (tractable, −23 once). Validate EVERY churn.** A green
+compile is necessary but NOT sufficient: an atomic mutation must PERSIST — gate with a behavioral test
+whose runtime output proves write-through (mirror AtomicFieldThroughPointer / IndexedElementDirectBoxMethod).
 
 First steps:
-1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop). Confirm the S1 bucket
-   sizes and read the actual CS0030/CS0021/CS1510 sites in runtime to ground the design.
-2. Read the go2cs-phase3-progress memory's unsafe.Pointer / pointer-array / cast-then-index notes
-   (prior attempts + the documented traps) before designing.
+1. Reconvert + overlay + build runtime, bucket fresh (see the measurement loop — and note overlay.sh now
+   restores the core manual files). Read the actual CS1929 + CS1510 sites to find the deref-chain shapes.
+2. Read the go2cs-phase3-progress memory's CS1929 atomic-deref-capture-mode notes (the cebbf51a8 family
+   remainder: field-of-receiver chains, value-call atomics, method-kind-in-predicate + transitive direct-ж)
+   and the documented copy-vs-box traps BEFORE editing.
 3. Implement per the Workflow (root fix + behavioral test via run-behavioral.ps1 --filter + zero churn
    via check-no-regression.ps1 + ConversionStrategies.md + one focused commit per root fix).
 
-Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off S1 with a result note,
-refresh the runtime count/date — then rewrite this "Next session prompt" block to point at S2
-(pointer-deref-chain atomic receivers, CS1929). Commit the doc update. Then stop and hand me the S2
+NOTE on S1 (do NOT re-attempt casually): S1's remaining bulk (CS0030 ~50) is the project's
+explicitly-accepted memory-layout-dependent runtime-unsafe code (map/lfstack/guintptr/muintptr/…). The
+ONLY correct fix is the user's managed-referent model — hand-rewrite those runtime types to hold `ж<T>`
+directly (like the promoted atomic.Pointer<T>), a dedicated multi-session redesign. Do NOT "make it
+compile" via a raw uintptr round-trip — that compiles-but-crashes (the reverted-fix trap).
+
+Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off S2 with a result note,
+refresh the runtime count/date — then rewrite this "Next session prompt" block to point at S3
+(TypeGenerator 2-level embedding promotion, CS1061). Commit the doc update. Then stop and hand me the S3
 prompt to kick off the following session.
 ```
 
