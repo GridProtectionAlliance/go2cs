@@ -7,9 +7,21 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~169 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~161 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
+- **2026-06-30 (latest): S2 `~`-deref-rooted receiver materialization landed (`716de3a64`; CS1510
+  9 → 0, runtime 169 → 161).** A pointer-receiver method on a value field reached through a pointer
+  RVALUE — a call `getg().schedlink.set(…)`, a method-call chain `q.tail.ptr().schedlink.set(…)`, or a
+  pointer-element index `batch[i].schedlink.set(…)` — emitted `(~rvalue).field.method(…)`, an rvalue the
+  generated `ref` couldn't bind. Fix (converter-only): new predicate `exprIsValueFieldOfPointerRvalue` +
+  a pointer-receiver routing branch in convSelectorExpr, and convUnaryExpr's `&base.field` box-field
+  branch now accepts a pointer-returning CALL / pointer-ELEMENT index base — materializing
+  `root.of(T.Ꮡfield).method(…)`. A type-CONVERSION CallExpr `(*T)(p)` is EXCLUDED (renders as a C# cast;
+  `.of(…)` would mis-bind by precedence → kept its `Ꮡ(…)` form, no StdLibInternalAbi churn). Test
+  `PointerRvalueFieldReceiver`; full suite green (191). Also re-baselined 3 cast-paren goldens stale
+  since `4261cd21a` (`ccca54886` — MethodSelector/RangeVarReassign/UnsafePointerArgPassing, missed by the
+  `42e1fa600` rebaseline; the stale-go2cs.exe false-green hid them).
 - **Behavioral-suite hygiene note (2026-06-30):** the "reduce redundant cast parentheses" beautify
   (`4261cd21a`) had over-stripped the outer parens of `string()` conversions, leaving the suite RED
   (UnsafeOperations failed to compile — a variadic-spread `.ꓸꓸꓸ` rebound to the cast's inner operand,
@@ -153,9 +165,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 late (`runtime` = ~169; the empty-struct-lift fix below cleared the
-type.cs `typesEqual` `seen[tp,ꟷ]` cluster, 175 → 169): CS0030 45, CS1503 24, CS1061 16, CS1929 11,
-CS0021 10, CS1510 9, CS0029 8, CS0121 6, CS0266 5, CS0103 5:
+as items land. As of 2026-06-30 latest (`runtime` = ~161; the S2 CS1510 receiver-materialization fix below
+cleared all 9 CS1510, 169 → 161): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS1929 9, CS0029 8,
+CS0121 6, CS0841 5, CS0266 5, CS0103 5:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -235,9 +247,17 @@ CS0021 10, CS1510 9, CS0029 8, CS0121 6, CS0266 5, CS0103 5:
     other direct-ж trigger). The `limiterEvent.start`/`timers.take` cases originally grouped here are NOT
     this shape — they are `(~ptrCall).field.method(…)` (deref-of-call root, the CS1510 receiver-
     materialization family), still open.
-  - **CS1510 ×9 — `[GoRecv] ref` method on a `~`-value-deref RVALUE receiver** (`(~getg()).schedlink.set(…)`,
-    `(~…).wbBuf.get2()`): the receiver root is a `~`-deref of a call/expr (not an ident param/receiver), so
-    the box routing above does not apply. Needs the receiver materialized to an addressable/box form.
+  - [x] **CS1510 ×9 — `[GoRecv] ref` method on a `~`-value-deref RVALUE receiver** *(landed 2026-06-30,
+    `716de3a64`; CS1510 9 → 0, runtime 169 → 161).* `(~getg()).schedlink.set(…)`, `(~batch[i]).schedlink.set(…)`,
+    `(~q.tail.ptr()).schedlink.set(…)`, `(~Δp.chunkOf(ci)).scavenged.setRange(…)`, `(~getg().m.p.ptr()).wbBuf.get2()`.
+    The receiver root is a pointer-returning CALL or a pointer-ELEMENT index — an rvalue that ALREADY is the
+    `ж<T>` box, so it materializes straight through it: `getg().of(g.Ꮡschedlink).set(…)`. Fix (converter-only):
+    new `exprIsValueFieldOfPointerRvalue` (value field rooted at a NON-ident, NON-selector pointer-to-struct
+    expr) + a pointer-receiver routing branch (convSelectorExpr), and convUnaryExpr's `&base.field` box-field
+    branch extended to CALL/INDEX bases — EXCLUDING type-conversion CallExprs (`(*T)(p)` renders as a C# cast;
+    `.of(…)` mis-binds by precedence, so S1 reinterprets keep their `Ꮡ(…)` form). Test
+    `PointerRvalueFieldReceiver`; zero churn; full suite green (191). See ConversionStrategies.md "The base
+    may also be a pointer rvalue…".
   - **Indexed-element atomic (CS1929 ×4: `mprof` `bh.val[i].Load()`/`.StoreNoWB()`).** Array element of
     atomic `UnsafePointer` via a pointer — the `daca4f3a1`/`exprIsIndexedValueElement` area; check why it
     isn't firing for `UnsafePointer`.
@@ -327,44 +347,54 @@ CS0021 10, CS1510 9, CS0029 8, CS0121 6, CS0266 5, CS0103 5:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~169. Last session landed the empty-struct-lift
-fix (CONVERTER, convStructType.go, +12 lines; cleared the type.cs `typesEqual` `seen[tp,ꟷ]` cluster —
-CS8130 ×2 + CS0021 ×2 + CS1503 — 175→169). NOTE the prior handoff's "implement visitMapType / anonymous-map-
-param lifting" diagnosis was WRONG: `visitMapType` is still a stub and was never the cause. Real root —
-convStructType lifted EVERY `struct{}` composite, including the EMPTY one; for `seen[k] = struct{}{}` the
-assignment passes the LHS ident `seen` as naming context, so the empty struct was registered under `seen`'s
-OWN type (the map `map[_typePair]struct{}`) in the lifted-type registry, poisoning the parameter signature +
-comma-ok + indexer. Fix: empty struct short-circuits to golib `EmptyStruct` before any lift. Test
-`EmptyStructMapSet`; zero churn. ALSO fixed a pre-existing suite-breaker (`61ce1157a`): the `4261cd21a`
-cast-paren beautify over-stripped `string()` conversions (`@string` is member-accessible — the variadic
-spread `string(r)...` rebound `.ꓸꓸꓸ` to the inner operand, CS1061 in UnsafeOperations). AND re-baselined
-11 goldens stale since `4261cd21a` (`42e1fa600` — the cause of "green in the runner, 14 CheckTarget fail in
-VS": the runner had been transpiling with a STALE go2cs.exe). Full behavioral suite green (190 projects).
-FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner
-only rebuilds the exe when a `.go` is newer, so a committed converter change can false-green on a stale
-binary (VS rebuilds fresh and exposes it). After any emitted-form change run `run-behavioral.ps1
---update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~161. Last session landed the S2 CS1510
+`~`-deref-rooted receiver materialization (CONVERTER-only, `716de3a64`; CS1510 9 → 0, runtime 169 → 161). A
+`[GoRecv] ref` method on a value field reached through a pointer RVALUE — a call `getg().schedlink.set(…)`, a
+method-call chain `q.tail.ptr().schedlink.set(…)`, `Δp.chunkOf(ci).scavenged.setRange(…)`,
+`getg().m.p.ptr().wbBuf.get2()`, or a pointer-element index `batch[i].schedlink.set(…)` — emitted
+`(~rvalue).field.method(…)`, an rvalue the generated `ref` couldn't bind. The root call/index value ALREADY is
+the `ж<T>` box, so the fix materializes straight through it: `getg().of(g.Ꮡschedlink).set(…)`. Two coordinated
+converter changes: new predicate `exprIsValueFieldOfPointerRvalue` (value field rooted at a NON-ident,
+NON-selector pointer-to-struct expr) + a pointer-receiver routing branch in convSelectorExpr; convUnaryExpr's
+`&base.field` box-field branch (the one that renders `e.of(Type.ᏑField)`) extended to accept a CALL / pointer-
+ELEMENT index base. CRUCIAL GOTCHA the fix handles: a type-CONVERSION CallExpr `(*T)(p)` renders as a C# CAST
+`(ж<T>)(uintptr)(…)`, so a trailing `.of(…)` mis-binds to the inner operand by precedence — EXCLUDE conversions
+(`v.callExprIsTypeConversion`) so S1 pointer-reinterprets keep their `Ꮡ(…)` form (this exclusion was the one
+self-inflicted regression, caught by StdLibInternalAbi's golden, then fixed). Test `PointerRvalueFieldReceiver`
+(call / method-call-chain / index roots, write-through verified); zero churn; full suite green (191). ALSO
+re-baselined 3 cast-paren goldens stale since `4261cd21a` (`ccca54886` — MethodSelector / RangeVarReassign /
+UnsafePointerArgPassing, missed by the `42e1fa600` rebaseline). FORCE `cd src/go2cs && go build -o
+bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is
+newer, so a committed converter change false-greens on a stale binary (this is exactly what hid the 3 stale
+goldens). After any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL
+affected goldens.
 
-Recommended NEXT root (CONTAINED, one root spanning ~9 errors): **S2 `~`-deref-rooted receiver
-materialization (CS1510 ×9).** A `[GoRecv] ref` method invoked on a `~`-value-deref RVALUE receiver whose
-root is a CALL/expr, not an ident — `(~getg()).schedlink.set(…)`, `(~…).wbBuf.get2()` (files:
-atomic_pointer, debugcall, mgcmark, mgcscavenge, mpagealloc, mpagecache, mwbbuf, proc ×2). The box-routing
-the prior S2 fixes added (`Ꮡp.of(…)`) keys off an ident param/receiver root, so it doesn't apply here; the
-receiver must be MATERIALIZED to an addressable/box form (e.g. a temp `ref var` or a synthesized box) before
-the ref method binds. Behavioral-testable SAME-package (a pointer-returning call `(*T)`, then a ref-receiver
-method on a value field of its deref — `(~getCfg()).slot.set(x)`). Study the prior S2 routing
-(`exprIsValueFieldOfDerefdPointerRoot`, convSelectorExpr, the `Ꮡ`-box machinery in convUnaryExpr) and the
-`[GoRecv]` ref-overload binding; the gap is specifically the non-ident receiver root.
+Recommended NEXT root (CONTAINED, S2 remainder, ~4 errors, in-area + behavioral-testable): **indexed-element
+atomic via a pointer (CS1929 ×4, mprof.cs 303/313/333/335).** `bh.val[i].Load()` / `.StoreNoWB()` — an
+ARRAY/SLICE element of atomic `UnsafePointer` reached through a pointer — emits `bh.val[i].Load()`, but the
+element is a value (rvalue), so the pointer-receiver `Load`/`StoreNoWB` can't bind (CS1929). The existing
+`IndexedElementDirectBoxMethod` routing (convSelectorExpr line ~663, `exprIsIndexedValueElement` +
+`selectorCallsDirectBoxMethod`) already handles `bh.val[i].Load()` for SAME-package direct-ж methods — but
+`atomic.UnsafePointer.Load` is a CROSS-package atomic method, and `selectorCallsDirectBoxMethod` checks only
+the SAME-package `packageDirectBoxReceiverMethods` set, so the gate fails and it doesn't route. Likely fix:
+broaden the gate (or add a sibling) so a cross-package pointer-receiver atomic method on an indexed value
+element routes through the element box too — mirroring how the value-field-of-global path (line ~940) already
+treats "any pointer-receiver method whose package's capture-mode set is not locally available" as ж-only. The
+element box is `Ꮡ(slice,i)` / `box.of(T.Ꮡfield).at<E>(i)` — never a `Ꮡ(value)` copy (atomic write must land).
+Behavioral-testable SAME-package: an array/slice of `atomic.Uint32` (or a UnsafePointer-like) reached through a
+pointer field, `.Add`/`.Load` on `container[i]`, write-through verified (extend `IndexedElementDirectBoxMethod`
+or `AtomicValues`).
 
 OTHER characterized roots (pick by fresh bucket if drift shifts the top):
-- S2 remainder: indexed-element atomic (mprof `bh.val[i].Load()`/`.StoreNoWB()`, CS1929 ×4 at mprof.cs
-  303/313/333/335 — array element of atomic UnsafePointer via a pointer; check why `exprIsIndexedValueElement`
-  isn't firing for UnsafePointer). Also `time` `timeTimer.modify/stop/reset` ×3 (CS1929, embedding promotion).
-- S3 remainder: `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (type.cs ×4 CS1061: `.Str`/`.TFlag`/
-  `.Kind_`/`.Size_`) — needs metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only
-  resolves source/same-package; `internal/abi` is a metadata-only DLL ref). Meatier generator extension.
+- S2/S3 EMBEDDING promotion (CS1929 ×4): `time` `timeTimer.modify/stop/reset` (×3, `timeTimer` embeds `timer`
+  → needs `ж<timer>`) + `type.cs:42` `Δrtype.Uncommon` (`Δrtype` embeds `abi.Type`). The `Δrtype` one is the
+  CROSS-package metadata case below; the `time` one is same-package embedding promotion.
+- S3 `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4: type.cs `.Str`/`.TFlag`/`.Kind_` 34/35/46/78
+  + the `.Uncommon` CS1929 + mbitmap.cs:1899 `ж<abi.Type>.Size_`) — needs metadata-based member resolution in
+  TypeGenerator (`GetStructDeclaration` only resolves source/same-package; `internal/abi` is a metadata-only DLL
+  ref). Meatier generator extension; ~6 errors.
 - S4 (CS0029 ~8: mgcstack ×2, mheap ×2, panic/proc/string/tracetime) pointer-reassign nil-safe re-alias
-  (a box-reassign was tried & REVERTED — NREs on nil).
+  (a box-reassign was tried & REVERTED — NREs on nil; needs a nil-safe re-alias model, not a naive box swap).
 - S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
   the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
   multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
@@ -373,10 +403,11 @@ First steps:
 1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
    src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
    internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
-   right). Confirm the CS1510 ×9 cluster (`(~…).field.method(…)` ref-receiver on a deref'd call).
-2. Pick the CS1510 receiver-materialization root (or re-pick by fresh bucket). Implement per the Workflow;
-   gate with a behavioral test + zero churn via check-no-regression.ps1 + ConversionStrategies.md + one
-   focused commit.
+   right). Confirm the mprof CS1929 ×4 cluster (`bh.val[i].Load()` cross-package atomic on an indexed element).
+2. Pick the mprof indexed-element-atomic root (or re-pick by fresh bucket). Study the existing
+   `exprIsIndexedValueElement` / `selectorCallsDirectBoxMethod` routing and the cross-package-atomic ж-only
+   handling at convSelectorExpr ~940. Implement per the Workflow; gate with a behavioral test + zero churn via
+   check-no-regression.ps1 + ConversionStrategies.md + one focused commit.
 
 Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
 refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
