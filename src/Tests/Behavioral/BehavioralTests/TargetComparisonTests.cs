@@ -122,6 +122,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
+    public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
+
+    [TestMethod]
+    public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]

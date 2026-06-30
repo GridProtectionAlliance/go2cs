@@ -109,6 +109,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
+    public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]
