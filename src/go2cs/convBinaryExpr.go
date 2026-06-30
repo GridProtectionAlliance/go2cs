@@ -92,6 +92,30 @@ func (v *Visitor) isBigIntegerBackedConstRef(expr ast.Expr) bool {
 	return false
 }
 
+// isLargeIntLiteralOperand reports whether expr is an integer literal whose value falls OUTSIDE the
+// C# int32 range. convBasicLit emits such a literal with a `(nint)`/unsigned cast (it no longer fits
+// a bare `int`), which makes it a non-`int` operand — so under a native-int bitwise operator
+// (`uintptrMask & 0x00ffffffffff`) it is `nuint & nint` → CS0019, like a computed-const operand. An
+// in-range literal (`x & 7`) is emitted bare and C#'s constant conversion fits it, so it is excluded.
+func (v *Visitor) isLargeIntLiteralOperand(expr ast.Expr) bool {
+	lit, ok := expr.(*ast.BasicLit)
+
+	if !ok || lit.Kind != token.INT {
+		return false
+	}
+
+	if tv, ok := v.info.Types[expr]; ok && tv.Value != nil {
+		if i, exact := constant.Int64Val(tv.Value); exact {
+			return i > math.MaxInt32 || i < math.MinInt32
+		}
+
+		// Value exceeds int64 (a large unsigned literal) — also outside int32.
+		return true
+	}
+
+	return false
+}
+
 // isWideShiftType reports whether a C# integer type does NOT promote to `int` when used as the
 // left operand of a shift — i.e. the shift is performed in that type's own width. For these,
 // shifting a bare `1` (an `int` literal) overflows before any result cast, so the operand must be
@@ -326,11 +350,11 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			// such an operand to the native result type. A bare literal is left alone (C#'s
 			// constant-conversion implicitly fits it), and a named untyped-const ref is handled above.
 			if binaryTypeName == "nuint" || binaryTypeName == "nint" || binaryTypeName == "uintptr" {
-				if v.isComputedConstOperand(binaryExpr.X) {
+				if v.isComputedConstOperand(binaryExpr.X) || v.isLargeIntLiteralOperand(binaryExpr.X) {
 					leftOperand = fmt.Sprintf("(%s)%s", binaryTypeName, leftOperand)
 				}
 
-				if v.isComputedConstOperand(binaryExpr.Y) {
+				if v.isComputedConstOperand(binaryExpr.Y) || v.isLargeIntLiteralOperand(binaryExpr.Y) {
 					rightOperand = fmt.Sprintf("(%s)%s", binaryTypeName, rightOperand)
 				}
 			}

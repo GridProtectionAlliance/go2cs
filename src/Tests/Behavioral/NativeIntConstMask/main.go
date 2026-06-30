@@ -15,8 +15,19 @@ const blockSize uintptr = 16 // ditto
 func low(i uintptr) uintptr   { return i & ((1 << shift) - 1) } // mask the low `shift` bits
 func align(i uintptr) uintptr { return i &^ (blockSize - 1) }   // round down to a blockSize boundary
 
+// A bitwise AND of a native-int (uintptr) with a LARGE literal mask whose value exceeds C# int32:
+// convBasicLit emits the literal with a cast (it no longer fits a bare `int`), so it must also be
+// cast to the native type or `nuint & nint` is CS0019. Mirrors runtime's `uintptrMask & 0x00ffffffffff`.
+func maskAddr(i uintptr) uintptr { return i & 0x00ffffffffff } // mirrors runtime's uintptrMask
+
 func main() {
 	fmt.Println(uint64(low(0b1011)))   // 0b1011 & 0b111 = 0b011 = 3
 	fmt.Println(uint64(align(0b1011))) // 11 &^ 15 = 0
 	fmt.Println(uint64(align(0b11011))) // 27 &^ 15 = 16
+	// Build a value with a high bit set without using a large literal in a non-bitwise context
+	// (those are separate cases); the large mask literal is exercised inside maskAddr's `&`.
+	var addr uintptr = 1
+	addr <<= 47
+	addr |= 0xABCD
+	fmt.Println(uint64(maskAddr(addr))) // high bit beyond 40 is masked off, low bits kept
 }
