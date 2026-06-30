@@ -185,6 +185,87 @@ func (v *Visitor) exprFieldRootsAtAddressedGlobal(expr ast.Expr) bool {
 	return ok && v.isAddressedGlobal(ident)
 }
 
+// exprIsValueFieldOfPointerRvalue reports whether expr is a VALUE (non-pointer) struct field whose
+// selector chain, after peeling value-field selectors, roots at a pointer-to-struct RVALUE expression
+// that already yields a box `ж<T>` directly — a pointer-returning CALL (`getg()`, `q.tail.ptr()`,
+// `Δp.chunkOf(ci)`, `getg().m.p.ptr()`) or a pointer ELEMENT index (`batch[i]`). The Go auto-deref
+// renders the field access as `(~root).field`, an rvalue, so a `[GoRecv] ref` (pointer-receiver)
+// method called on it cannot bind (CS1510). Unlike a deref-aliased ident param/receiver (which has a
+// `ref`), the root call/index value IS the box, so the receiver is materialized through the
+// &-machinery as `root.of(T.Ꮡfield)` — never a `Ꮡ(value)` copy (which would lose the write).
+//
+// This is the rvalue COMPLEMENT of exprIsValueFieldOfPointer: that one roots at a pointer FIELD
+// selector or pointer LOCAL ident; this one roots at a NON-ident, NON-selector pointer expression (a
+// call/index). The two domains are disjoint, so the routing branches never overlap.
+func (v *Visitor) exprIsValueFieldOfPointerRvalue(expr ast.Expr) bool {
+	sel, ok := expr.(*ast.SelectorExpr)
+
+	if !ok {
+		return false
+	}
+
+	if selection, ok := v.info.Selections[sel]; !ok || selection.Kind() != types.FieldVal {
+		return false
+	}
+
+	// The field itself must be a VALUE — a pointer field is already a box.
+	if _, isPtr := v.info.TypeOf(sel).(*types.Pointer); isPtr {
+		return false
+	}
+
+	base := sel.X
+
+	for {
+		switch b := base.(type) {
+		case *ast.SelectorExpr:
+			// A pointer field/chain mid-way is exprIsValueFieldOfPointer's territory, not this.
+			if _, ok := v.getType(b, false).(*types.Pointer); ok {
+				return false
+			}
+
+			// Keep peeling only through VALUE-field selectors.
+			if selection, ok := v.info.Selections[b]; !ok || selection.Kind() != types.FieldVal {
+				return false
+			}
+
+			base = b.X
+		case *ast.Ident:
+			// An ident root (pointer local/param/receiver) is handled by the sibling predicates — not
+			// this rvalue case.
+			return false
+		default:
+			// A type CONVERSION (`(*T)(p)`) renders as a C# CAST — a low-precedence form on which a
+			// trailing `.of(…)` mis-binds to the inner operand. Exclude it so a pointer reinterpret
+			// (`(*structTypeUncommon)(unsafe.Pointer(t))`) keeps its existing `Ꮡ(…)` form (S1 territory).
+			if call, ok := b.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {
+				return false
+			}
+
+			// A genuine CALL / INDEX / other rvalue: route only when it is a pointer-to-struct box (the
+			// value it yields IS a `ж<T>`, so `root.of(T.Ꮡfield)` field-refs the real storage).
+			ptrType, ok := v.getType(b, false).(*types.Pointer)
+
+			if !ok {
+				return false
+			}
+
+			_, ok = ptrType.Elem().Underlying().(*types.Struct)
+
+			return ok
+		}
+	}
+}
+
+// callExprIsTypeConversion reports whether a CallExpr is a Go type CONVERSION (`T(x)`, `(*T)(p)`) —
+// its Fun denotes a TYPE — rather than a genuine function/method call. A conversion renders as a C#
+// cast (`(T)x`), a low-precedence form on which a trailing `.of(…)` would mis-bind to the inner
+// operand; a genuine call renders as a postfix `f(…)` that `.of(…)` chains off cleanly. The
+// pointer-rvalue field-receiver routing excludes conversions for this reason.
+func (v *Visitor) callExprIsTypeConversion(callExpr *ast.CallExpr) bool {
+	tv, ok := v.info.Types[callExpr.Fun]
+	return ok && tv.IsType()
+}
+
 // exprIsValueFieldOfPointer reports whether expr is a VALUE (non-pointer) struct field whose base is
 // a pointer-to-struct *field selector* (`o.h.wait`, `gp.m.mLockProfile`) — a pointer reached by
 // dereferencing another field. Such a pointer deref is an rvalue (`(~o.h)`), so the value field on it
@@ -637,6 +718,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// would silently lose the atomic write. (A pointer-LOCAL field is handled by the
 	// exprIsPointerLocalField branch above; this covers a pointer field/chain or pointer param.)
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsValueFieldOfPointer(selectorExpr.X) {
+		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+	}
+
+	// A ж-only / pointer-receiver method called on a VALUE field rooted at a pointer-to-struct RVALUE —
+	// `(~getg()).schedlink.set(…)`, `(~batch[i]).schedlink.set(…)`, `(~Δp.chunkOf(ci)).scavenged.setRange(…)`,
+	// `(~getg().m.p.ptr()).wbBuf.get2()` — where the base is a pointer-returning CALL or a pointer ELEMENT
+	// index (an rvalue, not an addressable ident/field). The `~`-deref field access is an rvalue, so the
+	// [GoRecv] ref overload cannot bind (CS1510). The root call/index value IS a `ж<T>` box, so route the
+	// receiver through the &-machinery, which renders the real field storage `root.of(T.Ꮡfield)` — never a
+	// `Ꮡ(value)` copy (which would silently lose the write). The complement of the param/receiver/field
+	// roots handled above (exprIsValueFieldOfPointerRvalue is disjoint from those predicates).
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) && v.exprIsValueFieldOfPointerRvalue(selectorExpr.X) {
 		fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}

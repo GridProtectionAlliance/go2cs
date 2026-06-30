@@ -227,19 +227,29 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		}
 
 		// Address of a field of a pointer *variable* that is not the receiver: `&e.v` where `e` is
-		// a `*entry` identifier, OR `&o.h.wait` where `o.h` is a pointer-typed FIELD. The base is
-		// already a box `ж<T>`, so field-ref through it directly — `e.of(Type.ᏑField)` — without the
-		// `Ꮡ(value)` copy form (which boxes a COPY, so writes are lost — critical for an atomic field
-		// reached through a pointer chain, where the lost write silently corrupts behavior). Handled
-		// for a bare ident or a field selector; a more complex pointer expression (a deref of an
-		// `unsafe.Pointer` cast, an index, …) is neither, so it keeps the old form. The receiver case
-		// is handled above and a value-struct field falls through to the struct branch below.
+		// a `*entry` identifier, OR `&o.h.wait` where `o.h` is a pointer-typed FIELD, OR a pointer
+		// RVALUE — a pointer-returning CALL (`&getg().schedlink`) or a pointer ELEMENT index
+		// (`&batch[i].schedlink`). The base is already a box `ж<T>`, so field-ref through it directly —
+		// `e.of(Type.ᏑField)` / `getg().of(Type.ᏑField)` — without the `Ꮡ(value)` copy form (which boxes
+		// a COPY, so writes are lost — critical for an atomic field reached through a pointer chain,
+		// where the lost write silently corrupts behavior). A more complex pointer expression (a deref
+		// of an `unsafe.Pointer` cast, etc.) is none of these, so it keeps the old form. The receiver
+		// case is handled above and a value-struct field falls through to the struct branch below.
 		if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
 			base := selectorExpr.X
 			_, baseIsIdent := base.(*ast.Ident)
 			_, baseIsSelector := base.(*ast.SelectorExpr)
+			_, baseIsIndex := base.(*ast.IndexExpr)
 
-			if baseIsIdent || baseIsSelector {
+			// A genuine pointer-returning CALL (`getg()`) is a postfix expression `.of(…)` chains off
+			// cleanly; a type-CONVERSION CallExpr (`(*T)(p)`) renders as a C# cast (low precedence) on
+			// which `.of(…)` would mis-bind, so it keeps the `Ꮡ(value)` form (S1 pointer-reinterpret).
+			baseIsCall := false
+			if call, ok := base.(*ast.CallExpr); ok {
+				baseIsCall = !v.callExprIsTypeConversion(call)
+			}
+
+			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex {
 				if ptrType, ok := v.getType(base, false).(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
