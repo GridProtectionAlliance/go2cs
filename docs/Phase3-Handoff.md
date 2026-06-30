@@ -7,7 +7,7 @@
 
 ## Where things stand (2026-06-30)
 
-- **`runtime` is the foundation and the current frontier — now at ~187 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~181 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
 - **Manual conversions live in `src/core` and must be restored over the auto output for measurement.**
@@ -29,7 +29,8 @@
   tail of isolated converter bugs (escape/box-naming, shadow-renames, collision-renames, narrow/native
   numeric casts, labeled loops, type-switch dedup, range-var reassignment, blank discards, constant
   overflow, shift-count casts, bitwise-operand casts, named-numeric `++`/`--`, named-numeric↔basic/named
-  conversion through the underlying…). The `git log` + the `go2cs-phase3-progress`
+  conversion through the underlying, cross-ASSEMBLY named-numeric implicit-conversion operators through
+  the underlying…). The `git log` + the `go2cs-phase3-progress`
   memory have the full per-defect history. **What remains in `runtime` is dominated by a handful of
   ARCHITECTURAL features** (see *Current frontier*), not one-line emit fixes.
 - The `Δslice` "2 errors" blocker from older handoffs is **solved** and was a measurement artifact —
@@ -145,8 +146,27 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 (`runtime` = ~262):
+as items land. As of 2026-06-30 (`runtime` = ~181; this session's fresh reconvert measured 199 raw,
+the cross-assembly named-numeric generator fix below cleared 6 → 181): CS0030 45, CS1503 28, CS1929 16,
+CS1061 16, CS0021 12, CS1510 9, CS0029 8, CS0121 6, CS0103 6:
 
+- [x] **Cross-assembly named-numeric implicit-conversion operators** *(landed 2026-06-30, `93bbf6ce5`).*
+  A `GoImplicitConv` numeric operator whose body constructs a named-numeric declared in ANOTHER assembly
+  was doubly broken: `(NameOff)src.val` (`ulong`→foreign `int32`-named) has no cross-assembly route C#
+  selects (CS0030 — the same cast to a LOCAL named type compiles), and where the foreign type would host
+  the operator (`partial struct NameOff`, reached via a local alias like runtime's `global using nameOff =
+  abi.NameOff` so the cross-package dot is hidden and it records `Inverted`) it declared a phantom empty
+  local type (CS1729). **Fix (`ImplicitConvGenerator` + template, contained):** when the `new`-constructed
+  side (LH type: source when `Inverted`, else target) is foreign, construct through its underlying basic —
+  `new global::go.@internal.abi_package.NameOff((int)src.val)` — and relocate the host into the LOCAL type
+  when the source side is foreign. Gated to the foreign-constructed case; same-assembly operators emit
+  byte-identically (muintptr↔Δhex unchanged). Cleared 3×CS0030 + 3×CS1729 in runtime (`nameOff`/`typeOff`/
+  `textOff` ↔ `Δhex`); 199→181. **No behavioral test** — the trigger is inherently cross-assembly and the
+  single-assembly behavioral harness cannot host a foreign named numeric (`internal/*` types are
+  un-importable from a test module; baseline stubs expose none; a two-module test hits an unrelated
+  converter namespace-mapping gap — `go.<pkgname>_package` vs the consumer's `go2cs.<seg>_package`). Guard
+  is the runtime build; full suite stayed green (186/186). See ConversionStrategies.md "Generated
+  conversion operators between named numerics of different assemblies".
 - [~] **S1 — `unsafe.Pointer` / pointer-conversion modeling** *(re-characterized 2026-06-30; one contained
   fix landed, the bulk is multi-session architectural).* **What landed:** `ef279eab3` — the
   `(*Base)(p)` identical-underlying pointer reinterpret now derefs a genuine box arg before the value
@@ -277,48 +297,54 @@ as items land. As of 2026-06-30 (`runtime` = ~262):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~187. Last session landed named-numeric ↔
-basic/named conversion through the underlying (CONVERTER, convCallExpr.go, −10): both the "FROM a named
-numeric" direction (`uint64(NameOff)` → `((uint64)(int32)off)`, `int(idx)` → `((nint)(nuint)i)`) AND the
-"TO a named numeric" branch unwrapping a NAMED arg (`hex(NameOff)` → `((Δhex)(uint64)(int32)off)`). The
-KEY gotcha was Go type ALIASES: runtime's `nameOff`/`typeOff`/`textOff` are `type X = abi.NameOff` aliases,
-so `info.TypeOf(arg)` returns `*types.Alias` not `*types.Named` — must `types.Unalias` before the assertion.
+This session: re-bucket, then tackle ONE root. Runtime is at ~181. Last session landed the cross-ASSEMBLY
+named-numeric implicit-conversion-operator fix (GENERATOR, ImplicitConvGenerator + ImplicitConvTemplate,
+`93bbf6ce5`, cleared 3×CS0030 + 3×CS1729): a `GoImplicitConv` numeric operator that constructs a
+named-numeric declared in ANOTHER assembly (runtime's `nameOff`/`typeOff`/`textOff` ↔ `Δhex`) now routes
+`new ForeignNamed((basic)src.val)` through the foreign type's underlying basic and relocates the host into
+the LOCAL type. NOTE: that bug was inherently cross-assembly, so no behavioral test could host it (the
+single-assembly harness can't import a foreign named numeric; a two-module test hits an unrelated converter
+namespace-mapping gap) — the runtime build was the guard. Most roots below ARE behavioral-testable.
 
-The recommended NEXT root is the **`Δhex` generator sub-root (3 CS0030)** — the GENERATOR analog of the
-fix just landed, now in `ImplicitConvGenerator`. The generated inverse conversion
-`go.runtime_package.{NameOff,TextOff,TypeOff}-go.runtime_package.Δhex-inv.g.cs` emits
-`public static implicit operator NameOff(Δhex src) => new NameOff((nameOff)src.val);` — `src.val` is the
-Δhex underlying (`ulong`), and `nameOff` aliases `abi.NameOff` (int32), so `(nameOff)src.val` = `(int32-
-named)(ulong)` is CS0030 (no ulong→NameOff route). It must go through the underlying: `(nameOff)(int32)
-src.val` — the same through-underlying routing, in the GENERATOR's emitted operator body. CONFIRM with a
-fresh bucket; this is a CONTAINED ImplicitConvGenerator fix (src/gen/go2cs-gen/), the cross-package-named-
-numeric implicit-conversion-operator case. (The 4th `Δhex` CS0030, mgc.cs `lfstack → Δhex`, is S1/unsafe-
-family — skip it.)
+Recommended NEXT root (highest impact, but DELICATE — fresh context is ideal): **S2 transitive direct-ж
+PROMOTION (CS1929 ~6–7).** `scavengeIndex.free` ×5 (mpagealloc.cs ~899–916), `limiterEvent.start`
+(mgcmark.cs:604), `timers.take` (proc). The error shape: `scavengeIndex does not contain 'free'; best
+overload free(ж<scavengeIndex>, …) requires receiver ж<scavengeIndex>`. The ENCLOSING method
+(`free(this ref pageAlloc Δp)`) is `[GoRecv] ref` so it has NO box `Ꮡp`, yet its body calls a DIRECT-ж
+method on a value field-chain of its own receiver (`Δp.scav.index.free(…)`) — which needs a real nested box
+to bind. The enclosing method must be PROMOTED to direct-ж (so `Ꮡp` exists), mirroring last-area S2 fix
+`7f0075d4f` but one level up. This is a SIGNATURE-CHANGING capture-mode change (captureModeOperations.go) —
+the repeatedly-flagged delicate, high-blast-radius area; reconvert + FULL behavioral suite after every
+step, and gate with a behavioral test (a `[GoRecv] ref` method calling a direct-ж method on its receiver's
+value field-chain, write-through verified). If it shows churn/regression you can't contain, REVERT and take
+the contained alternate instead.
+
+CONTAINED alternate (safer clean win): **Anonymous-map-param lifting (type.cs `typesEqual` `seen[tp,ꟷ]`,
+~4: 2 CS8130 + 2 CS0021 + 1 CS1503).** A `map[_typePair]struct{}` PARAMETER is lifted to a `[GoType("dyn")]`
+STRUCT instead of a map named type, so its comma-ok index / two-arg indexer don't exist. Param-type lifting
+(visitFuncDecl/convFuncType) only handles struct/interface (`extractStructType`/`extractInterfaceType`) —
+no map case; `visitMapType` is a stub (a known ToDo). Lift an anonymous map param to `[GoType("map[K]V")]`.
+Behavioral-testable same-package (a func taking an anonymous `map[K]struct{}` param, comma-ok lookup).
 
 First steps:
-1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh restores the core manual files). Read the
-   generated `*-Δhex-inv.g.cs` operator bodies and confirm the `(nameOff)(ulong)` → needs-`(int32)` shape.
-2. Find where ImplicitConvGenerator emits the `new T((underlying)src.val)` operator body (the numeric-
-   named inverse-conversion path) and route the inner cast through the SOURCE named type's underlying when
-   the two named types have different underlying basics (mirror of last session's converter fix).
-3. Implement per the Workflow; gate with a behavioral test (a named-numeric ↔ named-numeric implicit
-   conversion with DIFFERENT underlyings, exercising the generated operator) + zero churn via
-   check-no-regression.ps1 + ConversionStrategies.md + one focused commit.
+1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
+   src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
+   internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
+   right). Confirm the CS1929 `scavengeIndex.free` cluster and read the enclosing method's `[GoRecv]` shape.
+2. For S2: study `7f0075d4f` (convUnaryExpr `&`-machinery + convSelectorExpr `exprIsValueFieldOfDerefdPointerRoot`)
+   and captureModeOperations.go; the promotion makes the enclosing `[GoRecv] ref` method direct-ж so `Ꮡp`
+   exists for the nested-box routing. For the alternate: implement `visitMapType` + map param lifting.
+3. Implement per the Workflow; gate with a behavioral test + zero churn via check-no-regression.ps1 +
+   ConversionStrategies.md + one focused commit.
 
-ALTERNATE roots if the above stalls (all characterized):
-- Anonymous-map-param lifting (type.cs `seen[tp,ꟷ]`, ~4: 2 CS8130 + 2 CS0021 + 1 CS1503). `typesEqual_seen`
-  is a `map[_typePair]struct{}` PARAMETER lifted to a `[GoType("dyn")]` STRUCT instead of a map named type,
-  so its comma-ok index / two-arg indexer don't exist. Param-type lifting (visitFuncDecl/convFuncType) only
-  handles struct/interface (`extractStructType`/`extractInterfaceType`) — no map case; `visitMapType` is a
-  stub. Lift an anonymous map param to `[GoType("map[K]V")]`.
+OTHER characterized roots (pick by fresh bucket):
 - S3 remainder: `Δrtype` embeds CROSS-PACKAGE `abi.Type` (~4 CS1061) — needs metadata-based member resolution
   in TypeGenerator (`GetStructDeclaration` only resolves source/same-package); field-on-box deref-missing (~7,
   several S1-tied).
-- S2 remainder (CS1929 ~16 + CS1510 ~9): transitive direct-ж PROMOTION for a `[GoRecv]` method calling a
-  direct-ж method on its receiver's field-chain (signature-changing capture-mode work, do FRESH);
-  `~`-deref-rooted CS1510; indexed-element atomic (mprof `bh.val[i]`).
+- S2 remainder: `~`-deref-rooted CS1510 (~9, `(~getg()).schedlink.set(…)` — receiver materialization);
+  indexed-element atomic (mprof `bh.val[i].Load()`, CS1929 ×4).
 - S4 (CS0029 ~8) pointer-reassign nil-safe re-alias (a box-reassign was tried & REVERTED — NREs on nil).
-- S1 CS0030 bulk (~44): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
+- S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
   the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
   multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
 
