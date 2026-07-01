@@ -391,6 +391,66 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		ast.Inspect(funcDecl.Body, collectFunctionLevelDecls)
 	}
 
+	// Second pass: a function-body-level `for i := …` (or range) loop var that ESCAPES to the heap is
+	// emitted as a `ref var i = ref heap<…>(out var Ꮡi)` declaration at the function-body scope — so in
+	// C# it is function-scoped, not loop-scoped. Other same-named for-loop vars in the function then
+	// collide with it (CS0136) — runtime `runqputslow` has three `for i := …` loops, the last of which
+	// escapes (its `batch[i].schedlink.set(…)` takes the element's address). Collect that escaped loop
+	// var as function-level so the shadow-rename pass renames the (non-escaping, loop-scoped) siblings —
+	// the escaped one, being the recorded function-level decl, keeps its name. Gated to (a) an ESCAPING
+	// var (a lone non-escaping loop var is untouched — no churn), (b) a FUNCTION-BODY-level loop (a
+	// nested loop's box is hoisted only to its own block, not the function body), and (c) a name WITHOUT
+	// an existing function-level decl (from the first pass) so a real function-level variable is never
+	// masked.
+	if funcDecl.Body != nil {
+		ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+			if _, ok := node.(*ast.FuncLit); ok {
+				return false
+			}
+
+			var loopVars []*ast.Ident
+
+			switch n := node.(type) {
+			case *ast.ForStmt:
+				if isFunctionLevelNode(n, funcDecl.Body) {
+					if assign, ok := n.Init.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
+						for _, lhs := range assign.Lhs {
+							if ident, ok := lhs.(*ast.Ident); ok {
+								loopVars = append(loopVars, ident)
+							}
+						}
+					}
+				}
+			case *ast.RangeStmt:
+				if isFunctionLevelNode(n, funcDecl.Body) && n.Tok == token.DEFINE {
+					if key, ok := n.Key.(*ast.Ident); ok {
+						loopVars = append(loopVars, key)
+					}
+					if value, ok := n.Value.(*ast.Ident); ok {
+						loopVars = append(loopVars, value)
+					}
+				}
+			}
+
+			for _, ident := range loopVars {
+				if isDiscardedVar(ident.Name) {
+					continue
+				}
+
+				if _, exists := functionLevelDecls[ident.Name]; exists {
+					continue
+				}
+
+				if varObj, ok := v.info.Defs[ident].(*types.Var); ok && v.identEscapesHeap[varObj] {
+					functionLevelDecls[ident.Name] = varObj
+					declaredPos[varObj] = ident.Pos()
+				}
+			}
+
+			return true
+		})
+	}
+
 	// Helper functions
 	isDeclaredInCurrentScope := func(varName string) bool {
 		scope := v.scopeStack[len(v.scopeStack)-1]
@@ -712,19 +772,47 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			} else {
 				// Regular assignment '='
 				for _, lhs := range node.Lhs {
-					ident := getIdentifier(lhs)
-
-					if ident == nil {
-						continue
+					// Reassign the ROOT ident (`batch`/`m`/`p`). getIdentifier returns nil for a
+					// PAREN-rooted target — `(*p)[i]`, `(arr)[i]` (Go parenthesizes because `*p[i]` parses
+					// as `*(p[i])`). There is no simple root to reassign there, but the index
+					// sub-expressions below STILL need their shadow-renamed idents rewritten, so do NOT bail
+					// on a nil root — only skip the reassign.
+					if ident := getIdentifier(lhs); ident != nil && !isDiscardedVar(ident.Name) {
+						reassignVar(ident.Name, ident)
 					}
 
-					varName := ident.Name
+					// Rename shadowed identifiers used inside the target's INDEX/KEY sub-expressions —
+					// `batch[i] = …`, `m[ns] = …`, `p.f[k] = …`. getIdentifier/reassignVar only handle the
+					// ROOT ident (batch/m/p); an inner index/key var was never visited, so a shadow-renamed
+					// one kept its raw name and resolved to the wrong (enclosing) variable — a silent wrong
+					// value, or CS0136/CS0165 once the index var itself is renamed (e.g. a renamed sibling
+					// loop var `iΔ1` whose `batch[i]` LHS index stayed `i`). Descend the base chain to the
+					// root, visiting every index expression so its idents get the rename.
+					for cur := lhs; ; {
+						switch e := cur.(type) {
+						case *ast.IndexExpr:
+							visitNode(e.Index)
+							cur = e.X
+							continue
+						case *ast.IndexListExpr:
+							for _, idx := range e.Indices {
+								visitNode(idx)
+							}
+							cur = e.X
+							continue
+						case *ast.SelectorExpr:
+							cur = e.X
+							continue
+						case *ast.StarExpr:
+							cur = e.X
+							continue
+						case *ast.ParenExpr:
+							cur = e.X
+							continue
+						}
 
-					if isDiscardedVar(varName) {
-						continue
+						break
 					}
-
-					reassignVar(varName, ident)
 				}
 			}
 

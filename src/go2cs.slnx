@@ -99,6 +99,7 @@
     <Project Path="Tests/Behavioral/EmbeddedValuePointerMethod/EmbeddedValuePointerMethod.csproj" />
     <Project Path="Tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
+    <Project Path="Tests/Behavioral/EscapedLoopVarSiblingIndex/EscapedLoopVarSiblingIndex.csproj" />
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />

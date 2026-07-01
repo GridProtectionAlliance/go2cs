@@ -119,10 +119,10 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
-    public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
+    public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]
-    public void CheckConstraints() => CheckTarget("Constraints");
+    public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
@@ -171,6 +171,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
+
+    [TestMethod]
+    public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
 
     [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");

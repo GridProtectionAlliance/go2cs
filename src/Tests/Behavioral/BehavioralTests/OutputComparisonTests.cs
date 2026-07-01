@@ -157,6 +157,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckErrorfFormatting() => CheckTarget("ErrorfFormatting");
 
     [TestMethod]
+    public void CheckEscapedLoopVarSiblingIndex() => CheckTarget("EscapedLoopVarSiblingIndex");
+
+    [TestMethod]
     public void CheckExprSwitch() => CheckTarget("ExprSwitch");
 
     [TestMethod]
