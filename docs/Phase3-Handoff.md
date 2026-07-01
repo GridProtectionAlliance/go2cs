@@ -7,10 +7,29 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~158 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~157 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): pointer-receiver method promoted through a VALUE embed routes to the embedded
+- **2026-06-30 (latest): block `const` that shadows an enclosing param/var is now shadow-renamed
+  (`a09f7826b`; CS0136 −1, runtime 158 → 157).** C# forbids block shadowing (CS0136); the shadow-rename
+  pass renamed shadowing *variables* but IGNORED consts (a const's object is `*types.Const`, not the
+  `*types.Var` the scope stack tracks), so runtime lock_sema `notetsleep_internal`'s `const ns = 10e6`
+  collided with its param `ns`. Fix (converter-only, `variableAnalysisOperations.go`): a `constShadowNames`
+  map records a shadowing block const (detected by the same by-name check the var path uses) and renames
+  its declaration + every use to `nsΔ1`, leaving the enclosing `ns`; non-shadowing consts are unchanged.
+  Test `ConstShadowsParam` (10/14 vs Go); full suite green (195), goldens byte-identical, adversarially
+  verified across iota/multi-name/typed/nested/counter-collision/const-shadows-const vectors. **The other 3
+  CS0136 in proc are DISTINCT roots** (proc `Δtrace` = collision-rename `trace`→`Δtrace` shadowing;
+  proc `i`×2 = a heap-ESCAPED loop var hoisted to func scope `ref var i = ref heap(…)` colliding with two
+  sibling `for(var i…)` loops that reuse the name — an emission-hoisting/scope interaction). **⚠ NEW
+  PRE-EXISTING BUG discovered by the verifier (silent data corruption, NOT a compile error): a shadowed
+  name used as an LHS index / map-key / selector-base in a plain `=` assignment is NOT renamed** — the
+  `=` AssignStmt case (`variableAnalysisOperations.go` ~714–734) only processes `getIdentifier(lhs)` (the
+  root, e.g. `m` in `m[ns]`) and `visitNode`s the RHS, never descending into LHS sub-expressions, so
+  `m[ns] = ns*100` (inner shadow `ns`) emits `m[ns] = nsΔ1*100` — LHS key stays the param, C# returns the
+  wrong value with NO compile error. Reproduces with a VAR shadow too (shared with the var path); needs the
+  `=` case to walk LHS index/key/selector sub-exprs. Queued as S6b below.
+- **2026-06-30: pointer-receiver method promoted through a VALUE embed routes to the embedded
   box (`0abc66e2d`; CS1929 −3, runtime 159 → 158).** `timeTimer` embeds `timer` BY VALUE; a promoted
   `t.modify(…)`/`Ꮡt.stop()`/`Ꮡt.reset(…)` on a `*timeTimer` emitted the whole `ж<timeTimer>` box, but
   the promoted method's ж/[GoRecv]-ref overload binds `ж<timer>` (CS1929) — the TypeGenerator emits NO
@@ -210,9 +229,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~158; the timeTimer value-embed fix above cleared
-3 CS1929, 159 → 158): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7, CS1929 6,
-CS0121 6, CS0841 5, CS0266 5, CS0136 4:
+as items land. As of 2026-06-30 latest (`runtime` = ~157; the const-shadow fix above cleared 1 CS0136,
+158 → 157): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7, CS1929 6,
+CS0121 6, CS0841 5, CS0266 5, CS0136 3:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -395,25 +414,18 @@ CS0121 6, CS0841 5, CS0266 5, CS0136 4:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~158. Last session routed a pointer-receiver
-method PROMOTED through a VALUE embed to the embedded box (CONVERTER-only, `0abc66e2d`; CS1929 −3, runtime
-159 → 158). `timeTimer` embeds `timer` BY VALUE; a promoted `t.modify(…)`/`Ꮡt.stop()`/`Ꮡt.reset(…)` on a
-`*timeTimer` emitted the whole `ж<timeTimer>` box, but the promoted method's ж/[GoRecv]-ref overload binds
-`ж<timer>` (CS1929) — the TypeGenerator emits NO forwarder for this shape (a value-copy forwarder would lose
-the write). Go auto-takes `&t.timer`, so the converter routes through the embedded field's box exactly as the
-explicit `t.timer.modify(…)` already renders: `t.of(timeTimer.Ꮡtimer).modify(…)` (pointer local) /
-`Ꮡt.of(timeTimer.Ꮡtimer).stop()` (deref'd param), via convUnaryExpr's `&receiver.field` &-machinery.
-Detection: `Selection.Index() == [embeddedField, method]` (single embed hop) in convSelectorExpr. GATED to a
-VALUE embed — a POINTER embed already yields the box as its field value and is left to the generated forwarder;
-taking its address would double-box to `ж<ж<T>>` (this gate fixed an over-boxing regression in the trace*
-writers, `traceWriter`→`traceBufPtr`, caught before commit). Write-through is genuine (a value-embedded field
-is a SHARED heap box `ж<inner>`, so `.of(…)` aliases the real storage — verified 108/108/108/7/0 vs Go). Test
-`EmbeddedValuePointerMethod`; full suite green (194), goldens byte-identical, adversarially verified. Known
-limitation (NOT a regression, cannot occur in converted code): embedding a hand-written baseline type whose
-pointer methods lack a `[GoRecv]` ж-overload would not bind. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .`
-before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a
-committed converter change false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1
---update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~157. Last session shadow-renamed a block
+`const` that shadows an enclosing param/var (CONVERTER-only, `a09f7826b`; CS0136 −1, runtime 158 → 157). C#
+forbids block shadowing (CS0136); the shadow-rename pass renamed shadowing *variables* but IGNORED consts (a
+const's `info.Defs` object is `*types.Const`, not the `*types.Var` the scope stack tracks), so runtime
+lock_sema `notetsleep_internal`'s `const ns = 10e6` collided with its param `ns`. Fix
+(`variableAnalysisOperations.go`): a `constShadowNames` map records a shadowing block const (detected by the
+same by-name check the var path uses — `isDeclaredInOuterScopes`/`isForwardDeclaredInOuterBlocks`) and renames
+its declaration + every use to `nsΔ1`, leaving the enclosing `ns`; non-shadowing consts are unchanged. Test
+`ConstShadowsParam` (10/14 vs Go); full suite green (195), goldens byte-identical, adversarially verified.
+FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
+rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
+any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -427,14 +439,24 @@ NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
 named-over-array entangled before committing):
-- **CS0136 local-shadowing (×4, lock_sema.cs:242 `ns`, proc.cs:5687 `Δtrace`, proc.cs:6669/6678 `i`)** — an
-  inner-scope local collides with an enclosing-scope C# local of the same name ("cannot be declared in this scope
-  because that name is used in an enclosing local scope"). C# has NO block-shadowing (Go does), so the converter's
-  shadow-rename pass (`variableAnalysisOperations.go`) must rename the inner declaration. These 4 are shadow-rename
-  MISSES. VERIFY each is a genuine miss (the inner+outer really are distinct Go locals in nested scopes) and not
-  analysis-order noise before committing — reproduce the Go scoping, check the rename pass didn't fire. Likely
-  contained converter-only. NOTE the `Δtrace` one already carries a collision marker (`Δ`), so it may be a
-  rename-INTERACTION (collision-rename vs shadow-rename) — inspect that one carefully.
+- **S6b (silent-correctness, NOT a compile error): LHS-index/map-key/selector-base shadow-rename gap.** Found by
+  the const-shadow verifier: a shadowed name used on the LHS of a plain `=` assignment as an index / map key /
+  selector base is NOT renamed. `variableAnalysisOperations.go`'s `=` AssignStmt case (~714–734) only processes
+  `getIdentifier(lhs)` (the ROOT — `m` in `m[ns]`) and `visitNode`s the RHS, so a shadow-var/const used inside the
+  LHS index (`m[ns] = ns*100`, inner shadow `ns`) emits `m[ns] = nsΔ1*100` — LHS key stays the outer `ns`, C#
+  silently returns the WRONG value with NO compile error. Repros with a VAR shadow too (shared root). Fix: make the
+  `=` case walk the LHS index/key/selector sub-expressions (visit them like the RHS) so their shadow-renamed idents
+  are rewritten. Contained converter-only; add a behavioral test that WOULD DIVERGE (Go vs C# output) without the
+  fix. **Highest-value pick — it is silent data corruption in already-"compiling" code, not just a missing green.**
+- **CS0136 remainder (×3 in proc, TWO distinct roots — the const case is DONE):**
+  (a) proc.cs `i`×2 (6669/6678) — a heap-ESCAPED loop var is hoisted to func scope `ref var i = ref heap<uint32>(…)`
+  (the 3rd `for i` loop in `runqputslow` escapes because `batch[i].schedlink.set(…)` takes the element's address),
+  which then encloses the two sibling `for(var i…)` loops that reuse the name → CS0136. An emission-hoisting/scope
+  interaction: the shadow pass treats all for-loop vars as inner scopes (correct for non-escaping), but an escaped
+  one becomes func-scoped in C#. Fix idea: when a for-loop `:=` var escapes (identEscapesHeap), treat it as
+  function-level in the shadow pass so sibling same-named loop vars get renamed. Verify escape info is available at
+  analysis time. (b) proc.cs `Δtrace` (5687) — collision-rename (`trace`→`Δtrace`) that ALSO shadows an outer
+  `trace`(→`Δtrace`); a rename-INTERACTION (both get the same collision name). Inspect carefully.
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
   `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
