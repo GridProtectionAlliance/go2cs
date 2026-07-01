@@ -287,6 +287,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
 
     [TestMethod]
+    public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
+
+    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]

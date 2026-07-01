@@ -285,6 +285,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
 
     [TestMethod]
+    public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
+
+    [TestMethod]
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]

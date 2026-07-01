@@ -95,12 +95,19 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	targetFile := v.targetFile.String()
 
-	// A file that references unsafe.Pointer (`@unsafe.Pointer`) but did not import `unsafe` under a
-	// usable name (inferred type, or a blank `_ "unsafe"` import) still needs the `@unsafe` alias to
-	// resolve it (CS0246). Supply it here; the alias is idempotent-safe because unsafeAliasImported
-	// guards against duplicating a named import's own `using @unsafe = unsafe_package;`.
-	if v.referencesUnsafePointer && !v.unsafeAliasImported {
-		v.addRequiredUsing("@unsafe = unsafe_package")
+	// Supply the file-local `using <alias> = <namespace>;` for any foreign package whose type this file
+	// referenced in short-alias form (`pkg.Type`, `@unsafe.Pointer`) but did not import under its
+	// canonical name — an inferred type, or a blank/dot/renamed import (CS0246). Skipped for a package
+	// the file already imports canonically, so a normal import emits its alias exactly once (no
+	// duplicate, no churn); a non-canonical alias (`using t = time_package;`) coexists with the added
+	// canonical one (`using time = time_package;`) without conflict.
+	for _, importPath := range v.referencedForeignPackages.Keys() {
+		if v.canonicalAliasImported.Contains(importPath) {
+			continue
+		}
+
+		alias, namespace := packageUsingAlias(importPath)
+		v.addRequiredUsing(fmt.Sprintf("%s = %s", alias, namespace))
 	}
 
 	// Ensure using ortder is consistent

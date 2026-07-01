@@ -52,15 +52,14 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.importQueue.Add(v.currentImportPath)
 	v.loadImportedTypeAliases(v.currentImportPath)
 
-	// Record whether this import emits the `@unsafe` alias that `@unsafe.Pointer` type references
-	// need. A default (unaliased) import of `unsafe` — or one explicitly aliased back to `unsafe` —
-	// emits `using @unsafe = unsafe_package;`; a blank import (`_`) or a different alias does not, so
-	// visitFile must supply the alias when the file references unsafe.Pointer (see getTypeName).
-	if v.currentImportPath == "unsafe" && (importSpec.Name == nil || importSpec.Name.Name == "unsafe") {
-		v.unsafeAliasImported = true
-	}
-
 	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(v.currentImportPath, PackageSuffix))
+
+	// The canonical C# alias for this package — what an unaliased import emits and what getTypeName's
+	// short-form type references (`pkg.Type`) resolve through. Record the import path when THIS import
+	// actually emits that canonical alias (an unaliased import, or one explicitly aliased to the same
+	// name), so visitFile does not re-emit (and duplicate) it; a blank/dot/renamed import does not emit
+	// it, so a foreign type reference from this file still gets the alias supplied (see collectTypePackages).
+	canonicalAlias, _ := packageUsingAlias(v.currentImportPath)
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())
 
@@ -70,9 +69,15 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 		if alias == "." {
 			v.packageImports.WriteString(fmt.Sprintf("using static %s;", importPath))
 		} else {
+			if getSanitizedImport(alias) == canonicalAlias {
+				v.canonicalAliasImported.Add(v.currentImportPath)
+			}
+
 			v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(alias), importPath))
 		}
 	} else {
+		v.canonicalAliasImported.Add(v.currentImportPath)
+
 		// Get package name from the import path, last name after last "."
 		importName := importPath
 		lastDotIndex := strings.LastIndex(importPath, ".")
@@ -119,6 +124,24 @@ func rootQualifyIfAmbiguous(ns string) string {
 	}
 
 	return ns
+}
+
+// packageUsingAlias returns the canonical C# using alias and target namespace for a Go import path,
+// matching visitImportSpec's unaliased-import emission (`using <alias> = <namespace>;`). Used both to
+// decide whether an import already emitted the canonical alias and to synthesize it in visitFile for a
+// foreign type referenced without a canonical import.
+func packageUsingAlias(importPath string) (alias string, namespace string) {
+	namespace = rootQualifyIfAmbiguous(convertImportPathToNamespace(importPath, PackageSuffix))
+
+	name := namespace
+
+	if lastDot := strings.LastIndex(namespace, "."); lastDot != -1 {
+		name = namespace[lastDot+1:]
+	}
+
+	alias = getSanitizedImport(strings.TrimSuffix(name, PackageSuffix))
+
+	return alias, namespace
 }
 
 func convertImportPathToNamespace(importPath string, packageSuffix string) string {

@@ -117,15 +117,17 @@ type Visitor struct {
 	importQueue           HashSet[string]
 	requiredUsings        HashSet[string]
 	typeAliasDeclarations *strings.Builder
-	// unsafe.Pointer is emitted as `@unsafe.Pointer`, which resolves only through the file-local
-	// alias `using @unsafe = unsafe_package;`. That alias is generated from a NAMED import of
-	// `unsafe`; a file that references unsafe.Pointer only via type INFERENCE (e.g. `fd :=
-	// funcdata(...)`, where funcdata returns unsafe.Pointer) or a BLANK import (`_ "unsafe"`, whose
-	// C# alias is `_`) never gets it → CS0246. referencesUnsafePointer is set by getTypeName when the
-	// type is emitted; unsafeAliasImported records whether a named import already emitted the `@unsafe`
-	// alias. visitFile emits the alias when referenced-but-not-aliased.
-	referencesUnsafePointer bool
-	unsafeAliasImported     bool
+	// A cross-package type reference emits a short-alias form (`pkg.Type`, `@unsafe.Pointer`) that
+	// resolves only through a file-local alias `using <alias> = <namespace>;`. That alias is emitted
+	// when the file imports the package under its canonical (unaliased) name; a file can reference the
+	// type WITHOUT such an import — via type INFERENCE (a same-package function returns a foreign type,
+	// so the caller need not import it — e.g. `fd := funcdata(...)`, funcdata returns unsafe.Pointer),
+	// a BLANK import (`_ "pkg"`, whose C# alias is `_`), or an alias that differs from the canonical
+	// name — and then the reference fails to resolve (CS0246). referencedForeignPackages collects the
+	// import paths whose types getTypeName emits; canonicalAliasImported records the paths whose
+	// canonical alias a file import already emitted. visitFile supplies the alias for the difference.
+	referencedForeignPackages HashSet[string]
+	canonicalAliasImported    HashSet[string]
 
 	// FuncDecl variables
 	inFunction           bool
@@ -707,6 +709,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					packageImports:        &strings.Builder{},
 					requiredUsings:        HashSet[string]{},
 					importQueue:           HashSet[string]{},
+					referencedForeignPackages: HashSet[string]{},
+					canonicalAliasImported:    HashSet[string]{},
 					typeAliasDeclarations: &strings.Builder{},
 					standAloneComments:    map[token.Pos]string{},
 					sortedCommentPos:      []token.Pos{},
@@ -2704,22 +2708,84 @@ func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
 	return v.getTypeName(v.getType(expr, underlying), underlying)
 }
 
+// collectTypePackages records the import paths of every foreign (non-current-package) named type
+// reachable in t — directly, or as a pointer/slice/array/map/chan element, a generic type argument,
+// or a func-signature parameter/result — into referencedForeignPackages, plus the pseudo-path
+// "unsafe" for an unsafe.Pointer basic. These are the packages whose short-alias type names
+// (`pkg.Type`, `@unsafe.Pointer`) the converter emits, so visitFile can supply the matching
+// `using <alias> = <namespace>;`. A named type is recorded by its own package only — its underlying
+// fields belong to its own declaration and are not emitted inline, so the walk does not recurse into
+// Underlying (which also avoids cycles on recursive struct types).
+func (v *Visitor) collectTypePackages(t types.Type, seen map[types.Type]bool) {
+	if t == nil {
+		return
+	}
+
+	if seen == nil {
+		seen = map[types.Type]bool{}
+	}
+
+	if seen[t] {
+		return
+	}
+
+	seen[t] = true
+
+	switch u := t.(type) {
+	case *types.Basic:
+		if u.Kind() == types.UnsafePointer {
+			v.referencedForeignPackages.Add("unsafe")
+		}
+	case *types.Named:
+		if obj := u.Obj(); obj != nil {
+			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
+				v.referencedForeignPackages.Add(pkg.Path())
+			}
+		}
+
+		if typeArgs := u.TypeArgs(); typeArgs != nil {
+			for i := range typeArgs.Len() {
+				v.collectTypePackages(typeArgs.At(i), seen)
+			}
+		}
+	case *types.Pointer:
+		v.collectTypePackages(u.Elem(), seen)
+	case *types.Slice:
+		v.collectTypePackages(u.Elem(), seen)
+	case *types.Array:
+		v.collectTypePackages(u.Elem(), seen)
+	case *types.Map:
+		v.collectTypePackages(u.Key(), seen)
+		v.collectTypePackages(u.Elem(), seen)
+	case *types.Chan:
+		v.collectTypePackages(u.Elem(), seen)
+	case *types.Signature:
+		if params := u.Params(); params != nil {
+			for i := range params.Len() {
+				v.collectTypePackages(params.At(i).Type(), seen)
+			}
+		}
+
+		if results := u.Results(); results != nil {
+			for i := range results.Len() {
+				v.collectTypePackages(results.At(i).Type(), seen)
+			}
+		}
+	}
+}
+
 func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if t == nil {
 		return ""
 	}
 
-	// A reference to unsafe.Pointer emits `@unsafe.Pointer`, which requires the file-local alias
-	// `using @unsafe = unsafe_package;`. Flag it so visitFile emits the alias even when the file did
-	// not import `unsafe` under a usable name (inferred type / blank import) — see the field comment.
-	// Match by the type's string form, not just a direct `*types.Basic`: a composite whose ELEMENT is
-	// unsafe.Pointer (`[]unsafe.Pointer`, `map[K]unsafe.Pointer`, `func() unsafe.Pointer`) renders the
-	// element as `@unsafe.Pointer` through the string path below without recursing into getTypeName, so
-	// a direct-Basic check would miss it. Only the builtin `unsafe.Pointer` yields this substring — a
-	// user defined type over it (`type myPtr unsafe.Pointer`) stringifies to its own qualified name.
-	if !v.referencesUnsafePointer && strings.Contains(t.String(), "unsafe.Pointer") {
-		v.referencesUnsafePointer = true
-	}
+	// Register any foreign package whose type is emitted here so visitFile can supply the file-local
+	// `using <alias> = <namespace>;` even when the file did not import the package under its canonical
+	// name (inferred type, blank/non-canonical alias import) — see the field comment. Walks composites
+	// and generics so an element/argument type (`[]time.Duration`, `map[K]abi.Kind`, unsafe.Pointer
+	// inside a slice) registers too, since those are emitted through the string path below without
+	// recursing into getTypeName.
+	v.collectTypePackages(t, nil)
 
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getTypeName(pointer.Elem(), isUnderlying)

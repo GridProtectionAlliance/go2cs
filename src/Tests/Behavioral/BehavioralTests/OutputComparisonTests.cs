@@ -256,6 +256,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
 
     [TestMethod]
+    public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]
