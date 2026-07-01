@@ -137,6 +137,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// asm stubs, so this is purely about producing compilable C#.
 		if targetTypeName == "@unsafe.Pointer" {
 			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
+				// A deref-aliased pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias
+				// (`ref var pc0 = ref Ꮡpc0.val`), not a box — `.val` on it is CS1061 (`nuint` has no
+				// `val`; runtime select.go `unsafe.Pointer(pc0)` / heapdump.go `unsafe.Pointer(pstk)`,
+				// both `*uintptr` params). The alias is itself a ref-local into the boxed storage, so
+				// take its ref directly. A genuine box (a local, field, call result) keeps `.val`.
+				if v.exprIsDerefAliasedPointer(arg) {
+					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
+				}
+
 				return fmt.Sprintf("@unsafe.Pointer.FromRef(ref (%s).val)", expr)
 			}
 		}

@@ -256,6 +256,7 @@
     <Project Path="Tests/Behavioral/UnsafePointerArgPassing/UnsafePointerArgPassing.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerInferredNoImport/UnsafePointerInferredNoImport.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerKeywordParam/UnsafePointerKeywordParam.csproj" />
+    <Project Path="Tests/Behavioral/UnsafePointerParamPin/UnsafePointerParamPin.csproj" />
     <Project Path="Tests/Behavioral/UnsafePointerReinterpret/UnsafePointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/UnsignedNamedNumeric/UnsignedNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />

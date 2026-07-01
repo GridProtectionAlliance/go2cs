@@ -639,6 +639,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
 
     [TestMethod]
+    public void CheckUnsafePointerParamPin() => CheckTarget("UnsafePointerParamPin");
+
+    [TestMethod]
     public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
 
     [TestMethod]
