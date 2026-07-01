@@ -7,10 +7,28 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~145 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~144 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): qualify a collision-renamed owning type in a box-field accessor
+- **2026-07-01 (latest): resolve the lambda-capture rename by OBJECT, not name — closure self-shadow
+  (`7baab09cb`; CS0841 −1, runtime 145 → 144).** A closure that captures an outer `s` snapshots
+  `var sʗ1 = s;` and rewrites captured uses inside the lambda to `sʗN`. The rewrite map
+  (`currentLambdaVars`) was keyed by NAME, so a self-shadowing initializer inside the closure — runtime
+  mgcsweep `systemstack(func(){ s := spanOf(uintptr(unsafe.Pointer(s.largeType))); … })` — mapped BOTH
+  the captured RHS use and the DISTINCT inner `s` binding to the same `sʗ3`; the inner decl emitted
+  `var sʗ3 = …(~sʗ3)…`, its RHS binding to the not-yet-initialized inner var → CS0841. Fix
+  (`main.go` + `variableAnalysisOperations.go`): new parallel map `currentLambdaVarObjs` records the
+  captured var's `types.Object` per name; in `getIdentName` the capture name is applied ONLY when
+  `v.info.ObjectOf(ident) == capturedObj`; a distinct inner binding falls through to its own
+  shadow-renamed name (`var sΔ1 = spanOf(…(~sʗ3)…)`). The object check passes for every non-shadowing
+  capture, so nothing outside this self-shadow case changes. Test `ClosureSelfShadowCapture` (211 vs Go);
+  full suite green (201), **byte-identical corpus (zero churn)**, adversarially verified (8 self-shadow
+  shapes — value/pointer/param captures, multi-use inner, write-through, nested/multiple closures — plus
+  ordinary-capture no-regression). **This was the mgcsweep `sʗ3` root — the explorer's #2, flagged
+  SUBTLE/medium-high-blast-radius, but (like malloc `Δp` before it) it had a CLEAN surgical angle: the
+  object-check is inert for all non-shadow captures. Two consecutive "subtle-flagged" CS0841 both yielded
+  clean fixes — investigate before declaring undoable.**
+- **2026-07-01: qualify a collision-renamed owning type in a box-field accessor
   (`04a5322f7`; CS0841 −1 + CS1061 −2, runtime 148 → 145 — 3 errors, one root).** A box accessor
   `receiver.of(TYPE.Ꮡfield)` was qualified with the package static class only when TYPE equaled the
   `.of()` RECEIVER variable. But a Go local named after its type is renamed to the SAME `Δ`-name, so
@@ -331,9 +349,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~145; the box-accessor collision-qualification above
-cleared malloc CS0841 + 2 mheap CS1061, 148 → 145): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10,
-CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS8030 4, CS0841 2 (CS0266 now 0):
+as items land. As of 2026-07-01 latest (`runtime` = ~144; the closure self-shadow object-check cleared
+mgcsweep CS0841, 145 → 144): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS8030 4, CS0841 1 (CS0266 now 0):
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -516,21 +534,26 @@ CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS8030 4, CS0841 2 (CS0266 now 0):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~145. Last session qualified a collision-renamed
-owning type in a box-field accessor (CONVERTER-only, `04a5322f7`; CS0841 −1 + CS1061 −2, 148 → 145). A box
-accessor `receiver.of(TYPE.Ꮡfield)` was package-qualified only when TYPE equaled the `.of()` receiver var; but
-a Go local named after its type is renamed to the SAME `Δp`, so such a local anywhere in the function shadows a
-bare `Δp.Ꮡfield` (C# locals are function-scoped) — runtime malloc `persistentalloc1` `&mp.p.ptr().palloc` +
-a later local `p`. Fix (`convUnaryExpr.go` `boxAccessorType`): qualify whenever the type name is `Δ`-prefixed
-(a type is never shadow-renamed, so `Δ`-prefixed = collision rename) → `.of(runtime_package.Δp.Ꮡpalloc)`. Test
-extension `CollisionFieldBoxAccessor.localShadowsCollisionType`; suite green (200), adversarially verified.
-NOTE: this was the malloc `Δp` CS0841 — the surgical box-accessor route (qualify the type-REF) avoided the
-explorer's `Δp` type-RENAME alternative, which had far more blast radius (core processor `p` type, generators).
+This session: re-bucket, then tackle ONE root. Runtime is at ~144. Last session resolved the lambda-capture
+rename by OBJECT not name (CONVERTER-only, `7baab09cb`; CS0841 −1, 145 → 144). A closure capturing an outer
+`s` snapshots `var sʗ1 = s;` and rewrites captured uses to `sʗN`; the rewrite map was keyed by NAME, so a
+self-shadowing initializer `s := f(s)` INSIDE the closure (runtime mgcsweep `systemstack(func(){ s :=
+spanOf(uintptr(unsafe.Pointer(s.largeType))) … })`) mapped BOTH the captured RHS use and the distinct inner
+`s` to `sʗ3` → `var sʗ3 = …(~sʗ3)…` (RHS binds to itself) → CS0841. Fix: new `currentLambdaVarObjs` records
+the captured var's `types.Object` per name; `getIdentName` applies the capture name only when the ident
+resolves to that exact object → inner falls through to `var sΔ1 = …(~sʗ3)…`. Test `ClosureSelfShadowCapture`
+(211 vs Go); suite green (201), BYTE-IDENTICAL corpus (zero churn), adversarially verified.
+NOTE: this was mgcsweep `sʗ3` — the explorer's #2, flagged SUBTLE, but it had a clean surgical angle (object
+check inert for non-shadow captures). Combined with malloc `Δp` last iteration, TWO consecutive subtle-flagged
+CS0841 yielded clean fixes — so INVESTIGATE the last one before assuming it's undoable (see below).
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
 any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 ⚠ gpg-agent may TIMEOUT on the signed commit — relaunch `gpgconf --launch gpg-agent`; if it still needs a
 passphrase, STOP and ask the user to unlock the key (never bypass signing).
+⚠ **testhost/verifier caveat: a spawned verifier that `git stash`es the converter files can leave the MSTest
+`Check*` registrations (from UpdateTestTargets) reverted — re-run UpdateTestTargets and re-verify the 4
+`*Tests.cs` are staged before committing a NEW test (hit this iteration).**
 
 ⚠ **DISCOVERED latent (pre-existing, separate root — do NOT confuse with the fix above):** a BARE const shift
 to a native int (`var p uintptr = 1 << 40`, `q = 1 << 40`) emits as a 32-bit `(uintptr)(1 << (int)(40))` that
@@ -558,15 +581,18 @@ named-over-array entangled before committing). NOTE: ALL CS0266 are now DONE —
   `nativeIntConstCastType`. Behavioral (parity) test is the gate; a `NativeIntBareShiftAssign` test FAILS until this
   lands. Verify how many runtime/stdlib sites actually hit it (the verifier's scan found real sites use VARIABLE shift
   amounts, so this may be low-yield for runtime — but it is a genuine correctness bug worth fixing).
-- **CS0841 (2 remaining, both DISTINCT + SUBTLE — the plain stack.cs one AND the malloc `Δp` box-accessor one
+- **CS0841 (1 remaining — the plain stack.cs, malloc `Δp` box-accessor, AND mgcsweep `sʗ3` closure-capture ones
   are DONE):** traceallocfree.cs `Δtrace` is a local shadowing a package-level GLOBAL `trace` where the GLOBAL is
-  used (line 35) BEFORE the local's decl (line 43) — both collision-renamed `Δtrace`, the C# function-scoped
-  local wins the earlier ref (kin to the DECLINED proc `Δtrace` CS0136; the explorer classified it DECLINED-KIN,
-  needs the shadow-detection-considers-globals deep-dive — do NOT attempt blindly). mgcsweep.cs `sʗ3` is a
-  closure self-shadowing initializer `s := spanOf(…s.largeType…)` inside `systemstack(() => {…})` where the inner
-  `s` and the captured outer `s` share the `sʗN` closure-capture name (the explorer classified it SUBTLE —
-  entangled with the closure-capture-rename × shadow counter). Neither is a clean contained root; both likely
-  need user-guided or multi-session work.
+  used (line 35, `Δtrace.minPageHeapAddr`) BEFORE the local's decl (line 43, `Δtrace = traceAcquire()`) — both
+  collision-renamed `Δtrace`, the C# function-scoped local wins the earlier ref → CS0841. The handoff/explorer
+  flagged it DECLINED-KIN to the proc `Δtrace` CS0136 (rename-the-local shadow-detection deep-dive). BUT a
+  DIFFERENT, surgical angle is worth trying FIRST (given malloc `Δp` and mgcsweep `sʗ3` both had clean angles):
+  **qualify the GLOBAL reference** at line 35 — `runtime_package.Δtrace.minPageHeapAddr` — which a same-named
+  local cannot shadow (exactly the malloc box-accessor idea, but for a direct global field access rather than a
+  `.of()` accessor). This is a reference-site fix (detect: ident resolves to a package-level var + a same-named
+  local is in function scope → qualify), sidestepping the declined "rename the local" shadow-pass deep-dive.
+  Investigate whether the converter can cleanly detect "global ref shadowed by a same-named local" at emission.
+  If that angle turns out entangled too, THEN it's the declined deep-dive — STOP.
 - **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
   if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
 - **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
