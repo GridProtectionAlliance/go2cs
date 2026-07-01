@@ -7,10 +7,27 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~161 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~159 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): S2 `~`-deref-rooted receiver materialization landed (`716de3a64`; CS1510
+- **2026-06-30 (latest): `@unsafe` alias emitted for inferred/blank-import unsafe.Pointer refs
+  (`08946c23d`; CS0246 2 → 0, runtime 161 → 159).** A reference to `unsafe.Pointer` renders as C#
+  `@unsafe.Pointer`, which resolves only via the file-local alias `using @unsafe = unsafe_package;`.
+  That alias was emitted solely from a NAMED `import "unsafe"`, so a file that reaches the type without
+  a usable import — via type INFERENCE (`fd := funcdata(f,i)`, funcdata returns unsafe.Pointer, so the
+  file never writes `unsafe.` and need not import it — `preempt.go`) or a BLANK import (`_ "unsafe"`,
+  whose C# alias is `_`, not `@unsafe` — `symtabinl.go`) — failed CS0246. Fix (converter-only, 3 files):
+  `getTypeName` flags any emitted type whose string form names unsafe.Pointer (covers the direct Basic
+  AND composite/func forms like `[]unsafe.Pointer` that render the element through the string path
+  without recursing — a Basic-only check missed those); `visitImportSpec` records whether a named import
+  already emitted the `@unsafe` alias; `visitFile` supplies it when referenced-but-not-aliased
+  (idempotent-safe, non-conflicting alongside a blank/aliased/dot import). Full suite green (192),
+  existing goldens byte-identical. Test `UnsafePointerInferredNoImport` (scalar / composite-isolated /
+  blank-import variants; the composite file provably catches a completion revert). See
+  ConversionStrategies.md "The `@unsafe` alias is emitted whenever a file references the unsafe.Pointer
+  type…". (CS0118 tracetime `unsafe_package is a type used like a variable` is a DISTINCT root — not the
+  alias issue — left untouched.)
+- **2026-06-30: S2 `~`-deref-rooted receiver materialization landed (`716de3a64`; CS1510
   9 → 0, runtime 169 → 161).** A pointer-receiver method on a value field reached through a pointer
   RVALUE — a call `getg().schedlink.set(…)`, a method-call chain `q.tail.ptr().schedlink.set(…)`, or a
   pointer-element index `batch[i].schedlink.set(…)` — emitted `(~rvalue).field.method(…)`, an rvalue the
@@ -165,9 +182,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~161; the S2 CS1510 receiver-materialization fix below
-cleared all 9 CS1510, 169 → 161): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS1929 9, CS0029 8,
-CS0121 6, CS0841 5, CS0266 5, CS0103 5:
+as items land. As of 2026-06-30 latest (`runtime` = ~159; the `@unsafe`-alias fix above cleared both
+CS0246, 161 → 159): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS1929 9, CS0029 8, CS0121 6, CS0841 5,
+CS0266 5, CS0103 5:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -347,27 +364,23 @@ CS0121 6, CS0841 5, CS0266 5, CS0103 5:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~161. Last session landed the S2 CS1510
-`~`-deref-rooted receiver materialization (CONVERTER-only, `716de3a64`; CS1510 9 → 0, runtime 169 → 161). A
-`[GoRecv] ref` method on a value field reached through a pointer RVALUE — a call `getg().schedlink.set(…)`, a
-method-call chain `q.tail.ptr().schedlink.set(…)`, `Δp.chunkOf(ci).scavenged.setRange(…)`,
-`getg().m.p.ptr().wbBuf.get2()`, or a pointer-element index `batch[i].schedlink.set(…)` — emitted
-`(~rvalue).field.method(…)`, an rvalue the generated `ref` couldn't bind. The root call/index value ALREADY is
-the `ж<T>` box, so the fix materializes straight through it: `getg().of(g.Ꮡschedlink).set(…)`. Two coordinated
-converter changes: new predicate `exprIsValueFieldOfPointerRvalue` (value field rooted at a NON-ident,
-NON-selector pointer-to-struct expr) + a pointer-receiver routing branch in convSelectorExpr; convUnaryExpr's
-`&base.field` box-field branch (the one that renders `e.of(Type.ᏑField)`) extended to accept a CALL / pointer-
-ELEMENT index base. CRUCIAL GOTCHA the fix handles: a type-CONVERSION CallExpr `(*T)(p)` renders as a C# CAST
-`(ж<T>)(uintptr)(…)`, so a trailing `.of(…)` mis-binds to the inner operand by precedence — EXCLUDE conversions
-(`v.callExprIsTypeConversion`) so S1 pointer-reinterprets keep their `Ꮡ(…)` form (this exclusion was the one
-self-inflicted regression, caught by StdLibInternalAbi's golden, then fixed). Test `PointerRvalueFieldReceiver`
-(call / method-call-chain / index roots, write-through verified); zero churn; full suite green (191). ALSO
-re-baselined 3 cast-paren goldens stale since `4261cd21a` (`ccca54886` — MethodSelector / RangeVarReassign /
-UnsafePointerArgPassing, missed by the `42e1fa600` rebaseline). FORCE `cd src/go2cs && go build -o
-bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is
-newer, so a committed converter change false-greens on a stale binary (this is exactly what hid the 3 stale
-goldens). After any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL
-affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~159. Last session landed the `@unsafe`-alias
+emission (CONVERTER-only, `08946c23d`; CS0246 2 → 0, runtime 161 → 159). A reference to `unsafe.Pointer`
+renders as C# `@unsafe.Pointer`, which resolves ONLY via the file-local alias `using @unsafe =
+unsafe_package;` — previously emitted solely from a NAMED `import "unsafe"`. A file reaching the type without
+a usable import — type INFERENCE (`fd := funcdata(f,i)`, funcdata returns unsafe.Pointer, so the file never
+writes `unsafe.` and need not import it — `preempt.go`) or a BLANK import (`_ "unsafe"`, whose C# alias is
+`_`, not `@unsafe` — `symtabinl.go`) — hit CS0246. Fix (3 files): `getTypeName` flags any emitted type whose
+STRING form names unsafe.Pointer (covers the direct Basic AND composite/func forms `[]unsafe.Pointer` that
+render the element via the string path without recursing — a Basic-only check missed those, a real same-class
+gap an adversarial verifier caught and I closed); `visitImportSpec` records whether a named import already
+aliased `@unsafe`; `visitFile` supplies the alias when referenced-but-not-aliased (idempotent-safe,
+non-conflicting with a blank/aliased/dot import). Test `UnsafePointerInferredNoImport` (scalar / composite-
+isolated / blank-import — the composite file provably catches a completion revert); full suite green (192),
+existing goldens byte-identical. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green"
+claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a committed converter change
+false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1 --update-targets` (post
+fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -381,15 +394,29 @@ NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
 named-over-array entangled before committing):
-- **S6 warm-up: CS0121 `add` overload collision** (mprof.cs 245/258/267) — a free func `add` vs a RecvGenerator
-  companion `add`, both static in `runtime_package` → ambiguous. A name-disambiguation fix, genuinely contained
-  (and these 3 are in mprof but unrelated to the entangled atomic lines). Read the S6 queue item + memory first.
-- **S2/S3 embedding: `time` `timeTimer.modify/stop/reset` (CS1929 ×3, time.cs 315/327/341)** — `timeTimer` embeds
-  `timer`; promoted pointer-receiver methods need a `ж<timer>`. TypeGenerator embedding area
-  (`PointerEmbeddingPromotion`/`NestedEmbeddingPromotion` tests). Verify it's same-package, not metadata-only.
+- **S2/S3 embedding: `time` `timeTimer.modify/stop/reset` (CS1929 ×3, time.cs ~315/327/341)** — `timeTimer`
+  embeds `timer` (value field, SAME package); a promoted pointer-receiver method `t.modify(…)` / `Ꮡt.stop()`
+  emits the receiver as `Ꮡt` (`ж<timeTimer>`) but the extension wants `ж<timer>` (CS1929). Fix: route the
+  receiver through the embedded-field box `Ꮡt.of(timeTimer.Ꮡtimer).modify(…)`. That exact field-box accessor
+  `t.of(timeTimer.Ꮡtimer)` is ALREADY emitted for field access on neighbouring lines (newTimer's
+  `racerelease(new @unsafe.Pointer(t.of(timeTimer.Ꮡtimer)))`), so the &-machinery already knows the embedded
+  field — the gap is only that convSelectorExpr's box-routing branches (capture-mode / pointer-receiver, ~648–760)
+  box as `Ꮡt` WITHOUT descending into the embedded field when the method is PROMOTED via embedding
+  (`v.info.Selections[sel].Index()` has >1 element: the embed-field hop(s) then the method). Contained
+  converter-only feature; VERIFY same-package (NOT the metadata-only `Δrtype`/`abi.Type` case). Existing embedding
+  tests: `PointerEmbeddingPromotion` / `NestedEmbeddingPromotion`. Start in convSelectorExpr.go + convUnaryExpr's
+  &-machinery.
+- **CS0136 local-shadowing (×4, lock_sema `ns`, proc `Δtrace`/`i`×2)** — an inner-scope local collides with an
+  enclosing-scope C# local of the same name (`variableAnalysisOperations.go` shadow-rename). Verify it's a genuine
+  shadow-rename miss, not analysis-order noise, before committing.
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
   `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
+- **S6 CS0121 `add` overload (mprof.cs 245/258/267, map.cs 184/191/195)** — free `add(unsafe.Pointer,uintptr)` vs
+  the `(*notInHeap).add` companion, both static in `runtime_package`. NOTE (found this session): the call sites
+  pass `(uintptr)@unsafe.Pointer.FromRef(ref b)` — a uintptr that converts implicitly to BOTH overloads (the
+  ambiguity), so it is SUBTLER than the sibling `UnsafePointerArgPassing` case (which passes the struct directly
+  and already resolves). The `(uintptr)` round-trip is S1-modeling territory — verify it isn't entangled first.
 
 OTHER characterized roots (pick by fresh bucket if drift shifts the top):
 - S2/S3 EMBEDDING promotion (CS1929 ×4): `time` `timeTimer.modify/stop/reset` (×3, `timeTimer` embeds `timer`
