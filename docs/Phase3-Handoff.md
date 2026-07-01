@@ -15,10 +15,23 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~101 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~96 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): reinterpret a named-numeric pointer to its underlying basic —
+- **2026-07-01 (latest): cast a `make()` length/capacity/hint of a non-int integer type to nint
+  (`438d633a0`; CS1503 −5, runtime 101 → 96).** The golib `slice<T>(nint,nint)` / `map<K,V>(nint)` /
+  `channel<T>(nint)` ctors take nint; C# has no implicit `uintptr`/`uint`/`uint32`/`uint64`/`int64` → nint
+  conversion, so `make([]byte, n/goarch.PtrSize)` (uintptr length, runtime/mbitmap ×4 + a []uint64 variant)
+  left `new slice<byte>(n/…)` with no applicable ctor → overload resolution fell onto `slice<T>(T[])`
+  (CS1503 `nuint`→`byte[]`). Fix (`convCallExpr.go` make handler): for a slice/map/chan target, cast each
+  length/cap/hint arg whose Go type is a non-nint-implicit integer to nint (`makeLenArgs` +
+  `makeLenArgNeedsNintCast`); plain int / untyped / widening int8/int16/uint8/uint16 left uncast (no churn).
+  The map/chan arms extend the same root the runtime cluster (slices) exposed. Cleared all 5, zero new error
+  codes, every other bucket unchanged. Test `MakeSliceUintptrLen` (**output** — slice/map/chan uintptr
+  lengths+hints + int/untyped controls, vs Go); suite green (208), zero corpus churn. **Verifier-1 CONFIRMED
+  SAFE** (no over-fire, only previously-CS1503 lines change); verifier-2 hung on reconvert mechanics (map/
+  chan arms self-verified: compile+run+output match Go).
+- **2026-07-01: reinterpret a named-numeric pointer to its underlying basic —
   `(*uint64)(*lfstack)` (`f19153a9e`; CS0030 −13, runtime 114 → 101; second S1-FORK "convert native"
   win).** The runtime's atomic-on-a-named-integer pattern — `atomic.Load64((*uint64)(head))` /
   `atomic.Cas64((*uint64)(head), …)` where head is `*lfstack` (`type lfstack uint64`; also sweepClass
@@ -468,27 +481,31 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~101; named-numeric reinterpret cleared 13, 114 → 101):
-CS1503 24, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+as items land. As of 2026-07-01 latest (`runtime` = ~96; make-len-cast cleared 5, 101 → 96):
+CS1503 19, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
-**CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), and TWO S1-fork "convert native" pointer-reinterpret wins —
-unsafe.Pointer `(*T)(p)` (`9e30a1c5b`, −23) and named-numeric `(*uint64)(*lfstack)` (`f19153a9e`, −13) —
-landed. The work continues SORTING the CS0030/S1 fork (banner at top + `Baseline-vs-FullConversion.md` "The
-corrected end-state"): convert native, model managed-referent with ж<T>, stub raw-metal with
-`[module: GoManualConversion]`. But CS0030 is now down to 9 — the biggest bucket is CS1503 (24).**
-- **NEXT — two candidates; re-bucket a fresh reconvert and pick the cleaner:**
-  1. **CS1503 (24, biggest bucket)** — triage for a contained converter root. Sub-clusters: **`pallocBits →
-     IArray` (5)** (a named ARRAY type not recognized as `IArray` at a call — likely a [GoType]/generator or
-     converter arg-conversion fix), **`nuint → byte[]` (4)** (a `nuint` passed where a `byte[]`/`ulong[]`
-     param is expected — an unsafe-slice or arg-conversion shape), `pMask → @string` (2), `slice<uint> →
-     slice<byte>` (2), `nuint → nint` args (2), `UntypedInt → params ReadOnlySpan` (2). Investigate the
-     pallocBits→IArray cluster first (biggest sub-lever, likely one root).
+**CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins (`9e30a1c5b` −23,
+`f19153a9e` −13), and the make-len-cast (`438d633a0`, −5) landed. CS1503 is still the biggest (19); CS0030 is
+at 9 (managed-referent). Keep SORTING the fork + triaging CS1503/CS1061.**
+- **NEXT — re-bucket a fresh reconvert and pick the cleaner:**
+  1. **CS1503 `pallocBits → IArray` (5) — GENERATOR-level (deferred once already).** `pallocBits` is
+     `[GoType("pageBits")]`, an INHERITED wrapper of `pageBits` (`type pageBits [8]uint64`, itself
+     `[GoType("[8]uint64")]`, which DOES implement IArray). The InheritedTypeTemplate wrapper does NOT forward
+     IArray, so `len(b)`/`b[i]` on a `pallocBits` fail (`cannot convert pallocBits to IArray`). Fix: either
+     (a) converter — for `type X Y` where Y's underlying is an array, emit X's [GoType] as the ARRAY form
+     (`[8]uint64`) resolving through Y (so the array-backed generator makes X implement IArray), OR
+     (b) generator — make InheritedTypeTemplate forward IArray when the inherited type is an array. Verify no
+     regression on the pallocBits↔pageBits value conversions. Behaviorally checkable (index/len a named-array
+     type). *(The `nuint → byte[]` (4) sub-cluster is DONE via `438d633a0`.)* Other CS1503: `pMask → @string`
+     (2), `slice<uint> → slice<byte>` (2), `nuint → nint`/`int` args (3), `UntypedInt → params ReadOnlySpan`
+     (2), `method group → object` (1).
   2. **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
-     `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3).** These hide a MANAGED pointer in a `uintptr` →
-     MODEL holding `ж<T>` directly (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite` `object?
-     m_target`), NOT a raw round-trip. This is the genuine architectural S1 managed-referent case — more
-     involved, a dedicated iteration; needs the ж<T>-model applied to gclinkptr/guintptr per the user's
-     model. (2 CS0030 singletons remain: `lfstack → Δhex`, `UntypedInt → unsafe.Pointer`.)
+     `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3).** Hide a MANAGED pointer in a `uintptr` → MODEL
+     holding `ж<T>` directly (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite` `object? m_target`),
+     NOT a raw round-trip. The genuine architectural S1 case — more involved, a dedicated iteration. (2 CS0030
+     singletons remain: `lfstack → Δhex`, `UntypedInt → unsafe.Pointer`.)
+  3. **CS1061 (16)** — abi metadata / box-field access (`ж<m>.Ꮡpark`, `Δrtype.TFlag`, `nuint.val`, …); triage
+     for a contained sub-cluster if 1 and 2 are entangled.
 - **DONE this campaign (S1-fork convert-native + the earlier families):** named-numeric reinterpret
   `(*uint64)(*lfstack)` (`f19153a9e`, −13); unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23); CS8917
   lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917 residual pre-existing, out
@@ -715,28 +732,31 @@ corrected end-state"): convert native, model managed-referent with ж<T>, stub r
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at ~101. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared;
-TWO S1-fork "convert native" pointer-reinterpret wins landed — unsafe.Pointer `(*T)(p)` (`9e30a1c5b`, −23) and
-named-numeric `(*uint64)(*lfstack)` (`f19153a9e`, −13).** Last session generalized the `(*Base)(defPtr)`
-reinterpret block (which boxes a COPY of the [GoType] value conversion) to also fire when the RESULT elem is a
-BASIC whose underlying equals a NAMED arg elem's (`namedToBasic`) — the runtime's `atomic.Load64((*uint64)(head))`
-on named atomics lfstack/sweepClass/profAtomic/sysMemStat → `Ꮡ((uint64)(head))`. Named↔Named path byte-identical
-(pure refactor); read path verified vs Go (output test `NamedNumericPointerReinterpret`); writes hit the copy but
-those atomics are asm-stubs. Verifier-1 CONFIRMED SAFE (diff exactly 3 lines, no over-fire); suite green (207),
-zero churn.
+This session: runtime is at ~96. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared; TWO
+S1-fork convert-native reinterpret wins (unsafe.Pointer `(*T)(p)` `9e30a1c5b` −23; named-numeric
+`(*uint64)(*lfstack)` `f19153a9e` −13); and the make-len-cast (`438d633a0`, −5).** Last session cast a `make()`
+length/cap/hint of a non-int integer (uintptr/uint/uint32/uint64/int64) to nint for slice/map/chan targets —
+`new slice<byte>((nint)(n/goarch.PtrSize))` — since the golib slice/map/chan ctors take nint and C# won't
+implicitly narrow nuint/ulong/long→nint (runtime/mbitmap `make([]byte, n/goarch.PtrSize)`, CS1503 nuint→byte[]).
+Helpers `makeLenArgs`/`makeLenArgNeedsNintCast`; int/untyped/int8/int16/uint8/uint16 left uncast. Verifier-1 SAFE
+(no over-fire); output test `MakeSliceUintptrLen`; suite green (208), zero churn.
 
-**⚠ The work continues SORTING the CS0030/S1 FORK** (read the strategy banner at the very top of this doc +
+**⚠ The work continues SORTING the CS0030/S1 FORK + triaging CS1503/CS1061** (read the strategy banner at top +
 `Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md` "S1 is a FORK to SORT").
-Milestone = clean COMPILE; each CS0030 site sorts three ways: native-type op → CONVERT; managed-referent
-(guintptr/muintptr) → MODEL holding ж<T> directly (like `core/sync/atomic` atomic.Pointer<T>); raw-metal →
-STUB with `[module: GoManualConversion]`. **BUT CS0030 is now down to 9 — the biggest bucket is CS1503 (24).
-RECOMMENDED NEXT — re-bucket a fresh reconvert and pick the cleaner of:**
-(1) **CS1503 (24, biggest)** — triage for a contained converter root. Sub-clusters: `pallocBits → IArray` (5,
-a named ARRAY type not recognized as `IArray` — investigate first, likely one [GoType]/generator or arg-conversion
-root), `nuint → byte[]`/`ulong[]` (4–5), `pMask → @string` (2), `slice<uint> → slice<byte>` (2), `nuint → nint`
-args (2). (2) **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
+Milestone = clean COMPILE; each CS0030 site sorts three ways: native → CONVERT; managed-referent
+(guintptr/muintptr) → MODEL holding ж<T> directly (like `core/sync/atomic` atomic.Pointer<T>); raw-metal → STUB
+with `[module: GoManualConversion]`. **CS1503 is still the biggest bucket (19). RECOMMENDED NEXT — re-bucket a
+fresh reconvert and pick the cleaner of:**
+(1) **CS1503 `pallocBits → IArray` (5) — GENERATOR-level (deferred once).** `pallocBits` is `[GoType("pageBits")]`,
+an INHERITED wrapper of `pageBits` (`type pageBits [8]uint64`, itself `[GoType("[8]uint64")]` which DOES implement
+IArray); the InheritedTypeTemplate wrapper does NOT forward IArray, so `len(b)`/`b[i]` on a pallocBits fail. Fix:
+(a) converter — for `type X Y` where Y's underlying is an array, emit X's [GoType] as the ARRAY form resolving
+through Y; OR (b) generator — InheritedTypeTemplate forwards IArray for an array inherited type. Verify the
+pallocBits↔pageBits value conversions don't regress. Behaviorally checkable. *(nuint→byte[] is DONE, `438d633a0`.)*
+(2) **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
 `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3)** — hide a managed pointer in a uintptr → MODEL holding
 `ж<T>` directly per the user's model; the genuine architectural S1 case, a dedicated iteration.
+(3) **CS1061 (16)** — abi metadata / box-field access; triage for a contained sub-cluster if (1)/(2) are entangled.
 Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case, CS0118/CS0119/CS0019
 S6) are architectural / risky / rabbit-holes.
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
