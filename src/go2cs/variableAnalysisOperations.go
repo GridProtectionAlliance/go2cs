@@ -809,6 +809,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						case *ast.ParenExpr:
 							cur = e.X
 							continue
+						case *ast.CallExpr:
+							// A method-call receiver buried in the LHS chain — `x.ptr().val.next = …`
+							// (runtime stackpoolalloc's `x := gclinkptr(…)` loop, where `x` is shadow-renamed
+							// `xΔ1`). The `x` inside `x.ptr()` is past the selector/index descent above; visit
+							// the whole call so its receiver and argument idents get the rename — else the use
+							// keeps the raw name and, being declared later, is CS0841 (or a silent wrong bind).
+							// The call's RESULT is the navigated base, so the descent stops here.
+							visitNode(cur)
 						}
 
 						break

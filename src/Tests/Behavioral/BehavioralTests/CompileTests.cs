@@ -498,6 +498,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]
+    public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]
