@@ -276,6 +276,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
 
     [TestMethod]
+    public void CheckGlobalShadowedByLocal() => CheckTarget("GlobalShadowedByLocal");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]

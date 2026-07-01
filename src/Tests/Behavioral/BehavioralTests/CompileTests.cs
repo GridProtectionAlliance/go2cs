@@ -276,6 +276,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
 
     [TestMethod]
+    public void CheckGlobalShadowedByLocal() => CheckTarget("GlobalShadowedByLocal");
+
+    [TestMethod]
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]

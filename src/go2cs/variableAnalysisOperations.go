@@ -248,6 +248,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 	// Track all function-level declarations for proper shadowing
 	functionLevelDecls := make(map[string]*types.Var)
+	// Expose the same map to emission (convIdent) so a global-var reference shadowed by a same-named
+	// function-level local can be package-qualified. The reference is repopulated per function; by the
+	// time the body is emitted the pre-scan has fully populated it.
+	v.funcLevelDecls = functionLevelDecls
 	var nameCounts = make(map[string]int)            // Counts for generating unique names
 	var declaredPos = make(map[*types.Var]token.Pos) // Track declaration positions
 	// A block-scoped `const` that shadows an enclosing var/param/const must be renamed like a

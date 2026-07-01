@@ -181,6 +181,7 @@ type Visitor struct {
 	identEscapesHeap       map[types.Object]bool
 	identNames             map[*ast.Ident]string   // Local identifiers to adjusted names map
 	isReassigned           map[*ast.Ident]bool     // Local identifiers to reassignment status map
+	funcLevelDecls         map[string]*types.Var   // Function-level local declarations of the current function (for global-shadow qualification)
 	scopeStack             []map[string]*types.Var // Stack of local variable scopes
 	lambdaCapture          *LambdaCapture          // Lambda capture tracking
 }

@@ -96,5 +96,22 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		return AddressPrefix + v.boxBaseName(ident) + valAccessor
 	}
 
+	// A same-package GLOBAL variable reference shadowed by a same-named function-level LOCAL: C# locals
+	// are function-scoped, so the bare global name binds to the local everywhere in the function — a use
+	// of the global BEFORE the local's declaration is CS0841 (and would read the wrong variable
+	// regardless). Runtime `traceallocfree.traceSnapshotMemory` reads the global `trace.minPageHeapAddr`
+	// before declaring the local `trace := traceAcquire()`; both are collision-renamed `Δtrace`. Qualify
+	// the global with its package static class (`runtime_package.Δtrace`), which a local can never shadow.
+	// Gated to an ident that resolves to a package-level var of THIS package with a same-named
+	// function-level local — so an ordinary global (no shadowing local) and the local's own uses (which
+	// resolve to the local, not the package scope) are untouched.
+	if v.funcLevelDecls != nil {
+		if _, shadowed := v.funcLevelDecls[ident.Name]; shadowed && v.pkg != nil {
+			if vr, ok := v.info.ObjectOf(ident).(*types.Var); ok && vr.Parent() == v.pkg.Scope() {
+				return getSanitizedImport(packageName+PackageSuffix) + "." + getSanitizedIdentifier(v.getIdentName(ident))
+			}
+		}
+	}
+
 	return getSanitizedIdentifier(v.getIdentName(ident))
 }
