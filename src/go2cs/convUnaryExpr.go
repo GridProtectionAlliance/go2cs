@@ -373,7 +373,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax.
 						// The golib element-address overloads take `int`/`nint`, so an unsigned/wide index
 						// (`&pclntable[funcoff]`, funcoff uint32) is cast to int (CS1503 otherwise).
-						return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castElemAddrIndex(indexExpr.Index))
+						return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castWideIntegerToInt(indexExpr.Index))
 					}
 				}
 			}

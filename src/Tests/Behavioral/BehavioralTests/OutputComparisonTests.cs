@@ -478,6 +478,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]
+    public void CheckSlice3IndexWideBound() => CheckTarget("Slice3IndexWideBound");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

@@ -92,14 +92,16 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 		return ident + "[" + v.getRangeIndexer(sliceExpr.Low) + ".." + v.getRangeIndexer(sliceExpr.High) + "]"
 	}
 
-	// sliceExpr[:High:Max] => sliceExpr.slice(-1, High, Max)
+	// sliceExpr[:High:Max] => sliceExpr.slice(-1, High, Max). The golib `.slice(nint low, nint high,
+	// nint max)` method takes nint, so a High/Max bound of a wide integer (uintptr/uint/…) is cast to
+	// int (CS1503 otherwise — runtime/mprof `stk[:b.nstk:b.nstk]` with a uintptr b.nstk).
 	if sliceExpr.Low == nil && sliceExpr.High != nil && sliceExpr.Slice3 {
-		return ident + ".slice(-1, " + v.convExpr(sliceExpr.High, nil) + ", " + v.convExpr(sliceExpr.Max, nil) + ")"
+		return ident + ".slice(-1, " + v.castWideIntegerToInt(sliceExpr.High) + ", " + v.castWideIntegerToInt(sliceExpr.Max) + ")"
 	}
 
 	// sliceExpr[Low:High:Max] => sliceExpr.slice(Low, High, Max)
 	if sliceExpr.Low != nil && sliceExpr.High != nil && sliceExpr.Slice3 {
-		return ident + ".slice(" + v.convExpr(sliceExpr.Low, nil) + ", " + v.convExpr(sliceExpr.High, nil) + ", " + v.convExpr(sliceExpr.Max, nil) + ")"
+		return ident + ".slice(" + v.castWideIntegerToInt(sliceExpr.Low) + ", " + v.castWideIntegerToInt(sliceExpr.High) + ", " + v.castWideIntegerToInt(sliceExpr.Max) + ")"
 	}
 
 	expr := v.getPrintedNode(sliceExpr)
@@ -120,19 +122,23 @@ func (v *Visitor) getRangeIndexer(expr ast.Expr) string {
 // basic), a direct `(int)(x)` is CS0030 — the generated struct only converts to its OWN underlying
 // basic — so it casts through the underlying first: `(int)(nuint)(x)`. A plain basic operand keeps
 // the bare `(int)(x)` form (no churn).
-// castElemAddrIndex converts an element-address index (`&arr[i]` → `Ꮡ(arr, i)`), casting it to
-// `int` only when its type does not already bind the golib `Ꮡ(IArray<T>, int)` / `(…, nint)`
-// overloads. Go `int` (→ C# nint) and the small integer types (int8/16/32, uint8/16, which
-// implicitly widen to `int`) bind directly and are left uncast to avoid churn; an unsigned
-// 32-bit-or-wider or 64-bit index (uint/uint32/uint64/uintptr/int64) does not implicitly convert
-// to `int`/`nint` (CS1503) and is cast (through its underlying for a named numeric).
-func (v *Visitor) castElemAddrIndex(expr ast.Expr) string {
+// castWideIntegerToInt converts an integer index/bound expression, casting it to `int` only when its
+// type does not already bind an `int`/`nint` parameter — used for an element-address index (`&arr[i]` →
+// `Ꮡ(arr, i)`, the golib `Ꮡ(IArray<T>, int)` / `(…, nint)` overloads) and for a 3-index slice's
+// `.slice(low, high, max)` bounds (the golib method takes `nint`). Go `int` (→ C# nint) and the small
+// integer types (int8/16/32, uint8/16, which implicitly widen to `int`) bind directly and are left
+// uncast to avoid churn; an unsigned 32-bit-or-wider or 64-bit value (uint/uint32/uint64/uintptr/int64)
+// does not implicitly convert to `int`/`nint` (CS1503) and is cast (through its underlying for a named
+// numeric). Go's own slice bounds are `int`, so the `(int)` narrowing matches Go semantics.
+func (v *Visitor) castWideIntegerToInt(expr ast.Expr) string {
 	converted := v.convExpr(expr, nil)
 
-	if basic, ok := v.getType(expr, false).Underlying().(*types.Basic); ok {
-		switch basic.Kind() {
-		case types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
-			return v.intCastOperand(expr, converted)
+	if exprType := v.getType(expr, false); exprType != nil {
+		if basic, ok := exprType.Underlying().(*types.Basic); ok {
+			switch basic.Kind() {
+			case types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
+				return v.intCastOperand(expr, converted)
+			}
 		}
 	}
 
