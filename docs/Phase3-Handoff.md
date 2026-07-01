@@ -7,10 +7,29 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~159 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~158 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): GENERALIZED cross-package type-reference alias emission (`a1d6db87e`,
+- **2026-06-30 (latest): pointer-receiver method promoted through a VALUE embed routes to the embedded
+  box (`0abc66e2d`; CS1929 −3, runtime 159 → 158).** `timeTimer` embeds `timer` BY VALUE; a promoted
+  `t.modify(…)`/`Ꮡt.stop()`/`Ꮡt.reset(…)` on a `*timeTimer` emitted the whole `ж<timeTimer>` box, but
+  the promoted method's ж/[GoRecv]-ref overload binds `ж<timer>` (CS1929) — the TypeGenerator emits NO
+  forwarder for this shape (a value-copy forwarder would lose the write). Go auto-takes `&t.timer`, so
+  the converter now routes through the embedded field's box exactly as the explicit `t.timer.modify(…)`
+  already renders: `t.of(timeTimer.Ꮡtimer).modify(…)` / `Ꮡt.of(timeTimer.Ꮡtimer).stop()`, via
+  convUnaryExpr's `&receiver.field` &-machinery. Detection: `Selection.Index() == [embeddedField,
+  method]` (single embed hop). GATED to a VALUE embed — a POINTER embed already yields the box as its
+  field value and is left to the generated forwarder; taking its address would double-box to `ж<ж<T>>`
+  (this gate fixed an initial over-boxing regression in the trace* writers — `traceWriter` embeds
+  `traceBufPtr` — caught and corrected before commit). Write-through is genuine (a value-embedded field
+  is a SHARED heap box `ж<inner>`, so `.of(…)` aliases the real storage — verified 108/108/108/7/0 vs Go).
+  Test `EmbeddedValuePointerMethod`; full suite green (194), goldens byte-identical, adversarially
+  verified. Known limitation (NOT a regression, cannot occur in converted code): embedding a hand-written
+  baseline type whose pointer methods lack a `[GoRecv]` ж-overload would not bind — the converted stdlib
+  always has the RecvGenerator overload. See ConversionStrategies.md "A pointer-receiver method promoted
+  through a VALUE embed…". *(Two prior commits this session: `6fd2df8d5` committed InferredForeignTypeNoImport's
+  generated .cs, missed in a1d6db87e; `a1d6db87e`/`af541a4e4` generalized the alias fix — below.)*
+- **2026-06-30: GENERALIZED cross-package type-reference alias emission (`a1d6db87e`,
   subsuming the unsafe-specific `08946c23d`; CS0246 2 → 0, runtime 161 → 159).** A cross-package type
   renders in short-alias form — `pkg.Type` (`time.Duration`, `abi.Kind`) for a named type,
   `@unsafe.Pointer` for the unsafe.Pointer basic — which resolves only via a file-local alias
@@ -191,9 +210,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~159; the `@unsafe`-alias fix above cleared both
-CS0246, 161 → 159): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS1929 9, CS0029 8, CS0121 6, CS0841 5,
-CS0266 5, CS0103 5:
+as items land. As of 2026-06-30 latest (`runtime` = ~158; the timeTimer value-embed fix above cleared
+3 CS1929, 159 → 158): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7, CS1929 6,
+CS0121 6, CS0841 5, CS0266 5, CS0136 4:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -287,9 +306,12 @@ CS0266 5, CS0103 5:
   - **Indexed-element atomic (CS1929 ×4: `mprof` `bh.val[i].Load()`/`.StoreNoWB()`).** Array element of
     atomic `UnsafePointer` via a pointer — the `daca4f3a1`/`exprIsIndexedValueElement` area; check why it
     isn't firing for `UnsafePointer`.
-  - **Embedding promotion (CS1929: `time` `timeTimer.modify/stop/reset` ×3 → needs `ж<timer>`; `type`
-    `Δrtype.Uncommon` → needs `ref abi.Type`).** Overlaps S3 (TypeGenerator embedding) — `timeTimer` embeds
-    `timer`, `Δrtype` embeds `abi.Type`.
+  - [x] **`time` `timeTimer.modify/stop/reset` value-embed promotion** *(landed 2026-06-30, `0abc66e2d`;
+    CS1929 −3, 159 → 158).* Pointer-receiver method promoted through the VALUE embed `timeTimer.timer`;
+    converter routes `t.of(timeTimer.Ꮡtimer).modify(…)` (single-hop, value-embed-gated). Write-through
+    verified. Test `EmbeddedValuePointerMethod`. **REMAINING embedding CS1929:** `type` `Δrtype.Uncommon`
+    (`Δrtype` embeds CROSS-PACKAGE `abi.Type`) — that is the S3 metadata-only case below, NOT this
+    same-package fix.
   - **iface `ж<ж<itabTableType>>.find` ×1** — double-box (a pointer field already a box, over-boxed).
 - [~] **S3 — named-type/embedding member forwarding** *(CS1061 26→19; named-over-STRUCT done; remainder
   characterized).* **What landed:** `e59b5865a` — a defined type over a STRUCT (`type winlibcall libcall`)
@@ -373,29 +395,25 @@ CS0266 5, CS0103 5:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~159. Last session GENERALIZED the
-cross-package type-reference alias emission (CONVERTER-only, `a1d6db87e`, subsuming the unsafe-specific
-`08946c23d`; CS0246 2 → 0, runtime 161 → 159). A cross-package type renders in short-alias form (`pkg.Type`
-like `time.Duration`, or `@unsafe.Pointer`), resolving ONLY via a file-local alias (`using time =
-time_package;`), previously emitted solely from a CANONICAL (unaliased) import. A file reaching a foreign
-type without one — type INFERENCE (a same-package func returns it, so the caller never writes `pkg.`:
-`preempt.go` `fd := funcdata()`→unsafe.Pointer), a BLANK import (`_ "pkg"`, alias `_`: `symtabinl.go`), or a
-non-canonical ALIAS — hit CS0246. (The user flagged the first fix was unsafe-specific and asked to
-generalize; confirmed generic via a `time.Duration` repro.) Fix (3 files): `collectTypePackages` (walked from
-`getTypeName`) records the import path of every foreign named type it emits — recursing pointer/slice/array/
-map/chan/generic-args/func-sig so composite elements register — plus pseudo-path `"unsafe"` for the
-unsafe.Pointer basic; `visitImportSpec` records canonical-imported paths (`canonicalAliasImported`,
-`packageUsingAlias` factors the derivation); `visitFile` supplies the alias for the difference (idempotent —
-no duplicate; a non-canonical alias coexists). Type-reference analog of the method-call
-`addMethodPackageNamespaceUsing`. Tests `UnsafePointerInferredNoImport` (Basic arm: scalar/composite/blank) +
-`InferredForeignTypeNoImport` (generic named arm: inferred `*strings.Reader` in an `fmt`-only consumer); full
-suite green (193), goldens byte-identical, adversarially verified head-to-head (no dup aliases across 219
-stdlib files). Known-inert side-effect: a few UNUSED alias directives in regenerable stdlib output
-(compile-inert — not even CS8019; zero golden churn; optional future cleanup = gate `collectTypePackages` to
-emission paths). FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green"
-claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a committed converter change
-false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1 --update-targets` (post
-fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~158. Last session routed a pointer-receiver
+method PROMOTED through a VALUE embed to the embedded box (CONVERTER-only, `0abc66e2d`; CS1929 −3, runtime
+159 → 158). `timeTimer` embeds `timer` BY VALUE; a promoted `t.modify(…)`/`Ꮡt.stop()`/`Ꮡt.reset(…)` on a
+`*timeTimer` emitted the whole `ж<timeTimer>` box, but the promoted method's ж/[GoRecv]-ref overload binds
+`ж<timer>` (CS1929) — the TypeGenerator emits NO forwarder for this shape (a value-copy forwarder would lose
+the write). Go auto-takes `&t.timer`, so the converter routes through the embedded field's box exactly as the
+explicit `t.timer.modify(…)` already renders: `t.of(timeTimer.Ꮡtimer).modify(…)` (pointer local) /
+`Ꮡt.of(timeTimer.Ꮡtimer).stop()` (deref'd param), via convUnaryExpr's `&receiver.field` &-machinery.
+Detection: `Selection.Index() == [embeddedField, method]` (single embed hop) in convSelectorExpr. GATED to a
+VALUE embed — a POINTER embed already yields the box as its field value and is left to the generated forwarder;
+taking its address would double-box to `ж<ж<T>>` (this gate fixed an over-boxing regression in the trace*
+writers, `traceWriter`→`traceBufPtr`, caught before commit). Write-through is genuine (a value-embedded field
+is a SHARED heap box `ж<inner>`, so `.of(…)` aliases the real storage — verified 108/108/108/7/0 vs Go). Test
+`EmbeddedValuePointerMethod`; full suite green (194), goldens byte-identical, adversarially verified. Known
+limitation (NOT a regression, cannot occur in converted code): embedding a hand-written baseline type whose
+pointer methods lack a `[GoRecv]` ж-overload would not bind. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .`
+before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a
+committed converter change false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1
+--update-targets` (post fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -409,21 +427,14 @@ NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
 named-over-array entangled before committing):
-- **S2/S3 embedding: `time` `timeTimer.modify/stop/reset` (CS1929 ×3, time.cs ~315/327/341)** — `timeTimer`
-  embeds `timer` (value field, SAME package); a promoted pointer-receiver method `t.modify(…)` / `Ꮡt.stop()`
-  emits the receiver as `Ꮡt` (`ж<timeTimer>`) but the extension wants `ж<timer>` (CS1929). Fix: route the
-  receiver through the embedded-field box `Ꮡt.of(timeTimer.Ꮡtimer).modify(…)`. That exact field-box accessor
-  `t.of(timeTimer.Ꮡtimer)` is ALREADY emitted for field access on neighbouring lines (newTimer's
-  `racerelease(new @unsafe.Pointer(t.of(timeTimer.Ꮡtimer)))`), so the &-machinery already knows the embedded
-  field — the gap is only that convSelectorExpr's box-routing branches (capture-mode / pointer-receiver, ~648–760)
-  box as `Ꮡt` WITHOUT descending into the embedded field when the method is PROMOTED via embedding
-  (`v.info.Selections[sel].Index()` has >1 element: the embed-field hop(s) then the method). Contained
-  converter-only feature; VERIFY same-package (NOT the metadata-only `Δrtype`/`abi.Type` case). Existing embedding
-  tests: `PointerEmbeddingPromotion` / `NestedEmbeddingPromotion`. Start in convSelectorExpr.go + convUnaryExpr's
-  &-machinery.
-- **CS0136 local-shadowing (×4, lock_sema `ns`, proc `Δtrace`/`i`×2)** — an inner-scope local collides with an
-  enclosing-scope C# local of the same name (`variableAnalysisOperations.go` shadow-rename). Verify it's a genuine
-  shadow-rename miss, not analysis-order noise, before committing.
+- **CS0136 local-shadowing (×4, lock_sema.cs:242 `ns`, proc.cs:5687 `Δtrace`, proc.cs:6669/6678 `i`)** — an
+  inner-scope local collides with an enclosing-scope C# local of the same name ("cannot be declared in this scope
+  because that name is used in an enclosing local scope"). C# has NO block-shadowing (Go does), so the converter's
+  shadow-rename pass (`variableAnalysisOperations.go`) must rename the inner declaration. These 4 are shadow-rename
+  MISSES. VERIFY each is a genuine miss (the inner+outer really are distinct Go locals in nested scopes) and not
+  analysis-order noise before committing — reproduce the Go scoping, check the rename pass didn't fire. Likely
+  contained converter-only. NOTE the `Δtrace` one already carries a collision marker (`Δ`), so it may be a
+  rename-INTERACTION (collision-rename vs shadow-rename) — inspect that one carefully.
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
   `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
