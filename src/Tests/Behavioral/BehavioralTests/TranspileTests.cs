@@ -108,6 +108,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckClosureMixedReturnUnsigned() => CheckTarget("ClosureMixedReturnUnsigned");
+
+    [TestMethod]
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]

@@ -2,10 +2,65 @@ package main
 
 import (
 	"go/ast"
+	"go/token"
+	"go/types"
 	"strings"
 )
 
 const DeferredDeclsMarker = ">>MARKER:DEFERRED_DECLS<<"
+
+// lambdaConstReturnCastType returns the C# type name to cast a constant integer-literal RETURN expression
+// to, when that return sits inside a LAMBDA body whose result type is an unsigned/pointer-sized integer.
+// C# infers a lambda's delegate type from the *types* of its return expressions; a lambda that mixes
+// `return 0` (the literal is typed `int`) with `return pcs[i]` (typed `nuint`/`uint`/`ulong`) has no
+// best-common-type between `int` and the unsigned target, so the enclosing `var f = …` assignment fails
+// with CS8917 ("no best type found"). Casting the literal to the result type (`return (nuint)0`) makes both
+// returns the same type, so the delegate is inferable. (runtime/select.go `casePC := func(casi int) uintptr
+// { if pcs == nil { return 0 }; return pcs[casi] }`.) Gated narrowly to avoid pointless golden churn:
+//   - only inside a lambda body (conversionInLambda) — a NAMED func's `return 0` to a `nuint` result
+//     compiles as an ordinary constant conversion and needs no cast;
+//   - only for a bare INTEGER literal (optionally negated) — the sole shape that trips the inference gap;
+//   - only when the result kind is uint/uint32/uint64/uintptr — `int` shares a common type with
+//     byte/uint16 (they widen to int) and with the signed/nint/long kinds, so those never hit CS8917.
+func (v *Visitor) lambdaConstReturnCastType(targetType types.Type, expr ast.Expr) string {
+	if v.lambdaCapture == nil || !v.lambdaCapture.conversionInLambda {
+		return ""
+	}
+
+	lit := expr
+
+	if unary, ok := lit.(*ast.UnaryExpr); ok && unary.Op == token.SUB {
+		lit = unary.X
+	}
+
+	if basicLit, ok := lit.(*ast.BasicLit); !ok || basicLit.Kind != token.INT {
+		return ""
+	}
+
+	// Require a BASIC target (not a named type over an unsigned kind): a basic uintptr/uint/uint32/uint64
+	// emits a C# alias cast (`(uintptr)0`, `(uint64)0`) that always compiles, whereas a named numeric type
+	// `type gclinkptr uintptr` would emit `(gclinkptr)0`, which only compiles if that type happens to
+	// define an int conversion — casting it here could introduce a NEW error. The runtime CS8917 site
+	// (select.go, basic uintptr) needs only the basic case; leave named-type lambda returns alone.
+	if targetType == nil {
+		return ""
+	}
+
+	targetBasic, ok := targetType.(*types.Basic)
+
+	if !ok {
+		return ""
+	}
+
+	switch targetBasic.Kind() {
+	case types.Uint, types.Uint32, types.Uint64, types.Uintptr:
+		// C# uint / ulong / nuint — a bare `int` literal has no best-common-type with these.
+	default:
+		return ""
+	}
+
+	return convertToCSTypeName(v.getTypeName(targetType, false))
+}
 
 func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	recvIndex := -1
@@ -204,12 +259,22 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				}
 
 				var narrowCast string
+				var lambdaConstCast string
 				if resultParams != nil && i < resultParams.Len() {
 					narrowCast = v.narrowArithmeticCastTypeFor(resultParams.At(i).Type(), expr, resultExpr)
+
+					if len(narrowCast) == 0 {
+						lambdaConstCast = v.lambdaConstReturnCastType(resultParams.At(i).Type(), expr)
+					}
 				}
 
 				if recvIndex != -1 && i == recvIndex {
 					result.WriteString(capturedRecvName)
+				} else if len(lambdaConstCast) > 0 {
+					// A constant integer-literal return inside a lambda whose result is an unsigned/
+					// pointer-sized integer must be cast to that type so the delegate return type is
+					// inferable (CS8917) — see lambdaConstReturnCastType.
+					result.WriteString("(" + lambdaConstCast + ")(" + resultExpr + ")")
 				} else if len(narrowCast) > 0 {
 					// A narrow-integer (byte/int8/uint8/int16/uint16) arithmetic RESULT is promoted to
 					// `int` by C#, so returning it from a narrow-typed function needs the cast back to

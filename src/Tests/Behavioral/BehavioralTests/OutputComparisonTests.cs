@@ -103,6 +103,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckClosureMixedReturnUnsigned() => CheckTarget("ClosureMixedReturnUnsigned");
+
+    [TestMethod]
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]

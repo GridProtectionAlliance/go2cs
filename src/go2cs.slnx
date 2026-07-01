@@ -78,6 +78,7 @@
     <Project Path="Tests/Behavioral/ClosureBareReturnNamedResults/ClosureBareReturnNamedResults.csproj" />
     <Project Path="Tests/Behavioral/ClosureCapturedPointerAddress/ClosureCapturedPointerAddress.csproj" />
     <Project Path="Tests/Behavioral/ClosureDefer/ClosureDefer.csproj" />
+    <Project Path="Tests/Behavioral/ClosureMixedReturnUnsigned/ClosureMixedReturnUnsigned.csproj" />
     <Project Path="Tests/Behavioral/ClosureParamShadow/ClosureParamShadow.csproj" />
     <Project Path="Tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
