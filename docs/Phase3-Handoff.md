@@ -7,10 +7,33 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~154 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~151 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): completed shadow-renaming for escaped sibling loop vars + LHS index/key uses
+- **2026-06-30 (latest): narrow-int arithmetic cast when only the FIRST operand is a conversion
+  (`de2e80bd4`; CS0266 −3, runtime 154 → 151).** Go byte arithmetic wraps at byte width; C# promotes to
+  `int`, so a narrow-typed assignment needs the result cast back (CS0266). `narrowArithmeticCastTypeFor`'s
+  redundant-cast guard skipped the cast whenever the converted RHS merely STARTED with `(byte)(` — but
+  `buf[i] = byte(e/100) + '0'` emits `(byte)(e/100) + (rune)'0'`, where that prefix casts only the FIRST
+  operand and the binary result is still `int` (runtime print.go exponent-format ×3). Fix
+  (`visitAssignStmt.go`): the guard now skips only when the WHOLE RHS is `(byte)(…)` — a paren-balance walk
+  (`wholeExprIsCastOfType`) requiring the cast-paren's matching close at the very end, skipping `(`/`)`
+  inside char/string literals. Adversarially verified (miscounts are false-NEGATIVE only = harmless
+  redundant cast; wrap semantics confirmed vs Go across all 4 narrow kinds). Test
+  `NarrowByteArithFirstOperandCast`; full suite green (197), goldens byte-identical. **The narrow cast on a
+  RETURN of such arithmetic (env_posix.lowerASCII, CS0266) is a SEPARATE still-open gap** (the return path
+  doesn't call narrowArithmeticCastType).
+- **⚠ Δtrace CS0136 — INVESTIGATED & DECLINED this session (do not blindly re-attempt).** proc `procresize`
+  has three `trace := traceAcquire()` (one func-body, two in nested if/else); `trace` collision-renames to
+  `Δtrace` (it's both a package VAR and a method name). The func-body one and one nested one both emit
+  `Δtrace` (the OTHER nested one correctly gets `traceΔ1`). The asymmetry — one nested `trace` renames, its
+  sibling doesn't — was NOT reproducible in isolation (a plain collision + nested if/else renames BOTH
+  siblings correctly) and NOT fully understood; it's a subtle interaction between the collision-rename, the
+  shadow-rename counter, and the specific scope nesting (the un-renamed one is a DIRECT statement in the
+  outer `else` block, after an inner `if`, not a sibling if/else). Declined rather than gamble a
+  poorly-understood fix in the delicate shadow pass. Needs a focused deep-dive on `declareVar`'s
+  funcLevelVar-branch needsShadowing logic (why it fires for one nested position but not another). 1 error.
+- **2026-06-30: completed shadow-renaming for escaped sibling loop vars + LHS index/key uses
   (`f0c1c946e`; CS0136 −2 + CS0841 −1, runtime 157 → 154).** TWO ENTANGLED fixes the runtime
   `runqputslow` shape needs together (`variableAnalysisOperations.go`): **(A)** an escaping
   function-body `for i := …` loop var is emitted as a func-scope `ref var i = ref heap<…>(out var Ꮡi)`
@@ -246,9 +269,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~154; the escaped-sibling-loop + LHS-index fixes above
-cleared 2 CS0136 + 1 CS0841, 157 → 154): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0266 5, CS0841 4, CS0117 3:
+as items land. As of 2026-06-30 latest (`runtime` = ~151; the narrow-int first-operand-cast fix above
+cleared 3 CS0266, 154 → 151): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 2:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -431,20 +454,17 @@ CS1929 6, CS0121 6, CS0266 5, CS0841 4, CS0117 3:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~154. Last session completed shadow-renaming
-for two ENTANGLED gaps the runtime `runqputslow` shape needs (CONVERTER-only, `f0c1c946e`; CS0136 −2 +
-CS0841 −1, 157 → 154). **(A)** an escaping function-body `for i := …` loop var is hoisted to a func-scope
-`ref var i = ref heap<…>` decl, so sibling `for i := …` loops reusing the name collide (CS0136) — collect
-the escaped loop var as function-level so the siblings rename `iΔ1`/`iΔ2` (gated escaped + func-body-level +
-name-not-already-func-level, preserving the ForVarMasks invariant). **(B)** a shadow-renamed var used as an
-LHS INDEX/MAP KEY (`a[i]=…`, `m[ns]=…`, `(*p)[i]=…`) was never rewritten (the `=` case only handled the ROOT
-ident) — a SILENT wrong-value bug + CS0136/CS0165 once the loop var renames; descend the target's
-index/selector/deref chain, incl. a PAREN-rooted `(*p)[i]` (getIdentifier→nil; a defect the verifier caught,
-fixed pre-commit). Test `EscapedLoopVarSiblingIndex` ([10 20 0 30 40]/2002/9 vs Go); full suite green (196),
-goldens byte-identical, adversarially verified. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any
-"suite green" claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a committed
-converter change false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1
---update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~151. Last session fixed the narrow-int
+arithmetic cast when only the FIRST operand is a conversion (CONVERTER-only, `de2e80bd4`; CS0266 −3, 154 →
+151). `buf[i] = byte(e/100) + '0'` emits `(byte)(e/100) + (rune)'0'`; the redundant-cast guard skipped the
+whole-expr `(byte)` cast because the RHS merely STARTED with `(byte)(` (which casts only the first operand),
+so the `byte + int` result stayed `int` (CS0266, runtime print.go ×3). Fix (`visitAssignStmt.go`): the guard
+now skips only when the WHOLE RHS is `(byte)(…)` — a paren-balance walk `wholeExprIsCastOfType` (matching close
+at the very end, skipping `(`/`)` inside char/string literals). Test `NarrowByteArithFirstOperandCast`; full
+suite green (197), goldens byte-identical, adversarially verified. FORCE `cd src/go2cs && go build -o
+bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is
+newer, so a committed converter change false-greens on a stale binary. After any emitted-form change run
+`run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -457,19 +477,21 @@ REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost 
 NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing). NOTE: S6b (LHS-index/map-key shadow rename) AND the proc `i`
-heap-escaped-loop-var hoist are BOTH DONE (`f0c1c946e`, entangled — landed together). Remaining shadow-rename
-CS0136 is just:
-- **proc.cs `Δtrace` (5687) — the last CS0136.** A collision-rename (`trace`→`Δtrace`, because `trace` collides
-  with a package type) that ALSO shadows an OUTER `trace` (also renamed `Δtrace`), so both nested `trace` locals
-  get the SAME collision name `Δtrace` → CS0136. A rename-INTERACTION: the shadow-rename `Δ`-counter suffix and the
-  collision-rename `Δ`-prefix don't compose (the inner shadow needs an ADDITIONAL disambiguator on top of the
-  collision rename). Inspect how collision-renamed names flow through declareVar / getShadowedVarName; likely
-  contained but subtle (verify the shadow rename applies to an already-collision-renamed name). ~1 error.
-- OR re-bucket and pick from **CS0841 (4)** ("use of unassigned local"/"before declared" — an emission-ORDER
-  issue, possibly contained), **CS0266 (5)** (named-numeric / pointer-walk conversions — read the S6 queue item),
-  or **CS0117 (3)** (pinner.cs `Ꮡx` — likely named-over-array, VERIFY not entangled). Avoid CS0030 (S1),
-  CS0029 (S4), CS0103 (S5), the mprof CS1929 (entangled), and the CS0121 add-overload (S1-uintptr subtle).
+named-over-array entangled before committing):
+- **CS0266 RETURN-path narrow cast (env_posix.lowerASCII, 1) — the cleanest sibling of the just-landed fix.**
+  `return c + ('a'-'A')` where `c`/return are `byte` emits `return c + ((rune)'a' - (rune)'A')` = byte+int = int
+  → CS0266. The narrow-arith cast (`narrowArithmeticCastType`) is called from the ASSIGNMENT/value-spec paths but
+  NOT from `visitReturnStmt`, so a return of narrow arithmetic isn't cast. Fix: apply the same narrow cast in the
+  return path when the function's result type is narrow and the returned expr is binary/unary arith. Contained,
+  directly analogous to `de2e80bd4`. (The `mbitmap.cs` `long→nuint` CS0266 is a DIFFERENT root — a wide-literal /
+  named-numeric conversion — not this.)
+- **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED this session (see Where-things-stand ⚠).** A subtle
+  collision-rename × shadow-rename × scope-nesting interaction NOT reproducible in isolation; needs a focused
+  deep-dive on `declareVar`'s funcLevelVar-branch `needsShadowing` (why it renames one nested `trace` position but
+  not its sibling). Do NOT re-attempt blindly — only pick it with a dedicated investigation session.
+- OR re-bucket and pick from **CS0841 (4)** ("use of unassigned local"/"before declared" — emission-ORDER, mixed
+  collision/box roots, heterogeneous), or **CS0117 (3)** (pinner.cs `Ꮡx` — likely named-over-array, SKIP if so).
+  Avoid CS0030 (S1), CS0029 (S4), CS0103 (S5), the mprof CS1929 (entangled), and the CS0121 add-overload (S1-uintptr).
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
   `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
