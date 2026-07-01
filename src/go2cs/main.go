@@ -141,7 +141,11 @@ type Visitor struct {
 	inFunction           bool
 	currentFuncDecl      *ast.FuncDecl
 	currentFuncSignature *types.Signature
-	currentFuncName      string
+	// currentReturnSignature is the signature whose RESULTS a `return` currently emits against — the
+	// enclosing function's, or a nested function literal's own (set with save/restore in convFuncLit).
+	// Distinct from currentFuncSignature (which stays the enclosing func for receiver/param detection).
+	currentReturnSignature *types.Signature
+	currentFuncName        string
 	currentFuncPrefix    *strings.Builder
 	paramNames           HashSet[string]
 	paramObjects         map[types.Object]bool

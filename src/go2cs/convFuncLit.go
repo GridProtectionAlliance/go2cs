@@ -14,6 +14,19 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 	litSig, _ := v.info.TypeOf(funcLit).(*types.Signature)
 
+	// visitReturnStmt derives a bare `return`'s emitted RESULTS from the return signature. A nested
+	// literal must return against ITS OWN results, not the enclosing function's — a bare `return` inside
+	// a VOID closure otherwise gets the OUTER function's named results (`forEachGRace(func(gp1 *g) { …
+	// return … })` inside a func returning named `(n, ok)` emitted `return (n, ok);` → CS8030). This is a
+	// SEPARATE field from currentFuncSignature, which must stay the ENCLOSING function's signature so the
+	// receiver/parameter detection (isBoxedPointerLocal, varIsDerefdPointerParam) still resolves a
+	// CAPTURED pointer param (an outer parameter) correctly. Save/restore around the body.
+	savedReturnSignature := v.currentReturnSignature
+
+	if litSig != nil {
+		v.currentReturnSignature = litSig
+	}
+
 	// Does THIS literal need its own func() execution context, and additionally the
 	// named-return-defer handling (named results that deferred code, including recover, mutates)?
 	// A deferred-call target is excluded — its defer/recover belong to the enclosing function.
@@ -36,6 +49,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	defer func() {
 		v.namedReturnDeferMode = savedNamedReturnDeferMode
 		v.namedReturnNames = savedNamedReturnNames
+		v.currentReturnSignature = savedReturnSignature
 	}()
 
 	if v.lambdaCapture == nil {

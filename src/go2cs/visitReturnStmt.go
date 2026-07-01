@@ -89,7 +89,13 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		result.WriteString("return")
 	}
 
-	signature := v.currentFuncSignature
+	// Emit the results against the signature of the function/literal this `return` belongs to — a nested
+	// function literal returns against ITS OWN results, not the enclosing function's (see convFuncLit).
+	signature := v.currentReturnSignature
+
+	if signature == nil {
+		signature = v.currentFuncSignature
+	}
 
 	if returnStmt.Results == nil || explicitIsNamed {
 		// In namedReturnDeferMode a naked return — or an explicit return of exactly the named

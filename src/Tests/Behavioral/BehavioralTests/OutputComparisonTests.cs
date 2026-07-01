@@ -94,6 +94,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
 
     [TestMethod]
+    public void CheckClosureBareReturnNamedResults() => CheckTarget("ClosureBareReturnNamedResults");
+
+    [TestMethod]
     public void CheckClosureCapturedPointerAddress() => CheckTarget("ClosureCapturedPointerAddress");
 
     [TestMethod]

@@ -95,6 +95,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 	signature := currentFuncType.Signature()
 	v.currentFuncSignature = signature
+	v.currentReturnSignature = signature
 
 	// A generic capture-mode method (e.g. atomic.Pointer[T]) is emitted with its heap box
 	// AS the receiver (`this ж<T> Ꮡx`) so the receiver's type parameter stays in scope for

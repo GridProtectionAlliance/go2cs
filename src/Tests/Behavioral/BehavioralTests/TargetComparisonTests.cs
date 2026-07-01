@@ -101,6 +101,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckClearBuiltinShadow() => CheckTarget("ClearBuiltinShadow");
 
     [TestMethod]
+    public void CheckClosureBareReturnNamedResults() => CheckTarget("ClosureBareReturnNamedResults");
+
+    [TestMethod]
     public void CheckClosureCapturedPointerAddress() => CheckTarget("ClosureCapturedPointerAddress");
 
     [TestMethod]
