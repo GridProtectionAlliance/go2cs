@@ -10,23 +10,32 @@
 - **`runtime` is the foundation and the current frontier — now at ~159 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): `@unsafe` alias emitted for inferred/blank-import unsafe.Pointer refs
-  (`08946c23d`; CS0246 2 → 0, runtime 161 → 159).** A reference to `unsafe.Pointer` renders as C#
-  `@unsafe.Pointer`, which resolves only via the file-local alias `using @unsafe = unsafe_package;`.
-  That alias was emitted solely from a NAMED `import "unsafe"`, so a file that reaches the type without
-  a usable import — via type INFERENCE (`fd := funcdata(f,i)`, funcdata returns unsafe.Pointer, so the
-  file never writes `unsafe.` and need not import it — `preempt.go`) or a BLANK import (`_ "unsafe"`,
-  whose C# alias is `_`, not `@unsafe` — `symtabinl.go`) — failed CS0246. Fix (converter-only, 3 files):
-  `getTypeName` flags any emitted type whose string form names unsafe.Pointer (covers the direct Basic
-  AND composite/func forms like `[]unsafe.Pointer` that render the element through the string path
-  without recursing — a Basic-only check missed those); `visitImportSpec` records whether a named import
-  already emitted the `@unsafe` alias; `visitFile` supplies it when referenced-but-not-aliased
-  (idempotent-safe, non-conflicting alongside a blank/aliased/dot import). Full suite green (192),
-  existing goldens byte-identical. Test `UnsafePointerInferredNoImport` (scalar / composite-isolated /
-  blank-import variants; the composite file provably catches a completion revert). See
-  ConversionStrategies.md "The `@unsafe` alias is emitted whenever a file references the unsafe.Pointer
-  type…". (CS0118 tracetime `unsafe_package is a type used like a variable` is a DISTINCT root — not the
-  alias issue — left untouched.)
+- **2026-06-30 (latest): GENERALIZED cross-package type-reference alias emission (`a1d6db87e`,
+  subsuming the unsafe-specific `08946c23d`; CS0246 2 → 0, runtime 161 → 159).** A cross-package type
+  renders in short-alias form — `pkg.Type` (`time.Duration`, `abi.Kind`) for a named type,
+  `@unsafe.Pointer` for the unsafe.Pointer basic — which resolves only via a file-local alias
+  (`using time = time_package;`, `using @unsafe = unsafe_package;`). That alias was emitted solely from a
+  CANONICAL (unaliased) import, so a file reaching a foreign type without one — via type INFERENCE (a
+  same-package function returns the foreign type, so the caller never writes `pkg.` and need not import
+  it: `preempt.go` `fd := funcdata()`→unsafe.Pointer), a BLANK import (`_ "pkg"`, alias `_`:
+  `symtabinl.go`), or a non-canonical ALIAS — failed CS0246. *The user flagged that my first fix was
+  unsafe-specific and asked to generalize it — confirmed generic via a `time.Duration` repro.* Fix
+  (converter-only, 3 files): `collectTypePackages` (walked from `getTypeName`) records the import path of
+  every foreign named type it emits — recursing pointer/slice/array/map/chan/generic-args/func-signature
+  so composite elements register — plus pseudo-path `"unsafe"` for the unsafe.Pointer basic;
+  `visitImportSpec` records (in `canonicalAliasImported`) paths whose canonical alias an import already
+  emitted (`packageUsingAlias` factors the derivation); `visitFile` supplies the alias for the difference
+  (idempotent — no duplicate; a non-canonical alias coexists). This is the type-reference analog of the
+  method-call `addMethodPackageNamespaceUsing`. Full suite green (193), existing goldens byte-identical;
+  adversarially verified head-to-head (no duplicate aliases across 219 stdlib files; unsafe goldens
+  byte-identical). Tests `UnsafePointerInferredNoImport` (Basic arm: scalar/composite/blank) +
+  `InferredForeignTypeNoImport` (generic named arm: inferred `*strings.Reader` in an `fmt`-only consumer).
+  See ConversionStrategies.md "A cross-package type reference emits its `using`…". **Known-inert
+  side-effect (optional future cleanup):** `collectTypePackages` runs on every `getTypeName` call incl.
+  non-emitting reasoning, so regenerable stdlib output gains a few UNUSED `using alias = …;` directives —
+  compile-inert (not even CS8019, which fires only for unused *namespace* usings) and zero golden churn;
+  could later be gated to emission paths only. (CS0118 tracetime `unsafe_package is a type used like a
+  variable` is a DISTINCT root — not the alias issue — left untouched.)
 - **2026-06-30: S2 `~`-deref-rooted receiver materialization landed (`716de3a64`; CS1510
   9 → 0, runtime 169 → 161).** A pointer-receiver method on a value field reached through a pointer
   RVALUE — a call `getg().schedlink.set(…)`, a method-call chain `q.tail.ptr().schedlink.set(…)`, or a
@@ -364,20 +373,26 @@ CS0266 5, CS0103 5:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~159. Last session landed the `@unsafe`-alias
-emission (CONVERTER-only, `08946c23d`; CS0246 2 → 0, runtime 161 → 159). A reference to `unsafe.Pointer`
-renders as C# `@unsafe.Pointer`, which resolves ONLY via the file-local alias `using @unsafe =
-unsafe_package;` — previously emitted solely from a NAMED `import "unsafe"`. A file reaching the type without
-a usable import — type INFERENCE (`fd := funcdata(f,i)`, funcdata returns unsafe.Pointer, so the file never
-writes `unsafe.` and need not import it — `preempt.go`) or a BLANK import (`_ "unsafe"`, whose C# alias is
-`_`, not `@unsafe` — `symtabinl.go`) — hit CS0246. Fix (3 files): `getTypeName` flags any emitted type whose
-STRING form names unsafe.Pointer (covers the direct Basic AND composite/func forms `[]unsafe.Pointer` that
-render the element via the string path without recursing — a Basic-only check missed those, a real same-class
-gap an adversarial verifier caught and I closed); `visitImportSpec` records whether a named import already
-aliased `@unsafe`; `visitFile` supplies the alias when referenced-but-not-aliased (idempotent-safe,
-non-conflicting with a blank/aliased/dot import). Test `UnsafePointerInferredNoImport` (scalar / composite-
-isolated / blank-import — the composite file provably catches a completion revert); full suite green (192),
-existing goldens byte-identical. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green"
+This session: re-bucket, then tackle ONE root. Runtime is at ~159. Last session GENERALIZED the
+cross-package type-reference alias emission (CONVERTER-only, `a1d6db87e`, subsuming the unsafe-specific
+`08946c23d`; CS0246 2 → 0, runtime 161 → 159). A cross-package type renders in short-alias form (`pkg.Type`
+like `time.Duration`, or `@unsafe.Pointer`), resolving ONLY via a file-local alias (`using time =
+time_package;`), previously emitted solely from a CANONICAL (unaliased) import. A file reaching a foreign
+type without one — type INFERENCE (a same-package func returns it, so the caller never writes `pkg.`:
+`preempt.go` `fd := funcdata()`→unsafe.Pointer), a BLANK import (`_ "pkg"`, alias `_`: `symtabinl.go`), or a
+non-canonical ALIAS — hit CS0246. (The user flagged the first fix was unsafe-specific and asked to
+generalize; confirmed generic via a `time.Duration` repro.) Fix (3 files): `collectTypePackages` (walked from
+`getTypeName`) records the import path of every foreign named type it emits — recursing pointer/slice/array/
+map/chan/generic-args/func-sig so composite elements register — plus pseudo-path `"unsafe"` for the
+unsafe.Pointer basic; `visitImportSpec` records canonical-imported paths (`canonicalAliasImported`,
+`packageUsingAlias` factors the derivation); `visitFile` supplies the alias for the difference (idempotent —
+no duplicate; a non-canonical alias coexists). Type-reference analog of the method-call
+`addMethodPackageNamespaceUsing`. Tests `UnsafePointerInferredNoImport` (Basic arm: scalar/composite/blank) +
+`InferredForeignTypeNoImport` (generic named arm: inferred `*strings.Reader` in an `fmt`-only consumer); full
+suite green (193), goldens byte-identical, adversarially verified head-to-head (no dup aliases across 219
+stdlib files). Known-inert side-effect: a few UNUSED alias directives in regenerable stdlib output
+(compile-inert — not even CS8019; zero golden churn; optional future cleanup = gate `collectTypePackages` to
+emission paths). FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green"
 claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a committed converter change
 false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1 --update-targets` (post
 fresh build) for ALL affected goldens.
