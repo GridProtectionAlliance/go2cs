@@ -340,6 +340,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNarrowByteArithFirstOperandCast() => CheckTarget("NarrowByteArithFirstOperandCast");
 
     [TestMethod]
+    public void CheckNarrowByteArithReturn() => CheckTarget("NarrowByteArithReturn");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

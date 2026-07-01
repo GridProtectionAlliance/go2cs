@@ -378,6 +378,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNarrowByteArithFirstOperandCast() => CheckTarget("NarrowByteArithFirstOperandCast");
 
     [TestMethod]
+    public void CheckNarrowByteArithReturn() => CheckTarget("NarrowByteArithReturn");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

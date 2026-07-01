@@ -197,8 +197,22 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					}
 				}
 
+				var narrowCast string
+				if resultParams != nil && i < resultParams.Len() {
+					narrowCast = v.narrowArithmeticCastTypeFor(resultParams.At(i).Type(), expr, resultExpr)
+				}
+
 				if recvIndex != -1 && i == recvIndex {
 					result.WriteString(capturedRecvName)
+				} else if len(narrowCast) > 0 {
+					// A narrow-integer (byte/int8/uint8/int16/uint16) arithmetic RESULT is promoted to
+					// `int` by C#, so returning it from a narrow-typed function needs the cast back to
+					// compile and to preserve Go's wrap (CS0266) — `func lowerASCII(c byte) byte { return
+					// c + ('a'-'A') }`. The assignment / value-spec paths already narrow such a result;
+					// the return path had omitted it. narrowArithmeticCastTypeFor gates on a binary/unary
+					// arith RHS whose Go type matches the (narrow) result type, and skips a whole-expr
+					// already-cast RHS — so a bare ident / call / already-narrowed return is untouched.
+					result.WriteString("(" + narrowCast + ")(" + resultExpr + ")")
 				} else {
 					result.WriteString(resultExpr)
 				}
