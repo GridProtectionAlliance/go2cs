@@ -7,10 +7,26 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~139 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~138 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): emit a `return` against its OWN function literal's results, not the enclosing
+- **2026-07-01 (latest): emit an unreachable trailing `return default!;` after an exhaustive
+  fallthrough-default switch (`a99d32f81`; CS0161 −1, runtime 139 → 138).** A Go `switch` lowered to an
+  if-chain whose `default:` is reached via `fallthrough` emits the default as a guarded `if (fallthrough
+  || !match){…}`; C# can't prove the guard always runs, so a value-returning func ending in it fails
+  CS0161 even though the Go `default` is exhaustive (runtime `startpanic_m`). Fix (`visitSwitchStmt.go`):
+  emit `return default!;` after the if-chain — GATED to be provably safe: every case is a genuine Go
+  TERMINATING statement (new `isTerminatingStmt`/`isTerminatingStmtList`, spec §Terminating, CONSERVATIVE)
+  or falls through, none can `break` out, the func returns a value, and NOT namedReturnDefer mode (void
+  wrapper → CS8030). **Two adversarial rounds earned their keep: a shallow "last-line-was-return" gate
+  false-positived on `if{return}`-without-`else` (falls out → the trailing return SILENTLY returned the
+  zero value); fixed with real terminality analysis. A second round found the namedReturnDefer CS8030
+  gap.** A whole-stdlib diff confirmed the fix's ONLY effect is the one `return` in `startpanic_m`. Test
+  `SwitchFallthroughDefaultReturn` (terminal + break-out + if-without-else + namedReturnDefer shapes vs
+  Go); suite green (204), zero churn. **This came from TRIAGING the runtime error tail: the singletons
+  hid 7 CONTAINED converter roots (not just the architectural bulk) — CS0161 was #1; 6 remain (see the
+  Session-queue triage note).**
+- **2026-07-01: emit a `return` against its OWN function literal's results, not the enclosing
   func's (`a59e760b7`; CS8030 −4, runtime 143 → 139).** A bare `return` in a named-results function emits
   `return (n, ok);`. `visitReturnStmt` built this from `currentFuncSignature`, but a NESTED function
   literal kept the ENCLOSING function's signature — so a bare `return` inside a VOID closure got the outer
@@ -389,12 +405,33 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~139; CS8030 closure-return-signature fix cleared 4,
-143 → 139): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10 (**architectural — triaged**), CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0117 3 (**CS0266, CS0841, CS8030 now all 0**). What remains is dominated by
-architectural S1/S3/S4. NEXT: triage the still-uncharacterized CS0103 (7, "name does not exist") and
-CS1503 (24, arg-conversion) for any contained sub-case + the named-result-CLOSURE gap (verify it's in the
-bucket); else STOP — the CS0030/CS1061/CS0021/CS0029/CS0121 bulk is the architectural wall:
+as items land. As of 2026-07-01 latest (`runtime` = ~138; CS0161 switch-default fix cleared 1, 139 → 138):
+CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3, then a
+SINGLETON tail (CS0128 2, CS0149 2, CS8917/CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
+**A 2026-07-01 triage of the tail found 7 CONTAINED converter roots hiding among the singletons (the bulk
+is architectural). CS0161 landed (`a99d32f81`); 6 remain — a real per-iteration queue before the wall:**
+- **CS0128 (type.cs:414, `i`/`Ꮡi` duplicate)** — two sibling `for i:=…` loops, the 2nd escape-hoisted
+  (`ref var i = ref heap<nint>`) collides with the 1st `i`. Escape-hoist × sibling-loop shadow (kin to the
+  landed `f0c1c946e` escaped-sibling fix — a residual gap). Explorer ranked EASIEST; verify it isn't the
+  declined-Δtrace-class entanglement.
+- **CS0206 (runtime2.cs:177, property used as ref)** — a field emitted as a C# property is passed `ref`;
+  needs it emitted as a field (or a ref-returning accessor). Converter property-vs-field decision.
+- **CS0118 (tracetime.cs:80, `unsafe_package` used as a value)** — a const (`traceBytesPerNumber` via
+  `unsafe.Sizeof`) mis-emitted so `unsafe` (the package) appears as a value; constant-fold/expr bug.
+- **CS8120 (error.cs:273, unreachable type-switch case)** — Go `uint` and `uintptr` BOTH map to C# `nuint`,
+  so the type-switch has a duplicate `case nuint` (CS8120). Dedup the C# case (SEMANTIC caveat: uint vs
+  uintptr indistinguishable in C# — for `printpanicval` both bodies are identical `print(v)`, so a merge is
+  fine; a general fix must handle differing bodies). Verify before landing.
+- **CS8917 (select.cs:151, delegate type not inferred)** and **CS1593 (metrics.cs:494, delegate arg count)**
+  — a closure `f := func(...) T {…}` emitted as `var f = lambda` whose delegate type C# can't infer (mixed
+  return types) / wrong arity; needs the explicit `Func<…>`/`Action<…>` delegate type from the Go func sig.
+- Architectural (SKIP): CS0119/CS0149 (S6 method-expression `(*timers).run`), CS0019 (S6 named-numeric
+  bitwise on `taggedPointer`), CS8175 (S5 ref-local captured in lambda), CS0136 (declined proc-`Δtrace`),
+  CS0103 7 (S5 unsafe.Pointer-param-as-box `Ꮡzero`/`Ꮡfd`), plus the CS0030/CS1503/CS1061/CS0021/CS0029/
+  CS0121/CS1929 bulk = the architectural wall.
+- **NOTE: even clearing all 6 remaining contained roots leaves ~132 architectural errors — runtime will
+  NOT compile without the user's S1/S3/S4 models. The contained roots are converter-correctness cleanups,
+  not on the critical path.** When the 6 are done, STOP (only architectural remains).
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -577,31 +614,23 @@ bucket); else STOP — the CS0030/CS1061/CS0021/CS0029/CS0121 bulk is the archit
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~139. **MILESTONE: ALL CS0266, CS0841, CS0136,
-and CS8030 are cleared — the shadow/rename/cast family AND the closure-return-signature root are done.** Last
-session emitted a `return` against its OWN function literal's results, not the enclosing func's (CONVERTER-only,
-`a59e760b7`; CS8030 −4, 143 → 139). A bare `return` in a nested VOID closure was inheriting the enclosing
-named-results func's `(n, ok)` → `return (n, ok);` in a `void` lambda → CS8030 (runtime mprof
-`goroutineProfileWithLabelsSync`). Fix: a SEPARATE `currentReturnSignature` field (set in `visitFuncDecl`, and
-to the literal's own sig with save/restore in `convFuncLit`); `currentFuncSignature` MUST stay the enclosing
-func's for captured-pointer-param detection (swapping it wholesale regressed `.val`→`.ValueSlot`). Test
-`ClosureBareReturnNamedResults`; suite green (203), zero churn, adversarially verified. NOTE: CS8030 came from
-TRIAGING an unknown class — a clean contained root. The other unknown CS0021 (10) is ARCHITECTURAL (S1
-unsafe-pointer reinterpret `(*[2]uint64)(x)[i]` + named-over-array indexing) — SKIP.
+This session: tackle ONE contained root from the triage queue. Runtime is at ~138. **MILESTONE: ALL CS0266,
+CS0841, CS0136, CS8030, CS0161 cleared.** Last session emitted an unreachable trailing `return default!;` after
+an exhaustive fallthrough-default switch (CONVERTER-only, `a99d32f81`; CS0161 −1, 139 → 138) — runtime
+`startpanic_m`'s guarded `if (fallthrough || !match)` default left C# unable to prove exhaustiveness. GATED on
+genuine Go terminality (`isTerminatingStmt`, conservative) + non-break-out + non-namedReturnDefer — two
+adversarial rounds caught a silent-wrong-value (shallow `if{return}`-no-else) and a CS8030 (namedReturnDefer
+void wrapper) before it was safe. Test `SwitchFallthroughDefaultReturn`; suite green (204), zero churn.
 
-**⚠ IMPORTANT for this session: the contained roots are nearly EXHAUSTED.** With CS0266/CS0841/CS0136/CS8030
-gone, the remaining buckets are dominated by ARCHITECTURAL classes the driver says to SKIP: CS0030 (~45, S1
-managed-referent), CS1503 (~24), CS1061 (~16, S3 `abi.Type` metadata), CS0021 (~10, S1+named-over-array),
-CS0029 (~8, S4 nil-realias), CS0121 (~6, S1 uintptr add-overload), CS1929 (~6, S2/S3). Before touching any of
-those, FIRST re-bucket fresh and triage the still-uncharacterized **CS0103 (~7, "name does not exist")** and any
-CONTAINED sub-case of **CS1503 (~24, arg-conversion)** — read the actual messages/files; one may hide a
-contained converter root. Also verify whether the DISCOVERED **named-result-CLOSURE gap** (a `func() (a, b int)
-{…}` literal never emits its own `a`/`b` local decls — only `visitFuncDecl` does) appears in the runtime bucket;
-if so, emitting named-result locals for function literals too is a clean contained follow-up. If NONE of
-{CS0103, a CS1503 sub-case, the named-result-closure gap, or any freshly-triaged class} yields a clean CONTAINED
-root, **STOP and report** — the remaining work is the architectural S1/S3/S4 redesign (see the S1–S7 roadmap
-above) that needs the user's managed-referent / named-over-array / nil-realias models, not autonomous grinding.
-(The const-shadow follow-up is CONFIRMED N/A — 0 CS0844 in the runtime bucket.)
+**⚠ A 2026-07-01 triage of the runtime error TAIL found 7 CONTAINED converter roots among the singletons (the
+bulk is architectural). CS0161 landed; 6 remain — see the Session-queue triage note above for the full list +
+file:line + root of each: CS0128 (type.cs escape-hoist sibling-`i`, explorer's EASIEST), CS0206 (property-as-ref),
+CS0118 (unsafe-as-value const-fold), CS8120 (uint/uintptr dup type-switch case — dedup w/ semantic caveat),
+CS8917 + CS1593 (closure delegate-type not inferred/wrong-arity). Pick ONE, verify it's not entangled, land it.**
+NOTE: even clearing all 6 leaves ~132 ARCHITECTURAL errors (CS0030/CS1503/CS1061/CS0021/CS0029/CS0121/CS1929 =
+S1/S3/S4/named-over-array) — runtime will NOT compile without the user's managed-referent / named-over-array /
+nil-realias models. **When the 6 contained roots are done, STOP and report** (only architectural remains).
+(The const-shadow follow-up is CONFIRMED N/A — 0 CS0844; the named-result-closure gap is NOT in the bucket.)
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
 any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
