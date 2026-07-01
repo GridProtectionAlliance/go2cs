@@ -408,30 +408,43 @@ Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (
 as items land. As of 2026-07-01 latest (`runtime` = ~138; CS0161 switch-default fix cleared 1, 139 → 138):
 CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3, then a
 SINGLETON tail (CS0128 2, CS0149 2, CS8917/CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
-**A 2026-07-01 triage of the tail found 7 CONTAINED converter roots hiding among the singletons (the bulk
-is architectural). CS0161 landed (`a99d32f81`); 6 remain — a real per-iteration queue before the wall:**
-- **CS0128 (type.cs:414, `i`/`Ꮡi` duplicate)** — two sibling `for i:=…` loops, the 2nd escape-hoisted
-  (`ref var i = ref heap<nint>`) collides with the 1st `i`. Escape-hoist × sibling-loop shadow (kin to the
-  landed `f0c1c946e` escaped-sibling fix — a residual gap). Explorer ranked EASIEST; verify it isn't the
-  declined-Δtrace-class entanglement.
-- **CS0206 (runtime2.cs:177, property used as ref)** — a field emitted as a C# property is passed `ref`;
-  needs it emitted as a field (or a ref-returning accessor). Converter property-vs-field decision.
-- **CS0118 (tracetime.cs:80, `unsafe_package` used as a value)** — a const (`traceBytesPerNumber` via
-  `unsafe.Sizeof`) mis-emitted so `unsafe` (the package) appears as a value; constant-fold/expr bug.
-- **CS8120 (error.cs:273, unreachable type-switch case)** — Go `uint` and `uintptr` BOTH map to C# `nuint`,
-  so the type-switch has a duplicate `case nuint` (CS8120). Dedup the C# case (SEMANTIC caveat: uint vs
-  uintptr indistinguishable in C# — for `printpanicval` both bodies are identical `print(v)`, so a merge is
-  fine; a general fix must handle differing bodies). Verify before landing.
-- **CS8917 (select.cs:151, delegate type not inferred)** and **CS1593 (metrics.cs:494, delegate arg count)**
-  — a closure `f := func(...) T {…}` emitted as `var f = lambda` whose delegate type C# can't infer (mixed
-  return types) / wrong arity; needs the explicit `Func<…>`/`Action<…>` delegate type from the Go func sig.
-- Architectural (SKIP): CS0119/CS0149 (S6 method-expression `(*timers).run`), CS0019 (S6 named-numeric
-  bitwise on `taggedPointer`), CS8175 (S5 ref-local captured in lambda), CS0136 (declined proc-`Δtrace`),
-  CS0103 7 (S5 unsafe.Pointer-param-as-box `Ꮡzero`/`Ꮡfd`), plus the CS0030/CS1503/CS1061/CS0021/CS0029/
-  CS0121/CS1929 bulk = the architectural wall.
-- **NOTE: even clearing all 6 remaining contained roots leaves ~132 architectural errors — runtime will
-  NOT compile without the user's S1/S3/S4 models. The contained roots are converter-correctness cleanups,
-  not on the critical path.** When the 6 are done, STOP (only architectural remains).
+**A 2026-07-01 triage of the tail found CONTAINED converter roots among the singletons. CS0161 landed
+(`a99d32f81`). ⚠ A 2026-07-01 RE-TRIAGE (iteration 15) inspected each remaining candidate closely and found
+the explorer's "6 remaining contained" was OPTIMISTIC — most are architectural, rabbit-holes, or risky. The
+CLEAN/QUICK/LOW-RISK contained roots are ESSENTIALLY EXHAUSTED. Corrected classification:**
+- **CS8917 (select.cs:151) — the ONE genuinely-contained-but-non-trivial root.** `casePC := func(casi int)
+  uintptr { if pcs==nil { return 0 }; return pcs[casi] }` emits `var casePC = (casiΔ1)=>{… return 0; …
+  return pcsʗ1[casiΔ1]; }` — C# can't infer the delegate type because the returns are MIXED (`0`=int,
+  `pcs[i]`=nuint). Fix: either cast the untyped-const return to its resolved type (`return (nuint)0`, narrow,
+  reuses the return-cast machinery + `currentReturnSignature`), OR emit the explicit `Func<nint,uintptr>` for
+  the var decl (churns ~6 behavioral goldens that use `var f = value-returning-lambda`). Tractable but needs
+  care + adversarial value-check. **BEST remaining contained candidate.**
+- **CS0128 (type.cs:414, `i`/`Ꮡi` dup) — ESCAPE-ANALYSIS RABBIT HOLE, not "easiest".** Both sibling
+  `for i:=…` loops in `typesEqual`'s `abi.Func` case are escape-hoisted (`ref var i = ref heap<nint>`) → dup.
+  A minimal repro of two sibling index loops does NOT escape `i` — the escape is CONTEXT-SPECIFIC to
+  `typesEqual` (recursion/unsafe/abi), likely a SPURIOUS over-escape. Needs escape-analysis investigation,
+  not a quick sibling-rename. Deprioritize.
+- **CS0206 (runtime2.cs:177) — ARCHITECTURAL (S1), explorer MIS-classified.** `atomic.Casuintptr(…ref
+  (gp).val…)` where `gp` is `Δguintptr` — `.val` is the managed-referent underlying-value; this is the S1
+  guintptr/managed-pointer model. SKIP.
+- **CS1593 (metrics.cs:494) — S6 method-VALUE, not delegate-arity.** `d.compute = read.compute` (a bound
+  method value) emitted as a 0-arg `() => read.compute()` wrapper; the field wants a 2-arg delegate. Method
+  values are S6 (architectural-ish). SKIP unless a clean method-value→delegate emission is found.
+- **CS8120 (error.cs:273) — RISKY (compiles-but-maybe-wrong).** `printpanicval`'s type-switch has `case uint`
+  and `case uintptr` both → C# `case nuint` (dup). Dedup COMPILES but silently mis-routes if the two bodies
+  differ; here both are `print(v)` so a merge is safe, but a general fix is fraught (the Go uint/uintptr
+  distinction is lost in the C# type map). Only land with a bodies-identical guard; treat as low priority.
+- **CS0118 (tracetime.cs:80) — UNCLEAR.** Error points at the `_` discard of a `(w, _) = w.ensure(…)`
+  deconstruction; not the `traceBytesPerNumber` const (that's a plain `const=10`, fine). Needs investigation.
+- Architectural (SKIP): CS0119/CS0149 (S6 method-expression), CS0019 (S6 named-numeric bitwise), CS8175 (S5
+  ref-local-in-lambda), CS0136 (declined proc-`Δtrace`), CS0103 7 (S5 unsafe.Pointer-param-as-box), plus the
+  CS0030/CS1503/CS1061/CS0021/CS0029/CS0121/CS1929 bulk = the architectural wall.
+- **⚠ BOTTOM LINE (iteration 15): the clean contained roots are exhausted. Only CS8917 (needs non-trivial
+  return-cast/delegate-type work, +6-golden churn) and maybe CS0118 (unclear) remain tractable; the rest are
+  architectural / rabbit-holes / risky. Even clearing them leaves ~132 architectural errors — runtime does
+  NOT compile without the user's S1/S3/S4 managed-referent / named-over-array / nil-realias models. This is
+  the point to REPORT to the user for direction (invest in CS8917-class converter cleanups, or the
+  architectural redesign), not to keep grinding autonomously.**
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
