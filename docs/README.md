@@ -136,6 +136,24 @@ The converter builds idiomatic C# for the full range of Go language features, va
 behavioral test suite. A curated subset of the Go standard library converts and compiles today; converting
 the *entire* standard library cleanly is ongoing work — see the [roadmap](Roadmap.md).
 
+## Milestones
+
+A skimmable timeline of the project's major turning points. Full detail lives in the git history, the
+[roadmap](Roadmap.md), and [`CLAUDE.md`](../CLAUDE.md).
+
+| Date | Milestone | Commit / Tag | Notes |
+|:--|:--|:--|:--|
+| 2018-05-21 | Project inception | `929d1457f` | Original go2cs: a C#/.NET converter built on an ANTLR4 Go grammar with T4 templates. |
+| 2020-07-09 | Runtime library + hand-converted stub | `9792eeea2` | `golib` Go-semantics runtime (slices, maps, channels, built-ins) and a curated hand-finished stdlib stub. |
+| 2022-03-13 | `v0.1.2` release | `v0.1.2` | Tagged release of the mature ANTLR4-era converter. |
+| 2025-01-12 | Rewrite as "go2cs2" — Go-based converter | `87465f5f5` | Converter re-implemented in Go on `go/ast` + `go/types`; T4 templates replaced by raw string literals; Roslyn source generators supply ancillary Go semantics; the ANTLR4/C# converter is retired. |
+| 2025-05-05 | First full standard-library auto-conversion | `6ca1c45b7` · `full-conversion-2025-05` (`cc14584c7`, 05-11) | Whole Go stdlib transpiled (~301 projects). "Converts" here means the transpiler did not crash — not that the emitted C# compiles. |
+| 2026-06-25 | Baseline ↔ full-conversion separation | `3c8b3a848` | Compiling curated baseline restored to `src/core`; the WIP full conversion isolated in `src/go-src-converted`. Green build and the converter-improvement loop restored. |
+| 2026-06-26 | First full-conversion package promoted | `05a53e8c0` | `sync/atomic` migrated into the baseline (`atomic.Pointer[T]` backed by a managed slot). |
+| 2026-06-27 | `math` package compiles clean | `math-green-2026-06-27` (`914d4bd72`) | Nine full-conversion packages greened via 19 behaviorally-tested converter fixes; the core, widely-imported `math` now compiles. |
+| 2026-06-25 → ongoing | Phase 3 compile grind (`runtime` 952 → 138) | `f3713df61` … | Iterative, test-locked converter fixes drive the full stdlib toward a clean compile; `runtime` — the root of the dependency graph — is down from 952 errors to 138. |
+| _pending_ | **First clean full-standard-library compile** | _(tag TBD)_ | The Phase 3 endpoint: every `src/go-src-converted` package compiles. Not yet reached — this row will be filled in when the milestone lands. |
+
 ## C# to Go?
 
 A full code-based conversion from C# to Go is not offered (it would require so many restrictions as to be
