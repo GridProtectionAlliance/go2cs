@@ -15,10 +15,30 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~94 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~91 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): cast a wide-integer 3-index slice bound to int (`cc1255754`; CS1503 −2,
+- **2026-07-01 (latest): pin a deref-aliased pointer param/receiver by its ref-local, not a phantom
+  `.val` (`016ce07ef`; CS1061 −2 + CS0206 −1, runtime 94 → 91).** `unsafe.Pointer(ptr)` emits the pin
+  helper `@unsafe.Pointer.FromRef` whose ref target was unconditionally `(expr).val` — right for a genuine
+  box, wrong for a DEREF-ALIASED pointer (param/receiver rendered as the value alias `ref var p = ref
+  Ꮡp.val`): a `*uintptr` param's alias is a plain nuint → CS1061 (select.go `unsafe.Pointer(pc0)`,
+  heapdump.go `unsafe.Pointer(pstk)`), and a `[GoType num]` receiver's `.val` resolves to the generated
+  get-only `val` PROPERTY → CS0206 as a ref arg (runtime2.go `guintptr.cas`). Fix (`convCallExpr.go`):
+  when `exprIsDerefAliasedPointer(arg)`, take the alias's ref directly — `FromRef(ref p)`; a genuine box
+  keeps `(box).val`; inside a lambda the alias renders through the box (`FromRef(ref Ꮡp.val)`, valid).
+  **HARDENING (`captureModeOperations.go`): a hung verifier's final probe surfaced a REAL silent-wrong —**
+  the helper's receiver arm matched by NAME, so an inner pointer local SHADOWING the receiver mis-took the
+  gate (`FromRef(ref rΔ1)` pins the box reference slot: compiles, reads garbage; repro'd — Go 111 vs C#
+  garbage). The receiver arm now also requires rendered==raw (the shadow pass Δ-renames every inner
+  same-named binding; the param arm was already object-accurate via `identIsParameter`). The CS0206
+  cascade is legitimate per the copy-box precedent (`Casuintptr` is a THROWING partial asm stub — loud,
+  not silent; the faithful guintptr ж<T>-model remains queued). Hardening is a corpus no-op (all ~107
+  bare-form emissions are genuine receivers/params — verifier audit). Test `UnsafePointerParamPin`
+  (**output** — param, receiver, SHADOWED-receiver, field-address-control, values vs Go); suite green
+  (210), zero churn. Verifier-2 CONFIRMED SAFE (91 exact, buckets exact, cascade mechanism explained);
+  verifier-1 hung mid-probe but its dying breath flagged the shadow edge that became the hardening.
+- **2026-07-01: cast a wide-integer 3-index slice bound to int (`cc1255754`; CS1503 −2,
   runtime 96 → 94).** A 3-index full slice `s[low:high:max]` lowers to the golib `.slice(nint low, nint high,
   nint max)` method; the bounds were emitted with a bare convExpr, so a wide-integer bound
   (uintptr/uint/uint32/uint64/int64) had no implicit conversion to the nint param → CS1503 (runtime/mprof
@@ -505,18 +525,20 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~94; 3-index slice-bound cast cleared 2, 96 → 94):
-CS1503 17, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
-then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
+as items land. As of 2026-07-01 latest (`runtime` = ~91; FromRef deref-alias fix cleared 3, 94 → 91):
+CS1503 17, CS1061 14, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 — CS0206 GONE).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
-(`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`, −2).
-⚠ The CLEAN contained converter roots are THINNING — the frontier is now mostly generator-fraught, architectural,
-or scattered small bugs. Re-triage carefully.**
+(`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
+−2), FromRef deref-alias pin (`016ce07ef`, −3 incl. the CS0206 cascade). ⚠ The CLEAN contained converter
+roots are THINNING — the frontier is now mostly generator-fraught, architectural, or a few uncharacterized
+small clusters. Re-triage carefully.**
 - **NEXT — re-bucket a fresh reconvert; the candidates, roughly cleanest-first:**
-  1. **Scattered small CONTAINED converter bugs — triage these FIRST for a clean root.** `nuint.val` CS1061
-     (2: heapdump.cs, select.cs — `.val` emitted on an already-deref'd nuint, `@unsafe.Pointer.FromRef(ref
-     (pstk).val)` where pstk is a nuint); plus re-triage the CS1503 `slice<uint> → slice<byte>` (2) and other
-     singletons for any clean converter angle. Small (−1/−2 each) but clean and verifiable.
+  1. **Uncharacterized small clusters — triage FIRST for a contained root.** CS1061 `ж<m>.Ꮡpark` (2 — a
+     field-box accessor missing on `ж<runtime_package.m>`; possibly the box-accessor family like
+     `04a5322f7`) and `Δrtype.TFlag` (2 — S3 abi-metadata-ish but verify); CS0117 (3, unknown); CS0149 (2,
+     method-expression S6?); re-triage the CS1503 `slice<uint> → slice<byte>` (2). Any clean converter angle
+     is worth −1/−2 each. *(The `nuint.val` pair is DONE via `016ce07ef`.)*
   2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
      unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
      (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
@@ -762,21 +784,25 @@ or scattered small bugs. Re-triage carefully.**
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at ~94. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared; TWO
-S1-fork convert-native reinterpret wins (`9e30a1c5b` −23; `f19153a9e` −13); the make-len-cast (`438d633a0`, −5);
-and the 3-index slice-bound cast (`cc1255754`, −2).** Last session routed a 3-index full-slice `s[low:high:max]`'s
-bounds through the wide-integer narrowing helper (renamed `castElemAddrIndex → castWideIntegerToInt`): a
-uintptr/uint/uint32/uint64/int64 bound is cast to `(int)` (the golib `.slice(nint,nint,nint)` takes nint;
-runtime/mprof `stk[:b.nstk:b.nstk]`). int/small-int/untyped left uncast. BOTH verifiers SAFE (diff exactly 6
-lines, no over-fire); output test `Slice3IndexWideBound`; suite green (209), zero churn.
+This session: runtime is at ~91. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917, CS0206
+cleared; TWO S1-fork convert-native reinterpret wins (`9e30a1c5b` −23; `f19153a9e` −13); make-len-cast
+(`438d633a0`, −5); 3-index slice-bound cast (`cc1255754`, −2); FromRef deref-alias pin (`016ce07ef`, −3).**
+Last session fixed the pin helper's ref target: a deref-aliased pointer param/receiver renders as the value
+alias (ref-local), so `FromRef(ref (p).val)` was `.val` on a nuint (CS1061, select/heapdump) or on the
+[GoType num] wrapper's get-only `val` property (CS0206, guintptr.cas); now `FromRef(ref p)` via
+`exprIsDerefAliasedPointer`, with a HARDENING of that helper's receiver arm (rendered==raw) after a repro
+proved an inner local shadowing the receiver mis-took the gate into a compiling-but-garbage pin. Test
+`UnsafePointerParamPin` (param/receiver/shadowed-receiver/box-control, output vs Go); suite green (210),
+zero churn; verifier confirmed 91 exact + corpus over-fire audit clean.
 
 **⚠ The CLEAN contained converter roots are THINNING** (read the strategy banner at top +
-`Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md`). The frontier at 94 is
-mostly generator-fraught, architectural, or scattered small bugs — re-triage a fresh reconvert carefully and
-pick, roughly cleanest-first:
-(1) **Scattered small CONTAINED converter bugs — try FIRST.** `nuint.val` CS1061 (2: heapdump.cs/select.cs —
-`.val` emitted on an already-deref'd nuint, e.g. `@unsafe.Pointer.FromRef(ref (pstk).val)` with pstk a nuint);
-re-triage the CS1503 `slice<uint>→slice<byte>` (2) and singletons for any clean converter angle. Small but clean.
+`Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md`). The frontier at 91
+is mostly generator-fraught, architectural, or a few uncharacterized small clusters — re-triage a fresh
+reconvert carefully and pick, roughly cleanest-first:
+(1) **Uncharacterized small clusters — try FIRST.** CS1061 `ж<m>.Ꮡpark` (2 — a field-box accessor missing on
+`ж<runtime_package.m>`; possibly the box-accessor family like `04a5322f7`) and `Δrtype.TFlag` (2 — verify vs
+S3 abi-metadata); CS0117 (3, unknown); CS0149 (2); re-triage CS1503 `slice<uint>→slice<byte>` (2). *(The
+`nuint.val` pair is DONE, `016ce07ef`.)*
 (2) **CS0030 managed-referent branch (9, ж<T>-model): gclinkptr/Δguintptr/puintptr/muintptr → unsafe.Pointer** —
 MODEL holding ж<T> directly per the user's model (like `core/sync/atomic` atomic.Pointer<T>); the genuine
 architectural S1 case, a dedicated careful iteration.
@@ -787,7 +813,7 @@ REVERTED for lost-writes. A correct fix forwards IArray to the *ref* of the inne
 pallocBits↔pageBits conversion — a careful dedicated generator effort.
 **If candidate (1) runs dry, the remainder is architectural/generator-fraught → the iteration-15-style signal to
 slow down and consider whether these need the user's models / a multi-session design rather than autonomous
-grinding.** Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case,
+grinding.** Remaining singletons (CS0128 escape-hoist, CS8175/CS1593 S5/S6, CS8120 dup-case,
 CS0118/CS0119/CS0019 S6) are architectural / risky / rabbit-holes.
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
