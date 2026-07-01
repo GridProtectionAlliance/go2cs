@@ -103,6 +103,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
+
+    [TestMethod]
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]

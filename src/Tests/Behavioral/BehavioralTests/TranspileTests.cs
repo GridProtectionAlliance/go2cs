@@ -108,6 +108,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
+
+    [TestMethod]
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]

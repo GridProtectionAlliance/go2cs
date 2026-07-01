@@ -66,6 +66,14 @@ type LambdaCapture struct {
 
 	currentLambdaVars map[string]string // Original var name to capture name tracking within current lambda
 
+	// currentLambdaVarObjs records, per captured NAME, the types.Object of the OUTER variable that was
+	// captured. currentLambdaVars maps by name, so a same-named variable DECLARED inside the lambda (an
+	// `s := f(s)` self-shadow, where the inner `s` shadows the captured outer `s`) would otherwise be
+	// renamed to the capture name too — conflating the two (`var sʗ3 = …(~sʗ3)…`, CS0841). The capture
+	// name is applied only when an ident resolves to this exact captured object; a distinct inner binding
+	// falls through to its own name.
+	currentLambdaVarObjs map[string]types.Object
+
 	// boxRefVars holds heap-boxed local variables whose address is taken inside a lambda. Such a
 	// variable must NOT be snapshot-captured (the value copy loses the box, so writes through the
 	// captured `&m` are lost — and the copy declaration is invalid in expression position, e.g. a
@@ -3542,7 +3550,16 @@ func (v *Visitor) getIdentName(ident *ast.Ident) string {
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
 		// First check if we already have a mapping for this variable in this lambda
 		if captureName, ok := v.lambdaCapture.currentLambdaVars[ident.Name]; ok {
-			return captureName
+			// The map is keyed by NAME. Apply the capture name only when this ident resolves to the exact
+			// captured OUTER variable — a same-named variable declared inside the lambda (an `s := f(s)`
+			// self-shadow, where the inner `s` shadows the captured outer `s`) is a distinct binding and
+			// must keep its own name (mapping it to the capture name emits `var sʗ3 = …(~sʗ3)…`, the inner
+			// decl's RHS binding to itself → CS0841). A nil/untracked captured object keeps prior behavior.
+			capturedObj, tracked := v.lambdaCapture.currentLambdaVarObjs[ident.Name]
+
+			if !tracked || capturedObj == nil || v.info.ObjectOf(ident) == capturedObj {
+				return captureName
+			}
 		}
 
 		// Then check if it needs to be captured
@@ -3551,6 +3568,7 @@ func (v *Visitor) getIdentName(ident *ast.Ident) string {
 
 			// Store the mapping for this lambda
 			v.lambdaCapture.currentLambdaVars[ident.Name] = captureInfo.copyIdent.Name
+			v.lambdaCapture.currentLambdaVarObjs[ident.Name] = v.info.ObjectOf(ident)
 
 			return captureInfo.copyIdent.Name
 		}

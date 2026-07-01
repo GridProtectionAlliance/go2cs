@@ -200,10 +200,11 @@ func newLambdaCapture() *LambdaCapture {
 	return &LambdaCapture{
 		capturedVars:      make(map[*ast.Ident]*CapturedVarInfo),
 		stmtCaptures:      make(map[ast.Node]map[*ast.Ident]bool),
-		pendingCaptures:   make(map[string]*CapturedVarInfo),
-		currentLambdaVars: make(map[string]string),
-		boxRefVars:        make(map[types.Object]bool),
-		detectingCaptures: true,
+		pendingCaptures:      make(map[string]*CapturedVarInfo),
+		currentLambdaVars:    make(map[string]string),
+		currentLambdaVarObjs: make(map[string]types.Object),
+		boxRefVars:           make(map[types.Object]bool),
+		detectingCaptures:    true,
 	}
 }
 
@@ -212,12 +213,14 @@ func (v *Visitor) enterLambdaConversion(node ast.Node) {
 	v.lambdaCapture.conversionInLambda = true
 	v.lambdaCapture.currentConversion = node
 	v.lambdaCapture.currentLambdaVars = make(map[string]string)
+	v.lambdaCapture.currentLambdaVarObjs = make(map[string]types.Object)
 }
 
 func (v *Visitor) exitLambdaConversion() {
 	v.lambdaCapture.conversionInLambda = false
 	v.lambdaCapture.currentConversion = nil
 	v.lambdaCapture.currentLambdaVars = nil
+	v.lambdaCapture.currentLambdaVarObjs = nil
 }
 
 // Perform variable analysis on the specified function block, handling shadowing and scope
@@ -1849,6 +1852,7 @@ func (v *Visitor) prepareStmtCaptures(stmt ast.Node) {
 
 			v.lambdaCapture.pendingCaptures[ident.Name] = info
 			v.lambdaCapture.currentLambdaVars[ident.Name] = captureName
+			v.lambdaCapture.currentLambdaVarObjs[ident.Name] = v.info.ObjectOf(ident)
 		}
 	}
 }

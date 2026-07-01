@@ -110,6 +110,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
+
+    [TestMethod]
     public void CheckCollisionFieldBoxAccessor() => CheckTarget("CollisionFieldBoxAccessor");
 
     [TestMethod]
