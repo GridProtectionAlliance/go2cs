@@ -333,6 +333,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]

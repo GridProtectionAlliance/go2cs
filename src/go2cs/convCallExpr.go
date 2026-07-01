@@ -493,6 +493,21 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					}
 				}
 
+				// make(T, len[, cap]) for a slice/map/chan — the golib `slice<T>(nint length, nint
+				// capacity)` / `map<K,V>(nint capacity)` / `channel<T>(nint capacity)` ctors all take nint.
+				// A length/cap/hint whose Go type is an integer with NO implicit C# conversion to nint
+				// (`uintptr`/`uint`/`uint32`/`uint64`/`int64` → `nuint`/`uint`/`ulong`/`long`) has no
+				// applicable ctor — for a slice, overload resolution falls onto `slice<T>(T[])` (CS1503:
+				// `nuint`→`byte[]`, runtime/mbitmap `make([]byte, n/goarch.PtrSize)`); for a map/chan it is
+				// a direct `nuint`→`nint` CS1503. Cast such args to nint. A plain `int` (nint) or an untyped
+				// constant binds directly and is left alone.
+				if !isTypeParam && len(callExpr.Args) > 1 {
+					switch typeParam.Underlying().(type) {
+					case *types.Slice, *types.Map, *types.Chan:
+						remainingArgs = v.makeLenArgs(callExpr.Args[1:])
+					}
+				}
+
 				if isTypeParam {
 					return fmt.Sprintf("make<%s>(%s)", typeName, remainingArgs)
 				}
@@ -943,6 +958,56 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 // ж<T>) that C# rejects (CS0030), so the caller routes it through uintptr instead. Excludes the pointer-to-
 // named-type value conversion (arg is a *types.Pointer, handled separately) — only a genuine raw-address
 // source (Basic UnsafePointer/Uintptr) qualifies.
+// makeLenArgs renders the length/capacity/size-hint arguments of a `make(T, len[, cap])` call (slice, map,
+// or chan), casting any argument whose Go type is an integer with no implicit C# conversion to nint to nint
+// — so it binds the golib `slice<T>(nint,nint)` / `map<K,V>(nint)` / `channel<T>(nint)` constructor rather
+// than falling onto `slice<T>(T[])` or failing `nuint`→`nint` (CS1503). A plain int / untyped constant
+// binds directly and is left alone (no golden churn).
+func (v *Visitor) makeLenArgs(args []ast.Expr) string {
+	parts := make([]string, len(args))
+
+	for i, arg := range args {
+		argStr := v.convExpr(arg, nil)
+
+		if v.makeLenArgNeedsNintCast(arg) {
+			argStr = "(nint)(" + argStr + ")"
+		}
+
+		parts[i] = argStr
+	}
+
+	return strings.Join(parts, ", ")
+}
+
+// makeLenArgNeedsNintCast reports whether a make length/cap argument's type is an integer that C# will not
+// implicitly convert to nint (so `new slice<T>(arg)` must cast it): true for uintptr/uint/uint32/uint64/
+// int64; false for int/int8/int16/int32/uint8/uint16 (which widen to nint) and untyped constants (which
+// render as bare literals that bind to nint directly).
+func (v *Visitor) makeLenArgNeedsNintCast(arg ast.Expr) bool {
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil {
+		return false
+	}
+
+	basic, ok := argType.Underlying().(*types.Basic)
+
+	if !ok {
+		return false
+	}
+
+	if basic.Info()&types.IsUntyped != 0 {
+		return false
+	}
+
+	switch basic.Kind() {
+	case types.Int64, types.Uint, types.Uint32, types.Uint64, types.Uintptr:
+		return true
+	}
+
+	return false
+}
+
 func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.Expr) bool {
 	if _, ok := v.info.TypeOf(callExpr).(*types.Pointer); !ok {
 		return false

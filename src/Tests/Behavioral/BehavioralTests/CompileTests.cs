@@ -333,6 +333,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]

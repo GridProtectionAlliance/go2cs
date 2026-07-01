@@ -295,6 +295,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
