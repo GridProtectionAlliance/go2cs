@@ -121,6 +121,13 @@ func (c *StdLibConverter) ScanAndConvertFiltered(packageFilter []string) error {
 		return fmt.Errorf("error during package conversion: %w", err)
 	}
 
+	// Step 5: Emit a Visual Studio .slnx solution referencing every converted project, the
+	// shared golib runtime, and the go2cs-gen analyzer, so the freshly converted stdlib is
+	// openable / buildable as one unit.
+	if err := c.GenerateSolutionFile(); err != nil {
+		fmt.Printf("WARNING: Failed to generate solution file: %v\n", err)
+	}
+
 	return nil
 }
 
