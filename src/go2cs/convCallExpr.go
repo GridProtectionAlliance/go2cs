@@ -60,22 +60,39 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// of a copy — the atomic intrinsics behind it are asm stubs, so this is about compilable C#.)
 		if resultPtr, ok := v.info.TypeOf(callExpr).(*types.Pointer); ok {
 			if argPtr, ok := v.info.TypeOf(arg).(*types.Pointer); ok {
-				baseNamed, okBase := resultPtr.Elem().(*types.Named)
-				defNamed, okDef := argPtr.Elem().(*types.Named)
+				resultElem := resultPtr.Elem()
+				argElem := argPtr.Elem()
 
-				if okBase && okDef && baseNamed != defNamed && types.Identical(baseNamed.Underlying(), defNamed.Underlying()) {
-					baseName := convertToCSTypeName(v.getTypeName(baseNamed, false))
+				baseNamed, okBaseNamed := resultElem.(*types.Named)
+				defNamed, okDefNamed := argElem.(*types.Named)
+
+				// A pointer reinterpret `(*Base)(p)` between two types with an IDENTICAL underlying, boxed
+				// as a COPY of the [GoType] VALUE conversion. `ж<Base>` and `ж<Def>` are distinct generic
+				// instantiations with no C# conversion between them, and the atomic intrinsics behind these
+				// are asm stubs, so this is about producing compilable C#, not write-through. Two shapes:
+				//   - Named ↔ Named: `(*pinnerBits)(*gcBits)` (type pinnerBits gcBits).
+				//   - Named → its underlying BASIC: `(*uint64)(*lfstack)` — an atomic op on a named numeric
+				//     `type lfstack uint64` (also sweepClass/profAtomic/sysMemStat), where the address of
+				//     the named field flows to `atomic.Load64((*uint64)(head))`. `ж<lfstack> → ж<uint64>`
+				//     has no conversion (CS0030); box a copy of the value conversion `(uint64)(head)`.
+				namedToNamed := okBaseNamed && okDefNamed && baseNamed != defNamed &&
+					types.Identical(baseNamed.Underlying(), defNamed.Underlying())
+
+				_, resultIsBasic := resultElem.(*types.Basic)
+				namedToBasic := resultIsBasic && okDefNamed && types.Identical(resultElem, defNamed.Underlying())
+
+				if namedToNamed || namedToBasic {
+					baseName := convertToCSTypeName(v.getTypeName(resultElem, false))
 					argExpr := v.convExpr(arg, nil)
 
 					// The [GoType] VALUE conversion `(Base)(Def)` operates on the underlying VALUE. A
-					// deref-aliased pointer param/receiver already renders as that value (`Δp`), so it
-					// casts directly — the original `(*atomic.Uint32)(p)` case. But a genuine pointer
-					// expression — a call result (`newMarkBits(…)` returning `*gcBits`), a local box, a
-					// pointer field — renders as the box `ж<Def>`, which has no conversion to the Base
-					// VALUE (CS0030, runtime/pinner `(*pinnerBits)(newMarkBits(…))`). Dereference the box
-					// first so the value conversion binds. Both forms then box a COPY (`Ꮡ`), matching this
-					// branch's long-standing copy semantics (Base's underlying is the shared struct, and
-					// e.g. pinnerBits wraps it in a `readonly` field, so there is no write-through to lose).
+					// deref-aliased pointer param/receiver already renders as that value (`Δp`/`head`), so
+					// it casts directly. But a genuine pointer expression — a call result (`newMarkBits(…)`
+					// returning `*gcBits`), a local box, a pointer field — renders as the box `ж<Def>`,
+					// which has no conversion to the Base VALUE (CS0030, runtime/pinner
+					// `(*pinnerBits)(newMarkBits(…))`). Dereference the box first so the value conversion
+					// binds. Both forms then box a COPY (`Ꮡ`) — the shared-underlying value has no
+					// write-through to lose (the atomic intrinsics are asm stubs).
 					if !v.exprIsDerefAliasedPointer(arg) {
 						argExpr = fmt.Sprintf("%s%s", PointerDerefOp, argExpr)
 					}
