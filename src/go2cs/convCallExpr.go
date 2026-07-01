@@ -94,7 +94,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// circular dependency. Although C# allows circular dependencies, NuGet does not. If the
 		// target happens to not be an unsafe pointer, the cast is still safe since all pointer
 		// types support this cast operation.
-		if context.isPointerCast {
+		//
+		// The same routing is required for a pointer-type conversion `(*T)(p)` whose SOURCE is a raw
+		// address — an unsafe.Pointer or uintptr — even when the deref path did not set isPointerCast.
+		// `unsafe.Pointer` is the golib `Pointer : ж<uintptr>`, so `(ж<T>)p` needs the two user-defined
+		// conversions Pointer→uintptr→ж<T>, which C# will not chain in a single cast (CS0030). Routing
+		// through uintptr — `(ж<T>)(uintptr)(p)` — reads the T at p's address via golib's
+		// `implicit operator ж<T>(uintptr) => new ж<T>(*(T*)value)` (with `uintptr(Pointer) => val`), which
+		// IS Go's `*(*T)(p)` semantics for native memory. Two shapes miss isPointerCast and need this: the
+		// bare-argument form `atomicwb((*unsafe.Pointer)(ptr), …)` and the extra-paren deref
+		// `*((*unsafe.Pointer)(k))` (convStarExpr's CallExpr branch sees a ParenExpr, not the CallExpr).
+		// The pointer-to-NAMED-type value conversion `(*atomic.Uint32)(counterPtr)` is handled and returned
+		// above (its arg is a *types.Pointer, not a raw address), so it never reaches here.
+		if context.isPointerCast || v.isRawAddressPointerConversion(callExpr, arg) {
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
@@ -905,6 +917,31 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 			}
 		}
 	}
+}
+
+// isRawAddressPointerConversion reports whether callExpr is a pointer-type conversion `(*T)(p)` whose
+// RESULT is a pointer type and whose SOURCE is a raw address — an unsafe.Pointer or a uintptr. Such a
+// conversion reinterprets the raw address as a `*T` (golib `ж<T>`); because `unsafe.Pointer` is the golib
+// `Pointer : ж<uintptr>`, a direct `(ж<T>)p` needs two chained user-defined conversions (Pointer→uintptr→
+// ж<T>) that C# rejects (CS0030), so the caller routes it through uintptr instead. Excludes the pointer-to-
+// named-type value conversion (arg is a *types.Pointer, handled separately) — only a genuine raw-address
+// source (Basic UnsafePointer/Uintptr) qualifies.
+func (v *Visitor) isRawAddressPointerConversion(callExpr *ast.CallExpr, arg ast.Expr) bool {
+	if _, ok := v.info.TypeOf(callExpr).(*types.Pointer); !ok {
+		return false
+	}
+
+	argType := v.info.TypeOf(arg)
+
+	if argType == nil {
+		return false
+	}
+
+	if basic, ok := argType.Underlying().(*types.Basic); ok {
+		return basic.Kind() == types.UnsafePointer || basic.Kind() == types.Uintptr
+	}
+
+	return false
 }
 
 func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {

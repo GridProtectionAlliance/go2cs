@@ -632,6 +632,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");
 
     [TestMethod]
+    public void CheckUnsafePointerReinterpret() => CheckTarget("UnsafePointerReinterpret");
+
+    [TestMethod]
     public void CheckUnsignedNamedNumeric() => CheckTarget("UnsignedNamedNumeric");
 
     [TestMethod]
