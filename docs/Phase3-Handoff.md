@@ -7,10 +7,30 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~143 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~139 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): qualify a same-package GLOBAL reference shadowed by a same-named LOCAL
+- **2026-07-01 (latest): emit a `return` against its OWN function literal's results, not the enclosing
+  func's (`a59e760b7`; CS8030 −4, runtime 143 → 139).** A bare `return` in a named-results function emits
+  `return (n, ok);`. `visitReturnStmt` built this from `currentFuncSignature`, but a NESTED function
+  literal kept the ENCLOSING function's signature — so a bare `return` inside a VOID closure got the outer
+  named results. Runtime mprof `goroutineProfileWithLabelsSync (n int, ok bool)` passes `forEachGRace(
+  func(gp1 *g){ …; return; … })`; the void closure's bare returns emitted `return (n, ok);` into a `void`
+  lambda → CS8030 ("void-returning delegate cannot return a value"). Fix (`convFuncLit`/`main.go`/
+  `visitFuncDecl`/`visitReturnStmt`): a SEPARATE `currentReturnSignature` field — set to the func signature
+  in `visitFuncDecl`, to the literal's own signature (save/restore) in `convFuncLit` — consumed by
+  `visitReturnStmt`. `currentFuncSignature` MUST stay the enclosing func's (receiver/param detection needs
+  it to resolve a CAPTURED pointer param — an earlier attempt that swapped it wholesale regressed
+  captured-param `.val`→`.ValueSlot`, caught by check-no-regression). Test `ClosureBareReturnNamedResults`
+  (10 true vs Go); full suite green (203), zero churn, adversarially verified (value/nested/doubly-nested/
+  defer-recover/IIFE/sibling closures). **This came from triaging the UNKNOWN class CS8030 — a clean
+  contained root. The other unknown, CS0021 (10), is ARCHITECTURAL (malloc `(*[2]uint64)(x)[i]` S1
+  unsafe-pointer reinterpret + mgcscavenge/proc/traceback named-over-array indexing `m.scavenged[i]`/
+  `mp.cgoCallers[0]`) — SKIP.** *(DISCOVERED pre-existing gap, out of scope: a named-result CLOSURE
+  `func() (a, b int){…}` never emits its own `a`/`b` local decls — only `visitFuncDecl` does — so it
+  drops/mis-returns results. Verify it's in the runtime bucket before pursuing; a follow-up would emit
+  named-result locals for function literals too.)*
+- **2026-07-01: qualify a same-package GLOBAL reference shadowed by a same-named LOCAL
   (`99ba29ef0`; CS0841 −1, runtime 144 → 143 — the LAST CS0841; ALL CS0841 now cleared).** Go allows a
   local to shadow a package-level global; a read of the global BEFORE the local's decl refers to the
   global (Go block scoping). C# locals are function-scoped, so the bare global name binds to the
@@ -369,12 +389,12 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~143; the global-shadow qualify cleared the last
-CS0841, 144 → 143): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS8030 4 (**CS0266 AND CS0841 now both 0** — the whole shadow/rename/cast family is
-cleared; what remains is dominated by architectural S1/S3/S4). Re-bucket + inspect CS0021 (10) and CS8030
-(4) first — those are UNKNOWN classes (not yet triaged) and may hide a contained root before the
-architectural wall:
+as items land. As of 2026-07-01 latest (`runtime` = ~139; CS8030 closure-return-signature fix cleared 4,
+143 → 139): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10 (**architectural — triaged**), CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0117 3 (**CS0266, CS0841, CS8030 now all 0**). What remains is dominated by
+architectural S1/S3/S4. NEXT: triage the still-uncharacterized CS0103 (7, "name does not exist") and
+CS1503 (24, arg-conversion) for any contained sub-case + the named-result-CLOSURE gap (verify it's in the
+bucket); else STOP — the CS0030/CS1061/CS0021/CS0029/CS0121 bulk is the architectural wall:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -557,29 +577,31 @@ architectural wall:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~143. **MILESTONE: ALL CS0266 and ALL CS0841
-are now cleared — the entire shadow/rename/cast defect family is done.** Last session qualified a same-package
-GLOBAL reference shadowed by a same-named LOCAL (CONVERTER-only, `99ba29ef0`; CS0841 −1, 144 → 143, the LAST
-CS0841). Runtime `traceallocfree` reads global `trace.minPageHeapAddr` before its local `trace := traceAcquire()`
-(both `Δtrace`); the C# function-scoped local shadows the global → CS0841. Fix (NOT rename-the-local, which was
-declined): `convIdent` qualifies the global reference `runtime_package.Δtrace…` when a use resolves to a
-package-level var of THIS package AND a same-named function-level local is declared (new Visitor field
-`funcLevelDecls`). Test `GlobalShadowedByLocal`; suite green (202), zero churn, adversarially verified.
-NOTE: this was traceallocfree `Δtrace` — flagged DECLINED-KIN, but the qualify-the-REFERENCE angle (vs
-rename-the-local) was clean. THREE consecutive declined/subtle-flagged CS0841 (malloc `Δp`, mgcsweep `sʗ3`,
-this) ALL had clean surgical angles — "investigate before assuming undoable" won every time.
+This session: re-bucket, then tackle ONE root. Runtime is at ~139. **MILESTONE: ALL CS0266, CS0841, CS0136,
+and CS8030 are cleared — the shadow/rename/cast family AND the closure-return-signature root are done.** Last
+session emitted a `return` against its OWN function literal's results, not the enclosing func's (CONVERTER-only,
+`a59e760b7`; CS8030 −4, 143 → 139). A bare `return` in a nested VOID closure was inheriting the enclosing
+named-results func's `(n, ok)` → `return (n, ok);` in a `void` lambda → CS8030 (runtime mprof
+`goroutineProfileWithLabelsSync`). Fix: a SEPARATE `currentReturnSignature` field (set in `visitFuncDecl`, and
+to the literal's own sig with save/restore in `convFuncLit`); `currentFuncSignature` MUST stay the enclosing
+func's for captured-pointer-param detection (swapping it wholesale regressed `.val`→`.ValueSlot`). Test
+`ClosureBareReturnNamedResults`; suite green (203), zero churn, adversarially verified. NOTE: CS8030 came from
+TRIAGING an unknown class — a clean contained root. The other unknown CS0021 (10) is ARCHITECTURAL (S1
+unsafe-pointer reinterpret `(*[2]uint64)(x)[i]` + named-over-array indexing) — SKIP.
 
-**⚠ IMPORTANT for this session: the easy/medium contained roots may be EXHAUSTED.** With CS0266/CS0841/CS0136
-gone, the remaining buckets are dominated by ARCHITECTURAL classes that the driver says to SKIP: CS0030 (~45,
-S1 managed-referent), CS1503 (~24), CS1061 (~16, S3 cross-package `abi.Type` metadata), CS0029 (~8, S4
-nil-realias), CS0121 (~6, S1 uintptr add-overload), CS1929 (~6, S2/S3). Before touching any of those, FIRST
-re-bucket fresh and triage the two UNKNOWN classes — **CS0021 (~10) and CS8030 (~4)** — which have not been
-characterized and might hide a contained converter root. Also consider the **CONST-shadow follow-up**: extend
-last session's `*types.Var` global-shadow qualify onto `*types.Const` IF a package const shadowed by a local
-actually appears in the runtime bucket (a package const → local shadow currently still fails CS0844). If NONE
-of {CS0021, CS8030, const-shadow, or any other freshly-triaged class} yields a clean CONTAINED root, **STOP and
-report** — the remaining work is the architectural S1/S3/S4 redesign that needs the user's managed-referent /
-named-over-array / nil-realias models, not autonomous grinding.
+**⚠ IMPORTANT for this session: the contained roots are nearly EXHAUSTED.** With CS0266/CS0841/CS0136/CS8030
+gone, the remaining buckets are dominated by ARCHITECTURAL classes the driver says to SKIP: CS0030 (~45, S1
+managed-referent), CS1503 (~24), CS1061 (~16, S3 `abi.Type` metadata), CS0021 (~10, S1+named-over-array),
+CS0029 (~8, S4 nil-realias), CS0121 (~6, S1 uintptr add-overload), CS1929 (~6, S2/S3). Before touching any of
+those, FIRST re-bucket fresh and triage the still-uncharacterized **CS0103 (~7, "name does not exist")** and any
+CONTAINED sub-case of **CS1503 (~24, arg-conversion)** — read the actual messages/files; one may hide a
+contained converter root. Also verify whether the DISCOVERED **named-result-CLOSURE gap** (a `func() (a, b int)
+{…}` literal never emits its own `a`/`b` local decls — only `visitFuncDecl` does) appears in the runtime bucket;
+if so, emitting named-result locals for function literals too is a clean contained follow-up. If NONE of
+{CS0103, a CS1503 sub-case, the named-result-closure gap, or any freshly-triaged class} yields a clean CONTAINED
+root, **STOP and report** — the remaining work is the architectural S1/S3/S4 redesign (see the S1–S7 roadmap
+above) that needs the user's managed-referent / named-over-array / nil-realias models, not autonomous grinding.
+(The const-shadow follow-up is CONFIRMED N/A — 0 CS0844 in the runtime bucket.)
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
 any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
@@ -617,15 +639,20 @@ named-over-array entangled before committing). NOTE: ALL CS0266 are now DONE —
   amounts, so this may be low-yield for runtime — but it is a genuine correctness bug worth fixing).
 - **CS0841 — ALL DONE** (stack.cs plain, malloc `Δp` box-accessor, mgcsweep `sʗ3` closure-capture, traceallocfree
   `Δtrace` global-shadow). CS0266 also all done. The shadow/rename/cast family is fully cleared.
-- **CS0021 (~10) and CS8030 (~4) — UNKNOWN, triage FIRST.** Not yet characterized; re-bucket a fresh reconvert
-  and read the actual messages/files. CS0021 = "cannot apply indexing with [] to an expression of type …" —
-  possibly a converter indexing-emission issue (could be contained) or a symptom of an upstream type error.
-  CS8030 — check the message. Either may hide a clean contained root; if both are symptoms of the architectural
-  S1/S3 wall (downstream of a CS0030/CS1061), they won't be independently fixable.
-- **CONST-shadow follow-up (verify it's in the bucket first).** Last session's global-shadow qualify is
-  `*types.Var`-only; a package-level CONST shadowed by a same-named local still fails CS0844. If such a case
-  appears in the runtime bucket, extend the `convIdent` global-shadow branch to also fire for a `*types.Const`
-  whose `Parent() == v.pkg.Scope()` (near-identical code) — a clean, contained follow-up.
+- **CS8030 (4) — DONE** (`a59e760b7`, closure-return-signature). **CS0021 (10) — TRIAGED = ARCHITECTURAL, SKIP:**
+  malloc `(*[2]uint64)(x)[i]` is the S1 unsafe-pointer reinterpret; mgcscavenge/proc/traceback (`m.scavenged[i]`,
+  `mp.cgoCallers[0]`) are named-over-array indexing (eager-shared-backing territory). **CONST-shadow follow-up =
+  N/A** (0 CS0844 in the runtime bucket, confirmed this session).
+- **CS0103 (~7) and a CS1503 (~24) sub-case — triage NEXT (still uncharacterized).** CS0103 "name does not
+  exist" is partly S5 (closure-captured-pointer box `ᏑmToFlush`, see the S5 roadmap item) — but read each; a
+  simple undeclared-name emission bug may hide among them. CS1503 (arg-conversion) is mostly S1/S3 but re-read
+  for a contained sub-case. If they're all S1/S3/S4/S5-architectural, STOP.
+- **named-result-CLOSURE gap (DISCOVERED this session; verify it's in the bucket first).** A `func() (a, b int)
+  {…}` literal never emits its own `a`/`b` named-result local declarations — only `visitFuncDecl` does — so it
+  drops/mis-returns results (a compile error if reached). The `a59e760b7` fix now emits the correct `return
+  (a, b)` operand level but can't cure the missing decls. If a named-result closure appears in the runtime
+  bucket, emit named-result locals for function literals too (mirror `visitFuncDecl`'s decl emission in
+  `convFuncLit`) — a clean contained follow-up.
 - **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
   if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
 - **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
