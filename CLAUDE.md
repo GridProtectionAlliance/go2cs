@@ -222,11 +222,26 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
   full-conversion package migrated to the baseline (scalar types are converter output; `Pointer[T]` is
   hand-rewritten with a managed slot + `Interlocked`, since `unsafe.Pointer`=`nuint` can't hold a managed
   reference across a GC — see [`docs/Roadmap.md`](docs/Roadmap.md)).
-- **Phase 3 in progress:** drive `src/go-src-converted` (the full ~301-package conversion) toward compiling,
-  bottom-up by converter-defect frequency; promote packages into the baseline as they go green. See
-  [`docs/Roadmap.md`](docs/Roadmap.md) for the iteration log. **Iteration 1 (2026-06-25)** landed 4 converter
-  fixes (variadic type-param, `comparable<T>`, asm/cgo throwing stubs, filename build-constraint
-  over-exclusion — the last un-dropped ~188 stdlib files). **Next defect:** `internal/cpu/cpu_x86.cs`
+- **Phase 3 in progress:** drive `src/go-src-converted` (the full ~301-package conversion) toward a clean
+  C# **compile** (the milestone is compiling, NOT operational — operational is Phase 4 / Go tests). See
+  [`docs/Roadmap.md`](docs/Roadmap.md) for the iteration log.
+  - **⚠ Strategy correction (2026-07-01):** **do NOT promote `go-src-converted → core` on a clean compile.**
+    Promotion is deferred to *post-Go-test* (Phase 4) and may not be needed. `core` stays the bootstrap
+    **stub** the behavioral tests build against (`sync/atomic` there is fine). The canonical
+    `[module: GoManualConversion]` / `*_impl.cs` files are hand-owned in `core` and must be copied **back
+    into `go-src-converted`** (overlay.sh does this) — that overlaid tree is the real final state.
+  - **⚠ The S1/CS0030 "architectural wall" is a FORK, not a wall (2026-07-01).** For **native-type** pointer/
+    unsafe ops (identical memory semantics in both GC languages) there IS a faithful conversion — do it in
+    the converter/`golib`. **Managed-referent** cases (`guintptr`/`muintptr`/… hiding a managed pointer in a
+    `uintptr`) hold the `ж<T>`/`object` **directly** (like `core/sync/atomic` `atomic.Pointer<T>`), never a
+    `nuint` round-trip. Only genuine **raw-metal on non-native types** (memory-layout math, type-descriptor
+    walking, `*.asm`) is the dragon → an immediate **`[module: GoManualConversion]` stub / review** (a stub
+    that compiles is an acceptable milestone solution). The loop SORTS these; it no longer stops at S1.
+    Full detail: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConversion.md) *The corrected
+    end-state*.
+  - **Iteration 1 (2026-06-25)** landed 4 converter fixes (variadic type-param, `comparable<T>`, asm/cgo
+    throwing stubs, filename build-constraint over-exclusion). Later sessions cleared the whole
+    shadow/rename/cast defect family (CS0266/CS0841/CS0136/CS8030/CS0161) — `runtime` 952 → ~138. **Next:**
   address-of-a-field-of-an-anonymous-struct-global mangling (~140 errors from one bug).
 - Open converter items: `src/go2cs/ToDo.md` (e.g. `visitMapType` completion, remaining dynamic-struct
   implicit-cast checks, optional recursive dependent-package conversion, comment conversion, cgo/asm targets).

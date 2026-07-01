@@ -64,9 +64,49 @@ full auto-output), so restoring it realigns with the original design.
    `-go2cspath`. It may be regenerated wholesale; nothing hand-edited lives here long-term (fixes belong in
    the converter or, for out-of-band pieces, in `golib`).
 3. **`golib` is shared and never auto-generated.** Both trees reference `src/core/golib/golib.csproj`.
-4. **Promotion is one-directional and deliberate:** when a full-conversion package compiles cleanly and
-   matches behavior, it may be promoted into the baseline (recorded in [`Roadmap.md`](Roadmap.md)). The
-   converter is never pointed at the baseline directory.
+4. **Promotion `go-src-converted → core` is DEFERRED (strategy correction, 2026-07-01).** Earlier work
+   promoted packages into `core` as they went *green* (compiling). That was premature — **compiling is not
+   operating.** Promotion should happen only once a package's **converted Go unit tests pass** (Phase 4),
+   and may not be needed at all (see *The corrected end-state* below). Until then, `core` stays the small
+   bootstrap **stub** the behavioral tests build against (chicken-and-egg — the tests need a working library
+   to run, and `go-src-converted` compiling doesn't yet mean it *works*). `sync/atomic` already living in
+   `core` is fine — it remains a useful stub. **Do not promote further** on the basis of a clean compile.
+   The converter is never pointed at the baseline directory.
+5. **The canonical MANUAL files live in `core` and are copied BACK into `go-src-converted`.** Files marked
+   `[module: GoManualConversion]` (the converter skips re-converting them) and hand-written `*_impl.cs`
+   files are hand-owned in `src/core/<pkg>`. For a full-conversion **milestone** to be complete, these must
+   be overlaid into their matching `src/go-src-converted/<pkg>` locations — that overlaid tree (auto-output
+   + manual/asm stubs) **is the real final state.** `overlay.sh` already re-copies the `src/core` manual
+   files after the cs/csproj copy; during these final compiling stages, do this **religiously**.
+
+## The corrected end-state (2026-07-01) — compile first, operate later
+
+The **milestone** is a **clean C# COMPILE** of the whole overlaid `go-src-converted` (auto-output + the
+manual/`*_impl.cs`/asm stubs) — *not* an operational one. Operational correctness is Phase 4 (converting +
+passing the Go unit tests). Getting there, for `runtime`:
+
+- **Native-type pointer/unsafe ops are convertible.** Go and C# are both GC languages with pinning and
+  unsafe pointers; native types share identical memory operations. Pointer parity for native types is the
+  goal and is achievable (the hand-converted `unsafe`/`sync/atomic` code proves the overlap). Fix these in
+  the converter/`golib` properly.
+- **Managed-referent cases have a known model.** Where Go stashes a *managed* pointer inside a `uintptr`
+  (`guintptr`/`muintptr`/`puintptr`…) to hide it from the GC, the C# equivalent holds the `ж<T>`/`object`
+  **directly** (Volatile/Interlocked + `nilCanon`), never a `nuint` round-trip — exactly as
+  `core/sync/atomic/type.cs`'s `atomic.Pointer<T>` and `reflectlite/value.cs`'s `object? m_target` do. A
+  raw `uintptr` cannot hold a managed reference across a GC (the "compiles-but-crashes" trap).
+- **Raw-metal on NON-native types is the dragon — stub it.** Memory-layout math, type-descriptor
+  pointer-walking, and `*.asm` cannot be faithfully transpiled. When the loop hits this wall, the file gets
+  an **immediate `[module: GoManualConversion]` task / review** — a hand-written C# equivalent, or a
+  throwing stub that **won't exist in the final build** — not a converter fight. A `GoManualConversion`
+  stub that makes the package COMPILE is an acceptable milestone solution; the faithful hand/asm
+  implementation can follow.
+
+So the loop no longer *stops* at the S1/CS0030 "architectural wall" — it **sorts**: convert the native-type
+ops, apply the managed-referent model, and stub the genuine raw-metal dragons with `GoManualConversion`.
+
+Once the whole stdlib compiles and the converted **Go tests** pass, a versioned build can ship to **NuGet**;
+at that point the chicken-and-egg is gone and `core` can be dropped (behavioral tests reference NuGet) or
+replaced with prior operational `go-src-converted` source — TBD.
 
 ## Regenerating the full conversion
 

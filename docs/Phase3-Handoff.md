@@ -4,6 +4,14 @@
 > `src/go-src-converted/` (~305 packages, `src/go-src-converted.sln`) compiles in C# with
 > **zero errors**. This is the headline goal of the whole `go2cs` project. Read
 > [`CLAUDE.md`](../CLAUDE.md) first; this doc is the focused Phase-3 playbook.
+>
+> **⚠ Strategy correction (2026-07-01) — the milestone is a clean COMPILE, not operational.** Operational
+> correctness is Phase 4 (Go unit tests). The CS0030/S1 "architectural wall" is a **FORK to SORT**, not a
+> stop: native-type ops → convert; managed-referent (`ж<T>` model) → model; raw-metal dragons →
+> `[module: GoManualConversion]` stub. Do NOT promote `go-src-converted → core` on a clean compile
+> (deferred to post-Go-test, maybe never); copy the hand-owned manual/`*_impl.cs` files BACK into
+> `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
+> *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
 ## Where things stand (2026-07-01)
 
@@ -439,12 +447,26 @@ CLEAN/QUICK/LOW-RISK contained roots are ESSENTIALLY EXHAUSTED. Corrected classi
 - Architectural (SKIP): CS0119/CS0149 (S6 method-expression), CS0019 (S6 named-numeric bitwise), CS8175 (S5
   ref-local-in-lambda), CS0136 (declined proc-`Δtrace`), CS0103 7 (S5 unsafe.Pointer-param-as-box), plus the
   CS0030/CS1503/CS1061/CS0021/CS0029/CS0121/CS1929 bulk = the architectural wall.
-- **⚠ BOTTOM LINE (iteration 15): the clean contained roots are exhausted. Only CS8917 (needs non-trivial
-  return-cast/delegate-type work, +6-golden churn) and maybe CS0118 (unclear) remain tractable; the rest are
-  architectural / rabbit-holes / risky. Even clearing them leaves ~132 architectural errors — runtime does
-  NOT compile without the user's S1/S3/S4 managed-referent / named-over-array / nil-realias models. This is
-  the point to REPORT to the user for direction (invest in CS8917-class converter cleanups, or the
-  architectural redesign), not to keep grinding autonomously.**
+- **⚠ BOTTOM LINE — SUPERSEDED (2026-07-01, user strategy correction).** Iteration 15 concluded "clean
+  contained roots exhausted → STOP" because it treated the ~132 CS0030/CS1503/… bulk as an impassable
+  "architectural wall." **The user reframed it: that wall is a FORK, not a wall, and the milestone is a
+  clean COMPILE (not operational — that's Phase 4).** So the loop no longer stops here; it **SORTS** the
+  S1/CS0030 family three ways and keeps going:
+  1. **Native-type unsafe/pointer op → CONVERT** faithfully in the converter/`golib` (both are GC langs
+     with pinning; native memory ops are identical — the hand-converted `unsafe`/`atomic` proves it).
+  2. **Managed-referent (`guintptr`/`muintptr`/… hiding a managed pointer in a `uintptr`) → MODEL** it
+     holding `ж<T>`/`object` directly (Volatile/Interlocked + `nilCanon`), like `core/sync/atomic`
+     `atomic.Pointer<T>`. Per-site, approachable — CS0206 runtime2.cs `Δguintptr.val` is exactly this.
+  3. **Raw-metal on NON-native types (layout math, type-descriptor walking, `*.asm`) → STUB** with
+     `[module: GoManualConversion]` (a compiling hand/throwing stub that won't exist in the final build is
+     an acceptable milestone solution; file a review note). Copy such stubs BACK into `go-src-converted`.
+
+  Still-tractable pure-converter contained roots (do these too, interleaved): **CS8917** (select.cs:151
+  mixed-return closure delegate type, +~6-golden churn) and **CS0118** (tracetime.cs:80, unclear — needs
+  investigation). Escalate to the user ONLY a specific site you cannot sort into convert/model/stub, or a
+  ж<T> model that needs a design decision. Full rationale:
+  [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md) *The corrected end-state* +
+  [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK to SORT*.
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's

@@ -103,8 +103,14 @@ Each verified by rebuild + reconvert + compile:
 2. **Fix by error class, bottom-up the full DAG.** Highest-frequency converter defects first (each fix
    clears many packages). Re-convert, re-bucket, repeat. **Measure by packages-compiling and error-count**,
    never by "conversion succeeded."
-3. **Promote, don't fork.** When a full package compiles cleanly and matches behavior, promote it toward the
-   baseline; `golib`'s hand-written core stays shared and never auto-overwritten. Track promotions here.
+3. ~~**Promote, don't fork.** When a full package compiles cleanly and matches behavior, promote it toward
+   the baseline; `golib`'s hand-written core stays shared and never auto-overwritten. Track promotions
+   here.~~ **SUPERSEDED (2026-07-01):** promotion `go-src-converted → core` is **deferred to post-Go-test
+   (Phase 4)** and may not be needed at all. Compiling ≠ operating; a clean compile is NOT a promotion
+   trigger. `core` stays the bootstrap **stub**. The hand-owned `[module: GoManualConversion]` / `*_impl.cs`
+   files live in `core` and are copied **back** into `go-src-converted` (the real final state). See
+   [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md) *The corrected end-state* and its
+   contract rules 4–5. `golib`'s hand-written core stays shared and never auto-overwritten.
 
 ### Phase 3 iteration 1 — converter fixes landed (2026-06-25)
 

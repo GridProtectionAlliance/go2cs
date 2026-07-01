@@ -21,7 +21,9 @@ adversarial verification of a candidate fix and (b) read-only bucket/exploration
    runner false-greens on a stale binary).
 2. **Measure** — reconvert (`-stdlib -comments -parallel 4`), overlay (incl. `src/core` manual files),
    build `runtime` (or the current frontier project), bucket by `CS####` then file/message.
-3. **Pick ONE highest-impact CONTAINED root** (see *Stop conditions* — skip architectural ones).
+3. **Pick ONE highest-impact CONTAINED root**, OR sort one CS0030/S1 site (convert native / model
+   managed-referent / stub raw-metal — see *S1 is a FORK to SORT*). Escalate only the genuinely
+   un-sortable (see *Stop conditions*).
 4. **Fix it in the correct component** — converter / `golib` / generator. NEVER hack `golib` or a
    generator just to compile; fix the genuine root (a compile-only fix that leaves `golib`
    behaviorally wrong is a regression in disguise).
@@ -43,12 +45,33 @@ adversarial verification of a candidate fix and (b) read-only bucket/exploration
 11. **Schedule the next iteration** (self-paced; short wake while a reconvert/build runs, longer when
     genuinely idle) — unless a stop condition fired.
 
+## S1 / CS0030 is a FORK to SORT, not a wall to stop at (2026-07-01)
+
+The old rule "park S1 and surface to the user" is **superseded**. The milestone is a clean **COMPILE**
+of the overlaid `go-src-converted` (operational correctness is Phase 4 / Go tests), and the CS0030
+`unsafe.Pointer(*T)`→`uintptr` family is not one wall — it forks three ways. **Sort each occurrence:**
+
+1. **Native-type pointer/unsafe op → CONVERT it faithfully** (converter/`golib`). Both languages are GC
+   with pinning + unsafe pointers; for native types the memory ops are identical (the hand-converted
+   `unsafe`/`sync/atomic` code proves the overlap). This is normal loop work.
+2. **Managed-referent (`guintptr`/`muintptr`/`puintptr`/`gclinkptr`/… hiding a *managed* pointer in a
+   `uintptr`) → apply the ж<T> MODEL.** Hold the `ж<T>`/`object` **directly** (Volatile/Interlocked +
+   `nilCanon`), never a `nuint` round-trip — exactly like `core/sync/atomic` `atomic.Pointer<T>` and
+   `reflectlite` `object? m_target`. A raw round-trip compiles-but-crashes; this modelled form does not.
+   Approachable per-site; no longer an automatic stop.
+3. **Raw-metal on NON-native types (memory-layout math, type-descriptor pointer-walking, `*.asm`) → STUB
+   it with `[module: GoManualConversion]`.** These genuine dragons can't be faithfully transpiled; a
+   hand-written equivalent or a throwing stub that **won't exist in the final build** is an acceptable
+   *milestone* solution (file a review note). Don't fight the converter over them.
+
+Only escalate to the user when a specific site resists ALL THREE — you can't tell native from
+managed-referent from raw-metal, or the ж<T> model needs a design decision you can't make. See
+[`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md) *The corrected end-state*.
+
 ## Stop conditions — escalate to the user (do NOT guess)
 
-- **Architectural / managed-referent roots.** S1 (CS0030 ~45: `guintptr`/`muintptr`/`puintptr`/
-  `gclinkptr`/`lfstack` storing a managed pointer as `uintptr`) MUST be done **with the user's
-  managed-referent model** (hold `ж<T>` directly — the promoted `atomic.Pointer<T>` play), a dedicated
-  multi-session redesign. A raw round-trip compiles-but-crashes. **Park it; surface to the user.**
+- **A CS0030/S1 site you cannot sort** into convert / model / stub per the fork above (genuinely
+  ambiguous, or the ж<T> model needs a design call). Park that one; keep sorting the rest.
 - Any root the handoff flags **REVERTED / multi-session / needs-user-model** (S4 nil-safe re-alias, S5
   pointer-to-pointer aliasing).
 - **Behavioral validation impossible** for a candidate fix (e.g. inherently cross-assembly, no
@@ -76,8 +99,17 @@ converter/generator routing → high; adversarial verifiers → medium–high; r
 Reserve **xhigh** for a single genuinely-hard correctness review (via a verifier), not the whole loop.
 **Not max** (wasteful over a long loop); **not medium** for the coordinator (revert-rate too high).
 
-## Definition of done
+## Definition of done — a clean COMPILE (not operational)
 
-`dotnet build src/go-src-converted.sln -c Debug` → **0 errors** across all ~305 packages, with the
-baseline (`src/go2cs.slnx`) and the full behavioral suite still green. Promote packages into the
-baseline (`src/core/<pkg>`) as they go green and stabilize. Then stop and stand by — **the milestone**.
+`dotnet build src/go-src-converted.sln -c Debug` → **0 errors** across all ~305 packages (auto-output +
+overlaid `[module: GoManualConversion]`/`*_impl.cs`/asm stubs), with the baseline (`src/go2cs.slnx`) and
+the full behavioral suite still green. **This is the milestone.** Operational correctness (Go unit tests)
+is Phase 4.
+
+- **Do NOT promote `go-src-converted → core`** on a clean compile. Promotion is deferred to post-Go-test
+  (Phase 4) and may not be needed; `core` stays the bootstrap stub. (Superseded the old "promote as they
+  go green" rule — see [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md) contract rules 4–5.)
+- **Copy the hand-owned manual files BACK into `go-src-converted` religiously** — `overlay.sh` re-copies
+  the `src/core` `[module: GoManualConversion]`/`*_impl.cs` files after the cs/csproj copy; the overlaid
+  tree (auto + manual/asm stubs) is the real final state that must compile.
+- When `runtime` hits 0 the frontier moves UP — re-measure the now-visible upper stdlib and continue.
