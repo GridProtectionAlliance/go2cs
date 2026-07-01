@@ -15,10 +15,27 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~114 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~101 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): route a raw-address pointer reinterpret `(*T)(p)` through uintptr
+- **2026-07-01 (latest): reinterpret a named-numeric pointer to its underlying basic —
+  `(*uint64)(*lfstack)` (`f19153a9e`; CS0030 −13, runtime 114 → 101; second S1-FORK "convert native"
+  win).** The runtime's atomic-on-a-named-integer pattern — `atomic.Load64((*uint64)(head))` /
+  `atomic.Cas64((*uint64)(head), …)` where head is `*lfstack` (`type lfstack uint64`; also sweepClass
+  uint32 / profAtomic uint64 / sysMemStat uint64) — reinterprets `*NamedNumeric` → `*underlying-basic`.
+  `ж<lfstack> → ж<uint64>` has no C# conversion (distinct instantiations) → CS0030. Fix (`convCallExpr.go`):
+  GENERALIZE the existing `(*Base)(defPtr)` reinterpret block (which boxed a COPY of the [GoType] value
+  conversion for Named↔Named, `(*pinnerBits)(*gcBits)`) to also fire when the RESULT elem is a BASIC whose
+  underlying equals a NAMED arg elem's (new `namedToBasic` branch) → `Ꮡ((uint64)(head))`. Named↔Named path
+  byte-for-byte preserved (pure refactor); reverse `(*Named)(*basic)` and both-basic excluded. Copy-box →
+  a READ is faithful (Load64 reads the copy — verified vs Go), a WRITE hits the copy but the runtime's
+  Store64/Cas64/Xadd64 on these types are asm-STUB (`partial`) atomics and there's no direct non-atomic
+  write, so no faithful write-through is lost. Cleared all 13 named-numeric→ж CS0030, zero new error codes,
+  every other bucket unchanged. Test `NamedNumericPointerReinterpret` (**output** comparison — read path
+  across uint64/uint32, values vs Go); suite green (207), zero corpus churn. **Verifier-1 CONFIRMED SAFE**
+  (old-vs-new diff exactly 3 lines, no over-fire, Named↔Named byte-identical); verifier-2 hung on reconvert
+  mechanics (its scope — read-correct / write-hazard / compile-101 — independently confirmed).
+- **2026-07-01: route a raw-address pointer reinterpret `(*T)(p)` through uintptr
   (`9e30a1c5b`; CS0030 −23, runtime 137 → 114 — the BIGGEST single-root drop of the campaign; first
   S1-FORK "convert native" win).** A Go pointer-type conversion whose SOURCE is a raw address —
   `(*unsafe.Pointer)(p)` where p is an unsafe.Pointer — reinterprets it as `*T` (`ж<T>`). Because
@@ -451,29 +468,31 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~114; unsafe.Pointer reinterpret cleared 23, 137 → 114):
-CS1503 24, CS0030 22, CS1061 16, CS0021 10, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+as items land. As of 2026-07-01 latest (`runtime` = ~101; named-numeric reinterpret cleared 13, 114 → 101):
+CS1503 24, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
-**CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), and the unsafe.Pointer reinterpret (`9e30a1c5b`, −23) landed.
-The work now is SORTING the CS0030/S1 fork (see the reframed strategy banner at the top +
-`Baseline-vs-FullConversion.md` "The corrected end-state"): convert native-type unsafe ops, model
-managed-referent with ж<T>, stub raw-metal dragons with `[module: GoManualConversion]`.**
-- **NEXT (biggest contained CS0030 lever, ~13 — "convert native" branch): named-numeric type → `ж<primitive>`.**
-  The residual CS0030 (22) splits: **`lfstack → ж<ulong>` (5), `sweepClass → ж<uint>` (3), `profAtomic → ж<ulong>`
-  (3), `sysMemStat → ж<ulong>` (2)** — a named numeric type (`type lfstack uint64`, `type sweepClass uint32`,
-  …) whose ADDRESS (`&field`, emitted `Ꮡfield` = `ж<lfstack>`) is passed to an atomic helper wanting
-  `ж<ulong>`/`ж<uint>`; `ж<NamedNumeric> → ж<underlying>` has no conversion (distinct generic instantiations).
-  A NATIVE-convert case (the named type is a plain numeric wrapper): emit the address through the underlying
-  (`ж<ulong>`) at the atomic-call site, OR add a golib/generator `ж<Named> ↔ ж<underlying>` conversion.
-  Investigate the exact atomic-call shape first (`atomic.Load64(&lfstackField)` etc.). Verify vs Go — these
-  are ordinary numeric loads/stores, so behaviorally checkable (unlike the raw-pointer case).
-- **THEN (managed-referent branch, 7): `gclinkptr → unsafe.Pointer` (4), `guintptr`/`puintptr`/`muintptr →
-  unsafe.Pointer` (3).** These hide a managed pointer in a `uintptr` → MODEL holding `ж<T>` directly (like
-  `core/sync/atomic` atomic.Pointer<T>), not a raw round-trip. More involved; a dedicated iteration.
-- **DONE this campaign:** unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23, first S1-fork "convert
-  native" win); CS8917 lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917
-  residual pre-existing, out of scope: rune/char literals, named-unsigned results, constant-`BinaryExpr`
-  returns inside lambdas — none at a runtime site.)
+**CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), and TWO S1-fork "convert native" pointer-reinterpret wins —
+unsafe.Pointer `(*T)(p)` (`9e30a1c5b`, −23) and named-numeric `(*uint64)(*lfstack)` (`f19153a9e`, −13) —
+landed. The work continues SORTING the CS0030/S1 fork (banner at top + `Baseline-vs-FullConversion.md` "The
+corrected end-state"): convert native, model managed-referent with ж<T>, stub raw-metal with
+`[module: GoManualConversion]`. But CS0030 is now down to 9 — the biggest bucket is CS1503 (24).**
+- **NEXT — two candidates; re-bucket a fresh reconvert and pick the cleaner:**
+  1. **CS1503 (24, biggest bucket)** — triage for a contained converter root. Sub-clusters: **`pallocBits →
+     IArray` (5)** (a named ARRAY type not recognized as `IArray` at a call — likely a [GoType]/generator or
+     converter arg-conversion fix), **`nuint → byte[]` (4)** (a `nuint` passed where a `byte[]`/`ulong[]`
+     param is expected — an unsafe-slice or arg-conversion shape), `pMask → @string` (2), `slice<uint> →
+     slice<byte>` (2), `nuint → nint` args (2), `UntypedInt → params ReadOnlySpan` (2). Investigate the
+     pallocBits→IArray cluster first (biggest sub-lever, likely one root).
+  2. **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
+     `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3).** These hide a MANAGED pointer in a `uintptr` →
+     MODEL holding `ж<T>` directly (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite` `object?
+     m_target`), NOT a raw round-trip. This is the genuine architectural S1 managed-referent case — more
+     involved, a dedicated iteration; needs the ж<T>-model applied to gclinkptr/guintptr per the user's
+     model. (2 CS0030 singletons remain: `lfstack → Δhex`, `UntypedInt → unsafe.Pointer`.)
+- **DONE this campaign (S1-fork convert-native + the earlier families):** named-numeric reinterpret
+  `(*uint64)(*lfstack)` (`f19153a9e`, −13); unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23); CS8917
+  lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917 residual pre-existing, out
+  of scope: rune/char literals, named-unsigned results, constant-`BinaryExpr` returns inside lambdas.)
 - **CS0128 (type.cs:414, `i`/`Ꮡi` dup) — ESCAPE-ANALYSIS RABBIT HOLE, not "easiest".** Both sibling
   `for i:=…` loops in `typesEqual`'s `abi.Func` case are escape-hoisted (`ref var i = ref heap<nint>`) → dup.
   A minimal repro of two sibling index loops does NOT escape `i` — the escape is CONTEXT-SPECIFIC to
@@ -696,32 +715,30 @@ managed-referent with ж<T>, stub raw-metal dragons with `[module: GoManualConve
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at ~114. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared;
-the unsafe.Pointer `(*T)(p)` reinterpret (first S1-fork "convert native" win) landed −23.** Last session routed
-a raw-address pointer reinterpret `(*unsafe.Pointer)(p)` through uintptr (CONVERTER-only, `9e30a1c5b`; CS0030
-−23, 137 → 114) — `unsafe.Pointer` is golib `Pointer : ж<uintptr>`, so `(ж<T>)p` needs the two chained
-conversions Pointer→uintptr→ж<T> C# rejects; the fix (`isRawAddressPointerConversion` in convCallExpr.go)
-routes any pointer-RESULT conversion with a raw-address ARG through uintptr — `(ж<T>)(uintptr)(p)` — extending
-the existing isPointerCast routing to the bare-arg (`atomicwb((*unsafe.Pointer)(ptr),…)`) and extra-paren-deref
-(`*((*unsafe.Pointer)(k))`) shapes. Raw-memory code → Compile+Target test `UnsafePointerReinterpret`. Both
-adversarial verifiers CONFIRMED SAFE (no over-fire; the only line changed was previously CS0030); suite green
-(206), zero churn.
+This session: runtime is at ~101. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared;
+TWO S1-fork "convert native" pointer-reinterpret wins landed — unsafe.Pointer `(*T)(p)` (`9e30a1c5b`, −23) and
+named-numeric `(*uint64)(*lfstack)` (`f19153a9e`, −13).** Last session generalized the `(*Base)(defPtr)`
+reinterpret block (which boxes a COPY of the [GoType] value conversion) to also fire when the RESULT elem is a
+BASIC whose underlying equals a NAMED arg elem's (`namedToBasic`) — the runtime's `atomic.Load64((*uint64)(head))`
+on named atomics lfstack/sweepClass/profAtomic/sysMemStat → `Ꮡ((uint64)(head))`. Named↔Named path byte-identical
+(pure refactor); read path verified vs Go (output test `NamedNumericPointerReinterpret`); writes hit the copy but
+those atomics are asm-stubs. Verifier-1 CONFIRMED SAFE (diff exactly 3 lines, no over-fire); suite green (207),
+zero churn.
 
-**⚠ The work now is SORTING the CS0030/S1 FORK** (read the strategy banner at the very top of this doc +
+**⚠ The work continues SORTING the CS0030/S1 FORK** (read the strategy banner at the very top of this doc +
 `Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md` "S1 is a FORK to SORT").
-The old "STOP at the architectural wall" rule is SUPERSEDED — the milestone is a clean COMPILE, and each CS0030
-site sorts three ways: native-type unsafe op → CONVERT in converter/golib; managed-referent (guintptr/muintptr/
-…) → MODEL holding ж<T> directly (like `core/sync/atomic` atomic.Pointer<T>); raw-metal on non-native types
-(`*.asm`, layout math, type-descriptor walking) → STUB with `[module: GoManualConversion]`. **RECOMMENDED NEXT
-(biggest contained CS0030 lever, ~13 — "convert native" branch): named-numeric type → `ж<primitive>`** —
-`lfstack → ж<ulong>` (5), `sweepClass → ж<uint>` (3), `profAtomic → ж<ulong>` (3), `sysMemStat → ж<ulong>` (2):
-a named numeric type whose ADDRESS (`Ꮡfield` = `ж<lfstack>`) is passed to an atomic helper wanting
-`ж<ulong>`/`ж<uint>`; `ж<Named> → ж<underlying>` has no conversion. Emit the address through the underlying at
-the atomic-call site, OR add a golib/generator `ж<Named> ↔ ж<underlying>` conversion. These are ordinary numeric
-loads/stores → behaviorally checkable vs Go (unlike the raw-pointer case). THEN the managed-referent branch (7:
-gclinkptr/guintptr/muintptr → unsafe.Pointer, the ж<T>-model). See the Session-queue triage note above for the
-full bucket. Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case,
-CS0118/CS0119/CS0019 S6) are architectural / risky / rabbit-holes.
+Milestone = clean COMPILE; each CS0030 site sorts three ways: native-type op → CONVERT; managed-referent
+(guintptr/muintptr) → MODEL holding ж<T> directly (like `core/sync/atomic` atomic.Pointer<T>); raw-metal →
+STUB with `[module: GoManualConversion]`. **BUT CS0030 is now down to 9 — the biggest bucket is CS1503 (24).
+RECOMMENDED NEXT — re-bucket a fresh reconvert and pick the cleaner of:**
+(1) **CS1503 (24, biggest)** — triage for a contained converter root. Sub-clusters: `pallocBits → IArray` (5,
+a named ARRAY type not recognized as `IArray` — investigate first, likely one [GoType]/generator or arg-conversion
+root), `nuint → byte[]`/`ulong[]` (4–5), `pMask → @string` (2), `slice<uint> → slice<byte>` (2), `nuint → nint`
+args (2). (2) **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
+`Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3)** — hide a managed pointer in a uintptr → MODEL holding
+`ж<T>` directly per the user's model; the genuine architectural S1 case, a dedicated iteration.
+Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case, CS0118/CS0119/CS0019
+S6) are architectural / risky / rabbit-holes.
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
 any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
