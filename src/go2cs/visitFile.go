@@ -95,6 +95,14 @@ func (v *Visitor) visitFile(file *ast.File) {
 
 	targetFile := v.targetFile.String()
 
+	// A file that references unsafe.Pointer (`@unsafe.Pointer`) but did not import `unsafe` under a
+	// usable name (inferred type, or a blank `_ "unsafe"` import) still needs the `@unsafe` alias to
+	// resolve it (CS0246). Supply it here; the alias is idempotent-safe because unsafeAliasImported
+	// guards against duplicating a named import's own `using @unsafe = unsafe_package;`.
+	if v.referencesUnsafePointer && !v.unsafeAliasImported {
+		v.addRequiredUsing("@unsafe = unsafe_package")
+	}
+
 	// Ensure using ortder is consistent
 	requiredUsings := v.requiredUsings.Keys()
 	sort.Strings(requiredUsings)

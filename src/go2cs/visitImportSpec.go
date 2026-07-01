@@ -52,6 +52,14 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.importQueue.Add(v.currentImportPath)
 	v.loadImportedTypeAliases(v.currentImportPath)
 
+	// Record whether this import emits the `@unsafe` alias that `@unsafe.Pointer` type references
+	// need. A default (unaliased) import of `unsafe` — or one explicitly aliased back to `unsafe` —
+	// emits `using @unsafe = unsafe_package;`; a blank import (`_`) or a different alias does not, so
+	// visitFile must supply the alias when the file references unsafe.Pointer (see getTypeName).
+	if v.currentImportPath == "unsafe" && (importSpec.Name == nil || importSpec.Name.Name == "unsafe") {
+		v.unsafeAliasImported = true
+	}
+
 	importPath := rootQualifyIfAmbiguous(convertImportPathToNamespace(v.currentImportPath, PackageSuffix))
 
 	v.writeDocString(v.packageImports, doc, importSpec.Pos())

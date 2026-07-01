@@ -423,6 +423,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerReceiverPointerLocalField() => CheckTarget("PointerReceiverPointerLocalField");
 
     [TestMethod]
+    public void CheckPointerRvalueFieldReceiver() => CheckTarget("PointerRvalueFieldReceiver");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
@@ -580,6 +583,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckUnsafePointerArgPassing() => CheckTarget("UnsafePointerArgPassing");
+
+    [TestMethod]
+    public void CheckUnsafePointerInferredNoImport() => CheckTarget("UnsafePointerInferredNoImport");
 
     [TestMethod]
     public void CheckUnsafePointerKeywordParam() => CheckTarget("UnsafePointerKeywordParam");

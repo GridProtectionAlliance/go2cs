@@ -117,6 +117,15 @@ type Visitor struct {
 	importQueue           HashSet[string]
 	requiredUsings        HashSet[string]
 	typeAliasDeclarations *strings.Builder
+	// unsafe.Pointer is emitted as `@unsafe.Pointer`, which resolves only through the file-local
+	// alias `using @unsafe = unsafe_package;`. That alias is generated from a NAMED import of
+	// `unsafe`; a file that references unsafe.Pointer only via type INFERENCE (e.g. `fd :=
+	// funcdata(...)`, where funcdata returns unsafe.Pointer) or a BLANK import (`_ "unsafe"`, whose
+	// C# alias is `_`) never gets it → CS0246. referencesUnsafePointer is set by getTypeName when the
+	// type is emitted; unsafeAliasImported records whether a named import already emitted the `@unsafe`
+	// alias. visitFile emits the alias when referenced-but-not-aliased.
+	referencesUnsafePointer bool
+	unsafeAliasImported     bool
 
 	// FuncDecl variables
 	inFunction           bool
@@ -2698,6 +2707,18 @@ func (v *Visitor) getExprTypeName(expr ast.Expr, underlying bool) string {
 func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if t == nil {
 		return ""
+	}
+
+	// A reference to unsafe.Pointer emits `@unsafe.Pointer`, which requires the file-local alias
+	// `using @unsafe = unsafe_package;`. Flag it so visitFile emits the alias even when the file did
+	// not import `unsafe` under a usable name (inferred type / blank import) — see the field comment.
+	// Match by the type's string form, not just a direct `*types.Basic`: a composite whose ELEMENT is
+	// unsafe.Pointer (`[]unsafe.Pointer`, `map[K]unsafe.Pointer`, `func() unsafe.Pointer`) renders the
+	// element as `@unsafe.Pointer` through the string path below without recursing into getTypeName, so
+	// a direct-Basic check would miss it. Only the builtin `unsafe.Pointer` yields this substring — a
+	// user defined type over it (`type myPtr unsafe.Pointer`) stringifies to its own qualified name.
+	if !v.referencesUnsafePointer && strings.Contains(t.String(), "unsafe.Pointer") {
+		v.referencesUnsafePointer = true
 	}
 
 	if pointer, ok := t.(*types.Pointer); ok {
