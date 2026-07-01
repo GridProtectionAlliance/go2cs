@@ -375,6 +375,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNarrowByteArithFirstOperandCast() => CheckTarget("NarrowByteArithFirstOperandCast");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]

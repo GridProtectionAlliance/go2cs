@@ -87,11 +87,62 @@ func (v *Visitor) narrowArithmeticCastTypeFor(targetType types.Type, rhs ast.Exp
 
 	castType := convertToCSTypeName(v.getTypeName(targetType, false))
 
-	if len(alreadyCast) > 0 && strings.HasPrefix(alreadyCast, fmt.Sprintf("(%s)(", castType)) {
+	// Skip ONLY when the WHOLE converted RHS is already `(castType)(…)` — another path narrowed the
+	// entire binary result (`(byte)(b | 128)`). A leading `(castType)(` that closes BEFORE the end is
+	// just the FIRST OPERAND's own conversion — `(byte)(e / 100) + (rune)'0'`, where the `(byte)(` casts
+	// only `e / 100`, so the binary result is still `int` and the narrowing cast is still required
+	// (CS0266). Verify the cast-paren's matching close is at the very end before treating it as covered.
+	if len(alreadyCast) > 0 && wholeExprIsCastOfType(alreadyCast, castType) {
 		return ""
 	}
 
 	return castType
+}
+
+// wholeExprIsCastOfType reports whether expr is exactly `(castType)(…)` spanning its whole length — the
+// cast wraps the entire expression, not just a leading sub-expression. Used to decide whether a
+// narrow-integer arithmetic RHS has already been narrowed in full (skip the redundant cast) versus only
+// having its first operand cast (the binary result still needs the cast). Balance-counts parentheses,
+// skipping any inside a char/string literal (`(rune)'('`) so a paren character does not perturb the depth.
+func wholeExprIsCastOfType(expr, castType string) bool {
+	prefix := fmt.Sprintf("(%s)(", castType)
+
+	if !strings.HasPrefix(expr, prefix) {
+		return false
+	}
+
+	// Balance from the opening paren of the cast body (the final '(' of the prefix).
+	depth := 0
+
+	for i := len(prefix) - 1; i < len(expr); i++ {
+		switch expr[i] {
+		case '\'', '"':
+			// Skip the literal's contents so a `(`/`)` byte inside a char/string literal is not
+			// counted. C# escapes an embedded quote as `\'`/`\"`, so honor the backslash escape.
+			quote := expr[i]
+
+			for i++; i < len(expr); i++ {
+				if expr[i] == '\\' {
+					i++ // skip the escaped character
+					continue
+				}
+
+				if expr[i] == quote {
+					break
+				}
+			}
+		case '(':
+			depth++
+		case ')':
+			depth--
+
+			if depth == 0 {
+				return i == len(expr)-1
+			}
+		}
+	}
+
+	return false
 }
 
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {

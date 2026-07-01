@@ -377,6 +377,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNarrowArithmeticArg() => CheckTarget("NarrowArithmeticArg");
 
     [TestMethod]
+    public void CheckNarrowByteArithFirstOperandCast() => CheckTarget("NarrowByteArithFirstOperandCast");
+
+    [TestMethod]
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]
