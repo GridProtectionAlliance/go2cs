@@ -15,10 +15,30 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~138 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~137 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): emit an unreachable trailing `return default!;` after an exhaustive
+- **2026-07-01 (latest): cast a constant integer-literal return to the lambda's unsigned result type
+  (`0ec8bac1c`; CS8917 −1, runtime 138 → 137 — the LAST CS8917).** A Go closure assigned to a local whose
+  result is unsigned/pointer-sized, mixing `return 0` with `return slice[i]` — runtime `select.go`
+  `casePC := func(casi int) uintptr { if pcs == nil { return 0 }; return pcs[casi] }` — emits `var casePC =
+  (nint casi) => {…}`, whose delegate type C# infers from the return-expression TYPES. `0` is `int`,
+  `pcs[casi]` is `nuint`; the best-common-type algorithm uses expression types (not constant
+  convertibility) and `int` has no common type with `nuint`/`uint`/`ulong` → CS8917. Fix
+  (`visitReturnStmt.go`, new `lambdaConstReturnCastType`): cast the literal to the result type →
+  `return (uintptr)(0)`, so both returns share it. Gated tightly: only inside a lambda body
+  (`conversionInLambda`; a NAMED func's `return 0` to nuint compiles as a constant conversion), only a bare
+  INTEGER literal (the sole int-vs-unsigned inference-gap shape — byte/uint16 widen to int, signed/nint/long
+  share a common type with int), only a BASIC uint/uint32/uint64/uintptr result (a NAMED unsigned type is
+  left alone — `(gclinkptr)0` could introduce a new error). Provably disjoint from the narrow-arith return
+  cast. Test `ClosureMixedReturnUnsigned` (uintptr/uint64/uint32/uint + signed control, vs Go); full suite
+  green (205), zero golden churn across the corpus, **both adversarial verifiers CONFIRMED-CORRECT** (tuple
+  `return ((uint64)(0), …)`, IIFE, named-defer, expression-body collapse `() => (uint64)(0)`, char-literal
+  `(rune)'?'` NOT cast — all compile+match Go). **Residual pre-existing (non-regression, out of scope):**
+  same CS8917 class remains for a rune/char literal, a NAMED-unsigned result, and a constant-`BinaryExpr`
+  (`return 1+2`) to unsigned inside a lambda — none at the runtime site; a follow-up could extend the helper
+  to constant-folded BinaryExpr + named types if they surface upstream.
+- **2026-07-01: emit an unreachable trailing `return default!;` after an exhaustive
   fallthrough-default switch (`a99d32f81`; CS0161 −1, runtime 139 → 138).** A Go `switch` lowered to an
   if-chain whose `default:` is reached via `fallthrough` emits the default as a guarded `if (fallthrough
   || !match){…}`; C# can't prove the guard always runs, so a value-returning func ending in it fails
@@ -413,20 +433,30 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~138; CS0161 switch-default fix cleared 1, 139 → 138):
-CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3, then a
-SINGLETON tail (CS0128 2, CS0149 2, CS8917/CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
-**A 2026-07-01 triage of the tail found CONTAINED converter roots among the singletons. CS0161 landed
-(`a99d32f81`). ⚠ A 2026-07-01 RE-TRIAGE (iteration 15) inspected each remaining candidate closely and found
-the explorer's "6 remaining contained" was OPTIMISTIC — most are architectural, rabbit-holes, or risky. The
-CLEAN/QUICK/LOW-RISK contained roots are ESSENTIALLY EXHAUSTED. Corrected classification:**
-- **CS8917 (select.cs:151) — the ONE genuinely-contained-but-non-trivial root.** `casePC := func(casi int)
-  uintptr { if pcs==nil { return 0 }; return pcs[casi] }` emits `var casePC = (casiΔ1)=>{… return 0; …
-  return pcsʗ1[casiΔ1]; }` — C# can't infer the delegate type because the returns are MIXED (`0`=int,
-  `pcs[i]`=nuint). Fix: either cast the untyped-const return to its resolved type (`return (nuint)0`, narrow,
-  reuses the return-cast machinery + `currentReturnSignature`), OR emit the explicit `Func<nint,uintptr>` for
-  the var decl (churns ~6 behavioral goldens that use `var f = value-returning-lambda`). Tractable but needs
-  care + adversarial value-check. **BEST remaining contained candidate.**
+as items land. As of 2026-07-01 latest (`runtime` = ~137; CS8917 lambda-const-return cast cleared 1,
+138 → 137): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
+**CS0161 landed (`a99d32f81`); CS8917 landed (`0ec8bac1c`). ⚠ The remaining SINGLETONS are architectural /
+rabbit-holes / risky (see below). The pure-converter contained roots in the tail are now essentially
+exhausted — the next productive work is SORTING the CS0030/S1 fork (see the reframed strategy banner at the
+top + `Baseline-vs-FullConversion.md` "The corrected end-state"): convert native-type unsafe ops, model
+managed-referent with ж<T>, stub raw-metal dragons with `[module: GoManualConversion]`.**
+- **NEXT (biggest lever, −21) — the `*(*unsafe.Pointer)(p)` reinterpret pattern, CS0030
+  `unsafe.Pointer → ж<unsafe.Pointer>` across 4 files (map.cs 16, iface.cs 2, atomic_pointer.cs 2, stack.cs
+  1).** Go `(*unsafe.Pointer)(p)` / `*(*unsafe.Pointer)(p)` (reinterpret address `p` as pointing to an
+  unsafe.Pointer, deref) emits `((ж<@unsafe.Pointer>)p)` / `(((ж<@unsafe.Pointer>)p)).val` — a C# cast from
+  `Pointer` (=`ж<uintptr>`) to `ж<Pointer>` (=`ж<ж<uintptr>>`), unrelated ref types → CS0030. This is the
+  first S1-FORK item to SORT: it needs a golib reinterpret helper (the reverse of the existing
+  `@unsafe.Pointer.FromRef(ref x)`), i.e. an `unsafe.Pointer → ж<T>` view. map.cs is Go's hashmap impl —
+  it's raw bucket-memory walking, and golib's `map<K,V>` is what actually runs, so map.cs only needs to
+  COMPILE (a strong candidate for the reinterpret-helper OR a `[module: GoManualConversion]` stub). Behavioral
+  validation is by-design impossible (raw memory, no single-module repro) → per the reframed strategy a
+  compile-correct helper/stub is an acceptable milestone solution; give it a dedicated iteration with a
+  clear golib-model decision.
+- **CS8917 (select.cs) — DONE (`0ec8bac1c`).** Cast the constant integer-literal return to the lambda's
+  unsigned/pointer result type (`return (uintptr)(0)`) so the delegate type is inferable. See *Where things
+  stand*. (Residual pre-existing, out of scope: same class for rune/char literals, named-unsigned results,
+  and constant-`BinaryExpr` returns inside lambdas — none at a runtime site.)
 - **CS0128 (type.cs:414, `i`/`Ꮡi` dup) — ESCAPE-ANALYSIS RABBIT HOLE, not "easiest".** Both sibling
   `for i:=…` loops in `typesEqual`'s `abi.Func` case are escape-hoisted (`ref var i = ref heap<nint>`) → dup.
   A minimal repro of two sibling index loops does NOT escape `i` — the escape is CONTEXT-SPECIFIC to
@@ -649,22 +679,28 @@ CLEAN/QUICK/LOW-RISK contained roots are ESSENTIALLY EXHAUSTED. Corrected classi
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: tackle ONE contained root from the triage queue. Runtime is at ~138. **MILESTONE: ALL CS0266,
-CS0841, CS0136, CS8030, CS0161 cleared.** Last session emitted an unreachable trailing `return default!;` after
-an exhaustive fallthrough-default switch (CONVERTER-only, `a99d32f81`; CS0161 −1, 139 → 138) — runtime
-`startpanic_m`'s guarded `if (fallthrough || !match)` default left C# unable to prove exhaustiveness. GATED on
-genuine Go terminality (`isTerminatingStmt`, conservative) + non-break-out + non-namedReturnDefer — two
-adversarial rounds caught a silent-wrong-value (shallow `if{return}`-no-else) and a CS8030 (namedReturnDefer
-void wrapper) before it was safe. Test `SwitchFallthroughDefaultReturn`; suite green (204), zero churn.
+This session: runtime is at ~137. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared.**
+Last session cast a constant integer-literal return to the lambda's unsigned result type (CONVERTER-only,
+`0ec8bac1c`; CS8917 −1, 138 → 137) — runtime `select.go` `casePC` mixed `return 0` (int) with `return pcs[i]`
+(nuint) so C# couldn't infer the `var casePC = (…) => {…}` delegate type. Fix `lambdaConstReturnCastType` casts
+the literal → `return (uintptr)(0)`, gated to a lambda body + bare INTEGER literal + BASIC uint/uint32/uint64/
+uintptr result. Both adversarial verifiers CONFIRMED-CORRECT; suite green (205), zero churn. Test
+`ClosureMixedReturnUnsigned`.
 
-**⚠ A 2026-07-01 triage of the runtime error TAIL found 7 CONTAINED converter roots among the singletons (the
-bulk is architectural). CS0161 landed; 6 remain — see the Session-queue triage note above for the full list +
-file:line + root of each: CS0128 (type.cs escape-hoist sibling-`i`, explorer's EASIEST), CS0206 (property-as-ref),
-CS0118 (unsafe-as-value const-fold), CS8120 (uint/uintptr dup type-switch case — dedup w/ semantic caveat),
-CS8917 + CS1593 (closure delegate-type not inferred/wrong-arity). Pick ONE, verify it's not entangled, land it.**
-NOTE: even clearing all 6 leaves ~132 ARCHITECTURAL errors (CS0030/CS1503/CS1061/CS0021/CS0029/CS0121/CS1929 =
-S1/S3/S4/named-over-array) — runtime will NOT compile without the user's managed-referent / named-over-array /
-nil-realias models. **When the 6 contained roots are done, STOP and report** (only architectural remains).
+**⚠ THE PURE-CONVERTER CONTAINED SINGLETONS ARE ESSENTIALLY EXHAUSTED. The next productive work is SORTING the
+CS0030/S1 FORK** (read the strategy banner at the very top of this doc + `Baseline-vs-FullConversion.md` "The
+corrected end-state" + `Phase3-AutonomousLoop.md` "S1 is a FORK to SORT"). The old "STOP at the architectural
+wall" rule is SUPERSEDED — the milestone is a clean COMPILE, and each CS0030 site sorts three ways: native-type
+unsafe op → CONVERT in converter/golib; managed-referent (guintptr/muintptr/…) → MODEL holding ж<T> directly
+(like `core/sync/atomic` atomic.Pointer<T>); raw-metal on non-native types (`*.asm`, layout math,
+type-descriptor walking) → STUB with `[module: GoManualConversion]` (a compiling stub that won't exist in the
+final build is acceptable). **RECOMMENDED NEXT: the `*(*unsafe.Pointer)(p)` reinterpret pattern** (CS0030
+`unsafe.Pointer → ж<unsafe.Pointer>`, −21 across map.cs/iface.cs/atomic_pointer.cs/stack.cs) — see the
+Session-queue triage note above for the full analysis. It needs a golib reinterpret helper (reverse of
+`@unsafe.Pointer.FromRef`) or a GoManualConversion stub for map.cs; behavioral validation is by-design
+impossible (raw memory) so a compile-correct model/stub is the milestone bar. Give it a dedicated iteration
+with a clear golib-model decision. The remaining pure-converter singletons (CS0128 escape-hoist,
+CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case, CS0118/CS0119/CS0019 S6) are architectural / risky / rabbit-holes.
 (The const-shadow follow-up is CONFIRMED N/A — 0 CS0844; the named-result-closure gap is NOT in the bucket.)
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
