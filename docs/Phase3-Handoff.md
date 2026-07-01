@@ -5,12 +5,32 @@
 > **zero errors**. This is the headline goal of the whole `go2cs` project. Read
 > [`CLAUDE.md`](../CLAUDE.md) first; this doc is the focused Phase-3 playbook.
 
-## Where things stand (2026-06-30, late)
+## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~149 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~148 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): rename a shadowed var used as a method-call receiver in an assignment target
+- **2026-07-01 (latest): cast a native-int const-ARITHMETIC RHS whose folded value overflows int32
+  (`aa0c36b6e`; CS0266 −1, runtime 149 → 148 — the LAST CS0266 cleared).** mbitmap's
+  `pattern = 1<<maxBits - 1` (uintptr, maxBits=57) folds `1<<maxBits` to a SIGNED C# `long` literal
+  (`144115188075855872L`, > int32), so the whole RHS is `long` — no implicit conversion to the native
+  uintptr/nuint/nint target (CS0266); a `UL`/`(nuint)` suffix would not help (ulong→nuint is also
+  explicit). Fix (`visitAssignStmt.go` new `nativeIntConstCastType`, wired into the simple-variable `=`
+  path as the fallback when the narrow-cast is empty): wrap the whole RHS in the native target's cast.
+  **Gated to the provably-64-bit case only** — the target is a PLAIN `*types.Basic` native-width int
+  (uintptr/uint/int; a NAMED type is excluded via `.(*types.Basic)` not `.Underlying()`, since a
+  `[GoType]` cast rejects a `long` → CS0030), the whole value fits int64 but overflows int32, AND at
+  least ONE operand itself folds to a signed `long` (`overflowingConstLiteral != ""`) so the emitted
+  arithmetic runs in 64-bit width. Test `NativeIntWideConstAssign` (uintptr/uint/int, values vs Go);
+  full suite green (200), goldens byte-identical, **two adversarial verifiers** (the first mis-flagged a
+  silent-wrong bare-shift as introduced; HEAD-diff PROVED it pre-existing → tightened the operand-fold
+  gate + named exclusion; second verifier CONFIRMED all four claims). ⚠ **DISCOVERED pre-existing latent
+  (separate future root, NOT introduced here):** a BARE const shift to a native int — `var p uintptr =
+  1 << 40` / `q = 1 << 40` — is emitted as a 32-bit `(uintptr)(1 << (int)(40))` that MASKS the count
+  (`40 & 31`) → prints 256 not 1099511627776 (SILENT wrong at HEAD). Fix belongs in the shift-emission
+  path (widen the left operand `((nuint)1) << k` for a native/unsigned target, cf. `isWideShiftType`);
+  a `NativeIntBareShiftAssign` guard would FAIL today, so don't add it until that path is fixed.
+- **2026-07-01: rename a shadowed var used as a method-call receiver in an assignment target
   (`cd86426ce`; CS0841 −1, runtime 150 → 149).** Extends the iteration-5 assignment-target descent: the `=`
   case renames shadowed idents in the LHS base chain (index/key/selector/star/paren), but had NO case for a
   METHOD CALL in the chain — `x.ptr().val.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1` because a
@@ -33,9 +53,8 @@
   (a bare ident / call / already-narrowed / non-narrow return is untouched; the receiver-return branch,
   checked first, is unaffected). Test `NarrowByteArithReturn` (97 122 97 / 145 wrap vs Go); full suite
   green (198), goldens byte-identical, adversarially verified (multi-value, named-return-defer,
-  interface/pointer, over-application gate, wrap across all 4 narrow kinds). **Remaining CS0266 = 1:
-  mbitmap.cs `long→nuint` — a DIFFERENT root (wide-literal / named-numeric conversion), not the narrow-arith
-  pattern.**
+  interface/pointer, over-application gate, wrap across all 4 narrow kinds). **CS0266 is now fully
+  cleared** (the mbitmap `long→nuint` root landed 2026-07-01, `aa0c36b6e` — see the latest bullet above).
 - **2026-06-30: narrow-int arithmetic cast when only the FIRST operand is a conversion
   (`de2e80bd4`; CS0266 −3, runtime 154 → 151).** Go byte arithmetic wraps at byte width; C# promotes to
   `int`, so a narrow-typed assignment needs the result cast back (CS0266). `narrowArithmeticCastTypeFor`'s
@@ -295,9 +314,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~149; the method-call-receiver LHS-rename fix above
-cleared 1 CS0841, 150 → 149): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0117 3, CS0841 3, CS0266 1:
+as items land. As of 2026-07-01 latest (`runtime` = ~148; the mbitmap native-int const-arith cast above
+cleared the last CS0266, 149 → 148): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0117 3, CS0841 3 (CS0266 now 0):
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -480,19 +499,26 @@ CS1929 6, CS0121 6, CS0117 3, CS0841 3, CS0266 1:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~149. Last session renamed a shadowed var used
-as a METHOD-CALL RECEIVER in an assignment target (CONVERTER-only, `cd86426ce`; CS0841 −1, 150 → 149) —
-extends the iteration-5 LHS-descent. `x.ptr().val.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1`
-because a func-body `x` is declared after the loop) buried the `x` inside `x.ptr()`, past the descent's
-selector/index steps, so the use kept raw `x`, read before its later decl → CS0841. Fix
-(`variableAnalysisOperations.go`): add `case *ast.CallExpr: visitNode(cur)` to the descent (visits the whole
-call — receiver + args — then stops). Test `ShadowedVarMethodCallLHS` (C# 30 vs Go, write-through via a
-pointer-receiver method); full suite green (199), goldens byte-identical, adversarially verified. FORCE `cd
-src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds
-the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After any
-emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~148. Last session cast a native-int
+const-ARITHMETIC RHS whose folded value overflows int32 (CONVERTER-only, `aa0c36b6e`; CS0266 −1, 149 → 148 —
+the LAST CS0266 cleared). mbitmap `pattern = 1<<maxBits - 1` (uintptr) folds `1<<maxBits` to a signed `long`
+literal `144115188075855872L`, so the whole `long` RHS won't implicitly convert to nuint (CS0266). Fix
+(`visitAssignStmt.go` new `nativeIntConstCastType`): wrap the RHS in the native target's cast, GATED to the
+provably-64-bit case (plain `*types.Basic` uintptr/uint/int target — named excluded; whole value fits int64,
+overflows int32; ≥1 operand folds to a signed `long` via `overflowingConstLiteral`). A bare shift `1 << 40`
+is deliberately NOT cast (its operands are small — it stays the pre-existing truncating `(uintptr)(1 <<
+(int)(40))`). Test `NativeIntWideConstAssign`; suite green (200), two verifiers. FORCE `cd src/go2cs && go
+build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a
+`.go` is newer, so a committed converter change false-greens on a stale binary. After any emitted-form change
+run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 ⚠ gpg-agent may TIMEOUT on the signed commit — relaunch `gpgconf --launch gpg-agent`; if it still needs a
 passphrase, STOP and ask the user to unlock the key (never bypass signing).
+
+⚠ **DISCOVERED latent (pre-existing, separate root — do NOT confuse with the fix above):** a BARE const shift
+to a native int (`var p uintptr = 1 << 40`, `q = 1 << 40`) emits as a 32-bit `(uintptr)(1 << (int)(40))` that
+MASKS the count (`40 & 31`) → 256 not 1099511627776 (SILENT wrong, at HEAD). Fix belongs in the shift-emission
+path (widen the left operand for a native/unsigned target — `((nuint)1) << k`, cf. `isWideShiftType`), NOT in
+`nativeIntConstCastType`. A `NativeIntBareShiftAssign` parity test FAILS until that lands — don't add it yet.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -505,11 +531,15 @@ REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost 
 NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing). NOTE: BOTH narrow-arith CS0266 roots (first-operand `de2e80bd4` +
-return-path `a351c3cc6`) and the stack.cs CS0841 (method-call-receiver `cd86426ce`) are DONE. Remaining candidates:
-- **mbitmap.cs `long→nuint` CS0266 (1) — the last CS0266.** A wide-literal / named-numeric conversion needing an
-  explicit cast; NOT the narrow-arith pattern. Read the S6 large-literal note in the memory before picking (may be
-  the >int32-literal-as-uintptr case). Inspect mbitmap.cs:1585 + its Go source first.
+named-over-array entangled before committing). NOTE: ALL CS0266 are now DONE — both narrow-arith roots (first-operand
+`de2e80bd4` + return-path `a351c3cc6`) AND the mbitmap native-int const-arith root (`aa0c36b6e`); the stack.cs CS0841
+(method-call-receiver `cd86426ce`) is DONE. Remaining candidates:
+- **BARE const shift to a native int (SILENT-wrong latent, ~2+ sites, NOT yet a compile error).** `var p uintptr =
+  1 << 40` emits `(uintptr)(1 << (int)(40))` — a 32-bit shift masking the count → wrong value. Fix the shift-EMISSION
+  path (widen the left operand to the native/unsigned target width — `((nuint)1) << k`, reuse `isWideShiftType`), NOT
+  `nativeIntConstCastType`. Behavioral (parity) test is the gate; a `NativeIntBareShiftAssign` test FAILS until this
+  lands. Verify how many runtime/stdlib sites actually hit it (the verifier's scan found real sites use VARIABLE shift
+  amounts, so this may be low-yield for runtime — but it is a genuine correctness bug worth fixing).
 - **CS0841 (3, all DISTINCT roots — the plain stack.cs one is DONE):** malloc.cs `Δp` + traceallocfree.cs `Δtrace`
   are collision-rename ordering (a collision-renamed local referenced before its decl — kin to the declined proc
   `Δtrace` CS0136; likely the same underlying collision×order interaction, so may share a fix but is SUBTLE); the
