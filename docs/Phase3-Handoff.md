@@ -7,10 +7,24 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~150 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~149 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): narrow-int arithmetic cast on the RETURN path (`a351c3cc6`; CS0266 −1, runtime
+- **2026-07-01 (latest): rename a shadowed var used as a method-call receiver in an assignment target
+  (`cd86426ce`; CS0841 −1, runtime 150 → 149).** Extends the iteration-5 assignment-target descent: the `=`
+  case renames shadowed idents in the LHS base chain (index/key/selector/star/paren), but had NO case for a
+  METHOD CALL in the chain — `x.ptr().val.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1` because a
+  func-body `x` is declared AFTER the loop) buried the `x` inside `x.ptr()`, so the use kept raw `x`, read
+  before its later decl → CS0841. Fix (`variableAnalysisOperations.go`): add `case *ast.CallExpr:
+  visitNode(cur)` — visits the whole call so receiver + args get the rename (visitNode keys on
+  info.Uses→*types.Var, so a method name/global/field of the same name is left alone). Test
+  `ShadowedVarMethodCallLHS` (write-through via a pointer-receiver method, C# 30 vs Go); full suite green
+  (199), goldens byte-identical, adversarially verified (control: all 8 shapes fail CS0841 without the fix).
+  **Remaining CS0841 = 3, all DISTINCT roots:** malloc.cs `Δp` (collision-rename ordering), mgcsweep.cs `sʗ3`
+  (closure-capture box name), traceallocfree.cs `Δtrace` (collision-rename ordering — kin to the declined
+  proc `Δtrace` CS0136). *(NB: the commit initially failed on a gpg-agent signing TIMEOUT; landed after the
+  user unlocked the key — never bypass signing.)*
+- **2026-06-30: narrow-int arithmetic cast on the RETURN path (`a351c3cc6`; CS0266 −1, runtime
   151 → 150).** Sibling of the assignment-path fix below: `func lowerASCII(c byte) byte { return c +
   ('a'-'A') }` (runtime env_posix) emits `return c + ((rune)'a' - (rune)'A')` = byte+int = int → CS0266.
   The narrow cast was applied on the assignment/value-spec paths but not the return path. Fix
@@ -281,9 +295,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~150; the narrow-int RETURN-cast fix above cleared
-1 CS0266, 151 → 150): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 1:
+as items land. As of 2026-07-01 latest (`runtime` = ~149; the method-call-receiver LHS-rename fix above
+cleared 1 CS0841, 150 → 149): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0117 3, CS0841 3, CS0266 1:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -466,17 +480,19 @@ CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 1:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~150. Last session applied the narrow-int
-arithmetic cast on the RETURN path (CONVERTER-only, `a351c3cc6`; CS0266 −1, 151 → 150) — sibling of the
-prior assignment-path fix. `func lowerASCII(c byte) byte { return c + ('a'-'A') }` emitted `return c +
-((rune)'a' - (rune)'A')` (byte+int=int) → CS0266; the narrow cast was applied on the assignment/value-spec
-paths but not the return path. Fix (`visitReturnStmt.go`): reuse `narrowArithmeticCastTypeFor` per
-result-position, emit `(type)(expr)` — gated to binary/unary arith matching the narrow result type (bare
-ident / call / already-narrowed / non-narrow untouched; receiver-return branch checked first). Test
-`NarrowByteArithReturn`; full suite green (198), goldens byte-identical, adversarially verified. FORCE `cd
+This session: re-bucket, then tackle ONE root. Runtime is at ~149. Last session renamed a shadowed var used
+as a METHOD-CALL RECEIVER in an assignment target (CONVERTER-only, `cd86426ce`; CS0841 −1, 150 → 149) —
+extends the iteration-5 LHS-descent. `x.ptr().val.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1`
+because a func-body `x` is declared after the loop) buried the `x` inside `x.ptr()`, past the descent's
+selector/index steps, so the use kept raw `x`, read before its later decl → CS0841. Fix
+(`variableAnalysisOperations.go`): add `case *ast.CallExpr: visitNode(cur)` to the descent (visits the whole
+call — receiver + args — then stops). Test `ShadowedVarMethodCallLHS` (C# 30 vs Go, write-through via a
+pointer-receiver method); full suite green (199), goldens byte-identical, adversarially verified. FORCE `cd
 src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds
 the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After any
 emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
+⚠ gpg-agent may TIMEOUT on the signed commit — relaunch `gpgconf --launch gpg-agent`; if it still needs a
+passphrase, STOP and ask the user to unlock the key (never bypass signing).
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -489,16 +505,16 @@ REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost 
 NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing). NOTE: BOTH narrow-arith CS0266 roots (first-operand-cast
-`de2e80bd4` + return-path `a351c3cc6`) are DONE. Remaining candidates:
-- **CS0841 (4) — "use of unassigned local" / "before declared" (stack.cs `x`, mgcsweep.cs `sʗ3`, malloc.cs `Δp`,
-  traceallocfree.cs `Δtrace`).** An emission-ORDER issue (a local referenced before its `ref var …`/heap decl is
-  emitted). HETEROGENEOUS — the `Δp`/`Δtrace` ones are collision-rename-tied and the `sʗ3` one is a box name, so
-  bucket each individually; the `stack.cs x` (plain) is likely the cleanest single sub-root. Pick ONE; verify the
-  Go declaration/use order and why the C# emits the use first.
-- **mbitmap.cs `long→nuint` CS0266 (1)** — a wide-literal / named-numeric conversion needing an explicit cast;
-  NOT the narrow-arith pattern. Read the S6 large-literal note in the memory before picking (may be the >int32
-  literal-as-uintptr case, subtle).
+named-over-array entangled before committing). NOTE: BOTH narrow-arith CS0266 roots (first-operand `de2e80bd4` +
+return-path `a351c3cc6`) and the stack.cs CS0841 (method-call-receiver `cd86426ce`) are DONE. Remaining candidates:
+- **mbitmap.cs `long→nuint` CS0266 (1) — the last CS0266.** A wide-literal / named-numeric conversion needing an
+  explicit cast; NOT the narrow-arith pattern. Read the S6 large-literal note in the memory before picking (may be
+  the >int32-literal-as-uintptr case). Inspect mbitmap.cs:1585 + its Go source first.
+- **CS0841 (3, all DISTINCT roots — the plain stack.cs one is DONE):** malloc.cs `Δp` + traceallocfree.cs `Δtrace`
+  are collision-rename ordering (a collision-renamed local referenced before its decl — kin to the declined proc
+  `Δtrace` CS0136; likely the same underlying collision×order interaction, so may share a fix but is SUBTLE); the
+  mgcsweep.cs `sʗ3` is a closure-capture box name used inside a `systemstack(() => {…})` closure that redeclares
+  it. Each needs individual investigation; NONE is the clean plain-order case anymore.
 - **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
   if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
 - **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
