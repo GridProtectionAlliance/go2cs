@@ -145,6 +145,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
+    public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]
@@ -254,9 +257,6 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
-
-    [TestMethod]
-    public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
 
     [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");

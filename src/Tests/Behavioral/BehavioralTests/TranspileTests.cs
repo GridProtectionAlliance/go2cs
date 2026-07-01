@@ -159,6 +159,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
+    public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]

@@ -640,6 +640,43 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A pointer-receiver method PROMOTED through a single embedded field — `t.modify(…)` where `t` is a
+	// `*timeTimer` and `modify` is a `(*timer)` method reached through timeTimer's embedded `timer` field
+	// (Go auto-takes `&t.timer` for the promoted receiver). The receiver box (`t` / `Ꮡt`, a
+	// `ж<timeTimer>`) is not the `ж<timer>` the promoted method's ж/[GoRecv]-ref overload binds to
+	// (CS1929). Descend into the embedded field's box via the &-machinery — `t.of(timeTimer.Ꮡtimer)` —
+	// exactly as the *explicit* `t.timer.modify(…)` already renders (the `&receiver.field` branch in
+	// convUnaryExpr handles the pointer-param-vs-local box distinction: `Ꮡt` for a deref'd param, `t`
+	// for a pointer local). Gated to a SINGLE embed hop (Selection.Index == [embeddedField, method]) — a
+	// deeper promotion chain falls through unchanged (no regression). A non-promoted call (Index len 1)
+	// and an explicit `x.field.method` (also Index len 1, method direct on the field) never match here.
+	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) {
+		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 2 {
+			recvType := v.info.TypeOf(selectorExpr.X)
+
+			if ptr, ok := recvType.Underlying().(*types.Pointer); ok {
+				recvType = ptr.Elem()
+			}
+
+			if structType, ok := recvType.Underlying().(*types.Struct); ok {
+				embedField := structType.Field(sel.Index()[0])
+
+				// Only a VALUE (struct) embedded field needs the box descent: the field itself is not a
+				// box, so `&field` (`.of(Type.Ꮡfield)`) materializes the `ж<field>` the promoted method
+				// binds to. A POINTER embed (`traceWriter` embeds `traceBufPtr` = `*traceBuf`) already
+				// yields the box as the field VALUE (`w.traceBuf`), so it is left to the existing
+				// field-access handling — taking its address would double-box to `ж<ж<T>>` (CS1929).
+				if embedField.Embedded() {
+					if _, isPtr := embedField.Type().Underlying().(*types.Pointer); !isPtr {
+						embedSel := &ast.SelectorExpr{X: selectorExpr.X, Sel: &ast.Ident{Name: embedField.Name()}}
+						fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: embedSel}, DefaultUnaryExprContext())
+						return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+					}
+				}
+			}
+		}
+	}
+
 	// A capture-mode method called on a value field of the current direct-ж receiver —
 	// `b.u.Load()` where the struct embeds an atomic-like type as a value field `u`. The callee's
 	// ж overload needs a `ж<FieldType>` aliasing the real field; emit it as `(&b.u).Load()`, which

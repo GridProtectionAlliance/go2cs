@@ -161,6 +161,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
+    public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
+
+    [TestMethod]
     public void CheckEmptyStructMapSet() => CheckTarget("EmptyStructMapSet");
 
     [TestMethod]
