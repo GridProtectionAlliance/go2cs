@@ -7,7 +7,7 @@ Convert source code written in the [Go programming language](https://golang.org/
 and *visually* similar to the original Go — so a Go developer can read the converted code and follow it
 easily, and a .NET developer can use Go code directly within the .NET ecosystem.
 
-## Why go2cs
+## Transpiler Goals
 
 Go provides a lot of high-level functionality from its compiler and runtime — slices, maps, channels,
 goroutines, `defer`/`panic`/`recover`, multiple return values, struct embedding, and interface
@@ -138,7 +138,7 @@ the *entire* standard library cleanly is ongoing work — see the [roadmap](Road
 
 ## Milestones
 
-A skimmable timeline of the project's major turning points. Full detail lives in the git history, the
+High level timeline of the project's major turning points. Full detail lives in the git history, the
 [roadmap](Roadmap.md), and [`CLAUDE.md`](../CLAUDE.md).
 
 | Date | Milestone | Commit / Tag | Notes |
