@@ -7,10 +7,27 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~157 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~154 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): block `const` that shadows an enclosing param/var is now shadow-renamed
+- **2026-06-30 (latest): completed shadow-renaming for escaped sibling loop vars + LHS index/key uses
+  (`f0c1c946e`; CS0136 −2 + CS0841 −1, runtime 157 → 154).** TWO ENTANGLED fixes the runtime
+  `runqputslow` shape needs together (`variableAnalysisOperations.go`): **(A)** an escaping
+  function-body `for i := …` loop var is emitted as a func-scope `ref var i = ref heap<…>(out var Ꮡi)`
+  decl, so sibling `for i := …` loops reusing the name collide (CS0136) — collect the escaped loop var
+  as function-level so the siblings rename `iΔ1`/`iΔ2` (gated to escaped + func-body-level +
+  name-not-already-a-real-func-level-decl, preserving the ForVarMasks invariant); **(B)** a shadow-renamed
+  var used as an LHS INDEX/MAP KEY (`a[i]=…`, `m[ns]=…`, `(*p)[i]=…`) was never rewritten — the `=` case
+  only handled the ROOT ident — a SILENT wrong-value bug (`m[ns]=nsΔ1*100` wrote the wrong key, no compile
+  error) and CS0136/CS0165 once the loop var renames. Descend the target's index/selector/deref chain;
+  runs even for a PAREN-rooted target `(*p)[i]` (getIdentifier→nil, ~36× in stdlib — a defect the verifier
+  caught and I fixed before commit). Entangled: A alone renames loop headers to `iΔ1` but leaves `batch[i]`
+  as `i`. Test `EscapedLoopVarSiblingIndex` (C# [10 20 0 30 40]/2002/9 vs Go; array won't compile / map
+  returns 30001 / paren OOB without the fixes); full suite green (196), goldens byte-identical,
+  adversarially verified. **Remaining CS0136 = 1: proc `Δtrace` (5687)** — a collision-rename
+  (`trace`→`Δtrace`) that ALSO shadows an outer `trace`(→`Δtrace`); a rename-INTERACTION (both get the same
+  collision name), a DISTINCT root.
+- **2026-06-30: block `const` that shadows an enclosing param/var is now shadow-renamed
   (`a09f7826b`; CS0136 −1, runtime 158 → 157).** C# forbids block shadowing (CS0136); the shadow-rename
   pass renamed shadowing *variables* but IGNORED consts (a const's object is `*types.Const`, not the
   `*types.Var` the scope stack tracks), so runtime lock_sema `notetsleep_internal`'s `const ns = 10e6`
@@ -229,9 +246,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~157; the const-shadow fix above cleared 1 CS0136,
-158 → 157): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7, CS1929 6,
-CS0121 6, CS0841 5, CS0266 5, CS0136 3:
+as items land. As of 2026-06-30 latest (`runtime` = ~154; the escaped-sibling-loop + LHS-index fixes above
+cleared 2 CS0136 + 1 CS0841, 157 → 154): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0266 5, CS0841 4, CS0117 3:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -414,18 +431,20 @@ CS0121 6, CS0841 5, CS0266 5, CS0136 3:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~157. Last session shadow-renamed a block
-`const` that shadows an enclosing param/var (CONVERTER-only, `a09f7826b`; CS0136 −1, runtime 158 → 157). C#
-forbids block shadowing (CS0136); the shadow-rename pass renamed shadowing *variables* but IGNORED consts (a
-const's `info.Defs` object is `*types.Const`, not the `*types.Var` the scope stack tracks), so runtime
-lock_sema `notetsleep_internal`'s `const ns = 10e6` collided with its param `ns`. Fix
-(`variableAnalysisOperations.go`): a `constShadowNames` map records a shadowing block const (detected by the
-same by-name check the var path uses — `isDeclaredInOuterScopes`/`isForwardDeclaredInOuterBlocks`) and renames
-its declaration + every use to `nsΔ1`, leaving the enclosing `ns`; non-shadowing consts are unchanged. Test
-`ConstShadowsParam` (10/14 vs Go); full suite green (195), goldens byte-identical, adversarially verified.
-FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
-rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
-any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~154. Last session completed shadow-renaming
+for two ENTANGLED gaps the runtime `runqputslow` shape needs (CONVERTER-only, `f0c1c946e`; CS0136 −2 +
+CS0841 −1, 157 → 154). **(A)** an escaping function-body `for i := …` loop var is hoisted to a func-scope
+`ref var i = ref heap<…>` decl, so sibling `for i := …` loops reusing the name collide (CS0136) — collect
+the escaped loop var as function-level so the siblings rename `iΔ1`/`iΔ2` (gated escaped + func-body-level +
+name-not-already-func-level, preserving the ForVarMasks invariant). **(B)** a shadow-renamed var used as an
+LHS INDEX/MAP KEY (`a[i]=…`, `m[ns]=…`, `(*p)[i]=…`) was never rewritten (the `=` case only handled the ROOT
+ident) — a SILENT wrong-value bug + CS0136/CS0165 once the loop var renames; descend the target's
+index/selector/deref chain, incl. a PAREN-rooted `(*p)[i]` (getIdentifier→nil; a defect the verifier caught,
+fixed pre-commit). Test `EscapedLoopVarSiblingIndex` ([10 20 0 30 40]/2002/9 vs Go); full suite green (196),
+goldens byte-identical, adversarially verified. FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any
+"suite green" claim — the standalone runner only rebuilds the exe when a `.go` is newer, so a committed
+converter change false-greens on a stale binary. After any emitted-form change run `run-behavioral.ps1
+--update-targets` (post fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -438,25 +457,19 @@ REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost 
 NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing):
-- **S6b (silent-correctness, NOT a compile error): LHS-index/map-key/selector-base shadow-rename gap.** Found by
-  the const-shadow verifier: a shadowed name used on the LHS of a plain `=` assignment as an index / map key /
-  selector base is NOT renamed. `variableAnalysisOperations.go`'s `=` AssignStmt case (~714–734) only processes
-  `getIdentifier(lhs)` (the ROOT — `m` in `m[ns]`) and `visitNode`s the RHS, so a shadow-var/const used inside the
-  LHS index (`m[ns] = ns*100`, inner shadow `ns`) emits `m[ns] = nsΔ1*100` — LHS key stays the outer `ns`, C#
-  silently returns the WRONG value with NO compile error. Repros with a VAR shadow too (shared root). Fix: make the
-  `=` case walk the LHS index/key/selector sub-expressions (visit them like the RHS) so their shadow-renamed idents
-  are rewritten. Contained converter-only; add a behavioral test that WOULD DIVERGE (Go vs C# output) without the
-  fix. **Highest-value pick — it is silent data corruption in already-"compiling" code, not just a missing green.**
-- **CS0136 remainder (×3 in proc, TWO distinct roots — the const case is DONE):**
-  (a) proc.cs `i`×2 (6669/6678) — a heap-ESCAPED loop var is hoisted to func scope `ref var i = ref heap<uint32>(…)`
-  (the 3rd `for i` loop in `runqputslow` escapes because `batch[i].schedlink.set(…)` takes the element's address),
-  which then encloses the two sibling `for(var i…)` loops that reuse the name → CS0136. An emission-hoisting/scope
-  interaction: the shadow pass treats all for-loop vars as inner scopes (correct for non-escaping), but an escaped
-  one becomes func-scoped in C#. Fix idea: when a for-loop `:=` var escapes (identEscapesHeap), treat it as
-  function-level in the shadow pass so sibling same-named loop vars get renamed. Verify escape info is available at
-  analysis time. (b) proc.cs `Δtrace` (5687) — collision-rename (`trace`→`Δtrace`) that ALSO shadows an outer
-  `trace`(→`Δtrace`); a rename-INTERACTION (both get the same collision name). Inspect carefully.
+named-over-array entangled before committing). NOTE: S6b (LHS-index/map-key shadow rename) AND the proc `i`
+heap-escaped-loop-var hoist are BOTH DONE (`f0c1c946e`, entangled — landed together). Remaining shadow-rename
+CS0136 is just:
+- **proc.cs `Δtrace` (5687) — the last CS0136.** A collision-rename (`trace`→`Δtrace`, because `trace` collides
+  with a package type) that ALSO shadows an OUTER `trace` (also renamed `Δtrace`), so both nested `trace` locals
+  get the SAME collision name `Δtrace` → CS0136. A rename-INTERACTION: the shadow-rename `Δ`-counter suffix and the
+  collision-rename `Δ`-prefix don't compose (the inner shadow needs an ADDITIONAL disambiguator on top of the
+  collision rename). Inspect how collision-renamed names flow through declareVar / getShadowedVarName; likely
+  contained but subtle (verify the shadow rename applies to an already-collision-renamed name). ~1 error.
+- OR re-bucket and pick from **CS0841 (4)** ("use of unassigned local"/"before declared" — an emission-ORDER
+  issue, possibly contained), **CS0266 (5)** (named-numeric / pointer-walk conversions — read the S6 queue item),
+  or **CS0117 (3)** (pinner.cs `Ꮡx` — likely named-over-array, VERIFY not entangled). Avoid CS0030 (S1),
+  CS0029 (S4), CS0103 (S5), the mprof CS1929 (entangled), and the CS0121 add-overload (S1-uintptr subtle).
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
   `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
