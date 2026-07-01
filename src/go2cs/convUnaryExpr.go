@@ -41,16 +41,32 @@ func (v *Visitor) convArrayIndex(index ast.Expr) string {
 // can never equal a bare type name, so those never qualify; an already-qualified cross-package type
 // (contains '.') is returned unchanged.
 func boxAccessorType(typeName, receiver string) string {
+	// An already-qualified cross-package type (contains '.') is left alone.
+	if strings.Contains(typeName, ".") {
+		return typeName
+	}
+
 	// A type whose name collides with a same-package method/function (`type funcInfo` vs
 	// `func (f *Func) funcInfo()`) is declared Δ-renamed (`ΔfuncInfo`), since the package static
 	// method shadows the namespace type. The box accessor must use that renamed name too — a bare
-	// `funcInfo.Ꮡnfuncdata` binds to the method group (CS0119). Applies only to a bare same-package
-	// name; an already-qualified cross-package type (contains '.') is left alone.
-	if !strings.Contains(typeName, ".") && nameCollisions[typeName] {
+	// `funcInfo.Ꮡnfuncdata` binds to the method group (CS0119). Callers that pass the RAW Go name are
+	// normalized here; callers that pass an already-sanitized name arrive Δ-prefixed already.
+	if nameCollisions[typeName] {
 		typeName = getCollisionAvoidanceIdentifier(typeName)
 	}
 
-	if typeName == receiver && !strings.Contains(typeName, ".") {
+	// Qualify the bare type name with its package static class (which a local variable can NEVER shadow)
+	// in either case:
+	//   - The type is COLLISION-renamed (Δ-prefixed): a Go local named after its type (`p`) is renamed
+	//     to the SAME `Δp`, so any such local in the enclosing function shadows a bare `Δp.Ꮡfield`. At
+	//     runtime malloc's `persistentalloc1`, `persistent = &mp.p.ptr().palloc` →
+	//     `(~mp).p.ptr().of(Δp.Ꮡpalloc)` binds `Δp` to the local `Δp` declared just below (CS0841;
+	//     CS1061 regardless). The receiver (`(~mp).p.ptr()`) is not the colliding local, so the receiver
+	//     check alone misses it. A type is never shadow-renamed (types are package-level), so a
+	//     Δ-prefixed accessor type is always a collision type — qualifying is always value-correct.
+	//   - The type name equals the `.of()` RECEIVER variable (`m := getg().m; &m.park` →
+	//     `m.of(runtime_package.m.Ꮡpark)`) — a bare `m.Ꮡpark` binds to the `ж<m>` variable `m`.
+	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
 

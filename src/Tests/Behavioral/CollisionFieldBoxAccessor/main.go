@@ -26,6 +26,22 @@ var h holder
 // Δ-renamed name (`Ꮡgm.of(Δmark.Ꮡid)`); a raw `mark.Ꮡid` binds to the `mark` method group (CS0119).
 var gm mark
 
+// localShadowsCollisionType reproduces runtime malloc `persistentalloc1`'s shape: a box accessor whose
+// OWNING type is the collision type `mark` (`&m.id` → `m.of(Δmark.Ꮡid)`), followed by a LOCAL variable
+// named after that type (`mark := 7` → renamed `Δmark`). In C# the local is function-scoped, so a bare
+// `Δmark.Ꮡid` in the earlier accessor binds to the not-yet-declared local (CS0841). The accessor must
+// qualify the owning type with its package static class (`main_package.Δmark.Ꮡid`), which a local can
+// never shadow. Guards boxAccessorType's collision-qualification.
+//
+//go:noinline
+func localShadowsCollisionType() int {
+	m := &mark{id: 10}
+	pid := &m.id // box accessor referencing the collision type `mark`
+	*pid = 55
+	mark := 7 // local named after the collision type, declared AFTER the accessor
+	return *pid + mark // 55 + 7 = 62
+}
+
 func main() {
 	// &global.field routes through the box-field accessor: Ꮡh.of(holder.Ꮡmark).
 	p := &h.mark
@@ -53,4 +69,6 @@ func main() {
 	// (`Δmark:`) is not a parameter of the generated constructor (CS1739).
 	h2 := holder{mark: 5, extra: 6}
 	fmt.Println(h2.mark, h2.extra) // 5 6
+
+	fmt.Println(localShadowsCollisionType()) // 62
 }

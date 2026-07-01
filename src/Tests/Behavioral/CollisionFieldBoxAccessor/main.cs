@@ -25,6 +25,14 @@ internal static ref holder h => ref Ꮡh.val;
 internal static ж<Δmark> Ꮡgm = new(default(Δmark));
 internal static ref Δmark gm => ref Ꮡgm.val;
 
+internal static nint localShadowsCollisionType() {
+    var m = Ꮡ(new Δmark(id: 10));
+    var pid = m.of(main_package.Δmark.Ꮡid);
+    pid.val = 55;
+    nint Δmark = 7;
+    return pid.val + Δmark;
+}
+
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
     p.val = 42;
@@ -36,11 +44,12 @@ internal static void Main() {
     tagger t = default!;
     t.mark();
     fmt.Println(m.id);
-    var pid = Ꮡgm.of(Δmark.Ꮡid);
+    var pid = Ꮡgm.of(main_package.Δmark.Ꮡid);
     pid.val = 99;
     fmt.Println(gm.id);
     var h2 = new holder(mark: 5, extra: 6);
     fmt.Println(h2.mark, h2.extra);
+    fmt.Println(localShadowsCollisionType());
 }
 
 } // end main_package
