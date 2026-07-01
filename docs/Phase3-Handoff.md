@@ -7,10 +7,27 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~148 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~145 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): cast a native-int const-ARITHMETIC RHS whose folded value overflows int32
+- **2026-07-01 (latest): qualify a collision-renamed owning type in a box-field accessor
+  (`04a5322f7`; CS0841 −1 + CS1061 −2, runtime 148 → 145 — 3 errors, one root).** A box accessor
+  `receiver.of(TYPE.Ꮡfield)` was qualified with the package static class only when TYPE equaled the
+  `.of()` RECEIVER variable. But a Go local named after its type is renamed to the SAME `Δ`-name, so
+  such a local ANYWHERE in the function shadows a bare `Δp.Ꮡfield` (C# locals are function-scoped).
+  Runtime malloc `persistentalloc1` does `persistent = &mp.p.ptr().palloc` then declares a local `p`
+  (→`Δp`) below; the accessor `(~mp).p.ptr().of(Δp.Ꮡpalloc)` bound its bare `Δp` to that later local
+  (CS0841; two mheap `Δp.Ꮡgcw` sites were CS1061 — a local `Δp` of type `unsafe.Pointer`). The receiver
+  isn't the colliding local, so the receiver-name check missed it. Fix (`convUnaryExpr.go`
+  `boxAccessorType`): qualify whenever the type name is `Δ`-prefixed (a type is never shadow-renamed, so
+  a `Δ`-prefixed accessor type is always a collision rename) → `(~mp).p.ptr().of(runtime_package.Δp.Ꮡpalloc)`.
+  Value-identical to the bare form when nothing shadows. Extends the `CollisionFieldBoxAccessor` test
+  (`localShadowsCollisionType`); full suite green (200), only that test's golden churns (benign
+  re-baseline), adversarially verified (write-through, multi-level, no wrong-package/CS0426, all 196
+  qualified sites compile). **The malloc `Δp` CS0841 was the cleanest of the 3 remaining CS0841 — the
+  explorer's ranked #1, correctly (its `Δp` type-rename alternative had far more blast radius). The
+  surgical box-accessor route avoided renaming the core processor `p` type entirely.**
+- **2026-07-01: cast a native-int const-ARITHMETIC RHS whose folded value overflows int32
   (`aa0c36b6e`; CS0266 −1, runtime 149 → 148 — the LAST CS0266 cleared).** mbitmap's
   `pattern = 1<<maxBits - 1` (uintptr, maxBits=57) folds `1<<maxBits` to a SIGNED C# `long` literal
   (`144115188075855872L`, > int32), so the whole RHS is `long` — no implicit conversion to the native
@@ -314,9 +331,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~148; the mbitmap native-int const-arith cast above
-cleared the last CS0266, 149 → 148): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0117 3, CS0841 3 (CS0266 now 0):
+as items land. As of 2026-07-01 latest (`runtime` = ~145; the box-accessor collision-qualification above
+cleared malloc CS0841 + 2 mheap CS1061, 148 → 145): CS0030 45, CS1503 24, CS1061 ~16, CS0021 10,
+CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS8030 4, CS0841 2 (CS0266 now 0):
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -499,18 +516,19 @@ CS1929 6, CS0121 6, CS0117 3, CS0841 3 (CS0266 now 0):
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~148. Last session cast a native-int
-const-ARITHMETIC RHS whose folded value overflows int32 (CONVERTER-only, `aa0c36b6e`; CS0266 −1, 149 → 148 —
-the LAST CS0266 cleared). mbitmap `pattern = 1<<maxBits - 1` (uintptr) folds `1<<maxBits` to a signed `long`
-literal `144115188075855872L`, so the whole `long` RHS won't implicitly convert to nuint (CS0266). Fix
-(`visitAssignStmt.go` new `nativeIntConstCastType`): wrap the RHS in the native target's cast, GATED to the
-provably-64-bit case (plain `*types.Basic` uintptr/uint/int target — named excluded; whole value fits int64,
-overflows int32; ≥1 operand folds to a signed `long` via `overflowingConstLiteral`). A bare shift `1 << 40`
-is deliberately NOT cast (its operands are small — it stays the pre-existing truncating `(uintptr)(1 <<
-(int)(40))`). Test `NativeIntWideConstAssign`; suite green (200), two verifiers. FORCE `cd src/go2cs && go
-build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a
-`.go` is newer, so a committed converter change false-greens on a stale binary. After any emitted-form change
-run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~145. Last session qualified a collision-renamed
+owning type in a box-field accessor (CONVERTER-only, `04a5322f7`; CS0841 −1 + CS1061 −2, 148 → 145). A box
+accessor `receiver.of(TYPE.Ꮡfield)` was package-qualified only when TYPE equaled the `.of()` receiver var; but
+a Go local named after its type is renamed to the SAME `Δp`, so such a local anywhere in the function shadows a
+bare `Δp.Ꮡfield` (C# locals are function-scoped) — runtime malloc `persistentalloc1` `&mp.p.ptr().palloc` +
+a later local `p`. Fix (`convUnaryExpr.go` `boxAccessorType`): qualify whenever the type name is `Δ`-prefixed
+(a type is never shadow-renamed, so `Δ`-prefixed = collision rename) → `.of(runtime_package.Δp.Ꮡpalloc)`. Test
+extension `CollisionFieldBoxAccessor.localShadowsCollisionType`; suite green (200), adversarially verified.
+NOTE: this was the malloc `Δp` CS0841 — the surgical box-accessor route (qualify the type-REF) avoided the
+explorer's `Δp` type-RENAME alternative, which had far more blast radius (core processor `p` type, generators).
+FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
+rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
+any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 ⚠ gpg-agent may TIMEOUT on the signed commit — relaunch `gpgconf --launch gpg-agent`; if it still needs a
 passphrase, STOP and ask the user to unlock the key (never bypass signing).
 
@@ -540,11 +558,15 @@ named-over-array entangled before committing). NOTE: ALL CS0266 are now DONE —
   `nativeIntConstCastType`. Behavioral (parity) test is the gate; a `NativeIntBareShiftAssign` test FAILS until this
   lands. Verify how many runtime/stdlib sites actually hit it (the verifier's scan found real sites use VARIABLE shift
   amounts, so this may be low-yield for runtime — but it is a genuine correctness bug worth fixing).
-- **CS0841 (3, all DISTINCT roots — the plain stack.cs one is DONE):** malloc.cs `Δp` + traceallocfree.cs `Δtrace`
-  are collision-rename ordering (a collision-renamed local referenced before its decl — kin to the declined proc
-  `Δtrace` CS0136; likely the same underlying collision×order interaction, so may share a fix but is SUBTLE); the
-  mgcsweep.cs `sʗ3` is a closure-capture box name used inside a `systemstack(() => {…})` closure that redeclares
-  it. Each needs individual investigation; NONE is the clean plain-order case anymore.
+- **CS0841 (2 remaining, both DISTINCT + SUBTLE — the plain stack.cs one AND the malloc `Δp` box-accessor one
+  are DONE):** traceallocfree.cs `Δtrace` is a local shadowing a package-level GLOBAL `trace` where the GLOBAL is
+  used (line 35) BEFORE the local's decl (line 43) — both collision-renamed `Δtrace`, the C# function-scoped
+  local wins the earlier ref (kin to the DECLINED proc `Δtrace` CS0136; the explorer classified it DECLINED-KIN,
+  needs the shadow-detection-considers-globals deep-dive — do NOT attempt blindly). mgcsweep.cs `sʗ3` is a
+  closure self-shadowing initializer `s := spanOf(…s.largeType…)` inside `systemstack(() => {…})` where the inner
+  `s` and the captured outer `s` share the `sʗN` closure-capture name (the explorer classified it SUBTLE —
+  entangled with the closure-capture-rename × shadow counter). Neither is a clean contained root; both likely
+  need user-guided or multi-session work.
 - **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
   if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
 - **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
