@@ -247,6 +247,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	functionLevelDecls := make(map[string]*types.Var)
 	var nameCounts = make(map[string]int)            // Counts for generating unique names
 	var declaredPos = make(map[*types.Var]token.Pos) // Track declaration positions
+	// A block-scoped `const` that shadows an enclosing var/param/const must be renamed like a
+	// shadowing var (C# has no block shadowing — CS0136), but a const's object is a *types.Const, not
+	// the *types.Var the scope stack / varNames track. constShadowNames maps such a renamed const
+	// object to its adjusted name so both its declaration and its uses (resolved via info.Uses to the
+	// same *types.Const) emit the renamed form. Only shadowing consts are recorded; a non-shadowing
+	// const is left unchanged (no churn).
+	constShadowNames := make(map[types.Object]string)
 
 	// Initialize tracker registry for different statement types
 	registry := newTrackerRegistry()
@@ -741,9 +748,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					continue
 				}
 
-				// Ignore constants here
 				if varObj, ok := obj.(*types.Var); ok {
 					declareVar(varName, varObj, ident)
+				} else if _, ok := obj.(*types.Const); ok {
+					// A block `const` that shadows an enclosing var/param — `const ns = 10e6` inside a
+					// function that has a parameter `ns` (runtime notetsleep_internal). C# forbids the
+					// shadow (CS0136); the shadow check is by NAME, so the enclosing `ns` is detected even
+					// though it lives in the *types.Var scope stack. Rename the const decl + its uses.
+					if isDeclaredInOuterScopes(varName, false) || isForwardDeclaredInOuterBlocks(varName) {
+						adjustedName := getShadowedVarName(varName)
+						constShadowNames[obj] = adjustedName
+						v.identNames[ident] = adjustedName
+					}
 				}
 			}
 
@@ -758,6 +774,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					if adjustedName, ok := v.varNames[varObj]; ok {
 						v.identNames[node] = adjustedName
 					}
+				} else if adjustedName, ok := constShadowNames[obj]; ok {
+					// A use of a shadow-renamed block const resolves to the same *types.Const.
+					v.identNames[node] = adjustedName
 				}
 			}
 

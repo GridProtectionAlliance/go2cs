@@ -112,6 +112,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
+    public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
+
+    [TestMethod]
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]

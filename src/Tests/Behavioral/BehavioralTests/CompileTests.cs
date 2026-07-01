@@ -117,6 +117,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
+    public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]

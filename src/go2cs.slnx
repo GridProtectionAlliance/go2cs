@@ -81,6 +81,7 @@
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
     <Project Path="Tests/Behavioral/CollisionRenamedLocalBox/CollisionRenamedLocalBox.csproj" />
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
+    <Project Path="Tests/Behavioral/ConstShadowsParam/ConstShadowsParam.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
