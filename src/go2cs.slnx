@@ -170,6 +170,7 @@
     <Project Path="Tests/Behavioral/NarrowByteArithFirstOperandCast/NarrowByteArithFirstOperandCast.csproj" />
     <Project Path="Tests/Behavioral/NarrowByteArithReturn/NarrowByteArithReturn.csproj" />
     <Project Path="Tests/Behavioral/NativeIntConstMask/NativeIntConstMask.csproj" />
+    <Project Path="Tests/Behavioral/NativeIntWideConstAssign/NativeIntWideConstAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedEmbeddingPromotion/NestedEmbeddingPromotion.csproj" />
     <Project Path="Tests/Behavioral/NestedFieldPointerAssign/NestedFieldPointerAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />

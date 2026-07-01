@@ -346,6 +346,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]
+    public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
+
+    [TestMethod]
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]

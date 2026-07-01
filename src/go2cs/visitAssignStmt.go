@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
+	"math"
 	"strings"
 )
 
@@ -143,6 +145,91 @@ func wholeExprIsCastOfType(expr, castType string) bool {
 	}
 
 	return false
+}
+
+// nativeIntConstCastType returns the C# native-integer type (`uintptr`/`nuint`/`nint`) a computed
+// CONSTANT arithmetic RHS must be cast to when assigned to a native-width integer LHS, or "" when none
+// applies. A Go untyped constant expression like `1<<maxBits - 1` (target `uintptr`, `maxBits` = 57) has
+// its sub-shift `1<<maxBits` folded by overflowingConstLiteral to a SIGNED C# `long` literal
+// (`144115188075855872L`, > int32), so the whole RHS is `long` — which has no implicit conversion to the
+// native unsigned/`nint` target (CS0266); a `UL`/`(nuint)` suffix would not help either (ulong→nuint is
+// also explicit). Wrapping the whole RHS in `(uintptr)(…)` narrows it back (the value fits the 64-bit
+// native type).
+//
+// The cast is applied ONLY when the emitted arithmetic is provably ≥64-bit — i.e. at least one OPERAND is
+// itself folded to a signed `long` literal (`overflowingConstLiteral != ""`). This is the crux of
+// correctness: a BARE shift `1 << 40` (both operands small) is emitted as a 32-bit `1 << (int)(40)` that
+// MASKS the count (`40 & 31`) and truncates to `256`; casting that wrongly-computed result would convert a
+// loud CS0266 into a SILENT wrong value. The mbitmap form passes because `1<<maxBits` (an operand) folds to
+// a `long`, forcing `long - 1`. Other exclusions: a bare literal (convBasicLit emits `UL`/`(nuint)`), an
+// in-range const (a bare `int` that converts implicitly), a non-const native arithmetic (`nuint - nuint`),
+// a value that OVERFLOWS int64 (a large unsigned `uintptr` like `1<<63 + 1<<62` — its sub-shift also
+// mis-emits, so it is left as a loud CS0266, not masked), and a NAMED type over a native int (a `[GoType]`
+// cast only accepts its exact underlying — `(myUintptr)(long)` is CS0030 — so those keep the loud error).
+func (v *Visitor) nativeIntConstCastType(lhs, rhs ast.Expr, alreadyCast string) string {
+	var operands []ast.Expr
+
+	switch e := rhs.(type) {
+	case *ast.BinaryExpr:
+		operands = []ast.Expr{e.X, e.Y}
+	case *ast.UnaryExpr:
+		operands = []ast.Expr{e.X}
+	default:
+		return ""
+	}
+
+	// PLAIN native-width target only (not `.Underlying()`): a named type over uintptr/uint/int is
+	// excluded — a `[GoType]` cast rejects a non-underlying operand (CS0030).
+	basic, ok := v.getType(lhs, false).(*types.Basic)
+
+	if !ok {
+		return ""
+	}
+
+	switch basic.Kind() {
+	case types.Uintptr, types.Uint, types.Int:
+		// C# nuint/nint — no implicit conversion from a long/ulong literal.
+	default:
+		return ""
+	}
+
+	// The whole RHS must be a CONSTANT whose value fits int64 but falls OUTSIDE the C# int32 range — the
+	// range overflowingConstLiteral folds to a signed `long`. An in-range constant emits as a bare `int`
+	// (converts implicitly); a value that overflows int64 goes through a different, already-imperfect path
+	// and is left as a loud CS0266 rather than masked.
+	tv, ok := v.info.Types[rhs]
+
+	if !ok || tv.Value == nil {
+		return ""
+	}
+
+	if i, exact := constant.Int64Val(constant.ToInt(tv.Value)); !exact || (i >= math.MinInt32 && i <= math.MaxInt32) {
+		return ""
+	}
+
+	// CRUX: at least one operand must itself fold to a signed `long` literal, so the emitted arithmetic is
+	// done in 64-bit width. Without this a bare `1 << 40` (small operands, 32-bit truncating shift) would be
+	// silently mis-cast; requiring a folded operand keeps such forms as a loud CS0266.
+	widened := false
+
+	for _, operand := range operands {
+		if len(v.overflowingConstLiteral(operand)) > 0 {
+			widened = true
+			break
+		}
+	}
+
+	if !widened {
+		return ""
+	}
+
+	castType := convertToCSTypeName(v.getTypeName(basic, false))
+
+	if len(alreadyCast) > 0 && wholeExprIsCastOfType(alreadyCast, castType) {
+		return ""
+	}
+
+	return castType
 }
 
 func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingContext) {
@@ -630,6 +717,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			if !bitwiseAssignOp && !andNotUncheckedClose && i < lhsLen && !lhsTypeIsInterface[i] {
 				narrowCastType = v.narrowArithmeticCastType(lhsExprs[i], rhs, rhsExpr)
+
+				if len(narrowCastType) == 0 {
+					// A computed CONSTANT arithmetic RHS assigned to a native-width integer LHS whose folded
+					// value overflows int32 is emitted as a C# `long` (`144115188075855872L - 1`, runtime
+					// mbitmap's `pattern = 1<<maxBits - 1`); `long` has no implicit conversion to the
+					// `uintptr`/`nuint`/`nint` target (CS0266). Cast it back through the same wrapper
+					// (mutually exclusive with the narrow-int cast — narrow targets are sub-int).
+					narrowCastType = v.nativeIntConstCastType(lhsExprs[i], rhs, rhsExpr)
+				}
 			}
 
 			var binaryTypeName string

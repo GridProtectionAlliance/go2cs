@@ -384,6 +384,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNativeIntConstMask() => CheckTarget("NativeIntConstMask");
 
     [TestMethod]
+    public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
+
+    [TestMethod]
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]
