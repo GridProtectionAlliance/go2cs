@@ -575,6 +575,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSwitchDefaultOrder() => CheckTarget("SwitchDefaultOrder");
 
     [TestMethod]
+    public void CheckSwitchFallthroughDefaultReturn() => CheckTarget("SwitchFallthroughDefaultReturn");
+
+    [TestMethod]
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]

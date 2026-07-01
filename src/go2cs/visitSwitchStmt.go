@@ -39,6 +39,53 @@ func caseBodyHasSwitchBreak(body []ast.Stmt) bool {
 	return found
 }
 
+// isTerminatingStmt reports whether a statement is a Go "terminating statement" (spec §Terminating
+// statements) — one after which control cannot fall through. Used to decide whether a switch case can
+// fall OUT of the switch: a non-terminating (and non-`fallthrough`) case means the switch is NOT terminal,
+// so no unreachable trailing `return default!;` may follow it (see visitSwitchStmt). CONSERVATIVE by
+// design — it returns false for any form it does not fully analyze (`for`/`switch`/`select`), which only
+// forgoes the trailing return (leaving the rarer CS0161), NEVER a false "terminal" that would make the
+// trailing return reachable and silently return the zero value. `fallthrough` is NOT terminating here
+// (tracked separately as a case that continues into the next clause); a lone `break`/`continue` is not.
+func isTerminatingStmt(stmt ast.Stmt) bool {
+	switch s := stmt.(type) {
+	case *ast.ReturnStmt:
+		return true
+	case *ast.BranchStmt:
+		return s.Tok == token.GOTO
+	case *ast.LabeledStmt:
+		return isTerminatingStmt(s.Stmt)
+	case *ast.BlockStmt:
+		return isTerminatingStmtList(s.List)
+	case *ast.IfStmt:
+		// Terminating only with an `else` where BOTH branches terminate.
+		return s.Else != nil && isTerminatingStmt(s.Body) && isTerminatingStmt(s.Else)
+	case *ast.ExprStmt:
+		// A call to the built-in `panic` is terminating.
+		if call, ok := s.X.(*ast.CallExpr); ok {
+			if ident, ok := call.Fun.(*ast.Ident); ok && ident.Name == "panic" {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// isTerminatingStmtList reports whether a statement list terminates — its final non-empty statement is a
+// terminating statement (Go spec: an empty trailing statement does not affect termination).
+func isTerminatingStmtList(list []ast.Stmt) bool {
+	for i := len(list) - 1; i >= 0; i-- {
+		if _, empty := list[i].(*ast.EmptyStmt); empty {
+			continue
+		}
+
+		return isTerminatingStmt(list[i])
+	}
+
+	return false
+}
+
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	var caseClauses []*ast.CaseClause
 	var caseHasFallthroughStmt []bool
@@ -208,6 +255,17 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			v.targetFile.WriteString(" = false;" + v.newline)
 		}
 
+		// A `default:` reached via fallthrough is emitted as a GUARDED `if (fallthrough || !match)` block
+		// (below), whose condition C# cannot prove always executes — so if the switch is the last
+		// statement of a value-returning function and every case is terminal, C# reports CS0161 ("not all
+		// code paths return a value") even though the Go `default` makes it exhaustive. Track that form to
+		// emit an (unreachable) trailing `return default!;` after the if-chain — but ONLY when the switch
+		// is genuinely terminal (allCasesTerminal below). A switch with a case that can fall OUT (a
+		// `break`, or a body that neither returns nor falls through) is NOT terminal: reachable Go code
+		// follows it, so a trailing `return default!;` there would execute and wrongly return the zero value.
+		guardedTerminalDefault := false
+		allCasesTerminal := true
+
 		// Write "if" statements for each case clause
 		for i, caseClause := range caseClauses {
 			v.writeOutput("")
@@ -229,6 +287,12 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			if caseClause.List == nil {
 				if caseFallsThrough {
 					v.targetFile.WriteString(fmt.Sprintf("if (fallthrough || !%s) { /* default: */", matchVarName))
+
+					// A trailing default emitted in the guarded form leaves C# unable to prove the switch
+					// is exhaustive (see guardedTerminalDefault above).
+					if i == len(caseClauses)-1 {
+						guardedTerminalDefault = true
+					}
 				} else {
 					v.targetFile.WriteString("{ /* default: */")
 				}
@@ -329,6 +393,17 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				v.visitStmt(stmt, []StmtContext{})
 			}
 
+			// A case whose body can fall OUT of the switch — it wraps a switch-`break`, or it is neither a
+			// Go terminating statement list (isTerminatingStmtList — a genuine spec check, so an
+			// `if { return }` WITHOUT an `else` or a possibly-zero-trip loop is correctly NON-terminating)
+			// nor a fallthrough — makes the switch non-terminal, so no trailing `return default!;` may be
+			// added (see guardedTerminalDefault). Using the shallow "last emitted line was a return" flag
+			// here is WRONG: it false-positives on `if { return }` and lets a reachable `return default!;`
+			// silently return the zero value.
+			if switchBreakWrap || !(isTerminatingStmtList(caseClause.Body) || caseHasFallthroughStmt[i]) {
+				allCasesTerminal = false
+			}
+
 			if switchBreakWrap {
 				v.indentLevel--
 				// Likewise close on its own indented line. A `"%s} while…"` format would emit the
@@ -346,6 +421,17 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 			v.indentLevel--
 			v.writeOutputLn("}")
+		}
+
+		// A trailing `default:` in the guarded (fallthrough) form is a runtime-conditional `if` that C#
+		// cannot prove exhaustive, so a value-returning function ending in this switch fails CS0161 ("not
+		// all code paths return a value") even though the Go `default` makes it exhaustive. Emit an
+		// unreachable `return default!;` — a guarded-terminal-default switch cannot be legally followed by
+		// reachable Go code (the switch always returns/exits), so nothing else can run after it. Skip in
+		// namedReturnDefer mode: there the body sits inside a `void` `func((defer, recover) => …)` wrapper,
+		// so a value `return default!;` is CS8030 — and the void wrapper needs no trailing return anyway.
+		if guardedTerminalDefault && allCasesTerminal && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
+			v.writeOutputLn("return default!;")
 		}
 	} else if allConst && switchStmt.Tag != nil {
 		// Most simple scenario when all case values are constant, a common C# switch will suffice
