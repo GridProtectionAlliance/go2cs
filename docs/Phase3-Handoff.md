@@ -15,10 +15,34 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~96 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~94 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): cast a `make()` length/capacity/hint of a non-int integer type to nint
+- **2026-07-01 (latest): cast a wide-integer 3-index slice bound to int (`cc1255754`; CS1503 −2,
+  runtime 96 → 94).** A 3-index full slice `s[low:high:max]` lowers to the golib `.slice(nint low, nint high,
+  nint max)` method; the bounds were emitted with a bare convExpr, so a wide-integer bound
+  (uintptr/uint/uint32/uint64/int64) had no implicit conversion to the nint param → CS1503 (runtime/mprof
+  `stk[:b.nstk:b.nstk]`, b.nstk uintptr). Fix (`convSliceExpr.go`): route the 3-index bounds through the
+  existing wide-integer narrowing helper (renamed `castElemAddrIndex → castWideIntegerToInt`, now shared by
+  element-address indices and slice bounds; caller in convUnaryExpr.go updated). Casts (int) only for
+  uint/uint32/uint64/uintptr/int64; int/small-int/untyped left uncast. Go bounds are int so the narrowing
+  matches Go; the runtime bound is guarded (`b.nstk ≤ 1024`). Test `Slice3IndexWideBound` (**output**);
+  suite green (209), zero churn. **BOTH verifiers CONFIRMED SAFE** (diff exactly 6 lines, no over-fire,
+  rename a no-op on the element-address + 2-index paths).
+  - **⚠ pallocBits → IArray (5) was investigated and DEFERRED — it is ENTANGLED, not a clean root.**
+    `pallocBits` = `[GoType("pageBits")]` (an InheritedTypeTemplate wrapper of `pageBits`, a named `[8]uint64`
+    array that DOES implement IArray). The wrapper doesn't forward IArray → `len(b)`/`b[i]` fail (5). BUT the
+    non-test runtime also has 7 `(*pageBits)(b)` pointer-reinterprets (mpallocbits.go:344-377) that currently
+    COMPILE precisely BECAUSE the `[GoType("pageBits")]` wrapper provides the pallocBits→pageBits conversion.
+    Option (a) — emit pallocBits's [GoType] as the array form `[8]uint64` (so it implements IArray) — would
+    LOSE the pallocBits→pageBits conversion and break those 7 (net worse). Option (b) — generator: make
+    InheritedTypeTemplate forward IArray for an array-inherited type (keeping the wrapper) — is the RIGHT fix
+    but needs cross-symbol work (detect pageBits is array-backed) OR delegating IArray to the inner `m_value`.
+    Same family: `pMask → @string` copy (4) — pMask=`[GoType("[]uint32")]` (Slice template, implements
+    ISlice<uint32> not slice<uint32>), so `copy(slice<uint32>, pMask)` doesn't bind `copy<T>(slice<T>,slice<T>)`
+    (fix: generator ISliceTypeTemplate implicit→slice<T>, OR a golib copy(slice, ISlice) overload). Both are
+    the InheritedTypeTemplate collection-interface family — a dedicated generator effort.
+- **2026-07-01: cast a `make()` length/capacity/hint of a non-int integer type to nint
   (`438d633a0`; CS1503 −5, runtime 101 → 96).** The golib `slice<T>(nint,nint)` / `map<K,V>(nint)` /
   `channel<T>(nint)` ctors take nint; C# has no implicit `uintptr`/`uint`/`uint32`/`uint64`/`int64` → nint
   conversion, so `make([]byte, n/goarch.PtrSize)` (uintptr length, runtime/mbitmap ×4 + a []uint64 variant)
@@ -481,24 +505,30 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~96; make-len-cast cleared 5, 101 → 96):
-CS1503 19, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+as items land. As of 2026-07-01 latest (`runtime` = ~94; 3-index slice-bound cast cleared 2, 96 → 94):
+CS1503 17, CS1061 16, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0206/CS0136/CS0119/CS0118/CS0019 ×1).
-**CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins (`9e30a1c5b` −23,
-`f19153a9e` −13), and the make-len-cast (`438d633a0`, −5) landed. CS1503 is still the biggest (19); CS0030 is
-at 9 (managed-referent). Keep SORTING the fork + triaging CS1503/CS1061.**
-- **NEXT — re-bucket a fresh reconvert and pick the cleaner:**
-  1. **CS1503 `pallocBits → IArray` (5) — GENERATOR-level (deferred once already).** `pallocBits` is
-     `[GoType("pageBits")]`, an INHERITED wrapper of `pageBits` (`type pageBits [8]uint64`, itself
-     `[GoType("[8]uint64")]`, which DOES implement IArray). The InheritedTypeTemplate wrapper does NOT forward
-     IArray, so `len(b)`/`b[i]` on a `pallocBits` fail (`cannot convert pallocBits to IArray`). Fix: either
-     (a) converter — for `type X Y` where Y's underlying is an array, emit X's [GoType] as the ARRAY form
-     (`[8]uint64`) resolving through Y (so the array-backed generator makes X implement IArray), OR
-     (b) generator — make InheritedTypeTemplate forward IArray when the inherited type is an array. Verify no
-     regression on the pallocBits↔pageBits value conversions. Behaviorally checkable (index/len a named-array
-     type). *(The `nuint → byte[]` (4) sub-cluster is DONE via `438d633a0`.)* Other CS1503: `pMask → @string`
-     (2), `slice<uint> → slice<byte>` (2), `nuint → nint`/`int` args (3), `UntypedInt → params ReadOnlySpan`
-     (2), `method group → object` (1).
+**Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
+(`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`, −2).
+⚠ The CLEAN contained converter roots are THINNING — the frontier is now mostly generator-fraught, architectural,
+or scattered small bugs. Re-triage carefully.**
+- **NEXT — re-bucket a fresh reconvert; the candidates, roughly cleanest-first:**
+  1. **Scattered small CONTAINED converter bugs — triage these FIRST for a clean root.** `nuint.val` CS1061
+     (2: heapdump.cs, select.cs — `.val` emitted on an already-deref'd nuint, `@unsafe.Pointer.FromRef(ref
+     (pstk).val)` where pstk is a nuint); plus re-triage the CS1503 `slice<uint> → slice<byte>` (2) and other
+     singletons for any clean converter angle. Small (−1/−2 each) but clean and verifiable.
+  2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
+     unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
+     (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
+  3. **⚠ GENERATOR-fraught (BOTH options have traps — a careful dedicated effort, not a quick win):**
+     `pallocBits → IArray` (5) + `pMask → @string` copy (4) — the InheritedTypeTemplate collection-interface
+     family (see *Where things stand*). Option (a) [emit the array form] breaks the 7 `(*pageBits)(b)`
+     reinterprets that rely on the pallocBits→pageBits conversion; option (b) [forward IArray from the wrapper]
+     was **already TRIED and REVERTED for lost-writes** (forwarding to a copy of `m_value`). A correct fix must
+     forward IArray to the *ref* of the inner value (no copy) AND keep the pallocBits↔pageBits conversion.
+- **If the small contained bugs (candidate 1) run dry, the remainder is architectural/generator-fraught → that
+  is the iteration-15-style signal to slow down and consider whether the managed-referent / generator efforts
+  need the user's models or a dedicated multi-session design rather than autonomous grinding.**
   2. **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
      `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3).** Hide a MANAGED pointer in a `uintptr` → MODEL
      holding `ж<T>` directly (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite` `object? m_target`),
@@ -732,33 +762,33 @@ at 9 (managed-referent). Keep SORTING the fork + triaging CS1503/CS1061.**
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at ~96. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared; TWO
-S1-fork convert-native reinterpret wins (unsafe.Pointer `(*T)(p)` `9e30a1c5b` −23; named-numeric
-`(*uint64)(*lfstack)` `f19153a9e` −13); and the make-len-cast (`438d633a0`, −5).** Last session cast a `make()`
-length/cap/hint of a non-int integer (uintptr/uint/uint32/uint64/int64) to nint for slice/map/chan targets —
-`new slice<byte>((nint)(n/goarch.PtrSize))` — since the golib slice/map/chan ctors take nint and C# won't
-implicitly narrow nuint/ulong/long→nint (runtime/mbitmap `make([]byte, n/goarch.PtrSize)`, CS1503 nuint→byte[]).
-Helpers `makeLenArgs`/`makeLenArgNeedsNintCast`; int/untyped/int8/int16/uint8/uint16 left uncast. Verifier-1 SAFE
-(no over-fire); output test `MakeSliceUintptrLen`; suite green (208), zero churn.
+This session: runtime is at ~94. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917 cleared; TWO
+S1-fork convert-native reinterpret wins (`9e30a1c5b` −23; `f19153a9e` −13); the make-len-cast (`438d633a0`, −5);
+and the 3-index slice-bound cast (`cc1255754`, −2).** Last session routed a 3-index full-slice `s[low:high:max]`'s
+bounds through the wide-integer narrowing helper (renamed `castElemAddrIndex → castWideIntegerToInt`): a
+uintptr/uint/uint32/uint64/int64 bound is cast to `(int)` (the golib `.slice(nint,nint,nint)` takes nint;
+runtime/mprof `stk[:b.nstk:b.nstk]`). int/small-int/untyped left uncast. BOTH verifiers SAFE (diff exactly 6
+lines, no over-fire); output test `Slice3IndexWideBound`; suite green (209), zero churn.
 
-**⚠ The work continues SORTING the CS0030/S1 FORK + triaging CS1503/CS1061** (read the strategy banner at top +
-`Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md` "S1 is a FORK to SORT").
-Milestone = clean COMPILE; each CS0030 site sorts three ways: native → CONVERT; managed-referent
-(guintptr/muintptr) → MODEL holding ж<T> directly (like `core/sync/atomic` atomic.Pointer<T>); raw-metal → STUB
-with `[module: GoManualConversion]`. **CS1503 is still the biggest bucket (19). RECOMMENDED NEXT — re-bucket a
-fresh reconvert and pick the cleaner of:**
-(1) **CS1503 `pallocBits → IArray` (5) — GENERATOR-level (deferred once).** `pallocBits` is `[GoType("pageBits")]`,
-an INHERITED wrapper of `pageBits` (`type pageBits [8]uint64`, itself `[GoType("[8]uint64")]` which DOES implement
-IArray); the InheritedTypeTemplate wrapper does NOT forward IArray, so `len(b)`/`b[i]` on a pallocBits fail. Fix:
-(a) converter — for `type X Y` where Y's underlying is an array, emit X's [GoType] as the ARRAY form resolving
-through Y; OR (b) generator — InheritedTypeTemplate forwards IArray for an array inherited type. Verify the
-pallocBits↔pageBits value conversions don't regress. Behaviorally checkable. *(nuint→byte[] is DONE, `438d633a0`.)*
-(2) **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
-`Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3)** — hide a managed pointer in a uintptr → MODEL holding
-`ж<T>` directly per the user's model; the genuine architectural S1 case, a dedicated iteration.
-(3) **CS1061 (16)** — abi metadata / box-field access; triage for a contained sub-cluster if (1)/(2) are entangled.
-Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case, CS0118/CS0119/CS0019
-S6) are architectural / risky / rabbit-holes.
+**⚠ The CLEAN contained converter roots are THINNING** (read the strategy banner at top +
+`Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md`). The frontier at 94 is
+mostly generator-fraught, architectural, or scattered small bugs — re-triage a fresh reconvert carefully and
+pick, roughly cleanest-first:
+(1) **Scattered small CONTAINED converter bugs — try FIRST.** `nuint.val` CS1061 (2: heapdump.cs/select.cs —
+`.val` emitted on an already-deref'd nuint, e.g. `@unsafe.Pointer.FromRef(ref (pstk).val)` with pstk a nuint);
+re-triage the CS1503 `slice<uint>→slice<byte>` (2) and singletons for any clean converter angle. Small but clean.
+(2) **CS0030 managed-referent branch (9, ж<T>-model): gclinkptr/Δguintptr/puintptr/muintptr → unsafe.Pointer** —
+MODEL holding ж<T> directly per the user's model (like `core/sync/atomic` atomic.Pointer<T>); the genuine
+architectural S1 case, a dedicated careful iteration.
+(3) **⚠ GENERATOR-fraught — NOT a quick win (both options have traps):** `pallocBits → IArray` (5) + `pMask →
+@string` copy (4), the InheritedTypeTemplate collection-interface family (full analysis in *Where things stand*).
+Option (a) breaks the 7 `(*pageBits)(b)` reinterprets; option (b) [wrapper forwards IArray] was ALREADY tried and
+REVERTED for lost-writes. A correct fix forwards IArray to the *ref* of the inner value (no copy) AND keeps the
+pallocBits↔pageBits conversion — a careful dedicated generator effort.
+**If candidate (1) runs dry, the remainder is architectural/generator-fraught → the iteration-15-style signal to
+slow down and consider whether these need the user's models / a multi-session design rather than autonomous
+grinding.** Remaining singletons (CS0128 escape-hoist, CS0206/CS8175/CS1593 S1/S5/S6, CS8120 dup-case,
+CS0118/CS0119/CS0019 S6) are architectural / risky / rabbit-holes.
 FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
 rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
 any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
