@@ -7,10 +7,22 @@
 
 ## Where things stand (2026-06-30, late)
 
-- **`runtime` is the foundation and the current frontier — now at ~151 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~150 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-06-30 (latest): narrow-int arithmetic cast when only the FIRST operand is a conversion
+- **2026-06-30 (latest): narrow-int arithmetic cast on the RETURN path (`a351c3cc6`; CS0266 −1, runtime
+  151 → 150).** Sibling of the assignment-path fix below: `func lowerASCII(c byte) byte { return c +
+  ('a'-'A') }` (runtime env_posix) emits `return c + ((rune)'a' - (rune)'A')` = byte+int = int → CS0266.
+  The narrow cast was applied on the assignment/value-spec paths but not the return path. Fix
+  (`visitReturnStmt.go`): reuse `narrowArithmeticCastTypeFor` against each result-position type, emitting
+  `(type)(expr)` — gated to a binary/unary arith expr whose Go type matches the narrow result type
+  (a bare ident / call / already-narrowed / non-narrow return is untouched; the receiver-return branch,
+  checked first, is unaffected). Test `NarrowByteArithReturn` (97 122 97 / 145 wrap vs Go); full suite
+  green (198), goldens byte-identical, adversarially verified (multi-value, named-return-defer,
+  interface/pointer, over-application gate, wrap across all 4 narrow kinds). **Remaining CS0266 = 1:
+  mbitmap.cs `long→nuint` — a DIFFERENT root (wide-literal / named-numeric conversion), not the narrow-arith
+  pattern.**
+- **2026-06-30: narrow-int arithmetic cast when only the FIRST operand is a conversion
   (`de2e80bd4`; CS0266 −3, runtime 154 → 151).** Go byte arithmetic wraps at byte width; C# promotes to
   `int`, so a narrow-typed assignment needs the result cast back (CS0266). `narrowArithmeticCastTypeFor`'s
   redundant-cast guard skipped the cast whenever the converted RHS merely STARTED with `(byte)(` — but
@@ -269,9 +281,9 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-06-30 latest (`runtime` = ~151; the narrow-int first-operand-cast fix above
-cleared 3 CS0266, 154 → 151): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
-CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 2:
+as items land. As of 2026-06-30 latest (`runtime` = ~150; the narrow-int RETURN-cast fix above cleared
+1 CS0266, 151 → 150): CS0030 45, CS1503 24, CS1061 18, CS0021 10, CS0029 8, CS0103 7,
+CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 1:
 
 - [x] **Empty `struct{}` lift poisoning a `map[K]struct{}` parameter** *(landed 2026-06-30, `ccab3e458`;
   cleared the type.cs `typesEqual` cluster — CS8130 ×2 + CS0021 ×2 + CS1503 — 175 → 169).* The handoff's
@@ -454,17 +466,17 @@ CS1929 6, CS0121 6, CS0841 4, CS0117 3, CS0266 2:
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: re-bucket, then tackle ONE root. Runtime is at ~151. Last session fixed the narrow-int
-arithmetic cast when only the FIRST operand is a conversion (CONVERTER-only, `de2e80bd4`; CS0266 −3, 154 →
-151). `buf[i] = byte(e/100) + '0'` emits `(byte)(e/100) + (rune)'0'`; the redundant-cast guard skipped the
-whole-expr `(byte)` cast because the RHS merely STARTED with `(byte)(` (which casts only the first operand),
-so the `byte + int` result stayed `int` (CS0266, runtime print.go ×3). Fix (`visitAssignStmt.go`): the guard
-now skips only when the WHOLE RHS is `(byte)(…)` — a paren-balance walk `wholeExprIsCastOfType` (matching close
-at the very end, skipping `(`/`)` inside char/string literals). Test `NarrowByteArithFirstOperandCast`; full
-suite green (197), goldens byte-identical, adversarially verified. FORCE `cd src/go2cs && go build -o
-bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds the exe when a `.go` is
-newer, so a committed converter change false-greens on a stale binary. After any emitted-form change run
-`run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
+This session: re-bucket, then tackle ONE root. Runtime is at ~150. Last session applied the narrow-int
+arithmetic cast on the RETURN path (CONVERTER-only, `a351c3cc6`; CS0266 −1, 151 → 150) — sibling of the
+prior assignment-path fix. `func lowerASCII(c byte) byte { return c + ('a'-'A') }` emitted `return c +
+((rune)'a' - (rune)'A')` (byte+int=int) → CS0266; the narrow cast was applied on the assignment/value-spec
+paths but not the return path. Fix (`visitReturnStmt.go`): reuse `narrowArithmeticCastTypeFor` per
+result-position, emit `(type)(expr)` — gated to binary/unary arith matching the narrow result type (bare
+ident / call / already-narrowed / non-narrow untouched; receiver-return branch checked first). Test
+`NarrowByteArithReturn`; full suite green (198), goldens byte-identical, adversarially verified. FORCE `cd
+src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only rebuilds
+the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After any
+emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
 
 ⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
 ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
@@ -477,20 +489,21 @@ REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost 
 NOT a contained tweak. Park it.
 
 Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing):
-- **CS0266 RETURN-path narrow cast (env_posix.lowerASCII, 1) — the cleanest sibling of the just-landed fix.**
-  `return c + ('a'-'A')` where `c`/return are `byte` emits `return c + ((rune)'a' - (rune)'A')` = byte+int = int
-  → CS0266. The narrow-arith cast (`narrowArithmeticCastType`) is called from the ASSIGNMENT/value-spec paths but
-  NOT from `visitReturnStmt`, so a return of narrow arithmetic isn't cast. Fix: apply the same narrow cast in the
-  return path when the function's result type is narrow and the returned expr is binary/unary arith. Contained,
-  directly analogous to `de2e80bd4`. (The `mbitmap.cs` `long→nuint` CS0266 is a DIFFERENT root — a wide-literal /
-  named-numeric conversion — not this.)
-- **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED this session (see Where-things-stand ⚠).** A subtle
-  collision-rename × shadow-rename × scope-nesting interaction NOT reproducible in isolation; needs a focused
-  deep-dive on `declareVar`'s funcLevelVar-branch `needsShadowing` (why it renames one nested `trace` position but
-  not its sibling). Do NOT re-attempt blindly — only pick it with a dedicated investigation session.
-- OR re-bucket and pick from **CS0841 (4)** ("use of unassigned local"/"before declared" — emission-ORDER, mixed
-  collision/box roots, heterogeneous), or **CS0117 (3)** (pinner.cs `Ꮡx` — likely named-over-array, SKIP if so).
+named-over-array entangled before committing). NOTE: BOTH narrow-arith CS0266 roots (first-operand-cast
+`de2e80bd4` + return-path `a351c3cc6`) are DONE. Remaining candidates:
+- **CS0841 (4) — "use of unassigned local" / "before declared" (stack.cs `x`, mgcsweep.cs `sʗ3`, malloc.cs `Δp`,
+  traceallocfree.cs `Δtrace`).** An emission-ORDER issue (a local referenced before its `ref var …`/heap decl is
+  emitted). HETEROGENEOUS — the `Δp`/`Δtrace` ones are collision-rename-tied and the `sʗ3` one is a box name, so
+  bucket each individually; the `stack.cs x` (plain) is likely the cleanest single sub-root. Pick ONE; verify the
+  Go declaration/use order and why the C# emits the use first.
+- **mbitmap.cs `long→nuint` CS0266 (1)** — a wide-literal / named-numeric conversion needing an explicit cast;
+  NOT the narrow-arith pattern. Read the S6 large-literal note in the memory before picking (may be the >int32
+  literal-as-uintptr case, subtle).
+- **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
+  if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
+- **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
+  × shadow-rename × scope-nesting; needs a dedicated deep-dive on `declareVar`'s funcLevelVar-branch
+  `needsShadowing`. Do NOT re-attempt blindly.
   Avoid CS0030 (S1), CS0029 (S4), CS0103 (S5), the mprof CS1929 (entangled), and the CS0121 add-overload (S1-uintptr).
 - **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
   metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
