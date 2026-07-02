@@ -15,10 +15,20 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~64 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~63 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): resolve cross-package embedded types via the semantic model (`38212b635`;
+- **2026-07-01 (latest): string-literal spread wrapped as @string (`c5c446110`; CS1061 −1, 64 → 63) +
+  an HONEST REVERT.** (1) `append(b, "runtime error: "...)` (error.go) rendered the literal `"…"u8`
+  (ReadOnlySpan — no spread property); the spread emission now wraps a direct string-literal source as
+  `((@string)"…"u8).ꓸꓸꓸ` — the same wrap `string(r)...` uses. Test: StringConvPostfix extension.
+  (2) **The double-pointer single (proc.cs `&(*pprev).alllink`) was attempted and REVERTED**: the
+  of-chain advance emission was correct, but the walk WRITES `*pprev = …` through `&allm` — the
+  pre-existing &GLOBAL COPY-BOX latent — so the C# walk cannot be output-faithful until that model
+  lands. RECLASSIFIED: entangled with the copy-box latent family (rides with the &global model, not a
+  standalone fix). (3) Repaired NestedFieldElementAddr's sed-mangled package_info.cs (the documented
+  sed gotcha — the corpus check flagged it twice before the pattern was recognized). Suite green (213).
+- **2026-07-01: resolve cross-package embedded types via the semantic model (`38212b635`;
   CS1061 −4, runtime 68 → 64).** Field promotion resolved the embedded type's SYNTAX only — in a real
   MSBuild build project references are METADATA references (never CompilationReference), so cross-package
   embed promotion had plausibly NEVER worked: `type rtype struct { *abi.Type }` generated an EMPTY
@@ -608,16 +618,18 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~64; cross-package embed promotion cleared 4, 68 → 64):
-CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6, CS1061 2,
+as items land. As of 2026-07-01 latest (`runtime` = ~63; string-literal spread cleared 1, 64 → 63):
+CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6, CS1061 1,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
 CS0206 + CS0117 GONE).
-**CS1061 is down to 2 SINGLES:** double-pointer selector (proc.cs `pprev = Ꮡ((pprev.val).alllink)` —
-`&(*pprev).field` with pprev `**m` needs a second deref); ReadOnlySpan `ꓸꓸꓸ` spread (error.cs — a
-u8-literal spread shape). **The multi-error non-architectural roots are now EXHAUSTED — what remains is
-the managed-referent ж<T>-model (9, THE architectural centerpiece, needs the user's design input), the
-S3/S4/S5/S6 buckets (CS1503/CS0029/CS0103/CS0021/CS1929/CS0121), the raw-metal GoManualConversion stub
-pass (CS0149 + kin), and the singles.**
+**CS1061's last entry (the proc.cs double-pointer walk) is RECLASSIFIED entangled** — its writes go
+through the &GLOBAL COPY-BOX latent; it rides with the &global model, not a standalone fix. **The
+contained converter/generator queue is now EMPTY — what remains: the managed-referent ж<T>-model
+(9 CS0030, THE architectural centerpiece — DESIGN DECISION PENDING WITH THE USER: Option A faithful
+managed-slot model now vs Option B copy-box compile-milestone precedent now + model at Phase 4), the
+S3-S6 buckets (CS1503 8 / CS0029 8 / CS0103 7 / CS0021 7 / CS1929 6 / CS0121 6 — UNTRIAGED for
+precedent-class roots), the raw-metal GoManualConversion stub pass (CS0149 + kin), and the entangled
+singles.**
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
 −2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
