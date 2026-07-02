@@ -15,10 +15,20 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 30 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 29 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
-- **2026-07-02 (latest): own-initializer func shadow renames (`2b7752648`; CS0149 −1, 34 → 33).**
+- **2026-07-02 (latest): duplicate-mapped type-switch case merged on an identical body
+  (`b0bb8b5a1`; CS8120 −1, 30 → 29 — the LAST autonomous root; the queue is DRY).** Go `uint` and
+  `uintptr` are distinct types but both map to C# `nuint`, so printpanicval's later `case uintptr:`
+  was unreachable. Merge ONLY on a byte-identical Go body (marker comment replaces the label);
+  differing bodies keep both — a compile error beats a silent mis-route. Keys on the resolved C#
+  type (uintptr→nuint, rune→int32, byte→uint8) per switch; synthetics register too. 4-site uniform
+  stdlib diff (the same latent cleared in fmt print.cs, internal/bisect, log/slog value.cs — fmt
+  confirmed zero own-errors). Test: TypeSwitch extension (merge shape, output vs Go). ALSO
+  `5c5f14a0c`: StringZeroValueConcat golden re-baselined — 19686fbec's concat suppression missed it
+  (bisect-proven stale since that commit; caught by check-no-regression's forced fresh-exe build).
+- **2026-07-02: own-initializer func shadow renames (`2b7752648`; CS0149 −1, 34 → 33).**
   `signame := signame(gp.sig)` — the function-shadow detection's position guard excluded the
   own-initializer case; object resolution alone is the correct test. 5-file stdlib diff, all the
   class (flate lengthCode, edwards25519 basepointTable, big three, net partialDeadline). The 4th
@@ -855,10 +865,9 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 - **CS1593 (metrics.cs:494) — S6 method-VALUE, not delegate-arity.** `d.compute = read.compute` (a bound
   method value) emitted as a 0-arg `() => read.compute()` wrapper; the field wants a 2-arg delegate. Method
   values are S6 (architectural-ish). SKIP unless a clean method-value→delegate emission is found.
-- **CS8120 (error.cs:273) — RISKY (compiles-but-maybe-wrong).** `printpanicval`'s type-switch has `case uint`
-  and `case uintptr` both → C# `case nuint` (dup). Dedup COMPILES but silently mis-routes if the two bodies
-  differ; here both are `print(v)` so a merge is safe, but a general fix is fraught (the Go uint/uintptr
-  distinction is lost in the C# type map). Only land with a bodies-identical guard; treat as low priority.
+- **CS8120 (error.cs:273) — DONE (`b0bb8b5a1`, 2026-07-02).** Landed exactly as designed: merge only
+  on a byte-identical Go body (marker comment), differing bodies keep both labels (compile error over
+  silent mis-route). 4-site uniform stdlib class; TypeSwitch behavioral extension with output parity.
 - **CS0118 (tracetime.cs:80) — UNCLEAR.** Error points at the `_` discard of a `(w, _) = w.ensure(…)`
   deconstruction; not the `traceBytesPerNumber` const (that's a plain `const=10`, fine). Needs investigation.
 - Architectural (SKIP): CS0119/CS0149 (S6 method-expression), CS0019 (S6 named-numeric bitwise), CS8175 (S5
@@ -1068,19 +1077,26 @@ ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the
 
 # ======== THE MORNING SUMMARY (2026-07-02 overnight run) ========
 
-**Trajectory: 51 -> 30 — fourteen roots, zero reverts, suite green throughout (215/215 every gate),
-output byte-deterministic, every count exact.** One-line ledger (git log has full detail):
+**Trajectory: 51 -> 29 — FIFTEEN roots, zero reverts, suite green at every gate (216/216 at the
+final one), output byte-deterministic, every count exact. The autonomous queue is now DRY — every
+remaining error waits on one of your two model decisions (or their adjacents).** One-line ledger
+(git log has full detail):
 `b28495a5d` CS0103 extinct (slice element-address on base TYPE) · `cc39fd0e6` tuple-reassigned
 pointer param repoints its box · `2c352ff49` empty named-collection composite = zero value ·
 `d9dbc9839` deref-of-cast paren wrap (dissolved a "raw-metal" CS0149) · `db6445f7c` min/max
 untyped-const cast · `e20a840f4` string-base wide index · `6c26a726a` receiver-in-pointer-composite
 direct-ж trigger · `082b05f1b` blank-import `using _` discard hijack · `d5ba6b44e` cross-package
 pointer-embed method hop · `7cdb7d010` index-on-cast wrap · `19686fbec` concat-under-u8-suppression
-(audit-narrowed 212->68) · `2b7752648` own-initializer func shadow · `9f8ae9f90` method-expression delegate cast (14-file class diff: flate/lzw function tables, the go122 trace event-handler TABLE, zstd FSE builders, slog) · `1195eb9c3` bound-method-value arity + named-func delegate creation (23 files: http.HandlerFunc everywhere, tls handshakeFn, json encoderFunc, parser dispatch, flag, ast.Walk). Plus BOTH side-session merges
-landed and validated earlier in the night (slice-aliasing 86566b9ef, benchmarks 8ea5253e5+02470cc93).
+(audit-narrowed 212->68) · `2b7752648` own-initializer func shadow · `9f8ae9f90` method-expression delegate cast (14-file class diff: flate/lzw function tables, the go122 trace event-handler TABLE, zstd FSE builders, slog) · `1195eb9c3` bound-method-value arity + named-func delegate creation (23 files: http.HandlerFunc everywhere, tls handshakeFn, json encoderFunc, parser dispatch, flag, ast.Walk) · `b0bb8b5a1` CS8120 duplicate-mapped
+type-switch case merged on an identical body (uint+uintptr both -> nuint; 4-site uniform class diff —
+the same latent also cleared in fmt print.cs, internal/bisect, log/slog). Plus BOTH side-session merges
+landed and validated earlier in the night (slice-aliasing 86566b9ef, benchmarks 8ea5253e5+02470cc93),
+plus `5c5f14a0c` — a stale-golden catch-up: 19686fbec's concat suppression had missed re-baselining
+StringZeroValueConcat (bisect-proven; the harness had compared the committed .cs instead of a
+fresh-exe transpile — check-no-regression with its forced go build caught it).
 
-**THE REMAINING 30 — every error classified, two DECISIONS own 20 of them; the ONLY remaining
-autonomous candidate is the CS8120 guarded dup-case merge (1):**
+**THE REMAINING 29 — every error classified; two DECISIONS own 20 of them; NO autonomous
+candidates remain:**
 
 1. **DECISION A — managed-referent ж<T> model (CS0030 ×9).** gclinkptr ×4 (malloc/mcache/stack),
    guintptr/puintptr/muintptr ×3 (runtime2), lfstack->Δhex (mgc), UntypedInt->Pointer (stkframe).
@@ -1102,10 +1118,11 @@ autonomous candidate is the CS8120 guarded dup-case merge (1):**
    conversions — both halves landed).
 5. **Escape-hoist CS0128 ×2** (typesEqual sibling `for i` loops both hoisted — spurious
    over-escape, needs an escape-analysis dive).
-6. **Misc singles (4):** error CS8120 dup-case (`case uint`+`case uintptr` -> both nuint; a
-   bodies-identical-guarded merge is designable), tagptr CS0019 (named-numeric `&` on
-   taggedPointer — S6 bitwise), trace CS8175 (ref-local `gen` captured in lambda — S5), proc
-   CS0136 Δtrace (previously investigated + declined as a deep collision×shadow interaction).
+6. **Misc singles (3):** tagptr CS0019 (named-numeric `&` on taggedPointer — S6 bitwise), trace
+   CS8175 (ref-local `gen` captured in lambda — S5), proc CS0136 Δtrace (previously investigated +
+   declined as a deep collision×shadow interaction). CS8120 dup-case: **DONE** (`b0bb8b5a1`).
+   Exact 29 bucket profile: CS0030 9 · CS0021 5 · CS1929 5 · CS0128 2 · CS1503 2 · CS0029 2 ·
+   CS8175 1 · CS1061 1 · CS0136 1 · CS0019 1.
 
 **LATENTS (compile fine, Phase-4 significance):** golib slice nil-vs-empty conflation
 (`pm{} == nil` -> true; needs a data-pointer distinction); receiver-into-INTERFACE-field composite
@@ -1115,9 +1132,9 @@ struct array-field NULL backing; bare-const-shift 32-bit truncation (`1 << 40` s
 named-result closure decls missing; promoted VALUE-receiver calls through metadata embeds.
 
 **Suggested morning agenda:** (1) rule on Decision A (B = fastest to milestone); (2) sketch the
-named-over-array model with me (Decision B — biggest single cluster); (3) optionally green-light
-the S6 method-expression attempt + CS8120 guarded merge as autonomous roots (worth ~4 more errors
-without decisions); (4) the &GLOBAL/double-pointer family design session unlocks 4 more.
+named-over-array model with me (Decision B — biggest single cluster); (3) the &GLOBAL/double-pointer
+family design session unlocks 4 more. (S6 and CS8120 both landed overnight — nothing autonomous is
+left; the loop is idling at a slow cadence until you weigh in.)
 
 Standing cautions:
 - FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim (stale-exe
@@ -1136,12 +1153,12 @@ Standing cautions:
   (task chip spawned); named-result CLOSURE decls missing; cross-pkg promoted METHOD calls.
 
 First steps:
-1. go build fresh; reconvert + overlay + build runtime -clp:ErrorsOnly; re-bucket (expect exactly 59;
+1. go build fresh; reconvert + overlay + build runtime -clp:ErrorsOnly; re-bucket (expect exactly 29;
    any drift is now REAL signal, not noise).
-2. Characterize the 6 CS0121 sites; pick the disambiguation that keeps both the free-call and the
-   receiver-call forms compiling; behavioral test with output parity (a two-overload add() shape is easy
-   to reproduce); adversarial verify dialed to risk; corpus check; suite; ConversionStrategies.md; one
-   signed local commit.
+2. The autonomous queue is DRY — every remaining error rides Decision A (managed-referent ж<T>,
+   CS0030 ×9, lean B copy-box), Decision B (named-over-array element boxes, 10 sites), the
+   &GLOBAL/double-pointer family (4), or the parked singles. Take the user's rulings from THE
+   MORNING SUMMARY agenda, then resume one-root iterations against the chosen model.
 
 Closing ritual (REQUIRED): update docs/Phase3-Handoff.md — check off the item with a result note, refresh
 the runtime count/date — then rewrite this "Next session prompt" block for the next unchecked item.
