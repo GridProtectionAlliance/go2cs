@@ -79,7 +79,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public static implicit operator {ObjectName}(nuint value) => new {ObjectName}((uintptr)value);
 
-                public static implicit operator nuint({ObjectName} value) => ((uintptr)value.{Value}).m_value;
+                public static implicit operator nuint({ObjectName} value) => ((uintptr)value.{Value}).Value;
 
                 public static implicit operator {ObjectName}(UntypedInt value) => new {ObjectName}((uintptr)(nuint)value);
 

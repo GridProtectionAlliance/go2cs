@@ -43,13 +43,13 @@ internal static void lock2(ж<mutex> Ꮡl) {
     // Speculative grab, then adaptive test-test-and-set spin (the Volatile.Read pre-test keeps
     // contended pollers off exclusive cache-line acquisition; SpinWait escalates spin → yield →
     // sleep, standing in for Go's active_spin/osyield/semasleep ladder).
-    if (Interlocked.CompareExchange(ref l.key.m_value, locked, 0) == 0) {
+    if (Interlocked.CompareExchange(ref l.key.Value, locked, 0) == 0) {
         return;
     }
 
     SpinWait spinner = default;
 
-    while (Volatile.Read(ref l.key.m_value) != 0 || Interlocked.CompareExchange(ref l.key.m_value, locked, 0) != 0) {
+    while (Volatile.Read(ref l.key.Value) != 0 || Interlocked.CompareExchange(ref l.key.Value, locked, 0) != 0) {
         spinner.SpinOnce();
     }
 }
@@ -59,14 +59,14 @@ internal static void unlock2(ж<mutex> Ꮡl) {
     ref var l = ref Ꮡl.val;
 
     // No waiter chain to dequeue — release the slot; a spinning lock2 observes it.
-    Interlocked.Exchange(ref l.key.m_value, 0);
+    Interlocked.Exchange(ref l.key.Value, 0);
 }
 
 // One-time notifications.
 internal static void notewakeup(ж<note> Ꮡn) {
     ref var n = ref Ꮡn.val;
 
-    uintptr v = Interlocked.Exchange(ref n.key.m_value, locked);
+    uintptr v = Interlocked.Exchange(ref n.key.Value, locked);
 
     if (v == locked) {
         // Two notewakeups! Not allowed.
@@ -82,7 +82,7 @@ internal static void notesleep(ж<note> Ꮡn) {
     SpinWait spinner = default;
 
     while (ᐧ) {
-        uintptr v = Volatile.Read(ref n.key.m_value);
+        uintptr v = Volatile.Read(ref n.key.Value);
 
         if (v == locked) {
             return;
@@ -113,7 +113,7 @@ internal static bool notetsleep_internal(ж<note> Ꮡn, int64 ns, ж<g> Ꮡgp, i
     SpinWait spinner = default;
 
     while (ᐧ) {
-        uintptr v = Volatile.Read(ref n.key.m_value);
+        uintptr v = Volatile.Read(ref n.key.Value);
 
         if (v == locked) {
             return true;

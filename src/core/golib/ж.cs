@@ -584,7 +584,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     // vs the `(*notInHeap).add` static companion).
     public static unsafe explicit operator ж<T>(uintptr value)
     {
-        return new ж<T>(*(T*)value.m_value);
+        return new ж<T>(*(T*)value.Value);
     }
 
     public static unsafe implicit operator uintptr(ж<T> value)

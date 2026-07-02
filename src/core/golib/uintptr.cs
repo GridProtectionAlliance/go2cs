@@ -1,4 +1,4 @@
-//******************************************************************************************************
+﻿//******************************************************************************************************
 //  uintptr.cs - Gbtc
 //
 //  Copyright © 2026, Grid Protection Alliance.  All Rights Reserved.
@@ -45,26 +45,26 @@ namespace go;
 /// silently changing dynamic types in inference and boxing positions).
 /// </para>
 /// <para>
-/// <see cref="m_value"/> is deliberately a PUBLIC mutable field: atomic call sites
+/// <see cref="Value"/> is deliberately a PUBLIC mutable field: atomic call sites
 /// (<see cref="System.Threading.Interlocked"/>/<see cref="System.Threading.Volatile"/>, e.g. the
 /// runtime's manual lock model in <c>lock_sema_impl.cs</c>) must target the inner storage —
-/// <c>ref key.m_value</c> — since the intrinsics cannot take a reference to a user struct.
+/// <c>ref key.Value</c> — since the intrinsics cannot take a reference to a user struct.
 /// </para>
 /// </remarks>
 public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, IFormattable
 {
     // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
-    public nuint m_value;
+    public nuint Value;
 
     /// <summary>
     /// Creates a new <see cref="uintptr"/> from a <c>nuint</c> value.
     /// </summary>
     public uintptr(nuint value)
     {
-        m_value = value;
+        Value = value;
     }
 
-    public bool Equals(uintptr other) => m_value == other.m_value;
+    public bool Equals(uintptr other) => Value == other.Value;
 
     public override bool Equals(object? obj)
     {
@@ -74,21 +74,21 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
         return obj is uintptr other && Equals(other);
     }
 
-    public override int GetHashCode() => m_value.GetHashCode();
+    public override int GetHashCode() => Value.GetHashCode();
 
-    public int CompareTo(uintptr other) => m_value.CompareTo(other.m_value);
+    public int CompareTo(uintptr other) => Value.CompareTo(other.Value);
 
     public int CompareTo(object? obj) => obj is uintptr other ? CompareTo(other) :
         throw new ArgumentException($"Object must be of type {nameof(go.uintptr)}");
 
-    public override string ToString() => m_value.ToString();
+    public override string ToString() => Value.ToString();
 
-    public string ToString(string? format, IFormatProvider? formatProvider) => m_value.ToString(format, formatProvider);
+    public string ToString(string? format, IFormatProvider? formatProvider) => Value.ToString(format, formatProvider);
 
     // Implicit bridge to/from 'nuint' (see remarks).
     public static implicit operator uintptr(nuint value) => new(value);
 
-    public static implicit operator nuint(uintptr value) => value.m_value;
+    public static implicit operator nuint(uintptr value) => value.Value;
 
     // Smaller unsigned sources get their own IMPLICIT operators (value-safe): although each
     // composes through the nuint bridge in implicit contexts, an EXPLICIT `(uintptr)u32` cast
@@ -130,30 +130,30 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     // implicit bridge at all (no implicit relation with nuint — CS0030). An exact-target
     // operator wins resolution outright in every case, and emitted code casts uintptr to
     // everything (`(nint)(i)` element indexes, `(int)(x)` shift counts, `(uint64)p` hashes).
-    public static explicit operator int8(uintptr value) => unchecked((int8)value.m_value);
+    public static explicit operator int8(uintptr value) => unchecked((int8)value.Value);
 
-    public static explicit operator int16(uintptr value) => unchecked((int16)value.m_value);
+    public static explicit operator int16(uintptr value) => unchecked((int16)value.Value);
 
-    public static explicit operator int32(uintptr value) => unchecked((int32)value.m_value);
+    public static explicit operator int32(uintptr value) => unchecked((int32)value.Value);
 
-    public static explicit operator int64(uintptr value) => unchecked((int64)value.m_value);
+    public static explicit operator int64(uintptr value) => unchecked((int64)value.Value);
 
-    public static explicit operator nint(uintptr value) => unchecked((nint)value.m_value);
+    public static explicit operator nint(uintptr value) => unchecked((nint)value.Value);
 
-    public static explicit operator uint8(uintptr value) => unchecked((uint8)value.m_value);
+    public static explicit operator uint8(uintptr value) => unchecked((uint8)value.Value);
 
-    public static explicit operator uint16(uintptr value) => unchecked((uint16)value.m_value);
+    public static explicit operator uint16(uintptr value) => unchecked((uint16)value.Value);
 
-    public static explicit operator uint32(uintptr value) => unchecked((uint32)value.m_value);
+    public static explicit operator uint32(uintptr value) => unchecked((uint32)value.Value);
 
-    public static explicit operator uint64(uintptr value) => value.m_value;
+    public static explicit operator uint64(uintptr value) => value.Value;
 
     // Floating targets need exact operators too: double/float have implicit conversions FROM
     // every integer type, so every integer-returning operator above is a viable candidate for
     // `(float64)u` and the set ties (CS0457). Go converts uintptr→float in scavenger/pacer math.
-    public static explicit operator float32(uintptr value) => value.m_value;
+    public static explicit operator float32(uintptr value) => value.Value;
 
-    public static explicit operator float64(uintptr value) => value.m_value;
+    public static explicit operator float64(uintptr value) => value.Value;
 
     // Inbound floats symmetrically (`uintptr(someFloat)` is legal Go): with the inbound integer
     // set declared and no exact float source, resolution needs a most-encompassing source among
@@ -165,58 +165,58 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     // Raw-pointer interop (unsafe seams in golib and emitted reinterprets)
     public static unsafe explicit operator uintptr(void* value) => new((nuint)value);
 
-    public static unsafe explicit operator void*(uintptr value) => (void*)value.m_value;
+    public static unsafe explicit operator void*(uintptr value) => (void*)value.Value;
 
     // Comparisons
-    public static bool operator ==(uintptr left, uintptr right) => left.m_value == right.m_value;
+    public static bool operator ==(uintptr left, uintptr right) => left.Value == right.Value;
 
-    public static bool operator !=(uintptr left, uintptr right) => left.m_value != right.m_value;
+    public static bool operator !=(uintptr left, uintptr right) => left.Value != right.Value;
 
-    public static bool operator <(uintptr left, uintptr right) => left.m_value < right.m_value;
+    public static bool operator <(uintptr left, uintptr right) => left.Value < right.Value;
 
-    public static bool operator <=(uintptr left, uintptr right) => left.m_value <= right.m_value;
+    public static bool operator <=(uintptr left, uintptr right) => left.Value <= right.Value;
 
-    public static bool operator >(uintptr left, uintptr right) => left.m_value > right.m_value;
+    public static bool operator >(uintptr left, uintptr right) => left.Value > right.Value;
 
-    public static bool operator >=(uintptr left, uintptr right) => left.m_value >= right.m_value;
+    public static bool operator >=(uintptr left, uintptr right) => left.Value >= right.Value;
 
     // Arithmetic — results stay 'uintptr'-typed (Go semantics; unchecked wraparound like Go)
-    public static uintptr operator +(uintptr left, uintptr right) => new(unchecked(left.m_value + right.m_value));
+    public static uintptr operator +(uintptr left, uintptr right) => new(unchecked(left.Value + right.Value));
 
-    public static uintptr operator -(uintptr left, uintptr right) => new(unchecked(left.m_value - right.m_value));
+    public static uintptr operator -(uintptr left, uintptr right) => new(unchecked(left.Value - right.Value));
 
-    public static uintptr operator *(uintptr left, uintptr right) => new(unchecked(left.m_value * right.m_value));
+    public static uintptr operator *(uintptr left, uintptr right) => new(unchecked(left.Value * right.Value));
 
-    public static uintptr operator /(uintptr left, uintptr right) => new(left.m_value / right.m_value);
+    public static uintptr operator /(uintptr left, uintptr right) => new(left.Value / right.Value);
 
-    public static uintptr operator %(uintptr left, uintptr right) => new(left.m_value % right.m_value);
+    public static uintptr operator %(uintptr left, uintptr right) => new(left.Value % right.Value);
 
-    public static uintptr operator ++(uintptr value) => new(unchecked(value.m_value + 1));
+    public static uintptr operator ++(uintptr value) => new(unchecked(value.Value + 1));
 
-    public static uintptr operator --(uintptr value) => new(unchecked(value.m_value - 1));
+    public static uintptr operator --(uintptr value) => new(unchecked(value.Value - 1));
 
     // Unary forms for hand-written code hygiene: emitted code never contains `-u` (the
     // converter rewrites unsigned negation as `((T)0 - x)`), but without these a manual `-u`
     // is CS0035-ambiguous through the float bridges and `+u` silently decays to ulong.
-    public static uintptr operator -(uintptr value) => new(unchecked((nuint)0 - value.m_value));
+    public static uintptr operator -(uintptr value) => new(unchecked((nuint)0 - value.Value));
 
     public static uintptr operator +(uintptr value) => value;
 
     // Bitwise
-    public static uintptr operator &(uintptr left, uintptr right) => new(left.m_value & right.m_value);
+    public static uintptr operator &(uintptr left, uintptr right) => new(left.Value & right.Value);
 
-    public static uintptr operator |(uintptr left, uintptr right) => new(left.m_value | right.m_value);
+    public static uintptr operator |(uintptr left, uintptr right) => new(left.Value | right.Value);
 
-    public static uintptr operator ^(uintptr left, uintptr right) => new(left.m_value ^ right.m_value);
+    public static uintptr operator ^(uintptr left, uintptr right) => new(left.Value ^ right.Value);
 
-    public static uintptr operator ~(uintptr value) => new(~value.m_value);
+    public static uintptr operator ~(uintptr value) => new(~value.Value);
 
-    public static uintptr operator <<(uintptr value, int shift) => new(value.m_value << shift);
+    public static uintptr operator <<(uintptr value, int shift) => new(value.Value << shift);
 
-    public static uintptr operator >>(uintptr value, int shift) => new(value.m_value >> shift);
+    public static uintptr operator >>(uintptr value, int shift) => new(value.Value >> shift);
 
     // Handle comparisons between 'nil' and struct 'uintptr' (Go nil comparison idiom)
-    public static bool operator ==(uintptr value, NilType nil) => value.m_value == 0;
+    public static bool operator ==(uintptr value, NilType nil) => value.Value == 0;
 
     public static bool operator !=(uintptr value, NilType nil) => !(value == nil);
 

@@ -482,7 +482,7 @@ private static uintptr AlignofType([DynamicallyAccessedMembers(DynamicallyAccess
 // uintptr forwards through its inner value (the golib struct does not implement the
 // IBinaryInteger generic-math surface the TLen constraint requires — CS0315)
 public static ж<T> Add<T>(ж<T> ptr, uintptr len) {
-    return Add(ptr, len.m_value);
+    return Add(ptr, len.Value);
 }
 
 public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
@@ -521,7 +521,7 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
 // deliberately will not) implement the IBinaryInteger generic-math surface the TLen
 // constraint requires (CS0315); the non-generic-length overload is preferred by resolution.
 public static slice<T> Slice<T>(ж<T> ptr, uintptr len) {
-    return Slice(ptr, len.m_value);
+    return Slice(ptr, len.Value);
 }
 
 public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
@@ -570,7 +570,7 @@ public static ж<T> SliceData<T>(slice<T> slice) {
 // must not be modified as long as the returned string value exists.
 // uintptr forwards through its inner value (see Add overload note)
 public static @string String(ж<byte> ptr, uintptr len) {
-    return String(ptr, len.m_value);
+    return String(ptr, len.Value);
 }
 
 public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
