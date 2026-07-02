@@ -142,17 +142,17 @@ partial class atomic_package
 
     public static partial uint32 /*old*/ OrUint32(ж<uint32> addr, uint32 mask)
     {
-        return Interlocked.And(ref addr.val, mask);
+        return Interlocked.Or(ref addr.val, mask);
     }
 
     public static partial int64 /*old*/ OrInt64(ж<int64> addr, int64 mask)
     {
-        return Interlocked.And(ref addr.val, mask);
+        return Interlocked.Or(ref addr.val, mask);
     }
 
     public static partial uint64 /*old*/ OrUint64(ж<uint64> addr, uint64 mask)
     {
-        return Interlocked.And(ref addr.val, mask);
+        return Interlocked.Or(ref addr.val, mask);
     }
 
     public static partial uintptr /*old*/ OrUintptr(ж<uintptr> addr, uintptr mask)
