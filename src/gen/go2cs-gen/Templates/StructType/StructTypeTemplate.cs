@@ -167,7 +167,25 @@ internal class StructTypeTemplate : TemplateBase
                     (StructDeclarationSyntax? structDecl, Compilation? compilation) = Context.GetStructDeclaration(typeName);
 
                     if (structDecl is null)
+                    {
+                        // A CROSS-PACKAGE embedded type cannot be resolved by syntax in a real MSBuild
+                        // build: project references arrive as METADATA references, never CompilationReference,
+                        // so the referenced-compilations walk finds nothing — `type rtype struct { *abi.Type }`
+                        // (runtime type.go) promoted NO fields and every `t.TFlag`/`t.Str`/`t.Kind_` was
+                        // CS1061. Fall back to the semantic model: resolve the embedded type's symbol by
+                        // metadata name and enumerate its public instance fields (the Go-visible members of
+                        // a converted struct are plain public fields). Transitive promotion through a
+                        // metadata type's own embeds is not chased (none of the runtime's cross-package
+                        // embeds need it); the emitted single-hop accessor resolves through the embedded
+                        // type's own generated promotion when it exists.
+                        foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
+                        {
+                            if (emittedNames.Add(fieldName))
+                                collected.Add((fieldTypeName, fieldName));
+                        }
+
                         return;
+                    }
 
                     foreach ((string memberType, string memberName, _, _) in structDecl.GetStructMembers(compilation!, true))
                     {
@@ -182,6 +200,42 @@ internal class StructTypeTemplate : TemplateBase
                         // which would never equal the bare field name.
                         if (GetSimpleName(GeneratorExecutionContextExtensions.GetUnderlyingTypeName(memberType)) == memberName)
                             collect(memberType, seenTypes);
+                    }
+                }
+
+                IEnumerable<(string typeName, string fieldName)> getMetadataStructFields(string typeName)
+                {
+                    // Normalize the source-form type reference to a CLR metadata name: strip the ж<>
+                    // pointer wrapper, the `global::` prefix and `@` identifier escapes, root it in the
+                    // `go` namespace, and mark the final containing package class as a NESTED type —
+                    // `ж<@internal.abi_package.Type>` → `go.internal.abi_package+Type` (a converted
+                    // package is a static class inside the go namespace; its types are nested members).
+                    string metadataName = GeneratorExecutionContextExtensions.GetUnderlyingTypeName(typeName)
+                        .Replace("global::", "").Replace("@", "");
+
+                    if (!metadataName.StartsWith("go.", StringComparison.Ordinal))
+                        metadataName = $"go.{metadataName}";
+
+                    int lastDot = metadataName.LastIndexOf('.');
+
+                    if (lastDot < 0)
+                        yield break;
+
+                    INamedTypeSymbol? typeSymbol =
+                        Context.Compilation.GetTypeByMetadataName($"{metadataName[..lastDot]}+{metadataName[(lastDot + 1)..]}");
+
+                    if (typeSymbol is null)
+                        yield break;
+
+                    foreach (IFieldSymbol field in typeSymbol.GetMembers().OfType<IFieldSymbol>())
+                    {
+                        if (field.DeclaredAccessibility != Accessibility.Public || field.IsStatic || field.IsImplicitlyDeclared)
+                            continue;
+
+                        if (GetSimpleName(field.Name) == "_")
+                            continue;
+
+                        yield return (field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), field.Name);
                     }
                 }
             }

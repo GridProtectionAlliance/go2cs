@@ -18,6 +18,26 @@ internal static void Main() {
     CrossPkgLib.Labeled l = s;
     fmt.Println(l.Label());
     fmt.Println(CrossPkgLib.Describe(s));
+    ref var s2 = ref heap<CrossPkgLib.Sensor>(out var Ꮡs2);
+    s2 = new CrossPkgLib.Sensor(Name: "attic"u8, Temp: 20);
+    var p = new probe(Sensor: Ꮡs2, id: 7);
+    fmt.Println(p.Name, (float64)p.Temp, p.id);
+    p.Temp = 75;
+    fmt.Println((float64)s2.Temp, s2.Hot());
+    var g = new tagged(Sensor: new CrossPkgLib.Sensor(Name: "cellar"u8, Temp: 5), n: 3);
+    fmt.Println(g.Name, (float64)g.Temp, g.n);
+    g.Temp = 60;
+    fmt.Println((float64)g.Temp, g.Sensor.Hot());
+}
+
+[GoType] partial struct probe {
+    public partial ref ж<CrossPkgLib_package.Sensor> Sensor { get; }
+    internal nint id;
+}
+
+[GoType] partial struct tagged {
+    public partial ref CrossPkgLib_package.Sensor Sensor { get; }
+    internal nint n;
 }
 
 } // end main_package
