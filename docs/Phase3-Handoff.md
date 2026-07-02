@@ -15,10 +15,23 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~91 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~89 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): pin a deref-aliased pointer param/receiver by its ref-local, not a phantom
+- **2026-07-01 (latest): qualify a box-accessor type shadowed by its variable's lambda CAPTURE
+  (`d133c769b`; CS1061 −2, runtime 91 → 89).** `boxAccessorType`'s collision check compared the owning
+  type name to the `.of()` RECEIVER only; inside a closure the captured variable renames to `mʗ1`, so
+  rwmutex `lockSlow`'s `systemstack(func(){ notesleep(&m.park) })` emitted `mʗ1.of(m.Ꮡpark)` — the bare
+  `m` bound the still-visible ENCLOSING `ж<m>` local → CS1061. Fix: also qualify when the receiver is
+  `typeName + ʗ…` (the capture marker) → `mʗ1.of(runtime_package.m.Ꮡpark)`. Qualification is
+  name-resolution only (same static accessor), so mis-resolution would fail to COMPILE, not run wrong —
+  the corpus byte-diff (210 projects, only the intended test changed) + stdlib bucket A/B (exactly the 2
+  target sites, no new codes) stood as the adversarial evidence (verifier round dialed to zero for this
+  one-comparison extension, disclosed to the user live). Guarded by a further `CollisionFieldBoxAccessor`
+  extension (`capturedLocalNamedAfterType`, write-through vs Go); suite green (210). Landed interactively
+  with the user (reduced loop cadence); ALSO this iteration instituted the reconvert timeout discipline
+  (`212f70904`) after the user flagged zombie 2-hour pollers.
+- **2026-07-01: pin a deref-aliased pointer param/receiver by its ref-local, not a phantom
   `.val` (`016ce07ef`; CS1061 −2 + CS0206 −1, runtime 94 → 91).** `unsafe.Pointer(ptr)` emits the pin
   helper `@unsafe.Pointer.FromRef` whose ref target was unconditionally `(expr).val` — right for a genuine
   box, wrong for a DEREF-ALIASED pointer (param/receiver rendered as the value alias `ref var p = ref
@@ -525,20 +538,23 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~91; FromRef deref-alias fix cleared 3, 94 → 91):
-CS1503 17, CS1061 14, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
+as items land. As of 2026-07-01 latest (`runtime` = ~89; capture-collision qualify cleared 2, 91 → 89):
+CS1503 17, CS1061 12, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 — CS0206 GONE).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
-−2), FromRef deref-alias pin (`016ce07ef`, −3 incl. the CS0206 cascade). ⚠ The CLEAN contained converter
-roots are THINNING — the frontier is now mostly generator-fraught, architectural, or a few uncharacterized
-small clusters. Re-triage carefully.**
+−2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2). ⚠ The CLEAN
+contained converter roots are THINNING — the frontier is now mostly generator-fraught, architectural, or a
+few uncharacterized small clusters. Re-triage carefully.**
 - **NEXT — re-bucket a fresh reconvert; the candidates, roughly cleanest-first:**
-  1. **Uncharacterized small clusters — triage FIRST for a contained root.** CS1061 `ж<m>.Ꮡpark` (2 — a
-     field-box accessor missing on `ж<runtime_package.m>`; possibly the box-accessor family like
-     `04a5322f7`) and `Δrtype.TFlag` (2 — S3 abi-metadata-ish but verify); CS0117 (3, unknown); CS0149 (2,
-     method-expression S6?); re-triage the CS1503 `slice<uint> → slice<byte>` (2). Any clean converter angle
-     is worth −1/−2 each. *(The `nuint.val` pair is DONE via `016ce07ef`.)*
+  1. **Remaining uncharacterized small clusters.** CS1061 `Δrtype.TFlag` (2, type.cs:35/46 — `rtype` embeds
+     `*abi.Type` (an embedded POINTER); `t.TFlag` promotes through it; verify whether the TypeGenerator's
+     embedded-pointer promotion misses cross-package fields — S3-adjacent but characterize before skipping);
+     CS0117 `pinnerBits.Ꮡx` (3, pinner.cs — `&p.x` on the inherited `[GoType("gcBits")]` wrapper: the
+     struct-member forwarding exists in InheritedTypeTemplate but apparently not the FIELD-BOX accessors
+     (`Ꮡx`); possibly a contained generator addition to the existing forwarding block); CS0149 (2,
+     panic.cs/proc.cs — method-expression S6?). *(`ж<m>.Ꮡpark` DONE via `d133c769b`; `nuint.val` DONE via
+     `016ce07ef`; `slice<uint>→slice<byte>` = the pMask copy, generator-fraught family.)*
   2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
      unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
      (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
