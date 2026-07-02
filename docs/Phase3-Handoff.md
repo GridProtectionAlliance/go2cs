@@ -15,10 +15,24 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~89 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~86 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): qualify a box-accessor type shadowed by its variable's lambda CAPTURE
+- **2026-07-01 (latest): forward field-box accessors on a struct-inherited wrapper as TRUE REFS
+  (`02a610466`; CS0117 −3 — bucket ELIMINATED, runtime 89 → 86; FIRST GENERATOR-side root of the
+  campaign).** `&p.x` on a `*pinnerBits` (`type pinnerBits gcBits`, runtime pinner.go) emits
+  `Δp.of(pinnerBits.Ꮡx)` — the accessor names the WRAPPER, but the `Ꮡx` static existed only on the
+  underlying `gcBits` → CS0117. Fix (`InheritedTypeTemplate`): alongside the forwarded get/set
+  properties, emit each forwarded FIELD's box accessor as a true ref THROUGH `m_value` —
+  `public static ref uint8 Ꮡx(ref pinnerBits instance) => ref instance.m_value.x;` — a genuine no-copy
+  ref chain (the copy trap sank the earlier pallocBits forwarding). Write-through output-proven twice
+  (repro `15 3`; `NamedTypeOverStruct` extension `bump(&c.a)` → the ORIGINAL observes `17 37` vs Go).
+  Suite green (210); zero golden churn is STRUCTURAL (the generator runs at C# build time — the
+  transpiled .cs is unchanged). **⚠ IMPLICATION for the pallocBits→IArray family: this validates the
+  true-ref-through-m_value pattern — the IArray forwarding for an array-inherited wrapper could follow
+  the same play (forward the interface members as refs/views over `m_value`, never a copy), keeping the
+  `[GoType("pageBits")]` conversion intact. The family may be more approachable than "fraught" now.**
+- **2026-07-01: qualify a box-accessor type shadowed by its variable's lambda CAPTURE
   (`d133c769b`; CS1061 −2, runtime 91 → 89).** `boxAccessorType`'s collision check compared the owning
   type name to the `.of()` RECEIVER only; inside a closure the captured variable renames to `mʗ1`, so
   rwmutex `lockSlow`'s `systemstack(func(){ notesleep(&m.park) })` emitted `mʗ1.of(m.Ꮡpark)` — the bare
@@ -538,23 +552,27 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~89; capture-collision qualify cleared 2, 91 → 89):
-CS1503 17, CS1061 12, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6, CS0117 3,
-then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 — CS0206 GONE).
+as items land. As of 2026-07-01 latest (`runtime` = ~86; wrapper field-box accessors cleared 3, 89 → 86):
+CS1503 17, CS1061 12, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6,
+then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
+CS0206 + CS0117 GONE).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
-−2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2). ⚠ The CLEAN
-contained converter roots are THINNING — the frontier is now mostly generator-fraught, architectural, or a
-few uncharacterized small clusters. Re-triage carefully.**
-- **NEXT — re-bucket a fresh reconvert; the candidates, roughly cleanest-first:**
-  1. **Remaining uncharacterized small clusters.** CS1061 `Δrtype.TFlag` (2, type.cs:35/46 — `rtype` embeds
-     `*abi.Type` (an embedded POINTER); `t.TFlag` promotes through it; verify whether the TypeGenerator's
-     embedded-pointer promotion misses cross-package fields — S3-adjacent but characterize before skipping);
-     CS0117 `pinnerBits.Ꮡx` (3, pinner.cs — `&p.x` on the inherited `[GoType("gcBits")]` wrapper: the
-     struct-member forwarding exists in InheritedTypeTemplate but apparently not the FIELD-BOX accessors
-     (`Ꮡx`); possibly a contained generator addition to the existing forwarding block); CS0149 (2,
-     panic.cs/proc.cs — method-expression S6?). *(`ж<m>.Ꮡpark` DONE via `d133c769b`; `nuint.val` DONE via
-     `016ce07ef`; `slice<uint>→slice<byte>` = the pMask copy, generator-fraught family.)*
+−2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
+field-box accessors (`02a610466`, −3, FIRST generator root). ⚠ The small clusters are nearly dry.**
+- **NEXT — the characterized frontier, roughly cleanest-first:**
+  1. **pallocBits → IArray (5) + pMask copy (4) — RE-RATED from "fraught" to APPROACHABLE.** `02a610466`
+     validated the true-ref-through-`m_value` forwarding pattern on the same template. The IArray/ISlice
+     interface forwarding for an array/slice-inherited wrapper can follow the same play (members as
+     refs/views over `m_value`, never a copy), keeping the `[GoType("pageBits")]` conversion intact —
+     the two traps (broken reinterprets, lost writes) both have known answers now. A careful generator
+     iteration with write-through output tests.
+  2. **CS1061 `Δrtype.TFlag` (2)** — field promotion through an embedded POINTER (`type rtype struct {
+     *abi.Type }`), cross-package; TypeGenerator promotion machinery (S3-adjacent). Characterize the
+     generator's embedded-pointer promotion before attempting.
+  3. **CS0030 managed-referent (9, ж<T>-model)** — the genuine architectural S1 case, dedicated iteration.
+  4. *(CS0149 (2) = a `func()` loaded from RAW MEMORY (`*(*func())(add(...))`) — a managed delegate in raw
+     memory, genuine S1 raw-metal → future `[module: GoManualConversion]` stub candidate. SKIP.)*
   2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
      unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
      (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
