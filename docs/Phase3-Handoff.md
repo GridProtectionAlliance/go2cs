@@ -15,10 +15,23 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~71 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~68 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): precise already-dereferenced test for a selector base (`ccfb952b0`; CS1061
+- **2026-07-01 (latest): route nested-field element addresses through the of-chain (`a342d25e7`;
+  CS1061 −3, runtime 71 → 68).** The `&field[i]` routing gated on the IMMEDIATE base only; a chain rooted
+  at a pointer through NESTED value fields (`&pp.wbBuf.buf[0]` mwbbuf.go, `&mp.trace.buf[gen%2]` trace.go)
+  and a NESTED-INDEX 2-D base (`&cache.entries[ck][i]` symtab.go — an IndexExpr the selector gate never
+  saw) fell to the naive `Ꮡ` prefix (CS1061). Fix: walk intermediate selectors to the chain ROOT + a new
+  inner-index arm; the proven recursive &-machinery renders the multi-hop chains
+  (`pp.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)`, `cache.at(…Ꮡentries, ck).at<nint>(i)`). Bonus: a heap-boxed
+  value-root 2-D index also fixed (was CS1061). Corpus byte-diff IDENTICAL (212); skeptic
+  CONFIRMED-PARITY on 6 chain variants (incl. aliasing identity + 3-deep chains); in the newly-gated
+  territory every old emission was a COMPILE ERROR — silent divergence impossible. Test
+  `NestedFieldElementAddr` (write-through vs Go); suite green (213). **Latents logged: a ZERO-VALUED
+  struct's array-field backing is null (any zero-value struct array-field access NREs — significant for
+  Phase 4); the intermediate-IndexExpr chain `&ptr.items[i].buf[j]` keeps its pre-existing CS1061.**
+- **2026-07-01: precise already-dereferenced test for a selector base (`ccfb952b0`; CS1061
   −3, runtime 74 → 71).** The selector auto-deref skip was a whole-subtree scan for ANY StarExpr — a
   conversion star buried in a call ARGUMENT (`stringStructOf((*string)(unsafe.Pointer(p))).n`, arena.go)
   falsely counted as an already-deref'd base → `.n` on the ж box (CS1061); an EXTRA-PAREN conversion base
@@ -583,16 +596,14 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~71; selector-deref precision cleared 3, 74 → 71):
-CS1061 9, CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6,
+as items land. As of 2026-07-01 latest (`runtime` = ~68; nested-field element-address cleared 3, 71 → 68):
+CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6, CS1061 6,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
 CS0206 + CS0117 GONE).
-**The remaining CS1061 (9) fully characterized:** Δrtype embedded-pointer promotion (4: Str/TFlag×2/Kind_,
-type.cs — generator promotion through `*abi.Type` cross-package); element-address-of-NESTED-field family
-(3: trace.cs `Ꮡ(~mp).trace.buf.at<…>`, symtab.cs `Ꮡ(~cache).entries[ck]`, mwbbuf.cs `Ꮡpp.wbBuf.buf.at` —
-the `&x.f1.f2[i]` chain emits `Ꮡ(deref).field` instead of the of-chain, one convUnaryExpr root);
-double-pointer selector (1: proc.cs `pprev = Ꮡ((pprev.val).alllink)` — `&(*pprev).field` with pprev `**m`
-needs a second deref); ReadOnlySpan `ꓸꓸꓸ` spread (1: error.cs — a u8-literal spread shape).
+**The remaining CS1061 (6) fully characterized:** Δrtype embedded-pointer promotion (4: Str/TFlag×2/Kind_,
+type.cs — generator promotion through `*abi.Type` cross-package); double-pointer selector (1: proc.cs
+`pprev = Ꮡ((pprev.val).alllink)` — `&(*pprev).field` with pprev `**m` needs a second deref);
+ReadOnlySpan `ꓸꓸꓸ` spread (1: error.cs — a u8-literal spread shape).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
 −2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
@@ -600,21 +611,18 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 (`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
 Δrtype.TFlag — what remains is dominated by the architectural S-families.**
 - **NEXT — the characterized frontier, roughly cleanest-first:**
-  1. **Element-address-of-NESTED-field family (3, one convUnaryExpr root):** `&x.f1.f2[i]` chains emit
-     `Ꮡ(deref).field` / `Ꮡbox.field` instead of the of-chain — trace.cs `Ꮡ(~mp).trace.buf.at<…>`,
-     symtab.cs `Ꮡ(~cache).entries[ck].at<…>`, mwbbuf.cs `Ꮡpp.wbBuf.buf.at<…>(0)`. The `&`-machinery's
-     of-chain recursion (cf. FieldChainBoxReceiver) doesn't cover the element-address-through-nested-fields
-     shape. Likely the last multi-error converter root.
-  2. **Δrtype embedded-pointer promotion (4):** Str/TFlag×2/Kind_ — TypeGenerator field promotion through
-     an embedded `*abi.Type` (cross-package). Generator promotion machinery (S3-adjacent).
-  3. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
+  1. **Δrtype embedded-pointer promotion (4):** Str/TFlag×2/Kind_ — TypeGenerator field promotion through
+     an embedded `*abi.Type` (cross-package). Generator promotion machinery (S3-adjacent). The last
+     multi-error non-architectural root.
+  2. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
      unsafe.Pointer + 2 singletons (`lfstack → Δhex`, `UntypedInt → unsafe.Pointer`).** MODEL holding
      `ж<T>` directly per the user's model (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite`
      `object? m_target`), NOT a raw round-trip. The architectural S1 centerpiece — a dedicated iteration;
      engage the user on the model design first.
-  4. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink`, `**m` needs a second deref);
+  3. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink`, `**m` needs a second deref);
      ReadOnlySpan `ꓸꓸꓸ` spread (error.cs). *(CS0149 (2) = raw-memory delegate → GoManualConversion stub
      candidate, SKIP for a dedicated stub pass.)*
+  *(Element-address-of-nested-field family DONE via `a342d25e7`.)*
 - **DONE this campaign (S1-fork convert-native + the earlier families):** named-numeric reinterpret
   `(*uint64)(*lfstack)` (`f19153a9e`, −13); unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23); CS8917
   lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917 residual pre-existing, out
