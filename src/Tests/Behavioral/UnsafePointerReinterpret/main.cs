@@ -28,6 +28,12 @@ internal static uint64 zeroPair(@unsafe.Pointer x) {
     return ((ж<array<uint64>>)(uintptr)(x)).val[0];
 }
 
+[GoType("num:uintptr")] partial struct linkaddr;
+
+internal static uintptr throughPointer(linkaddr v) {
+    return (uintptr)((@unsafe.Pointer)(uintptr)v);
+}
+
 internal static void Main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
     @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).val);
@@ -38,6 +44,9 @@ internal static void Main() {
     _ = ok;
     ref var pair = ref heap(new array<uint64>(2), out var Ꮡpair);
     _ = zeroPair(new @unsafe.Pointer(Ꮡpair));
+    linkaddr @base = 16384;
+    var next = ((linkaddr)((uintptr)@base + 32));
+    println(throughPointer(@base) == 16384, throughPointer(next) - throughPointer(@base));
     println("compiled");
 }
 

@@ -136,6 +136,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// that applies to every unsafe.Pointer-as-uintptr use; the atomic intrinsics consuming it are
 		// asm stubs, so this is purely about producing compilable C#.
 		if targetTypeName == "@unsafe.Pointer" {
+			// A NAMED-numeric arg whose underlying is uintptr — `unsafe.Pointer(v)` where v is
+			// `type gclinkptr uintptr` (runtime malloc/mcache/stack: the allocator's span-address
+			// arithmetic type). The [GoType] wrapper only converts named↔underlying, and golib's
+			// Pointer only converts from uintptr, so the direct cast needs a two-op chain C# will
+			// not build (CS0030); hop through the underlying — `((@unsafe.Pointer)(uintptr)v)`.
+			// (Go permits exactly uintptr-underlying types here, so the gate matches the language.)
+			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok {
+				if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Kind() == types.Uintptr {
+					if v.needsParentheses(arg) {
+						return fmt.Sprintf("((@unsafe.Pointer)(uintptr)(%s))", expr)
+					}
+
+					return fmt.Sprintf("((@unsafe.Pointer)(uintptr)%s)", expr)
+				}
+			}
+
 			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
 				// A deref-aliased pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias
 				// (`ref var pc0 = ref Ꮡpc0.val`), not a box — `.val` on it is CS1061 (`nuint` has no

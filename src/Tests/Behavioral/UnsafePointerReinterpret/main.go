@@ -55,6 +55,20 @@ func zeroPair(x unsafe.Pointer) uint64 {
 	return (*[2]uint64)(x)[0]
 }
 
+// linkaddr is a NAMED type over uintptr — runtime's gclinkptr (`type gclinkptr uintptr`, the
+// allocator's span-address arithmetic type). Converting one to unsafe.Pointer
+// (`unsafe.Pointer(v)`, malloc/mcache/stack) needs the underlying hop
+// `((@unsafe.Pointer)(uintptr)v)`: the [GoType] wrapper converts named↔underlying only, and
+// golib's Pointer converts from uintptr only — the direct cast is a two-op chain C# won't
+// build (CS0030). A named-uintptr value is a pure NUMBER (never a managed reference), so the
+// round-trip is value-exact and asserted below.
+type linkaddr uintptr
+
+//go:noinline
+func throughPointer(v linkaddr) uintptr {
+	return uintptr(unsafe.Pointer(v))
+}
+
 func main() {
 	// Back the pointers with a real uintptr slot (avoids a bare `var _ unsafe.Pointer` zero-value
 	// declaration, which is an unrelated converter gap: unsafe.Pointer has no parameterless C#
@@ -68,5 +82,13 @@ func main() {
 	_ = ok
 	var pair [2]uint64
 	_ = zeroPair(unsafe.Pointer(&pair))
+
+	// named-uintptr -> unsafe.Pointer -> uintptr round-trip: pure number plumbing, value-exact.
+	// (Explicit-typed decl: `base := linkaddr(0x4000)` elides the conversion — the untyped const
+	// adopts the target type in Go — leaving C#'s `var` to infer int; a separate documented shape.)
+	var base linkaddr = 0x4000
+	next := linkaddr(uintptr(base) + 32)
+	println(throughPointer(base) == 0x4000, throughPointer(next)-throughPointer(base))
+
 	println("compiled")
 }
