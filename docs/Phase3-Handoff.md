@@ -15,10 +15,19 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 51 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 50 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
-- **2026-07-02 (latest): promoted embed call on a [GoRecv] ref receiver (`308debde7`; CS0103 −2,
+- **2026-07-02 (latest): CS0103 IS EXTINCT — element address of any slice-typed base (`b28495a5d`;
+  −1, 51 → 50).** The slice element-address arm was ident-gated, so a base without a bare identifier
+  (a method-CALL result `&b.stk()[0]` mprof, syscall's `&StringByteSlice(s)[0]`, reflect's
+  `unsafe.Slice(…)` result, math/big's slice-expression base) fell into the ARRAY branch (slice type
+  names also start with `[`) whose naive fallback textually prefixed `Ꮡ` onto the postfix chain —
+  `(Ꮡb).stk()…`, a nonexistent box. Now fires on the base TYPE alone: `Ꮡ(b.stk(), 0)` — the element
+  address of the returned slice VIEW (write-through per the new aliasing golib). Whole-stdlib diff:
+  exactly 7 files, all this class (incl. an os/dir_windows copy-box lost-write latent fixed). Test:
+  NestedFieldElementAddr extension. Suite 215/215.
+- **2026-07-02: promoted embed call on a [GoRecv] ref receiver (`308debde7`; CS0103 −2,
   53 → 51) + the benchmarks-session merge (`8ea5253e5` + `02470cc93`).**
   1. *Converter root:* a pointer-receiver method promoted through a VALUE embed, called on the
      enclosing method's OWN non-direct-ж receiver (`sc.setEmpty()` in `(*scavChunkData).alloc/free`),
@@ -965,24 +974,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at 51, EXACT (output is byte-deterministic, `32fd49a45`). Landed since: golib
-slice ALIASING (`86566b9ef`); CS0121 ELIMINATED (`d0a935138` — explicit `uintptr → ж<T>` operator);
-promoted-embed-call-on-ref-receiver (`308debde7` — explicit field call `sc.scavChunkFlags.setEmpty()`
-when the base is the enclosing non-direct-ж receiver, + the rendered==raw hardening in convUnaryExpr's
-`&recv.field` arm; pre-cleared the same latent in zip/gcimporter/go-types/image); and the BENCHMARKS
-session merged (`8ea5253e5` + `02470cc93` — src/Tests/Performance suite; golib span-path append
-reconciled BY HAND with the aliasing rewrite, byte-wise @string compare/hash, the sort.cs
-infinite-recursion fix, time.UnixNano; SliceAliasing + full suite green post-merge).
+This session: runtime is at 50, EXACT (output is byte-deterministic, `32fd49a45`). **CS0103 is
+EXTINCT** (`b28495a5d` — the slice element-address arm now fires on the base TYPE, not just a bare
+ident: `&b.stk()[0]` → `Ꮡ(b.stk(), 0)`; 7-file whole-stdlib diff, all the same class, incl. an
+os/dir_windows copy-box lost-write latent). Earlier this session: slice ALIASING merge (`86566b9ef`),
+explicit `uintptr → ж<T>` operator (`d0a935138`), embed-call-on-ref-receiver (`308debde7`), benchmarks
+merge (`8ea5253e5`+`02470cc93` — golib span-append reconciled by hand with the aliasing rewrite).
 
-Recommended NEXT root — **the LAST CS0103 (mprof.cs:1119):** `&b.stk()[0]` (Go mprof.go
-iterate_memprof) emits `Ꮡb.stk().at<uintptr>(0)` where `b` is a pointer LOCAL (`var b = head` loop
-var) — b IS the box, the `Ꮡ` prefix is spurious; correct form `b.stk().at<uintptr>(0)`. The
-element-address machinery's root-boxing mis-fires on a method-CALL-result slice rooted at a pointer
-local (convUnaryExpr element-address arm — find why the root walk prefixes Ꮡ to a pointer-local root
-when the indexed base is a CALL result). Small contained gate. Fallbacks: CS0029 box↔value triage (8 —
-linked-list assignment shapes, may share a gate with the pointer-walk machinery), then CS1929
-extension-shadowing (4, mprof UnsafePointer Load/StoreNoWB — but verify it isn't the parked
-named-over-array entanglement first).
+Recommended NEXT root — **CS0029 box↔value triage (8):** implicit-conversion mismatches, previously
+characterized as linked-list assignment shapes (`x = *y` / `*x = y` box-vs-value). Re-bucket, read all
+8 sites' Go source + emitted C#, group by shape; if one gate covers several, fix that ONE root and log
+the rest (the make-len-cast precedent: triage revealed one family). May share a gate with the
+pointer-walk machinery (`Ꮡp = p.next; p = ref Ꮡp.val` re-alias family — see PointerParamWalk /
+PointerParamNilWalk in ConversionStrategies). Fallback: CS1929 (6: 4 = mprof UnsafePointer
+Load/StoreNoWB extension-shadowing — VERIFY it isn't the parked named-over-array entanglement before
+picking; + 1 cross-pkg method-promotion residual + 1 double-box).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
