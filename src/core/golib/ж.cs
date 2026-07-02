@@ -576,7 +576,13 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         return new ж<T>(nil);
     }
 
-    public static unsafe implicit operator ж<T>(uintptr value)
+    // EXPLICIT by design: reinterpreting a raw address as a pointer BOXES A COPY of the pointed-at
+    // value (the runtime-unsafe reinterpret seam) and dereferences an arbitrary address — never
+    // something to happen silently. Converter-emitted reinterprets always use explicit cast syntax
+    // ((ж<T>)(uintptr)(p)). As an implicit conversion it also made every uintptr argument ambiguous
+    // between an unsafe.Pointer overload and a ж<T> overload (CS0121 — runtime's free `add(p, x)`
+    // vs the `(*notInHeap).add` static companion).
+    public static unsafe explicit operator ж<T>(uintptr value)
     {
         return new ж<T>(*(T*)value);
     }

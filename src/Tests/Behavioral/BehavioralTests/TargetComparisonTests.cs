@@ -227,6 +227,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
+    public void CheckFuncVsMethodOverload() => CheckTarget("FuncVsMethodOverload");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]

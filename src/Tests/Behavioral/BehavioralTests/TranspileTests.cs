@@ -225,6 +225,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
+    public void CheckFuncVsMethodOverload() => CheckTarget("FuncVsMethodOverload");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]
