@@ -2055,30 +2055,6 @@ func (v *Visitor) isFunctionNameInScope(name string) bool {
 
 	var foundUsageBeforeDecl bool
 	var foundDelegateUsage bool
-	var varDeclPos token.Pos
-
-	// Find variable declaration position
-	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
-		switch node := n.(type) {
-		case *ast.ValueSpec:
-			for _, ident := range node.Names {
-				if ident.Name == name {
-					varDeclPos = ident.Pos()
-					return false
-				}
-			}
-		case *ast.AssignStmt:
-			if node.Tok == token.DEFINE {
-				for _, expr := range node.Lhs {
-					if ident, ok := expr.(*ast.Ident); ok && ident.Name == name {
-						varDeclPos = ident.Pos()
-						return false
-					}
-				}
-			}
-		}
-		return true
-	})
 
 	// Track parent node during traversal
 	var parent ast.Node
@@ -2097,11 +2073,16 @@ func (v *Visitor) isFunctionNameInScope(name string) bool {
 				// Check if this identifier refers to our function
 				if obj, ok := v.info.Uses[node].(*types.Func); ok && obj == funcObj {
 					// Check if it's part of a call expression
-					if callExpr, ok := parent.(*ast.CallExpr); ok {
-						// Only consider it a conflict if the call is before the variable declaration
-						if varDeclPos == token.NoPos || callExpr.Pos() < varDeclPos {
-							foundUsageBeforeDecl = true
-						}
+					if _, ok := parent.(*ast.CallExpr); ok {
+						// The object resolution already proves Go bound this ident to the
+						// FUNCTION — possible only where the same-named local is not yet in
+						// scope: before its declaration, or WITHIN its own initializer
+						// (`signame := signame(gp.sig)`, runtime panic.go — Go starts the
+						// shadow AFTER the initializer, but C# scopes the local over its own
+						// initializer, so the call would bind the string local: CS0149). The
+						// old position guard (`call before the declaration`) excluded exactly
+						// that initializer case.
+						foundUsageBeforeDecl = true
 					} else {
 						// Used as a value rather than called
 						foundDelegateUsage = true

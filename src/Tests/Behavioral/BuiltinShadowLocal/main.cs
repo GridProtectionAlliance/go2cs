@@ -21,10 +21,27 @@ internal static nint capPlusOne(slice<nint> s) {
     return capΔ1 + 1;
 }
 
+internal static @string signame(nint sig) {
+    if (sig == 9) {
+        return "SIGKILL"u8;
+    }
+    return "SIG?"u8;
+}
+
+internal static @string describeSignal(nint sig) {
+    @string signameΔ1 = signame(sig);
+    if (signameΔ1 != ""u8) {
+        return "["u8 + signameΔ1 + "]"u8;
+    }
+    return "none"u8;
+}
+
 internal static void Main() {
     fmt.Println(sumWithLenLocal(new nint[]{10, 20, 30}.slice()));
     fmt.Println(sumWithLenLocal(default!));
     fmt.Println(capPlusOne(new slice<nint>(2, 5)));
+    fmt.Println(describeSignal(9));
+    fmt.Println(describeSignal(1));
 }
 
 } // end main_package

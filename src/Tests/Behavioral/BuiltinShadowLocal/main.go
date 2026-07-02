@@ -31,8 +31,30 @@ func capPlusOne(s []int) int {
 	return cap + 1
 }
 
+// signame is a PACKAGE function whose name a local shadows in its own initializer — the
+// runtime panic.go shape `signame := signame(gp.sig)`. Go starts the shadow AFTER the
+// initializer, so the call resolves to the function; C# scopes the local over its own
+// initializer, so without the rename the call binds the (non-invocable) string local
+// (CS0149). The local renames (signameΔ1); the call stays `signame(...)`.
+func signame(sig int) string {
+	if sig == 9 {
+		return "SIGKILL"
+	}
+	return "SIG?"
+}
+
+func describeSignal(sig int) string {
+	signame := signame(sig) // local shadows the package func in its own initializer
+	if signame != "" {
+		return "[" + signame + "]"
+	}
+	return "none"
+}
+
 func main() {
 	fmt.Println(sumWithLenLocal([]int{10, 20, 30})) // 60 + 3 = 63
 	fmt.Println(sumWithLenLocal(nil))               // 0
 	fmt.Println(capPlusOne(make([]int, 2, 5)))      // 5 + 1 = 6
+	fmt.Println(describeSignal(9))                  // [SIGKILL]
+	fmt.Println(describeSignal(1))                  // [SIG?]
 }
