@@ -8,6 +8,14 @@
 // `cache.at(cacheT.Ꮡentries, 1).at<nint>(2)`. Write-through verified against Go on every shape.
 // (Arrays are explicitly initialized — a ZERO-VALUED struct's array-field backing is null in the
 // C# emulation, a separate pre-existing latent.)
+//
+// Also: the element-address of a SLICE returned by a METHOD CALL — `&st.stk()[0]` (runtime
+// mprof.go iterate_memprof's `&b.stk()[0]`). A slice-typed base without a bare identifier (a call
+// result) fell out of the ident-gated slice arm into the ARRAY branch (a slice's type name also
+// starts with "["), whose naive fallback textually prefixed `Ꮡ` onto the postfix chain —
+// `Ꮡst.stk().at<uintptr>(0)` binds as `(Ꮡst).stk()…`, a nonexistent box (CS0103). The slice arm
+// now takes ANY slice-typed base: `Ꮡ(st.stk(), 0)`. Write-through reaches the underlying storage
+// (the returned slice VIEW shares its backing array per Go aliasing).
 
 package main
 
@@ -26,6 +34,14 @@ type pstate struct {
 type cacheT struct {
 	entries [2][3]int
 }
+
+type store struct {
+	id   int
+	data []uintptr
+}
+
+// a method returning a slice — the mprof `(*bucket).stk()` shape
+func (s *store) stk() []uintptr { return s.data }
 
 //go:noinline
 func bump(p *uintptr) { *p = *p + 7 }
@@ -52,4 +68,12 @@ func main() {
 	cache := &cacheT{entries: [2][3]int{{1, 2, 3}, {4, 5, 6}}}
 	bumpInt(&cache.entries[1][2])
 	fmt.Println(cache.entries[1][2], cache.entries[0][0]) // 9 1
+
+	// mprof shape: &ptr.method()[i] — element address of a method-call-result slice via a
+	// pointer local; the write reaches the shared backing storage
+	st := &store{id: 5, data: []uintptr{11, 22, 33}}
+	bump(&st.stk()[0])
+	fmt.Println(st.data[0], st.stk()[0]) // 18 18 — write-through via the returned slice view
+	bump(&st.stk()[2])
+	fmt.Println(st.data[2]) // 40
 }

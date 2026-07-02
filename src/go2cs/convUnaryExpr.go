@@ -368,24 +368,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			exprType := v.getType(indexExpr.X, true)
 			ident := getIdentifier(indexExpr.X)
 
-			if ident != nil {
-				if isRecvPointer {
-					// Check if index target is an identifier matching the receiver name
-					if ident.Name == recvName {
-						refRecv = true
-					}
-				}
+			if ident != nil && isRecvPointer && ident.Name == recvName {
+				// Index target is an identifier matching the receiver name
+				refRecv = true
+			}
 
-				if _, ok := exprType.Underlying().(*types.Slice); ok {
-					if refRecv {
-						// For a receiver reference to a slice, we use the "Ꮡ(slice[index])" syntax
-						return fmt.Sprintf("%s(%s[%s])", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
-					} else {
-						// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax.
-						// The golib element-address overloads take `int`/`nint`, so an unsigned/wide index
-						// (`&pclntable[funcoff]`, funcoff uint32) is cast to int (CS1503 otherwise).
-						return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castWideIntegerToInt(indexExpr.Index))
-					}
+			// The slice element-address form applies to ANY slice-typed base expression, not just a
+			// bare identifier: a method-CALL result (`&b.stk()[0]`, runtime mprof.go — `b` a pointer
+			// local, so `getIdentifier` is nil) previously fell through to the ARRAY branch below
+			// (a slice's type name also starts with "["), whose naive fallback textually prefixed
+			// `Ꮡ` onto the postfix chain — `Ꮡb.stk().at<uintptr>(0)` binds as `(Ꮡb).stk()…`,
+			// referencing a box that does not exist (CS0103).
+			if _, ok := exprType.Underlying().(*types.Slice); ok {
+				if refRecv {
+					// For a receiver reference to a slice, we use the "Ꮡ(slice[index])" syntax
+					return fmt.Sprintf("%s(%s[%s])", AddressPrefix, v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, nil))
+				} else {
+					// For address of an indexed reference into slice we use the "Ꮡ(x, index)" syntax.
+					// The golib element-address overloads take `int`/`nint`, so an unsigned/wide index
+					// (`&pclntable[funcoff]`, funcoff uint32) is cast to int (CS1503 otherwise).
+					return fmt.Sprintf("%s(%s, %s)", AddressPrefix, v.convExpr(indexExpr.X, nil), v.castWideIntegerToInt(indexExpr.Index))
 				}
 			}
 

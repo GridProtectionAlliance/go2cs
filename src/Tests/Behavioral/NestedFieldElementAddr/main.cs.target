@@ -18,6 +18,15 @@ partial class main_package {
     internal array<array<nint>> entries = new(2);
 }
 
+[GoType] partial struct store {
+    internal nint id;
+    internal slice<uintptr> data;
+}
+
+[GoRecv] internal static slice<uintptr> stk(this ref store s) {
+    return s.data;
+}
+
 internal static void bump(ж<uintptr> Ꮡp) {
     ref var p = ref Ꮡp.val;
 
@@ -44,6 +53,11 @@ internal static void Main() {
     var cache = Ꮡ(new cacheT(entries: new array<nint>[]{new nint[]{1, 2, 3}.array(), new nint[]{4, 5, 6}.array()}.array()));
     bumpInt(cache.at(cacheT.Ꮡentries, 1).at<nint>(2));
     fmt.Println((~cache).entries[1][2], (~cache).entries[0][0]);
+    var st = Ꮡ(new store(id: 5, data: new uintptr[]{11, 22, 33}.slice()));
+    bump(Ꮡ(st.stk(), 0));
+    fmt.Println((~st).data[0], st.stk()[0]);
+    bump(Ꮡ(st.stk(), 2));
+    fmt.Println((~st).data[2]);
 }
 
 } // end main_package
