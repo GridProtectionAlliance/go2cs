@@ -15,10 +15,22 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 59 errors, a count that is now
-  EXACT and REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the
-  dependency graph and the **sole failing project**, but read the next bullets.
-- **2026-07-02 (latest): golib slice ALIASING landed (`86566b9ef`, cherry-picked from the spun-off
+- **`runtime` is the foundation and the current frontier — now at 53 errors, EXACT and
+  REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
+  graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): CS0121 ELIMINATED — the `uintptr → ж<T>` reinterpret operator is now
+  EXPLICIT (`d0a935138`; 59 → 53).** The free `add(unsafe.Pointer, uintptr)` vs `(*notInHeap).add`
+  static-overload pair was ambiguous at every free-call site passing a boxless-receiver pin
+  (`(uintptr)@unsafe.Pointer.FromRef(ref b)` — map.go keys/overflow/setoverflow, mprof.go walkers ×6)
+  because the raw-address reinterpret operator was IMPLICIT, so a `uintptr` argument converted to
+  both first params. Explicit is right independent of the fix: a silent deref-an-arbitrary-address
+  copy-box should never happen implicitly, and all emitted reinterprets already use explicit cast
+  syntax `(ж<T>)(uintptr)(p)`. Box→address stays implicit; numeric `uintptr ↔ Pointer` untouched.
+  Golib-only (no reconvert); A/B: every other bucket byte-identical; suite 215/215 green. Test:
+  `FuncVsMethodOverload` (output vs Go — the overload pair + the ambiguous pin shape + both
+  method-call forms). Doc: ConversionStrategies *Converting a Go pointer to unsafe.Pointer* —
+  explicit-by-design paragraph.
+- **2026-07-02: golib slice ALIASING landed (`86566b9ef`, cherry-picked from the spun-off
   session's `89398c93f`) — reslicing SHARES the backing array.** `slice<T>` now stores `m_capacity`
   (relative to `m_low`); every reslice (range indexer, `.slice(low,high,max)`, `Slice()`) is a
   bounds-checked shared view (`Reslice`, Go-style `SliceBoundsOutOfRange` panics); append writes the
@@ -683,24 +695,20 @@ singles.**
 field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask IArray-view + ISlice-copy
 (`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
 Δrtype.TFlag — what remains is dominated by the architectural S-families.**
-- **NEXT — the characterized frontier at 59 (determinism DONE `32fd49a45`; Δrtype embed promotion DONE
-  `38212b635`; element-address family DONE `a342d25e7`), roughly cleanest-first:**
-  1. **CS0121 `add()` ambiguity (6, ONE shape):** runtime has both `func add(p unsafe.Pointer, x uintptr)`
-     and `func (p *notInHeap) add(…)` — the method emits a static `[GoRecv]` overload colliding with the
-     free function for `add(p, n)` calls (both bind unsafe.Pointer-vs-ж<notInHeap> first params). The
-     type-vs-method Δ-collision machinery may extend to func-vs-method. Possibly the cleanest multi-error
-     root left.
-  2. **CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2) + a receiver materialization
+- **NEXT — the characterized frontier at 53 (determinism DONE `32fd49a45`; slice aliasing DONE
+  `86566b9ef`; CS0121 DONE `d0a935138`; Δrtype embed promotion DONE `38212b635`; element-address
+  family DONE `a342d25e7`), roughly cleanest-first:**
+  1. **CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2) + a receiver materialization
      (mprof ×1) — small, characterized, likely independent gates.
-  3. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
+  2. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
      unsafe.Pointer + 2 singletons (`lfstack → Δhex`, `UntypedInt → unsafe.Pointer`).** MODEL holding
      `ж<T>` directly per the user's model (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite`
      `object? m_target`), NOT a raw round-trip. The architectural S1 centerpiece — a dedicated iteration;
      **the A/B decision is PENDING WITH THE USER** (A faithful managed-slot now / B copy-box compile-
      milestone now + faithful as the first Phase-4 ticket; stated lean B).
-  4. **CS0029 box↔value family (8):** linked-list assignment shapes (`x = *y` / `*x = y` box-vs-value
+  3. **CS0029 box↔value family (8):** linked-list assignment shapes (`x = *y` / `*x = y` box-vs-value
      mismatches) — needs per-site shape triage; may share a gate with the pointer-walk machinery.
-  5. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink` — ENTANGLED with the &GLOBAL
+  4. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink` — ENTANGLED with the &GLOBAL
      copy-box latent, rides with that model); CS1929 extension-shadowing (4, mprof UnsafePointer
      Load/StoreNoWB). *(CS0149 (2) = raw-memory delegate → GoManualConversion stub candidate, SKIP for a
      dedicated stub pass.)*
@@ -930,24 +938,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at 59 — and that count is now EXACT: converter output is BYTE-DETERMINISTIC
-(`32fd49a45`; two consecutive full reconverts diff to ZERO across all 305 packages). Sequential per-file
-conversion (was concurrent goroutines over shared globals — initΔN claim order, an unsynchronized blank-
-name counter, and the imported-alias parse race that manufactured 3 phantom CS0019), sorted topo-queue
-roots, GOROOT-vendored dependency edges resolved (bidirule no longer converts before bidi), sorted
-multi-box re-alias emission. Sequential costs nothing (3m39s vs 3m42s). Reconvert-to-reconvert diffs are
-now a valid regression instrument.
+This session: runtime is at 53, EXACT (output is byte-deterministic, `32fd49a45`; reconvert-to-reconvert
+diffs are a valid regression instrument). Landed since: golib slice ALIASING (`86566b9ef` — reslicing
+shares the backing array, slice<T> stores m_capacity, .slice() bounds now RELATIVE to the view; suite +
+SliceAliasing output test) and CS0121 ELIMINATED (`d0a935138` — the `uintptr → ж<T>` raw-address
+reinterpret operator is now EXPLICIT; a silent deref-and-copy-box should never be implicit, and it made
+every uintptr arg ambiguous between unsafe.Pointer and ж<T> overloads; test FuncVsMethodOverload).
 
-Recommended NEXT root — **CS0121 `add()` func-vs-method ambiguity (6, ONE shape; mprof.cs 245/258/267,
-map.cs 184/191/195):** free `func add(p unsafe.Pointer, x uintptr)` and method `func (p *notInHeap)
-add(…)` both emit as static `add` overloads in `runtime_package`. NUANCE from prior triage: the call
-sites pass `(uintptr)@unsafe.Pointer.FromRef(ref b)` — a uintptr converts implicitly to BOTH first
-params (unsafe.Pointer via the uintptr operator AND ж<notInHeap> via…verify which path), hence ambiguous.
-Options to weigh: extend the Δ-collision machinery to func-vs-method (rename the METHOD's static emission
-— but [GoRecv] extension binding must keep working), or qualify/disambiguate at the CALL site (cast the
-first arg to the free function's exact param type). Verify the 6 sites all want the FREE function first.
-Fallbacks if entangled: CS0103 remnants (3: value-receiver box miss mgcscavenge ×2, receiver
-materialization mprof ×1), then CS0029 box↔value triage (8).
+Recommended NEXT root — **the CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2 — a
+`Ꮡx` referenced where x is a VALUE receiver with no box) and a receiver materialization (mprof ×1).
+Re-bucket fresh, read each site's Go source, characterize the exact gate that mis-fires; these are
+likely two small independent gates in the box-routing machinery (convUnaryExpr/convSelectorExpr
+territory — mind the Δ/ʗ rename rules and paren-unwrap). Fallbacks: CS0029 box↔value triage (8 —
+linked-list assignment shapes, may share a gate with the pointer-walk machinery), then CS1929
+extension-shadowing (4, mprof UnsafePointer Load/StoreNoWB — but verify it isn't the parked
+named-over-array entanglement first).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
