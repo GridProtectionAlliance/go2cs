@@ -15,9 +15,17 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 40 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 38 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): a blank import emits NO using (`082b05f1b`; CS0118+CS0029 −2, 40 → 38).**
+  `import _ "unsafe"` emitted `using _ = unsafe_package;` — hijacking C#'s `_` DISCARD file-wide;
+  tracetime's `(w, _) = w.ensure(…)` bound the namespace alias (two errors, one line). Blank imports
+  are side-effects-only → comment emission; exported-alias loading + the inferred-type canonical
+  using machinery unchanged. 67-file stdlib diff, uniformly the mechanical swap. Also confirmed
+  proc.cs:5393 Range→nint is ENTANGLED with the parked ΔcgoCallers named-over-array family (the
+  Range is on the wrapper, not stk). Test: UnsafePointerInferredNoImport extension (discards in a
+  blank-import file).
 - **2026-07-02 (latest): receiver-in-pointer-composite promotion trigger (`6c26a726a`; CS1503 −1,
   41 → 40).** `return funcInfo{f, mod}` in `(f *_func).funcInfo()` needed the receiver's box in the
   ж<_func> field — a boxless ref receiver has none; placing the receiver whole into a POINTER-typed
@@ -1028,21 +1036,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 40, EXACT. Tonight: b28495a5d (CS0103 extinct),
-cc39fd0e6 (tuple-reassign), 2c352ff49 (empty composite), d9dbc9839 (deref-of-cast paren),
-db6445f7c (min/max untyped-const), e20a840f4 (string wide-index), 6c26a726a
-(receiver-in-pointer-composite promotion).
+This session (overnight run): runtime is at 38, EXACT. Tonight: b28495a5d, cc39fd0e6, 2c352ff49,
+d9dbc9839, db6445f7c, e20a840f4, 6c26a726a, 082b05f1b (blank-import discard hijack — 8 roots, 51→38).
 
-FOR THE MORNING (beyond the standing A/B): (1) the golib slice nil-vs-empty conflation
-(`pm{} == nil` → C# true, Go false — needs a data-pointer distinction in slice<T>'s nil-compare);
-(2) receiver-into-INTERFACE-field composites currently pass the deref'd value alias — compiles, but
-Go stores the POINTER in the interface (identity semantics); promoting those would re-route ~70
-more files — worth a deliberate decision.
+FOR THE MORNING: (1) the managed-referent A/B (CS0030 9 — the largest remaining bucket); (2) golib
+slice nil-vs-empty conflation; (3) receiver-into-INTERFACE-field composite identity (~70 sites);
+(4) proc.cs:5393 Range→nint is CONFIRMED part of the ΔcgoCallers named-over-array family (now 4
+sites in proc: 3× CS0021 + 1× CS1503 — the named-over-array eager-shared-backing model would clear
+CS0021 7's majority + these; it and the A/B are the two big architectural decisions left).
 
-Recommended NEXT root — **proc.cs:5393 Range→nint (CS1503 ×1):** read the site first (a Go
-slice-expr where an index is expected suggests an emission confusion). Fallbacks: tracetime
-CS0118+CS0029 line pair (`(w, _) = w.ensure(…)` — one LINE, may clear both); CS0021 7 re-triage;
-CS1929 6 (VERIFY the mprof 4 aren't the parked named-over-array entanglement FIRST).
+Recommended NEXT root — **CS1929 6 verification-triage:** the 4 mprof UnsafePointer Load/StoreNoWB
+"extension-shadowing" sites were characterized 10+ roots ago — VERIFY against the parked
+named-over-array entanglement first (mprof's buckhashArray is [179999]atomic.UnsafePointer —
+likely the SAME family); the +1 cross-pkg method-promotion residual and +1 double-box may be
+contained. If all entangled → CS0021 7 re-triage (fresh read), then the stub pass (CS0149 1 +
+CS0128 2) as the honest tail.
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
