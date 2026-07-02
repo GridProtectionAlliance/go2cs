@@ -15,10 +15,34 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 53 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 51 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
-- **2026-07-02 (latest): CS0121 ELIMINATED — the `uintptr → ж<T>` reinterpret operator is now
+- **2026-07-02 (latest): promoted embed call on a [GoRecv] ref receiver (`308debde7`; CS0103 −2,
+  53 → 51) + the benchmarks-session merge (`8ea5253e5` + `02470cc93`).**
+  1. *Converter root:* a pointer-receiver method promoted through a VALUE embed, called on the
+     enclosing method's OWN non-direct-ж receiver (`sc.setEmpty()` in `(*scavChunkData).alloc/free`),
+     emitted the box descent `Ꮡsc.of(…)` — but a `this ref` receiver has NO box (CS0103). Fix: the
+     embedded field of a ref receiver is addressable, so emit the explicit field call
+     `sc.scavChunkFlags.setEmpty()` (binds the `[GoRecv] ref` overload, write-through). Includes the
+     rendered==raw hardening in convUnaryExpr's `&recv.field` arm (a pointer LOCAL shadowing the
+     receiver name emitted `Ꮡ`+raw — nonexistent box, or the WRONG target inside a direct-ж method).
+     Whole-stdlib reconvert diff: exactly 5 files — the fix also pre-cleared the same latent CS0103 in
+     archive/zip, gcimporter, go/types, image. Test: EmbeddedValuePointerMethod extended (ref-receiver
+     form + shadow control, output vs Go). **CS0103 remnant: 1 (mprof.cs:1119 `Ꮡb.stk().at<uintptr>(0)`
+     — a spurious Ꮡ on a pointer LOCAL root in `&b.stk()[0]` element-address; b IS the box → should be
+     `b.stk().at<uintptr>(0)`. NEXT.)**
+  2. *Benchmarks merge:* the "Go/C# runtime performance benchmarks" session landed
+     `src/Tests/Performance/` (PerfSort/PerfStartup/PerfString + PerformanceRunner + run-performance.ps1,
+     Go vs C# JIT + Native AOT) plus golib perf: allocation-free append span path (span overload is the
+     implementation; single-element fast path) and byte-wise `@string` CompareTo/GetHashCode/operators
+     (Go byte order — also MORE correct than UTF-16 ordinal for supplementary chars) + a REAL sort.cs
+     bug fix (the `Sort(this IntSlice)` convenience overloads were infinitely self-recursive; cast to
+     `Interface<T>` disambiguates) + time.UnixNano. **The append optimization was reconciled by hand
+     with the slice-aliasing rewrite** (branch predated `86566b9ef`): fast-path/span writes + the
+     4-arg shared-view return within cap, m_low-relative copy + detached 0-based view beyond cap.
+     Gates: SliceAliasing 4-phase green; full suite 215/215 (Output 195); runtime count unchanged (51).
+- **2026-07-02: CS0121 ELIMINATED — the `uintptr → ж<T>` reinterpret operator is now
   EXPLICIT (`d0a935138`; 59 → 53).** The free `add(unsafe.Pointer, uintptr)` vs `(*notInHeap).add`
   static-overload pair was ambiguous at every free-call site passing a boxless-receiver pin
   (`(uintptr)@unsafe.Pointer.FromRef(ref b)` — map.go keys/overflow/setoverflow, mprof.go walkers ×6)
@@ -695,11 +719,14 @@ singles.**
 field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask IArray-view + ISlice-copy
 (`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
 Δrtype.TFlag — what remains is dominated by the architectural S-families.**
-- **NEXT — the characterized frontier at 53 (determinism DONE `32fd49a45`; slice aliasing DONE
-  `86566b9ef`; CS0121 DONE `d0a935138`; Δrtype embed promotion DONE `38212b635`; element-address
-  family DONE `a342d25e7`), roughly cleanest-first:**
-  1. **CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2) + a receiver materialization
-     (mprof ×1) — small, characterized, likely independent gates.
+- **NEXT — the characterized frontier at 51 (determinism DONE `32fd49a45`; slice aliasing DONE
+  `86566b9ef`; CS0121 DONE `d0a935138`; embed-receiver CS0103 DONE `308debde7`; benchmarks merged),
+  roughly cleanest-first:**
+  1. **CS0103 last remnant (1): mprof.cs:1119** — `&b.stk()[0]` emits `Ꮡb.stk().at<uintptr>(0)` where
+     `b` is a pointer LOCAL (`var b = head` loop var): b IS the box, the `Ꮡ` prefix is spurious →
+     should be `b.stk().at<uintptr>(0)`. The element-address machinery's root-boxing mis-fires on a
+     method-CALL-result slice rooted at a pointer local. Small contained gate (convUnaryExpr
+     element-address arm).
   2. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
      unsafe.Pointer + 2 singletons (`lfstack → Δhex`, `UntypedInt → unsafe.Pointer`).** MODEL holding
      `ж<T>` directly per the user's model (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite`
@@ -938,18 +965,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at 53, EXACT (output is byte-deterministic, `32fd49a45`; reconvert-to-reconvert
-diffs are a valid regression instrument). Landed since: golib slice ALIASING (`86566b9ef` — reslicing
-shares the backing array, slice<T> stores m_capacity, .slice() bounds now RELATIVE to the view; suite +
-SliceAliasing output test) and CS0121 ELIMINATED (`d0a935138` — the `uintptr → ж<T>` raw-address
-reinterpret operator is now EXPLICIT; a silent deref-and-copy-box should never be implicit, and it made
-every uintptr arg ambiguous between unsafe.Pointer and ж<T> overloads; test FuncVsMethodOverload).
+This session: runtime is at 51, EXACT (output is byte-deterministic, `32fd49a45`). Landed since: golib
+slice ALIASING (`86566b9ef`); CS0121 ELIMINATED (`d0a935138` — explicit `uintptr → ж<T>` operator);
+promoted-embed-call-on-ref-receiver (`308debde7` — explicit field call `sc.scavChunkFlags.setEmpty()`
+when the base is the enclosing non-direct-ж receiver, + the rendered==raw hardening in convUnaryExpr's
+`&recv.field` arm; pre-cleared the same latent in zip/gcimporter/go-types/image); and the BENCHMARKS
+session merged (`8ea5253e5` + `02470cc93` — src/Tests/Performance suite; golib span-path append
+reconciled BY HAND with the aliasing rewrite, byte-wise @string compare/hash, the sort.cs
+infinite-recursion fix, time.UnixNano; SliceAliasing + full suite green post-merge).
 
-Recommended NEXT root — **the CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2 — a
-`Ꮡx` referenced where x is a VALUE receiver with no box) and a receiver materialization (mprof ×1).
-Re-bucket fresh, read each site's Go source, characterize the exact gate that mis-fires; these are
-likely two small independent gates in the box-routing machinery (convUnaryExpr/convSelectorExpr
-territory — mind the Δ/ʗ rename rules and paren-unwrap). Fallbacks: CS0029 box↔value triage (8 —
+Recommended NEXT root — **the LAST CS0103 (mprof.cs:1119):** `&b.stk()[0]` (Go mprof.go
+iterate_memprof) emits `Ꮡb.stk().at<uintptr>(0)` where `b` is a pointer LOCAL (`var b = head` loop
+var) — b IS the box, the `Ꮡ` prefix is spurious; correct form `b.stk().at<uintptr>(0)`. The
+element-address machinery's root-boxing mis-fires on a method-CALL-result slice rooted at a pointer
+local (convUnaryExpr element-address arm — find why the root walk prefixes Ꮡ to a pointer-local root
+when the indexed base is a CALL result). Small contained gate. Fallbacks: CS0029 box↔value triage (8 —
 linked-list assignment shapes, may share a gate with the pointer-walk machinery), then CS1929
 extension-shadowing (4, mprof UnsafePointer Load/StoreNoWB — but verify it isn't the parked
 named-over-array entanglement first).
