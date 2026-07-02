@@ -28,6 +28,7 @@ build scripts still reference it (see *Known staleness* below).
 | **Baseline stdlib** | `src/core/<pkg>` | C# (converted) | Small hand-finished stdlib subset (errors, fmt, io, math, math/rand, sort, strings, sync, **sync/atomic**, time, unsafe, a few internal/*) — **compiles**; the test loop builds against this. Restored from the old stub (`3426298eb`); `sync/atomic` promoted from the full conversion (2026-06-26, first migrated package). |
 | **Full auto-conversion (WIP)** | `src/go-src-converted/` | C# (converted) | Whole Go stdlib (~301 projects) auto-output. Does **not** all compile yet. Its own `src/go-src-converted.sln`. |
 | **Behavioral tests** | `src/Tests/Behavioral/` (59 test projects + `BehavioralTests` runner) | Go + C# | Per-feature Go↔C# equivalence (arrays, channels, defer, generics, interfaces…). |
+| **Performance tests** | `src/Tests/Performance/` (8 `Perf*` benchmarks + `PerformanceRunner`) | Go + C# | Go vs transpiled C# (JIT **and** Native AOT) time/memory comparison — results table in its `README.md`. |
 | **Examples** | `src/Examples/` | Go + C# | Hand-converted Tour-of-Go / go101 / misc samples. |
 
 **Two solutions:** `src/go2cs.sln` = converter-dev workspace (golib + `go2cs-gen` + the baseline subset +
@@ -141,6 +142,25 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   **~2.3 min / 228 green**; materially longer means the test host has hung under lock contention, not real
   work — stop and clear it rather than waiting 10–20 min. (Raise the ceiling later only if the suite
   legitimately grows.)
+
+### Performance comparison suite (`src/Tests/Performance`, 2026-07-02)
+- **Purpose:** answer "how fast is the transpiled C# vs the original Go?" — 8 small `Perf*` benchmark
+  projects (Startup, Fib, Sieve, MatMul, String, Map, Sort, Channel), each a behavioral-test-shaped folder,
+  measured across **three variants**: Go binary, C# JIT (`Release`), C# **Native AOT** self-contained.
+  Drive via **`run-performance.ps1 [--filter X] [--no-aot] [--runs N] [--update-readme]`** (standalone
+  `PerformanceRunner`, no testhost; phases Transpile → Build → Verify → Measure; Verify requires identical
+  timing-filtered stdout across all three binaries before anything is timed). The results table lives in
+  `src/Tests/Performance/README.md` between `PERF-RESULTS` markers (`--update-readme` rewrites it; prior
+  toolchain tables accumulate in its *History* section for .NET 9 → 10 comparisons).
+- **Mechanics gotchas:** benchmarks self-time via `time.Now().UnixNano()` (added to the baseline
+  `core/time` stub for this) and print `elapsed_ns:` lines the runner strips before output comparison; the
+  converter **regenerates each benchmark csproj on transpile**, so shared settings live in
+  `Directory.Build.props`/`.targets` there (AOT is gated by custom `-p:PerfAot=true` — passing `PublishAot`
+  globally breaks the netstandard2.0 `go2cs-gen` analyzer with NETSDK1207); AOT publish needs MSVC
+  `link.exe` and the runner prepends the VS Installer dir to PATH for the SDK's `vswhere` probe; AOT trims
+  with `TrimMode=partial` because golib `fmt` formatting and sort's `Interface<T>` bind members via
+  reflection. Full run ≈3–4 min warm (AOT publishes ≈7 s each); `--no-aot` well under a minute. Keep each
+  benchmark ≥50 ms and output deterministic (inline xorshift, no `math/rand`).
 
 ### Adding a regression test when a converter defect is fixed
 When a meaningful converter bug is fixed, lock it in with a behavioral test so later changes can't silently

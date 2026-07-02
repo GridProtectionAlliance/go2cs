@@ -273,6 +273,21 @@
   <Folder Name="/tests/library/">
     <Project Path="Tests/ChannelTests/ChannelTests.csproj" />
   </Folder>
+  <Folder Name="/tests/performance/">
+    <File Path="Tests/Performance/README.md" />
+    <File Path="Tests/Performance/run-performance.ps1" />
+    <Project Path="Tests/Performance/PerformanceRunner/PerformanceRunner.csproj" />
+  </Folder>
+  <Folder Name="/tests/performance/target-projects/">
+    <Project Path="Tests/Performance/PerfChannel/PerfChannel.csproj" />
+    <Project Path="Tests/Performance/PerfFib/PerfFib.csproj" />
+    <Project Path="Tests/Performance/PerfMap/PerfMap.csproj" />
+    <Project Path="Tests/Performance/PerfMatMul/PerfMatMul.csproj" />
+    <Project Path="Tests/Performance/PerfSieve/PerfSieve.csproj" />
+    <Project Path="Tests/Performance/PerfSort/PerfSort.csproj" />
+    <Project Path="Tests/Performance/PerfStartup/PerfStartup.csproj" />
+    <Project Path="Tests/Performance/PerfString/PerfString.csproj" />
+  </Folder>
   <Folder Name="/utilities/">
     <File Path="set-version.ps1" />
     <Project Path="Utilities/GenGoFuncRefInstances/GenGoFuncRefInstances.csproj" />

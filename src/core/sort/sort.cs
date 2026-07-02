@@ -404,7 +404,7 @@ public static partial class sort_package
     // Sort is a convenience method.
     public static void Sort(this IntSlice p)
     {
-        Sort(p);
+        Sort((Interface<IntSlice>)p);
     }
 
     public static nint Len(this Float64Slice p)
@@ -433,7 +433,7 @@ public static partial class sort_package
     // Sort is a convenience method.
     public static void Sort(this Float64Slice p)
     {
-        Sort(p);
+        Sort((Interface<Float64Slice>)p);
     }
 
     public static nint Len(this StringSlice p)
@@ -456,7 +456,7 @@ public static partial class sort_package
     // Sort is a convenience method.
     public static void Sort(this StringSlice p)
     {
-        Sort(p);
+        Sort((Interface<StringSlice>)p);
     }
 
     // Convenience wrappers for common cases

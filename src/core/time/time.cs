@@ -49,6 +49,8 @@ public static class time_package
 
     public static int Unix(this in Time time) => (int)time.DateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 
+    public static long UnixNano(this in Time time) => (time.DateTime.ToUniversalTime().Ticks - DateTime.UnixEpoch.Ticks) * 100L;
+
     public static Time UTC(this in Time time) => new Time { DateTime = time.DateTime.ToUniversalTime() };
 
 

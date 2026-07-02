@@ -1,0 +1,21 @@
+<Project>
+
+  <!-- Native AOT publish support for the benchmark projects. The PerformanceRunner publishes with
+       -p:PerfAot=true (a custom gate) rather than -p:PublishAot=true, because a global PublishAot
+       property propagates into referenced projects and breaks the netstandard2.0 go2cs-gen analyzer
+       (NETSDK1207). Only projects under this directory import this file, so the gate is scoped here.
+       This lives in Directory.Build.targets (imported after the project body) so it can override the
+       converter-generated csproj's PublishReadyToRun=true, which conflicts with AOT. -->
+
+  <PropertyGroup Condition="'$(PerfAot)'=='true'">
+    <PublishAot>true</PublishAot>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    <PublishTrimmed>true</PublishTrimmed>
+    <RuntimeIdentifier>$(NETCoreSdkRuntimeIdentifier)</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <!-- Partial trim keeps golib and the converted core packages fully rooted: golib's fmt formatting
+         and sort's Interface<T> bind members through reflection, which full trimming would strip. -->
+    <TrimMode>partial</TrimMode>
+  </PropertyGroup>
+
+</Project>

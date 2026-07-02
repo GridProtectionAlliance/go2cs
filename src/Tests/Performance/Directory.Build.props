@@ -1,0 +1,11 @@
+<Project>
+
+  <!-- Shared settings for the performance benchmark projects. The go2cs converter regenerates each
+       benchmark's .csproj on every transpile, so settings that must survive a re-transpile live here
+       (this file is never converter-owned). Native AOT publish support is in Directory.Build.targets. -->
+
+  <PropertyGroup>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+  </PropertyGroup>
+
+</Project>
