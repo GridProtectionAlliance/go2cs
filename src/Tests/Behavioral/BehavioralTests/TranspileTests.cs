@@ -411,6 +411,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]
+    public void CheckNestedFieldElementAddr() => CheckTarget("NestedFieldElementAddr");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]

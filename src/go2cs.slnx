@@ -179,6 +179,7 @@
     <Project Path="Tests/Behavioral/NativeIntConstMask/NativeIntConstMask.csproj" />
     <Project Path="Tests/Behavioral/NativeIntWideConstAssign/NativeIntWideConstAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedEmbeddingPromotion/NestedEmbeddingPromotion.csproj" />
+    <Project Path="Tests/Behavioral/NestedFieldElementAddr/NestedFieldElementAddr.csproj" />
     <Project Path="Tests/Behavioral/NestedFieldPointerAssign/NestedFieldPointerAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />

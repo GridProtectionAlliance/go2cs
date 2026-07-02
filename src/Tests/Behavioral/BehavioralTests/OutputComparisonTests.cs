@@ -373,6 +373,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]
+    public void CheckNestedFieldElementAddr() => CheckTarget("NestedFieldElementAddr");
+
+    [TestMethod]
     public void CheckNestedFieldPointerAssign() => CheckTarget("NestedFieldPointerAssign");
 
     [TestMethod]

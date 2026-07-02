@@ -587,6 +587,25 @@ The combined overload is behaviorally identical to the chain (it literally forwa
 `ArrayOfCrossPackageType`, `IndexedElementDirectBoxMethod` and `PointerFieldArrayElementAddress` — all
 output-compared; the `.inc()`/`bump()` element writes verify runtime equivalence.)
 
+The routing gate sees through **nested value fields to the chain root**. `&pp.wbBuf.buf[0]` (runtime
+`mwbbuf.go`) roots at the pointer `pp` through the *value* field `wbBuf`; the original gate checked
+pointer-ness only one level up (`pp.wbBuf`, a struct), fell to a naive `Ꮡ` prefix (`Ꮡpp.wbBuf…` — CS1061
+on the box), and the same failure hit the closure-captured variant (`&mp.trace.buf[gen%2]`, `trace.go`).
+The gate now walks intermediate selectors to the root, so any pointer-rooted (or heap-boxed) chain routes
+through the recursive `&field` machinery — `pp.of(pstate.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)` — which already
+rendered multi-hop of-chains. A **nested-index** base — `&cache.entries[ck][i]` (2-D array via a pointer,
+`symtab.go`) — is an `IndexExpr`, not a selector, so it gets its own arm: recursively take the inner
+element's address (`cache.at(pcvalueCache.Ꮡentries, ck)`) and chain the outer `.at<T>(i)` onto it — the
+gate also accepts a HEAP-BOXED value root (`&grid.cells[1][2]` on an address-escaping local), fixing that
+shape too. An unboxed value-rooted chain keeps the prior naive form (corpus byte-identical). *Known
+remaining gap (pre-existing): an intermediate `IndexExpr` inside the selector chain —
+`&ptr.items[i].buf[j]`, an array-of-structs hop — defeats the root walk (both arms only step through
+selectors) and keeps the CS1061 naive form; the recursive machinery likely has the pieces when a runtime
+site demands it.* (Guarded by
+the `NestedFieldElementAddr` behavioral test — all three runtime shapes with write-through vs Go; note a
+ZERO-VALUED struct's array-field backing is null in the C# emulation — a separate pre-existing latent —
+so the test initializes its arrays.)
+
 A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
 
 ```go

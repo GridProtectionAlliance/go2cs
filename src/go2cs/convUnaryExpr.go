@@ -431,7 +431,34 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 							_, baseIsPointer = baseType.Underlying().(*types.Pointer)
 						}
 
-						if v.isHeapBoxedExpr(sel) || baseIsPointer {
+						// The base check must see through NESTED value fields to the chain ROOT:
+						// `&pp.wbBuf.buf[0]` (runtime mwbbuf.go) roots at the pointer `pp` through the
+						// value field `wbBuf` — the one-level check (sel.X = `pp.wbBuf`, a struct) missed
+						// it and fell to the naive `Ꮡ` prefix (`Ꮡpp.wbBuf…`, CS1061 on the box). The
+						// recursive `&field` machinery below already renders multi-hop of-chains
+						// (`pp.of(Δp.ᏑwbBuf).at(wbBuf.Ꮡbuf, 0)`), so route any chain whose root is a
+						// pointer (or heap-boxed) through it; intermediate POINTER hops already fired the
+						// one-level check on their own segment.
+						chainRootIsPointer := false
+
+						if !baseIsPointer {
+							root := ast.Expr(sel.X)
+
+							for {
+								if inner, ok := root.(*ast.SelectorExpr); ok {
+									root = inner.X
+									continue
+								}
+
+								break
+							}
+
+							if rootType := v.info.TypeOf(root); rootType != nil {
+								_, chainRootIsPointer = rootType.Underlying().(*types.Pointer)
+							}
+						}
+
+						if v.isHeapBoxedExpr(sel) || baseIsPointer || chainRootIsPointer {
 							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
 							index := v.convArrayIndex(indexExpr.Index)
 
@@ -453,6 +480,42 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 							}
 
 							return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, index)
+						}
+					}
+
+					// A NESTED index base — `&cache.entries[ck][i]` (runtime symtab.go), a 2-D array
+					// reached through a pointer — is an *ast.IndexExpr*, not a SelectorExpr, so the
+					// field-routing above never sees it. When its own element address routes through the
+					// box machinery (recursively: `(~cache).entries[ck]` → `cache.at(pcvalueCache.Ꮡentries,
+					// ck)`), chain the outer element address onto it the same way; a plain value 2-D index
+					// keeps the naive form below (no churn).
+					if innerIndex, ok := indexExpr.X.(*ast.IndexExpr); ok {
+						innerNeedsBoxRouting := false
+
+						if innerSel, ok := innerIndex.X.(*ast.SelectorExpr); ok {
+							root := ast.Expr(innerSel.X)
+
+							for {
+								if inner, ok := root.(*ast.SelectorExpr); ok {
+									root = inner.X
+									continue
+								}
+
+								break
+							}
+
+							if rootType := v.info.TypeOf(root); rootType != nil {
+								_, innerNeedsBoxRouting = rootType.Underlying().(*types.Pointer)
+							}
+
+							if !innerNeedsBoxRouting {
+								innerNeedsBoxRouting = v.isHeapBoxedExpr(innerSel)
+							}
+						}
+
+						if innerNeedsBoxRouting {
+							arrayAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: indexExpr.X}, DefaultUnaryExprContext())
+							return fmt.Sprintf("%s.at<%s>(%s)", arrayAddr, csTypeName, v.convArrayIndex(indexExpr.Index))
 						}
 					}
 
