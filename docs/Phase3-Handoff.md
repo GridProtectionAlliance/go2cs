@@ -15,9 +15,17 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 46 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 44 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): deref-of-cast wraps before `.val` (`d9dbc9839`; CS0029 −1 + CS0149 −1,
+  46 → 44).** The default deref appended a naked `.val`; on a type-CONVERSION operand (a C# cast)
+  postfix re-binds onto the cast's INNER operand — panic.go's `return *(*func())(add(…)), true`
+  read the @unsafe.Pointer's uintptr (CS0029), and proc.cs's `f := *(*func())(…); f()` made f a
+  nuint (CS0149 — one of the two "raw-metal delegate" errors was never raw-metal, just this paren
+  bug). Func-type starred inners miss the ident-gated cast-deref branch. 4-file stdlib diff, all
+  the class (panic, proc, reflect+reflectlite lifted-anon-type latents). 4th extra-paren-family
+  instance. Test: UnsafePointerReinterpret extension. Suite 215/215.
 - **2026-07-02 (latest): empty named-collection composite = zero value (`2c352ff49`; CS0029 −1,
   47 → 46).** The named-composite `nil` filler (struct zero-ctor arg) landed INSIDE a
   named-over-array/slice composite's element literal — `tmpBuf{}` → `new tmpBuf(new
@@ -998,21 +1006,22 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 46, EXACT. Tonight's roots: CS0103 EXTINCT
+This session (overnight run): runtime is at 44, EXACT. Tonight's roots: CS0103 EXTINCT
 (`b28495a5d`); tuple-reassigned pointer param (`cc39fd0e6`, CS0029 −3, audit caught a :=-shadow
-over-fire); empty named-collection composite = zero value (`2c352ff49`, CS0029 −1, 10-file stdlib
-diff all same class). CS0029 remaining 4: mheap ×2 double-pointer (parked), panic reinterpret-paren,
-tracetime (CS0118-entangled).
+over-fire); empty named-collection composite (`2c352ff49`, CS0029 −1, 10-file class diff);
+deref-of-cast paren wrap (`d9dbc9839`, CS0029 −1 + CS0149 −1 — the proc "raw-metal delegate" was
+just precedence). CS0029 remaining 3: mheap ×2 double-pointer (parked), tracetime
+(CS0118-entangled). CS0149 remaining 1 (mprof — possibly genuinely raw-metal).
 
-Recommended NEXT root — **panic.cs:909 reinterpret-deref paren in a tuple return (CS0029 ×1):**
-Go `return *(*func())(add(…)), true` emits `return ((ж<Action>)(uintptr)(add(…)).val, true)` — the
-`.val` binds to `(add(…))` (postfix beats cast precedence), so the tuple element is ж<Action> not
-Action; the deref must wrap the WHOLE cast: `(~((ж<Action>)(uintptr)(add(…)))).val` or
-`((ж<Action>)(uintptr)(add(…))).val`. The extra-paren family (ccfb952b0 kin) — find the deref
-emission for a reinterpret-cast operand inside a RETURN-tuple/argument context and wrap defensively.
-Fallbacks: CS1503 8 re-triage (arg-conversion — read each site fresh, the make-len/wide-index
-precedents cleared similar); CS0021 7 re-triage; CS1929 6 (VERIFY the 4 mprof extension-shadowing
-aren't the parked named-over-array entanglement FIRST).
+Recommended NEXT root — **CS1503 8 re-triage:** argument-conversion mismatches, uncharacterized
+since the make-len/wide-index/3-index-bound roots cleared the earlier waves. Read all 8 sites'
+Go source + emitted C#, group by exact shape (the family precedents: cast a wide integer at a
+specific seam), pick the largest single-gate family, fix ONE root, log the rest. Fallbacks:
+CS0021 7 re-triage (earlier coarse triage said named-over-array indexing + S1 reinterpret —
+re-read fresh, the landscape has shifted); CS1929 6 (VERIFY the 4 mprof extension-shadowing
+aren't the parked named-over-array entanglement FIRST); tracetime CS0118+CS0029 pair
+(investigate the LINE once — `(w, _) = w.ensure(…)` deconstruction with a namespace-collision
+smell — may clear both).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
