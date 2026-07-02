@@ -36,4 +36,29 @@ func main() {
 	apply := func(fn func(*counter, int) int, base *counter, d int) int { return fn(base, d) }
 	fmt.Println(apply((*counter).add, c, 3)) // 20
 	fmt.Println(g(*c))                       // 20
+
+	// BOUND method value with parameters (the runtime metrics.go `d.compute = read.compute`
+	// shape): the receiver is captured, and the forwarding lambda carries the method's OWN
+	// parameters (the old emission hardcoded arity zero — CS1593 against a non-nullary target).
+	var bump func(int) int = c.add
+	fmt.Println(bump(4)) // 24
+	fmt.Println(bump(1)) // 25 — mutations accumulate through the bound receiver
+	fmt.Println(g(*c))   // 25
+
+	// The FULL metrics.go shape: a NAMED FUNC type conversion (`reader(read)` — a C# delegate
+	// declaration needs `new reader(read)`, not a cast) with a bound method value on the
+	// converted receiver, assigned to a func field and invoked.
+	var d dispatcher
+	d.compute = reader(readTen).sum
+	fmt.Println(d.compute(3)) // 13
 }
+
+type reader func() int
+
+func (f reader) sum(extra int) int { return f() + extra }
+
+type dispatcher struct {
+	compute func(int) int
+}
+
+func readTen() int { return 10 }

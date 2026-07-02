@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // typeCollidingFieldName renames a struct field whose C# name would equal its enclosing
@@ -553,6 +554,34 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			if v.isPackageIdentifier(ident) {
 				// This is a package selector (like fmt.Println) -- no need for lambda
 				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+			}
+		}
+
+		// A BOUND METHOD VALUE with parameters — `d.compute = metricReader(read).compute`
+		// (runtime metrics.go; compute takes (*statAggregate, *metricValue)) — forwards through
+		// a lambda carrying the METHOD'S OWN parameters: the previous emission hardcoded arity
+		// zero, mismatching any non-nullary target delegate (CS1593). Parameters are explicitly
+		// typed (fresh pN names — no collision with the receiver expression) so the lambda binds
+		// without a target-typed inference context. Note the receiver expression is evaluated
+		// inside the lambda (per call) — Go binds it once at method-value creation; acceptable
+		// for the compile milestone and the simple receivers observed (documented).
+		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Params().Len() > 0 {
+				var paramDecls, paramUses strings.Builder
+
+				for i := 0; i < sig.Params().Len(); i++ {
+					if i > 0 {
+						paramDecls.WriteString(", ")
+						paramUses.WriteString(", ")
+					}
+
+					name := fmt.Sprintf("p%d", i+1)
+					paramDecls.WriteString(fmt.Sprintf("%s %s", convertToCSTypeName(v.getTypeName(sig.Params().At(i).Type(), false)), name))
+					paramUses.WriteString(name)
+				}
+
+				return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.convExpr(selectorExpr.X, nil),
+					v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 			}
 		}
 

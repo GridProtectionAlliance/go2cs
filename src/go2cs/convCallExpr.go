@@ -158,6 +158,17 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion to a NAMED FUNC type — `metricReader(read)` where `type metricReader
+		// func() uint64` (runtime metrics.go) — targets a C# DELEGATE declaration
+		// (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast
+		// conversion (CS0030 from `Func<ulong>`); C# converts via DELEGATE CREATION:
+		// `new metricReader(read)` (accepts a compatible delegate or method group).
+		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+			if _, isSig := named.Underlying().(*types.Signature); isSig {
+				return fmt.Sprintf("new %s(%s)", targetTypeName, expr)
+			}
+		}
+
 		// A conversion of a string LITERAL to a named type whose underlying is `string`
 		// (e.g. `errorString("makeslice: len out of range")`, `type errorString string`): the
 		// literal renders as a `u8` ReadOnlySpan<byte>, which has no conversion to the named type
