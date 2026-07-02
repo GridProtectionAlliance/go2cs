@@ -15,9 +15,32 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 29 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 26 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **⚖ RULINGS (2026-07-02 morning, user):** end-goal lens = the two use cases (library: "use Go
+  code in my C# project"; application: "extend a Go app in C#"); **NOTHING-THROWAWAY** — if an
+  implementation would be manually replaced in Phase 4 anyway, build the manual replacement NOW.
+  **Decision A → Option C** (hand-owned managed-slot types, not converter-machinery A nor
+  copy-box B); distinct golib `uintptr` struct approved as its own root; Decision B
+  (named-over-array) + &GLOBAL family = durable general converter work, design WITH the user.
+- **2026-07-02 (latest): Option C iteration 1 — manual type-level conversion + managed-slot
+  guintptr family (`abf928c3d`; CS0030 −3 + CS1503 −1 + CS1929 −1, 29 → 26).** New
+  `manualTypeOperations.go` registry: converter skips listed type decls, their methods, listed
+  adjacent funcs (g.guintptr, setG/MNoWB), and GoImplicitConv attrs (both plain and Δ-renamed
+  forms — the Δguintptr miss was caught by the first measurement); call sites cooperate via the
+  referent-preserving ctor arm (`new Δguintptr(newg)`, convCallExpr) and the box-receiver arm
+  (`Ꮡgp.guintptr()`, convSelectorExpr). `core/runtime/runtime2_impl.cs`: the trio holds ж<T>
+  DIRECTLY; cas = real Interlocked (the asm-stub Casuintptr now WORKS); numeric escapes loud
+  (panic on non-zero int in; identity token out). 4-file uniform audit; corpus byte-identical;
+  suite 216/216. **Adversarial review: manual surface CONFIRMED faithful (cas null/ABA, operator
+  resolution, slot writes); boundary latents: lock_sema.go tagged-pointer arithmetic → loud panic
+  on contended unlock (NEXT MANDATORY manual conversion, Windows mutex waiter list);
+  runqempty/persistentChunks slot-reinterpret loads compile but silently read reference bits as
+  numbers (Phase-4; converter-rule candidate: atomic load of a manual-type slot → m_ref read);
+  stale Generated/ snapshots (cosmetic); hash-token prints unstable vs Go addresses (Phase-4
+  cosmetic).** Queue next: gclinkptr (4×CS0030), lfstack (Δhex print), stkframe UntypedInt,
+  taggedPointer (CS0019) — then lock_sema.
 - **2026-07-02 (latest): duplicate-mapped type-switch case merged on an identical body
   (`b0bb8b5a1`; CS8120 −1, 30 → 29 — the LAST autonomous root; the queue is DRY).** Go `uint` and
   `uintptr` are distinct types but both map to C# `nuint`, so printpanicval's later `case uintptr:`
