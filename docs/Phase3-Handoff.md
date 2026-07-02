@@ -15,10 +15,23 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~63 compile errors** (down from
-  952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
-  it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): string-literal spread wrapped as @string (`c5c446110`; CS1061 −1, 64 → 63) +
+- **`runtime` is the foundation and the current frontier — now at ~59 real errors (62 measured; see the
+  nondeterminism note)** (down from 952 at the start of the campaign). It is the bottom of the dependency
+  graph and the **sole failing project**, but read the next bullets.
+- **2026-07-01 (latest): unsafe.Pointer param returned whole is a plain value return (`ecfc7dbbf`;
+  CS0103 −4).** The return-path pointer-param boxing (`return p` → `Ꮡp`) fired on the UnsafePointer
+  BASIC, but such a param renders as a plain VALUE with no box → CS0103 `Ꮡzero`/`Ꮡv`/`Ꮡfd` (map.go
+  mapaccess1/2_fat, mem_windows, panic readvarintUnsafe tuple). Gate: the returned param's own type must
+  be a genuine `*types.Pointer`. Test: UnsafePointerParamPin extension (whole/tuple/genuine-*T control).
+  Suite green (213). CS0103's remaining 3 = different sub-shapes (a value-receiver box miss
+  mgcscavenge ×2, a receiver materialization mprof ×1).
+- **⚠ NONDETERMINISM ROOT CHARACTERIZED (the campaign's ±10 jitter, now precisely pinned): the abi
+  package's Kind-const-vs-method collision classification flips with map iteration order across
+  reconverts** — recon19 emitted `abi.ΔString` (correct); recon20 emitted `abi.String` (binds the method
+  group → CS0019 ×3 in arena/cgocall). Same converter both times; the identical abi type.cs proves the
+  CONSUMER-side rename decision is order-dependent (the imported-package collision registry). **QUEUE
+  THIS NEXT — determinism is a quality gate for goldens, measurements, and the milestone tag itself.**
+- **2026-07-01: string-literal spread wrapped as @string (`c5c446110`; CS1061 −1, 64 → 63) +
   an HONEST REVERT.** (1) `append(b, "runtime error: "...)` (error.go) rendered the literal `"…"u8`
   (ReadOnlySpan — no spread property); the spread emission now wraps a direct string-literal source as
   `((@string)"…"u8).ꓸꓸꓸ` — the same wrap `string(r)...` uses. Test: StringConvPostfix extension.
