@@ -15,9 +15,14 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 42 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 41 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): wide index on a string base → (int) cast (`e20a840f4`; CS1503 −1,
+  42 → 41).** `"0123456789abcdef"[pc&15]` (heapdump, pc uintptr) — a string literal renders as
+  ReadOnlySpan<byte> (int indexer). 12-file stdlib diff, all string-base wide-index sites (Go's
+  lookup-table-as-string idiom: pop8tab/len8tab/smallsString/udigits/strings.Reader…); verified
+  fmt builds with zero own-errors post-widening. Test: ArrayWideIndexAddress extension.
 - **2026-07-02 (latest): untyped-const argument to min/max (`db6445f7c`; CS1503 −2, 44 → 42).**
   A named untyped const renders as its UntypedInt static, which the `params ReadOnlySpan<T>`
   min/max overloads reject; cast to the call's Go-resolved type (`min(n, (uintptr)(maxObletBytes))`),
@@ -1014,22 +1019,17 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 42, EXACT. Tonight's roots: CS0103 EXTINCT
-(`b28495a5d`); tuple-reassigned pointer param (`cc39fd0e6`); empty named-collection composite
-(`2c352ff49`); deref-of-cast paren wrap (`d9dbc9839` — dissolved a "raw-metal" CS0149);
-min/max untyped-const cast (`db6445f7c`).
+This session (overnight run): runtime is at 41, EXACT. Tonight: b28495a5d (CS0103 extinct),
+cc39fd0e6 (tuple-reassign), 2c352ff49 (empty composite), d9dbc9839 (deref-of-cast paren),
+db6445f7c (min/max untyped-const), e20a840f4 (string wide-index).
 
-Recommended NEXT root — **heapdump.cs:637 u8-literal wide index (CS1503 ×1, contained):**
-`buf[n] = "0123456789abcdef"u8[(uintptr)(pc & 15)];` — indexing a u8 string-literal
-(ReadOnlySpan<byte>, int indexer) with a nuint. The wide-index cast family
-(castWideIntegerToInt) covers at()/element-address seams; the plain INDEX of a
-ReadOnlySpan-rendered string literal missed. Small gate in the index-expression emission —
-find where a string-literal base's indexer arg renders and route the index through the
-wide-int cast. Behavioral test: extend StringConvPostfix or ArrayWideIndexAddress with
-`"…"u8[uintptrIdx]` (output parity — byte values are stable).
-Fallbacks: symtab.cs:369 `_func` value→box routing miss (single); proc.cs:5393 Range→nint
-(read the site first); tracetime CS0118+CS0029 line pair; CS0021 7 re-triage; CS1929 6
-(VERIFY the mprof 4 aren't the parked named-over-array entanglement FIRST).
+Recommended NEXT root — **symtab.cs:369 `_func` value→box argument (CS1503 ×1):** an addressable
+`_func` value passed where `ж<_func>` is expected — read the site (Go symtab.go, likely
+`funcInfo{f, datap}` composite or a call taking *_func with an auto-& receiver-style argument);
+the &-machinery may need the same routing as an established family, or it is a small
+argument-conversion gate. Fallbacks: proc.cs:5393 Range→nint (read the site); tracetime
+CS0118+CS0029 line pair (`(w, _) = w.ensure(…)` — one LINE, may clear both); CS0021 7 re-triage;
+CS1929 6 (VERIFY the mprof 4 aren't the parked named-over-array entanglement FIRST).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
