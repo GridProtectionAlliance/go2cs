@@ -31,6 +31,42 @@ internal static void viaParam(ж<outer> Ꮡo) {
     Ꮡo.of(outer.Ꮡinner).bump(100);
 }
 
+[GoType("num:uint8")] partial struct flags;
+
+[GoRecv] internal static void set(this ref flags f, flags bit) {
+    f |= (flags)(bit);
+}
+
+[GoRecv] internal static void clear(this ref flags f, flags bit) {
+    f &= unchecked((flags)~(flags)(bit));
+}
+
+[GoType] partial struct chunk {
+    internal uint16 inUse;
+    internal partial ref flags flags { get; }
+}
+
+[GoRecv] internal static void alloc(this ref chunk c, uint16 n) {
+    c.inUse += n;
+    if (c.inUse >= 4) {
+        c.flags.set(1);
+    }
+}
+
+[GoRecv] internal static void free(this ref chunk c, uint16 n) {
+    c.inUse -= n;
+    c.flags.clear(1);
+}
+
+[GoRecv] internal static void bump(this ref chunk c, ж<chunk> Ꮡother) {
+    ref var other = ref Ꮡother.val;
+
+    {
+        var cΔ1 = Ꮡother;
+        cΔ1.of(chunk.Ꮡflags).set(2);
+    }
+}
+
 internal static void Main() {
     var o = Ꮡ(new outer(tag: 7));
     o.of(outer.Ꮡinner).bump(5);
@@ -42,6 +78,16 @@ internal static void Main() {
     fmt.Println((~o).tag);
     o.of(outer.Ꮡinner).reset0();
     fmt.Println((~o).n);
+    var c = new chunk(nil);
+    c.alloc(5);
+    fmt.Println(c.inUse, (uint8)c.flags);
+    c.free(2);
+    fmt.Println(c.inUse, (uint8)c.flags);
+    var d = new chunk(nil);
+    ref var e = ref heap<chunk>(out var Ꮡe);
+    e = new chunk(nil);
+    d.bump(Ꮡe);
+    fmt.Println((uint8)d.flags, (uint8)e.flags);
 }
 
 } // end main_package

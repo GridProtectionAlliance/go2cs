@@ -226,7 +226,14 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		// threads for distinct receivers — broken for concurrent types like sync/atomic.
 		if isRecvPointer {
 			if selectorExpr, ok := unaryExpr.X.(*ast.SelectorExpr); ok {
-				if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName {
+				// rendered==raw guards the name match against an INNER binding that shadows the
+				// receiver name: the shadow pass Δ-renames such a binding (`c` → `cΔ1`), so a
+				// rendered name differing from the raw name is not the receiver. Without this, a
+				// pointer LOCAL shadowing the receiver took this arm and emitted `Ꮡ`+raw — a box
+				// that does not exist for a non-direct-ж method (CS0103); the shadow-renamed local
+				// falls through to the pointer-variable arm below, which field-refs through the
+				// local itself (`cΔ1.of(…)`).
+				if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == recvName && v.getIdentName(ident) == ident.Name {
 					recvType := recv.Type()
 
 					if pointer, ok := recvType.(*types.Pointer); ok {

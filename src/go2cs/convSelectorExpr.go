@@ -702,6 +702,25 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 				// field-access handling — taking its address would double-box to `ж<ж<T>>` (CS1929).
 				if embedField.Embedded() {
 					if _, isPtr := embedField.Type().Underlying().(*types.Pointer); !isPtr {
+						// When the base is the current method's OWN receiver and that method is NOT
+						// direct-ж, the receiver renders as `this ref T` with NO box — the descent's
+						// `Ꮡrecv.of(…)` references a nonexistent `Ꮡrecv` (CS0103; runtime mgcscavenge
+						// `sc.setEmpty()` inside `(*scavChunkData).alloc/free`). No box is needed
+						// either: the embedded field of a `ref` receiver is addressable, so the
+						// promoted method's `[GoRecv] ref` overload binds on the explicit field call
+						// `recv.embedField.method(…)`. (A direct-ж TARGET on the bare receiver would
+						// have promoted the enclosing method via the capture-mode fixpoint, so this
+						// arm's target always has the `ref` overload.) The rendered==raw check keeps
+						// an inner binding that shadows the receiver name (Δ-renamed) on the descent
+						// path.
+						if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+							if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && recvIdent.Name == recvName &&
+								v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+								return getAliasedTypeName(fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, nil),
+									getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+							}
+						}
+
 						embedSel := &ast.SelectorExpr{X: selectorExpr.X, Sel: &ast.Ident{Name: embedField.Name()}}
 						fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: embedSel}, DefaultUnaryExprContext())
 						return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
