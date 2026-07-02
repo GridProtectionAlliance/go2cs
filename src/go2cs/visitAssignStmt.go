@@ -592,11 +592,44 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
+			// rhsElemIsPointer reports whether the RHS value feeding THIS element is pointer-typed —
+			// element-wise for a multi-RHS assign, or the i-th component of the single call RHS's
+			// result tuple for a tuple deconstruction (`(left, x, idx) = binarySearchTree(…)`,
+			// runtime mgcstack.go / `(pp, _) = pidleget(0)`, proc.go — a pointer param reassigned
+			// INSIDE a tuple otherwise misses the box-reassignment triggers below, assigning the
+			// tuple's ж<T> component into the deref'd value alias → CS0029).
+			rhsElemIsPointer := func(i int) bool {
+				// A tuple DECONSTRUCTION (one call RHS, several LHS) probes the call's result
+				// tuple for every element — including element 0, whose raw expression type is
+				// the whole *types.Tuple (never a pointer), not its first component.
+				if rhsLen == 1 && lhsLen > 1 {
+					if tuple, ok := v.getExprType(rhsExprs[0]).(*types.Tuple); ok && i < tuple.Len() {
+						return isPointer(tuple.At(i).Type())
+					}
+
+					return false
+				}
+
+				if i < rhsLen {
+					return isPointer(v.getExprType(rhsExprs[i]))
+				}
+
+				return false
+			}
+
+			// Both box-reassignment triggers below apply to a REASSIGNED element only: a `:=`-DECLARED
+			// pointer element binds the tuple's ж<T> component into a fresh pointer local — which IS
+			// the box — directly (`var (cΔ1, …) = …`), and needs no repoint/re-alias. Without this
+			// gate, an inner `:=` local shadowing a pointer parameter's name (`cΔ1`, Δ-renamed)
+			// mis-took the parameter trigger and emitted a re-alias of an undeclared name
+			// (crypto/x509 `c, _, err := …cert(i)`, net/http routing_tree).
+			elemIsReassigned := ident != nil && v.isReassignment(ident)
+
 			// Reassigning the direct-ж receiver to a pointer value (`r = r.prev`, a ring walk):
 			// emit the box `Ꮡr` on the LHS so the pointer-reassignment path below repoints the box
 			// and re-aliases the value var (`Ꮡr = r.prev; r = ref Ꮡr.val;`). The deref'd value var
 			// alone cannot be repointed at a different node.
-			if i < rhsLen && v.exprIsCurrentDirectBoxReceiver(lhsExprs[i]) && isPointer(v.getExprType(rhsExprs[i])) {
+			if elemIsReassigned && v.exprIsCurrentDirectBoxReceiver(lhsExprs[i]) && rhsElemIsPointer(i) {
 				context.isPointer = true
 			}
 
@@ -606,7 +639,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			// `Ꮡbits` on the LHS so the pointer-reassignment path below repoints it and re-aliases the
 			// value var (`Ꮡbits = addb(Ꮡbits, n); bits = ref Ꮡbits.val;`). The RHS already references
 			// the box form. (The `&`-RHS case above is a subset; setting isPointer twice is harmless.)
-			if i < rhsLen && v.identIsParameter(ident) && v.isPointer(ident) && isPointer(v.getExprType(rhsExprs[i])) {
+			if elemIsReassigned && v.identIsParameter(ident) && v.isPointer(ident) && rhsElemIsPointer(i) {
 				context.isPointer = true
 			}
 

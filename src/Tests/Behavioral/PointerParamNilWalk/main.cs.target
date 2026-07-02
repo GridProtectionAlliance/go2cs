@@ -40,12 +40,50 @@ internal static ж<node> build(params ꓸꓸꓸnint valsʗp) {
     return head;
 }
 
+internal static (ж<node>, nint) advance(ж<node> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+    return (p.next, p.val);
+}
+
+internal static nint sumEveryOther(ж<node> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNil();
+
+    nint total = 0;
+    nint skipped = 0;
+    while (Ꮡp != nil) {
+        total += p.val;
+        (Ꮡp, skipped) = advance(Ꮡp); p = ref Ꮡp.DerefOrNil();
+        _ = skipped;
+        if (Ꮡp != nil) {
+            (Ꮡp, skipped) = advance(Ꮡp); p = ref Ꮡp.DerefOrNil();
+            total += skipped * 0;
+        }
+    }
+    return total;
+}
+
+internal static void bumpFirstViaTuple(ж<node> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNil();
+
+    nint skipped = default!;
+    (Ꮡp, skipped) = advance(Ꮡp); p = ref Ꮡp.DerefOrNil();
+    _ = skipped;
+    if (Ꮡp != nil) {
+        p.val += 100;
+    }
+}
+
 internal static void Main() {
     var list = build(1, 2, 3, 4);
     fmt.Println(sumList(list));
     doubleList(list);
     fmt.Println(sumList(list));
     fmt.Println(sumList(nil));
+    fmt.Println(sumEveryOther(list));
+    fmt.Println(sumEveryOther(nil));
+    bumpFirstViaTuple(list);
+    fmt.Println(sumList(list));
 }
 
 } // end main_package
