@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
@@ -85,7 +86,19 @@ internal class InheritedTypeTemplate : TemplateBase
                 .Where(member => GetSimpleName(member.memberName) != "_")
                 .Select(member => $"\r\n        public {member.typeName} {member.memberName} {{ get => m_value.{member.memberName}; set => m_value.{member.memberName} = value; }}");
 
-            return $"\r\n\r\n        // Forwarded fields of the underlying '{TypeName}'{string.Concat(props)}";
+            // The field-box accessors (`Ꮡfield`) that a plain struct's partial generates (used by the
+            // converter's `receiver.of(Type.Ꮡfield)` field-address form — `&p.x` on a *pinnerBits, where
+            // `type pinnerBits gcBits`) must exist on the WRAPPER type too, since the accessor names the
+            // wrapper (`pinnerBits.Ꮡx`, CS0117 otherwise). Forward them as true refs THROUGH `m_value`
+            // into the underlying struct's field — `ref instance.m_value.x` is a genuine ref chain into
+            // the wrapper's own storage (no copy, so writes through the resulting box persist; `m_value`
+            // is mutable whenever members are forwarded). Property members cannot be ref'd and get no
+            // accessor (matching the plain-struct template, which only emits them for fields).
+            IEnumerable<string> fieldRefs = ForwardedStructMembers
+                .Where(member => GetSimpleName(member.memberName) != "_" && !member.isProperty)
+                .Select(member => $"\r\n        public static ref {member.typeName} {AddressPrefix}{GetUnsanitizedIdentifier(member.memberName)}(ref {ObjectName} instance) => ref instance.m_value.{member.memberName};");
+
+            return $"\r\n\r\n        // Forwarded fields of the underlying '{TypeName}'{string.Concat(props)}{string.Concat(fieldRefs)}";
         }
     }
 

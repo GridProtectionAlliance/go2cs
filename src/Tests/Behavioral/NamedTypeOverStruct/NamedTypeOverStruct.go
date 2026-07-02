@@ -30,9 +30,21 @@ func readBack(b *box) int64 {
 	return c.a + c.b
 }
 
+// bump writes through a pointer TO A FIELD of the wrapper — the pinner.go `&p.x` shape. The
+// address routes through the wrapper's forwarded field-box accessor (`c.of(wrapper.Ꮡa)`), which
+// must exist on the WRAPPER (CS0117 otherwise) and must be a true ref through `m_value` into the
+// underlying struct's field — a copy would silently drop the write.
+//
+//go:noinline
+func bump(p *int64) { *p = *p + 7 }
+
 func main() {
 	var b box
 	fill(&b)
 	fmt.Println(b.w.a, b.w.b) // 10 20 — write-through the forwarded fields persisted
 	fmt.Println(readBack(&b)) // 30 — read back through the pointer
+
+	c := &b.w
+	bump(&c.a) // address of the wrapper's forwarded FIELD
+	fmt.Println(b.w.a, readBack(&b)) // 17 37 — the write through &c.a persisted in the original
 }

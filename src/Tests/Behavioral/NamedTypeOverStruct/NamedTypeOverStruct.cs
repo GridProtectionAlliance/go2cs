@@ -30,11 +30,20 @@ internal static int64 readBack(ж<box> Ꮡb) {
     return (~c).a + (~c).b;
 }
 
+internal static void bump(ж<int64> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+    p = p + 7;
+}
+
 internal static void Main() {
     ref var b = ref heap(new box(), out var Ꮡb);
     fill(Ꮡb);
     fmt.Println(b.w.a, b.w.b);
     fmt.Println(readBack(Ꮡb));
+    var c = Ꮡb.of(box.Ꮡw);
+    bump(c.of(wrapper.Ꮡa));
+    fmt.Println(b.w.a, readBack(Ꮡb));
 }
 
 } // end main_package
