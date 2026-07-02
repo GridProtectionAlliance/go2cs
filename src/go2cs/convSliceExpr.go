@@ -66,7 +66,14 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 					}
 				} else {
 					// A pointer-to-array BOX (a local, field, or call result) is dereferenced first.
-					ident = "(" + PointerDerefOp + ident + ")"
+					// A NAMED array's deref yields the wrapper (no slice/range members) — reach its
+					// underlying array<T> via `.val`, mirroring the deref-aliased branch above
+					// (runtime proc.go's `mp.cgoCallers[:cgoOff]`, cgoCallers a `*cgoCallers`).
+					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
+						ident = "(" + PointerDerefOp + ident + ").val"
+					} else {
+						ident = "(" + PointerDerefOp + ident + ")"
+					}
 				}
 			}
 		}

@@ -94,4 +94,39 @@ func main() {
 	// zeroing an existing wrapper THROUGH A POINTER via the empty composite (the string.go shape)
 	zeroTB(&t)
 	fmt.Println(t[2], len(t)) // 0 4
+
+	// POINTER-TO-NAMED-ARRAY access (runtime's `m.cgoCallers *cgoCallers` family): index
+	// read/write, len, and slice all auto-deref in Go; the converter routes them through the
+	// wrapper's backing (`h.trace.val[0]`, `len(h.trace.val)`, `(~h.trace).val[..2]`) — the
+	// backing array<T> is a shared view, so writes through the pointer land on the original.
+	var c callers
+	h := holder{trace: &c}
+	h.trace[0] = 0x10
+	h.trace[1] = h.trace[0] + 2
+	fmt.Println(len(h.trace), h.trace[0], h.trace[1], c[0]) // 4 16 18 16
+	dst := make([]uintptr, 2)
+	nc := copy(dst, h.trace[:2])
+	fmt.Println(nc, dst[1]) // 2 18
+
+	// POINTER-RECEIVER METHOD on an ELEMENT of a pointer-to-named-array (mprof's
+	// `bh[i].Load()` shape): emitted via the element BOX — `pcs.at<counter2>(0).bump()` —
+	// whose array-index backing writes through to the real element.
+	var cs counters
+	pcs := &cs
+	fmt.Println(pcs[0].bump(), pcs[0].bump(), cs[0].n) // 1 2 2
 }
+
+// callers mirrors runtime's `type cgoCallers [32]uintptr` reached through a pointer field.
+type callers [4]uintptr
+
+type holder struct {
+	trace *callers
+}
+
+// counter2/counters exercise a pointer-receiver method on an array element through a
+// pointer-to-named-array base.
+type counter2 struct{ n int32 }
+
+func (c *counter2) bump() int32 { c.n++; return c.n }
+
+type counters [3]counter2

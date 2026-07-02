@@ -34,9 +34,13 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 				contexts = []ExprContext{context}
 			}
 		} else if _, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
-			ident := getIdentifier(indexExpr.X)
-
-			if ident == nil || !v.identIsParameter(ident) {
+			// The deref-aliased-parameter exception applies only when the base ITSELF is the
+			// parameter ident (`p[i]` renders through the value alias). A pointer FIELD reached
+			// through a selector — `mp.cgoCallers[0]`, where cgoCallers is `*cgoCallers` (runtime
+			// proc.go) — is a real ж box and needs the `.val` deref: the old root-ident test
+			// mistook the selector's parameter ROOT for the indexed pointer and skipped it
+			// (CS0021 on every named-array-wrapper box index).
+			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
 				ptrDeref = ".val"
 			}
 		}

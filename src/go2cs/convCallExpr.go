@@ -542,6 +542,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	callExprContext.replacementArgs = replacementArgs
 
 	if ident, ok := callExpr.Fun.(*ast.Ident); ok {
+		// Go auto-derefs `len(p)`/`cap(p)` for a pointer-to-array; a ж<named-array-wrapper>
+		// argument has no golib len/cap overload (the wrapper itself implements IArray, its box
+		// does not — CS1503, runtime proc.go's `len(mp.cgoCallers)` where cgoCallers is
+		// `*cgoCallers`). Emit the deref explicitly: `len(mp.cgoCallers.val)`.
+		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
+			if ptr, ok := v.info.TypeOf(callExpr.Args[0]).(*types.Pointer); ok {
+				if named, ok := types.Unalias(ptr.Elem()).(*types.Named); ok {
+					if _, isArray := named.Underlying().(*types.Array); isArray {
+						return fmt.Sprintf("%s(%s.val)", ident.Name, v.convExpr(callExpr.Args[0], nil))
+					}
+				}
+			}
+		}
+
 		// Handle make call as a special case
 		if ident.Name == "make" {
 			typeExpr := callExpr.Args[0]

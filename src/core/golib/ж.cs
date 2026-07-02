@@ -363,11 +363,42 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         }
     }
 
+    // Materializes a value-type IArray implementer's lazy backing ON THE REAL STORAGE (see the
+    // comment in at<Telem> below). Built once per T when T is a struct implementing IArray; the
+    // constrained generic call (`value.Source` on `ref TVal`) does not box, so the wrapper's
+    // `m_value ??= …` runs against the caller's ref. Null for every other T (zero overhead).
+    private delegate void EnsureBackingFunc(ref T value);
+
+    private static readonly EnsureBackingFunc? s_ensureArrayBacking = BuildEnsureArrayBacking();
+
+    private static EnsureBackingFunc? BuildEnsureArrayBacking()
+    {
+        if (!typeof(T).IsValueType || !typeof(IArray).IsAssignableFrom(typeof(T)))
+            return null;
+
+        MethodInfo method = typeof(ж<T>).GetMethod(nameof(EnsureArrayBackingImpl), BindingFlags.Static | BindingFlags.NonPublic)!;
+        return (EnsureBackingFunc)method.MakeGenericMethod(typeof(T)).CreateDelegate(typeof(EnsureBackingFunc));
+    }
+
+    private static void EnsureArrayBackingImpl<TVal>(ref TVal value) where TVal : IArray
+    {
+        _ = value.Source; // constrained call — lazy backings materialize on the real storage
+    }
+
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get pointer element at index, type is not an array or slice.</exception>
     /// <exception cref="IndexOutOfRangeException">Index is out of range for array or slice.</exception>
     public ж<Telem> at<Telem>(nint index)
     {
+        // An Array-class [GoType] wrapper's ZERO VALUE has a null lazy backing that its members
+        // allocate on first touch. The `val is IArray<Telem>` pattern below COPIES the wrapper —
+        // touched on the copy, the backing allocates on the copy and the REAL storage stays
+        // virgin, silently dropping every write through the returned element pointer (the
+        // pallocBits lesson, resurfacing at the box-element seam). Materialize the backing on
+        // the real storage FIRST via a non-boxing constrained interface call; the copy then
+        // SHARES the materialized backing (array<T> is a readonly struct over a shared T[]).
+        s_ensureArrayBacking?.Invoke(ref val);
+
         // Read through `val`, not `m_val` — when this pointer is itself a field reference (from
         // `of(...)`) or an array-element reference, the real array storage lives behind `val` and
         // `m_val` is an empty default. Reading `m_val` would miss the array entirely (spurious "not

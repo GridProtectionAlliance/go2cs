@@ -27,7 +27,7 @@ internal static void zeroTB(ж<tb> Ꮡbuf) {
 }
 
 [GoRecv] internal static void fill(this ref pallocBits b) {
-    for (nint i = 0; i < len(b); i++) {
+    for (nint i = 0; i < len(b.val); i++) {
         b.val[i] = (uint64)(i * 10 + 1);
     }
 }
@@ -70,6 +70,34 @@ internal static void Main() {
     fmt.Println(len(w), w[0]);
     zeroTB(Ꮡt);
     fmt.Println(t[2], len(t));
+    ref var c = ref heap(new callers(), out var Ꮡc);
+    var h = new holder(trace: Ꮡc);
+    h.trace.val[0] = 0x10;
+    h.trace.val[1] = h.trace.val[0] + 2;
+    fmt.Println(len(h.trace.val), h.trace.val[0], h.trace.val[1], c[0]);
+    var dst = new slice<uintptr>(2);
+    nint nc = copy(dst, (~h.trace).val[..2]);
+    fmt.Println(nc, dst[1]);
+    ref var cs = ref heap(new counters(), out var Ꮡcs);
+    var pcs = Ꮡcs;
+    fmt.Println(pcs.at<counter2>(0).bump(), pcs.at<counter2>(0).bump(), cs[0].n);
 }
+
+[GoType("[4]uintptr")] partial struct callers;
+
+[GoType] partial struct holder {
+    internal ж<callers> trace;
+}
+
+[GoType] partial struct counter2 {
+    internal int32 n;
+}
+
+[GoRecv] internal static int32 bump(this ref counter2 c) {
+    c.n++;
+    return c.n;
+}
+
+[GoType("[3]counter2")] partial struct counters;
 
 } // end main_package

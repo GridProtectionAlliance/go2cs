@@ -547,6 +547,35 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A POINTER-RECEIVER method called on an ELEMENT of a pointer-to-NAMED-ARRAY —
+	// `bh[i].Load()` where bh is `*buckhashArray` (`[N]atomic.UnsafePointer`, runtime
+	// mprof.go). The wrapper's ref indexer yields `ref TElem`, which cannot bind a ж-form
+	// (direct-ж) extension method; route through the ELEMENT BOX — `bh.at<TElem>(i).Load()`
+	// — which binds both the ж form and a [GoRecv] ref form (via its generated ж overload),
+	// and whose array-index backing writes through to the real element storage.
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+		if fn, ok := sel.Obj().(*types.Func); ok {
+			if sig, ok := fn.Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, recvIsPtr := sig.Recv().Type().(*types.Pointer); recvIsPtr {
+					if indexExpr, ok := selectorExpr.X.(*ast.IndexExpr); ok {
+						if ptr, ok := v.info.TypeOf(indexExpr.X).(*types.Pointer); ok {
+							if named, ok := types.Unalias(ptr.Elem()).(*types.Named); ok {
+								if arrayType, ok := named.Underlying().(*types.Array); ok {
+									elemTypeName := convertToCSTypeName(v.getDisplayTypeName(arrayType.Elem(), false))
+
+									return fmt.Sprintf("%s.at<%s>(%s).%s",
+										v.convExpr(indexExpr.X, nil), elemTypeName,
+										v.convExpr(indexExpr.Index, nil),
+										v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
 	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
 	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property
