@@ -15,9 +15,16 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 34 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 33 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): own-initializer func shadow renames (`2b7752648`; CS0149 −1, 34 → 33).**
+  `signame := signame(gp.sig)` — the function-shadow detection's position guard excluded the
+  own-initializer case; object resolution alone is the correct test. 5-file stdlib diff, all the
+  class (flate lengthCode, edwards25519 basepointTable, big three, net partialDeadline). The 4th
+  stale triage label dissolved (this CS0149 was labeled "mprof raw-metal"). Fresh-read pass also
+  confirmed tracetime CS0029 cleared (blank-import fix) and reclassified proc:1901 CS1061 alllink
+  into the &GLOBAL/double-pointer family. Test: BuiltinShadowLocal extension.
 - **2026-07-02 (latest): concat-under-u8-suppression renders plain strings (`19686fbec`; CS1503 −1,
   35 → 34).** stack.go's `print(…, "
 "+"	m=", …)` — the vararg u8 suppression never reached the
@@ -1059,22 +1066,58 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 34, EXACT — 11 roots tonight, 51→34.
+# ======== THE MORNING SUMMARY (2026-07-02 overnight run) ========
 
-THE REMAINING 34, fully classified: ΔcgoCallers named-over-array 10 + managed-referent A/B 9 (the
-TWO DECISIONS, 56%); &GLOBAL/double-pointer 3 (mheap CS0029 ×2 + iface CS1929); escape-hoist
-CS0128 2; raw-metal CS0149 1; S6 method-expression 2 (time CS1503 + CS0119 kin); misc singles 7
-(CS8175, CS8120, CS1593, CS0136 declined, CS0019, CS1061, CS0029-tracetime-residual? re-verify).
+**Trajectory: 51 -> 33 — twelve roots, zero reverts, suite green throughout (215/215 every gate),
+output byte-deterministic, every count exact.** One-line ledger (git log has full detail):
+`b28495a5d` CS0103 extinct (slice element-address on base TYPE) · `cc39fd0e6` tuple-reassigned
+pointer param repoints its box · `2c352ff49` empty named-collection composite = zero value ·
+`d9dbc9839` deref-of-cast paren wrap (dissolved a "raw-metal" CS0149) · `db6445f7c` min/max
+untyped-const cast · `e20a840f4` string-base wide index · `6c26a726a` receiver-in-pointer-composite
+direct-ж trigger · `082b05f1b` blank-import `using _` discard hijack · `d5ba6b44e` cross-package
+pointer-embed method hop · `7cdb7d010` index-on-cast wrap · `19686fbec` concat-under-u8-suppression
+(audit-narrowed 212->68) · `2b7752648` own-initializer func shadow. Plus BOTH side-session merges
+landed and validated earlier in the night (slice-aliasing 86566b9ef, benchmarks 8ea5253e5+02470cc93).
 
-Recommended NEXT: re-verify the tail singles against the current 34 (labels may be stale — the
-blank-import fix may have cleared the tracetime CS0029; the CS1061 residual needs a fresh read),
-evaluate the CS0149 GoManualConversion stub, then COMPOSE THE MORNING SUMMARY laying out both
-architectural decisions with effort estimates + all latents. If the singles are all architectural,
-the non-decision queue is DRY — say so plainly in the summary.
+**THE REMAINING 33 — every error classified, two DECISIONS own 20 of them:**
 
-PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
-B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
-cheaper roots run dry.
+1. **DECISION A — managed-referent ж<T> model (CS0030 ×9).** gclinkptr ×4 (malloc/mcache/stack),
+   guintptr/puintptr/muintptr ×3 (runtime2), lfstack->Δhex (mgc), UntypedInt->Pointer (stkframe).
+   Option A: faithful managed-slot model now (like core/sync/atomic Pointer<T>) — multi-iteration,
+   golib types + converter routing. Option B: copy-box/uintptr compile-milestone precedent now
+   (~1-2 iterations — the reinterpret seams already exist), faithful model as the first Phase-4
+   ticket. MY LEAN: B (the milestone is compile; the faithful model is better designed against
+   Go-test failures in Phase 4).
+2. **DECISION B — named-over-array eager-shared-backing model (11 sites).** ΔcgoCallers (proc
+   CS0021 ×3 + CS1503 ×2, traceback CS0021 ×2) + mprof buckhashArray CS1929 ×4 ([179999]
+   atomic.UnsafePointer elements cannot bind atomic's ж-extensions). Needs the generator to give a
+   named-over-array wrapper REAL element boxes (eager shared backing or at()-routing through the
+   wrapper) — the pallocBits IArray-view precedent (adc8546cc) is the design seed, but ELEMENT
+   ADDRESSES (not just views) are needed here. Wants your model input like pallocBits did.
+3. **&GLOBAL/double-pointer family (4):** mheap CS0029 ×2 (`*i.pprev` over-deref), iface CS1929
+   double-box (ж<ж<itabTableType>>), proc:1901 CS1061 (&allm walk `alllink`). One model: globals
+   holding pointers + **T derefs.
+4. **S6 method-expression/value (3):** time CS1503+CS0119 pair (`(*timers).run` as a value —
+   needs delegate materialization `(Action<ж<timers>>)run`), metrics CS1593 (bound method value
+   arity). A contained emission design exists if you want it attempted autonomously.
+5. **Escape-hoist CS0128 ×2** (typesEqual sibling `for i` loops both hoisted — spurious
+   over-escape, needs an escape-analysis dive).
+6. **Misc singles (4):** error CS8120 dup-case (`case uint`+`case uintptr` -> both nuint; a
+   bodies-identical-guarded merge is designable), tagptr CS0019 (named-numeric `&` on
+   taggedPointer — S6 bitwise), trace CS8175 (ref-local `gen` captured in lambda — S5), proc
+   CS0136 Δtrace (previously investigated + declined as a deep collision×shadow interaction).
+
+**LATENTS (compile fine, Phase-4 significance):** golib slice nil-vs-empty conflation
+(`pm{} == nil` -> true; needs a data-pointer distinction); receiver-into-INTERFACE-field composite
+identity (~70 sites pass the value alias — pointer identity lost; promoting = wide re-route);
+&GLOBAL copy-box writes; &LOCAL copy-box lost-write (mgcscavenge.cs:1101 zeroing); zero-valued
+struct array-field NULL backing; bare-const-shift 32-bit truncation (`1 << 40` silently wrong);
+named-result closure decls missing; promoted VALUE-receiver calls through metadata embeds.
+
+**Suggested morning agenda:** (1) rule on Decision A (B = fastest to milestone); (2) sketch the
+named-over-array model with me (Decision B — biggest single cluster); (3) optionally green-light
+the S6 method-expression attempt + CS8120 guarded merge as autonomous roots (worth ~4 more errors
+without decisions); (4) the &GLOBAL/double-pointer family design session unlocks 4 more.
 
 Standing cautions:
 - FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim (stale-exe
