@@ -15,10 +15,23 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~74 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~71 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): the pallocBits/pMask named-collection family LANDED (`adc8546cc`; CS1503 −9 +
+- **2026-07-01 (latest): precise already-dereferenced test for a selector base (`ccfb952b0`; CS1061
+  −3, runtime 74 → 71).** The selector auto-deref skip was a whole-subtree scan for ANY StarExpr — a
+  conversion star buried in a call ARGUMENT (`stringStructOf((*string)(unsafe.Pointer(p))).n`, arena.go)
+  falsely counted as an already-deref'd base → `.n` on the ж box (CS1061); an EXTRA-PAREN conversion base
+  (`((*specialWeakHandle)(…)).handle`, mheap.go) missed the conversion branch through the parens — the
+  THIRD instance of the extra-paren blind-spot pattern. Fix: inspect only the base's own outermost shape
+  (paren-unwrapped); the branch dispatch also unwraps parens. **Verification (disclosed): the corpus
+  byte-diff was IDENTICAL across all 211 prior projects — no previously-compiling emission changed —
+  plus output-verified reads.** A WRITE through a conversion base hits the copy box (documented
+  reinterpret-seam contract; probed: Go 11 vs C# 3, excluded+documented; runtime sites are reads). Test
+  `PointerSelectorDeref`; suite green (212). **DISCOVERED pre-existing latent: `&s` on a string LOCAL
+  misses escape-boxing (`s := "hello"; f(&s)` references Ꮡs without the heap<> decl) — unrelated pass,
+  logged.**
+- **2026-07-01: the pallocBits/pMask named-collection family LANDED (`adc8546cc`; CS1503 −9 +
   CS0021 −3 cascade, runtime 86 → 74).** Two coupled roots: (1) GENERATOR `IArrayViewTypeTemplate` —
   a defined-over-array-backed-defined type (`type pallocBits pageBits`) now implements IArray<elem> as a
   view; every member AND the wrapper's `val` (the converter emits `b.val[i] = v` in pointer-receiver
@@ -570,10 +583,16 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~74; pallocBits/pMask family cleared 12, 86 → 74):
-CS1061 12, CS0030 9, CS1503 8, CS0029 8, CS0021 7, CS0103 7, CS1929 6, CS0121 6,
+as items land. As of 2026-07-01 latest (`runtime` = ~71; selector-deref precision cleared 3, 74 → 71):
+CS1061 9, CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
 CS0206 + CS0117 GONE).
+**The remaining CS1061 (9) fully characterized:** Δrtype embedded-pointer promotion (4: Str/TFlag×2/Kind_,
+type.cs — generator promotion through `*abi.Type` cross-package); element-address-of-NESTED-field family
+(3: trace.cs `Ꮡ(~mp).trace.buf.at<…>`, symtab.cs `Ꮡ(~cache).entries[ck]`, mwbbuf.cs `Ꮡpp.wbBuf.buf.at` —
+the `&x.f1.f2[i]` chain emits `Ꮡ(deref).field` instead of the of-chain, one convUnaryExpr root);
+double-pointer selector (1: proc.cs `pprev = Ꮡ((pprev.val).alllink)` — `&(*pprev).field` with pprev `**m`
+needs a second deref); ReadOnlySpan `ꓸꓸꓸ` spread (1: error.cs — a u8-literal spread shape).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
 −2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
@@ -581,35 +600,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 (`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
 Δrtype.TFlag — what remains is dominated by the architectural S-families.**
 - **NEXT — the characterized frontier, roughly cleanest-first:**
-  1. **CS1061 `Δrtype.TFlag` (2)** — field promotion through an embedded POINTER (`type rtype struct {
-     *abi.Type }`), cross-package; TypeGenerator promotion machinery (S3-adjacent). Characterize the
-     generator's embedded-pointer promotion before attempting; the remaining CS1061 (12) likely shares
-     the abi-metadata S3 family — triage the other 10 alongside.
-  2. **CS0030 managed-referent (9, ж<T>-model)** — the genuine architectural S1 case
-     (gclinkptr/Δguintptr/puintptr/muintptr → unsafe.Pointer): MODEL holding ж<T> directly per the user's
-     model (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration — likely THE next
-     big lever alongside a triage of CS1503 8 / CS0029 8 / CS0021 7 / CS0103 7 remnants.
-  3. *(CS0149 (2) = a `func()` loaded from RAW MEMORY — S1 raw-metal → `[module: GoManualConversion]`
-     stub candidate. SKIP for a dedicated stub pass.)*
-  2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
-     unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
-     (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
-  3. **⚠ GENERATOR-fraught (BOTH options have traps — a careful dedicated effort, not a quick win):**
-     `pallocBits → IArray` (5) + `pMask → @string` copy (4) — the InheritedTypeTemplate collection-interface
-     family (see *Where things stand*). Option (a) [emit the array form] breaks the 7 `(*pageBits)(b)`
-     reinterprets that rely on the pallocBits→pageBits conversion; option (b) [forward IArray from the wrapper]
-     was **already TRIED and REVERTED for lost-writes** (forwarding to a copy of `m_value`). A correct fix must
-     forward IArray to the *ref* of the inner value (no copy) AND keep the pallocBits↔pageBits conversion.
-- **If the small contained bugs (candidate 1) run dry, the remainder is architectural/generator-fraught → that
-  is the iteration-15-style signal to slow down and consider whether the managed-referent / generator efforts
-  need the user's models or a dedicated multi-session design rather than autonomous grinding.**
-  2. **CS0030 managed-referent branch (7, ж<T>-model): `gclinkptr → unsafe.Pointer` (4),
-     `Δguintptr`/`puintptr`/`muintptr → unsafe.Pointer` (3).** Hide a MANAGED pointer in a `uintptr` → MODEL
-     holding `ж<T>` directly (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite` `object? m_target`),
-     NOT a raw round-trip. The genuine architectural S1 case — more involved, a dedicated iteration. (2 CS0030
-     singletons remain: `lfstack → Δhex`, `UntypedInt → unsafe.Pointer`.)
-  3. **CS1061 (16)** — abi metadata / box-field access (`ж<m>.Ꮡpark`, `Δrtype.TFlag`, `nuint.val`, …); triage
-     for a contained sub-cluster if 1 and 2 are entangled.
+  1. **Element-address-of-NESTED-field family (3, one convUnaryExpr root):** `&x.f1.f2[i]` chains emit
+     `Ꮡ(deref).field` / `Ꮡbox.field` instead of the of-chain — trace.cs `Ꮡ(~mp).trace.buf.at<…>`,
+     symtab.cs `Ꮡ(~cache).entries[ck].at<…>`, mwbbuf.cs `Ꮡpp.wbBuf.buf.at<…>(0)`. The `&`-machinery's
+     of-chain recursion (cf. FieldChainBoxReceiver) doesn't cover the element-address-through-nested-fields
+     shape. Likely the last multi-error converter root.
+  2. **Δrtype embedded-pointer promotion (4):** Str/TFlag×2/Kind_ — TypeGenerator field promotion through
+     an embedded `*abi.Type` (cross-package). Generator promotion machinery (S3-adjacent).
+  3. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
+     unsafe.Pointer + 2 singletons (`lfstack → Δhex`, `UntypedInt → unsafe.Pointer`).** MODEL holding
+     `ж<T>` directly per the user's model (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite`
+     `object? m_target`), NOT a raw round-trip. The architectural S1 centerpiece — a dedicated iteration;
+     engage the user on the model design first.
+  4. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink`, `**m` needs a second deref);
+     ReadOnlySpan `ꓸꓸꓸ` spread (error.cs). *(CS0149 (2) = raw-memory delegate → GoManualConversion stub
+     candidate, SKIP for a dedicated stub pass.)*
 - **DONE this campaign (S1-fork convert-native + the earlier families):** named-numeric reinterpret
   `(*uint64)(*lfstack)` (`f19153a9e`, −13); unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23); CS8917
   lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917 residual pre-existing, out
