@@ -15,10 +15,22 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~68 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~64 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): route nested-field element addresses through the of-chain (`a342d25e7`;
+- **2026-07-01 (latest): resolve cross-package embedded types via the semantic model (`38212b635`;
+  CS1061 −4, runtime 68 → 64).** Field promotion resolved the embedded type's SYNTAX only — in a real
+  MSBuild build project references are METADATA references (never CompilationReference), so cross-package
+  embed promotion had plausibly NEVER worked: `type rtype struct { *abi.Type }` generated an EMPTY
+  promoted-accessors section (t.TFlag/t.Str/t.Kind_ all CS1061). Fix (StructTypeTemplate): fall back to
+  the type's metadata symbol (`GetTypeByMetadataName` on the normalized nested name
+  `go.internal.abi_package+Type`), enumerate public instance fields; accessors unchanged in form — TRUE
+  REFS through the embed (`ref Type.val.TFlag`), write-through reaches the target (no copy syntactically
+  possible). Guarded by the CrossPkgUser Phase-4 extension (pointer-embed + value-embed across a real
+  assembly boundary, write-through vs Go, 10 lines). **KNOWN RESIDUAL: promoted METHOD calls through a
+  cross-package embed (also syntax-resolved; zero runtime sites) — call through the embed explicitly.**
+  Suite green (213).
+- **2026-07-01: route nested-field element addresses through the of-chain (`a342d25e7`;
   CS1061 −3, runtime 71 → 68).** The `&field[i]` routing gated on the IMMEDIATE base only; a chain rooted
   at a pointer through NESTED value fields (`&pp.wbBuf.buf[0]` mwbbuf.go, `&mp.trace.buf[gen%2]` trace.go)
   and a NESTED-INDEX 2-D base (`&cache.entries[ck][i]` symtab.go — an IndexExpr the selector gate never
@@ -596,14 +608,16 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~68; nested-field element-address cleared 3, 71 → 68):
-CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6, CS1061 6,
+as items land. As of 2026-07-01 latest (`runtime` = ~64; cross-package embed promotion cleared 4, 68 → 64):
+CS0030 9, CS1503 8, CS0029 8, CS0103 7, CS0021 7, CS1929 6, CS0121 6, CS1061 2,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
 CS0206 + CS0117 GONE).
-**The remaining CS1061 (6) fully characterized:** Δrtype embedded-pointer promotion (4: Str/TFlag×2/Kind_,
-type.cs — generator promotion through `*abi.Type` cross-package); double-pointer selector (1: proc.cs
-`pprev = Ꮡ((pprev.val).alllink)` — `&(*pprev).field` with pprev `**m` needs a second deref);
-ReadOnlySpan `ꓸꓸꓸ` spread (1: error.cs — a u8-literal spread shape).
+**CS1061 is down to 2 SINGLES:** double-pointer selector (proc.cs `pprev = Ꮡ((pprev.val).alllink)` —
+`&(*pprev).field` with pprev `**m` needs a second deref); ReadOnlySpan `ꓸꓸꓸ` spread (error.cs — a
+u8-literal spread shape). **The multi-error non-architectural roots are now EXHAUSTED — what remains is
+the managed-referent ж<T>-model (9, THE architectural centerpiece, needs the user's design input), the
+S3/S4/S5/S6 buckets (CS1503/CS0029/CS0103/CS0021/CS1929/CS0121), the raw-metal GoManualConversion stub
+pass (CS0149 + kin), and the singles.**
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
 −2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
