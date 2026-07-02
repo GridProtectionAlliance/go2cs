@@ -10,6 +10,14 @@ partial class main_package {
 
 [GoType("[]uint32")] partial struct pm;
 
+[GoType("[4]byte")] partial struct tb;
+
+internal static void zeroTB(ж<tb> Ꮡbuf) {
+    ref var buf = ref Ꮡbuf.val;
+
+    buf = new tb(new byte[4].array());
+}
+
 [GoRecv] internal static void set(this ref pageBits b, nuint i, uint64 v) {
     b.val[i] = v;
 }
@@ -51,6 +59,17 @@ internal static void Main() {
     fmt.Println(copy(dd, src), dd[2]);
     src[0] = 100;
     fmt.Println(src[0], dd[0]);
+    ref var t = ref heap<tb>(out var Ꮡt);
+    t = new tb(new byte[4].array());
+    fmt.Println(len(t), t[0], t[3]);
+    t[2] = 9;
+    fmt.Println(t[2]);
+    var w = new pm(new uint32[]{}.slice());
+    fmt.Println(len(w), cap(w));
+    w = append(w, (uint32)(42));
+    fmt.Println(len(w), w[0]);
+    zeroTB(Ꮡt);
+    fmt.Println(t[2], len(t));
 }
 
 } // end main_package

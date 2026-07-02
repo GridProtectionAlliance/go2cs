@@ -262,10 +262,26 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	typeRender := v.convExpr(compositeLit.Type, contexts)
 
 	if namedArrayComposite {
+		csElementType := convertToCSTypeName(v.getTypeName(elementType, false))
+
+		// An EMPTY composite of a named-over-array/slice (`tmpBuf{}` where `type tmpBuf [32]byte`
+		// — runtime string.go's `*buf = tmpBuf{}` — or `pm{}` over a named slice) is the type's
+		// ZERO VALUE. The generic named-composite `nil` filler below would land INSIDE the
+		// element literal (`new tmpBuf(new byte[]{nil}.array())` — CS0029 NilType→byte). Emit
+		// the zero value directly: a zeroed FIXED-LENGTH backing for an array wrapper (Go's
+		// zero `[N]T` — an empty `{}` literal would produce a length-0 backing, not `[N]T`),
+		// and an empty non-nil backing for a slice wrapper.
+		if len(compositeLit.Elts) == 0 {
+			if definedLen > 0 {
+				return fmt.Sprintf("new %s(new %s[%d]%s)", typeRender, csElementType, definedLen, compositeSuffix)
+			}
+
+			return fmt.Sprintf("new %s(new %s[]{}%s)", typeRender, csElementType, compositeSuffix)
+		}
+
 		// Wrap the underlying array/slice literal in the named type's constructor:
 		// `new d(new rune[]{...}.array())`. The element literal and its `.array()`/
 		// `.slice()` suffix render via the ArraySource path below; close the ctor here.
-		csElementType := convertToCSTypeName(v.getTypeName(elementType, false))
 		typeRender = fmt.Sprintf("%s(new %s[]", typeRender, csElementType)
 		compositeSuffix += ")"
 	}

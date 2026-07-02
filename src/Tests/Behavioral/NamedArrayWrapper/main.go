@@ -12,6 +12,12 @@
 // on a VIRGIN wrapper (`b.val[i] = v` emission — val must route through the ensuring view or lazy
 // allocation lands on a temp and every write is lost), and copy() with a NONZERO-Low source or
 // destination (both indexers are slice-relative — adding Low double-offsets).
+//
+// Also: the EMPTY composite of a named-over-array (`tb{}` — runtime string.go's `*buf = tmpBuf{}`)
+// and of a named slice (`pm{}`). The generic named-composite `nil` filler landed INSIDE the
+// element literal (`new tb(new byte[]{nil}.array())` — CS0029 NilType→byte). An empty array
+// composite is Go's zero `[N]T` — a zeroed FIXED-LENGTH backing (`new byte[4].array()`, not a
+// length-0 `{}` literal); an empty slice composite is empty but NON-NIL.
 package main
 
 import "fmt"
@@ -19,6 +25,10 @@ import "fmt"
 type pageBits [4]uint64
 type pallocBits pageBits
 type pm []uint32
+type tb [4]byte
+
+// the runtime string.go `*buf = tmpBuf{}` shape: zero the pointee via an empty composite
+func zeroTB(buf *tb) { *buf = tb{} }
 
 func (b *pageBits) set(i uint, v uint64) { b[i] = v }
 func (b *pageBits) get(i uint) uint64    { return b[i] }
@@ -67,4 +77,21 @@ func main() {
 	fmt.Println(copy(dd, src), dd[2]) // 3 3
 	src[0] = 100
 	fmt.Println(src[0], dd[0]) // 100 1
+
+	// EMPTY composites: named-over-array = zero [N]T (full length, zeroed, writable);
+	// named slice = empty but non-nil
+	t := tb{}
+	fmt.Println(len(t), t[0], t[3]) // 4 0 0
+	t[2] = 9
+	fmt.Println(t[2]) // 9
+	// (nil-vs-empty distinction is NOT probed: golib's slice nil-compare conflates a nil slice
+	// with an empty-but-allocated one — a separate, pre-existing model latent)
+	w := pm{}
+	fmt.Println(len(w), cap(w)) // 0 0
+	w = append(w, 42)
+	fmt.Println(len(w), w[0]) // 1 42
+
+	// zeroing an existing wrapper THROUGH A POINTER via the empty composite (the string.go shape)
+	zeroTB(&t)
+	fmt.Println(t[2], len(t)) // 0 4
 }
