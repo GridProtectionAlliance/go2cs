@@ -687,6 +687,68 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 	}
 
+	// Go's min/max builtins type every argument to the call's single result type. An argument that
+	// is a NAMED UNTYPED CONSTANT renders as its UntypedInt (BigInteger) static, which the golib
+	// min/max `params ReadOnlySpan<T>` overloads reject (CS1503 — params-span element binding does
+	// not apply the user-defined implicit conversion): runtime `min(n, maxObletBytes)` (mgcmark.go,
+	// n uintptr) and `min(debug.profstackdepth, maxProfStackDepth)` (runtime1.go, int32). Cast such
+	// an argument to the call's Go-resolved result type: `min(n, (uintptr)(maxObletBytes))`.
+	// Literal and typed arguments are left as-is (no churn — the early return fires only when an
+	// untyped-const argument is present).
+	if funcName == "min" || funcName == "max" || funcName == "builtin.min" || funcName == "builtin.max" {
+		if funIdent, ok := callExpr.Fun.(*ast.Ident); ok {
+			if _, isBuiltin := v.info.ObjectOf(funIdent).(*types.Builtin); isBuiltin {
+				if callType := v.info.TypeOf(callExpr); callType != nil {
+					argIsNamedUntypedConst := func(arg ast.Expr) bool {
+						ident := getIdentifier(arg)
+
+						if ident == nil {
+							return false
+						}
+
+						constObj, ok := v.info.ObjectOf(ident).(*types.Const)
+
+						if !ok {
+							return false
+						}
+
+						basic, ok := constObj.Type().(*types.Basic)
+
+						return ok && basic.Info()&types.IsUntyped != 0
+					}
+
+					needsCast := false
+
+					for _, arg := range callExpr.Args {
+						if argIsNamedUntypedConst(arg) {
+							needsCast = true
+							break
+						}
+					}
+
+					if needsCast {
+						// Once one argument is cast, an untyped LITERAL sibling (`min(big, limit,
+						// 500)` — a bare `500` is a C# int) breaks T inference against the cast
+						// type, so every constant-valued argument gets the cast; typed variable
+						// arguments are left as-is.
+						csCallType := convertToCSTypeName(v.getTypeName(callType, false))
+						args := make([]string, len(callExpr.Args))
+
+						for i, arg := range callExpr.Args {
+							args[i] = v.convExpr(arg, nil)
+
+							if _, isLit := arg.(*ast.BasicLit); isLit || argIsNamedUntypedConst(arg) {
+								args[i] = fmt.Sprintf("(%s)(%s)", csCallType, args[i])
+							}
+						}
+
+						return fmt.Sprintf("%s(%s)", funcName, strings.Join(args, ", "))
+					}
+				}
+			}
+		}
+	}
+
 	// Handle unsafe.Offsetof and unsafe.AlignOf as a special cases. Gate on funcName before
 	// converting the argument: this re-converts the single arg purely to reshape it for the
 	// unsafe.* helpers, and doing it unconditionally would re-run a func-literal argument's capture
