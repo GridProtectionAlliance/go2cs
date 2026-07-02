@@ -20,6 +20,12 @@ internal static void Main() {
     var pe = Ꮡa.at<nint>((nint)(g % 2));
     pe.val = 66;
     fmt.Println(a[0], a[1], a[2], a[3]);
+    uintptr pc = 171;
+    fmt.Println("0123456789abcdef"u8[(int)((uintptr)(pc & 15))]);
+    fmt.Println("0123456789abcdef"u8[(int)((uintptr)((pc >> (int)(4)) & 15))]);
+    @string hex = "0123456789abcdef"u8;
+    uint64 k = 12;
+    fmt.Println(hex[(int)(k)]);
 }
 
 } // end main_package

@@ -29,4 +29,15 @@ func main() {
 	*pe = 66
 
 	fmt.Println(a[0], a[1], a[2], a[3])
+
+	// A STRING indexed by a wide/unsigned integer. A string LITERAL renders as a
+	// ReadOnlySpan<byte> ("…"u8) whose indexer takes int — a uintptr index was CS1503
+	// (runtime heapdump.go's `"0123456789abcdef"[pc&15]`). The index routes through the
+	// same (int) cast; an @string VARIABLE with a wide index takes it too.
+	var pc uintptr = 0xAB
+	fmt.Println("0123456789abcdef"[pc&15])   // 98 ('b')
+	fmt.Println("0123456789abcdef"[pc>>4&15]) // 97 ('a')
+	hex := "0123456789abcdef"
+	var k uint64 = 12
+	fmt.Println(hex[k]) // 99 ('c')
 }

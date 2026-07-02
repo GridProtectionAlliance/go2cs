@@ -55,7 +55,22 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, nil), ptrDeref, v.convExpr(indexExpr.Index, contexts))
 	}
 
-	return fmt.Sprintf("%s%s[%s]", v.convExpr(indexExpr.X, nil), ptrDeref, v.convExpr(indexExpr.Index, contexts))
+	index := v.convExpr(indexExpr.Index, contexts)
+
+	// A STRING base indexed by a wide/unsigned integer: a string LITERAL renders as a
+	// ReadOnlySpan<byte> (`"…"u8`) whose indexer takes int — a uintptr index is CS1503
+	// (runtime heapdump.go's `"0123456789abcdef"[pc&15]`, pc a uintptr). Go converts any
+	// integer index to int for the access; route the wide kinds (uint/uint32/uint64/
+	// uintptr/int64) through the same `(int)` cast the element-address seams use. An
+	// `@string` variable's indexer binds an int argument too, so the cast is safe for
+	// both renders; an int/small-integer index is emitted unchanged (no churn).
+	if baseType := v.getType(indexExpr.X, false); baseType != nil {
+		if basic, ok := baseType.Underlying().(*types.Basic); ok && basic.Info()&types.IsString != 0 {
+			index = v.castWideIntegerToInt(indexExpr.Index)
+		}
+	}
+
+	return fmt.Sprintf("%s%s[%s]", v.convExpr(indexExpr.X, nil), ptrDeref, index)
 }
 
 func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {
