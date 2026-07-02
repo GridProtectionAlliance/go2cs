@@ -15,9 +15,15 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 37 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 35 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): index-on-cast wraps (`7cdb7d010`; CS0021 −2, 37 → 35).** malloc's
+  `(*[2]uint64)(x)[0] = 0` — the auto-deref `.val` + index re-bound onto the cast's inner operand;
+  5th cast-precedence instance. 2-file diff (malloc + sync/pool latent). CS0021 re-triage: the
+  other 5 are ALL the ΔcgoCallers named-over-array family (proc ×3 + traceback ×2) — that model
+  now owns 10 runtime sites (CS0021 5 + CS1503 1 + CS1929 4). Test: UnsafePointerReinterpret
+  extension (indexed reinterpret).
 - **2026-07-02 (latest): cross-package pointer-embed promoted method hop (`d5ba6b44e`; CS1929 −1,
   38 → 37).** `t.Uncommon()` on Δrtype → explicit `t.Type.val.Uncommon()` (no generated forwarder
   for metadata embeds). 9-file stdlib diff, all the class (reflectlite rtype, bufio.ReadWriter's
@@ -1044,24 +1050,25 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 37, EXACT. Tonight (9 roots, 51→37): b28495a5d,
-cc39fd0e6, 2c352ff49, d9dbc9839, db6445f7c, e20a840f4, 6c26a726a, 082b05f1b, d5ba6b44e.
+This session (overnight run): runtime is at 35, EXACT — 10 roots tonight, 51→35: b28495a5d,
+cc39fd0e6, 2c352ff49, d9dbc9839, db6445f7c, e20a840f4, 6c26a726a, 082b05f1b, d5ba6b44e, 7cdb7d010.
 
-FOR THE MORNING — the remaining 37 is now dominated by architectural clusters needing decisions:
-(1) **managed-referent A/B** (CS0030 9 — largest bucket; lean B copy-box milestone);
-(2) **named-over-array model** (owns proc ΔcgoCallers ×4 [3 CS0021 + 1 CS1503] + mprof ×4 CS1929 +
-likely CS0021 majority — eager-shared-backing design needed);
-(3) golib slice nil-vs-empty conflation; (4) receiver-into-INTERFACE-field composite identity.
-Non-decision remnants: iface double-box single (&GLOBAL family), CS0021 re-triage residue,
-mheap ×2 double-pointer (parked), CS0128 2 escape-hoist, CS0149 1 raw-metal, CS1503 2 residual
-singles (stack u8-vararg, time method-group), proc-Δtrace CS0136 (declined), CS8175/CS8120/CS1593/
-CS0019/CS0119 singles.
+THE REMAINING 35, fully classified:
+- **ΔcgoCallers named-over-array cluster: 10** (proc CS0021 ×3 + CS1503 ×1, traceback CS0021 ×2,
+  mprof CS1929 ×4) — needs the eager-shared-backing model (DECISION).
+- **managed-referent: 9 CS0030** — needs the A/B decision (lean B copy-box milestone).
+- **&GLOBAL/double-pointer family: 3** (mheap CS0029 ×2, iface CS1929 double-box ×1).
+- **Escape-hoist dup: 2 CS0128** (typesEqual — spurious over-escape, rabbit-hole rated).
+- **Raw-metal: 1 CS0149** (mprof delegate-from-raw-memory — stub candidate).
+- **CS1503 singles: 2** (stack u8-literal→object print vararg; time method-group→object vararg).
+- **Misc singles: 8** (CS8175 ref-local-in-lambda, CS8120 dup-case, CS1593 method-value arity,
+  CS0136 proc-Δtrace declined, CS0119/CS0019 S6, CS1061 residual, CS0029 tracetime? re-verify).
 
-Recommended NEXT root — **CS0021 7 re-triage (fresh):** list all sites; the ΔcgoCallers family
-likely owns several (malloc `(*[2]uint64)(x)[i]` is S1-reinterpret-indexing; mgcscavenge/traceback
-named-over-array indexing) — characterize what remains OUTSIDE the two architectural clusters and
-fix a contained one if found. If nothing contained: the honest stub-pass tail (CS0149 1 + evaluate
-CS0128 2), then compose the morning summary with ALL pending decisions laid out.
+Recommended NEXT root — **the CS1503 singles (2):** stack.cs:960 passes a u8 string literal to a
+print/println OBJECT vararg (ReadOnlySpan<byte>→object — likely needs the @string wrap the spread
+fix used); time.cs:993 passes a METHOD GROUP to an object vararg (needs delegate materialization —
+possibly a small emission gate, possibly S6). Read both fresh; fix what's contained. Then compose
+the MORNING SUMMARY with the two architectural decisions + latents laid out.
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
