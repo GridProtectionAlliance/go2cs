@@ -15,9 +15,20 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 47 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 46 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): empty named-collection composite = zero value (`2c352ff49`; CS0029 −1,
+  47 → 46).** The named-composite `nil` filler (struct zero-ctor arg) landed INSIDE a
+  named-over-array/slice composite's element literal — `tmpBuf{}` → `new tmpBuf(new
+  byte[]{nil}.array())` (CS0029 NilType→byte). Empty ARRAY composite now = zeroed FIXED-LENGTH
+  backing (`new byte[32]` — Go's [N]T{} is full-length); empty SLICE composite = empty non-nil
+  backing. 10-file stdlib diff, all this class (tar block[512], nistec p256Element[4], jpeg
+  block[64], reflect IntArgRegBitmap[2]×2, strings byteReplacer[256], testing, mprof
+  buckhashArray[179999], …). Test: NamedArrayWrapper extension (incl. `*buf = tb{}` zeroing
+  through a pointer). NEW LATENT LOGGED: golib slice nil-compare conflates nil with
+  empty-but-allocated (`pm{} == nil` → true; Go says false) — a model question for the user's
+  Phase-4 list. Suite 215/215.
 - **2026-07-02 (latest): tuple-reassigned pointer param repoints its box (`cc39fd0e6`; CS0029 −3,
   50 → 47).** `(left, x, idx) = binarySearchTree(…)` (mgcstack) / `pp, _ = pidleget(0)` (proc)
   assigned the ж<T> tuple component into the deref'd value alias — the box-reassignment triggers
@@ -987,24 +998,21 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 47, EXACT. Landed tonight: CS0103 EXTINCT (`b28495a5d`
-— slice element-address fires on base TYPE: `Ꮡ(b.stk(), 0)`); tuple-reassigned pointer param
-(`cc39fd0e6` — box repoint + re-alias extended to tuple deconstructions, gated to REASSIGNED
-elements after the audit caught a `:=`-shadow over-fire). Earlier: slice ALIASING merge
-(`86566b9ef`), explicit `uintptr → ж<T>` (`d0a935138`), embed-call-on-ref-receiver (`308debde7`),
-benchmarks merge (`8ea5253e5`+`02470cc93`).
+This session (overnight run): runtime is at 46, EXACT. Tonight's roots: CS0103 EXTINCT
+(`b28495a5d`); tuple-reassigned pointer param (`cc39fd0e6`, CS0029 −3, audit caught a :=-shadow
+over-fire); empty named-collection composite = zero value (`2c352ff49`, CS0029 −1, 10-file stdlib
+diff all same class). CS0029 remaining 4: mheap ×2 double-pointer (parked), panic reinterpret-paren,
+tracetime (CS0118-entangled).
 
-Recommended NEXT root — **the empty named-array composite (string.cs:199, 1 + latents):** Go
-`tmpBuf{}` (`type tmpBuf [32]byte`, an EMPTY composite of a named-over-array) emits
-`new tmpBuf(new byte[]{nil}.array())` — a NilType element inside a byte array literal (CS0029
-NilType→byte). The composite-literal emission for an empty named-collection composite fabricates a
-nil ELEMENT instead of an empty/default construction (`new tmpBuf()` or `default`). Same family as
-the logged `pm{}` empty named-slice composite latent — fixing the composite emission likely clears
-both shapes. Small contained gate (composite-literal conversion, likely convCompositeLit).
-Fallbacks: panic.cs:909 reinterpret-deref paren placement in a tuple return (`((ж<Action>)(uintptr)
-(add(…))).val` — the `.val` must wrap the WHOLE cast; extra-paren family, ccfb952b0 kin); then
-CS1503 8 re-triage / CS0021 7 re-triage; CS1929 6 (VERIFY the 4 mprof extension-shadowing aren't
-the parked named-over-array entanglement first).
+Recommended NEXT root — **panic.cs:909 reinterpret-deref paren in a tuple return (CS0029 ×1):**
+Go `return *(*func())(add(…)), true` emits `return ((ж<Action>)(uintptr)(add(…)).val, true)` — the
+`.val` binds to `(add(…))` (postfix beats cast precedence), so the tuple element is ж<Action> not
+Action; the deref must wrap the WHOLE cast: `(~((ж<Action>)(uintptr)(add(…)))).val` or
+`((ж<Action>)(uintptr)(add(…))).val`. The extra-paren family (ccfb952b0 kin) — find the deref
+emission for a reinterpret-cast operand inside a RETURN-tuple/argument context and wrap defensively.
+Fallbacks: CS1503 8 re-triage (arg-conversion — read each site fresh, the make-len/wide-index
+precedents cleared similar); CS0021 7 re-triage; CS1929 6 (VERIFY the 4 mprof extension-shadowing
+aren't the parked named-over-array entanglement FIRST).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
