@@ -1538,6 +1538,16 @@ func (v *Visitor) isNonCallValue(expr ast.Expr) bool {
 // (non-untyped) basic type. A variable, or a const emitted as `static readonly` (untyped/named,
 // see visitValueSpec), does not, and the caller must use a `when` guard instead (avoids CS9135).
 func (v *Visitor) isCSharpConstantExpr(expr ast.Expr) bool {
+	// A uintptr-typed constant expression can NEVER be a C# constant: uintptr is a golib STRUCT
+	// (golib/uintptr.cs), so its consts emit `static readonly` and no constant/relational
+	// pattern can compare against it (CS9135) — even a literal label adopts the uintptr type
+	// from the switch tag. Force the when-guard/`==` fallback for the whole class.
+	if tv, ok := v.info.Types[expr]; ok && tv.Type != nil {
+		if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.Uintptr {
+			return false
+		}
+	}
+
 	switch e := expr.(type) {
 	case *ast.BasicLit:
 		return true

@@ -154,6 +154,15 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				namedTypes = true
 				break
 			}
+
+			// A uintptr-typed label (even a plain literal — it adopts the switch tag's type in
+			// context, so `case 4:` under `switch t.Size_` types as uintptr) can never be a C#
+			// constant: uintptr is a golib STRUCT (golib/uintptr.cs), so a constant-label switch
+			// over it is invalid (CS9135). Force the if-else (==) form.
+			if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.Uintptr {
+				allConst = false
+				break
+			}
 		}
 
 		// Check if any case clause has a fallthrough statement
@@ -662,6 +671,15 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 			switch expr.(type) {
 			case *ast.Ident, *ast.SelectorExpr:
 				if !v.isCSharpConstantExpr(expr) {
+					usePattenMatch = false
+				}
+			}
+
+			// A uintptr-typed label — even a plain literal, which adopts the tag's type in context
+			// (`exprᴛ1 is 4` under a uintptr tag) — can never be a constant pattern: uintptr is a
+			// golib STRUCT (CS9135). Fall back to `==` (the struct's operator).
+			if tv, ok := v.info.Types[expr]; ok && tv.Type != nil {
+				if basic, ok := tv.Type.Underlying().(*types.Basic); ok && basic.Kind() == types.Uintptr {
 					usePattenMatch = false
 				}
 			}

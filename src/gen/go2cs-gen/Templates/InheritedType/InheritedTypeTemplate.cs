@@ -69,6 +69,22 @@ internal class InheritedTypeTemplate : TemplateBase
         _ => "m_value"
     };
 
+    // A wrapper over golib's `uintptr` STRUCT needs its own bridges to the plain numeric world:
+    // `gclinkptr x = 0` / `(gclinkptr)someNuint` would otherwise chain TWO user-defined
+    // conversions (nuint→uintptr, uintptr→gclinkptr), which C# never composes. The nuint bridge
+    // (plus UntypedInt for named untyped consts) restores the reachability the old
+    // System.UIntPtr alias provided for free.
+    private string UintptrBridgeOperators => TypeName != "uintptr" ? "" :
+        $"""
+
+                public static implicit operator {ObjectName}(nuint value) => new {ObjectName}((uintptr)value);
+
+                public static implicit operator nuint({ObjectName} value) => ((uintptr)value.{Value}).m_value;
+
+                public static implicit operator {ObjectName}(UntypedInt value) => new {ObjectName}((uintptr)(nuint)value);
+
+        """;
+
     private string ToStringImplementation => TypeClass switch
     {
         "bool" => $"{Value}.ToString().ToLowerInvariant()",
@@ -148,9 +164,9 @@ internal class InheritedTypeTemplate : TemplateBase
         
                 // Handle implicit conversions between '{{TypeName}}' and {{ObjectKind}} '{{ObjectName}}'
                 public static implicit operator {{ObjectName}}({{TypeName}} value) => new {{ObjectName}}(value);
-                    
+
                 public static implicit operator {{TypeName}}({{ObjectName}} value) => value.{{Value}};
-                    
+                    {{UintptrBridgeOperators}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => value.Equals(default({{ObjectName}}));
         

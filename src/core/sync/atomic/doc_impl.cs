@@ -1,4 +1,4 @@
-using System.Threading;
+﻿using System.Threading;
 
 namespace go.sync;
 
@@ -28,7 +28,8 @@ partial class atomic_package
 
     public static partial uintptr /*old*/ SwapUintptr(ж<uintptr> addr, uintptr @new)
     {
-        return Interlocked.Exchange(ref addr.val, @new);
+        // uintptr is a golib struct; atomics target its inner nuint storage
+        return Interlocked.Exchange(ref addr.val.m_value, @new.m_value);
     }
 
     public static partial @unsafe.Pointer /*old*/ SwapPointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer @new)
@@ -58,7 +59,7 @@ partial class atomic_package
 
     public static partial bool /*swapped*/ CompareAndSwapUintptr(ж<uintptr> addr, uintptr old, uintptr @new)
     {
-        return Interlocked.CompareExchange(ref addr.val, @new, old) == old;
+        return Interlocked.CompareExchange(ref addr.val.m_value, @new.m_value, old.m_value) == old.m_value;
     }
 
     public static partial bool /*swapped*/ CompareAndSwapPointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer old, @unsafe.Pointer @new)
@@ -92,10 +93,10 @@ partial class atomic_package
 
         do
         {
-            initialValue = Volatile.Read(ref addr.val);
+            initialValue = Volatile.Read(ref addr.val.m_value);
             newValue = initialValue + delta;
         }
-        while (Interlocked.CompareExchange(ref addr.val, newValue, initialValue) != initialValue);
+        while (Interlocked.CompareExchange(ref addr.val.m_value, newValue, initialValue) != initialValue);
 
         return newValue;
     }
@@ -126,10 +127,10 @@ partial class atomic_package
 
         do
         {
-            initialValue = Volatile.Read(ref addr.val);
+            initialValue = Volatile.Read(ref addr.val.m_value);
             newValue = initialValue & mask;
         }
-        while (Interlocked.CompareExchange(ref addr.val, newValue, initialValue) != initialValue);
+        while (Interlocked.CompareExchange(ref addr.val.m_value, newValue, initialValue) != initialValue);
 
         return newValue;
     }
@@ -160,10 +161,10 @@ partial class atomic_package
 
         do
         {
-            initialValue = Volatile.Read(ref addr.val);
+            initialValue = Volatile.Read(ref addr.val.m_value);
             newValue = initialValue | mask;
         }
-        while (Interlocked.CompareExchange(ref addr.val, newValue, initialValue) != initialValue);
+        while (Interlocked.CompareExchange(ref addr.val.m_value, newValue, initialValue) != initialValue);
 
         return newValue;
     }
@@ -190,7 +191,7 @@ partial class atomic_package
 
     public static partial uintptr /*val*/ LoadUintptr(ж<uintptr> addr)
     {
-        return Volatile.Read(ref addr.val);
+        return Volatile.Read(ref addr.val.m_value);
     }
 
     public static partial @unsafe.Pointer /*val*/ LoadPointer(ж<@unsafe.Pointer> addr)
@@ -220,7 +221,7 @@ partial class atomic_package
 
     public static partial void StoreUintptr(ж<uintptr> addr, uintptr val)
     {
-        Interlocked.Exchange(ref addr.val, val);
+        Interlocked.Exchange(ref addr.val.m_value, val.m_value);
     }
 
     public static partial void StorePointer(ж<@unsafe.Pointer> addr, @unsafe.Pointer val)

@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 using go;
@@ -58,6 +58,20 @@ internal partial struct Δguintptr {
     // Diagnostic identity for print/hex sites: an opaque stable token, never an address.
     public static explicit operator nuint(Δguintptr value) {
         return value.m_ref is null ? 0u : (nuint)(uint)RuntimeHelpers.GetHashCode(value.m_ref);
+    }
+
+    // Direct uintptr bridges: C#'s user-conversion "encompassing" rules count only STANDARD
+    // conversions, so nothing chains through nuint's user bridge — `(uintptr)mp` (print
+    // diagnostics) and the reverse need their own operators (same loud/token semantics).
+    public static explicit operator uintptr(Δguintptr value) {
+        return (nuint)value;
+    }
+
+    public static explicit operator Δguintptr(uintptr value) {
+        if (value != 0)
+            throw panic("guintptr: a non-zero integer cannot carry a managed reference");
+
+        return default;
     }
 
     public static implicit operator Δhex(Δguintptr value) {
@@ -147,6 +161,20 @@ internal partial struct puintptr {
         return value.m_ref is null ? 0u : (nuint)(uint)RuntimeHelpers.GetHashCode(value.m_ref);
     }
 
+    // Direct uintptr bridges: C#'s user-conversion "encompassing" rules count only STANDARD
+    // conversions, so nothing chains through nuint's user bridge — `(uintptr)mp` (print
+    // diagnostics) and the reverse need their own operators (same loud/token semantics).
+    public static explicit operator uintptr(puintptr value) {
+        return (nuint)value;
+    }
+
+    public static explicit operator puintptr(uintptr value) {
+        if (value != 0)
+            throw panic("puintptr: a non-zero integer cannot carry a managed reference");
+
+        return default;
+    }
+
     public static implicit operator Δhex(puintptr value) {
         return (Δhex)(ulong)(nuint)value;
     }
@@ -222,6 +250,20 @@ internal partial struct muintptr {
 
     public static explicit operator nuint(muintptr value) {
         return value.m_ref is null ? 0u : (nuint)(uint)RuntimeHelpers.GetHashCode(value.m_ref);
+    }
+
+    // Direct uintptr bridges: C#'s user-conversion "encompassing" rules count only STANDARD
+    // conversions, so nothing chains through nuint's user bridge — `(uintptr)mp` (print
+    // diagnostics) and the reverse need their own operators (same loud/token semantics).
+    public static explicit operator uintptr(muintptr value) {
+        return (nuint)value;
+    }
+
+    public static explicit operator muintptr(uintptr value) {
+        if (value != 0)
+            throw panic("muintptr: a non-zero integer cannot carry a managed reference");
+
+        return default;
     }
 
     public static implicit operator Δhex(muintptr value) {

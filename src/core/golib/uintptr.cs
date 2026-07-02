@@ -1,0 +1,228 @@
+//******************************************************************************************************
+//  uintptr.cs - Gbtc
+//
+//  Copyright © 2026, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  07/02/2026 - J. Ritchie Carroll
+//       Generated original version of source code.
+//
+//******************************************************************************************************
+
+using System;
+
+namespace go;
+
+/// <summary>
+/// Represents the Go <c>uintptr</c> type: an unsigned integer wide enough to hold a pointer's bits.
+/// </summary>
+/// <remarks>
+/// Historically <c>uintptr</c> was a compile-time alias of <see cref="UIntPtr"/> (<c>nuint</c>), which
+/// erased Go's type distinction between <c>uint</c> and <c>uintptr</c> — the two are DISTINCT types in
+/// Go (both may appear in one type switch; <c>%T</c> reports them differently; conversion between them
+/// is explicit). This struct restores that identity: a boxed <c>uintptr</c> has its own dynamic type,
+/// type-switch <c>case uintptr:</c> labels match exactly, and overloads can distinguish the two.
+/// <para>
+/// The value is a pure NUMBER (single <c>nuint</c> field, no managed-reference slot): the
+/// pointer-carrying job belongs to <c>unsafe.Pointer</c> and the managed-referent manual types.
+/// The only user-defined conversions are the implicit bridge to/from <c>nuint</c> — every other
+/// numeric conversion composes through C#'s standard conversions on the <c>nuint</c> side (an
+/// explicit <c>(uintptr)intValue</c> or <c>(int)uintptrValue</c> chains a standard step with the
+/// bridge). The full operator surface is declared so <c>uintptr</c>-typed expressions KEEP the
+/// <c>uintptr</c> type (a bridge-only design would decay arithmetic results to <c>nuint</c>,
+/// silently changing dynamic types in inference and boxing positions).
+/// </para>
+/// <para>
+/// <see cref="m_value"/> is deliberately a PUBLIC mutable field: atomic call sites
+/// (<see cref="System.Threading.Interlocked"/>/<see cref="System.Threading.Volatile"/>, e.g. the
+/// runtime's manual lock model in <c>lock_sema_impl.cs</c>) must target the inner storage —
+/// <c>ref key.m_value</c> — since the intrinsics cannot take a reference to a user struct.
+/// </para>
+/// </remarks>
+public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, IFormattable
+{
+    // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
+    public nuint m_value;
+
+    /// <summary>
+    /// Creates a new <see cref="uintptr"/> from a <c>nuint</c> value.
+    /// </summary>
+    public uintptr(nuint value)
+    {
+        m_value = value;
+    }
+
+    public bool Equals(uintptr other) => m_value == other.m_value;
+
+    public override bool Equals(object? obj)
+    {
+        // Deliberately NO nuint arm: a boxed uintptr and a boxed uint (nuint) are DISTINCT Go
+        // dynamic types — accepting nuint here re-erased the distinction asymmetrically
+        // (adversarial review D4: a map[any] entry keyed uintptr was found by a uint probe).
+        return obj is uintptr other && Equals(other);
+    }
+
+    public override int GetHashCode() => m_value.GetHashCode();
+
+    public int CompareTo(uintptr other) => m_value.CompareTo(other.m_value);
+
+    public int CompareTo(object? obj) => obj is uintptr other ? CompareTo(other) :
+        throw new ArgumentException($"Object must be of type {nameof(go.uintptr)}");
+
+    public override string ToString() => m_value.ToString();
+
+    public string ToString(string? format, IFormatProvider? formatProvider) => m_value.ToString(format, formatProvider);
+
+    // Implicit bridge to/from 'nuint' (see remarks).
+    public static implicit operator uintptr(nuint value) => new(value);
+
+    public static implicit operator nuint(uintptr value) => value.m_value;
+
+    // Smaller unsigned sources get their own IMPLICIT operators (value-safe): although each
+    // composes through the nuint bridge in implicit contexts, an EXPLICIT `(uintptr)u32` cast
+    // sees uint32→long / uint32→ulong / uint32→nuint all as implicit-standard pre-hops to the
+    // declared operators, and C# calls the long/ulong pair ambiguous (CS0457). An exact-source
+    // operator wins resolution outright.
+    public static implicit operator uintptr(uint8 value) => new(value);
+
+    public static implicit operator uintptr(uint16 value) => new(value);
+
+    public static implicit operator uintptr(uint32 value) => new(value);
+
+    public static implicit operator uintptr(char value) => new(value);
+
+    // A named untyped constant renders as the golib UntypedInt wrapper; Go assigns untyped
+    // consts to uintptr freely, and two user-defined conversions never chain — bridge directly.
+    public static implicit operator uintptr(UntypedInt value) => new((nuint)value);
+
+    // INBOUND signed types and uint64 do NOT reach the implicit bridge in explicit casts (their
+    // standard conversions to nuint are explicit, and Roslyn's candidate rules reject the chain
+    // — `(uintptr)someInt` was CS0030 with the bridge alone). Go casts these constantly
+    // (`uintptr(i)`), so declare exact-source operators (unchecked, Go semantics).
+    public static explicit operator uintptr(int8 value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(int16 value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(int32 value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(int64 value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(nint value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(uint64 value) => new(unchecked((nuint)value));
+
+    // OUTBOUND casts get the FULL exact-target matrix. A partial set is unstable under C#'s
+    // candidate rules: with only some targets declared, a cast to an undeclared unsigned target
+    // finds MULTIPLE viable candidates through standard hops (`(uint)u` saw to-long vs to-ulong,
+    // then to-long vs the bridge — CS0457), while signed targets have NO path through the
+    // implicit bridge at all (no implicit relation with nuint — CS0030). An exact-target
+    // operator wins resolution outright in every case, and emitted code casts uintptr to
+    // everything (`(nint)(i)` element indexes, `(int)(x)` shift counts, `(uint64)p` hashes).
+    public static explicit operator int8(uintptr value) => unchecked((int8)value.m_value);
+
+    public static explicit operator int16(uintptr value) => unchecked((int16)value.m_value);
+
+    public static explicit operator int32(uintptr value) => unchecked((int32)value.m_value);
+
+    public static explicit operator int64(uintptr value) => unchecked((int64)value.m_value);
+
+    public static explicit operator nint(uintptr value) => unchecked((nint)value.m_value);
+
+    public static explicit operator uint8(uintptr value) => unchecked((uint8)value.m_value);
+
+    public static explicit operator uint16(uintptr value) => unchecked((uint16)value.m_value);
+
+    public static explicit operator uint32(uintptr value) => unchecked((uint32)value.m_value);
+
+    public static explicit operator uint64(uintptr value) => value.m_value;
+
+    // Floating targets need exact operators too: double/float have implicit conversions FROM
+    // every integer type, so every integer-returning operator above is a viable candidate for
+    // `(float64)u` and the set ties (CS0457). Go converts uintptr→float in scavenger/pacer math.
+    public static explicit operator float32(uintptr value) => value.m_value;
+
+    public static explicit operator float64(uintptr value) => value.m_value;
+
+    // Inbound floats symmetrically (`uintptr(someFloat)` is legal Go): with the inbound integer
+    // set declared and no exact float source, resolution needs a most-encompassing source among
+    // the integer params and none exists (long ⇹ ulong) — CS0457 (adversarial review D3).
+    public static explicit operator uintptr(float32 value) => new(unchecked((nuint)value));
+
+    public static explicit operator uintptr(float64 value) => new(unchecked((nuint)value));
+
+    // Raw-pointer interop (unsafe seams in golib and emitted reinterprets)
+    public static unsafe explicit operator uintptr(void* value) => new((nuint)value);
+
+    public static unsafe explicit operator void*(uintptr value) => (void*)value.m_value;
+
+    // Comparisons
+    public static bool operator ==(uintptr left, uintptr right) => left.m_value == right.m_value;
+
+    public static bool operator !=(uintptr left, uintptr right) => left.m_value != right.m_value;
+
+    public static bool operator <(uintptr left, uintptr right) => left.m_value < right.m_value;
+
+    public static bool operator <=(uintptr left, uintptr right) => left.m_value <= right.m_value;
+
+    public static bool operator >(uintptr left, uintptr right) => left.m_value > right.m_value;
+
+    public static bool operator >=(uintptr left, uintptr right) => left.m_value >= right.m_value;
+
+    // Arithmetic — results stay 'uintptr'-typed (Go semantics; unchecked wraparound like Go)
+    public static uintptr operator +(uintptr left, uintptr right) => new(unchecked(left.m_value + right.m_value));
+
+    public static uintptr operator -(uintptr left, uintptr right) => new(unchecked(left.m_value - right.m_value));
+
+    public static uintptr operator *(uintptr left, uintptr right) => new(unchecked(left.m_value * right.m_value));
+
+    public static uintptr operator /(uintptr left, uintptr right) => new(left.m_value / right.m_value);
+
+    public static uintptr operator %(uintptr left, uintptr right) => new(left.m_value % right.m_value);
+
+    public static uintptr operator ++(uintptr value) => new(unchecked(value.m_value + 1));
+
+    public static uintptr operator --(uintptr value) => new(unchecked(value.m_value - 1));
+
+    // Unary forms for hand-written code hygiene: emitted code never contains `-u` (the
+    // converter rewrites unsigned negation as `((T)0 - x)`), but without these a manual `-u`
+    // is CS0035-ambiguous through the float bridges and `+u` silently decays to ulong.
+    public static uintptr operator -(uintptr value) => new(unchecked((nuint)0 - value.m_value));
+
+    public static uintptr operator +(uintptr value) => value;
+
+    // Bitwise
+    public static uintptr operator &(uintptr left, uintptr right) => new(left.m_value & right.m_value);
+
+    public static uintptr operator |(uintptr left, uintptr right) => new(left.m_value | right.m_value);
+
+    public static uintptr operator ^(uintptr left, uintptr right) => new(left.m_value ^ right.m_value);
+
+    public static uintptr operator ~(uintptr value) => new(~value.m_value);
+
+    public static uintptr operator <<(uintptr value, int shift) => new(value.m_value << shift);
+
+    public static uintptr operator >>(uintptr value, int shift) => new(value.m_value >> shift);
+
+    // Handle comparisons between 'nil' and struct 'uintptr' (Go nil comparison idiom)
+    public static bool operator ==(uintptr value, NilType nil) => value.m_value == 0;
+
+    public static bool operator !=(uintptr value, NilType nil) => !(value == nil);
+
+    public static bool operator ==(NilType nil, uintptr value) => value == nil;
+
+    public static bool operator !=(NilType nil, uintptr value) => value != nil;
+
+    public static implicit operator uintptr(NilType nil) => default;
+}

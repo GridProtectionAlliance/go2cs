@@ -70,21 +70,21 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		}
 	}
 
-	// Go type distinctions can VANISH in the C# type map — `case uint:` emits `case nuint` and
-	// `case uintptr:` emits `case uintptr` (a using-alias of the SAME System.UIntPtr), making the
-	// later case unreachable (CS8120; runtime error.go's printpanicval). A duplicate-mapped case
-	// is merged (skipped, with a marker comment) ONLY when its Go body is byte-identical to the
-	// first occurrence's — then the earlier label already routes it exactly; DIFFERING bodies keep
-	// both labels, preferring the compile error over silently routing one Go case into another's
-	// body. Keyed by the RESOLVED C# type; values are the printed Go bodies.
+	// Go type distinctions can VANISH in the C# type map — historically `case uint:` and
+	// `case uintptr:` both resolved to System.UIntPtr, making the later case unreachable (CS8120;
+	// runtime error.go's printpanicval). A duplicate-mapped case is merged (skipped, with a marker
+	// comment) ONLY when its Go body is byte-identical to the first occurrence's — then the earlier
+	// label already routes it exactly; DIFFERING bodies keep both labels, preferring the compile
+	// error over silently routing one Go case into another's body. Keyed by the RESOLVED C# type;
+	// values are the printed Go bodies. (uintptr is now a DISTINCT golib struct — golib/uintptr.cs
+	// — so the uint/uintptr pair no longer collides and both original labels emit; the merge
+	// machinery remains for the alias pairs that DO share a C# type.)
 	emittedCaseTypes := map[string]string{}
 
 	resolveCaseType := func(caseExpr string) string {
 		typeToken, _, _ := strings.Cut(caseExpr, " ")
 
 		switch typeToken {
-		case "uintptr":
-			return "nuint"
 		case "rune":
 			return "int32"
 		case "byte":

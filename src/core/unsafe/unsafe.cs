@@ -1,4 +1,4 @@
-// Copyright 2009 The Go Authors. All rights reserved.
+﻿// Copyright 2009 The Go Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -479,6 +479,12 @@ private static uintptr AlignofType([DynamicallyAccessedMembers(DynamicallyAccess
 // A constant len argument must be representable by a value of type int;
 // if it is an untyped constant it is given type int.
 // The rules for valid uses of Pointer still apply.
+// uintptr forwards through its inner value (the golib struct does not implement the
+// IBinaryInteger generic-math surface the TLen constraint requires — CS0315)
+public static ж<T> Add<T>(ж<T> ptr, uintptr len) {
+    return Add(ptr, len.m_value);
+}
+
 public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to the pointer
     // offset type. A signed/unsigned/native-width argument (e.g. a `uintptr`) thus all bind here.
@@ -511,6 +517,13 @@ public static ж<T> Add<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numeri
 // if it is an untyped constant it is given type int.
 // At run time, if len is negative, or if ptr is nil and len is not zero,
 // a run-time panic occurs.
+// A uintptr length forwards through its inner value: golib's uintptr STRUCT does not (and
+// deliberately will not) implement the IBinaryInteger generic-math surface the TLen
+// constraint requires (CS0315); the non-generic-length overload is preferred by resolution.
+public static slice<T> Slice<T>(ж<T> ptr, uintptr len) {
+    return Slice(ptr, len.m_value);
+}
+
 public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
     int n = int.CreateTruncating(len);
@@ -555,6 +568,11 @@ public static ж<T> SliceData<T>(slice<T> slice) {
 //
 // Since Go strings are immutable, the bytes passed to String
 // must not be modified as long as the returned string value exists.
+// uintptr forwards through its inner value (see Add overload note)
+public static @string String(ж<byte> ptr, uintptr len) {
+    return String(ptr, len.m_value);
+}
+
 public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.Numerics.IBinaryInteger<TLen> {
     // Go's len is of any integer type (the `IntegerType` constraint); reduce it to int.
     int n = int.CreateTruncating(len);

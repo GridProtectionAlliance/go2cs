@@ -12,5 +12,4 @@ global using uint16 = global::System.UInt16;
 global using uint32 = global::System.UInt32;
 global using uint64 = global::System.UInt64;
 global using uint8 = global::System.Byte;
-global using uintptr = global::System.UIntPtr;
 global using static global::go.builtin;

@@ -78,14 +78,17 @@ internal static void Main() {
     var kind = (any i) => {
         switch (i.type()) {
         case nuint: {
-            fmt.Println("word");
+            fmt.Println("uint word");
             break;
         }
         case uint32: {
-            fmt.Println("word");
+            fmt.Println("uint word");
             break;
         }
-        /* case uintptr: merged with an earlier case mapping to the same C# type (identical body) */
+        case uintptr: {
+            fmt.Println("uintptr word");
+            break;
+        }
         case @string: {
             fmt.Println("text");
             break;

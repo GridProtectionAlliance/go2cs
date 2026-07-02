@@ -57,19 +57,19 @@ func main() {
 	classify(c)
 	classify(d)
 
-	// Go `uint` and `uintptr` are DISTINCT types (both may appear in one Go type switch) but map
-	// to the SAME C# type (nuint; `uintptr` is a using-alias of System.UIntPtr), making the later
-	// case unreachable (CS8120; runtime error.go's printpanicval). With byte-IDENTICAL Go bodies
-	// the converter MERGES them — a marker comment replaces the duplicate label, and the earlier
-	// label routes both dynamic types to the shared body, which is exact. DIFFERING bodies keep
-	// both labels: the compile error is preferred over silently routing one Go case into the
-	// other's body — that variant cannot compile, so it is documented here rather than exercised.
+	// Go `uint` and `uintptr` are DISTINCT types, and since golib gained a dedicated `uintptr`
+	// STRUCT (golib/uintptr.cs — no longer a using-alias of System.UIntPtr), the C# type map
+	// preserves the distinction: both cases emit their own labels and each dynamic type routes
+	// to ITS OWN case, exactly as in Go (runtime error.go's printpanicval lists both). The
+	// duplicate-mapped-case merge machinery remains for alias pairs that DO share a C# type,
+	// but no longer fires here. The bodies below are deliberately DIFFERENT — under the old
+	// alias model this switch could not even compile.
 	kind := func(i interface{}) {
 		switch i.(type) {
 		case uint:
-			fmt.Println("word")
+			fmt.Println("uint word")
 		case uintptr:
-			fmt.Println("word")
+			fmt.Println("uintptr word")
 		case string:
 			fmt.Println("text")
 		default:
@@ -78,8 +78,8 @@ func main() {
 	}
 	var u uint = 5
 	var p uintptr = 6
-	kind(u)    // word
-	kind(p)    // word — routed by the merged (earlier) case
+	kind(u)    // uint word — distinct dynamic type
+	kind(p)    // uintptr word — distinct dynamic type
 	kind("x")  // text
 	kind(3.14) // other
 }

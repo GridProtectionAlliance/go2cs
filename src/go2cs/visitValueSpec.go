@@ -416,6 +416,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			// (CS0133/CS0266) — must be emitted as `static readonly` with an unchecked cast
 			// rather than `const`. Small native-int consts (e.g. `const nint iota = 0`) are fine.
 			nativeIntConst := false
+			uintptrConst := false
 
 			if c.Val().Kind() == constant.Int && (csTypeName == "nint" || csTypeName == "nuint" || csTypeName == "uintptr") {
 				// A C# constant of a native-int type only accepts an int-range literal; a value
@@ -424,6 +425,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				// as `static readonly` with an unchecked cast rather than `const`.
 				if _, errInt := strconv.ParseInt(constVal, 0, 32); errInt != nil {
 					nativeIntConst = true
+				}
+
+				// uintptr is a golib STRUCT (golib/uintptr.cs — distinct from uint), and C# forbids
+				// `const` of a user struct entirely: every uintptr const is `static readonly`. An
+				// int-range value still initializes via the constant-conversion chain (`= 1`), so
+				// the unchecked cast stays reserved for the beyond-int32 case above.
+				if csTypeName == "uintptr" {
+					uintptrConst = true
 				}
 			}
 
@@ -482,6 +491,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 				} else if nativeIntConst {
 					constExpr = "static readonly"
 					constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)
+				} else if uintptrConst {
+					constExpr = "static readonly"
 				} else {
 					constExpr = "const"
 
@@ -497,7 +508,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// C# locals cannot be declared "static readonly"; for named
 					// (custom) types "const" is also invalid, so emit a plain local
 					// variable. Primitive/string consts can still use "const" locally.
-					if isNamedType || nativeIntConst {
+					if isNamedType || nativeIntConst || uintptrConst {
 						v.writeOutput("%s %s =%s %s;", csTypeName, csIDName, orgExpr, constValExpr)
 					} else {
 						v.writeOutput("%s %s %s =%s %s;", constExpr, csTypeName, csIDName, orgExpr, constValExpr)

@@ -2062,7 +2062,9 @@ public static class builtin
             {
                 "go.string" => "string",
                 "System.IntPtr" => "int",
-                "System.UIntPtr" => "uintptr",
+                // uintptr is now a distinct struct (go.uintptr); a bare System.UIntPtr is Go's uint
+                "System.UIntPtr" => "uint",
+                "go.uintptr" => "uintptr",
                 "System.Numerics.Complex" => "complex128",
                 "go.complex64" => "complex64",
                 _ => type == typeof(object) ? "interface {}" : typeName

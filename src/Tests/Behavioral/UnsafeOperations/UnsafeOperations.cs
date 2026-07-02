@@ -52,8 +52,8 @@ internal static void Main() {
     uint8 k = ~(ж<uint8>)(uintptr)(new @unsafe.Pointer(Ꮡi));
     fmt.Println(k);
     main_x x = default!;
-    const uintptr M = /* unsafe.Sizeof(x.c) */ 16;
-    const uintptr N = /* unsafe.Sizeof(x) */ 32;
+    uintptr M = /* unsafe.Sizeof(x.c) */ 16;
+    uintptr N = /* unsafe.Sizeof(x) */ 32;
     fmt.Println(M, N);
     fmt.Println(@unsafe.Alignof(x.GetType(), "a"));
     fmt.Println(@unsafe.Alignof(x.GetType(), "b"));
