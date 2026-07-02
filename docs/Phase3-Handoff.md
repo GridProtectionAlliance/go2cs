@@ -21,7 +21,23 @@
   named-over-array 11 (Decision B) + &GLOBAL 4 (both design-with-user), escape-hoist 2 (rabbit
   hole), parked singles 2. Sanctioned non-error work remains: lock_sema manual waiter-list
   (reviewer-mandated), the approved distinct golib `uintptr` struct, const-DECL literal formatting.
-- **2026-07-02 (latest): the distinct golib `uintptr` struct — SIZED AND DEFERRED with analysis
+- **2026-07-02 (latest): the distinct golib `uintptr` struct LANDED (`a2f52f726`; user green-lit;
+  runtime EXACTLY 19 — error-neutral by design, the root buys identity fidelity).** uint and
+  uintptr are distinct C# types again: type switches carry their original `case uintptr:` labels
+  (the CS8120 merge is dormant for the pair — error.cs/fmt/bisect/slog all restored), `%T` is
+  truthful (`System.UIntPtr`→"uint", `go.uintptr`→"uintptr"), `map[any]` keys are distinct, and
+  the TypeSwitch test now compiles uint/uintptr cases with DIFFERENT bodies (impossible under the
+  alias) with output parity vs Go. Six-cycle 305-package tail convergence (4→99→3→1→81→33→19);
+  hard-won C# conversion-design rules recorded in ConversionStrategies + memory (encompassing is
+  standard-conversions-only so user ops never chain; partial outbound operator sets are unstable —
+  none or the FULL exact matrix; struct consts → static readonly with ==/if-else pattern
+  fallbacks; Interlocked needs the inner public m_value; IBinaryInteger generics need non-generic
+  overloads). Empirical adversarial review (probe-compiled against live golib) — matrix held
+  against every legal-Go shape; its 4 findings applied pre-commit (straggler csproj, dead-code
+  revert, inbound floats, the Equals nuint arm that asymmetrically re-erased identity). Bonus
+  review catch, fixed separately (`054e13f9a`): sync/atomic OrUint32/OrInt64/OrUint64 called
+  Interlocked.AND — a pre-existing silent atomic bug.
+- **(superseded same day) the distinct golib `uintptr` struct — SIZED AND DEFERRED with analysis
   (iteration 8; no commit — deliberate stop, not a failure).** The census found the seams run
   deeper than the morning sketch: (1) the alias is an **MSBuild `<Using Include="System.UIntPtr"
   Alias="uintptr"/>` item baked into EVERY csproj** (converter template + committed
