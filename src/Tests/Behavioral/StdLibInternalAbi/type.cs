@@ -625,12 +625,12 @@ public static readonly UntypedInt TraceArgsLimit = 10;
 public static readonly UntypedInt TraceArgsMaxDepth = 5;
 public static readonly UntypedInt TraceArgsMaxLen = /* (TraceArgsMaxDepth*3+2)*TraceArgsLimit + 1 */ 171;
 
-public static readonly UntypedInt TraceArgsEndSeq = /* 0xff */ 255;
-public static readonly UntypedInt TraceArgsStartAgg = /* 0xfe */ 254;
-public static readonly UntypedInt TraceArgsEndAgg = /* 0xfd */ 253;
-public static readonly UntypedInt TraceArgsDotdotdot = /* 0xfc */ 252;
-public static readonly UntypedInt TraceArgsOffsetTooLarge = /* 0xfb */ 251;
-public static readonly UntypedInt TraceArgsSpecial = /* 0xf0 */ 240;
+public static readonly UntypedInt TraceArgsEndSeq = 0xff;
+public static readonly UntypedInt TraceArgsStartAgg = 0xfe;
+public static readonly UntypedInt TraceArgsEndAgg = 0xfd;
+public static readonly UntypedInt TraceArgsDotdotdot = 0xfc;
+public static readonly UntypedInt TraceArgsOffsetTooLarge = 0xfb;
+public static readonly UntypedInt TraceArgsSpecial = 0xf0;
 
 public static readonly UntypedInt MaxPtrmaskBytes = 2048;
 

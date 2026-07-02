@@ -436,6 +436,17 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					constVal = "iota"
 				}
 
+				// A plain integer-literal initializer keeps its Go source formatting when it is
+				// also a valid C# literal (hex/binary/`_` separators — preserveGoIntLiteral):
+				// `const m5 = 0x1d8e4e27c47d124f` emits the hex directly, which also elides the
+				// now-redundant `/* original */` comment below. Folded expressions/iota keep the
+				// comment form; the GoUntyped path above keeps the decimal (BigInteger.Parse).
+				if c.Val().Kind() == constant.Int && len(valueSpec.Values) >= i+1 {
+					if lit, ok := valueSpec.Values[i].(*ast.BasicLit); ok && lit.Kind == token.INT {
+						constVal = preserveGoIntLiteral(lit.Value, constVal)
+					}
+				}
+
 				orgExpr := ""
 
 				if len(valueSpec.Values) >= i+1 {

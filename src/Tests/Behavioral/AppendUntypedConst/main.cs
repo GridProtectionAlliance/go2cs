@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-internal static readonly UntypedInt marker = /* 0xFFFD */ 65533;
+internal static readonly UntypedInt marker = 0xFFFD;
 
 [GoType("[]uint16")] partial struct words;
 
