@@ -15,9 +15,23 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 26 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 21 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): Option C iterations 2+3 — the gclinkptr PIVOT and two general
+  conversion-hop arms (`639c704e2` 26→22, `d07772473` 22→21).** gclinkptr was queued as a
+  managed-slot manual type, but every Go constructor is raw span-address arithmetic
+  (`gclinkptr(s.base()+i)`) — there is never a box to hold, so the faithful model is the NUMBER
+  it already is. **Triage rule extracted: re-check every "manual type" label against the type's
+  actual Go constructors — referent-holding types (the trio pattern) get manual slots;
+  address-arithmetic types stay `[GoType num]` and get general converter arms.** The two arms
+  (both durable general capability, funded by the end-goal test): (1) named-uintptr →
+  unsafe.Pointer hops through the underlying (`((@unsafe.Pointer)(uintptr)v)`; 3-file surgical
+  audit, zero churn by construction); (2) named→named numeric with an IDENTICAL underlying also
+  hops (`((Δhex)(uint64)work.full)` — the skip trusting the exact [GoType] operator is right only
+  for BASIC operands; 27-file audit, every line the same class, idna verified zero own-errors).
+  Tests: UnsafePointerReinterpret linkaddr round-trip; NamedNumericPointerReinterpret named→named
+  (output parity). CS0030 is down to 1 (stkframe UntypedInt). Suites 216/216 at both gates.
 - **⚖ RULINGS (2026-07-02 morning, user):** end-goal lens = the two use cases (library: "use Go
   code in my C# project"; application: "extend a Go app in C#"); **NOTHING-THROWAWAY** — if an
   implementation would be manually replaced in Phase 4 anyway, build the manual replacement NOW.
