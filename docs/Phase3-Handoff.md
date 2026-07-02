@@ -15,10 +15,28 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~86 compile errors** (down from
+- **`runtime` is the foundation and the current frontier — now at ~74 compile errors** (down from
   952 at the start of the campaign, 2769 mid-campaign). It is the bottom of the dependency graph, so
   it gates the entire upper stdlib. It is the **sole failing project**, but read the next bullet.
-- **2026-07-01 (latest): forward field-box accessors on a struct-inherited wrapper as TRUE REFS
+- **2026-07-01 (latest): the pallocBits/pMask named-collection family LANDED (`adc8546cc`; CS1503 −9 +
+  CS0021 −3 cascade, runtime 86 → 74).** Two coupled roots: (1) GENERATOR `IArrayViewTypeTemplate` —
+  a defined-over-array-backed-defined type (`type pallocBits pageBits`) now implements IArray<elem> as a
+  view; every member AND the wrapper's `val` (the converter emits `b.val[i] = v` in pointer-receiver
+  methods) routes through an ensuring `view` accessor (materialize the lazy backing on the wrapper's OWN
+  mutable m_value, return a copy sharing the heap T[]). Corpus-surgical: exactly ONE recipient
+  (pallocBits) across all 669 [GoType] structs. (2) GOLIB `copy<T1,T2>(in slice<T1>, ISlice<T2>)` — a
+  named-slice source now binds; same-type copies via window-span CopyTo (memmove, Go-overlap-safe).
+  **TWO SKEPTICS EACH FOUND A REAL VALUE BUG in the first cut (the family's lost-writes history earned
+  its verifier budget): the copy overload double-offset window-relative indexers with +Low (panic on any
+  nonzero-Low operand), and the virgin-wrapper pointer-receiver fill loop silently dropped every write
+  (lazy backing on a by-value temp). Both fixed + output-pinned.** Test `NamedArrayWrapper` (8 output
+  lines vs Go incl. nonzero-Low src+dst copies and an overlapping memmove copy). Suite green (211), zero
+  churn (structural). **Scope notes:** Go-legal named-DST copy (`copy(pmDst, …)`) still doesn't bind —
+  ZERO corpus occurrences, report-only; virgin-reinterpret-write remains the documented lazy-backing
+  edge; pre-existing latents found by the skeptics (range sub-slice DETACHES on nonzero low —
+  slice.this[Range] copies, a skeptic filed a task chip; array/wrapper assignment shares backing vs Go
+  value-copy; empty named-slice composite `pm{}` → CS0029) logged for future iterations.
+- **2026-07-01: forward field-box accessors on a struct-inherited wrapper as TRUE REFS
   (`02a610466`; CS0117 −3 — bucket ELIMINATED, runtime 89 → 86; FIRST GENERATOR-side root of the
   campaign).** `&p.x` on a `*pinnerBits` (`type pinnerBits gcBits`, runtime pinner.go) emits
   `Δp.of(pinnerBits.Ꮡx)` — the accessor names the WRAPPER, but the `Ꮡx` static existed only on the
@@ -552,27 +570,27 @@ the real gate. Validate with `run-behavioral.ps1` / `check-no-regression.ps1` (s
 ## Session queue (ordered; full per-defect detail in the `go2cs-phase3-progress` memory)
 
 Re-bucket a fresh reconvert at the start of each session — counts drift ±10 (nondeterminism) and shift
-as items land. As of 2026-07-01 latest (`runtime` = ~86; wrapper field-box accessors cleared 3, 89 → 86):
-CS1503 17, CS1061 12, CS0021 10, CS0030 9, CS0029 8, CS0103 7, CS1929 6, CS0121 6,
+as items land. As of 2026-07-01 latest (`runtime` = ~74; pallocBits/pMask family cleared 12, 86 → 74):
+CS1061 12, CS0030 9, CS1503 8, CS0029 8, CS0021 7, CS0103 7, CS1929 6, CS0121 6,
 then a SINGLETON tail (CS0128 2, CS0149 2, CS8175/CS8120/CS1593/CS0136/CS0119/CS0118/CS0019 ×1 —
 CS0206 + CS0117 GONE).
 **Landed: CS0161 (`a99d32f81`), CS8917 (`0ec8bac1c`), TWO S1-fork convert-native reinterpret wins
 (`9e30a1c5b` −23, `f19153a9e` −13), make-len-cast (`438d633a0`, −5), 3-index slice-bound cast (`cc1255754`,
 −2), FromRef deref-alias pin (`016ce07ef`, −3), capture-collision qualify (`d133c769b`, −2), wrapper
-field-box accessors (`02a610466`, −3, FIRST generator root). ⚠ The small clusters are nearly dry.**
+field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask IArray-view + ISlice-copy
+(`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
+Δrtype.TFlag — what remains is dominated by the architectural S-families.**
 - **NEXT — the characterized frontier, roughly cleanest-first:**
-  1. **pallocBits → IArray (5) + pMask copy (4) — RE-RATED from "fraught" to APPROACHABLE.** `02a610466`
-     validated the true-ref-through-`m_value` forwarding pattern on the same template. The IArray/ISlice
-     interface forwarding for an array/slice-inherited wrapper can follow the same play (members as
-     refs/views over `m_value`, never a copy), keeping the `[GoType("pageBits")]` conversion intact —
-     the two traps (broken reinterprets, lost writes) both have known answers now. A careful generator
-     iteration with write-through output tests.
-  2. **CS1061 `Δrtype.TFlag` (2)** — field promotion through an embedded POINTER (`type rtype struct {
+  1. **CS1061 `Δrtype.TFlag` (2)** — field promotion through an embedded POINTER (`type rtype struct {
      *abi.Type }`), cross-package; TypeGenerator promotion machinery (S3-adjacent). Characterize the
-     generator's embedded-pointer promotion before attempting.
-  3. **CS0030 managed-referent (9, ж<T>-model)** — the genuine architectural S1 case, dedicated iteration.
-  4. *(CS0149 (2) = a `func()` loaded from RAW MEMORY (`*(*func())(add(...))`) — a managed delegate in raw
-     memory, genuine S1 raw-metal → future `[module: GoManualConversion]` stub candidate. SKIP.)*
+     generator's embedded-pointer promotion before attempting; the remaining CS1061 (12) likely shares
+     the abi-metadata S3 family — triage the other 10 alongside.
+  2. **CS0030 managed-referent (9, ж<T>-model)** — the genuine architectural S1 case
+     (gclinkptr/Δguintptr/puintptr/muintptr → unsafe.Pointer): MODEL holding ж<T> directly per the user's
+     model (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration — likely THE next
+     big lever alongside a triage of CS1503 8 / CS0029 8 / CS0021 7 / CS0103 7 remnants.
+  3. *(CS0149 (2) = a `func()` loaded from RAW MEMORY — S1 raw-metal → `[module: GoManualConversion]`
+     stub candidate. SKIP for a dedicated stub pass.)*
   2. **CS0030 managed-referent branch (9, ж<T>-model): `gclinkptr`/`Δguintptr`/`puintptr`/`muintptr` →
      unsafe.Pointer.** The genuine architectural S1 case — MODEL holding `ж<T>` directly per the user's model
      (like `core/sync/atomic` atomic.Pointer<T>). A dedicated, careful iteration.
