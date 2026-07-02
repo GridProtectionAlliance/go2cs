@@ -26,7 +26,7 @@ internal static void Main() {
     s += "b"u8;
     fmt.Println(s);
     @string z = default!;
-    fmt.Println(len(z), z == ""u8, "["u8 + z + "]"u8);
+    fmt.Println(len(z), z == ""u8, "[" + z + "]");
     fmt.Println(build(1));
     fmt.Println(build(2));
     fmt.Println(build(3));
