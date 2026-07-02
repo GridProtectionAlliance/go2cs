@@ -128,7 +128,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -309,7 +309,7 @@ func bodyReturnsReceiver(body *ast.BlockStmt, recvName string) bool {
 // without it a value-ref receiver (`this ref T recv`) has no pointer to hand out, and `recv`
 // (a T value) cannot be assigned to a *T field or compared with a ж<T>. The selector-`X` position
 // (`recvName.field`, a value field access) is not a bare ident, so it is naturally excluded.
-func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string) bool {
+func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *types.Info) bool {
 	found := false
 
 	ast.Inspect(body, func(node ast.Node) bool {
@@ -331,6 +331,49 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string) bool {
 				if ident, ok := n.Y.(*ast.Ident); ok && ident.Name == recvName {
 					found = true
 					return false
+				}
+			}
+		case *ast.CompositeLit:
+			// The receiver placed whole into a COMPOSITE-LITERAL element whose FIELD is a Go
+			// pointer — `return funcInfo{f, mod}` inside `func (f *_func) funcInfo()` (runtime
+			// symtab.go; funcInfo's first field is the embedded pointer *_func). The pointer-typed
+			// field needs the receiver's box, which only exists when the method is direct-ж. Gated
+			// on the FIELD's declared type (the element expression's own type is always *T for a
+			// pointer receiver): a receiver placed into an INTERFACE-typed field also typechecks in
+			// Go, but that emission compiles today and promoting for it would re-route every such
+			// method stdlib-wide — deliberately out of scope (its pointer-identity semantics are a
+			// separate question).
+			structType, ok := info.TypeOf(n).Underlying().(*types.Struct)
+
+			if !ok {
+				return true
+			}
+
+			for i, elt := range n.Elts {
+				fieldIdx := i
+				val := elt
+
+				if kv, ok := elt.(*ast.KeyValueExpr); ok {
+					val = kv.Value
+					fieldIdx = -1
+
+					if keyIdent, ok := kv.Key.(*ast.Ident); ok {
+						for j := 0; j < structType.NumFields(); j++ {
+							if structType.Field(j).Name() == keyIdent.Name {
+								fieldIdx = j
+								break
+							}
+						}
+					}
+				}
+
+				if ident, ok := val.(*ast.Ident); ok && ident.Name == recvName {
+					if fieldIdx >= 0 && fieldIdx < structType.NumFields() {
+						if _, isPtr := structType.Field(fieldIdx).Type().(*types.Pointer); isPtr {
+							found = true
+							return false
+						}
+					}
 				}
 			}
 		}

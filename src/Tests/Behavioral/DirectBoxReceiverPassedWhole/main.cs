@@ -27,10 +27,33 @@ internal static void reset(this ж<mc> Ꮡc) {
     clearViaPtr(Ꮡc);
 }
 
+[GoType] partial struct wrap {
+    internal ж<mc> p;
+    internal nint tag;
+}
+
+internal static wrap wrapped(this ж<mc> Ꮡc) {
+    ref var c = ref Ꮡc.val;
+
+    return new wrap(Ꮡc, 7);
+}
+
+internal static wrap keyed(this ж<mc> Ꮡc) {
+    ref var c = ref Ꮡc.val;
+
+    return new wrap(tag: 8, p: Ꮡc);
+}
+
 internal static void Main() {
     var c = Ꮡ(new mc(n: 9));
     c.reset();
     fmt.Println((~c).n);
+    var w = c.wrapped();
+    w.p.val.n = 42;
+    fmt.Println((~c).n, w.tag);
+    var k = c.keyed();
+    k.p.val.n++;
+    fmt.Println((~c).n, k.tag);
 }
 
 } // end main_package
