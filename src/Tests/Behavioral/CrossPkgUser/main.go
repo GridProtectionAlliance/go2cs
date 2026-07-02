@@ -41,6 +41,14 @@ func main() {
 	p.Temp = 75
 	fmt.Println(float64(s2.Temp), s2.Hot()) // 75 true — write-through observed via the target
 
+	// Phase 4b: a promoted POINTER-RECEIVER METHOD through the cross-package pointer embed —
+	// `p.Calibrate(5)` has no generated forwarder (method promotion is syntax-resolved), so the
+	// converter emits the explicit hop `p.Sensor.val.Calibrate(…)`; the write reaches the target.
+	// (A promoted VALUE-receiver method call, p.Hot(), remains a documented open gap — call
+	// through the embed explicitly.)
+	p.Calibrate(5)
+	fmt.Println(float64(s2.Temp)) // 80 — the promoted pointer-receiver write reached s2
+
 	// Phase 4: promoted fields through a cross-package VALUE embed.
 	g := tagged{Sensor: CrossPkgLib.Sensor{Name: "cellar", Temp: 5}, n: 3}
 	fmt.Println(g.Name, float64(g.Temp), g.n) // cellar 5 3

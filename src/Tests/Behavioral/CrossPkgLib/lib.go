@@ -34,6 +34,11 @@ func (s Sensor) Hot() bool { return s.Temp > 50 }
 // Label returns the sensor name; it also makes Sensor satisfy the Labeled interface.
 func (s Sensor) Label() string { return s.Name }
 
+// Calibrate is a POINTER-receiver method — promoted through a cross-package pointer embed it has
+// no generated forwarder (method promotion is syntax-resolved); the converter emits the explicit
+// hop `p.Sensor.val.Calibrate(…)` at such call sites (the runtime Δrtype.Uncommon shape).
+func (s *Sensor) Calibrate(d Celsius) { s.Temp += d }
+
 // Labeled is an exported interface (Phase 3: cross-assembly interface satisfaction / duck typing —
 // Sensor implements it in this assembly and a consumer assigns a Sensor to a Labeled).
 type Labeled interface {

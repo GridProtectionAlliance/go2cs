@@ -701,7 +701,22 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 				// yields the box as the field VALUE (`w.traceBuf`), so it is left to the existing
 				// field-access handling — taking its address would double-box to `ж<ж<T>>` (CS1929).
 				if embedField.Embedded() {
-					if _, isPtr := embedField.Type().Underlying().(*types.Pointer); !isPtr {
+					if ptr, isPtr := embedField.Type().Underlying().(*types.Pointer); isPtr {
+						// A POINTER embed whose embedded type is CROSS-PACKAGE has no generated
+						// method forwarder: method promotion is syntax-resolved, and a metadata
+						// embed promotes FIELDS only (the StructTypeTemplate metadata fallback) —
+						// `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime type.go) is
+						// CS1929. Emit the explicit hop through the embed field's box —
+						// `t.Type.val.Uncommon(…)` — the deref'd `.val` is a ref return, so the
+						// `[GoRecv] ref` extension binds addressably. A same-package pointer embed
+						// keeps its generated forwarder (no churn).
+						if named, ok := ptr.Elem().(*types.Named); ok {
+							if named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
+								return getAliasedTypeName(fmt.Sprintf("%s.%s.val.%s", v.convExpr(selectorExpr.X, nil),
+									getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+							}
+						}
+					} else {
 						// When the base is the current method's OWN receiver and that method is NOT
 						// direct-ж, the receiver renders as `this ref T` with NO box — the descent's
 						// `Ꮡrecv.of(…)` references a nonexistent `Ꮡrecv` (CS0103; runtime mgcscavenge

@@ -24,6 +24,8 @@ internal static void Main() {
     fmt.Println(p.Name, (float64)p.Temp, p.id);
     p.Temp = 75;
     fmt.Println((float64)s2.Temp, s2.Hot());
+    p.Sensor.val.Calibrate(5);
+    fmt.Println((float64)s2.Temp);
     var g = new tagged(Sensor: new CrossPkgLib.Sensor(Name: "cellar"u8, Temp: 5), n: 3);
     fmt.Println(g.Name, (float64)g.Temp, g.n);
     g.Temp = 60;

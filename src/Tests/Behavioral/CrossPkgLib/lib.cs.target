@@ -31,6 +31,10 @@ public static @string Label(this Sensor s) {
     return s.Name;
 }
 
+[GoRecv] public static void Calibrate(this ref Sensor s, Celsius d) {
+    s.Temp += d;
+}
+
 [GoType] partial interface Labeled {
     @string Label();
 }
