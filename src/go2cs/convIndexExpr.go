@@ -70,7 +70,19 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 	}
 
-	return fmt.Sprintf("%s%s[%s]", v.convExpr(indexExpr.X, nil), ptrDeref, index)
+	baseExpr := v.convExpr(indexExpr.X, nil)
+
+	// A type-CONVERSION base renders as a C# cast, and postfix binds tighter than a cast — both
+	// the pointer auto-deref `.val` and the index itself would re-bind onto the cast's INNER
+	// operand: Go malloc.go's `(*[2]uint64)(x)[0] = 0` emitted
+	// `(ж<array<uint64>>)(uintptr)(x).val[0]` — the `.val` read the inner @unsafe.Pointer's
+	// uintptr, then indexed a nuint (CS0021). Wrap the cast before appending. Fifth instance of
+	// the cast-precedence family.
+	if call, ok := indexExpr.X.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {
+		baseExpr = "(" + baseExpr + ")"
+	}
+
+	return fmt.Sprintf("%s%s[%s]", baseExpr, ptrDeref, index)
 }
 
 func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {

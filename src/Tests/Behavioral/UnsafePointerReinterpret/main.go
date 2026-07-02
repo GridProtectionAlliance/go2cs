@@ -41,6 +41,20 @@ func funcAt(p unsafe.Pointer) (func(), bool) {
 	return *(*func())(p), true
 }
 
+// zeroPair INDEXES a reinterpret-cast result directly — runtime malloc.go's
+// `(*[2]uint64)(x)[0] = 0`. The pointer-to-array auto-deref `.val` (and the index itself) must
+// wrap the cast: postfix beats cast precedence, so a naked append read the inner
+// @unsafe.Pointer's uintptr and indexed a nuint (CS0021). Copy-box seam: the write hits the
+// boxed copy (documented reinterpret contract) — Compile + Target only, like the rest of this
+// test.
+//
+//go:noinline
+func zeroPair(x unsafe.Pointer) uint64 {
+	(*[2]uint64)(x)[0] = 0
+	(*[2]uint64)(x)[1] = 0
+	return (*[2]uint64)(x)[0]
+}
+
 func main() {
 	// Back the pointers with a real uintptr slot (avoids a bare `var _ unsafe.Pointer` zero-value
 	// declaration, which is an unrelated converter gap: unsafe.Pointer has no parameterless C#
@@ -52,5 +66,7 @@ func main() {
 	var fslot func()
 	_, ok := funcAt(unsafe.Pointer(&fslot))
 	_ = ok
+	var pair [2]uint64
+	_ = zeroPair(unsafe.Pointer(&pair))
 	println("compiled")
 }

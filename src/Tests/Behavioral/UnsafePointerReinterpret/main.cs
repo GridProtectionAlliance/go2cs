@@ -22,6 +22,12 @@ internal static (Action, bool) funcAt(@unsafe.Pointer p) {
     return (((ж<Action>)(uintptr)(p)).val, true);
 }
 
+internal static uint64 zeroPair(@unsafe.Pointer x) {
+    ((ж<array<uint64>>)(uintptr)(x)).val[0] = 0;
+    ((ж<array<uint64>>)(uintptr)(x)).val[1] = 0;
+    return ((ж<array<uint64>>)(uintptr)(x)).val[0];
+}
+
 internal static void Main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
     @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).val);
@@ -30,6 +36,8 @@ internal static void Main() {
     Action fslot = default!;
     var (_, ok) = funcAt(new @unsafe.Pointer(Ꮡ(fslot)));
     _ = ok;
+    ref var pair = ref heap(new array<uint64>(2), out var Ꮡpair);
+    _ = zeroPair(new @unsafe.Pointer(Ꮡpair));
     println("compiled");
 }
 
