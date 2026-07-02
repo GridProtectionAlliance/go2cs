@@ -16,6 +16,7 @@ import (
 //   - adjacent free functions / methods on other types listed in manualConversionFuncs,
 //   - GoImplicitConv assembly attributes referencing the type (the manual file declares any
 //     conversion operators its call sites need).
+//
 // Call-site emission is unchanged except conversions handled in convCallExpr: a manual-type
 // conversion from unsafe.Pointer(x) emits the referent-preserving ctor form `new T(x)` instead
 // of the numeric cast chain `(T)(uintptr)new Pointer(x)` (which would lose the referent).
@@ -36,6 +37,19 @@ var manualConversionFuncs = map[string]map[string]bool{
 		"g.guintptr": true,
 		"setGNoWB":   true,
 		"setMNoWB":   true,
+		// lock_sema.go (lock_sema_impl.cs): the mutex/note key-slot protocol smuggles an *m
+		// address through the uintptr slot and parks on OS semaphores — the managed model is a
+		// {0, locked} spinlock/latch. Thin wrappers (lock/unlock/noteclear/notetsleep[g]) and
+		// the consts stay auto. ⚠ These entries encode lock_SEMA semantics (the windows/darwin/
+		// plan9 family — the default host platform): a futex-platform conversion (-platforms
+		// linux/amd64) includes lock_futex.go instead, whose notetsleep_internal is 2-parameter
+		// and whose key protocol is {0,1,2} — the name-keyed skip would mismatch (CS7036).
+		"mutexContended":      true,
+		"lock2":               true,
+		"unlock2":             true,
+		"notewakeup":          true,
+		"notesleep":           true,
+		"notetsleep_internal": true,
 	},
 }
 
