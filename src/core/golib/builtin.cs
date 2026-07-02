@@ -549,6 +549,45 @@ public static class builtin
     }
 
     /// <summary>
+    /// Copies elements from a source <see cref="ISlice{T}"/> into a destination slice.
+    /// </summary>
+    /// <param name="dst">Destination slice.</param>
+    /// <param name="src">Source slice implementation (e.g., a defined type over a slice, like Go's <c>type pMask []uint32</c>).</param>
+    /// <returns>
+    /// The number of elements copied, which will be the minimum of len(src) and len(dst).
+    /// </returns>
+    /// <remarks>
+    /// A named slice type (`[GoType("[]uint32")]` wrapper) implements <see cref="ISlice{T}"/> but is not a
+    /// <see cref="slice{T}"/>, so generic inference cannot bind the slice/slice overload from it (CS1503 —
+    /// runtime <c>copy(nidlepMask, idlepMask)</c>, idlepMask a <c>pMask</c>). The source window comes from the
+    /// interface's <see cref="IArray{T}.ToSpan"/>, which views the wrapper's underlying storage — no copy.
+    /// A genuine <see cref="slice{T}"/> source still binds the more specific slice/slice overload.
+    /// </remarks>
+    public static nint copy<T1, T2>(in slice<T1> dst, ISlice<T2> src)
+    {
+        nint min = Min(dst.Length, src.Length);
+
+        if (min > 0)
+        {
+            // Same-type sources copy via the window spans: ToSpan() views each side's true slice
+            // window (indexing with an added Low here would double-offset — both indexers are
+            // window-relative), and Span.CopyTo has memmove semantics, so an overlapping src/dst
+            // (Go permits overlap in copy) transfers correctly.
+            if (src is ISlice<T1> same)
+            {
+                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            }
+            else
+            {
+                for (nint i = 0; i < min; i++)
+                    dst[i] = (T1)TypeExtensions.ConvertToType((IConvertible)src[i]!);
+            }
+        }
+
+        return min;
+    }
+
+    /// <summary>
     /// Copies elements from a source slice into a destination slice.
     /// The source and destination may overlap.
     /// </summary>

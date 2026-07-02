@@ -239,6 +239,7 @@ public class TypeGenerator : ISourceGenerator
                         // ж<T>.val ref) persists. Non-struct underlyings (a named type over an interface or
                         // another named type) resolve to null and keep the plain wrapper (no churn).
                         List<(string typeName, string memberName, bool isReferenceType, bool isProperty)>? forwardedMembers = null;
+                        string? underlyingArrayElem = null;
                         bool mutableValue = false;
 
                         (StructDeclarationSyntax? underlyingStruct, Compilation? underlyingCompilation) = context.GetStructDeclaration(typeDefinition);
@@ -255,6 +256,31 @@ public class TypeGenerator : ISourceGenerator
                                 forwardedMembers = members;
                                 mutableValue = true;
                             }
+                            else
+                            {
+                                // A defined type over an ARRAY-backed [GoType] wrapper — `type pallocBits
+                                // pageBits` where `type pageBits [8]uint64` — is len()'d / indexed directly
+                                // in Go, which needs IArray on THIS wrapper (golib `len(IArray)`, CS1503
+                                // otherwise; runtime mpallocbits.go). Detect it from the underlying's own
+                                // [GoType] definition (`[N]elem`, not a `[]` slice) and implement
+                                // IArray<elem> as a view over m_value (IArrayViewTypeTemplate).
+                                string? underlyingDefinition = GetGoTypeDefinition(underlyingStruct);
+
+                                if (underlyingDefinition is not null && underlyingDefinition.StartsWith("[") && !underlyingDefinition.StartsWith("[]"))
+                                {
+                                    int closeBracket = underlyingDefinition.IndexOf(']');
+
+                                    if (closeBracket > 0 && closeBracket < underlyingDefinition.Length - 1)
+                                    {
+                                        underlyingArrayElem = underlyingDefinition[(closeBracket + 1)..].Trim();
+
+                                        // The view's ref accessor must ensure the underlying's lazily-
+                                        // allocated backing lands on THIS wrapper's own m_value (a
+                                        // readonly field would force a defensive copy and lose writes).
+                                        mutableValue = true;
+                                    }
+                                }
+                            }
                         }
 
                         generatedSource = new InheritedTypeTemplate
@@ -268,6 +294,7 @@ public class TypeGenerator : ISourceGenerator
                             TargetTypeName = typeName,
                             TypeClass = typeDefinition,
                             ForwardedStructMembers = forwardedMembers,
+                            UnderlyingArrayElementType = underlyingArrayElem,
                             UsingStatements = usingStatements
                         }
                         .Generate();
@@ -345,5 +372,35 @@ public class TypeGenerator : ISourceGenerator
                 context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.g.cs")), generatedSource);
             }
         }
+    }
+
+    // Reads a struct declaration's own [GoType("…")] definition string (first constructor argument,
+    // quotes stripped) — used to inspect the UNDERLYING type of a defined-over-defined chain
+    // (`type pallocBits pageBits`: pageBits' definition is "[8]uint64"). Null when the struct has no
+    // GoType attribute or no argument.
+    private static string? GetGoTypeDefinition(StructDeclarationSyntax structDeclaration)
+    {
+        foreach (AttributeListSyntax attributeList in structDeclaration.AttributeLists)
+        {
+            foreach (AttributeSyntax attribute in attributeList.Attributes)
+            {
+                string name = attribute.Name.ToString();
+
+                if (name != AttributeName && name != $"{AttributeName}Attribute")
+                    continue;
+
+                (string _, string value)[] arguments = attribute.GetArgumentValues();
+
+                if (arguments.Length > 0)
+                {
+                    string value = arguments[0].value;
+
+                    if (!string.IsNullOrWhiteSpace(value) && value.Length > 2)
+                        return value[1..^1].Trim();
+                }
+            }
+        }
+
+        return null;
     }
 }

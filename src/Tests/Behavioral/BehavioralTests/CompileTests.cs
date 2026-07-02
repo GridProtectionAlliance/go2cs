@@ -357,6 +357,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]
+    public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
+
+    [TestMethod]
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]

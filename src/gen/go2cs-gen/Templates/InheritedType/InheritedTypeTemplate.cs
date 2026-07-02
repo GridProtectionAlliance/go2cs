@@ -23,6 +23,12 @@ internal class InheritedTypeTemplate : TemplateBase
     // (mutable) `m_value`. Null/empty for every other inherited kind (slice/map/array/numeric/…).
     public List<(string typeName, string memberName, bool isReferenceType, bool isProperty)>? ForwardedStructMembers = null;
 
+    // For a defined type whose underlying is ITSELF an array-backed [GoType] wrapper
+    // (`type pallocBits pageBits`, `type pageBits [8]uint64`), the element type of that underlying
+    // array — set to implement IArray<elem> on this wrapper as a view over `m_value` (golib `len()`
+    // and indexing bind IArray). Null for every other inherited kind.
+    public string? UnderlyingArrayElementType = null;
+
     private string ImplementedInterface => TypeClass switch
     {
         "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>",
@@ -31,7 +37,7 @@ internal class InheritedTypeTemplate : TemplateBase
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>",
         "Numeric" => $" : IEquatable<{TargetTypeName}>",
-        _ => ""
+        _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
     };
 
     private string InterfaceImplementation => TypeClass switch
@@ -43,13 +49,18 @@ internal class InheritedTypeTemplate : TemplateBase
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),
         "Pointer" => PointerTypeTemplate.Generate(ObjectName, TargetTypeName),
-        _ => ""
+        _ => UnderlyingArrayElementType is null ? "" : IArrayViewTypeTemplate.Generate(TypeName, UnderlyingArrayElementType)
     };
 
     private string ValueGetter => TypeClass switch
     {
         "Array" => $"m_value ??= new {TypeName}({TargetTypeSize ?? "0"})",
-        _ => "m_value"
+        // The array-view wrapper's `val` must route through `view` (ensure the underlying's lazy
+        // backing materializes on THIS wrapper's own m_value, then return a copy sharing that T[]):
+        // the converter emits `b.val[i] = v` inside the wrapper's pointer-receiver methods, and a
+        // plain by-value `m_value` would lazily allocate on the returned temp — silently dropping
+        // every write on virgin storage (the pallocBits fill-loop shape).
+        _ => UnderlyingArrayElementType is null ? "m_value" : "view"
     };
 
     private string Value => TypeClass switch
