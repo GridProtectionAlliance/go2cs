@@ -21,7 +21,18 @@
   named-over-array 11 (Decision B) + &GLOBAL 4 (both design-with-user), escape-hoist 2 (rabbit
   hole), parked singles 2. Sanctioned non-error work remains: lock_sema manual waiter-list
   (reviewer-mandated), the approved distinct golib `uintptr` struct, const-DECL literal formatting.
-- **2026-07-02 (latest): iterations 4+5 — the last CS0030 and CS0019 are EXTINCT (`3c507c3cd`
+- **2026-07-02 (latest): iteration 6 — the managed lock/note model (`0b37c61e7`; count unchanged
+  at 19; the reviewer-mandated Phase-4 artifact).** lock_sema's six protocol functions hand-owned:
+  mutex = `{0, locked}` Interlocked test-test-and-set spinlock on the real key storage with
+  SpinWait escalation; note = signaled/clear latch (loud diagnostics preserved). Adversarial
+  review: ZERO confirmed defects (mutual exclusion airtight, nuint Interlocked shapes
+  compile-verified on net9, protocol compatibility proven); recommendations applied
+  (Volatile.Read polls, corrupt-key throws, platform-coupling comment). **The mutex path is LIVE
+  today** (lock/unlock → lock2/unlock2 with no getg in the route). **⭐ KEYSTONE FUTURE ROOT: a
+  `[ThreadStatic]` g/m model realizing `getg()`** — the compiler intrinsic is a throwing stub
+  that poisons the note wrappers and all m.locks/preempt bookkeeping; landing it is what turns
+  "compiles" into "runtime-operational" for scheduler-adjacent code.
+- **2026-07-02: iterations 4+5 — the last CS0030 and CS0019 are EXTINCT (`3c507c3cd`
   21→20, `c87702e8b` 20→19).** Same family, two arms: (4) a COMPUTED untyped-const operand in
   concrete arithmetic (`arg0 + 4*goarch.PtrSize`, stkframe) types the whole expression UntypedInt —
   breaking conversions AND silently mistyping `var` inference (zip's nsecs inferred double; fixed
