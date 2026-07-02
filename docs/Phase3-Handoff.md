@@ -15,7 +15,7 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 33 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 31 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
 - **2026-07-02 (latest): own-initializer func shadow renames (`2b7752648`; CS0149 −1, 34 → 33).**
@@ -1068,7 +1068,7 @@ ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the
 
 # ======== THE MORNING SUMMARY (2026-07-02 overnight run) ========
 
-**Trajectory: 51 -> 33 — twelve roots, zero reverts, suite green throughout (215/215 every gate),
+**Trajectory: 51 -> 31 — thirteen roots, zero reverts, suite green throughout (215/215 every gate),
 output byte-deterministic, every count exact.** One-line ledger (git log has full detail):
 `b28495a5d` CS0103 extinct (slice element-address on base TYPE) · `cc39fd0e6` tuple-reassigned
 pointer param repoints its box · `2c352ff49` empty named-collection composite = zero value ·
@@ -1076,10 +1076,10 @@ pointer param repoints its box · `2c352ff49` empty named-collection composite =
 untyped-const cast · `e20a840f4` string-base wide index · `6c26a726a` receiver-in-pointer-composite
 direct-ж trigger · `082b05f1b` blank-import `using _` discard hijack · `d5ba6b44e` cross-package
 pointer-embed method hop · `7cdb7d010` index-on-cast wrap · `19686fbec` concat-under-u8-suppression
-(audit-narrowed 212->68) · `2b7752648` own-initializer func shadow. Plus BOTH side-session merges
+(audit-narrowed 212->68) · `2b7752648` own-initializer func shadow · `9f8ae9f90` method-expression delegate cast (14-file class diff: flate/lzw function tables, the go122 trace event-handler TABLE, zstd FSE builders, slog). Plus BOTH side-session merges
 landed and validated earlier in the night (slice-aliasing 86566b9ef, benchmarks 8ea5253e5+02470cc93).
 
-**THE REMAINING 33 — every error classified, two DECISIONS own 20 of them:**
+**THE REMAINING 31 — every error classified, two DECISIONS own 20 of them:**
 
 1. **DECISION A — managed-referent ж<T> model (CS0030 ×9).** gclinkptr ×4 (malloc/mcache/stack),
    guintptr/puintptr/muintptr ×3 (runtime2), lfstack->Δhex (mgc), UntypedInt->Pointer (stkframe).
@@ -1097,9 +1097,9 @@ landed and validated earlier in the night (slice-aliasing 86566b9ef, benchmarks 
 3. **&GLOBAL/double-pointer family (4):** mheap CS0029 ×2 (`*i.pprev` over-deref), iface CS1929
    double-box (ж<ж<itabTableType>>), proc:1901 CS1061 (&allm walk `alllink`). One model: globals
    holding pointers + **T derefs.
-4. **S6 method-expression/value (3):** time CS1503+CS0119 pair (`(*timers).run` as a value —
-   needs delegate materialization `(Action<ж<timers>>)run`), metrics CS1593 (bound method value
-   arity). A contained emission design exists if you want it attempted autonomously.
+4. **S6 bound method VALUE (1):** metrics CS1593 (`d.compute = read.compute` — types.MethodVal
+   used as a value; the METHOD-EXPRESSION half landed as `9f8ae9f90`). Possibly the same
+   delegate-cast treatment on the MethodVal-as-value path — one more autonomous candidate.
 5. **Escape-hoist CS0128 ×2** (typesEqual sibling `for i` loops both hoisted — spurious
    over-escape, needs an escape-analysis dive).
 6. **Misc singles (4):** error CS8120 dup-case (`case uint`+`case uintptr` -> both nuint; a
