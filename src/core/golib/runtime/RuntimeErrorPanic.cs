@@ -45,6 +45,24 @@ public static class RuntimeErrorPanic
         return new PanicException(string.Format(IndexOutOfRangeMessage, index, length));
     }
 
+    private const string SliceBoundsOutOfRangeMessage = $"{RuntimeErrorMessage}slice bounds out of range ";
+    public static PanicException SliceBoundsOutOfRange(int64 low, int64 high, int64 max, int64 capacity)
+    {
+        // Mirrors the Go runtime's message shapes for a slice expression s[low:high:max]
+        string bounds;
+
+        if (max > capacity)
+            bounds = $"[::{max}] with capacity {capacity}";
+        else if (high > max)
+            bounds = max == capacity ? $"[:{high}] with capacity {capacity}" : $"[:{high}:{max}]";
+        else if (low < 0)
+            bounds = $"[{low}:]";
+        else
+            bounds = $"[{low}:{high}]";
+
+        return new PanicException(SliceBoundsOutOfRangeMessage + bounds);
+    }
+
     private const string IntegerDivideByZeroMessage = $"{RuntimeErrorMessage}integer divide by zero";
     public static PanicException IntegerDivideByZero()
     {

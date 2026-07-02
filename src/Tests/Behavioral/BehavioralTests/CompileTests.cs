@@ -537,6 +537,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSlice3IndexWideBound() => CheckTarget("Slice3IndexWideBound");
 
     [TestMethod]
+    public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]

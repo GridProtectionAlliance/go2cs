@@ -222,6 +222,7 @@
     <Project Path="Tests/Behavioral/ShadowedVarMethodCallLHS/ShadowedVarMethodCallLHS.csproj" />
     <Project Path="Tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
     <Project Path="Tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
+    <Project Path="Tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
     <Project Path="Tests/Behavioral/Solitaire/Solitaire.csproj" />
     <Project Path="Tests/Behavioral/SortArrayType/SortArrayType.csproj" />
     <Project Path="Tests/Behavioral/SpreadOperator/SpreadOperator.csproj" />

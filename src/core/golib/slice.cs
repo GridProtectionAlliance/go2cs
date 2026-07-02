@@ -74,18 +74,20 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     internal readonly T[] m_array;
     private readonly nint m_low;
     private readonly nint m_length;
+    private readonly nint m_capacity; // cap(s), relative to m_low — can end before the backing array does
 
     public slice()
     {
         m_array = [];
-        m_low = m_length = 0;
+        m_low = m_length = m_capacity = 0;
     }
-    
+
     public slice(T[]? array)
     {
         m_array = array ?? throw new ArgumentNullException(nameof(array), "slice array reference is null.");
         m_low = 0;
         m_length = array.Length;
+        m_capacity = array.Length;
     }
 
     public slice(Span<T> source)
@@ -93,6 +95,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
         m_low = 0;
         m_length = m_array.Length;
+        m_capacity = m_array.Length;
     }
 
     public slice(ReadOnlySpan<T> source)
@@ -100,6 +103,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
         m_low = 0;
         m_length = m_array.Length;
+        m_capacity = m_array.Length;
     }
 
     public slice(Memory<T> source)
@@ -107,6 +111,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
         m_low = 0;
         m_length = m_array.Length;
+        m_capacity = m_array.Length;
     }
 
     public slice(ReadOnlyMemory<T> source)
@@ -114,6 +119,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = source.ToArray();
         m_low = 0;
         m_length = m_array.Length;
+        m_capacity = m_array.Length;
     }
 
     public slice(array<T> array) : this((T[])array) { }
@@ -137,9 +143,29 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = array;
         m_low = low;
         m_length = length;
+        m_capacity = array.Length - low;
     }
 
     public slice(array<T> array, nint low = 0, nint high = -1) : this((T[])array, low, high) { }
+
+    // Full-slice-expression view (Go s[low:high:max] over an existing backing array): max bounds the
+    // CAPACITY (cap = max - low), which can end before the backing array does. The view SHARES the array.
+    public slice(T[]? array, nint low, nint high, nint max)
+    {
+        if (array is null)
+            throw new ArgumentNullException(nameof(array), "slice array reference is null.");
+
+        if (low < 0)
+            throw new ArgumentOutOfRangeException(nameof(low), "Value is less than zero.");
+
+        if (high < low || max < high || max > array.Length)
+            throw new ArgumentException($"Indices {nameof(low)}, {nameof(high)} and {nameof(max)} represent a range outside bounds of the array reference.");
+
+        m_array = array;
+        m_low = low;
+        m_length = high - low;
+        m_capacity = max - low;
+    }
 
     public slice(nint length, nint capacity = -1, nint low = 0)
     {
@@ -155,6 +181,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = new T[capacity];
         m_low = low;
         m_length = length;
+        m_capacity = capacity - low;
     }
 
     public T[] Source => ToSpan().ToArray();
@@ -170,9 +197,9 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     // ReSharper disable once ConvertToAutoPropertyWithPrivateSetter
     public nint Length => m_length;
 
-    public nint Capacity => (m_array?.Length ?? 0) - m_low;
+    public nint Capacity => m_capacity;
 
-    public nint Available => (m_array?.Length ?? 0) - m_length;
+    public nint Available => m_capacity - m_length;
 
     // Returning by-ref value allows slice to be a struct instead of a class and still allow read and write
     // Allows for implicit index support: https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/proposals/csharp-8.0/ranges#implicit-index-support
@@ -200,16 +227,39 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public ref T this[ulong index] => ref this[(nint)index];
 
-    public slice<T> this[Range range] => m_array.slice(range.Start.GetOffset(m_array.Length), range.End.GetOffset(m_array.Length), Capacity);
+    // Go reslice expression s[low:high]: bounds are RELATIVE to this slice (which may itself be an
+    // offset view over its backing array), a from-end index resolves against the slice LENGTH
+    // (s[low..] == Go s[low:], high = len(s)), and the result SHARES the backing array — writes
+    // through the sub-slice are visible through the original and vice versa. Go reslicing never copies.
+    public slice<T> this[Range range]
+    {
+        get
+        {
+            nint low = range.Start.IsFromEnd ? m_length - range.Start.Value : range.Start.Value;
+            nint high = range.End.IsFromEnd ? m_length - range.End.Value : range.End.Value;
+            return Reslice(low, high, m_capacity);
+        }
+    }
 
     public slice<T> Slice(int start, int length)
     {
-        return m_array.slice(start, start + length, Capacity);
+        return Reslice(start, start + length, m_capacity);
     }
 
     public slice<T> Slice(nint start, nint length)
     {
-        return Slice((int)start, (int)length);
+        return Reslice(start, start + length, m_capacity);
+    }
+
+    // Core of every Go slice expression over a slice: bounds are RELATIVE to this slice and checked
+    // like Go (0 <= low <= high <= max <= cap(s)); the result is a shared view over the same backing
+    // array with length high - low and capacity max - low.
+    internal slice<T> Reslice(nint low, nint high, nint max)
+    {
+        if (low < 0 || high < low || max < high || max > m_capacity)
+            throw RuntimeErrorPanic.SliceBoundsOutOfRange(low, high, max, m_capacity);
+
+        return new slice<T>(m_array ?? [], m_low + low, m_low + high, m_low + max);
     }
 
     public nint IndexOf(in T item)
@@ -245,7 +295,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public slice<T> Clone()
     {
-        return m_array.slice();
+        return this; // a slice is a view over its backing array; copying the header is Go's s2 := s
     }
 
     public IEnumerator<(nint, T)> GetEnumerator()
@@ -482,7 +532,7 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     int IReadOnlyCollection<T>.Count => (int)m_length;
 
-    T IReadOnlyList<T>.this[int index] => this[m_low + index];
+    T IReadOnlyList<T>.this[int index] => this[index]; // the ref indexer is already m_low-relative
 
     bool ICollection<T>.IsReadOnly => false;
 
@@ -614,20 +664,23 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
         if (elems.Length <= slice.Available)
         {
+            // Within capacity: Go appends IN PLACE into the shared backing array — the writes are
+            // visible to every slice sharing it — and the result is the same view, one longer.
             Array.Copy(elems, 0, slice.m_array, slice.High, elems.Length);
-            return slice.slice(high: slice.High + elems.Length);
+            return new slice<T>(slice.m_array, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity);
         }
 
-        nint newCapacity = CalculateNewCapacity(slice, slice.m_array.Length + elems.Length);
+        // Beyond capacity: reallocate and DETACH from the original backing array, like Go.
+        nint newCapacity = CalculateNewCapacity(slice, slice.Length + elems.Length);
         newArray = new T[newCapacity];
 
-        Array.Copy(slice.m_array, newArray, slice.Length);
+        Array.Copy(slice.m_array, slice.m_low, newArray, 0, slice.Length);
         Array.Copy(elems, 0, newArray, slice.Length, elems.Length);
 
-        return new slice<T>(newArray, slice.Low, slice.High + elems.Length);
+        return new slice<T>(newArray, 0, slice.Length + elems.Length);
     }
 
-    private static nint CalculateNewCapacity(in slice<T> slice, int neededCapacity)
+    private static nint CalculateNewCapacity(in slice<T> slice, nint neededCapacity)
     {
         nint capacity = slice.Capacity;
 
@@ -662,39 +715,35 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
 public static class SliceExtensions
 {
-    // slice of a slice helper function:
+    // slice of a slice helper function — bounds are RELATIVE to the slice (Go semantics; the source
+    // slice may itself be an offset view over its backing array), defaults are Go's (missing high =
+    // len(s), missing max = cap(s)), and the result SHARES the backing array:
     //      s = s[2:]    => s = s.slice(2)
     //      s = s[3:5]   => s = s.slice(3, 5);
     //      s = s[:4]    => s = s.slice(high:4)
     //      s = s[1:3:5] => s = s.slice(1, 3, 5) // Full slice expression
     public static slice<T> slice<T>(this in slice<T> slice, nint low = -1, nint high = -1, nint max = -1)
     {
-        return slice.m_array.slice(low == -1 ? slice.Low : low, high == -1 ? slice.High : high, max);
+        return slice.Reslice(low == -1 ? 0 : low, high == -1 ? slice.Length : high, max == -1 ? slice.Capacity : max);
     }
 
-    // slice of a C# array helper function
+    // slice of a C# array helper function — Go slicing always produces a SHARED view over the array
+    // (never a copy); max (the full-slice-expression bound) restricts capacity below the array's end
     public static slice<T> slice<T>(this T[] array, nint low = -1, nint high = -1, nint max = -1)
     {
         if (low == -1)
             low = 0;
 
-        if (high > -1 && max > -1)
-        {
-            nint length = high - low;
-            nint capacity = max - low;
-
-            if (capacity == array.Length)
-                return new slice<T>(array, low, high);
-
-            slice<T> fullSlice = new(length, capacity);
-            Array.Copy(array, low, fullSlice.m_array, 0, length);
-            return fullSlice;
-        }
-
         if (high == -1)
             high = array.Length;
 
-        return new slice<T>(array, low, high);
+        if (max == -1)
+            max = array.Length;
+
+        if (low < 0 || high < low || max < high || max > array.Length)
+            throw RuntimeErrorPanic.SliceBoundsOutOfRange(low, high, max, array.Length);
+
+        return new slice<T>(array, low, high, max);
     }
 
     // slice from a Span helper function

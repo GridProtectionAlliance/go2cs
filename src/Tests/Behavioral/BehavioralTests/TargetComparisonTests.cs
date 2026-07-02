@@ -539,6 +539,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckSlice3IndexWideBound() => CheckTarget("Slice3IndexWideBound");
 
     [TestMethod]
+    public void CheckSliceAliasing() => CheckTarget("SliceAliasing");
+
+    [TestMethod]
     public void CheckSolitaire() => CheckTarget("Solitaire");
 
     [TestMethod]
