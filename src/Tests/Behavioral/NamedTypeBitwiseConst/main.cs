@@ -18,10 +18,20 @@ public static Tag Context(this Tag t) {
     return (Tag)(t | (uint8)classContext);
 }
 
+[GoType("num:uint64")] partial struct word;
+
+internal static readonly UntypedInt tagBits = 19;
+
+internal static word low(this word w) {
+    return (word)(w & (uint64)(((1 << (int)(tagBits)) - 1)));
+}
+
 internal static void Main() {
     Tag t = 0x10;
     fmt.Println((uint8)t.Constructed());
     fmt.Println((uint8)t.Context());
+    word w = 0xABCDEF012345UL;
+    fmt.Println((uint64)w.low());
 }
 
 } // end main_package

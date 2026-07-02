@@ -377,6 +377,52 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 				}
 			}
 
+			// The same for a NAMED-numeric result — `tp & (1<<taggedPointerBits - 1)` (runtime
+			// tagptr_64bit.go, taggedPointer over uint64): the computed mask renders as an
+			// UntypedInt-typed C# expression, and `taggedPointer & int` has no operator (CS0019).
+			// Cast the computed operand to the result's UNDERLYING basic (`(uint64)(1<<bits - 1)`
+			// — the named type itself would be CS0030), after which the named operand's implicit
+			// underlying conversion binds. Gated tightly to an ARITHMETIC-shaped constant operand
+			// containing a named untyped-const ref: a BITWISE-shaped constant operand (`m0 & m`,
+			// `a | b`) is recursively emitted with its own concrete `(type)(…)` wrap and casting
+			// again just doubles it; pure-literal masks convert as C# constants and need no cast.
+			arithConstOperand := func(operand ast.Expr) bool {
+				for {
+					paren, ok := operand.(*ast.ParenExpr)
+
+					if !ok {
+						break
+					}
+
+					operand = paren.X
+				}
+
+				binary, ok := operand.(*ast.BinaryExpr)
+
+				if !ok {
+					return false
+				}
+
+				switch binary.Op {
+				case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
+				default:
+					return false
+				}
+
+				return v.isComputedConstOperand(operand) && v.containsUntypedNamedConstRef(operand)
+			}
+
+			if operandCast := v.concreteNumericCSType(binaryType); operandCast != "" &&
+				binaryTypeName != "nuint" && binaryTypeName != "nint" && binaryTypeName != "uintptr" {
+				if arithConstOperand(binaryExpr.X) {
+					leftOperand = fmt.Sprintf("(%s)(%s)", operandCast, leftOperand)
+				}
+
+				if arithConstOperand(binaryExpr.Y) {
+					rightOperand = fmt.Sprintf("(%s)(%s)", operandCast, rightOperand)
+				}
+			}
+
 			// A computed untyped-constant operand — a mask like `(1 << k) - 1` or `~(pageSize - 1)`
 			// — in a bitwise op with a NATIVE-int result (`nuint`/`nint`/`uintptr`) is emitted as a
 			// bare C# `int` expression (it involves a non-const native value such as a cast, so it is
