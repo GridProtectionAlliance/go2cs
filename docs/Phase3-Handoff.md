@@ -15,9 +15,22 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 50 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 47 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): tuple-reassigned pointer param repoints its box (`cc39fd0e6`; CS0029 −3,
+  50 → 47).** `(left, x, idx) = binarySearchTree(…)` (mgcstack) / `pp, _ = pidleget(0)` (proc)
+  assigned the ж<T> tuple component into the deref'd value alias — the box-reassignment triggers
+  matched the RHS element-wise and never saw a deconstruction (element 0 additionally hid behind the
+  whole-*types.Tuple expression type). Per-element RHS type now comes from the call's result tuple;
+  emitted form = the single-assign form verbatim incl. nil-safe (`pp = ref Ꮡpp.DerefOrNil()`).
+  **Gated to REASSIGNED elements — the whole-stdlib audit caught the first cut firing on `:=`-declared
+  elements shadowing a param's name (x509/routing_tree, re-alias of an undeclared name); a declared
+  pointer local IS the box.** Corrected audit: exactly 4 files (targets + math/big + net/udpsock
+  latents pre-cleared). CS0029 remaining 5: mheap ×2 = double-pointer **special (parked family),
+  panic ×1 = reinterpret-deref paren in a tuple return, string ×1 = empty named-array composite
+  `tmpBuf{}` → `new byte[]{nil}` (the pm{} family), tracetime ×1 = CS0118-entangled same line.
+  Test: PointerParamNilWalk extension. Suite 215/215.
 - **2026-07-02 (latest): CS0103 IS EXTINCT — element address of any slice-typed base (`b28495a5d`;
   −1, 51 → 50).** The slice element-address arm was ident-gated, so a base without a bare identifier
   (a method-CALL result `&b.stk()[0]` mprof, syscall's `&StringByteSlice(s)[0]`, reflect's
@@ -974,21 +987,24 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at 50, EXACT (output is byte-deterministic, `32fd49a45`). **CS0103 is
-EXTINCT** (`b28495a5d` — the slice element-address arm now fires on the base TYPE, not just a bare
-ident: `&b.stk()[0]` → `Ꮡ(b.stk(), 0)`; 7-file whole-stdlib diff, all the same class, incl. an
-os/dir_windows copy-box lost-write latent). Earlier this session: slice ALIASING merge (`86566b9ef`),
-explicit `uintptr → ж<T>` operator (`d0a935138`), embed-call-on-ref-receiver (`308debde7`), benchmarks
-merge (`8ea5253e5`+`02470cc93` — golib span-append reconciled by hand with the aliasing rewrite).
+This session (overnight run): runtime is at 47, EXACT. Landed tonight: CS0103 EXTINCT (`b28495a5d`
+— slice element-address fires on base TYPE: `Ꮡ(b.stk(), 0)`); tuple-reassigned pointer param
+(`cc39fd0e6` — box repoint + re-alias extended to tuple deconstructions, gated to REASSIGNED
+elements after the audit caught a `:=`-shadow over-fire). Earlier: slice ALIASING merge
+(`86566b9ef`), explicit `uintptr → ж<T>` (`d0a935138`), embed-call-on-ref-receiver (`308debde7`),
+benchmarks merge (`8ea5253e5`+`02470cc93`).
 
-Recommended NEXT root — **CS0029 box↔value triage (8):** implicit-conversion mismatches, previously
-characterized as linked-list assignment shapes (`x = *y` / `*x = y` box-vs-value). Re-bucket, read all
-8 sites' Go source + emitted C#, group by shape; if one gate covers several, fix that ONE root and log
-the rest (the make-len-cast precedent: triage revealed one family). May share a gate with the
-pointer-walk machinery (`Ꮡp = p.next; p = ref Ꮡp.val` re-alias family — see PointerParamWalk /
-PointerParamNilWalk in ConversionStrategies). Fallback: CS1929 (6: 4 = mprof UnsafePointer
-Load/StoreNoWB extension-shadowing — VERIFY it isn't the parked named-over-array entanglement before
-picking; + 1 cross-pkg method-promotion residual + 1 double-box).
+Recommended NEXT root — **the empty named-array composite (string.cs:199, 1 + latents):** Go
+`tmpBuf{}` (`type tmpBuf [32]byte`, an EMPTY composite of a named-over-array) emits
+`new tmpBuf(new byte[]{nil}.array())` — a NilType element inside a byte array literal (CS0029
+NilType→byte). The composite-literal emission for an empty named-collection composite fabricates a
+nil ELEMENT instead of an empty/default construction (`new tmpBuf()` or `default`). Same family as
+the logged `pm{}` empty named-slice composite latent — fixing the composite emission likely clears
+both shapes. Small contained gate (composite-literal conversion, likely convCompositeLit).
+Fallbacks: panic.cs:909 reinterpret-deref paren placement in a tuple return (`((ж<Action>)(uintptr)
+(add(…))).val` — the `.val` must wrap the WHOLE cast; extra-paren family, ccfb952b0 kin); then
+CS1503 8 re-triage / CS0021 7 re-triage; CS1929 6 (VERIFY the 4 mprof extension-shadowing aren't
+the parked named-over-array entanglement first).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
