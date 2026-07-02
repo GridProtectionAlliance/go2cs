@@ -345,6 +345,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMapSamePackageTypes() => CheckTarget("MapSamePackageTypes");
 
     [TestMethod]
+    public void CheckMethodExpression() => CheckTarget("MethodExpression");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

@@ -520,6 +520,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A Go METHOD EXPRESSION — `(*timers).run`, the unbound method as a func value whose first
+	// parameter is the receiver (runtime time.go's `abi.FuncPCABIInternal((*timers).run)`) —
+	// selects a method off a TYPE. Emitting the selector naively renders the type in value
+	// position (`(ж<timers>).run` — CS0119/CS1503). Go types the expression as the func signature
+	// with the receiver prepended; render that signature as the concrete delegate type and cast
+	// the method's static form to it: `(Func<ж<timers>, int64, int64>)run` — for a `[GoRecv]`
+	// method the RecvGenerator's ж-overload matches the delegate exactly, and a direct-ж method's
+	// primary form does. FuncPCABIInternal-style `any` parameters then take a real delegate.
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodExpr {
+		delegateType := convertToCSTypeName(v.getCSTypeName(v.info.TypeOf(selectorExpr)))
+		return fmt.Sprintf("(%s)(%s)", delegateType, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+	}
+
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
 	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
 	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property
