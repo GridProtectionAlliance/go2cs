@@ -15,22 +15,44 @@
 
 ## Where things stand (2026-07-01)
 
-- **`runtime` is the foundation and the current frontier — now at ~59 real errors (62 measured; see the
-  nondeterminism note)** (down from 952 at the start of the campaign). It is the bottom of the dependency
-  graph and the **sole failing project**, but read the next bullets.
-- **2026-07-01 (latest): unsafe.Pointer param returned whole is a plain value return (`ecfc7dbbf`;
+- **`runtime` is the foundation and the current frontier — now at 59 errors, a count that is now
+  EXACT and REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the
+  dependency graph and the **sole failing project**, but read the next bullets.
+- **2026-07-01 (latest): CONVERTER OUTPUT IS NOW BYTE-DETERMINISTIC (`32fd49a45`) — the campaign's
+  ±10 jitter is DEAD.** Two consecutive full-stdlib reconverts now `diff -rq` to **ZERO files across
+  all 305 packages** (previously dozens flipped), and the error count is stable at 59 both runs (3
+  CS0019 were phantom errors manufactured by the converter's own race). The "abi.ΔString flips with
+  map order" characterization from iteration 29 led to THREE order-dependent mechanisms, all fixed:
+  1. **Per-file goroutines (main.go)** — files converted CONCURRENTLY over shared package globals
+     (`-parallel` gates packages, which is forced to 1; per-FILE concurrency was unconditional):
+     `initFuncCounter` claimed initΔN in completion order; `getGlobalTempVarName` was an
+     UNSYNCHRONIZED map (real data race); and `loadImportedTypeAliases` marked an imported
+     package_info "parsed" BEFORE parsing finished, so a racing file skipped the wait and emitted the
+     imported renamed const BARE (`abi.String` → CS0019 ×3, present or absent by scheduling luck).
+     Files now convert sequentially in sorted order — for FREE: 3m42s concurrent vs 3m39s sequential
+     (the cost is go/packages loading, not emission).
+  2. **The stdlib queue (stdLibConverter.go)** — DFS roots iterated a map (queue order flipped
+     run-to-run), and GOROOT-VENDORED dependency edges were silently DROPPED (`golang.org/x/…`
+     import vs `vendor/golang.org/x/…` key; isStdLib's dot-check rejected it), so bidirule could
+     convert BEFORE bidi and emit `bidi.Direction` bare (bidi's package_info didn't exist yet).
+     Sorted roots + vendored-key resolution + set-membership gate; queue order now
+     bidi → bidirule → norm → idna (dependency-correct every run).
+  3. **Multi-box re-alias order (visitAssignStmt.go)** — `(Ꮡx, Ꮡy) = (Ꮡy, Ꮡx)` emitted its
+     `n = ref Ꮡn.val` refreshers in map order (math/big int.cs flipped). Sorted.
+  Verification: recon23-vs-recon24 zero-diff; corpus byte-identical 213/213 (no golden churn — the
+  strongest over-fire proof class); suite green. **Downstream effects: (a) reconverts are now
+  RE-USABLE as goldens — measurement noise is gone; (b) `initΔN`/`_ᴛN` indices settled to canonical
+  file order (one-time churn absorbed in the committed corpus, which was already byte-identical);
+  (c) x/net + x/text vendor packages now convert AFTER their deps, so their imported-alias emissions
+  (`bidiꓸClass` etc.) are complete and correct.** ConversionStrategies has a new *Deterministic
+  Output* section recording the guarantee.
+- **2026-07-01: unsafe.Pointer param returned whole is a plain value return (`ecfc7dbbf`;
   CS0103 −4).** The return-path pointer-param boxing (`return p` → `Ꮡp`) fired on the UnsafePointer
   BASIC, but such a param renders as a plain VALUE with no box → CS0103 `Ꮡzero`/`Ꮡv`/`Ꮡfd` (map.go
   mapaccess1/2_fat, mem_windows, panic readvarintUnsafe tuple). Gate: the returned param's own type must
   be a genuine `*types.Pointer`. Test: UnsafePointerParamPin extension (whole/tuple/genuine-*T control).
   Suite green (213). CS0103's remaining 3 = different sub-shapes (a value-receiver box miss
   mgcscavenge ×2, a receiver materialization mprof ×1).
-- **⚠ NONDETERMINISM ROOT CHARACTERIZED (the campaign's ±10 jitter, now precisely pinned): the abi
-  package's Kind-const-vs-method collision classification flips with map iteration order across
-  reconverts** — recon19 emitted `abi.ΔString` (correct); recon20 emitted `abi.String` (binds the method
-  group → CS0019 ×3 in arena/cgocall). Same converter both times; the identical abi type.cs proves the
-  CONSUMER-side rename decision is order-dependent (the imported-package collision registry). **QUEUE
-  THIS NEXT — determinism is a quality gate for goldens, measurements, and the milestone tag itself.**
 - **2026-07-01: string-literal spread wrapped as @string (`c5c446110`; CS1061 −1, 64 → 63) +
   an HONEST REVERT.** (1) `append(b, "runtime error: "...)` (error.go) rendered the literal `"…"u8`
   (ReadOnlySpan — no spread property); the spread emission now wraps a direct string-literal source as
@@ -649,19 +671,27 @@ singles.**
 field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask IArray-view + ISlice-copy
 (`adc8546cc`, −12, generator+golib). ⚠ The characterized contained/approachable roots are now DRY except
 Δrtype.TFlag — what remains is dominated by the architectural S-families.**
-- **NEXT — the characterized frontier, roughly cleanest-first:**
-  1. **Δrtype embedded-pointer promotion (4):** Str/TFlag×2/Kind_ — TypeGenerator field promotion through
-     an embedded `*abi.Type` (cross-package). Generator promotion machinery (S3-adjacent). The last
-     multi-error non-architectural root.
-  2. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
+- **NEXT — the characterized frontier at 59 (determinism DONE `32fd49a45`; Δrtype embed promotion DONE
+  `38212b635`; element-address family DONE `a342d25e7`), roughly cleanest-first:**
+  1. **CS0121 `add()` ambiguity (6, ONE shape):** runtime has both `func add(p unsafe.Pointer, x uintptr)`
+     and `func (p *notInHeap) add(…)` — the method emits a static `[GoRecv]` overload colliding with the
+     free function for `add(p, n)` calls (both bind unsafe.Pointer-vs-ж<notInHeap> first params). The
+     type-vs-method Δ-collision machinery may extend to func-vs-method. Possibly the cleanest multi-error
+     root left.
+  2. **CS0103 remnants (3):** a value-receiver box miss (mgcscavenge ×2) + a receiver materialization
+     (mprof ×1) — small, characterized, likely independent gates.
+  3. **CS0030 managed-referent (9, ж<T>-model): gclinkptr(4)/Δguintptr/puintptr/muintptr(3) →
      unsafe.Pointer + 2 singletons (`lfstack → Δhex`, `UntypedInt → unsafe.Pointer`).** MODEL holding
      `ж<T>` directly per the user's model (like `core/sync/atomic` atomic.Pointer<T> / `reflectlite`
      `object? m_target`), NOT a raw round-trip. The architectural S1 centerpiece — a dedicated iteration;
-     engage the user on the model design first.
-  3. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink`, `**m` needs a second deref);
-     ReadOnlySpan `ꓸꓸꓸ` spread (error.cs). *(CS0149 (2) = raw-memory delegate → GoManualConversion stub
-     candidate, SKIP for a dedicated stub pass.)*
-  *(Element-address-of-nested-field family DONE via `a342d25e7`.)*
+     **the A/B decision is PENDING WITH THE USER** (A faithful managed-slot now / B copy-box compile-
+     milestone now + faithful as the first Phase-4 ticket; stated lean B).
+  4. **CS0029 box↔value family (8):** linked-list assignment shapes (`x = *y` / `*x = y` box-vs-value
+     mismatches) — needs per-site shape triage; may share a gate with the pointer-walk machinery.
+  5. **Singles:** double-pointer selector (proc.cs `&(*pprev).alllink` — ENTANGLED with the &GLOBAL
+     copy-box latent, rides with that model); CS1929 extension-shadowing (4, mprof UnsafePointer
+     Load/StoreNoWB). *(CS0149 (2) = raw-memory delegate → GoManualConversion stub candidate, SKIP for a
+     dedicated stub pass.)*
 - **DONE this campaign (S1-fork convert-native + the earlier families):** named-numeric reinterpret
   `(*uint64)(*lfstack)` (`f19153a9e`, −13); unsafe.Pointer reinterpret `(*T)(p)` (`9e30a1c5b`, −23); CS8917
   lambda-const-return (`0ec8bac1c`); CS0161 switch-default (`a99d32f81`). (CS8917 residual pre-existing, out
@@ -888,131 +918,56 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session: runtime is at ~91. **MILESTONE: ALL CS0266, CS0841, CS0136, CS8030, CS0161, CS8917, CS0206
-cleared; TWO S1-fork convert-native reinterpret wins (`9e30a1c5b` −23; `f19153a9e` −13); make-len-cast
-(`438d633a0`, −5); 3-index slice-bound cast (`cc1255754`, −2); FromRef deref-alias pin (`016ce07ef`, −3).**
-Last session fixed the pin helper's ref target: a deref-aliased pointer param/receiver renders as the value
-alias (ref-local), so `FromRef(ref (p).val)` was `.val` on a nuint (CS1061, select/heapdump) or on the
-[GoType num] wrapper's get-only `val` property (CS0206, guintptr.cas); now `FromRef(ref p)` via
-`exprIsDerefAliasedPointer`, with a HARDENING of that helper's receiver arm (rendered==raw) after a repro
-proved an inner local shadowing the receiver mis-took the gate into a compiling-but-garbage pin. Test
-`UnsafePointerParamPin` (param/receiver/shadowed-receiver/box-control, output vs Go); suite green (210),
-zero churn; verifier confirmed 91 exact + corpus over-fire audit clean.
+This session: runtime is at 59 — and that count is now EXACT: converter output is BYTE-DETERMINISTIC
+(`32fd49a45`; two consecutive full reconverts diff to ZERO across all 305 packages). Sequential per-file
+conversion (was concurrent goroutines over shared globals — initΔN claim order, an unsynchronized blank-
+name counter, and the imported-alias parse race that manufactured 3 phantom CS0019), sorted topo-queue
+roots, GOROOT-vendored dependency edges resolved (bidirule no longer converts before bidi), sorted
+multi-box re-alias emission. Sequential costs nothing (3m39s vs 3m42s). Reconvert-to-reconvert diffs are
+now a valid regression instrument.
 
-**⚠ The CLEAN contained converter roots are THINNING** (read the strategy banner at top +
-`Baseline-vs-FullConversion.md` "The corrected end-state" + `Phase3-AutonomousLoop.md`). The frontier at 91
-is mostly generator-fraught, architectural, or a few uncharacterized small clusters — re-triage a fresh
-reconvert carefully and pick, roughly cleanest-first:
-(1) **Uncharacterized small clusters — try FIRST.** CS1061 `ж<m>.Ꮡpark` (2 — a field-box accessor missing on
-`ж<runtime_package.m>`; possibly the box-accessor family like `04a5322f7`) and `Δrtype.TFlag` (2 — verify vs
-S3 abi-metadata); CS0117 (3, unknown); CS0149 (2); re-triage CS1503 `slice<uint>→slice<byte>` (2). *(The
-`nuint.val` pair is DONE, `016ce07ef`.)*
-(2) **CS0030 managed-referent branch (9, ж<T>-model): gclinkptr/Δguintptr/puintptr/muintptr → unsafe.Pointer** —
-MODEL holding ж<T> directly per the user's model (like `core/sync/atomic` atomic.Pointer<T>); the genuine
-architectural S1 case, a dedicated careful iteration.
-(3) **⚠ GENERATOR-fraught — NOT a quick win (both options have traps):** `pallocBits → IArray` (5) + `pMask →
-@string` copy (4), the InheritedTypeTemplate collection-interface family (full analysis in *Where things stand*).
-Option (a) breaks the 7 `(*pageBits)(b)` reinterprets; option (b) [wrapper forwards IArray] was ALREADY tried and
-REVERTED for lost-writes. A correct fix forwards IArray to the *ref* of the inner value (no copy) AND keeps the
-pallocBits↔pageBits conversion — a careful dedicated generator effort.
-**If candidate (1) runs dry, the remainder is architectural/generator-fraught → the iteration-15-style signal to
-slow down and consider whether these need the user's models / a multi-session design rather than autonomous
-grinding.** Remaining singletons (CS0128 escape-hoist, CS8175/CS1593 S5/S6, CS8120 dup-case,
-CS0118/CS0119/CS0019 S6) are architectural / risky / rabbit-holes.
-FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim — the standalone runner only
-rebuilds the exe when a `.go` is newer, so a committed converter change false-greens on a stale binary. After
-any emitted-form change run `run-behavioral.ps1 --update-targets` (post fresh build) for ALL affected goldens.
-⚠ gpg-agent may TIMEOUT on the signed commit — relaunch `gpgconf --launch gpg-agent`; if it still needs a
-passphrase, STOP and ask the user to unlock the key (never bypass signing).
-⚠ **testhost/verifier caveat: a spawned verifier that `git stash`es the converter files can leave the MSTest
-`Check*` registrations (from UpdateTestTargets) reverted — re-run UpdateTestTargets and re-verify the 4
-`*Tests.cs` are staged before committing a NEW test.**
+Recommended NEXT root — **CS0121 `add()` func-vs-method ambiguity (6, ONE shape; mprof.cs 245/258/267,
+map.cs 184/191/195):** free `func add(p unsafe.Pointer, x uintptr)` and method `func (p *notInHeap)
+add(…)` both emit as static `add` overloads in `runtime_package`. NUANCE from prior triage: the call
+sites pass `(uintptr)@unsafe.Pointer.FromRef(ref b)` — a uintptr converts implicitly to BOTH first
+params (unsafe.Pointer via the uintptr operator AND ж<notInHeap> via…verify which path), hence ambiguous.
+Options to weigh: extend the Δ-collision machinery to func-vs-method (rename the METHOD's static emission
+— but [GoRecv] extension binding must keep working), or qualify/disambiguate at the CALL site (cast the
+first arg to the free function's exact param type). Verify the 6 sites all want the FREE function first.
+Fallbacks if entangled: CS0103 remnants (3: value-receiver box miss mgcscavenge ×2, receiver
+materialization mprof ×1), then CS0029 box↔value triage (8).
 
-⚠ **DISCOVERED latent (pre-existing, separate root — do NOT confuse with the fix above):** a BARE const shift
-to a native int (`var p uintptr = 1 << 40`, `q = 1 << 40`) emits as a 32-bit `(uintptr)(1 << (int)(40))` that
-MASKS the count (`40 & 31`) → 256 not 1099511627776 (SILENT wrong, at HEAD). Fix belongs in the shift-emission
-path (widen the left operand for a native/unsigned target — `((nuint)1) << k`, cf. `isWideShiftType`), NOT in
-`nativeIntConstCastType`. A `NativeIntBareShiftAssign` parity test FAILS until that lands — don't add it yet.
+PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
+B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
+cheaper roots run dry.
 
-⚠ **mprof indexed-element atomic (CS1929 ×4, mprof.cs 303/313/333/335) is NOT a clean root — S1/named-over-array
-ENTANGLED; do NOT pick it for the autonomous loop** *(classified 2026-06-30 next-session start, did not attempt).*
-`bh.val[i].Load()`/`.StoreNoWB()` where `bh` is `*buckhashArray` and `buckhashArray` is `[N]atomic.UnsafePointer`
-— a NAMED-over-array. The element box would be `bh.at<atomic.UnsafePointer>(i)`, but golib `ж<T>.at<TElem>`
-requires `val is IArray<TElem>`, which a named-over-array struct does NOT implement with eager shared backing (the
-REVERTED `pallocBits`→IArray trap — lazy alloc on a throwaway copy → lost writes). AND the surrounding
-`(ж<bucket>)(uintptr)(bh.val[i].Load())` is the S1 runtime-unsafe managed-referent / unsafe.Pointer reinterpret
-(compile-ONLY goal). Needs the user's named-over-array eager-shared-backing model (multi-session S3-array + S1),
-NOT a contained tweak. Park it.
-
-Recommended NEXT root — re-bucket fresh and pick the cleanest CONTAINED one (VERIFY it isn't itself cross-package /
-named-over-array entangled before committing). NOTE: ALL CS0266 are now DONE — both narrow-arith roots (first-operand
-`de2e80bd4` + return-path `a351c3cc6`) AND the mbitmap native-int const-arith root (`aa0c36b6e`); the stack.cs CS0841
-(method-call-receiver `cd86426ce`) is DONE. Remaining candidates:
-- **BARE const shift to a native int (SILENT-wrong latent, ~2+ sites, NOT yet a compile error).** `var p uintptr =
-  1 << 40` emits `(uintptr)(1 << (int)(40))` — a 32-bit shift masking the count → wrong value. Fix the shift-EMISSION
-  path (widen the left operand to the native/unsigned target width — `((nuint)1) << k`, reuse `isWideShiftType`), NOT
-  `nativeIntConstCastType`. Behavioral (parity) test is the gate; a `NativeIntBareShiftAssign` test FAILS until this
-  lands. Verify how many runtime/stdlib sites actually hit it (the verifier's scan found real sites use VARIABLE shift
-  amounts, so this may be low-yield for runtime — but it is a genuine correctness bug worth fixing).
-- **CS0841 — ALL DONE** (stack.cs plain, malloc `Δp` box-accessor, mgcsweep `sʗ3` closure-capture, traceallocfree
-  `Δtrace` global-shadow). CS0266 also all done. The shadow/rename/cast family is fully cleared.
-- **CS8030 (4) — DONE** (`a59e760b7`, closure-return-signature). **CS0021 (10) — TRIAGED = ARCHITECTURAL, SKIP:**
-  malloc `(*[2]uint64)(x)[i]` is the S1 unsafe-pointer reinterpret; mgcscavenge/proc/traceback (`m.scavenged[i]`,
-  `mp.cgoCallers[0]`) are named-over-array indexing (eager-shared-backing territory). **CONST-shadow follow-up =
-  N/A** (0 CS0844 in the runtime bucket, confirmed this session).
-- **CS0103 (~7) and a CS1503 (~24) sub-case — triage NEXT (still uncharacterized).** CS0103 "name does not
-  exist" is partly S5 (closure-captured-pointer box `ᏑmToFlush`, see the S5 roadmap item) — but read each; a
-  simple undeclared-name emission bug may hide among them. CS1503 (arg-conversion) is mostly S1/S3 but re-read
-  for a contained sub-case. If they're all S1/S3/S4/S5-architectural, STOP.
-- **named-result-CLOSURE gap (DISCOVERED this session; verify it's in the bucket first).** A `func() (a, b int)
-  {…}` literal never emits its own `a`/`b` named-result local declarations — only `visitFuncDecl` does — so it
-  drops/mis-returns results (a compile error if reached). The `a59e760b7` fix now emits the correct `return
-  (a, b)` operand level but can't cure the missing decls. If a named-result closure appears in the runtime
-  bucket, emit named-result locals for function literals too (mirror `visitFuncDecl`'s decl emission in
-  `convFuncLit`) — a clean contained follow-up.
-- **CS0117 (3)** — pinner.cs `pinnerBits.Ꮡx` — likely NAMED-OVER-ARRAY (the pinnerBits→gcBits/array family). VERIFY;
-  if named-over-array, SKIP (architectural, the REVERTED eager-shared-backing territory).
-- **proc.cs `Δtrace` (last CS0136) — INVESTIGATED & DECLINED (see Where-things-stand ⚠).** Subtle collision-rename
-  × shadow-rename × scope-nesting; needs a dedicated deep-dive on `declareVar`'s funcLevelVar-branch
-  `needsShadowing`. Do NOT re-attempt blindly.
-  Avoid CS0030 (S1), CS0029 (S4), CS0103 (S5), the mprof CS1929 (entangled), and the CS0121 add-overload (S1-uintptr).
-- **S3 `Δrtype` embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4 + CS1929 ×1, type.cs 34/35/42/46/78 + mbitmap 1899)** —
-  metadata-based member resolution in TypeGenerator (`GetStructDeclaration` only resolves source/same-package;
-  `internal/abi` is metadata-only). Meatier/architectural-ish; ~6 errors.
-- **S6 CS0121 `add` overload (mprof.cs 245/258/267, map.cs 184/191/195)** — free `add(unsafe.Pointer,uintptr)` vs
-  the `(*notInHeap).add` companion, both static in `runtime_package`. NOTE (found this session): the call sites
-  pass `(uintptr)@unsafe.Pointer.FromRef(ref b)` — a uintptr that converts implicitly to BOTH overloads (the
-  ambiguity), so it is SUBTLER than the sibling `UnsafePointerArgPassing` case (which passes the struct directly
-  and already resolves). The `(uintptr)` round-trip is S1-modeling territory — verify it isn't entangled first.
-
-OTHER characterized roots (pick by fresh bucket if drift shifts the top):
-- S2/S3 EMBEDDING promotion (CS1929 ×4): `time` `timeTimer.modify/stop/reset` (×3, `timeTimer` embeds `timer`
-  → needs `ж<timer>`) + `type.cs:42` `Δrtype.Uncommon` (`Δrtype` embeds `abi.Type`). The `Δrtype` one is the
-  CROSS-package metadata case below; the `time` one is same-package embedding promotion.
-- S3 `Δrtype` (reflect) embeds CROSS-PACKAGE `abi.Type` (CS1061 ×4: type.cs `.Str`/`.TFlag`/`.Kind_` 34/35/46/78
-  + the `.Uncommon` CS1929 + mbitmap.cs:1899 `ж<abi.Type>.Size_`) — needs metadata-based member resolution in
-  TypeGenerator (`GetStructDeclaration` only resolves source/same-package; `internal/abi` is a metadata-only DLL
-  ref). Meatier generator extension; ~6 errors.
-- S4 (CS0029 ~8: mgcstack ×2, mheap ×2, panic/proc/string/tracetime) pointer-reassign nil-safe re-alias
-  (a box-reassign was tried & REVERTED — NREs on nil; needs a nil-safe re-alias model, not a naive box swap).
-- S1 CS0030 bulk (~45): the accepted memory-layout-dependent runtime-unsafe code — the ONLY correct fix is
-  the user's managed-referent model (hand-rewrite guintptr/muintptr/… to hold `ж<T>` directly), a dedicated
-  multi-session redesign, NOT a raw uintptr round-trip (compiles-but-crashes trap).
+Standing cautions:
+- FORCE `cd src/go2cs && go build -o bin/go2cs.exe .` before any "suite green" claim (stale-exe
+  false-green). After any emitted-form change: `run-behavioral.ps1 --update-targets` post fresh build.
+- Reconvert with the HARD TIMEOUT pattern (timeout -k 30 600, marker INTO the log, retry once on 124).
+  Overlay = bash scratchpad/overlay.sh <recon>/core (it also restores the src/core manual files).
+- gpg-agent may TIMEOUT on the signed commit — `gpgconf --launch gpg-agent`; if it still needs a
+  passphrase, STOP and ask (never bypass signing). Commits LOCAL only until the milestone workflow.
+- NEVER sed package_info.cs (Edit only); paren-unwrap before AST shape-matching; name-gates must respect
+  Δ-shadow/ʗ-capture renames; MSBuild project refs are METADATA (cross-package = semantic model).
+- mprof indexed-element atomic (CS1929 ×4) is S1/named-over-array ENTANGLED — park it. proc.cs
+  double-pointer walk rides the &GLOBAL copy-box model. CS0128 (2) escape-hoist = rabbit hole.
+- Logged latents (do not trip over them): bare const shift to native int is SILENT-wrong (`1 << 40`
+  masks to 32-bit — fix in shift emission, widen the left operand); zero-valued struct array-field
+  backing is NULL (NRE, Phase-4-significant); string-local `&s` escape miss; range sub-slice detach
+  (task chip spawned); named-result CLOSURE decls missing; cross-pkg promoted METHOD calls.
 
 First steps:
-1. Reconvert + overlay + build runtime, bucket fresh (overlay.sh = measurement-loop memory body, PLUS copy
-   src/core manual files — *_impl.cs and the GoManualConversion .cs — over go-src-converted, else
-   internal/abi etc. fail on unimplemented partials; the memory's overlay.sh OMITS this, the handoff is
-   right). Re-bucket; DO NOT re-pick the mprof indexed-element atomic (classified entangled above — park it).
-2. Pick the cleanest CONTAINED root from the candidates above (S6 `add`-overload warm-up, `time` embedding, or
-   `Δrtype` metadata) — VERIFY it isn't cross-package / named-over-array entangled before committing. Implement
-   per the Workflow; gate with a behavioral test + adversarial verify + zero churn via check-no-regression.ps1
-   + ConversionStrategies.md + one focused commit.
+1. go build fresh; reconvert + overlay + build runtime -clp:ErrorsOnly; re-bucket (expect exactly 59;
+   any drift is now REAL signal, not noise).
+2. Characterize the 6 CS0121 sites; pick the disambiguation that keeps both the free-call and the
+   receiver-call forms compiling; behavioral test with output parity (a two-overload add() shape is easy
+   to reproduce); adversarial verify dialed to risk; corpus check; suite; ConversionStrategies.md; one
+   signed local commit.
 
-Closing ritual (REQUIRED at the end): update docs/Phase3-Handoff.md — check off the item with a result note,
-refresh the runtime count/date — then rewrite this "Next session prompt" block to point at the next
-unchecked item (re-bucket to pick the new top root). Commit the doc update. Then stop and hand me that
-prompt to kick off the following session.
+Closing ritual (REQUIRED): update docs/Phase3-Handoff.md — check off the item with a result note, refresh
+the runtime count/date — then rewrite this "Next session prompt" block for the next unchecked item.
+Commit the doc update. Then stop and hand me that prompt.
 ```
 
 ## Definition of done
