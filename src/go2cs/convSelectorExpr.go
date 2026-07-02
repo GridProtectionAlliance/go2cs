@@ -534,6 +534,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		return fmt.Sprintf("(%s)(%s)", delegateType, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
+	// A method call on a manually-converted foreign-receiver method (`gp.guintptr()` on a *g —
+	// see manualTypeOperations.go): the manual implementation captures the receiver's IDENTITY,
+	// so it takes the receiver BOX (`this ж<g>`). A deref-aliased pointer receiver (`ref var gp
+	// = ref Ꮡgp.val`) renders as the value alias, which binds neither the box form nor identity;
+	// emit the box itself — `Ꮡgp.guintptr()`.
+	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
+		if obj := sel.Obj(); obj != nil && v.isManualBoxReceiverMethod(obj) && v.exprIsDerefAliasedPointer(selectorExpr.X) {
+			if ident, ok := selectorExpr.X.(*ast.Ident); ok {
+				return fmt.Sprintf("%s%s.%s", AddressPrefix, v.getIdentName(ident), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+			}
+		}
+	}
+
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
 	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
 	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property

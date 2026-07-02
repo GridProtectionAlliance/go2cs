@@ -84,6 +84,25 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		return
 	}
 
+	// A manually-converted type (see manualTypeOperations.go) emits only a marker comment; the
+	// package's *_impl.cs declares the type. Both its plain and collision-renamed forms are
+	// recorded (a type-vs-method collision Δ-prefixes the TYPE — guintptr → Δguintptr) so the
+	// GoImplicitConv attribute emission can skip conversions referencing either rendering.
+	if v.isManualType(typeSpec.Name.Name) {
+		packageLock.Lock()
+		packageManualTypeNames[name] = true
+		packageManualTypeNames[getSanitizedIdentifier(typeSpec.Name.Name)] = true
+		packageLock.Unlock()
+
+		if !v.inFunction {
+			v.targetFile.WriteString(v.newline)
+		}
+
+		v.writeOutput("// type %s is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])", name)
+		v.targetFile.WriteString(v.newline)
+		return
+	}
+
 	// An unexported type used as an exported struct field must be emitted as public (CS0051/
 	// CS0052). Set the access modifier for the type-kind emitter below to consume.
 	if v.isPublicizedType(typeSpec.Name) {

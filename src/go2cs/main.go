@@ -342,6 +342,13 @@ var packageLock = sync.Mutex{}
 // concurrent file-visit barrier, bridges that gap. Guarded by packageLock.
 var packageDynamicTypeNames map[string]string
 
+// packageManualTypeNames records the CONVERTED names of this package's manually-converted
+// types (see manualTypeOperations.go), collected as visitTypeSpec skips their declarations.
+// Consumed by the GoImplicitConv attribute emission, which must not reference the skipped
+// auto forms (the *_impl.cs declares any conversion operators the call sites need). Guarded
+// by packageLock.
+var packageManualTypeNames map[string]bool
+
 func main() {
 	var goRoot, goPath, go2csPath string
 	var err error
@@ -598,6 +605,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		nameCollisions = make(map[string]bool)
 		globalTempVarCount = make(map[string]int)
 		packageDynamicTypeNames = make(map[string]string)
+		packageManualTypeNames = make(map[string]bool)
 		packageAddressedGlobals = make(map[types.Object]bool)
 		packagePublicizedTypes = make(map[types.Object]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
@@ -998,9 +1006,26 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
+			// A conversion referencing a manually-converted type must not emit — the generated
+			// operator would read the skipped auto form's numeric backing; the *_impl.cs declares
+			// any conversion operators its call sites need (see manualTypeOperations.go).
+			referencesManualType := func(typeNames ...string) bool {
+				for _, typeName := range typeNames {
+					if packageManualTypeNames[typeName] {
+						return true
+					}
+				}
+
+				return false
+			}
+
 			// Add new implicit conversions to package info file (hashset ensures uniqueness)
 			for sourceType, targetTypes := range implicitConversions {
 				for targetType := range targetTypes {
+					if referencesManualType(sourceType, targetType) {
+						continue
+					}
+
 					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", sourceType, targetType))
 				}
 			}
@@ -1008,6 +1033,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Add new inverted implicit conversions to package info file (hashset ensures uniqueness)
 			for sourceType, targetTypes := range invertedImplicitConversions {
 				for targetType := range targetTypes {
+					if referencesManualType(sourceType, targetType) {
+						continue
+					}
+
 					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceType))
 				}
 			}
@@ -1015,6 +1044,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Add new indirect implicit conversions to package info file (hashset ensures uniqueness)
 			for sourceType, targetTypes := range indirectImplicitConversions {
 				for targetType := range targetTypes {
+					if referencesManualType(sourceType, targetType) {
+						continue
+					}
+
 					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
 				}
 			}
@@ -1022,6 +1055,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Add new numeric conversions to package info file (maps ensure uniqueness)
 			for sourceType, targetTypes := range numericConversions {
 				for targetType, valueType := range targetTypes {
+					if referencesManualType(sourceType, targetType) {
+						continue
+					}
+
 					var inverted bool
 
 					if strings.HasPrefix(valueType, "imported:") {
@@ -1038,6 +1075,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// Add new indirect numeric conversions to package info file (maps ensure uniqueness)
 			for sourceType, targetTypes := range indirectNumericConversions {
 				for targetType, valueType := range targetTypes {
+					if referencesManualType(sourceType, targetType) {
+						continue
+					}
+
 					var inverted bool
 
 					if strings.HasPrefix(valueType, "imported:") {

@@ -65,6 +65,15 @@ func (v *Visitor) variadicElementType(elem types.Type) (typeName string, inline 
 }
 
 func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
+	// A declaration owned by a manual conversion (see manualTypeOperations.go) emits only a
+	// marker comment — the package's *_impl.cs supplies the implementation.
+	if v.isManualFuncDecl(funcDecl) {
+		v.targetFile.WriteString(v.newline)
+		v.writeOutput("// func %s is hand-converted with managed semantics — see the package's *_impl.cs ([module: GoManualConversion])", funcDecl.Name.Name)
+		v.targetFile.WriteString(v.newline)
+		return
+	}
+
 	v.inFunction = true
 	v.capturedVarCount = nil
 	v.tempVarCount = nil
