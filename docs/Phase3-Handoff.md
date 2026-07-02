@@ -15,9 +15,17 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 44 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 42 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): untyped-const argument to min/max (`db6445f7c`; CS1503 −2, 44 → 42).**
+  A named untyped const renders as its UntypedInt static, which the `params ReadOnlySpan<T>`
+  min/max overloads reject; cast to the call's Go-resolved type (`min(n, (uintptr)(maxObletBytes))`),
+  plus constant-valued siblings once one is cast. 6-file stdlib diff (targets + zip/bufio/
+  go-printer/regexp latents). Test: MinMaxBuiltin extension. **CS1503 triage ledger (6 left):
+  heapdump u8-literal wide index (contained single — next candidate); proc ж<ΔcgoCallers>→IArray
+  (named-over-array, parked); proc Range→nint (uncharacterized); stack u8-literal into print
+  vararg; symtab _func value→box routing; time method-group into vararg (S6-ish).** Suite 215/215.
 - **2026-07-02 (latest): deref-of-cast wraps before `.val` (`d9dbc9839`; CS0029 −1 + CS0149 −1,
   46 → 44).** The default deref appended a naked `.val`; on a type-CONVERSION operand (a C# cast)
   postfix re-binds onto the cast's INNER operand — panic.go's `return *(*func())(add(…)), true`
@@ -1006,22 +1014,22 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 44, EXACT. Tonight's roots: CS0103 EXTINCT
-(`b28495a5d`); tuple-reassigned pointer param (`cc39fd0e6`, CS0029 −3, audit caught a :=-shadow
-over-fire); empty named-collection composite (`2c352ff49`, CS0029 −1, 10-file class diff);
-deref-of-cast paren wrap (`d9dbc9839`, CS0029 −1 + CS0149 −1 — the proc "raw-metal delegate" was
-just precedence). CS0029 remaining 3: mheap ×2 double-pointer (parked), tracetime
-(CS0118-entangled). CS0149 remaining 1 (mprof — possibly genuinely raw-metal).
+This session (overnight run): runtime is at 42, EXACT. Tonight's roots: CS0103 EXTINCT
+(`b28495a5d`); tuple-reassigned pointer param (`cc39fd0e6`); empty named-collection composite
+(`2c352ff49`); deref-of-cast paren wrap (`d9dbc9839` — dissolved a "raw-metal" CS0149);
+min/max untyped-const cast (`db6445f7c`).
 
-Recommended NEXT root — **CS1503 8 re-triage:** argument-conversion mismatches, uncharacterized
-since the make-len/wide-index/3-index-bound roots cleared the earlier waves. Read all 8 sites'
-Go source + emitted C#, group by exact shape (the family precedents: cast a wide integer at a
-specific seam), pick the largest single-gate family, fix ONE root, log the rest. Fallbacks:
-CS0021 7 re-triage (earlier coarse triage said named-over-array indexing + S1 reinterpret —
-re-read fresh, the landscape has shifted); CS1929 6 (VERIFY the 4 mprof extension-shadowing
-aren't the parked named-over-array entanglement FIRST); tracetime CS0118+CS0029 pair
-(investigate the LINE once — `(w, _) = w.ensure(…)` deconstruction with a namespace-collision
-smell — may clear both).
+Recommended NEXT root — **heapdump.cs:637 u8-literal wide index (CS1503 ×1, contained):**
+`buf[n] = "0123456789abcdef"u8[(uintptr)(pc & 15)];` — indexing a u8 string-literal
+(ReadOnlySpan<byte>, int indexer) with a nuint. The wide-index cast family
+(castWideIntegerToInt) covers at()/element-address seams; the plain INDEX of a
+ReadOnlySpan-rendered string literal missed. Small gate in the index-expression emission —
+find where a string-literal base's indexer arg renders and route the index through the
+wide-int cast. Behavioral test: extend StringConvPostfix or ArrayWideIndexAddress with
+`"…"u8[uintptrIdx]` (output parity — byte values are stable).
+Fallbacks: symtab.cs:369 `_func` value→box routing miss (single); proc.cs:5393 Range→nint
+(read the site first); tracetime CS0118+CS0029 line pair; CS0021 7 re-triage; CS1929 6
+(VERIFY the mprof 4 aren't the parked named-over-array entanglement FIRST).
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
