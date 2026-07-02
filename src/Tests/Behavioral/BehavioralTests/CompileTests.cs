@@ -468,6 +468,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerRvalueFieldReceiver() => CheckTarget("PointerRvalueFieldReceiver");
 
     [TestMethod]
+    public void CheckPointerSelectorDeref() => CheckTarget("PointerSelectorDeref");
+
+    [TestMethod]
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]

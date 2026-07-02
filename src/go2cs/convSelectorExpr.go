@@ -546,24 +546,58 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
-	// Check if an expression contains an explicit dereference at any level
+	// Check if the selector BASE itself is an explicit dereference (or a pointer conversion whose
+	// result the special-cased branch below derefs). This must inspect only the base's own outermost
+	// shape — unwrapping parens and looking through a conversion-call's operand — NOT the whole
+	// subtree: a `*T` star buried in an ARGUMENT (`stringStructOf((*string)(e.data)).str`, where the
+	// star belongs to the conversion inside the call's argument) does not dereference the call's
+	// RESULT, and treating it as if it did skipped the auto-deref (`.str` on the returned `ж<T>` box,
+	// CS1061 — runtime arena.go; same for an extra-paren conversion base, mheap.go's
+	// `((*specialWeakHandle)(unsafe.Pointer(…))).handle`).
 	containsExplicitDeref := func(expr ast.Expr) bool {
-		found := false
-		ast.Inspect(expr, func(n ast.Node) bool {
-			if _, isStarExpr := n.(*ast.StarExpr); isStarExpr {
-				found = true
-				return false // Stop traversal if we found a star expression
+		for {
+			switch e := expr.(type) {
+			case *ast.ParenExpr:
+				expr = e.X
+				continue
+			case *ast.StarExpr:
+				return true
+			case *ast.CallExpr:
+				// A pointer-CONVERSION base `(*T)(p)` — the Fun is a parenthesized star — reaches the
+				// dedicated conversion branch below (which appends `.val` itself); a plain call result
+				// is NOT a deref regardless of stars inside its arguments.
+				if parenFun, ok := e.Fun.(*ast.ParenExpr); ok {
+					if _, isStar := parenFun.X.(*ast.StarExpr); isStar {
+						return true
+					}
+				}
+
+				return false
+			default:
+				return false
 			}
-			return true // Continue traversal
-		})
-		return found
+		}
 	}
 
 	// Get the original expression type and check if it's a pointer
 	if exprType := v.info.TypeOf(selectorExpr.X); exprType != nil {
-		// Check if there's an explicit dereference at any level in the expression
+		// Check if the selector base is itself an explicit dereference (or a pointer conversion)
 		if containsExplicitDeref(selectorExpr.X) {
-			if callExpr, ok := selectorExpr.X.(*ast.CallExpr); ok {
+			// Unwrap enclosing parens so an extra-paren conversion base — mheap.go's
+			// `((*specialWeakHandle)(unsafe.Pointer(…))).handle` — reaches the conversion branch
+			// (the same extra-paren blind spot the reinterpret routing had).
+			baseExpr := selectorExpr.X
+
+			for {
+				if paren, ok := baseExpr.(*ast.ParenExpr); ok {
+					baseExpr = paren.X
+					continue
+				}
+
+				break
+			}
+
+			if callExpr, ok := baseExpr.(*ast.CallExpr); ok {
 				// Check if the call expressions is a parenthesized expression
 				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
 					// For a pointer-conversion-then-method like `(*atomic.Uint32)(c).Store(v)`, the
