@@ -34,6 +34,12 @@ internal static uint64 peekVia(ж<lfstack> Ꮡp) {
     return load64(Ꮡ((uint64)(p)));
 }
 
+[GoType("num:uint64")] partial struct hexval;
+
+internal static uint64 describe(hexval v) {
+    return (uint64)v;
+}
+
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
     a = 956397711105UL;
@@ -42,6 +48,8 @@ internal static void Main() {
     fmt.Println(peekVia(Ꮡa));
     lfstack c = 42;
     fmt.Println(c.peek());
+    var h = ((hexval)(uint64)a);
+    fmt.Println(describe(h), (uint64)((hexval)(uint64)c));
 }
 
 } // end main_package

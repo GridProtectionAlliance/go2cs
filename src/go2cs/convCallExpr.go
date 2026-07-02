@@ -238,7 +238,21 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					return expr
 				}
 
-				if argType == nil || !types.Identical(argType.Underlying(), basic) {
+				// A NAMED numeric arg needs the underlying hop even when its underlying is
+				// IDENTICAL to the target's — `hex(work.full)` where full is `type lfstack uint64`
+				// and hex is uint64 (runtime mgc.go): the direct `(Δhex)full` is still a two-op
+				// user-defined chain (lfstack→uint64, uint64→Δhex) that C# won't build (CS0030).
+				// The identical-underlying skip below is right only for a BASIC arg, where the
+				// exact [GoType] operator binds directly.
+				argIsDistinctNamedNumeric := false
+
+				if argNamed, ok := types.Unalias(argType).(*types.Named); ok && argType != nil {
+					if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 {
+						argIsDistinctNamedNumeric = true
+					}
+				}
+
+				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) {
 					underlyingCS := v.getCSTypeName(basic)
 					inner := expr
 

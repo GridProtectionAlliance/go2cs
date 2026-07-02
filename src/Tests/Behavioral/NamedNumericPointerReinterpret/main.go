@@ -29,6 +29,16 @@ func (sc *sweepClass) peek() uint32 { return load32((*uint32)(sc)) }
 // A non-receiver pointer variable (not a deref-aliased receiver) also reinterprets — the box-deref arm.
 func peekVia(p *lfstack) uint64 { return load64((*uint64)(p)) }
 
+// Converting a NAMED numeric to a DIFFERENT named type over the IDENTICAL underlying —
+// runtime mgc.go's `hex(work.full)` (`type lfstack uint64` → `type hex uint64` print
+// diagnostics) — needs the underlying hop `((Δhex)(uint64)full)`: the direct cast is a two-op
+// user-defined chain C# won't build (CS0030). The emission skip that trusts the exact [GoType]
+// operator is right only for a BASIC-typed operand, so a named operand always hops.
+type hexval uint64
+
+//go:noinline
+func describe(v hexval) uint64 { return uint64(v) }
+
 func main() {
 	var a lfstack = 0xDEADBEEF01
 	var b sweepClass = 1234
@@ -37,4 +47,8 @@ func main() {
 
 	var c lfstack = 42
 	fmt.Println(c.peek()) // 42
+
+	// named → named, identical underlying: value-exact round trip
+	h := hexval(a)
+	fmt.Println(describe(h), uint64(hexval(c))) // 956397711105 42
 }
