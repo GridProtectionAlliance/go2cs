@@ -42,6 +42,35 @@ func localShadowsCollisionType() int {
 	return *pid + mark // 55 + 7 = 62
 }
 
+// `w` is a struct type; locals named after it (`w := &w{…}`) reproduce the runtime's pervasive
+// local-named-after-its-own-type idiom (`m := getg().m`).
+type w struct {
+	park  int
+	other int
+}
+
+//go:noinline
+func run(f func()) { f() }
+
+// capturedLocalNamedAfterType reproduces runtime rwmutex `lockSlow`'s shape: the field-address of a
+// type-named local taken INSIDE a closure that captures it. The capture renames the receiver (`wʗ1`),
+// but the ENCLOSING local `w` stays visible to the lambda, so a bare owning-type reference `w.Ꮡpark`
+// in the accessor binds to that `ж<w>` local (CS1061). The owning type must be package-qualified when
+// the receiver is the type-named variable OR its lambda capture (`wʗ1.of(main_package.w.Ꮡpark)`).
+// Guards boxAccessorType's capture-suffix collision arm.
+//
+//go:noinline
+func capturedLocalNamedAfterType() int {
+	w := &w{park: 30, other: 4}
+	got := 0
+	run(func() {
+		p := &w.park // &captured.field inside the closure — the rwmutex notesleep(&m.park) shape
+		*p = *p + 3
+		got = *p
+	})
+	return got + w.other // 33 + 4 = 37
+}
+
 func main() {
 	// &global.field routes through the box-field accessor: Ꮡh.of(holder.Ꮡmark).
 	p := &h.mark
@@ -71,4 +100,6 @@ func main() {
 	fmt.Println(h2.mark, h2.extra) // 5 6
 
 	fmt.Println(localShadowsCollisionType()) // 62
+
+	fmt.Println(capturedLocalNamedAfterType()) // 37
 }

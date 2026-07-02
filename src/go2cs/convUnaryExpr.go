@@ -65,8 +65,12 @@ func boxAccessorType(typeName, receiver string) string {
 	//     check alone misses it. A type is never shadow-renamed (types are package-level), so a
 	//     Δ-prefixed accessor type is always a collision type — qualifying is always value-correct.
 	//   - The type name equals the `.of()` RECEIVER variable (`m := getg().m; &m.park` →
-	//     `m.of(runtime_package.m.Ꮡpark)`) — a bare `m.Ꮡpark` binds to the `ж<m>` variable `m`.
-	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver {
+	//     `m.of(runtime_package.m.Ꮡpark)`) — a bare `m.Ꮡpark` binds to the `ж<m>` variable `m` — or the
+	//     receiver is that variable's lambda CAPTURE (`mʗ1`): inside `systemstack(func(){ notesleep(&m.park) })`
+	//     the captured receiver renames to `mʗ1`, but the ENCLOSING local `m` is still visible to the
+	//     lambda, so a bare `m.Ꮡpark` binds to it all the same (CS1061, runtime rwmutex `lockSlow`).
+	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
+		strings.HasPrefix(receiver, typeName+CapturedVarMarker) {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
 

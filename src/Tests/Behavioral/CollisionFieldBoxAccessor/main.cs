@@ -33,6 +33,27 @@ internal static nint localShadowsCollisionType() {
     return pid.val + Δmark;
 }
 
+[GoType] partial struct w {
+    internal nint park;
+    internal nint other;
+}
+
+internal static void run(Action f) {
+    f();
+}
+
+internal static nint capturedLocalNamedAfterType() {
+    var w = Ꮡ(new w(park: 30, other: 4));
+    nint got = 0;
+    var wʗ1 = w;
+    run(() => {
+        var p = wʗ1.of(main_package.w.Ꮡpark);
+        p.val = p.val + 3;
+        got = p.val;
+    });
+    return got + (~w).other;
+}
+
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
     p.val = 42;
@@ -50,6 +71,7 @@ internal static void Main() {
     var h2 = new holder(mark: 5, extra: 6);
     fmt.Println(h2.mark, h2.extra);
     fmt.Println(localShadowsCollisionType());
+    fmt.Println(capturedLocalNamedAfterType());
 }
 
 } // end main_package
