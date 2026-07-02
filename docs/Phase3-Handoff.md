@@ -15,9 +15,17 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 38 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 37 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
   graph and the **sole failing project**, but read the next bullets.
+- **2026-07-02 (latest): cross-package pointer-embed promoted method hop (`d5ba6b44e`; CS1929 −1,
+  38 → 37).** `t.Uncommon()` on Δrtype → explicit `t.Type.val.Uncommon()` (no generated forwarder
+  for metadata embeds). 9-file stdlib diff, all the class (reflectlite rtype, bufio.ReadWriter's
+  *Writer in fcgi/httputil/chunked, exec *ProcessState, template *Tree, unique *HashTrieMap).
+  CS1929 triage RECLASSIFIED the rest: mprof ×4 = the parked named-over-array family (NOT
+  extension-shadowing — a value element can't bind atomic's ж-extension); iface.cs:79 = double-box
+  (&GLOBAL pointer-global family). Value-receiver promoted calls (p.Hot()) remain a documented gap.
+  Test: CrossPkgUser Phase-4b extension (cross-assembly write-through).
 - **2026-07-02 (latest): a blank import emits NO using (`082b05f1b`; CS0118+CS0029 −2, 40 → 38).**
   `import _ "unsafe"` emitted `using _ = unsafe_package;` — hijacking C#'s `_` DISCARD file-wide;
   tracetime's `(w, _) = w.ensure(…)` bound the namespace alias (two errors, one line). Blank imports
@@ -1036,21 +1044,24 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
 Continue Phase 3 of go2cs. Read docs/Phase3-Handoff.md and CLAUDE.md first — they have the goal, the
 ALL-SHIPS-RISE principle, the per-defect Workflow, the measurement loop, and the session queue.
 
-This session (overnight run): runtime is at 38, EXACT. Tonight: b28495a5d, cc39fd0e6, 2c352ff49,
-d9dbc9839, db6445f7c, e20a840f4, 6c26a726a, 082b05f1b (blank-import discard hijack — 8 roots, 51→38).
+This session (overnight run): runtime is at 37, EXACT. Tonight (9 roots, 51→37): b28495a5d,
+cc39fd0e6, 2c352ff49, d9dbc9839, db6445f7c, e20a840f4, 6c26a726a, 082b05f1b, d5ba6b44e.
 
-FOR THE MORNING: (1) the managed-referent A/B (CS0030 9 — the largest remaining bucket); (2) golib
-slice nil-vs-empty conflation; (3) receiver-into-INTERFACE-field composite identity (~70 sites);
-(4) proc.cs:5393 Range→nint is CONFIRMED part of the ΔcgoCallers named-over-array family (now 4
-sites in proc: 3× CS0021 + 1× CS1503 — the named-over-array eager-shared-backing model would clear
-CS0021 7's majority + these; it and the A/B are the two big architectural decisions left).
+FOR THE MORNING — the remaining 37 is now dominated by architectural clusters needing decisions:
+(1) **managed-referent A/B** (CS0030 9 — largest bucket; lean B copy-box milestone);
+(2) **named-over-array model** (owns proc ΔcgoCallers ×4 [3 CS0021 + 1 CS1503] + mprof ×4 CS1929 +
+likely CS0021 majority — eager-shared-backing design needed);
+(3) golib slice nil-vs-empty conflation; (4) receiver-into-INTERFACE-field composite identity.
+Non-decision remnants: iface double-box single (&GLOBAL family), CS0021 re-triage residue,
+mheap ×2 double-pointer (parked), CS0128 2 escape-hoist, CS0149 1 raw-metal, CS1503 2 residual
+singles (stack u8-vararg, time method-group), proc-Δtrace CS0136 (declined), CS8175/CS8120/CS1593/
+CS0019/CS0119 singles.
 
-Recommended NEXT root — **CS1929 6 verification-triage:** the 4 mprof UnsafePointer Load/StoreNoWB
-"extension-shadowing" sites were characterized 10+ roots ago — VERIFY against the parked
-named-over-array entanglement first (mprof's buckhashArray is [179999]atomic.UnsafePointer —
-likely the SAME family); the +1 cross-pkg method-promotion residual and +1 double-box may be
-contained. If all entangled → CS0021 7 re-triage (fresh read), then the stub pass (CS0149 1 +
-CS0128 2) as the honest tail.
+Recommended NEXT root — **CS0021 7 re-triage (fresh):** list all sites; the ΔcgoCallers family
+likely owns several (malloc `(*[2]uint64)(x)[i]` is S1-reinterpret-indexing; mgcscavenge/traceback
+named-over-array indexing) — characterize what remains OUTSIDE the two architectural clusters and
+fix a contained one if found. If nothing contained: the honest stub-pass tail (CS0149 1 + evaluate
+CS0128 2), then compose the morning summary with ALL pending decisions laid out.
 
 PENDING WITH THE USER: the CS0030 managed-referent ж<T>-model decision (A faithful managed-slot now /
 B copy-box compile-milestone now, faithful as first Phase-4 ticket; stated lean B). Re-present when the
