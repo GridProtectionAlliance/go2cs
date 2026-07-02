@@ -694,21 +694,28 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
 		collectPublicizedTypes(packageTypes)
 
-		var concurrentTasks sync.WaitGroup
 		var outputFileNames []string
 
+		// Convert files SEQUENTIALLY, in the deterministic pkg.Syntax (sorted filename) order. Files
+		// were previously converted in concurrent goroutines, but the per-file visitors share package-
+		// level state claimed at visit time — initFuncCounter (initΔN indices), getGlobalTempVarName
+		// (blank `_` func/var numbering, an unsynchronized map), and the loadImportedTypeAliases
+		// check-then-act (a file marked an imported package_info "parsed" BEFORE the parse finished, so
+		// a concurrently-converting file saw the marker, skipped the wait, and emitted an imported
+		// const collision-rename bare — e.g. `abi.String` instead of `abi.ΔString`, a compile error
+		// that came and went with goroutine scheduling). Claim order = schedule order made the emitted
+		// bytes nondeterministic across otherwise-identical runs. Per-file emission is a small fraction
+		// of conversion cost (dominated by go/packages type-graph loading), so sequential conversion
+		// buys byte-reproducible output for free: a full-stdlib conversion (305 packages, -parallel 4)
+		// measured 3m42s with the concurrent per-file goroutines and 3m39s sequential — within noise.
 		for _, fileEntry := range files {
-			concurrentTasks.Add(1)
-
-			go func(fileEntry FileEntry) {
+			func(fileEntry FileEntry) {
 				defer func() {
 					if !options.debugMode {
 						if r := recover(); r != nil {
 							showWarning("visit file error: %v in \"%s\"", r, filepath.Base(fileEntry.filePath))
 						}
 					}
-
-					concurrentTasks.Done()
 				}()
 
 				visitor := &Visitor{
@@ -756,8 +763,6 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				packageLock.Unlock()
 			}(fileEntry)
 		}
-
-		concurrentTasks.Wait()
 
 		// Resolve any deferred cross-file dynamic (anonymous struct) type references
 		// now that every file's lifted names are registered in the shared registry.

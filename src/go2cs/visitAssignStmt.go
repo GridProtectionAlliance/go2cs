@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"go/types"
 	"math"
+	"sort"
 	"strings"
 )
 
@@ -782,7 +783,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		}
 
 		if len(leftExprs) > 0 && operator == " = " {
-			for _, leftExpr := range leftExprs.Keys() {
+			// Sorted for deterministic output: leftExprs is a map-backed set, so a multi-assign
+			// re-aliasing several boxes (`(Ꮡx, Ꮡy) = (Ꮡy, Ꮡx)`) emitted its independent
+			// `n = ref Ꮡn.val` refreshers in an order that flipped run-to-run.
+			sortedLeftExprs := leftExprs.Keys()
+			sort.Strings(sortedLeftExprs)
+
+			for _, leftExpr := range sortedLeftExprs {
 				// Only a bare pointer-box reassignment (`Ꮡp = …`) needs the deref ref-local
 				// re-aliased (`p = ref Ꮡp.val`). A write *through* the box (`Ꮡp.val = …`, emitted
 				// for `*p = …` inside a lambda — see convStarExpr) has member access and must not

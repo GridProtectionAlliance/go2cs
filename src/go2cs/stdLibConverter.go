@@ -245,8 +245,20 @@ func (c *StdLibConverter) buildDependencyGraph() error {
 
 		// Get imports
 		for importPath := range pkgs[0].Imports {
-			// Only include standard library packages
-			if c.isStdLib(importPath) {
+			// A GOROOT-vendored dependency is imported by its source path (golang.org/x/…) but keyed
+			// in the package set by its on-disk path (vendor/golang.org/x/…). Resolve to the vendored
+			// key — otherwise the edge is silently dropped (isStdLib rejects the dotted domain) and the
+			// topological order can convert an importer BEFORE its dependency, whose package_info.cs
+			// (the source of imported collision-rename aliases like `bidiꓸClass`) does not exist yet
+			// at that point, so the importer emits the un-renamed form.
+			if _, exists := c.packages[importPath]; !exists {
+				if _, vendored := c.packages["vendor/"+importPath]; vendored {
+					importPath = "vendor/" + importPath
+				}
+			}
+
+			// Only include packages that are part of this conversion set
+			if _, isConversionTarget := c.packages[importPath]; isConversionTarget {
 				c.mutex.Lock()
 				// Add dependency if not already added
 				if !containsString(pkg.Dependencies, importPath) {
@@ -336,8 +348,18 @@ func (c *StdLibConverter) topologicalSort() error {
 	// Keep track of packages being processed (to detect cycles)
 	processing := make(map[string]bool)
 
-	// Then recursively process remaining packages
+	// Then recursively process remaining packages — from SORTED roots, so packages not ordered
+	// relative to each other by a dependency edge still land in the same queue position every run
+	// (map-iteration roots made the queue, and thus any order-sensitive output, flip run-to-run).
+	remaining := make([]string, 0, len(unprocessed))
+
 	for path := range unprocessed {
+		remaining = append(remaining, path)
+	}
+
+	sort.Strings(remaining)
+
+	for _, path := range remaining {
 		if !unprocessed[path].Processed {
 			if err := c.visitPackage(path, unprocessed, processing); err != nil {
 				return err
