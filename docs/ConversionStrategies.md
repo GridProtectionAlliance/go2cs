@@ -137,6 +137,8 @@ A native-sized integer constant (`nint`/`nuint`, including the `uintptr` alias) 
 public static readonly uintptr MaxUintptr = /* ^uintptr(0) */ unchecked((uintptr)18446744073709551615);
 ```
 
+**Numeric literal formatting is preserved** wherever Go and C# syntax overlap: hex (`0x4000`), binary (`0b1011`), and decimal literals — including `_` digit separators — emit with their original source text (`0x4000` never flattens to `16384`), keeping bit masks and addresses recognizable; required `U`/`UL`/`L` suffixes and casts compose with the preserved text (`0xFFFFFFFFU`). Go-only forms re-render as decimal: `0o…` octal has no C# syntax, and a legacy leading-zero octal (`0755`) would silently re-bind as decimal 755 in C#.
+
 See [Untyped Constants and Named Numeric Types](#untyped-constants-and-named-numeric-types) for how these interact with native-int and named numeric types. See also [example](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions/basics/numeric-constants).
 
 ## Handling "int" and "uint" Types
