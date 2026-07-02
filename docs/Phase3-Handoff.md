@@ -15,9 +15,26 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 21 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 19 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
-  graph and the **sole failing project**, but read the next bullets.
+  graph and the **sole failing project**. **The COMPILE queue is decisions-only again:**
+  named-over-array 11 (Decision B) + &GLOBAL 4 (both design-with-user), escape-hoist 2 (rabbit
+  hole), parked singles 2. Sanctioned non-error work remains: lock_sema manual waiter-list
+  (reviewer-mandated), the approved distinct golib `uintptr` struct, const-DECL literal formatting.
+- **2026-07-02 (latest): iterations 4+5 — the last CS0030 and CS0019 are EXTINCT (`3c507c3cd`
+  21→20, `c87702e8b` 20→19).** Same family, two arms: (4) a COMPUTED untyped-const operand in
+  concrete arithmetic (`arg0 + 4*goarch.PtrSize`, stkframe) types the whole expression UntypedInt —
+  breaking conversions AND silently mistyping `var` inference (zip's nsecs inferred double; fixed
+  by the class); the arithmetic cast arm now fires on computed const operands CONTAINING a named
+  untyped ref (Go-conversion operands excluded after a double-cast wart; 56-file uniform audit).
+  (5) the same shape under a NAMED-numeric BITWISE result (`tp & (1<<taggedPointerBits - 1)`,
+  tagptr) casts to the UNDERLYING basic — narrowed to arithmetic-SHAPED masks after a 24-file
+  over-fire (bitwise-shaped consts are already recursively wrapped; final audit 10 files uniform).
+  **taggedPointer re-triaged as a NUMBER** (its Windows identity rides an OS completion key through
+  netpoll; netpoll+lfstack are superseded metal) — the manual-type label was wrong, the triage rule
+  held. ALSO: `08718b3c6` numeric literal formatting preservation (user request: hex/binary/`_`
+  survive; 246-file mechanically-verified audit; goldens re-baselined). Tests: NativeIntConstMask +
+  NamedTypeBitwiseConst extensions (output parity). Suites 216/216 at every gate.
 - **2026-07-02 (latest): Option C iterations 2+3 — the gclinkptr PIVOT and two general
   conversion-hop arms (`639c704e2` 26→22, `d07772473` 22→21).** gclinkptr was queued as a
   managed-slot manual type, but every Go constructor is raw span-address arithmetic
