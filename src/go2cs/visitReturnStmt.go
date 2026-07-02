@@ -251,10 +251,17 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					// `Ꮡp` (the value alias cannot bind the pointer result). Use a DIRECT ident check,
 					// not getIdentifier (which digs through a selector/index to the root): `return it.key`
 					// — a field of a pointer param — returns the FIELD value, so prefixing `Ꮡ` would
-					// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061).
+					// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061). The box form applies
+					// only to a GENUINE `*T` parameter (deref-aliased, so a box `Ꮡp` exists): an
+					// `unsafe.Pointer` parameter counts as a pointer result type (isPointer includes the
+					// UnsafePointer basic) but renders as a plain VALUE param with NO box — prefixing `Ꮡ`
+					// referenced a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103; runtime map.go
+					// `mapaccess1_fat`'s `return zero`, mem_windows.go, panic.go `readvarintUnsafe`).
 					if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
-						result.WriteString(AddressPrefix)
-						resultExpr = strings.TrimPrefix(resultExpr, "@")
+						if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
+							result.WriteString(AddressPrefix)
+							resultExpr = strings.TrimPrefix(resultExpr, "@")
+						}
 					}
 				}
 

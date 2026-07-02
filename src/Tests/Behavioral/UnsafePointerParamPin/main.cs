@@ -33,6 +33,23 @@ internal static uintptr readViaParam(ж<uintptr> Ꮡp) {
     internal uintptr v;
 }
 
+internal static @unsafe.Pointer pick(bool cond, @unsafe.Pointer a, @unsafe.Pointer zero) {
+    if (cond) {
+        return a;
+    }
+    return zero;
+}
+
+internal static (uint32, @unsafe.Pointer) advance(@unsafe.Pointer fd, uint32 n) {
+    return (n + 1, fd);
+}
+
+internal static ж<uintptr> same(ж<uintptr> Ꮡp) {
+    ref var p = ref Ꮡp.val;
+
+    return Ꮡp;
+}
+
 internal static void Main() {
     ref var x = ref heap(new uintptr(), out var Ꮡx);
     x = 42;
@@ -43,6 +60,18 @@ internal static void Main() {
     var h = new holder(v: 9);
     var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡ(h).of(holder.Ꮡv)).val));
     fmt.Println(q.val);
+    ref var a = ref heap(new uintptr(), out var Ꮡa);
+    a = 11;
+    ref var z = ref heap(new uintptr(), out var Ꮡz);
+    z = 22;
+    @unsafe.Pointer pa = @unsafe.Pointer.FromRef(ref (Ꮡa).val);
+    @unsafe.Pointer pz = @unsafe.Pointer.FromRef(ref (Ꮡz).val);
+    fmt.Println(~(ж<uintptr>)(uintptr)((uintptr)pick(true, pa, pz)), ~(ж<uintptr>)(uintptr)((uintptr)pick(false, pa, pz)));
+    var (n2, fd2) = advance(pa, 5);
+    fmt.Println(n2, ~(ж<uintptr>)(uintptr)(fd2));
+    var w = same(Ꮡa);
+    w.val = 99;
+    fmt.Println(a);
 }
 
 } // end main_package

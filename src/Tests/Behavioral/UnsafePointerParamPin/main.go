@@ -53,6 +53,31 @@ func (r *utp) tricky() uintptr {
 
 type holder struct{ v uintptr }
 
+// pick returns an unsafe.Pointer PARAMETER whole (runtime map.go mapaccess1_fat's `return zero`).
+// An unsafe.Pointer param renders as a plain VALUE param with NO box, so the return-path's
+// pointer-param boxing (`return p` → `Ꮡp`, correct for a genuine *T) must not fire here — it
+// referenced a nonexistent box (CS0103 Ꮡzero/Ꮡv/Ꮡfd).
+//
+//go:noinline
+func pick(cond bool, a, zero unsafe.Pointer) unsafe.Pointer {
+	if cond {
+		return a
+	}
+	return zero
+}
+
+// advance returns the unsafe.Pointer param in a TUPLE (panic.go readvarintUnsafe's shape).
+//
+//go:noinline
+func advance(fd unsafe.Pointer, n uint32) (uint32, unsafe.Pointer) {
+	return n + 1, fd
+}
+
+// same returns a GENUINE *T param whole — the box form must stay (control).
+//
+//go:noinline
+func same(p *uintptr) *uintptr { return p }
+
 func main() {
 	var x uintptr = 42
 	fmt.Println(readViaParam(&x))
@@ -65,4 +90,14 @@ func main() {
 	h := holder{v: 9}
 	q := (*uintptr)(unsafe.Pointer(&h.v))
 	fmt.Println(*q)
+
+	// return-an-unsafe.Pointer-param shapes (whole + in a tuple) + a genuine *T control
+	var a, z uintptr = 11, 22
+	pa, pz := unsafe.Pointer(&a), unsafe.Pointer(&z)
+	fmt.Println(*(*uintptr)(pick(true, pa, pz)), *(*uintptr)(pick(false, pa, pz))) // 11 22
+	n2, fd2 := advance(pa, 5)
+	fmt.Println(n2, *(*uintptr)(fd2)) // 6 11
+	w := same(&a)
+	*w = 99
+	fmt.Println(a) // 99 — the *T control writes through its box
 }
