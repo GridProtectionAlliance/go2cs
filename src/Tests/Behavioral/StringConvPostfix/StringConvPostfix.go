@@ -30,4 +30,12 @@ func main() {
 	var m []byte
 	m = append(m, string(rune('世'))...)
 	fmt.Println(len(m)) // 3
+
+	// A string LITERAL spread — `append(b, "prefix: "...)` (runtime error.go's message builder).
+	// The literal renders as a `"…"u8` ReadOnlySpan<byte>, which has no spread property; the
+	// converter wraps it as the member-accessible @string (the same wrap string(r)... uses).
+	var eb []byte
+	eb = append(eb, "runtime error: "...)
+	eb = append(eb, "oops"...)
+	fmt.Println(string(eb), len(eb)) // runtime error: oops 19
 }

@@ -283,6 +283,8 @@ a = append(a, (uint16)(replacementChar));
 a = append(a, (uint16)(7), (uint16)(8));
 ```
 
+**A string-literal spread** — `append(b, "runtime error: "...)` (runtime `error.go`'s message builder) — renders the literal as a `"…"u8` `ReadOnlySpan<byte>`, which has no spread property (`.ꓸꓸꓸ` → CS1061). The spread emission wraps a direct string-literal source in the member-accessible `@string` — `append(b, ((@string)"runtime error: "u8).ꓸꓸꓸ)` — whose `ꓸꓸꓸ` returns the `Span<byte>` the `append<T>(slice<T>, params Span<T>)` overload binds; this is the same wrap the `string(r)...` conversion spread uses (above). A non-literal spread source (a slice, a `@string` variable) is unchanged. (Guarded by the `StringConvPostfix` extension — two literal spreads appended and value-compared vs Go.)
+
 Typed arguments and already-explicitly-converted elements (`uint16(r)`) are left as-is.
 
 Relatedly, when the shifted (left) operand of a shift is an untyped constant — `1 << k` — Go gives the whole shift the type it assumes from context (e.g. `uintptr` when compared with a `uintptr`), but the bare C# literal makes the result `int`, which then cannot compare or combine with the typed operand (CS0034). The shift result is cast to its resolved type:

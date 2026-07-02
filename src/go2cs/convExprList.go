@@ -112,6 +112,28 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// If the last expression has a spread operator, use elipsis property as source
 		// this way elements are passed as arguments instead of a slice or array
 		if hasSpreadOperator && i == len(exprs)-1 {
+			// A STRING-LITERAL spread — `append(b, "runtime error: "...)` (runtime error.go) — renders
+			// the literal as a `"…"u8` ReadOnlySpan<byte>, which has no spread property (CS1061). Wrap
+			// it as the member-accessible @string, whose `ꓸꓸꓸ` returns the Span<byte> the variadic
+			// overload binds — the same wrap the `string(r)...` conversion spread already uses. A
+			// non-literal spread source (slice, @string variable) is unchanged.
+			spreadExpr := expr
+
+			for {
+				if paren, ok := spreadExpr.(*ast.ParenExpr); ok {
+					spreadExpr = paren.X
+					continue
+				}
+
+				break
+			}
+
+			if lit, ok := spreadExpr.(*ast.BasicLit); ok && lit.Kind == token.STRING {
+				truncated := arg.String()
+				arg.Reset()
+				arg.WriteString(fmt.Sprintf("((@string)%s)", truncated))
+			}
+
 			arg.WriteString("." + EllipsisOperator)
 		}
 

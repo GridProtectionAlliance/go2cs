@@ -16,6 +16,10 @@ internal static void Main() {
     slice<byte> m = default!;
     m = append(m, ((@string)(rune)(rune)'世').ꓸꓸꓸ);
     fmt.Println(len(m));
+    slice<byte> eb = default!;
+    eb = append(eb, ((@string)"runtime error: "u8).ꓸꓸꓸ);
+    eb = append(eb, ((@string)"oops"u8).ꓸꓸꓸ);
+    fmt.Println(((@string)eb), len(eb));
 }
 
 } // end main_package
