@@ -70,6 +70,30 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		}
 	}
 
+	// Go type distinctions can VANISH in the C# type map — `case uint:` emits `case nuint` and
+	// `case uintptr:` emits `case uintptr` (a using-alias of the SAME System.UIntPtr), making the
+	// later case unreachable (CS8120; runtime error.go's printpanicval). A duplicate-mapped case
+	// is merged (skipped, with a marker comment) ONLY when its Go body is byte-identical to the
+	// first occurrence's — then the earlier label already routes it exactly; DIFFERING bodies keep
+	// both labels, preferring the compile error over silently routing one Go case into another's
+	// body. Keyed by the RESOLVED C# type; values are the printed Go bodies.
+	emittedCaseTypes := map[string]string{}
+
+	resolveCaseType := func(caseExpr string) string {
+		typeToken, _, _ := strings.Cut(caseExpr, " ")
+
+		switch typeToken {
+		case "uintptr":
+			return "nuint"
+		case "rune":
+			return "int32"
+		case "byte":
+			return "uint8"
+		}
+
+		return typeToken
+	}
+
 	for i, caseClause := range caseClauses {
 		if i > 0 {
 			v.targetFile.WriteString(v.newline)
@@ -148,10 +172,43 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 				}
 			}
 
-			for i, caseExpr := range caseExprs {
-				if i > 0 {
+			// The clause's printed Go body — the identity key for the duplicate-mapped-case merge.
+			printedBody := &strings.Builder{}
+
+			for _, stmt := range caseClause.Body {
+				printedBody.WriteString(v.getPrintedNode(stmt))
+			}
+
+			bodyKey := printedBody.String()
+			outputs := 0
+
+			for _, caseExpr := range caseExprs {
+				// Duplicate-mapped concrete case: skip only on an identical Go body (see the
+				// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
+				if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
+					resolved := resolveCaseType(caseExpr)
+
+					if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
+						if outputs > 0 {
+							v.targetFile.WriteString(v.newline)
+						}
+
+						outputs++
+
+						v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
+						continue
+					}
+
+					if _, seen := emittedCaseTypes[resolved]; !seen {
+						emittedCaseTypes[resolved] = bodyKey
+					}
+				}
+
+				if outputs > 0 {
 					v.targetFile.WriteString(v.newline)
 				}
+
+				outputs++
 
 				v.writeOutput("case ")
 				// Trim the trailing space left when a concrete-type case carries no binding variable

@@ -75,6 +75,33 @@ internal static void Main() {
     classify(b);
     classify(c);
     classify(d);
+    var kind = (any i) => {
+        switch (i.type()) {
+        case nuint: {
+            fmt.Println("word");
+            break;
+        }
+        case uint32: {
+            fmt.Println("word");
+            break;
+        }
+        /* case uintptr: merged with an earlier case mapping to the same C# type (identical body) */
+        case @string: {
+            fmt.Println("text");
+            break;
+        }
+        default: {
+            fmt.Println("other");
+            break;
+        }}
+
+    };
+    nuint u = 5;
+    uintptr p = 6;
+    kind(u);
+    kind(p);
+    kind("x");
+    kind(3.14D);
 }
 
 } // end main_package

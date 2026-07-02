@@ -56,4 +56,30 @@ func main() {
 	classify(b)
 	classify(c)
 	classify(d)
+
+	// Go `uint` and `uintptr` are DISTINCT types (both may appear in one Go type switch) but map
+	// to the SAME C# type (nuint; `uintptr` is a using-alias of System.UIntPtr), making the later
+	// case unreachable (CS8120; runtime error.go's printpanicval). With byte-IDENTICAL Go bodies
+	// the converter MERGES them — a marker comment replaces the duplicate label, and the earlier
+	// label routes both dynamic types to the shared body, which is exact. DIFFERING bodies keep
+	// both labels: the compile error is preferred over silently routing one Go case into the
+	// other's body — that variant cannot compile, so it is documented here rather than exercised.
+	kind := func(i interface{}) {
+		switch i.(type) {
+		case uint:
+			fmt.Println("word")
+		case uintptr:
+			fmt.Println("word")
+		case string:
+			fmt.Println("text")
+		default:
+			fmt.Println("other")
+		}
+	}
+	var u uint = 5
+	var p uintptr = 6
+	kind(u)    // word
+	kind(p)    // word — routed by the merged (earlier) case
+	kind("x")  // text
+	kind(3.14) // other
 }
