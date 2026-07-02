@@ -25,10 +25,21 @@ func maskAddr(i uintptr) uintptr { return i & 0x00ffffffffff } // mirrors runtim
 // constant is cast to the native type (`& ~(uintptr)15`). Mirrors runtime's `ptr &^ 15` 16-byte align.
 func alignSmall(i uintptr) uintptr { return i &^ 15 }
 
+// A COMPUTED untyped-constant operand in native arithmetic — runtime stkframe.go's
+// `arg0 + 4*goarch.PtrSize`: the product of a literal and a named UNTYPED const renders as an
+// UntypedInt-typed C# expression, so the whole sum types as UntypedInt and breaks a following
+// conversion or `var` inference. The computed operand is cast to the concrete operand's type —
+// `base + (uintptr)(4 * ptrWords)`. Pure-literal arithmetic (`x + 2*3`) and Go-conversion
+// operands (`float64(…)/…`) need no cast and are left alone.
+const ptrWords = 8 // a named UNTYPED int const (no type annotation)
+
+func fieldAddr(base uintptr) uintptr { return base + 4*ptrWords }
+
 func main() {
 	fmt.Println(uint64(low(0b1011)))   // 0b1011 & 0b111 = 0b011 = 3
 	fmt.Println(uint64(align(0b1011))) // 11 &^ 15 = 0
 	fmt.Println(uint64(align(0b11011))) // 27 &^ 15 = 16
+	fmt.Println(uint64(fieldAddr(0x1000))) // 0x1000 + 32 = 4128
 	// Build a value with a high bit set without using a large literal in a non-bitwise context
 	// (those are separate cases); the large mask literal is exercised inside maskAddr's `&`.
 	var addr uintptr = 1

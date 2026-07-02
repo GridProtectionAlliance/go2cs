@@ -30,6 +30,29 @@ func (v *Visitor) isComputedConstOperand(expr ast.Expr) bool {
 	return true
 }
 
+// containsUntypedNamedConstRef reports whether any subexpression is a reference to a named
+// untyped numeric constant (see isUntypedNamedConstRef) — used to distinguish a computed
+// constant operand that renders with a golib `Untyped*` wrapper somewhere inside
+// (`4 * goarch.PtrSize`) from pure-literal constant arithmetic (`2 * 3`), which needs no cast.
+func (v *Visitor) containsUntypedNamedConstRef(expr ast.Expr) bool {
+	found := false
+
+	ast.Inspect(expr, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		if e, ok := n.(ast.Expr); ok && v.isUntypedNamedConstRef(e) {
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
+}
+
 // isUntypedNamedConstRef reports whether the expression is a reference (ident or selector) to an
 // untyped numeric constant — which the converter emits as a golib `Untyped*` wrapper. It is false
 // for literals (those render as ordinary C# literals and follow normal numeric promotion rules).
@@ -396,13 +419,31 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		//     yields CS0019. (Wrapper comparisons resolve via the implicit conversion, so those are
 		//     left alone to avoid redundant casts.)
 		// Cast the untyped-const operand to the concrete operand's type. Bare literals are not
-		// wrapped and follow normal C# rules, so this targets named consts only.
+		// wrapped and follow normal C# rules, so this targets named consts — bare (`q1 * two32`)
+		// or inside a COMPUTED constant operand (`arg0 + 4*goarch.PtrSize`, runtime stkframe.go:
+		// the product renders as an UntypedInt-typed expression, so the whole sum types as
+		// UntypedInt and breaks a following conversion or inference; pure-literal arithmetic
+		// like `x + 2*3` has no wrapper and is left alone).
 		var castLeft, castRight bool
+
+		untypedConstOperand := func(operand ast.Expr) bool {
+			if v.isUntypedNamedConstRef(operand) {
+				return true
+			}
+
+			// A Go CONVERSION operand (`float64(1<<x) / 1e9`) already renders concretely
+			// typed — casting again would just double the cast.
+			if call, ok := operand.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {
+				return false
+			}
+
+			return v.isComputedConstOperand(operand) && v.containsUntypedNamedConstRef(operand)
+		}
 
 		switch binaryExpr.Op {
 		case token.ADD, token.SUB, token.MUL, token.QUO, token.REM:
-			castLeft = v.isUntypedNamedConstRef(binaryExpr.X)
-			castRight = !castLeft && v.isUntypedNamedConstRef(binaryExpr.Y)
+			castLeft = untypedConstOperand(binaryExpr.X)
+			castRight = !castLeft && untypedConstOperand(binaryExpr.Y)
 		case token.LSS, token.LEQ, token.GTR, token.GEQ, token.EQL, token.NEQ:
 			castLeft = v.isBigIntegerBackedConstRef(binaryExpr.X)
 			castRight = !castLeft && v.isBigIntegerBackedConstRef(binaryExpr.Y)
@@ -410,11 +451,19 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 
 		if castLeft {
 			if tn := v.concreteNumericCSType(rhsType); tn != "" {
-				leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
+				if v.needsParentheses(binaryExpr.X) {
+					leftOperand = fmt.Sprintf("(%s)(%s)", tn, leftOperand)
+				} else {
+					leftOperand = fmt.Sprintf("(%s)%s", tn, leftOperand)
+				}
 			}
 		} else if castRight {
 			if tn := v.concreteNumericCSType(lhsType); tn != "" {
-				rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
+				if v.needsParentheses(binaryExpr.Y) {
+					rightOperand = fmt.Sprintf("(%s)(%s)", tn, rightOperand)
+				} else {
+					rightOperand = fmt.Sprintf("(%s)%s", tn, rightOperand)
+				}
 			}
 		}
 

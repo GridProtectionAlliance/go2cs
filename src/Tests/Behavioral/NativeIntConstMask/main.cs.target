@@ -24,10 +24,17 @@ internal static uintptr alignSmall(uintptr i) {
     return (uintptr)(i & ~(uintptr)15);
 }
 
+internal static readonly UntypedInt ptrWords = 8;
+
+internal static uintptr fieldAddr(uintptr @base) {
+    return @base + (uintptr)(4 * ptrWords);
+}
+
 internal static void Main() {
     fmt.Println((uint64)low(0b1011));
     fmt.Println((uint64)align(0b1011));
     fmt.Println((uint64)align(0b11011));
+    fmt.Println((uint64)fieldAddr(0x1000));
     uintptr addr = 1;
     addr <<= (int)(47);
     addr |= (uintptr)(0xABCD);
