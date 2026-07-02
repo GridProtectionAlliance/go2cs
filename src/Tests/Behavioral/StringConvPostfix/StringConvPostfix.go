@@ -38,4 +38,12 @@ func main() {
 	eb = append(eb, "runtime error: "...)
 	eb = append(eb, "oops"...)
 	fmt.Println(string(eb), len(eb)) // runtime error: oops 19
+
+	// A string-literal CONCAT as an object-vararg argument (runtime stack.go's newline+tab
+	// print-join shape): the u8 suppression must propagate INTO the BinaryExpr's operands —
+	// both halves otherwise render as `"..."u8` spans, which cannot box to object and have
+	// no `+` operator.
+	tag := 7
+	fmt.Println("g="+"\tm=", tag) // g=<TAB>m= 7
+	fmt.Println("a" + "b" + "c")  // abc — nested concat, all plain strings
 }

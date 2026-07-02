@@ -186,7 +186,7 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 	return strconv.FormatInt(i, 10) + "L"
 }
 
-func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext) string {
+func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {
 	// A constant operator expression whose value overflows int32 must emit as the folded 64-bit
 	// literal — C# would compute the operators in int32 and overflow at compile time (CS0220).
 	if lit := v.overflowingConstLiteral(binaryExpr); lit != "" {
@@ -198,7 +198,18 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 
 	identContext := DefaultIdentContext()
 	basicLitContext := DefaultBasicLitContext()
-	basicLitContext.u8StringOK = v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
+	// Honor an INCOMING u8 suppression (an object/interface vararg argument context, e.g. print's
+	// `object[]`) for a string CONCAT only: a literal-concat argument — print's newline+tab join
+	// in runtime stack.go's newstack diagnostics — otherwise rendered BOTH halves as `"…"u8`
+	// spans; a ReadOnlySpan<byte> cannot box to object (CS1503), and span + span has no
+	// operator. With suppression the operands render as plain C# strings, whose `+` and boxing
+	// are fine. Gated to token.ADD: comparisons and other binary kinds under a suppressed
+	// context (case-when clauses, equality inside varargs — `major == "0"u8`) keep their own
+	// operand rendering, which already binds golib's span-aware operators (a first-cut
+	// suppression of ALL kinds churned 212 stdlib files and risked @string↔string operator
+	// re-binding). The default context has u8StringOK=true, so every other path is unchanged.
+	concatSuppressed := !litContext.u8StringOK && binaryExpr.Op == token.ADD
+	basicLitContext.u8StringOK = !concatSuppressed && v.isStringType(binaryExpr.X) && v.isStringType(binaryExpr.Y)
 
 	// In a `==`/`!=` comparison, a deref'd pointer PARAMETER must compare its box `Ꮡp`, not its
 	// value alias `p` (a struct value). Each operand's pointer context is otherwise taken from the
