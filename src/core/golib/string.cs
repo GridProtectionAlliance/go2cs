@@ -181,9 +181,11 @@ public readonly struct @string :
         return BytesAreEqual(Bytes, other.Bytes);
     }
 
+    // Go compares strings as raw bytes; for valid UTF-8 this is also code-point order. Comparing the
+    // backing bytes directly avoids transcoding both sides to UTF-16 strings per comparison.
     public int CompareTo(@string other)
     {
-        return StringComparer.Ordinal.Compare(ToString(), other);
+        return Bytes.AsSpan().SequenceCompareTo(other.Bytes);
     }
 
     public override bool Equals(object? obj)
@@ -199,7 +201,9 @@ public readonly struct @string :
 
     public override int GetHashCode()
     {
-        return ToString().GetHashCode();
+        System.HashCode hash = new();
+        hash.AddBytes(Bytes);
+        return hash.ToHashCode();
     }
 
     public string ToString(IFormatProvider? provider)
@@ -449,22 +453,22 @@ public readonly struct @string :
 
     public static bool operator <(@string a, @string b)
     {
-        return string.CompareOrdinal(a, b) < 0;
+        return a.CompareTo(b) < 0;
     }
 
     public static bool operator <=(@string a, @string b)
     {
-        return string.CompareOrdinal(a, b) <= 0;
+        return a.CompareTo(b) <= 0;
     }
 
     public static bool operator >(@string a, @string b)
     {
-        return string.CompareOrdinal(a, b) > 0;
+        return a.CompareTo(b) > 0;
     }
 
     public static bool operator >=(@string a, @string b)
     {
-        return string.CompareOrdinal(a, b) >= 0;
+        return a.CompareTo(b) >= 0;
     }
 
     public static @string operator +(@string a, @string b)

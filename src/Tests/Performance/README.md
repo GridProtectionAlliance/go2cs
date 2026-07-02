@@ -72,27 +72,27 @@ C# builds: JIT = framework-dependent `Release`; Native AOT = `-p:PublishAot=true
 
 | Benchmark | Go | C# (JIT) | C# (Native AOT) |
 |---|---:|---:|---:|
-| Startup | 15.8 | 34.3 (2.18×) | 16.3 (1.03×) |
-| Fib | 80.1 | 99.0 (1.24×) | 86.6 (1.08×) |
-| Sieve | 72.3 | 94.7 (1.31×) | 135.7 (1.88×) |
-| MatMul | 53.9 | 135.9 (2.52×) | 197.9 (3.67×) |
-| String | 69.4 | 760.9 (10.96×) | 952.7 (13.73×) |
-| Map | 279.7 | 243.3 (0.87×) | 83.3 (0.30×) |
-| Sort | 112.7 | 385.8 (3.42×) | 432.1 (3.83×) |
-| Channel | 42.7 | 150.1 (3.52×) | 104.9 (2.46×) |
+| Startup | 12.5 | 34.1 (2.73×) | 15.3 (1.23×) |
+| Fib | 81.6 | 101.3 (1.24×) | 88.1 (1.08×) |
+| Sieve | 73.1 | 98.2 (1.34×) | 135.7 (1.86×) |
+| MatMul | 54.5 | 139.8 (2.57×) | 201.7 (3.70×) |
+| String | 70.2 | 491.2 (7.00×) | 619.5 (8.83×) |
+| Map | 277.6 | 233.7 (0.84×) | 81.8 (0.29×) |
+| Sort | 113.1 | 384.7 (3.40×) | 409.0 (3.62×) |
+| Channel | 46.9 | 150.2 (3.20×) | 102.1 (2.18×) |
 
 **Peak memory** (working set, MB -- lower is better):
 
 | Benchmark | Go | C# (JIT) | C# (Native AOT) |
 |---|---:|---:|---:|
-| Startup | 2.5 | 16.2 | 4.5 |
+| Startup | 2.5 | 16.3 | 2.5 |
 | Fib | 5.5 | 17.9 | 10.6 |
-| Sieve | 35.0 | 38.7 | 29.9 |
-| MatMul | 10.5 | 25.5 | 16.8 |
-| String | 5.4 | 39.3 | 28.8 |
+| Sieve | 35.5 | 38.6 | 29.9 |
+| MatMul | 10.5 | 26.4 | 16.8 |
+| String | 5.4 | 40.4 | 28.8 |
 | Map | 158.7 | 138.6 | 128.3 |
-| Sort | 21.8 | 42.1 | 28.5 |
-| Channel | 5.5 | 39.9 | 10.8 |
+| Sort | 21.9 | 42.5 | 28.5 |
+| Channel | 5.4 | 39.8 | 10.8 |
 
 <!-- PERF-RESULTS:END -->
 
@@ -109,8 +109,10 @@ What the numbers above actually show, and why:
   checks the JIT can't always elide, compounded on nested `[][]float64` access. Note **AOT is *slower*
   than the JIT here** — ILC lacks the JIT's dynamic PGO / OSR loop optimizations, so AOT trades tight-
   loop throughput for its startup and memory wins.
-- **String:** the biggest honest gap (~11–14×): every `[]byte`→`string` round-trip is an allocation +
-  copy through the `@string` emulation. The number to watch when optimizing `golib` string paths.
+- **String:** the biggest honest gap (~7–9×): every `[]byte`→`string` round-trip is an allocation +
+  copy through the `@string` emulation, plus the per-call `append` chain Go inlines to a few
+  instructions. (Already down from ~11–14× — this suite caught a per-`append` array allocation and a
+  single-element slow path in `golib`; it remains the number to watch when optimizing `@string`.)
 - **Map:** the transpiled C# is *faster than Go* — `map<K,V>` rides .NET's heavily-optimized
   `Dictionary`, and the AOT build is ~3× faster than Go on this insert/lookup/delete churn.
 - **Sort (~3.5×):** the runtime's `sort.Interface` shim (`Interface<T>`) binds `Len`/`Less`/`Swap` via

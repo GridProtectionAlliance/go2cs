@@ -648,17 +648,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
 
     public static slice<T> Append(in slice<T> slice, params Span<T> elems)
     {
-        return Append(slice, elems.ToArray());
-    }
-
-    public static slice<T> Append(in slice<T> slice, params T[] elems)
-    {
         T[] newArray;
 
         if (slice == nil)
         {
             newArray = new T[elems.Length];
-            Array.Copy(elems, newArray, elems.Length);
+            elems.CopyTo(newArray);
             return new slice<T>(newArray);
         }
 
@@ -666,7 +661,12 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         {
             // Within capacity: Go appends IN PLACE into the shared backing array — the writes are
             // visible to every slice sharing it — and the result is the same view, one longer.
-            Array.Copy(elems, 0, slice.m_array, slice.High, elems.Length);
+            // Single-element append is the dominant Go idiom — store directly instead of span-copying.
+            if (elems.Length == 1)
+                slice.m_array[slice.High] = elems[0];
+            else
+                elems.CopyTo(new Span<T>(slice.m_array, (int)slice.High, elems.Length));
+
             return new slice<T>(slice.m_array, slice.m_low, slice.High + elems.Length, slice.m_low + slice.m_capacity);
         }
 
@@ -675,9 +675,14 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         newArray = new T[newCapacity];
 
         Array.Copy(slice.m_array, slice.m_low, newArray, 0, slice.Length);
-        Array.Copy(elems, 0, newArray, slice.Length, elems.Length);
+        elems.CopyTo(newArray.AsSpan((int)slice.Length));
 
         return new slice<T>(newArray, 0, slice.Length + elems.Length);
+    }
+
+    public static slice<T> Append(in slice<T> slice, params T[] elems)
+    {
+        return Append(slice, elems.AsSpan());
     }
 
     private static nint CalculateNewCapacity(in slice<T> slice, nint neededCapacity)

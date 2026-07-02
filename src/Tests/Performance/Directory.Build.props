@@ -8,4 +8,13 @@
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
   </PropertyGroup>
 
+  <!-- Native AOT publishes (PerfAot gate, see Directory.Build.targets) get their own intermediate
+       tree: a RID-specific self-contained publish and a plain framework-dependent build sharing one
+       obj\ cross-pollute (the next JIT build inherits self-contained restore assets and produces an
+       exe that fails with "You must install or update .NET"). -->
+  <PropertyGroup Condition="'$(PerfAot)'=='true'">
+    <BaseIntermediateOutputPath>obj\aot\</BaseIntermediateOutputPath>
+    <BaseOutputPath>bin\aot-build\</BaseOutputPath>
+  </PropertyGroup>
+
 </Project>
