@@ -21,7 +21,25 @@
   named-over-array 11 (Decision B) + &GLOBAL 4 (both design-with-user), escape-hoist 2 (rabbit
   hole), parked singles 2. Sanctioned non-error work remains: lock_sema manual waiter-list
   (reviewer-mandated), the approved distinct golib `uintptr` struct, const-DECL literal formatting.
-- **2026-07-02 (latest): iteration 6 — the managed lock/note model (`0b37c61e7`; count unchanged
+- **2026-07-02 (latest): the distinct golib `uintptr` struct — SIZED AND DEFERRED with analysis
+  (iteration 8; no commit — deliberate stop, not a failure).** The census found the seams run
+  deeper than the morning sketch: (1) the alias is an **MSBuild `<Using Include="System.UIntPtr"
+  Alias="uintptr"/>` item baked into EVERY csproj** (converter template + committed
+  go-src-converted csprojs + golib/unsafe/core + ~180 behavioral csprojs + Examples +
+  `core/GlobalUsings.cs`) — the swap is a repo-wide csproj/template change, and duplicate-alias
+  rules mean the old items must be REMOVED, not overridden; (2) golib's unsafe seams do raw
+  memory math on the alias (`ж.cs` `explicit operator ж<T>(uintptr)` reads `*(T*)value`;
+  `Pointer : ж<uintptr>` with implicit both ways; builtin.cs ×8) — rewritable to `.m_value` but
+  delicate; (3) the `[GoType("num:uintptr")]` generator template's named↔underlying operators
+  need a chain audit (two user-defined conversions won't chain); (4) the manual Interlocked
+  files (lock_sema_impl, sync/atomic) must target the inner field (`ref l.key.m_value` —
+  `Interlocked` cannot take a ref to the struct). The GOOD news: emitted **text** barely changes
+  (`uintptr` still spells `uintptr` — resolution changes, not spelling), so corpus/golden churn
+  ≈ 0 and the risk is concentrated in compile errors across the 305-package build with an
+  unknown iteration tail. **Recommendation: a dedicated block (side-session worktree like the
+  benchmarks branch, or the next overnight run) with its own adversarial review — not a mid-day
+  squeeze.** Quality-of-life root; nothing in the compile milestone depends on it.
+- **2026-07-02: iteration 6 — the managed lock/note model (`0b37c61e7`; count unchanged
   at 19; the reviewer-mandated Phase-4 artifact).** lock_sema's six protocol functions hand-owned:
   mutex = `{0, locked}` Interlocked test-test-and-set spinlock on the real key storage with
   SpinWait escalation; note = signaled/clear latch (loud diagnostics preserved). Adversarial
