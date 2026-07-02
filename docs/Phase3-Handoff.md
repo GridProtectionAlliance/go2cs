@@ -13,12 +13,24 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-01)
+## Where things stand (2026-07-02)
 
 - **`runtime` is the foundation and the current frontier — now at 59 errors, a count that is now
   EXACT and REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the
   dependency graph and the **sole failing project**, but read the next bullets.
-- **2026-07-01 (latest): CONVERTER OUTPUT IS NOW BYTE-DETERMINISTIC (`32fd49a45`) — the campaign's
+- **2026-07-02 (latest): golib slice ALIASING landed (`86566b9ef`, cherry-picked from the spun-off
+  session's `89398c93f`) — reslicing SHARES the backing array.** `slice<T>` now stores `m_capacity`
+  (relative to `m_low`); every reslice (range indexer, `.slice(low,high,max)`, `Slice()`) is a
+  bounds-checked shared view (`Reslice`, Go-style `SliceBoundsOutOfRange` panics); append writes the
+  shared backing in place within capacity and detaches beyond it. Kills the range-sub-slice-detach
+  latent AND two more (offset-view beyond-cap append copied from index 0; IReadOnlyList indexer
+  double-offset). The `.slice()` extension's bounds are now RELATIVE to the view (were absolute into
+  the backing array — consistent only because everything used to detach to low=0). Zero emission
+  change (golib-only): corpus byte-identical 214/214; full suite green with output comparisons
+  (Output 194 — the new `SliceAliasing` test covers copy-into-offset-view write-through, compound
+  reslices, capped 3-index views, in-place vs detaching append). Doc: ConversionStrategies *Slices
+  and Arrays* addendum (came with the branch).
+- **2026-07-01: CONVERTER OUTPUT IS NOW BYTE-DETERMINISTIC (`32fd49a45`) — the campaign's
   ±10 jitter is DEAD.** Two consecutive full-stdlib reconverts now `diff -rq` to **ZERO files across
   all 305 packages** (previously dozens flipped), and the error count is stable at 59 both runs (3
   CS0019 were phantom errors manufactured by the converter's own race). The "abi.ΔString flips with
