@@ -18,11 +18,18 @@ internal static void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {
     store((ж<@unsafe.Pointer>)(uintptr)(ptr), val);
 }
 
+internal static (Action, bool) funcAt(@unsafe.Pointer p) {
+    return (((ж<Action>)(uintptr)(p)).val, true);
+}
+
 internal static void Main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
     @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).val);
     writeBarrier(p, p);
     _ = (uintptr)indirectKey(p);
+    Action fslot = default!;
+    var (_, ok) = funcAt(new @unsafe.Pointer(Ꮡ(fslot)));
+    _ = ok;
     println("compiled");
 }
 

@@ -116,6 +116,16 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return v.convExpr(starExpr.X, nil)
 	}
 
+	// A deref whose operand is a type CONVERSION renders as a C# cast, and postfix binds tighter
+	// than a cast — a naked `.val` re-binds onto the cast's inner operand: runtime panic.go's
+	// `return *(*func())(add(…)), true` emitted `(ж<Action>)(uintptr)(add(…)).val` (the `.val`
+	// reads the inner @unsafe.Pointer → CS0029 ж<Action>→Action in the tuple). The cast-deref
+	// branch above misses it because a FUNC-type (or other non-ident) starred inner has no
+	// identifier. Wrap the whole cast before dereferencing.
+	if call, ok := starExpr.X.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {
+		return fmt.Sprintf("(%s).val", v.convExpr(starExpr.X, nil))
+	}
+
 	return v.convExpr(starExpr.X, nil) + ".val"
 }
 

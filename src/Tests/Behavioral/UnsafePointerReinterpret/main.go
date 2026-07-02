@@ -30,6 +30,17 @@ func writeBarrier(ptr unsafe.Pointer, val unsafe.Pointer) {
 	store((*unsafe.Pointer)(ptr), val)
 }
 
+// funcAt derefs a reinterpret whose starred inner is a FUNC TYPE, inside a TUPLE return —
+// runtime panic.go's `return *(*func())(add(p.slotsPtr, …)), true`. A func-type starred inner
+// has no identifier, so this misses the ident-gated cast-deref branch and falls to the default
+// deref, which must WRAP the cast before `.val` (C# postfix beats cast precedence — a naked
+// `.val` re-binds onto the cast's inner operand: CS0029 ж<Action>→Action in the tuple).
+//
+//go:noinline
+func funcAt(p unsafe.Pointer) (func(), bool) {
+	return *(*func())(p), true
+}
+
 func main() {
 	// Back the pointers with a real uintptr slot (avoids a bare `var _ unsafe.Pointer` zero-value
 	// declaration, which is an unrelated converter gap: unsafe.Pointer has no parameterless C#
@@ -38,5 +49,8 @@ func main() {
 	p := unsafe.Pointer(&backing)
 	writeBarrier(p, p)
 	_ = indirectKey(p)
+	var fslot func()
+	_, ok := funcAt(unsafe.Pointer(&fslot))
+	_ = ok
 	println("compiled")
 }
