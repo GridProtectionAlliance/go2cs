@@ -13,7 +13,7 @@ internal static readonly uintptr big = unchecked((uintptr)33054211828000289);
 internal const float32 hashLoad = /* float32(13) / float32(2) */ 6.5f;
 
 internal static void Main() {
-    fmt.Println(takesUint32(2147483648U));
+    fmt.Println(takesUint32(0x80000000U));
     fmt.Println(big);
     fmt.Println(hashLoad);
     @string env = "cpu.feature=on"u8;

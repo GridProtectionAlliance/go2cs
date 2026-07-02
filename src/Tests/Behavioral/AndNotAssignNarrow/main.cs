@@ -15,14 +15,14 @@ internal static void Main() {
     h.val.flags &= unchecked((uint8)~writing);
     h.val.flags |= 8;
     fmt.Println((~h).flags);
-    uint16 u = 65535;
-    u &= unchecked((uint16)~(uint16)(240));
+    uint16 u = 0xFFFF;
+    u &= unchecked((uint16)~(uint16)(0x0F0));
     fmt.Println(u);
-    uint32 x = 4294967295U;
-    x &= unchecked((uint32)~(uint32)(255));
+    uint32 x = 0xFFFFFFFFU;
+    x &= unchecked((uint32)~(uint32)(0xFF));
     fmt.Println(x);
-    nint i = 255;
-    i &= ~(nint)(15);
+    nint i = 0xFF;
+    i &= ~(nint)(0x0F);
     fmt.Println(i);
 }
 

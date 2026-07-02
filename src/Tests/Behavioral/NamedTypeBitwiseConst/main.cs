@@ -19,7 +19,7 @@ public static Tag Context(this Tag t) {
 }
 
 internal static void Main() {
-    Tag t = 16;
+    Tag t = 0x10;
     fmt.Println((uint8)t.Constructed());
     fmt.Println((uint8)t.Context());
 }

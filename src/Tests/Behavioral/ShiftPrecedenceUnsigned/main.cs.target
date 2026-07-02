@@ -17,7 +17,7 @@ internal static void Main() {
     fmt.Println(lowestSetBit(40));
     uint64 z = 6;
     fmt.Println((uint64)(z & ((uint64)0 - z)));
-    uint64 x = 256;
+    uint64 x = 0x100;
     fmt.Println((x >> (int)(4)) + x);
     fmt.Println((1 << (int)(15)) - 1);
     fmt.Println(x - ((uint64)1 << (int)(4)));
@@ -27,15 +27,15 @@ internal static void Main() {
     fmt.Println(y);
     y >>= (int)(s);
     fmt.Println(y);
-    var bf = new main_bitfield(cache: 255);
+    var bf = new main_bitfield(cache: 0xFF);
     nuint n = 4;
     bf.cache >>= (int)(n);
     fmt.Println(bf.cache);
     bf.cache <<= (int)(n);
     fmt.Println(bf.cache);
-    uint64 hi = (nuint)18446744073709551615UL;
+    uint64 hi = (nuint)0xFFFFFFFFFFFFFFFFUL;
     fmt.Println((uint64)(hi & ~(((uint64)1 << (int)(63)))));
-    uint32 u = 4294967295U;
+    uint32 u = 0xFFFFFFFFU;
     fmt.Println((uint32)(u & ~(((uint32)1 << (int)(31)))));
 }
 

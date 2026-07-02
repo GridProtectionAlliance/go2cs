@@ -44,9 +44,9 @@ internal static void Main() {
     _ = ok;
     ref var pair = ref heap(new array<uint64>(2), out var Ꮡpair);
     _ = zeroPair(new @unsafe.Pointer(Ꮡpair));
-    linkaddr @base = 16384;
+    linkaddr @base = 0x4000;
     var next = ((linkaddr)((uintptr)@base + 32));
-    println(throughPointer(@base) == 16384, throughPointer(next) - throughPointer(@base));
+    println(throughPointer(@base) == 0x4000, throughPointer(next) - throughPointer(@base));
     println("compiled");
 }
 

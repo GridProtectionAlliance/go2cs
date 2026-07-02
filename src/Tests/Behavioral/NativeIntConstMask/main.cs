@@ -17,7 +17,7 @@ internal static uintptr align(uintptr i) {
 }
 
 internal static uintptr maskAddr(uintptr i) {
-    return (uintptr)(i & (uintptr)1099511627775UL);
+    return (uintptr)(i & (uintptr)0x00ffffffffffUL);
 }
 
 internal static uintptr alignSmall(uintptr i) {
@@ -25,12 +25,12 @@ internal static uintptr alignSmall(uintptr i) {
 }
 
 internal static void Main() {
-    fmt.Println((uint64)low(11));
-    fmt.Println((uint64)align(11));
-    fmt.Println((uint64)align(27));
+    fmt.Println((uint64)low(0b1011));
+    fmt.Println((uint64)align(0b1011));
+    fmt.Println((uint64)align(0b11011));
     uintptr addr = 1;
     addr <<= (int)(47);
-    addr |= (uintptr)(43981);
+    addr |= (uintptr)(0xABCD);
     fmt.Println((uint64)maskAddr(addr));
     fmt.Println((uint64)alignSmall(27));
 }

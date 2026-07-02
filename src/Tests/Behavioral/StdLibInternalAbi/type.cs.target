@@ -542,8 +542,8 @@ public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
         var x = n.DataChecked(off + i, "read varint"u8).val;
-        v += ((nint)((byte)(x & 127)) << (int)((7 * i)));
-        if ((byte)(x & 128) == 0) {
+        v += ((nint)((byte)(x & 0x7f)) << (int)((7 * i)));
+        if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
         }
     }
@@ -559,13 +559,13 @@ public static bool IsBlank(this ΔName n) {
 
 internal static nint writeVarint(slice<byte> buf, nint n) {
     for (nint i = 0; ᐧ ; i++) {
-        var b = (byte)((nint)(n & 127));
+        var b = (byte)((nint)(n & 0x7f));
         n >>= (int)(7);
         if (n == 0) {
             buf[i] = b;
             return i + 1;
         }
-        buf[i] = (byte)(b | 128);
+        buf[i] = (byte)(b | 0x80);
     }
 }
 

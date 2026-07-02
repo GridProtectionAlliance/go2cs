@@ -10,8 +10,8 @@ internal static uint64 copysign(uint64 f, uint64 sign) {
 }
 
 internal static void Main() {
-    fmt.Println(copysign(255, (nuint)9223372036854775808UL));
-    fmt.Println(copysign((nuint)9223372036854775874UL, 0));
+    fmt.Println(copysign(0xFF, (nuint)0x8000000000000000UL));
+    fmt.Println(copysign((nuint)0x8000000000000042UL, 0));
 }
 
 } // end main_package

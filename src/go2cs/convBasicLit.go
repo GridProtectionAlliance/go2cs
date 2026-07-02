@@ -43,16 +43,34 @@ func replaceOctalChars(value string) string {
 	return value
 }
 
+// preserveGoIntLiteral returns the literal's SOURCE text when it is also a valid C# integer
+// literal denoting the same value — hex `0x…`, binary `0b…`, and decimal, each with optional
+// `_` digit separators — keeping the developer's own formatting (the visually-similar goal:
+// `0x4000` must not flatten to `16384`). Go-only forms re-render as the decimal fallback:
+// `0o…` octal has no C# syntax, and a LEGACY leading-zero octal (`0755`) would silently
+// re-bind as decimal 755 in C#.
+func preserveGoIntLiteral(source string, decimal string) string {
+	if len(source) > 1 && source[0] == '0' {
+		if c := source[1]; c == 'x' || c == 'X' || c == 'b' || c == 'B' {
+			return source
+		}
+
+		return decimal
+	}
+
+	return source
+}
+
 func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) string {
 	result := &strings.Builder{}
 	value := basicLit.Value
 
 	switch basicLit.Kind {
 	case token.INT:
-		// Parse literal octal, binary, etc as a decimal integer
+		// Parse literal octal, binary, etc as a decimal integer (the VALUE classifies the
+		// emitted form below; the TEXT keeps the Go source formatting where C# supports it)
 		if intval, err := strconv.ParseInt(value, 0, 64); err == nil {
-			// Convert the signed integer to a string
-			value = strconv.FormatInt(intval, 10)
+			value = preserveGoIntLiteral(value, strconv.FormatInt(intval, 10))
 
 			if intval > math.MaxInt32 || intval < math.MinInt32 {
 				// A value outside int32 used in an unsigned context (e.g. 0x80000000
@@ -75,8 +93,7 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 				result.WriteString(value)
 			}
 		} else if uintval, err := strconv.ParseUint(value, 0, 64); err == nil {
-			// Convert the unsigned integer to a string
-			value = strconv.FormatUint(uintval, 10)
+			value = preserveGoIntLiteral(value, strconv.FormatUint(uintval, 10))
 
 			if uintval > math.MaxUint32 {
 				result.WriteString("(nuint)")

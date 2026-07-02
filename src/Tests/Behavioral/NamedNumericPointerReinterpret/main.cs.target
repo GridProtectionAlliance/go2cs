@@ -42,7 +42,7 @@ internal static uint64 describe(hexval v) {
 
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
-    a = 956397711105UL;
+    a = 0xDEADBEEF01UL;
     sweepClass b = 1234;
     fmt.Println(a.peek(), b.peek());
     fmt.Println(peekVia(Ꮡa));

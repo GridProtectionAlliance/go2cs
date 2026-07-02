@@ -20,7 +20,7 @@ internal static void Main() {
     var pe = Ꮡa.at<nint>((nint)(g % 2));
     pe.val = 66;
     fmt.Println(a[0], a[1], a[2], a[3]);
-    uintptr pc = 171;
+    uintptr pc = 0xAB;
     fmt.Println("0123456789abcdef"u8[(int)((uintptr)(pc & 15))]);
     fmt.Println("0123456789abcdef"u8[(int)((uintptr)((pc >> (int)(4)) & 15))]);
     @string hex = "0123456789abcdef"u8;
