@@ -68,6 +68,15 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 		if alias == "." {
 			v.packageImports.WriteString(fmt.Sprintf("using static %s;", importPath))
+		} else if alias == "_" {
+			// A BLANK import (`import _ "unsafe"`) is side-effects-only: Go forbids referencing
+			// the package through it, so the alias is never legitimately used — but emitting
+			// `using _ = <ns>;` HIJACKS C#'s `_` DISCARD for the whole file: any deconstruction
+			// discard (`(w, _) = w.ensure(…)`, runtime tracetime.go) then binds the namespace
+			// alias instead (CS0118 + CS0029). Record the import as a comment only; the package's
+			// exported aliases still load (loadImportedTypeAliases above) and a genuine type
+			// reference gets its canonical `using` from visitFile's collectTypePackages machinery.
+			v.packageImports.WriteString(fmt.Sprintf("// blank import: %s (side effects only; no using emitted — a `using _` alias hijacks C# discards)", importPath))
 		} else {
 			if getSanitizedImport(alias) == canonicalAlias {
 				v.canonicalAliasImported.Add(v.currentImportPath)

@@ -15,4 +15,5 @@ func main() {
 	fmt.Println(isNil(p))                  // false
 	fmt.Println(compositeLen())            // 1
 	fmt.Println(blankImportInfersUnsafe()) // false
+	fmt.Println(discardInBlankImportFile()) // 42 — a `_` discard works alongside the blank import
 }

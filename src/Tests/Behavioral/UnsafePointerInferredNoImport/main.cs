@@ -14,6 +14,7 @@ internal static void Main() {
     fmt.Println(isNil(p));
     fmt.Println(compositeLen());
     fmt.Println(blankImportInfersUnsafe());
+    fmt.Println(discardInBlankImportFile());
 }
 
 } // end main_package
