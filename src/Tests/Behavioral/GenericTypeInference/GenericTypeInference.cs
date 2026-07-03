@@ -82,6 +82,21 @@ public static S AppendKeep<S, E>(S s, E v)
     return @out;
 }
 
+internal static void setFirst<E>(slice<E> s, E v)
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    if (len(s) > 0) {
+        s[0] = v;
+    }
+}
+
+public static void PassSlice<S, E>(S s, E v)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    setFirst(new slice<E>(s), v);
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
@@ -95,6 +110,9 @@ internal static void Main() {
     fmt.Println(q.String(), total);
     var grown = AppendKeep(new Point(new int32[]{5, 6}.slice()), 7);
     fmt.Println(grown.String());
+    var pt = new Point(new int32[]{1, 2}.slice());
+    PassSlice(pt, 42);
+    fmt.Println(pt.String());
 }
 
 } // end main_package

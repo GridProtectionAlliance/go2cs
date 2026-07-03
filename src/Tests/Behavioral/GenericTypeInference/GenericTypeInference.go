@@ -74,6 +74,20 @@ func AppendKeep[S ~[]E, E Integer](s S, v E) S {
 	return out
 }
 
+// setFirst takes a CONCRETE []E parameter.
+func setFirst[E Integer](s []E, v E) {
+	if len(s) > 0 {
+		s[0] = v
+	}
+}
+
+// PassSlice passes the constrained S where []E is expected (Go assignability -- the slices
+// package's rotateRight/pdqsort helper chain): the emitted `new slice<E>(s)` materialization
+// SHARES backing, so the helper's write lands in the caller's array.
+func PassSlice[S ~[]E, E Integer](s S, v E) {
+	setFirst(s, v)
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
@@ -87,4 +101,7 @@ func main() {
 	fmt.Println(q.String(), total)
 	grown := AppendKeep(Point{5, 6}, 7)
 	fmt.Println(grown.String())
+	pt := Point{1, 2}
+	PassSlice(pt, 42)
+	fmt.Println(pt.String())
 }

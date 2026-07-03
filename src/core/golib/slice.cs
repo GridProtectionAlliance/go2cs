@@ -140,10 +140,20 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
             return;
         }
 
-        m_array = (T[])((IArray)view).Source!;
-        m_low = view.Low;
-        m_length = view.High - view.Low;
-        m_capacity = view.Capacity;
+        // The full-window interface sub-slice of a golib implementer returns a BOXED slice<T>
+        // over the same backing (a named-slice wrapper routes through its wrapped window) —
+        // unbox it to share. `Source` cannot be used here: it materializes a detached copy.
+        if (view.Slice((nint)0, view.Length) is slice<T> shared)
+        {
+            this = shared;
+            return;
+        }
+
+        // Foreign implementer: a detached copy is the only option.
+        m_array = view.ToSpan().ToArray();
+        m_low = 0;
+        m_length = m_array.Length;
+        m_capacity = m_array.Length;
     }
 
     public slice(T[]? array, nint low = 0, nint high = -1)

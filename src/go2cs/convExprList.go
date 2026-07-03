@@ -105,6 +105,16 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 		}
 
+		// A constrained slice type parameter passed where a CONCRETE slice<E> is expected (Go
+		// assignability: S ~[]E is assignable to []E — slices' rotateRight/pdqsort helper calls)
+		// materializes through the SHARING slice<T>(ISlice<T>) constructor — a cast cannot apply
+		// (the source is interface-constrained; C# forbids user conversions from interfaces).
+		if callContext != nil && callContext.wrapArgWithNew != nil {
+			if newType, ok := callContext.wrapArgWithNew[i]; ok && len(newType) > 0 {
+				resultExpr = fmt.Sprintf("new %s(%s)", newType, resultExpr)
+			}
+		}
+
 		arg := &strings.Builder{}
 
 		arg.WriteString(resultExpr)

@@ -38,6 +38,9 @@ type CallExprContext struct {
 	callArgs            []string
 	replacementArgs     []string
 	castArgToType       map[int]string
+	// wrapArgWithNew wraps the indexed argument in a constructor call (`new slice<E>(arg)`) — the
+	// S-where-[]E-expected materialization (see convExprList).
+	wrapArgWithNew map[int]string
 	// deferredDecls hoists a func-literal argument's capture declarations out of the call's
 	// argument list (where a `var mʗ1 = m;` statement is invalid C#) up to the enclosing
 	// statement. Threaded from the statement emitter (visitExprStmt/visitAssignStmt) through

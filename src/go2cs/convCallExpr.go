@@ -439,6 +439,24 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
+			// A CONSTRAINED SLICE TYPE PARAMETER passed where a concrete slice<E> parameter is
+			// expected — Go assignability (S ~[]E is assignable to []E; the slices package's
+			// rotateRight(s[m:i], …)/pdqsortOrdered(x, …) helper chain) — materializes through
+			// the SHARING slice<T>(ISlice<T>) constructor: `new slice<E>(arg)`. A cast cannot
+			// apply (the source is interface-constrained; C# forbids user-defined conversions
+			// from interfaces), and the constructor shares backing, preserving Go aliasing.
+			if paramHasArg && i < len(callExpr.Args) {
+				if paramSlice, ok := types.Unalias(paramType).(*types.Slice); ok {
+					if argTP, ok := types.Unalias(v.info.TypeOf(callExpr.Args[i])).(*types.TypeParam); ok && typeParamSliceCore(argTP) != nil {
+						if callExprContext.wrapArgWithNew == nil {
+							callExprContext.wrapArgWithNew = make(map[int]string)
+						}
+
+						callExprContext.wrapArgWithNew[i] = fmt.Sprintf("slice<%s>", convertToCSTypeName(v.getTypeName(paramSlice.Elem(), false)))
+					}
+				}
+			}
+
 			// A Go string passed to a generic type-parameter parameter must be cast to
 			// golib's `@string` (a struct). Without a target type, a bare string literal
 			// converts to a .NET `System.String`, so C# infers the type argument as

@@ -11,27 +11,34 @@ import (
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	ident := v.convExpr(sliceExpr.X, nil)
 
-	// A sub-slice of a CONSTRAINED TYPE PARAMETER (`s[lo:hi]` where s is `S ~[]E`) must yield S
-	// again, sharing backing — Go's named-slice sub-slice semantics (pdqsort's recursion assigns
-	// it back to S-typed values, CS0266). golib's subslice<S, E> reconstructs via S.Wrap; the
-	// type arguments are emitted explicitly (E is constraint-only — C# cannot infer it). The
-	// 3-index form falls through (unseen on constrained values in the stdlib).
-	if sliceExpr.Max == nil {
-		if tp, ok := types.Unalias(v.info.TypeOf(sliceExpr.X)).(*types.TypeParam); ok {
-			if sliceType := typeParamSliceCore(tp); sliceType != nil {
-				low, high := "-1", "-1"
+	// A sub-slice of a CONSTRAINED TYPE PARAMETER (`s[lo:hi]` / `s[lo:hi:max]` where s is
+	// `S ~[]E`) must yield S again, sharing backing — Go's named-slice sub-slice semantics
+	// (pdqsort's recursion assigns it back to S-typed values, CS0266). golib's
+	// subslice<S, E>/subslice3<S, E> reconstruct via S.Wrap; the type arguments are emitted
+	// explicitly (E is constraint-only — C# cannot infer it).
+	if tp, ok := types.Unalias(v.info.TypeOf(sliceExpr.X)).(*types.TypeParam); ok {
+		if sliceType := typeParamSliceCore(tp); sliceType != nil {
+			low, high, max := "-1", "-1", "-1"
 
-				if sliceExpr.Low != nil {
-					low = v.convExpr(sliceExpr.Low, nil)
-				}
-
-				if sliceExpr.High != nil {
-					high = v.convExpr(sliceExpr.High, nil)
-				}
-
-				elemType := convertToCSTypeName(v.getTypeName(sliceType.Elem(), false))
-				return fmt.Sprintf("subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
+			if sliceExpr.Low != nil {
+				low = v.convExpr(sliceExpr.Low, nil)
 			}
+
+			if sliceExpr.High != nil {
+				high = v.convExpr(sliceExpr.High, nil)
+			}
+
+			if sliceExpr.Max != nil {
+				max = v.convExpr(sliceExpr.Max, nil)
+			}
+
+			elemType := convertToCSTypeName(v.getTypeName(sliceType.Elem(), false))
+
+			if sliceExpr.Max != nil {
+				return fmt.Sprintf("subslice3<%s, %s>(%s, %s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high, max)
+			}
+
+			return fmt.Sprintf("subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
 		}
 	}
 

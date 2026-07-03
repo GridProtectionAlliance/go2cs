@@ -800,6 +800,27 @@ public static class builtin
     /// <param name="s">Constrained slice value.</param>
     /// <param name="items">Elements to append.</param>
     /// <returns>The appended slice, as the same constrained type.</returns>
+    /// <summary>
+    /// Span twin of the constrained append below: a spread of another constrained value
+    /// (`append(s, v.ꓸꓸꓸ)`) yields Span&lt;T&gt;, for which the legacy `params T[]` candidate wins
+    /// betterness with T = Span&lt;E&gt; (a ref struct as a type argument — CS9244); the exact Span
+    /// normal form wins instead.
+    /// </summary>
+    public static S append<S, T>(S s, params Span<T> items) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        return S.Wrap(go.slice<T>.Append(new slice<T>(s), items));
+    }
+
+    /// <summary>
+    /// Full (3-index) sub-slice of a constrained slice type parameter, preserving its type —
+    /// Go's <c>s[low:high:max]</c> on a named slice type. Bounds follow the golib
+    /// <c>slice()</c> convention (-1 for defaults).
+    /// </summary>
+    public static S subslice3<S, T>(S s, nint low, nint high, nint max) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        return S.Wrap(new slice<T>(s).slice(low, high, max));
+    }
+
     public static S append<S, T>(S s, params ReadOnlySpan<T> items) where S : ISlice<T>, ISliceWrap<S, T>
     {
         // Route to the core slice Append directly — a recursive `append(...)` call would resolve
