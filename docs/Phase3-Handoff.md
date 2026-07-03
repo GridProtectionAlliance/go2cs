@@ -15,6 +15,13 @@
 
 ## Where things stand (2026-07-03)
 
+- **iface-vs-concrete compares CLEARED (`661359348`) — WAVE-15 = 77 / 13.** The ==/!=
+  arm routes one-sided interface-vs-concrete operands through AreEqual (no public operator can
+  exist for internal-scope pairs; AreEqual reproduces Go's dynamic type+value equality). Guard:
+  InterfaceImplementation errno extension, run-verified. syscall residual 21 (DLL-import
+  'wrong return type' ×8 + misc — triage next), then strconv 7 / path 7 / edwards25519 13 +
+  fiat 4 / dnsmessage tail 9 / io 5 / singles 11.
+
 - **The 131-error Errno family is CLEARED (`9e5fe0990`) — WAVE-14 = 86 errors / 13 packages.**
   Two coupled sparse-array defects: composite CONSTANT keys now fold to their integer value
   (mixed named/underlying operand operators were ambiguous, CS0034; symbolic ident keys keep
