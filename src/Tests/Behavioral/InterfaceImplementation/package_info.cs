@@ -40,6 +40,7 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<Dog, Animal>(Pointer = true)]
 [assembly: GoImplement<Frog, Animal>(Pointer = true)]
+[assembly: GoImplement<errno, error>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

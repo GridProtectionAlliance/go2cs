@@ -31,6 +31,8 @@ internal static void Main() {
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], f));
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], zoo[0]));
     fmt.Printf("Iface cmp result = %v\n"u8, !AreEqual(zoo[0], t));
+    checkErr(1);
+    checkErr(0);
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
     foreach (var (_, aΔ1) in zoo) {
@@ -41,6 +43,31 @@ internal static void Main() {
     fmt.Printf("%T\n"u8, a);
     var vowels = new array<bool>(128){[(rune)'a'] = true, [(rune)'e'] = true, [(rune)'i'] = true, [(rune)'o'] = true, [(rune)'u'] = true, [(rune)'y'] = true};
     fmt.Println(vowels);
+}
+
+[GoType("num:uintptr")] partial struct errno;
+
+internal static @string Error(this errno e) {
+    return "errno"u8;
+}
+
+internal static readonly errno errAgain = 11;
+
+internal static error mayFail(nint n) {
+    if (n > 0) {
+        return errAgain;
+    }
+    return default!;
+}
+
+internal static void checkErr(nint n) {
+    var err = mayFail(n);
+    if (AreEqual(err, errAgain)) {
+        fmt.Println("got again");
+    }
+    if (!AreEqual(err, errAgain)) {
+        fmt.Println("not again");
+    }
 }
 
 public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {

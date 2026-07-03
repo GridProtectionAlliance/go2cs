@@ -30,6 +30,9 @@ func main() {
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] == zoo[0])
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] != t)
 
+	checkErr(1) // got again
+	checkErr(0) // not again
+
 	var a Animal = nil
 	fmt.Printf("%T\n", a)
 
@@ -47,6 +50,35 @@ func main() {
 	// vowels[ch] is true if ch is a vowel
 	vowels := [128]bool{'a': true, 'e': true, 'i': true, 'o': true, 'u': true, 'y': true}
 	fmt.Println(vowels)
+}
+
+// errno mirrors syscall.Errno: a named numeric implementing the error interface. Comparing an
+// error INTERFACE against the concrete value (`err == errAgain`) has no C# operator between the
+// interface and the implementing struct - the converter emits AreEqual, whose boxed same-type
+// value compare reproduces Go's dynamic type+value interface equality.
+type errno uintptr
+
+func (e errno) Error() string {
+	return "errno"
+}
+
+const errAgain errno = 11
+
+func mayFail(n int) error {
+	if n > 0 {
+		return errAgain
+	}
+	return nil
+}
+
+func checkErr(n int) {
+	err := mayFail(n)
+	if err == errAgain {
+		fmt.Println("got again")
+	}
+	if err != errAgain {
+		fmt.Println("not again")
+	}
 }
 
 func ShowZoo(zoo *[2]Animal) {

@@ -389,7 +389,28 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			lhsIsInterface, isEmpty := isInterface(lhsType)
 			rhsIsInterface, rhsIsEmpty := isInterface(rhsType)
 
-			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) {
+			// A CONCRETE comparable value against a non-empty interface (`err ==
+			// ERROR_ENVVAR_NOT_FOUND`, error vs the Errno named numeric; syscall CS0019 x12)
+			// also routes through AreEqual: Go compares the interface's dynamic type+value,
+			// which AreEqual's boxed same-type value compare reproduces - no operator between
+			// the interface and the implementing struct exists (user-defined operators must be
+			// public, which an internal-scoped pair cannot declare). Excludes nil (the
+			// dedicated nil arms above), pointers (box identity below), and interfaces.
+			concreteOperand := func(t types.Type) bool {
+				if t == nil || isPointer(t) {
+					return false
+				}
+
+				if basic, ok := t.Underlying().(*types.Basic); ok && basic.Kind() == types.UntypedNil {
+					return false
+				}
+
+				iface, _ := isInterface(t)
+				return !iface
+			}
+
+			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) ||
+				(lhsIsInterface && !isEmpty && concreteOperand(rhsType)) || (rhsIsInterface && !rhsIsEmpty && concreteOperand(lhsType)) {
 				// Handle interface comparison with special runtime function
 				if binaryOp == "==" {
 					return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)
