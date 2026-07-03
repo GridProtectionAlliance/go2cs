@@ -299,6 +299,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]

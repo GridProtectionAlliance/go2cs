@@ -274,6 +274,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]

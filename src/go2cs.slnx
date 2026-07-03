@@ -141,6 +141,7 @@
     <Project Path="Tests/Behavioral/GlobalPointerWalk/GlobalPointerWalk.csproj" />
     <Project Path="Tests/Behavioral/GlobalShadowedByLocal/GlobalShadowedByLocal.csproj" />
     <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
+    <Project Path="Tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="Tests/Behavioral/IfStatements/IfStatements.csproj" />

@@ -15,6 +15,21 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 	v.writeDoc(doc, valueSpec.End())
 
 	if tok == token.VAR {
+		// A package-level `var a, b = f()` — ONE call initializer whose result tuple Go
+		// deconstructs across the names. C# field initializers cannot deconstruct, so the
+		// per-name loop below assigned the WHOLE ValueTuple to the first field (CS0029 —
+		// edwards25519's `var identity, _ = new(Point).SetBytes(…)`) and left the rest
+		// uninitialized. Route through the ValueTuple component-read emission instead.
+		// In-function specs keep the existing path (`:=` tuples are visitAssignStmt's).
+		if !v.inFunction && valueSpec.Type == nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			if _, isCall := valueSpec.Values[0].(*ast.CallExpr); isCall {
+				if tuple, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple); isTuple {
+					v.visitPackageTupleVarSpec(valueSpec, tuple)
+					return
+				}
+			}
+		}
+
 		for i, ident := range valueSpec.Names {
 			var isAnyType bool
 			var isInterfaceType bool
@@ -566,4 +581,76 @@ func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Typ
 	}
 
 	return v.convertToInterfaceType(ifaceDeclType, rhsType, v.convExpr(value, contexts))
+}
+
+// visitPackageTupleVarSpec emits a package-level `var a, b = f()` — a single multi-value call
+// initializer with no explicit type. C# static field initializers cannot deconstruct a tuple, so
+// each non-blank name reads its ValueTuple component. With exactly ONE non-blank name the call
+// stays inline on that field and reads its component (`internal static ж<Point> identity =
+// @new<Point>().SetBytes(…).Item1;` — blank names keep the plain path's uninitialized `_ᴛNʗ`
+// field emission, and the call still runs exactly once). With two or more non-blank names the
+// call is evaluated ONCE into a hidden tuple field and each name reads its component from it —
+// C# static field initializers run in textual order within a class part, so the reads follow the
+// temp. `.ItemN` binds both unnamed and named result tuples. (Comma-ok package vars —
+// `var v, ok = m[k]` — are not calls and keep the existing path; no stdlib occurrence.)
+func (v *Visitor) visitPackageTupleVarSpec(valueSpec *ast.ValueSpec, tuple *types.Tuple) {
+	nonBlankCount := 0
+
+	for _, ident := range valueSpec.Names {
+		if ident.Name != "_" {
+			nonBlankCount++
+		}
+	}
+
+	context := DefaultBasicLitContext()
+	context.u8StringOK = true
+
+	callExpr := v.convExpr(valueSpec.Values[0], []ExprContext{context})
+	componentSource := callExpr
+	firstLine := true
+
+	if nonBlankCount > 1 {
+		// Hidden once-evaluated tuple holder; the named fields read components from it.
+		tempName := getGlobalTempVarName("tuple") + CapturedVarMarker
+		componentTypes := make([]string, tuple.Len())
+
+		for i := range tuple.Len() {
+			componentTypes[i] = v.getCSTypeName(tuple.At(i).Type())
+		}
+
+		v.writeOutput("internal static (%s) %s = %s;", strings.Join(componentTypes, ", "), tempName, callExpr)
+		componentSource = tempName
+		firstLine = false
+	}
+
+	for i, ident := range valueSpec.Names {
+		goIDName := v.getIdentName(ident)
+		csIDName := getSanitizedIdentifier(goIDName)
+		isBlank := csIDName == "_"
+
+		if isBlank {
+			csIDName = getGlobalTempVarName("_") + CapturedVarMarker
+		}
+
+		if !firstLine {
+			v.targetFile.WriteString(v.newline)
+		}
+
+		firstLine = false
+		csTypeName := v.getCSTypeName(tuple.At(i).Type())
+		access := getAccess(goIDName)
+
+		// An ALL-BLANK spec (`var _, _ = f()`) must still evaluate the call once for its side
+		// effect: carry it on the first blank's initializer. Otherwise blanks stay uninitialized —
+		// the call already ran via the non-blank/temp field.
+		if isBlank && !(nonBlankCount == 0 && i == 0) {
+			v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
+		} else if v.isAddressedGlobal(ident) {
+			v.writeAddressedGlobalDecl(access, csTypeName, csIDName, fmt.Sprintf("%s.Item%d", componentSource, i+1), isInherentlyHeapAllocatedType(tuple.At(i).Type()))
+		} else {
+			v.writeOutput("%s static %s %s = %s.Item%d;", access, csTypeName, csIDName, componentSource, i+1)
+		}
+	}
+
+	v.writeComment(valueSpec.Comment, valueSpec.End())
 }

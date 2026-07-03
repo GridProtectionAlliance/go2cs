@@ -297,6 +297,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]

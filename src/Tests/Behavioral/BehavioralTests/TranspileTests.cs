@@ -297,6 +297,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckGlobalStructFieldPointers() => CheckTarget("GlobalStructFieldPointers");
 
     [TestMethod]
+    public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
+
+    [TestMethod]
     public void CheckGoCallVariations() => CheckTarget("GoCallVariations");
 
     [TestMethod]
