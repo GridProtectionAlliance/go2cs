@@ -15,6 +15,27 @@
 
 ## Where things stand (2026-07-03)
 
+- **FIFTEEN roots landed (recon112 pending) — dnsmessage AT ZERO (club = 14).** Post-batch roots:
+  b447795c4 func literals in PACKAGE-LEVEL var initializers get function scope (inFunction save/
+  restore in convFuncLit + synthetic-FuncDecl performVariableAnalysis in visitValueSpec — the
+  sync.OnceValue lambda emitted locals as package fields, CS1002 cascade gating os/fmt via
+  internal/syscall/windows); 32d65a263 integer TYPE-PARAMETER conversions route through NEW golib
+  ConvertToType<T>/ConvertToUInt64<T> (rand/v2 E(100): Int(x)/uint64(n)/n<=0; SHIFT counts excluded
+  — the full suite caught the overreach); e2bbe490a conversions to/from a CROSS-PACKAGE written
+  base take the ONE-STEP wrapper operator (registry Key/syscall.Handle 25 errors; same-package
+  chains keep the underlying hop — [GoType num:] has no named-base operator); also the Key
+  GoImplicitConv dedup (prev commit). MEASUREMENT GOTCHAS burned this session: csproj basenames in
+  go-src-converted are DOTTED (internal.syscall.windows.registry.csproj — hardcoding registry.csproj
+  gives MSB1009 which greps as ZERO errors = phantom-clean); cwd drift does the same — ALWAYS
+  absolute paths + verify a build actually ran; concurrent suite+corpus MSBuild races produce
+  transient phantom errors — measure sequentially. NEXT: (1) internal/syscall/windows DLL-stub
+  family (~10 CS0234: stub.g.cs qualifies syscall types as go.@internal.syscall.WSABuf — wrong
+  namespace — plus partial-method signature mismatch ж<WSABuf> vs ж<syscall_package.WSABuf>);
+  (2) remeasure time/os/fmt on recon112 (their residuals were behind registry/windows); (3) fiat 20
+  alias-array reinterprets; (4) reflect 3 + time CS0557-class generator bugs; (5) bytes 6 (CS1113
+  SpecialCase method values x3 + reader long-to-int CS1503 x2 + CS8716); strings 5; bufio 11;
+  netip 3; edwards 1.
+
 - **TEN-ROOT BATCH LANDED (recon109 wave) — strconv, syscall, io, weak ALL AT ZERO; zero club = 13.**
   The batch (in commit order): `5e739e712` FuncType-in-expression-position — reflect/type.go was
   being SILENTLY DROPPED (per-file recover() ate the convExpr panic as a warning; 218 CS0246
