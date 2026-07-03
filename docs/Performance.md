@@ -1,3 +1,5 @@
+<!-- AUTO-COPIED from src/Tests/Performance/README.md by run-performance.ps1 -- edit that file, not this one. -->
+
 # Go vs transpiled C# — runtime performance comparison
 
 A small, targeted benchmark suite answering the question people ask first about go2cs: **"how fast is

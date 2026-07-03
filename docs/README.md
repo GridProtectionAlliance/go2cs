@@ -124,7 +124,7 @@ NuGet package) plus a set of Roslyn source generators that supply Go semantics a
 | `src/core/` | A compiling subset of the converted Go standard library used by the tests. |
 | `src/go-src-converted/` | Work-in-progress full conversion of the Go standard library. |
 | `src/Tests/Behavioral/` | Per-feature Go↔C# equivalence tests (transpile, compile, run-and-compare). |
-| `src/Tests/Performance/` | Go vs transpiled C# runtime benchmarks (JIT and Native AOT) — see its [README](../src/Tests/Performance/README.md) for current numbers. |
+| `src/Tests/Performance/` | Go vs transpiled C# runtime benchmarks (JIT and Native AOT) — see the [performance comparison](Performance.md) for current numbers. |
 | `src/Examples/` | Sample conversions. |
 
 Contributors: see [`CLAUDE.md`](../CLAUDE.md) for an architecture overview and
@@ -138,7 +138,7 @@ behavioral test suite. A curated subset of the Go standard library converts and 
 the *entire* standard library cleanly is ongoing work — see the [roadmap](Roadmap.md).
 
 Wondering how fast the transpiled C# runs compared to the original Go — including startup time, memory,
-and Native AOT builds? See the [performance comparison](../src/Tests/Performance/README.md).
+and Native AOT builds? See the [performance comparison](Performance.md).
 
 ## Milestones
 
