@@ -142,6 +142,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					goTypeName := v.getTypeName(def.Type(), false)
 					csTypeName := convertToCSTypeName(goTypeName)
 
+					// An ANONYMOUS func-typed var renders through the signature-aware path
+					// (Func<…>/Action<…> via iifeDelegateType): the raw getTypeName text
+					// (`func(string, string) ([]byte, error)`) mangles under convertToCSTypeName
+					// (`(<>byte, error)` — time zoneinfo_read's loadTzinfoFromTzdata, CS1003
+					// cascade). A NAMED func type keeps its delegate name via the normal path.
+					if _, isSig := types.Unalias(def.Type()).(*types.Signature); isSig {
+						csTypeName = v.getCSTypeName(def.Type())
+					}
+
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {

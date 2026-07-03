@@ -28,7 +28,12 @@ internal static void Main() {
     Stringy baz = () => "anonymous stringy\n"u8;
     fmt.Print(baz());
     fmt.Println(cached(), cached());
+    loader = (@string name) => (slice<byte>(name), default!);
+    var (b, err) = loader("zone"u8);
+    fmt.Println(len(b), err == default!);
 }
+
+internal static Func<@string, (slice<byte>, error)> loader;
 
 internal static Func<nint> cached = memo(() => {
     nint n = default!;
