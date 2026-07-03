@@ -17,7 +17,7 @@ public static nint Count<T>(params Span<T> valsʗp) {
 }
 
 public static T Or<T>(params Span<T> valsʗp)
-    where T : /* comparable */ comparable<T>, new()
+    where T : /* comparable */ new()
 {
     var vals = valsʗp.slice();
 

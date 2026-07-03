@@ -2636,9 +2636,16 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					} else if constraintExpr == "string" || constraintExpr == "[]byte" {
 						typeConstraint = "ISlice<byte>"
 					} else if constraintExpr == "comparable" {
-						// The Go built-in `comparable` constraint maps to golib's generic
-						// `comparable<T>` interface (self-referential CRTP form).
-						typeConstraint = fmt.Sprintf("comparable<%s>", typeParamNames[i])
+						// Go's built-in `comparable` admits every ==-able Go type — numerics,
+						// strings, pointers, channels, comparable structs/arrays/interfaces. No C#
+						// constraint can express that set: golib's comparable<T> CRTP is
+						// implemented by NOTHING (every real instantiation failed — blocking
+						// maps.Keys), and lifting IEqualityOperators would reject structs, which
+						// Go admits. Emit NO C# constraint beyond new(): Go's checker already
+						// validated every instantiation, and emitted equality on type parameters
+						// routes through AreEqual (object equality), not operator ==.
+						constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s new()", v.newline, v.indent(v.indentLevel), typeParamNames[i], originalConstraint))
+						continue
 					}
 				}
 
