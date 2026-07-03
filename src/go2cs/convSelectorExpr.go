@@ -860,8 +860,18 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								// like a Δ-renamed package type (rtype's embedded `Type` vs the
 								// reflectlite `Type` interface) is DECLARED unrenamed, so the hop
 								// must not apply the package-level rename (`t.ΔType` is CS1061).
-								return getAliasedTypeName(fmt.Sprintf("%s.%s.Value.%s", v.convExpr(selectorExpr.X, nil),
-									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								// A DIRECT-Ж target binds the embed field's box itself; only a
+								// [GoRecv] ref target binds the deref'd `.Value` ref-return
+								// (abi.Type.Uncommon promoted direct-ж by the pointer-arg
+								// detector - `t.Type.Value.Uncommon()` was CS1929).
+								deref := ".Value"
+
+								if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok && packageDirectBoxReceiverMethods[funcObj.Origin()] {
+									deref = ""
+								}
+
+								return getAliasedTypeName(fmt.Sprintf("%s.%s%s.%s", v.convExpr(selectorExpr.X, nil),
+									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), deref, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 						}
 					} else {

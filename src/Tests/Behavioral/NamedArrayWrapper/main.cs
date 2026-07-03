@@ -26,7 +26,9 @@ internal static void zeroTB(ж<tb> Ꮡbuf) {
     return b.Value[i];
 }
 
-[GoRecv] internal static void fill(this ref pallocBits b) {
+internal static void fill(this ж<pallocBits> Ꮡb) {
+    ref var b = ref Ꮡb.Value;
+
     for (nint i = 0; i < len(b.Value); i++) {
         b.Value[i] = (uint64)(i * 10 + 1);
     }
@@ -34,7 +36,7 @@ internal static void zeroTB(ж<tb> Ꮡbuf) {
 
 internal static void Main() {
     ref var e = ref heap(new pallocBits(), out var Ꮡe);
-    e.fill();
+    Ꮡe.fill();
     fmt.Println((Ꮡ((pageBits)(~Ꮡe))).get(0), (Ꮡ((pageBits)(~Ꮡe))).get(3));
     (Ꮡ((pageBits)(~Ꮡe))).set(1, 99);
     fmt.Println(e[1]);

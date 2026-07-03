@@ -128,7 +128,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -354,6 +354,50 @@ func bodyHasPointerMethodValueOnReceiver(body *ast.BlockStmt, recvName string, i
 		if selectorRootsAtReceiverValueFieldChain(sel.X, recvName, info) {
 			found = true
 			return false
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyPassesReceiverAsPointerArg reports whether the body passes the receiver itself as a
+// CALL ARGUMENT bound to a POINTER parameter - `trim(a)` inside `func (a *decimal)` where
+// `func trim(a *decimal)` (strconv decimal.go; syscall's SID helpers). The callee's emitted
+// form takes the box `ж<T>`, so the caller needs its receiver box in scope - promote to
+// direct-ж. The assignment/comparison uses are detected separately
+// (bodyUsesReceiverAsPointerValue); this covers the argument position.
+func bodyPassesReceiverAsPointerArg(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if found {
+			return false
+		}
+
+		callExpr, ok := node.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		for _, arg := range callExpr.Args {
+			ident, ok := arg.(*ast.Ident)
+
+			if !ok || ident.Name != recvName {
+				continue
+			}
+
+			// The receiver ident must bind a POINTER argument slot (Go only allows this when
+			// the parameter is the same pointer type, but check the signature to exclude a
+			// SHADOWED local of another type).
+			if argType := info.TypeOf(arg); argType != nil {
+				if _, isPtr := argType.(*types.Pointer); isPtr {
+					found = true
+					return false
+				}
+			}
 		}
 
 		return true

@@ -20,11 +20,15 @@ internal static uint32 load32(ж<uint32> Ꮡp) {
 
 [GoType("num:uint32")] partial struct sweepClass;
 
-[GoRecv] internal static uint64 peek(this ref lfstack head) {
+internal static uint64 peek(this ж<lfstack> Ꮡhead) {
+    ref var head = ref Ꮡhead.Value;
+
     return load64(Ꮡ((uint64)(head)));
 }
 
-[GoRecv] internal static uint32 peek(this ref sweepClass sc) {
+internal static uint32 peek(this ж<sweepClass> Ꮡsc) {
+    ref var sc = ref Ꮡsc.Value;
+
     return load32(Ꮡ((uint32)(sc)));
 }
 
@@ -43,11 +47,13 @@ internal static uint64 describe(hexval v) {
 internal static void Main() {
     ref var a = ref heap(new lfstack(), out var Ꮡa);
     a = 0xDEADBEEF01UL;
-    sweepClass b = 1234;
-    fmt.Println(a.peek(), b.peek());
+    ref var b = ref heap(new sweepClass(), out var Ꮡb);
+    b = 1234;
+    fmt.Println(Ꮡa.peek(), Ꮡb.peek());
     fmt.Println(peekVia(Ꮡa));
-    lfstack c = 42;
-    fmt.Println(c.peek());
+    ref var c = ref heap(new lfstack(), out var Ꮡc);
+    c = 42;
+    fmt.Println(Ꮡc.peek());
     var h = ((hexval)(uint64)a);
     fmt.Println(describe(h), (uint64)((hexval)(uint64)c));
 }

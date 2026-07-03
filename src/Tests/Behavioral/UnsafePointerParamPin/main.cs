@@ -14,12 +14,16 @@ internal static uintptr readViaParam(ж<uintptr> Ꮡp) {
     return q.Value;
 }
 
-[GoRecv] internal static uintptr read(this ref utp r) {
+internal static uintptr read(this ж<utp> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref r));
     return q.Value;
 }
 
-[GoRecv] internal static uintptr tricky(this ref utp r) {
+internal static uintptr tricky(this ж<utp> Ꮡr) {
+    ref var r = ref Ꮡr.Value;
+
     ref var y = ref heap(new uintptr(), out var Ꮡy);
     y = 111;
     {
@@ -54,9 +58,10 @@ internal static void Main() {
     ref var x = ref heap(new uintptr(), out var Ꮡx);
     x = 42;
     fmt.Println(readViaParam(Ꮡx));
-    utp t = 77;
-    fmt.Println(t.read());
-    fmt.Println(t.tricky());
+    ref var t = ref heap(new utp(), out var Ꮡt);
+    t = 77;
+    fmt.Println(Ꮡt.read());
+    fmt.Println(Ꮡt.tricky());
     var h = new holder(v: 9);
     var q = (ж<uintptr>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡ(h).of(holder.Ꮡv)).Value));
     fmt.Println(q.Value);
