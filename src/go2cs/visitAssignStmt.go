@@ -285,7 +285,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		if callExpr, ok := rhsExprs[0].(*ast.CallExpr); ok {
 			funType := v.info.TypeOf(callExpr.Fun)
 
-			if signature, ok := funType.(*types.Signature); ok {
+			// A CONVERSION to a func type — `f := (func(...) (T, bool))(g)` — has a Fun that IS
+			// the func type, so TypeOf(Fun) is that *types.Signature; its result count describes
+			// the CONVERTED function, not a tuple-returning call. Only a genuine call site
+			// (Fun is a value) can produce a tuple result.
+			funIsType := false
+
+			if tv, ok := v.info.Types[callExpr.Fun]; ok {
+				funIsType = tv.IsType()
+			}
+
+			if signature, ok := funType.(*types.Signature); ok && !funIsType {
 				results := signature.Results()
 
 				if results != nil {

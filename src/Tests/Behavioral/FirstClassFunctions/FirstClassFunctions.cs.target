@@ -103,6 +103,9 @@ internal static void Main() {
         fmt.Printf("Wins, losses staying at k =% 4d: %s\n"u8,
             k + 1, ratioString(wins[k], games - wins[k]));
     }
+    var converted = (Func<score, (score, bool)>)(stay);
+    var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
+    fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
 }
 
 } // end main_package

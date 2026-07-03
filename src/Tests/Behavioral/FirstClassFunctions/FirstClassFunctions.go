@@ -119,4 +119,11 @@ func main() {
 		fmt.Printf("Wins, losses staying at k =% 4d: %s\n",
 			k+1, ratioString(wins[k], games-wins[k]))
 	}
+
+	// A conversion whose target is a bare func TYPE — `(func(...))(f)`, the shape of reflect
+	// FuncOf's `(func())(nil)` prototype — exercises the *ast.FuncType expression-position case
+	// in the converter (previously an unhandled convExpr node, silently dropping the file).
+	converted := (func(score) (score, bool))(stay)
+	result, turnIsOver := converted(score{player: 3, opponent: 5, thisTurn: 7})
+	fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver)
 }
