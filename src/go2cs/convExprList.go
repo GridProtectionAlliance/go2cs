@@ -88,6 +88,15 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		var resultExpr string
 
 		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil {
+			// A POINTER argument converting to an interface must render as the pointer VALUE —
+			// the box `Ꮡfs`, not the deref'd receiver ref-local `fs` — since Go's interface
+			// holds the *T and the pointer-adapter emission wraps the box itself
+			// (`new runtimeSourceᴵSource(Ꮡfs)`; math/rand's read call, CS1503).
+			if _, argIsPtr := v.getType(expr, false).(*types.Pointer); argIsPtr {
+				identContext.isPointer = true
+				contexts = []ExprContext{basicLitContext, identContext, keyValueContext, lambdaContext, callContext}
+			}
+
 			resultExpr = v.convertToInterfaceType(interfaceType, v.getType(expr, false), v.convExpr(expr, contexts))
 		} else {
 			resultExpr = v.convExpr(expr, contexts)

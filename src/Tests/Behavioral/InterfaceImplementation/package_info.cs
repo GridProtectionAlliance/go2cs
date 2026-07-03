@@ -38,8 +38,8 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Dog, Animal>]
-[assembly: GoImplement<Frog, Animal>]
+[assembly: GoImplement<Dog, Animal>(Pointer = true)]
+[assembly: GoImplement<Frog, Animal>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

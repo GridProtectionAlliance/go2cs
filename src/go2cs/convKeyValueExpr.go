@@ -12,6 +12,7 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	// needs `Ꮡval` (like the same value passed as a pointer call argument). Resolve the field from
 	// the key name so this works for keyed literals regardless of field order.
 	var valueContexts []ExprContext
+	var structFieldIfaceType types.Type
 
 	if context.source == StructSource {
 		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok {
@@ -20,12 +21,29 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 					valueContexts = []ExprContext{identContext}
+				} else if needsCast, isEmpty := isInterface(fieldObj.Type()); needsCast && !isEmpty {
+					// An INTERFACE field routes its value through the interface conversion below —
+					// a POINTER value (`src: &runtimeSource{}`, math/rand's Rand literal) renders
+					// as the box and wraps in the pointer-interface adapter
+					// (`src: new runtimeSourceᴵSource(Ꮡ(new runtimeSource()))`); without this the
+					// raw box meets the interface-typed ctor parameter (CS1503).
+					structFieldIfaceType = fieldObj.Type()
+
+					if _, valIsPtr := v.getExprType(keyValueExpr.Value).(*types.Pointer); valIsPtr {
+						identContext := DefaultIdentContext()
+						identContext.isPointer = true
+						valueContexts = []ExprContext{identContext}
+					}
 				}
 			}
 		}
 	}
 
 	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
+
+	if structFieldIfaceType != nil {
+		valueExpr = v.convertToInterfaceType(structFieldIfaceType, v.getExprType(keyValueExpr.Value), valueExpr)
+	}
 
 	if context.ident != nil {
 		keySourceType := v.getIdentType(context.ident)

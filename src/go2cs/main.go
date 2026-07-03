@@ -943,7 +943,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
-			// Drop lower level interface implementations where interface inheritances are already covered
+			// Drop lower level interface implementations where interface inheritances are already covered.
+			// POINTER-form (ж<T>-wrapped) pairs are exempt: each generates a DISTINCT IжAdapter class,
+			// and cast sites reference the adapter for the EXACT interface they target — a Source-
+			// targeted cast needs runtimeSourceᴵSource even though runtimeSourceᴵSource64 also
+			// implements Source through interface inheritance (math/rand CS0246). Only the value-boxing
+			// partial-struct form (one type, one interface list) is redundant under inheritance.
 			for interfaceName, inheritedInterfaces := range interfaceInheritances {
 				for _, inheritedInterfaceName := range inheritedInterfaces.Keys() {
 					// Check if the same type implements both interfaces
@@ -951,6 +956,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
 							baseImplementations.IntersectWithSet(inheritedImplementations)
 							for _, implementation := range baseImplementations.Keys() {
+								if strings.HasPrefix(implementation, PointerPrefix+"<") {
+									continue
+								}
+
 								implementedTypes := interfaceImplementations[inheritedInterfaceName]
 								implementedTypes.Remove(implementation)
 							}
@@ -959,9 +968,17 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
-			// Add new interface implementations to package info file (hashset ensures uniqueness)
+			// Add new interface implementations to package info file (hashset ensures uniqueness).
+			// A ж<T>-wrapped implementation records a POINTER-sourced cast (`var s Iface = &t`) —
+			// unwrap it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter
+			// wrapper (interface aliases the receiver box) instead of the value-boxing partial.
 			for interfaceName, implementations := range interfaceImplementations {
 				for implementation := range implementations {
+					if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
+						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", rootQualifySubNamespaceTypeRefs(strings.TrimSuffix(inner, ">")), rootQualifySubNamespaceTypeRefs(interfaceName)))
+						continue
+					}
+
 					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", rootQualifySubNamespaceTypeRefs(implementation), rootQualifySubNamespaceTypeRefs(interfaceName)))
 				}
 			}
@@ -2062,24 +2079,36 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	}
 
 	var prefix string
+	pointerTarget := false
 
 	if strings.HasPrefix(targetTypeName, PointerPrefix+"<") {
 		targetTypeName = targetTypeName[3 : len(targetTypeName)-1]
+		pointerTarget = true
 		prefix = PointerDerefOp
 	}
 
-	if interfaceTypeName != "" && interfaceTypeName != "nil" &&
+	recordable := interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
 		interfaceTypeName != "any" &&
 		!strings.Contains(targetTypeName, "interface{") &&
-		v.isLocalImplType(targetType) {
+		v.isLocalImplType(targetType)
+
+	if recordable {
+		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
+		// it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter wrapper
+		// instead of the value-boxing partial struct (see convert-to-interface emission below).
+		recordName := targetTypeName
+
+		if pointerTarget {
+			recordName = PointerPrefix + "<" + targetTypeName + ">"
+		}
 
 		packageLock.Lock()
 
 		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
-			implementations.Add(targetTypeName)
+			implementations.Add(recordName)
 		} else {
-			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{recordName})
 		}
 
 		packageLock.Unlock()
@@ -2171,6 +2200,17 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		}
 	}
 
+	// A POINTER-sourced cast to a locally-implemented interface routes through the generated
+	// IжAdapter wrapper: Go's interface value holds the *T, so the adapter aliases the receiver
+	// box exactly — every call through the interface mutates the original object, direct-ж
+	// receiver methods bind on the box, and a type assert back to *T unwraps to the same box.
+	// The old `~box` deref boxed a COPY into the C# interface (aliasing divergence) and could
+	// not serve direct-ж members at all (math/rand lockedSource CS1929/CS1503). Non-local impl
+	// types keep the deref-copy form below (their adapter is not generated in this assembly).
+	if pointerTarget && recordable && exprResult != "" {
+		return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+	}
+
 	// Handle special case for pointer dereference of immediate address of operation, this
 	// is an unnecessary operation as it creates a pointer to an object and then immediately
 	// dereferences the pointer value, so we can just return the expression result instead
@@ -2183,6 +2223,21 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	}
 
 	return prefix + exprResult
+}
+
+// adapterTypeRef renders the reference to the generated pointer-interface adapter class for a
+// *T → iface cast: `<struct>ᴵ<ifaceSimple>` (U+1D35), nested in the struct's package class like
+// the struct itself, so a same-package reference is the bare name. The interface side uses its
+// SIMPLE name — the generator derives the same identifier via GetSimpleName, so both sides must
+// agree on last-dot-segment naming.
+func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
+	ifaceSimple := interfaceTypeName
+
+	if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+		ifaceSimple = ifaceSimple[idx+1:]
+	}
+
+	return structTypeName + "ᴵ" + ifaceSimple
 }
 
 func isDynamicStruct(t types.Type) bool {

@@ -47,4 +47,30 @@ public class GoImplementAttribute<TStruct, TInterface> : Attribute
     /// field in the structure.
     /// </summary>
     public bool Promoted { get; set; }
+
+    /// <summary>
+    /// Gets or sets flag indicating the Go interface cast source was a POINTER to the struct
+    /// (<c>var s Iface = &amp;t</c>). The generator then emits an <see cref="IжAdapter"/> wrapper
+    /// class holding the receiver box <c>ж&lt;TStruct&gt;</c> — the interface value aliases the
+    /// original box exactly as Go's interface holds the <c>*T</c> — instead of the value-boxing
+    /// partial-struct implementation (which copies, and cannot bind direct-ж receiver methods).
+    /// </summary>
+    public bool Pointer { get; set; }
+}
+
+/// <summary>
+/// Implemented by generated interface-implementation adapters that wrap the receiver box
+/// <c>ж&lt;T&gt;</c> of a POINTER-sourced Go interface value.
+/// </summary>
+/// <remarks>
+/// A type assert back to the Go pointer type (<c>s.(*T)</c>) targets the box itself, so the
+/// assert machinery unwraps the adapter through <see cref="Box"/>. Adapter equality also
+/// delegates to box identity, matching Go pointer-interface equality.
+/// </remarks>
+public interface IжAdapter
+{
+    /// <summary>
+    /// Gets the wrapped receiver box (a <c>ж&lt;T&gt;</c>).
+    /// </summary>
+    object? Box { get; }
 }

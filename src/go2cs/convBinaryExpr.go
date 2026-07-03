@@ -304,28 +304,23 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
 	if !context.usePattenMatch {
-		// Check for comparisons between interface and pointer types,
-		// dereferencing pointer type for the comparison if necessary
+		// Check for comparisons between interface and pointer types. Go compares an interface
+		// against a pointer by POINTER IDENTITY (the interface holds the *T); the interface value
+		// is a generated IжAdapter wrapping the receiver box, and AreEqual unwraps adapters to
+		// compare box identity. The old deref form (`iface == ~p`) boxed a COPY of the pointed-to
+		// value — wrong identity semantics, and CS0019 once the adapter replaced the partial-struct
+		// comparison operators (InterfaceImplementation's `zoo[0] == f`).
 		if binaryOp == "==" || binaryOp == "!=" {
 			lhsIsInterface, isEmpty := isInterface(lhsType)
+			rhsIsInterface, rhsIsEmpty := isInterface(rhsType)
 
-			if lhsIsInterface && !isEmpty && rhsIsPointer {
-				rightOperand = fmt.Sprintf("%s%s", PointerDerefOp, rightOperand)
-			} else {
-				rhsIsInterface, isEmpty := isInterface(rhsType)
-
-				if rhsIsInterface && !isEmpty && lhsIsPointer {
-					leftOperand = fmt.Sprintf("%s%s", PointerDerefOp, leftOperand)
+			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) {
+				// Handle interface comparison with special runtime function
+				if binaryOp == "==" {
+					return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)
 				}
 
-				if lhsIsInterface && rhsIsInterface {
-					// Handle interface comparison with special runtime function
-					if binaryOp == "==" {
-						return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)
-					} else {
-						return fmt.Sprintf("!AreEqual(%s, %s)", leftOperand, rightOperand)
-					}
-				}
+				return fmt.Sprintf("!AreEqual(%s, %s)", leftOperand, rightOperand)
 			}
 		} else if binaryOp == "<<" || binaryOp == ">>" {
 			rightOperand = v.intCastOperand(binaryExpr.Y, rightOperand)

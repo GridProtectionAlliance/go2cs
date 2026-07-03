@@ -91,9 +91,10 @@ public class ImplementGenerator : ISourceGenerator
             string structName = structType.GetFullTypeName();
             string interfaceName = interfaceType.GetFullTypeName(true);
 
-            // Get the attribute's Promoted argument value, if defined
+            // Get the attribute's Promoted / Pointer argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
             bool promoted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false");
+            bool pointer = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Pointer")).value?.Trim() ?? "false");
 
             // Get all extension methods for the struct, any directly defined receivers
             // take precedence over promoted interface methods that have the same name
@@ -110,7 +111,7 @@ public class ImplementGenerator : ISourceGenerator
                     .Select(method => (name: iface.ToDisplayString(), method)))
                 .Select(info => new MethodInfo
                 {
-                    Name = promoted && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
+                    Name = promoted && !pointer && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
                     ReturnType = info.method.ReturnType.ToDisplayString(),
                     Parameters = info.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
@@ -118,6 +119,44 @@ public class ImplementGenerator : ISourceGenerator
                 })
                 .Distinct()
                 .ToList();
+
+            if (pointer)
+            {
+                // A POINTER-sourced interface cast (`var s Iface = &t`): the interface value must
+                // alias the receiver box (Go's interface holds the *T), so emit the IжAdapter
+                // wrapper instead of the value-boxing partial struct — which copies, and cannot
+                // bind direct-ж receiver methods from a struct's `this` at all (CS1929).
+                Dictionary<string, string> forwardReceivers = new(StringComparer.Ordinal);
+
+                foreach (MethodInfo structMethod in structMethods ?? [])
+                {
+                    // A [GoRecv] ref extension has a RecvGenerator ж-twin that binds on the box;
+                    // a plain value-receiver method needs the deref'd value (Go copies at the call).
+                    forwardReceivers[structMethod.Name] = structMethod.IsRefRecv ? "m_box" : "m_box.Value";
+                }
+
+                foreach (string boxReceiverName in structDecl?.GetBoxReceiverMethodNames(compilation!) ?? [])
+                    forwardReceivers[boxReceiverName] = "m_box"; // direct-ж primary form binds the box itself
+
+                string adapterScope = GetScope(structName) == "public" && GetScope(GetSimpleName(interfaceName)) == "public" ? "public" : "internal";
+
+                string adapterSource = new AdapterImplTemplate
+                {
+                    PackageNamespace = packageNamespace,
+                    PackageName = packageName,
+                    StructName = structName,
+                    InterfaceName = interfaceName,
+                    AdapterName = $"{structName}ᴵ{GetSimpleName(interfaceName)}",
+                    AdapterScope = adapterScope,
+                    Methods = methods,
+                    ForwardReceivers = forwardReceivers,
+                    UsingStatements = usingStatements
+                }
+                .Generate();
+
+                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-ptr.g.cs")), adapterSource);
+                continue;
+            }
 
             string generatedSource = new InterfaceImplTemplate
             {

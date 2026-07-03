@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -174,15 +175,45 @@ public static class StructDeclarationSyntaxExtensions
     private static bool IsExtensionMethodForStruct(this MethodDeclarationSyntax method, string structName)
     {
         ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();
-        
+
         if (firstParam is null || !firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)))
             return false;
 
         string paramType = firstParam.Type?.ToString() ?? "";
-        
+
         return paramType == structName ||
                paramType == $"ref {structName}" ||
                paramType == $"in {structName}" ||
                paramType == $"ref readonly {structName}";
+    }
+
+    /// <summary>
+    /// Gets the names of extension methods whose receiver is the struct's box <c>ж&lt;T&gt;</c> —
+    /// the direct-ж primary form (emitted by the converter when a method needs the real receiver
+    /// box, e.g. it takes the address of a receiver field). These bind on the box itself, so a
+    /// pointer-interface adapter forwards to <c>m_box.M(...)</c> directly.
+    /// </summary>
+    public static HashSet<string> GetBoxReceiverMethodNames(
+        this StructDeclarationSyntax structDeclaration,
+        Compilation compilation)
+    {
+        string boxType = $"ж<{structDeclaration.Identifier.Text}>";
+
+        return new HashSet<string>(compilation.SyntaxTrees
+            .SelectMany(tree => tree.GetRoot()
+                .DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .Where(method =>
+                    method.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) &&
+                    method.ParameterList.Parameters.Count > 0))
+            .Where(method =>
+            {
+                ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();
+
+                return firstParam is not null &&
+                       firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
+                       (firstParam.Type?.ToString() ?? "") == boxType;
+            })
+            .Select(method => method.Identifier.Text), StringComparer.Ordinal);
     }
 }

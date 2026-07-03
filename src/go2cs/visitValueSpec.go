@@ -18,6 +18,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 		for i, ident := range valueSpec.Names {
 			var isAnyType bool
 			var isInterfaceType bool
+			var ifaceDeclType types.Type
 
 			// Check if this is an interface type being assigned a value
 			if len(valueSpec.Values) > i {
@@ -41,9 +42,11 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							// Get the concrete type from the RHS
 							rhsType := v.info.TypeOf(valueSpec.Values[i])
 
-							// Record the implementation
+							// Record the implementation; the render sites below route the RHS
+							// through the interface conversion (pointer-adapter wrapping).
 							if rhsType != nil {
 								v.convertToInterfaceType(declType, rhsType, "")
+								ifaceDeclType = declType
 							}
 						}
 					}
@@ -192,7 +195,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						hoistBuf := &strings.Builder{}
 						savedHoist := v.hoistedDecls
 						v.hoistedDecls = hoistBuf
-						valExpr := v.convExpr(valueSpec.Values[i], []ExprContext{context})
+						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context)
 						v.hoistedDecls = savedHoist
 
 						// A narrow-integer arithmetic initializer (`var x uint8 = a + b`) needs the
@@ -223,9 +226,9 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						typeLenDeviation -= token.Pos(len(access) + 9)
 
 						if v.isAddressedGlobal(ident) {
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}), isInherentlyHeapAllocatedType(v.getIdentType(ident)))
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context), isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 						} else {
-							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context))
 						}
 					}
 
@@ -523,4 +526,26 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 	} else {
 		println(fmt.Sprintf("Unexpected ValueSpec token type: %s", tok))
 	}
+}
+
+// convInterfaceDeclValue renders a var-decl initializer. When the declared type is a non-empty
+// interface (ifaceDeclType non-nil), the value routes through the interface conversion: a POINTER
+// value renders as the box and wraps in the pointer-interface adapter (`var inc Incrementer = c`
+// emits `Incrementer inc = new CounterᴵIncrementer(c)`) — Go's interface value holds the *T.
+// A nil ifaceDeclType renders the plain expression.
+func (v *Visitor) convInterfaceDeclValue(value ast.Expr, ifaceDeclType types.Type, context ExprContext) string {
+	if ifaceDeclType == nil {
+		return v.convExpr(value, []ExprContext{context})
+	}
+
+	rhsType := v.info.TypeOf(value)
+	contexts := []ExprContext{context}
+
+	if _, isPtr := rhsType.(*types.Pointer); isPtr {
+		identContext := DefaultIdentContext()
+		identContext.isPointer = true
+		contexts = []ExprContext{identContext, context}
+	}
+
+	return v.convertToInterfaceType(ifaceDeclType, rhsType, v.convExpr(value, contexts))
 }

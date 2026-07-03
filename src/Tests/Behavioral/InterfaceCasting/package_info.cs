@@ -38,8 +38,9 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
-[assembly: GoImplement<Cat, Animal>]
-[assembly: GoImplement<Dog, Animal>]
+[assembly: GoImplement<Cat, Animal>(Pointer = true)]
+[assembly: GoImplement<Counter, Incrementer>(Pointer = true)]
+[assembly: GoImplement<Dog, Animal>(Pointer = true)]
 [assembly: GoImplement<JavaProgrammer, Animal>]
 [assembly: GoImplement<Llama, Animal>]
 [assembly: GoImplement<MyError, error>]

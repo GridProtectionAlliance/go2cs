@@ -1390,6 +1390,12 @@ public static class builtin
                     return (T)(object)new @string(str);
                 case T typedTarget:
                     return typedTarget;
+                // An interface value created from a Go POINTER (`var s Iface = &t`) is a generated
+                // IжAdapter wrapping the receiver box; a type assert back to the pointer type
+                // (`s.(*T)`, targeting ж<T>) unwraps the adapter to the original box, matching
+                // Go's interface-holds-the-pointer semantics.
+                case IжAdapter adapter when adapter.Box is T box:
+                    return box;
             }
 
             Type targetType = target.GetType();
@@ -2135,6 +2141,16 @@ public static class builtin
 
     public static bool AreEqual(object? left, object? right)
     {
+        // An interface value created from a Go POINTER is a generated IжAdapter wrapping the
+        // receiver box; Go compares such interfaces (against each other, or against a raw
+        // pointer) by POINTER IDENTITY. Unwrap both sides so the comparison below sees the
+        // boxes themselves (ж<T>.Equals is identity-based).
+        if (left is IжAdapter leftAdapter)
+            left = leftAdapter.Box;
+
+        if (right is IжAdapter rightAdapter)
+            right = rightAdapter.Box;
+
         // Check if both are null
         if (left is null && right is null)
             return true;
