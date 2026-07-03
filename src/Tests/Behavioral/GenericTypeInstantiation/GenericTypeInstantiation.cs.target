@@ -41,6 +41,12 @@ public static slice<U> MapElements<T, U>(ж<Stack<T>> Ꮡs, Func<T, U> mapper)
     return result;
 }
 
+public delegate bool Seq2Like<K, V>(K _Δp0, V _Δp1);
+
+internal static bool consume<K, V>(Seq2Like<K, V> s, K k, V v) {
+    return s(k, v);
+}
+
 internal static void Main() {
     var intStack = new Stack<nint>(nil);
     intStack.Push(10);
@@ -52,6 +58,8 @@ internal static void Main() {
     stringStack.Push("world"u8);
     var (text, _) = stringStack.Pop();
     fmt.Printf("Popped from string stack: %s\n"u8, text);
+    var pair = new Seq2Like<@string, nint>((@string k, nint v) => len(k) == v);
+    fmt.Println(consume(pair, (@string)"four", 4), pair("nope"u8, 3));
 }
 
 } // end main_package

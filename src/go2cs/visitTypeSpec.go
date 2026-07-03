@@ -117,7 +117,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.ChanType:
 		v.visitChanType(typeSpecType)
 	case *ast.FuncType:
-		v.visitFuncType(typeSpecType, name)
+		v.visitFuncType(typeSpecType, identType, name)
 	case *ast.Ident:
 		v.visitIdent(typeSpecType, identType, name, v.inFunction)
 	case *ast.InterfaceType:

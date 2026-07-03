@@ -1186,6 +1186,13 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 		case *ast.IndexExpr:
 			targetExpr = funExpr.X
 			continue
+		case *ast.IndexListExpr:
+			// A conversion to a MULTI-type-parameter generic instantiation — Go 1.23 iter's
+			// `Seq2Like[K, V](fn)` shape. The single-param IndexExpr case above already peels;
+			// without this arm the two-param form fell through as a plain (non-invocable) call
+			// (CS1955 on the emitted `Seq2Like<K, V>(…)`).
+			targetExpr = funExpr.X
+			continue
 		case *ast.StarExpr:
 			if ident, ok := funExpr.X.(*ast.Ident); ok {
 				obj = v.info.ObjectOf(ident)
@@ -1247,6 +1254,19 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 
 	// Get the target type
 	targetType := resolvedTypeName.Type()
+
+	// A conversion to a GENERIC INSTANTIATION (`Seq2Like[K, V](fn)`, Go 1.23 iter shapes)
+	// resolves through the TypeName to the UNINSTANTIATED generic, against which
+	// ConvertibleTo is false and the rendered name drops its type arguments. The
+	// instantiated target is the type of the Fun expression itself. Gated to exactly the
+	// uninstantiated-generic case: for a POINTER conversion the Fun type is the full `*T`
+	// (the `*` is re-applied via isPointer below — overriding would double it, ж<ж<T>>),
+	// and a non-generic target needs no override.
+	if named, ok := targetType.(*types.Named); ok && !isPointer && named.TypeParams().Len() > 0 && named.TypeArgs() == nil {
+		if tv, ok := v.info.Types[callExpr.Fun]; ok && tv.IsType() && tv.Type != nil {
+			targetType = tv.Type
+		}
+	}
 
 	// Type conversions typically have exactly one argument
 	if len(callExpr.Args) != 1 {
