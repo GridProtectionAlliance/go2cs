@@ -187,18 +187,19 @@ internal class StructTypeTemplate : TemplateBase
                         return;
                     }
 
-                    foreach ((string memberType, string memberName, _, _) in structDecl.GetStructMembers(compilation!, true))
+                    foreach ((string memberType, string memberName, _, bool isEmbedded) in structDecl.GetStructMembers(compilation!, true))
                     {
                         // First (closest) declaration of a name wins, matching Go's promotion rules.
                         if (emittedNames.Add(memberName))
                             collected.Add((memberType, memberName));
 
-                        // An embedded struct field (Go embedding: the field name equals its type's
-                        // simple name) contributes its own members transitively. A POINTER embed
-                        // (`*traceBuf` → field type `ж<traceBuf>`) is an embed too, so compare against
-                        // the dereferenced type name — `GetSimpleName` appends `.Value` for a pointer,
-                        // which would never equal the bare field name.
-                        if (GetSimpleName(GeneratorExecutionContextExtensions.GetUnderlyingTypeName(memberType)) == memberName)
+                        // An embedded struct field contributes its own members transitively. The
+                        // converter emits every embed - value or POINTER - as a `partial ref`
+                        // PROPERTY (the marker the top level keys isPromotedStruct on), so recurse
+                        // on that flag; a NAMED field whose name merely equals its type's simple
+                        // name (`RCode RCode` in dnsmessage.Header) is a plain FIELD and must not
+                        // contribute nested promotions.
+                        if (isEmbedded)
                             collect(memberType, seenTypes);
                     }
                 }
@@ -288,12 +289,16 @@ internal class StructTypeTemplate : TemplateBase
                         promotedStructMethods.Add(m);
                 }
 
-                // Recurse into nested embedded struct fields (field name == type simple name). A
-                // POINTER embed (`*traceBuf` → `ж<traceBuf>`) is an embed too — compare against the
-                // dereferenced type name (`GetSimpleName` appends `.Value` for a pointer).
-                foreach ((string memberType, string memberName, _, _) in decl.GetStructMembers(comp!, true))
+                // Recurse into nested embedded struct fields. The converter emits every embed -
+                // value or POINTER - as a `partial ref` PROPERTY, the marker the top level keys
+                // isPromotedStruct on; GetStructMembers(..., true) surfaces it as the 4th tuple
+                // element. A NAMED field whose name merely equals its type's simple name
+                // (`RCode RCode` in dnsmessage.Header) is a plain FIELD, not an embed - recursing
+                // into it falsely promotes the field type's methods (Message got RCode's String()
+                // forwarded as `target.Header.String()`, but Header has no String - CS1929).
+                foreach ((string memberType, _, _, bool isEmbedded) in decl.GetStructMembers(comp!, true))
                 {
-                    if (GetSimpleName(GeneratorExecutionContextExtensions.GetUnderlyingTypeName(memberType)) == memberName)
+                    if (isEmbedded)
                         collectPromotedMethods(memberType, seenTypes);
                 }
             }
