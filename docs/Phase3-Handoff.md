@@ -15,6 +15,65 @@
 
 ## Where things stand (2026-07-03)
 
+- **SORT IS AT ZERO (`c2670bac9` stale-file removal + `450834c38` promoted-pointer-adapter) —
+  ZERO CLUB IS NINE. THE WAVE-10 FAMILY CENSUS IS DONE** (15-agent workflow, all 159 errors
+  root-caused; full detail in the workflow output at
+  `%TEMP%/claude/.../tasks/w5of0yct9.output` and the family list below). Two lessons landed:
+  tracked strays from prior converter eras mask real error surfaces (sort 27 were 2), and the
+  Pointer/Promoted GoImplement flags arrive on SEPARATE attribute instances (pre-index pairs).
+
+  **THE FAMILY CENSUS (count, family, codes, packages) — remaining after sort/io strays:**
+```
+ 33  addressof-to-interface-lhs-emits-pointer-box-reassign  [CS0103,CS8373]  (dnsmessage:33)
+ 25  vendored-import-namespace-missing-vendor-prefix  [CS0234]  (bidirule:25)
+ 20  stale-antlr-companion-struct-files-duplicate-typegen-members  [CS0111,CS0262,CS0557,CS0579]  (sort:20)
+ 12  renamed-import-alias-double-qualified-type-name  [CS0426]  (io:12)
+ 10  delta-aliased-import-type-qualifier-doubling  [CS0426]  (syscall:10)
+  7  stale-conversion-of-upstream-deleted-go-file-duplicate-funcs  [CS0111]  (sort:7)
+  7  keyword-escape-prefix-defeats-receiver-access-clamp  [CS0051]  (strconv:7)
+  7  variadic-alias-keyword-escape-mid-identifier  [CS0116,CS1001,CS1002,CS1003,CS1022]  (path:7)
+  6  named-array-pointer-reinterpret-cast  [CS0030]  (edwards25519:6)
+  5  range-value-var-passed-as-ref-receiver  [CS1657]  (dnsmessage:5)
+  4  global-using-alias-rhs-uses-golib-numeric-alias  [CS0246]  (fiat:4)
+  3  composite-literal-untyped-rune-element-loses-contextual-byte-type  [CS0266]  (dnsmessage:3)
+  3  pkg-level-multi-value-var-tuple-not-deconstructed  [CS0029]  (edwards25519:3)
+  3  variadic-pointer-args-after-first-lose-address-name  [CS1503]  (edwards25519:3)
+  2  expr-lambda-composite-literal-brace-truncation  [CS1513]  (reflect:2)
+  2  gotype-any-underlying-emits-object-conversion-operators  [CS0553]  (plugin:2)
+  1  typegen-false-embed-name-equals-type-nested-method-promotion  [CS1929]  (dnsmessage:1)
+  1  stale-legacy-duck-typing-shim-signature-drift  [CS0535]  (io:1)
+  1  slice-to-array-pointer-conversion-as-cast  [CS0030]  (edwards25519:1)
+  1  for-init-heap-escaped-tuple-decl-inline  [CS1003]  (reflect:1)
+  1  type-param-untyped-const-comparison  [CS0019]  (v2:1)
+  1  type-param-numeric-conversion-cast  [CS0030]  (v2:1)
+  1  named-slice-pointer-conversion-cast-between-zh-boxes  [CS0030]  (buffer:1)
+  1  named-slice-to-string-conversion-needs-underlying-unwrap  [CS0030]  (buffer:1)
+  1  uninstantiated-generic-signature-drops-pointer-arg-box  [CS0029]  (weak:1)
+  1  relative-using-alias-captured-by-sibling-child-namespace  [CS0234]  (metrics:1)
+  0  generic-call-type-args-from-result-named-type  [CS0305-latent (masked by CS1513 parse abort; 0 reported this wave)]  (reflect:0)
+```
+  **Priority order by leverage:**
+  1. **dnsmessage 33 — `addressof-to-interface-lhs` (CS0103/CS8373)**: `r = &rb` where r is an
+     INTERFACE local — RHS correctly wraps in the pointer adapter, but visitAssignStmt's &-RHS
+     trigger (lines ~590-597) unconditionally sets the LHS pointer-box context, emitting
+     `Ꮡr = new ΔAResourceᴵResourceBody(Ꮡrb); r = ref Ꮡr.Value;` against a plain interface local
+     (no box exists). FIX: suppress the &-RHS isPointer trigger when the LHS type is an
+     interface — plain `r = new …(Ꮡrb);`. NEXT ROOT.
+  2. **bidirule 25 — `vendored-import-namespace-missing-vendor-prefix` (CS0234)**: consumer
+     namespace text derives from the UNRESOLVED import path (`golang.org/x/text/transform`)
+     instead of the vendor-resolved path — emits `go.golang.org…` refs that live nowhere.
+  3. **io 12 + syscall 10 — Δ-aliased import qualifier DOUBLING (CS0426)**: getTypeName's
+     de-dup guard `!strings.HasPrefix(typeName, pkgPrefix)` misses when the alias was
+     Δ-renamed (computeImportAliasRenames) → `Δio.Δio.Writer`-style doubles. ONE family.
+  4. strconv 7 — getAccess doesn't strip the `@` keyword escape → CS0051 accessibility clamp
+     misjudged. 5. path 7 — variadic Span alias with mid-identifier `@` (`ꓸꓸꓸ@string` parse
+     errors). 6. edwards25519 10 (three pointer/tuple families) + fiat 4 (global-using alias
+     rendering golib numeric aliases). 7. dnsmessage tail: range-var ref-receiver CS1657 ×5
+     (extend rangeVarReassignedInBody to ref-receiver calls), rune-const contextual type ×3,
+     TypeGenerator false-embed (name==type heuristic on NAMED fields — Header's `RCode RCode`)
+     ×1. 8. reflect 3, plugin 2 (GoType-any conversion operators CS0553), math/rand/v2 2
+     (type-param const/conversion), buffer 2, weak 1, metrics 1 (carryovers).
+
 - **internal/reflectlite IS AT ZERO (`43144d186`) — ZERO CLUB IS EIGHT: runtime, iter, sync,
   slices, maps, internal/godebug, math/rand, internal/reflectlite. MASSIVE UNMASK — WAVE-10 =
   159 errors / 15 packages as the middle-stdlib tier builds for the FIRST time** (previously
