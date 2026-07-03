@@ -15,6 +15,14 @@
 
 ## Where things stand (2026-07-03)
 
+- **value→box argument family CLEARED (`4745bfc0d`) — WAVE-18 = 70 / 13.** Sixth direct-ж
+  promotion trigger: receiver passed as a pointer ARGUMENT (`trim(a)` in `func (a *decimal)`);
+  the cross-package embed hop adapts to direct-ж targets (binds the box, no `.Value` —
+  abi.Type.Uncommon). strconv 21→13, syscall 12→8. Ref form remains the default (see the
+  commit for the design rationale). NEXT: strconv 13 (CS9135 pattern non-const labels ×5,
+  CS0315 bsearch ushort constraint ×4, parse ×2, foreach ×1 + 1), path 7, edwards 13 + fiat 4,
+  dnsmessage tail 9, syscall 8, io 5, singles.
+
 - **@-escape accessibility CLEARED (`deee110d1`) — WAVE-17 = 82 / 13 (strconv unmasked 7→21).**
   getAccess strips the leading '@' (keyword escapes are always-lowercase Go names). Guard:
   HeapKeywordVar extension. strconv's 21: **value→box args CS1503 ×8 — the RECURRING family
