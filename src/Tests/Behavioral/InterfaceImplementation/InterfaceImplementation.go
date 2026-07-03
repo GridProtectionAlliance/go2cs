@@ -30,8 +30,9 @@ func main() {
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] == zoo[0])
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] != t)
 
-	checkErr(1) // got again
-	checkErr(0) // not again
+	checkErr(1) // got again + switch: again
+	checkErr(0) // not again + switch: nil
+	useAndRelease()
 
 	var a Animal = nil
 	fmt.Printf("%T\n", a)
@@ -79,6 +80,30 @@ func checkErr(n int) {
 	if err != errAgain {
 		fmt.Println("not again")
 	}
+	// A switch on the error INTERFACE with concrete Errno-style case labels routes each case
+	// equality through AreEqual (no operator exists between the interface and the implementing
+	// struct - syscall's mkErr switches).
+	switch err {
+	case errAgain:
+		fmt.Println("switch: again")
+	case nil:
+		fmt.Println("switch: nil")
+	default:
+		fmt.Println("switch: other")
+	}
+}
+
+// release returns a value like syscall's CloseHandle - a DEFERRED call to it discards the
+// result, requiring golib deferǃ Func twins (a value-returning method group cannot bind the
+// Action overloads, CS0407).
+func release(e errno) error {
+	fmt.Println("released", uintptr(e))
+	return errAgain
+}
+
+func useAndRelease() {
+	defer release(errAgain)
+	fmt.Println("using")
 }
 
 func ShowZoo(zoo *[2]Animal) {

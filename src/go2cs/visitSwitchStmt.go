@@ -320,14 +320,31 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					}
 				}
 
+				// An INTERFACE-typed tag compared against concrete case labels (`switch e {
+				// case ERROR_FILE_NOT_FOUND:` where e is error and the labels are Errno) has no
+				// C# operator — route the equality through AreEqual, mirroring convBinaryExpr's
+				// interface-vs-concrete compare arm (syscall syscall_windows CS0019).
+				tagNeedsAreEqual := false
+
+				if !usePattenMatch && switchStmt.Tag != nil {
+					if tagIface, tagEmpty := isInterface(v.getType(switchStmt.Tag, false)); tagIface && !tagEmpty {
+						tagNeedsAreEqual = true
+					}
+				}
+
 				for i, expr := range caseClause.List {
+					needAreEqualClose := false
+
 					if i == 0 {
 						if switchStmt.Tag != nil {
-							v.targetFile.WriteString(exprVarName)
-
 							if usePattenMatch {
+								v.targetFile.WriteString(exprVarName)
 								v.targetFile.WriteString(" is ")
+							} else if tagNeedsAreEqual {
+								v.targetFile.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
+								needAreEqualClose = true
 							} else {
+								v.targetFile.WriteString(exprVarName)
 								v.targetFile.WriteString(" == ")
 							}
 						}
@@ -338,8 +355,13 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 							v.targetFile.WriteString(" || ")
 
 							if switchStmt.Tag != nil {
-								v.targetFile.WriteString(exprVarName)
-								v.targetFile.WriteString(" == ")
+								if tagNeedsAreEqual {
+									v.targetFile.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
+									needAreEqualClose = true
+								} else {
+									v.targetFile.WriteString(exprVarName)
+									v.targetFile.WriteString(" == ")
+								}
 							}
 						}
 					}
@@ -354,6 +376,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					}
 
 					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
+
+					if needAreEqualClose {
+						v.targetFile.WriteRune(')')
+					}
 
 					if !usePattenMatch && caseClauseCount > 1 && switchStmt.Tag == nil {
 						v.targetFile.WriteRune(')')

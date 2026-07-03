@@ -33,6 +33,7 @@ internal static void Main() {
     fmt.Printf("Iface cmp result = %v\n"u8, !AreEqual(zoo[0], t));
     checkErr(1);
     checkErr(0);
+    useAndRelease();
     Animal a = default!;
     fmt.Printf("%T\n"u8, a);
     foreach (var (_, aΔ1) in zoo) {
@@ -68,7 +69,28 @@ internal static void checkErr(nint n) {
     if (!AreEqual(err, errAgain)) {
         fmt.Println("not again");
     }
+    var exprᴛ1 = err;
+    if (AreEqual(exprᴛ1, errAgain)) {
+        fmt.Println("switch: again");
+    }
+    else if (AreEqual(exprᴛ1, default!)) {
+        fmt.Println("switch: nil");
+    }
+    else { /* default: */
+        fmt.Println("switch: other");
+    }
+
 }
+
+internal static error release(errno e) {
+    fmt.Println("released", (uintptr)e);
+    return errAgain;
+}
+
+internal static void useAndRelease() => func((defer, recover) => {
+    deferǃ(release, errAgain, defer);
+    fmt.Println("using");
+});
 
 public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {
     ref var zoo = ref Ꮡzoo.Value;
