@@ -176,6 +176,43 @@ public class ImplicitConvGenerator : ISourceGenerator
                 }
             }
 
+            // A MIXED-accessibility local pair (public ΔKind ↔ internal flag — reflect's
+            // GoImplicitConv<ΔKind, flag>(Inverted)): C# operators are necessarily public, so
+            // hosting in the MORE accessible type makes the less-accessible parameter fail
+            // CS0057. Relocate into the LESS accessible side — a public operator inside an
+            // internal struct is legal, and both operand types are visible there.
+            // Accessibility derives from the GO export rule (GetScope on the Δ-stripped name):
+            // at analysis time the [GoType] partials are modifier-less — the public/internal
+            // modifier lives on the TypeGenerator's OWN output, which single-pass generators
+            // cannot see (DeclaredAccessibility reads Private for both).
+            if (hostTypeNameOverride is null &&
+                GetScope(GetSimpleName(sourceType.Name, dropCollisionPrefix: true)) == "public" &&
+                GetScope(GetSimpleName(targetType.Name, dropCollisionPrefix: true)) != "public" &&
+                SymbolEqualityComparer.Default.Equals(targetType.ContainingAssembly, context.Compilation.Assembly))
+            {
+                hostTypeNameOverride = targetType.Name;
+            }
+
+            // The operator's body casts `src.Value` to the constructed type; a uintptr-BACKED
+            // src wrapper's Value is the golib uintptr STRUCT, and struct→ΔKind chains two user
+            // conversions (CS0030 — reflect's flag→ΔKind). Hop through nuint. The backing kind
+            // comes from the src side's [GoType("num:uintptr")] tag — the generated Value
+            // property is invisible to a single-pass sibling generator.
+            if (convExprOverride is null && !string.IsNullOrWhiteSpace(valueType))
+            {
+                ITypeSymbol srcSide = inverted ? targetType : sourceType;
+                StructDeclarationSyntax? srcDecl = GetStructDeclaration(syntaxContext, srcSide.Name);
+
+                string? goTypeTag = srcDecl?.AttributeLists
+                    .SelectMany(list => list.Attributes)
+                    .Where(attr => attr.Name.ToString() is "GoType" or "GoTypeAttribute")
+                    .Select(attr => attr.ArgumentList?.Arguments.FirstOrDefault()?.ToString().Trim('"'))
+                    .FirstOrDefault();
+
+                if (goTypeTag == "num:uintptr")
+                    convExprOverride = $"new {valueType}(({valueType})(nuint)src.Value)";
+            }
+
             // The emitted user-defined conversion operator's signature is (sourceTypeName,
             // targetTypeName, inverted) — `direct` vs `indirect` only changes the body. The same
             // pair can be recorded as BOTH a direct and an indirect conversion (e.g. `g` ↔ `ж<g>`),

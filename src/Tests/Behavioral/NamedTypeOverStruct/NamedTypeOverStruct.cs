@@ -44,6 +44,20 @@ internal static void Main() {
     var c = Ꮡb.of(box.Ꮡw);
     bump(c.of(wrapper.Ꮡa));
     fmt.Println(b.w.a, readBack(Ꮡb));
+    var s = new shadowed(nil);
+    s.fn = 5;
+    s.ctxt.fn = 7;
+    s.tag = 9;
+    fmt.Println(s.fn, s.ctxt.fn, s.tag);
+}
+
+[GoType] partial struct ctxt {
+    internal nint fn, tag;
+}
+
+[GoType] partial struct shadowed {
+    internal partial ref ctxt ctxt { get; }
+    internal nint fn;
 }
 
 } // end main_package

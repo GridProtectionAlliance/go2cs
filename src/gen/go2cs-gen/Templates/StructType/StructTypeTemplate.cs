@@ -106,6 +106,12 @@ internal class StructTypeTemplate : TemplateBase
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessors");
 
+            // Go's shadowing rule: an OWN (declared) field with the same name shadows the embedded
+            // member, so promotion must skip it — reflect's makeFuncImpl declares `fn` while
+            // embedding makeFuncCtxt, whose `fn` would otherwise emit a duplicate accessor
+            // (CS0102) and a duplicate Ꮡfn reference (CS0111).
+            HashSet<string> declaredMemberNames = new(StructMembers.Select(m => GetSimpleName(m.memberName)));
+
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
@@ -114,6 +120,9 @@ internal class StructTypeTemplate : TemplateBase
                     // selectable in Go; emitting an accessor for it collides with the enclosing
                     // struct's own `_` field (CS0102).
                     if (GetSimpleName(memberName) == "_")
+                        continue;
+
+                    if (declaredMemberNames.Contains(GetSimpleName(memberName)))
                         continue;
 
                     string typeScope = GetScope(GetSimpleName(typeName));
@@ -130,6 +139,10 @@ internal class StructTypeTemplate : TemplateBase
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
                     // enclosing struct's own `Ꮡ_` (CS0111).
                     if (GetSimpleName(memberName) == "_")
+                        continue;
+
+                    // Own-field shadowing — see the accessor loop above (CS0111 on Ꮡfn).
+                    if (declaredMemberNames.Contains(GetSimpleName(memberName)))
                         continue;
 
                     // The Ꮡ-prefixed accessor NAME must use the unescaped member name — a C#-keyword

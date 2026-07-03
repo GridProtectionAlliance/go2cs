@@ -47,4 +47,22 @@ func main() {
 	c := &b.w
 	bump(&c.a) // address of the wrapper's forwarded FIELD
 	fmt.Println(b.w.a, readBack(&b)) // 17 37 — the write through &c.a persisted in the original
+
+	// An EMBEDDED struct whose field name collides with the outer struct's OWN field
+	// (reflect makeFuncImpl embeds makeFuncCtxt, both have fn): Go shadows the embedded
+	// member - the generated promotion must skip it (CS0102/CS0111 on fn and its ref).
+	s := shadowed{}
+	s.fn = 5
+	s.ctxt.fn = 7
+	s.tag = 9
+	fmt.Println(s.fn, s.ctxt.fn, s.tag) // 5 7 9
+}
+
+type ctxt struct{ fn, tag int }
+
+// shadowed embeds ctxt and declares its OWN fn - the own field shadows ctxt.fn;
+// tag stays promoted.
+type shadowed struct {
+	ctxt
+	fn int
 }
