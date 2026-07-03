@@ -117,6 +117,26 @@ public static bool EqualMaps<M, K, V>(M m1, M m2)
     return true;
 }
 
+public delegate void Seq<V>(Func<V, bool> yield);
+
+public delegate void KVSeq<K, V>(Func<K, V, bool> yield);
+
+internal static Seq<nint> countdown(nint n) {
+    return (Func<nint, bool> yield) => {
+        for (nint i = n; i > 0; i--) {
+            if (!yield(i)) {
+                return;
+            }
+        }
+    };
+}
+
+internal static KVSeq<@string, nint> letters() {
+    return (Func<@string, nint, bool> yield) => {
+        _ = yield("a"u8, 1) && yield("b"u8, 2);
+    };
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
@@ -137,6 +157,17 @@ internal static void Main() {
     var g2 = new Grades(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
     var g3 = new Grades(new map<@string, nint>{["a"u8] = 9});
     fmt.Println(EqualMaps<Grades, @string, nint>(g1, g2), EqualMaps<Grades, @string, nint>(g1, g3));
+    nint sum = 0;
+    foreach (var v in range<nint>(countdown(5).Invoke)) {
+        if (v == 2) {
+            break;
+        }
+        sum += v;
+    }
+    fmt.Println(sum);
+    foreach (var (k, v) in range<@string, nint>(letters().Invoke)) {
+        fmt.Println(k, v);
+    }
 }
 
 } // end main_package

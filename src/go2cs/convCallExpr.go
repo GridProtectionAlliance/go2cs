@@ -677,7 +677,28 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	resultType := v.info.TypeOf(callExpr)
 
 	if resultType != nil {
-		if named, ok := resultType.(*types.Named); ok {
+		// A call whose RESULT is a generic instantiation needs the type arguments when the
+		// callee IS the type (a conversion/constructor form) or a GENERIC function (whose
+		// untyped-const args would infer C# int where Go infers nint — `NewOption<nint>(42)`).
+		// A plain NON-generic function returning a generic named type
+		// (`func countdown(n int) Seq[int]`) must not have them appended (`countdown<nint>(5)`
+		// — CS0308 on a non-generic method).
+		funIsType := false
+		calleeIsGeneric := false
+
+		if tv, ok := v.info.Types[callExpr.Fun]; ok {
+			funIsType = tv.IsType()
+		}
+
+		if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
+			if funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func); ok {
+				if sig, ok := funcObj.Type().(*types.Signature); ok && sig.TypeParams() != nil && sig.TypeParams().Len() > 0 {
+					calleeIsGeneric = true
+				}
+			}
+		}
+
+		if named, ok := resultType.(*types.Named); ok && (funIsType || calleeIsGeneric) {
 			if named.TypeArgs().Len() > 0 {
 				var typeParams []string
 

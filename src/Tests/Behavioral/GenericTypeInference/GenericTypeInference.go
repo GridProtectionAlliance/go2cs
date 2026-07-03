@@ -105,6 +105,29 @@ func EqualMaps[M ~map[K]V, K, V comparable](m1, m2 M) bool {
 	return true
 }
 
+// Seq mirrors Go 1.23 iter.Seq: a GENERIC defined function type ranged over with
+// range-over-func semantics (break must stop the producer via yield returning false).
+type Seq[V any] func(yield func(V) bool)
+
+// KVSeq mirrors iter.Seq2 (two-value range-over-func).
+type KVSeq[K, V any] func(yield func(K, V) bool)
+
+func countdown(n int) Seq[int] {
+	return func(yield func(int) bool) {
+		for i := n; i > 0; i-- {
+			if !yield(i) {
+				return
+			}
+		}
+	}
+}
+
+func letters() KVSeq[string, int] {
+	return func(yield func(string, int) bool) {
+		_ = yield("a", 1) && yield("b", 2)
+	}
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
@@ -125,4 +148,15 @@ func main() {
 	g2 := Grades{"a": 1, "b": 2}
 	g3 := Grades{"a": 9}
 	fmt.Println(EqualMaps(g1, g2), EqualMaps(g1, g3))
+	sum := 0
+	for v := range countdown(5) {
+		if v == 2 {
+			break // range-over-func break: yield returns false, producer stops
+		}
+		sum += v
+	}
+	fmt.Println(sum)
+	for k, v := range letters() {
+		fmt.Println(k, v)
+	}
 }

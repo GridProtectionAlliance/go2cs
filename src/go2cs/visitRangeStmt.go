@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -76,8 +77,13 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		}
 	}
 
-	// Get the underlying type if it's a named type
+	// Get the underlying type if it's a named type. Remember the named-ness: a NAMED func
+	// type renders as a C# DELEGATE whose range() adaptation needs the method group
+	// (`range(seq.Invoke)` — see the yield-func emission below).
+	rangeIsNamedType := false
+
 	if named, ok := rangeType.(*types.Named); ok {
+		rangeIsNamedType = true
 		rangeType = named.Underlying()
 	}
 
@@ -295,20 +301,45 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 
 		v.writeOutput("foreach (%s%s in range(%s%s))", keyType, keyExpr, rangeExpr, ptrDeref)
 	} else if yieldFunc > -1 {
+		// A NAMED func type renders as a C# DELEGATE; golib's range() overloads take
+		// Action<Func<…>>, and a distinct delegate type has no conversion — but its method
+		// GROUP does: `range(seq.Invoke)`.
+		invokeSuffix := ""
+		rangeTypeArgs := ""
+
+		if rangeIsNamedType {
+			// The method-group conversion binds golib's Action<Func<…>> overloads, but C#
+			// cannot infer T from a method group's PARAMETERS — spell the type arguments out
+			// from the yield signature: `range<nint>(countdown(5).Invoke)`.
+			invokeSuffix = ".Invoke"
+
+			if sig, ok := rangeType.(*types.Signature); ok && sig.Params().Len() == 1 {
+				if yieldSig, ok := sig.Params().At(0).Type().Underlying().(*types.Signature); ok && yieldSig.Params().Len() > 0 {
+					var elems []string
+
+					for i := range yieldSig.Params().Len() {
+						elems = append(elems, v.getCSTypeName(yieldSig.Params().At(i).Type()))
+					}
+
+					rangeTypeArgs = fmt.Sprintf("<%s>", strings.Join(elems, ", "))
+				}
+			}
+		}
+
 		if yieldFunc == 0 {
 			if v.options.preferVarDecl {
 				keyType = "var "
 			}
 
-			v.writeOutput("foreach (object %s in range(%s%s))", keyExpr, rangeExpr, ptrDeref)
+			v.writeOutput("foreach (object %s in range%s(%s%s%s))", keyExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)
 		} else if yieldFunc == 1 {
 			if v.options.preferVarDecl {
 				keyType = "var "
 			}
 
-			v.writeOutput("foreach (%s%s in range(%s%s))", keyType, keyExpr, rangeExpr, ptrDeref)
+			v.writeOutput("foreach (%s%s in range%s(%s%s%s))", keyType, keyExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)
 		} else {
-			v.writeOutput("foreach (%s(%s%s, %s%s) in range(%s%s))", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
+			v.writeOutput("foreach (%s(%s%s, %s%s) in range%s(%s%s%s))", varInit, keyType, keyExpr, valType, valExpr, rangeTypeArgs, rangeExpr, ptrDeref, invokeSuffix)
 		}
 	} else {
 		// Handle slice, array, and map types
@@ -430,8 +461,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 }
 
 func isYieldFunc(t types.Type) int {
-	// First check if it's a function type
-	sig, ok := t.(*types.Signature)
+	// First check if it's a function type. A NAMED func type — a defined `type Seq
+	// func(yield func(V) bool)` or a generic instantiation like iter.Seq[E] — carries the
+	// signature as its UNDERLYING (checking the bare *types.Signature missed every named
+	// range-over-func, which then bound golib's numeric range overloads — CS1503/CS8130).
+	sig, ok := t.Underlying().(*types.Signature)
 
 	if !ok {
 		return -1

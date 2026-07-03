@@ -468,6 +468,19 @@ public static class builtin
     }
 
     /// <summary>
+    /// Enumerates over a two-value yield function (Go's `for k, v := range seq2` on an
+    /// iter.Seq2-shaped func) by adapting the pair into the tuple-typed yield machinery.
+    /// </summary>
+    /// <typeparam name="T1">First enumeration type.</typeparam>
+    /// <typeparam name="T2">Second enumeration type.</typeparam>
+    /// <param name="enumerator">Two-value yield function.</param>
+    /// <returns>Enumerable range of value pairs.</returns>
+    public static IEnumerable<(T1, T2)> range<T1, T2>(Action<Func<T1, T2, bool>> enumerator)
+    {
+        return new YieldFunctionEnumerable<(T1, T2)>(yield => enumerator((k, v) => yield((k, v))));
+    }
+
+    /// <summary>
     /// Constructs a complex value from two floating-point values.
     /// </summary>
     /// <param name="realPart">Real-part of complex value.</param>
