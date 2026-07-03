@@ -646,21 +646,29 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
 	}
 
-	// Handle start of pattern match expression with "is" keyword:
+	// Handle start of pattern match expression with "is" keyword. Go's `!=` has no C# pattern
+	// operator spelling — `x is != y` is a parse error (CS1525); the negation pattern
+	// `x is not y` carries the exact semantics. Relational ops (<, <=, >, >=) map verbatim.
 	if context.declareIsExpr {
-		if binaryOp == "==" {
+		switch binaryOp {
+		case "==":
 			binaryOp = ""
-		} else {
+		case "!=":
+			binaryOp = " not"
+		default:
 			binaryOp = " " + binaryOp
 		}
 
 		return fmt.Sprintf("%s is%s %s", leftOperand, binaryOp, rightOperand)
 	}
 
-	// Handle remaining pattern match expressions:
-	if binaryOp == "==" {
+	// Handle remaining pattern match expressions (an `or`-chained subsequent case value):
+	switch binaryOp {
+	case "==":
 		binaryOp = ""
-	} else {
+	case "!=":
+		binaryOp = "not "
+	default:
 		binaryOp = binaryOp + " "
 	}
 
