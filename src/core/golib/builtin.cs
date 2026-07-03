@@ -2085,6 +2085,29 @@ public static class builtin
     /// compile time, this method uses reflection to get the equality operator for the type and calls it if available.
     /// If the equality operator is not found, the default <see cref="object.Equals(object, object)"/> method is used.
     /// </remarks>
+    /// <summary>
+    /// Fast-path generic equality for same-typed operands — the form emitted inside generic
+    /// bodies (a `comparable`-constrained Go type parameter erases to no C# constraint, and
+    /// `==` on it routes here). For a VALUE-type <typeparamref name="T"/> the JIT specializes
+    /// this method per type and devirtualizes <see cref="EqualityComparer{T}.Default"/> to the
+    /// type's own <see cref="IEquatable{T}"/> implementation — operator-comparable speed with
+    /// no reflection or boxing (golib wrappers emit `operator ==` and `Equals` as consistent
+    /// pairs, so semantics match the reflective path). Reference and interface type arguments
+    /// delegate to the reflective overload below, preserving its typed-null and runtime-type
+    /// semantics; C# prefers the non-generic overload for plain `object` operands, so the
+    /// delegation cannot recurse.
+    /// </summary>
+    /// <param name="left">Left operand.</param>
+    /// <param name="right">Right operand.</param>
+    /// <returns><c>true</c> if operands are equal; otherwise, <c>false</c>.</returns>
+    public static bool AreEqual<T>(T? left, T? right)
+    {
+        if (default(T) is null)
+            return AreEqual((object?)left, (object?)right);
+
+        return EqualityComparer<T>.Default.Equals(left!, right!);
+    }
+
     public static bool AreEqual(object? left, object? right)
     {
         // Check if both are null
