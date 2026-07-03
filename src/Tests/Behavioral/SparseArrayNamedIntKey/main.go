@@ -59,6 +59,13 @@ func main() {
 	fmt.Println(len(rankNames))                                              // 3
 	fmt.Println(errNames[eBig-errBase], errNames[eAcces-errBase])            // big acces
 	fmt.Println(asciiSpace['\t'], asciiSpace['\n'], asciiSpace[' '], asciiSpace['A'], len(asciiSpace)) // 1 1 1 0 256
+	// int64/uint32 cursors indexing a slice (bytes.Reader r.s[r.i] shape - CS1503
+	// long->nint): plain basic wide kinds take an explicit (nint) cast; NAMED integer
+	// indexes (errno above) keep their own conversion surface.
+	data := []byte{10, 20, 30}
+	var cur int64 = 2
+	var u32 uint32 = 1
+	fmt.Println(data[cur], data[u32]) // 30 20
 }
 
 // asciiSpace mirrors bytes.Fields: ESCAPED rune keys in an indexed array composite

@@ -86,6 +86,23 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		if basic, ok := baseType.Underlying().(*types.Basic); ok && basic.Info()&types.IsString != 0 {
 			index = v.castWideIntegerToInt(indexExpr.Index)
 		}
+
+		// A SLICE/ARRAY base indexed by a PLAIN BASIC integer kind with no implicit
+		// conversion to the golib nint indexer — int64/uint/uint32/uint64 (`r.s[r.i]`,
+		// bytes Reader's int64 cursor; CS1503 long→nint) — takes an explicit (nint) cast,
+		// matching Go's implicit index conversion. Kinds that widen implicitly (int32,
+		// int16, byte, …) are unchanged, and a NAMED index type is left alone — its own
+		// conversion surface binds the indexer (a `(nint)` cast of a named-over-uintptr
+		// would chain two user conversions, CS0030 — SparseArrayNamedIntKey's errno keys).
+		switch baseType.Underlying().(type) {
+		case *types.Slice, *types.Array:
+			if basic, isBasic := types.Unalias(v.getType(indexExpr.Index, false)).(*types.Basic); isBasic {
+				switch basic.Kind() {
+				case types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
+					index = fmt.Sprintf("(nint)(%s)", index)
+				}
+			}
+		}
 	}
 
 	baseExpr := v.convExpr(indexExpr.X, nil)
