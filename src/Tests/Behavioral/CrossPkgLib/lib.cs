@@ -58,4 +58,6 @@ public static ж<Meter> NewMeter() {
     return Ꮡ(new Meter(nil));
 }
 
+[GoType("num:uintptr")] partial struct Ticks;
+
 } // end CrossPkgLib_package

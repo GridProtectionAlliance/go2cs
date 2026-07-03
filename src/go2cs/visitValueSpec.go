@@ -570,7 +570,21 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// Beyond-int32 named-uintptr const: same unchecked cast the native-int
 					// consts use — `unchecked((ΔHandle)18446744073709551615)`.
 					if nativeIntConst {
-						constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)
+						// A named type whose WRITTEN base is a CROSS-PACKAGE named type (registry's
+						// `type Key syscall.Handle` — [GoType("syscall_package.ΔHandle")]) has NO
+						// numeric bridge of its own; the literal hops through the base, one user
+						// conversion per cast: `unchecked((Key)(syscall_package.ΔHandle)2147483648)`.
+						baseHop := ""
+
+						if named, ok := types.Unalias(c.Type()).(*types.Named); ok {
+							if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil {
+								if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed.Obj().Pkg() != named.Obj().Pkg() {
+									baseHop = fmt.Sprintf("(%s)", v.getCSTypeName(rhsNamed))
+								}
+							}
+						}
+
+						constValExpr = fmt.Sprintf("unchecked((%s)%s%s)", csTypeName, baseHop, constVal)
 					}
 				} else if nativeIntConst {
 					constExpr = "static readonly"

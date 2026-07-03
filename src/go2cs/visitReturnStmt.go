@@ -267,16 +267,26 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 				var narrowCast string
 				var lambdaConstCast string
+				var crossBaseCast string
 				if resultParams != nil && i < resultParams.Len() {
 					narrowCast = v.narrowArithmeticCastTypeFor(resultParams.At(i).Type(), expr, resultExpr)
 
 					if len(narrowCast) == 0 {
 						lambdaConstCast = v.lambdaConstReturnCastType(resultParams.At(i).Type(), expr)
 					}
+
+					if len(narrowCast) == 0 && len(lambdaConstCast) == 0 {
+						crossBaseCast = v.crossBaseConstCastFor(resultParams.At(i).Type(), expr)
+					}
 				}
 
 				if recvIndex != -1 && i == recvIndex {
 					result.WriteString(capturedRecvName)
+				} else if len(crossBaseCast) > 0 {
+					// A CONSTANT result whose type is defined over a CROSS-PACKAGE named base
+					// (`return 0, err` with a registry Key result) hops through the base — the
+					// [GoType("syscall_package.ΔHandle")] wrapper has no numeric bridge (CS0029).
+					result.WriteString(crossBaseCast + "(" + resultExpr + ")")
 				} else if len(lambdaConstCast) > 0 {
 					// A constant integer-literal return inside a lambda whose result is an unsigned/
 					// pointer-sized integer must be cast to that type so the delegate return type is
@@ -317,4 +327,43 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	}
 
 	v.targetFile.WriteString(strings.ReplaceAll(result.String(), DeferredDeclsMarker, deferredDecls.String()))
+}
+
+// crossBaseConstCastFor returns the two-step cast chain for an untyped-CONSTANT result whose
+// type is a defined type over a CROSS-PACKAGE named base — `return 0, err` with a registry Key
+// result: the [GoType("syscall_package.ΔHandle")] wrapper declares operators only to/from that
+// base (no numeric bridge), so the bare literal has no implicit path (CS0029). The chain hops
+// the base with one user conversion per cast: `((Key)(syscall_package.ΔHandle)(0))`. Returns ""
+// when not applicable (non-constant expr, non-named result, same-package or non-numeric base —
+// same-package chains resolve to [GoType("num:…")] with a direct bridge).
+func (v *Visitor) crossBaseConstCastFor(targetType types.Type, expr ast.Expr) string {
+	tv, ok := v.info.Types[expr]
+
+	if !ok || tv.Value == nil {
+		return ""
+	}
+
+	named, ok := types.Unalias(targetType).(*types.Named)
+
+	if !ok {
+		return ""
+	}
+
+	rhs, okRHS := packageTypeSpecRHS[named.Obj()]
+
+	if !okRHS || rhs == nil {
+		return ""
+	}
+
+	rhsNamed, ok := types.Unalias(rhs).(*types.Named)
+
+	if !ok || rhsNamed.Obj().Pkg() == named.Obj().Pkg() {
+		return ""
+	}
+
+	if basic, ok := rhsNamed.Underlying().(*types.Basic); !ok || basic.Info()&types.IsNumeric == 0 {
+		return ""
+	}
+
+	return "(" + v.getCSTypeName(named) + ")(" + v.getCSTypeName(rhsNamed) + ")"
 }

@@ -39,9 +39,23 @@ internal static void Main() {
     var rd = ((reading)CrossPkgLib.Boiling());
     var cback = ((CrossPkgLib.Celsius)rd);
     fmt.Println((float64)cback, cback == CrossPkgLib.Boiling());
+    var (st1, err1) = stampOrErr(false);
+    var (st2, err2) = stampOrErr(true);
+    fmt.Println(st1 == st2, err1 != default!, st2 == bigStamp, err2 == default!);
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;
+
+[GoType("CrossPkgLib_package.Ticks")] partial struct stamp;
+
+internal static readonly stamp bigStamp = unchecked((stamp)(CrossPkgLib.Ticks)0x80000001);
+
+internal static (stamp, error) stampOrErr(bool ok) {
+    if (!ok) {
+        return ((stamp)(CrossPkgLib.Ticks)(0), fmt.Errorf("no stamp"u8));
+    }
+    return ((stamp)(CrossPkgLib.Ticks)(bigStamp), default!);
+}
 
 [GoType] partial struct probe {
     public partial ref ж<CrossPkgLib_package.Sensor> Sensor { get; }

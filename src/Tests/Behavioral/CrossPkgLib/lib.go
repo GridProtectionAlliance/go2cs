@@ -68,3 +68,7 @@ func (m *Meter) Bump() int {
 
 // NewMeter returns a fresh *Meter (count is unexported, so consumers need a constructor).
 func NewMeter() *Meter { return &Meter{} }
+
+// Ticks is an exported named INTEGER type (uintptr-based) - consumers define types over it
+// (the registry Key over syscall.Handle shape).
+type Ticks uintptr

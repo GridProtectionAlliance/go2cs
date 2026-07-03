@@ -75,10 +75,28 @@ func main() {
 	rd := reading(CrossPkgLib.Boiling())
 	cback := CrossPkgLib.Celsius(rd)
 	fmt.Println(float64(cback), cback == CrossPkgLib.Boiling())
+	st1, err1 := stampOrErr(false)
+	st2, err2 := stampOrErr(true)
+	fmt.Println(st1 == st2, err1 != nil, st2 == bigStamp, err2 == nil)
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
 type reading CrossPkgLib.Celsius
+
+// stamp mirrors registry Key over an INTEGER base: its wrapper has only stamp<->Ticks operators
+// (no numeric bridge), so a beyond-int32 const must chain through the base
+// (unchecked((stamp)(CrossPkgLib.Ticks)2147483649)) and a constant return ()
+// needs the same hop.
+type stamp CrossPkgLib.Ticks
+
+const bigStamp stamp = 0x80000001
+
+func stampOrErr(ok bool) (stamp, error) {
+	if !ok {
+		return 0, fmt.Errorf("no stamp")
+	}
+	return bigStamp, nil
+}
 
 // Phase 4: field promotion through a CROSS-PACKAGE embed. In a real MSBuild build the library
 // arrives as a METADATA reference (never a CompilationReference), so the generator's syntax-based
