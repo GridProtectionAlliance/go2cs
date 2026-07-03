@@ -607,6 +607,8 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageDynamicTypeNames = make(map[string]string)
 		packageManualTypeNames = make(map[string]bool)
 		packageAddressedGlobals = make(map[types.Object]bool)
+		packageImportAliasRenames = make(map[string]string)
+		packageChildNamespaces = make(map[string]bool)
 		packagePublicizedTypes = make(map[types.Object]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
@@ -697,6 +699,11 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// Find package-level vars whose address is taken (cross-file) so their
 		// declarations can be emitted as heap boxes that &global references directly.
 		collectAddressedGlobals(files, packageTypes, info)
+
+		// Find import aliases whose name collides with a child namespace visible from the
+		// transitive import closure (CS0576) so alias emission and every package-qualifier
+		// render Δ-renames them consistently.
+		computeImportAliasRenames(files, packageTypes, packageNamespace)
 
 		// Find unexported types used as exported struct fields so they can be emitted as public
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
@@ -2881,7 +2888,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 					args[i] = v.getTypeName(typeArgs.At(i), false)
 				}
 
-				return fmt.Sprintf("%s.%s[%s]", pkg.Name(), obj.Name(), strings.Join(args, ", "))
+				return fmt.Sprintf("%s.%s[%s]", importQualifier(pkg.Name()), obj.Name(), strings.Join(args, ", "))
 			}
 		}
 	}
@@ -2894,7 +2901,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg != v.pkg {
-			pkgPrefix = pkg.Name() + "."
+			pkgPrefix = importQualifier(pkg.Name()) + "."
 		}
 	}
 

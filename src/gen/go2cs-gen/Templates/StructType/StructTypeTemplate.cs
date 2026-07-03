@@ -462,7 +462,7 @@ internal class StructTypeTemplate : TemplateBase
 
     public string HashCode => StructMembers.Count == 0 ? "base.GetHashCode()" :
         $"""
-        global::go.runtime.HashCode.Combine(
+        global::go.golib.HashCode.Combine(
                     {ParamList})
         """;
 

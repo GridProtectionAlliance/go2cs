@@ -19,7 +19,7 @@ global using Kind = go.@internal.abi_package.ΔKind;
 
 using System.Runtime.InteropServices;
 using go;
-using go.runtime;
+using go.golib;
 
 [module: GoManualConversion]
 

@@ -27,7 +27,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Defines extension methods for actions.

@@ -24,7 +24,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Represents common runtime error messages thrown in Go environment.

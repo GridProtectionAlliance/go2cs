@@ -73,7 +73,7 @@ public static @string String(this ΔKind k) {
     return kindNames[0];
 }
 
-internal static slice<@string> kindNames = new runtime.SparseArray<@string>{
+internal static slice<@string> kindNames = new golib.SparseArray<@string>{
     [Invalid] = "invalid"u8,
     [Bool] = "bool"u8,
     [Int] = "int"u8,

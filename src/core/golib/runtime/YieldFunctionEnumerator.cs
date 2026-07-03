@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace go.runtime;
+namespace go.golib;
 
 internal class YieldFunctionEnumerable<T>(Action<Func<T, bool>> enumerator) : IEnumerable<T>
 {

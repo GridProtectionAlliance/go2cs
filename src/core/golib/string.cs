@@ -35,7 +35,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using System.Text;
-using go.runtime;
+using go.golib;
 
 namespace go;
 

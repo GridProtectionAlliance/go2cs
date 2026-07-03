@@ -44,7 +44,7 @@ using System.Threading;
 #pragma warning disable IL2070
 #pragma warning disable IL2026
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Defines type related helper functions.
@@ -108,7 +108,7 @@ public static class TypeExtensions
             return;
 
         // Ignore extensions methods from the .NET framework
-        if (name.StartsWith("System.") || name.StartsWith("netstandard") || name.StartsWith("Microsoft.") || name.StartsWith("WindowsBase") || name.StartsWith("go.runtime."))
+        if (name.StartsWith("System.") || name.StartsWith("netstandard") || name.StartsWith("Microsoft.") || name.StartsWith("WindowsBase") || name.StartsWith("go.golib."))
             return;
 
         Debug.WriteLine($"Scanning extensions for assembly \"{assembly.FullName}\"...");

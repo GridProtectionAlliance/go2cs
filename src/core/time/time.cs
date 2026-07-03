@@ -23,7 +23,7 @@
 
 using System;
 using System.Threading.Tasks;
-using go.runtime;
+using go.golib;
 
 namespace go;
 

@@ -82,7 +82,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 				v.canonicalAliasImported.Add(v.currentImportPath)
 			}
 
-			v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(alias), importPath))
+			v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(importQualifier(alias)), importPath))
 		}
 	} else {
 		v.canonicalAliasImported.Add(v.currentImportPath)
@@ -101,7 +101,7 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 			}
 		}
 
-		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(strings.TrimSuffix(importName, PackageSuffix)), importPath))
+		v.packageImports.WriteString(fmt.Sprintf("using %s = %s;", getSanitizedImport(importQualifier(strings.TrimSuffix(importName, PackageSuffix))), importPath))
 	}
 
 	v.writeCommentString(v.packageImports, importSpec.Comment, importSpec.End())

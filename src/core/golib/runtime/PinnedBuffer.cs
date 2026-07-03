@@ -26,7 +26,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Represents a pinned buffer that can be used as an array pointer reference.

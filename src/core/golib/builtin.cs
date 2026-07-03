@@ -34,10 +34,10 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
-using go.runtime;
+using go.golib;
 using static System.Math;
 using static go2cs.Symbols;
-using TypeExtensions = go.runtime.TypeExtensions;
+using TypeExtensions = go.golib.TypeExtensions;
 
 namespace go;
 

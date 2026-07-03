@@ -1,7 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
-using io = io_package;
+using Δio = io_package;
 
 partial class main_package {
 
@@ -114,11 +114,11 @@ internal static @string Error(this fakeError _) {
 }
 
 internal static error Unwrap(this fakeError _) {
-    return io.EOF;
+    return Δio.EOF;
 }
 
 internal static bool Is(this fakeError _, error err) {
-    return AreEqual(err, io.EOF);
+    return AreEqual(err, Δio.EOF);
 }
 
 internal static void Main() {

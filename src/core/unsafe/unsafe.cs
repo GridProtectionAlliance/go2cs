@@ -12,7 +12,7 @@ Go 1 compatibility guidelines.
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using go.runtime;
+using go.golib;
 using go;
 
 [module: GoManualConversion]

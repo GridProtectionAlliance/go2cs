@@ -10,7 +10,7 @@ internal static readonly rank rA = /* iota */ 0;
 internal static readonly rank rB = 1;
 internal static readonly rank rC = 2;
 
-internal static slice<slice<rank>> order = new runtime.SparseArray<slice<rank>>{
+internal static slice<slice<rank>> order = new golib.SparseArray<slice<rank>>{
     [(int)rA] = new rank[]{}.slice(),
     [(int)rB] = new rank[]{rA}.slice(),
     [(int)rC] = new rank[]{rA, rB}.slice()

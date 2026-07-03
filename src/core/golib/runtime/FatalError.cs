@@ -21,7 +21,7 @@
 //
 //******************************************************************************************************
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Represents common fatal error messages reported in Go environment.

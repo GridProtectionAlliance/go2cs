@@ -5,7 +5,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using go;
-using go.runtime;
+using go.golib;
 
 [module: GoManualConversion]
 

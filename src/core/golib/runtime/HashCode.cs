@@ -23,7 +23,7 @@
 
 using System;
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Provides a helper class for generating hash codes.

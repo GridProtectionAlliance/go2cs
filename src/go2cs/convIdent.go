@@ -8,6 +8,15 @@ import (
 )
 
 func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
+	// A package qualifier (`runtime.Goexit()`) renders its using alias, which is
+	// collision-renamed when a same-named child namespace is visible from the import
+	// closure (CS0576 — see importAliasOperations.go).
+	if pkgName, isPkg := v.identifierIsPackageName(ident); isPkg {
+		if renamed, ok := packageImportAliasRenames[pkgName]; ok {
+			return getSanitizedImport(renamed)
+		}
+	}
+
 	if ident.Name == "nil" {
 		if context.isPointer {
 			return "nil"

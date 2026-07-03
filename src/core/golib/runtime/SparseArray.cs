@@ -25,7 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace go.runtime;
+namespace go.golib;
 
 /// <summary>
 /// Represents a sparse array.

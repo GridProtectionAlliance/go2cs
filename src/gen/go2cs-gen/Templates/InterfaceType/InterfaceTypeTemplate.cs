@@ -25,7 +25,7 @@ internal class InterfaceTypeTemplate : TemplateBase
 
     public override string Generate()
     {
-        string[] RequiredUsings = ["using System.Diagnostics;", "using System.Reflection;", "using go.runtime;"];
+        string[] RequiredUsings = ["using System.Diagnostics;", "using System.Reflection;", "using go.golib;"];
 
         UsingStatements = UsingStatements is null ?
             RequiredUsings :

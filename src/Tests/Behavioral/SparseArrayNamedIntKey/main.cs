@@ -15,13 +15,13 @@ internal static readonly rank rankHigh = 2;
 internal static readonly code codeA = /* iota */ 0;
 internal static readonly code codeB = 1;
 
-internal static slice<@string> rankNames = new runtime.SparseArray<@string>{
+internal static slice<@string> rankNames = new golib.SparseArray<@string>{
     [(int)rankLow] = "low"u8,
     [(int)rankMid] = "mid"u8,
     [(int)rankHigh] = "high"u8
 }.slice();
 
-internal static slice<@string> codeNames = new runtime.SparseArray<@string>{
+internal static slice<@string> codeNames = new golib.SparseArray<@string>{
     [codeA] = "a"u8,
     [codeB] = "b"u8
 }.slice();

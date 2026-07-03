@@ -20,7 +20,7 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using go.runtime;
+using go.golib;
 using @unsafe = go.unsafe_package;
 //using go2cs.AST;
 
