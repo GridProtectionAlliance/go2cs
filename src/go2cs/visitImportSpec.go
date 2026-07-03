@@ -9,8 +9,11 @@ import (
 )
 
 // packageQualifiedNameRegex matches a dotted qualified identifier. Segments may contain Unicode
-// letters/digits the converter uses in generated names (e.g. Δ, ꓸ, ᴛ), so the class is Unicode-aware.
-var packageQualifiedNameRegex = regexp.MustCompile(`[\p{L}_][\p{L}\p{N}_]*(?:\.[\p{L}_][\p{L}\p{N}_]*)*`)
+// letters/digits the converter uses in generated names (e.g. Δ, ꓸ, ᴛ) and may carry the C#
+// keyword escape (`@internal`) — the `@` must be INSIDE the match, or the root-qualifier below
+// splices the prefix between the escape and its segment (`@internal.bisect_package.Writer`
+// became `@go.internal.…` — a parse error in internal/godebug's GoImplement attribute).
+var packageQualifiedNameRegex = regexp.MustCompile(`@?[\p{L}_][\p{L}\p{N}_]*(?:\.@?[\p{L}_][\p{L}\p{N}_]*)*`)
 
 // rootQualifySubNamespaceTypeRefs prefixes the root namespace ("go.") onto package-qualified type
 // references that live in a sub-namespace (e.g. image.color_package.ΔRGBA -> go.image.color_package.ΔRGBA).
