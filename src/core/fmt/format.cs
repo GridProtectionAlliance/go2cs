@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ꓸꓸꓸobject = System.Span<object>;
@@ -32,7 +33,7 @@ namespace go;
 // This is a simple proxy for the fmt package for testing...
 public static partial class fmt_package
 {
-    [GeneratedRegex(@"\%(?:[0-9]*(?:\.[0-9]*)?)?(?<type>[vtbcdoOqxXUeEfFgGspTw%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
+    [GeneratedRegex(@"\%(?<flags>[\x20+\-#0]*)(?<width>[0-9]*)(?:\.(?<precision>[0-9]*))?(?<type>[vtbcdoOqxXUeEfFgGspTw%])", RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace)]
     private static partial Regex FormatExpr();
 
     private static readonly Regex s_formatExpr = FormatExpr();
@@ -89,33 +90,127 @@ public static partial class fmt_package
     private static (string, object[]) ConvertFormat(string format, object[] args)
     {
         int index = 0;
-        
+
         foreach (Match match in s_formatExpr.Matches(format))
         {
-            switch (match.Groups["type"].Value)
+            if (match.Groups["type"].Value == "%")
             {
-                case "%":
-                    format = new Regex(Regex.Escape(match.Value)).Replace(format, "%", 1);
-                    break;
-                case "T":
-                    string gotTypeName = GetGoTypeName(args[index]);
-                    
-                    if (gotTypeName.StartsWith("go."))
-                        gotTypeName = gotTypeName[3..];
-
-                    if (gotTypeName == "nil")
-                        gotTypeName = "<nil>";
-
-                    args[index] = gotTypeName;
-                    format = new Regex(Regex.Escape(match.Value)).Replace(format, $"{{{index++}}}", 1);
-                    break;
-                default:
-                    format = new Regex(Regex.Escape(match.Value)).Replace(format, $"{{{index++}}}", 1);
-                    break;
+                format = new Regex(Regex.Escape(match.Value)).Replace(format, "%", 1);
+                continue;
             }
+
+            if (index >= args.Length)
+                break;
+
+            if (match.Groups["type"].Value == "T")
+            {
+                string gotTypeName = GetGoTypeName(args[index]);
+
+                if (gotTypeName.StartsWith("go."))
+                    gotTypeName = gotTypeName[3..];
+
+                if (gotTypeName == "nil")
+                    gotTypeName = "<nil>";
+
+                args[index] = ApplyWidth(gotTypeName, match, numeric: false);
+            }
+            else
+            {
+                args[index] = FormatArg(args[index], match);
+            }
+
+            format = new Regex(Regex.Escape(match.Value)).Replace(format, $"{{{index++}}}", 1);
         }
 
         return (format, args);
+    }
+
+    // Renders a single argument applying the matched verb's flags, width and precision —
+    // stub-proxy scope: fixed-point precision (%f/%F), the ' '/'+' sign flags on numbers,
+    // and '-'/'0' width padding. Other verb-specific renderings still fall back to ToString.
+    private static string FormatArg(object? arg, Match match)
+    {
+        string flags = match.Groups["flags"].Value;
+        Group precision = match.Groups["precision"];
+        string verb = match.Groups["type"].Value;
+        bool numeric = IsNumericValue(arg);
+        string value;
+
+        if (precision.Success && verb is "f" or "F" && TryGetDouble(arg, out double number))
+            value = number.ToString("F" + (precision.Value.Length == 0 ? "0" : precision.Value), CultureInfo.InvariantCulture);
+        else
+            value = ToString(arg!);
+
+        if (numeric && !value.StartsWith('-'))
+        {
+            if (flags.Contains('+'))
+                value = "+" + value;
+            else if (flags.Contains(' '))
+                value = " " + value;
+        }
+
+        return ApplyWidth(value, match, numeric);
+    }
+
+    private static string ApplyWidth(string value, Match match, bool numeric)
+    {
+        string widthText = match.Groups["width"].Value;
+
+        if (widthText.Length == 0)
+            return value;
+
+        int width = int.Parse(widthText, CultureInfo.InvariantCulture);
+        string flags = match.Groups["flags"].Value;
+
+        if (flags.Contains('-'))
+            return value.PadRight(width);
+
+        if (flags.Contains('0') && numeric && value.Length < width)
+        {
+            // Zero padding goes after any sign (or the space/plus sign placeholder)
+            int prefixLength = value.Length > 0 && value[0] is '-' or '+' or ' ' ? 1 : 0;
+            return value[..prefixLength] + value[prefixLength..].PadLeft(width - prefixLength, '0');
+        }
+
+        return value.PadLeft(width);
+    }
+
+    private static bool IsNumericValue(object? arg) =>
+        arg is sbyte or byte or short or ushort or int or uint or long or ulong
+            or nint or nuint or float or double or decimal or UntypedInt or UntypedFloat;
+
+    private static bool TryGetDouble(object? arg, out double value)
+    {
+        switch (arg)
+        {
+            case float source:
+                value = source;
+                return true;
+            case double source:
+                value = source;
+                return true;
+            case decimal source:
+                value = (double)source;
+                return true;
+            case sbyte or byte or short or ushort or int or uint or long or ulong:
+                value = Convert.ToDouble(arg, CultureInfo.InvariantCulture);
+                return true;
+            case nint source:
+                value = source;
+                return true;
+            case nuint source:
+                value = source;
+                return true;
+            case UntypedFloat source:
+                value = (float64)source;
+                return true;
+            case UntypedInt source:
+                value = (int64)source;
+                return true;
+            default:
+                value = 0.0D;
+                return false;
+        }
     }
     
     public static void Printf(ReadOnlySpan<byte> format, params object[] args) =>

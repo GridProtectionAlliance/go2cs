@@ -492,6 +492,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPointerToPointer() => CheckTarget("PointerToPointer");
 
     [TestMethod]
+    public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
+
+    [TestMethod]
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
