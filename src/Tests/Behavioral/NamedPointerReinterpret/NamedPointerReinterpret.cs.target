@@ -17,11 +17,26 @@ internal static ж<@base> makeBase() {
     return Ꮡx;
 }
 
+[GoType("ж<int64>")] partial class intRef;
+
+internal static @string classify(any v) {
+    if (v == ((intRef)default!)) {
+        return "nilref"u8;
+    }
+    return "other"u8;
+}
+
 internal static void Main() {
     var pb = makeBase();
     var pv = Ꮡ((view)(~pb));
     var bb = ((@base)(pv.Value));
     fmt.Println(bb.a, bb.b);
+    any boxed = ((intRef)default!);
+    fmt.Println(classify(boxed));
+    ref var n = ref heap<int64>(out var Ꮡn);
+    n = (int64)5;
+    intRef r = Ꮡn;
+    fmt.Println(r.Value, classify(r));
 }
 
 } // end main_package

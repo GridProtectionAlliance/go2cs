@@ -12,18 +12,20 @@ internal static class PointerTypeTemplate
                 public override int GetHashCode() => m_value.GetHashCode();
         
                 public ref {{targetTypeName}} Value => ref m_value.Value;
+
+                public bool IsNull => m_value is null || m_value.IsNull;
                 
                 public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
                 public {{PointerPrefix}}<TElem> of<TElem>(FieldRefFunc<{{targetTypeName}}, TElem> fieldRefFunc) => m_value.of(fieldRefFunc);
                 
-                public {{PointerPrefix}}<Telem> at<Telem>(int index) => m_value.at<Telem>(index);
+                public {{PointerPrefix}}<TElem> at<TElem>(nint index) => m_value.at<TElem>(index);
                 
                 static {{targetTypeName}} IPointer<{{targetTypeName}}>.operator ~(IPointer<{{targetTypeName}}> value) => value.Value;
 
                 public static unsafe implicit operator {{className}}(uintptr value)
                 {
-                    return new {{className}}(*({{targetTypeName}}*)value);
+                    return new {{className}}(new {{PointerPrefix}}<{{targetTypeName}}>(*({{targetTypeName}}*)value));
                 }
                 
                 public static unsafe implicit operator uintptr({{className}} value)
@@ -34,7 +36,7 @@ internal static class PointerTypeTemplate
                 
                 public static unsafe implicit operator {{className}}(void* value)
                 {
-                    return new {{className}}(*({{targetTypeName}}*)value);
+                    return new {{className}}(new {{PointerPrefix}}<{{targetTypeName}}>(*({{targetTypeName}}*)value));
                 }
                 
                 public static unsafe implicit operator void*({{className}} value)

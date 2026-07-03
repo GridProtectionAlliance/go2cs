@@ -153,7 +153,19 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			v.targetFile.WriteString(v.convSelectorExpr(typeSpecType, DefaultLambdaContext()))
 		}
 	case *ast.StarExpr:
-		v.targetFile.WriteString(v.convStarExpr(typeSpecType, DefaultStarExprContext()))
+		{
+			// A defined POINTER type — `type dequeueNil *struct{}` (sync/poolqueue). The bare
+			// converted star-type text (`ж<EmptyStruct>`) is not a declaration (CS1585 — sync's
+			// wave-1 error); emit the `[GoType("ж<T>")] partial class` forward declaration whose
+			// Pointer template go2cs-gen implements (the generator matches a CLASS declaration
+			// for ж<-prefixed definitions — a named pointer is reference-like).
+			pointerTypeName := v.convStarExpr(typeSpecType, DefaultStarExprContext())
+			access := v.pendingTypeAccess
+			v.pendingTypeAccess = ""
+			v.targetFile.WriteString(v.newline)
+			v.writeOutputLn("[GoType(\"%s\")] %spartial class %s;", pointerTypeName, access, getSanitizedIdentifier(name))
+			usesUnsafeCode = true
+		}
 	case *ast.StructType:
 		v.visitStructType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	default:

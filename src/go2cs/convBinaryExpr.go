@@ -254,14 +254,21 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 		}
 	}
 
+	// A pointer comparand puts the OTHER operand in pointer (box) context — but not when that
+	// operand is itself an INTERFACE: `v == dequeueNil(nil)` (sync/poolqueue; v is `any`, the
+	// comparand a defined pointer type) must compare v's held VALUE, and the box form emitted a
+	// nonexistent `Ꮡv` (CS0103).
+	lhsIsInterfaceType, _ := isInterface(lhsType)
+	rhsIsInterfaceType, _ := isInterface(rhsType)
+
 	rhsIsPointer := isPointer(rhsType)
-	identContext.isPointer = rhsIsPointer || leftIsDerefdPtrParam
+	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType
 	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})
 
 	binaryOp := binaryExpr.Op.String()
 
 	lhsIsPointer := isPointer(lhsType)
-	identContext.isPointer = lhsIsPointer || rightIsDerefdPtrParam
+	identContext.isPointer = (lhsIsPointer || rightIsDerefdPtrParam) && !rhsIsInterfaceType
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
 	if !context.usePattenMatch {

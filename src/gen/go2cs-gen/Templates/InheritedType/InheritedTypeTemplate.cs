@@ -69,6 +69,22 @@ internal class InheritedTypeTemplate : TemplateBase
         _ => "m_value"
     };
 
+    // The Pointer class supplies its own ref-returning Value (PointerTypeTemplate); emitting the
+    // base value property too is a duplicate member (CS0102).
+    private string EqualityExpression => TypeClass switch
+    {
+        // A nil named pointer is a NULL reference (class) — left.Equals would NRE; Equals(a, b)
+        // is null-safe (null == null is true, matching Go's nil == nil).
+        "Pointer" => "Equals(left, right)",
+        _ => "left.Equals(right)"
+    };
+
+    private string ValueProperty => TypeClass switch
+    {
+        "Pointer" => "",
+        _ => $"        public {TypeName} Value => {ValueGetter};"
+    };
+
     // A wrapper over golib's `uintptr` STRUCT needs its own bridges to the plain numeric world:
     // `gclinkptr x = 0` / `(gclinkptr)someNuint` would otherwise chain TWO user-defined
     // conversions (nuint→uintptr, uintptr→gclinkptr), which C# never composes. The nuint bridge
@@ -154,11 +170,10 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public {{ConstructorName}}(NilType _) => m_value = default!;
 
-                public {{TypeName}} Value => {{ValueGetter}};
-                
+        {{ValueProperty}}
                 public override string ToString() => {{ToStringImplementation}};
         
-                public static bool operator ==({{ObjectName}} left, {{ObjectName}} right) => left.Equals(right);
+                public static bool operator ==({{ObjectName}} left, {{ObjectName}} right) => {{EqualityExpression}};
         
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
