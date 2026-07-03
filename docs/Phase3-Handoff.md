@@ -15,17 +15,24 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 4 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 1 error, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
-  graph and the **sole failing project**. Remaining queue (all triaged, none decision-gated):
-  **(1) type.cs:414 CS0128 ×2** — two sibling `for i := 0` loops in one block each emit the
-  escape-hoist `ref var i = ref heap<nint>(out var Ꮡi);`; the hoist path lacks the
-  already-declared-in-scope rename normal decls get (extend `EscapedLoopVarSiblingIndex` — it
-  covers range siblings, not for-clause siblings). **(2) proc.cs:5687 CS0136** — two Go locals
-  named `trace` in nested scopes both collision-rename to `Δtrace`; the Δ-rename bypasses
-  shadow-numbering (should compose: `ΔtraceΔ1`). **(3) trace.cs:344 CS8175** — the capture
-  snapshot `var genʗ2 = gen;` sits *inside* the `forEachGRace` lambda, reading ref-local `gen`;
-  needs the established in-lambda box routing (`Ꮡgen.Value`).
+  graph and the **sole failing project**. Remaining: **proc.cs:5687 CS0136** — two Go locals named
+  `trace` in nested scopes both collision-rename to `Δtrace`; the Δ-rename bypasses
+  shadow-numbering (should compose: `ΔtraceΔ1`). At zero: FULL go-src-converted.sln build →
+  bucket the 237-package wave.
+- **2026-07-02 (latest three roots):** (1) **escape-hoist grouping** (`bd45b5bd7`, 4→2): one
+  hoisted loop-var box per name per container; typesEqual CS0128 pair cleared; retired 42 corpus
+  files' spurious old-pass renames. (2) **val → Value rename** (`5912ba9fd`, user-directed):
+  ж<T>.val + IPointer<T>.val + generated-wrapper val → `Value` across golib/generators/converter/
+  hand-owned core/Examples/goldens/docs (263 files; suite 217/217; slnx 0 errors; corpus parity
+  held; three adversarial verify agents, findings fixed pre-commit). DerefOrNil KEPT — census
+  proved it guards the nil BOX (null ж<T> receiver, extension-method-only) and returns a throwaway
+  slot, complementary to ValueSlot's real-slot no-check read; NOT subsumed. (3) **storage-root
+  escape analysis** (`fda9a52f5`, user-spotted, 2→1): a pointer arg escapes only its peeled
+  storage root — loop indexes inside args (`typesEqual(tin[i],…)`, `&xs[i+1]`) no longer
+  heap-box; 63 corpus files shed spurious boxes (22 runtime); trace.cs CS8175 DISSOLVED with its
+  spurious `gen` box; typesEqual emits plain `for (nint i…)` loops.
 - **2026-07-02 (latest): the &GLOBAL/double-pointer family landed (`f454a7106`; runtime 8 → 4).**
   Pointer-typed addressed globals (`var head *node` → `ж<ж<node>>`) now support the faithful
   runtime walk (`for pp := &head; *pp != nil; pp = &(*pp).next { *pp = n }`): one star = ONE deref
