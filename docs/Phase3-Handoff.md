@@ -15,6 +15,21 @@
 
 ## Where things stand (2026-07-03)
 
+- **recon116 WAVE — bytes AND strings AT ZERO (club = 20). GPG-BLOCKED: the reflect gen pair
+  (CS0057 relocation + nuint hop; CS0102/0111 promotion shadow-skip) is VERIFIED (suite 220/220,
+  reflect generated files at zero) and STAGED but uncommitted — pinentry needs the user
+  passphrase; NEVER kill gpg-agent (clearing the cache caused this); never bypass signing.**
+  Frontier (recon116, sequential absolute-path): bytes 0, strings 0, edwards 1, internal/
+  concurrent 5, netip 6, bufio 8, time 24, os 24, fmt 178. fmt = reflect tail LEAK (identical
+  CS1061 x54 / CS0030 x28 distribution) + own ~28 — the remaining big census is REFLECT (~150:
+  CS1061 54, CS0030 28, CS1503 16, CS0021 14, CS0117 13, CS9135, CS8917). time 24 = NEW small
+  families: IByteSeq<byte>→`bytes` type-param CS1503 x8 (format_rfc3339 — union-constraint call
+  sites passing the IByteSeq where the CONSTRAINED param is expected — sibling of the union-order
+  fix: the PARAMETER type renders as the type param `bytes` but the ARG renders interface-typed);
+  CS8120 unreachable-switch x3; method-group→Action CS1503 x2 (zoneinfo_windows); Duration-const
+  pattern CS9135 x2. os 24 probably time+fmt leak. NEXT after GPG unblocks: commit gen pair →
+  ConversionStrategies batch docs → time IByteSeq family → reflect census.
+
 - **TWENTY-ONE roots (recon115 overlaid) — registry AND fiat AT ZERO (club = 18).** Latest:
   2e7c172a7 Key cross-base const hop (registry 8→0); 4d6dbab4b fiat alias-target reinterprets
   (20→0, one types.Unalias in the namedToArray gate); 971ab01a7 string|[]byte union check hoisted
