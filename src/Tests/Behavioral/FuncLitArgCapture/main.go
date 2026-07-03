@@ -104,4 +104,26 @@ func main() {
 		return k * seed[0]
 	}
 	fmt.Println("9:", mul(21))
+
+	// 10. Func literal with NAMED RESULTS and a bare return (the iter.Pull shape:
+	//     `next = func() (v1 V, ok1 bool) { ...; return }`). The lambda must DECLARE the
+	//     named results at the top of its block (zero-initialized) or the emitted
+	//     `return (v1, ok1);` references undeclared names (CS0103).
+	pick := func(sel int) (x int, ok bool) {
+		if sel > 0 {
+			x = sel * 7
+			ok = true
+			return // bare return: named results as assigned
+		}
+		return // bare return: zero values
+	}
+	a, b := pick(3)
+	zx, zok := pick(-1)
+	fmt.Println("10:", a, b, zx, zok)
+
+	// 11. Named-result literal whose FIRST statement is a bare return (must NOT collapse to
+	//     an expression-bodied lambda -- the names only exist as block declarations).
+	zero := func() (n int, s string) { return }
+	n0, s0 := zero()
+	fmt.Println("11:", n0, s0 == "")
 }

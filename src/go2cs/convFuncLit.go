@@ -38,6 +38,23 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		litNamedDefer, litNamedNames = v.detectNamedReturnDefer(litSig, litHasDefer, litHasRecover)
 	}
 
+	// A function literal with NAMED results needs their declarations at the top of its block —
+	// Go zero-initializes them and a bare `return` returns them. iter.Pull's
+	// `next = func() (v1 V, ok1 bool) { …; return }` emitted `return (v1, ok1);` with nothing
+	// declared (CS0103 — the wave-1 iter errors). The litNamedDefer path composes its own decls;
+	// this covers plain and defer-without-mutation literals.
+	litHasNamedResults := false
+
+	if litSig != nil && funcLit.Type.Results != nil {
+		for _, field := range funcLit.Type.Results.List {
+			for _, name := range field.Names {
+				if !isDiscardedVar(name.Name) {
+					litHasNamedResults = true
+				}
+			}
+		}
+	}
+
 	// A function literal's body is converted with ITS OWN namedReturnDeferMode, not the enclosing
 	// function's (which must not leak in — otherwise the closure's `return expr` would be rewritten
 	// against the OUTER named results). Save/restore around the body conversion.
@@ -129,7 +146,7 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	// source); other single-return literals collapse to an expression-bodied lambda. A
 	// namedReturnDefer literal always keeps a block (it returns its named results after the
 	// func() wrapper).
-	if v.firstStatementIsReturn && !context.isIIFE && !litNamedDefer {
+	if v.firstStatementIsReturn && !context.isIIFE && !litNamedDefer && !litHasNamedResults {
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(body, "return ")
 
@@ -149,6 +166,12 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 	} else {
 		body = strings.TrimSpace(body)
+	}
+
+	// Declare plain named results at the top of the literal's block (the litNamedDefer arm
+	// below declares its own, outside the func() wrapper).
+	if litHasNamedResults && !litNamedDefer && strings.HasPrefix(body, "{") {
+		body = "{" + v.namedReturnDeclLines(litSig, v.indentLevel+1) + strings.TrimPrefix(body, "{")
 	}
 
 	// Build the lambda body (what follows `=>`). A function literal that uses defer/recover gets

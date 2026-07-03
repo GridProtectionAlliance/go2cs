@@ -75,6 +75,26 @@ internal static void Main() {
     var seedʗ1 = seed;
     Func<nint, nint> mul = (nint k) => k * seedʗ1[0];
     fmt.Println("9:", mul(21));
+    var pick = (nint sel) => {
+        nint x = default!;
+        bool ok = default!;
+        if (sel > 0) {
+            x = sel * 7;
+            ok = true;
+            return (x, ok);
+        }
+        return (x, ok);
+    };
+    var (a, b) = pick(3);
+    var (zx, zok) = pick(-1);
+    fmt.Println("10:", a, b, zx, zok);
+    var zero = () => {
+        nint nΔ1 = default!;
+        @string s = default!;
+        return (nΔ1, s);
+    };
+    var (n0, s0) = zero();
+    fmt.Println("11:", n0, s0 == ""u8);
 }
 
 } // end main_package
