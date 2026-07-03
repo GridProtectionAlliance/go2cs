@@ -128,7 +128,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -294,6 +294,66 @@ func bodyReturnsReceiver(body *ast.BlockStmt, recvName string) bool {
 				found = true
 				return false
 			}
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyHasPointerMethodValueOnReceiver reports whether the body uses a method VALUE (a method
+// referenced without calling it) whose target has a POINTER receiver and whose receiver expression
+// is the method's own receiver or a VALUE field-chain rooted at it — `s.nonDefaultOnce.Do(s.register)`,
+// `registerMetric(…, s.nonDefault.Load)` (internal/godebug). Go binds the receiver ADDRESS at
+// method-value creation, so convSelectorExpr emits a box-bound method group (`Ꮡs.register`,
+// `Ꮡs.of(Setting.ᏑnonDefault).Load`), which requires the enclosing method to be direct-ж so the
+// receiver box `Ꮡrecv` is in scope.
+func bodyHasPointerMethodValueOnReceiver(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	// A selector that is a call's Fun is a method CALL, not a method value.
+	calledFuns := map[ast.Expr]bool{}
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if callExpr, ok := node.(*ast.CallExpr); ok {
+			calledFuns[callExpr.Fun] = true
+		}
+
+		return true
+	})
+
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		sel, ok := node.(*ast.SelectorExpr)
+
+		if !ok || calledFuns[sel] {
+			return true
+		}
+
+		selection, ok := info.Selections[sel]
+
+		if !ok || selection.Kind() != types.MethodVal {
+			return true
+		}
+
+		sig, ok := selection.Obj().Type().(*types.Signature)
+
+		if !ok || sig.Recv() == nil {
+			return true
+		}
+
+		if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr {
+			return true
+		}
+
+		if ident, ok := sel.X.(*ast.Ident); ok && ident.Name == recvName {
+			found = true
+			return false
+		}
+
+		if selectorRootsAtReceiverValueFieldChain(sel.X, recvName, info) {
+			found = true
+			return false
 		}
 
 		return true

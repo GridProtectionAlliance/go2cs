@@ -630,6 +630,40 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
+	// A method VALUE over a POINTER-receiver method in a VALUE context — a call argument
+	// (`s.nonDefaultOnce.Do(s.register)`, `registerMetric(…, s.nonDefault.Load)`; internal/godebug).
+	// The [GoRecv] emission is a `ref`-receiver extension, and C# cannot create a delegate from an
+	// extension whose first parameter is a value type (CS1113/CS1061). Go binds the receiver ADDRESS
+	// once at method-value creation (`s.register` ≡ `(&s).register`); emit that same binding through
+	// the box — `Ꮡs.register` / `Ꮡs.of(Setting.ᏑnonDefault).Load` — a method group over the
+	// generated ж<T> receiver overload (class-typed, delegate-legal). A receiver expression that is
+	// already a pointer needs no &-synthesis and keeps the plain emission (the base renders as the
+	// box itself).
+	if v.isMethodValue(selectorExpr, context.isCallExpr) && !context.isAssignment {
+		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); isPtrRecv {
+					if recvType := v.getType(selectorExpr.X, false); recvType != nil {
+						if _, alreadyPtr := recvType.(*types.Pointer); !alreadyPtr {
+							boundRecv := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+							return fmt.Sprintf("%s.%s", boundRecv, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+						}
+
+						// A pointer-typed IDENT base whose plain rendering is the deref'd ref-local
+						// — the [GoRecv] receiver `s` itself (`s.register` inside another method of
+						// *Setting) or a deref'd pointer param. The isPointer ident context renders
+						// the pointer VALUE (the box `Ꮡs`), which the ж<T> overload group binds to.
+						if ident, ok := selectorExpr.X.(*ast.Ident); ok {
+							identContext := DefaultIdentContext()
+							identContext.isPointer = true
+							return fmt.Sprintf("%s.%s", v.convIdent(ident, identContext), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+						}
+					}
+				}
+			}
+		}
+	}
+
 	// Check if the selector BASE itself is an explicit dereference (or a pointer conversion whose
 	// result the special-cased branch below derefs). This must inspect only the base's own outermost
 	// shape — unwrapping parens and looking through a conversion-call's operand — NOT the whole

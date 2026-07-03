@@ -62,6 +62,33 @@ public static void Reset(this ж<Flag> Ꮡf, int32 v) {
     return f.label;
 }
 
+internal static int32 applyTwice(Func<int32, int32> f, int32 d) {
+    f(d);
+    return f(d);
+}
+
+internal static int32 readVia(Func<int32> get) {
+    return get();
+}
+
+public static int32 AddTwice(this ж<Counter> Ꮡc, int32 d) {
+    ref var c = ref Ꮡc.Value;
+
+    return applyTwice(Ꮡc.Add, d);
+}
+
+public static int32 AddViaValue(this ж<Flag> Ꮡf, int32 d) {
+    ref var f = ref Ꮡf.Value;
+
+    return applyTwice(Ꮡf.of(Flag.Ꮡc).Add, d);
+}
+
+public static int32 ReadViaValue(this ж<Flag> Ꮡf) {
+    ref var f = ref Ꮡf.Value;
+
+    return readVia(Ꮡf.of(Flag.Ꮡc).Get);
+}
+
 internal static void Main() {
     ref var fl = ref heap(new Flag(), out var Ꮡfl);
     fl.label = "hits"u8;
@@ -71,6 +98,10 @@ internal static void Main() {
     fmt.Println("Incr:", Ꮡfl.Incr());
     fmt.Println("AddN 5:", Ꮡfl.AddN(5));
     fmt.Println("final:", fl.Value());
+    fmt.Println("AddTwice 3:", Ꮡfl.of(Flag.Ꮡc).AddTwice(3));
+    fmt.Println("AddViaValue 2:", Ꮡfl.AddViaValue(2));
+    fmt.Println("ReadViaValue:", Ꮡfl.ReadViaValue());
+    fmt.Println("local value:", applyTwice(Ꮡfl.of(Flag.Ꮡc).Add, 1));
 }
 
 } // end main_package
