@@ -15,12 +15,15 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 1 error, EXACT and
-  REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
-  graph and the **sole failing project**. Remaining: **proc.cs:5687 CS0136** — two Go locals named
-  `trace` in nested scopes both collision-rename to `Δtrace`; the Δ-rename bypasses
-  shadow-numbering (should compose: `ΔtraceΔ1`). At zero: FULL go-src-converted.sln build →
-  bucket the 237-package wave.
+- **THE RUNTIME MILESTONE IS REACHED (2026-07-02): `src/go-src-converted/runtime` builds with
+  ZERO errors — 952 → 0.** The bottom of the dependency graph, the hardest package in the Go
+  standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
+  `processing` flag being cleared by a nested block's exit while the enclosing block was still
+  mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
+  check (procresize's `Δtrace` CS0136). **The frontier is now the 237-package wave**: full
+  `go-src-converted.sln` build → bucket own-errors by package+CS#### → largest-multiplicity root
+  first. Known wave item: `database/sql/convert.cs` invalid `var d.Value = …` (deref-assign into a
+  var decl, pre-existing).
 - **2026-07-02 (latest three roots):** (1) **escape-hoist grouping** (`bd45b5bd7`, 4→2): one
   hoisted loop-var box per name per container; typesEqual CS0128 pair cleared; retired 42 corpus
   files' spurious old-pass renames. (2) **val → Value rename** (`5912ba9fd`, user-directed):
