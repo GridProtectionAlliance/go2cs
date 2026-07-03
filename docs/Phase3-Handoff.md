@@ -15,6 +15,23 @@
 
 ## Where things stand (2026-07-03)
 
+- **SEVENTEEN roots + both chip cherry-picks (e36e9b7d6 alias-array, e58f274b9 fmt flags) —
+  math/rand/v2 AND internal/syscall/windows AT ZERO (club = 16). recon113 overlaid.** 07cd23364:
+  PartialStubGenerator emits using aliases AFTER the file-scoped namespace (a FILE-level alias
+  loses simple-name lookup to an enclosing namespace SEGMENT — go.@internal.syscall shadowed the
+  syscall alias; windows 10→0, unmasking os 18→8 / fmt 21→11 / time 8). WAVE (recon113):
+  registry 8 = ONE family: Key is named-over-CROSS-PACKAGE-named ([GoType("syscall_package.
+  ΔHandle")] — wrapper has ONLY Key↔ΔHandle ops, NO numeric bridge), so (a) beyond-int32 const
+   is CS0030 x5 (visitValueSpec unchecked path must chain through the
+  written base: unchecked((Key)(syscall_package.ΔHandle)2147483648) — one user conv per cast) and
+  (b)  with Key result is CS0029 x3 (untyped const in return position — same chain,
+  or generator grows an UntypedInt bridge THROUGH the base for named-over-named-numeric wrappers —
+  the all-ships option, needs the converter to mark the base numeric in the GoType tag). time 8 /
+  os 8 / fmt 11 = registry leak + own residue (remeasure after registry). bytes 6 / strings 5 /
+  bufio 11 / fiat 20 (alias-array REINTERPRETS — writtenRHS map skips aliases) / reflect 3 (gen) /
+  netip 36 (JUMPED from 3 — census needed) / edwards 1. Zero-club spot-checks all 0 post-gen-change;
+  full suite 220/220 green twice (fmt cherry-pick gate + stub gate).
+
 - **FIFTEEN roots landed (recon112 pending) — dnsmessage AT ZERO (club = 14).** Post-batch roots:
   b447795c4 func literals in PACKAGE-LEVEL var initializers get function scope (inFunction save/
   restore in convFuncLit + synthetic-FuncDecl performVariableAnalysis in visitValueSpec — the
