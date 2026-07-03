@@ -26,6 +26,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		keyValueContext.source = callContext.keyValueSource
 		keyValueContext.ident = callContext.keyValueIdent
 		keyValueContext.arrayBacked = callContext.keyValueArrayBacked
+		keyValueContext.compositeType = callContext.keyValueCompositeType
 		forceMultiLine = callContext.forceMultiLine
 		hasSpreadOperator = callContext.hasSpreadOperator
 		interfaceTypes = callContext.interfaceTypes

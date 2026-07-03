@@ -32,6 +32,9 @@ type CallExprContext struct {
 	// (nint), so a key whose Go type is a defined integer type must be cast to int (a `num:nint`
 	// key like runtime's `lockRank` cannot implicitly narrow to the indexer type otherwise).
 	keyValueArrayBacked bool
+	// keyValueCompositeType carries the keyed composite's resolved type through to
+	// KeyValueContext.compositeType (see that field's note; runtime/metrics CS1739).
+	keyValueCompositeType types.Type
 	forceMultiLine      bool
 	sourceIsRuneArray   bool
 	sourceIsTypeParams  bool
@@ -206,6 +209,11 @@ type KeyValueContext struct {
 	source      KeyValueSource
 	ident       *ast.Ident
 	arrayBacked bool
+
+	// compositeType carries the keyed composite literal's resolved type so a struct-field key
+	// can detect the field-named-like-its-own-type collision (the declaration applies
+	// typeCollidingFieldName; the keyed ctor argument must match — runtime/metrics CS1739).
+	compositeType types.Type
 }
 
 func DefaultKeyValueContext() KeyValueContext {

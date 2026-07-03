@@ -22,8 +22,32 @@ var table = map[OSArch]info{
 	{"windows", "386"}:   {supported: false},
 }
 
+// Description mirrors runtime/metrics.Description: a FIELD named like its OWN struct type.
+// The declaration renames the field (CS0542 avoidance), so keyed literals - typed AND elided
+// (inside the slice literal, where the ctor-arg name must match) - must use the renamed
+// parameter (CS1739 x57 in runtime/metrics).
+type Description struct {
+	Name        string
+	Description string
+}
+
+var allDesc = []Description{
+	{Name: "a", Description: "first"},
+	{Name: "b", Description: "second"},
+}
+
+func describe() Description {
+	return Description{Name: "c", Description: "third"}
+}
+
 func main() {
 	fmt.Println(table[OSArch{"linux", "amd64"}].supported)
 	fmt.Println(table[OSArch{"windows", "386"}].supported)
 	fmt.Println(len(table))
+
+	for _, d := range allDesc {
+		fmt.Println(d.Name, d.Description)
+	}
+	c := describe()
+	fmt.Println(c.Name, c.Description)
 }

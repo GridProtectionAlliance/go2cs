@@ -67,8 +67,23 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		// emit `funcInfo:`, not `ΔfuncInfo:` (which is not a parameter of the generated ctor → CS1739).
 		key := v.convExpr(keyValueExpr.Key, nil)
 
-		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok && nameCollisions[keyIdent.Name] {
-			key = removeSanitizationMarker(getCoreSanitizedIdentifier(keyIdent.Name))
+		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok {
+			if nameCollisions[keyIdent.Name] {
+				key = removeSanitizationMarker(getCoreSanitizedIdentifier(keyIdent.Name))
+			}
+
+			// A field named like its OWN struct type (`Description.Description`, runtime/metrics)
+			// is DECLARED with the type-colliding rename (CS0542 avoidance), so the keyed literal
+			// must name the renamed ctor parameter too — the unrenamed key was CS1739 ×57. Only a
+			// PACKAGE-LEVEL named type keeps its Go name as the C# type name (the same gate
+			// fieldCollidesWithType applies for selector emission).
+			if named, ok := types.Unalias(context.compositeType).(*types.Named); ok {
+				obj := named.Obj()
+
+				if obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() && getSanitizedIdentifier(keyIdent.Name) == getSanitizedIdentifier(obj.Name()) {
+					key = removeSanitizationMarker(typeCollidingFieldName(getCoreSanitizedIdentifier(keyIdent.Name)))
+				}
+			}
 		}
 
 		return fmt.Sprintf("%s: %s", key, valueExpr)

@@ -43,7 +43,19 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			rparenSuffix = fmt.Sprintf("%s%s", v.newline, v.indent(v.indentLevel))
 		}
 
-		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil)))
+		// Thread the ELIDED literal's resolved type to the keyed-field emission so a field
+		// named like its own struct type detects the declaration's type-colliding rename
+		// (runtime/metrics `{Description: …}` inside `[]Description{…}`, CS1739 ×56).
+		elidedContext := DefaultCallExprContext()
+		elidedContext.keyValueCompositeType = v.info.TypeOf(compositeLit)
+
+		// The nil-context path this replaces defaulted u8StringOK true per element; an empty
+		// map defaults it FALSE, silently stripping the u8 suffix from string-literal elements.
+		for i := range compositeLit.Elts {
+			elidedContext.u8StringArgOK[i] = true
+		}
+
+		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, elidedContext)))
 		v.writeStandAloneCommentString(result, compositeLit.Rbrace, nil, " ")
 		result.WriteString(fmt.Sprintf("%s)", rparenSuffix))
 
@@ -83,9 +95,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	}
 
 	exprType := v.getExprType(compositeLit.Type)
+
 	arrayTypeContext := DefaultArrayTypeContext()
 	callContext := DefaultCallExprContext()
 	callContext.keyValueIdent = context.ident
+
+	// Thread the composite's RESOLVED type to the keyed-field emission so a field named like
+	// its OWN struct type detects the declaration's type-colliding rename (runtime/metrics
+	// `Description{Description: …}`, CS1739 ×57). Derived from the LITERAL, not its Type
+	// syntax — an elided element literal (`{Name: …}` inside `[]Description{…}`) has a nil
+	// Type node but still resolves contextually.
+	if tv, ok := v.info.Types[compositeLit]; ok && tv.Type != nil {
+		if _, ok := tv.Type.Underlying().(*types.Struct); ok {
+			callContext.keyValueCompositeType = tv.Type
+		}
+	}
+
 	compositeSuffix := ""
 
 	// Get the element type for arrays/slices/maps to check for interfaces
@@ -186,6 +211,37 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		if needsInterfaceCast && !isEmpty {
 			for i := range compositeLit.Elts {
 				callContext.interfaceTypes[i] = elementType
+			}
+		}
+	}
+
+	// A NARROW-INTEGER element type (int8/uint8/int16/uint16) receiving a binary/unary
+	// arithmetic element: Go evaluates `b/100 + '0'` at the element's narrow width (with
+	// overflow wrapping), but C# promotes sub-int integer arithmetic to `int`, so a
+	// NON-CONSTANT element needs an explicit cast back to the element type — both to compile
+	// (int→narrow is not implicit, CS0266) and to preserve Go's wrap semantics. This is the
+	// composite-literal twin of the narrow-integer call-argument cast (see convCallExpr),
+	// which is why the equivalent `append(buf, b/100+'0')` form already compiles. Gated on
+	// the element's Go type already matching the element type (so Go accepts it without a
+	// conversion) and on it being an arithmetic expression — a bare ident is already the
+	// narrow type, and a constant literal element gets C#'s implicit constant-expression
+	// conversion. Key-value elements (sparse arrays / maps) are not ast.BinaryExpr/UnaryExpr,
+	// so they never match.
+	if elementType != nil && callContext.keyValueSource == ArraySource {
+		if elemBasic, ok := elementType.Underlying().(*types.Basic); ok && isNarrowIntegerKind(elemBasic.Kind()) {
+			csElemType := convertToCSTypeName(v.getTypeName(elementType, false))
+
+			for i, elt := range compositeLit.Elts {
+				switch elt.(type) {
+				case *ast.BinaryExpr, *ast.UnaryExpr:
+					if eltType := v.getType(elt, false); eltType != nil && types.Identical(eltType, elementType) {
+						if callContext.castArgToType == nil {
+							callContext.castArgToType = make(map[int]string)
+						}
+
+						callContext.castArgToType[i] = csElemType
+					}
+				}
 			}
 		}
 	}
