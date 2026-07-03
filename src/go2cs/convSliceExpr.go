@@ -276,6 +276,41 @@ func typeParamSliceCore(tp *types.TypeParam) *types.Slice {
 	return core
 }
 
+// typeParamIsInteger reports whether every term of the type parameter's constraint type-set has
+// an INTEGER underlying (`~int32 | ~int64` — rand.N's intType, reflect rangeNum's sets). Such a
+// parameter routes Go conversions through golib's runtime-typed ConvertToType/ConvertToUInt64
+// (no C# cast exists to/from a type parameter). Mirrors typeParamSliceCore's walk.
+func typeParamIsInteger(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	found := false
+
+	for i := range iface.NumEmbeddeds() {
+		switch et := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range et.Len() {
+				if basic, ok := et.Term(j).Type().Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+					found = true
+				} else {
+					return false
+				}
+			}
+		default:
+			if basic, ok := et.Underlying().(*types.Basic); ok && basic.Info()&types.IsInteger != 0 {
+				found = true
+			} else {
+				return false
+			}
+		}
+	}
+
+	return found
+}
+
 // typeParamMapCore returns the map CORE type of a type parameter constrained `~map[K]V` (all of
 // the constraint's type-set terms share the map underlying), or nil. Mirrors typeParamSliceCore.
 func typeParamMapCore(tp *types.TypeParam) *types.Map {

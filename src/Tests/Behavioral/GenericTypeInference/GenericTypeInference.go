@@ -186,6 +186,7 @@ func main() {
 	i16, ok16 := bsearchLike([]uint16{2, 4, 8}, uint16(4))
 	i32, ok32 := bsearchLike([]uint32{10, 20, 30}, uint32(25))
 	fmt.Println(i16, ok16, i32, ok32, halve(uint16(6)), halve(uint32(100)))
+	fmt.Println(halveN(int32(10)), halveN(int64(-3)))
 }
 
 // bsearchLike mirrors strconv's bsearch: a ~uint16|~uint32 union whose lifted Integer set
@@ -202,6 +203,17 @@ func bsearchLike[S ~[]E, E ~uint16 | ~uint32](s S, v E) (int, bool) {
 		}
 	}
 	return i, i < n && s[i] == v
+}
+
+// halveN mirrors rand.N[Int intType]: an integer-constrained type parameter compared
+// against an untyped constant (CS0019 - the lifted operator interfaces take Int, not int)
+// and converted to/from a basic integer (CS0030 - no cast exists to/from a type parameter;
+// routed through golib ConvertToType/ConvertToUInt64, the banked E(100) family).
+func halveN[Int ~int32 | ~int64](n Int) Int {
+	if n <= 0 {
+		return n
+	}
+	return Int(uint64(n) / 2)
 }
 
 // halve exercises a shift ON the type parameter itself: emits `v >> (int)(1)`,

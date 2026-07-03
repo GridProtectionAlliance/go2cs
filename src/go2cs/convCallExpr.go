@@ -224,6 +224,35 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion whose TARGET is an integer-constrained TYPE PARAMETER — `Int(x)` in
+		// rand.N[Int intType] (the banked E(100) family; also reflect rangeNum's `T(0)`/`T(v)`)
+		// — cannot be a C# cast (CS0030). Route through golib's runtime-typed ConvertToType<T>.
+		// An argument that is ITSELF a type parameter first drops to uint64 (no overload binds
+		// a bare type parameter).
+		if targetTP, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.TypeParam); ok && typeParamIsInteger(targetTP) {
+			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsInteger(argTP) {
+				return fmt.Sprintf("ConvertToType<%s>(ConvertToUInt64<%s>(%s))", targetTypeName, v.getCSTypeName(argTP), expr)
+			}
+
+			return fmt.Sprintf("ConvertToType<%s>(%s)", targetTypeName, expr)
+		}
+
+		// The MIRROR: a conversion FROM an integer-constrained type parameter TO a basic integer
+		// — `uint64(n)` in rand.N[Int] (CS0030). Drop through golib's ConvertToUInt64 (sign-/
+		// zero-extension through the instantiated type — Go's exact widening), then a plain
+		// numeric cast when the target is not uint64 itself.
+		if targetBasic, ok := v.info.TypeOf(callExpr).(*types.Basic); ok && targetBasic.Info()&types.IsInteger != 0 {
+			if argTP, ok := types.Unalias(v.info.TypeOf(arg)).(*types.TypeParam); ok && typeParamIsInteger(argTP) {
+				inner := fmt.Sprintf("ConvertToUInt64<%s>(%s)", v.getCSTypeName(argTP), expr)
+
+				if targetBasic.Kind() == types.Uint64 {
+					return inner
+				}
+
+				return fmt.Sprintf("(%s)%s", targetTypeName, inner)
+			}
+		}
+
 		// A conversion to a NAMED FUNC type — `metricReader(read)` where `type metricReader
 		// func() uint64` (runtime metrics.go) — targets a C# DELEGATE declaration
 		// (`internal delegate uint64 metricReader();`). Distinct delegate types have no cast

@@ -3991,5 +3991,75 @@ public static class builtin
                 ref ref16);
     }
 
+    #region Type parameter integer conversions
+
+    // Go type-parameter conversions: `T(x)` / `uint64(n)` where a constrained type parameter is
+    // involved cannot be a C# cast (CS0030 - no conversion to/from a type parameter). Runtime-typed
+    // dispatch; the typeof checks JIT-fold to a single branch per instantiation. Signed kinds
+    // sign-extend, unsigned kinds zero-extend - exactly Go integer conversion semantics.
+    public static T ConvertToType<T>(ulong value) where T : new()
+    {
+        if (typeof(T) == typeof(nint)) return (T)(object)unchecked((nint)value);
+        if (typeof(T) == typeof(long)) return (T)(object)unchecked((long)value);
+        if (typeof(T) == typeof(int)) return (T)(object)unchecked((int)value);
+        if (typeof(T) == typeof(short)) return (T)(object)unchecked((short)value);
+        if (typeof(T) == typeof(sbyte)) return (T)(object)unchecked((sbyte)value);
+        if (typeof(T) == typeof(nuint)) return (T)(object)unchecked((nuint)value);
+        if (typeof(T) == typeof(ulong)) return (T)(object)value;
+        if (typeof(T) == typeof(uint)) return (T)(object)unchecked((uint)value);
+        if (typeof(T) == typeof(ushort)) return (T)(object)unchecked((ushort)value);
+        if (typeof(T) == typeof(byte)) return (T)(object)unchecked((byte)value);
+
+        return TypeParamCaster<T>.FromUInt64(value);
+    }
+
+    public static T ConvertToType<T>(long value) where T : new() => ConvertToType<T>(unchecked((ulong)value));
+
+    public static ulong ConvertToUInt64<T>(T value) where T : new()
+    {
+        if (typeof(T) == typeof(nint)) return unchecked((ulong)(long)(nint)(object)value!);
+        if (typeof(T) == typeof(long)) return unchecked((ulong)(long)(object)value!);
+        if (typeof(T) == typeof(int)) return unchecked((ulong)(long)(int)(object)value!);
+        if (typeof(T) == typeof(short)) return unchecked((ulong)(long)(short)(object)value!);
+        if (typeof(T) == typeof(sbyte)) return unchecked((ulong)(long)(sbyte)(object)value!);
+        if (typeof(T) == typeof(nuint)) return (ulong)(nuint)(object)value!;
+        if (typeof(T) == typeof(ulong)) return (ulong)(object)value!;
+        if (typeof(T) == typeof(uint)) return (uint)(object)value!;
+        if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
+        if (typeof(T) == typeof(byte)) return (byte)(object)value!;
+
+        return TypeParamCaster<T>.ToUInt64(value);
+    }
+
+    // Reflection-cached bridge for a [GoType("num:*")] wrapper instantiation: reads/writes the
+    // wrapper through its public Value property and single-argument constructor (both guaranteed
+    // by the generated numeric wrapper shape). Static per-T caches keep the reflection cost to
+    // first use.
+    private static class TypeParamCaster<T>
+    {
+        private static readonly System.Reflection.PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value");
+        private static readonly System.Reflection.ConstructorInfo? s_valueCtor = s_valueProperty is null ? null : typeof(T).GetConstructor(new[] { s_valueProperty.PropertyType });
+
+        public static T FromUInt64(ulong value)
+        {
+            if (s_valueProperty is null || s_valueCtor is null)
+                throw new NotSupportedException($"ConvertToType: no numeric wrapper surface on {typeof(T)}");
+
+            object underlying = System.Convert.ChangeType(unchecked((long)value), s_valueProperty.PropertyType);
+            return (T)s_valueCtor.Invoke(new[] { underlying });
+        }
+
+        public static ulong ToUInt64(T value)
+        {
+            if (s_valueProperty is null)
+                throw new NotSupportedException($"ConvertToUInt64: no numeric wrapper surface on {typeof(T)}");
+
+            object underlying = s_valueProperty.GetValue(value)!;
+            return unchecked((ulong)System.Convert.ToInt64(underlying));
+        }
+    }
+
+    #endregion
+
     #endregion
 }

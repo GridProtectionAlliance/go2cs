@@ -389,6 +389,37 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	identContext.isPointer = (lhsIsPointer || rightIsDerefdPtrParam) && !rhsIsInterfaceType
 	rightOperand := v.convExpr(binaryExpr.Y, []ExprContext{identContext, basicLitContext})
 
+	// A binary op between an integer-constrained TYPE PARAMETER and an untyped CONSTANT —
+	// `n <= 0` in rand.N[Int intType] — leaves the constant as C# `int`, which the lifted
+	// IComparisonOperators<Int, Int, bool> does not accept (CS0019). Go types the constant AS
+	// the type parameter; materialize it via golib ConvertToType<Int>(…).
+	wrapTypeParamConst := func(operandType types.Type, other ast.Expr, otherOperand string) string {
+		tp, ok := types.Unalias(operandType).(*types.TypeParam)
+
+		if !ok || !typeParamIsInteger(tp) {
+			return otherOperand
+		}
+
+		if tv, ok := v.info.Types[other]; ok && tv.Value != nil {
+			if otherType := v.info.TypeOf(other); otherType != nil {
+				if basic, isBasic := otherType.(*types.Basic); types.Identical(otherType, tp) || (isBasic && basic.Info()&types.IsUntyped != 0) {
+					return fmt.Sprintf("ConvertToType<%s>(%s)", v.getCSTypeName(tp), otherOperand)
+				}
+			}
+		}
+
+		return otherOperand
+	}
+
+	// A SHIFT count is typed independently in Go (never as the left operand's type parameter),
+	// and the emission coerces it to int — wrapping it would cast ConvertToType<E>(1) to int
+	// (CS0030). Only non-shift operators take the const materialization.
+	if binaryExpr.Op != token.SHL && binaryExpr.Op != token.SHR {
+		rightOperand = wrapTypeParamConst(lhsType, binaryExpr.Y, rightOperand)
+	}
+
+	leftOperand = wrapTypeParamConst(rhsType, binaryExpr.X, leftOperand)
+
 	if !context.usePattenMatch {
 		// Check for comparisons between interface and pointer types. Go compares an interface
 		// against a pointer by POINTER IDENTITY (the interface holds the *T); the interface value

@@ -200,6 +200,7 @@ internal static void Main() {
     var (i16, ok16) = bsearchLike(new uint16[]{2, 4, 8}.slice(), (uint16)4);
     var (i32, ok32) = bsearchLike(new uint32[]{10, 20, 30}.slice(), (uint32)25);
     fmt.Println(i16, ok16, i32, ok32, halve((uint16)6), halve((uint32)100));
+    fmt.Println(halveN((int32)10), halveN((int64)(-3)));
 }
 
 internal static (nint, bool) bsearchLike<S, E>(S s, E v)
@@ -218,6 +219,15 @@ internal static (nint, bool) bsearchLike<S, E>(S s, E v)
         }
     }
     return (i, i < n && AreEqual(s[i], v));
+}
+
+internal static Int halveN<Int>(Int n)
+    where Int : /* ~int32 | ~int64 */ IAdditionOperators<Int, Int, Int>, ISubtractionOperators<Int, Int, Int>, IMultiplyOperators<Int, Int, Int>, IDivisionOperators<Int, Int, Int>, IModulusOperators<Int, Int, Int>, IBitwiseOperators<Int, Int, Int>, IShiftOperators<Int, int, Int>, IEqualityOperators<Int, Int, bool>, IComparisonOperators<Int, Int, bool>, new()
+{
+    if (n <= ConvertToType<Int>(0)) {
+        return n;
+    }
+    return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);
 }
 
 internal static E halve<E>(E v)
