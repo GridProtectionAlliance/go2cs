@@ -42,10 +42,37 @@ internal static nint mapShadow(nint ns) {
     return m[ns] * 10 + len(m);
 }
 
+internal static nint caseSiblings(nint kind) {
+    nint total = 0;
+    switch (kind) {
+    case 1: {
+        ref var xs = ref heap(new array<node>(3), out var Ꮡxs);
+        ref var i = ref heap<nint>(out var Ꮡi);
+        for (i = 0; i < 2; i++) {
+            xs[i].link(Ꮡxs.at<node>(i + 1));
+        }
+        ref var ys = ref heap(new array<node>(3), out var Ꮡys);
+        ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1);
+        for (iΔ1 = 0; iΔ1 < 2; iΔ1++) {
+            ys[iΔ1].link(Ꮡys.at<node>(iΔ1 + 1));
+        }
+        for (var p = Ꮡxs.at<node>(0); p != nil; p = p.val.next) {
+            total++;
+        }
+        for (var p = Ꮡys.at<node>(0); p != nil; p = p.val.next) {
+            total += 10;
+        }
+        break;
+    }}
+
+    return total;
+}
+
 internal static void Main() {
     fmt.Println(process(5));
     fmt.Println(mapShadow(2));
     fmt.Println(parenIndex());
+    fmt.Println(caseSiblings(1));
 }
 
 } // end main_package

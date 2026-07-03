@@ -50,8 +50,36 @@ func mapShadow(ns int) int {
 	return m[ns]*10 + len(m) // m[param ns]*10 + count
 }
 
+//go:noinline
+func caseSiblings(kind int) int {
+	// The runtime `typesEqual` shape: TWO sibling `for i := …` loops in ONE switch case, BOTH
+	// escaping — each hoists a `ref var i = ref heap(…)` box into the same case block. Without
+	// the per-container force-shadow rename the second box duplicates the first (CS0128); the
+	// first keeps the name, the second renames.
+	total := 0
+	switch kind {
+	case 1:
+		var xs [3]node
+		for i := 0; i < 2; i++ {
+			xs[i].link(&xs[i+1]) // i escapes (element address via pointer receiver)
+		}
+		var ys [3]node
+		for i := 0; i < 2; i++ {
+			ys[i].link(&ys[i+1]) // sibling i escapes too -> second hoisted box, same case block
+		}
+		for p := &xs[0]; p != nil; p = p.next {
+			total++
+		}
+		for p := &ys[0]; p != nil; p = p.next {
+			total += 10
+		}
+	}
+	return total
+}
+
 func main() {
 	fmt.Println(process(5))  // [10 20 0 30 40]
 	fmt.Println(mapShadow(2)) // m[2]=200, m[3]=3000 -> 200*10 + 2 = 2002
 	fmt.Println(parenIndex()) // 9 (write through (*p)[shadow i=1])
+	fmt.Println(caseSiblings(1)) // 33 (3 linked xs + 3 linked ys * 10)
 }

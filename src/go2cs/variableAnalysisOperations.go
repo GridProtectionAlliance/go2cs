@@ -398,38 +398,63 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 		ast.Inspect(funcDecl.Body, collectFunctionLevelDecls)
 	}
 
-	// Second pass: a function-body-level `for i := …` (or range) loop var that ESCAPES to the heap is
-	// emitted as a `ref var i = ref heap<…>(out var Ꮡi)` declaration at the function-body scope — so in
-	// C# it is function-scoped, not loop-scoped. Other same-named for-loop vars in the function then
-	// collide with it (CS0136) — runtime `runqputslow` has three `for i := …` loops, the last of which
-	// escapes (its `batch[i].schedlink.set(…)` takes the element's address). Collect that escaped loop
-	// var as function-level so the shadow-rename pass renames the (non-escaping, loop-scoped) siblings —
-	// the escaped one, being the recorded function-level decl, keeps its name. Gated to (a) an ESCAPING
-	// var (a lone non-escaping loop var is untouched — no churn), (b) a FUNCTION-BODY-level loop (a
-	// nested loop's box is hoisted only to its own block, not the function body), and (c) a name WITHOUT
-	// an existing function-level decl (from the first pass) so a real function-level variable is never
-	// masked.
+	// Second pass: a `for i := …` (or range) loop var that ESCAPES to the heap is emitted as a
+	// `ref var i = ref heap<…>(out var Ꮡi)` declaration hoisted into the ENCLOSING block — so in
+	// C# it is block-scoped, not loop-scoped. Within one container (function body, block, or
+	// switch/select clause), at most ONE hoisted box per name can exist: the FIRST escaped loop
+	// var keeps the name; every OTHER direct-child loop var with the same name in the same
+	// container is force-shadow-renamed. An escaped sibling would otherwise duplicate the hoisted
+	// box decl (CS0128 — runtime `typesEqual`'s tin/tout `for i` pair inside a switch case), and a
+	// non-escaping sibling nests inside the block that now owns the box name (CS0136 — runtime
+	// `runqputslow` has three `for i := …` loops, the last of which escapes). A function-body-level
+	// keeper is additionally recorded as a function-level decl (unless a real one exists, which is
+	// never masked) so non-loop uses elsewhere in the function shadow-rename as before. A name
+	// group with NO escaped var is untouched (loop-scoped in C# too — no churn).
+	forcedShadowVars := make(map[*types.Var]bool)
+
 	if funcDecl.Body != nil {
-		ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
-			if _, ok := node.(*ast.FuncLit); ok {
+		// A range over a slice/array/map (or pointer-to-array) boxes its escaped var PER ITERATION
+		// inside the loop body (Go 1.22 per-iteration semantics — see visitRangeStmt's
+		// deferRangeVarBox), so it never claims a name in the enclosing container; a string/int/
+		// chan/func range writes the box decl before the loop, which does.
+		rangeBoxHoists := func(n *ast.RangeStmt) bool {
+			if t := v.info.TypeOf(n.X); t != nil {
+				switch u := t.Underlying().(type) {
+				case *types.Basic:
+					return u.Info()&(types.IsString|types.IsInteger) != 0
+				case *types.Chan, *types.Signature:
+					_ = u
+					return true
+				}
+
 				return false
 			}
 
-			var loopVars []*ast.Ident
+			return true
+		}
 
-			switch n := node.(type) {
+		loopVarIdents := func(stmt ast.Stmt) ([]*ast.Ident, bool) {
+			// A labeled loop (`Label: for i := …`) hoists exactly like an unlabeled one.
+			if labeled, ok := stmt.(*ast.LabeledStmt); ok {
+				stmt = labeled.Stmt
+			}
+
+			var loopVars []*ast.Ident
+			hoistsToContainer := false
+
+			switch n := stmt.(type) {
 			case *ast.ForStmt:
-				if isFunctionLevelNode(n, funcDecl.Body) {
-					if assign, ok := n.Init.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
-						for _, lhs := range assign.Lhs {
-							if ident, ok := lhs.(*ast.Ident); ok {
-								loopVars = append(loopVars, ident)
-							}
+				if assign, ok := n.Init.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE {
+					for _, lhs := range assign.Lhs {
+						if ident, ok := lhs.(*ast.Ident); ok {
+							loopVars = append(loopVars, ident)
 						}
 					}
 				}
+
+				hoistsToContainer = true
 			case *ast.RangeStmt:
-				if isFunctionLevelNode(n, funcDecl.Body) && n.Tok == token.DEFINE {
+				if n.Tok == token.DEFINE {
 					if key, ok := n.Key.(*ast.Ident); ok {
 						loopVars = append(loopVars, key)
 					}
@@ -437,21 +462,93 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						loopVars = append(loopVars, value)
 					}
 				}
+
+				hoistsToContainer = rangeBoxHoists(n)
 			}
 
-			for _, ident := range loopVars {
-				if isDiscardedVar(ident.Name) {
+			return loopVars, hoistsToContainer
+		}
+
+		processContainer := func(stmts []ast.Stmt, isFuncBody bool) {
+			type loopVarEntry struct {
+				varObj *types.Var
+				pos    token.Pos
+				claims bool
+			}
+
+			groups := make(map[string][]loopVarEntry)
+			var groupOrder []string
+
+			for _, stmt := range stmts {
+				loopVars, hoistsToContainer := loopVarIdents(stmt)
+
+				for _, ident := range loopVars {
+					if isDiscardedVar(ident.Name) {
+						continue
+					}
+
+					varObj, ok := v.info.Defs[ident].(*types.Var)
+
+					if !ok {
+						continue
+					}
+
+					// The var claims a container-level name only when a heap box decl is actually
+					// emitted for it AND hoisted before the loop. Mirrors convertToHeapTypeDecl's
+					// gate: an inherently heap-allocated var (pointer/slice/map/chan/interface/
+					// func) is already a reference and gets no box. (The lambda box-ref exception
+					// there is invisible to this pre-pass — boxRefVars populates during the main
+					// walk — so that exotic keeper shape is not grouped; it was never handled
+					// before either.)
+					claims := hoistsToContainer && v.identEscapesHeap[varObj] &&
+						!isInherentlyHeapAllocatedType(v.info.TypeOf(ident))
+
+					if len(groups[ident.Name]) == 0 {
+						groupOrder = append(groupOrder, ident.Name)
+					}
+
+					groups[ident.Name] = append(groups[ident.Name], loopVarEntry{varObj, ident.Pos(), claims})
+				}
+			}
+
+			for _, name := range groupOrder {
+				entries := groups[name]
+				keeper := -1
+
+				for i, entry := range entries {
+					if entry.claims {
+						keeper = i
+						break
+					}
+				}
+
+				if keeper < 0 {
 					continue
 				}
 
-				if _, exists := functionLevelDecls[ident.Name]; exists {
-					continue
+				for i, entry := range entries {
+					if i != keeper {
+						forcedShadowVars[entry.varObj] = true
+					}
 				}
 
-				if varObj, ok := v.info.Defs[ident].(*types.Var); ok && v.identEscapesHeap[varObj] {
-					functionLevelDecls[ident.Name] = varObj
-					declaredPos[varObj] = ident.Pos()
+				if isFuncBody {
+					if _, exists := functionLevelDecls[name]; !exists {
+						functionLevelDecls[name] = entries[keeper].varObj
+						declaredPos[entries[keeper].varObj] = entries[keeper].pos
+					}
 				}
+			}
+		}
+
+		ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+			switch n := node.(type) {
+			case *ast.BlockStmt:
+				processContainer(n.List, n == funcDecl.Body)
+			case *ast.CaseClause:
+				processContainer(n.Body, false)
+			case *ast.CommClause:
+				processContainer(n.Body, false)
 			}
 
 			return true
@@ -529,6 +626,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// But in C# the built-in is a `using static go.builtin` method, so a same-named
 			// local shadows it and the call `len(...)` binds to the (non-invocable) local
 			// (CS0149 / CS0841). Rename the local so the built-in call stays valid.
+			adjustedName = getShadowedVarName(varName)
+		} else if forcedShadowVars[varObj] {
+			// A loop var sharing its container's hoisted-box name (second pass above) — an escaped
+			// or nested sibling of the keeper. Always renamed, regardless of scope-stack state.
 			adjustedName = getShadowedVarName(varName)
 		} else if funcLevelVar, exists := functionLevelDecls[varName]; exists {
 			needsShadowing := false
