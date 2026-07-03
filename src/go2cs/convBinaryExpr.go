@@ -190,7 +190,7 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 
 	basic, ok := tv.Type.Underlying().(*types.Basic)
 
-	if !ok || basic.Info()&types.IsInteger == 0 || basic.Info()&types.IsUnsigned != 0 {
+	if !ok || basic.Info()&types.IsInteger == 0 {
 		return ""
 	}
 
@@ -200,6 +200,31 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 		return ""
 	}
 
+	if basic.Info()&types.IsUnsigned != 0 {
+		// UNSIGNED targets normally keep the readable operator form: a TYPED unsigned constant
+		// shift emits with a width-cast operand (`(uint64)1 << 40`) from the retype path below,
+		// an int64-range untyped constant subtree is folded by the SIGNED arm when recursion
+		// reaches it (`(281474976710655L)` in runtime mranges), and a named-const reference
+		// renders via its Untyped* wrapper. The one unfixable shape is an untyped constant
+		// OPERATOR subtree whose value exceeds int64 entirely (`1 << 63` nested inside
+		// `(1 << 63) - 1` — go/types lands the uint64 conversion on the outermost node, so the
+		// inner shift stays untyped, no width cast reaches it, and C# computes it in int32:
+		// math/rand Int63n, CS0220). Fold exactly those trees, and only under a plain uint64
+		// (a native-width uintptr/nuint target would need a further cast the fold cannot
+		// safely synthesize — that pre-existing caveat keeps its visible error).
+		if v.getCSTypeName(basic) != "uint64" || !v.constExprHasBeyondInt64UntypedOperatorSubexpr(expr) {
+			return ""
+		}
+
+		u, exact := constant.Uint64Val(val)
+
+		if !exact {
+			return ""
+		}
+
+		return strconv.FormatUint(u, 10) + "UL"
+	}
+
 	i, exact := constant.Int64Val(val)
 
 	if !exact || (i >= math.MinInt32 && i <= math.MaxInt32) {
@@ -207,6 +232,56 @@ func (v *Visitor) overflowingConstLiteral(expr ast.Expr) string {
 	}
 
 	return strconv.FormatInt(i, 10) + "L"
+}
+
+// constExprHasBeyondInt64UntypedOperatorSubexpr reports whether any PROPER subexpression of the
+// constant expression is an UNTYPED constant OPERATOR computation (a BinaryExpr — an inner
+// `1 << 63`) whose value exceeds int64 — the one shape no other mechanism can rescue: the signed
+// fold needs int64 range, the width-cast retype needs a TYPED shift, and named-const references
+// (idents/selectors, any range) render via their Untyped* wrappers. C# would evaluate such a
+// subtree in int32 before any enclosing cast could widen it.
+func (v *Visitor) constExprHasBeyondInt64UntypedOperatorSubexpr(expr ast.Expr) bool {
+	found := false
+
+	ast.Inspect(expr, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		e, ok := n.(*ast.BinaryExpr)
+
+		if !ok || ast.Expr(e) == expr {
+			return true
+		}
+
+		tv, ok := v.info.Types[e]
+
+		if !ok || tv.Value == nil || tv.Type == nil {
+			return true
+		}
+
+		basic, ok := tv.Type.(*types.Basic)
+
+		if !ok || basic.Info()&types.IsUntyped == 0 {
+			return true
+		}
+
+		val := constant.ToInt(tv.Value)
+
+		if val.Kind() != constant.Int {
+			return true
+		}
+
+		// Fits int64 → the signed fold handles it when recursion reaches the subtree.
+		if _, exact := constant.Int64Val(val); exact {
+			return true
+		}
+
+		found = true
+		return false
+	})
+
+	return found
 }
 
 func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatchExprContext, litContext BasicLitContext) string {

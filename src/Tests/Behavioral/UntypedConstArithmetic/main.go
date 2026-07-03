@@ -27,4 +27,13 @@ func main() {
 	fmt.Println(c)          // 1099511627783
 	fmt.Println(d)          // 9223372036854775807
 	fmt.Println(sum(12345*1000000000 + 54321)) // 12345000054321
+
+	// An UNSIGNED-context constant expression with a NESTED untyped shift: go/types lands the
+	// uint64 conversion on the OUTERMOST constant node, so the inner `1<<63` stays untyped and
+	// no width-cast reaches it - C# would compute it in int32 (CS0220). The whole constant
+	// subtree folds to 9223372036854775807UL; the standalone typed shift `(1<<63)%uint64(n)`
+	// keeps its readable width-cast form. Mirrors math/rand's Int63n.
+	n := int64(7)
+	max := int64((1 << 63) - 1 - (1<<63)%uint64(n))
+	fmt.Println(max) // 9223372036854775806
 }

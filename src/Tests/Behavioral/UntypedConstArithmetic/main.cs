@@ -22,6 +22,9 @@ internal static void Main() {
     fmt.Println(c);
     fmt.Println(d);
     fmt.Println(sum(12345000054321L));
+    var n = (int64)7;
+    var max = (int64)(9223372036854775807UL - (((uint64)1 << (int)(63))) % (uint64)n);
+    fmt.Println(max);
 }
 
 } // end main_package
