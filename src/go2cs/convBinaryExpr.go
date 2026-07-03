@@ -261,6 +261,38 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 	lhsIsInterfaceType, _ := isInterface(lhsType)
 	rhsIsInterfaceType, _ := isInterface(rhsType)
 
+	// Go's ONLY legal map comparison is against nil. On a CONSTRAINED map type parameter
+	// (`m == nil` — maps.Clone's nil-preserve guard) no operator exists (CS8761); the
+	// IMap.IsNil property carries the exact check (backing-store null — an allocated empty
+	// map is NOT nil).
+	if isEqualityComparison {
+		nilCompareOperand := func(operand ast.Expr, other ast.Expr) (string, bool) {
+			if ident, ok := other.(*ast.Ident); !ok || ident.Name != "nil" {
+				return "", false
+			}
+
+			if tp, ok := types.Unalias(v.info.TypeOf(operand)).(*types.TypeParam); ok && typeParamMapCore(tp) != nil {
+				return v.convExpr(operand, nil), true
+			}
+
+			return "", false
+		}
+
+		operandExpr, isMapNilCompare := nilCompareOperand(binaryExpr.X, binaryExpr.Y)
+
+		if !isMapNilCompare {
+			operandExpr, isMapNilCompare = nilCompareOperand(binaryExpr.Y, binaryExpr.X)
+		}
+
+		if isMapNilCompare {
+			if binaryExpr.Op == token.NEQ {
+				return fmt.Sprintf("!%s.IsNil", operandExpr)
+			}
+
+			return fmt.Sprintf("%s.IsNil", operandExpr)
+		}
+	}
+
 	rhsIsPointer := isPointer(rhsType)
 	identContext.isPointer = (rhsIsPointer || leftIsDerefdPtrParam) && !lhsIsInterfaceType
 	leftOperand := v.convExpr(binaryExpr.X, []ExprContext{identContext, basicLitContext})

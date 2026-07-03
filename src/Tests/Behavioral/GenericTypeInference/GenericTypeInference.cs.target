@@ -137,6 +137,29 @@ internal static KVSeq<@string, nint> letters() {
     };
 }
 
+public static M CloneOrNil<M, K, V>(M m)
+    where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
+    where K : /* comparable */ new()
+    where V : /* comparable */ new()
+{
+    if (m.IsNil) {
+        return default!;
+    }
+    var @out = make<M>(len(m));
+    foreach (var (k, v) in m) {
+        @out[k] = v;
+    }
+    return @out;
+}
+
+public static void DropKey<M, K, V>(M m, K key)
+    where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
+    where K : /* comparable */ new()
+    where V : /* comparable */ new()
+{
+    delete(m, key);
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
@@ -168,6 +191,12 @@ internal static void Main() {
     foreach (var (k, v) in range<@string, nint>(letters().Invoke)) {
         fmt.Println(k, v);
     }
+    Grades nilG = default!;
+    fmt.Println(CloneOrNil<Grades, @string, nint>(nilG) == default!);
+    var cl = CloneOrNil<Grades, @string, nint>(g1);
+    fmt.Println(len(cl), cl["a"u8]);
+    DropKey<Grades, @string, nint>(g1, (@string)"a");
+    fmt.Println(len(g1));
 }
 
 } // end main_package

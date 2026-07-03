@@ -128,6 +128,24 @@ func letters() KVSeq[string, int] {
 	}
 }
 
+// CloneOrNil mirrors maps.Clone: the nil-preserve guard (`m == nil` — Go's only legal map
+// comparison, IMap.IsNil in C#) plus make/range/index-set through the constraint.
+func CloneOrNil[M ~map[K]V, K, V comparable](m M) M {
+	if m == nil {
+		return nil
+	}
+	out := make(M, len(m))
+	for k, v := range m {
+		out[k] = v
+	}
+	return out
+}
+
+// DropKey mirrors maps.DeleteFunc's constrained delete.
+func DropKey[M ~map[K]V, K, V comparable](m M, key K) {
+	delete(m, key)
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
@@ -159,4 +177,10 @@ func main() {
 	for k, v := range letters() {
 		fmt.Println(k, v)
 	}
+	var nilG Grades
+	fmt.Println(CloneOrNil(nilG) == nil)
+	cl := CloneOrNil(g1)
+	fmt.Println(len(cl), cl["a"])
+	DropKey(g1, "a")
+	fmt.Println(len(g1))
 }

@@ -9,6 +9,8 @@ internal static class IMapTypeTemplate
         
                 public nint Length => ((IMap)m_value).Length;
                 
+                public bool IsNil => ((IMap)m_value).IsNil;
+                
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
                 

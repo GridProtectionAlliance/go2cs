@@ -33,6 +33,12 @@ namespace go;
 public interface IMap
 {
     nint Length { get; }
+
+    /// <summary>
+    /// Gets a flag indicating whether the map is nil — no backing store; an empty but
+    /// allocated map is NOT nil (Go's only legal map comparison is against nil).
+    /// </summary>
+    bool IsNil { get; }
 }
 
 public interface IMap<TKey, TValue> : IMap, IDictionary<TKey, TValue> where TKey : notnull
@@ -195,6 +201,11 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
     {
         return !(a == b);
     }
+
+    /// <summary>
+    /// Gets a flag indicating whether the map is nil — no backing store.
+    /// </summary>
+    public bool IsNil => m_map is null;
 
     // map<T> to nil comparisons
     public static bool operator ==(map<TKey, TValue> map, NilType _)

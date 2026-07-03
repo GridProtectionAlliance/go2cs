@@ -769,6 +769,18 @@ public static class builtin
     }
 
     /// <summary>
+    /// Deletes a key from a map held as a constrained map type parameter (<c>M ~map[K]V</c>,
+    /// boxed to its <see cref="IMap{TKey, TValue}"/> constraint — the maps package's
+    /// DeleteFunc). Key and value types infer from the interface conversion.
+    /// </summary>
+    /// <param name="map">Map view.</param>
+    /// <param name="key">Key to delete.</param>
+    public static void delete<TKey, TValue>(IMap<TKey, TValue> map, TKey key) where TKey : notnull
+    {
+        map.Remove(key);
+    }
+
+    /// <summary>
     /// Zeros all elements of a slice (the Go 1.21 <c>clear</c> built-in). The length and capacity are
     /// unchanged; only the element values are reset to the zero value of T.
     /// </summary>
