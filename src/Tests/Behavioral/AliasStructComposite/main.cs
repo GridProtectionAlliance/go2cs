@@ -32,6 +32,16 @@ internal static uint64 sum(words w) {
     return s;
 }
 
+internal static uint64 rangeSum(words w) {
+    uint64 s = default!;
+    foreach (var (_, e) in w) {
+        s += e;
+    }
+    return s;
+}
+
+internal static words gw = new(4);
+
 internal static void Main() {
     var a = keyed();
     var b = empty();
@@ -39,6 +49,15 @@ internal static void Main() {
     fmt.Println(a.V, a.W, b.V, c.V, c.W);
     var w = new uint64[]{10, 20, 30, 40}.array();
     fmt.Println(sum(w), len(w));
+    var d = new uint64[]{10, 20, 30, 40}.array();
+    fmt.Println(sum(d), rangeSum(d));
+    words z = new(4);
+    for (nint i = 0; i < len(z); i++) {
+        z[i] = (uint64)(i + 1);
+    }
+    fmt.Println(rangeSum(z), z[3]);
+    gw[0] = 99;
+    fmt.Println(gw[0], len(gw));
 }
 
 } // end main_package

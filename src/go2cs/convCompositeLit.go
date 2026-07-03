@@ -121,6 +121,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var namedArrayComposite bool
 	var namedMapComposite bool
 	var namedMapRender string
+	var aliasArrayComposite bool
 
 	// Check composite lit elements against struct fields
 	checkStructFields := func(structType *types.Struct) {
@@ -153,18 +154,29 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		}
 	}
 
-	switch t := exprType.(type) {
+	// Dispatch on the UNALIASED type (*types.Alias, Go 1.22+): an alias to an unnamed array
+	// (fiat's `type p224UntypedFieldElement = [4]uint64`) matched no arm, so the literal kept
+	// C# collection-initializer braces on the alias name (`new words{…}` — CS1061, array<T>
+	// has no Add). An alias renders through its name (an Ident, not an ast.ArrayType), so the
+	// array/slice arms also flag the typeRender swap to the element-array projection form the
+	// unnamed literal uses (`new uint64[]{…}.array()`). An alias to a NAMED type falls into
+	// the *types.Named arm and keeps the alias name (same wrapper struct either way).
+	_, isAliasType := exprType.(*types.Alias)
+
+	switch t := types.Unalias(exprType).(type) {
 	case *types.Array:
 		elementType = t.Elem()
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".array()"
 		definedLen = int(t.Len())
+		aliasArrayComposite = isAliasType
 	case *types.Slice:
 		elementType = t.Elem()
 		callContext.keyValueSource = ArraySource
 		arrayTypeContext.compositeInitializer = true
 		compositeSuffix = ".slice()"
+		aliasArrayComposite = isAliasType
 	case *types.Map:
 		elementType = t.Elem()
 		callContext.keyValueSource = MapSource
@@ -333,6 +345,24 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	contexts := []ExprContext{arrayTypeContext, identContext}
 
 	typeRender := v.convExpr(compositeLit.Type, contexts)
+
+	if aliasArrayComposite {
+		// The alias renders as its Ident name, which cannot take the composite-initializer
+		// bracket rewrite an ast.ArrayType gets in convArrayType — substitute the same forms
+		// the unnamed literal produces: the element-array projection for plain elements
+		// (`new uint64[]{…}` + `.array()`/`.slice()`), SparseArray for non-constant indexed
+		// keys, and the alias's int-length ctor for constant-indexed sparse literals
+		// (`new words(4){[2] = 30}` — the alias IS array<T>, which has that ctor).
+		csElementType := convertToCSTypeName(v.getTypeName(elementType, false))
+
+		if arrayTypeContext.indexedInitializer {
+			typeRender = fmt.Sprintf("golib.SparseArray<%s>", csElementType)
+		} else if arrayTypeContext.compositeInitializer {
+			typeRender = fmt.Sprintf("%s[]", csElementType)
+		} else if arrayTypeContext.maxLength > 0 {
+			typeRender = fmt.Sprintf("%s(%d)", typeRender, arrayTypeContext.maxLength)
+		}
+	}
 
 	if namedArrayComposite {
 		csElementType := convertToCSTypeName(v.getTypeName(elementType, false))

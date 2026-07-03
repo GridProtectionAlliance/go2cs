@@ -31,6 +31,20 @@ func sum(w words) uint64 {
 	return s
 }
 
+// Ranging over an ALIAS-typed array: the range-operand dispatch must resolve through
+// types.Unalias or no arm matches and the WHOLE loop silently emits as a C# comment.
+func rangeSum(w words) uint64 {
+	var s uint64
+	for _, e := range w {
+		s += e
+	}
+	return s
+}
+
+// A package-level var of the alias type must allocate the fixed-size backing array
+// (`new(4)`), not the empty default — element writes in main would NRE otherwise.
+var gw words
+
 func main() {
 	a := keyed()
 	b := empty()
@@ -38,4 +52,19 @@ func main() {
 	fmt.Println(a.V, a.W, b.V, c.V, c.W)
 	w := [4]uint64{10, 20, 30, 40}
 	fmt.Println(sum(w), len(w))
+
+	// Composite literal of the alias type: must emit the unnamed element-array form
+	// (`new uint64[]{…}.array()`), not a C# collection initializer on the alias name.
+	d := words{10, 20, 30, 40}
+	fmt.Println(sum(d), rangeSum(d))
+
+	// Local var of the alias type + element writes: needs the allocated `new(4)` form.
+	var z words
+	for i := 0; i < len(z); i++ {
+		z[i] = uint64(i + 1)
+	}
+	fmt.Println(rangeSum(z), z[3])
+
+	gw[0] = 99
+	fmt.Println(gw[0], len(gw))
 }

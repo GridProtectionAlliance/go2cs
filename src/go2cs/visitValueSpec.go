@@ -170,6 +170,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								} else {
 									v.writeOutput("%s %s = new(%s);", csTypeName, csIDName, arrayLenExpr)
 								}
+							} else if arrayType, ok := types.Unalias(def.Type()).(*types.Array); ok {
+								// A type ALIAS to a fixed-size array (`type words = [4]uint64`,
+								// *types.Alias in Go 1.22+): the spec's type syntax is an Ident, so
+								// the ast.ArrayType check above misses — resolve the length through
+								// types.Unalias or the local gets `default!` with a null backing
+								// array (NRE on first element write).
+								v.writeOutput("%s %s = new(%d);", csTypeName, csIDName, arrayType.Len())
 							} else {
 								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
 							}
@@ -190,6 +197,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								intLength, _ := constant.Int64Val(tv.Value)
 								arrayLenValue = strconv.FormatInt(intLength, 10)
 							}
+						} else if arrayType, ok := types.Unalias(def.Type()).(*types.Array); ok {
+							// Alias-typed global (`var gw words` where `type words = [4]uint64`):
+							// same types.Unalias resolution as the local path above.
+							arrayLenValue = strconv.FormatInt(arrayType.Len(), 10)
 						}
 
 						if v.isAddressedGlobal(ident) {

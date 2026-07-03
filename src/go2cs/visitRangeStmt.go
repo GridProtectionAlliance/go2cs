@@ -91,10 +91,15 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 	var ptrDeref string
 
 	rangeExpr := v.convExpr(rangeStmt.X, nil)
-	rangeType := v.getExprType(rangeStmt.X)
+
+	// Resolve a type ALIAS (*types.Alias, Go 1.22+ — fiat's `type p224UntypedFieldElement =
+	// [4]uint64`) to the type it aliases: the arm dispatch below type-switches on the concrete
+	// type, and an unhandled alias fell through every arm — silently emitting the ENTIRE loop
+	// as a C# comment. Applied again after the pointer unwrap (the pointee may itself alias).
+	rangeType := types.Unalias(v.getExprType(rangeStmt.X))
 
 	if ptrType, ok := rangeType.(*types.Pointer); ok {
-		rangeType = ptrType.Elem()
+		rangeType = types.Unalias(ptrType.Elem())
 		ptrDeref = ".Value"
 
 		// A pointer parameter is implicitly dereferenced to a value local in the body
