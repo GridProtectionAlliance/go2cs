@@ -23,6 +23,7 @@
 
 //#define DEBUG_GENERATOR
 
+using System;
 using System.Collections.Generic;
 using go2cs.Templates.ReceiverMethod;
 using Microsoft.CodeAnalysis;
@@ -58,6 +59,12 @@ public class RecvGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AttributeFinder<MethodDeclarationSyntax> { HasAttributes: true } attributeFinder)
             return;
 
+        // Roslyn hintNames are compared case-INSENSITIVELY, and Go routinely pairs an exported
+        // method with an unexported case-twin on the same receiver (math/rand's Int31n/int31n on
+        // *Rand) — a raw name-based hintName then throws, suppressing ALL ж-overloads for the
+        // package (every box.Method() call fails CS1929).
+        HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
+
         foreach ((MethodDeclarationSyntax methodSyntax, List<AttributeSyntax> attributes) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = methodSyntax.SyntaxTree;
@@ -91,7 +98,7 @@ public class RecvGenerator : ISourceGenerator
                 .Generate();
 
                 // Add the source code to the compilation
-                context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs"), generatedSource);
+                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{identifier}.{method.Parameters[0].type}.g.cs")), generatedSource);
             }
         }
     }

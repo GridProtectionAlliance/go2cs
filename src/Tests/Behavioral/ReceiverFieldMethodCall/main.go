@@ -14,6 +14,12 @@ func bump(p *int32, delta int32) int32 {
 }
 
 func (c *Counter) Add(delta int32) int32 { return bump(&c.n, delta) }
+
+// add is a case-twin of Add: Go routinely pairs an exported method with an unexported
+// case-variant on the same receiver (math/rand's Int31n/int31n). Roslyn generator hintNames
+// are case-INSENSITIVE, so the RecvGenerator must disambiguate or it crashes (CS8785) and
+// suppresses every zh-overload in the package.
+func (c *Counter) add(delta int32) int32 { return bump(&c.n, delta) }
 func (c *Counter) Set(v int32)           { *(&c.n) = v }
 func (c *Counter) Get() int32            { return c.n } // a plain value method (not capture-mode)
 
@@ -60,4 +66,5 @@ func main() {
 	fmt.Println("AddViaValue 2:", fl.AddViaValue(2))     // 27
 	fmt.Println("ReadViaValue:", fl.ReadViaValue())      // 27
 	fmt.Println("local value:", applyTwice(fl.c.Add, 1)) // 29
+	fmt.Println("case twin:", fl.c.add(1))               // 30
 }

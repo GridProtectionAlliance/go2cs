@@ -21,6 +21,12 @@ public static int32 Add(this ж<Counter> Ꮡc, int32 delta) {
     return bump(Ꮡc.of(Counter.Ꮡn), delta);
 }
 
+internal static int32 add(this ж<Counter> Ꮡc, int32 delta) {
+    ref var c = ref Ꮡc.Value;
+
+    return bump(Ꮡc.of(Counter.Ꮡn), delta);
+}
+
 public static void Set(this ж<Counter> Ꮡc, int32 v) {
     ref var c = ref Ꮡc.Value;
 
@@ -102,6 +108,7 @@ internal static void Main() {
     fmt.Println("AddViaValue 2:", Ꮡfl.AddViaValue(2));
     fmt.Println("ReadViaValue:", Ꮡfl.ReadViaValue());
     fmt.Println("local value:", applyTwice(Ꮡfl.of(Flag.Ꮡc).Add, 1));
+    fmt.Println("case twin:", Ꮡfl.of(Flag.Ꮡc).add(1));
 }
 
 } // end main_package

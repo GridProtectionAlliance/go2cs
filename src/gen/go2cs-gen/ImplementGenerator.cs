@@ -60,6 +60,11 @@ public class ImplementGenerator : ISourceGenerator
         if (context.SyntaxContextReceiver is not AssemblyAttributeFinder { HasAttributes: true } attributeFinder)
             return;
 
+        // Roslyn hintNames are case-insensitive; Go type names differing only by case are legal
+        // and common, so disambiguate like the other generators (a collision throws and suppresses
+        // ALL interface implementations for the package).
+        HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
@@ -128,7 +133,7 @@ public class ImplementGenerator : ISourceGenerator
             .Generate();
 
             // Add the source code to the compilation
-            context.AddSource(GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}.g.cs"), generatedSource);
+            context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}.g.cs")), generatedSource);
         }
     }
 
