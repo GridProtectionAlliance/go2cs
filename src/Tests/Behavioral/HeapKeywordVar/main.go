@@ -9,6 +9,22 @@ func set(p *int) { *p = 42 }
 // for the local and a valid box identifier (`Ꮡbase`, not the invalid `Ꮡ@base`) consistently at
 // the declaration and every `&base` reference. The runtime package hits this (signal_windows
 // `base`, cgocall `as`).
+// decimal is an UNEXPORTED type whose name is a C# keyword (strconv's shape): the emitted
+// struct is internal `@decimal`, and its exported-looking methods must CLAMP to internal -
+// the '@' escape previously read as exported in getAccess, emitting a public method with an
+// internal receiver parameter type (CS0051).
+type decimal struct {
+	d int
+}
+
+func (a *decimal) String() string {
+	return fmt.Sprint(a.d)
+}
+
+func (a *decimal) Assign(v int) {
+	a.d = v
+}
+
 func main() {
 	var base int
 	var as int
@@ -20,4 +36,8 @@ func main() {
 
 	base += 1
 	fmt.Println(base, as, event)
+
+	var dec decimal
+	dec.Assign(7)
+	fmt.Println(dec.String())
 }

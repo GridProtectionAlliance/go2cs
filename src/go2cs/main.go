@@ -1816,6 +1816,13 @@ func getAccess(name string) string {
 	// whose unexported parameter types are less accessible (CS0051).
 	name = strings.TrimPrefix(name, ShadowVarMarker)
 
+	// Strip the C# keyword escape so accessibility tracks the Go name's case: an @-escaped
+	// unexported type (`decimal` -> `@decimal`, strconv) otherwise reads as exported ('@' is
+	// neither lowercase nor '_'), defeating the receiver clamp - a public method with an
+	// internal receiver parameter type (CS0051 x7). Only C# keywords are escaped and all are
+	// lowercase, so the stripped name is always judged internal, never wrongly public.
+	name = strings.TrimPrefix(name, "@")
+
 	// If name starts with a lowercase letter, scope is "internal"
 	ch, _ := utf8.DecodeRuneInString(name)
 
