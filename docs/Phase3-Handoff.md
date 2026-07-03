@@ -15,6 +15,18 @@
 
 ## Where things stand (2026-07-03)
 
+- **bidirule 25 -> 0 (`7d1fa9b8e`): the vendor-namespace family is CLEARED — WAVE-12 = 73
+  errors / 13 packages.** GOROOT-vendored import paths now resolve to their on-disk form
+  (resolveGorootVendoredPath: dotted-domain pre-filter + GOROOT/src/vendor stat) inside
+  convertImportPathToNamespace — the single point all using/namespace text flows through —
+  plus visitImportSpec currentImportPath (queue/alias loader, gated on importing file under
+  GOROOT) and visitFile's canonical-alias dedup checking both key forms (CS1537). No
+  behavioral test possible (corpus can't place packages under GOROOT/src/vendor; byte-identical
+  transpile proves zero behavioral surface). NEXT per census: io 12 + syscall 10 (Δ-alias
+  qualifier DOUBLING — `sync_package.sync` CS0426; getTypeName de-dup guard misses Δ-renamed
+  aliases; ONE family, unblocks transform/bidi/dnsmessage dependents), then strconv 7, path 7,
+  edwards25519 13 + fiat 4, dnsmessage tail 9, singles.
+
 - **dnsmessage 42 -> 9 (`b2db75239`): the biggest census family (addressof-to-interface-LHS 33)
   is CLEARED — WAVE-11 = 98 errors / 14 packages.** The &-RHS pointer-box assign trigger in
   visitAssignStmt is now gated on the LHS not being an interface (the adapter IS the interface
