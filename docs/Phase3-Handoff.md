@@ -15,6 +15,46 @@
 
 ## Where things stand (2026-07-03)
 
+- **TEN-ROOT BATCH LANDED (recon109 wave) — strconv, syscall, io, weak ALL AT ZERO; zero club = 13.**
+  The batch (in commit order): `5e739e712` FuncType-in-expression-position — reflect/type.go was
+  being SILENTLY DROPPED (per-file recover() ate the convExpr panic as a warning; 218 CS0246
+  downstream) + conversion-to-func-type misread as tuple call in `:=` (declaration dropped);
+  `3eefe8e7c` lifted Integer shift constraint → BCL `IShiftOperators<T, int, T>` (strconv bsearch
+  CS0315); `2176706c6` syscall 5-fix family (all-typeless-return exec wrapper gets explicit
+  `func<T>` type arg CS8030; deferred untyped-nil arg casts to param type CS0123; named-uintptr
+  beyond-int32 const unchecked cast CS0266; named-uintptr untyped-const cast targets the NAMED
+  type CS0034; array-param element address boxes a storage-sharing copy CS0103) + nil-safe entry
+  alias widened to ANY nil-compared pointer param; `b1e862a8f` golib channel RUNTIME bug —
+  non-blocking receive returned true on an OPEN empty channel (every default-select poll took the
+  receive case; SelectStatement poll probe caught it); `1806c5b5f` io family (GoImplement
+  inheritance-prune mutated the DERIVED set in place, emptying it — intersect on a copy; index-LHS
+  interface-element recording; empty select clause `break;`; terminating blocking select
+  `return default!;`); `1cf2cd541` array-backed defined-type reinterprets share storage via
+  `Ꮡ((box).Value.Value)` + NEW writtenUnderlyingOperations.go pre-pass (TypeSpec written-RHS map;
+  Named.Underlying() loses it); `f8e6a5783` variadic `...*T` box fan-out to ALL trailing args;
+  `8ca1a8fad` package-level `var a, b = f()` → ValueTuple component reads (once-evaluated temp for
+  multi-non-blank); `f4f1b986b` global-using alias RHS renders csproj-alias numerics as C# keywords
+  (`go.array<ulong>`, fiat CS0246); `05af43b83` range-var ref-bound by pointer-receiver method →
+  mutable-copy (dnsmessage CS1657, measures NEXT wave).
+  **WAVE (recon109 overlay, per-package Rebuild):** io 0, strconv 0, syscall 0, weak 0,
+  reflectlite 0, metrics 0, path 0, plugin 0 — plus the established club (runtime, iter, sync,
+  slices, maps, godebug, math/rand, sort). **NEW FRONTIER (mostly fresh unmasks):**
+  bytes 21 + strings 21 + bufio 42 + os 34 + fmt 37 — dominated by ONE family: **escaped-rune
+  composite KEYS render `'\t'` as `'\'`** (bytes.cs:413 asciiSpace `[256]uint8{'\t': 1, …}` —
+  CS1012 syntax cascade; the sparse-array key path loses the escape — NEXT ROOT, likely -100+);
+  fiat 20 (ALIAS-to-array reinterprets — `(*p224UntypedFieldElement)(&tmp)` where the target is an
+  alias; the writtenRHS map deliberately skips aliases, sibling family of the edwards fix);
+  edwards25519 1 residual; dnsmessage 5 (fix committed, unmeasured); reflect 3 (GENERATOR:
+  CS0057 implicit-conv accessibility ΔKind/flag + CS0102/CS0111 makeFuncImpl embedded-field name
+  collision); time 1 (GENERATOR CS0557 duplicate conversion, `type Key syscall.Handle` named-over-
+  named-uintptr); netip 3; rand/v2 2 (spec FIX 4 E(100) + REFLECT-c convCallExpr Instances-sourced
+  type args — still unapplied). **Latent gaps flagged (chips/tasks):** alias-to-array emission
+  family — range over an alias-array SILENTLY EMITS AS A COMMENT, composite literal takes
+  Add-form, `var` decl misses allocation (task_82a09b18); golib fmt `% 4d` space-flag renders
+  literally (task_76e1e42f); named-uintptr const conversion at expression position elides
+  (`handle(0)` → bare `0`); `handle(expr).method()` drops parens; in-function `var x, y = f()`
+  tuple decl still broken (no corpus hit).
+
 - **value→box argument family CLEARED (`4745bfc0d`) — WAVE-18 = 70 / 13.** Sixth direct-ж
   promotion trigger: receiver passed as a pointer ARGUMENT (`trim(a)` in `func (a *decimal)`);
   the cross-package embed hop adapts to direct-ж targets (binds the box, no `.Value` —
