@@ -15,6 +15,19 @@
 
 ## Where things stand (2026-07-03)
 
+- **The 131-error Errno family is CLEARED (`9e5fe0990`) — WAVE-14 = 86 errors / 13 packages.**
+  Two coupled sparse-array defects: composite CONSTANT keys now fold to their integer value
+  (mixed named/underlying operand operators were ambiguous, CS0034; symbolic ident keys keep
+  their form — zero churn), uintptr-backed ident keys split the two-user-defined-conversion
+  cast; and golib SparseArray was enumerating with gaps SKIPPED where Go's sparse composite is
+  DENSE (max-index+1, zero-valued holes) — Count/CopyTo/GetEnumerator now gap-fill (a RUNTIME
+  correctness bug: mis-positioned elements + short slices, caught by the new behavioral shape's
+  output comparison). Guard: SparseArrayNamedIntKey extension (errno-over-uintptr, run-verified).
+  syscall residual 30: error-vs-Errno ==/!= CS0019 ×12 (NEXT — Errno implements error via
+  GoImplement; compare emits raw operator, needs the AreEqual route like iface-vs-iface),
+  DLL-import method-group 'wrong return type' ×8, + misc. Then strconv 7 / path 7 /
+  edwards25519 13 + fiat 4 / dnsmessage tail 9 / io 5 / singles.
+
 - **Δ-alias qualifier doubling CLEARED (`a73da0c3c`) — and it was MASKING: WAVE-13 = 217 errors,
   most of it syscall's newly-visible latent surface.** getTypeName now strips the plain package
   qualifier before prepending a Δ-renamed alias (`ж<Δsync.sync.Pool>` → `ж<Δsync.Pool>`; io 12 +
