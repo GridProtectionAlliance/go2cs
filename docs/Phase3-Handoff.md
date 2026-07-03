@@ -15,6 +15,36 @@
 
 ## Where things stand (2026-07-03)
 
+- **math/rand 28 → 6 (`118a38a3e`): Roslyn hintNames are case-INSENSITIVE — Go's exported/
+  unexported case-twins (`Int31n`/`int31n` on `*Rand`) crashed RecvGenerator (CS8785), which
+  suppressed EVERY ж-overload in the package (26 CS1929 cascade).** Both RecvGenerator and
+  ImplementGenerator now route hintNames through `GetUniqueHintName` (TypeGenerator/
+  ImplicitConvGenerator already did). Guarded by ReceiverFieldMethodCall's `Add`/`add` case-twin.
+  Suite 217/217; zero club re-verified (runtime/iter/sync/slices/maps/godebug all 0).
+  **math/rand's remaining 6 = three roots:**
+  1. **Direct-ж interface members (.g.cs CS1929 ×2) — DESIGN ITEM, likely design-WITH-user.**
+     `lockedSource`'s `Int63`/`Seed` are direct-ж (`this ж<lockedSource>` — Lock on a Mutex
+     field), so InterfaceImplTemplate's `this.Int63()` can't bind, and NO ref twin can exist
+     (a ref twin would box a copy of the Mutex — liveness bugs). Options analyzed:
+     (a) **C#-interface-box model**: emit the struct VALUE at `*T → iface` cast sites (C#'s
+     boxing makes the interface box THE object; mutations through interface calls persist) —
+     but the interface box and any ж<T> box are then DISTINCT objects (aliasing divergence when
+     Go uses both paths), and direct-ж members still can't be called from `this`.
+     (b) **Generated adapter class**: `sealed class lockedSourceᴵSource(ж<lockedSource> box) :
+     Source { long Source.Int63() => box.Int63(); }` — EXACT Go aliasing (interface holds the
+     shared box), but type asserts (`src._<ж<rngSource>>(ᐧ)`) must learn to unwrap adapters.
+     (c) golib `ж<T>` implementing interfaces — impossible cross-assembly.
+  2. **Interface casts in composite-literal fields (CS1503 ×2 + CS0023)**: `new Rand(src:
+     Ꮡ(new runtimeSource(nil)), …)` — Go `&Rand{src: &runtimeSource{}}` stores `*runtimeSource`
+     into a `Source` field; the direct-call-arg path already emits the value form
+     (`New(new lockedSource())` line 355 compiles — C# boxes into the interface) but
+     composite-literal FIELD values keep the `Ꮡ(...)` box (CS1503); plus a `~` deref applied to
+     a runtimeSource value (CS0023, nearby). Mechanical-ish converter fix; NOTE it commits to
+     model (a) semantics for stateless sources — fine here, but see root 1 design.
+  3. **nint const overflow (CS0220 rand.cs:141 + CS8778 warnings rng.cs:21)**: int64-range
+     constants (`4181792142133755926`) typed as nint in emission — likely an untyped-const
+     context defaulting to nint where the Go type is int64. Separate mechanical root.
+
 - **internal/godebug IS AT ZERO (8 → 0, two roots, `75cb9fdd8` + `6cb858e2d`) — the os/time/net
   gate is OPEN.** Root 1: `packageQualifiedNameRegex` didn't carry the `@` keyword escape, so the
   root-qualifier spliced `go.` INSIDE `@internal.bisect_package.Writer` → `@go.internal…` (a parse
