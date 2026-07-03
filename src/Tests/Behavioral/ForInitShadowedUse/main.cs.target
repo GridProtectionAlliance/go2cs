@@ -14,7 +14,7 @@ partial class main_package {
 
 internal static nint shadowedForInit() {
     var b = Ꮡ(new counter(n: 100));
-    nint total = b.val.n;
+    nint total = b.Value.n;
     {
         var bΔ1 = Ꮡ(new counter(n: 5));
         for ((nint i, nint x) = (0, bΔ1.start()); i < 3; i++) {

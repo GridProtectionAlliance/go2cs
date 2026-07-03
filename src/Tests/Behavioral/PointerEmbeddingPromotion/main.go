@@ -16,7 +16,7 @@ type holder struct {
 
 // Two-level TRANSITIVE through a pointer embed: top embeds mid (value) which embeds *leaf (pointer).
 // Go promotes leaf's methods all the way up to top. The generator must recurse through the nested
-// pointer embed `*leaf` — its field type is `ж<leaf>`, whose simple name carries a `.val` suffix, so
+// pointer embed `*leaf` — its field type is `ж<leaf>`, whose simple name carries a `.Value` suffix, so
 // the embed-marker comparison must deref first. Mirrors runtime's
 // `traceExpWriter`→`traceWriter`→`*traceBuf` (the `varint`/`byte` methods).
 type mid struct {

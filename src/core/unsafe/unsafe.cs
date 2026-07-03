@@ -212,9 +212,9 @@ public class Pointer : ж<uintptr> {
     {
     }
 
-    public Pointer this[int index] => val + (uintptr)index;
+    public Pointer this[int index] => Value + (uintptr)index;
 
-    public Pointer this[nint index] => val + (uintptr)index;
+    public Pointer this[nint index] => Value + (uintptr)index;
 
     public Pointer this[Range range]
     {
@@ -223,7 +223,7 @@ public class Pointer : ж<uintptr> {
             if (range.End.Value >= 0)
                 throw new IndexOutOfRangeException($"End of range not supported for '{nameof(Pointer)}' indexing -- length is not known");
 
-            return val + (uintptr)range.Start.Value;
+            return Value + (uintptr)range.Start.Value;
         }
     }
 
@@ -258,7 +258,7 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator uintptr(Pointer value) {
-        return value.val;
+        return value.Value;
     }
 
     public static implicit operator Pointer(void* value) {
@@ -266,7 +266,7 @@ public class Pointer : ж<uintptr> {
     }
 
     public static implicit operator void*(Pointer value) {
-        return (void*)value.val;
+        return (void*)value.Value;
     }
 
     public static Pointer FromRef<T>(ref T type)
@@ -539,7 +539,7 @@ public static slice<T> Slice<T, TLen>(ж<T> ptr, TLen len) where TLen : System.N
         throw panic("ptr is nil and len is not zero");
     }
 
-    fixed (T* pointer = &ptr.val)
+    fixed (T* pointer = &ptr.Value)
         return new slice<T>(new ReadOnlySpan<T>(pointer, n));
 }
 
@@ -588,7 +588,7 @@ public static @string String<TLen>(ж<byte> ptr, TLen len) where TLen : System.N
         throw panic("ptr is nil and len is not zero");
     }
 
-    fixed (byte* pointer = &ptr.val)
+    fixed (byte* pointer = &ptr.Value)
         return new @string(new ReadOnlySpan<byte>(pointer, n));
 }
 

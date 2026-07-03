@@ -56,8 +56,8 @@ static class main_package
         ref var c = ref heap(make_channel<int>(), out var c__ptr);
         ref var quit = ref heap(make_channel<int>(), out var quit__ptr);
         go_(() => {
-            ref var c = ref c__ptr.val;
-            ref var quit = ref quit__ptr.val;
+            ref var c = ref c__ptr.Value;
+            ref var quit = ref quit__ptr.Value;
 
             for (int i = 0; i < 10; i++) {
                 fmt.Println(c.Receive());

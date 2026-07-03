@@ -48,7 +48,7 @@ static partial class main
     }
 
     public static void ScaleFunc(ptr<Vertex> v__ptr, float64 f) {
-        ref var v = ref v__ptr.val;
+        ref var v = ref v__ptr.Value;
         v.X = v.X * f;
         v.Y = v.Y * f;
     }
@@ -60,7 +60,7 @@ static partial class main
         ScaleFunc(v__ptr, 10);
 
         var p = addr(new Vertex(4, 3));
-        p.val.Scale(3);
+        p.Value.Scale(3);
         ScaleFunc(p, 8);
 
         fmt.Println(v, p);

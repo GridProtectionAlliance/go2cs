@@ -42,7 +42,7 @@ public static unsafe partial class main_package
 
     private static ref int Test()
     {
-        ref int c = ref Ꮡ(12).val;
+        ref int c = ref Ꮡ(12).Value;
 
         return ref c;
     }
@@ -88,7 +88,7 @@ public static unsafe partial class main_package
 
         Console.WriteLine("Ref int out1 = {0}", value);
 
-        value = Main9().val;
+        value = Main9().Value;
 
         Console.WriteLine("Ref int out2 = {0}", value);
         Console.WriteLine();
@@ -119,7 +119,7 @@ public static unsafe partial class main_package
 
     private static ref NumError syntaxError(@string fn, @string str)
     {
-        return ref new ж<NumError>(new NumError{Func = fn, Num = str, Err = null}).val;
+        return ref new ж<NumError>(new NumError{Func = fn, Num = str, Err = null}).Value;
     }
 
     public struct ColorList
@@ -177,11 +177,11 @@ public static unsafe partial class main_package
         // MyError structure promotion
         private readonly ж<MyError> m_MyErrorRef;
 
-        private ref MyError MyError_val => ref m_MyErrorRef.val;
+        private ref MyError MyError_val => ref m_MyErrorRef.Value;
 
-        public ref DateTime When => ref m_MyErrorRef.val.When;
+        public ref DateTime When => ref m_MyErrorRef.Value.When;
 
-        public ref string What => ref m_MyErrorRef.val.What;            
+        public ref string What => ref m_MyErrorRef.Value.What;            
 
         [DebuggerStepperBoundary]
         static MyCustomError()
@@ -277,7 +277,7 @@ public static unsafe partial class main_package
 
         fmt f = new fmt();
 
-        val(ref f.buf.val);
+        val(ref f.buf.Value);
 
         f.clearFlags();
 
@@ -547,25 +547,25 @@ public static unsafe partial class main_package
     {
         ж<int> i = new ж<int>(42), j = new ж<int>(2701);
 
-        ref int p = ref i.val;
+        ref int p = ref i.Value;
         Console.WriteLine(p);
         p = 21;
         Console.WriteLine(i);
 
-        p = ref j.val;
+        p = ref j.Value;
         p = p / 37;
         Console.WriteLine(j);
 
         ж<Vertex> v = new ж<Vertex>(new Vertex { X = 1, Y = 2 });
-        ref Vertex pv = ref v.val;
+        ref Vertex pv = ref v.Value;
 
         pv.X = 12;
 
         pv.X = 99;
 
-        PrintVertex(ref v.val);
+        PrintVertex(ref v.Value);
 
-        return ref i.val;
+        return ref i.Value;
     }
 
     private static ж<int> Main9()

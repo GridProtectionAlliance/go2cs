@@ -1,8 +1,8 @@
 // IncDecPointerField guards `++`/`--` applied to a FIELD reached through a pointer
 // LOCAL. Increment/decrement reads and writes its operand, so it must be assignable —
 // a field accessed through the value-returning `~` dereference is an rvalue
-// (`(~mp).ncgocall++` is CS1059). The converter emits the assignable `.val` form,
-// `mp.val.ncgocall++`. Mirrors runtime's `(~mp).ncgocall++` in cgocall.
+// (`(~mp).ncgocall++` is CS1059). The converter emits the assignable `.Value` form,
+// `mp.Value.ncgocall++`. Mirrors runtime's `(~mp).ncgocall++` in cgocall.
 package main
 
 import "fmt"

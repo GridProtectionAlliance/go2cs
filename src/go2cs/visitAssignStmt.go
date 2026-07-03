@@ -14,7 +14,7 @@ import (
 // rhsPointerCopyContext returns an IdentContext that forces the pointer (box) form when the
 // assignment RHS is a plain pointer-typed identifier — a Go pointer copy (`r := p` / `r = p`
 // where p is *T). A deref'd pointer parameter then emits its box `Ꮡp` so the target is a
-// ж<T> (the rest of the converter already treats such a target as a pointer via `.val`/`~`).
+// ж<T> (the rest of the converter already treats such a target as a pointer via `.Value`/`~`).
 // A pointer *local* holds the pointer directly, so convIdent returns it unchanged. Returns
 // nil when rhs is not a plain non-nil pointer identifier (callers append nothing).
 func (v *Visitor) rhsPointerCopyContext(rhs ast.Expr) ExprContext {
@@ -627,7 +627,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			// Reassigning the direct-ж receiver to a pointer value (`r = r.prev`, a ring walk):
 			// emit the box `Ꮡr` on the LHS so the pointer-reassignment path below repoints the box
-			// and re-aliases the value var (`Ꮡr = r.prev; r = ref Ꮡr.val;`). The deref'd value var
+			// and re-aliases the value var (`Ꮡr = r.prev; r = ref Ꮡr.Value;`). The deref'd value var
 			// alone cannot be repointed at a different node.
 			if elemIsReassigned && v.exprIsCurrentDirectBoxReceiver(lhsExprs[i]) && rhsElemIsPointer(i) {
 				context.isPointer = true
@@ -635,9 +635,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			// Reassigning a deref'd pointer PARAMETER to a new pointer value (`bits = addb(bits, n)`,
 			// a *byte memory walk in the runtime). Every named pointer param is deref-aliased to a
-			// value var (`ref var bits = ref Ꮡbits.val`), which cannot be repointed; emit the box
+			// value var (`ref var bits = ref Ꮡbits.Value`), which cannot be repointed; emit the box
 			// `Ꮡbits` on the LHS so the pointer-reassignment path below repoints it and re-aliases the
-			// value var (`Ꮡbits = addb(Ꮡbits, n); bits = ref Ꮡbits.val;`). The RHS already references
+			// value var (`Ꮡbits = addb(Ꮡbits, n); bits = ref Ꮡbits.Value;`). The RHS already references
 			// the box form. (The `&`-RHS case above is a subset; setting isPointer twice is harmless.)
 			if elemIsReassigned && v.identIsParameter(ident) && v.isPointer(ident) && rhsElemIsPointer(i) {
 				context.isPointer = true
@@ -687,7 +687,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			// `r = p` where p is *T): emit its pointer form so the target is a ж<T>, not a
 			// copy of the pointed-to value. For a deref'd pointer parameter this yields the
 			// box `Ꮡp` (without this it emits the value alias `p`, and the target — which the
-			// rest of the converter treats as a pointer via `.val`/`~` — fails to compile).
+			// rest of the converter treats as a pointer via `.Value`/`~` — fails to compile).
 			// A pointer *local* already holds the pointer directly, so convIdent returns it
 			// unchanged. Skip interface targets (handled by the interface-cast path).
 			if i < lhsLen && !lhsTypeIsInterface[i] {
@@ -818,28 +818,28 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		if len(leftExprs) > 0 && operator == " = " {
 			// Sorted for deterministic output: leftExprs is a map-backed set, so a multi-assign
 			// re-aliasing several boxes (`(Ꮡx, Ꮡy) = (Ꮡy, Ꮡx)`) emitted its independent
-			// `n = ref Ꮡn.val` refreshers in an order that flipped run-to-run.
+			// `n = ref Ꮡn.Value` refreshers in an order that flipped run-to-run.
 			sortedLeftExprs := leftExprs.Keys()
 			sort.Strings(sortedLeftExprs)
 
 			for _, leftExpr := range sortedLeftExprs {
 				// Only a bare pointer-box reassignment (`Ꮡp = …`) needs the deref ref-local
-				// re-aliased (`p = ref Ꮡp.val`). A write *through* the box (`Ꮡp.val = …`, emitted
+				// re-aliased (`p = ref Ꮡp.Value`). A write *through* the box (`Ꮡp.Value = …`, emitted
 				// for `*p = …` inside a lambda — see convStarExpr) has member access and must not
 				// trigger this; it is a plain value assignment.
 				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") {
 					// This is a special case for pointer reassignments which should be extended
-					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.val`
+					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.Value`
 					boxBaseName := leftExpr[len(AddressPrefix):]
 					derefExpr := getSanitizedIdentifier(boxBaseName)
 
 					// A pointer PARAMETER walked to a nil terminator (`for p != nil { …; p = p.next }`)
 					// repoints its box to the nil terminator on the final step; re-aliasing through the
-					// plain `.val` getter would then throw a nil-pointer dereference (the loop guard has
+					// plain `.Value` getter would then throw a nil-pointer dereference (the loop guard has
 					// not yet re-checked). Use the nil-safe accessor so the re-alias yields a ref to
 					// default(T) that is never read while the box is nil. Other reassigned pointer boxes
-					// (non-nil-compared params, receivers, locals — never nil here) keep `.val`.
-					derefAccessor := "val"
+					// (non-nil-compared params, receivers, locals — never nil here) keep `.Value`.
+					derefAccessor := "Value"
 
 					if v.nilSafePtrParamNames.Contains(boxBaseName) {
 						derefAccessor = NilSafeDerefAccessor

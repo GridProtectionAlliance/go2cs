@@ -5,11 +5,11 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static @unsafe.Pointer indirectKey(@unsafe.Pointer k) {
-    return ((ж<@unsafe.Pointer>)(uintptr)(k)).val;
+    return ((ж<@unsafe.Pointer>)(uintptr)(k)).Value;
 }
 
 internal static void store(ж<@unsafe.Pointer> Ꮡdst, @unsafe.Pointer val) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
     dst = val;
 }
@@ -23,9 +23,9 @@ internal static (Action, bool) funcAt(@unsafe.Pointer p) {
 }
 
 internal static uint64 zeroPair(@unsafe.Pointer x) {
-    ((ж<array<uint64>>)(uintptr)(x)).val[0] = 0;
-    ((ж<array<uint64>>)(uintptr)(x)).val[1] = 0;
-    return ((ж<array<uint64>>)(uintptr)(x)).val[0];
+    ((ж<array<uint64>>)(uintptr)(x)).Value[0] = 0;
+    ((ж<array<uint64>>)(uintptr)(x)).Value[1] = 0;
+    return ((ж<array<uint64>>)(uintptr)(x)).Value[0];
 }
 
 [GoType("num:uintptr")] partial struct linkaddr;
@@ -36,7 +36,7 @@ internal static uintptr throughPointer(linkaddr v) {
 
 internal static void Main() {
     ref var backing = ref heap(new uintptr(), out var Ꮡbacking);
-    @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).val);
+    @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).Value);
     writeBarrier(p, p);
     _ = (uintptr)indirectKey(p);
     Action fslot = default!;

@@ -32,7 +32,7 @@ internal static (ж<nint>, ж<nint>) shadow() {
     ref var y = ref heap<nint>(out var Ꮡy);
     y = 200;
     var (px, py) = (Ꮡx, Ꮡy);
-    if (px.val > 0) {
+    if (px.Value > 0) {
         var (pxΔ1, pyΔ1) = pair();
         return (pxΔ1, pyΔ1);
     }
@@ -41,9 +41,9 @@ internal static (ж<nint>, ж<nint>) shadow() {
 
 internal static void Main() {
     var (a, b) = step(5);
-    fmt.Println(a.val, b);
+    fmt.Println(a.Value, b);
     var (c, d) = shadow();
-    fmt.Println(c.val, d.val);
+    fmt.Println(c.Value, d.Value);
 }
 
 } // end main_package

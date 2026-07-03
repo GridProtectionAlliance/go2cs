@@ -349,7 +349,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 				// An unnamed (`func(*T)`) or blank (`_`) pointer parameter is never referenced in the
 				// body, so it gets no deref alias; it is emitted in the signature with a synthetic name
-				// and no box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.val;`.
+				// and no box (`Ꮡ`) convention. Emitting the deref would produce `ref var  = ref Ꮡ.Value;`.
 				if param.Name() == "" || param.Name() == "_" {
 					continue
 				}
@@ -357,8 +357,8 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				// A pointer param walked to a nil terminator (`for p != nil { …; p = p.next }`) derefs
 				// through the nil-safe accessor so a nil argument (or, after the in-loop re-alias, a
 				// nil box) yields a ref to default(T) instead of throwing — the ref is never read while
-				// the box is nil (the `Ꮡp != nil` guard excludes it). Other pointer params keep `.val`.
-				derefAccessor := "val"
+				// the box is nil (the `Ꮡp != nil` guard excludes it). Other pointer params keep `.Value`.
+				derefAccessor := "Value"
 
 				if v.nilSafePtrParamNames.Contains(param.Name()) {
 					derefAccessor = NilSafeDerefAccessor
@@ -429,7 +429,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 					if directBoxReceiver {
 						// Direct-ж: emit the box itself (`ж<Box<T>> Ꮡb`) as the receiver. The
-						// deref `ref var b = ref Ꮡb.val;` is emitted above so the body's value
+						// deref `ref var b = ref Ꮡb.Value;` is emitted above so the body's value
 						// references still read as `b`, while `&b.field` uses the box `Ꮡb`.
 						updatedSignature.WriteString(v.getCSTypeName(param.Type()))
 						updatedSignature.WriteRune(' ')
@@ -624,7 +624,7 @@ func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 // nil-terminated-walk signature (`for p != nil { …; p = p.next }`). Only a reassigned param's box
 // can become nil mid-function (the reassignment repoints it to the terminator), so only such a
 // param needs the nil-safe deref/re-alias accessor; a param that is merely compared (never
-// repointed) keeps the plain `.val` form (zero golden churn). The set is reset each function.
+// repointed) keeps the plain `.Value` form (zero golden churn). The set is reset each function.
 func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 	if v.nilSafePtrParamNames == nil {
 		v.nilSafePtrParamNames = HashSet[string]{}
@@ -672,7 +672,7 @@ func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 }
 
 // isDerefdPointerParamIdent reports whether ident resolves to a non-blank pointer (`*T`) PARAMETER
-// — one that is emitted as a deref alias `ref var p = ref Ꮡp.val` over its box `Ꮡp`. A pointer
+// — one that is emitted as a deref alias `ref var p = ref Ꮡp.Value` over its box `Ꮡp`. A pointer
 // LOCAL (which already holds the box directly) and an unsafe.Pointer param are excluded. Used both
 // to drive the box (`Ꮡp`) form in `==`/`!=` comparisons and to gate the nil-safe deref accessor.
 func (v *Visitor) isDerefdPointerParamIdent(ident *ast.Ident) bool {

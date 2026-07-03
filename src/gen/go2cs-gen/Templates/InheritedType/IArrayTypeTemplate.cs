@@ -7,35 +7,35 @@ internal static class IArrayTypeTemplate
     public static string Generate(string structName, string typeName, string targetTypeName, string? targetTypeSize) =>
         $$"""
                 
-                public {{targetTypeName}}[] Source => val;
+                public {{targetTypeName}}[] Source => Value;
                 
-                public nint Length => val.Length;
+                public nint Length => Value.Length;
                 
-                Array IArray.Source => ((IArray)val).Source!;
+                Array IArray.Source => ((IArray)Value).Source!;
                 
                 object? IArray.this[nint index]
                 {
-                    get => ((IArray)val)[index];
-                    set => ((IArray)val)[index] = value;
+                    get => ((IArray)Value)[index];
+                    set => ((IArray)Value)[index] = value;
                 }
                     
-                public ref {{targetTypeName}} this[nint index] => ref val[index];
+                public ref {{targetTypeName}} this[nint index] => ref Value[index];
             
-                public ref {{targetTypeName}} this[int index] => ref val[(nint)index];
+                public ref {{targetTypeName}} this[int index] => ref Value[(nint)index];
             
-                public ref {{targetTypeName}} this[ulong index] => ref val[(nint)index];
+                public ref {{targetTypeName}} this[ulong index] => ref Value[(nint)index];
                 
                 public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 
-                public Span<{{targetTypeName}}> ToSpan() => val.ToSpan();
+                public Span<{{targetTypeName}}> ToSpan() => Value.ToSpan();
                 
-                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => val.GetEnumerator();
+                public IEnumerator<(nint, {{targetTypeName}})> GetEnumerator() => Value.GetEnumerator();
                 
-                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)val).GetEnumerator();
+                IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Value).GetEnumerator();
                 
-                public bool Equals(IArray<{{targetTypeName}}>? other) => val.Equals(other);
+                public bool Equals(IArray<{{targetTypeName}}>? other) => Value.Equals(other);
                 
-                public object Clone() => ((ICloneable)val).Clone();
+                public object Clone() => ((ICloneable)Value).Clone();
                 
                 public static {{structName}} Make(nint p1 = 0, nint p2 = -1) => new {{structName}}();
         """;

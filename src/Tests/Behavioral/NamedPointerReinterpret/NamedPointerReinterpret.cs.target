@@ -20,7 +20,7 @@ internal static ж<@base> makeBase() {
 internal static void Main() {
     var pb = makeBase();
     var pv = Ꮡ((view)(~pb));
-    var bb = ((@base)(pv.val));
+    var bb = ((@base)(pv.Value));
     fmt.Println(bb.a, bb.b);
 }
 

@@ -17,7 +17,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// panics on a null held value, so these derefs read through `ValueSlot` (identical real
 	// slot, no nil check — reads and writes both persist); a deref producing a VALUE keeps the
 	// strict `val` (a nil `*node` deref must panic, as in Go).
-	derefAccessor := ".val"
+	derefAccessor := ".Value"
 
 	if resultType := v.info.TypeOf(starExpr); resultType != nil && isInherentlyHeapAllocatedType(resultType) {
 		derefAccessor = ".ValueSlot"
@@ -28,8 +28,8 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// reached through the parameter): `getIdentifier` digs through the selector to the param root, but
 	// the operand `p.field` is a distinct lvalue that still needs its own dereference. Letting it take
 	// the shortcut returned the field pointer un-dereferenced (`gp.ancestors` instead of
-	// `gp.ancestors.val`), e.g. `for _, a := range *gp.ancestors` → a Span/slice mismatch (CS8130). A
-	// selector operand falls through to the selector handling below, which derefs via `.val`.
+	// `gp.ancestors.Value`), e.g. `for _, a := range *gp.ancestors` → a Span/slice mismatch (CS8130). A
+	// selector operand falls through to the selector handling below, which derefs via `.Value`.
 	_, starXIsSelector := starExpr.X.(*ast.SelectorExpr)
 
 	if ident != nil && v.identIsParameter(ident) && !starXIsSelector {
@@ -41,9 +41,9 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		}
 
 		// A pointer parameter is dereferenced in the function body via a `ref var p = ref
-		// Ꮡp.val` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
+		// Ꮡp.Value` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
 		// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
-		// the heap box parameter directly (`Ꮡp.val`), which is a capturable reference type.
+		// the heap box parameter directly (`Ꮡp.Value`), which is a capturable reference type.
 		if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
 			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + derefAccessor
 		}
@@ -57,10 +57,10 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		baseExpr := v.convExpr(starExpr.X, nil)
 
 		// One star is ONE deref: `*i.pprev` on a `**special` field yields a `*special` —
-		// `i.pprev.val`. The old multi-level arm added an EXTRA `.val` for pointer depth > 1,
+		// `i.pprev.Value`. The old multi-level arm added an EXTRA `.Value` for pointer depth > 1,
 		// double-dereferencing every single-star of a double-pointer field (runtime mheap.go's
 		// specialsIter walk — CS0029 in both assignment directions). A genuine `**pp` is two
-		// nested StarExprs, each contributing its own `.val`.
+		// nested StarExprs, each contributing its own `.Value`.
 		if _, ok := v.getIdentType(selectorExpr.Sel).(*types.Pointer); !ok {
 			// Selector is not a pointer, assume this is a pointer cast operation
 			return fmt.Sprintf("%s<%s>", PointerPrefix, baseExpr)
@@ -72,7 +72,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// In a parenthesis, we are applying a pointer cast operation — but only when the starred
 	// operand denotes a TYPE (`(*int)(p)`, `(*MyType)(p)`). When it is a VALUE, e.g. a function
 	// pointer variable `newInc`, then `(*newInc)(args)` is a dereference-then-call of that pointer
-	// (`newInc.val(args)`), not a cast; let it fall through to the deref path below.
+	// (`newInc.Value(args)`), not a cast; let it fall through to the deref path below.
 	starXIsType := false
 	if tv, ok := v.info.Types[starExpr.X]; ok && tv.IsType() {
 		starXIsType = true
@@ -81,7 +81,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// When the starred operand denotes a TYPE, `*T` is the pointer TYPE `ж<T>` — in a `(*T)(p)`
 	// cast (inParenExpr) and equally in any other type position, e.g. a type assertion `x.(*T)`
 	// (which renders the asserted type via convStarExpr). A non-paren `*type` would otherwise fall
-	// through to the value-deref path and emit `T.val` (CS0426: `val` is not a member type of `T`).
+	// through to the value-deref path and emit `T.Value` (CS0426: `val` is not a member type of `T`).
 	if starXIsType {
 		// Check if the pointer target type is a struct or pointer to a struct
 		if structType, exprType := v.extractStructType(starExpr); structType != nil && !v.liftedTypeExists(structType) {
@@ -130,8 +130,8 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	}
 
 	// A deref whose operand is a type CONVERSION renders as a C# cast, and postfix binds tighter
-	// than a cast — a naked `.val` re-binds onto the cast's inner operand: runtime panic.go's
-	// `return *(*func())(add(…)), true` emitted `(ж<Action>)(uintptr)(add(…)).val` (the `.val`
+	// than a cast — a naked `.Value` re-binds onto the cast's inner operand: runtime panic.go's
+	// `return *(*func())(add(…)), true` emitted `(ж<Action>)(uintptr)(add(…)).Value` (the `.Value`
 	// reads the inner @unsafe.Pointer → CS0029 ж<Action>→Action in the tuple). The cast-deref
 	// branch above misses it because a FUNC-type (or other non-ident) starred inner has no
 	// identifier. Wrap the whole cast before dereferencing.

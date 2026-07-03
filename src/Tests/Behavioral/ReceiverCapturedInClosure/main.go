@@ -4,8 +4,8 @@ import "fmt"
 
 // A pointer-receiver method whose receiver is referenced inside a function literal (a closure) must
 // be emitted direct-ж — the box passed AS the receiver param (`this ж<counter> Ꮡc`) — because the
-// deref'd ref-local alias (`ref var c = ref Ꮡc.val`) cannot be captured by a C# lambda (CS8175).
-// Inside the closure the receiver routes through the box: a value use becomes `Ꮡc.val.n`, a field
+// deref'd ref-local alias (`ref var c = ref Ꮡc.Value`) cannot be captured by a C# lambda (CS8175).
+// Inside the closure the receiver routes through the box: a value use becomes `Ꮡc.Value.n`, a field
 // address `Ꮡc.of(counter.Ꮡn)`. Mirrors runtime's `func (p *_panic) nextFrame() { systemstack(
 // func(){ … p.lr … }) }`. Guards the bodyCapturesReceiverInClosure direct-ж trigger.
 

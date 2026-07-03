@@ -1,11 +1,11 @@
 // Regression test: an `unsafe.Pointer` parameter whose name is a C# keyword.
 //
 // When an identifier of type `unsafe.Pointer` is used in a pointer context (e.g. a
-// comparison operand), the converter emits the box-value deref form `name.val`. It built
+// comparison operand), the converter emits the box-value deref form `name.Value`. It built
 // that string from the raw Go name, so a parameter named `new` — a reserved C# keyword —
-// came out as `new.val`, which C# parses as the `new` operator (CS1526). This is exactly
+// came out as `new.Value`, which C# parses as the `new` operator (CS1526). This is exactly
 // how internal/runtime/atomic's `CompareAndSwap(old, new unsafe.Pointer)` failed to compile.
-// The fix sanitizes the name first, so it is emitted as `@new.val`.
+// The fix sanitizes the name first, so it is emitted as `@new.Value`.
 package main
 
 import (
@@ -14,7 +14,7 @@ import (
 )
 
 // `new` and `type` are C# keywords; both are valid Go identifiers used here as
-// unsafe.Pointer parameters in comparison contexts (which trigger the `.val` deref).
+// unsafe.Pointer parameters in comparison contexts (which trigger the `.Value` deref).
 func sameAs(old, new unsafe.Pointer) bool {
 	return new == old
 }

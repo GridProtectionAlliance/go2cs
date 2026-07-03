@@ -14,7 +14,7 @@ internal static nint total(params Span<ж<box>> bsʗp) {
 
     nint sum = 0;
     foreach (var (_, b) in bs) {
-        sum += b.val.v;
+        sum += b.Value.v;
     }
     return sum;
 }

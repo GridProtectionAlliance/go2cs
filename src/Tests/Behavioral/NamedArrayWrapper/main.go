@@ -9,7 +9,7 @@
 // cannot reach the slice/slice overload from a wrapper). All values verified against Go,
 // including write-through via the (*pageBits)(b) reinterpret and post-copy independence.
 // Adversarial additions (all found by a skeptic on the first cut): the pointer-receiver fill loop
-// on a VIRGIN wrapper (`b.val[i] = v` emission — val must route through the ensuring view or lazy
+// on a VIRGIN wrapper (`b.Value[i] = v` emission — val must route through the ensuring view or lazy
 // allocation lands on a temp and every write is lost), and copy() with a NONZERO-Low source or
 // destination (both indexers are slice-relative — adding Low double-offsets).
 //
@@ -97,7 +97,7 @@ func main() {
 
 	// POINTER-TO-NAMED-ARRAY access (runtime's `m.cgoCallers *cgoCallers` family): index
 	// read/write, len, and slice all auto-deref in Go; the converter routes them through the
-	// wrapper's backing (`h.trace.val[0]`, `len(h.trace.val)`, `(~h.trace).val[..2]`) — the
+	// wrapper's backing (`h.trace.Value[0]`, `len(h.trace.Value)`, `(~h.trace).Value[..2]`) — the
 	// backing array<T> is a shared view, so writes through the pointer land on the original.
 	var c callers
 	h := holder{trace: &c}

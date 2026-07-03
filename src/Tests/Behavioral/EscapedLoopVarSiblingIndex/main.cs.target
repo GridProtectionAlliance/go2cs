@@ -9,7 +9,7 @@ partial class main_package {
 }
 
 [GoRecv] internal static void link(this ref node n, ж<node> Ꮡm) {
-    ref var m = ref Ꮡm.val;
+    ref var m = ref Ꮡm.Value;
 
     n.next = Ꮡm;
 }
@@ -56,10 +56,10 @@ internal static nint caseSiblings(nint kind) {
         for (iΔ1 = 0; iΔ1 < 2; iΔ1++) {
             ys[iΔ1].link(Ꮡys.at<node>(iΔ1 + 1));
         }
-        for (var p = Ꮡxs.at<node>(0); p != nil; p = p.val.next) {
+        for (var p = Ꮡxs.at<node>(0); p != nil; p = p.Value.next) {
             total++;
         }
-        for (var p = Ꮡys.at<node>(0); p != nil; p = p.val.next) {
+        for (var p = Ꮡys.at<node>(0); p != nil; p = p.Value.next) {
             total += 10;
         }
         break;

@@ -235,8 +235,8 @@ public class TypeGenerator : ISourceGenerator
                         // A defined type whose underlying is a STRUCT (`type winlibcall libcall`) exposes
                         // the underlying struct's fields in Go (`w.fn`). Resolve the underlying struct
                         // (same-package or a source-referenced package) and forward its members as get/set
-                        // properties over a MUTABLE m_value, so `box.val.fn = x` (a write through a
-                        // ж<T>.val ref) persists. Non-struct underlyings (a named type over an interface or
+                        // properties over a MUTABLE m_value, so `box.Value.fn = x` (a write through a
+                        // ж<T>.Value ref) persists. Non-struct underlyings (a named type over an interface or
                         // another named type) resolve to null and keep the plain wrapper (no churn).
                         List<(string typeName, string memberName, bool isReferenceType, bool isProperty)>? forwardedMembers = null;
                         string? underlyingArrayElem = null;

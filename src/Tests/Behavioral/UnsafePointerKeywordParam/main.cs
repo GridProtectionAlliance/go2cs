@@ -6,7 +6,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static bool sameAs(@unsafe.Pointer old, @unsafe.Pointer @new) {
-    return @new.val == old.val;
+    return @new.Value == old.Value;
 }
 
 internal static bool notNil(@unsafe.Pointer @new) {

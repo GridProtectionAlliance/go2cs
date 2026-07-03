@@ -10,16 +10,16 @@ partial class main_package {
 }
 
 internal static Func<nint, nint> scaler(ж<config> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
-    return (nint x) => x * Ꮡc.val.size + Ꮡc.val.tag;
+    return (nint x) => x * Ꮡc.Value.size + Ꮡc.Value.tag;
 }
 
 internal static Action mutate(ж<config> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return () => {
-        Ꮡc.val.size++;
+        Ꮡc.Value.size++;
     };
 }
 

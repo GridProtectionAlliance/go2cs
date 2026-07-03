@@ -10,13 +10,13 @@ partial class main_package {
 }
 
 internal static ж<node> advance(ж<node> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     return n.next;
 }
 
 internal static ж<node> self(ж<node> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     return Ꮡn;
 }

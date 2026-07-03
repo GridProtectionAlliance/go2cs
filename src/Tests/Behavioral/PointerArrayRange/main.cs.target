@@ -5,7 +5,7 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void swap(ж<array<uint64>> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     foreach (var (i, x) in buf) {
         buf[i] = (uint64)((x >> (int)(32)) | (x << (int)(32)));

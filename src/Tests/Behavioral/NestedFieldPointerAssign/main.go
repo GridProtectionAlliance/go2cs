@@ -1,5 +1,5 @@
 // NestedFieldPointerAssign guards assignment to a NESTED field through a pointer
-// LOCAL variable. The base of such an assignment must use the assignable `.val`
+// LOCAL variable. The base of such an assignment must use the assignable `.Value`
 // dereference throughout the chain, not the value-returning `~` operator: a
 // `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable or
 // property, so it cannot be assigned to (CS0131). Mirrors runtime/cgocall.go's

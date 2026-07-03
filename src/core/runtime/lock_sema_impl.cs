@@ -38,7 +38,7 @@ internal static bool mutexContended(ж<mutex> Ꮡl) {
 }
 
 internal static void lock2(ж<mutex> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     // Speculative grab, then adaptive test-test-and-set spin (the Volatile.Read pre-test keeps
     // contended pollers off exclusive cache-line acquisition; SpinWait escalates spin → yield →
@@ -56,7 +56,7 @@ internal static void lock2(ж<mutex> Ꮡl) {
 
 // We might not be holding a p in this code.
 internal static void unlock2(ж<mutex> Ꮡl) {
-    ref var l = ref Ꮡl.val;
+    ref var l = ref Ꮡl.Value;
 
     // No waiter chain to dequeue — release the slot; a spinning lock2 observes it.
     Interlocked.Exchange(ref l.key.Value, 0);
@@ -64,7 +64,7 @@ internal static void unlock2(ж<mutex> Ꮡl) {
 
 // One-time notifications.
 internal static void notewakeup(ж<note> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     uintptr v = Interlocked.Exchange(ref n.key.Value, locked);
 
@@ -77,7 +77,7 @@ internal static void notewakeup(ж<note> Ꮡn) {
 }
 
 internal static void notesleep(ж<note> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     SpinWait spinner = default;
 
@@ -102,7 +102,7 @@ internal static void notesleep(ж<note> Ꮡn) {
 // (as Go's semasleep(-1)); millisecond granularity stands in for Go's nanosecond budget
 // (the note is a coarse rendezvous — parking precision is not part of its contract).
 internal static bool notetsleep_internal(ж<note> Ꮡn, int64 ns, ж<g> Ꮡgp, int64 deadline) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     if (ns < 0) {
         notesleep(Ꮡn);

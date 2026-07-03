@@ -45,7 +45,7 @@ static class main_package
         ref var c = ref heap(make_channel<int>(10), out var c__ptr);
         go_(() =>
         {
-            ref var c = ref c__ptr.val;
+            ref var c = ref c__ptr.Value;
             fibonacci(cap(c), c);
         });
         foreach (int i in c) {

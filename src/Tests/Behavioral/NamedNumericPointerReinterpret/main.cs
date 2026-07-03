@@ -5,13 +5,13 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static uint64 load64(ж<uint64> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     return p;
 }
 
 internal static uint32 load32(ж<uint32> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     return p;
 }
@@ -29,7 +29,7 @@ internal static uint32 load32(ж<uint32> Ꮡp) {
 }
 
 internal static uint64 peekVia(ж<lfstack> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     return load64(Ꮡ((uint64)(p)));
 }

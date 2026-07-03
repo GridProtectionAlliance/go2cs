@@ -28,7 +28,7 @@ internal class ReceiverMethodTemplate : TemplateBase
             [{{GeneratedCodeAttribute}}]
             {{TargetScope}} static {{Method.ReturnType}} {{Method.Name}}{{Method.GetGenericSignature()}}({{DeclParams}}){{Method.GetWhereConstraints()}}
             {
-                ref var {{ReceiverParamName}} = ref {{ReceiverBoxName}}.val;
+                ref var {{ReceiverParamName}} = ref {{ReceiverBoxName}}.Value;
                 {{ReturnStatement}}{{ReceiverParamName}}.{{Method.Name}}({{CallParams}});
             }
         """;

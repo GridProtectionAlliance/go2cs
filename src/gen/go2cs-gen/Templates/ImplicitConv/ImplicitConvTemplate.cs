@@ -59,7 +59,7 @@ internal class ImplicitConvTemplate : TemplateBase
 
                 // Self-boxing (`T -> ж<T>`): the source value IS the boxed element type, so box it
                 // directly. Reconstructing it field-by-field would wrongly deref pointer fields
-                // (`src.f?.val`) whose target ctor parameter is itself a `ж<…>` pointer field — the
+                // (`src.f?.Value`) whose target ctor parameter is itself a `ж<…>` pointer field — the
                 // value cannot bind the pointer parameter (CS1503). `Ꮡ(src)` boxes a copy of the
                 // whole struct, identical in effect but without the per-field deref.
                 if (innerType == RHTypeName)
@@ -74,11 +74,11 @@ internal class ImplicitConvTemplate : TemplateBase
 
     private string ParamList => string.IsNullOrWhiteSpace(ValueType) ? 
         string.Join(", ", StructMembers.Select(GetParamExpr)) : 
-        $"({ValueType})src.val";
+        $"({ValueType})src.Value";
 
     private string GetParamExpr((string, string) member)
     {
         (string typeName, string memberName) = member;
-        return Indirect && PointerExpr.IsMatch(typeName) ? $"src.{memberName}?.val ?? default!" : $"src.{memberName}";
+        return Indirect && PointerExpr.IsMatch(typeName) ? $"src.{memberName}?.Value ?? default!" : $"src.{memberName}";
     }
 }

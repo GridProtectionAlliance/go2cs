@@ -185,8 +185,8 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 	// Check if the unary expression is a pointer dereference
 	if unaryExpr.Op == token.AND {
 		// Inside a lambda, a captured heap-boxed local is referenced through its box (the ref-local
-		// alias `ref var m = ref Ꮡm.val` can't be captured — CS8175). Build address forms from the
-		// box name directly, bypassing the value-rewrite that renders the box as `Ꮡm.val`.
+		// alias `ref var m = ref Ꮡm.Value` can't be captured — CS8175). Build address forms from the
+		// box name directly, bypassing the value-rewrite that renders the box as `Ꮡm.Value`.
 		if boxForm, ok := v.lambdaBoxRefAddressForm(unaryExpr); ok {
 			return boxForm
 		}
@@ -277,7 +277,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			}
 
 			// A DEREF base — `&(*pprev).alllink` where pprev is `**m` (runtime proc.go's allm
-			// walk): the star of a double pointer renders `pprev.val`, itself the ж<m> box, and
+			// walk): the star of a double pointer renders `pprev.Value`, itself the ж<m> box, and
 			// field-refs through `.of(…)` cleanly (postfix on postfix).
 			baseIsStar := false
 			{
@@ -300,11 +300,11 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
 
-						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.val`),
+						// A pointer *parameter* is deref'd to a value alias (`ref var s = ref Ꮡs.Value`),
 						// so its box is `Ꮡs` — field-ref through the box. A pointer *local* or a
 						// pointer *field* already holds/yields the box directly, so it is used as-is.
 						// The box keeps the RAW parameter name: a collision/shadow-renamed param `p`→`Δp`
-						// is `ref var Δp = ref Ꮡp.val`, so its box is `Ꮡp`, not `ᏑΔp` (CS0103). boxBaseName
+						// is `ref var Δp = ref Ꮡp.Value`, so its box is `Ꮡp`, not `ᏑΔp` (CS0103). boxBaseName
 						// yields the raw name when shadow-renamed and the sanitized name otherwise (no churn).
 						if baseIdent, ok := base.(*ast.Ident); ok && v.identIsParameter(baseIdent) {
 							structExpr = AddressPrefix + v.boxBaseName(baseIdent)

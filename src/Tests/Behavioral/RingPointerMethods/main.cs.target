@@ -10,7 +10,7 @@ partial class main_package {
 }
 
 internal static ж<Ring> init(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     r.next = Ꮡr;
     r.prev = Ꮡr;
@@ -18,7 +18,7 @@ internal static ж<Ring> init(this ж<Ring> Ꮡr) {
 }
 
 public static ж<Ring> Next(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     if (r.next == nil) {
         return Ꮡr.init();
@@ -27,7 +27,7 @@ public static ж<Ring> Next(this ж<Ring> Ꮡr) {
 }
 
 public static ж<Ring> Prev(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     if (r.next == nil) {
         return Ꮡr.init();
@@ -36,27 +36,27 @@ public static ж<Ring> Prev(this ж<Ring> Ꮡr) {
 }
 
 public static ж<Ring> Move(this ж<Ring> Ꮡr, nint n) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     if (r.next == nil) {
         return Ꮡr.init();
     }
     for (; n < 0; n++) {
-        Ꮡr = r.prev; r = ref Ꮡr.val;
+        Ꮡr = r.prev; r = ref Ꮡr.Value;
     }
     for (; n > 0; n--) {
-        Ꮡr = r.next; r = ref Ꮡr.val;
+        Ꮡr = r.next; r = ref Ꮡr.Value;
     }
     return Ꮡr;
 }
 
 public static nint Len(this ж<Ring> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     nint n = 0;
     if (r != nil) {
         n = 1;
-        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.val.next) {
+        for (var p = Ꮡr.Next(); p != Ꮡr; p = p.Value.next) {
             n++;
         }
     }
@@ -73,10 +73,10 @@ internal static ж<Ring> makeRing(nint count) {
     ref var i = ref heap<nint>(out var Ꮡi);
     for (i = 1; i < count; i++) {
         var e = Ꮡ(new Ring(Value: i));
-        e.val.prev = p;
-        e.val.next = p.val.next;
-        p.val.next.val.prev = e;
-        p.val.next = e;
+        e.Value.prev = p;
+        e.Value.next = p.Value.next;
+        p.Value.next.Value.prev = e;
+        p.Value.next = e;
         p = e;
     }
     return r;

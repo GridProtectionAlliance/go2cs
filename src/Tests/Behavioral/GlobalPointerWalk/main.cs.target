@@ -10,11 +10,11 @@ partial class main_package {
 }
 
 internal static nint sum(this ж<node> Ꮡn) {
-    ref var n = ref Ꮡn.val;
+    ref var n = ref Ꮡn.Value;
 
     nint total = 0;
-    for (var p = Ꮡn; p != nil; p = p.val.next) {
-        total += p.val.val;
+    for (var p = Ꮡn; p != nil; p = p.Value.next) {
+        total += p.Value.val;
     }
     return total;
 }
@@ -28,14 +28,14 @@ internal static void insert(nint v) {
     while (pp.ValueSlot != nil && (~(pp.ValueSlot)).val < v) {
         pp = (pp.ValueSlot).of(node.Ꮡnext);
     }
-    n.val.next = pp.ValueSlot;
+    n.Value.next = pp.ValueSlot;
     pp.ValueSlot = n;
 }
 
 internal static bool remove(nint v) {
     for (var pp = Ꮡhead; pp.ValueSlot != nil; pp = (pp.ValueSlot).of(node.Ꮡnext)) {
         if ((~(pp.ValueSlot)).val == v) {
-            pp.ValueSlot = (pp.ValueSlot).val.next;
+            pp.ValueSlot = (pp.ValueSlot).Value.next;
             return true;
         }
     }
@@ -44,7 +44,7 @@ internal static bool remove(nint v) {
 
 internal static @string list() {
     @string s = ""u8;
-    for (var p = head; p != nil; p = p.val.next) {
+    for (var p = head; p != nil; p = p.Value.next) {
         s += fmt.Sprintf("%d "u8, (~p).val);
     }
     return s;

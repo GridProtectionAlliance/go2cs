@@ -45,7 +45,7 @@ public static partial class strings_package
     }
 
     public static (nint n, error err) Read(this ж<Reader> r, in slice<byte> b) =>
-        Read(ref r.val, b);
+        Read(ref r.Value, b);
 
     // Size returns the original length of the underlying string.
     // Size is the number of bytes available for reading via ReadAt.

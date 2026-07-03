@@ -26,7 +26,7 @@ static class main_package
             // 'i' escapes stack in defer below, so we use a pointer
             var i__ptr = addr(i);
             defer(() => {
-                ref var i = ref i__ptr.val;
+                ref var i = ref i__ptr.Value;
                 fmt.Println(i);
             });
         }

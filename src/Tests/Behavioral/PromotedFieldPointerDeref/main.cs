@@ -20,19 +20,19 @@ partial class main_package {
 
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
-    a.val.tag = 7;
+    a.Value.tag = 7;
     var b = Ꮡ(new node(val: 2));
-    b.val.tag = 9;
-    a.val.next = b;
+    b.Value.tag = 9;
+    a.Value.next = b;
     list l = default!;
     l.head = a;
     var x = l.head;
     while (x != nil) {
         fmt.Println((~x).val, (~x).tag);
-        x = x.val.next;
+        x = x.Value.next;
     }
     var y = l.head;
-    y.val.tag = 99;
+    y.Value.tag = 99;
     fmt.Println((~a).tag);
 }
 

@@ -156,7 +156,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                             get
                             {
                                 if (m_target_is_ptr && m_target_ptr is not null)
-                                    return ref m_target_ptr.val;
+                                    return ref m_target_ptr.Value;
                     
                                 return ref m_target;
                             }
@@ -272,7 +272,7 @@ internal class InterfaceTypeTemplate : TemplateBase
                              {{TypeTTarget}} target = m_target;
                          
                              if (m_target_is_ptr && m_target_ptr is not null)
-                                 target = m_target_ptr.val;
+                                 target = m_target_ptr.Value;
                          
                              if (s_{{method.Name}}ByPtr is null || !m_target_is_ptr)
                                  {{getReturnStatement()}}s_{{method.Name}}ByVal!(target{{getCommaPrefixedCallParameters()}});

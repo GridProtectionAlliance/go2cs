@@ -32,7 +32,7 @@ partial class main_package {
 public static slice<U> MapElements<T, U>(ж<Stack<T>> Ꮡs, Func<T, U> mapper)
     where T : /* ~int */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, T, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
 {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     var result = new slice<U>(0, len(s.elements));
     foreach (var (_, elem) in s.elements) {

@@ -9,20 +9,20 @@ partial class main_package {
 }
 
 internal static nint use(ж<T> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return t.n;
 }
 
 internal static nint outer(ж<T> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     nint r = use(Ꮡt);
     switch (ᐧ) {
     default: {
         ж<T> tΔ2 = Ꮡ(new T(n: 5));
         r += use(tΔ2);
-        r += (tΔ2.val).n;
+        r += (tΔ2.Value).n;
         break;
     }}
 

@@ -31,14 +31,14 @@ partial class main_package {
 }
 
 internal static void bump(ж<owner> Ꮡo, int64 d) {
-    ref var o = ref Ꮡo.val;
+    ref var o = ref Ꮡo.Value;
 
     o.h.of(holder.Ꮡwait).add(d);
     o.deep.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);
 }
 
 internal static int64 viaPointerLocal(ж<owner> Ꮡo, int64 d) {
-    ref var o = ref Ꮡo.val;
+    ref var o = ref Ꮡo.Value;
 
     var mp = o.h;
     mp.of(holder.Ꮡprof).of(profile.Ꮡwait).add(d);

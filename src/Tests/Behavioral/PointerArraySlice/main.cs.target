@@ -8,17 +8,17 @@ partial class main_package {
 
 [GoRecv] internal static nint firstTwo(this ref grid b) {
     nint total = 0;
-    foreach (var (_, v) in b.val[..2]) {
+    foreach (var (_, v) in b.Value[..2]) {
         total += v;
     }
     return total;
 }
 
 internal static nint sumParam(ж<grid> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     nint total = 0;
-    foreach (var (_, v) in p.val[..]) {
+    foreach (var (_, v) in p.Value[..]) {
         total += v;
     }
     return total;

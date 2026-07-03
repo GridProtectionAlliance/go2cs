@@ -19,7 +19,7 @@ func main() {
 
 // pointerAssertion asserts an interface to a POINTER type `*box`. The asserted type `*box` is a
 // type position, so it must render as the pointer type `ж<box>` (`arg._<ж<box>>()`), not as a
-// value deref `box.val` (CS0426 — `val` is not a member type of `box`).
+// value deref `box.Value` (CS0426 — `val` is not a member type of `box`).
 func pointerAssertion() {
 	var i any = &box{n: 7}
 

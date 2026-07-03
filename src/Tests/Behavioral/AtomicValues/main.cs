@@ -11,7 +11,7 @@ partial class main_package {
 }
 
 internal static ж<holder> ᏑgHolder = new(default(holder));
-internal static ref holder gHolder => ref ᏑgHolder.val;
+internal static ref holder gHolder => ref ᏑgHolder.Value;
 
 internal static void Main() {
     ref var n = ref heap(new atomic.Int32(), out var Ꮡn);
@@ -27,14 +27,14 @@ internal static void Main() {
     ref var a = ref heap<nint>(out var Ꮡa);
     a = 1;
     Ꮡp.Store(Ꮡa);
-    fmt.Println("ptr load:", Ꮡp.Load().val);
+    fmt.Println("ptr load:", Ꮡp.Load().Value);
     ref var b = ref heap<nint>(out var Ꮡb);
     b = 2;
     fmt.Println("ptr cas no:", Ꮡp.CompareAndSwap(Ꮡb, Ꮡb));
     fmt.Println("ptr cas ok:", Ꮡp.CompareAndSwap(Ꮡa, Ꮡb));
-    fmt.Println("ptr final:", Ꮡp.Load().val);
+    fmt.Println("ptr final:", Ꮡp.Load().Value);
     var old = Ꮡp.Swap(Ꮡa);
-    fmt.Println("ptr swap:", old.val, Ꮡp.Load().val);
+    fmt.Println("ptr swap:", old.Value, Ꮡp.Load().Value);
     ᏑgHolder.of(holder.Ꮡcount).Store(42);
     ᏑgHolder.of(holder.Ꮡcount).Add(8);
     fmt.Println("global field:", ᏑgHolder.of(holder.Ꮡcount).Load());

@@ -44,7 +44,7 @@ internal static void Main() {
 }
 
 public static void ShowZoo(ж<array<Animal>> Ꮡzoo) {
-    ref var zoo = ref Ꮡzoo.val;
+    ref var zoo = ref Ꮡzoo.Value;
 
     Animal a = default!;
     foreach (var (_, vᴛ1) in zoo) {

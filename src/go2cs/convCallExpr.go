@@ -130,7 +130,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// unsafe.Pointer(ptr) where ptr is a Go pointer (`*T`, emitted as the managed box `ж<T>`).
 		// A managed box has no conversion to the numeric Pointer (`ж<uintptr>`), so a plain cast is
 		// CS0030 — e.g. `unsafe.Pointer(&u.value)` → `(@unsafe.Pointer)(Ꮡu.of(…))`. Pin the
-		// pointed-to storage instead via the golib helper: `@unsafe.Pointer.FromRef(ref (box).val)`.
+		// pointed-to storage instead via the golib helper: `@unsafe.Pointer.FromRef(ref (box).Value)`.
 		// (`uintptr`/`unsafe.Pointer` args are not boxes and keep the implicit-cast path below; only
 		// a genuine pointer arg needs this.) The numeric address is not GC-stable — the same caveat
 		// that applies to every unsafe.Pointer-as-uintptr use; the atomic intrinsics consuming it are
@@ -154,15 +154,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
 				// A deref-aliased pointer PARAMETER or RECEIVER renders as the pointed-to VALUE alias
-				// (`ref var pc0 = ref Ꮡpc0.val`), not a box — `.val` on it is CS1061 (`nuint` has no
+				// (`ref var pc0 = ref Ꮡpc0.Value`), not a box — `.Value` on it is CS1061 (`nuint` has no
 				// `val`; runtime select.go `unsafe.Pointer(pc0)` / heapdump.go `unsafe.Pointer(pstk)`,
 				// both `*uintptr` params). The alias is itself a ref-local into the boxed storage, so
-				// take its ref directly. A genuine box (a local, field, call result) keeps `.val`.
+				// take its ref directly. A genuine box (a local, field, call result) keeps `.Value`.
 				if v.exprIsDerefAliasedPointer(arg) {
 					return fmt.Sprintf("@unsafe.Pointer.FromRef(ref %s)", expr)
 				}
 
-				return fmt.Sprintf("@unsafe.Pointer.FromRef(ref (%s).val)", expr)
+				return fmt.Sprintf("@unsafe.Pointer.FromRef(ref (%s).Value)", expr)
 			}
 		}
 
@@ -500,8 +500,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// argument is the whole slice, not a single element pointer, so the element
 				// address-of treatment (which would emit `Ꮡs`) must be skipped.
 				// An `unsafe.Pointer` argument passed to an `unsafe.Pointer` parameter is passed as the
-				// `@unsafe.Pointer` struct directly — NOT reduced to its inner `uintptr` via `.val`.
-				// `.val` (a uintptr) converts implicitly to BOTH the `@unsafe.Pointer` parameter AND any
+				// `@unsafe.Pointer` struct directly — NOT reduced to its inner `uintptr` via `.Value`.
+				// `.Value` (a uintptr) converts implicitly to BOTH the `@unsafe.Pointer` parameter AND any
 				// same-named method's `ж<T>` overload (golib has uintptr↔both), so the call goes
 				// ambiguous — e.g. `add(p, x)` between the free `add(@unsafe.Pointer,…)` and a
 				// `notInHeap.add(ж<…>,…)` extension (CS0121). The struct is an exact match for the
@@ -521,7 +521,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 
 				if paramIsUnsafePtr && argIsUnsafePtr {
-					// pass the @unsafe.Pointer struct directly; no argTypeIsPtr / `.val`
+					// pass the @unsafe.Pointer struct directly; no argTypeIsPtr / `.Value`
 				} else {
 					ident := getIdentifier(callExpr.Args[i])
 
@@ -545,12 +545,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// Go auto-derefs `len(p)`/`cap(p)` for a pointer-to-array; a ж<named-array-wrapper>
 		// argument has no golib len/cap overload (the wrapper itself implements IArray, its box
 		// does not — CS1503, runtime proc.go's `len(mp.cgoCallers)` where cgoCallers is
-		// `*cgoCallers`). Emit the deref explicitly: `len(mp.cgoCallers.val)`.
+		// `*cgoCallers`). Emit the deref explicitly: `len(mp.cgoCallers.Value)`.
 		if (ident.Name == "len" || ident.Name == "cap") && len(callExpr.Args) == 1 {
 			if ptr, ok := v.info.TypeOf(callExpr.Args[0]).(*types.Pointer); ok {
 				if named, ok := types.Unalias(ptr.Elem()).(*types.Named); ok {
 					if _, isArray := named.Underlying().(*types.Array); isArray {
-						return fmt.Sprintf("%s(%s.val)", ident.Name, v.convExpr(callExpr.Args[0], nil))
+						return fmt.Sprintf("%s(%s.Value)", ident.Name, v.convExpr(callExpr.Args[0], nil))
 					}
 				}
 			}
@@ -733,9 +733,9 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	funcName := ""
 
 	// A call through a dereferenced function pointer, `(*fp)(args)`. Converting the ParenExpr
-	// faithfully yields `(fp.val)(args)`, which C# parses as a CAST when the argument list is empty
-	// (`(fp.val)()` reads as "cast `()` to type `fp.val`" → CS1525). Emit the deref WITHOUT the
-	// wrapping parens (`fp.val(args)`) so it is unambiguously an invocation. Restricted to a starred
+	// faithfully yields `(fp.Value)(args)`, which C# parses as a CAST when the argument list is empty
+	// (`(fp.Value)()` reads as "cast `()` to type `fp.Value`" → CS1525). Emit the deref WITHOUT the
+	// wrapping parens (`fp.Value(args)`) so it is unambiguously an invocation. Restricted to a starred
 	// VALUE operand; a starred type (`(*int)(x)`) is a conversion handled earlier.
 	if paren, ok := callExpr.Fun.(*ast.ParenExpr); ok {
 		if star, ok := paren.X.(*ast.StarExpr); ok {
@@ -930,7 +930,7 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 					// Dereference target type when casting to pointer types,
 					// in C# implicit casting operator requires the target type
 					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
+					expr = fmt.Sprintf("(%s?.Value ?? default!)", expr)
 				}
 
 				argTypeName := v.getCSTypeName(argType)
@@ -986,7 +986,7 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 					// Dereference target type when casting to pointer types,
 					// in C# implicit casting operator requires the target type
 					// to be a direct type, not a pointer type
-					expr = fmt.Sprintf("(%s?.val ?? default!)", expr)
+					expr = fmt.Sprintf("(%s?.Value ?? default!)", expr)
 				}
 
 				argTypeName := v.getCSTypeName(argType)

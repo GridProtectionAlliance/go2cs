@@ -66,11 +66,11 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 
 	if ptrType, ok := rangeType.(*types.Pointer); ok {
 		rangeType = ptrType.Elem()
-		ptrDeref = ".val"
+		ptrDeref = ".Value"
 
 		// A pointer parameter is implicitly dereferenced to a value local in the body
-		// (`ref var p = ref Ꮡp.val`), so `p` already denotes the pointed-to value — ranging over
-		// it must not add a second `.val` (which would be applied to the value type, CS1061).
+		// (`ref var p = ref Ꮡp.Value`), so `p` already denotes the pointed-to value — ranging over
+		// it must not add a second `.Value` (which would be applied to the value type, CS1061).
 		if ident, ok := rangeStmt.X.(*ast.Ident); ok && v.identIsParameter(ident) {
 			ptrDeref = ""
 		}

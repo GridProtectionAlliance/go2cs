@@ -5,7 +5,7 @@ using @unsafe = unsafe_package;
 partial class main_package {
 
 internal static @unsafe.Pointer ptrOf(ж<int64> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return new @unsafe.Pointer(Ꮡx);
 }
@@ -15,7 +15,7 @@ internal static bool isNil(@unsafe.Pointer p) {
 }
 
 internal static slice<@unsafe.Pointer> makePtrs(ж<int64> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return new @unsafe.Pointer[]{new @unsafe.Pointer(Ꮡx)}.slice();
 }

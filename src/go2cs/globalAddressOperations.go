@@ -152,7 +152,7 @@ func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExp
 	// which may legitimately be nil (Go reads a nil pointer global freely; only DEREFERENCING
 	// it panics). The strict `val` nil-checks the slot, so the property reads `ValueSlot`
 	// (the identical real slot, no check); a plain value global keeps the strict `val`.
-	accessor := "val"
+	accessor := "Value"
 
 	if valueIsRefLike {
 		accessor = "ValueSlot"

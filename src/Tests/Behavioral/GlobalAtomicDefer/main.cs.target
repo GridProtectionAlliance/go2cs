@@ -7,9 +7,9 @@ using sync;
 partial class main_package {
 
 internal static ж<atomic.Int32> Ꮡlocked = new(default(atomic.Int32));
-internal static ref atomic.Int32 locked => ref Ꮡlocked.val;
+internal static ref atomic.Int32 locked => ref Ꮡlocked.Value;
 internal static ж<atomic.Uint64> ᏑrunGoid = new(default(atomic.Uint64));
-internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.val;
+internal static ref atomic.Uint64 runGoid => ref ᏑrunGoid.Value;
 
 internal static int32 lockUnlock(uint64 id) => func((defer, recover) => {
     while (!Ꮡlocked.CompareAndSwap(0, 1)) {

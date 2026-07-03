@@ -10,33 +10,33 @@ partial class main_package {
 }
 
 internal static ж<node> last(ж<node> Ꮡstart) {
-    ref var start = ref Ꮡstart.val;
+    ref var start = ref Ꮡstart.Value;
 
     var r = Ꮡstart;
     while ((~r).next != nil) {
-        r = r.val.next;
+        r = r.Value.next;
     }
     return r;
 }
 
 internal static nint length(ж<node> Ꮡstart) {
-    ref var start = ref Ꮡstart.val;
+    ref var start = ref Ꮡstart.Value;
 
     nint n = 0;
-    for (var r = Ꮡstart; r != nil; r = r.val.next) {
+    for (var r = Ꮡstart; r != nil; r = r.Value.next) {
         n++;
     }
     return n;
 }
 
 internal static nint sum(ж<node> Ꮡstart) {
-    ref var start = ref Ꮡstart.val;
+    ref var start = ref Ꮡstart.Value;
 
     nint total = 0;
     var p = Ꮡstart;
     while (p != nil) {
-        total += p.val.val;
-        p = p.val.next;
+        total += p.Value.val;
+        p = p.Value.next;
     }
     return total;
 }

@@ -37,11 +37,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// The deref-aliased-parameter exception applies only when the base ITSELF is the
 			// parameter ident (`p[i]` renders through the value alias). A pointer FIELD reached
 			// through a selector — `mp.cgoCallers[0]`, where cgoCallers is `*cgoCallers` (runtime
-			// proc.go) — is a real ж box and needs the `.val` deref: the old root-ident test
+			// proc.go) — is a real ж box and needs the `.Value` deref: the old root-ident test
 			// mistook the selector's parameter ROOT for the indexed pointer and skipped it
 			// (CS0021 on every named-array-wrapper box index).
 			if ident, isBare := indexExpr.X.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
-				ptrDeref = ".val"
+				ptrDeref = ".Value"
 			}
 		}
 	}
@@ -77,9 +77,9 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	baseExpr := v.convExpr(indexExpr.X, nil)
 
 	// A type-CONVERSION base renders as a C# cast, and postfix binds tighter than a cast — both
-	// the pointer auto-deref `.val` and the index itself would re-bind onto the cast's INNER
+	// the pointer auto-deref `.Value` and the index itself would re-bind onto the cast's INNER
 	// operand: Go malloc.go's `(*[2]uint64)(x)[0] = 0` emitted
-	// `(ж<array<uint64>>)(uintptr)(x).val[0]` — the `.val` read the inner @unsafe.Pointer's
+	// `(ж<array<uint64>>)(uintptr)(x).Value[0]` — the `.Value` read the inner @unsafe.Pointer's
 	// uintptr, then indexed a nuint (CS0021). Wrap the cast before appending. Fifth instance of
 	// the cast-precedence family.
 	if call, ok := indexExpr.X.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {

@@ -14,19 +14,19 @@ partial class main_package {
 }
 
 internal static ж<outer> Ꮡg = new(default(outer));
-internal static ref outer g => ref Ꮡg.val;
+internal static ref outer g => ref Ꮡg.Value;
 
 internal static void keep(ж<outer> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     _ = Ꮡp;
 }
 
 internal static void mutate() {
     var p = Ꮡg.of(outer.Ꮡmid).of(inner.Ꮡa);
-    p.val = 42;
+    p.Value = 42;
     var q = Ꮡg.of(outer.Ꮡmid);
-    q.val.b = 7;
+    q.Value.b = 7;
 }
 
 internal static void Main() {

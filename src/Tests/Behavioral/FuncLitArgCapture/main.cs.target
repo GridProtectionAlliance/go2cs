@@ -18,7 +18,7 @@ internal static void run(Action f) {
 }
 
 internal static void set(ж<box> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p.x = 42;
 }
@@ -32,13 +32,13 @@ internal static void Main() {
     ref var n = ref heap(new box(), out var Ꮡn);
     run(() => {
         set(Ꮡn);
-        Ꮡn.val.y = Ꮡn.val.x + 1;
+        Ꮡn.Value.y = Ꮡn.Value.x + 1;
     });
     fmt.Println("2:", n.x, n.y);
     ref var c = ref heap(new box(), out var Ꮡc);
     run(() => {
         var p = Ꮡc.of(box.Ꮡx);
-        p.val = 99;
+        p.Value = 99;
     });
     fmt.Println("3:", c.x);
     ref var d = ref heap(new box(), out var Ꮡd);
@@ -51,13 +51,13 @@ internal static void Main() {
     var pe = Ꮡe;
     var peʗ1 = pe;
     run(() => {
-        peʗ1.val.x = 11;
-        peʗ1.val.y = (~peʗ1).x + 1;
+        peʗ1.Value.x = 11;
+        peʗ1.Value.y = (~peʗ1).x + 1;
     });
     fmt.Println("5:", e.x, e.y);
     gPtr = Ꮡe;
     run(() => {
-        gPtr.val.x = gVal.x;
+        gPtr.Value.x = gVal.x;
     });
     fmt.Println("6:", e.x);
     var vals = new nint[]{5}.slice();

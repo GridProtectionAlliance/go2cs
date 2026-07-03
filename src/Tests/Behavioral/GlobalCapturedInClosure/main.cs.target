@@ -14,10 +14,10 @@ partial class main_package {
 }
 
 internal static ж<heap> Ꮡmheap = new(default(heap));
-internal static ref heap mheap => ref Ꮡmheap.val;
+internal static ref heap mheap => ref Ꮡmheap.Value;
 
 internal static void keep(ж<heap> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     _ = Ꮡh;
 }
@@ -32,7 +32,7 @@ internal static void Main() {
     run(() => {
         got = mheap.alloc();
         var p = Ꮡmheap.of(heap.Ꮡcount);
-        p.val += 10;
+        p.Value += 10;
     });
     fmt.Println(got, mheap.count);
 }

@@ -107,7 +107,7 @@ public static class Common
 
         string[] parts = typeName.Split('.');
 
-        string simpleName = $"{parts[^1]}{(isPointer ? ".val" : "")}";
+        string simpleName = $"{parts[^1]}{(isPointer ? ".Value" : "")}";
 
         if (dropGeneric)
         {

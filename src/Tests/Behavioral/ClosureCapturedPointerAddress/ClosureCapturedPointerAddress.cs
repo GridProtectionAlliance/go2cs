@@ -20,14 +20,14 @@ internal static void Main() {
     run(() => {
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
-            ᏑmToFlush.ValueSlot.val.v += 100;
-            prev.ValueSlot = ᏑmToFlush.ValueSlot.val.next;
+            ᏑmToFlush.ValueSlot.Value.v += 100;
+            prev.ValueSlot = ᏑmToFlush.ValueSlot.Value.next;
         }
     });
     fmt.Println("mToFlush is nil:", mToFlush == nil);
     nint sum = 0;
-    for (var n = head; n != nil; n = n.val.next) {
-        sum += n.val.v;
+    for (var n = head; n != nil; n = n.Value.next) {
+        sum += n.Value.v;
     }
     fmt.Println("sum:", sum);
 }

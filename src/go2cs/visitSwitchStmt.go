@@ -132,7 +132,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					allConst = false
 				}
 			case *ast.UnaryExpr:
-				// An address-of (`&frame.fp` → `Ꮡframe.val.fp`) is a runtime value, never a constant.
+				// An address-of (`&frame.fp` → `Ꮡframe.Value.fp`) is a runtime value, never a constant.
 				if expr.(*ast.UnaryExpr).Op == token.AND {
 					allConst = false
 				}

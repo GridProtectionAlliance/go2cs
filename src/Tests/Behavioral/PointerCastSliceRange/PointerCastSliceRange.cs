@@ -19,7 +19,7 @@ internal static unsafe void Main() {
     }
     foreach (var (i, _) in s) {
         var ps = Ꮡ(s, i);
-        ps.val += 1;
+        ps.Value += 1;
     }
     fmt.Println(sum, total, s[0]);
 }

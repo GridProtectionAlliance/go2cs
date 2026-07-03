@@ -24,7 +24,7 @@ internal static array<poolᴛ1> pool = new(2);
 internal static array<nint> nums = new(3);
 
 internal static ж<array<nint>> Ꮡaddr = new(new array<nint>(2));
-internal static ref array<nint> addr => ref Ꮡaddr.val;
+internal static ref array<nint> addr => ref Ꮡaddr.Value;
 
 internal static nint statsTotal() {
     var s = new Stats(Total: 42);
@@ -42,7 +42,7 @@ internal static nint localHeapAnon() {
         bound: 7
     );
     var p = ᏑfirstFree;
-    p.val.bound = 10;
+    p.Value.bound = 10;
     return firstFree.@base + firstFree.bound;
 }
 
@@ -52,8 +52,8 @@ internal static void Main() {
     nums[0] = 11;
     nums[2] = 13;
     var p = Ꮡaddr;
-    p.val[0] = 21;
-    p.val[1] = 22;
+    p.Value[0] = 21;
+    p.Value[1] = 22;
     fmt.Println(pool[0].item, pool[1].item);
     fmt.Println(nums[0], nums[2], addr[0], addr[1]);
     fmt.Println(statsTotal());

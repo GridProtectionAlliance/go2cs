@@ -10,23 +10,23 @@ partial class main_package {
 }
 
 internal static void initSelf(this ж<ring> Ꮡr) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     r.next = Ꮡr;
 }
 
 [GoRecv] internal static void linkTo(this ref ring r, ж<ring> Ꮡother) {
-    ref var other = ref Ꮡother.val;
+    ref var other = ref Ꮡother.Value;
 
     r.next = Ꮡother;
 }
 
 internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
-    ref var r = ref Ꮡr.val;
+    ref var r = ref Ꮡr.Value;
 
     var p = Ꮡr;
     for (nint i = 0; i < n; i++) {
-        p = p.val.next;
+        p = p.Value.next;
     }
     return p;
 }
@@ -34,7 +34,7 @@ internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
 internal static void Main() {
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
-    a.val.data = 42;
+    a.Value.data = 42;
     fmt.Println((~(~a).next).data);
     fmt.Println((~a.advance(5)).data);
     var b = Ꮡ(new ring(data: 2));

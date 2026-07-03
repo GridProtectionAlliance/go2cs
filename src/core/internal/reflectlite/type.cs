@@ -269,15 +269,15 @@ internal static ж<byte> data(this Δname n, nint off, @string whySafe) {
 }
 
 internal static bool isExported(this Δname n) {
-    return (byte)((n.bytes.val) & (1 << (int)(0))) != 0;
+    return (byte)((n.bytes.Value) & (1 << (int)(0))) != 0;
 }
 
 internal static bool hasTag(this Δname n) {
-    return (byte)((n.bytes.val) & (1 << (int)(1))) != 0;
+    return (byte)((n.bytes.Value) & (1 << (int)(1))) != 0;
 }
 
 internal static bool embedded(this Δname n) {
-    return (byte)((n.bytes.val) & (1 << (int)(3))) != 0;
+    return (byte)((n.bytes.Value) & (1 << (int)(3))) != 0;
 }
 
 // readVarint parses a varint as encoded by encoding/binary.
@@ -285,7 +285,7 @@ internal static bool embedded(this Δname n) {
 internal static (nint, nint) readVarint(this Δname n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
-        var x = n.data(off + i, "read varint"u8).val;
+        var x = n.data(off + i, "read varint"u8).Value;
         v += ((nint)((byte)(x & 127))) << (int)((7 * i));
         if ((byte)(x & 128) == 0) {
             return (i + 1, v);
@@ -311,7 +311,7 @@ internal static @string tag(this Δname n) {
 }
 
 internal static @string pkgPath(abiꓸName n) {
-    if (n.Bytes == nil || (byte)(n.DataChecked(0, "name flag field"u8).val & (1 << (int)(2))) == 0) {
+    if (n.Bytes == nil || (byte)(n.DataChecked(0, "name flag field"u8).Value & (1 << (int)(2))) == 0) {
         return ""u8;
     }
     var (i, l) = n.ReadVarint(1);
@@ -424,13 +424,13 @@ internal static @string Name(this rtype t) {
 }
 
 internal static rtype toRType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return new rtype(Ꮡt);
 }
 
 internal static ж<abi.Type> elem(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     var et = t.Elem();
     if (et != nil) {
@@ -544,8 +544,8 @@ internal static bool Comparable(this rtype t) {
 
 // implements reports whether the type V implements the interface type T.
 internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
-    ref var T = ref ᏑT.val;
-    ref var V = ref ᏑV.val;
+    ref var T = ref ᏑT.Value;
+    ref var V = ref ᏑV.Value;
 
     var t = T.InterfaceType();
     if (t == nil) {
@@ -640,8 +640,8 @@ internal static bool implements(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
 // Ignoring the interface rules (implemented elsewhere)
 // and the ideal constant rules (no ideal constants at run time).
 internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
-    ref var T = ref ᏑT.val;
-    ref var V = ref ᏑV.val;
+    ref var T = ref ᏑT.Value;
+    ref var V = ref ᏑV.Value;
 
     // x's type V is identical to T?
     if (ᏑT == ᏑV) {
@@ -657,8 +657,8 @@ internal static bool directlyAssignable(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV) {
 }
 
 internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
-    ref var T = ref ᏑT.val;
-    ref var V = ref ᏑV.val;
+    ref var T = ref ᏑT.Value;
+    ref var V = ref ᏑV.Value;
 
     if (cmpTags) {
         return ᏑT == ᏑV;
@@ -670,8 +670,8 @@ internal static bool haveIdenticalType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, boo
 }
 
 internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type> ᏑV, bool cmpTags) {
-    ref var T = ref ᏑT.val;
-    ref var V = ref ᏑV.val;
+    ref var T = ref ᏑT.Value;
+    ref var V = ref ᏑV.Value;
 
     if (ᏑT == ᏑV) {
         return true;
@@ -774,7 +774,7 @@ internal static bool haveIdenticalUnderlyingType(ж<abi.Type> ᏑT, ж<abi.Type>
 // function takes care of ensuring that multiple *rtype for the same
 // type are coalesced into a single Type.
 internal static ΔType toType(ж<abi.Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     if (t == nil) {
         return default!;

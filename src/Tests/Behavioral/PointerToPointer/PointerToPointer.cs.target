@@ -24,15 +24,15 @@ internal static void Main() {
     ppptr = Ꮡ(pptr);
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
-    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).Value);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.Value);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
     a = 1900;
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
-    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).val);
-    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.val);
+    fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).Value);
+    fmt.Printf("Main-function updated value available at *ptr = %d\n"u8, ptr.Value);
     PrintValPtr2Ptr(pptr);
     PrintValPtr2Ptr2Ptr(ppptr);
     ref var b = ref heap<Buffer>(out var Ꮡb);
@@ -61,34 +61,34 @@ public static ж<Buffer> /*b1*/ NewBuffer(slice<byte> buf) {
 }
 
 public static void PrintValPtr(ж<nint> Ꮡptr) {
-    ref var ptr = ref Ꮡptr.val;
+    ref var ptr = ref Ꮡptr.Value;
 
     fmt.Printf("Value available at *ptr = %d\n"u8, ptr);
     ptr++;
 }
 
 public static ж<nint> EscapePrintValPtr(ж<nint> Ꮡout) {
-    ref var @out = ref Ꮡout.val;
+    ref var @out = ref Ꮡout.Value;
 
     fmt.Printf("Value available at *ptr = %d\n"u8, @out);
     ref var i = ref heap<nint>(out var Ꮡi);
     i = 99;
-    Ꮡout = Ꮡi; @out = ref Ꮡout.val;
+    Ꮡout = Ꮡi; @out = ref Ꮡout.Value;
     fmt.Printf("Intra-function updated value available at *ptr = %d\n"u8, @out);
     PrintValPtr(Ꮡout);
     return Ꮡout;
 }
 
 public static void PrintValPtr2Ptr(ж<ж<nint>> Ꮡpptr) {
-    ref var pptr = ref Ꮡpptr.val;
+    ref var pptr = ref Ꮡpptr.Value;
 
-    fmt.Printf("Value available at **pptr = %d\n"u8, pptr.val);
+    fmt.Printf("Value available at **pptr = %d\n"u8, pptr.Value);
 }
 
 public static void PrintValPtr2Ptr2Ptr(ж<ж<ж<nint>>> Ꮡppptr) {
-    ref var ppptr = ref Ꮡppptr.val;
+    ref var ppptr = ref Ꮡppptr.Value;
 
-    fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.ValueSlot.val);
+    fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.ValueSlot.Value);
 }
 
 } // end main_package

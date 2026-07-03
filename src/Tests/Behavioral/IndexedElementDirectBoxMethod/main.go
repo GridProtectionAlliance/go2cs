@@ -9,7 +9,7 @@ type counter struct {
 // inc is DIRECT-ж: it takes the address of a field of its receiver (&c.n), so it is emitted as a
 // box-receiver method `inc(this ж<counter>)`. Called on an array ELEMENT it therefore needs the
 // element's box, not the element value — `h.arr[i].inc()` must route through `Ꮡ` / `.at<T>(i)`,
-// else the box-receiver overload cannot bind (CS1929). Mirrors the runtime's `bh.val[i].Load()`
+// else the box-receiver overload cannot bind (CS1929). Mirrors the runtime's `bh.Value[i].Load()`
 // (an array of atomic UnsafePointer, whose Load is direct-ж via `&u.value`).
 func (c *counter) inc() {
 	p := &c.n

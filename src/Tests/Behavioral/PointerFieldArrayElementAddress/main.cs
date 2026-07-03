@@ -17,20 +17,20 @@ partial class main_package {
 }
 
 internal static void bump(ж<cycle> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     c.n++;
 }
 
 internal static void viaParam(ж<rec> Ꮡp, nint i) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     var c = Ꮡp.at(rec.Ꮡfuture, i);
     bump(c);
 }
 
 internal static void viaLocal(ж<holder> Ꮡh, nint i) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     var p = h.r;
     var c = p.at(rec.Ꮡfuture, i);

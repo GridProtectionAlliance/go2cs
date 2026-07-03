@@ -19,7 +19,7 @@ internal static void p(this tagger _) {
 }
 
 internal static void setN(ж<box> Ꮡb, nint v) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     b.n = v;
 }

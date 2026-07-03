@@ -13,7 +13,7 @@ partial class main_package {
 }
 
 internal static ж<array<item>> Ꮡpool = new(new array<item>(3));
-internal static ref array<item> pool => ref Ꮡpool.val;
+internal static ref array<item> pool => ref Ꮡpool.Value;
 
 
 [GoType("dyn")] partial struct gridᴛ1 {
@@ -21,10 +21,10 @@ internal static ref array<item> pool => ref Ꮡpool.val;
     internal array<byte> pad = new(4);
 }
 internal static ж<array<gridᴛ1>> Ꮡgrid = new(new array<gridᴛ1>(3));
-internal static ref array<gridᴛ1> grid => ref Ꮡgrid.val;
+internal static ref array<gridᴛ1> grid => ref Ꮡgrid.Value;
 
 internal static void setInt(ж<nint> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = 7;
 }

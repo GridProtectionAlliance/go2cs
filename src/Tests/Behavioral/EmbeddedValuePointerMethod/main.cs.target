@@ -26,7 +26,7 @@ partial class main_package {
 }
 
 internal static void viaParam(ж<outer> Ꮡo) {
-    ref var o = ref Ꮡo.val;
+    ref var o = ref Ꮡo.Value;
 
     Ꮡo.of(outer.Ꮡinner).bump(100);
 }
@@ -59,7 +59,7 @@ internal static void viaParam(ж<outer> Ꮡo) {
 }
 
 [GoRecv] internal static void bump(this ref chunk c, ж<chunk> Ꮡother) {
-    ref var other = ref Ꮡother.val;
+    ref var other = ref Ꮡother.Value;
 
     {
         var cΔ1 = Ꮡother;

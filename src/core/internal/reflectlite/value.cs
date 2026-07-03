@@ -153,15 +153,15 @@ internal static any packEface(Value v) {
             typedmemmove(t, c, ptr);
             ptr = c;
         }
-        e.val.Data = ptr;
+        e.Value.Data = ptr;
         break;
     }
     case {} when (flag)(v.flag & flagIndir) != 0: {
-        e.val.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
+        e.Value.Data = ~(ж<@unsafe.Pointer>)(uintptr)(v.ptr);
         break;
     }
     default: {
-        e.val.Data = v.ptr;
+        e.Value.Data = v.ptr;
         break;
     }}
 
@@ -172,7 +172,7 @@ internal static any packEface(Value v) {
     // to have any operation between the e.word and e.typ assignments
     // that would let the garbage collector observe the partially-built
     // interface value.
-    e.val.Type = t;
+    e.Value.Type = t;
     return i;
 }
 
@@ -180,7 +180,7 @@ internal static any packEface(Value v) {
 internal static Value unpackEface(any i) {
     var e = (ж<abi.EmptyInterface>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)));
     // NOTE: don't read e.word until we know whether it is really a pointer or not.
-    var t = e.val.Type;
+    var t = e.Value.Type;
     if (t == nil) {
         return new Value(nil);
     }
@@ -306,7 +306,7 @@ internal static any valueInterface(Value v) {
         if (v.numMethod() == 0) {
             return ~(ж<any>)(uintptr)(v.ptr);
         }
-        return (ж<valueInterface_type>)(uintptr)(v.ptr).val;
+        return (ж<valueInterface_type>)(uintptr)(v.ptr).Value;
     }
     return packEface(v);
 }
@@ -436,7 +436,7 @@ public static Value ValueOf(any? i) {
 // It panics if v is not assignable to typ.
 // For a conversion to an interface type, target is a suggested scratch space to use.
 public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst, @unsafe.Pointer target) {
-    ref var dst = ref Ꮡdst.val;
+    ref var dst = ref Ꮡdst.Value;
 
     // if v.flag&flagMethod != 0 {
     // 	v = makeMethodValue(context, v)
@@ -461,11 +461,11 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
         }
         var x = valueInterface(v);
         if (dst.NumMethod() == 0){
-            ((ж<any>)(uintptr)(target)).val = x;
+            ((ж<any>)(uintptr)(target)).Value = x;
         } else {
-            ifaceE2I(Ꮡdst, x, target.val);
+            ifaceE2I(Ꮡdst, x, target.Value);
         }
-        return new Value(Ꮡdst, target.val, (flag)(flagIndir | ((flag)abi.Interface)));
+        return new Value(Ꮡdst, target.Value, (flag)(flagIndir | ((flag)abi.Interface)));
     }}
 
     // Failed.
@@ -480,7 +480,7 @@ public static Value assignTo(this Value v, @string context, ж<abi.Type> Ꮡdst,
 // whySafe must explain why i < len. (Passing "i < len" is fine;
 // the benefit is to surface this assumption at the call site.)
 internal static @unsafe.Pointer arrayAt(@unsafe.Pointer p, nint i, uintptr eltSize, @string whySafe) {
-    return (uintptr)add(p.val, ((uintptr)i) * eltSize, "i < len"u8);
+    return (uintptr)add(p.Value, ((uintptr)i) * eltSize, "i < len"u8);
 }
 
 internal static partial void ifaceE2I(ж<abi.Type> t, any src, @unsafe.Pointer dst);

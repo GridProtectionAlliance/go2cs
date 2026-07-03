@@ -1,7 +1,7 @@
 // Regression test for copying a pointer parameter into a local and walking a linked structure.
 //
 // Go `r := start` where start is a *T is a pointer copy: r is a *T. The converter deref's a
-// pointer parameter to a value alias (`ref var start = ref Ꮡstart.val`), so `r := start` used
+// pointer parameter to a value alias (`ref var start = ref Ꮡstart.Value`), so `r := start` used
 // to emit `var r = start` — copying the pointed-to *value*, making r a T, not a *T. The rest
 // of the converter already treats such a walked variable as a pointer (`r.next`, `r = r.next`),
 // so the value-copy form failed to compile. The fix emits the pointer (box) form

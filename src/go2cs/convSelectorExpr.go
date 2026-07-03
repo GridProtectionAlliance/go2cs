@@ -102,7 +102,7 @@ func structFieldReachable(structType *types.Struct, name string) bool {
 // the heap box `ж<T>` directly, so `base.field` reached through the value-returning `~` deref is an
 // rvalue; the field's address `&base.field` must instead go through the box accessor
 // `base.of(T.Ꮡfield)`. A pointer parameter and the receiver are deref-aliased to a value
-// (`ref var p = ref Ꮡp.val`), so their fields are already assignable — those are excluded (handled
+// (`ref var p = ref Ꮡp.Value`), so their fields are already assignable — those are excluded (handled
 // by exprIsDerefdPointerParam / the receiver paths).
 func (v *Visitor) exprIsPointerLocalField(expr ast.Expr) bool {
 	sel, ok := expr.(*ast.SelectorExpr)
@@ -343,7 +343,7 @@ func (v *Visitor) exprIsValueFieldOfPointer(expr ast.Expr) bool {
 
 // exprIsValueFieldOfDerefdPointerRoot reports whether expr is a VALUE struct field whose selector
 // chain, after peeling value-field selectors, roots at a deref-aliased pointer PARAMETER or the
-// pointer RECEIVER — a bare ident emitted as `ref var x = ref Ꮡx.val`, whose box is `Ꮡx`. Examples:
+// pointer RECEIVER — a bare ident emitted as `ref var x = ref Ꮡx.Value`, whose box is `Ꮡx`. Examples:
 // `Δp.scav.index` (root `p`, a `*pageAlloc` receiver), `mp.trace.seqlock` (root `mp`, a `*m` param),
 // `h.userArena.readyList` (root `h`, a `*mheap` param).
 //
@@ -436,7 +436,7 @@ func (v *Visitor) exprIsAlreadyBoxedPointerFieldOrElement(expr ast.Expr) bool {
 // exprIsIndexedValueElement reports whether expr is an indexed element `container[i]` of an
 // ADDRESSABLE container (an array or slice — NOT a map, whose elements are not addressable) whose
 // element type is a VALUE (not already a pointer/box). A pointer-receiver / direct-ж method called
-// on such an element — `bh.val[i].Load()` (an array of atomic `UnsafePointer`) — operates on the
+// on such an element — `bh.Value[i].Load()` (an array of atomic `UnsafePointer`) — operates on the
 // element VALUE, so the `[GoRecv] ref` / `ж` overload cannot bind (CS1510 / CS1929). The receiver
 // must be routed through the element's box via the &-machinery (`Ꮡ(slice, i)` / `…at<T>(i)`).
 func (v *Visitor) exprIsIndexedValueElement(expr ast.Expr) bool {
@@ -537,7 +537,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// A method call on a manually-converted foreign-receiver method (`gp.guintptr()` on a *g —
 	// see manualTypeOperations.go): the manual implementation captures the receiver's IDENTITY,
 	// so it takes the receiver BOX (`this ж<g>`). A deref-aliased pointer receiver (`ref var gp
-	// = ref Ꮡgp.val`) renders as the value alias, which binds neither the box form nor identity;
+	// = ref Ꮡgp.Value`) renders as the value alias, which binds neither the box form nor identity;
 	// emit the box itself — `Ꮡgp.guintptr()`.
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
 		if obj := sel.Obj(); obj != nil && v.isManualBoxReceiverMethod(obj) && v.exprIsDerefAliasedPointer(selectorExpr.X) {
@@ -577,10 +577,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	}
 
 	// When this selector is the LHS of an assignment, any nested pointer dereference in its base
-	// expression must use the assignable `.val` form, not the value-returning `~` operator — a
+	// expression must use the assignable `.Value` form, not the value-returning `~` operator — a
 	// chained `(~o).stack.hi = …` (the inner `o.stack` deref via `~`) is not a variable/property
 	// (CS0131). Propagate the assignment context down to the base so inner pointer-field selectors
-	// emit `o.val.stack` instead of `(~o).stack`. Only set when assigning, so reads are unchanged.
+	// emit `o.Value.stack` instead of `(~o).stack`. Only set when assigning, so reads are unchanged.
 	var xContexts []ExprContext
 
 	if context.isAssignment {
@@ -648,7 +648,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 				return true
 			case *ast.CallExpr:
 				// A pointer-CONVERSION base `(*T)(p)` — the Fun is a parenthesized star — reaches the
-				// dedicated conversion branch below (which appends `.val` itself); a plain call result
+				// dedicated conversion branch below (which appends `.Value` itself); a plain call result
 				// is NOT a deref regardless of stars inside its arguments.
 				if parenFun, ok := e.Fun.(*ast.ParenExpr); ok {
 					if _, isStar := parenFun.X.(*ast.StarExpr); isStar {
@@ -666,11 +666,11 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// Get the original expression type and check if it's a pointer
 	if exprType := v.info.TypeOf(selectorExpr.X); exprType != nil {
 		// A STAR base that is still POINTER-typed after its own deref — `(*outer.ptr).Value`
-		// where ptr is a DOUBLE pointer (`**Inner`): the star peels one level (`outer.ptr.val`,
+		// where ptr is a DOUBLE pointer (`**Inner`): the star peels one level (`outer.ptr.Value`,
 		// a ж<Inner>), and Go's selector auto-deref supplies the second. Skipping the
 		// suppression lets the normal pointer-base field handling below add it; treating the
 		// star as a full deref left `.Value` on the box (CS1061 — surfaced when the
-		// one-star-one-deref fix removed the old double-`.val` compensation in convStarExpr).
+		// one-star-one-deref fix removed the old double-`.Value` compensation in convStarExpr).
 		// Gated to ACTUAL star bases: a pointer-CONVERSION base (`(*T)(p).field`) is also
 		// pointer-typed but must keep its dedicated branch below.
 		starBaseStillPointer := false
@@ -711,10 +711,10 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 				// Check if the call expressions is a parenthesized expression
 				if _, ok := callExpr.Fun.(*ast.ParenExpr); ok {
 					// For a pointer-conversion-then-method like `(*atomic.Uint32)(c).Store(v)`, the
-					// converted X is a heap box `ж<T>`. Appending `.val` derefs it to a value, which
+					// converted X is a heap box `ж<T>`. Appending `.Value` derefs it to a value, which
 					// is only right for a VALUE-receiver method; a POINTER-receiver method (`func
 					// (c *T) Store`) binds to the `ж<T>` overload, so the box itself is the receiver
-					// and `.val` must be omitted.
+					// and `.Value` must be omitted.
 					if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.MethodVal {
 						if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
 							if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
@@ -723,7 +723,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						}
 					}
 
-					return fmt.Sprintf("(%s).val.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+					return fmt.Sprintf("(%s).Value.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 				}
 			}
 
@@ -772,7 +772,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 								// If the field belongs to the struct, automatically dereference the pointer
 								if context.isAssignment {
 									// Left-hand side of assignment cannot use pointer dereference operator
-									return fmt.Sprintf("%s.val.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+									return fmt.Sprintf("%s.Value.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								} else {
 									return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 								}
@@ -817,12 +817,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						// embed promotes FIELDS only (the StructTypeTemplate metadata fallback) —
 						// `t.Uncommon()` on `Δrtype` (embeds `*abi.Type`, runtime type.go) is
 						// CS1929. Emit the explicit hop through the embed field's box —
-						// `t.Type.val.Uncommon(…)` — the deref'd `.val` is a ref return, so the
+						// `t.Type.Value.Uncommon(…)` — the deref'd `.Value` is a ref return, so the
 						// `[GoRecv] ref` extension binds addressably. A same-package pointer embed
 						// keeps its generated forwarder (no churn).
 						if named, ok := ptr.Elem().(*types.Named); ok {
 							if named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
-								return getAliasedTypeName(fmt.Sprintf("%s.%s.val.%s", v.convExpr(selectorExpr.X, nil),
+								return getAliasedTypeName(fmt.Sprintf("%s.%s.Value.%s", v.convExpr(selectorExpr.X, nil),
 									getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 						}
@@ -877,7 +877,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// PROPERTY value is the ж<itabTableType> receiver) must not route through `Ꮡ` — that passes
 	// the global's SLOT box (ж<ж<itabTableType>>), one layer too high (CS1929, runtime iface.go).
 	// A DEREF-ALIASED pointer param/receiver is the opposite: its rendering is the value alias
-	// (`ref var s = ref Ꮡs.val`), so it still needs the box route.
+	// (`ref var s = ref Ꮡs.Value`), so it still needs the box route.
 	_, receiverIsPointerValue := v.info.TypeOf(selectorExpr.X).(*types.Pointer)
 	receiverYieldsBox := receiverIsPointerValue && !v.exprIsDerefAliasedPointer(selectorExpr.X)
 
@@ -895,7 +895,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 
 		// The receiver box is `Ꮡ`+the RAW variable name — a deref-aliased pointer is declared
-		// `ref var <shadow-name> = ref Ꮡ<raw>.val` (the box keeps the raw name; visitFuncDecl /
+		// `ref var <shadow-name> = ref Ꮡ<raw>.Value` (the box keeps the raw name; visitFuncDecl /
 		// heap decls never shadow-rename the `Ꮡ` companion). convExpr returns the shadow-renamed
 		// VALUE alias, so for a collision-renamed var `p`→`Δp` it yields `ᏑΔp` — which is not in
 		// scope (the box is `Ꮡp`), CS0103. Build the box from the raw ident name to match.
@@ -974,7 +974,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	}
 
 	// A ж-only / pointer-receiver method called on a VALUE element of an addressable array/slice —
-	// `bh.val[i].Load()` (an array of atomic `UnsafePointer`). The element value is not a box, so the
+	// `bh.Value[i].Load()` (an array of atomic `UnsafePointer`). The element value is not a box, so the
 	// `[GoRecv] ref` / `ж` overload cannot bind (CS1510 / CS1929). Route the receiver through the
 	// element's box via the &-machinery, which renders the real element address (`Ꮡ(slice, i)` /
 	// `…at<T>(i)`) — never a `Ꮡ(value)` copy, which would lose an atomic write.

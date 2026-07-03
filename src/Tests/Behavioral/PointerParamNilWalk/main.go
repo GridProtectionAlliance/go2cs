@@ -1,12 +1,12 @@
 // Regression test for walking a *node parameter to a NIL terminator.
 //
-// A named pointer parameter is deref-aliased in C# to a value var (`ref var p = ref Ꮡp.val`)
+// A named pointer parameter is deref-aliased in C# to a value var (`ref var p = ref Ꮡp.Value`)
 // over its box `Ꮡp`. Two things must hold together for a nil-terminated walk
 // (`for p != nil { …; p = p.next }`):
 //   1. the loop guard must compare the BOX `Ꮡp != nil`, not the value alias `p` (a `node`
 //      struct value) — emitting the value form compares the wrong thing; and
 //   2. the in-loop re-alias after repointing the box (`Ꮡp = p.next; p = ref Ꮡp.…`) must be
-//      nil-safe — on the final step `p.next` is nil, and the plain `.val` getter would throw a
+//      nil-safe — on the final step `p.next` is nil, and the plain `.Value` getter would throw a
 //      nil-pointer dereference before the guard is re-checked.
 // The converter detects a pointer parameter compared with nil and (a) emits its box in the
 // comparison and (b) routes its deref/re-alias through the nil-safe `Ꮡp.DerefOrNil()` accessor,

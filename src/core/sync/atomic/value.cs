@@ -29,19 +29,19 @@ partial class atomic_package {
 
     var vp = (ж<efaceWords>)(uintptr)(@unsafe.Pointer.FromRef(ref v));
     @unsafe.Pointer typ = (uintptr)LoadPointer(Ꮡ((~vp).typ));
-    if (typ == nil || typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+    if (typ == nil || typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
         // First store not yet completed.
         return default!;
     }
     @unsafe.Pointer data = (uintptr)LoadPointer(Ꮡ((~vp).data));
     var vlp = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(val)));
-    vlp.val.typ = typ;
-    vlp.val.data = data;
+    vlp.Value.typ = typ;
+    vlp.Value.data = data;
     return val;
 }
 
 internal static ж<byte> ᏑfirstStoreInProgress = new(default(byte));
-internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val;
+internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.Value;
 
 // Store sets the value of the [Value] v to val.
 // All calls to Store for a given Value must use values of the same concrete type.
@@ -69,14 +69,14 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
             runtime_procUnpin();
             return;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~vlp).typ) {
+        if (typ.Value != (~vlp).typ) {
             throw panic("sync/atomic: store of inconsistently typed value into Value");
         }
         StorePointer(Ꮡ((~vp).data), (~vlp).data);
@@ -115,18 +115,18 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
             runtime_procUnpin();
             return default!;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~np).typ) {
+        if (typ.Value != (~np).typ) {
             throw panic("sync/atomic: swap of inconsistently typed value into Value");
         }
         var op = (ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(old)));
-        (op.val.typ, op.val.data) = (np.val.typ, (uintptr)SwapPointer(Ꮡ((~vp).data), (~np).data));
+        (op.Value.typ, op.Value.data) = (np.Value.typ, (uintptr)SwapPointer(Ꮡ((~vp).data), (~np).data));
         return old;
     }
 }
@@ -169,14 +169,14 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
             runtime_procUnpin();
             return true;
         }
-        if (typ.val == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
+        if (typ.Value == new @unsafe.Pointer(ᏑfirstStoreInProgress)) {
             // First store in progress. Wait.
             // Since we disable preemption around the first store,
             // we can wait with active spinning.
             continue;
         }
         // First store completed. Check type and overwrite data.
-        if (typ.val != (~np).typ) {
+        if (typ.Value != (~np).typ) {
             throw panic("sync/atomic: compare and swap of inconsistently typed value into Value");
         }
         // Compare old and current via runtime equality check.
@@ -186,8 +186,8 @@ internal static ref byte firstStoreInProgress => ref ᏑfirstStoreInProgress.val
         // has not changed since LoadPointer.
         @unsafe.Pointer data = (uintptr)LoadPointer(Ꮡ((~vp).data));
         any i = default!;
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).val.typ = typ;
-        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).val.data = data;
+        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).Value.typ = typ;
+        ((ж<efaceWords>)(uintptr)(new @unsafe.Pointer(Ꮡ(i)))).Value.data = data;
         if (!AreEqual(i, old)) {
             return false;
         }

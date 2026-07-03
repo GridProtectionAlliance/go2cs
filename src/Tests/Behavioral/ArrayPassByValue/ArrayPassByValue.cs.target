@@ -28,7 +28,7 @@ internal static void Main() {
 }
 
 internal static void stest(ж<@string> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = "hello"u8;
 }
@@ -42,7 +42,7 @@ internal static void test(array<@string> a) {
 }
 
 internal static void test2(ж<array<@string>> Ꮡa) {
-    ref var a = ref Ꮡa.val;
+    ref var a = ref Ꮡa.Value;
 
     fmt.Println(a[0], a[1]);
     a[0] = "Goodbye"u8;

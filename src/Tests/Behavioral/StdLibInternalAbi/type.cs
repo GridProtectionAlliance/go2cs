@@ -189,13 +189,13 @@ internal static @unsafe.Pointer addChecked(@unsafe.Pointer p, uintptr x, @string
 
 [GoRecv] public static nint Len(this ref Type t) {
     if (t.Kind() == Array) {
-        return (nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Len;
+        return (nint)((ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.Len;
     }
     return 0;
 }
 
 public static ж<Type> Common(this ж<Type> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     return Ꮡt;
 }
@@ -272,31 +272,31 @@ public static readonly ΔChanDir InvalidDir = 0;
     }
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Struct) {
-        return Ꮡ(((ж<structTypeUncommon>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<structTypeUncommon>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Pointer) {
-        return Ꮡ(((ж<Uncommon_u>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_u>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Func) {
-        return Ꮡ(((ж<Uncommon_uᴛ1>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ1>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Slice) {
-        return Ꮡ(((ж<Uncommon_uᴛ2>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ2>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Array) {
-        return Ꮡ(((ж<Uncommon_uᴛ3>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ3>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Chan) {
-        return Ꮡ(((ж<Uncommon_uᴛ4>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ4>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Map) {
-        return Ꮡ(((ж<Uncommon_uᴛ5>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ5>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     if (exprᴛ1 == Interface) {
-        return Ꮡ(((ж<Uncommon_uᴛ6>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ6>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
     { /* default: */
-        return Ꮡ(((ж<Uncommon_uᴛ7>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.u);
+        return Ꮡ(((ж<Uncommon_uᴛ7>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.u);
     }
 
 }
@@ -434,7 +434,7 @@ public static readonly ΔChanDir InvalidDir = 0;
 
 [GoRecv] public static ж<Type> Key(this ref Type t) {
     if (t.Kind() == Map) {
-        return ((ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).val.Key;
+        return ((ж<ΔMapType>)(uintptr)(@unsafe.Pointer.FromRef(ref t))).Value.Key;
     }
     return default!;
 }
@@ -527,21 +527,21 @@ public static ж<byte> Data(this ΔName n, nint off) {
 }
 
 public static bool IsExported(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(0)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(0)))) != 0;
 }
 
 public static bool HasTag(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(1)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(1)))) != 0;
 }
 
 public static bool IsEmbedded(this ΔName n) {
-    return (byte)((n.Bytes.val) & ((byte)(1 << (int)(3)))) != 0;
+    return (byte)((n.Bytes.Value) & ((byte)(1 << (int)(3)))) != 0;
 }
 
 public static (nint, nint) ReadVarint(this ΔName n, nint off) {
     nint v = 0;
     for (nint i = 0; ᐧ ; i++) {
-        var x = n.DataChecked(off + i, "read varint"u8).val;
+        var x = n.DataChecked(off + i, "read varint"u8).Value;
         v += ((nint)((byte)(x & 0x7f)) << (int)((7 * i)));
         if ((byte)(x & 0x80) == 0) {
             return (i + 1, v);
@@ -554,7 +554,7 @@ public static bool IsBlank(this ΔName n) {
         return false;
     }
     var (_, l) = n.ReadVarint(1);
-    return l == 1 && n.Data(2).val == (rune)'_';
+    return l == 1 && n.Data(2).Value == (rune)'_';
 }
 
 internal static nint writeVarint(slice<byte> buf, nint n) {

@@ -10,21 +10,21 @@ partial class main_package {
 }
 
 internal static nint sumWalk(ж<node> Ꮡp, nint steps) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     nint total = 0;
     for (nint i = 0; i < steps; i++) {
         total += p.val;
-        Ꮡp = p.next; p = ref Ꮡp.val;
+        Ꮡp = p.next; p = ref Ꮡp.Value;
     }
     return total;
 }
 
 internal static ж<node> firstAfter(ж<node> Ꮡp, nint steps) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     for (nint i = 0; i < steps; i++) {
-        Ꮡp = p.next; p = ref Ꮡp.val;
+        Ꮡp = p.next; p = ref Ꮡp.Value;
     }
     return Ꮡp;
 }
@@ -33,9 +33,9 @@ internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
     var c = Ꮡ(new node(val: 3));
-    a.val.next = b;
-    b.val.next = c;
-    c.val.next = a;
+    a.Value.next = b;
+    b.Value.next = c;
+    c.Value.next = a;
     fmt.Println(sumWalk(a, 6));
     fmt.Println((~firstAfter(a, 4)).val);
 }

@@ -9,23 +9,23 @@ partial class main_package {
 }
 
 internal static void addInt(ж<nint> Ꮡx, nint d) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     x += d;
 }
 
 internal static nint addInClosure(this ж<counter> Ꮡc, nint d) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var apply = () => {
-        Ꮡc.val.n += d;
+        Ꮡc.Value.n += d;
     };
     apply();
     return c.n;
 }
 
 internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var apply = () => {
         addInt(Ꮡc.of(counter.Ꮡn), d);
@@ -35,10 +35,10 @@ internal static nint addViaFieldPtr(this ж<counter> Ꮡc, nint d) {
 }
 
 internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return (nint d) => {
-        Ꮡc.val.n += d;
+        Ꮡc.Value.n += d;
     };
 }
 

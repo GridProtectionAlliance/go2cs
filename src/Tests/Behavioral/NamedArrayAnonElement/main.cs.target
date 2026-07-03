@@ -16,7 +16,7 @@ partial class main_package {
 [GoType("[4]semTableᴛ1")] partial struct semTable;
 
 [GoRecv] internal static ж<semaRoot> rootFor(this ref semTable t, nint i) {
-    return Ꮡ(t.val[i]).of(semTableᴛ1.Ꮡroot);
+    return Ꮡ(t.Value[i]).of(semTableᴛ1.Ꮡroot);
 }
 
 internal static void Main() {

@@ -21,7 +21,7 @@ internal static nint run() {
         var sΔ1 = Ꮡ(new span(largeType: (~sʗ1).largeType * 2, val: (~sʗ1).val + 1));
         total += (~sΔ1).largeType + (~sΔ1).val;
     });
-    total += s.val.val;
+    total += s.Value.val;
     return total;
 }
 

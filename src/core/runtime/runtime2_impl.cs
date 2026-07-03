@@ -133,7 +133,7 @@ internal static Δguintptr guintptr(this ж<g> Ꮡgp) {
 //go:nosplit
 //go:nowritebarrier
 internal static void setGNoWB(ж<ж<g>> Ꮡgp, ж<g> Ꮡnew) {
-    Ꮡgp.val = Ꮡnew;
+    Ꮡgp.Value = Ꮡnew;
 }
 
 internal partial struct puintptr {
@@ -315,7 +315,7 @@ internal static ж<m> ptr(this muintptr mp) {
 //go:nosplit
 //go:nowritebarrier
 internal static void setMNoWB(ж<ж<m>> Ꮡmp, ж<m> Ꮡnew) {
-    Ꮡmp.val = Ꮡnew;
+    Ꮡmp.Value = Ꮡnew;
 }
 
 } // end runtime_package

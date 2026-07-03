@@ -918,7 +918,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 							cur = e.X
 							continue
 						case *ast.CallExpr:
-							// A method-call receiver buried in the LHS chain — `x.ptr().val.next = …`
+							// A method-call receiver buried in the LHS chain — `x.ptr().Value.next = …`
 							// (runtime stackpoolalloc's `x := gclinkptr(…)` loop, where `x` is shadow-renamed
 							// `xΔ1`). The `x` inside `x.ptr()` is past the selector/index descent above; visit
 							// the whole call so its receiver and argument idents get the rename — else the use
@@ -1447,7 +1447,7 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			tracker.processing = false
 
 			// The for-loop init's RHS expressions reference variables from the ENCLOSING scope —
-			// e.g. a shadow-renamed local in `for i, x := 0, b.val(); …` (where an inner `b` was
+			// e.g. a shadow-renamed local in `for i, x := 0, b.Value(); …` (where an inner `b` was
 			// renamed `bΔ1`). processAssignStmt only processed the init's LHS (the newly declared
 			// loop vars), so traverse the RHS too, or those uses keep the raw name and resolve to the
 			// wrong/forward variable (CS0841 / wrong binding).
@@ -1693,9 +1693,9 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
-	// A deref'd pointer parameter or pointer receiver is a `ref var p = ref Ꮡp.val` alias, which a C#
+	// A deref'd pointer parameter or pointer receiver is a `ref var p = ref Ꮡp.Value` alias, which a C#
 	// closure cannot capture (CS8175). Inside a lambda, reference it through its box `Ꮡp` instead —
-	// value uses become `Ꮡp.val`, address uses `Ꮡp` (see convIdent / convUnaryExpr). The box is a
+	// value uses become `Ꮡp.Value`, address uses `Ꮡp` (see convIdent / convUnaryExpr). The box is a
 	// plain reference-typed parameter, captured by reference, matching Go's capture of the pointer.
 	if v.varIsDerefdPointerParam(varObj) {
 		v.lambdaCapture.boxRefVars[varObj] = true
@@ -1716,7 +1716,7 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 	// box, not snapshot-copied: the value copy loses the box (writes through the captured `&m` are
 	// lost) and the copy declaration `var mʗ1 = m;` is invalid in expression position (a func
 	// literal passed as a call argument has no statement slot). Mark it box-ref and skip the
-	// snapshot — emission then renders `&m` as `Ꮡm` and value uses as `Ꮡm.val` (see convUnaryExpr
+	// snapshot — emission then renders `&m` as `Ꮡm` and value uses as `Ꮡm.Value` (see convUnaryExpr
 	// / convIdent). The box `Ꮡm` is a plain local, captured by reference by the C# closure, which
 	// matches Go's capture-by-reference semantics.
 	if escapesToHeap && v.varAddressTakenInLambda(varObj) {
@@ -1781,7 +1781,7 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 
 // varIsDerefdPointerParam reports whether varObj is a pointer-typed parameter (or the pointer
 // receiver) of the current function. Such a parameter is emitted as the box `ж<T> Ꮡp` and aliased to
-// a value with `ref var p = ref Ꮡp.val`; the ref-local alias cannot be captured by a C# closure, so
+// a value with `ref var p = ref Ꮡp.Value`; the ref-local alias cannot be captured by a C# closure, so
 // inside a lambda it must be referenced through the box `Ꮡp` (rendered by the box-ref-var paths).
 func (v *Visitor) varIsDerefdPointerParam(varObj types.Object) bool {
 	if varObj == nil || v.currentFuncSignature == nil {

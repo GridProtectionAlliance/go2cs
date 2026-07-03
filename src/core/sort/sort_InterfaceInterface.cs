@@ -54,7 +54,7 @@ public static partial class sort_package
             get
             {
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    return ref m_target_ptr.val;
+                    return ref m_target_ptr.Value;
 
                 return ref m_target;
             }
@@ -80,7 +80,7 @@ public static partial class sort_package
             T target = m_target;
 
             if (m_target_is_ptr && !(m_target_ptr is null))
-                target = m_target_ptr.val;
+                target = m_target_ptr.Value;
 
             if (s_LenByPtr is null || !m_target_is_ptr)
                 return s_LenByVal!(target);
@@ -100,7 +100,7 @@ public static partial class sort_package
             T target = m_target;
 
             if (m_target_is_ptr && !(m_target_ptr is null))
-                target = m_target_ptr.val;
+                target = m_target_ptr.Value;
 
             if (s_LessByPtr is null || !m_target_is_ptr)
                 return s_LessByVal!(target, i, j);
@@ -120,7 +120,7 @@ public static partial class sort_package
             T target = m_target;
 
             if (m_target_is_ptr && !(m_target_ptr is null))
-                target = m_target_ptr.val;
+                target = m_target_ptr.Value;
 
             if (s_SwapByPtr is null || !m_target_is_ptr)
             {

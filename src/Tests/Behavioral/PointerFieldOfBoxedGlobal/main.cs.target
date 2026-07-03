@@ -9,13 +9,13 @@ partial class main_package {
 }
 
 internal static void push(this ж<profBuf> Ꮡb, nint v) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     appendInt(Ꮡb.of(profBuf.Ꮡdata), v);
 }
 
 internal static void appendInt(ж<slice<nint>> Ꮡs, nint v) {
-    ref var s = ref Ꮡs.val;
+    ref var s = ref Ꮡs.Value;
 
     s = append(s, v);
 }
@@ -34,10 +34,10 @@ internal static void appendInt(ж<slice<nint>> Ꮡs, nint v) {
 }
 
 internal static ж<cpuProfile> Ꮡcpuprof = new(default(cpuProfile));
-internal static ref cpuProfile cpuprof => ref Ꮡcpuprof.val;
+internal static ref cpuProfile cpuprof => ref Ꮡcpuprof.Value;
 
 internal static void incr(ж<nint> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p++;
 }
@@ -53,7 +53,7 @@ internal static void run() {
 }
 
 internal static nint viaLocal(ж<holder> Ꮡh) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     var s = h.span;
     (~s).log.push(10);

@@ -2,7 +2,7 @@
 // an identifier: (a) a CALL RESULT whose ARGUMENT contains a conversion star —
 // `stringStructOf((*string)(unsafe.Pointer(p))).n` (runtime arena.go) — where the old
 // whole-subtree deref check mistook the argument's `(*string)` star for a dereferenced base and
-// skipped the `.val` (CS1061 on the ж<T> box); and (b) an EXTRA-PAREN pointer conversion —
+// skipped the `.Value` (CS1061 on the ж<T> box); and (b) an EXTRA-PAREN pointer conversion —
 // `((*view)(unsafe.Pointer(&g))).n` (runtime mheap.go) — which failed to reach the conversion
 // branch through the enclosing parens (the same extra-paren blind spot the reinterpret routing
 // had). READ paths only: a WRITE through the reinterpret hits the copy box (the documented

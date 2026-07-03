@@ -14,7 +14,7 @@ internal static @unsafe.Pointer add(@unsafe.Pointer p, uintptr x) {
 }
 
 internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     if (bytes == 0) {
         return Ꮡp;
@@ -23,10 +23,10 @@ internal static ж<nih> add(this ж<nih> Ꮡp, uintptr bytes) {
 }
 
 internal static uint32 step(ж<uint32> Ꮡv) {
-    ref var v = ref Ꮡv.val;
+    ref var v = ref Ꮡv.Value;
 
     var q = (ж<uint32>)(uintptr)(add(new @unsafe.Pointer(Ꮡv), @unsafe.Sizeof((uint32)0)));
-    return q.val;
+    return q.Value;
 }
 
 [GoType] partial struct holder {
@@ -48,7 +48,7 @@ internal static void Main() {
     var m = Ꮡn.add(0);
     fmt.Println((~m).a, (~m).b);
     var pb = (ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡn.add(4)));
-    fmt.Println(pb.val);
+    fmt.Println(pb.Value);
     var hh = new holder(x: 3, y: 5);
     fmt.Println(hh.second());
 }

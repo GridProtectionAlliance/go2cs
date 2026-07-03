@@ -113,7 +113,7 @@ public interface IPointer<T>
     /// Gets a reference to the value of type <typeparamref name="T"/>.
     /// </summary>
     /// <exception cref="PanicException">runtime error: invalid memory address or nil pointer dereference</exception>
-    ref T val { get; }
+    ref T Value { get; }
 
     /// <summary>
     /// Gets flag indicating if the pointer is null.
@@ -166,7 +166,7 @@ public interface IPointer<T>
 /// <para>
 /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that value
 /// will be "boxed" for heap allocation. Since boxed value will be a new copy of original value, make
-/// sure to use ref-based <see cref="val"/> for updates instead of a local stack copy of value.
+/// sure to use ref-based <see cref="Value"/> for updates instead of a local stack copy of value.
 /// See the <see cref="builtin.heap{T}(out ж{T})"/> and notes on boxing:
 /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
 /// </para>
@@ -221,7 +221,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get reference to value, source is not a valid array or slice pointer.</exception>
-    public ref T val
+    public ref T Value
     {
         get
         {
@@ -252,21 +252,21 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     }
 
     /// <summary>
-    /// Gets a reference to the value slot WITHOUT the nil-pointer-dereference check that <see cref="val"/>
-    /// performs — identical to <see cref="val"/> except it never throws.
+    /// Gets a reference to the value slot WITHOUT the nil-pointer-dereference check that <see cref="Value"/>
+    /// performs — identical to <see cref="Value"/> except it never throws.
     /// </summary>
     /// <remarks>
     /// <para>
     /// Used only where this box is a real heap allocation (created via <c>Ꮡ</c> / <c>heap</c>, so it is
     /// structurally a non-nil pointer) AND its value is a <em>reference</em> type that may legitimately
     /// be null — a heap-boxed pointer, slice, map, interface, or func <em>local</em> captured by a
-    /// closure (a <c>ж&lt;ж&lt;T&gt;&gt;</c>, etc.). There <c>.val</c> is a <em>read of the held value</em>,
+    /// closure (a <c>ж&lt;ж&lt;T&gt;&gt;</c>, etc.). There <c>.Value</c> is a <em>read of the held value</em>,
     /// not a dereference of this box, so it must not panic when the held value is null: in Go,
     /// <c>*(&amp;p)</c> where <c>p</c> is a nil <c>*T</c>/slice/map yields the nil value, no dereference
     /// happens. Unlike <see cref="PointerExtensions.DerefOrNil{T}"/> (which returns a throwaway slot for a
     /// nil box, so writes are lost), this returns the <em>real</em> slot — reads and writes both persist,
-    /// which the captured local requires. A genuine nil-pointer dereference (<c>~Ꮡp</c> / <c>Ꮡp.val</c>)
-    /// still routes through the strict <see cref="val"/> and panics, preserving Go semantics.
+    /// which the captured local requires. A genuine nil-pointer dereference (<c>~Ꮡp</c> / <c>Ꮡp.Value</c>)
+    /// still routes through the strict <see cref="Value"/> and panics, preserving Go semantics.
     /// </para>
     /// </remarks>
     public ref T ValueSlot
@@ -297,8 +297,8 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     /// <summary>
     /// Gets a flag indicating whether this is a nil <em>standard</em> pointer — a plain heap pointer
     /// whose value is unset — as opposed to a struct-field or array-element reference (which resolve
-    /// through <see cref="val"/> without a null check). This is exactly the case for which the
-    /// <see cref="val"/> getter throws <see cref="RuntimeErrorPanic.NilPointerDereference"/>; the
+    /// through <see cref="Value"/> without a null check). This is exactly the case for which the
+    /// <see cref="Value"/> getter throws <see cref="RuntimeErrorPanic.NilPointerDereference"/>; the
     /// nil-safe <see cref="PointerExtensions.DerefOrNil{T}"/> re-alias accessor uses it to avoid that
     /// throw when re-aliasing a pointer parameter walked to a nil terminator.
     /// </summary>
@@ -317,21 +317,21 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
                 if (IsNull)
                     throw RuntimeErrorPanic.NilPointerDereference();
                 
-                return new PinnedBuffer(val, Marshal.SizeOf<T>());
+                return new PinnedBuffer(Value, Marshal.SizeOf<T>());
             }
 
             // Get reference to struct field
             if (m_structFieldRef is not null)
             {
                 (object source, FieldRefFunc<T> _) = m_structFieldRef!.Value;
-                return new PinnedBuffer(val, Marshal.SizeOf(source));
+                return new PinnedBuffer(Value, Marshal.SizeOf(source));
             }
 
             // Get reference to array or slice element
             (IArray array, int _) = m_arrayIndexRef!.Value;
 
             if (array is IArray<T>)
-                return new PinnedBuffer(val, array.Length);
+                return new PinnedBuffer(Value, array.Length);
 
             throw new InvalidOperationException("Cannot get pinned buffer to value, source is not a valid struct field, array or slice reference.");
         }
@@ -354,12 +354,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         {
             ж<T> typedPtr = (ж<T>)structPtr;
 
-            // Resolve the parent value through `val`, not `m_val` — when this pointer is itself a
-            // field reference (or array element) its real storage lives behind `val` and `m_val` is
+            // Resolve the parent value through `Value`, not `m_val` — when this pointer is itself a
+            // field reference (or array element) its real storage lives behind `Value` and `m_val` is
             // an empty default. This is the case for a nested `of()` chain, e.g.
             // `Ꮡb.of(Bool.Ꮡu).of(Uint8.Ꮡvalue)` where the intermediate `ж<Uint8>` is a field ref —
             // reading `m_val` would alias a throwaway copy and lose writes.
-            return ref fieldRefFunc(ref typedPtr.val);
+            return ref fieldRefFunc(ref typedPtr.Value);
         }
     }
 
@@ -391,22 +391,22 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     public ж<Telem> at<Telem>(nint index)
     {
         // An Array-class [GoType] wrapper's ZERO VALUE has a null lazy backing that its members
-        // allocate on first touch. The `val is IArray<Telem>` pattern below COPIES the wrapper —
+        // allocate on first touch. The `Value is IArray<Telem>` pattern below COPIES the wrapper —
         // touched on the copy, the backing allocates on the copy and the REAL storage stays
         // virgin, silently dropping every write through the returned element pointer (the
         // pallocBits lesson, resurfacing at the box-element seam). Materialize the backing on
         // the real storage FIRST via a non-boxing constrained interface call; the copy then
         // SHARES the materialized backing (array<T> is a readonly struct over a shared T[]).
-        s_ensureArrayBacking?.Invoke(ref val);
+        s_ensureArrayBacking?.Invoke(ref Value);
 
-        // Read through `val`, not `m_val` — when this pointer is itself a field reference (from
-        // `of(...)`) or an array-element reference, the real array storage lives behind `val` and
+        // Read through `Value`, not `m_val` — when this pointer is itself a field reference (from
+        // `of(...)`) or an array-element reference, the real array storage lives behind `Value` and
         // `m_val` is an empty default. Reading `m_val` would miss the array entirely (spurious "not
         // an array" / null deref). This is the `Ꮡg.of(T.ᏑarrayField).at<E>(i)` form — the address of
         // an element of an array FIELD of a boxed struct (a boxed global, a pointer param/local).
-        // `array<T>` is a readonly struct over a shared backing `T[]`, so the copy `val` yields still
+        // `array<T>` is a readonly struct over a shared backing `T[]`, so the copy `Value` yields still
         // aliases the real elements (writes through the returned element pointer land).
-        if (val is not IArray<Telem> array)
+        if (Value is not IArray<Telem> array)
             throw new InvalidOperationException("Cannot get pointer to element at index, type is not an array or slice.");
         
         if (!array.IndexIsValid(index))
@@ -529,7 +529,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     //     public static ref T operator ref(ж<T> value) => ref value.m_value;
     // Converted code like this:
     //     var v = 2; var vp = ptr(v);
-    //     vp.val = 999;
+    //     vp.Value = 999;
     // Could then become:
     //     var v = 2; var vp = ptr(v);
     //     ~vp = 999; // or
@@ -547,12 +547,12 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (value.IsNull)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        // Resolve through `val`, not the raw `m_val` field: for a struct-field reference (`Ꮡx.of(T.Ꮡf)`)
-        // or an array-element reference, the real storage lives behind `val` and `m_val` is an empty
+        // Resolve through `Value`, not the raw `m_val` field: for a struct-field reference (`Ꮡx.of(T.Ꮡf)`)
+        // or an array-element reference, the real storage lives behind `Value` and `m_val` is an empty
         // default — returning `m_val` would yield a zero-valued copy (so `(~(&x.field)).sub` read 0, e.g.
-        // a `c := &b.w; c.a` field-chain read). For a standard pointer `val` returns `m_val`, so this is
-        // identical there. Matches the IPointer<T>.operator ~ above, which already resolves via `val`.
-        return value.val;
+        // a `c := &b.w; c.a` field-chain read). For a standard pointer `Value` returns `m_val`, so this is
+        // identical there. Matches the IPointer<T>.operator ~ above, which already resolves via `Value`.
+        return value.Value;
     }
 
     static T IPointer<T>.operator ~(IPointer<T> value)
@@ -560,7 +560,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         if (value.IsNull)
             throw RuntimeErrorPanic.NilPointerDereference();
 
-        return value.val;
+        return value.Value;
     }
 
     // I posted a suggestion for at least the "ref" operator:
@@ -620,7 +620,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator uintptr(ж<T> value)
     {
-        fixed (void* ptr = &value.val)
+        fixed (void* ptr = &value.Value)
             return (uintptr)ptr;
     }
 
@@ -631,7 +631,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator void*(ж<T> value)
     {
-        fixed (T* ptr = &value.val)
+        fixed (T* ptr = &value.Value)
             return ptr;
     }
 
@@ -658,13 +658,13 @@ public static class PointerExtensions
     /// Converted code re-aliases a deref'd pointer parameter after repointing its box, e.g.
     /// <c>Ꮡp = p.next; p = ref Ꮡp.DerefOrNil();</c>, when the parameter is walked to a nil terminator
     /// (<c>for p != nil { …; p = p.next }</c>). On the final step the box becomes nil, and the plain
-    /// <see cref="ж{T}.val"/> getter would throw a nil-pointer dereference before the loop guard is
+    /// <see cref="ж{T}.Value"/> getter would throw a nil-pointer dereference before the loop guard is
     /// re-checked. This accessor instead yields a <c>ref</c> to a throwaway default slot — never read
     /// while the box is nil (the <c>Ꮡp != nil</c> guard excludes it), so the value is harmless.
     /// </para>
     /// <para>
     /// This is <em>not</em> a substitute for a genuine dereference: reading or writing <c>*p</c> on a
-    /// nil pointer (emitted as <c>~Ꮡp</c> / <c>Ꮡp.val</c>) still panics, preserving Go semantics. Only
+    /// nil pointer (emitted as <c>~Ꮡp</c> / <c>Ꮡp.Value</c>) still panics, preserving Go semantics. Only
     /// the re-alias — which captures a reference without reading it — uses the nil-safe form. As an
     /// extension method it tolerates a <c>null</c> receiver (a nil pointer field is a <c>null</c>
     /// reference, not a nil box).
@@ -675,7 +675,7 @@ public static class PointerExtensions
         if (box is null || box.IsNilStandardPointer)
             return ref NilSlot<T>.Slot;
 
-        return ref box.val;
+        return ref box.Value;
     }
 
     // Per-T shared default slot returned by ref for a nil pointer. Never read while the pointer is

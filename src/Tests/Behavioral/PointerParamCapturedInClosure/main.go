@@ -1,8 +1,8 @@
 // PointerParamCapturedInClosure guards a deref'd pointer PARAMETER (or receiver) that
 // is captured by a closure. A pointer param is emitted as the box `ж<T> Ꮡp` aliased to
-// `ref var p = ref Ꮡp.val`; a C# closure cannot capture that ref-local (CS8175). Inside
+// `ref var p = ref Ꮡp.Value`; a C# closure cannot capture that ref-local (CS8175). Inside
 // a lambda the converter references it through the box instead — a value use becomes
-// `Ꮡp.val.field`, an address use `Ꮡp`. Mirrors runtime closures that capture a `*maptype`
+// `Ꮡp.Value.field`, an address use `Ꮡp`. Mirrors runtime closures that capture a `*maptype`
 // / `*m` / `*p` parameter (e.g. map.go's markBucketsEmpty using `t.BucketSize`).
 package main
 

@@ -41,7 +41,7 @@ internal static ж<node> build(params ꓸꓸꓸnint valsʗp) {
 }
 
 internal static (ж<node>, nint) advance(ж<node> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     return (p.next, p.val);
 }

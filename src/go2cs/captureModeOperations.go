@@ -20,7 +20,7 @@ import (
 var packageCaptureModeMethods map[*types.Func]bool
 
 // packageDirectBoxReceiverMethods holds the field-address capture-mode methods that are
-// emitted with the box AS the receiver directly (`this ж<T> Ꮡx` + `ref var x = ref Ꮡx.val;`),
+// emitted with the box AS the receiver directly (`this ж<T> Ꮡx` + `ref var x = ref Ꮡx.Value;`),
 // where `&x.field` references the parameter box (`Ꮡx.of(Type.ᏑField)`). This replaces the
 // static-ThreadLocal capture for ALL such methods (generic and non-generic): the ThreadLocal
 // is a shared static reassigned per call and races across threads for distinct receivers —
@@ -386,7 +386,7 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 
 // bodyCapturesReceiverInClosure reports whether the body references the receiver inside a function
 // literal (a closure) — e.g. runtime's `func (p *_panic) nextFrame() { … systemstack(func(){ … p.lr
-// … }) }`. The receiver is normally emitted as the deref'd ref-local alias `ref var p = ref Ꮡp.val`,
+// … }) }`. The receiver is normally emitted as the deref'd ref-local alias `ref var p = ref Ꮡp.Value`,
 // but a C# ref-local cannot be captured by a lambda (CS8175); inside the closure the receiver must
 // be referenced through its box `Ꮡp` (the convIdent/convUnaryExpr box-ref forms). That box only
 // exists when the method is direct-ж — the box passed AS the receiver param (`this ж<T> Ꮡp`). A
@@ -567,7 +567,7 @@ func (v *Visitor) exprIsCaptureModeFieldBase(expr ast.Expr) bool {
 }
 
 // exprIsDerefdPointerParam reports whether expr is a pointer-typed parameter. Such a parameter is
-// emitted deref'd to a value alias (`ref var p = ref Ꮡp.val`) with the box `Ꮡp` as the actual
+// emitted deref'd to a value alias (`ref var p = ref Ꮡp.Value`) with the box `Ꮡp` as the actual
 // parameter, so a direct-ж method called on it must route through `Ꮡp` (a pointer *local* holds
 // the box directly and needs no routing).
 func (v *Visitor) exprIsDerefdPointerParam(expr ast.Expr) bool {

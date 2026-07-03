@@ -515,7 +515,7 @@ public static class builtin
         ArgumentNullException.ThrowIfNull((object?)dst);
         ArgumentNullException.ThrowIfNull((object?)src);
 
-        return copy(dst.val, src.val);
+        return copy(dst.Value, src.Value);
     }
 
     /// <summary>
@@ -530,7 +530,7 @@ public static class builtin
     {
         ArgumentNullException.ThrowIfNull((object?)dst);
 
-        return copy(dst.val, src);
+        return copy(dst.Value, src);
     }
 
     /// <summary>
@@ -545,7 +545,7 @@ public static class builtin
     {
         ArgumentNullException.ThrowIfNull((object?)src);
 
-        return copy(dst, src.val);
+        return copy(dst, src.Value);
     }
 
     /// <summary>
@@ -630,7 +630,7 @@ public static class builtin
         ArgumentNullException.ThrowIfNull((object?)dst);
         ArgumentNullException.ThrowIfNull((object?)src);
 
-        return copy(dst.val, src.val);
+        return copy(dst.Value, src.Value);
     }
 
     /// <summary>
@@ -646,7 +646,7 @@ public static class builtin
     {
         ArgumentNullException.ThrowIfNull((object?)dst);
 
-        return copy(dst.val, src);
+        return copy(dst.Value, src);
     }
 
     /// <summary>
@@ -662,7 +662,7 @@ public static class builtin
     {
         ArgumentNullException.ThrowIfNull((object?)src);
 
-        return copy(dst, src.val);
+        return copy(dst, src.Value);
     }
 
     /// <summary>
@@ -699,7 +699,7 @@ public static class builtin
     {
         ArgumentNullException.ThrowIfNull((object?)dst);
 
-        return copy(dst.val, src);
+        return copy(dst.Value, src);
     }
 
     /// <summary>
@@ -860,7 +860,7 @@ public static class builtin
     /// <returns>The length of the <paramref name="array"/>.</returns>
     public static nint len<T>(in ж<array<T>> array)
     {
-        return array.val.Length;
+        return array.Value.Length;
     }
 
     /// <summary>
@@ -905,7 +905,7 @@ public static class builtin
     /// <returns>The length of the <paramref name="slice"/>.</returns>
     public static nint len<T>(in ж<slice<T>> slice)
     {
-        return slice.val.Length;
+        return slice.Value.Length;
     }
 
     /// <summary>
@@ -935,7 +935,7 @@ public static class builtin
     /// <returns>The length of the <paramref name="str"/>.</returns>
     public static nint len(in ж<@string> str)
     {
-        return str.val.Length;
+        return str.Value.Length;
     }
 
     /// <summary>
@@ -975,7 +975,7 @@ public static class builtin
     /// <returns>The length of the <paramref name="map"/>.</returns>
     public static nint len<TKey, TValue>(in ж<map<TKey, TValue>> map) where TKey : notnull
     {
-        return map.val.Count;
+        return map.Value.Count;
     }
 
     /// <summary>
@@ -1005,7 +1005,7 @@ public static class builtin
     /// <returns>The length of the <paramref name="channel"/>.</returns>
     public static nint len<T>(in ж<channel<T>> channel)
     {
-        return channel.val.Length;
+        return channel.Value.Length;
     }
 
     /// <summary>
@@ -1059,11 +1059,11 @@ public static class builtin
     /// <param name="source">Source pointer.</param>
     /// <returns>Dereferenced value that <paramref name="source"/> points to.</returns>
     /// <remarks>
-    /// This is equivalent to <c>~source</c> and <c>source.val</c>.
+    /// This is equivalent to <c>~source</c> and <c>source.Value</c>.
     /// </remarks>
     public static T ж<T>(in ж<T> source)
     {
-        return source.val;
+        return source.Value;
     }
 
     /// <summary>
@@ -1117,9 +1117,9 @@ public static class builtin
     public static ref T heap<T>(out ж<T> pointer)
     {
         pointer = Ꮡ<T>(default!);
-        // ValueSlot, not val: the box was just allocated, so it is structurally a non-nil pointer —
-        // the val getter's nil-pointer-dereference check is always spurious here. For a value-type T
-        // this is identical to val; for a reference-type T (a heap-boxed pointer/slice/map local whose
+        // ValueSlot, not Value: the box was just allocated, so it is structurally a non-nil pointer —
+        // the Value getter's nil-pointer-dereference check is always spurious here. For a value-type T
+        // this is identical to Value; for a reference-type T (a heap-boxed pointer/slice/map local whose
         // zero value is null) it avoids a spurious panic when establishing the ref-local alias.
         return ref pointer.ValueSlot;
     }
@@ -1141,8 +1141,8 @@ public static class builtin
     public static ref T heap<T>(in T target, out ж<T> pointer)
     {
         pointer = Ꮡ(target);
-        // ValueSlot, not val: a freshly allocated box is structurally non-nil, so the val getter's
-        // nil-pointer-dereference check is spurious here (identical to val for a value-type T; avoids a
+        // ValueSlot, not Value: a freshly allocated box is structurally non-nil, so the Value getter's
+        // nil-pointer-dereference check is spurious here (identical to Value for a value-type T; avoids a
         // spurious panic for a reference-type T whose target value is null).
         return ref pointer.ValueSlot;
     }

@@ -13,22 +13,22 @@ partial class main_package {
 [GoType("[4]byte")] partial struct tb;
 
 internal static void zeroTB(ж<tb> Ꮡbuf) {
-    ref var buf = ref Ꮡbuf.val;
+    ref var buf = ref Ꮡbuf.Value;
 
     buf = new tb(new byte[4].array());
 }
 
 [GoRecv] internal static void set(this ref pageBits b, nuint i, uint64 v) {
-    b.val[i] = v;
+    b.Value[i] = v;
 }
 
 [GoRecv] internal static uint64 get(this ref pageBits b, nuint i) {
-    return b.val[i];
+    return b.Value[i];
 }
 
 [GoRecv] internal static void fill(this ref pallocBits b) {
-    for (nint i = 0; i < len(b.val); i++) {
-        b.val[i] = (uint64)(i * 10 + 1);
+    for (nint i = 0; i < len(b.Value); i++) {
+        b.Value[i] = (uint64)(i * 10 + 1);
     }
 }
 
@@ -72,11 +72,11 @@ internal static void Main() {
     fmt.Println(t[2], len(t));
     ref var c = ref heap(new callers(), out var Ꮡc);
     var h = new holder(trace: Ꮡc);
-    h.trace.val[0] = 0x10;
-    h.trace.val[1] = h.trace.val[0] + 2;
-    fmt.Println(len(h.trace.val), h.trace.val[0], h.trace.val[1], c[0]);
+    h.trace.Value[0] = 0x10;
+    h.trace.Value[1] = h.trace.Value[0] + 2;
+    fmt.Println(len(h.trace.Value), h.trace.Value[0], h.trace.Value[1], c[0]);
     var dst = new slice<uintptr>(2);
-    nint nc = copy(dst, (~h.trace).val[..2]);
+    nint nc = copy(dst, (~h.trace).Value[..2]);
     fmt.Println(nc, dst[1]);
     ref var cs = ref heap(new counters(), out var Ꮡcs);
     var pcs = Ꮡcs;

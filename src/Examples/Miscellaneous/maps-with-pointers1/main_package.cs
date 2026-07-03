@@ -80,20 +80,20 @@ static partial class main_package
         fmt.Println(v1, m["Bell Labs"]);
 
         var v = m["Bell Labs"];
-        v.val.Lat = 99;
+        v.Value.Lat = 99;
         fmt.Println(v1, m["Bell Labs"]);
 
         var v2 = m["Bell Labs"];
-        v2.val.Lat = 999;
+        v2.Value.Lat = 999;
         fmt.Println(v1, m["Bell Labs"]);
 
-        /* Option 1: */ m["Bell Labs"].val.Lat = 1000;
+        /* Option 1: */ m["Bell Labs"].Value.Lat = 1000;
         /* Option 2 - unsafe: */ //((Vertex*)m["Bell Labs"])->Lat = 1000;
         /* Option 3 - unsafe: */ // (~m["Bell Labs"])->Lat = 1000;
         fmt.Println(v1, m["Bell Labs"]);
 
         // Escape detected here with address of operator for "&v2.Lat"
-        update(ref v2.val.Lat);
+        update(ref v2.Value.Lat);
         fmt.Println(v1, m["Bell Labs"]);
     }
 }

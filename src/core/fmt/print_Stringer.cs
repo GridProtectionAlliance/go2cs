@@ -66,7 +66,7 @@ public static partial class fmt_package
             get
             {
                 if (m_target_is_ptr && m_target_ptr is not null)
-                    return ref m_target_ptr.val;
+                    return ref m_target_ptr.Value;
 
                 return ref m_target;
             }
@@ -92,7 +92,7 @@ public static partial class fmt_package
             T target = m_target;
 
             if (m_target_is_ptr && m_target_ptr is not null)
-                target = m_target_ptr.val;
+                target = m_target_ptr.Value;
 
             if (s_StringByRef is null)
                 return s_StringByVal!(target);
@@ -112,7 +112,7 @@ public static partial class fmt_package
                 case "v":
                 {
                     if (m_target_is_ptr)
-                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
+                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
 
                     return m_target?.ToString() ?? "<nil>";
                 }

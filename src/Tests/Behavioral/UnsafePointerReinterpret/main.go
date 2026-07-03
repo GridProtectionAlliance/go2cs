@@ -33,8 +33,8 @@ func writeBarrier(ptr unsafe.Pointer, val unsafe.Pointer) {
 // funcAt derefs a reinterpret whose starred inner is a FUNC TYPE, inside a TUPLE return —
 // runtime panic.go's `return *(*func())(add(p.slotsPtr, …)), true`. A func-type starred inner
 // has no identifier, so this misses the ident-gated cast-deref branch and falls to the default
-// deref, which must WRAP the cast before `.val` (C# postfix beats cast precedence — a naked
-// `.val` re-binds onto the cast's inner operand: CS0029 ж<Action>→Action in the tuple).
+// deref, which must WRAP the cast before `.Value` (C# postfix beats cast precedence — a naked
+// `.Value` re-binds onto the cast's inner operand: CS0029 ж<Action>→Action in the tuple).
 //
 //go:noinline
 func funcAt(p unsafe.Pointer) (func(), bool) {
@@ -42,7 +42,7 @@ func funcAt(p unsafe.Pointer) (func(), bool) {
 }
 
 // zeroPair INDEXES a reinterpret-cast result directly — runtime malloc.go's
-// `(*[2]uint64)(x)[0] = 0`. The pointer-to-array auto-deref `.val` (and the index itself) must
+// `(*[2]uint64)(x)[0] = 0`. The pointer-to-array auto-deref `.Value` (and the index itself) must
 // wrap the cast: postfix beats cast precedence, so a naked append read the inner
 // @unsafe.Pointer's uintptr and indexed a nuint (CS0021). Copy-box seam: the write hits the
 // boxed copy (documented reinterpret contract) — Compile + Target only, like the rest of this

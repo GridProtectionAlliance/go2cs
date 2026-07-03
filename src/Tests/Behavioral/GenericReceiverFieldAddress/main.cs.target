@@ -9,25 +9,25 @@ partial class main_package {
 }
 
 internal static void setT<T>(ж<T> Ꮡp, T val) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = val;
 }
 
 internal static T getT<T>(ж<T> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     return p;
 }
 
 public static void Set<T>(this ж<Box<T>> Ꮡb, T val) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     setT(Ꮡb.of(Box<T>.Ꮡv), val);
 }
 
 public static T Get<T>(this ж<Box<T>> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     return getT(Ꮡb.of(Box<T>.Ꮡv));
 }

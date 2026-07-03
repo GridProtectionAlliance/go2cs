@@ -9,11 +9,11 @@ namespace go2cs.Templates.InheritedType;
 /// (golib <c>len(IArray)</c> — CS1503 otherwise; runtime mpallocbits.go).
 /// </summary>
 /// <remarks>
-/// Every member delegates through the private ref accessor <c>view</c>, NOT the copying <c>val</c>
+/// Every member delegates through the private ref accessor <c>view</c>, NOT the copying <c>Value</c>
 /// property: the underlying array wrapper's backing is LAZILY allocated (<c>m_value ??= new …</c>),
 /// so a zero-valued instance reached through a value copy would allocate on the copy and silently
 /// drop writes (the historical pallocBits lost-writes trap). <c>view</c> first touches
-/// <c>m_value.val</c> — allocating the backing in THIS wrapper's own storage (<c>m_value</c> is
+/// <c>m_value.Value</c> — allocating the backing in THIS wrapper's own storage (<c>m_value</c> is
 /// mutable for this branch) — then returns <c>ref m_value</c>, so element refs land in the real,
 /// now-shared <c>T[]</c>. Subsequent struct copies (e.g. the <c>(pageBits)(b)</c> reinterpret
 /// conversion) share that same backing array by reference.
@@ -23,7 +23,7 @@ internal static class IArrayViewTypeTemplate
     public static string Generate(string typeName, string targetTypeName) =>
         $$"""
 
-                // View over the underlying array wrapper: first touches m_value.val ON THE FIELD
+                // View over the underlying array wrapper: first touches m_value.Value ON THE FIELD
                 // (mutable — no defensive copy), materializing the lazily-allocated backing in THIS
                 // wrapper's own storage; the returned VALUE copy then shares that heap T[] by
                 // reference, so element refs taken through it land in the real storage (a struct
@@ -32,7 +32,7 @@ internal static class IArrayViewTypeTemplate
                 {
                     get
                     {
-                        _ = m_value.val;
+                        _ = m_value.Value;
                         return m_value;
                     }
                 }

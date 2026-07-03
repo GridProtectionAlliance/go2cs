@@ -11,7 +11,7 @@ internal static nint sumWithinIter(slice<nint> s) {
         i = iᴛ1;
 
         var p = Ꮡi;
-        sum += p.val + s[i];
+        sum += p.Value + s[i];
     }
     return sum;
 }
@@ -32,7 +32,7 @@ internal static void Main() {
     fmt.Println(sumWithinIter(s));
     var ptrs = collectPointers(s);
     foreach (var (_, p) in ptrs) {
-        fmt.Print(p.val, " ");
+        fmt.Print(p.Value, " ");
     }
     fmt.Println();
 }

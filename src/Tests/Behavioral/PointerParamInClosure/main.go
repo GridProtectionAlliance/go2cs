@@ -2,10 +2,10 @@
 // func literal, or any lambda).
 //
 // The converter dereferences a pointer parameter in the function body through a
-// `ref var p = ref Ꮡp.val` ref-local. A ref-local cannot be captured by a C# lambda
+// `ref var p = ref Ꮡp.Value` ref-local. A ref-local cannot be captured by a C# lambda
 // (CS8175 "cannot use ref local inside an anonymous method"), so `*p = …` inside a deferred or
 // nested closure failed to compile. The fix dereferences the heap box parameter directly
-// (`Ꮡp.val`) inside a lambda, which is a capturable reference type — while leaving the direct
+// (`Ꮡp.Value`) inside a lambda, which is a capturable reference type — while leaving the direct
 // (non-lambda) body deref as the efficient ref-local.
 package main
 

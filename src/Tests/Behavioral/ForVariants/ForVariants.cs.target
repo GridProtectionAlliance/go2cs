@@ -77,7 +77,7 @@ break_scan:;
 }
 
 internal static void f(ж<nint> Ꮡy) {
-    ref var y = ref Ꮡy.val;
+    ref var y = ref Ꮡy.Value;
 
     fmt.Print(y);
 }

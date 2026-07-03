@@ -4,7 +4,7 @@ import "fmt"
 
 // A method receiver / pointer parameter named after a colliding package identifier — runtime's
 // `func (p *cpuProfile) add()` where `p` collides with the type `p` — is shadow-renamed (`Δp`), but
-// its box keeps the raw Go name (`ref var Δp = ref Ꮡp.val`). A pointer-receiver (capture-mode)
+// its box keeps the raw Go name (`ref var Δp = ref Ꮡp.Value`). A pointer-receiver (capture-mode)
 // method call on that receiver, a closure that *reads* through it, and a closure that takes the
 // *address* of one of its fields must all route through the box `Ꮡp`, not `Ꮡ`+the renamed value
 // alias (`ᏑΔp`, which is not in scope → CS0103). Guards the raw-box-name routing in
@@ -34,7 +34,7 @@ func (p *counter) bumpTwice() {
 // box (`p.n`) and takes the address of its field (`&p.n`).
 func addInClosure(p *counter, d int) int {
 	apply := func() {
-		p.n += d        // closure read: p.n -> Ꮡp.val.n, NOT ᏑΔp.val.n
+		p.n += d        // closure read: p.n -> Ꮡp.Value.n, NOT ᏑΔp.Value.n
 		addInt(&p.n, d) // closure address-of: &p.n routed through box Ꮡp, NOT ᏑΔp
 	}
 	apply()

@@ -20,17 +20,17 @@ internal static void mark(this tagger _) {
 }
 
 internal static ж<holder> Ꮡh = new(default(holder));
-internal static ref holder h => ref Ꮡh.val;
+internal static ref holder h => ref Ꮡh.Value;
 
 internal static ж<Δmark> Ꮡgm = new(default(Δmark));
-internal static ref Δmark gm => ref Ꮡgm.val;
+internal static ref Δmark gm => ref Ꮡgm.Value;
 
 internal static nint localShadowsCollisionType() {
     var m = Ꮡ(new Δmark(id: 10));
     var pid = m.of(main_package.Δmark.Ꮡid);
-    pid.val = 55;
+    pid.Value = 55;
     nint Δmark = 7;
-    return pid.val + Δmark;
+    return pid.Value + Δmark;
 }
 
 [GoType] partial struct w {
@@ -48,17 +48,17 @@ internal static nint capturedLocalNamedAfterType() {
     var wʗ1 = w;
     run(() => {
         var p = wʗ1.of(main_package.w.Ꮡpark);
-        p.val = p.val + 3;
-        got = p.val;
+        p.Value = p.Value + 3;
+        got = p.Value;
     });
     return got + (~w).other;
 }
 
 internal static void Main() {
     var p = Ꮡh.of(holder.Ꮡmark);
-    p.val = 42;
+    p.Value = 42;
     var q = Ꮡh.of(holder.Ꮡextra);
-    q.val = 7;
+    q.Value = 7;
     fmt.Println(h.mark, h.extra);
     Δmark m = default!;
     m.id = 3;
@@ -66,7 +66,7 @@ internal static void Main() {
     t.mark();
     fmt.Println(m.id);
     var pid = Ꮡgm.of(main_package.Δmark.Ꮡid);
-    pid.val = 99;
+    pid.Value = 99;
     fmt.Println(gm.id);
     var h2 = new holder(mark: 5, extra: 6);
     fmt.Println(h2.mark, h2.extra);

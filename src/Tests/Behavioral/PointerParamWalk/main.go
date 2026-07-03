@@ -9,9 +9,9 @@ type node struct {
 
 // sumWalk REASSIGNS its `*node` parameter `p` to step through a (circular) list, reading the
 // pointed-to value each step (`total += p.val; p = p.next`). Every named pointer parameter is
-// deref-aliased in C# to a value var (`ref var p = ref Ꮡp.val`), which cannot itself be
+// deref-aliased in C# to a value var (`ref var p = ref Ꮡp.Value`), which cannot itself be
 // repointed; the reassignment must repoint the box and re-alias the value var
-// (`Ꮡp = p.next; p = ref Ꮡp.val;`). Earlier it emitted `p = p.next` — assigning a `ж<node>`
+// (`Ꮡp = p.next; p = ref Ꮡp.Value;`). Earlier it emitted `p = p.next` — assigning a `ж<node>`
 // into the `node` value alias — which fails to compile (CS0266/CS0029). This is the no-unsafe
 // analogue of the runtime's `bits = addb(bits, n)` *byte memory walk (a value-using,
 // never-nil pointer-parameter walk).

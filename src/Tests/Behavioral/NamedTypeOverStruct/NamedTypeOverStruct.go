@@ -17,7 +17,7 @@ type box struct {
 }
 
 // fill writes the forwarded fields through a *wrapper obtained from a struct field — mirrors
-// runtime's winlibcall `c.val.fn = fn` (c is a *winlibcall field accessor).
+// runtime's winlibcall `c.Value.fn = fn` (c is a *winlibcall field accessor).
 func fill(b *box) {
 	c := &b.w
 	c.a = 10

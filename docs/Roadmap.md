@@ -178,7 +178,7 @@ backing **address-taken** package-global vars with a heap box, so the pointer re
   `&g` / `&g.field` / `&g[i]` rooted at a package-level var → `packageAddressedGlobals` (cross-file, since the
   global may be declared in one file and addressed in another).
 - `visitValueSpec`: an addressed global is emitted as a box + ref-property —
-  `static ж<T> ᏑG = new(default(T)); static ref T G => ref ᏑG.val;` — instead of `static T G;`. Reads/writes of
+  `static ж<T> ᏑG = new(default(T)); static ref T G => ref ᏑG.Value;` — instead of `static T G;`. Reads/writes of
   `G` are unchanged (the ref-property forwards to the box). Only address-taken globals are boxed; everything
   else keeps the plain field, so the blast radius is tiny (only `GlobalStructFieldPointers` re-transpiled).
 - `convUnaryExpr` / `isHeapBoxedExpr`: for an addressed global, emit the identifier form `ᏑG` (the box) rather
@@ -281,7 +281,7 @@ stages:
   now work end to end** — `var i atomic.Int32; i.Store(10); i.Add(5); i.Load()` → 15, CAS/Swap/etc. all match
   Go. Guarded by the self-contained `ReceiverFieldAddress` behavioral test (no `go-src-converted` dependency).
 - **Generic receivers (direct-`ж`) — DONE.** Generic capture-mode receivers (`atomic.Pointer[T]`) are now
-  emitted with the heap box **as the receiver** (`this ж<Box<T>> Ꮡx` + `ref var x = ref Ꮡx.val;`), and
+  emitted with the heap box **as the receiver** (`this ж<Box<T>> Ꮡx` + `ref var x = ref Ꮡx.Value;`), and
   `&x.field` field-refs through the box parameter (`Ꮡx.of(Box<T>.ᏑField)`) — `T` stays in scope, no static
   field needed. `[GoRecv]` is suppressed automatically (the signature is `this ж<…>`, not `this ref …`, so
   `RecvGenerator` skips it and there is no duplicate overload). Value calls heap-box and route through the ж
@@ -393,9 +393,9 @@ True own-defect leaders after the rewrite: container/list (25) + ring (12) = the
 arithmetic/shift-count coercions); a handful of 1–2-error leaves.
 
 **The `ж<T>` model split into two sub-problems** (converter derefs a pointer param/receiver to a value alias
-`ref var x = ref Ꮡx.val`, losing pointer identity when Go uses it *as* a pointer):
+`ref var x = ref Ꮡx.Value`, losing pointer identity when Go uses it *as* a pointer):
 - **Sub-problem B — DONE (this iteration).** `r := p` / `r = p` (pointer copy of a *T parameter) emitted `var r = p`
-  (a copy of the pointed-to value); the converter already treats the walked target as a pointer (`r.val`/`~r`), so
+  (a copy of the pointed-to value); the converter already treats the walked target as a pointer (`r.Value`/`~r`), so
   it miscompiled. Fix (`visitAssignStmt.go`): a plain pointer-typed identifier on an assignment RHS now gets the
   pointer (box) form — `var r = Ꮡp` — via a new `rhsPointerCopyContext`/`appendRhsPtrContext` helper applied in both
   the declare/reassign branch and the per-variable (escaping-var) branch. A pointer *local* already holds the pointer
@@ -432,8 +432,8 @@ container/ring 12→8 errors, container/list 25→~10 (and the remainder are now
   `return r.init()` where `init` is direct-ж → `r` (a `ref Ring` value) can't call the `ж<Ring>` overload (CS1929).
   The caller must itself become direct-ж; needs a fixpoint over `bodyCallsDirectBoxMethodOnReceiver`.
 - **D — reassign the receiver pointer.** `Move`'s `r = r.prev` / `r = r.next` walks the ring by repointing the
-  receiver. With a direct-ж receiver `r` is `ref var r = ref Ꮡr.val` (a value alias) → assigning a `ж<Ring>` to it
-  is CS0029. Needs `Ꮡr = r.prev; r = ref Ꮡr.val` (repoint the box, re-alias) — the receiver-pointer-reassignment case.
+  receiver. With a direct-ж receiver `r` is `ref var r = ref Ꮡr.Value` (a value alias) → assigning a `ж<Ring>` to it
+  is CS0029. Needs `Ꮡr = r.prev; r = ref Ꮡr.Value` (repoint the box, re-alias) — the receiver-pointer-reassignment case.
 - **A-variant — receiver in a comparison.** `Len`/`Do`'s `for (… p != r; …)` compares a `ж<Ring>` to the value
   receiver `r` (CS0019). The comparison must emit `Ꮡr`; extend the receiver-as-pointer-value detection/emission to
   binary (==/!=) operands, not just assignment RHS.
@@ -452,7 +452,7 @@ Finished the `ж<T>` self-referential-pointer model — **container/ring and con
   for a deref'd pointer **parameter** (`exprIsDerefdPointerParam`, e.g. `Link`'s `s.Prev()`). (ring 6→2)
 - **D — reassign the receiver pointer** (`visitAssignStmt.go`): `r = r.prev` on a direct-ж receiver emits the box on
   the LHS (`exprIsCurrentDirectBoxReceiver` + RHS-is-pointer), so the existing pointer-reassignment path produces
-  `Ꮡr = r.prev; r = ref Ꮡr.val;` (repoint + re-alias). (ring 2→0 — **container/ring compiles clean**)
+  `Ꮡr = r.prev; r = ref Ꮡr.Value;` (repoint + re-alias). (ring 2→0 — **container/ring compiles clean**)
 - **E — chained selector through a pointer field** (`convSelectorExpr.go`): `e.list.root` / `p.next.prev` (an
   intermediate pointer field) wasn't dereferenced — the receiver/param skip-deref check used `getIdentifier(X)`,
   which digs to the *root* of the chain (`e`), so it wrongly skipped derefing `e.list`. Now it only skips when `X`
@@ -477,7 +477,7 @@ the one intended re-baseline noted):
 | Fix | Defect | Greens | Commit |
 |---|---|---|---|
 | **`min`/`max` built-ins** (golib `builtin.cs`) | Go 1.21 `min`/`max` emitted verbatim but golib had no such methods → CS0103. Added generic `min`/`max` constrained to `IComparable<T>` (numeric primitives + `@string`). No converter change. | **crypto/subtle** (+ unblocks ~dozens that use the built-ins) | `daddd953d` |
-| **unsafe.Pointer keyword sanitization** (`convIdent.go`) | The `name.val` deref form for an `unsafe.Pointer` ident used the raw Go name, so a param named `new` (C# keyword) emitted `new.val` → CS1526. Now sanitized to `@new.val`. | (internal/runtime/atomic syntax; pkg has deeper latent ж issues) | `175e0dfd3` |
+| **unsafe.Pointer keyword sanitization** (`convIdent.go`) | The `name.Value` deref form for an `unsafe.Pointer` ident used the raw Go name, so a param named `new` (C# keyword) emitted `new.Value` → CS1526. Now sanitized to `@new.Value`. | (internal/runtime/atomic syntax; pkg has deeper latent ж issues) | `175e0dfd3` |
 | **unsigned unary-minus + shift precedence + shift-assign count** (`convUnaryExpr`/`convBinaryExpr`/`visitAssignStmt`) | `x & -x` → CS0023 (now `(T)0 - x`); Go `x>>4 + x` / `1<<15 - 1` re-associated in C# (shift binds looser) → now shift exprs parenthesized; `y <<= s` cast count to RHS type → CS0019 (now `(int)`). | **math/bits 4→1**; corrected a *latent* `1<<15-1`→`1<<14` miscompile in the StdLibInternalAbi golden (re-baselined) | `9089b9c4b` |
 | **builtin-shadowing local rename** (`variableAnalysisOperations.go`) | `len := len(buf)` — a local named like a *called* built-in shadows the `using static` method → CS0149/CS0841. Renames the local (`lenΔ1`) when that built-in is actually called in the function; built-in call stays `len`. | **hash/maphash** | `e87705650` |
 | **comma-ok map access** (`convIndexExpr`/`convExpr`/`visitAssignStmt`) | `v, ok := m[k]` (+ blank, if-init, reassign forms) wasn't detected as a tuple result → indexed twice, value assigned to `ok` (CS0029). Now routed through golib's two-value indexer `m[key, ꟷ]` via a new `IndexExprContext.isTupleResult`. **High-value correctness fix** (every comma-ok map read was wrong; no behavioral test had covered it). | **internal/coverage/rtcov** | `92d832204` |
@@ -490,7 +490,7 @@ nil-map representation gap — a chip was filed). math/bits' last error is a loc
 
 ### Phase 3 — earlier note: the `ж<T>` self-referential-pointer-struct confusion in container/ring & container/list —
 `r.next = r` (assign receiver to a pointer field → needs the box `Ꮡr`) and `r = r.prev` (reassign the Go
-pointer variable, but the C# `ref var r = ref Ꮡr.val` deref aliases the value). The deeper one (CS0019/CS1061/
+pointer variable, but the C# `ref var r = ref Ꮡr.Value` deref aliases the value). The deeper one (CS0019/CS1061/
 CS0029/CS1929 cluster), blocking both container packages.
 
 ## Phase 4 — Convert and run Go package tests

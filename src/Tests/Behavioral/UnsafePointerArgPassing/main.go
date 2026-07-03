@@ -1,6 +1,6 @@
 // UnsafePointerArgPassing guards passing an unsafe.Pointer argument to an
 // unsafe.Pointer parameter. The argument must be passed as the `@unsafe.Pointer`
-// struct directly, not reduced to its inner `uintptr` via `.val`: a `uintptr`
+// struct directly, not reduced to its inner `uintptr` via `.Value`: a `uintptr`
 // converts implicitly to BOTH the `@unsafe.Pointer` parameter AND any same-named
 // method's `ж<T>` overload, so the call goes ambiguous (CS0121). Here the free
 // `add(unsafe.Pointer, uintptr)` collides with the `(*counter).add` method exactly
@@ -27,7 +27,7 @@ func main() {
 	var base int64 = 100
 	p := unsafe.Pointer(&base)
 
-	q := add(p, 16) // free add must resolve unambiguously (pass p, not p.val)
+	q := add(p, 16) // free add must resolve unambiguously (pass p, not p.Value)
 	r := add(p, 0)
 
 	// Pure numeric checks — no managed round-trip through the unsafe pointer.

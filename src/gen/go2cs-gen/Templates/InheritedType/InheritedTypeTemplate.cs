@@ -55,9 +55,9 @@ internal class InheritedTypeTemplate : TemplateBase
     private string ValueGetter => TypeClass switch
     {
         "Array" => $"m_value ??= new {TypeName}({TargetTypeSize ?? "0"})",
-        // The array-view wrapper's `val` must route through `view` (ensure the underlying's lazy
+        // The array-view wrapper's `Value` must route through `view` (ensure the underlying's lazy
         // backing materializes on THIS wrapper's own m_value, then return a copy sharing that T[]):
-        // the converter emits `b.val[i] = v` inside the wrapper's pointer-receiver methods, and a
+        // the converter emits `b.Value[i] = v` inside the wrapper's pointer-receiver methods, and a
         // plain by-value `m_value` would lazily allocate on the returned temp — silently dropping
         // every write on virgin storage (the pallocBits fill-loop shape).
         _ => UnderlyingArrayElementType is null ? "m_value" : "view"
@@ -65,7 +65,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string Value => TypeClass switch
     {
-        "Array" => "val", // Null-coalescing property auto-creates array on first reference
+        "Array" => "Value", // Null-coalescing property auto-creates array on first reference
         _ => "m_value"
     };
 
@@ -99,8 +99,8 @@ internal class InheritedTypeTemplate : TemplateBase
     private string Nullable => TypeClass == "Array" ? "?" : "";
 
     // Forwarding properties for a defined-type-over-struct, exposing the underlying struct's fields on
-    // the wrapper. `m_value` is mutable (ReadOnlyValue=false) so a write through a ж<T>.val ref —
-    // `box.val.fn = x`, where `box.val` is `ref winlibcall` — invokes the setter on the real storage
+    // the wrapper. `m_value` is mutable (ReadOnlyValue=false) so a write through a ж<T>.Value ref —
+    // `box.Value.fn = x`, where `box.Value` is `ref winlibcall` — invokes the setter on the real storage
     // and persists. A blank `_` field is unaddressable/unselectable in Go and would collide.
     private string ForwardedMembers
     {
@@ -154,7 +154,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
                 public {{ConstructorName}}(NilType _) => m_value = default!;
 
-                public {{TypeName}} val => {{ValueGetter}};
+                public {{TypeName}} Value => {{ValueGetter}};
                 
                 public override string ToString() => {{ToStringImplementation}};
         

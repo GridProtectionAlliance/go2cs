@@ -26,14 +26,14 @@ partial class atomic_package {
 
 // Load atomically loads and returns the value stored in x.
 public static bool Load(this ж<Bool> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadUint32(Ꮡx.of(Bool.Ꮡv)) != 0;
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Bool> Ꮡx, bool val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreUint32(Ꮡx.of(Bool.Ꮡv), b32(val));
 }
@@ -42,7 +42,7 @@ public static void Store(this ж<Bool> Ꮡx, bool val) {
 public static bool /*old*/ Swap(this ж<Bool> Ꮡx, bool @new) {
     bool old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapUint32(Ꮡx.of(Bool.Ꮡv), b32(@new)) != 0;
 }
 
@@ -50,7 +50,7 @@ public static bool /*old*/ Swap(this ж<Bool> Ꮡx, bool @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Bool> Ꮡx, bool old, bool @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapUint32(Ꮡx.of(Bool.Ꮡv), b32(old), b32(@new));
 }
 
@@ -89,28 +89,28 @@ private static ж<T> nilCanon<T>(ж<T> p){
 
 // Load atomically loads and returns the value stored in x.
 public static ж<T> Load<T>(this ж<Pointer<T>> Ꮡx){
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return Volatile.Read(ref x.v);
 }
 
 // Store atomically stores val into x.
 public static void Store<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡval){
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     Volatile.Write(ref x.v, nilCanon(Ꮡval));
 }
 
 // Swap atomically stores new into x and returns the previous value.
 public static ж<T> /*old*/ Swap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡnew){
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return Interlocked.Exchange(ref x.v, nilCanon(Ꮡnew));
 }
 
 // CompareAndSwap executes the compare-and-swap operation for x.
 public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T> Ꮡold, ж<T> Ꮡnew){
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     ж<T> old = nilCanon(Ꮡold);
     return ReferenceEquals(Interlocked.CompareExchange(ref x.v, nilCanon(Ꮡnew), old), old);
@@ -124,14 +124,14 @@ public static bool /*swapped*/ CompareAndSwap<T>(this ж<Pointer<T>> Ꮡx, ж<T>
 
 // Load atomically loads and returns the value stored in x.
 public static int32 Load(this ж<Int32> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadInt32(Ꮡx.of(Int32.Ꮡv));
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Int32> Ꮡx, int32 val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreInt32(Ꮡx.of(Int32.Ꮡv), val);
 }
@@ -140,7 +140,7 @@ public static void Store(this ж<Int32> Ꮡx, int32 val) {
 public static int32 /*old*/ Swap(this ж<Int32> Ꮡx, int32 @new) {
     int32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapInt32(Ꮡx.of(Int32.Ꮡv), @new);
 }
 
@@ -148,7 +148,7 @@ public static int32 /*old*/ Swap(this ж<Int32> Ꮡx, int32 @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Int32> Ꮡx, int32 old, int32 @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapInt32(Ꮡx.of(Int32.Ꮡv), old, @new);
 }
 
@@ -156,7 +156,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Int32> Ꮡx, int32 old, in
 public static int32 /*new*/ Add(this ж<Int32> Ꮡx, int32 delta) {
     int32 @new = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AddInt32(Ꮡx.of(Int32.Ꮡv), delta);
 }
 
@@ -165,7 +165,7 @@ public static int32 /*new*/ Add(this ж<Int32> Ꮡx, int32 delta) {
 public static int32 /*old*/ And(this ж<Int32> Ꮡx, int32 mask) {
     int32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AndInt32(Ꮡx.of(Int32.Ꮡv), mask);
 }
 
@@ -174,7 +174,7 @@ public static int32 /*old*/ And(this ж<Int32> Ꮡx, int32 mask) {
 public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) {
     int32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return OrInt32(Ꮡx.of(Int32.Ꮡv), mask);
 }
 
@@ -187,14 +187,14 @@ public static int32 /*old*/ Or(this ж<Int32> Ꮡx, int32 mask) {
 
 // Load atomically loads and returns the value stored in x.
 public static int64 Load(this ж<Int64> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadInt64(Ꮡx.of(Int64.Ꮡv));
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Int64> Ꮡx, int64 val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreInt64(Ꮡx.of(Int64.Ꮡv), val);
 }
@@ -203,7 +203,7 @@ public static void Store(this ж<Int64> Ꮡx, int64 val) {
 public static int64 /*old*/ Swap(this ж<Int64> Ꮡx, int64 @new) {
     int64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapInt64(Ꮡx.of(Int64.Ꮡv), @new);
 }
 
@@ -211,7 +211,7 @@ public static int64 /*old*/ Swap(this ж<Int64> Ꮡx, int64 @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Int64> Ꮡx, int64 old, int64 @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapInt64(Ꮡx.of(Int64.Ꮡv), old, @new);
 }
 
@@ -219,7 +219,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Int64> Ꮡx, int64 old, in
 public static int64 /*new*/ Add(this ж<Int64> Ꮡx, int64 delta) {
     int64 @new = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AddInt64(Ꮡx.of(Int64.Ꮡv), delta);
 }
 
@@ -228,7 +228,7 @@ public static int64 /*new*/ Add(this ж<Int64> Ꮡx, int64 delta) {
 public static int64 /*old*/ And(this ж<Int64> Ꮡx, int64 mask) {
     int64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AndInt64(Ꮡx.of(Int64.Ꮡv), mask);
 }
 
@@ -237,7 +237,7 @@ public static int64 /*old*/ And(this ж<Int64> Ꮡx, int64 mask) {
 public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) {
     int64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return OrInt64(Ꮡx.of(Int64.Ꮡv), mask);
 }
 
@@ -249,14 +249,14 @@ public static int64 /*old*/ Or(this ж<Int64> Ꮡx, int64 mask) {
 
 // Load atomically loads and returns the value stored in x.
 public static uint32 Load(this ж<Uint32> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadUint32(Ꮡx.of(Uint32.Ꮡv));
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Uint32> Ꮡx, uint32 val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreUint32(Ꮡx.of(Uint32.Ꮡv), val);
 }
@@ -265,7 +265,7 @@ public static void Store(this ж<Uint32> Ꮡx, uint32 val) {
 public static uint32 /*old*/ Swap(this ж<Uint32> Ꮡx, uint32 @new) {
     uint32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapUint32(Ꮡx.of(Uint32.Ꮡv), @new);
 }
 
@@ -273,7 +273,7 @@ public static uint32 /*old*/ Swap(this ж<Uint32> Ꮡx, uint32 @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Uint32> Ꮡx, uint32 old, uint32 @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapUint32(Ꮡx.of(Uint32.Ꮡv), old, @new);
 }
 
@@ -281,7 +281,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uint32> Ꮡx, uint32 old, 
 public static uint32 /*new*/ Add(this ж<Uint32> Ꮡx, uint32 delta) {
     uint32 @new = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AddUint32(Ꮡx.of(Uint32.Ꮡv), delta);
 }
 
@@ -290,7 +290,7 @@ public static uint32 /*new*/ Add(this ж<Uint32> Ꮡx, uint32 delta) {
 public static uint32 /*old*/ And(this ж<Uint32> Ꮡx, uint32 mask) {
     uint32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AndUint32(Ꮡx.of(Uint32.Ꮡv), mask);
 }
 
@@ -299,7 +299,7 @@ public static uint32 /*old*/ And(this ж<Uint32> Ꮡx, uint32 mask) {
 public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) {
     uint32 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return OrUint32(Ꮡx.of(Uint32.Ꮡv), mask);
 }
 
@@ -312,14 +312,14 @@ public static uint32 /*old*/ Or(this ж<Uint32> Ꮡx, uint32 mask) {
 
 // Load atomically loads and returns the value stored in x.
 public static uint64 Load(this ж<Uint64> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadUint64(Ꮡx.of(Uint64.Ꮡv));
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Uint64> Ꮡx, uint64 val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreUint64(Ꮡx.of(Uint64.Ꮡv), val);
 }
@@ -328,7 +328,7 @@ public static void Store(this ж<Uint64> Ꮡx, uint64 val) {
 public static uint64 /*old*/ Swap(this ж<Uint64> Ꮡx, uint64 @new) {
     uint64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapUint64(Ꮡx.of(Uint64.Ꮡv), @new);
 }
 
@@ -336,7 +336,7 @@ public static uint64 /*old*/ Swap(this ж<Uint64> Ꮡx, uint64 @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Uint64> Ꮡx, uint64 old, uint64 @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapUint64(Ꮡx.of(Uint64.Ꮡv), old, @new);
 }
 
@@ -344,7 +344,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uint64> Ꮡx, uint64 old, 
 public static uint64 /*new*/ Add(this ж<Uint64> Ꮡx, uint64 delta) {
     uint64 @new = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AddUint64(Ꮡx.of(Uint64.Ꮡv), delta);
 }
 
@@ -353,7 +353,7 @@ public static uint64 /*new*/ Add(this ж<Uint64> Ꮡx, uint64 delta) {
 public static uint64 /*old*/ And(this ж<Uint64> Ꮡx, uint64 mask) {
     uint64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AndUint64(Ꮡx.of(Uint64.Ꮡv), mask);
 }
 
@@ -362,7 +362,7 @@ public static uint64 /*old*/ And(this ж<Uint64> Ꮡx, uint64 mask) {
 public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) {
     uint64 old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return OrUint64(Ꮡx.of(Uint64.Ꮡv), mask);
 }
 
@@ -374,14 +374,14 @@ public static uint64 /*old*/ Or(this ж<Uint64> Ꮡx, uint64 mask) {
 
 // Load atomically loads and returns the value stored in x.
 public static uintptr Load(this ж<Uintptr> Ꮡx) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     return LoadUintptr(Ꮡx.of(Uintptr.Ꮡv));
 }
 
 // Store atomically stores val into x.
 public static void Store(this ж<Uintptr> Ꮡx, uintptr val) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     StoreUintptr(Ꮡx.of(Uintptr.Ꮡv), val);
 }
@@ -390,7 +390,7 @@ public static void Store(this ж<Uintptr> Ꮡx, uintptr val) {
 public static uintptr /*old*/ Swap(this ж<Uintptr> Ꮡx, uintptr @new) {
     uintptr old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return SwapUintptr(Ꮡx.of(Uintptr.Ꮡv), @new);
 }
 
@@ -398,7 +398,7 @@ public static uintptr /*old*/ Swap(this ж<Uintptr> Ꮡx, uintptr @new) {
 public static bool /*swapped*/ CompareAndSwap(this ж<Uintptr> Ꮡx, uintptr old, uintptr @new) {
     bool swapped = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return CompareAndSwapUintptr(Ꮡx.of(Uintptr.Ꮡv), old, @new);
 }
 
@@ -406,7 +406,7 @@ public static bool /*swapped*/ CompareAndSwap(this ж<Uintptr> Ꮡx, uintptr old
 public static uintptr /*new*/ Add(this ж<Uintptr> Ꮡx, uintptr delta) {
     uintptr @new = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AddUintptr(Ꮡx.of(Uintptr.Ꮡv), delta);
 }
 
@@ -415,7 +415,7 @@ public static uintptr /*new*/ Add(this ж<Uintptr> Ꮡx, uintptr delta) {
 public static uintptr /*old*/ And(this ж<Uintptr> Ꮡx, uintptr mask) {
     uintptr old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return AndUintptr(Ꮡx.of(Uintptr.Ꮡv), mask);
 }
 
@@ -424,7 +424,7 @@ public static uintptr /*old*/ And(this ж<Uintptr> Ꮡx, uintptr mask) {
 public static uintptr /*old*/ Or(this ж<Uintptr> Ꮡx, uintptr mask) {
     uintptr old = default!;
 
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
     return OrUintptr(Ꮡx.of(Uintptr.Ꮡv), mask);
 }
 

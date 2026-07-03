@@ -32,7 +32,7 @@ public static partial class main_package
             get
             {
                 if (m_target_is_ptr && !(m_target_ptr is null))
-                    return ref m_target_ptr.val;
+                    return ref m_target_ptr.Value;
 
                 return ref m_target;
             }
@@ -58,7 +58,7 @@ public static partial class main_package
             T target = m_target;
 
             if (m_target_is_ptr && !(m_target_ptr is null))
-                target = m_target_ptr.val;
+                target = m_target_ptr.Value;
 
             if (s_MByRef is null)
                 s_MByVal!(target);
@@ -78,7 +78,7 @@ public static partial class main_package
                 case "v":
                 {
                     if (m_target_is_ptr)
-                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
+                        return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
 
                     return m_target?.ToString() ?? "<nil>";
                 }

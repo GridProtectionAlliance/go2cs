@@ -5,29 +5,29 @@ using fmt = fmt_package;
 partial class main_package {
 
 internal static void setViaDefer(ж<nint> Ꮡp) => func((defer, recover) => {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     defer(() => {
-        Ꮡp.val = 42;
+        Ꮡp.Value = 42;
     });
 });
 
 internal static void bumpInClosure(ж<nint> Ꮡp) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     var add = () => {
-        Ꮡp.val = Ꮡp.val + 1;
+        Ꮡp.Value = Ꮡp.Value + 1;
     };
     add();
     add();
 }
 
 internal static void mixed(ж<nint> Ꮡp) => func((defer, recover) => {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p = 5;
     defer(() => {
-        Ꮡp.val = Ꮡp.val * 10;
+        Ꮡp.Value = Ꮡp.Value * 10;
     });
 });
 

@@ -19,29 +19,29 @@ internal static void p(this tagger _) {
 }
 
 internal static void add(this ж<counter> Ꮡc, nint d) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     addInt(Ꮡc.of(counter.Ꮡn), d);
 }
 
 internal static void addInt(ж<nint> Ꮡx, nint d) {
-    ref var x = ref Ꮡx.val;
+    ref var x = ref Ꮡx.Value;
 
     x += d;
 }
 
 internal static void bumpTwice(this ж<counter> Ꮡp) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     Ꮡp.add(1);
     Ꮡp.add(1);
 }
 
 internal static nint addInClosure(ж<counter> Ꮡp, nint d) {
-    ref var Δp = ref Ꮡp.val;
+    ref var Δp = ref Ꮡp.Value;
 
     var apply = () => {
-        Ꮡp.val.n += d;
+        Ꮡp.Value.n += d;
         addInt(Ꮡp.of(counter.Ꮡn), d);
     };
     apply();

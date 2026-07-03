@@ -9,10 +9,10 @@ partial class main_package {
 }
 
 internal static void inc(this ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     var p = Ꮡc.of(counter.Ꮡn);
-    p.val++;
+    p.Value++;
 }
 
 [GoRecv] internal static nint get(this ref counter c) {
@@ -24,7 +24,7 @@ internal static void inc(this ж<counter> Ꮡc) {
 }
 
 internal static void bump(ж<holder> Ꮡh, nint i) {
-    ref var h = ref Ꮡh.val;
+    ref var h = ref Ꮡh.Value;
 
     Ꮡh.at(holder.Ꮡarr, i).inc();
 }

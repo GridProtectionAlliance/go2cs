@@ -78,8 +78,8 @@ type LambdaCapture struct {
 	// variable must NOT be snapshot-captured (the value copy loses the box, so writes through the
 	// captured `&m` are lost — and the copy declaration is invalid in expression position, e.g. a
 	// func literal passed as a call argument). Instead the lambda references the box directly: `&m`
-	// emits `Ꮡm` (a capturable reference) and value uses emit `Ꮡm.val` — the ref-local alias
-	// `ref var m = ref Ꮡm.val` itself can't be captured (CS8175). Keyed by the var's types.Object.
+	// emits `Ꮡm` (a capturable reference) and value uses emit `Ꮡm.Value` — the ref-local alias
+	// `ref var m = ref Ꮡm.Value` itself can't be captured (CS8175). Keyed by the var's types.Object.
 	boxRefVars map[types.Object]bool
 
 	// Analysis phase tracking
@@ -153,9 +153,9 @@ type Visitor struct {
 	// `!=` (against nil or another pointer) anywhere in the current function body — i.e. params
 	// walked to a nil terminator (`for p != nil { …; p = p.next }`). For these, the deref-alias and
 	// any pointer-reassignment re-alias use the nil-safe `Ꮡp.DerefOrNil()` accessor instead of
-	// `Ꮡp.val`, so re-aliasing to a nil box yields a ref to default(T) (never read while p is nil)
+	// `Ꮡp.Value`, so re-aliasing to a nil box yields a ref to default(T) (never read while p is nil)
 	// rather than throwing a nil-pointer dereference. Populated per function in visitFuncDecl;
-	// other (non-nil-compared) pointer params keep the plain `.val` form (zero golden churn).
+	// other (non-nil-compared) pointer params keep the plain `.Value` form (zero golden churn).
 	nilSafePtrParamNames HashSet[string]
 	varNames             map[*types.Var]string
 	hasDefer             bool
@@ -219,11 +219,11 @@ const ChannelLeftOp = "\u1438\uA7F7"          // Example: `ch.ᐸꟷ(val)` for `
 const ChannelRightOp = "\uA7F7\u1433"         // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
 const PointerDerefOp = "~"                    // Example: `~ptr` for dereferencing a pointer
 
-// NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.val` to re-alias a
+// NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a
 // deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike
-// `.val` (which throws on a nil box), it returns a ref to a shared default(T) slot when the box is
+// `.Value` (which throws on a nil box), it returns a ref to a shared default(T) slot when the box is
 // nil — the ref is never read while the box is nil, so the standard `*p` panic semantics are
-// preserved (a genuine nil deref still uses `~`/`.val`). Includes `()` as it is a method call.
+// preserved (a genuine nil deref still uses `~`/`.Value`). Includes `()` as it is a method call.
 const NilSafeDerefAccessor = "DerefOrNil()"
 
 var keywords = NewHashSet([]string{
@@ -3473,7 +3473,7 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		// a shared box `Ꮡname` so that writes made through `&name` inside the closure reach the outer
 		// function's storage (`mToFlush := &node{…}; run(func(){ prev := &mToFlush; *prev = … })`). A
 		// `Ꮡ(name)` copy would box a throwaway snapshot and silently lose those writes. The box must be
-		// declared here; the closure already emits `Ꮡname`/`Ꮡname.val` references for it (CS0103 until
+		// declared here; the closure already emits `Ꮡname`/`Ꮡname.Value` references for it (CS0103 until
 		// it is declared). So emit the heap box for a box-ref var even when the type is inherently
 		// heap-allocated — the same-function `&ptr` case (no closure) stays a copy box (PointerToPointer).
 		if !escapesHeap || (isInherentlyHeapAllocatedType(identType) && !v.isLambdaBoxRefVar(obj)) {
@@ -3535,10 +3535,10 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 
 // isBoxedPointerLocal reports whether ident is a box-ref LOCAL of an inherently heap-allocated type
 // (pointer/slice/map/chan/interface/func) — exactly the case convertToHeapTypeDecl heap-boxes as a
-// `ж<ж<T>>` because its address is taken inside a capturing closure. For such a box, `Ꮡm.val` reads the
+// `ж<ж<T>>` because its address is taken inside a capturing closure. For such a box, `Ꮡm.Value` reads the
 // HELD reference value (which may legitimately be nil), so emission must use `.ValueSlot` (no nil-deref
-// panic) rather than the strict `.val`. A deref'd pointer PARAMETER is excluded: its box wraps the
-// pointed-to value, so `Ꮡp.val` is a genuine dereference that must keep the strict nil check.
+// panic) rather than the strict `.Value`. A deref'd pointer PARAMETER is excluded: its box wraps the
+// pointed-to value, so `Ꮡp.Value` is a genuine dereference that must keep the strict nil check.
 func (v *Visitor) isBoxedPointerLocal(ident *ast.Ident) bool {
 	obj := v.info.ObjectOf(ident)
 
@@ -3547,9 +3547,9 @@ func (v *Visitor) isBoxedPointerLocal(ident *ast.Ident) bool {
 	}
 
 	// A deref'd pointer PARAMETER or RECEIVER is excluded: its box `Ꮡp` wraps the pointed-to value
-	// (a `ж<T>`), so `Ꮡp.val` is a genuine dereference that must keep the strict nil check. Only a
+	// (a `ж<T>`), so `Ꮡp.Value` is a genuine dereference that must keep the strict nil check. Only a
 	// pointer/slice/map/... LOCAL gets a box that wraps the pointer value itself (a `ж<ж<T>>`), where
-	// `.val` is a non-dereferencing read of the held value. (identIsParameter misses the receiver,
+	// `.Value` is a non-dereferencing read of the held value. (identIsParameter misses the receiver,
 	// which is not in the parameter list — varIsDerefdPointerParam covers both.)
 	if v.varIsDerefdPointerParam(obj) {
 		return false

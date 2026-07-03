@@ -8,7 +8,7 @@ import "fmt"
 //     `&head` must reference the REAL slot (`Ꮡhead`, a ж<ж<node>>), never box a copy — the
 //     walk below REMOVES entries by writing `*pp = n.next` through it;
 //   - `&(*pp).next` advances the walk by taking the address of a field THROUGH the double
-//     pointer (`pp.val.of(node.Ꮡnext)`);
+//     pointer (`pp.Value.of(node.Ꮡnext)`);
 //   - `*i.pprev`-style single stars of a double pointer deref exactly ONE level;
 //   - a method called through the pointer GLOBAL binds on the pointer value (the property),
 //     not the slot box (`head.sum()` — ж<node> receiver, not ж<ж<node>>).

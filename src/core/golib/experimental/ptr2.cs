@@ -112,7 +112,7 @@ public interface IPointer<T>
     /// <summary>
     /// Gets a reference to the value of type <typeparamref name="T"/>.
     /// </summary>
-    ref T val { get; }
+    ref T Value { get; }
 
     /// <summary>
     /// Gets a pointer to the field of a struct.
@@ -160,7 +160,7 @@ public interface IPointer<T>
 /// <para>
 /// If <typeparamref name="T"/> is a <see cref="System.ValueType"/>, e.g., a struct, note that value
 /// will be "boxed" for heap allocation. Since boxed value will be a new copy of original value, make
-/// sure to use ref-based <see cref="val"/> for updates instead of a local stack copy of value.
+/// sure to use ref-based <see cref="Value"/> for updates instead of a local stack copy of value.
 /// See the <see cref="builtin.heap{T}(out ж{T})"/> and notes on boxing:
 /// https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/types/boxing-and-unboxing
 /// </para>
@@ -218,7 +218,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     /// <inheritdoc/>
     /// <exception cref="InvalidOperationException">Cannot get reference to value, source is not a valid array or slice pointer.</exception>
-    public unsafe ref T val
+    public unsafe ref T Value
     {
         get
         {
@@ -256,24 +256,24 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
         {
             // Get reference to standard pointer value
             if (m_structFieldRef is null && m_arrayIndexRef is null && m_pointerRef is null)
-                return new PinnedBuffer(val, Marshal.SizeOf<T>());
+                return new PinnedBuffer(Value, Marshal.SizeOf<T>());
 
             // Get reference to struct field
             if (m_structFieldRef is not null)
             {
                 (object source, FieldRefFunc<T> _) = m_structFieldRef!.Value;
-                return new PinnedBuffer(val, Marshal.SizeOf(source));
+                return new PinnedBuffer(Value, Marshal.SizeOf(source));
             }
 
             // Get reference to array or slice element
             (IArray array, int _) = m_arrayIndexRef!.Value;
 
             if (array is IArray<T>)
-                return new PinnedBuffer(val, array.Length);
+                return new PinnedBuffer(Value, array.Length);
 
             // Get reference to pointer value
             if (m_pointerRef is not null)
-                return new PinnedBuffer(val, Marshal.SizeOf<T>());
+                return new PinnedBuffer(Value, Marshal.SizeOf<T>());
 
             throw new InvalidOperationException("Cannot get pinned buffer to value, source is not a valid struct field, array or slice reference, or pointer reference.");
         }
@@ -365,7 +365,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
     //     public static ref T operator ref(ж<T> value) => ref value.m_value;
     // Converted code like this:
     //     var v = 2; var vp = ptr(v);
-    //     vp.val = 999;
+    //     vp.Value = 999;
     // Could then become:
     //     var v = 2; var vp = ptr(v);
     //     ~vp = 999; // or
@@ -385,7 +385,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     static T IPointer<T>.operator ~(IPointer<T> value)
     {
-        return value.val;
+        return value.Value;
     }
 
     // I posted a suggestion for at least the "ref" operator:
@@ -434,7 +434,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator uintptr(ж<T> value)
     {
-        fixed (void* ptr = &value.val)
+        fixed (void* ptr = &value.Value)
             return (uintptr)ptr;
     }
 
@@ -445,7 +445,7 @@ public class ж<T> : IPointer<T>, IEquatable<ж<T>>
 
     public static unsafe implicit operator void*(ж<T> value)
     {
-        fixed (T* ptr = &value.val)
+        fixed (T* ptr = &value.Value)
             return ptr;
     }
 

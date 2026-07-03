@@ -71,7 +71,7 @@ public class error<T> : error
         get
         {
             if (m_target_is_ptr && m_target_ptr is not null)
-                return ref m_target_ptr.val;
+                return ref m_target_ptr.Value;
 
             return ref m_target;
         }
@@ -100,7 +100,7 @@ public class error<T> : error
         T target = m_target;
 
         if (m_target_is_ptr && m_target_ptr is not null)
-            target = m_target_ptr.val;
+            target = m_target_ptr.Value;
 
         if (s_ErrorByPtr is null || !m_target_is_ptr)
             return s_ErrorByVal!(target);
@@ -120,7 +120,7 @@ public class error<T> : error
             case "v":
             {
                 if (m_target_is_ptr)
-                    return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.val}";
+                    return m_target_ptr is null ? "<nil>" : $"&{m_target_ptr.Value}";
 
                 return m_target?.ToString() ?? "<nil>";
             }

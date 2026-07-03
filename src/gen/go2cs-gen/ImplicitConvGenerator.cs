@@ -137,10 +137,10 @@ public class ImplicitConvGenerator : ISourceGenerator
             //     be extended here (CS1729) — and constructs the foreign source.
             //   • foreign TARGET via a qualified reference (`GoImplicitConv<Hx, pkg.Off>`): the host is
             //     local, but the body still `new pkg.Off(...)`s a foreign type.
-            // In both, casting `src.val` straight to the foreign named type has no cross-assembly route
+            // In both, casting `src.Value` straight to the foreign named type has no cross-assembly route
             // (`ulong`→`NameOff` ⇒ CS0030). The constructed type is whichever side the operator builds
             // via `new` (the LH type: source when inverted, else target). When it is foreign, construct
-            // it through its UNDERLYING basic — `new global::…NameOff((int)src.val)` — mirroring the
+            // it through its UNDERLYING basic — `new global::…NameOff((int)src.Value)` — mirroring the
             // converter's through-underlying inline cast; and if the default host (the source type) is
             // itself foreign, relocate the operator into the LOCAL type so it can be declared at all.
             string? hostTypeNameOverride = null, lhTypeNameOverride = null, rhTypeNameOverride = null, convExprOverride = null;
@@ -159,7 +159,7 @@ public class ImplicitConvGenerator : ISourceGenerator
                         string qualifiedConstructed = constructedType.ToDisplayString(s_qualifiedFormat);
 
                         lhTypeNameOverride = qualifiedConstructed;
-                        convExprOverride = $"new {qualifiedConstructed}(({constructedUnderlying})src.val)";
+                        convExprOverride = $"new {qualifiedConstructed}(({constructedUnderlying})src.Value)";
 
                         // The default host is the SOURCE type's partial struct. If that is itself
                         // foreign it can't be extended here (CS1729 phantom); relocate into the LOCAL
@@ -216,12 +216,12 @@ public class ImplicitConvGenerator : ISourceGenerator
         return compilationUnit.DescendantNodes().OfType<ClassDeclarationSyntax>().FirstOrDefault()?.Identifier.Text;
     }
 
-    // A generated named-numeric struct exposes its underlying basic value through a public `val`
+    // A generated named-numeric struct exposes its underlying basic value through a public `Value`
     // property (see InheritedTypeTemplate). That basic is the through-underlying cast target needed to
     // construct a foreign named-numeric type cross-assembly. Returns null when no such property exists.
     private static string? GetUnderlyingBasicName(ITypeSymbol type)
     {
-        IPropertySymbol? valProperty = type.GetMembers("val").OfType<IPropertySymbol>().FirstOrDefault();
+        IPropertySymbol? valProperty = type.GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
         return valProperty?.Type.ToDisplayString(s_qualifiedFormat);
     }
 

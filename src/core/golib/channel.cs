@@ -126,8 +126,8 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
     /// </summary>
     public bool IsClosed
     {
-        get => m_isClosed.val;
-        private set => m_isClosed.val = value;
+        get => m_isClosed.Value;
+        private set => m_isClosed.Value = value;
     }
 
     /// <summary>

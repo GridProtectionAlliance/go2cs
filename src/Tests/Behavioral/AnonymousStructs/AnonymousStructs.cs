@@ -15,7 +15,7 @@ partial class main_package {
     public nint Retries;
 }
 internal static ж<settingsᴛ1> Ꮡsettings = new(new settingsᴛ1(Verbose: true, Retries: 3));
-internal static ref settingsᴛ1 settings => ref Ꮡsettings.val;
+internal static ref settingsᴛ1 settings => ref Ꮡsettings.Value;
 
 [GoType("dyn")] partial struct processAnonymousStruct_data {
     public @string Name;
@@ -62,8 +62,8 @@ internal static void Main() {
     fmt.Println("\n=== Package-Global Anonymous Struct ===");
     fmt.Printf("settings: Verbose=%t Retries=%d\n"u8, settings.Verbose, settings.Retries);
     var pRetries = Ꮡsettings.of(settingsᴛ1.ᏑRetries);
-    pRetries.val = 5;
-    fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.val, settings.Retries);
+    pRetries.Value = 5;
+    fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.Value, settings.Retries);
 }
 
 } // end main_package

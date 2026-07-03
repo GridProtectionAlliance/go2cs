@@ -43,7 +43,7 @@ func main() {
 
 	// Phase 4b: a promoted POINTER-RECEIVER METHOD through the cross-package pointer embed —
 	// `p.Calibrate(5)` has no generated forwarder (method promotion is syntax-resolved), so the
-	// converter emits the explicit hop `p.Sensor.val.Calibrate(…)`; the write reaches the target.
+	// converter emits the explicit hop `p.Sensor.Value.Calibrate(…)`; the write reaches the target.
 	// (A promoted VALUE-receiver method call, p.Hot(), remains a documented open gap — call
 	// through the embed explicitly.)
 	p.Calibrate(5)
@@ -62,7 +62,7 @@ func main() {
 // `p.Name`/`p.Temp` on the embedding struct was CS1061 (runtime hits this on
 // `type rtype struct { *abi.Type }`, t.TFlag/t.Str/t.Kind_). The generator now falls back to the
 // semantic model (public instance fields via the type's metadata symbol), emitting true-ref
-// accessors through the embed (`ref Sensor.val.Temp` for a pointer embed), so writes through the
+// accessors through the embed (`ref Sensor.Value.Temp` for a pointer embed), so writes through the
 // promoted name reach the embedded target.
 
 // probe embeds *CrossPkgLib.Sensor (POINTER embed — the rtype shape).

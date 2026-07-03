@@ -8,13 +8,13 @@ internal static void Main() {
     var s = new nint[]{10, 20, 30, 40}.slice();
     uint32 i = 2;
     var p = Ꮡ(s, (int)(i));
-    p.val = 99;
+    p.Value = 99;
     uintptr j = 0;
     var q = Ꮡ(s, (int)(j));
-    q.val = 7;
+    q.Value = 7;
     nuint k = 3;
     var r = Ꮡ(s, (int)(k));
-    r.val = 55;
+    r.Value = 55;
     fmt.Println(s[0], s[1], s[2], s[3]);
 }
 

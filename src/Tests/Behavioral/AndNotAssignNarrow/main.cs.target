@@ -12,8 +12,8 @@ internal static readonly UntypedInt writing = 4;
 
 internal static void Main() {
     var h = Ꮡ(new hmap(flags: 7));
-    h.val.flags &= unchecked((uint8)~writing);
-    h.val.flags |= 8;
+    h.Value.flags &= unchecked((uint8)~writing);
+    h.Value.flags |= 8;
     fmt.Println((~h).flags);
     uint16 u = 0xFFFF;
     u &= unchecked((uint16)~(uint16)(0x0F0));

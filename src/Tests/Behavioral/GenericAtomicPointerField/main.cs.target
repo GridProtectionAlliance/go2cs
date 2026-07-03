@@ -17,21 +17,21 @@ partial class main_package {
 }
 
 public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
-    ref var c = ref Ꮡc.val;
-    ref var key = ref Ꮡkey.val;
-    ref var val = ref Ꮡval.val;
+    ref var c = ref Ꮡc.Value;
+    ref var key = ref Ꮡkey.Value;
+    ref var val = ref Ꮡval.Value;
 
     var e = Ꮡ(new entry<V>(key: Ꮡkey));
     e.of(entry<V>.Ꮡv).Store(Ꮡval);
-    e.val.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
+    e.Value.next = Ꮡc.of(Cache<V>.Ꮡhead).Load();
     Ꮡc.of(Cache<V>.Ꮡhead).Store(e);
 }
 
 public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
-    ref var c = ref Ꮡc.val;
-    ref var key = ref Ꮡkey.val;
+    ref var c = ref Ꮡc.Value;
+    ref var key = ref Ꮡkey.Value;
 
-    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.val.next) {
+    for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.Value.next) {
         if ((~e).key == Ꮡkey) {
             return e.of(entry<V>.Ꮡv).Load();
         }
@@ -51,12 +51,12 @@ internal static void Main() {
     bv = 20;
     Ꮡc.Put(Ꮡa, Ꮡav);
     Ꮡc.Put(Ꮡb, Ꮡbv);
-    fmt.Println("get a:", Ꮡc.Get(Ꮡa).val);
-    fmt.Println("get b:", Ꮡc.Get(Ꮡb).val);
+    fmt.Println("get a:", Ꮡc.Get(Ꮡa).Value);
+    fmt.Println("get b:", Ꮡc.Get(Ꮡb).Value);
     ref var newAv = ref heap<nint>(out var ᏑnewAv);
     newAv = 99;
     Ꮡc.Put(Ꮡa, ᏑnewAv);
-    fmt.Println("get a again:", Ꮡc.Get(Ꮡa).val);
+    fmt.Println("get a again:", Ꮡc.Get(Ꮡa).Value);
     fmt.Println("missing:", Ꮡc.Get(@new<nint>()) == nil);
 }
 

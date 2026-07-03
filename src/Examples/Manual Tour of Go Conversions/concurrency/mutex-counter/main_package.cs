@@ -71,7 +71,7 @@ static partial class main_package
         c.mu.Lock();
         // Lock so only one goroutine at a time can access the map c.v.
         defer(() => {
-            ref var c = ref c__ptr.val;
+            ref var c = ref c__ptr.Value;
             c.mu.Unlock();
         });
         return c.v[key];
@@ -83,7 +83,7 @@ static partial class main_package
 
         for (var i = 0; i < 1000; i++) {
             go_(() => {
-                ref var c = ref c__ptr.val;
+                ref var c = ref c__ptr.Value;
                 c.Inc("somekey");
             });
         }

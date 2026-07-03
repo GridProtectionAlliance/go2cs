@@ -9,13 +9,13 @@ partial class main_package {
 }
 
 internal static void add(ж<nint> Ꮡp, nint d) {
-    ref var p = ref Ꮡp.val;
+    ref var p = ref Ꮡp.Value;
 
     p += d;
 }
 
 internal static void bump(this ж<buf> Ꮡb) {
-    ref var b = ref Ꮡb.val;
+    ref var b = ref Ꮡb.Value;
 
     add(Ꮡb.of(buf.Ꮡn), 1);
 }
@@ -29,10 +29,10 @@ internal static void bump(this ж<buf> Ꮡb) {
 }
 
 internal static ж<tracer> Ꮡtr = new(default(tracer));
-internal static ref tracer tr => ref Ꮡtr.val;
+internal static ref tracer tr => ref Ꮡtr.Value;
 
 internal static void keep(ж<tracer> Ꮡt) {
-    ref var t = ref Ꮡt.val;
+    ref var t = ref Ꮡt.Value;
 
     _ = Ꮡt;
 }

@@ -31,9 +31,9 @@ partial class main_package {
 internal static void Main() {
     ж<main_data> data = default!;
     ref var mine = ref heap(new Person(), out var Ꮡmine);
-    ж<Person> person = ((ж<Person>)(data?.val ?? default!));
+    ж<Person> person = ((ж<Person>)(data?.Value ?? default!));
     person = Ꮡmine;
-    fmt.Println(mine == person.val);
+    fmt.Println(mine == person.Value);
     fmt.Println(slice<rune>(((@string)"白鵬翔"u8)));
 }
 

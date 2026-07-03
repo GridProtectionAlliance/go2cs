@@ -27,13 +27,13 @@ static class main_package
         ref int r = ref heap(default(int), out var r__ptr);
 
         defer(() =>{
-            ref int r = ref r__ptr.val;
+            ref int r = ref r__ptr.Value;
             r = 789;
         });
 
         r = 123;
         return r__ptr; // Named result leaves stack in defer, return pointer to named result
-    }).val; // Defererence named result
+    }).Value; // Defererence named result
 
     static void Main() {
         fmt.Println(F()); // 789

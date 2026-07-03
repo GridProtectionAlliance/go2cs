@@ -25,20 +25,20 @@
   named `trace` in nested scopes both collision-rename to `Δtrace`; the Δ-rename bypasses
   shadow-numbering (should compose: `ΔtraceΔ1`). **(3) trace.cs:344 CS8175** — the capture
   snapshot `var genʗ2 = gen;` sits *inside* the `forEachGRace` lambda, reading ref-local `gen`;
-  needs the established in-lambda box routing (`Ꮡgen.val`).
+  needs the established in-lambda box routing (`Ꮡgen.Value`).
 - **2026-07-02 (latest): the &GLOBAL/double-pointer family landed (`f454a7106`; runtime 8 → 4).**
   Pointer-typed addressed globals (`var head *node` → `ж<ж<node>>`) now support the faithful
   runtime walk (`for pp := &head; *pp != nil; pp = &(*pp).next { *pp = n }`): one star = ONE deref
-  (removed the depth>1 extra-`.val` arm — mheap specialsIter CS0029); a deref whose RESULT is
+  (removed the depth>1 extra-`.Value` arm — mheap specialsIter CS0029); a deref whose RESULT is
   reference-like reads golib **`ValueSlot`** (real slot, no nil check — Go reads nil held pointers
-  freely, only *deref* panics; writes persist), value-producing derefs keep strict `.val`;
+  freely, only *deref* panics; writes persist), value-producing derefs keep strict `.Value`;
   `&global` = identity box `Ꮡallm` never a copy; `&(*pprev).field` peels into
-  `pprev.val.of(m.Ꮡalllink)` (proc allm CS1061, iface itabTable CS1929). New `GlobalPointerWalk`
+  `pprev.Value.of(m.Ꮡalllink)` (proc allm CS1061, iface itabTable CS1929). New `GlobalPointerWalk`
   behavioral test (insert/remove/method through global `**node`, output parity); six goldens
   re-baselined to ValueSlot; suite 217/217. ConversionStrategies *Pointer-typed globals* section.
   Earlier this cadence: `Value` field rename (`a89b2772f`), named-over-array family
   (`47ddd5a50`, 19→8, incl. the golib `ж.at` lazy-backing materializer caught by output gate).
-  Noted in passing (wave, not runtime): `database/sql/convert.cs` emits invalid `var d.val = …`
+  Noted in passing (wave, not runtime): `database/sql/convert.cs` emits invalid `var d.Value = …`
   (pre-existing, deref-assign into a `var` decl — bucket when the 237-package wave starts).
 - **2026-07-02 (latest): the distinct golib `uintptr` struct LANDED (`a2f52f726`; user green-lit;
   runtime EXACTLY 19 — error-neutral by design, the root buys identity fidelity).** uint and
@@ -163,13 +163,13 @@
   cwd-drift incident built a TEST binary as go2cs.exe and ran a fake "reconvert" — caught by the
   audit sanity (always verify "Successfully converted: 305" in the log, not just EXIT=0).
 - **2026-07-02 (latest): index-on-cast wraps (`7cdb7d010`; CS0021 −2, 37 → 35).** malloc's
-  `(*[2]uint64)(x)[0] = 0` — the auto-deref `.val` + index re-bound onto the cast's inner operand;
+  `(*[2]uint64)(x)[0] = 0` — the auto-deref `.Value` + index re-bound onto the cast's inner operand;
   5th cast-precedence instance. 2-file diff (malloc + sync/pool latent). CS0021 re-triage: the
   other 5 are ALL the ΔcgoCallers named-over-array family (proc ×3 + traceback ×2) — that model
   now owns 10 runtime sites (CS0021 5 + CS1503 1 + CS1929 4). Test: UnsafePointerReinterpret
   extension (indexed reinterpret).
 - **2026-07-02 (latest): cross-package pointer-embed promoted method hop (`d5ba6b44e`; CS1929 −1,
-  38 → 37).** `t.Uncommon()` on Δrtype → explicit `t.Type.val.Uncommon()` (no generated forwarder
+  38 → 37).** `t.Uncommon()` on Δrtype → explicit `t.Type.Value.Uncommon()` (no generated forwarder
   for metadata embeds). 9-file stdlib diff, all the class (reflectlite rtype, bufio.ReadWriter's
   *Writer in fcgi/httputil/chunked, exec *ProcessState, template *Tree, unique *HashTrieMap).
   CS1929 triage RECLASSIFIED the rest: mprof ×4 = the parked named-over-array family (NOT
@@ -206,8 +206,8 @@
   heapdump u8-literal wide index (contained single — next candidate); proc ж<ΔcgoCallers>→IArray
   (named-over-array, parked); proc Range→nint (uncharacterized); stack u8-literal into print
   vararg; symtab _func value→box routing; time method-group into vararg (S6-ish).** Suite 215/215.
-- **2026-07-02 (latest): deref-of-cast wraps before `.val` (`d9dbc9839`; CS0029 −1 + CS0149 −1,
-  46 → 44).** The default deref appended a naked `.val`; on a type-CONVERSION operand (a C# cast)
+- **2026-07-02 (latest): deref-of-cast wraps before `.Value` (`d9dbc9839`; CS0029 −1 + CS0149 −1,
+  46 → 44).** The default deref appended a naked `.Value`; on a type-CONVERSION operand (a C# cast)
   postfix re-binds onto the cast's INNER operand — panic.go's `return *(*func())(add(…)), true`
   read the @unsafe.Pointer's uintptr (CS0029), and proc.cs's `f := *(*func())(…); f()` made f a
   nuint (CS0149 — one of the two "raw-metal delegate" errors was never raw-metal, just this paren
@@ -315,7 +315,7 @@
      Sorted roots + vendored-key resolution + set-membership gate; queue order now
      bidi → bidirule → norm → idna (dependency-correct every run).
   3. **Multi-box re-alias order (visitAssignStmt.go)** — `(Ꮡx, Ꮡy) = (Ꮡy, Ꮡx)` emitted its
-     `n = ref Ꮡn.val` refreshers in map order (math/big int.cs flipped). Sorted.
+     `n = ref Ꮡn.Value` refreshers in map order (math/big int.cs flipped). Sorted.
   Verification: recon23-vs-recon24 zero-diff; corpus byte-identical 213/213 (no golden churn — the
   strongest over-fire proof class); suite green. **Downstream effects: (a) reconverts are now
   RE-USABLE as goldens — measurement noise is gone; (b) `initΔN`/`_ᴛN` indices settled to canonical
@@ -347,7 +347,7 @@
   promoted-accessors section (t.TFlag/t.Str/t.Kind_ all CS1061). Fix (StructTypeTemplate): fall back to
   the type's metadata symbol (`GetTypeByMetadataName` on the normalized nested name
   `go.internal.abi_package+Type`), enumerate public instance fields; accessors unchanged in form — TRUE
-  REFS through the embed (`ref Type.val.TFlag`), write-through reaches the target (no copy syntactically
+  REFS through the embed (`ref Type.Value.TFlag`), write-through reaches the target (no copy syntactically
   possible). Guarded by the CrossPkgUser Phase-4 extension (pointer-embed + value-embed across a real
   assembly boundary, write-through vs Go, 10 lines). **KNOWN RESIDUAL: promoted METHOD calls through a
   cross-package embed (also syntax-resolved; zero runtime sites) — call through the embed explicitly.**
@@ -381,7 +381,7 @@
 - **2026-07-01: the pallocBits/pMask named-collection family LANDED (`adc8546cc`; CS1503 −9 +
   CS0021 −3 cascade, runtime 86 → 74).** Two coupled roots: (1) GENERATOR `IArrayViewTypeTemplate` —
   a defined-over-array-backed-defined type (`type pallocBits pageBits`) now implements IArray<elem> as a
-  view; every member AND the wrapper's `val` (the converter emits `b.val[i] = v` in pointer-receiver
+  view; every member AND the wrapper's `Value` (the converter emits `b.Value[i] = v` in pointer-receiver
   methods) routes through an ensuring `view` accessor (materialize the lazy backing on the wrapper's OWN
   mutable m_value, return a copy sharing the heap T[]). Corpus-surgical: exactly ONE recipient
   (pallocBits) across all 669 [GoType] structs. (2) GOLIB `copy<T1,T2>(in slice<T1>, ISlice<T2>)` — a
@@ -424,14 +424,14 @@
   with the user (reduced loop cadence); ALSO this iteration instituted the reconvert timeout discipline
   (`212f70904`) after the user flagged zombie 2-hour pollers.
 - **2026-07-01: pin a deref-aliased pointer param/receiver by its ref-local, not a phantom
-  `.val` (`016ce07ef`; CS1061 −2 + CS0206 −1, runtime 94 → 91).** `unsafe.Pointer(ptr)` emits the pin
-  helper `@unsafe.Pointer.FromRef` whose ref target was unconditionally `(expr).val` — right for a genuine
+  `.Value` (`016ce07ef`; CS1061 −2 + CS0206 −1, runtime 94 → 91).** `unsafe.Pointer(ptr)` emits the pin
+  helper `@unsafe.Pointer.FromRef` whose ref target was unconditionally `(expr).Value` — right for a genuine
   box, wrong for a DEREF-ALIASED pointer (param/receiver rendered as the value alias `ref var p = ref
-  Ꮡp.val`): a `*uintptr` param's alias is a plain nuint → CS1061 (select.go `unsafe.Pointer(pc0)`,
-  heapdump.go `unsafe.Pointer(pstk)`), and a `[GoType num]` receiver's `.val` resolves to the generated
-  get-only `val` PROPERTY → CS0206 as a ref arg (runtime2.go `guintptr.cas`). Fix (`convCallExpr.go`):
+  Ꮡp.Value`): a `*uintptr` param's alias is a plain nuint → CS1061 (select.go `unsafe.Pointer(pc0)`,
+  heapdump.go `unsafe.Pointer(pstk)`), and a `[GoType num]` receiver's `.Value` resolves to the generated
+  get-only `Value` PROPERTY → CS0206 as a ref arg (runtime2.go `guintptr.cas`). Fix (`convCallExpr.go`):
   when `exprIsDerefAliasedPointer(arg)`, take the alias's ref directly — `FromRef(ref p)`; a genuine box
-  keeps `(box).val`; inside a lambda the alias renders through the box (`FromRef(ref Ꮡp.val)`, valid).
+  keeps `(box).Value`; inside a lambda the alias renders through the box (`FromRef(ref Ꮡp.Value)`, valid).
   **HARDENING (`captureModeOperations.go`): a hung verifier's final probe surfaced a REAL silent-wrong —**
   the helper's receiver arm matched by NAME, so an inner pointer local SHADOWING the receiver mis-took the
   gate (`FromRef(ref rΔ1)` pins the box reference slot: compiles, reads garbage; repro'd — Go 111 vs C#
@@ -562,7 +562,7 @@
   in `visitFuncDecl`, to the literal's own signature (save/restore) in `convFuncLit` — consumed by
   `visitReturnStmt`. `currentFuncSignature` MUST stay the enclosing func's (receiver/param detection needs
   it to resolve a CAPTURED pointer param — an earlier attempt that swapped it wholesale regressed
-  captured-param `.val`→`.ValueSlot`, caught by check-no-regression). Test `ClosureBareReturnNamedResults`
+  captured-param `.Value`→`.ValueSlot`, caught by check-no-regression). Test `ClosureBareReturnNamedResults`
   (10 true vs Go); full suite green (203), zero churn, adversarially verified (value/nested/doubly-nested/
   defer-recover/IIFE/sibling closures). **This came from triaging the UNKNOWN class CS8030 — a clean
   contained root. The other unknown, CS0021 (10), is ARCHITECTURAL (malloc `(*[2]uint64)(x)[i]` S1
@@ -649,7 +649,7 @@
 - **2026-07-01: rename a shadowed var used as a method-call receiver in an assignment target
   (`cd86426ce`; CS0841 −1, runtime 150 → 149).** Extends the iteration-5 assignment-target descent: the `=`
   case renames shadowed idents in the LHS base chain (index/key/selector/star/paren), but had NO case for a
-  METHOD CALL in the chain — `x.ptr().val.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1` because a
+  METHOD CALL in the chain — `x.ptr().Value.next = …` (runtime stackpoolalloc, loop `x` renamed `xΔ1` because a
   func-body `x` is declared AFTER the loop) buried the `x` inside `x.ptr()`, so the use kept raw `x`, read
   before its later decl → CS0841. Fix (`variableAnalysisOperations.go`): add `case *ast.CallExpr:
   visitNode(cur)` — visits the whole call so receiver + args get the rename (visitNode keys on
@@ -978,7 +978,7 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
   `typesEqual` (recursion/unsafe/abi), likely a SPURIOUS over-escape. Needs escape-analysis investigation,
   not a quick sibling-rename. Deprioritize.
 - **CS0206 (runtime2.cs:177) — ARCHITECTURAL (S1), explorer MIS-classified.** `atomic.Casuintptr(…ref
-  (gp).val…)` where `gp` is `Δguintptr` — `.val` is the managed-referent underlying-value; this is the S1
+  (gp).Value…)` where `gp` is `Δguintptr` — `.Value` is the managed-referent underlying-value; this is the S1
   guintptr/managed-pointer model. SKIP.
 - **CS1593 (metrics.cs:494) — S6 method-VALUE, not delegate-arity.** `d.compute = read.compute` (a bound
   method value) emitted as a 0-arg `() => read.compute()` wrapper; the field wants a 2-arg delegate. Method
@@ -1000,7 +1000,7 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
      with pinning; native memory ops are identical — the hand-converted `unsafe`/`atomic` proves it).
   2. **Managed-referent (`guintptr`/`muintptr`/… hiding a managed pointer in a `uintptr`) → MODEL** it
      holding `ж<T>`/`object` directly (Volatile/Interlocked + `nilCanon`), like `core/sync/atomic`
-     `atomic.Pointer<T>`. Per-site, approachable — CS0206 runtime2.cs `Δguintptr.val` is exactly this.
+     `atomic.Pointer<T>`. Per-site, approachable — CS0206 runtime2.cs `Δguintptr.Value` is exactly this.
   3. **Raw-metal on NON-native types (layout math, type-descriptor walking, `*.asm`) → STUB** with
      `[module: GoManualConversion]` (a compiling hand/throwing stub that won't exist in the final build is
      an acceptable milestone solution; file a review note). Copy such stubs BACK into `go-src-converted`.
@@ -1028,13 +1028,13 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
   ConversionStrategies.md "...empty struct `struct{}` is never lifted...".
 - [x] **Cross-assembly named-numeric implicit-conversion operators** *(landed 2026-06-30, `93bbf6ce5`).*
   A `GoImplicitConv` numeric operator whose body constructs a named-numeric declared in ANOTHER assembly
-  was doubly broken: `(NameOff)src.val` (`ulong`→foreign `int32`-named) has no cross-assembly route C#
+  was doubly broken: `(NameOff)src.Value` (`ulong`→foreign `int32`-named) has no cross-assembly route C#
   selects (CS0030 — the same cast to a LOCAL named type compiles), and where the foreign type would host
   the operator (`partial struct NameOff`, reached via a local alias like runtime's `global using nameOff =
   abi.NameOff` so the cross-package dot is hidden and it records `Inverted`) it declared a phantom empty
   local type (CS1729). **Fix (`ImplicitConvGenerator` + template, contained):** when the `new`-constructed
   side (LH type: source when `Inverted`, else target) is foreign, construct through its underlying basic —
-  `new global::go.@internal.abi_package.NameOff((int)src.val)` — and relocate the host into the LOCAL type
+  `new global::go.@internal.abi_package.NameOff((int)src.Value)` — and relocate the host into the LOCAL type
   when the source side is foreign. Gated to the foreign-constructed case; same-assembly operators emit
   byte-identically (muintptr↔Δhex unchanged). Cleared 3×CS0030 + 3×CS1729 in runtime (`nameOff`/`typeOff`/
   `textOff` ↔ `Δhex`); 199→181. **No behavioral test** — the trigger is inherently cross-assembly and the
@@ -1050,8 +1050,8 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
   test `NamedPointerReinterpret`. **CORRECTED CHARACTERIZATION (the original "~80, CS0030 59 + CS0021 12 +
   CS1510 9" estimate over-counted S1):**
   - **CS1510 ×9 is NOT S1 — it is S2** (ref-receiver method on a value-deref rvalue: `(~…).wbBuf.get2()`,
-    `(~getg()).schedlink.set(…)`). The `unsafe.Pointer.FromRef(ref X.val)` lines actually **compile** (a
-    minimal repro confirms `ref (rvalue).val` on a ref-returning property is legal). Moved to S2.
+    `(~getg()).schedlink.set(…)`). The `unsafe.Pointer.FromRef(ref X.Value)` lines actually **compile** (a
+    minimal repro confirms `ref (rvalue).Value` on a ref-returning property is legal). Moved to S2.
   - **CS0021 splits:** only `malloc.cs` ×2 is the genuine S1 cast-then-index `(*[2]uint64)(x)[i]` (and it
     compiles-but-CRASHES — `(ж<array<E>>)(uintptr)` does an immediate raw `*(array*)addr` deref of a
     managed type; not runtime-testable). The rest (mgcscavenge/type/proc/traceback) is named-type-over-
@@ -1101,7 +1101,7 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
     `.of(…)` mis-binds by precedence, so S1 reinterprets keep their `Ꮡ(…)` form). Test
     `PointerRvalueFieldReceiver`; zero churn; full suite green (191). See ConversionStrategies.md "The base
     may also be a pointer rvalue…".
-  - **Indexed-element atomic (CS1929 ×4: `mprof` `bh.val[i].Load()`/`.StoreNoWB()`).** Array element of
+  - **Indexed-element atomic (CS1929 ×4: `mprof` `bh.Value[i].Load()`/`.StoreNoWB()`).** Array element of
     atomic `UnsafePointer` via a pointer — the `daca4f3a1`/`exprIsIndexedValueElement` area; check why it
     isn't firing for `UnsafePointer`.
   - [x] **`time` `timeTimer.modify/stop/reset` value-embed promotion** *(landed 2026-06-30, `0abc66e2d`;
@@ -1115,7 +1115,7 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
   characterized).* **What landed:** `e59b5865a` — a defined type over a STRUCT (`type winlibcall libcall`)
   now forwards the underlying struct's fields as get/set properties over a MUTABLE `m_value`
   (`TypeGenerator`+`InheritedTypeTemplate`), cleared the 7 `winlibcall` `fn/n/args/r1/r2/err` CS1061. PAIRED
-  golib fix: `ж<T>.operator ~` now returns `value.val` not `value.m_val` — `(~c).field` on a field-ref box
+  golib fix: `ж<T>.operator ~` now returns `value.Value` not `value.m_val` — `(~c).field` on a field-ref box
   was reading a zero-valued copy (compiles-but-wrong; the winlibcall reads `(~c).n` returned 0). Runtime
   243→236, full suite green, zero converter churn. Test `NamedTypeOverStruct`. **NOTE: 2-level struct
   EMBEDDING promotion already works** (`stackWorkBuf`→`stackWorkBufHdr`→`workbufhdr.nobj`, transitive — see
@@ -1132,10 +1132,10 @@ field-box accessors (`02a610466`, −3, FIRST generator root), pallocBits/pMask 
     CS0021/CS8130) may be easier (maps are reference types). Also the range/deconstruct CS8130 10 + CS8183 5
     overlap here (`for i := range namedSliceOrSpan` / comma-ok over a named map).
 - [ ] **S4 — pointer-reassign nil-safe re-alias model** *(CS0029 ~11).* `gp = getg()` where `gp` is a
-  deref-aliased `*g` param (`ref var gp = ref Ꮡgp.val`) can't take a `ж<g>`. A box-reassign-then-realias
-  (`Ꮡgp = …; gp = ref Ꮡgp.val`) was implemented (−32!) but **REVERTED — it eagerly derefs the box, so a
+  deref-aliased `*g` param (`ref var gp = ref Ꮡgp.Value`) can't take a `ж<g>`. A box-reassign-then-realias
+  (`Ꮡgp = …; gp = ref Ꮡgp.Value`) was implemented (−32!) but **REVERTED — it eagerly derefs the box, so a
   nil reassignment NREs** (the behavioral test caught it; compile+churn looked clean). The fix is a
-  nil-safe re-alias model (golib `ж<T>.val` nil handling, or a deferred/conditional re-alias). Canonical
+  nil-safe re-alias model (golib `ж<T>.Value` nil handling, or a deferred/conditional re-alias). Canonical
   repro documented in memory.
 - [ ] **S5 — closure-captured-pointer box + pointer-to-pointer aliasing** *(CS0103 ~6 + part of CS1503).*
   `ᏑmToFlush` in `traceAdvance` (a `*m` whose `&local` is taken inside `systemstack(func(){…})` —

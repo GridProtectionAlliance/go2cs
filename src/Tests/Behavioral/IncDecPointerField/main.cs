@@ -14,18 +14,18 @@ partial class main_package {
 }
 
 internal static ж<counter> get(ж<counter> Ꮡc) {
-    ref var c = ref Ꮡc.val;
+    ref var c = ref Ꮡc.Value;
 
     return Ꮡc;
 }
 
 internal static void Main() {
     var @base = Ꮡ(new counter(n: 5));
-    @base.val.sub.k = 3;
+    @base.Value.sub.k = 3;
     var c = get(@base);
-    c.val.n++;
-    c.val.n++;
-    c.val.sub.k--;
+    c.Value.n++;
+    c.Value.n++;
+    c.Value.sub.k--;
     fmt.Println((~@base).n, (~@base).sub.k);
 }
 

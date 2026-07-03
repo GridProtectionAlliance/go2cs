@@ -58,19 +58,19 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 				if v.exprIsDerefAliasedPointer(sliceExpr.X) {
 					// A deref-aliased pointer PARAMETER/RECEIVER is the pointed-to value, not a box.
 					// For a NAMED array type (`*pageBits` → `ref pageBits b`) that value is the wrapper,
-					// which has no slice/range members — reach its underlying `array<T>` via `.val`
-					// (`b.val[..]`). For an ANONYMOUS array (`*[N]T` → `ref array<T> p`) the value IS the
+					// which has no slice/range members — reach its underlying `array<T>` via `.Value`
+					// (`b.Value[..]`). For an ANONYMOUS array (`*[N]T` → `ref array<T> p`) the value IS the
 					// `array<T>`, sliced directly. A `~` on either would deref a non-pointer (CS0023).
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident += ".val"
+						ident += ".Value"
 					}
 				} else {
 					// A pointer-to-array BOX (a local, field, or call result) is dereferenced first.
 					// A NAMED array's deref yields the wrapper (no slice/range members) — reach its
-					// underlying array<T> via `.val`, mirroring the deref-aliased branch above
+					// underlying array<T> via `.Value`, mirroring the deref-aliased branch above
 					// (runtime proc.go's `mp.cgoCallers[:cgoOff]`, cgoCallers a `*cgoCallers`).
 					if _, isNamed := ptr.Elem().(*types.Named); isNamed {
-						ident = "(" + PointerDerefOp + ident + ").val"
+						ident = "(" + PointerDerefOp + ident + ").Value"
 					} else {
 						ident = "(" + PointerDerefOp + ident + ")"
 					}
