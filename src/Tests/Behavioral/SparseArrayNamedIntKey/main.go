@@ -35,8 +35,27 @@ var codeNames = []string{
 	codeB: "b",
 }
 
+// errno mirrors syscall.Errno: a NAMED type over uintptr. Its golib rendering is the uintptr
+// STRUCT, so reaching the SparseArray's int indexer takes two user-defined conversions - the
+// key cast must split the steps ((int)((uintptr)eBig)), and a composite CONSTANT key
+// (eBig - errBase, syscall zerrors' shape) folds to its integer value (the mixed
+// named/underlying operand rendering has ambiguous operators, CS0034).
+type errno uintptr
+
+const (
+	errBase errno = 1 << 10
+	eBig    errno = errBase + 1
+	eAcces  errno = errBase + 2
+)
+
+var errNames = []string{
+	eBig - errBase:   "big",
+	eAcces - errBase: "acces",
+}
+
 func main() {
 	fmt.Println(rankNames[rankLow], rankNames[rankMid], rankNames[rankHigh]) // low mid high
 	fmt.Println(codeNames[codeA], codeNames[codeB])                          // a b
 	fmt.Println(len(rankNames))                                              // 3
+	fmt.Println(errNames[eBig-errBase], errNames[eAcces-errBase])            // big acces
 }

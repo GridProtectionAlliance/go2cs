@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/types"
+	"strconv"
 )
 
 func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyValueContext) string {
@@ -103,6 +105,37 @@ func (v *Visitor) sparseArrayKey(key ast.Expr, context KeyValueContext) string {
 				default:
 					// int/int64/uint/uint32/uint64/uintptr underlyings do NOT implicitly narrow
 					// to int32, so an explicit cast is required for the SparseArray int indexer.
+					// A COMPOSITE key (`E2BIG - APPLICATION_ERROR`) must parenthesize, or the
+					// cast binds only the first operand. A UINTPTR-backed named numeric converts
+					// through TWO user-defined operators (named -> golib uintptr struct -> int),
+					// which C# rejects in a single cast (syscall zerrors' Errno keys, CS0030
+					// x131) - split the steps; other underlyings reach int with one user-defined
+					// plus one standard conversion, so the direct form stays (no golden churn).
+					_, isIdent := key.(*ast.Ident)
+
+					// A composite CONSTANT key (`E2BIG - APPLICATION_ERROR`, syscall zerrors
+					// x131) folds to its integer value: its rendering mixes named/underlying
+					// operands whose operators are ambiguous (CS0034), and no cast placement
+					// fixes both operands. Simple IDENT keys keep their symbolic form (visual
+					// similarity - `[(int)rankLow]` stays).
+					if !isIdent {
+						if tv, ok := v.info.Types[key]; ok && tv.Value != nil {
+							if i, exact := constant.Int64Val(constant.ToInt(tv.Value)); exact {
+								return strconv.FormatInt(i, 10)
+							}
+						}
+
+						// Non-constant composite: parenthesize so the cast binds the whole key.
+						keyExpr = fmt.Sprintf("(%s)", keyExpr)
+					}
+
+					// A uintptr-backed named numeric converts through TWO user-defined
+					// operators (named -> golib uintptr struct -> int), which C# rejects in a
+					// single cast (CS0030) - split the steps, keeping the symbolic operand.
+					if basic.Kind() == types.Uintptr {
+						return fmt.Sprintf("(int)((%s)%s)", v.getCSTypeName(basic), keyExpr)
+					}
+
 					return fmt.Sprintf("(int)%s", keyExpr)
 				}
 			}

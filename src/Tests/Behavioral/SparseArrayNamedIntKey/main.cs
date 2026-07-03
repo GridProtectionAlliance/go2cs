@@ -26,10 +26,22 @@ internal static slice<@string> codeNames = new golib.SparseArray<@string>{
     [codeB] = "b"u8
 }.slice();
 
+[GoType("num:uintptr")] partial struct errno;
+
+internal static readonly errno errBase = /* 1 << 10 */ 1024;
+internal static readonly errno eBig = /* errBase + 1 */ 1025;
+internal static readonly errno eAcces = /* errBase + 2 */ 1026;
+
+internal static slice<@string> errNames = new golib.SparseArray<@string>{
+    [1] = "big"u8,
+    [2] = "acces"u8
+}.slice();
+
 internal static void Main() {
     fmt.Println(rankNames[rankLow], rankNames[rankMid], rankNames[rankHigh]);
     fmt.Println(codeNames[codeA], codeNames[codeB]);
     fmt.Println(len(rankNames));
+    fmt.Println(errNames[eBig - errBase], errNames[eAcces - errBase]);
 }
 
 } // end main_package

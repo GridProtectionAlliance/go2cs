@@ -43,7 +43,11 @@ public class SparseArray<T> : IList<T>
     }
 
     /// <inheritdoc />
-    public int Count => m_items.Count;
+    /// <remarks>
+    /// A Go sparse composite (<c>[]string{5: "x"}</c>) produces a DENSE array of length
+    /// max-index+1 with zero-valued gaps, so the count reflects the dense length.
+    /// </remarks>
+    public int Count => m_items.Count == 0 ? 0 : m_items.Keys.Max() + 1;
 
     /// <inheritdoc />
     public bool IsReadOnly => false;
@@ -69,7 +73,8 @@ public class SparseArray<T> : IList<T>
     /// <inheritdoc />
     public void CopyTo(T[] array, int arrayIndex)
     {
-        m_items.Values.CopyTo(array, arrayIndex);
+        foreach (T item in this)
+            array[arrayIndex++] = item;
     }
 
     /// <inheritdoc />
@@ -104,11 +109,17 @@ public class SparseArray<T> : IList<T>
     /// </remarks>
     public IEnumerator<T> GetEnumerator()
     {
-        // Ensure items are enumerated in order by key
-        return m_items
-            .OrderBy(entry => entry.Key)
-            .Select(entry => entry.Value)
-            .GetEnumerator();
+        // Enumerate the DENSE Go array this sparse initializer denotes: index order from 0
+        // through the max key, GAPS INCLUDED as zero values. Skipping gaps mis-positions every
+        // element after the first hole and shortens the materialized slice (syscall zerrors'
+        // invented-error table, index-out-of-range at runtime).
+        if (m_items.Count == 0)
+            yield break;
+
+        int max = m_items.Keys.Max();
+
+        for (int i = 0; i <= max; i++)
+            yield return m_items.TryGetValue(i, out T? value) ? value! : default!;
     }
 
     IEnumerator IEnumerable.GetEnumerator()
