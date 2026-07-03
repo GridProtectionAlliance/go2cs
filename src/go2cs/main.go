@@ -3407,7 +3407,20 @@ func convertToCSFullTypeName(typeName string) string {
 				subTypes[i] = convertToCSTypeName(strings.TrimSpace(subTypes[i]))
 			}
 
-			typeName = fmt.Sprintf("%s<%s>%s", typeName[:start], strings.Join(subTypes, ", "), typeName[end+1:])
+			base := typeName[:start]
+
+			// The type-vs-method collision Δ-rename keys on the BARE type name; a generic
+			// instantiation reaches the default sanitize with its `<args>` attached
+			// (`indirect<K, V>`), missing the map — internal/concurrent's `type indirect[K, V]`
+			// vs `func (n *node[K, V]) indirect()` renamed the DECLARATION `Δindirect<K, V>`
+			// while every use kept the raw name (CS0246 ×33, leaking into net/netip). Rename
+			// the bare base at reassembly; a dotted (package-qualified) base never matches the
+			// per-package map and keeps its exported-alias route.
+			if nameCollisions[base] {
+				base = getCollisionAvoidanceIdentifier(base)
+			}
+
+			typeName = fmt.Sprintf("%s<%s>%s", base, strings.Join(subTypes, ", "), typeName[end+1:])
 		}
 	}
 

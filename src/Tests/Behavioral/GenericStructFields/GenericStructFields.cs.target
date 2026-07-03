@@ -39,6 +39,31 @@ internal static void Main() {
     fmt.Printf("String result: %s\n"u8, container.StringResult.Value);
     fmt.Printf("First float value: %f\n"u8, container.FloatValues[0].Value);
     fmt.Printf("Completion status: %t\n"u8, container.Mappings["completed"u8].Value);
+    Δpool<nint> pl = default!;
+    pl.items = append(pl.items, (nint)(7), (nint)(8));
+    var (v, ok) = pl.take();
+    fmt.Println(v, ok, new keeper(nil).pool());
+}
+
+[GoType] partial struct Δpool<T> {
+    internal slice<T> items;
+}
+
+[GoRecv] internal static (T, bool) take<T>(this ref Δpool<T> p) {
+    if (len(p.items) == 0) {
+        T zero = default!;
+        return (zero, false);
+    }
+    var v = p.items[len(p.items) - 1];
+    p.items = p.items[..(int)(len(p.items) - 1)];
+    return (v, true);
+}
+
+[GoType] partial struct keeper {
+}
+
+internal static @string pool(this keeper k) {
+    return "kept"u8;
 }
 
 } // end main_package
