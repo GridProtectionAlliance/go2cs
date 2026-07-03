@@ -15,6 +15,34 @@
 
 ## Where things stand (2026-07-03)
 
+- **THE POINTER-INTERFACE ADAPTER MODEL LANDED (`2a44886b1`, 18 files, all three ships) — math/rand
+  28 → 1, WAVE-8 = 15 errors / 5 packages.** A Go interface value created from a pointer now emits
+  a generated `IжAdapter` class wrapping the receiver box (`[assembly: GoImplement<T, Iface>
+  (Pointer = true)]` → `sealed class TᴵIface(ж<T> box) : Iface, IжAdapter`): exact Go aliasing
+  (interface calls mutate the original), direct-ж members bind (`m_box.M()`), `s.(*T)` unwraps to
+  the same box (golib `_<T>` + AreEqual unwrap `IжAdapter.Box`), equality is box identity.
+  Cast-site coverage: call args (convExprList), keyed composite fields (convKeyValueExpr), var
+  decls (visitValueSpec) — pointer operands render as the box via isPointer ident context;
+  `iface == ptr` emits `AreEqual(box…)` (was `~p` copy-compare); interface-inheritance de-dup
+  exempts pointer pairs (Source vs Source64 CS0246). Value-sourced casts keep the partial-struct
+  form (Go copies there). KNOWN LIMITS (fine for corpus, revisit if surfaced): cross-package
+  pointer casts keep deref-copy (adapter only exists in impl assembly); adapter-to-OTHER-interface
+  assert not unwrapped. OPEN ITEM SPOTTED: a Go method named `Value` on a pointer type collides
+  with `ж<T>.Value` property at box call sites (`c.Value()` binds the property, CS1955) —
+  the val→Value rename made this reachable; needs a collision Δ-rename or emission guard.
+  Guards: InterfaceCasting extension (aliasing both directions, assert-back, `back == c`,
+  run-verified vs Go), InterfaceImplementation output comparison. Suite 217/217; churn exactly 2
+  projects, re-goldened.
+
+  **WAVE-8 (recon92 full sln warm double): 15 errors / 5 packages:**
+  1. internal/reflectlite 10 → 4 real (stale hand files, see wave-7 triage below — unchanged).
+  2. log/slog/internal/buffer 2 (named-slice-wrapper convs — unchanged).
+  3. internal/weak 1 (abi.Escape box arg — unchanged).
+  4. runtime/metrics 1 (godebugs ns — unchanged).
+  5. math/rand 1 — **CS0220 rand.cs:89 + CS8778 rng.cs — int64-range consts typed nint** (NEXT:
+     mechanical; the untyped-const context defaults to nint where the Go type is int64 —
+     rngCooked array literal + `1<<63` shift site).
+
 - **math/rand 28 → 6 (`118a38a3e`): Roslyn hintNames are case-INSENSITIVE — Go's exported/
   unexported case-twins (`Int31n`/`int31n` on `*Rand`) crashed RecvGenerator (CS8785), which
   suppressed EVERY ж-overload in the package (26 CS1929 cascade).** Both RecvGenerator and
