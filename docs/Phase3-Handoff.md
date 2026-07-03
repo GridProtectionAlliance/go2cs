@@ -20,7 +20,18 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS: explicit-type-args root LANDED (`3694611d0`) — slices 74 → 68, all 14
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 2: golib interface-typed builtin overloads LANDED (`92ffc80d8`) — slices
+  68 → 31** (copy(ISlice,ISlice)+string form, clear(ISlice), 2-arg min/max on
+  IComparisonOperators; write-through via the constraint box's shared backing; exact overloads
+  keep concrete calls unchanged — golib-only root, no reconvert). REMAINING slices 31: CS0266 ×9
+  + CS0411 ×4 + CS1503 ×9 = the S-PRESERVING SUB-SLICE design family (s[i:j] on constrained S
+  yields ISlice<E>, pdqsort recursion — candidate: ISupportMake<S> reconstruction, converter- or
+  golib-side); CS9244 ×8 = append-through-constraint (append(S, S...) → Span-as-type-arg;
+  candidate golib append<S,T>(S, params ReadOnlySpan<T>) where S : ISlice<T>, ISupportMake<S>);
+  CS0029 ×1. Plus the untyped-const→E conversion gap (`E(100)` emits `(E)100` CS0030 — A-bucket).
+  maps 13 = delete inference + comparable<T> decision.
+
+  **CAMPAIGN PROGRESS: explicit-type-args root LANDED (`3694611d0`) — slices 74 → 68, all 14
   CS0411 cleared** (constraint-only type params render resolved instantiations from
   info.Instances; partial Go instantiations replaced via balanced strip — the `Grow<S><S, E>`
   parse error had been masking slices' semantic count). Remaining 68 = the B-bucket golib
