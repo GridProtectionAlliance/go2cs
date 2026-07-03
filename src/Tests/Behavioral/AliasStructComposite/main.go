@@ -17,9 +17,25 @@ func keyed() alias    { return alias{V: 7, W: 3} }
 func empty() alias    { return alias{} }
 func positional() alias { return alias{1, 2} }
 
+// A type ALIAS to an array of a csproj-aliased numeric type (fiat's
+// `type p224UntypedFieldElement = [4]uint64`). The `global using` RHS cannot see the
+// golib csproj aliases (C# using directives are invisible to one another), so the
+// element must render as a C# keyword: `global using words = go.array<ulong>;`.
+type words = [4]uint64
+
+func sum(w words) uint64 {
+	var s uint64
+	for i := 0; i < len(w); i++ {
+		s += w[i]
+	}
+	return s
+}
+
 func main() {
 	a := keyed()
 	b := empty()
 	c := positional()
 	fmt.Println(a.V, a.W, b.V, c.V, c.W)
+	w := [4]uint64{10, 20, 30, 40}
+	fmt.Println(sum(w), len(w))
 }
