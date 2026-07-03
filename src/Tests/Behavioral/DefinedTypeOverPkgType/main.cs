@@ -40,6 +40,18 @@ internal static void Main() {
     Ꮡc.Store(10);
     _ = Ꮡc.Add(5);
     fmt.Println("defined-type methods compiled");
+    uintptr seed = 42;
+    var h = ((handleT)seed);
+    var k = openKey(h);
+    fmt.Println(k == ((keyT)(uintptr)h), (uintptr)h);
+}
+
+[GoType("num:uintptr")] partial struct handleT;
+
+[GoType("num:uintptr")] partial struct keyT;
+
+internal static keyT openKey(handleT h) {
+    return ((keyT)(uintptr)h);
 }
 
 } // end main_package

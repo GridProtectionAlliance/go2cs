@@ -1121,6 +1121,23 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 		}
 
 		if !types.Identical(funcType, argType) {
+			// A conversion between a defined type and its WRITTEN base named type — `Key(handle)`
+			// or `Handle(key)` where `type Key syscall.Handle` — is already provided by the
+			// [GoType] wrapper itself (TypeGenerator emits the implicit operators both ways);
+			// recording it again makes ImplicitConvGenerator emit the identical operator into the
+			// same type (CS0557 — internal/syscall/windows/registry's Key, gating os/fmt).
+			if named, ok := funcType.(*types.Named); ok {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, argType) {
+					return expr
+				}
+			}
+
+			if named, ok := argType.(*types.Named); ok {
+				if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil && types.Identical(rhs, funcType) {
+					return expr
+				}
+			}
+
 			// Check if the arg type is an aliased numeric type
 			if ok := isAliasedNumericType(argType); ok {
 				valueTypeName := convertToCSTypeName(v.getTypeName(argType, true))

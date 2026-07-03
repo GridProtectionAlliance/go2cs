@@ -34,4 +34,18 @@ func main() {
 	c.Store(10)
 	_ = c.Add(5)
 	fmt.Println("defined-type methods compiled")
+
+	var seed uintptr = 42
+	h := handleT(seed)
+	k := openKey(h)
+	fmt.Println(k == keyT(h), uintptr(h))
 }
+
+// Case 3 (internal/syscall/windows/registry): a defined type over a NAMED NUMERIC with an
+// explicit VALUE conversion (Key(handle) where type Key syscall.Handle). The [GoType]
+// wrapper already provides the implicit operators both ways; recording the conversion
+// again made ImplicitConvGenerator emit the identical operator (CS0557).
+type handleT uintptr
+type keyT handleT
+
+func openKey(h handleT) keyT { return keyT(h) }
