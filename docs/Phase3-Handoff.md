@@ -20,7 +20,19 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 2: golib interface-typed builtin overloads LANDED (`92ffc80d8`) — slices
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 3: S-preserving sub-slice/append LANDED (`845fc37c5`) — slices 31 → 22.**
+  ISliceWrap<TSelf,T> static-abstract factory + sharing slice<T>(ISlice<T>) ctor + golib
+  subslice<S,E>/append<S,T> + ~[]E where-clause carries ISliceWrap + convSliceExpr type-param arm
+  (core type via constraint type-set — a TypeParam's Underlying() is its constraint INTERFACE).
+  BONUS latent fix: named-slice wrapper template sub-slices routed ToSpan() = DETACHED COPIES
+  (silent Go-aliasing divergence for all named slice types) — now share via m_value. Remaining
+  slices 22: S-where-[]E-expected assignability (rotateRight family), untyped-const→E, Span
+  singles. **USER-REPORTED next root (task #10): GoImplicitConv records struct UNDERLYINGS as raw
+  Go text (encoding/xml package_info: `struct{p printer}` + mangled anonymous decoder-state
+  monster) — main.go ~2100-2135 records getCSTypeName(.Underlying()); fix = named type's name for
+  the record, lifted dynamic name or SKIP for genuinely anonymous.**
+
+  **CAMPAIGN PROGRESS 2: golib interface-typed builtin overloads LANDED (`92ffc80d8`) — slices
   68 → 31** (copy(ISlice,ISlice)+string form, clear(ISlice), 2-arg min/max on
   IComparisonOperators; write-through via the constraint box's shared backing; exact overloads
   keep concrete calls unchanged — golib-only root, no reconvert). REMAINING slices 31: CS0266 ×9
