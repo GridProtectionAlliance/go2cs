@@ -15,6 +15,16 @@
 
 ## Where things stand (2026-07-03)
 
+- **@-escape accessibility CLEARED (`deee110d1`) — WAVE-17 = 82 / 13 (strconv unmasked 7→21).**
+  getAccess strips the leading '@' (keyword escapes are always-lowercase Go names). Guard:
+  HeapKeywordVar extension. strconv's 21: **value→box args CS1503 ×8 — the RECURRING family
+  (syscall SID ×3 too, total 11+): a value passed where ж<T> param expected — probably the
+  &-arg/isPointer context missing at ordinary call sites for addressable locals — NEXT ROOT,
+  spans packages**; pattern-match non-const labels CS9135 ×5; ushort-vs-IShiftOperators
+  constraint CS0315 ×4 (golib bsearch S,E constraint too tight for uint16 — check emitted
+  where-clause vs golib op interfaces); parse ×2; foreach-var ×1. Then path 7, edwards 13 +
+  fiat 4, dnsmessage tail 9, syscall next-layer 12, io 5, singles.
+
 - **Value-returning defers + interface-tag switches CLEARED (`a6f163022`) — WAVE-16 = 68 / 13.**
   golib deferǃ gained Func<…,TResult> result-discarding twins (T1..T16); switch equality on a
   non-empty interface tag routes each case through AreEqual. Guard: InterfaceImplementation
