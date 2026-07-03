@@ -19,7 +19,7 @@ internal static void writeBarrier(@unsafe.Pointer ptr, @unsafe.Pointer val) {
 }
 
 internal static (Action, bool) funcAt(@unsafe.Pointer p) {
-    return (((ж<Action>)(uintptr)(p)).val, true);
+    return (((ж<Action>)(uintptr)(p)).ValueSlot, true);
 }
 
 internal static uint64 zeroPair(@unsafe.Pointer x) {

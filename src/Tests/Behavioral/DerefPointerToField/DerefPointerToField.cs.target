@@ -13,7 +13,7 @@ internal static nint sumRange(ж<holder> Ꮡh) {
     ref var h = ref Ꮡh.val;
 
     nint s = 0;
-    foreach (var (_, x) in h.xs.val) {
+    foreach (var (_, x) in h.xs.ValueSlot) {
         s += x;
     }
     return s;

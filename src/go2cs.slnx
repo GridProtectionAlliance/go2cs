@@ -137,6 +137,7 @@
     <Project Path="Tests/Behavioral/GlobalAtomicDefer/GlobalAtomicDefer.csproj" />
     <Project Path="Tests/Behavioral/GlobalAtomicFieldMethod/GlobalAtomicFieldMethod.csproj" />
     <Project Path="Tests/Behavioral/GlobalNestedFieldAddress/GlobalNestedFieldAddress.csproj" />
+    <Project Path="Tests/Behavioral/GlobalPointerWalk/GlobalPointerWalk.csproj" />
     <Project Path="Tests/Behavioral/GlobalShadowedByLocal/GlobalShadowedByLocal.csproj" />
     <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />

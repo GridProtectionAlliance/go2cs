@@ -276,7 +276,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 				baseIsCall = !v.callExprIsTypeConversion(call)
 			}
 
-			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex {
+			// A DEREF base — `&(*pprev).alllink` where pprev is `**m` (runtime proc.go's allm
+			// walk): the star of a double pointer renders `pprev.val`, itself the ж<m> box, and
+			// field-refs through `.of(…)` cleanly (postfix on postfix).
+			baseIsStar := false
+			{
+				unwrapped := base
+
+				for {
+					if paren, ok := unwrapped.(*ast.ParenExpr); ok {
+						unwrapped = paren.X
+						continue
+					}
+
+					break
+				}
+
+				_, baseIsStar = unwrapped.(*ast.StarExpr)
+			}
+
+			if baseIsIdent || baseIsSelector || baseIsCall || baseIsIndex || baseIsStar {
 				if ptrType, ok := v.getType(base, false).(*types.Pointer); ok {
 					if _, ok := ptrType.Elem().Underlying().(*types.Struct); ok {
 						structExpr := v.convExpr(base, nil)
@@ -533,9 +552,26 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			}
 		}
 
-		// Check if unary target is a pointer to a pointer
+		// Check if unary target is a pointer to a pointer. `Ꮡ(value)` boxes a COPY of the
+		// pointer — acceptable only when no identity box exists. An ADDRESSED GLOBAL (or a
+		// heap-escaped local) of pointer type has one (`Ꮡallm`, a ж<ж<m>>), and the copy form
+		// would silently orphan writes through the double pointer (runtime proc.go's allm walk
+		// REMOVES entries via `*pprev = mp.alllink` from `pprev := &allm`) — fall through to
+		// the identity-box branches below for those.
 		if _, ok := v.getType(unaryExpr.X, true).(*types.Pointer); ok {
-			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
+			identityBoxed := false
+
+			if ident := getIdentifier(unaryExpr.X); ident != nil {
+				if v.isAddressedGlobal(ident) {
+					identityBoxed = true
+				} else if obj := v.info.ObjectOf(ident); obj != nil && v.identEscapesHeap[obj] {
+					identityBoxed = true
+				}
+			}
+
+			if !identityBoxed {
+				return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
+			}
 		}
 
 		// Check if unary target is not a variable or a field

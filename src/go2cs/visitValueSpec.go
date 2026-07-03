@@ -146,7 +146,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								initExpr = fmt.Sprintf("new %s(%s)", csTypeName, arrayLenValue)
 							}
 
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr)
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 						} else if len(arrayLenValue) > 0 {
 							v.writeOutput("%s static %s %s = new(%s);", access, csTypeName, csIDName, arrayLenValue)
 						} else {
@@ -223,7 +223,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						typeLenDeviation -= token.Pos(len(access) + 9)
 
 						if v.isAddressedGlobal(ident) {
-							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
+							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}), isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 						} else {
 							v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, v.convExpr(valueSpec.Values[i], []ExprContext{context}))
 						}
@@ -275,7 +275,7 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					// a constant (runtime's `var uint16Eface any = uint16InterfacePtr(0)`, addressed
 					// via `efaceOf(&uint16Eface)`): convUnaryExpr emits the box form `Ꮡuint16Eface`,
 					// so without boxing here that identifier would not exist (CS0103).
-					v.writeAddressedGlobalDecl(access, csTypeName, csIDName, csValue)
+					v.writeAddressedGlobalDecl(access, csTypeName, csIDName, csValue, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 				} else {
 					v.writeOutput("%s static %s %s = %s;", access, csTypeName, csIDName, csValue)
 				}

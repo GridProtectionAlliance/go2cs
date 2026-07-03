@@ -11,6 +11,18 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	ident := getIdentifier(starExpr.X)
 	pointerRecv, recvName := v.isPointerReceiver()
 
+	// A deref whose RESULT is still a reference-like value (pointer/slice/map/chan/func/
+	// interface — `*pp` on a `**node`) is a READ OF THE HELD VALUE, not a dereference of it:
+	// Go's `*pp` may legally yield nil (`for pp := &head; *pp != nil; …`). The strict `val`
+	// panics on a null held value, so these derefs read through `ValueSlot` (identical real
+	// slot, no nil check — reads and writes both persist); a deref producing a VALUE keeps the
+	// strict `val` (a nil `*node` deref must panic, as in Go).
+	derefAccessor := ".val"
+
+	if resultType := v.info.TypeOf(starExpr); resultType != nil && isInherentlyHeapAllocatedType(resultType) {
+		derefAccessor = ".ValueSlot"
+	}
+
 	// The parameter-deref shortcut below applies to `*p` (the whole parameter) and `**p` — where the
 	// operand denotes the parameter itself. It must NOT fire for `*p.field` (a deref of a pointer FIELD
 	// reached through the parameter): `getIdentifier` digs through the selector to the param root, but
@@ -24,7 +36,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		// Check if the star expression is a pointer to pointer dereference
 		if v.isPointer(ident) {
 			if _, ok := starExpr.X.(*ast.StarExpr); ok {
-				return v.convExpr(starExpr.X, nil) + ".val"
+				return v.convExpr(starExpr.X, nil) + derefAccessor
 			}
 		}
 
@@ -33,7 +45,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
 		// the heap box parameter directly (`Ꮡp.val`), which is a capturable reference type.
 		if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
-			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + ".val"
+			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + derefAccessor
 		}
 
 		// Prefer to use local reference instead of dereferencing a pointer
@@ -43,17 +55,18 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// Special handling for field access (e.g., outer.ptr)
 	if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
 		baseExpr := v.convExpr(starExpr.X, nil)
-		pointerDepth := v.getSelectorExprPointerDepth(selectorExpr)
 
-		// For multi-level pointers, we need to add enough .val
-		if pointerDepth > 1 {
-			baseExpr += ".val"
-		} else if _, ok := v.getIdentType(selectorExpr.Sel).(*types.Pointer); !ok {
+		// One star is ONE deref: `*i.pprev` on a `**special` field yields a `*special` —
+		// `i.pprev.val`. The old multi-level arm added an EXTRA `.val` for pointer depth > 1,
+		// double-dereferencing every single-star of a double-pointer field (runtime mheap.go's
+		// specialsIter walk — CS0029 in both assignment directions). A genuine `**pp` is two
+		// nested StarExprs, each contributing its own `.val`.
+		if _, ok := v.getIdentType(selectorExpr.Sel).(*types.Pointer); !ok {
 			// Selector is not a pointer, assume this is a pointer cast operation
 			return fmt.Sprintf("%s<%s>", PointerPrefix, baseExpr)
 		}
 
-		return baseExpr + ".val"
+		return baseExpr + derefAccessor
 	}
 
 	// In a parenthesis, we are applying a pointer cast operation — but only when the starred
@@ -101,7 +114,7 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 						result := v.convExpr(starExpr.X, []ExprContext{lambdaContext})
 
 						if context.inLhsAssign {
-							return fmt.Sprintf("(%s).val", result)
+							return fmt.Sprintf("(%s)%s", result, derefAccessor)
 						} else {
 							return fmt.Sprintf("%s%s", PointerDerefOp, result)
 						}
@@ -123,28 +136,10 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 	// branch above misses it because a FUNC-type (or other non-ident) starred inner has no
 	// identifier. Wrap the whole cast before dereferencing.
 	if call, ok := starExpr.X.(*ast.CallExpr); ok && v.callExprIsTypeConversion(call) {
-		return fmt.Sprintf("(%s).val", v.convExpr(starExpr.X, nil))
+		return fmt.Sprintf("(%s)%s", v.convExpr(starExpr.X, nil), derefAccessor)
 	}
 
-	return v.convExpr(starExpr.X, nil) + ".val"
+	return v.convExpr(starExpr.X, nil) + derefAccessor
 }
 
 // Helper to get pointer depth for selector expressions
-func (v *Visitor) getSelectorExprPointerDepth(expr ast.Expr) int {
-	exprType := v.info.TypeOf(expr)
-	if exprType == nil {
-		return 0
-	}
-
-	depth := 0
-	current := exprType
-	for {
-		ptrType, ok := current.(*types.Pointer)
-		if !ok {
-			break
-		}
-		depth++
-		current = ptrType.Elem()
-	}
-	return depth
-}

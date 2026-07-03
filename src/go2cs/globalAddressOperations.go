@@ -139,7 +139,7 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 // `&global` (emitted as the "Ꮡname" identifier) references the original storage. The
 // box holds the value; the var name becomes a ref-returning property over the box, so
 // reads/writes of the global are unchanged. An empty initExpr defaults the value.
-func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr string) {
+func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr string, valueIsRefLike bool) {
 	box := AddressPrefix + csIDName
 
 	if len(initExpr) == 0 {
@@ -148,9 +148,19 @@ func (v *Visitor) writeAddressedGlobalDecl(access, csTypeName, csIDName, initExp
 		initExpr = fmt.Sprintf("default(%s)", csTypeName)
 	}
 
+	// A REFERENCE-LIKE valued global (`var head *node`) reads the HELD value through the box,
+	// which may legitimately be nil (Go reads a nil pointer global freely; only DEREFERENCING
+	// it panics). The strict `val` nil-checks the slot, so the property reads `ValueSlot`
+	// (the identical real slot, no check); a plain value global keeps the strict `val`.
+	accessor := "val"
+
+	if valueIsRefLike {
+		accessor = "ValueSlot"
+	}
+
 	v.writeOutput("%s static %s<%s> %s = new(%s);", access, PointerPrefix, csTypeName, box, initExpr)
 	v.targetFile.WriteString(v.newline)
-	v.writeOutput("%s static ref %s %s => ref %s.val;", access, csTypeName, csIDName, box)
+	v.writeOutput("%s static ref %s %s => ref %s.%s;", access, csTypeName, csIDName, box, accessor)
 }
 
 // isAddressedGlobal reports whether the identifier resolves to a package-level var

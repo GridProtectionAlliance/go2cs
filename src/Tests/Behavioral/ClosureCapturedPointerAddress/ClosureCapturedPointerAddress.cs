@@ -21,7 +21,7 @@ internal static void Main() {
         while (ᏑmToFlush.ValueSlot != nil) {
             var prev = ᏑmToFlush;
             ᏑmToFlush.ValueSlot.val.v += 100;
-            prev.val = ᏑmToFlush.ValueSlot.val.next;
+            prev.ValueSlot = ᏑmToFlush.ValueSlot.val.next;
         }
     });
     fmt.Println("mToFlush is nil:", mToFlush == nil);

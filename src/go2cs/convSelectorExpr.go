@@ -665,8 +665,34 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 
 	// Get the original expression type and check if it's a pointer
 	if exprType := v.info.TypeOf(selectorExpr.X); exprType != nil {
+		// A STAR base that is still POINTER-typed after its own deref — `(*outer.ptr).Value`
+		// where ptr is a DOUBLE pointer (`**Inner`): the star peels one level (`outer.ptr.val`,
+		// a ж<Inner>), and Go's selector auto-deref supplies the second. Skipping the
+		// suppression lets the normal pointer-base field handling below add it; treating the
+		// star as a full deref left `.Value` on the box (CS1061 — surfaced when the
+		// one-star-one-deref fix removed the old double-`.val` compensation in convStarExpr).
+		// Gated to ACTUAL star bases: a pointer-CONVERSION base (`(*T)(p).field`) is also
+		// pointer-typed but must keep its dedicated branch below.
+		starBaseStillPointer := false
+		{
+			unwrapped := ast.Expr(selectorExpr.X)
+
+			for {
+				if paren, ok := unwrapped.(*ast.ParenExpr); ok {
+					unwrapped = paren.X
+					continue
+				}
+
+				break
+			}
+
+			if _, isStar := unwrapped.(*ast.StarExpr); isStar {
+				_, starBaseStillPointer = exprType.Underlying().(*types.Pointer)
+			}
+		}
+
 		// Check if the selector base is itself an explicit dereference (or a pointer conversion)
-		if containsExplicitDeref(selectorExpr.X) {
+		if containsExplicitDeref(selectorExpr.X) && !starBaseStillPointer {
 			// Unwrap enclosing parens so an extra-paren conversion base — mheap.go's
 			// `((*specialWeakHandle)(unsafe.Pointer(…))).handle` — reaches the conversion branch
 			// (the same extra-paren blind spot the reinterpret routing had).
@@ -846,7 +872,16 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// receiver (its box `Ꮡrecv` is the parameter) — e.g. `func (r *Ring) Next() { return r.init() }`
 	// — or a deref'd pointer parameter (its box `Ꮡp` is the parameter), e.g.
 	// `func (r *Ring) Link(s *Ring) { s.Prev() }`. In each case route through the box.
-	if context.isCallExpr && v.isCaptureModeMethod(selectorExpr) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
+	// A receiver whose GO TYPE is already a POINTER and whose RENDERING yields the box directly
+	// (`itabTable.find(…)` where `var itabTable *itabTableType` is an addressed global: the
+	// PROPERTY value is the ж<itabTableType> receiver) must not route through `Ꮡ` — that passes
+	// the global's SLOT box (ж<ж<itabTableType>>), one layer too high (CS1929, runtime iface.go).
+	// A DEREF-ALIASED pointer param/receiver is the opposite: its rendering is the value alias
+	// (`ref var s = ref Ꮡs.val`), so it still needs the box route.
+	_, receiverIsPointerValue := v.info.TypeOf(selectorExpr.X).(*types.Pointer)
+	receiverYieldsBox := receiverIsPointerValue && !v.exprIsDerefAliasedPointer(selectorExpr.X)
+
+	if context.isCallExpr && !receiverYieldsBox && v.isCaptureModeMethod(selectorExpr) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) && (v.isHeapBoxedExpr(selectorExpr.X) || v.exprIsCurrentDirectBoxReceiver(selectorExpr.X) || v.exprIsDerefdPointerParam(selectorExpr.X) || v.exprIsPointerLocalField(selectorExpr.X)) {
 		// When the receiver base is itself a FIELD selector or an INDEX into a heap-boxed value —
 		// e.g. a boxed global's atomic field `ctrl.total.Add()`, or `trace.stackTab[i].dump()` where
 		// `trace` is an address-taken global — the box address must go through the &-machinery, which

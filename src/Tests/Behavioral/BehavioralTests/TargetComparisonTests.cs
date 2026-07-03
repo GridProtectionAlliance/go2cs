@@ -287,6 +287,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckGlobalNestedFieldAddress() => CheckTarget("GlobalNestedFieldAddress");
 
     [TestMethod]
+    public void CheckGlobalPointerWalk() => CheckTarget("GlobalPointerWalk");
+
+    [TestMethod]
     public void CheckGlobalShadowedByLocal() => CheckTarget("GlobalShadowedByLocal");
 
     [TestMethod]

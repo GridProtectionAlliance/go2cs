@@ -54,7 +54,7 @@ internal static void Main() {
     var middle = new Middle(Inner: inner);
     fmt.Println(middle.Value);
     var outer = new Outer(ptr: innerPtr);
-    fmt.Println((outer.ptr.val.val).Value);
+    fmt.Println((~(outer.ptr.ValueSlot)).Value);
 }
 
 } // end main_package

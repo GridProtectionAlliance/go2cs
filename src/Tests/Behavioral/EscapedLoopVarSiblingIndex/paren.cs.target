@@ -8,7 +8,7 @@ internal static nint parenIndex() {
     nint i = 100;
     {
         nint iΔ1 = 1;
-        (p.val)[iΔ1] = 9;
+        (p.ValueSlot)[iΔ1] = 9;
     }
     _ = i;
     return s[1];

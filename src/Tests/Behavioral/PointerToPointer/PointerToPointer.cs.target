@@ -88,7 +88,7 @@ public static void PrintValPtr2Ptr(ж<ж<nint>> Ꮡpptr) {
 public static void PrintValPtr2Ptr2Ptr(ж<ж<ж<nint>>> Ꮡppptr) {
     ref var ppptr = ref Ꮡppptr.val;
 
-    fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.val.val);
+    fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.ValueSlot.val);
 }
 
 } // end main_package
