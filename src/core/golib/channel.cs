@@ -463,8 +463,12 @@ public struct channel<T> : IChannel<T>, IEnumerable<T>, ISupportMake<channel<T>>
             }
         }
 
+        // A CLOSED empty channel is receive-ready with the zero value (Go semantics); an OPEN
+        // empty channel is NOT ready — a select's `case <-ch:` guard with a `default:` present
+        // must fail so the default is taken (returning true here made every such poll take the
+        // receive case immediately — SelectStatement's poll probe).
         value = default!;
-        return true;
+        return IsClosed;
     }
 
     /// <summary>
