@@ -15,6 +15,16 @@
 
 ## Where things stand (2026-07-03)
 
+- **dnsmessage 42 -> 9 (`b2db75239`): the biggest census family (addressof-to-interface-LHS 33)
+  is CLEARED — WAVE-11 = 98 errors / 14 packages.** The &-RHS pointer-box assign trigger in
+  visitAssignStmt is now gated on the LHS not being an interface (the adapter IS the interface
+  value; the box form referenced a nonexistent `Ꮡr` + ref-realiased a non-ref local). Guard:
+  InterfaceCasting pick() switch. Campaign continues per the census order below: NEXT bidirule 25
+  (vendor-namespace), then io 12 + syscall 10 (Δ-alias qualifier doubling — one family),
+  strconv 7 (@-escape in getAccess), path 7 (variadic alias @ mid-identifier), edwards25519 13 +
+  fiat 4, dnsmessage tail 9, then singles (reflect 3, plugin 2, rand/v2 2, buffer 2, weak 1,
+  metrics 1).
+
 - **SORT IS AT ZERO (`c2670bac9` stale-file removal + `450834c38` promoted-pointer-adapter) —
   ZERO CLUB IS NINE. THE WAVE-10 FAMILY CENSUS IS DONE** (15-agent workflow, all 159 errors
   root-caused; full detail in the workflow output at
