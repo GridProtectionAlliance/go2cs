@@ -20,7 +20,17 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 3: S-preserving sub-slice/append LANDED (`845fc37c5`) — slices 31 → 22.**
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 4: S-where-[]E materialization LANDED (`fad2e3a36`) — slices 22 → 1.**
+  Per-arg wrapArgWithNew hook emits `new slice<E>(arg)` (SHARING ctor — fixed to unbox the
+  full-window interface sub-slice; `Source` is a detached copy, caught by the PassSlice
+  write-through gate); Span-twin append kills the CS9244 betterness trap; subslice3 covers the
+  3-index form. **slices' SURVIVOR (1): range-over-func on generic iter.Seq[E]** (`for v :=
+  range seq` — iter.cs:57 `range(seq)` binds nint overloads; needs the range-over-func emission:
+  `seq((v) => { body; return true; })` shape — converter feature, next root candidate).
+  maps 13 = delete builtin inference + comparable<T> decision (emit NO C# constraint for Go
+  comparable + AreEqual routing — delegated). Untyped-const→E still recorded.
+
+  **CAMPAIGN PROGRESS 3: S-preserving sub-slice/append LANDED (`845fc37c5`) — slices 31 → 22.**
   ISliceWrap<TSelf,T> static-abstract factory + sharing slice<T>(ISlice<T>) ctor + golib
   subslice<S,E>/append<S,T> + ~[]E where-clause carries ISliceWrap + convSliceExpr type-param arm
   (core type via constraint type-set — a TypeParam's Underlying() is its constraint INTERFACE).
