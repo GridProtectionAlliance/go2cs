@@ -15,6 +15,28 @@
 
 ## Where things stand (2026-07-03)
 
+- **TWENTY-ONE roots (recon115 overlaid) — registry AND fiat AT ZERO (club = 18).** Latest:
+  2e7c172a7 Key cross-base const hop (registry 8→0); 4d6dbab4b fiat alias-target reinterprets
+  (20→0, one types.Unalias in the namedToArray gate); 971ab01a7 string|[]byte union check hoisted
+  ahead of the slice-prefix branch (the REVERSED order `[]byte | string` starts with "[]" and took
+  the ISlice branch with the raw union as element — time/format.cs CS1003 x16); 5a1f5dbde
+  value-receiver method values in ARGUMENT position take the param-carrying lambda form (bytes
+  ToUpperSpecial CS1113 x3 — extension on a value type cannot delegate-bind; interface receivers
+  excluded; measures in recon116). NEW FAMILIES FOUND (recon115): (A) time 8 = a FUNC-TYPED
+  package-level var (`var loadTzinfoFromTzdata func(string, string) ([]byte, error)`,
+  zoneinfo_read.cs:521) renders its slice result as `Func<@string, @string, (<>byte, error)>` —
+  the `[]byte` inside the signature rendering came through the RAW intermediate form (`<>byte`,
+  missing the slice< > projection) — visitValueSpec no-value branch getTypeName(Signature) →
+  convertToCSTypeName path; syntax cascade, likely also in os 8/fmt 11 residue. (B) netip 36 = 33
+  CS0246 leaking from internal/concurrent (Go 1.24 HashTrieMap[K,V]): RecvGenerator emits ж-twins
+  with MANGLED generic receiver names (`indirect<,>`, `entry<,>` — the g.cs filenames show
+  underscore-mangled type args `indirect_K, V_`) — generic RECEIVER types need their type
+  parameters carried into the twin emission; + CS8337/CS0234/CS0029 singles. NEXT: (1) family A
+  (time/os/fmt func-typed global signatures); (2) family B (RecvGenerator generics);
+  (3) bytes residual (reader long→int CS1503 x2 + CS8716) after recon116; (4) strings 5 / bufio 11
+  buckets; (5) reflect 3 gen bugs (CS0057 conv accessibility, CS0102/0111 makeFuncImpl embed
+  collision); (6) edwards 1.
+
 - **SEVENTEEN roots + both chip cherry-picks (e36e9b7d6 alias-array, e58f274b9 fmt flags) —
   math/rand/v2 AND internal/syscall/windows AT ZERO (club = 16). recon113 overlaid.** 07cd23364:
   PartialStubGenerator emits using aliases AFTER the file-scoped namespace (a FILE-level alias
