@@ -457,8 +457,13 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						if inline {
 							updatedSignature.WriteString("Span<" + typeName + ">")
 						} else {
-							updatedSignature.WriteString(EllipsisOperator + typeName)
-							v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+							// A keyword-escaped element type ("@string") cannot compose into the alias
+							// identifier: '@' is only legal at identifier START, so "ꓸꓸꓸ@string" is a lex
+							// error (CS1002/CS0116). Strip the escape — "ꓸꓸꓸstring" no longer matches a
+							// keyword — while the Span<> referent keeps the escaped name.
+							aliasName := EllipsisOperator + strings.TrimPrefix(typeName, "@")
+							updatedSignature.WriteString(aliasName)
+							v.addRequiredUsing(fmt.Sprintf("%s = Span<%s>", aliasName, typeName))
 						}
 					} else {
 						updatedSignature.WriteString("object[]")
@@ -761,8 +766,11 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				if inline {
 					result.WriteString("Span<" + typeName + ">")
 				} else {
-					result.WriteString(EllipsisOperator + typeName)
-					v.addRequiredUsing(fmt.Sprintf("%s%s = Span<%s>", EllipsisOperator, typeName, typeName))
+					// Strip a keyword-escape from the alias identifier — see generateParametersSignature
+					// note above: '@' is only legal at identifier start ("ꓸꓸꓸ@string" is a lex error).
+					aliasName := EllipsisOperator + strings.TrimPrefix(typeName, "@")
+					result.WriteString(aliasName)
+					v.addRequiredUsing(fmt.Sprintf("%s = Span<%s>", aliasName, typeName))
 				}
 			} else {
 				result.WriteString("object[]")
