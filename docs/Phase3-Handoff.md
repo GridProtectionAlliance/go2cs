@@ -15,6 +15,21 @@
 
 ## Where things stand (2026-07-03)
 
+- **Δ-alias qualifier doubling CLEARED (`a73da0c3c`) — and it was MASKING: WAVE-13 = 217 errors,
+  most of it syscall's newly-visible latent surface.** getTypeName now strips the plain package
+  qualifier before prepending a Δ-renamed alias (`ж<Δsync.sync.Pool>` → `ж<Δsync.Pool>`; io 12 +
+  syscall 10 CS0426 gone; transform/bidi/dnsmessage dependents unblocked). The CS0426s were
+  suppressing downstream diagnostics: **syscall 10 → 161 own-errors, ALL pre-existing latent**
+  (emission byte-identical across recons): `(int)E2BIG` CS0030 ×131 — a SparseArray-index cast
+  of a named-numeric (num:uintptr) Errno needs the two-step underlying route
+  (`(int)((uintptr)E2BIG)`, the documented named-numeric conversion rule — likely sparseArrayKey
+  emits the one-step cast); + error-vs-Errno ==/!= operators ×12; + DLL-import method-group
+  return-type mismatches ×8. io 12 → 5: value→interface conv CS0029 ×3 (`nopCloser` →
+  `ReadCloser` — probably the value-form GoImplement pair not recorded/emitted for these
+  return shapes) + pipe.cs switch-fallthrough CS8070/CS0161 ×2. NEXT ROOT: **syscall Errno
+  SparseArray cast family (131 — one mechanical fix, biggest single family ever)**, then
+  strconv 7 / path 7 / edwards25519 13 / dnsmessage tail 9 / io 5 / singles.
+
 - **bidirule 25 -> 0 (`7d1fa9b8e`): the vendor-namespace family is CLEARED — WAVE-12 = 73
   errors / 13 packages.** GOROOT-vendored import paths now resolve to their on-disk form
   (resolveGorootVendoredPath: dotted-domain pre-filter + GOROOT/src/vendor stat) inside
