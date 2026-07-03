@@ -33,7 +33,9 @@ internal static uint32 step(ж<uint32> Ꮡv) {
     internal uint32 x, y;
 }
 
-[GoRecv] internal static uint32 second(this ref holder h) {
+internal static uint32 second(this ж<holder> Ꮡh) {
+    ref var h = ref Ꮡh.Value;
+
     return ~(ж<uint32>)(uintptr)(add((uintptr)@unsafe.Pointer.FromRef(ref h), @unsafe.Sizeof((uint32)0)));
 }
 
@@ -49,8 +51,9 @@ internal static void Main() {
     fmt.Println((~m).a, (~m).b);
     var pb = (ж<uint32>)(uintptr)(new @unsafe.Pointer(Ꮡn.add(4)));
     fmt.Println(pb.Value);
-    var hh = new holder(x: 3, y: 5);
-    fmt.Println(hh.second());
+    ref var hh = ref heap<holder>(out var Ꮡhh);
+    hh = new holder(x: 3, y: 5);
+    fmt.Println(Ꮡhh.second());
 }
 
 } // end main_package

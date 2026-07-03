@@ -15,24 +15,30 @@ internal static stdFunction other;
 
 [GoType("sync.atomic_package.Uint32")] partial struct counter;
 
-[GoRecv] internal static uint32 Load(this ref counter c) {
+internal static uint32 Load(this ж<counter> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
     return (Ꮡ((atomic.Uint32)(c))).Load();
 }
 
-[GoRecv] internal static void Store(this ref counter c, uint32 v) {
+internal static void Store(this ж<counter> Ꮡc, uint32 v) {
+    ref var c = ref Ꮡc.Value;
+
     (Ꮡ((atomic.Uint32)(c))).Store(v);
 }
 
-[GoRecv] internal static uint32 Add(this ref counter c, uint32 d) {
+internal static uint32 Add(this ж<counter> Ꮡc, uint32 d) {
+    ref var c = ref Ꮡc.Value;
+
     return (Ꮡ((atomic.Uint32)(c))).Add(d);
 }
 
 internal static void Main() {
     handler = other;
     fmt.Println(handler == other);
-    counter c = default!;
-    c.Store(10);
-    _ = c.Add(5);
+    ref var c = ref heap(new counter(), out var Ꮡc);
+    Ꮡc.Store(10);
+    _ = Ꮡc.Add(5);
     fmt.Println("defined-type methods compiled");
 }
 

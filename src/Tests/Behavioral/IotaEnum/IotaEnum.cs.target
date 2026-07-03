@@ -137,7 +137,9 @@ public static ж<Type> TypeFor<T>() {
     return (TFlag)(t.TFlag & TFlagNamed) != 0;
 }
 
-[GoRecv] public static ж<Type> Elem(this ref Type t) {
+public static ж<Type> Elem(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     var exprᴛ1 = t.Kind();
     if (exprᴛ1 == Array) {
         var tt = (ж<ΔArrayType>)(uintptr)(@unsafe.Pointer.FromRef(ref t));
@@ -163,7 +165,9 @@ public static ж<Type> TypeFor<T>() {
     public uint32 Flags;
 }
 
-[GoRecv] public static ж<ΔMapType> MapType(this ref Type t) {
+public static ж<ΔMapType> MapType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Map) {
         return default!;
     }
@@ -177,7 +181,9 @@ public static ж<Type> TypeFor<T>() {
     public uintptr Len;
 }
 
-[GoRecv] public static ж<ΔArrayType> ArrayType(this ref Type t) {
+public static ж<ΔArrayType> ArrayType(this ж<Type> Ꮡt) {
+    ref var t = ref Ꮡt.Value;
+
     if (t.Kind() != Array) {
         return default!;
     }
