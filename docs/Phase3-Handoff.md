@@ -20,7 +20,17 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 5: `comparable` erasure LANDED (`2cb0e7804`, delegated decision)** — Go
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 6: named-map + comma-ok-through-constraint LANDED (`9e87f265f`) — maps
+  13 → 5.** Four coupled gaps: typeParamMapCore detection (assign gate + convIndexExpr),
+  named-map composite wraps concrete literal in ctor, visitMapType COMPLETED (was a stub ToDo —
+  defined map types were never declared), and IMapTypeTemplate CREATED (the generator's Map
+  template was a commented-out line with no file). REMAINING GENERIC CAMPAIGN (6 total):
+  range-over-func on generic Seq/Seq2 (slices 1 + maps 3 — THE next root), nil-compare on
+  constrained M (CS8761, maps.cs:68 `m == nil` — emit via IsNull/Length? design), one delete
+  inference (maps.cs:95 — golib delete IMap overload). Then untyped-const→E. Then FULL SLN
+  warm double for the next unmask (cmp users etc).
+
+  **CAMPAIGN PROGRESS 5: `comparable` erasure LANDED (`2cb0e7804`, delegated decision)** — Go
   comparable emits NO C# constraint beyond new() (`where K : /* comparable */ new()`); golib
   comparable<T> kept for separate removal. maps' comparable/delete failures cleared, exposing the
   next layer (count holds 13, all-new shapes): **comma-ok on constrained maps** (`v, ok := m[k]`
