@@ -25,12 +25,16 @@
   1. **internal/reflectlite (9)** — CS0759 ×7: manual `*_impl.cs` implementing halves vs auto
      defining halves (both exist — suspect signature/merge mismatch, possibly downstream of the
      CS0246 ×3 `rtype`/`flag` missing in package_info.cs); triage the auto-emitted type names first.
-  2. **iter — generics root LANDED (`779b13a26`)**: generic defined function types now emit
-     generic delegates (`delegate void Seq2<K, V>(…)`; conversions peel IndexListExpr + resolve
-     the instantiated target, `new Seq2Like<K, V>(fn)`). Next latent layer surfaced (was masked):
-     CS0103 `v1`/`ok1`/`k1` (capture decls missing in Pull's closure machinery, iter.cs:296/428)
-     + CS0576 alias `runtime` conflict ×2 (iter.cs:309/330 — SAME family as internal/weak's :66;
-     likely one root: the `using runtime = …` alias vs the emitted `go.runtime` namespace).
+  2. **iter — generics root LANDED (`779b13a26`)** (generic delegates + IndexListExpr conversion
+     peel) and **the CS0576 namespace/alias collision family LANDED (`c45818a09`)**: golib's
+     support namespace renamed `go.runtime` → `go.golib` (never `go.<Go pkg name>`), and the
+     general parent/child form (runtime.csproj → runtime/internal/*, sync → sync/atomic) fixed by
+     Δ-renaming captured import aliases (`using Δruntime = runtime_package;`) via a transitive-
+     closure pre-pass (importAliasOperations.go). iter's remaining errors: CS0103 ×5 — `v1`/`ok1`/
+     `k1` are NAMED RESULT PARAMETERS of the `next`/`stop` func literals (`func() (v1 V, ok1 bool)`)
+     that the lambda emission never declares; a bare `return` emits `return (v1, ok1);` with
+     nothing in scope. Root: func-literal named results need local decls + returns (visitFuncLit /
+     the named-results machinery that visitFuncDecl already has).
   3. **internal/weak (2)** — pointer.cs CS0029 `T` → `ж<T>` (line 61) + CS0576 namespace/alias
      `runtime` conflict (line 66).
   4. **runtime/metrics (1)** — CS0234 `go.runtime.@internal.godebugs_package` missing: stale
