@@ -508,7 +508,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if !isEmpty {
 					callExprContext.interfaceTypes[i] = paramType
 				}
-			} else if paramHasArg && isPointer(paramType) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
+			} else if paramHasArg && (isPointer(paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
 				// paramHasArg guards Args[i]: a variadic pointer parameter called with no
 				// trailing arguments (e.g. `In(r)` for `In(r rune, ...*RangeTable)`) has no
 				// arg at the variadic index, so indexing Args[i] would panic.
@@ -1781,4 +1781,28 @@ func stripTrailingTypeArgs(funcName string) string {
 	}
 
 	return funcName
+}
+
+// instantiatedParamIsPointer reports whether a parameter DECLARED as a type parameter is a
+// POINTER at this call's instantiation — `abi.Escape(ptr)` where `Escape[T any](x T) T` and
+// T=*T (internal/weak Make): the argument must render as its box (`Ꮡptr`), not the deref'd
+// value alias (`ptr`), or the result cannot assign back to the pointer (CS0029 T → ж<T>).
+// getFunctionSignature returns the DECLARED generic signature; go/types records the
+// INSTANTIATED one as the type of the call's Fun expression.
+func (v *Visitor) instantiatedParamIsPointer(callExpr *ast.CallExpr, declaredParam types.Type, i int) bool {
+	if _, isTP := types.Unalias(declaredParam).(*types.TypeParam); !isTP {
+		return false
+	}
+
+	instSig, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature)
+
+	if !ok {
+		return false
+	}
+
+	if paramType, ok := getParameterType(instSig, i); ok {
+		return isPointer(paramType)
+	}
+
+	return false
 }
