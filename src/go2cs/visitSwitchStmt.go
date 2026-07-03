@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/constant"
 	"go/token"
 	"go/types"
 	"slices"
@@ -87,6 +88,19 @@ func isTerminatingStmtList(list []ast.Stmt) bool {
 }
 
 func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
+	// A tagged switch whose tag is the CONSTANT `true` (`switch c := s[i]; true { case cond: … }`
+	// — strconv readFloat) is Go's idiom for an expressionless switch with an init statement:
+	// each boolean case CONDITION matches when it holds. Normalize to the expressionless form
+	// (nil tag) — the tagged routes would otherwise emit the conditions as C# case labels /
+	// constant patterns, which must be compile-time constants (CS9135).
+	tag := switchStmt.Tag
+
+	if tag != nil {
+		if tv, ok := v.info.Types[tag]; ok && tv.Value != nil && tv.Value.Kind() == constant.Bool && constant.BoolVal(tv.Value) {
+			tag = nil
+		}
+	}
+
 	var caseClauses []*ast.CaseClause
 	var caseHasFallthroughStmt []bool
 
@@ -148,6 +162,15 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				break
 			}
 
+			// A case label that is not even a GO compile-time constant (`case 1<<flt.expbits - 1:`
+			// — flt is a variable; Go tagged-switch labels may be runtime expressions) can never
+			// be a C# case label (CS9135). Ident/Selector/&-labels are screened above; this
+			// catches the compound forms (binary/index/paren…). Force the if-else (==) form.
+			if tv.Value == nil {
+				allConst = false
+				break
+			}
+
 			// Named typed are not constant values in C# conversion
 			if _, ok := tv.Type.(*types.Named); ok {
 				allConst = false
@@ -185,7 +208,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	// through out (those are source-order-sensitive); removing a fallthrough-independent default
 	// preserves every other clause's fallthrough link. The C# `switch` branches accept `default`
 	// anywhere, so this is only for the if/else-chain path.
-	if !allConst && switchStmt.Tag != nil {
+	if !allConst && tag != nil {
 		for i, caseClause := range caseClauses {
 			if caseClause.List != nil || i == len(caseClauses)-1 {
 				continue
@@ -228,7 +251,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 	v.targetFile.WriteString(v.newline)
 
-	if hasFallthroughs || (!allConst && switchStmt.Tag != nil) {
+	if hasFallthroughs || (!allConst && tag != nil) {
 		// Most complex scenario with standalone if's, and fallthrough
 		exprVarName := v.getTempVarName("expr")
 
@@ -238,18 +261,18 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 			matchVarName = v.getTempVarName("match")
 		}
 
-		if switchStmt.Tag != nil {
+		if tag != nil {
 			if v.options.preferVarDecl {
 				v.writeOutput("var ")
 			} else {
-				exprType := convertToCSTypeName(v.getExprTypeName(switchStmt.Tag, false))
+				exprType := convertToCSTypeName(v.getExprTypeName(tag, false))
 				v.targetFile.WriteString(exprType)
 				v.targetFile.WriteRune(' ')
 			}
 
 			v.targetFile.WriteString(exprVarName)
 			v.targetFile.WriteString(" = ")
-			v.targetFile.WriteString(v.convExpr(switchStmt.Tag, nil))
+			v.targetFile.WriteString(v.convExpr(tag, nil))
 			v.targetFile.WriteString(";" + v.newline)
 		}
 
@@ -310,12 +333,12 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 				v.targetFile.WriteString("if (")
 
-				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
+				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
 
 				if caseFallsThrough {
 					v.targetFile.WriteString(fmt.Sprintf("fallthrough || !%s && ", matchVarName))
 
-					if caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil {
+					if caseClauseCount > 1 || !usePattenMatch && tag == nil {
 						v.targetFile.WriteRune('(')
 					}
 				}
@@ -326,8 +349,8 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				// interface-vs-concrete compare arm (syscall syscall_windows CS0019).
 				tagNeedsAreEqual := false
 
-				if !usePattenMatch && switchStmt.Tag != nil {
-					if tagIface, tagEmpty := isInterface(v.getType(switchStmt.Tag, false)); tagIface && !tagEmpty {
+				if !usePattenMatch && tag != nil {
+					if tagIface, tagEmpty := isInterface(v.getType(tag, false)); tagIface && !tagEmpty {
 						tagNeedsAreEqual = true
 					}
 				}
@@ -336,7 +359,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					needAreEqualClose := false
 
 					if i == 0 {
-						if switchStmt.Tag != nil {
+						if tag != nil {
 							if usePattenMatch {
 								v.targetFile.WriteString(exprVarName)
 								v.targetFile.WriteString(" is ")
@@ -354,7 +377,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 						} else {
 							v.targetFile.WriteString(" || ")
 
-							if switchStmt.Tag != nil {
+							if tag != nil {
 								if tagNeedsAreEqual {
 									v.targetFile.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
 									needAreEqualClose = true
@@ -371,7 +394,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 					if usePattenMatch {
 						context.usePattenMatch = true
 						context.declareIsExpr = i == 0
-					} else if caseClauseCount > 1 && switchStmt.Tag == nil {
+					} else if caseClauseCount > 1 && tag == nil {
 						v.targetFile.WriteRune('(')
 					}
 
@@ -381,7 +404,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 						v.targetFile.WriteRune(')')
 					}
 
-					if !usePattenMatch && caseClauseCount > 1 && switchStmt.Tag == nil {
+					if !usePattenMatch && caseClauseCount > 1 && tag == nil {
 						v.targetFile.WriteRune(')')
 					}
 
@@ -390,7 +413,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 							// Only close the wrapping paren when it was actually opened above
 							// (same guard as the matching '(' write). Otherwise a fallthrough
 							// case with a single pattern-matched value emits an unbalanced ')'.
-							if caseFallsThrough && (caseClauseCount > 1 || !usePattenMatch && switchStmt.Tag == nil) {
+							if caseFallsThrough && (caseClauseCount > 1 || !usePattenMatch && tag == nil) {
 								v.targetFile.WriteRune(')')
 							}
 
@@ -468,10 +491,10 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 		if guardedTerminalDefault && allCasesTerminal && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
 			v.writeOutputLn("return default!;")
 		}
-	} else if allConst && switchStmt.Tag != nil {
+	} else if allConst && tag != nil {
 		// Most simple scenario when all case values are constant, a common C# switch will suffice
 		v.writeOutput("switch (")
-		v.targetFile.WriteString(v.convExpr(switchStmt.Tag, nil))
+		v.targetFile.WriteString(v.convExpr(tag, nil))
 		v.targetFile.WriteString(") {")
 		v.targetFile.WriteString(v.newline)
 
@@ -531,7 +554,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				// Use pattern match when all case list expressions are
 				// use comparison operators and the same target
 				caseClauseCount := len(caseClause.List)
-				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, switchStmt.Tag != nil)
+				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
 
 				for i, expr := range caseClause.List {
 					if i == 0 {
@@ -714,13 +737,13 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 				break
 			}
 
-			// Check for binary expressions with bitwise operations
-			if binaryExpr, ok := expr.(*ast.BinaryExpr); ok {
-				// Check if expression involves bitwise operation followed by comparison
-				if isBitwiseFollowedByComparison(binaryExpr) {
-					usePattenMatch = false
-					break
-				}
+			// A compound (binary) case label under a TAGGED switch cannot use the `is` form:
+			// convBinaryExpr's pattern arm renders comparison OPERANDS (`X is <op> Y`), yielding
+			// `tag is X is <op> Y` — never valid — and a runtime label is no constant pattern
+			// anyway (CS0150). Fall back to `==` equality for the clause.
+			if _, ok := expr.(*ast.BinaryExpr); ok {
+				usePattenMatch = false
+				break
 			}
 		}
 
