@@ -67,7 +67,9 @@ internal class InterfaceTypeTemplate : TemplateBase
         {
             "Sum" => [$"{Indent}IAdditionOperators<{TypeT}, {TypeT}, {TypeT}>"],
             "Arithmetic" => [$"{Indent}ISubtractionOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IMultiplyOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IDivisionOperators<{TypeT}, {TypeT}, {TypeT}>"],
-            "Integer" => [$"{Indent}IModulusOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IBitwiseOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IShiftOperators<{TypeT}, {TypeT}, {TypeT}>"],
+            // Shift-count parameter is int, matching the BCL IShiftOperators<TSelf, int, TSelf>
+            // shape (see the converter's lifted Integer constraint set in constraintOperations.go).
+            "Integer" => [$"{Indent}IModulusOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IBitwiseOperators<{TypeT}, {TypeT}, {TypeT}>", $"{Indent}IShiftOperators<{TypeT}, int, {TypeT}>"],
             "Comparable" => [$"{Indent}IEqualityOperators<{TypeT}, {TypeT}, bool>"],
             "Ordered" => [$"{Indent}IComparisonOperators<{TypeT}, {TypeT}, bool>"],
             _ => [$"{Indent}{name}"]
@@ -217,11 +219,11 @@ internal class InterfaceTypeTemplate : TemplateBase
                         
                         public static {{ConversionTypeName}} operator ~({{ConversionTypeName}} value) => default!;
                         
-                        public static {{ConversionTypeName}} operator <<({{ConversionTypeName}} value, {{ConversionTypeName}} shiftAmount) => default!;
-                        
-                        public static {{ConversionTypeName}} operator >>({{ConversionTypeName}} value, {{ConversionTypeName}} shiftAmount) => default!;
-                        
-                        public static {{ConversionTypeName}} operator >>>({{ConversionTypeName}} value, {{ConversionTypeName}} shiftAmount) => default!;
+                        public static {{ConversionTypeName}} operator <<({{ConversionTypeName}} value, int shiftAmount) => default!;
+
+                        public static {{ConversionTypeName}} operator >>({{ConversionTypeName}} value, int shiftAmount) => default!;
+
+                        public static {{ConversionTypeName}} operator >>>({{ConversionTypeName}} value, int shiftAmount) => default!;
                         
                         #endregion
                     

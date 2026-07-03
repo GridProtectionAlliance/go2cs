@@ -281,7 +281,13 @@ func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
 			constraints = []string{
 				fmt.Sprintf("IModulusOperators<%s, %s, %s>", name, name, name),
 				fmt.Sprintf("IBitwiseOperators<%s, %s, %s>", name, name, name),
-				fmt.Sprintf("IShiftOperators<%s, %s, %s>", name, name, name),
+				// The shift-count type parameter is `int`, matching the BCL: every binary
+				// integer implements IShiftOperators<TSelf, int, TSelf> (only `int` itself
+				// also satisfies the self-typed shape). The emitted shift form is
+				// `x << (int)(k)` (intCastOperand coerces every shift count to int), so this
+				// is exactly the shape a generic body requires (strconv bsearch
+				// ~uint16|~uint32 — CS0315 on ushort/uint instantiations).
+				fmt.Sprintf("IShiftOperators<%s, int, %s>", name, name),
 			}
 		case ComparableOperators:
 			constraints = []string{

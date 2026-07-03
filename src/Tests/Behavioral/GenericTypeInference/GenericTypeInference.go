@@ -183,4 +183,29 @@ func main() {
 	fmt.Println(len(cl), cl["a"])
 	DropKey(g1, "a")
 	fmt.Println(len(g1))
+	i16, ok16 := bsearchLike([]uint16{2, 4, 8}, uint16(4))
+	i32, ok32 := bsearchLike([]uint32{10, 20, 30}, uint32(25))
+	fmt.Println(i16, ok16, i32, ok32, halve(uint16(6)), halve(uint32(100)))
+}
+
+// bsearchLike mirrors strconv's bsearch: a ~uint16|~uint32 union whose lifted Integer set
+// must use the BCL shift shape IShiftOperators<E, int, E> (ushort/uint lack the self-typed form).
+func bsearchLike[S ~[]E, E ~uint16 | ~uint32](s S, v E) (int, bool) {
+	n := len(s)
+	i, j := 0, n
+	for i < j {
+		h := i + (j-i)>>1
+		if s[h] < v {
+			i = h + 1
+		} else {
+			j = h
+		}
+	}
+	return i, i < n && s[i] == v
+}
+
+// halve exercises a shift ON the type parameter itself: emits `v >> (int)(1)`,
+// which binds IShiftOperators<E, int, E>.
+func halve[E ~uint16 | ~uint32](v E) E {
+	return v >> 1
 }
