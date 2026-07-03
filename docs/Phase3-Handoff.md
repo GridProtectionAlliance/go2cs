@@ -27,10 +27,10 @@
   BONUS latent fix: named-slice wrapper template sub-slices routed ToSpan() = DETACHED COPIES
   (silent Go-aliasing divergence for all named slice types) — now share via m_value. Remaining
   slices 22: S-where-[]E-expected assignability (rotateRight family), untyped-const→E, Span
-  singles. **USER-REPORTED next root (task #10): GoImplicitConv records struct UNDERLYINGS as raw
-  Go text (encoding/xml package_info: `struct{p printer}` + mangled anonymous decoder-state
-  monster) — main.go ~2100-2135 records getCSTypeName(.Underlying()); fix = named type's name for
-  the record, lifted dynamic name or SKIP for genuinely anonymous.**
+  singles. **USER-REPORTED GoImplicitConv root LANDED (`e346ffd10`)**: attribute-safe names
+  (named form / visitor lifted name / registry / deferred marker resolved post-barrier; drop
+  unresolvable + self-pairs — CS0555). Corpus: zero raw struct text or unresolved markers in all
+  305 package_info files; behavioral corpus byte-identical.
 
   **CAMPAIGN PROGRESS 2: golib interface-typed builtin overloads LANDED (`92ffc80d8`) — slices
   68 → 31** (copy(ISlice,ISlice)+string form, clear(ISlice), 2-arg min/max on
