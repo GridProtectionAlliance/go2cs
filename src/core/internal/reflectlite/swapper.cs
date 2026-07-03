@@ -3,8 +3,6 @@
 // license that can be found in the LICENSE file.
 using go;
 
-[module: GoManualConversion]
-
 namespace go.@internal;
 
 //using goarch = @internal.goarch_package;

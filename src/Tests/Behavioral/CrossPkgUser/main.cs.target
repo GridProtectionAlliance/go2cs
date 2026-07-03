@@ -30,6 +30,12 @@ internal static void Main() {
     fmt.Println(g.Name, (float64)g.Temp, g.n);
     g.Temp = 60;
     fmt.Println((float64)g.Temp, g.Sensor.Hot());
+    var c = new counter(Meter: CrossPkgLib.NewMeter());
+    fmt.Println(c.Meter.Value.Bump());
+    ΔMeter m = c;
+    fmt.Println(m.Bump());
+    fmt.Println(c.Meter.Value.Bump());
+    fmt.Println(g.Meter());
 }
 
 [GoType] partial struct probe {
@@ -40,6 +46,18 @@ internal static void Main() {
 [GoType] partial struct tagged {
     public partial ref CrossPkgLib_package.Sensor Sensor { get; }
     internal nint n;
+}
+
+[GoType] partial interface ΔMeter {
+    nint Bump();
+}
+
+internal static @string Meter(this tagged t) {
+    return "tagged-meter"u8;
+}
+
+[GoType] partial struct counter {
+    public partial ref ж<CrossPkgLib_package.Meter> Meter { get; }
 }
 
 } // end main_package

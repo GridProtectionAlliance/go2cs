@@ -28,6 +28,7 @@ using static go.main_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Meter", "ΔMeter")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -39,6 +40,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<counter, ΔMeter>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

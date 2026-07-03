@@ -120,6 +120,16 @@ public class ImplementGenerator : ISourceGenerator
                 .Distinct()
                 .ToList();
 
+            // An interface member with NO direct struct method may be satisfied by Go method
+            // promotion through an embedded POINTER field (`type rtype struct { *abi.Type }`).
+            // That promotion is syntax-resolved at Go call sites (the converter emits the hop
+            // `t.Type.Value.M()`), so the explicit interface implementation must forward through
+            // the same hop — `this.M()` has nothing to bind (CS1929). Gated to a SINGLE hop
+            // (Go's promotion ambiguity rules make multi-embed satisfaction rare; extend when
+            // the corpus surfaces one).
+            List<string> embedHops = structDecl?.GetEmbeddedPointerHopNames() ?? [];
+            string? embedHop = embedHops.Count == 1 ? embedHops[0] : null;
+
             if (pointer)
             {
                 // A POINTER-sourced interface cast (`var s Iface = &t`): the interface value must
@@ -137,6 +147,19 @@ public class ImplementGenerator : ISourceGenerator
 
                 foreach (string boxReceiverName in structDecl?.GetBoxReceiverMethodNames(compilation!) ?? [])
                     forwardReceivers[boxReceiverName] = "m_box"; // direct-ж primary form binds the box itself
+
+                // Interface members with NO struct method forward through a single embedded-pointer
+                // hop, mirroring the value-form template (Go method promotion through `*abi.Type`).
+                if (embedHops.Count == 1)
+                {
+                    foreach (MethodInfo method in methods)
+                    {
+                        string simpleName = GetSimpleName(method.Name);
+
+                        if (!forwardReceivers.ContainsKey(simpleName))
+                            forwardReceivers[simpleName] = $"m_box.Value.{embedHops[0]}.Value";
+                    }
+                }
 
                 string adapterScope = GetScope(structName) == "public" && GetScope(GetSimpleName(interfaceName)) == "public" ? "public" : "internal";
 
@@ -167,6 +190,7 @@ public class ImplementGenerator : ISourceGenerator
                 Promoted = promoted,
                 Overrides = overrides,
                 Methods = methods,
+                EmbedHop = embedHop,
                 UsingStatements = usingStatements
             }
             .Generate();

@@ -21,8 +21,6 @@ using System.Runtime.InteropServices;
 using go;
 using go.golib;
 
-[module: GoManualConversion]
-
 namespace go.@internal;
 
 using abi = @internal.abi_package;

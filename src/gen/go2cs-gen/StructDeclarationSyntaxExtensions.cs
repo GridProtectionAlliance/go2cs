@@ -172,6 +172,28 @@ public static class StructDeclarationSyntaxExtensions
         return extensions.Select(method => method.GetMethodInfo(compilation));
     }
 
+    /// <summary>
+    /// Gets the names of embedded-POINTER hop properties on the struct — the `public partial ref
+    /// ж&lt;X&gt; F { get; }` members the converter emits for a Go embedded pointer field
+    /// (`type rtype struct { *abi.Type }`). Method promotion through such an embed is
+    /// syntax-resolved at Go call sites (the converter emits the hop `t.F.Value.M()`), so an
+    /// interface member with no direct struct method must forward through the hop the same way.
+    /// </summary>
+    public static List<string> GetEmbeddedPointerHopNames(this StructDeclarationSyntax structDeclaration)
+    {
+        List<string> hops = [];
+
+        foreach (PropertyDeclarationSyntax property in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
+        {
+            TypeSyntax type = property.Type is RefTypeSyntax refType ? refType.Type : property.Type;
+
+            if (type.ToString().StartsWith("ж<") && property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+                hops.Add(property.Identifier.Text);
+        }
+
+        return hops;
+    }
+
     private static bool IsExtensionMethodForStruct(this MethodDeclarationSyntax method, string structName)
     {
         ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();

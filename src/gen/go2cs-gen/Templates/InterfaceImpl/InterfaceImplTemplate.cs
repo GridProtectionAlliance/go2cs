@@ -13,6 +13,11 @@ internal class InterfaceImplTemplate : TemplateBase
     public required HashSet<string> Overrides;
     public required List<MethodInfo> Methods;
 
+    // Single embedded-pointer hop property (`Type` for rtype's `*abi.Type`): an interface member
+    // with no direct struct method forwards through it (`this.Type.Value.M()`), matching the
+    // converter's syntax-resolved promotion at Go call sites. Null when no (single) hop exists.
+    public string? EmbedHop;
+
     public override string TemplateBody =>
         $$"""
              partial struct {{StructName}} : {{InterfaceName}}
@@ -53,7 +58,9 @@ internal class InterfaceImplTemplate : TemplateBase
                         result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' explicit implementation mapped to direct struct receiver method:\r\n        ");
                     }
 
-                    result.Append($"{method.ReturnType} {method.GetSignature()} => this.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
+                    string receiver = !methodOverriden && EmbedHop is not null ? $"this.{EmbedHop}.Value" : "this";
+
+                    result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
             }
 

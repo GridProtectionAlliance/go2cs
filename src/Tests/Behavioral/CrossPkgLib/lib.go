@@ -52,3 +52,19 @@ var _ Labeled = Sensor{}
 
 // Describe takes the interface, so the consumer can pass a Sensor across the assembly boundary.
 func Describe(l Labeled) string { return l.Label() }
+
+// Meter is an exported struct whose only method has a POINTER receiver and mutates state - a
+// consumer that embeds *Meter satisfies its interfaces purely by promotion (the reflectlite
+// rtype/*abi.Type shape), and mutations through any promoted path land on the shared object.
+type Meter struct {
+	count int
+}
+
+// Bump increments and returns the count (pointer receiver - promoted through pointer embeds).
+func (m *Meter) Bump() int {
+	m.count++
+	return m.count
+}
+
+// NewMeter returns a fresh *Meter (count is unexported, so consumers need a constructor).
+func NewMeter() *Meter { return &Meter{} }

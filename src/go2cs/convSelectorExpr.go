@@ -856,8 +856,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						// keeps its generated forwarder (no churn).
 						if named, ok := ptr.Elem().(*types.Named); ok {
 							if named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
+								// The hop names the FIELD, which is struct-scoped: a field named
+								// like a Δ-renamed package type (rtype's embedded `Type` vs the
+								// reflectlite `Type` interface) is DECLARED unrenamed, so the hop
+								// must not apply the package-level rename (`t.ΔType` is CS1061).
 								return getAliasedTypeName(fmt.Sprintf("%s.%s.Value.%s", v.convExpr(selectorExpr.X, nil),
-									getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 						}
 					} else {
@@ -876,7 +880,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && recvIdent.Name == recvName &&
 								v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
 								return getAliasedTypeName(fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, nil),
-									getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 						}
 

@@ -54,6 +54,18 @@ func main() {
 	fmt.Println(g.Name, float64(g.Temp), g.n) // cellar 5 3
 	g.Temp = 60
 	fmt.Println(float64(g.Temp), g.Sensor.Hot()) // 60 true
+
+	// Phase 5: the reflectlite rtype shape. counter embeds *CrossPkgLib.Meter; the local Meter
+	// INTERFACE is Δ-renamed (collides with tagged's Meter method), but the embed FIELD keeps its
+	// unrenamed struct-scoped name — the promoted-call hop must render `c.Meter.Value.Bump()`,
+	// not `c.ΔMeter...` (CS1061). The interface value is satisfied purely by promotion, so the
+	// generated implementation forwards through the same hop (CS1929); all paths share the box.
+	c := counter{Meter: CrossPkgLib.NewMeter()}
+	fmt.Println(c.Bump())        // 1 — promoted call through the hop
+	var m Meter = c
+	fmt.Println(m.Bump())        // 2 — through the generated interface impl, same object
+	fmt.Println(c.Bump())        // 3 — aliasing: all bumps landed on one Meter
+	fmt.Println(g.Meter())       // tagged-meter — the colliding METHOD still works
 }
 
 // Phase 4: field promotion through a CROSS-PACKAGE embed. In a real MSBuild build the library
@@ -75,4 +87,24 @@ type probe struct {
 type tagged struct {
 	CrossPkgLib.Sensor
 	n int
+}
+
+// Meter is a LOCAL package-level type sharing its name with the method tagged.Meter below - the
+// type-vs-method collision Δ-renames THIS type (ΔMeter). The counter embed field below is ALSO
+// named Meter (from *CrossPkgLib.Meter) but is struct-scoped and declared UNRENAMED - the
+// embedded-pointer hop emission must not apply the package-level rename to the field
+// (reflectlite's rtype.Type vs the ΔType interface, CS1061).
+type Meter interface {
+	Bump() int
+}
+
+// Meter (the method) forces the collision that Δ-renames the Meter interface above.
+func (t tagged) Meter() string { return "tagged-meter" }
+
+// counter satisfies the local Meter interface PURELY by promotion through a cross-package
+// pointer embed - the generated interface implementation must forward through the hop
+// (this.Meter.Value.Bump()), since counter has no Bump of its own (reflectlite's
+// GoImplement<rtype, ΔType> Size/Kind shape, CS1929).
+type counter struct {
+	*CrossPkgLib.Meter
 }

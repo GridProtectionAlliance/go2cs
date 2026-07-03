@@ -45,4 +45,17 @@ public static @string Describe(Labeled l) {
     return l.Label();
 }
 
+[GoType] partial struct Meter {
+    internal nint count;
+}
+
+[GoRecv] public static nint Bump(this ref Meter m) {
+    m.count++;
+    return m.count;
+}
+
+public static ж<Meter> NewMeter() {
+    return Ꮡ(new Meter(nil));
+}
+
 } // end CrossPkgLib_package
