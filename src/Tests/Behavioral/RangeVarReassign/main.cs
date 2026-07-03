@@ -23,6 +23,24 @@ internal static void Main() {
     }
     fmt.Println();
     fmt.Println("len", len(@out));
+    var pts = new point[]{new(1, 2), new(3, 4)}.slice();
+    nint total = 0;
+    foreach (var (_, vᴛ1) in pts) {
+        var p = vᴛ1;
+
+        total += p.bump();
+    }
+    fmt.Println("total", total);
+    fmt.Println("orig", pts[0].x, pts[1].x);
+}
+
+[GoType] partial struct point {
+    internal nint x, y;
+}
+
+[GoRecv] internal static nint bump(this ref point p) {
+    p.x++;
+    return p.x + p.y;
 }
 
 } // end main_package

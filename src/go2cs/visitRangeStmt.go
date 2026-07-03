@@ -8,12 +8,15 @@ import (
 	"go/types"
 )
 
-// rangeVarReassignedInBody reports whether the range key/value identifier is reassigned (via `=`,
-// `+=`, `-=`, `++`, …) anywhere in the loop body. Go lets a range variable be reassigned (it is a
-// per-iteration copy), but a C# `foreach` iteration variable is read-only (CS1656), so such a var
-// must be iterated through a temp and copied into a mutable local. A `:=` redeclaration shadows into
-// a new object, so it is not counted (the object identity check excludes it).
-func (v *Visitor) rangeVarReassignedInBody(expr ast.Expr, body *ast.BlockStmt) bool {
+// rangeVarNeedsMutableCopy reports whether the range key/value identifier must be copied into a
+// mutable local in the loop body. Two triggers: (1) the var is reassigned (via `=`, `+=`, `-=`,
+// `++`, …) — Go lets a range variable be reassigned (it is a per-iteration copy), but a C#
+// `foreach` iteration variable is read-only (CS1656); (2) the var is the receiver of a
+// POINTER-RECEIVER method — the emitted `[GoRecv]` form takes `this ref T`, and a foreach
+// iteration variable cannot bind ref (CS1657 — dnsmessage's GoString). Such a var must be
+// iterated through a temp and copied into a mutable local. A `:=` redeclaration shadows into a
+// new object, so it is not counted (the object identity check excludes it).
+func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) bool {
 	ident, ok := expr.(*ast.Ident)
 
 	if !ok || ident.Name == "_" {
@@ -49,6 +52,31 @@ func (v *Visitor) rangeVarReassignedInBody(expr ast.Expr, body *ast.BlockStmt) b
 			if id, ok := s.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
 				found = true
 				return false
+			}
+		case *ast.SelectorExpr:
+			// A pointer-receiver method selected directly on the (value-typed) range var:
+			// `q.GoString()` binds the `[GoRecv]` `this ref` extension, which needs a mutable
+			// lvalue (CS1657 on a foreach var). A pointer-typed range var dereferences instead
+			// and stays read-only, so it is excluded.
+			id, ok := s.X.(*ast.Ident)
+
+			if !ok || v.info.ObjectOf(id) != obj {
+				return true
+			}
+
+			sel, ok := v.info.Selections[s]
+
+			if !ok || sel.Kind() != types.MethodVal {
+				return true
+			}
+
+			if sig, ok := sel.Obj().Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, recvIsPtr := sig.Recv().Type().(*types.Pointer); recvIsPtr {
+					if _, varIsPtr := v.info.TypeOf(id).(*types.Pointer); !varIsPtr {
+						found = true
+						return false
+					}
+				}
 			}
 		}
 
@@ -229,23 +257,25 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		varInit = "var "
 	}
 
+	// A newly-DEFINED range var that is reassigned in the body — or that receives a pointer-
+	// receiver ([GoRecv] `this ref`) method call — must become a mutable local: a C# foreach
+	// iteration variable is read-only (CS1656) and cannot bind ref (CS1657). The string and
+	// slice/array/map emissions iterate a temp and declare the var from it in the body
+	// (`foreach (var (_, rᴛ1) in s) { var r = rᴛ1; … }`).
+	keyNeedsCopy := !assignVars && v.rangeVarNeedsMutableCopy(rangeStmt.Key, rangeStmt.Body)
+	valNeedsCopy := !assignVars && v.rangeVarNeedsMutableCopy(rangeStmt.Value, rangeStmt.Body)
+
 	if isStr {
 		if untypedStr {
 			rangeExpr = fmt.Sprintf("(@string)%s", rangeExpr)
 		}
 
-		// A newly-DEFINED range var that is reassigned in the body must become a mutable local: a
-		// C# foreach iteration variable is read-only (CS1656). Iterate a temp and declare the var
-		// from it in the body (`foreach (var (_, rᴛ1) in s) { var r = rᴛ1; … }`).
-		keyReassigned := !assignVars && v.rangeVarReassignedInBody(rangeStmt.Key, rangeStmt.Body)
-		valReassigned := !assignVars && v.rangeVarReassignedInBody(rangeStmt.Value, rangeStmt.Body)
-
-		if assignVars || keyReassigned || valReassigned {
+		if assignVars || keyNeedsCopy || valNeedsCopy {
 			// `assignVars` copies into pre-existing vars (`r = rᴛ1;`); a reassigned DEFINE var is
 			// declared from the temp (`var r = rᴛ1;`).
 			var innerPrefix, tempKeyExpr, tempValExpr string
 
-			if keyExpr == "_" || (!assignVars && !keyReassigned) {
+			if keyExpr == "_" || (!assignVars && !keyNeedsCopy) {
 				tempKeyExpr = keyExpr
 			} else {
 				tempKeyExpr = v.getTempVarName("i")
@@ -260,7 +290,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, v.indent(v.indentLevel+1), decl, keyExpr, tempKeyExpr)
 			}
 
-			if valExpr == "_" || (!assignVars && !valReassigned) {
+			if valExpr == "_" || (!assignVars && !valNeedsCopy) {
 				tempValExpr = valExpr
 			} else {
 				tempValExpr = v.getTempVarName("r")
@@ -422,14 +452,12 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 			// mutable local: a C# foreach iteration variable is read-only (CS1656 — strconv
 			// Atoi's `ch -= '0'`). Iterate a temp and declare the var from it in the body
 			// (`foreach (var (_, vᴛ1) in s) { var ch = vᴛ1; … }`) — mirrors the string arm.
-			keyReassigned := v.rangeVarReassignedInBody(rangeStmt.Key, rangeStmt.Body)
-			valReassigned := v.rangeVarReassignedInBody(rangeStmt.Value, rangeStmt.Body)
 
-			if keyReassigned || valReassigned {
+			if keyNeedsCopy || valNeedsCopy {
 				var innerPrefix, tempKeyExpr, tempValExpr string
 				bodyIndent := v.indent(v.indentLevel + 1)
 
-				if keyExpr == "_" || !keyReassigned {
+				if keyExpr == "_" || !keyNeedsCopy {
 					tempKeyExpr = keyExpr
 				} else {
 					name := "i"
@@ -449,7 +477,7 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 					innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, keyExpr, tempKeyExpr)
 				}
 
-				if valExpr == "_" || valExpr == "" || !valReassigned {
+				if valExpr == "_" || valExpr == "" || !valNeedsCopy {
 					tempValExpr = valExpr
 				} else {
 					tempValExpr = v.getTempVarName("v")

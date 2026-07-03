@@ -26,4 +26,22 @@ func main() {
 	}
 	fmt.Println()
 	fmt.Println("len", len(out))
+
+	// Pointer-receiver method on a slice-range value var (CS1657 - dnsmessage GoString shape)
+	pts := []point{{1, 2}, {3, 4}}
+	total := 0
+	for _, p := range pts {
+		total += p.bump()
+	}
+	fmt.Println("total", total)
+	fmt.Println("orig", pts[0].x, pts[1].x)
+}
+
+type point struct{ x, y int }
+
+// bump has a pointer receiver - emitted as [GoRecv] this ref; called on a range value
+// var it needs the mutable-copy emission (a foreach var cannot bind ref).
+func (p *point) bump() int {
+	p.x++ // mutates the per-iteration copy, as in Go
+	return p.x + p.y
 }
