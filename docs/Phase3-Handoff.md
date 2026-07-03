@@ -13,7 +13,51 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-02)
+## Where things stand (2026-07-03)
+
+- **internal/godebug IS AT ZERO (8 → 0, two roots, `75cb9fdd8` + `6cb858e2d`) — the os/time/net
+  gate is OPEN.** Root 1: `packageQualifiedNameRegex` didn't carry the `@` keyword escape, so the
+  root-qualifier spliced `go.` INSIDE `@internal.bisect_package.Writer` → `@go.internal…` (a parse
+  error; syntax errors MASKED the real count — 8 were 2). Root 2: **pointer-receiver METHOD VALUES
+  in value contexts** (`s.nonDefaultOnce.Do(s.register)`, `registerMetric(…, s.nonDefault.Load)`)
+  emitted bare selectors — C# can't form a delegate from a value-type-receiver extension
+  (CS1113/CS1061). Now emitted as **box-bound method groups** (`Ꮡs.register`,
+  `Ꮡs.of(Setting.ᏑnonDefault).Load` — Go's bind-once address semantics exactly), with a new
+  capture-mode detector (`bodyHasPointerMethodValueOnReceiver`) promoting the enclosing method to
+  direct-ж so the box exists. Guarded by the `ReceiverFieldMethodCall` extension. Zero club intact
+  (runtime, iter, sync, slices, maps re-verified 0 on recon91).
+
+  **WAVE-7 (recon91 full sln, warm double): 36 errors / 6 packages.** math/rand (28) is an
+  UNMASK, not a regression — it was a silently-SKIPPED dependent of failing godebug in wave-6
+  (emission byte-identical recon90↔recon91):
+  1. **math/rand 28 (26 CS1929 + 2 CS1503 + CS0220) — NEXT, biggest + generator-level.**
+     `ImplementGenerator` maps interface members to `this.M()`, but `lockedSource`'s methods are
+     **direct-ж** (`this ж<lockedSource>` receivers) → `this.Int63()` doesn't bind (CS1929 ×26
+     cascade). Design needed: explicit interface impls on a direct-ж method — a struct's `this`
+     has no box; options: RecvGenerator ref-receiver twin for interface mapping, or the impl
+     routes `new ж<T>(this)`-style (semantics! interface calls on a COPY vs Go's *T receiver —
+     think before coding; Go passes the *lockedSource INTERFACE value, so the runtime object IS
+     already a box — maybe GoImplement should target `ж<lockedSource>` instead of the struct).
+     Plus CS1503 ×2: `ж<runtimeSource>` → `Source`/`Source64` param (interface conv through box)
+     and rand.cs:141 CS0220 checked-mode constant overflow.
+  2. **internal/reflectlite 4** (was 10). The 10 came from STALE hand files —
+     `src/core/internal/reflectlite/{type,value,swapper}.cs` are old-stub-era, with the
+     `rtype`/`flag` declarations and defining partials INSIDE `/*…*/` blocks; overlay restores
+     them over good auto output. Composing recon91 auto + committed `*_impl.cs` halves = 4 real
+     errors: CS1061 ×2 `rtype.ΔType` + CS1929 `.Size`/`.Kind` — embedded-`*abi.Type` method
+     promotion through `rtype`'s embedded pointer field. Root: delete/modernize the three stale
+     hand files (keep impl halves — they live ONLY in committed go-src-converted, reconcile with
+     "manual is hand-owned in core"), fix the embedded-pointer promotion. NOTE: the COMMITTED
+     reflectlite csproj `<Compile Remove>`s the impl files + comments out unsafeheader/runtime
+     refs; the recon csproj includes them — reconcile intentionally.
+  3. **log/slog/internal/buffer 2** — named-slice-wrapper conversions: `(*Buffer)(&b)` box
+     reinterpret `ж<slice<byte>>`→`ж<Buffer>` (CS0030) and `string(*b)` Buffer→@string (CS0030
+     — route through the underlying slice).
+  4. **runtime/metrics 1** — CS0234 `go.runtime.@internal.godebugs_package` (Go
+     runtime/internal vs internal/runtime layout relocation; check importSpec emission/csproj ref).
+  5. **internal/weak 1** — pointer.cs:61 CS0029: `Ꮡptr = abi.Escape(ptr)` — generic arg where
+     T instantiates to `*T` must render the BOX (`abi.Escape(Ꮡptr)`); instantiated-signature
+     pointer context missing on the argument.
 
 - **THE RUNTIME MILESTONE IS REACHED (2026-07-02): `src/go-src-converted/runtime` builds with
   ZERO errors — 952 → 0.** The bottom of the dependency graph, the hardest package in the Go
