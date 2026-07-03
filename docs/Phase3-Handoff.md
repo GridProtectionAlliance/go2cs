@@ -20,7 +20,16 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 4: S-where-[]E materialization LANDED (`fad2e3a36`) — slices 22 → 1.**
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 5: `comparable` erasure LANDED (`2cb0e7804`, delegated decision)** — Go
+  comparable emits NO C# constraint beyond new() (`where K : /* comparable */ new()`); golib
+  comparable<T> kept for separate removal. maps' comparable/delete failures cleared, exposing the
+  next layer (count holds 13, all-new shapes): **comma-ok on constrained maps** (`v, ok := m[k]`
+  where M is IMap<K,V>-constrained — needs an IMap comma-ok surface matching what concrete
+  map<K,V> emits, golib+possibly converter) ×~9, and **range-over-func on generic Seq/Seq2**
+  (slices' survivor too — `for v := range seq` / `for k, v := range seq2` on iter delegates;
+  find visitRangeStmt's yieldFunc arm and why generic/cross-pkg delegates miss it) ×~4.
+
+  **CAMPAIGN PROGRESS 4: S-where-[]E materialization LANDED (`fad2e3a36`) — slices 22 → 1.**
   Per-arg wrapArgWithNew hook emits `new slice<E>(arg)` (SHARING ctor — fixed to unbox the
   full-window interface sub-slice; `Source` is a detached copy, caught by the PassSlice
   write-through gate); Span-twin append kills the CS9244 betterness trap; subslice3 covers the
