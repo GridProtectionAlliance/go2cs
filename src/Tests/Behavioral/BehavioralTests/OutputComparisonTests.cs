@@ -142,6 +142,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferLambdaParam() => CheckTarget("DeferLambdaParam");
 
     [TestMethod]
+    public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
+
+    [TestMethod]
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]

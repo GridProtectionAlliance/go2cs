@@ -630,6 +630,17 @@ the `NestedFieldElementAddr` behavioral test — all three runtime shapes with w
 ZERO-VALUED struct's array-field backing is null in the C# emulation — a separate pre-existing latent —
 so the test initializes its arrays.)
 
+**Element address of a by-value ARRAY PARAMETER.** Array parameters are cloned by value in the
+function preamble (`value = value.Clone();`, Go's array-copy semantics) but are never
+escape-analyzed, so they have no heap box — the naive element-address form would name a box that
+does not exist (`Ꮡvalue.at<byte>(0)`, CS0103 — syscall `SetsockoptInet4Addr`, `&value[0]` on
+`value [4]byte`). The converter boxes a **copy of the wrapper struct** instead:
+`Ꮡ(value).at<byte>(0)`. `array<T>` wraps a `T[]` reference, so the copied wrapper SHARES element
+storage with the cloned parameter — element reads and writes through the pointer stay behaviorally
+correct. (One accepted edge, no stdlib hit: reassigning the *whole* array param after taking an
+element address leaves the pointer on the older backing array.) (Guarded by `DeferTypelessReturns`'
+`first` — element address of a `[4]byte` parameter, value vs Go.)
+
 A **built-in used as a generic type argument** is rendered in its golib form, the same as anywhere else — in particular Go `string` becomes golib `@string`, never C# `string` (`System.String`). This matters because the converter adds a `new()` constraint to every generic type parameter: `@string` is a struct with a public parameterless constructor and satisfies it, whereas `System.String` would violate it (CS0310), and assigning a string literal — emitted as a `u8` `ReadOnlySpan<byte>` — into such a field would fail (CS0029). So:
 
 ```go
@@ -690,6 +701,10 @@ A defined map type — `type Grades map[string]int` — emits the `[GoType("map[
 
 ## Generic Constraints
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
+
+### Lifted shift constraint uses the BCL shape `IShiftOperators<T, int, T>`
+
+The lifted Integer operator set constrains shifts as `IShiftOperators<T, int, T>` — the shift **count** is `int`, not the type parameter. Every BCL binary integer implements exactly that shape (`IShiftOperators<TSelf, int, TSelf>`); only C# `int` itself happens to also satisfy the self-typed form, so the self-typed constraint made every non-`int` instantiation fail (CS0315 — strconv's `bsearch[S ~[]E, E ~uint16 | ~uint32]` on `ushort`/`uint`). The shape is also exactly what emitted bodies need: the converter coerces every shift count to `int` (`x << (int)(k)`), so a generic body can only ever perform `T << int`. The generated named-constraint interface template (`Integer` in go2cs-gen) and its dynamic-conversion placeholder shift operators use the same `int`-count shape, keeping the two emitters consistent. (Guarded by the `GenericTypeInference` extensions `bsearchLike`/`halve` — `~uint16 | ~uint32` instantiations with a shift on the type parameter, values vs Go.)
 
 ### Builtins over constrained slice type parameters
 
@@ -837,6 +852,7 @@ A function that neither directly nor indirectly (through a deferred lambda) uses
 * **Named results + defer.** When a function has named return values *and* uses defer/recover, the named results are declared *outside* the wrapper (closure-captured), the wrapper runs as a `void` action, and the function returns the named results afterward — so the deferred "recover sets the result" idiom is observed.
 * **IIFEs.** An immediately-invoked function literal that itself uses defer/recover gets its own wrapper, rendered as a delegate-cast invocation (e.g. `((Func<int>)(() => func((defer, recover) => { … })))()`), so its `recover` scopes to the IIFE and not the enclosing function.
 * **A `return` emits against ITS OWN function's results, not the enclosing function's.** A bare `return` in a function with named results emits `return (n, ok);` (the named results). A *nested function literal* must be converted against its **own** signature — otherwise a bare `return` inside a **void** closure would inherit the enclosing function's named results and emit `return (n, ok);` into a `void` lambda (CS8030, "anonymous function converted to a void-returning delegate cannot return a value"). Runtime `mprof.goroutineProfileWithLabelsSync` (named `(n, ok)`) passes `forEachGRace(func(gp1 *g) { …; return; … })` — the void closure's bare returns must stay `return;`. The return signature is tracked separately from `currentFuncSignature` (which stays the *enclosing* function's, so the receiver/parameter detection still resolves a **captured** pointer parameter — an outer parameter — correctly): `convFuncLit` sets a dedicated return-signature to the literal's own signature with save/restore, and `visitReturnStmt` emits results against it. (Guarded by the `ClosureBareReturnNamedResults` behavioral test — a void closure with bare returns nested in a named-results function, output verified vs Go; cleared runtime's 4 CS8030.)
+* **All-typeless returns need the explicit wrapper type argument.** C# infers the value-returning wrapper's `T` (`func<T>((defer, recover) => …)`) from the lambda's return statements, and a tuple literal has a natural type only when *all* its elements do — Go `nil` renders as a typeless `default!`. When **every** return in the body contains a nil (`return nil, err` / `return &x, nil` — syscall's `getProcessEntry`, unnamed `(*ProcessEntry32, error)` results), no return contributes a type, inference fails, and overload resolution silently binds the *void* `GoAction` wrapper (CS8030 at each value return). The converter detects that shape and emits the result type explicitly: `=> func<(ж<ProcessEntry32>, error)>((defer, recover) => …)`. Any function with one fully-typed return keeps the inferred form (zero churn). (Guarded by `DeferTypelessReturns`' `find` — unnamed results, a defer, and both returns carrying nil.)
 
 ### Function-literal named results
 
@@ -1115,7 +1131,7 @@ internal static nint sumList(ж<node> Ꮡp) {
 }
 ```
 
-`DerefOrNil()` is **not** a substitute for a genuine dereference: reading or writing `*p` on a nil pointer (`~Ꮡp` / `Ꮡp.Value`) still panics, preserving Go semantics — only the re-alias, which captures a reference without reading it, uses the nil-safe form. Both pieces are gated on a pointer parameter that is **both** compared with `==`/`!=` **and** reassigned in the body (the true walk signature); a param that is merely compared (never repointed, e.g. an identity `==` check) keeps the plain `.Value` form, so non-walk code is unchanged. (Guarded by the `PointerParamNilWalk` behavioral test — a nil-terminated sum, a mutate-through-the-parameter pass, and an empty-list call. The never-nil circular walk stays on the plain `.Value` path via `PointerParamWalk`.)
+`DerefOrNil()` is **not** a substitute for a genuine dereference: reading or writing `*p` on a nil pointer (`~Ꮡp` / `Ꮡp.Value`) still panics, preserving Go semantics — only the re-alias, which captures a reference without reading it, uses the nil-safe form. Both pieces are gated on a pointer parameter that is compared with `==`/`!=` anywhere in the body: a comparison signals that nil is a *legal argument* (Go panics only at an actual deref, never at entry), so the eager entry alias must not throw for it. This covers both the reassigned walk above and a nil-testing body invoked with a literal-nil argument (`defer closeIt(nil, 3)` → `p == nil` — the eager `Ꮡp.Value` alias otherwise panics before the body runs). The accepted trade-off, shared with the walk case: an *unguarded* value deref of an actually-nil argument reads the throwaway slot instead of raising Go's nil-deref panic — observable only by a program already panicking in Go. A parameter that is never nil-compared keeps the plain `.Value` form, so other code is unchanged. (Guarded by the `PointerParamNilWalk` behavioral test — a nil-terminated sum, a mutate-through-the-parameter pass, and an empty-list call — plus `DeferTypelessReturns`' deferred nil-argument call. The never-nil circular walk stays on the plain `.Value` path via `PointerParamWalk`.)
 
 A **package-level global** referenced inside a closure is *not* captured at all — it is a C# static, accessed live. A value snapshot (`var gʗ1 = g`) would copy the struct (so `&gʗ1` has no box → CS0103, and writes through the global from inside the closure would be lost) and is semantically wrong, since Go reads/writes the live global. For an address-taken (heap-boxed) global the closure references the static box `Ꮡg` directly — a method call routes as `Ꮡg.method()` and a field address as `Ꮡg.of(T.Ꮡfield)`. (Guarded by `GlobalCapturedInClosure`; the runtime does this in every `systemstack(func(){ … mheap_ … })`.)
 

@@ -421,7 +421,19 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			nativeIntConst := false
 			uintptrConst := false
 
-			if c.Val().Kind() == constant.Int && (csTypeName == "nint" || csTypeName == "nuint" || csTypeName == "uintptr") {
+			// A NAMED type over uintptr (`type Handle uintptr`) has the same gap as raw uintptr:
+			// its generated struct bridges the numeric world only through nuint/UntypedInt
+			// (UintptrBridgeOperators), so a beyond-int32 folded constant renders as a ulong
+			// literal with no implicit path (CS0266 — syscall InvalidHandle = ^Handle(0)).
+			namedUintptrType := false
+
+			if isNamedType {
+				if basic, ok := c.Type().Underlying().(*types.Basic); ok && basic.Kind() == types.Uintptr {
+					namedUintptrType = true
+				}
+			}
+
+			if c.Val().Kind() == constant.Int && (csTypeName == "nint" || csTypeName == "nuint" || csTypeName == "uintptr" || namedUintptrType) {
 				// A C# constant of a native-int type only accepts an int-range literal; a value
 				// beyond int32 (e.g. runtime/alg's `uintptr c0 = 33054211828000289`) has no
 				// implicit/constant conversion to nint/nuint (CS0133/CS0266), so it must be emitted
@@ -491,6 +503,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 				if isNamedType {
 					constExpr = "static readonly"
+
+					// Beyond-int32 named-uintptr const: same unchecked cast the native-int
+					// consts use — `unchecked((ΔHandle)18446744073709551615)`.
+					if nativeIntConst {
+						constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)
+					}
 				} else if nativeIntConst {
 					constExpr = "static readonly"
 					constValExpr = fmt.Sprintf("unchecked((%s)%s)", csTypeName, constVal)

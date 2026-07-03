@@ -164,6 +164,17 @@ func (v *Visitor) concreteNumericCSType(t types.Type) string {
 
 	if basic, ok := t.Underlying().(*types.Basic); ok {
 		if basic.Info()&types.IsNumeric != 0 && basic.Info()&types.IsUntyped == 0 {
+			// A NAMED type over uintptr takes the cast to the NAMED type, not the underlying:
+			// golib `uintptr` is a STRUCT with its own operators plus implicit conversions to
+			// nuint, so `Errno - (uintptr)c` leaves multiple built-in candidates (CS0034 —
+			// syscall Errno.Error). The named wrapper's UintptrBridgeOperators provide the
+			// one-step UntypedInt conversion (`(Errno)APPLICATION_ERROR`), and the named type's
+			// single predefined-type conversion (nuint) then binds unambiguously. Non-uintptr
+			// named types keep the underlying cast (`(Tag)c` would be CS0030 — see above).
+			if _, isNamed := t.(*types.Named); isNamed && basic.Kind() == types.Uintptr {
+				return convertToCSTypeName(v.getTypeName(t, false))
+			}
+
 			return convertToCSTypeName(v.getTypeName(t.Underlying(), false))
 		}
 	}

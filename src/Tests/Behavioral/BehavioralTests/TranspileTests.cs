@@ -156,6 +156,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferSimple() => CheckTarget("DeferSimple");
 
     [TestMethod]
+    public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
+
+    [TestMethod]
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]

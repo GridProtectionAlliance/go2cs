@@ -558,7 +558,20 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			// `return <named>;` and block close are emitted after the body below.
 			funcExecutionContext = fmt.Sprintf(" {%s%s%sfunc((%s, %s) =>", namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), deferParam, recoverParam)
 		} else {
-			funcExecutionContext = fmt.Sprintf(" => func((%s, %s) =>", deferParam, recoverParam)
+			// C# infers the value-returning wrapper's T (func<T>, builtin.cs GoFunction) from the
+			// lambda's return statements; a return whose expression contains a typeless `default!`
+			// (Go nil) has no natural type — a tuple literal is typed only when ALL elements are.
+			// When NO return contributes a type, inference fails and overload resolution binds the
+			// void GoAction overload instead (CS8030 on every value return — syscall
+			// getProcessEntry). Emit the explicit result type argument for exactly that shape;
+			// any function with one fully-typed return keeps the inferred (unchanged) form.
+			resultTypeArg := ""
+
+			if signature.Results().Len() > 0 && v.allExecWrapperReturnsAreTypeless(funcDecl) {
+				resultTypeArg = fmt.Sprintf("<%s>", v.generateResultSignature(signature))
+			}
+
+			funcExecutionContext = fmt.Sprintf(" => func%s((%s, %s) =>", resultTypeArg, deferParam, recoverParam)
 		}
 	} else {
 		funcExecutionContext = ""
@@ -606,6 +619,50 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 	v.inFunction = false
 }
 
+// allExecWrapperReturnsAreTypeless reports whether no top-level return statement in the function
+// body carries a C#-inferable natural type: every return (if any) includes at least one untyped-nil
+// result, which renders as a typeless `default!`. Nested function literals are skipped — they get
+// their own execution wrappers. Zero-return bodies (all paths loop/panic) also report true: with no
+// returns C# infers a VOID lambda, which cannot convert to the value-returning wrapper either.
+func (v *Visitor) allExecWrapperReturnsAreTypeless(funcDecl *ast.FuncDecl) bool {
+	if funcDecl.Body == nil {
+		return false
+	}
+
+	typedReturnFound := false
+
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		if typedReturnFound {
+			return false
+		}
+
+		if _, ok := n.(*ast.FuncLit); ok {
+			return false
+		}
+
+		returnStmt, ok := n.(*ast.ReturnStmt)
+
+		if !ok {
+			return true
+		}
+
+		if len(returnStmt.Results) == 0 {
+			return true
+		}
+
+		for _, result := range returnStmt.Results {
+			if tv, ok := v.info.Types[result]; ok && tv.IsNil() {
+				return true // this return contributes no type; keep scanning
+			}
+		}
+
+		typedReturnFound = true
+		return false
+	})
+
+	return !typedReturnFound
+}
+
 // identIsParameter checks if the given identifier is a parameter in the current function.
 func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 	if v.paramNames == nil || !v.paramNames.Contains(ident.Name) {
@@ -625,11 +682,16 @@ func (v *Visitor) identIsParameter(ident *ast.Ident) bool {
 }
 
 // collectNilSafePtrParams populates v.nilSafePtrParamNames with the raw names of the pointer
-// parameters that are BOTH compared with `==`/`!=` AND reassigned somewhere in body — the
-// nil-terminated-walk signature (`for p != nil { …; p = p.next }`). Only a reassigned param's box
-// can become nil mid-function (the reassignment repoints it to the terminator), so only such a
-// param needs the nil-safe deref/re-alias accessor; a param that is merely compared (never
-// repointed) keeps the plain `.Value` form (zero golden churn). The set is reset each function.
+// parameters that are compared with `==`/`!=` anywhere in body. A compared param signals nil is a
+// LEGAL argument (Go panics only on an actual deref, not at entry), so the eager entry alias
+// `ref var p = ref Ꮡp.Value` must not throw for it — it uses the nil-safe accessor instead. This
+// covers both the nil-terminated walk (`for p != nil { …; p = p.next }`, where the reassignment
+// repoints the box to the terminator) and a nil-testing body invoked with a nil argument
+// (`defer closeIt(nil, …)` → `p == nil`). Valid value reads of such a param sit behind non-nil
+// guards, never touching the shared default slot; the accepted trade-off (same as the walk case)
+// is that an UNGUARDED deref of an actually-nil argument reads default(T) instead of raising Go's
+// nil-deref panic — a path that only a program already panicking in Go would observe. A param that
+// is never nil-compared keeps the plain `.Value` form. The set is reset each function.
 func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 	if v.nilSafePtrParamNames == nil {
 		v.nilSafePtrParamNames = HashSet[string]{}
@@ -641,39 +703,17 @@ func (v *Visitor) collectNilSafePtrParams(body *ast.BlockStmt) {
 		return
 	}
 
-	compared := HashSet[string]{}
-	reassigned := HashSet[string]{}
-
 	ast.Inspect(body, func(node ast.Node) bool {
-		switch n := node.(type) {
-		case *ast.BinaryExpr:
-			if n.Op == token.EQL || n.Op == token.NEQ {
-				for _, operand := range []ast.Expr{n.X, n.Y} {
-					if ident, ok := operand.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
-						compared.Add(ident.Name)
-					}
-				}
-			}
-		case *ast.AssignStmt:
-			// A plain reassignment (`p = …`) repoints the param's box; `:=` (token.DEFINE) would
-			// shadow it with a new local, which is not a reassignment of the parameter.
-			if n.Tok != token.DEFINE {
-				for _, lhs := range n.Lhs {
-					if ident, ok := lhs.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
-						reassigned.Add(ident.Name)
-					}
+		if n, ok := node.(*ast.BinaryExpr); ok && (n.Op == token.EQL || n.Op == token.NEQ) {
+			for _, operand := range []ast.Expr{n.X, n.Y} {
+				if ident, ok := operand.(*ast.Ident); ok && v.isDerefdPointerParamIdent(ident) {
+					v.nilSafePtrParamNames.Add(ident.Name)
 				}
 			}
 		}
 
 		return true
 	})
-
-	for _, name := range compared.Keys() {
-		if reassigned.Contains(name) {
-			v.nilSafePtrParamNames.Add(name)
-		}
-	}
 }
 
 // isDerefdPointerParamIdent reports whether ident resolves to a non-blank pointer (`*T`) PARAMETER

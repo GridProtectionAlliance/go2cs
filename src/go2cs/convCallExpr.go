@@ -408,6 +408,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							callExprContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(deferParamType, false))
 						}
 					}
+
+					// An untyped-nil argument renders as golib `nil` (NilType), which unifies the
+					// deferǃ/goǃ type parameter as NilType and breaks the method-group match
+					// (CS0123 — exec_windows DuplicateHandle). Cast it to the parameter's C# type:
+					// ж<T>/interface/slice/map/channel all carry an implicit NilType conversion,
+					// so `(ж<ΔHandle>)(nil)` binds and keeps the visible `nil`.
+					if tv, ok := v.info.Types[callExpr.Args[i]]; ok && tv.IsNil() {
+						if callExprContext.castArgToType == nil {
+							callExprContext.castArgToType = make(map[int]string)
+						}
+						callExprContext.castArgToType[i] = v.getCSTypeName(deferParamType)
+					}
 				}
 			}
 

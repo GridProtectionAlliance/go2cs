@@ -547,6 +547,19 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 					}
 
+					// An ARRAY-typed PARAMETER has no heap box: params are cloned by value in the
+					// preamble (`value = value.Clone();`) but never escape-analyzed, so the naive
+					// box prefix names a box that does not exist (`Ꮡvalue`, CS0103 — syscall
+					// SetsockoptInet4Addr, `&value[0]` on `value [4]byte`). Box a COPY of the
+					// wrapper struct instead: `Ꮡ(value).at<byte>(0)` — array<T> wraps a T[]
+					// reference, so the copy SHARES element storage with the cloned parameter and
+					// element reads/writes through the pointer stay behaviorally correct.
+					if ident, ok := indexExpr.X.(*ast.Ident); ok && v.identIsParameter(ident) {
+						if obj := v.info.ObjectOf(ident); obj == nil || !v.identEscapesHeap[obj] {
+							return fmt.Sprintf("%s(%s).at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convArrayIndex(indexExpr.Index))
+						}
+					}
+
 					return fmt.Sprintf("%s%s.at<%s>(%s)", AddressPrefix, v.convExpr(indexExpr.X, nil), csTypeName, v.convArrayIndex(indexExpr.Index))
 				}
 			}

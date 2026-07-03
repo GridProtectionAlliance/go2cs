@@ -29,7 +29,7 @@ public static void Put<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey, ж<V> Ꮡval) {
 
 public static ж<V> Get<V>(this ж<Cache<V>> Ꮡc, ж<V> Ꮡkey) {
     ref var c = ref Ꮡc.Value;
-    ref var key = ref Ꮡkey.Value;
+    ref var key = ref Ꮡkey.DerefOrNil();
 
     for (var e = Ꮡc.of(Cache<V>.Ꮡhead).Load(); e != nil; e = e.Value.next) {
         if ((~e).key == Ꮡkey) {
