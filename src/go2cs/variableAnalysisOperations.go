@@ -838,10 +838,15 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			if !initialBlock {
-				// Only cleanup tracking for non-initial blocks
+				// Only cleanup tracking for non-initial blocks. `processing` is a single flag
+				// shared by every nesting level of the one BlockTracker, so an inner block's
+				// cleanup must RESTORE it for a still-open enclosing block rather than clear it —
+				// clearing it made a declaration that FOLLOWED a nested block (procresize's
+				// second `trace := traceAcquire()` after the inner if) skip the outer-scope
+				// shadow check and keep its name (CS0136 against the function-level decl).
 				blockTracker := registry.get(BlockTracker)
-				blockTracker.processing = false
 				blockTracker.exit()
+				blockTracker.processing = blockTracker.level > 0
 			}
 
 			// Exit the current scope
@@ -1238,8 +1243,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						visitNode(stmt)
 					}
 
-					blockTracker.processing = false
 					blockTracker.exit()
+					blockTracker.processing = blockTracker.level > 0
 
 					// Exit the current scope
 					popScope()
@@ -1507,8 +1512,8 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						visitNode(stmt)
 					}
 
-					blockTracker.processing = false
 					blockTracker.exit()
+					blockTracker.processing = blockTracker.level > 0
 
 					// Exit the current scope
 					popScope()

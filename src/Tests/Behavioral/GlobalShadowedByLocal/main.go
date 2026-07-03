@@ -34,8 +34,38 @@ func plainGlobalShadow() int {
 	return x + plainCounter // 200 + 5 = 205
 }
 
+//go:noinline
+func acquire(n int) int { return n * 10 }
+
+// nestedBlockShadow mirrors runtime procresize: a FUNCTION-LEVEL `trace` local, then inside an
+// else-block an inner if declares its own `trace` shadow, and — AFTER that inner if closes — a
+// SIBLING `trace :=` in the same else block. The sibling declaration follows a CLOSED nested
+// block: the shared block-tracker flag used to be cleared by the inner block's exit, so the
+// sibling skipped the outer-scope shadow check and kept its name — both emitted `Δtrace`
+// (CS0136 against the function-level decl).
+//
+//go:noinline
+func nestedBlockShadow(kind int) int {
+	total := 0
+	trace := acquire(1) // function-level local (emits Δtrace — the global collision rename)
+	total += trace
+	if kind == 0 {
+		total = -1
+	} else {
+		if kind > 1 {
+			trace := acquire(2) // inner-if shadow (renamed)
+			total += trace
+		}
+		trace := acquire(3) // sibling AFTER the closed inner if — the procresize shape
+		total += trace
+	}
+	total += trace // binds the function-level local again
+	return total
+}
+
 func main() {
 	fmt.Println(collisionGlobalShadow()) // 49
 	fmt.Println(plainGlobalShadow())     // 205
 	fmt.Println(trace.addr, plainCounter) // 42 100 (globals unchanged)
+	fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1)) // 70 50
 }
