@@ -15,6 +15,15 @@
 
 ## Where things stand (2026-07-03)
 
+- **Value-returning defers + interface-tag switches CLEARED (`a6f163022`) — WAVE-16 = 68 / 13.**
+  golib deferǃ gained Func<…,TResult> result-discarding twins (T1..T16); switch equality on a
+  non-empty interface tag routes each case through AreEqual. Guard: InterfaceImplementation
+  extension (switch on error + deferred release(), run-verified). syscall residual 12 (next
+  layer: deferred LAMBDA returning value into void delegate CS8030 ×4, nil-arg delegate
+  inference NilType CS0123, SID value→box args CS1503 ×3, singles). Priority resume: strconv 7
+  (getAccess @ escape), path 7 (variadic alias @), edwards25519 13 + fiat 4, dnsmessage tail 9,
+  io 5, then singles.
+
 - **iface-vs-concrete compares CLEARED (`661359348`) — WAVE-15 = 77 / 13.** The ==/!=
   arm routes one-sided interface-vs-concrete operands through AreEqual (no public operator can
   exist for internal-scope pairs; AreEqual reproduces Go's dynamic type+value equality). Guard:
