@@ -20,7 +20,17 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 7: range-over-func LANDED (`186a67112`) — SLICES AT ZERO (74 → 0),
+  check (procresize's `Δtrace` CS0136). **THE GENERIC-CONSTRAINT CAMPAIGN IS COMPLETE (`a7c8165a8`) — slices AND maps at ZERO** (87
+  errors at wave-4 → 0 across 9 roots). ZERO CLUB: runtime, iter, sync, slices, maps.
+  **WAVE-6 (recon89): 22 errors, five packages — the ENTIRE remaining frontier:**
+  1. internal/reflectlite 10 — CS0759 ×7 (manual *_impl.cs implementing halves vs auto defining
+     halves — triage signature/merge mismatch) + CS0246 rtype/flag ×3 in package_info.
+  2. internal/godebug 8 — GATES os/time/net (highest unmask leverage — DO FIRST).
+  3. log/slog/internal/buffer 2.
+  4. runtime/metrics 1 — CS0234 go.runtime.@internal.godebugs_package namespace/ref.
+  5. internal/weak 1 — pointer.cs:61 CS0029 T→ж<T>.
+
+  **CAMPAIGN PROGRESS 7: range-over-func LANDED (`186a67112`) — SLICES AT ZERO (74 → 0),
   maps at 2.** Named/generic Seq detection (Underlying unwrap + pre-unwrap named flag), method-
   group `.Invoke` emission with explicit `range<T>` args (C# can't infer from group params),
   golib two-value `range<T1,T2>` overload; result-TypeArgs gate refined (conversions + generic
