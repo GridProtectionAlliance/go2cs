@@ -46,4 +46,14 @@ func main() {
 	tag := 7
 	fmt.Println("g="+"\tm=", tag) // g=<TAB>m= 7
 	fmt.Println("a" + "b" + "c")  // abc — nested concat, all plain strings
+
+	// string(named-byte-slice) hops through the written underlying (strings replace.go
+	// appendSliceWriter shape): the wrapper converts only to slice<byte>, and
+	// slice<byte>->string is a second user conversion C# will not chain (CS0030).
+	var w sink
+	w = append(w, 'h', 'i')
+	fmt.Println(string(w), len(w)) // hi 2
 }
+
+// sink mirrors strings.appendSliceWriter: a named byte slice converted to string.
+type sink []byte

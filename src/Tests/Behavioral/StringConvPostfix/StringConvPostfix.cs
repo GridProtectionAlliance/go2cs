@@ -23,6 +23,11 @@ internal static void Main() {
     nint tag = 7;
     fmt.Println("g=" + "\tm=", tag);
     fmt.Println("a" + "b" + "c");
+    sink w = default!;
+    w = append(w, (byte)((rune)'h'), (byte)((rune)'i'));
+    fmt.Println(((@string)(slice<byte>)w), len(w));
 }
+
+[GoType("[]byte")] partial struct sink;
 
 } // end main_package

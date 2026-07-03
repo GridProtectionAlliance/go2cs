@@ -226,6 +226,18 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			if _, ok := v.getType(arg, false).(*types.TypeParam); ok {
 				return fmt.Sprintf("new %s(%s)", targetTypeName, expr)
 			}
+
+			// A NAMED-slice arg converting to string — `string(buf)` where `type
+			// appendSliceWriter []byte` (strings replace.go) — hops through the written
+			// underlying: the [GoType] wrapper converts only to slice<byte>, and
+			// slice<byte>→@string is a SECOND user conversion C# won't chain (CS0030).
+			if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok {
+				if sliceType, ok := argNamed.Underlying().(*types.Slice); ok {
+					if basic, ok := sliceType.Elem().Underlying().(*types.Basic); ok && (basic.Kind() == types.Byte || basic.Kind() == types.Rune) {
+						return fmt.Sprintf("((@string)(%s)%s)", v.getCSTypeName(sliceType), expr)
+					}
+				}
+			}
 		}
 
 		// A conversion whose TARGET is an integer-constrained TYPE PARAMETER — `Int(x)` in
