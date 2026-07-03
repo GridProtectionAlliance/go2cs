@@ -671,6 +671,28 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A call to a GENERIC FUNCTION whose resolved type arguments involve a TYPE PARAMETER —
+		// slices.Sort's helper chain (`Sort[S ~[]E, …]` calling `pdqsortOrdered(x, …)`), pdqsort's
+		// recursion — must render its type arguments EXPLICITLY: Go infers them through core
+		// types, but C# never infers a type parameter that appears only in constraints (CS0411,
+		// 14 sites in the slices/maps wave). go/types already resolved every instantiation
+		// (info.Instances); a concrete instantiation still infers fine in C# and stays bare
+		// (no churn).
+		if len(typeParamExpr) == 0 {
+			if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
+				if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil &&
+					v.calleeHasConstraintOnlyTypeParam(funIdent) {
+					var typeParams []string
+
+					for i := range instance.TypeArgs.Len() {
+						typeParams = append(typeParams, v.getCSTypeName(instance.TypeArgs.At(i)))
+					}
+
+					typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))
+				}
+			}
+		}
+
 		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
 		// This is required since unsafe.Pointer is in its own library and no implicit cast can
 		// be added for it on the pointer class (ж<T>) in the core library without creating a
@@ -862,7 +884,11 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	}
 
 	if len(typeParamExpr) > 0 && !strings.HasSuffix(funcName, typeParamExpr) {
-		funcName += typeParamExpr
+		// A PARTIAL Go instantiation (`Grow[S](nil, size)` — only S written, E inferred through
+		// core types) already rendered its explicit arguments into funcName; the RESOLVED full
+		// list replaces them (C# needs every constraint-only parameter spelled out — appending
+		// would emit `Grow<S><S, E>`).
+		funcName = stripTrailingTypeArgs(funcName) + typeParamExpr
 	}
 
 	var result string
@@ -1594,4 +1620,126 @@ func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature 
 	}
 
 	return nil
+}
+
+// getCallFunIdent returns the NAME identifier of a called function — the ident itself, a
+// selector's Sel, or the peeled base of an explicit instantiation — the key go/types uses
+// for info.Instances.
+func getCallFunIdent(fun ast.Expr) *ast.Ident {
+	switch e := fun.(type) {
+	case *ast.Ident:
+		return e
+	case *ast.SelectorExpr:
+		return e.Sel
+	case *ast.ParenExpr:
+		return getCallFunIdent(e.X)
+	case *ast.IndexExpr:
+		return getCallFunIdent(e.X)
+	case *ast.IndexListExpr:
+		return getCallFunIdent(e.X)
+	}
+
+	return nil
+}
+
+
+// calleeHasConstraintOnlyTypeParam reports whether the called generic function declares a type
+// parameter that appears in NO parameter type — visible only in constraints (`Twice[S ~[]E, E
+// Integer](s S)`: E). Go infers such a parameter through core types; C# cannot infer it from
+// arguments at ANY call site (concrete included), so those calls need explicit type arguments.
+func (v *Visitor) calleeHasConstraintOnlyTypeParam(funIdent *ast.Ident) bool {
+	funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func)
+
+	if !ok {
+		return false
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.TypeParams() == nil {
+		return false
+	}
+
+	for i := range sig.TypeParams().Len() {
+		tp := sig.TypeParams().At(i)
+		found := false
+
+		for j := range sig.Params().Len() {
+			if typeUsesTypeParam(sig.Params().At(j).Type(), tp) {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			return true
+		}
+	}
+
+	return false
+}
+
+// typeUsesTypeParam reports whether t structurally contains the SPECIFIC type parameter tp.
+func typeUsesTypeParam(t types.Type, tp *types.TypeParam) bool {
+	switch tt := t.(type) {
+	case *types.TypeParam:
+		return tt == tp
+	case *types.Slice:
+		return typeUsesTypeParam(tt.Elem(), tp)
+	case *types.Array:
+		return typeUsesTypeParam(tt.Elem(), tp)
+	case *types.Pointer:
+		return typeUsesTypeParam(tt.Elem(), tp)
+	case *types.Map:
+		return typeUsesTypeParam(tt.Key(), tp) || typeUsesTypeParam(tt.Elem(), tp)
+	case *types.Chan:
+		return typeUsesTypeParam(tt.Elem(), tp)
+	case *types.Signature:
+		params := tt.Params()
+		for i := range params.Len() {
+			if typeUsesTypeParam(params.At(i).Type(), tp) {
+				return true
+			}
+		}
+		results := tt.Results()
+		for i := range results.Len() {
+			if typeUsesTypeParam(results.At(i).Type(), tp) {
+				return true
+			}
+		}
+	case *types.Named:
+		if args := tt.TypeArgs(); args != nil {
+			for i := range args.Len() {
+				if typeUsesTypeParam(args.At(i), tp) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+// stripTrailingTypeArgs removes a trailing balanced <...> type-argument group from a rendered
+// function name (`Grow<S>` -> `Grow`, `F<slice<E>>` -> `F`); a name without one is unchanged.
+func stripTrailingTypeArgs(funcName string) string {
+	if !strings.HasSuffix(funcName, ">") {
+		return funcName
+	}
+
+	depth := 0
+
+	for i := len(funcName) - 1; i >= 0; i-- {
+		switch funcName[i] {
+		case '>':
+			depth++
+		case '<':
+			depth--
+			if depth == 0 {
+				return funcName[:i]
+			}
+		}
+	}
+
+	return funcName
 }

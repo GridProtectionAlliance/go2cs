@@ -37,8 +37,17 @@ func ScaleAndPrint(p Point) {
 	fmt.Println(r.String())
 }
 
+// Twice runs the constrained S back through ANOTHER generic function: Go infers the inner
+// Scale's [S, E] through core types, but C# cannot re-infer a type parameter that appears only
+// in constraints (CS0411 — the slices.Sort -> pdqsort chain), so the converter renders the
+// resolved instantiation explicitly: `Scale<S, E>(s, 2)`.
+func Twice[S ~[]E, E Integer](s S, c E) S {
+	return Scale(s, c) // constrained S/E flow through: C# needs Scale<S, E>(s, c)
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
 	ScaleAndPrint(p)
+	fmt.Println(Twice(Point{3, 4}, 2).String())
 }

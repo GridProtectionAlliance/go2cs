@@ -44,10 +44,18 @@ public static void ScaleAndPrint(Point p) {
     fmt.Println(r.String());
 }
 
+public static S Twice<S, E>(S s, E c)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    return Scale(s, c);
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
     ScaleAndPrint(p);
+    fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), 2).String());
 }
 
 } // end main_package
