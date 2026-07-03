@@ -123,12 +123,19 @@ func main() {
 	var dm nonMont                    // heap-escaped local box (the Ꮡss/Ꮡdiff shape)
 	fromBytes((*[4]uint64)(&dm), 3)
 	fmt.Println(dm[1], dm[2]) // 4 5
+
+	// ALIAS-target reinterpret of a named-over-array (fiat: (*p224UntypedFieldElement)(&x)
+	// where the target is an ALIAS to the unnamed array): same storage-sharing route.
+	fromBytes((*feAlias)(&sm.s), 20)
+	fmt.Println(sm.s[0], sm.s[3]) // 20 23
 }
 
 // SIBLING defined array types over the SAME unnamed underlying (crypto/internal/edwards25519
 // scalar.go fiat shape): `(*[4]uint64)(&s.s)` writes the parsed value INTO the named field
 // through the reinterpreted pointer on a VIRGIN receiver, and `(*nonMont)(&s.s)` reinterprets
 // between siblings neither of which converts to the other.
+type feAlias = [4]uint64
+
 type mont [4]uint64
 type nonMont [4]uint64
 type scal struct{ s mont }

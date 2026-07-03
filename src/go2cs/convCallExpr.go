@@ -97,9 +97,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// rebind only the boxed copy — acceptable, matching the documented array<T> model.
 				// The written-RHS gate keeps chain-defined types (`type pallocBits pageBits`, whose
 				// wrappers DO convert to each other) on the namedToNamed route below, byte-identical.
-				_, resultIsArray := resultElem.(*types.Array)
+				// types.Unalias: the target may be an ALIAS to the unnamed array — fiat's
+				// `(*p224UntypedFieldElement)(&x)` where `type p224UntypedFieldElement =
+				// [4]uint64` renders as `ж<array<ulong>>` via its global using, so the same
+				// storage-sharing route applies (CS0030 ×20, all four fiat curves).
+				_, resultIsArray := types.Unalias(resultElem).(*types.Array)
 				namedToArray := resultIsArray && okDefNamed &&
-					types.Identical(resultElem, defNamed.Underlying()) &&
+					types.Identical(types.Unalias(resultElem), defNamed.Underlying()) &&
 					writtenRHSIsUnnamedArray(defNamed)
 
 				namedSiblingArrays := namedToNamed &&

@@ -1,3 +1,5 @@
+global using feAlias = go.array<ulong>;
+
 namespace go;
 
 using fmt = fmt_package;
@@ -90,6 +92,8 @@ internal static void Main() {
     ref var dm = ref heap(new nonMont(), out var Ꮡdm);
     fromBytes(Ꮡ((Ꮡdm).Value.Value), 3);
     fmt.Println(dm[1], dm[2]);
+    fromBytes(Ꮡ((Ꮡsm.of(scal.Ꮡs)).Value.Value), 20);
+    fmt.Println(sm.s[0], sm.s[3]);
 }
 
 [GoType("[4]uint64")] partial struct mont;
