@@ -146,6 +146,28 @@ func rootQualifyIfAmbiguous(ns string) string {
 		}
 	}
 
+	// A relative alias target ALSO mis-binds when its first segment names a CHILD namespace of
+	// the current namespace — contributed by the transitive reference closure, not the current
+	// namespace's own path: runtime/metrics (namespace go.runtime) importing internal/godebugs
+	// emitted `using godebugs = @internal.godebugs_package;`, but runtime.csproj's own
+	// runtime/internal/* references put go.runtime.@internal in the compilation, so C#'s
+	// inner-to-outer lookup binds `@internal` there (CS0234). packageChildNamespaces (the
+	// CS0576 Δ-alias machinery) already mirrors that closure; walk every enclosing-namespace
+	// prefix above the root, since any level can shadow the intended go.<firstSeg>.
+	prefix := packageNamespace
+
+	for prefix != "" && prefix != RootNamespace {
+		if packageChildNamespaces[prefix+"."+firstSeg] {
+			return RootNamespace + "." + ns
+		}
+
+		if dot := strings.LastIndex(prefix, "."); dot != -1 {
+			prefix = prefix[:dot]
+		} else {
+			break
+		}
+	}
+
 	return ns
 }
 
