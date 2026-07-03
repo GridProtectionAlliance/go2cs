@@ -15,12 +15,31 @@
 
 ## Where things stand (2026-07-02)
 
-- **`runtime` is the foundation and the current frontier — now at 19 errors, EXACT and
+- **`runtime` is the foundation and the current frontier — now at 4 errors, EXACT and
   REPRODUCIBLE** (down from 952 at the start of the campaign). It is the bottom of the dependency
-  graph and the **sole failing project**. **The COMPILE queue is decisions-only again:**
-  named-over-array 11 (Decision B) + &GLOBAL 4 (both design-with-user), escape-hoist 2 (rabbit
-  hole), parked singles 2. Sanctioned non-error work remains: lock_sema manual waiter-list
-  (reviewer-mandated), the approved distinct golib `uintptr` struct, const-DECL literal formatting.
+  graph and the **sole failing project**. Remaining queue (all triaged, none decision-gated):
+  **(1) type.cs:414 CS0128 ×2** — two sibling `for i := 0` loops in one block each emit the
+  escape-hoist `ref var i = ref heap<nint>(out var Ꮡi);`; the hoist path lacks the
+  already-declared-in-scope rename normal decls get (extend `EscapedLoopVarSiblingIndex` — it
+  covers range siblings, not for-clause siblings). **(2) proc.cs:5687 CS0136** — two Go locals
+  named `trace` in nested scopes both collision-rename to `Δtrace`; the Δ-rename bypasses
+  shadow-numbering (should compose: `ΔtraceΔ1`). **(3) trace.cs:344 CS8175** — the capture
+  snapshot `var genʗ2 = gen;` sits *inside* the `forEachGRace` lambda, reading ref-local `gen`;
+  needs the established in-lambda box routing (`Ꮡgen.val`).
+- **2026-07-02 (latest): the &GLOBAL/double-pointer family landed (`f454a7106`; runtime 8 → 4).**
+  Pointer-typed addressed globals (`var head *node` → `ж<ж<node>>`) now support the faithful
+  runtime walk (`for pp := &head; *pp != nil; pp = &(*pp).next { *pp = n }`): one star = ONE deref
+  (removed the depth>1 extra-`.val` arm — mheap specialsIter CS0029); a deref whose RESULT is
+  reference-like reads golib **`ValueSlot`** (real slot, no nil check — Go reads nil held pointers
+  freely, only *deref* panics; writes persist), value-producing derefs keep strict `.val`;
+  `&global` = identity box `Ꮡallm` never a copy; `&(*pprev).field` peels into
+  `pprev.val.of(m.Ꮡalllink)` (proc allm CS1061, iface itabTable CS1929). New `GlobalPointerWalk`
+  behavioral test (insert/remove/method through global `**node`, output parity); six goldens
+  re-baselined to ValueSlot; suite 217/217. ConversionStrategies *Pointer-typed globals* section.
+  Earlier this cadence: `Value` field rename (`a89b2772f`), named-over-array family
+  (`47ddd5a50`, 19→8, incl. the golib `ж.at` lazy-backing materializer caught by output gate).
+  Noted in passing (wave, not runtime): `database/sql/convert.cs` emits invalid `var d.val = …`
+  (pre-existing, deref-assign into a `var` decl — bucket when the 237-package wave starts).
 - **2026-07-02 (latest): the distinct golib `uintptr` struct LANDED (`a2f52f726`; user green-lit;
   runtime EXACTLY 19 — error-neutral by design, the root buys identity fidelity).** uint and
   uintptr are distinct C# types again: type switches carry their original `case uintptr:` labels
