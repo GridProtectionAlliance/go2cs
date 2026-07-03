@@ -171,6 +171,36 @@ internal static void Main() {
         fmt.Println(v);
     }
     sieve();
+    var ca = new channel<@string>(1);
+    var cb = new channel<@string>(1);
+    ca.ᐸꟷ("hello"u8);
+    fmt.Println(firstMsg(ca, cb));
+    var done = new channel<EmptyStruct>(1);
+    fmt.Println(poll(done));
+    close(done);
+    fmt.Println(poll(done));
+}
+
+internal static @string firstMsg(channel<@string> a, channel<@string> b) {
+    switch (select(ᐸꟷ(a, ꓸꓸꓸ), ᐸꟷ(b, ꓸꓸꓸ))) {
+    case 0 when a.ꟷᐳ(out var m): {
+        return "a:"u8 + m;
+    }
+    case 1 when b.ꟷᐳ(out var m): {
+        return "b:"u8 + m;
+    }}
+    return default!;
+}
+
+internal static @string poll(channel<EmptyStruct> done) {
+    switch (ᐧ) {
+    case ᐧ when done.ꟷᐳ(out _): {
+        return "done"u8;
+    }
+    default: {
+        break;
+    }}
+    return "pending"u8;
 }
 
 } // end main_package

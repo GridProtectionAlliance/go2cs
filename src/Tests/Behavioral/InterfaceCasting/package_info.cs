@@ -46,8 +46,10 @@ using static go.main_package;
 [assembly: GoImplement<Llama, Animal>(Pointer = true)]
 [assembly: GoImplement<Llama, Animal>]
 [assembly: GoImplement<MyError, error>]
+[assembly: GoImplement<fileRdr, rdCloser>]
 [assembly: GoImplement<reversed, Animal>(Pointer = true)]
 [assembly: GoImplement<reversed, Animal>(Promoted = true)]
+[assembly: GoImplement<strRdr, rdr>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

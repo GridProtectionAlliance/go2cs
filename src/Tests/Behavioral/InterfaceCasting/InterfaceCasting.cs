@@ -132,6 +132,50 @@ internal static void Main() {
         var (a, name) = pick(k);
         fmt.Println("picked:", name, a.Speak());
     }
+    rdr rd = new strRdr(nil);
+    fmt.Println(rd.read());
+    var rc = open("data"u8);
+    fmt.Println(rc.read(), rc.close());
+    var readers = new rdr[]{new strRdr(nil)}.slice();
+    readers[0] = new fileRdr(name: "x"u8);
+    fmt.Println(readers[0].read());
+}
+
+[GoType] partial interface rdr {
+    @string read();
+}
+
+[GoType] partial interface clsr {
+    @string close();
+}
+
+[GoType] partial interface rdCloser :
+    rdr,
+    clsr
+{
+}
+
+[GoType] partial struct strRdr {
+}
+
+internal static @string read(this strRdr _) {
+    return "strRdr"u8;
+}
+
+[GoType] partial struct fileRdr {
+    internal @string name;
+}
+
+internal static @string read(this fileRdr f) {
+    return "read:"u8 + f.name;
+}
+
+internal static @string close(this fileRdr f) {
+    return "close:"u8 + f.name;
+}
+
+internal static rdCloser open(@string name) {
+    return new fileRdr(name);
 }
 
 } // end main_package

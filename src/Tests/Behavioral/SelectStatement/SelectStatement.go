@@ -169,4 +169,36 @@ func main() {
 		fmt.Println(v)
 	}
 	sieve()
+
+	ca := make(chan string, 1)
+	cb := make(chan string, 1)
+	ca <- "hello"
+	fmt.Println(firstMsg(ca, cb))
+	done := make(chan struct{})
+	fmt.Println(poll(done))
+	close(done)
+	fmt.Println(poll(done))
+}
+
+// firstMsg ends a value-returning function with a BLOCKING select whose every case returns —
+// a Go terminating statement; the lowered guarded switch cannot prove exhaustiveness, so the
+// emission appends an unreachable `return default!;` (io pipe.go read CS0161).
+func firstMsg(a, b chan string) string {
+	select {
+	case m := <-a:
+		return "a:" + m
+	case m := <-b:
+		return "b:" + m
+	}
+}
+
+// poll has an EMPTY default after a returning case: the emitted `default:` section still needs
+// its `break;` (the stale last-statement-was-return flag suppressed it — io pipe.go CS8070).
+func poll(done chan struct{}) string {
+	select {
+	case <-done:
+		return "done"
+	default:
+	}
+	return "pending"
 }

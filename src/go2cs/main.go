@@ -954,14 +954,23 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					// Check if the same type implements both interfaces
 					if inheritedImplementations, ok := interfaceImplementations[inheritedInterfaceName]; ok {
 						if baseImplementations, ok := interfaceImplementations[interfaceName]; ok {
-							baseImplementations.IntersectWithSet(inheritedImplementations)
-							for _, implementation := range baseImplementations.Keys() {
+							// Intersect on a COPY — IntersectWithSet mutates its receiver, and the receiver
+							// here is the DERIVED interface's LIVE implementation set. The old in-place
+							// intersect deleted every derived-only implementation (io: nopCloser →
+							// ReadCloser shares nothing with Reader's set, so both ReadCloser pairs
+							// vanished and the returns failed CS0029) and made the surviving set depend
+							// on map iteration order. Only the COMMON implementations are dropped, and
+							// only from the LOWER (inherited) interface — C# interface inheritance
+							// already covers them via the derived implementation.
+							commonImplementations := NewHashSet(baseImplementations.Keys())
+							commonImplementations.IntersectWithSet(inheritedImplementations)
+
+							for _, implementation := range commonImplementations.Keys() {
 								if strings.HasPrefix(implementation, PointerPrefix+"<") {
 									continue
 								}
 
-								implementedTypes := interfaceImplementations[inheritedInterfaceName]
-								implementedTypes.Remove(implementation)
+								inheritedImplementations.Remove(implementation)
 							}
 						}
 					}
@@ -2044,7 +2053,20 @@ func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr 
 	if selectorExpr, ok := interfaceExpr.(*ast.SelectorExpr); ok {
 		interfaceExpr = selectorExpr.Sel
 	} else if indexExpr, ok := interfaceExpr.(*ast.IndexExpr); ok {
-		interfaceExpr = indexExpr.X
+		// A container-element index (`mr.readers[0]`, `m[k]`) already types as its ELEMENT — the
+		// interface itself — so keep the whole expression. Redirect to X only when the indexed
+		// expression is not interface-typed (e.g. a generic instantiation F[T]); redirecting a
+		// container gave the SLICE/MAP type and recorded/keyed the conversion on the wrong type.
+		exprType := v.getType(interfaceExpr, false)
+		exprIsInterface := false
+
+		if exprType != nil {
+			exprIsInterface, _ = isInterface(exprType)
+		}
+
+		if !exprIsInterface {
+			interfaceExpr = indexExpr.X
+		}
 	}
 
 	return v.convertToInterfaceType(v.getType(interfaceExpr, false), v.getType(targetExpr, false), exprResult)

@@ -405,6 +405,19 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				anyTypeIsUnsafePointer = true
 			}
 		}
+
+		// An INDEX-expression LHS (`mr.readers[0] = eofReader{}`, `m[k] = impl{}`) assigns to a
+		// container ELEMENT: the interface-cast check must use the ELEMENT type — the type of the
+		// whole index expression — not the container's root ident (`mr`), which both branches
+		// above test and which can never be an interface (Go forbids indexing one). Without this
+		// the concrete RHS is emitted bare and no GoImplement pair is recorded (io/multi.go
+		// `mr.readers[0] = eofReader{}` → CS0029).
+		if _, ok := lhs.(*ast.IndexExpr); ok {
+			if lhsType := v.getType(lhs, false); lhsType != nil {
+				isIfaceElem, isEmptyElem := isInterface(lhsType)
+				lhsTypeIsInterface[i] = isIfaceElem && !isEmptyElem
+			}
+		}
 	}
 
 	// Lift an anonymous-struct composite-literal RHS up front (named after the LHS var) when the

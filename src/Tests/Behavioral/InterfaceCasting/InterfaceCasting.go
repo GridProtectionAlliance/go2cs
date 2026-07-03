@@ -143,4 +143,36 @@ func main() {
 		a, name := pick(k)
 		fmt.Println("picked:", name, a.Speak())
 	}
+
+	var rd rdr = strRdr{} // populates rdr's implementation set (triggers the inheritance prune)
+	fmt.Println(rd.read())
+	rc := open("data")
+	fmt.Println(rc.read(), rc.close())
+	readers := []rdr{strRdr{}}
+	readers[0] = fileRdr{name: "x"} // index-element interface assignment (io eofReader shape)
+	fmt.Println(readers[0].read())
 }
+
+// rdCloser mirrors io.ReadCloser: an interface INHERITING other interfaces. A concrete type
+// returned as the inheriting interface (open below) records GoImplement<fileRdr, rdCloser>;
+// the package_info inheritance prune must drop only the COMMON implementations from the LOWER
+// interface (fileRdr from rdr), never the derived-only recordings (the in-place intersect
+// emptied rdCloser's whole set - io NopCloser CS0029).
+type rdr interface{ read() string }
+type clsr interface{ close() string }
+
+type rdCloser interface {
+	rdr
+	clsr
+}
+
+type strRdr struct{}
+
+func (strRdr) read() string { return "strRdr" }
+
+type fileRdr struct{ name string }
+
+func (f fileRdr) read() string  { return "read:" + f.name }
+func (f fileRdr) close() string { return "close:" + f.name }
+
+func open(name string) rdCloser { return fileRdr{name} }

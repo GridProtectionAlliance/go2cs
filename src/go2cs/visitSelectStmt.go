@@ -131,6 +131,12 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 			v.targetFile.WriteString(v.newline)
 		}
 
+		// visitStmt resets this per statement, but an EMPTY clause body (a bare `default:` — io
+		// pipe.go read's poll select) never calls visitStmt, so the flag would carry the PREVIOUS
+		// clause's terminal `return` and suppress the mandatory `break;` (C# requires every switch
+		// section to end in a jump: CS8070 on a final `default:`, CS0163 otherwise).
+		v.lastStatementWasReturn = false
+
 		if comClause.Comm == nil {
 			v.writeOutput("default: {")
 		} else {
@@ -234,4 +240,28 @@ func (v *Visitor) visitSelectStmt(selectStmt *ast.SelectStmt) {
 	}
 
 	v.targetFile.WriteRune('}')
+
+	// A blocking select (no `default:`) lowers to `switch (select(…))` whose sections are guarded
+	// `case N when <recv>:` labels — C# cannot prove the switch exhaustive, so a value-returning
+	// function ending in it fails CS0161 even though Go's spec makes such a select (every comm
+	// clause terminating, no select-level break) a terminating statement. Mirror visitSwitchStmt's
+	// guarded-terminal-default emission: an unreachable trailing `return default!;`. A clause that
+	// can fall OUT (a select-targeting `break`, or a non-terminating body) disqualifies — the
+	// trailing return would be reachable and silently return the zero value. Skip in
+	// namedReturnDefer mode (void wrapper — a value return is CS8030, and none is needed).
+	if !hasDefault && !v.namedReturnDeferMode && v.currentReturnSignature != nil && v.currentReturnSignature.Results().Len() > 0 {
+		allClausesTerminal := true
+
+		for _, comClause := range comClauses {
+			if caseBodyHasSwitchBreak(comClause.Body) || !isTerminatingStmtList(comClause.Body) {
+				allClausesTerminal = false
+				break
+			}
+		}
+
+		if allClausesTerminal {
+			v.targetFile.WriteString(v.newline)
+			v.writeOutput("return default!;")
+		}
+	}
 }
