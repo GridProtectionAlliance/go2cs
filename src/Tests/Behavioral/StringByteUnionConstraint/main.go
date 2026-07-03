@@ -38,4 +38,13 @@ func main() {
 	fmt.Println("prefix []byte:", prefixMatch(bs, helBytes))
 	fmt.Println("prefix miss:", prefixMatch(str, "xyz"))
 	fmt.Println("prefix too long:", prefixMatch(str, "hello world"))
+	fmt.Println("last(string):", lastByte(str))
+	fmt.Println("last([]byte):", lastByte(bs))
+}
+
+// lastByte uses the REVERSED union order - `[]byte | string` (time/format.go appendNano):
+// the slice term leads, which previously matched the ISlice branch and leaked the raw
+// union as the element type (ISlice<byte | string> - CS1003 cascade).
+func lastByte[T []byte | string](s T) byte {
+	return s[len(s)-1]
 }

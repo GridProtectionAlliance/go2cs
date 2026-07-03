@@ -35,6 +35,14 @@ internal static void Main() {
     fmt.Println("prefix []byte:", prefixMatch(bs, helBytes));
     fmt.Println("prefix miss:", prefixMatch(str, (@string)"xyz"));
     fmt.Println("prefix too long:", prefixMatch(str, (@string)"hello world"));
+    fmt.Println("last(string):", lastByte(str));
+    fmt.Println("last([]byte):", lastByte(bs));
+}
+
+internal static byte lastByte<T>(T s)
+    where T : /* []byte | string */ IByteSeq<byte>, new()
+{
+    return s[len(s) - 1];
 }
 
 } // end main_package

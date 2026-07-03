@@ -2685,8 +2685,17 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 				// operator constraints (IAddition/IComparison/...) for it; set in the union branch below.
 				suppressLiftedConstraints := false
 
-				// Check for common Go types, e.g., slice, map, channel, etc.
-				if strings.HasPrefix(constraintExpr, "[]") {
+				// Check for common Go types, e.g., slice, map, channel, etc. The `string | []byte`
+				// UNION is checked FIRST: its `[]byte | string` ordering starts with "[]" and would
+				// otherwise take the ISlice branch with the raw union as the element type
+				// (`ISlice<byte | string>` — CS1003 cascade, time/format.go's appendNano family).
+				if constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
+					// Go's `string | []byte` union — emit the read-only byte-sequence interface
+					// both @string and slice<byte> implement (IByteSeq<byte>); C# cannot express
+					// the "or" directly. See golib IByteSeq.
+					typeConstraint = "IByteSeq<byte>"
+					suppressLiftedConstraints = true
+				} else if strings.HasPrefix(constraintExpr, "[]") {
 					// Handle slice via ISlice interface. ISliceWrap supplies the S-preserving factory:
 					// a sub-slice or append of a constrained S must yield S again (Go's named-slice
 					// semantics), which golib's subslice<S, T>/append<S, T> realize through S.Wrap.
@@ -2714,14 +2723,9 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					v.showWarning("@getGenericDefinition - unhandled struct constraint `%s` on `%s`", constraintName, srcType.String())
 					typeConstraint = originalConstraint
 				} else {
-					// Handle special case for string and []byte types
-					if constraintExpr == "string|[]byte" || constraintExpr == "[]byte|string" {
-						// Go's `string | []byte` union — emit the read-only byte-sequence interface
-						// both @string and slice<byte> implement (IByteSeq<byte>); C# cannot express
-						// the "or" directly. See golib IByteSeq.
-						typeConstraint = "IByteSeq<byte>"
-						suppressLiftedConstraints = true
-					} else if constraintExpr == "string" || constraintExpr == "[]byte" {
+					// Handle special case for string and []byte types (the union form is hoisted
+					// to the head of this chain - see above)
+					if constraintExpr == "string" || constraintExpr == "[]byte" {
 						typeConstraint = "ISlice<byte>"
 					} else if constraintExpr == "comparable" {
 						// Go's built-in `comparable` admits every ==-able Go type — numerics,
