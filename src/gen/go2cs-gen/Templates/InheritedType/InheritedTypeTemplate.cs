@@ -90,6 +90,19 @@ internal class InheritedTypeTemplate : TemplateBase
     // conversions (nuint→uintptr, uintptr→gclinkptr), which C# never composes. The nuint bridge
     // (plus UntypedInt for named untyped consts) restores the reachability the old
     // System.UIntPtr alias provided for free.
+    // A named type over `any` (`type Symbol any` — plugin; also crypto.PublicKey/PrivateKey,
+    // driver.Value, json.Token) cannot declare user-defined conversions to or from its
+    // underlying: `any` is System.Object, the base type of everything (CS0553 ×2). No bridge is
+    // lost — boxing already converts any value to object, `(Symbol)obj` is the unbox-cast, and
+    // the `new Symbol(value)` constructor plus the NilType operators are unaffected.
+    private string UnderlyingConversionOperators => TypeName is "any" or "object" ? "" :
+        $$"""
+                // Handle implicit conversions between '{{TypeName}}' and {{ObjectKind}} '{{ObjectName}}'
+                public static implicit operator {{ObjectName}}({{TypeName}} value) => new {{ObjectName}}(value);
+
+                public static implicit operator {{TypeName}}({{ObjectName}} value) => value.{{Value}};
+        """;
+
     private string UintptrBridgeOperators => TypeName != "uintptr" ? "" :
         $"""
 
@@ -177,10 +190,7 @@ internal class InheritedTypeTemplate : TemplateBase
         
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
-                // Handle implicit conversions between '{{TypeName}}' and {{ObjectKind}} '{{ObjectName}}'
-                public static implicit operator {{ObjectName}}({{TypeName}} value) => new {{ObjectName}}(value);
-
-                public static implicit operator {{TypeName}}({{ObjectName}} value) => value.{{Value}};
+        {{UnderlyingConversionOperators}}
                     {{UintptrBridgeOperators}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => value.Equals(default({{ObjectName}}));
