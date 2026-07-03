@@ -82,6 +82,32 @@ public static Animal Reversed(Animal a) {
     return new reversedᴵAnimal(Ꮡ(new reversed(a)));
 }
 
+internal static (Animal, @string) pick(nint kind) {
+    Animal a = default!;
+    @string name = default!;
+    switch (kind) {
+    case 0: {
+        ref var d = ref heap(new Dog(), out var Ꮡd);
+        a = new DogᴵAnimal(Ꮡd);
+        name = "dog"u8;
+        break;
+    }
+    case 1: {
+        ref var c = ref heap(new Cat(), out var Ꮡc);
+        a = new CatᴵAnimal(Ꮡc);
+        name = "cat"u8;
+        break;
+    }
+    default: {
+        ref var l = ref heap(new Llama(), out var Ꮡl);
+        a = new LlamaᴵAnimal(Ꮡl);
+        name = "llama"u8;
+        break;
+    }}
+
+    return (a, name);
+}
+
 internal static void Main() {
     error err = default!;
     err = new MyError("bar");
@@ -102,6 +128,10 @@ internal static void Main() {
     fmt.Println("assert-back:", ok, c.Total(), back == c);
     var r = Reversed(new Dog(nil));
     fmt.Println("promoted via pointer adapter:", r.Speak());
+    for (nint k = 0; k < 3; k++) {
+        var (a, name) = pick(k);
+        fmt.Println("picked:", name, a.Speak());
+    }
 }
 
 } // end main_package

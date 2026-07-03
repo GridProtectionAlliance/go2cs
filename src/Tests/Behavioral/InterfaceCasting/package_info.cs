@@ -43,6 +43,7 @@ using static go.main_package;
 [assembly: GoImplement<Dog, Animal>(Pointer = true)]
 [assembly: GoImplement<Dog, Animal>]
 [assembly: GoImplement<JavaProgrammer, Animal>]
+[assembly: GoImplement<Llama, Animal>(Pointer = true)]
 [assembly: GoImplement<Llama, Animal>]
 [assembly: GoImplement<MyError, error>]
 [assembly: GoImplement<reversed, Animal>(Pointer = true)]

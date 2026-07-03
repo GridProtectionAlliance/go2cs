@@ -588,10 +588,17 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			context := DefaultIdentContext()
 
 			if (!v.isPointer(ident) || v.identIsParameter(ident)) && i < rhsLen {
-				// If rhs is a address of expression, we need to convert identifier to its pointer variable
+				// If rhs is a address of expression, we need to convert identifier to its pointer variable.
+				// NOT when the LHS is an INTERFACE local: `r = &rb` with `var r ResourceBody` converts
+				// the RHS through the pointer-interface adapter (the adapter IS the interface value), so
+				// the assignment stays plain — the pointer-box LHS form referenced a nonexistent `Ꮡr`
+				// and appended a ref re-alias against a non-ref local (dnsmessage's unpack switch,
+				// CS0103/CS8373 x33).
 				if unaryExpr, ok := rhsExprs[i].(*ast.UnaryExpr); ok {
 					if unaryExpr.Op == token.AND {
-						context.isPointer = true
+						if lhsIsIface, _ := isInterface(v.getType(lhsExprs[i], false)); !lhsIsIface {
+							context.isPointer = true
+						}
 					}
 				}
 			}

@@ -87,6 +87,30 @@ func Reversed(a Animal) Animal {
 	return &reversed{a}
 }
 
+// pick reassigns an INTERFACE local from &local inside a switch - dnsmessage's unpack shape.
+// The RHS converts through the pointer-interface adapter (the adapter IS the interface value),
+// so the assignment must stay plain (`a = new DogᴵAnimal(Ꮡd)`) - the pointer-box LHS form
+// referenced a nonexistent box and ref-realiased a non-ref local (CS0103/CS8373).
+func pick(kind int) (Animal, string) {
+	var a Animal
+	var name string
+	switch kind {
+	case 0:
+		var d Dog
+		a = &d
+		name = "dog"
+	case 1:
+		var c Cat
+		a = &c
+		name = "cat"
+	default:
+		var l Llama
+		a = &l
+		name = "llama"
+	}
+	return a, name
+}
+
 func main() {
 	var err error
 
@@ -114,4 +138,9 @@ func main() {
 
 	r := Reversed(Dog{})
 	fmt.Println("promoted via pointer adapter:", r.Speak()) // Woof!
+
+	for k := 0; k < 3; k++ {
+		a, name := pick(k)
+		fmt.Println("picked:", name, a.Speak())
+	}
 }
