@@ -83,6 +83,38 @@ internal static void Main() {
     ref var cs = ref heap(new counters(), out var Ꮡcs);
     var pcs = Ꮡcs;
     fmt.Println(pcs.at<counter2>(0).bump(), pcs.at<counter2>(0).bump(), cs[0].n);
+    ref var sm = ref heap(new scal(), out var Ꮡsm);
+    fromBytes(Ꮡ((Ꮡsm.of(scal.Ꮡs)).Value.Value), 7);
+    @double(Ꮡsm.of(scal.Ꮡs), Ꮡ((nonMont)((Ꮡsm.of(scal.Ꮡs)).Value.Value)));
+    fmt.Println(sm.s[0], sm.s[3]);
+    ref var dm = ref heap(new nonMont(), out var Ꮡdm);
+    fromBytes(Ꮡ((Ꮡdm).Value.Value), 3);
+    fmt.Println(dm[1], dm[2]);
+}
+
+[GoType("[4]uint64")] partial struct mont;
+
+[GoType("[4]uint64")] partial struct nonMont;
+
+[GoType] partial struct scal {
+    internal mont s;
+}
+
+internal static void fromBytes(ж<array<uint64>> Ꮡout, uint64 seed) {
+    ref var @out = ref Ꮡout.Value;
+
+    foreach (var (i, _) in @out) {
+        @out[i] = seed + (uint64)i;
+    }
+}
+
+internal static void @double(ж<mont> Ꮡout, ж<nonMont> Ꮡarg) {
+    ref var @out = ref Ꮡout.Value;
+    ref var arg = ref Ꮡarg.Value;
+
+    foreach (var (i, _) in @out) {
+        @out[i] = arg[i] * 2;
+    }
 }
 
 [GoType("[4]uintptr")] partial struct callers;

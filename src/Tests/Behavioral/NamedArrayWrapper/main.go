@@ -114,6 +114,35 @@ func main() {
 	var cs counters
 	pcs := &cs
 	fmt.Println(pcs[0].bump(), pcs[0].bump(), cs[0].n) // 1 2 2
+
+	// sibling-array reinterprets (the edwards25519 fiatScalar shape)
+	var sm scal
+	fromBytes((*[4]uint64)(&sm.s), 7) // write through Named→underlying reinterpret, VIRGIN field
+	double(&sm.s, (*nonMont)(&sm.s))  // sibling reinterpret aliasing the same storage
+	fmt.Println(sm.s[0], sm.s[3])     // 14 20
+	var dm nonMont                    // heap-escaped local box (the Ꮡss/Ꮡdiff shape)
+	fromBytes((*[4]uint64)(&dm), 3)
+	fmt.Println(dm[1], dm[2]) // 4 5
+}
+
+// SIBLING defined array types over the SAME unnamed underlying (crypto/internal/edwards25519
+// scalar.go fiat shape): `(*[4]uint64)(&s.s)` writes the parsed value INTO the named field
+// through the reinterpreted pointer on a VIRGIN receiver, and `(*nonMont)(&s.s)` reinterprets
+// between siblings neither of which converts to the other.
+type mont [4]uint64
+type nonMont [4]uint64
+type scal struct{ s mont }
+
+func fromBytes(out *[4]uint64, seed uint64) {
+	for i := range out {
+		out[i] = seed + uint64(i)
+	}
+}
+
+func double(out *mont, arg *nonMont) {
+	for i := range out {
+		out[i] = arg[i] * 2
+	}
 }
 
 // callers mirrors runtime's `type cgoCallers [32]uintptr` reached through a pointer field.

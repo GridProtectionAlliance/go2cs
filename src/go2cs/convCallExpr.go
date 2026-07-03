@@ -81,6 +81,56 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				_, resultIsBasic := resultElem.(*types.Basic)
 				namedToBasic := resultIsBasic && okDefNamed && types.Identical(resultElem, defNamed.Underlying())
 
+				// `(*[4]uint64)(&s.s)` / `(*fiatScalarNonMontgomeryDomainFieldElement)(&s.s)` — pointer
+				// reinterprets of an array-backed DEFINED type (crypto/internal/edwards25519 scalar.go):
+				// to its unnamed underlying array, or to a SIBLING defined type written over the SAME
+				// unnamed array. `ж<Def>` has no conversion to `ж<array<E>>`/`ж<Sibling>` (distinct
+				// generic instantiations — CS0030), and the sibling VALUE conversion the namedToNamed
+				// route emits does not exist either (each [GoType("[N]elem")] wrapper converts only
+				// to array<E>, and C# never chains two user-defined conversions). Unlike the copy-boxed
+				// atomic shapes below, these fiat sites WRITE through the reinterpreted pointer
+				// (fiatScalarFromBytes parses the scalar INTO &s.s on a virgin receiver), so the route
+				// must share element storage: the wrapper's `Value` property invoked THROUGH THE REF
+				// (ж<T>.Value is ref-returning) materializes the lazy array<E> backing on the ORIGINAL
+				// storage and returns an array<E> struct sharing its T[]; boxing that (Ꮡ) yields a
+				// pointer whose element reads AND writes flow through. Whole-value writes (`*p = q`)
+				// rebind only the boxed copy — acceptable, matching the documented array<T> model.
+				// The written-RHS gate keeps chain-defined types (`type pallocBits pageBits`, whose
+				// wrappers DO convert to each other) on the namedToNamed route below, byte-identical.
+				_, resultIsArray := resultElem.(*types.Array)
+				namedToArray := resultIsArray && okDefNamed &&
+					types.Identical(resultElem, defNamed.Underlying()) &&
+					writtenRHSIsUnnamedArray(defNamed)
+
+				namedSiblingArrays := namedToNamed &&
+					writtenRHSIsUnnamedArray(defNamed) && writtenRHSIsUnnamedArray(baseNamed)
+
+				if namedToArray || namedSiblingArrays {
+					argExpr := v.convExpr(arg, nil)
+
+					if v.needsParentheses(arg) {
+						argExpr = fmt.Sprintf("(%s)", argExpr)
+					}
+
+					// A deref-aliased pointer param/receiver renders as the wrapper VALUE — a
+					// ref-local alias of the real storage, so its `Value` property already runs in
+					// place. A genuine box (field box `Ꮡs.of(…)`, heap box `Ꮡss`) derefs through the
+					// ref-returning ж<T>.Value first — NOT `~` (operator ~ returns a COPY, which would
+					// materialize a virgin backing on the temp and orphan every write — the
+					// SetCanonicalBytes-on-a-fresh-Scalar shape).
+					if !v.exprIsDerefAliasedPointer(arg) {
+						argExpr = fmt.Sprintf("%s.Value", argExpr)
+					}
+
+					if namedToArray {
+						return fmt.Sprintf("%s(%s.Value)", AddressPrefix, argExpr)
+					}
+
+					baseName := convertToCSTypeName(v.getTypeName(resultElem, false))
+
+					return fmt.Sprintf("%s((%s)(%s.Value))", AddressPrefix, baseName, argExpr)
+				}
+
 				if namedToNamed || namedToBasic {
 					baseName := convertToCSTypeName(v.getTypeName(resultElem, false))
 					argExpr := v.convExpr(arg, nil)
@@ -1278,6 +1328,34 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 				// A pointer conversion to a cross-package type: `(*atomic.Uint32)(p)`.
 				obj = v.info.ObjectOf(sel.Sel)
 				isPointer = true
+			} else {
+				// A pointer conversion to a TYPE-LITERAL target — `(*[4]uint64)(&s.s)`
+				// (edwards25519's fiat reinterprets): a composite type has no types.Object,
+				// so resolve the target directly from type info. Claimed ONLY for the fiat
+				// reinterpret shape — the argument is a pointer to a defined type written
+				// directly over an unnamed array, converting to a pointer to that exact
+				// underlying array — so every other pointer-to-type-literal conversion (the
+				// pointer-cast slice form `(*[1<<20]Method)(p)[:n:n]`, internal/abi) keeps
+				// its pre-existing route byte-identically.
+				if len(callExpr.Args) != 1 {
+					return false, ""
+				}
+
+				elemType := v.info.TypeOf(funExpr.X)
+				argType := v.info.TypeOf(callExpr.Args[0])
+
+				if elemType == nil || argType == nil {
+					return false, ""
+				}
+
+				if argPtr, ok := argType.(*types.Pointer); ok {
+					if named, ok := argPtr.Elem().(*types.Named); ok && writtenRHSIsUnnamedArray(named) &&
+						types.Identical(elemType, named.Underlying()) {
+						return types.ConvertibleTo(argType, types.NewPointer(elemType)), "*" + v.getTypeName(elemType, false)
+					}
+				}
+
+				return false, ""
 			}
 			targetExpr = nil
 		case *ast.Ident:

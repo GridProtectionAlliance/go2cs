@@ -694,6 +694,10 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// called can be marked as escaping (and the call routed through the ж overload).
 		collectCaptureModeMethods(pkg)
 
+		// Record each defined type's WRITTEN right-hand side (lost by Named.Underlying()'s
+		// full resolution) — the array-reinterpret emission in convCallExpr consults it.
+		collectTypeSpecRHS(pkg)
+
 		performEscapeAnalysis(files, fset, packageTypes, info)
 
 		// Find package-level vars whose address is taken (cross-file) so their
