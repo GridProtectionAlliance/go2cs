@@ -15,6 +15,24 @@
 
 ## Where things stand (2026-07-03)
 
+- **internal/reflectlite IS AT ZERO (`43144d186`) — ZERO CLUB IS EIGHT: runtime, iter, sync,
+  slices, maps, internal/godebug, math/rand, internal/reflectlite. MASSIVE UNMASK — WAVE-10 =
+  159 errors / 15 packages as the middle-stdlib tier builds for the FIRST time** (previously
+  skipped dependents of reflectlite): vendor/x/net/dnsmessage 42, sort 27, vendor/x/text/
+  bidirule 25, io 13, crypto/edwards25519 13, syscall 10, strconv 7, path 7, nistec/fiat 4,
+  reflect 3, plugin 2, math/rand/v2 2 + the old buffer 2 / weak 1 / metrics 1. Codes: CS0234 26,
+  CS0426 22, CS0103 22, CS0111 21 (!dup members — likely a generator/case-twin family), CS8373
+  11, CS0030 10. NEXT: census the wave FIRST (families likely span packages — CS0111 smells like
+  one root; CS0234/CS0426 may be the namespace/rename families) — census-first campaign like the
+  generic-constraint one; pick the biggest family as the next root.
+  The reflectlite closer (3 pieces, one commit): (a) embedded-pointer hop names the FIELD
+  (struct-scoped, structFieldBoxName — `t.ΔType` CS1061); (b) generated interface impls forward
+  promoted members through the hop (`this.Type.Value.Size()` — CS1929; adapter parity too);
+  (c) core's old-stub reflectlite files unmarked (GoManualConversion removed + provenance note)
+  so the overlay stops shadowing the auto output — core baseline unchanged and still green;
+  wholesale core modernization banked. Guarded by CrossPkgUser Phase-5 (Δ-collision embed field
+  + promotion-only interface satisfaction + aliasing, vs Go).
+
 - **math/rand IS AT ZERO (`e88be09ff`) — zero club: runtime, iter, sync, slices, maps,
   internal/godebug, math/rand. WAVE-9: 14 errors / 4 packages = the ENTIRE stdlib frontier:**
   1. **internal/reflectlite 10 -> 4 real — NEXT** (stale old-stub hand files
