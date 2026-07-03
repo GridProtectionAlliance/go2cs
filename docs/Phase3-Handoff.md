@@ -20,10 +20,22 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **The frontier is now the 237-package wave**: full
-  `go-src-converted.sln` build → bucket own-errors by package+CS#### → largest-multiplicity root
-  first. Known wave item: `database/sql/convert.cs` invalid `var d.Value = …` (deref-assign into a
-  var decl, pre-existing).
+  check (procresize's `Δtrace` CS0136). **WAVE-1 MEASURED (2026-07-02, recon71): 19 own-errors in FIVE leaf packages gate the whole
+  solution** (dependents skipped; everything else green or masked):
+  1. **internal/reflectlite (9)** — CS0759 ×7: manual `*_impl.cs` implementing halves vs auto
+     defining halves (both exist — suspect signature/merge mismatch, possibly downstream of the
+     CS0246 ×3 `rtype`/`flag` missing in package_info.cs); triage the auto-emitted type names first.
+  2. **iter (5)** — generic FUNCTION-TYPE declarations `type Seq[V any] func(yield func(V) bool)`
+     emit non-generic `Seq` (CS0308/CS0246 K,V) — a real converter generics gap: type params on a
+     defined function type.
+  3. **internal/weak (2)** — pointer.cs CS0029 `T` → `ж<T>` (line 61) + CS0576 namespace/alias
+     `runtime` conflict (line 66).
+  4. **runtime/metrics (1)** — CS0234 `go.runtime.@internal.godebugs_package` missing: stale
+     namespace/csproj ref for the Go 1.23 runtime/internal → internal/runtime godebugs relocation.
+  5. **sync (1)** — poolqueue.cs:59 CS1585: a stray bare `ж<EmptyStruct>` line emitted between
+     declarations (mangled decl emission).
+  Known deeper-wave item (masked for now): `database/sql/convert.cs` invalid `var d.Value = …`
+  (deref-assign into a var decl, pre-existing).
 - **2026-07-02 (latest three roots):** (1) **escape-hoist grouping** (`bd45b5bd7`, 4→2): one
   hoisted loop-var box per name per container; typesEqual CS0128 pair cleared; retired 42 corpus
   files' spurious old-pass renames. (2) **val → Value rename** (`5912ba9fd`, user-directed):
