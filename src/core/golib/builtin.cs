@@ -684,6 +684,49 @@ public static class builtin
     }
 
     /// <summary>
+    /// Copies elements into a destination held as a constrained slice type parameter
+    /// (<c>S ~[]E</c> boxed to its <see cref="ISlice{T}"/> constraint). The box wraps the same
+    /// backing array, so writes through the interface land in the caller's storage; source and
+    /// destination may overlap (span CopyTo has memmove semantics). Concrete
+    /// <see cref="slice{T}"/> arguments still bind the exact overloads above.
+    /// </summary>
+    /// <param name="dst">Destination slice view.</param>
+    /// <param name="src">Source slice view.</param>
+    /// <returns>The number of elements copied — min of len(src) and len(dst).</returns>
+    public static nint copy<T1, T2>(ISlice<T1> dst, ISlice<T2> src)
+    {
+        nint min = Min(dst.Length, src.Length);
+
+        if (min > 0)
+        {
+            if (src is ISlice<T1> same)
+            {
+                same.ToSpan()[..(int)min].CopyTo(dst.ToSpan());
+            }
+            else
+            {
+                for (nint i = 0; i < min; i++)
+                    dst[i] = (T1)TypeExtensions.ConvertToType((IConvertible)src[i]!);
+            }
+        }
+
+        return min;
+    }
+
+    /// <summary>
+    /// Copies string bytes into a destination held as a constrained slice type parameter
+    /// (<c>S ~[]byte</c> boxed to <see cref="ISlice{T}"/> of byte).
+    /// </summary>
+    /// <param name="dst">Destination byte-slice view.</param>
+    /// <param name="src">Source string.</param>
+    /// <returns>The number of bytes copied.</returns>
+    public static nint copy(ISlice<byte> dst, in @string src)
+    {
+        slice<byte> bytes = src;
+        return copy(dst, (ISlice<byte>)bytes);
+    }
+
+    /// <summary>
     /// Copies elements from a source slice pointer into a destination slice.
     /// The source and destination may overlap.
     /// </summary>
@@ -717,6 +760,17 @@ public static class builtin
     /// unchanged; only the element values are reset to the zero value of T.
     /// </summary>
     /// <param name="slice">Target slice.</param>
+    /// <summary>
+    /// Zeroes the elements of a slice held as a constrained slice type parameter
+    /// (<c>S ~[]E</c> boxed to its <see cref="ISlice{T}"/> constraint) — the boxed view
+    /// aliases the caller's backing array.
+    /// </summary>
+    /// <param name="s">Slice view to clear.</param>
+    public static void clear<T>(ISlice<T> s)
+    {
+        s.ToSpan().Clear();
+    }
+
     public static void clear<T>(slice<T> slice)
     {
         for (nint i = 0; i < slice.Length; i++)
@@ -751,6 +805,17 @@ public static class builtin
     /// <returns>The minimum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
     /// <remarks>For floating-point arguments this follows <see cref="IComparable{T}"/> ordering, which
     /// sorts NaN below all other values — matching Go's <c>min</c> (which yields NaN if any argument is NaN).</remarks>
+    /// <summary>
+    /// Returns the smaller of two values via comparison operators — the form a constrained type
+    /// parameter satisfies (Go's <c>cmp.Ordered</c> lifts to IComparisonOperators; such a
+    /// parameter has no IComparable&lt;T&gt; conversion). Exact two-argument calls on
+    /// operator-capable types prefer this normal form over the params overload below.
+    /// </summary>
+    public static T min<T>(T x, T y) where T : System.Numerics.IComparisonOperators<T, T, bool>
+    {
+        return x < y ? x : y;
+    }
+
     public static T min<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
     {
         T result = x;
@@ -770,6 +835,15 @@ public static class builtin
     /// <param name="x">First value (Go requires at least one argument).</param>
     /// <param name="rest">Remaining values to compare.</param>
     /// <returns>The maximum of <paramref name="x"/> and <paramref name="rest"/>.</returns>
+    /// <summary>
+    /// Returns the larger of two values via comparison operators — see the two-argument
+    /// <see cref="min{T}(T, T)"/> remarks.
+    /// </summary>
+    public static T max<T>(T x, T y) where T : System.Numerics.IComparisonOperators<T, T, bool>
+    {
+        return x > y ? x : y;
+    }
+
     public static T max<T>(T x, params ReadOnlySpan<T> rest) where T : IComparable<T>
     {
         T result = x;

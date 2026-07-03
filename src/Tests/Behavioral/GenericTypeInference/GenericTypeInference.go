@@ -45,9 +45,23 @@ func Twice[S ~[]E, E Integer](s S, c E) S {
 	return Scale(s, c) // constrained S/E flow through: C# needs Scale<S, E>(s, c)
 }
 
+// CopyClearMinMax drives golib's interface-typed builtin overloads through the ~[]E constraint:
+// copy with an ISlice-boxed dst must write into the caller's backing array, clear must zero it,
+// and 2-arg min/max bind the IComparisonOperators overload (a constrained E has no IComparable).
+func CopyClearMinMax[S ~[]E, E Integer](dst, src S) (E, E) {
+	copy(dst, src)
+	lo := min(dst[0], src[1])
+	hi := max(dst[0], src[1])
+	clear(src)
+	return lo, hi
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
 	ScaleAndPrint(p)
 	fmt.Println(Twice(Point{3, 4}, 2).String())
+	dst2, src2 := Point{0, 0, 0}, Point{7, 8, 9}
+	lo, hi := CopyClearMinMax(dst2, src2)
+	fmt.Println(dst2.String(), src2.String(), lo, hi)
 }

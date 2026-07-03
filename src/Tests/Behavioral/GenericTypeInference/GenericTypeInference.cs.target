@@ -51,11 +51,25 @@ public static S Twice<S, E>(S s, E c)
     return Scale(s, c);
 }
 
+public static (E, E) CopyClearMinMax<S, E>(S dst, S src)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    copy(dst, src);
+    var lo = min(dst[0], src[1]);
+    var hi = max(dst[0], src[1]);
+    clear(src);
+    return (lo, hi);
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
     ScaleAndPrint(p);
     fmt.Println(Twice(new Point(new int32[]{3, 4}.slice()), 2).String());
+    var (dst2, src2) = (new Point(new int32[]{0, 0, 0}.slice()), new Point(new int32[]{7, 8, 9}.slice()));
+    var (lo, hi) = CopyClearMinMax<Point, int32>(dst2, src2);
+    fmt.Println(dst2.String(), src2.String(), lo, hi);
 }
 
 } // end main_package
