@@ -553,7 +553,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 		if escapingHeapDecls != "" {
 			mixedDeclare = true
-			result.WriteString(escapingHeapDecls)
+
+			// In a for-init clause the heap decls cannot precede the deconstruction INLINE — the
+			// `;` after each decl becomes a fourth for-clause (CS1003; reflect/iter.go's
+			// `for value, ok := v.Recv(); ok; …`). Route them to the for statement's hoist
+			// target (visitForStmt's ForVarInitMarker mechanism), mirroring the single-variable
+			// path below; the init clause then emits the pure mixed deconstruction-assignment
+			// `(value, var ok) = …`.
+			if format.heapTypeDeclTarget != nil {
+				format.heapTypeDeclTarget.WriteString(strings.TrimSuffix(escapingHeapDecls, v.newline+v.indent(v.indentLevel)))
+			} else {
+				result.WriteString(escapingHeapDecls)
+			}
 		}
 
 		// Handle LHS

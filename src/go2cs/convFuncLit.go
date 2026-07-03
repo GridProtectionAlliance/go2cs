@@ -152,15 +152,15 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 
 		if returnIndex != -1 {
 			body = body[returnIndex+7:]
+
+			// Remove the BLOCK's closing brace — always the last non-whitespace rune of the
+			// visited block; the statement's `;` always separates it from the expression. The
+			// old TrimSuffix+LastIndex pair cut at the last `}` ANYWHERE, truncating a return
+			// expression containing its own `}` — `return []Value{ValueOf(yield(in[0]))}`
+			// emitted `new ΔValue[]{ValueOf(yield(@in[0]))` with `}.slice()` chopped
+			// (reflect/iter.go MakeFunc literals, CS1513 x2).
+			body = strings.TrimSpace(body)
 			body = strings.TrimSuffix(body, "}")
-
-			// Remove trailing brace
-			braceIndex := strings.LastIndex(body, "}")
-
-			if braceIndex != -1 {
-				body = body[:braceIndex]
-			}
-
 			body = strings.TrimSpace(body)
 			body = strings.TrimSuffix(body, ";")
 		}
