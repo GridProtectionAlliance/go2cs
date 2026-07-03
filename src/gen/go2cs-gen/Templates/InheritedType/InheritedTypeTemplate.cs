@@ -44,7 +44,7 @@ internal class InheritedTypeTemplate : TemplateBase
     {
         // TODO: Complete the implementation for the following types
         "Slice" => ISliceTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName),
-        //"Map" => IMapTypeTemplate.Generate(TargetTypeName, TargetValueTypeName),
+        "Map" => IMapTypeTemplate.Generate(ObjectName, TargetTypeName, TargetValueTypeName),
         //"Channel" => IChannelTypeTemplate.Generate(TargetTypeName),
         "Array" => IArrayTypeTemplate.Generate(ObjectName, TypeName, TargetTypeName, TargetTypeSize),
         "Numeric" => NumericTypeTemplate.Generate(TypeName, TargetTypeName),

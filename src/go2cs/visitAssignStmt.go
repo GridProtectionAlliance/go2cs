@@ -301,7 +301,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		} else if indexExpr, ok := rhsExprs[0].(*ast.IndexExpr); ok && lhsLen > 1 {
 			// Comma-ok map access: `v, ok := m[k]`. Detecting it as a tuple result routes
 			// the RHS through golib's two-value map indexer `m[key, ꟷ]` (see convIndexExpr).
+			// A CONSTRAINED TYPE PARAMETER with a map core (`M ~map[K]V`, the maps package)
+			// indexes through the same IMap<K, V> comma-ok surface.
 			if _, isMap := v.getType(indexExpr.X, true).(*types.Map); isMap {
+				tupleResult = true
+			} else if tp, isTypeParam := types.Unalias(v.getType(indexExpr.X, false)).(*types.TypeParam); isTypeParam && typeParamMapCore(tp) != nil {
 				tupleResult = true
 			}
 		}

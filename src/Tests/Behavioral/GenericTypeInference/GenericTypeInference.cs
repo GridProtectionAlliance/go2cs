@@ -97,6 +97,26 @@ public static void PassSlice<S, E>(S s, E v)
     setFirst(new slice<E>(s), v);
 }
 
+[GoType("map[@string, nint]")] partial struct Grades;
+
+public static bool EqualMaps<M, K, V>(M m1, M m2)
+    where M : /* ~map[K]V */ IMap<K, V>, ISupportMake<M>, new()
+    where K : /* comparable */ new()
+    where V : /* comparable */ new()
+{
+    if (len(m1) != len(m2)) {
+        return false;
+    }
+    foreach (var (k, v1) in m1) {
+        {
+            var (v2, ok) = m2[k, ꟷ]; if (!ok || !AreEqual(v1, v2)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 internal static void Main() {
     Point p = default!;
     p = new int32[]{1, 2, 3}.slice();
@@ -113,6 +133,10 @@ internal static void Main() {
     var pt = new Point(new int32[]{1, 2}.slice());
     PassSlice(pt, 42);
     fmt.Println(pt.String());
+    var g1 = new Grades(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
+    var g2 = new Grades(new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2});
+    var g3 = new Grades(new map<@string, nint>{["a"u8] = 9});
+    fmt.Println(EqualMaps<Grades, @string, nint>(g1, g2), EqualMaps<Grades, @string, nint>(g1, g3));
 }
 
 } // end main_package

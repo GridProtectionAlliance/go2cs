@@ -123,7 +123,7 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	case *ast.InterfaceType:
 		v.visitInterfaceType(typeSpecType, v.info.Defs[typeSpec.Name].Type(), name, doc, v.inFunction, nil)
 	case *ast.MapType:
-		v.visitMapType(typeSpecType)
+		v.visitMapType(typeSpecType, name)
 	case *ast.ParenExpr:
 		v.targetFile.WriteString(v.convParenExpr(typeSpecType, DefaultLambdaContext()))
 	case *ast.SelectorExpr:

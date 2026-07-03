@@ -94,6 +94,8 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var isEmpty bool
 	var definedLen int
 	var namedArrayComposite bool
+	var namedMapComposite bool
+	var namedMapRender string
 
 	// Check composite lit elements against struct fields
 	checkStructFields := func(structType *types.Struct) {
@@ -163,6 +165,16 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			arrayTypeContext.compositeInitializer = true
 			compositeSuffix = ".slice()"
 			namedArrayComposite = true
+		} else if mapType, ok := t.Underlying().(*types.Map); ok {
+			// A named map type's composite literal wraps the CONCRETE map literal in the
+			// named ctor — `new Grades(new map<@string, nint>{["a"u8] = 1})` — mirroring
+			// named arrays/slices. The wrapper struct's default instance has no backing
+			// dictionary for a direct indexer-initializer, and without this arm the keys
+			// emitted Go-style (`"a"u8: 1` inside C# braces — CS1513/CS1002).
+			elementType = mapType.Elem()
+			callContext.keyValueSource = MapSource
+			namedMapComposite = true
+			namedMapRender = fmt.Sprintf("map<%s, %s>", convertToCSTypeName(v.getTypeName(mapType.Key(), false)), convertToCSTypeName(v.getTypeName(mapType.Elem(), false)))
 		}
 	case *types.Struct:
 		checkStructFields(t)
@@ -286,13 +298,21 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		compositeSuffix += ")"
 	}
 
+	if namedMapComposite {
+		// Open the named ctor around the concrete map literal; the ')' closes after the
+		// brace via compositeSuffix.
+		typeRender = fmt.Sprintf("%s(new %s", typeRender, namedMapRender)
+		compositeSuffix += ")"
+	}
+
 	result.WriteString(fmt.Sprintf("new%s%s%s%s", newSpace, typeRender, lbracePrefix, lbrace))
 
 	if len(compositeLit.Elts) > 0 {
 		v.writeStandAloneCommentString(result, compositeLit.Elts[0].Pos(), nil, " ")
 	} else {
-		// If constructing a struct with no parameters, pass in a nill value
-		if _, ok := exprType.(*types.Named); ok {
+		// If constructing a struct with no parameters, pass in a nill value (a named-map
+		// composite's braces belong to the inner CONCRETE map literal — nothing to fill)
+		if _, ok := exprType.(*types.Named); ok && !namedMapComposite {
 			result.WriteString("nil")
 		}
 	}

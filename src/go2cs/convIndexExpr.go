@@ -11,8 +11,22 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	var ptrDeref string
 
 	if typeAndVal, ok := v.info.Types[indexExpr.X]; ok {
-		// Check if the type is a map and its key is an empty interface
-		if mapType, isMap := typeAndVal.Type.(*types.Map); isMap {
+		// Check if the type is a map and its key is an empty interface. A CONSTRAINED TYPE
+		// PARAMETER with a map core (`M ~map[K]V` — the maps package) indexes through the same
+		// IMap<K, V> surface (its comma-ok two-value indexer is on the interface), so it takes
+		// this branch too; the concrete *types.Map check alone missed it, emitting a single-arg
+		// index whose V result failed the (v, ok) deconstruction (CS8130/CS8129).
+		mapType, isMap := typeAndVal.Type.(*types.Map)
+
+		if !isMap {
+			if tp, isTypeParam := types.Unalias(typeAndVal.Type).(*types.TypeParam); isTypeParam {
+				if core := typeParamMapCore(tp); core != nil {
+					mapType, isMap = core, true
+				}
+			}
+		}
+
+		if isMap {
 			// Comma-ok map access (`v, ok := m[k]`): use golib's two-value indexer
 			// `m[key, ꟷ]`, which returns `(value, present)`.
 			if context.isTupleResult {

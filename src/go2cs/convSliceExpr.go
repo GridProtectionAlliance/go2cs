@@ -275,3 +275,34 @@ func typeParamSliceCore(tp *types.TypeParam) *types.Slice {
 
 	return core
 }
+
+// typeParamMapCore returns the map CORE type of a type parameter constrained `~map[K]V` (all of
+// the constraint's type-set terms share the map underlying), or nil. Mirrors typeParamSliceCore.
+func typeParamMapCore(tp *types.TypeParam) *types.Map {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return nil
+	}
+
+	var core *types.Map
+
+	for i := range iface.NumEmbeddeds() {
+		switch et := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range et.Len() {
+				if m, ok := et.Term(j).Type().Underlying().(*types.Map); ok {
+					core = m
+				} else {
+					return nil
+				}
+			}
+		default:
+			if m, ok := et.Underlying().(*types.Map); ok {
+				core = m
+			}
+		}
+	}
+
+	return core
+}

@@ -88,6 +88,23 @@ func PassSlice[S ~[]E, E Integer](s S, v E) {
 	setFirst(s, v)
 }
 
+// Grades is a named map type satisfying ~map[K]V.
+type Grades map[string]int
+
+// EqualMaps mirrors maps.Equal: comma-ok indexing through a ~map[K]V constrained M (the
+// IMap<K, V> two-value indexer), with comparable-erased K/V equality routed through AreEqual.
+func EqualMaps[M ~map[K]V, K, V comparable](m1, m2 M) bool {
+	if len(m1) != len(m2) {
+		return false
+	}
+	for k, v1 := range m1 {
+		if v2, ok := m2[k]; !ok || v1 != v2 {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
@@ -104,4 +121,8 @@ func main() {
 	pt := Point{1, 2}
 	PassSlice(pt, 42)
 	fmt.Println(pt.String())
+	g1 := Grades{"a": 1, "b": 2}
+	g2 := Grades{"a": 1, "b": 2}
+	g3 := Grades{"a": 9}
+	fmt.Println(EqualMaps(g1, g2), EqualMaps(g1, g3))
 }
