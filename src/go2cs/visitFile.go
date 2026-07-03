@@ -102,7 +102,10 @@ func (v *Visitor) visitFile(file *ast.File) {
 	// duplicate, no churn); a non-canonical alias (`using t = time_package;`) coexists with the added
 	// canonical one (`using time = time_package;`) without conflict.
 	for _, importPath := range v.referencedForeignPackages.Keys() {
-		if v.canonicalAliasImported.Contains(importPath) {
+		// referencedForeignPackages is keyed by pkg.Path() (unprefixed for GOROOT-vendored
+		// packages), while canonicalAliasImported records the RESOLVED on-disk path — check
+		// both forms, or a vendored import's canonical alias emits twice (CS1537).
+		if v.canonicalAliasImported.Contains(importPath) || v.canonicalAliasImported.Contains(resolveGorootVendoredPath(importPath)) {
 			continue
 		}
 

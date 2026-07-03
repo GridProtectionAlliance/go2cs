@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/build"
 	"log"
+	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -50,6 +53,14 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 
 	if !v.options.parseCgoTargets && v.currentImportPath == "C" {
 		log.Fatalf("cgo target parsing is not supported: file \"%s\"", v.fset.Position(importSpec.Pos()).Filename)
+	}
+
+	// Resolve a GOROOT-vendored import to its on-disk path (see resolveGorootVendoredPath) so
+	// the import queue and the imported-alias loader look at the real output location. Gated on
+	// the importing FILE living under GOROOT so a user module's own golang.org/x dependency is
+	// untouched.
+	if goroot := filepath.Clean(build.Default.GOROOT); strings.HasPrefix(filepath.Clean(v.fset.Position(importSpec.Pos()).Filename), goroot+string(filepath.Separator)) {
+		v.currentImportPath = resolveGorootVendoredPath(v.currentImportPath)
 	}
 
 	v.importQueue.Add(v.currentImportPath)
@@ -156,7 +167,37 @@ func packageUsingAlias(importPath string) (alias string, namespace string) {
 	return alias, namespace
 }
 
+// resolveGorootVendoredPath maps a GOROOT-vendored import path to its ON-DISK form: a stdlib
+// package imports `golang.org/x/text/transform` (the type info also carries the unprefixed
+// path), but the converted package - its namespace, csproj, and output directory - lives at
+// `vendor/golang.org/x/text/transform`, the key the stdlib dependency graph uses
+// (stdLibConverter). Every namespace-text derivation must agree, or consumers emit
+// `go.golang.org...` refs that exist nowhere (bidirule's 25 CS0234). The dotted-domain first
+// segment is the cheap pre-filter (no plain stdlib path contains a dot). CAVEAT: a USER module
+// that depends on the same golang.org/x package would false-positive here (its copy is not
+// GOROOT-vendored); revisit with module-conversion support - the behavioral corpus has no such
+// dependency today.
+func resolveGorootVendoredPath(importPath string) string {
+	firstSegment := importPath
+
+	if idx := strings.Index(firstSegment, "/"); idx >= 0 {
+		firstSegment = firstSegment[:idx]
+	}
+
+	if !strings.Contains(firstSegment, ".") || strings.HasPrefix(importPath, "vendor/") {
+		return importPath
+	}
+
+	if _, err := os.Stat(filepath.Join(build.Default.GOROOT, "src", "vendor", filepath.FromSlash(importPath))); err == nil {
+		return "vendor/" + importPath
+	}
+
+	return importPath
+}
+
 func convertImportPathToNamespace(importPath string, packageSuffix string) string {
+	importPath = resolveGorootVendoredPath(importPath)
+
 	// Split import path by "/"
 	importPathParts := strings.Split(importPath, "/")
 
