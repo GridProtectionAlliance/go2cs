@@ -51,11 +51,33 @@ func mapShadow(ns int) int {
 }
 
 //go:noinline
+func boxedSiblings(kind int) int {
+	// GENUINELY escaping sibling loop vars in ONE switch case: each loop takes &i directly, so
+	// each hoists a real `ref var i = ref heap(…)` box into the same case block. Without the
+	// per-container force-shadow rename the second box duplicates the first (CS0128); the first
+	// keeps the name, the second renames. (The pointer is used within its own iteration, so the
+	// value is independent of per-iteration box identity.)
+	total := 0
+	switch kind {
+	case 1:
+		for i := 0; i < 3; i++ {
+			p := &i
+			total += *p
+		}
+		for i := 10; i < 13; i++ {
+			p := &i
+			total += *p * 2
+		}
+	}
+	return total
+}
+
+//go:noinline
 func caseSiblings(kind int) int {
-	// The runtime `typesEqual` shape: TWO sibling `for i := …` loops in ONE switch case, BOTH
-	// escaping — each hoists a `ref var i = ref heap(…)` box into the same case block. Without
-	// the per-container force-shadow rename the second box duplicates the first (CS0128); the
-	// first keeps the name, the second renames.
+	// The runtime `typesEqual` shape: TWO sibling `for i := …` loops in ONE switch case whose
+	// `i` is used ONLY as an index — the addressed storage is the ARRAY element (`&xs[i+1]`),
+	// never `&i`, so NO box is hoisted for either loop and both legally reuse the plain
+	// loop-scoped `i` (the old contains-anywhere escape check heap-boxed both, colliding CS0128).
 	total := 0
 	switch kind {
 	case 1:
@@ -82,4 +104,5 @@ func main() {
 	fmt.Println(mapShadow(2)) // m[2]=200, m[3]=3000 -> 200*10 + 2 = 2002
 	fmt.Println(parenIndex()) // 9 (write through (*p)[shadow i=1])
 	fmt.Println(caseSiblings(1)) // 33 (3 linked xs + 3 linked ys * 10)
+	fmt.Println(boxedSiblings(1)) // 69 (0+1+2 + 2*(10+11+12))
 }

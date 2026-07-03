@@ -146,30 +146,6 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 
 	escapes := false
 
-	// Helper function to check if identObj occurs within an expression
-	containsIdent := func(node ast.Node) bool {
-		found := false
-
-		ast.Inspect(node, func(n ast.Node) bool {
-			if found {
-				return false // Stop if already found
-			}
-
-			if id := getIdentifier(n); id != nil {
-				obj := v.info.ObjectOf(id)
-
-				if obj == identObj {
-					found = true
-					return false
-				}
-			}
-
-			return true
-		})
-
-		return found
-	}
-
 	// Visitor function to traverse the AST
 	inspectFunc := func(node ast.Node) bool {
 		if escapes {
@@ -248,14 +224,21 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 			}
 
 		case *ast.CallExpr:
-			// Check if ident is passed as an argument
+			// Check if ident's STORAGE is passed as a pointer argument. Only a literal
+			// address-of whose peeled ROOT is the ident (`&i`, `&i.field`, `&i[k]`) — or the
+			// bare ident itself — hands the callee a pointer into the ident's storage. An
+			// ident that merely appears in a subexpression of a pointer arg computes a VALUE:
+			// in `xs[i].link(&xs[i+1])` or `typesEqual(tin[i], vin[i], seen)` the element/
+			// slice storage escapes (the peeled root `xs`/`tin`), but the INDEX `i` does not —
+			// the old contains-anywhere check heap-boxed every such loop index (a spurious
+			// allocation, and duplicate hoisted boxes for sibling loops).
 			for i, arg := range n.Args {
 				// Skip this arg if it's a nested call expression
 				if _, isNestedCall := arg.(*ast.CallExpr); isNestedCall {
 					continue
 				}
 
-				if containsIdent(arg) {
+				if argRootIsIdent(arg, identObj, v.info) {
 					// Get the function type
 					funType := v.info.TypeOf(n.Fun)
 					sig, ok := funType.Underlying().(*types.Signature)
@@ -425,6 +408,46 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	}
 
 	v.identEscapesHeap[identObj] = escapes
+}
+
+// argRootIsIdent reports whether passing arg to a pointer parameter hands the callee a
+// pointer into identObj's own storage: arg is `&expr` whose storage root — peeled through
+// parens, field selectors, index expressions (the CONTAINER, never the index), and derefs —
+// is the ident, or arg is the bare ident itself (only possible when the ident is already
+// pointer-typed). Anything else (the ident inside an index, an operand of arithmetic, a
+// nested composite) contributes a value, not the ident's address; a literal `&ident` deeper
+// inside such an expression is caught independently by the UnaryExpr arm.
+func argRootIsIdent(arg ast.Expr, identObj types.Object, info *types.Info) bool {
+	root := arg
+
+	if unary, ok := arg.(*ast.UnaryExpr); ok && unary.Op == token.AND {
+		root = unary.X
+
+		for {
+			switch expr := root.(type) {
+			case *ast.ParenExpr:
+				root = expr.X
+				continue
+			case *ast.SelectorExpr:
+				root = expr.X
+				continue
+			case *ast.IndexExpr:
+				root = expr.X
+				continue
+			case *ast.StarExpr:
+				root = expr.X
+				continue
+			}
+
+			break
+		}
+	}
+
+	if id, ok := root.(*ast.Ident); ok {
+		return info.ObjectOf(id) == identObj
+	}
+
+	return false
 }
 
 // Check if the identifier is used in a type expression (like array size)
