@@ -771,6 +771,44 @@ public static class builtin
         s.ToSpan().Clear();
     }
 
+    /// <summary>
+    /// Sub-slices a value held as a constrained slice type parameter (<c>S ~[]E</c>),
+    /// PRESERVING its type: Go's <c>s[low:high]</c> on a named slice type yields the same named
+    /// type sharing the same backing storage. The converter emits the type arguments explicitly
+    /// (T is constraint-only and C# cannot infer it).
+    /// </summary>
+    /// <param name="s">Constrained slice value.</param>
+    /// <param name="low">Low bound (-1 for the window start).</param>
+    /// <param name="high">High bound (-1 for the window end).</param>
+    /// <returns>The sub-slice, as the same constrained type.</returns>
+    public static S subslice<S, T>(S s, nint low, nint high) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        if (low < 0)
+            low = 0;
+
+        if (high < 0)
+            high = s.Length;
+
+        return S.Wrap(new slice<T>(s.Slice(low, high - low)));
+    }
+
+    /// <summary>
+    /// Appends elements to a value held as a constrained slice type parameter (<c>S ~[]E</c>),
+    /// PRESERVING its type — Go's <c>append(s, items...)</c> on a named slice type yields the
+    /// same named type (S infers from the first argument, T from the element span).
+    /// </summary>
+    /// <param name="s">Constrained slice value.</param>
+    /// <param name="items">Elements to append.</param>
+    /// <returns>The appended slice, as the same constrained type.</returns>
+    public static S append<S, T>(S s, params ReadOnlySpan<T> items) where S : ISlice<T>, ISliceWrap<S, T>
+    {
+        // Route to the core slice Append directly — a recursive `append(...)` call would resolve
+        // back to THIS overload (slice<T> itself satisfies the constraints, and the concrete
+        // overloads take Span, not ReadOnlySpan): infinite recursion.
+        slice<T> result = go.slice<T>.Append(new slice<T>(s), items.ToArray());
+        return S.Wrap(result);
+    }
+
     public static void clear<T>(slice<T> slice)
     {
         for (nint i = 0; i < slice.Length; i++)

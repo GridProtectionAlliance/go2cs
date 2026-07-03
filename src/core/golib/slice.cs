@@ -69,7 +69,7 @@ public interface ISlice<T> : IArray<T>, ISlice
 // option in the future, at least for slices that are private and used with internal package functions only.
 
 [Serializable]
-public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, IByteSeq<T>
+public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquatable<ISlice>, IEquatable<IArray>, ISupportMake<slice<T>>, ISliceWrap<slice<T>, T>, IByteSeq<T>
 {
     internal readonly T[] m_array;
     private readonly nint m_low;
@@ -123,6 +123,28 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     }
 
     public slice(array<T> array) : this((T[])array) { }
+
+    /// <summary>
+    /// Creates a slice over an existing slice VIEW (an <see cref="ISlice{T}"/>-boxed value — a
+    /// constrained type parameter or a named-slice wrapper), SHARING its backing storage: a
+    /// boxed <see cref="slice{T}"/> unwraps directly; any other implementer is reconstructed
+    /// from its source array and window so writes through either view remain visible to both
+    /// (Go's aliasing for `S ~[]E` values passed where `[]E` is expected).
+    /// </summary>
+    /// <param name="view">Slice view to share.</param>
+    public slice(ISlice<T> view)
+    {
+        if (view is slice<T> other)
+        {
+            this = other;
+            return;
+        }
+
+        m_array = (T[])((IArray)view).Source!;
+        m_low = view.Low;
+        m_length = view.High - view.Low;
+        m_capacity = view.Capacity;
+    }
 
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
@@ -625,6 +647,17 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
     #endregion
 
     /// <inheritdoc />
+    /// <summary>
+    /// Wraps an existing slice as itself — the <see cref="ISliceWrap{TSelf, T}"/> identity for
+    /// the base slice type (named-slice wrappers wrap the window in their own type instead).
+    /// </summary>
+    /// <param name="source">Slice window to wrap.</param>
+    /// <returns>The same window.</returns>
+    public static slice<T> Wrap(in slice<T> source)
+    {
+        return source;
+    }
+
     public static slice<T> Make(nint p1 = 0, nint p2 = -1)
     {
         return new slice<T>(p1, p2);

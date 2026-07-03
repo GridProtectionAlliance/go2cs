@@ -2564,8 +2564,11 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 
 				// Check for common Go types, e.g., slice, map, channel, etc.
 				if strings.HasPrefix(constraintExpr, "[]") {
-					// Handle slice via ISlice interface
-					typeConstraint = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>", convertToCSTypeName(constraintName[2:]), typeParamNames[i])
+					// Handle slice via ISlice interface. ISliceWrap supplies the S-preserving factory:
+					// a sub-slice or append of a constrained S must yield S again (Go's named-slice
+					// semantics), which golib's subslice<S, T>/append<S, T> realize through S.Wrap.
+					elemType := convertToCSTypeName(constraintName[2:])
+					typeConstraint = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>, ISliceWrap<%s, %s>", elemType, typeParamNames[i], typeParamNames[i], elemType)
 				} else if strings.HasPrefix(constraintExpr, "map[") {
 					// Handle map via IMap interface
 					keyValue := strings.Split(constraintName[4:], "]")

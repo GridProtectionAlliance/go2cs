@@ -11,6 +11,30 @@ import (
 func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 	ident := v.convExpr(sliceExpr.X, nil)
 
+	// A sub-slice of a CONSTRAINED TYPE PARAMETER (`s[lo:hi]` where s is `S ~[]E`) must yield S
+	// again, sharing backing — Go's named-slice sub-slice semantics (pdqsort's recursion assigns
+	// it back to S-typed values, CS0266). golib's subslice<S, E> reconstructs via S.Wrap; the
+	// type arguments are emitted explicitly (E is constraint-only — C# cannot infer it). The
+	// 3-index form falls through (unseen on constrained values in the stdlib).
+	if sliceExpr.Max == nil {
+		if tp, ok := types.Unalias(v.info.TypeOf(sliceExpr.X)).(*types.TypeParam); ok {
+			if sliceType := typeParamSliceCore(tp); sliceType != nil {
+				low, high := "-1", "-1"
+
+				if sliceExpr.Low != nil {
+					low = v.convExpr(sliceExpr.Low, nil)
+				}
+
+				if sliceExpr.High != nil {
+					high = v.convExpr(sliceExpr.High, nil)
+				}
+
+				elemType := convertToCSTypeName(v.getTypeName(sliceType.Elem(), false))
+				return fmt.Sprintf("subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
+			}
+		}
+	}
+
 	// When converting a pointer expression to a slice, we use special handling
 	if isMatch, ptrType := isPointerCast(ident); isMatch && v.inFunction && sliceExpr.High != nil {
 		v.useUnsafeFunc = true
@@ -211,4 +235,36 @@ func isPointerExpr(expr string) (bool, string) {
 	}
 
 	return false, ""
+}
+
+// typeParamSliceCore returns the slice CORE type of a type parameter constrained `~[]E` (all of
+// the constraint's type-set terms share the []E underlying), or nil. A type parameter's
+// Underlying() is its constraint INTERFACE — the core type lives in the embedded terms.
+func typeParamSliceCore(tp *types.TypeParam) *types.Slice {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return nil
+	}
+
+	var core *types.Slice
+
+	for i := range iface.NumEmbeddeds() {
+		switch et := iface.EmbeddedType(i).(type) {
+		case *types.Union:
+			for j := range et.Len() {
+				if s, ok := et.Term(j).Type().Underlying().(*types.Slice); ok {
+					core = s
+				} else {
+					return nil
+				}
+			}
+		default:
+			if s, ok := et.Underlying().(*types.Slice); ok {
+				core = s
+			}
+		}
+	}
+
+	return core
 }

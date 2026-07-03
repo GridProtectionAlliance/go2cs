@@ -29,7 +29,7 @@ public static @string String(this Point p) {
 }
 
 public static S Scale<S, E>(S s, E c)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     var r = make<S>(len(s));
@@ -45,14 +45,14 @@ public static void ScaleAndPrint(Point p) {
 }
 
 public static S Twice<S, E>(S s, E c)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     return Scale(s, c);
 }
 
 public static (E, E) CopyClearMinMax<S, E>(S dst, S src)
-    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
     where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
 {
     copy(dst, src);
@@ -60,6 +60,26 @@ public static (E, E) CopyClearMinMax<S, E>(S dst, S src)
     var hi = max(dst[0], src[1]);
     clear(src);
     return (lo, hi);
+}
+
+public static E SumHalves<S, E>(S s)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    if (len(s) == 1) {
+        s[0] += s[0];
+        return s[0];
+    }
+    nint mid = len(s) / 2;
+    return SumHalves<S, E>(subslice<S, E>(s, -1, mid)) + SumHalves<S, E>(subslice<S, E>(s, mid, -1));
+}
+
+public static S AppendKeep<S, E>(S s, E v)
+    where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, ISliceWrap<S, E>, new()
+    where E : /* Integer */ IAdditionOperators<E, E, E>, ISubtractionOperators<E, E, E>, IMultiplyOperators<E, E, E>, IDivisionOperators<E, E, E>, IModulusOperators<E, E, E>, IBitwiseOperators<E, E, E>, IShiftOperators<E, E, E>, IEqualityOperators<E, E, bool>, IComparisonOperators<E, E, bool>, new()
+{
+    var @out = append(s, v);
+    return @out;
 }
 
 internal static void Main() {
@@ -70,6 +90,11 @@ internal static void Main() {
     var (dst2, src2) = (new Point(new int32[]{0, 0, 0}.slice()), new Point(new int32[]{7, 8, 9}.slice()));
     var (lo, hi) = CopyClearMinMax<Point, int32>(dst2, src2);
     fmt.Println(dst2.String(), src2.String(), lo, hi);
+    var q = new Point(new int32[]{1, 2, 3, 4}.slice());
+    var total = SumHalves<Point, int32>(q);
+    fmt.Println(q.String(), total);
+    var grown = AppendKeep(new Point(new int32[]{5, 6}.slice()), 7);
+    fmt.Println(grown.String());
 }
 
 } // end main_package

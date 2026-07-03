@@ -8,6 +8,9 @@ internal static class ISliceTypeTemplate
         $$"""
         
                 public {{targetTypeName}}[] Source => m_value;
+
+                /// <summary>ISliceWrap factory — wraps a window in this named slice type, sharing backing.</summary>
+                public static {{structName}} Wrap(in slice<{{targetTypeName}}> source) => new {{structName}}(source);
                     
                 public ISlice<{{targetTypeName}}> Append({{targetTypeName}}[] elems) => m_value.Append(elems);
                     
@@ -31,15 +34,15 @@ internal static class ISliceTypeTemplate
                     
                 public ref {{targetTypeName}} this[nint index] => ref m_value[index];
         
-                public slice<{{targetTypeName}}> this[Range range] => ToSpan()[range];
+                public slice<{{targetTypeName}}> this[Range range] => m_value[range];
                 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[Range range] => this[range];
                 
-                public slice<{{targetTypeName}}> Slice(int start, int length) => ToSpan().Slice(start, length);
+                public slice<{{targetTypeName}}> Slice(int start, int length) => m_value.Slice(start, length);
                 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(int start, int length) => Slice(start, length);
                 
-                public slice<{{targetTypeName}}> Slice(nint start, nint length) => ToSpan().Slice((int)start, (int)length);
+                public slice<{{targetTypeName}}> Slice(nint start, nint length) => m_value.Slice(start, length);
                 
                 ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => Slice(start, length);
         

@@ -56,6 +56,24 @@ func CopyClearMinMax[S ~[]E, E Integer](dst, src S) (E, E) {
 	return lo, hi
 }
 
+// SumHalves recurses over SUB-SLICES of the constrained S (the pdqsort shape): s[lo:hi] on a
+// type parameter must yield S again SHARING backing (golib subslice<S, E> via S.Wrap), and
+// append through the constraint must yield S (golib append<S, T>).
+func SumHalves[S ~[]E, E Integer](s S) E {
+	if len(s) == 1 {
+		s[0] += s[0] // write through the sub-slice view -- must land in the caller's array
+		return s[0]
+	}
+	mid := len(s) / 2
+	return SumHalves(s[:mid]) + SumHalves(s[mid:])
+}
+
+// AppendKeep grows a constrained S through append, preserving its type.
+func AppendKeep[S ~[]E, E Integer](s S, v E) S {
+	out := append(s, v)
+	return out
+}
+
 func main() {
 	var p Point
 	p = []int32{1, 2, 3}
@@ -64,4 +82,9 @@ func main() {
 	dst2, src2 := Point{0, 0, 0}, Point{7, 8, 9}
 	lo, hi := CopyClearMinMax(dst2, src2)
 	fmt.Println(dst2.String(), src2.String(), lo, hi)
+	q := Point{1, 2, 3, 4}
+	total := SumHalves(q)
+	fmt.Println(q.String(), total)
+	grown := AppendKeep(Point{5, 6}, 7)
+	fmt.Println(grown.String())
 }

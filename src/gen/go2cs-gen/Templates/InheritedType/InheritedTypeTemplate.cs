@@ -31,7 +31,7 @@ internal class InheritedTypeTemplate : TemplateBase
 
     private string ImplementedInterface => TypeClass switch
     {
-        "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>",
+        "Slice" => $" : ISlice<{TargetTypeName}>, ISupportMake<{ObjectName}>, ISliceWrap<{ObjectName}, {TargetTypeName}>",
         "Map" => $" : IMap<{TargetTypeName}, {TargetValueTypeName}>, ISupportMake<{ObjectName}>",
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
