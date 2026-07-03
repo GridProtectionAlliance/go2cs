@@ -65,6 +65,24 @@ public class ImplementGenerator : ISourceGenerator
         // ALL interface implementations for the package).
         HashSet<string> emittedHintNames = new(StringComparer.OrdinalIgnoreCase);
 
+        // A (struct, interface) pair can carry Pointer and Promoted on SEPARATE attribute
+        // instances (the converter records the ж-form and the embed-promotion independently);
+        // the pointer-adapter emission needs to know the pair is promoted, so pre-index.
+        HashSet<string> promotedPairs = new(StringComparer.Ordinal);
+
+        foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, _, _) in attributeFinder.TargetAttributes)
+        {
+            (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
+
+            if (!bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false"))
+                continue;
+
+            (ITypeSymbol? structType, ITypeSymbol? interfaceType) = attributeSyntax.Get2GenericTypeArguments(syntaxContext);
+
+            if (structType is not null && interfaceType is not null)
+                promotedPairs.Add($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}");
+        }
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, CompilationUnitSyntax compilationUnit, FileScopedNamespaceDeclarationSyntax? namespaceSyntax) in attributeFinder.TargetAttributes)
         {
             SyntaxTree syntaxTree = attributeSyntax.SyntaxTree;
@@ -158,6 +176,23 @@ public class ImplementGenerator : ISourceGenerator
 
                         if (!forwardReceivers.ContainsKey(simpleName))
                             forwardReceivers[simpleName] = $"m_box.Value.{embedHops[0]}.Value";
+                    }
+                }
+
+                // PROMOTED members (an embedded INTERFACE field — sort's `type reverse struct
+                // { Interface }`) forward through the interface field itself, mirroring the
+                // value-form template's promoted arm (`m_box.Len()` has nothing to bind — CS1929).
+                // The Promoted flag may live on the pair's SIBLING attribute instance.
+                if (promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"))
+                {
+                    string interfaceFieldName = GetSimpleName(interfaceName);
+
+                    foreach (MethodInfo method in methods)
+                    {
+                        string simpleName = GetSimpleName(method.Name);
+
+                        if (!forwardReceivers.ContainsKey(simpleName))
+                            forwardReceivers[simpleName] = $"m_box.Value.{interfaceFieldName}";
                     }
                 }
 

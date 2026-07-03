@@ -74,6 +74,19 @@ type Incrementer interface {
 	Total() int
 }
 
+// reversed EMBEDS the Animal interface and overrides nothing - a pointer cast &reversed{a}
+// satisfies Animal purely through the promoted embedded-interface field (sort's
+// `type reverse struct{ Interface }` shape). The generated pointer adapter must forward
+// promoted members through the interface field (m_box.Value.Animal.Speak()), and the
+// Promoted flag may live on a sibling GoImplement attribute instance.
+type reversed struct {
+	Animal
+}
+
+func Reversed(a Animal) Animal {
+	return &reversed{a}
+}
+
 func main() {
 	var err error
 
@@ -98,4 +111,7 @@ func main() {
 	back, ok := inc.(*Counter) // assert back to the pointer
 	back.Inc()
 	fmt.Println("assert-back:", ok, c.Total(), back == c) // true 11 true
+
+	r := Reversed(Dog{})
+	fmt.Println("promoted via pointer adapter:", r.Speak()) // Woof!
 }

@@ -74,6 +74,14 @@ public static @string Inc(this ж<Counter> Ꮡc) {
     nint Total();
 }
 
+[GoType] partial struct reversed {
+    public Animal Animal;
+}
+
+public static Animal Reversed(Animal a) {
+    return new reversedᴵAnimal(Ꮡ(new reversed(a)));
+}
+
 internal static void Main() {
     error err = default!;
     err = new MyError("bar");
@@ -92,6 +100,8 @@ internal static void Main() {
     var (back, ok) = inc._<ж<Counter>>(ᐧ);
     back.Inc();
     fmt.Println("assert-back:", ok, c.Total(), back == c);
+    var r = Reversed(new Dog(nil));
+    fmt.Println("promoted via pointer adapter:", r.Speak());
 }
 
 } // end main_package
