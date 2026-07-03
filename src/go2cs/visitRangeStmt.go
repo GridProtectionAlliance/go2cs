@@ -418,7 +418,59 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 				context.innerPrefix = innerPrefix + v.newline
 			}
 		} else {
-			v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
+			// A newly-DEFINED slice/array/map range var reassigned in the body must become a
+			// mutable local: a C# foreach iteration variable is read-only (CS1656 — strconv
+			// Atoi's `ch -= '0'`). Iterate a temp and declare the var from it in the body
+			// (`foreach (var (_, vᴛ1) in s) { var ch = vᴛ1; … }`) — mirrors the string arm.
+			keyReassigned := v.rangeVarReassignedInBody(rangeStmt.Key, rangeStmt.Body)
+			valReassigned := v.rangeVarReassignedInBody(rangeStmt.Value, rangeStmt.Body)
+
+			if keyReassigned || valReassigned {
+				var innerPrefix, tempKeyExpr, tempValExpr string
+				bodyIndent := v.indent(v.indentLevel + 1)
+
+				if keyExpr == "_" || !keyReassigned {
+					tempKeyExpr = keyExpr
+				} else {
+					name := "i"
+
+					if isMap {
+						name = "k"
+					}
+
+					tempKeyExpr = v.getTempVarName(name)
+					decl := "var "
+
+					if !v.options.preferVarDecl {
+						keyType = v.getCSTypeName(v.getExprType(rangeStmt.Key)) + " "
+						decl = ""
+					}
+
+					innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, keyExpr, tempKeyExpr)
+				}
+
+				if valExpr == "_" || valExpr == "" || !valReassigned {
+					tempValExpr = valExpr
+				} else {
+					tempValExpr = v.getTempVarName("v")
+					decl := "var "
+
+					if !v.options.preferVarDecl {
+						valType = v.getCSTypeName(v.getExprType(rangeStmt.Value)) + " "
+						decl = ""
+					}
+
+					innerPrefix += fmt.Sprintf("%s%s%s%s = %s;", v.newline, bodyIndent, decl, valExpr, tempValExpr)
+				}
+
+				v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, tempKeyExpr, valType, tempValExpr, rangeExpr, ptrDeref)
+
+				if innerPrefix != "" {
+					context.innerPrefix = innerPrefix + v.newline
+				}
+			} else {
+				v.writeOutput("foreach (%s(%s%s, %s%s) in %s%s)", varInit, keyType, keyExpr, valType, valExpr, rangeExpr, ptrDeref)
+			}
 		}
 	}
 
