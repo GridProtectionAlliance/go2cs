@@ -58,4 +58,10 @@ func main() {
 	fmt.Println(codeNames[codeA], codeNames[codeB])                          // a b
 	fmt.Println(len(rankNames))                                              // 3
 	fmt.Println(errNames[eBig-errBase], errNames[eAcces-errBase])            // big acces
+	fmt.Println(asciiSpace['\t'], asciiSpace['\n'], asciiSpace[' '], asciiSpace['A'], len(asciiSpace)) // 1 1 1 0 256
 }
+
+// asciiSpace mirrors bytes.Fields: ESCAPED rune keys in an indexed array composite
+// ('\t': 1). The key decode read the backslash byte of the escape (92), corrupting
+// every escaped key to '\\' - a syntax cascade across bytes/strings/os/fmt.
+var asciiSpace = [256]uint8{'\t': 1, '\n': 1, '\v': 1, '\f': 1, '\r': 1, ' ': 1}

@@ -277,9 +277,14 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			for _, elt := range compositeLit.Elts {
 				if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
 					if basicLit, ok := keyValue.Key.(*ast.BasicLit); ok {
-						// Check for rune literal
+						// Check for rune literal — DECODE it (escapes and multi-byte runes): byte
+						// [0] of the unquoted text read the BACKSLASH of an escape sequence (92),
+						// so every escaped key (`'\t': 1`, bytes asciiSpace) corrupted to '\' — a
+						// CS1012 syntax cascade across bytes/strings/os/fmt.
 						if strings.HasPrefix(basicLit.Value, "'") && strings.HasSuffix(basicLit.Value, "'") {
-							basicLit.Value = strconv.Itoa(int(basicLit.Value[1 : len(basicLit.Value)-1][0]))
+							if r, _, _, err := strconv.UnquoteChar(basicLit.Value[1:len(basicLit.Value)-1], '\''); err == nil {
+								basicLit.Value = strconv.Itoa(int(r))
+							}
 						}
 
 						if keyValue, err := strconv.ParseInt(basicLit.Value, 0, 64); err == nil {

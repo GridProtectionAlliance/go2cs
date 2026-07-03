@@ -164,8 +164,11 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 
 		if err == nil {
 			if intVal <= 0xFFFF {
-				// Character can be represented as a char in C# Rune
-				result.WriteString(fmt.Sprintf("(rune)'%c'", intVal))
+				// Character can be represented as a char in C# Rune. QuoteRune escapes control
+				// and special characters (`'\t'`, `'\n'`, `'\\'` — Go's escapes are all valid C#
+				// char escapes for BMP runes); the raw `%c` form emitted literal control bytes,
+				// and a raw newline inside a char literal does not even parse (CS1010).
+				result.WriteString(fmt.Sprintf("(rune)%s", strconv.QuoteRune(rune(intVal))))
 			} else {
 				// For characters beyond BMP, we can use the direct code point
 				result.WriteString(fmt.Sprintf("0x%X", intVal))

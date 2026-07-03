@@ -42,6 +42,9 @@ internal static void Main() {
     fmt.Println(codeNames[codeA], codeNames[codeB]);
     fmt.Println(len(rankNames));
     fmt.Println(errNames[eBig - errBase], errNames[eAcces - errBase]);
+    fmt.Println(asciiSpace[(rune)'\t'], asciiSpace[(rune)'\n'], asciiSpace[(rune)' '], asciiSpace[(rune)'A'], len(asciiSpace));
 }
+
+internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};
 
 } // end main_package
