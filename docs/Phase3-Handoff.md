@@ -15,6 +15,27 @@
 
 ## Where things stand (2026-07-03)
 
+- **math/rand IS AT ZERO (`e88be09ff`) — zero club: runtime, iter, sync, slices, maps,
+  internal/godebug, math/rand. WAVE-9: 14 errors / 4 packages = the ENTIRE stdlib frontier:**
+  1. **internal/reflectlite 10 -> 4 real — NEXT** (stale old-stub hand files
+     `src/core/internal/reflectlite/{type,value,swapper}.cs` shadow good auto output via overlay
+     — delete/modernize, move the `*_impl.cs` halves from committed go-src-converted into core as
+     hand-owned canon, reconcile the csproj Compile-Removes; then 4 real = embedded-`*abi.Type`
+     promotion: `rtype.ΔType` CS1061 x2 + `Size`/`Kind` CS1929).
+  2. log/slog/internal/buffer 2 (named-slice-wrapper convs: `(*Buffer)(&b)` reinterpret +
+     `string(*b)` — route through underlying slice).
+  3. internal/weak 1 (`abi.Escape(ptr)` T=*T arg must render box `Ꮡptr`).
+  4. runtime/metrics 1 (CS0234 `go.runtime.@internal.godebugs_package` relocation).
+
+  The math/rand closer: an untyped constant shift NESTED in a larger constant expr stays untyped
+  (go/types converts at the outermost node), so no width-cast reaches it and C# computes it in
+  int32 — `int64((1<<63) - 1 - (1<<63)%uint64(n))` (Int63n CS0220) now folds the constant subtree
+  to `9223372036854775807UL`. Trigger deliberately narrow (untyped OPERATOR subtree beyond int64,
+  plain-uint64 target): the first broader cut regressed runtime hash64/mranges by stealing
+  already-working shapes (named-const Untyped* wrappers; signed-fold-on-recursion) — the narrow
+  trigger is load-bearing, see ConversionStrategies. NOTE: the signed-fold base
+  (`overflowingConstLiteral`) arrived from the USER in a parallel edit this session.
+
 - **THE POINTER-INTERFACE ADAPTER MODEL LANDED (`2a44886b1`, 18 files, all three ships) — math/rand
   28 → 1, WAVE-8 = 15 errors / 5 packages.** A Go interface value created from a pointer now emits
   a generated `IжAdapter` class wrapping the receiver box (`[assembly: GoImplement<T, Iface>
