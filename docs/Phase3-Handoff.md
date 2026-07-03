@@ -20,7 +20,17 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **WAVE-1 MEASURED (2026-07-02, recon71): 19 own-errors in FIVE leaf packages gate the whole
+  check (procresize's `Δtrace` CS0136). **WAVE-4 MEASURED (2026-07-02 late, recon76, after iter cleared): 100 own-errors** —
+  the iter unmasking worked: **slices (74) + maps (13)** are the new frontier, the
+  GENERIC-CONSTRAINT family (`S ~[]E`/`M ~map[K]V` type params vs golib `slice<E>`/`map<K,V>`:
+  CS1503 ×40 constrained-S vs concrete-slice seams, CS0411 ×14 inference failures, CS9244 ×8
+  `Span<E>` as type argument in generics, CS0266/CS8130/CS8129 mixed). This is a DESIGN-LEVEL
+  campaign in constraintOperations.go + golib's ISlice/slice surface — open it census-first.
+  Remaining singles: internal/reflectlite 10 (CS0759/CS0246 seams), internal/weak 1 (CS0029),
+  runtime/metrics 1 (CS0234 godebugs), sync 1 (CS1585 stray line — clearing it unmasks the
+  os/time/net tier). iter: ZERO (`80c62fe41` func-literal named results was its last root).
+
+  **WAVE-1 MEASURED (2026-07-02, recon71): 19 own-errors in FIVE leaf packages gate the whole
   solution** (dependents skipped; everything else green or masked):
   1. **internal/reflectlite (9)** — CS0759 ×7: manual `*_impl.cs` implementing halves vs auto
      defining halves (both exist — suspect signature/merge mismatch, possibly downstream of the
