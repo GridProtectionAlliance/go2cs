@@ -51,6 +51,24 @@ func main() {
 	var d dispatcher
 	d.compute = reader(readTen).sum
 	fmt.Println(d.compute(3)) // 13
+
+	// A VALUE-receiver method value in a CALL-ARGUMENT context (bytes ToUpperSpecial:
+	// Map(c.ToUpper, s) - the extension on a value type cannot delegate-bind, CS1113;
+	// the emission forwards through a param-carrying lambda).
+	sh := shifter{delta: 2}
+	fmt.Println(string(mapRunes(sh.shift, []rune("AB")))) // CD
+}
+
+type shifter struct{ delta rune }
+
+func (s shifter) shift(r rune) rune { return r + s.delta }
+
+func mapRunes(f func(rune) rune, rs []rune) []rune {
+	out := make([]rune, len(rs))
+	for i, r := range rs {
+		out[i] = f(r)
+	}
+	return out
 }
 
 type reader func() int

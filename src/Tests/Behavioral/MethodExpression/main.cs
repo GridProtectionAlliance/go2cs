@@ -36,6 +36,24 @@ internal static void Main() {
     dispatcher d = default!;
     d.compute = (nint p1) => new reader(readTen).sum(p1);
     fmt.Println(d.compute(3));
+    var sh = new shifter(delta: 2);
+    fmt.Println(((@string)mapRunes((rune p1) => sh.shift(p1), slice<rune>((@string)"AB"))));
+}
+
+[GoType] partial struct shifter {
+    internal rune delta;
+}
+
+internal static rune shift(this shifter s, rune r) {
+    return r + s.delta;
+}
+
+internal static slice<rune> mapRunes(Func<rune, rune> f, slice<rune> rs) {
+    var @out = new slice<rune>(len(rs));
+    foreach (var (i, r) in rs) {
+        @out[i] = f(r);
+    }
+    return @out;
 }
 
 internal delegate nint reader();

@@ -659,6 +659,30 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							return fmt.Sprintf("%s.%s", v.convIdent(ident, identContext), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 						}
 					}
+				} else if !types.IsInterface(sig.Recv().Type()) {
+					// A VALUE-receiver method value in a call-argument context — `Map(c.ToUpper, s)`
+					// (bytes ToUpperSpecial; c is unicode.SpecialCase): the emitted method is an
+					// EXTENSION on a value type, from which C# cannot create a delegate (CS1113).
+					// Forward through the same param-carrying lambda the assignment context uses —
+					// `(rune p1) => c.ToUpper(p1)` (invocation through the extension is legal; only
+					// delegate creation is not). Interface receivers are excluded: an interface
+					// instance method delegate-binds directly. Same documented caveat as the
+					// assignment form: the receiver expression re-evaluates per call.
+					var paramDecls, paramUses strings.Builder
+
+					for i := 0; i < sig.Params().Len(); i++ {
+						if i > 0 {
+							paramDecls.WriteString(", ")
+							paramUses.WriteString(", ")
+						}
+
+						name := fmt.Sprintf("p%d", i+1)
+						paramDecls.WriteString(fmt.Sprintf("%s %s", convertToCSTypeName(v.getTypeName(sig.Params().At(i).Type(), false)), name))
+						paramUses.WriteString(name)
+					}
+
+					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.convExpr(selectorExpr.X, nil),
+						v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 				}
 			}
 		}
