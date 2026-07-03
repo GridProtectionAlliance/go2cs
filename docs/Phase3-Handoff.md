@@ -20,7 +20,26 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **WAVE-4 MEASURED (2026-07-02 late, recon76, after iter cleared): 100 own-errors** —
+  check (procresize's `Δtrace` CS0136). **GENERIC-CONSTRAINT CAMPAIGN MAP (census, 4 agents, 2026-07-02 late).** The `S ~[]E` machinery
+  EXISTS and is sound: `where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()` (main.go:2557-2604),
+  `~map[K]V` → `IMap<K,V>, ISupportMake<M>` (ZERO test coverage + a naive `]`-split parse hazard at
+  main.go:2569), `string|[]byte` → `IByteSeq<byte>`, `cmp.Ordered` → lifted operator interfaces
+  only. Element access/len/range work through the golib interfaces with no conversions. 13 error
+  shapes, 87 lines, three buckets, NO manual-stub candidates:
+  - **B golib-surface (~44, DO FIRST)**: `copy` with ISlice dst ×30, generic `append`+Span overload
+    ×8, IMap `delete` overload, min/max via IComparisonOperators ×2, ISlice 3-index slice ext,
+    Seq2 range overload.
+  - **A converter (~21)**: explicit type args where C# can't infer constraint-only params (Go
+    infers via core types — `Sort<S,E>(S)` CS0411), materializer insertions, comma-ok indexer on
+    IMap, `range seq.Invoke`, CS9244 = converter emits Span<E> as a generic type ARGUMENT (golib
+    has no ref-struct issue — slice<T> is a readonly struct).
+  - **C design (~11)**: S-preserving sub-slice (slicing S returns ISlice<E>, loses S — candidate:
+    ISupportMake<S> reconstruction) + nil-comparison for constrained params.
+  - **`comparable<T>` is BROKEN by design**: a CRTP interface NOTHING implements (golib TODO says
+    delete) — every real instantiation fails (blocks maps.Keys). Likely fix: emit NO C# constraint
+    for `comparable` (Go already validated; equality routes through AreEqual) — decision needed.
+
+  **WAVE-4 MEASURED (2026-07-02 late, recon76, after iter cleared): 100 own-errors** —
   the iter unmasking worked: **slices (74) + maps (13)** are the new frontier, the
   GENERIC-CONSTRAINT family (`S ~[]E`/`M ~map[K]V` type params vs golib `slice<E>`/`map<K,V>`:
   CS1503 ×40 constrained-S vs concrete-slice seams, CS0411 ×14 inference failures, CS9244 ×8
