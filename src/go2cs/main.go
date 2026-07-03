@@ -2994,6 +2994,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	var pkgPrefix string
+	var plainPkgPrefix string
 
 	if named, ok := t.(*types.Named); ok {
 		obj := named.Obj()
@@ -3002,6 +3003,7 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		// Handle builtin types with no package
 		if pkg != nil && pkg != v.pkg {
 			pkgPrefix = importQualifier(pkg.Name()) + "."
+			plainPkgPrefix = pkg.Name() + "."
 		}
 	}
 
@@ -3071,6 +3073,15 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	}
 
 	if len(pkgPrefix) > 0 && !strings.HasPrefix(typeName, pkgPrefix) {
+		// A Δ-renamed import alias (importQualifier) diverges from the PLAIN package name that
+		// t.String() carries (`sync.Pool` under alias `Δsync`): strip the plain qualifier before
+		// prepending the alias, or the name doubles — `Δsync.sync.Pool`, `'sync' does not exist
+		// in the type 'sync_package'` (io/syscall CS0426 ×22). When alias == plain name the
+		// HasPrefix guard above already short-circuits, so this strip only fires on renames.
+		if len(plainPkgPrefix) > 0 && strings.HasPrefix(typeName, plainPkgPrefix) {
+			typeName = typeName[len(plainPkgPrefix):]
+		}
+
 		return prefix + pkgPrefix + typeName
 	}
 
