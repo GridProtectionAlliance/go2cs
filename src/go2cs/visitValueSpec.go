@@ -15,6 +15,43 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 	v.writeDoc(doc, valueSpec.End())
 
 	if tok == token.VAR {
+		// A PACKAGE-LEVEL var whose initializer contains a func LITERAL (`var Support =
+		// sync.OnceValue(func() bool { … })` — internal/syscall/windows) needs the same
+		// per-function variable analysis a declared function gets — shadow renames,
+		// reassignment tracking, capture state — for the literal's body. Wrap the initializers
+		// in a synthetic function so the analysis walks them; without it the body's locals
+		// emitted against stale/empty analysis state (`nint n += i` — CS1002 cascade).
+		if !v.inFunction && len(valueSpec.Values) > 0 {
+			hasFuncLit := false
+
+			for _, value := range valueSpec.Values {
+				ast.Inspect(value, func(n ast.Node) bool {
+					if _, ok := n.(*ast.FuncLit); ok {
+						hasFuncLit = true
+						return false
+					}
+
+					return !hasFuncLit
+				})
+			}
+
+			if hasFuncLit {
+				stmts := make([]ast.Stmt, 0, len(valueSpec.Values))
+
+				for _, value := range valueSpec.Values {
+					stmts = append(stmts, &ast.ExprStmt{X: value})
+				}
+
+				syntheticDecl := &ast.FuncDecl{
+					Name: ast.NewIdent(""),
+					Type: &ast.FuncType{Params: &ast.FieldList{}},
+					Body: &ast.BlockStmt{List: stmts},
+				}
+
+				v.performVariableAnalysis(syntheticDecl, types.NewSignatureType(nil, nil, nil, nil, nil, false))
+			}
+		}
+
 		// A package-level `var a, b = f()` — ONE call initializer whose result tuple Go
 		// deconstructs across the names. C# field initializers cannot deconstruct, so the
 		// per-name loop below assigned the WHOLE ValueTuple to the first field (CS0029 —

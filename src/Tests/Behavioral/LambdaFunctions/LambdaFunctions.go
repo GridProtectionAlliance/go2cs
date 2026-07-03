@@ -27,4 +27,28 @@ func main() {
 		return "anonymous stringy\n"
 	}
 	fmt.Print(baz())
+	fmt.Println(cached(), cached())
+}
+
+// A func literal in a PACKAGE-LEVEL var initializer (sync.OnceValue shape,
+// internal/syscall/windows SupportUnixSocket): the literal BODY is function scope,
+// so its locals must emit as locals, not package fields (CS1002 cascade).
+var cached = memo(func() int {
+	var n int
+	for i := 1; i <= 4; i++ {
+		n += i
+	}
+	return n
+})
+
+func memo(f func() int) func() int {
+	done := false
+	v := 0
+	return func() int {
+		if !done {
+			v = f()
+			done = true
+		}
+		return v
+	}
 }

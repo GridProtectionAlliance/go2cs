@@ -27,6 +27,27 @@ internal static void Main() {
     f();
     Stringy baz = () => "anonymous stringy\n"u8;
     fmt.Print(baz());
+    fmt.Println(cached(), cached());
+}
+
+internal static Func<nint> cached = memo(() => {
+    nint n = default!;
+    for (nint i = 1; i <= 4; i++) {
+        n += i;
+    }
+    return n;
+});
+
+internal static Func<nint> memo(Func<nint> f) {
+    var done = false;
+    nint v = 0;
+    return () => {
+        if (!done) {
+            v = f();
+            done = true;
+        }
+        return v;
+    };
 }
 
 } // end main_package

@@ -63,10 +63,19 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 	v.namedReturnDeferMode = litNamedDefer
 	v.namedReturnNames = litNamedNames
 
+	// A func literal BODY is function scope even when the literal sits in a PACKAGE-LEVEL var
+	// initializer (`var Support = sync.OnceValue(func() bool { var size uint32; … })` —
+	// internal/syscall/windows): visitFuncDecl never ran, so inFunction was false and the
+	// literal's locals emitted as package fields (`internal static uint32 size;` inside the
+	// lambda — a CS1002 syntax cascade gating os/fmt). Save/restore around the body.
+	savedInFunction := v.inFunction
+	v.inFunction = true
+
 	defer func() {
 		v.namedReturnDeferMode = savedNamedReturnDeferMode
 		v.namedReturnNames = savedNamedReturnNames
 		v.currentReturnSignature = savedReturnSignature
+		v.inFunction = savedInFunction
 	}()
 
 	if v.lambdaCapture == nil {
