@@ -20,7 +20,12 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **GENERIC-CONSTRAINT CAMPAIGN MAP (census, 4 agents, 2026-07-02 late).** The `S ~[]E` machinery
+  check (procresize's `Δtrace` CS0136). **WAVE-5 (2026-07-02 night, recon77, sync+iter at ZERO): 109 errors.** sync's clearing
+  (`7b8f56075` defined-pointer-type root) unmasked **internal/godebug (8)** — which itself gates
+  the os/time/net tier — and log/slog/internal/buffer (2). Buckets: slices 74 + maps 13 (the
+  generic-constraint campaign below), reflectlite 10, godebug 8, slog/buffer 2, metrics 1, weak 1.
+
+  **GENERIC-CONSTRAINT CAMPAIGN MAP (census, 4 agents, 2026-07-02 late).** The `S ~[]E` machinery
   EXISTS and is sound: `where S : /* ~[]E */ ISlice<E>, ISupportMake<S>, new()` (main.go:2557-2604),
   `~map[K]V` → `IMap<K,V>, ISupportMake<M>` (ZERO test coverage + a naive `]`-split parse hazard at
   main.go:2569), `string|[]byte` → `IByteSeq<byte>`, `cmp.Ordered` → lifted operator interfaces
