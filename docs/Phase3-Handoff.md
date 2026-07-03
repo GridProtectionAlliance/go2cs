@@ -20,7 +20,14 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **WAVE-5 (2026-07-02 night, recon77, sync+iter at ZERO): 109 errors.** sync's clearing
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS: explicit-type-args root LANDED (`3694611d0`) — slices 74 → 68, all 14
+  CS0411 cleared** (constraint-only type params render resolved instantiations from
+  info.Instances; partial Go instantiations replaced via balanced strip — the `Grow<S><S, E>`
+  parse error had been masking slices' semantic count). Remaining 68 = the B-bucket golib
+  generic-overload family (copy/append CS1503+CS9244, ISlice<E>→S CS0266 subslice family) —
+  NEXT ROOT. maps 13 unchanged (delete inference + comparable).
+
+  **WAVE-5 (2026-07-02 night, recon77, sync+iter at ZERO): 109 errors.** sync's clearing
   (`7b8f56075` defined-pointer-type root) unmasked **internal/godebug (8)** — which itself gates
   the os/time/net tier — and log/slog/internal/buffer (2). Buckets: slices 74 + maps 13 (the
   generic-constraint campaign below), reflectlite 10, godebug 8, slog/buffer 2, metrics 1, weak 1.
