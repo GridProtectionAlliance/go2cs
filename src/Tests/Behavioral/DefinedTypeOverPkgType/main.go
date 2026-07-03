@@ -39,6 +39,8 @@ func main() {
 	h := handleT(seed)
 	k := openKey(h)
 	fmt.Println(k == keyT(h), uintptr(h))
+	back := handleT(k) // conversion TO the written base: one-step wrapper operator
+	fmt.Println(back == h)
 }
 
 // Case 3 (internal/syscall/windows/registry): a defined type over a NAMED NUMERIC with an

@@ -65,8 +65,20 @@ func main() {
 	var m Meter = c
 	fmt.Println(m.Bump())        // 2 — through the generated interface impl, same object
 	fmt.Println(c.Bump())        // 3 — aliasing: all bumps landed on one Meter
-	fmt.Println(g.Meter())       // tagged-meter — the colliding METHOD still works
+	fmt.Println(g.Meter())       // tagged-meter - the colliding METHOD still works
+
+	// Phase 6: the registry Key shape - a LOCAL defined type over a CROSS-PACKAGE named
+	// numeric (type reading CrossPkgLib.Celsius). Its [GoType] wrapper keeps the NAMED
+	// base, so a conversion back to that base must be the ONE-STEP wrapper operator
+	// (CrossPkgLib.Celsius(rd)) - the underlying hop would chain two user conversions
+	// (reading->Celsius->float64, CS0030 - registry value.go syscall.Handle(k)).
+	rd := reading(CrossPkgLib.Boiling())
+	cback := CrossPkgLib.Celsius(rd)
+	fmt.Println(float64(cback), cback == CrossPkgLib.Boiling())
 }
+
+// reading mirrors registry Key: a defined type whose written base is a cross-package named type.
+type reading CrossPkgLib.Celsius
 
 // Phase 4: field promotion through a CROSS-PACKAGE embed. In a real MSBuild build the library
 // arrives as a METADATA reference (never a CompilationReference), so the generator's syntax-based

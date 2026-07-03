@@ -329,6 +329,33 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					if argBasic, ok := argNamed.Underlying().(*types.Basic); ok && argBasic.Info()&types.IsNumeric != 0 {
 						argIsDistinctNamedNumeric = true
 					}
+
+					// EXCEPTION to the hop: the conversion target IS the arg's WRITTEN base named
+					// type — `syscall.Handle(k)` where `type Key syscall.Handle` (registry value.go).
+					// The arg's [GoType] wrapper declares the one-step operator to exactly that type
+					// (Key → ΔHandle), so the direct cast binds; the underlying hop's first leg
+					// `(uintptr)k` is itself the illegal two-op chain (Key→ΔHandle→uintptr, CS0030).
+					// Gated to a CROSS-PACKAGE base: only there does the [GoType] emission keep the
+					// NAMED base (`[GoType("syscall_package.ΔHandle")]`); a same-package chain
+					// resolves to the basic underlying (`[GoType("num:uintptr")]` — no named-base
+					// operator exists) and the underlying hop already binds one-op-per-leg.
+					if rhs, okRHS := packageTypeSpecRHS[argNamed.Obj()]; okRHS && rhs != nil {
+						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == named &&
+							named.Obj().Pkg() != argNamed.Obj().Pkg() {
+							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
+						}
+					}
+
+					// The FORWARD mirror: the conversion TARGET's written base IS the arg's named
+					// type (`Key(handle)` / `reading(celsius)` where `type reading lib.Celsius`) —
+					// the target's wrapper declares the one-step operator FROM exactly that type;
+					// the hop's second leg `(reading)(double)…` has no operator (CS0030).
+					if rhs, okRHS := packageTypeSpecRHS[named.Obj()]; okRHS && rhs != nil {
+						if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok && rhsNamed == argNamed &&
+							named.Obj().Pkg() != argNamed.Obj().Pkg() {
+							return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
+						}
+					}
 				}
 
 				if argType == nil || argIsDistinctNamedNumeric || !types.Identical(argType.Underlying(), basic) {

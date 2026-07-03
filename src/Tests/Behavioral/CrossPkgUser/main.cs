@@ -36,7 +36,12 @@ internal static void Main() {
     fmt.Println(m.Bump());
     fmt.Println(c.Meter.Value.Bump());
     fmt.Println(g.Meter());
+    var rd = ((reading)CrossPkgLib.Boiling());
+    var cback = ((CrossPkgLib.Celsius)rd);
+    fmt.Println((float64)cback, cback == CrossPkgLib.Boiling());
 }
+
+[GoType("CrossPkgLib_package.Celsius")] partial struct reading;
 
 [GoType] partial struct probe {
     public partial ref ж<CrossPkgLib_package.Sensor> Sensor { get; }

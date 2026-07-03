@@ -44,6 +44,8 @@ internal static void Main() {
     var h = ((handleT)seed);
     var k = openKey(h);
     fmt.Println(k == ((keyT)(uintptr)h), (uintptr)h);
+    var back = ((handleT)(uintptr)k);
+    fmt.Println(back == h);
 }
 
 [GoType("num:uintptr")] partial struct handleT;
