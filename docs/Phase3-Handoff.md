@@ -20,7 +20,18 @@
   standard library, compiles as C#. The final root (`3bb2ea000`) was the shared block-tracker
   `processing` flag being cleared by a nested block's exit while the enclosing block was still
   mid-visit, so a declaration FOLLOWING a closed nested block skipped the enclosing-scope shadow
-  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 6: named-map + comma-ok-through-constraint LANDED (`9e87f265f`) — maps
+  check (procresize's `Δtrace` CS0136). **CAMPAIGN PROGRESS 7: range-over-func LANDED (`186a67112`) — SLICES AT ZERO (74 → 0),
+  maps at 2.** Named/generic Seq detection (Underlying unwrap + pre-unwrap named flag), method-
+  group `.Invoke` emission with explicit `range<T>` args (C# can't infer from group params),
+  golib two-value `range<T1,T2>` overload; result-TypeArgs gate refined (conversions + generic
+  callees only — countdown<nint>(5) was CS0308, NewOption(42) needs <nint>). ZERO CLUB: runtime,
+  iter, sync, SLICES. **THE GENERIC CAMPAIGN'S LAST TWO ERRORS (maps): (1) maps.cs:68 CS8761
+  `m == nil` on constrained M — read Go maps.go:68 for the actual check, likely emit
+  AreEqual(m, default(M)) or an IMap-IsNil route; (2) maps.cs:95 delete inference — golib
+  `delete<K, V>(IMap<K, V>, K)` overload (K,V infer from IMap ref conversion).** At campaign
+  ZERO: full sln warm double → bucket unmasked (cmp users, internal/godebug tier next).
+
+  **CAMPAIGN PROGRESS 6: named-map + comma-ok-through-constraint LANDED (`9e87f265f`) — maps
   13 → 5.** Four coupled gaps: typeParamMapCore detection (assign gate + convIndexExpr),
   named-map composite wraps concrete literal in ctor, visitMapType COMPLETED (was a stub ToDo —
   defined map types were never declared), and IMapTypeTemplate CREATED (the generator's Map
