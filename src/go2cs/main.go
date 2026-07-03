@@ -1033,7 +1033,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", sourceType, targetType))
+					source, okSource := resolveImplicitConvTypeName(sourceType)
+					target, okTarget := resolveImplicitConvTypeName(targetType)
+
+					if !okSource || !okTarget || source == target {
+						continue
+					}
+
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", source, target))
 				}
 			}
 
@@ -1044,7 +1051,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", targetType, sourceType))
+					source, okSource := resolveImplicitConvTypeName(sourceType)
+					target, okTarget := resolveImplicitConvTypeName(targetType)
+
+					if !okSource || !okTarget || source == target {
+						continue
+					}
+
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", target, source))
 				}
 			}
 
@@ -1055,7 +1069,14 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", sourceType, targetType))
+					source, okSource := resolveImplicitConvTypeName(sourceType)
+					target, okTarget := resolveImplicitConvTypeName(targetType)
+
+					if !okSource || !okTarget {
+						continue
+					}
+
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", source, target))
 				}
 			}
 
@@ -2096,24 +2117,38 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				totalParameters := interfaceMethodSignature.Params().Len()
 
 				for j := 0; j < totalParameters; j++ {
-					interfaceParamType := interfaceMethodSignature.Params().At(j).Type().Underlying()
-					targetParameterType := targetMethodSignature.Params().At(j).Type().Underlying()
+					// Underlying() is used ONLY for the struct-KIND checks below — recording the
+					// underlying's name stringifies a raw *types.Struct into Go-ish text
+					// (`GoImplicitConv<struct{p printer}, …>` and a mangled anonymous decoder-state
+					// monster in encoding/xml's package_info.cs — not valid C# attribute args).
+					interfaceParamType := interfaceMethodSignature.Params().At(j).Type()
+					targetParameterType := targetMethodSignature.Params().At(j).Type()
 
 					// Check if targetParamType is a struct or a pointer to a struct
-					if ptrType, ok := targetParameterType.(*types.Pointer); ok {
-						targetParameterType = ptrType.Elem().Underlying()
+					if ptrType, ok := targetParameterType.Underlying().(*types.Pointer); ok {
+						targetParameterType = ptrType.Elem()
 					}
 
-					if _, ok := targetParameterType.(*types.Struct); ok {
+					if _, ok := targetParameterType.Underlying().(*types.Struct); ok {
 						// Check if interfaceParamType is a struct or a pointer to a struct
-						if ptrType, ok := interfaceParamType.(*types.Pointer); ok {
-							interfaceParamType = ptrType.Elem().Underlying()
+						if ptrType, ok := interfaceParamType.Underlying().(*types.Pointer); ok {
+							interfaceParamType = ptrType.Elem()
 						}
 
-						if _, ok := interfaceParamType.(*types.Struct); ok {
+						if _, ok := interfaceParamType.Underlying().(*types.Struct); ok {
 							// Both interfaceParamType and targetParamType are structs, track implicit conversions
-							interfaceParamTypeName := v.getCSTypeName(interfaceParamType)
-							targetParamTypeName := v.getCSTypeName(targetParameterType)
+							interfaceParamTypeName := v.implicitConvStructTypeName(interfaceParamType)
+							targetParamTypeName := v.implicitConvStructTypeName(targetParameterType)
+
+							// An IDENTICAL pair (the interface and target methods share the
+							// parameter type) is a self-conversion — meaningless, and a
+							// user-defined operator cannot convert a type to itself (CS0555 from
+							// the generator). Marker-form names compare by signature, so identical
+							// anonymous structs are also skipped; differing markers resolve after
+							// the barrier (see resolveImplicitConvTypeName).
+							if interfaceParamTypeName == targetParamTypeName {
+								continue
+							}
 							var conversions HashSet[string]
 							var exists bool
 
@@ -3664,4 +3699,48 @@ func (v *Visitor) getIdentName(ident *ast.Ident) string {
 // Determine if the identifier represents a reassignment
 func (v *Visitor) isReassignment(ident *ast.Ident) bool {
 	return v.isReassigned[ident]
+}
+
+// implicitConvStructTypeName renders the C# name a GoImplicitConv attribute can carry for a
+// struct-underlying type: a NAMED type's converted name, or the lifted dynamic-type name for a
+// package-level anonymous struct. A lifted name whose declaring file has not been visited yet
+// records the DEFERRED MARKER, resolved after the file-visit barrier when the package_info
+// lines are emitted (raw Go `struct{…}` text is never attribute-safe C#).
+func (v *Visitor) implicitConvStructTypeName(t types.Type) string {
+	if named, ok := types.Unalias(t).(*types.Named); ok {
+		return v.getCSTypeName(named)
+	}
+
+	// This visitor's lifted name is type-identity-keyed — precise even when two anonymous
+	// structs share a structural signature (Process_data vs main_data); the shared registry
+	// and the deferred marker are the cross-file fallbacks.
+	if name, ok := v.liftedTypeMap[t]; ok {
+		return name
+	}
+
+	signature := t.String()
+
+	if name := lookupDynamicTypeName(signature); name != "" {
+		return name
+	}
+
+	return dynamicTypeMarkerPrefix + signature + dynamicTypeMarkerSuffix
+}
+
+// resolveImplicitConvTypeName resolves a possibly-deferred implicit-conversion type name after
+// the file-visit barrier (the dynamic-type registry is complete). Returns ok=false when the
+// marker cannot resolve — a genuinely unlifted anonymous struct has no attribute-safe name and
+// its record is dropped.
+func resolveImplicitConvTypeName(name string) (string, bool) {
+	if strings.HasPrefix(name, dynamicTypeMarkerPrefix) && strings.HasSuffix(name, dynamicTypeMarkerSuffix) {
+		signature := name[len(dynamicTypeMarkerPrefix) : len(name)-len(dynamicTypeMarkerSuffix)]
+
+		if resolved := lookupDynamicTypeName(signature); resolved != "" {
+			return resolved, true
+		}
+
+		return "", false
+	}
+
+	return name, true
 }
