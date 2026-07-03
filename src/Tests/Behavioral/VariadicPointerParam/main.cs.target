@@ -36,6 +36,15 @@ internal static void Main() {
     fmt.Println(total(boxes.ꓸꓸꓸ));
     fmt.Println(countPtrs(new @unsafe.Pointer(a), new @unsafe.Pointer(b), new @unsafe.Pointer(c)));
     fmt.Println(countPtrs());
+    fmt.Println(pairTotal(a, b, c));
+}
+
+internal static nint pairTotal(ж<box> Ꮡp, ж<box> Ꮡq, ж<box> Ꮡr) {
+    ref var p = ref Ꮡp.Value;
+    ref var q = ref Ꮡq.Value;
+    ref var r = ref Ꮡr.Value;
+
+    return total(Ꮡp, Ꮡq, Ꮡr);
 }
 
 } // end main_package

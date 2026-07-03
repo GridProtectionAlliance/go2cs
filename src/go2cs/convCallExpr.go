@@ -592,18 +592,34 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					paramIsUnsafePtr = true
 				}
 
-				argIsUnsafePtr := false
+				// A variadic pointer parameter (`...*T`) receives EVERY trailing argument, so the
+				// per-argument box treatment below must apply to all of them — this loop only visits
+				// declared parameters, and argTypeIsPtr's false default left args after the first as
+				// the deref'd value alias (`checkInitialized(Ꮡp, q)`, edwards25519 CS1503). Mirrors
+				// the variadic fan-out of the type-parameter @string treatment above; the spread form
+				// (`f(s...)`) is already excluded by this branch's guard. A non-variadic parameter
+				// degenerates to the single index (lastArg == i), byte-identical to before.
+				lastArg := i
 
-				if argType := v.getType(callExpr.Args[i], false); argType != nil {
-					if basic, ok := argType.Underlying().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
-						argIsUnsafePtr = true
-					}
+				if funcSignature.Variadic() && i == params.Len()-1 {
+					lastArg = len(callExpr.Args) - 1
 				}
 
-				if paramIsUnsafePtr && argIsUnsafePtr {
-					// pass the @unsafe.Pointer struct directly; no argTypeIsPtr / `.Value`
-				} else {
-					ident := getIdentifier(callExpr.Args[i])
+				for j := i; j <= lastArg; j++ {
+					argIsUnsafePtr := false
+
+					if argType := v.getType(callExpr.Args[j], false); argType != nil {
+						if basic, ok := argType.Underlying().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
+							argIsUnsafePtr = true
+						}
+					}
+
+					if paramIsUnsafePtr && argIsUnsafePtr {
+						// pass the @unsafe.Pointer struct directly; no argTypeIsPtr / `.Value`
+						continue
+					}
+
+					ident := getIdentifier(callExpr.Args[j])
 
 					// A deref-aliased pointer (a parameter, or the current method's direct-ж receiver)
 					// passed WHOLE as a pointer argument must be emitted as its box `Ꮡc`, not the value
@@ -611,8 +627,8 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// is not an `identIsParameter`, so it needs the explicit receiver check — e.g.
 					// `func (c *mcache) prepareForSweep(){ … stackcache_clear(c) }` where `c` also takes
 					// a field address (making it direct-ж).
-					if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[i]) {
-						callExprContext.argTypeIsPtr[i] = true
+					if !v.isPointer(ident) || v.identIsParameter(ident) || v.exprIsCurrentDirectBoxReceiver(callExpr.Args[j]) {
+						callExprContext.argTypeIsPtr[j] = true
 					}
 				}
 			}

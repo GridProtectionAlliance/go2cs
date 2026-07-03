@@ -50,4 +50,13 @@ func main() {
 	// variadic of a qualified type
 	fmt.Println(countPtrs(unsafe.Pointer(a), unsafe.Pointer(b), unsafe.Pointer(c))) // 3
 	fmt.Println(countPtrs())                                                         // 0
+
+	fmt.Println(pairTotal(a, b, c)) // 6
+}
+
+// deref-aliased pointer PARAMETERS passed as variadic pointer args: every trailing arg must
+// render as its box, not the deref'd value alias - edwards25519's checkInitialized(p, q)
+// emitted only the first variadic arg as the box (CS1503).
+func pairTotal(p, q, r *box) int {
+	return total(p, q, r)
 }
