@@ -898,7 +898,17 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 									deref = ""
 								}
 
-								return getAliasedTypeName(fmt.Sprintf("%s.%s%s.%s", v.convExpr(selectorExpr.X, nil),
+								xExpr := v.convExpr(selectorExpr.X, nil)
+
+								// X itself may be a POINTER rendering as a raw BOX (a ж local,
+								// not a deref-aliased param/receiver) — hop through its Value
+								// first (unique's `m.Load(value)` with m a ж<uniqueMap[T]>
+								// local emitted `m.HashTrieMap…`, CS1061 ×4).
+								if _, xIsPtr := v.info.TypeOf(selectorExpr.X).Underlying().(*types.Pointer); xIsPtr && !v.exprIsDerefAliasedPointer(selectorExpr.X) {
+									xExpr += ".Value"
+								}
+
+								return getAliasedTypeName(fmt.Sprintf("%s.%s%s.%s", xExpr,
 									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), deref, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 							}
 						}

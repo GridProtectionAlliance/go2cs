@@ -83,6 +83,15 @@ func (c cert) Seal() string  { return "wax" }
 func (c cert) Rating() int   { return 9 }
 func (c cert) Serial() int   { return c.id }
 
+// holder embeds the FOREIGN GENERIC *CrossPkgLib.Cache[T] (unique.uniqueMap's shape):
+// the member emits under the base name `Cache` (bracket-strip before dot-strip - the
+// type args' qualified names otherwise win the LastIndex and misname the member), and a
+// promoted method call through a raw box local hops X.Value first (CS1061 x4).
+type holder[T any] struct {
+	*CrossPkgLib.Cache[T]
+	name string
+}
+
 // relay's pointer receiver satisfies CrossPkgLib.Reporter; getReporter forwards the
 // multi-value call as its WHOLE result list, so the converter deconstructs the tuple and
 // converts the interface element — C# tuple conversions are not element-wise (os
@@ -245,6 +254,9 @@ func main() {
 	pr := &CrossPkgLib.Probe{}
 	var sam CrossPkgLib.Sampler = pr
 	fmt.Println(sam.Sample(), sam.Sample(), pr.Hits) // 1 2 2
+
+	h := &holder[int]{Cache: &CrossPkgLib.Cache[int]{}, name: "h"}
+	fmt.Println(h.Bump(), h.Bump(), h.name) // 1 2 h
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

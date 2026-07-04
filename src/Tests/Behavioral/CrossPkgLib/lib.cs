@@ -90,6 +90,15 @@ public static Reporter AsReporter(ж<Meter> Ꮡm) {
     return new MeterжReporter(Ꮡm);
 }
 
+[GoType] partial struct Cache<T> {
+    public nint Hits;
+}
+
+[GoRecv] public static nint Bump<T>(this ref Cache<T> c) {
+    c.Hits++;
+    return c.Hits;
+}
+
 [GoType] partial struct Probe {
     public nint Hits;
 }

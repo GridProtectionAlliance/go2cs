@@ -78,6 +78,11 @@ internal static nint Serial(this cert c) {
     return c.id;
 }
 
+[GoType] partial struct holder<T> {
+    public partial ref ж<CrossPkgLib_package.Cache<T>> Cache { get; }
+    internal @string name;
+}
+
 [GoType] partial struct relay {
     internal @string tag;
 }
@@ -185,6 +190,8 @@ internal static void Main() => func((defer, recover) => {
     var pr = Ꮡ(new CrossPkgLib.Probe(nil));
     CrossPkgLib.Sampler sam = new ProbeжSampler(pr);
     fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
+    var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"u8));
+    fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

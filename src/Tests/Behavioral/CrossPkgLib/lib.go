@@ -100,6 +100,14 @@ func AsErr(a *Alarm) error { return a }
 func AsReporter(m *Meter) Reporter { return m }
 
 
+// Cache is a GENERIC struct with a pointer-receiver method - consumers embed *Cache[T]
+// (the unique.uniqueMap shape: the embed's member name must come from the BASE type with
+// the bracket-strip running before the dot-strip) and call through a raw box local (the
+// X.Value hop ahead of the cross-package pointer-embed hop).
+type Cache[T any] struct{ Hits int }
+
+func (c *Cache[T]) Bump() int { c.Hits++; return c.Hits }
+
 // Probe/Sampler: the lib never converts *Probe to Sampler itself, so no exported adapter
 // record exists - a consumer's pointer conversion records the pair LOCALLY and emits its
 // own ProbeжSampler adapter with metadata-bound forwarding (fmt Fscan(os.Stdin, ...),
