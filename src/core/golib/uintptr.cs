@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Numerics;
 
 namespace go;
 
@@ -51,7 +52,16 @@ namespace go;
 /// <c>ref key.Value</c> — since the intrinsics cannot take a reference to a user struct.
 /// </para>
 /// </remarks>
-public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, IFormattable
+public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, IFormattable,
+    // Generic-math interfaces so uintptr satisfies converter-emitted numeric union constraints
+    // (a Go `~uint64 | ~uintptr`-style type set maps to this interface list) as a type ARGUMENT -
+    // the operators below already exist; without the declarations an instantiation like reflect's
+    // rangeNum<uintptr, uint64> is CS0315 x9 even though every member binds.
+    IAdditionOperators<uintptr, uintptr, uintptr>, ISubtractionOperators<uintptr, uintptr, uintptr>,
+    IMultiplyOperators<uintptr, uintptr, uintptr>, IDivisionOperators<uintptr, uintptr, uintptr>,
+    IModulusOperators<uintptr, uintptr, uintptr>, IBitwiseOperators<uintptr, uintptr, uintptr>,
+    IShiftOperators<uintptr, int, uintptr>, IEqualityOperators<uintptr, uintptr, bool>,
+    IComparisonOperators<uintptr, uintptr, bool>
 {
     // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
     public nuint Value;
@@ -214,6 +224,12 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     public static uintptr operator <<(uintptr value, int shift) => new(value.Value << shift);
 
     public static uintptr operator >>(uintptr value, int shift) => new(value.Value >> shift);
+
+    /// <summary>
+    /// Shifts the bits of a <see cref="uintptr"/> right by the specified count (unsigned - required by
+    /// <see cref="IShiftOperators{TSelf, TOther, TResult}"/>; identical to <c>&gt;&gt;</c> on an unsigned value).
+    /// </summary>
+    public static uintptr operator >>>(uintptr value, int shift) => new(value.Value >>> shift);
 
     // Handle comparisons between 'nil' and struct 'uintptr' (Go nil comparison idiom)
     public static bool operator ==(uintptr value, NilType nil) => value.Value == 0;

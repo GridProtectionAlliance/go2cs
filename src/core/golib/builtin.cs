@@ -4011,6 +4011,7 @@ public static class builtin
         if (typeof(T) == typeof(uint)) return (T)(object)unchecked((uint)value);
         if (typeof(T) == typeof(ushort)) return (T)(object)unchecked((ushort)value);
         if (typeof(T) == typeof(byte)) return (T)(object)unchecked((byte)value);
+        if (typeof(T) == typeof(uintptr)) return (T)(object)new uintptr(unchecked((nuint)value));
 
         return TypeParamCaster<T>.FromUInt64(value);
     }
@@ -4029,35 +4030,55 @@ public static class builtin
         if (typeof(T) == typeof(uint)) return (uint)(object)value!;
         if (typeof(T) == typeof(ushort)) return (ushort)(object)value!;
         if (typeof(T) == typeof(byte)) return (byte)(object)value!;
+        if (typeof(T) == typeof(uintptr)) return (ulong)((uintptr)(object)value!).Value;
 
         return TypeParamCaster<T>.ToUInt64(value);
     }
 
-    // Reflection-cached bridge for a [GoType("num:*")] wrapper instantiation: reads/writes the
-    // wrapper through its public Value property and single-argument constructor (both guaranteed
-    // by the generated numeric wrapper shape). Static per-T caches keep the reflection cost to
-    // first use.
+    // Reflection-cached bridge for a numeric wrapper instantiation: reads/writes the wrapper
+    // through its public Value member and single-argument constructor. A generated
+    // [GoType("num:*")] wrapper exposes Value as a PROPERTY; hand-written wrappers (golib
+    // uintptr, the managed-referent manual types) expose a public FIELD so Interlocked/Volatile
+    // seams can take `ref x.Value` - probe both. Static per-T caches keep the reflection cost
+    // to first use.
     private static class TypeParamCaster<T>
     {
         private static readonly System.Reflection.PropertyInfo? s_valueProperty = typeof(T).GetProperty("Value");
-        private static readonly System.Reflection.ConstructorInfo? s_valueCtor = s_valueProperty is null ? null : typeof(T).GetConstructor(new[] { s_valueProperty.PropertyType });
+        private static readonly System.Reflection.FieldInfo? s_valueField = s_valueProperty is null ? typeof(T).GetField("Value") : null;
+        private static readonly Type? s_valueType = s_valueProperty?.PropertyType ?? s_valueField?.FieldType;
+        private static readonly System.Reflection.ConstructorInfo? s_valueCtor = s_valueType is null ? null : typeof(T).GetConstructor(new[] { s_valueType });
 
         public static T FromUInt64(ulong value)
         {
-            if (s_valueProperty is null || s_valueCtor is null)
+            if (s_valueType is null || s_valueCtor is null)
                 throw new NotSupportedException($"ConvertToType: no numeric wrapper surface on {typeof(T)}");
 
-            object underlying = System.Convert.ChangeType(unchecked((long)value), s_valueProperty.PropertyType);
+            // Convert.ChangeType cannot target the native-sized kinds (nint/nuint lack IConvertible)
+            object underlying =
+                s_valueType == typeof(nint) ? unchecked((nint)value) :
+                s_valueType == typeof(nuint) ? unchecked((nuint)value) :
+                System.Convert.ChangeType(unchecked((long)value), s_valueType);
+
             return (T)s_valueCtor.Invoke(new[] { underlying });
         }
 
         public static ulong ToUInt64(T value)
         {
-            if (s_valueProperty is null)
+            object underlying;
+
+            if (s_valueProperty is not null)
+                underlying = s_valueProperty.GetValue(value)!;
+            else if (s_valueField is not null)
+                underlying = s_valueField.GetValue(value)!;
+            else
                 throw new NotSupportedException($"ConvertToUInt64: no numeric wrapper surface on {typeof(T)}");
 
-            object underlying = s_valueProperty.GetValue(value)!;
-            return unchecked((ulong)System.Convert.ToInt64(underlying));
+            return underlying switch
+            {
+                nint ni => unchecked((ulong)(long)ni),
+                nuint nu => nu,
+                _ => unchecked((ulong)System.Convert.ToInt64(underlying))
+            };
         }
     }
 

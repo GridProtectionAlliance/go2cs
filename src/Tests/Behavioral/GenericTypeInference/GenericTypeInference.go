@@ -192,6 +192,17 @@ func main() {
 		ssum += v
 	}
 	fmt.Println(ssum)
+	fmt.Println(growShrink(uintptr(1), uintptr(20)), growShrink(uint32(2), uint32(9)))
+}
+
+// growShrink instantiates a numeric-union constraint with U = uintptr: the golib uintptr
+// STRUCT must DECLARE the generic-math interfaces the union maps to - matching operators
+// alone never satisfy a where-clause (CS0315 x9 at reflect's rangeNum<uintptr, uint64>).
+func growShrink[U ~uint32 | ~uintptr](v, lim U) U {
+	for v < lim {
+		v = v*2 + 1
+	}
+	return (v % lim) >> 1
 }
 
 // seqOf mirrors reflect's rangeNum[T, N]: TWO type parameters where the call supplies only T

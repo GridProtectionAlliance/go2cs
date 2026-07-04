@@ -206,6 +206,16 @@ internal static void Main() {
         ssum += v;
     }
     fmt.Println(ssum);
+    fmt.Println(growShrink((uintptr)1, (uintptr)20), growShrink((uint32)2, (uint32)9));
+}
+
+internal static U growShrink<U>(U v, U lim)
+    where U : /* ~uint32 | ~uintptr */ IAdditionOperators<U, U, U>, ISubtractionOperators<U, U, U>, IMultiplyOperators<U, U, U>, IDivisionOperators<U, U, U>, IModulusOperators<U, U, U>, IBitwiseOperators<U, U, U>, IShiftOperators<U, int, U>, IEqualityOperators<U, U, bool>, IComparisonOperators<U, U, bool>, new()
+{
+    while (v < lim) {
+        v = v * ConvertToType<U>(2) + ConvertToType<U>(1);
+    }
+    return ((v % lim) >> (int)(1));
 }
 
 internal static Seq<T> seqOf<T, N>(N n)
