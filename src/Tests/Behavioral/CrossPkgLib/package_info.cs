@@ -27,6 +27,7 @@ using static go.CrossPkgLib_package;
 // when referenced.
 
 // <ExportedTypeAliases>
+[assembly: GoTypeAlias("Grade", "ΔGrade")]
 [assembly: GoTypeAlias("Status", "ΔStatus")]
 [assembly: GoTypeAlias("Temperature", "go.CrossPkgLib_package.Celsius")]
 // </ExportedTypeAliases>

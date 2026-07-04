@@ -88,6 +88,13 @@ type Status struct {
 
 func (s Sensor) Status() int { return int(s.Temp) }
 
+// Grade (the type) collides with the Sensor.Grade method - a renamed foreign NUMERIC for
+// conversion-target and var-decl alias routing (internal/poll DupCloseOnExec/sockaddrToRaw).
+type Grade int
+
+func (s Sensor) Grade() int { return 1 }
+
+
 // snapshot is UNEXPORTED but exposed by the exported var Latest and the exported func
 // Peek - Go consumers hold the value and call its exported surface, so the C# type is
 // publicized (CS0052/CS0050, internal/poll ErrNetClosing).

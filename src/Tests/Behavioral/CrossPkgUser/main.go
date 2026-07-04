@@ -139,6 +139,13 @@ func main() {
 	mb := meterBox{st: CrossPkgLib.Status{Code: 3}, sat: 1}
 	fmt.Println(mb.st.Code + mb.sat) // 4
 	fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At) // 42 42
+
+	// Conversion-TARGET and no-value VAR-DECL positions of renamed foreign types route
+	// through the recorded alias (CS0426, internal/poll).
+	gv := CrossPkgLib.Grade(7)
+	var stv CrossPkgLib.Status
+	stv.Code = int(gv)
+	fmt.Println(stv.Code) // 7
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

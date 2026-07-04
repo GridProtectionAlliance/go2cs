@@ -78,6 +78,10 @@ internal static void Main() {
     var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
     fmt.Println(mb.st.Code + mb.sat);
     fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At);
+    CrossPkgLibꓸGrade gv = 7;
+    CrossPkgLibꓸStatus stv = default!;
+    stv.Code = (nint)gv;
+    fmt.Println(stv.Code);
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

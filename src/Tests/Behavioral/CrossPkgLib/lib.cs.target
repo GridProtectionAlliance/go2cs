@@ -70,6 +70,12 @@ public static nint Status(this Sensor s) {
     return (nint)(float64)s.Temp;
 }
 
+[GoType("num:nint")] partial struct ΔGrade;
+
+public static nint Grade(this Sensor s) {
+    return 1;
+}
+
 [GoType] public partial struct snapshot {
     public nint At;
 }

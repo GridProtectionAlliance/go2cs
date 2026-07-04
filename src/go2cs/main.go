@@ -3233,23 +3233,10 @@ func (v *Visitor) collectCrossPackagePaths(t types.Type, paths HashSet[string]) 
 // staying compilable. NOT for GoType attribute strings or other generator-consumed strings, which live
 // in alias-less generated files and must always use getFullTypeName.
 func (v *Visitor) getDisplayTypeName(t types.Type, isUnderlying bool) string {
-	// A foreign type RENAMED inside its own package (syscall's `ΔHandle`) displays as the
-	// recorded imported-type alias (`syscallꓸHandle`) — the raw qualified render
-	// (`Δsyscall.Handle`) names a type that does not exist (CS0426, internal/poll's struct
-	// FIELDS: `Sysfd syscall.Handle`). Same rationale and gates as getCSTypeName; this is
-	// the display layer, so promoted-member naming (getFullTypeName consumers) is untouched.
-	if named, ok := types.Unalias(t).(*types.Named); ok && (named.TypeArgs() == nil || named.TypeArgs().Len() == 0) {
-		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
-			plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
-
-			packageLock.Lock()
-			_, aliasExists := importedTypeAliases[plainKey]
-			packageLock.Unlock()
-
-			if aliasExists {
-				return getAliasedTypeName(plainKey)
-			}
-		}
+	// Foreign renamed types display as the recorded imported-type alias (see
+	// foreignAliasedTypeName) - the display layer, so promoted-member naming is untouched.
+	if aliased, ok := v.foreignAliasedTypeName(t); ok {
+		return aliased
 	}
 
 	paths := HashSet[string]{}
@@ -3310,30 +3297,47 @@ func (v *Visitor) getCSTypeName(t types.Type) string {
 		return v.iifeDelegateType(sig)
 	}
 
-	// A cross-package type that is RENAMED (or Go-aliased) inside its own package — syscall
-	// declares `ΔHandle` for its type-vs-method-colliding `Handle` — must be referenced
-	// through the recorded imported-type alias (`syscallꓸHandle` = `go.syscall_package.
-	// ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not
-	// exist (CS0426 ×19, internal/poll's method parameter/result signatures). This lives at
-	// the C#-NAME layer, NOT in getTypeName: the Go-shaped name also feeds promoted-embed
-	// MEMBER naming, where the alias substitution renamed and rescoped the generated
-	// accessors (reflect CS8799 ×3 regression on the first cut). A type without a registered
-	// alias, and every generic instantiation, keeps the plain render (no churn).
-	if named, ok := types.Unalias(t).(*types.Named); ok && (named.TypeArgs() == nil || named.TypeArgs().Len() == 0) {
-		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
-			plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
-
-			packageLock.Lock()
-			_, aliasExists := importedTypeAliases[plainKey]
-			packageLock.Unlock()
-
-			if aliasExists {
-				return getAliasedTypeName(plainKey)
-			}
-		}
+	if aliased, ok := v.foreignAliasedTypeName(t); ok {
+		return aliased
 	}
 
 	return convertToCSTypeName(v.getTypeName(t, false))
+}
+
+// foreignAliasedTypeName resolves a cross-package type that is RENAMED (or Go-aliased) inside
+// its own package — syscall declares `ΔHandle` for its type-vs-method-colliding `Handle` — to
+// the recorded imported-type alias (`syscallꓸHandle` = `go.syscall_package.ΔHandle`): the raw
+// qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 ×21,
+// internal/poll's signatures, fields, conversion targets, and local declarations). This lives
+// at the C#-NAME layers ONLY (getCSTypeName / getDisplayTypeName / conversion targets), never
+// in getTypeName: the Go-shaped name also feeds promoted-embed MEMBER naming, where the alias
+// substitution renamed and rescoped the generated accessors (reflect CS8799 ×3 regression on
+// the first cut). A type without a registered alias, and every generic instantiation, keeps
+// the plain render (no churn).
+func (v *Visitor) foreignAliasedTypeName(t types.Type) (string, bool) {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok || (named.TypeArgs() != nil && named.TypeArgs().Len() > 0) {
+		return "", false
+	}
+
+	pkg := named.Obj().Pkg()
+
+	if pkg == nil || pkg == v.pkg {
+		return "", false
+	}
+
+	plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
+
+	packageLock.Lock()
+	_, aliasExists := importedTypeAliases[plainKey]
+	packageLock.Unlock()
+
+	if !aliasExists {
+		return "", false
+	}
+
+	return getAliasedTypeName(plainKey), true
 }
 
 func convertToCSTypeName(typeName string) string {

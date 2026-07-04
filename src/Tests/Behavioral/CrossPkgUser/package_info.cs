@@ -10,6 +10,7 @@
 // importing type aliases at a namespace level.
 
 // <ImportedTypeAliases>
+global using CrossPkgLibꓸGrade = go.CrossPkgLib_package.ΔGrade;
 global using CrossPkgLibꓸStatus = go.CrossPkgLib_package.ΔStatus;
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
 // </ImportedTypeAliases>

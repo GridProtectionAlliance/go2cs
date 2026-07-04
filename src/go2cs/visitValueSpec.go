@@ -193,6 +193,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						csTypeName = v.getCSTypeName(def.Type())
 					}
 
+					// A local declared as a foreign RENAMED type routes through the recorded
+					// alias (`syscallꓸSockaddr sa`, not the nonexistent `Δsyscall.Sockaddr` —
+					// CS0426, internal/poll sockaddrToRaw).
+					if aliased, ok := v.foreignAliasedTypeName(def.Type()); ok {
+						csTypeName = aliased
+					}
+
 					typeLenDeviation := token.Pos(len(csTypeName) - len(goTypeName) + len(goIDName) + (len(csIDName) - len(goIDName)))
 
 					if v.inFunction {

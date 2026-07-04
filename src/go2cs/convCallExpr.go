@@ -157,6 +157,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 
 		targetTypeName = convertToCSTypeName(targetTypeName)
+
+		// A conversion TARGET that is a foreign RENAMED type routes through the recorded
+		// alias (`(syscallꓸHandle)fd`, not the nonexistent `(Δsyscall.Handle)fd` -
+		// CS0426, internal/poll DupCloseOnExec).
+		if aliased, ok := v.foreignAliasedTypeName(v.info.TypeOf(callExpr)); ok {
+			targetTypeName = aliased
+		}
 		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
 		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
