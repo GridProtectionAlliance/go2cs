@@ -47,6 +47,7 @@ internal class ValueAdapterImplTemplate : TemplateBase
     public required string InterfaceName;
     public required string AdapterName;
     public required string AdapterScope;
+    public bool ImplementsFormattable;
     public required List<MethodInfo> Methods;
 
     public override string TemplateBody =>
@@ -73,9 +74,16 @@ internal class ValueAdapterImplTemplate : TemplateBase
 
                  public override int GetHashCode() => m_value.GetHashCode();
 
-                 public override string? ToString() => m_value.ToString();
+                 public override string? ToString() => m_value.ToString();{{FormattableImplementation}}
              }
          """;
+
+    // The interface may inherit System.IFormattable (the hand-finished io stub's Reader);
+    // its member cannot forward through the copy uncast — implement directly.
+    private string FormattableImplementation =>
+        ImplementsFormattable
+            ? "\r\n\r\n        string System.IFormattable.ToString(string? format, System.IFormatProvider? formatProvider) => m_value.ToString() ?? \"\";"
+            : string.Empty;
 
     private string MethodsImplementation
     {

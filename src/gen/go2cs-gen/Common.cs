@@ -136,6 +136,17 @@ public static class Common
         return s_rootTypeRefRegex.Replace(typeName, "$1global::go.");
     }
 
+    // RefKindPrefix renders a parameter's ref-kind modifier ("in " / "ref " / "out ") so a
+    // generated signature matches an interface member declared with one (the hand-finished
+    // io stub's Reader.Read(in slice<byte>) - an explicit impl without it is CS0539).
+    public static string RefKindPrefix(RefKind refKind) => refKind switch
+    {
+        RefKind.In => "in ",
+        RefKind.Ref => "ref ",
+        RefKind.Out => "out ",
+        _ => "",
+    };
+
     public static string GetFullTypeName(this ITypeSymbol? typeSymbol, bool useDisplayString = false)
     {
         switch (typeSymbol)

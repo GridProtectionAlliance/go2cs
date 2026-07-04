@@ -24,6 +24,10 @@ internal static class IArrayTypeTemplate
                 public ref {{targetTypeName}} this[int index] => ref Value[(nint)index];
             
                 public ref {{targetTypeName}} this[ulong index] => ref Value[(nint)index];
+
+                public slice<{{targetTypeName}}> this[Range range] => Value[range];
+
+                public slice<{{targetTypeName}}> Slice(nint start, nint length) => Value.Slice(start, length);
                 
                 public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 

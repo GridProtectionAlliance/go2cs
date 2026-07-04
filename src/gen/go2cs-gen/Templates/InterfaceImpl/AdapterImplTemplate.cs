@@ -47,6 +47,7 @@ internal class AdapterImplTemplate : TemplateBase
     public required string StructName;
     public required string InterfaceName;
     public required string AdapterName;
+    public bool ImplementsFormattable;
     public required string AdapterScope;
     public required List<MethodInfo> Methods;
 
@@ -84,9 +85,16 @@ internal class AdapterImplTemplate : TemplateBase
 
                  public override int GetHashCode() => m_box?.GetHashCode() ?? 0;
 
-                 public override string? ToString() => m_box?.ToString();
+                 public override string? ToString() => m_box?.ToString();{{FormattableImplementation}}
              }
          """;
+
+    // The interface may inherit System.IFormattable (the hand-finished io stub's Reader);
+    // its member cannot forward through the box (no such overload) — implement directly.
+    private string FormattableImplementation =>
+        ImplementsFormattable
+            ? "\r\n\r\n        string System.IFormattable.ToString(string? format, System.IFormatProvider? formatProvider) => m_box?.ToString() ?? \"\";"
+            : string.Empty;
 
     private string MethodsImplementation
     {

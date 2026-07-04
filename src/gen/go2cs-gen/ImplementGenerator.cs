@@ -71,6 +71,13 @@ public class ImplementGenerator : ISourceGenerator
         // the pointer-adapter emission needs to know the pair is promoted, so pre-index.
         HashSet<string> promotedPairs = new(StringComparer.Ordinal);
 
+        // Emit ONE value-form implementation per (struct, interface) pair: the converter can
+        // record the same pair both plain AND Promoted (archive/tar's lifted anon struct got
+        // a promotion record from its interface embed and a plain record from the conversion
+        // site) — the second partial re-emitted the comparison operators (CS0111 ×8). The
+        // promotedPairs pre-index already folds the Promoted flag into the first emission.
+        HashSet<string> emittedValuePairs = new(StringComparer.Ordinal);
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, _, _) in attributeFinder.TargetAttributes)
         {
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -132,12 +139,21 @@ public class ImplementGenerator : ISourceGenerator
                 {
                     Name = promoted && !pointer && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{GlobalQualify(info.name)}.{info.method.Name}",
                     ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
-                    Parameters = info.method.Parameters.Select(param => (type: GlobalQualify(param.Type.ToDisplayString()), name: param.Name)).ToArray(),
+                    // Carry the parameter REF KIND: an interface member declared with an `in`
+                    // param (the hand-finished io stub's Reader.Read(in slice<byte>)) is a
+                    // distinct signature - an explicit impl without it is CS0539.
+                    Parameters = info.method.Parameters.Select(param => (type: $"{RefKindPrefix(param.RefKind)}{GlobalQualify(param.Type.ToDisplayString())}", name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                     TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray())
                 })
                 .Distinct()
                 .ToList();
+
+            // The interface may inherit System.IFormattable (the hand-finished io stub's
+            // Reader does, for the dyn machinery): its ToString(format, provider) cannot
+            // forward through the box or an uncast struct (CS1501/CS0030) — the templates
+            // emit a canned explicit impl instead when flagged.
+            bool implementsFormattable = methods.RemoveAll(m => m.Name.StartsWith("System.IFormattable.")) > 0;
 
             // An interface member with NO direct struct method may be satisfied by Go method
             // promotion through an embedded POINTER field (`type rtype struct { *abi.Type }`).
@@ -262,6 +278,7 @@ public class ImplementGenerator : ISourceGenerator
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
+                    ImplementsFormattable = implementsFormattable,
                     UsingStatements = usingStatements
                 }
                 .Generate();
@@ -292,6 +309,7 @@ public class ImplementGenerator : ISourceGenerator
                     // PointerPrefix-composed pointer adapters.
                     AdapterName = $"{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}",
                     AdapterScope = valueAdapterScope,
+                    ImplementsFormattable = implementsFormattable,
                     Methods = methods,
                     UsingStatements = usingStatements
                 }
@@ -301,13 +319,18 @@ public class ImplementGenerator : ISourceGenerator
                 continue;
             }
 
+            // One value-form impl per pair — a plain + Promoted duplicate would re-emit the
+            // comparison operators (CS0111); the promotedPairs pre-index folds the flag in.
+            if (!emittedValuePairs.Add($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"))
+                continue;
+
             string generatedSource = new InterfaceImplTemplate
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
                 StructName = structName,
                 InterfaceName = interfaceName,
-                Promoted = promoted,
+                Promoted = promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"),
                 Overrides = overrides,
                 Methods = methods,
                 EmbedHop = embedHop,
