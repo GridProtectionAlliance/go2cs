@@ -75,6 +75,14 @@ type stamped interface {
 	Stamp() string
 }
 
+// Labeled is a LOCAL interface sharing the FOREIGN interface's SIMPLE name and SHAPE
+// (image/draw's local Image vs image.Image): a pointer cast to THIS interface must take
+// the LOCAL adapter, not CrossPkgLib's exported SensorжLabeled (which implements the
+// FOREIGN Labeled — the existence key qualifies the interface side; image/draw CS1503).
+type Labeled interface {
+	Label() string
+}
+
 type seal struct{ name string }
 
 func (s seal) Label() string { return s.name }
@@ -257,6 +265,18 @@ func main() {
 	var st stamped = seal{name: "notary"}
 	var lb CrossPkgLib.Labeled = seal{name: "base"}
 	fmt.Println(st.Label(), st.Stamp(), CrossPkgLib.Describe(st), lb.Label()) // notary ok:notary notary base
+
+	var wide Labeled = seal{name: "w"}
+	fmt.Println(CrossPkgLib.Labeled(wide) == lb) // false
+
+	// The image/draw family: an EXPLICIT pointer-to-foreign-interface conversion takes the
+	// adapter (`image.Image(dst)` with dst *image.RGBA emitted `new image.Image(...)`,
+	// CS0144), and a pointer cast to the same-simple-name LOCAL interface takes the LOCAL
+	// adapter (CrossPkgLib's exported SensorжLabeled implements the FOREIGN Labeled).
+	sp2 := &CrossPkgLib.Sensor{Name: "porch", Temp: 40}
+	fmt.Println(CrossPkgLib.Labeled(sp2).Label(), CrossPkgLib.LabeledOf(sp2).Label()) // porch porch
+	var localLb Labeled = sp2
+	fmt.Println(localLb.Label()) // porch
 
 	rp, rerr := getReporter()
 	fmt.Println(rp.Report(), rerr == nil) // relay:live true

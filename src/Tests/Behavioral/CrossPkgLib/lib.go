@@ -61,6 +61,12 @@ var _ Labeled = Sensor{}
 // Describe takes the interface, so the consumer can pass a Sensor across the assembly boundary.
 func Describe(l Labeled) string { return l.Label() }
 
+// LabeledOf records the POINTER-sourced Sensor->Labeled pair IN THIS package, so its
+// exported SensorжLabeled adapter exists — the consumer's same-simple-name LOCAL Labeled
+// interface must NOT pick it up (the existence key qualifies the interface side; image's
+// Paletted->image.Image record satisfying a Paletted->draw.Image cast, CS1503).
+func LabeledOf(s *Sensor) Labeled { return s }
+
 // Meter is an exported struct whose only method has a POINTER receiver and mutates state - a
 // consumer that embeds *Meter satisfies its interfaces purely by promotion (the reflectlite
 // rtype/*abi.Type shape), and mutations through any promoted path land on the shared object.

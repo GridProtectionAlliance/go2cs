@@ -2227,14 +2227,22 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	if recordableBase && !pointerTarget && targetIsForeignNamed && !v.isLocalImplType(interfaceType) {
 		if named, ok := types.Unalias(targetType).(*types.Named); ok {
 			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
-				ifaceSimple := interfaceTypeName
+				// The interface side of the key is the CANONICAL QUALIFIED name — the simple
+				// name collides across same-named interfaces (image's Paletted→image.Image
+				// record must not satisfy a Paletted→draw.Image cast; see
+				// canonicalRecordIfaceName). A dotless render qualifies with the INTERFACE's
+				// own package (not the target struct's).
+				ifacePkgName := pkg.Name()
 
-				if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
-					ifaceSimple = ifaceSimple[idx+1:]
+				if ifaceNamed, ok := types.Unalias(interfaceType).(*types.Named); ok {
+					if ifacePkg := ifaceNamed.Obj().Pkg(); ifacePkg != nil {
+						ifacePkgName = ifacePkg.Name()
+					}
 				}
 
 				key := fmt.Sprintf("%s|%s|%s", getSanitizedIdentifier(pkg.Name()),
-					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())), ifaceSimple)
+					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())),
+					canonicalRecordIfaceName(interfaceTypeName, ifacePkgName))
 
 				packageLock.Lock()
 				foreignValueImplExists := importedValueImplements.Contains(key)
@@ -2413,18 +2421,29 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 
 		if named, ok := types.Unalias(namedTarget).(*types.Named); ok {
 			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
-				ifaceSimple := interfaceTypeName
+				// The interface side of the key is CANONICAL QUALIFIED — the simple name
+				// collides across same-named interfaces (image's Paletted→image.Image record
+				// satisfied a Paletted→draw.Image cast, referencing the foreign adapter that
+				// implements the WRONG interface; image/draw CS1503).
+				ifacePkgName := pkg.Name()
 
-				if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
-					ifaceSimple = ifaceSimple[idx+1:]
+				if ifaceNamed, ok := types.Unalias(interfaceType).(*types.Named); ok {
+					if ifacePkg := ifaceNamed.Obj().Pkg(); ifacePkg != nil {
+						ifacePkgName = ifacePkg.Name()
+					}
 				}
 
 				key := fmt.Sprintf("%s|%s|%s", getSanitizedIdentifier(pkg.Name()),
-					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())), ifaceSimple)
+					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())),
+					canonicalRecordIfaceName(interfaceTypeName, ifacePkgName))
 
 				packageLock.Lock()
 				foreignAdapterExists := importedPointerImplements.Contains(key)
 				packageLock.Unlock()
+
+				if strings.Contains(key, "Paletted") {
+					fmt.Printf("DEBUG-KEY: %q exists=%v\n", key, foreignAdapterExists)
+				}
 
 				if foreignAdapterExists {
 					// Reference through the file-local package ALIAS (`CrossPkgLib.Meter` +

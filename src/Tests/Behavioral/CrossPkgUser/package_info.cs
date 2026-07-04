@@ -44,11 +44,13 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<CrossPkgLib_package.Probe, CrossPkgLib_package.Sampler>(Pointer = true)]
+[assembly: GoImplement<CrossPkgLib_package.Sensor, Labeled>(Pointer = true)]
 [assembly: GoImplement<badge, Tagged>]
 [assembly: GoImplement<cert, certificate>]
 [assembly: GoImplement<counter, ΔMeter>]
 [assembly: GoImplement<emblem, namedLabel>]
 [assembly: GoImplement<relay, CrossPkgLib_package.Reporter>(Pointer = true)]
+[assembly: GoImplement<seal, Labeled>]
 [assembly: GoImplement<seal, stamped>]
 // </InterfaceImplementations>
 

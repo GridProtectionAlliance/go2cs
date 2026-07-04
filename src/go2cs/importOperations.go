@@ -380,7 +380,7 @@ func loadImportedTypeAliases(info PackageInfo) {
 			packageLock.Lock()
 
 			for _, pair := range pairs {
-				importedPointerImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], pair[1]))
+				importedPointerImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], canonicalRecordIfaceName(pair[1], info.RootPackageName)))
 			}
 
 			packageLock.Unlock()
@@ -396,7 +396,7 @@ func loadImportedTypeAliases(info PackageInfo) {
 			packageLock.Lock()
 
 			for _, pair := range pairs {
-				importedValueImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], pair[1]))
+				importedValueImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], canonicalRecordIfaceName(pair[1], info.RootPackageName)))
 			}
 
 			packageLock.Unlock()
@@ -460,8 +460,25 @@ func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
 	return aliases, nil
 }
 
+// canonicalRecordIfaceName reduces a GoImplement record's INTERFACE side to the canonical
+// qualified form the cast-site keys use: the RootNamespace prefix is stripped and a DOTLESS
+// name (an interface local to the recording package, or the universe `error`) is qualified
+// with the recording package's class. The SIMPLE name alone is ambiguous — image's
+// Paletted→image.Image record must not satisfy a Paletted→draw.Image cast (both reduce to
+// "Image"; image/draw referenced the foreign adapter implementing the WRONG interface,
+// CS1503).
+func canonicalRecordIfaceName(ifaceName string, rootPackageName string) string {
+	ifaceName = strings.TrimPrefix(ifaceName, RootNamespace+".")
+
+	if !strings.Contains(ifaceName, ".") && ifaceName != "error" {
+		ifaceName = getSanitizedIdentifier(rootPackageName) + PackageSuffix + "." + ifaceName
+	}
+
+	return ifaceName
+}
+
 // parseExportedPointerImplements parses a package info file for `GoImplement<T, Iface>(Pointer
-// = true)` assembly attributes, returning (T-simple, Iface-simple) pairs - the adapter-class
+// = true)` assembly attributes, returning (T-simple, Iface-qualified) pairs - the adapter-class
 // existence records for cross-package pointer-to-interface conversions.
 func parseExportedPointerImplements(packageInfoFile string) ([][2]string, error) {
 	file, err := os.Open(packageInfoFile)
@@ -485,21 +502,16 @@ func parseExportedPointerImplements(packageInfoFile string) ([][2]string, error)
 			continue
 		}
 
-		// Both sides reduce to their SIMPLE (last-dot-segment) names - the adapter class
-		// name composes from exactly those (see adapterTypeRef / the ImplementGenerator).
+		// The struct side reduces to its SIMPLE (last-dot-segment) name - the adapter class
+		// name composes from exactly that (see adapterTypeRef / the ImplementGenerator). The
+		// INTERFACE side keeps its qualifier (canonicalized at the populate site).
 		tName := matches[1]
 
 		if idx := strings.LastIndex(tName, "."); idx >= 0 {
 			tName = tName[idx+1:]
 		}
 
-		ifaceName := matches[2]
-
-		if idx := strings.LastIndex(ifaceName, "."); idx >= 0 {
-			ifaceName = ifaceName[idx+1:]
-		}
-
-		pairs = append(pairs, [2]string{tName, ifaceName})
+		pairs = append(pairs, [2]string{tName, matches[2]})
 	}
 
 	return pairs, scanner.Err()
@@ -535,21 +547,16 @@ func parseExportedValueImplements(packageInfoFile string) ([][2]string, error) {
 			continue
 		}
 
-		// Both sides reduce to their SIMPLE (last-dot-segment) names - matching the key
-		// composition at the conversion site (see convertToInterfaceType).
+		// The struct side reduces to its SIMPLE (last-dot-segment) name; the INTERFACE side
+		// keeps its qualifier (canonicalized at the populate site — the simple name collides
+		// across same-named interfaces, see canonicalRecordIfaceName).
 		tName := matches[1]
 
 		if idx := strings.LastIndex(tName, "."); idx >= 0 {
 			tName = tName[idx+1:]
 		}
 
-		ifaceName := matches[2]
-
-		if idx := strings.LastIndex(ifaceName, "."); idx >= 0 {
-			ifaceName = ifaceName[idx+1:]
-		}
-
-		pairs = append(pairs, [2]string{tName, ifaceName})
+		pairs = append(pairs, [2]string{tName, matches[2]})
 	}
 
 	return pairs, scanner.Err()

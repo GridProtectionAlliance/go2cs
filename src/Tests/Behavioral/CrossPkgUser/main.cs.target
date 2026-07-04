@@ -56,6 +56,10 @@ internal static nint Rank(this emblem e) {
     @string Stamp();
 }
 
+[GoType] partial interface Labeled {
+    @string Label();
+}
+
 [GoType] partial struct seal {
     internal @string name;
 }
@@ -201,6 +205,12 @@ internal static void Main() => func((defer, recover) => {
     stamped st = new seal(name: "notary"u8);
     CrossPkgLib.Labeled lb = new seal(name: "base"u8);
     fmt.Println(st.Label(), st.Stamp(), CrossPkgLib.Describe(st), lb.Label());
+    Labeled wide = new seal(name: "w"u8);
+    fmt.Println(AreEqual(((CrossPkgLib.Labeled)wide), lb));
+    var sp2 = Ꮡ(new CrossPkgLib.Sensor(Name: "porch"u8, Temp: 40));
+    fmt.Println(((CrossPkgLib.Labeled)new CrossPkgLib.SensorжLabeled(sp2)).Label(), CrossPkgLib.LabeledOf(sp2).Label());
+    Labeled localLb = new CrossPkgLib_SensorжLabeled(sp2);
+    fmt.Println(localLb.Label());
     var (rp, rerr) = getReporter();
     fmt.Println(rp.Report(), rerr == default!);
     certificate ct = new cert(id: 42);

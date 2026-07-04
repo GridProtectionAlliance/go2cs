@@ -49,6 +49,12 @@ public static @string Describe(Labeled l) {
     return l.Label();
 }
 
+public static Labeled LabeledOf(ж<Sensor> Ꮡs) {
+    ref var s = ref Ꮡs.Value;
+
+    return new SensorжLabeled(Ꮡs);
+}
+
 [GoType] partial struct Meter {
     internal nint count;
 }

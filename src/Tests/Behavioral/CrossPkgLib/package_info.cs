@@ -43,6 +43,7 @@ using static go.CrossPkgLib_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<Alarm, error>(Pointer = true)]
 [assembly: GoImplement<Meter, Reporter>(Pointer = true)]
+[assembly: GoImplement<Sensor, Labeled>(Pointer = true)]
 [assembly: GoImplement<Sensor, Labeled>]
 // </InterfaceImplementations>
 
