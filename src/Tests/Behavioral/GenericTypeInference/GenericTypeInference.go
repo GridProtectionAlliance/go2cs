@@ -212,7 +212,7 @@ func growShrink[U ~uint32 | ~uintptr](v, lim U) U {
 // reflect iter.go).
 func seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[T] {
 	return func(yield func(T) bool) {
-		for i := T(0); i < T(n); i = i + 1 {
+		for i := T(0); i < T(n); i++ {
 			if !yield(i) {
 				return
 			}

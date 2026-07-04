@@ -276,6 +276,12 @@ func (v *Visitor) getLiftedConstraints(typ types.Type, name string) string {
 				fmt.Sprintf("ISubtractionOperators<%s, %s, %s>", name, name, name),
 				fmt.Sprintf("IMultiplyOperators<%s, %s, %s>", name, name, name),
 				fmt.Sprintf("IDivisionOperators<%s, %s, %s>", name, name, name),
+				// `i++` / `i--` on a type parameter (reflect rangeNum's loop, CS0023) binds
+				// these. They live in the numeric-only Arithmetic set — NOT the
+				// string-including Sum set (@string implements neither). Mirrors the
+				// go2cs-gen InterfaceTypeTemplate "Arithmetic" list — keep the two in sync.
+				fmt.Sprintf("IIncrementOperators<%s>", name),
+				fmt.Sprintf("IDecrementOperators<%s>", name),
 			}
 		case IntegerOperators:
 			constraints = []string{

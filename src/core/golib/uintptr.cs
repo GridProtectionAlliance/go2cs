@@ -61,7 +61,7 @@ public struct uintptr : IEquatable<uintptr>, IComparable<uintptr>, IComparable, 
     IMultiplyOperators<uintptr, uintptr, uintptr>, IDivisionOperators<uintptr, uintptr, uintptr>,
     IModulusOperators<uintptr, uintptr, uintptr>, IBitwiseOperators<uintptr, uintptr, uintptr>,
     IShiftOperators<uintptr, int, uintptr>, IEqualityOperators<uintptr, uintptr, bool>,
-    IComparisonOperators<uintptr, uintptr, bool>
+    IComparisonOperators<uintptr, uintptr, bool>, IIncrementOperators<uintptr>, IDecrementOperators<uintptr>
 {
     // Pointer-width unsigned value of the struct 'uintptr' — public for Interlocked/Volatile seams
     public nuint Value;
