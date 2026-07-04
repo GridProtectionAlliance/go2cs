@@ -49,6 +49,15 @@ internal static int64 twice(this @base b) {
     internal int64 tag;
 }
 
+[GoType] partial struct @file {
+    internal int64 fd;
+}
+
+[GoRecv] internal static int64 bump(this ref @file f) {
+    f.fd += 2;
+    return f.fd;
+}
+
 internal static void Main() {
     ref var b = ref heap(new box(), out var Ꮡb);
     fill(Ꮡb);
@@ -78,6 +87,8 @@ internal static void Main() {
     var np = @new<shadowed>();
     np.Value.tag = 11;
     fmt.Println((~np).tag, (~np).ctxt.tag);
+    var fl = Ꮡ(new @file(fd: 5));
+    fmt.Println(fl.bump(), (~fl).fd);
 }
 
 [GoType] partial struct ctxt {

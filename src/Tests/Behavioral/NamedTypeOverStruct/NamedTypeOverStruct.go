@@ -56,6 +56,17 @@ type derived struct {
 	tag int64
 }
 
+// file is a C# 11 contextual keyword reserved as a TYPE-name modifier (CS9056) - the
+// emitted type must be '@file' (os's `type file struct` cascaded ~30 errors).
+type file struct {
+	fd int64
+}
+
+func (f *file) bump() int64 {
+	f.fd += 2
+	return f.fd
+}
+
 func main() {
 	var b box
 	fill(&b)
@@ -97,6 +108,9 @@ func main() {
 	np := new(shadowed)
 	np.tag = 11
 	fmt.Println(np.tag, np.ctxt.tag) // 11 11
+
+	fl := &file{fd: 5}
+	fmt.Println(fl.bump(), fl.fd) // 7 7
 }
 
 type ctxt struct{ fn, tag int }

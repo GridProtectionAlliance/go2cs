@@ -241,6 +241,12 @@ var keywords = NewHashSet([]string{
 	// name as the field name, so these should also be escaped with an `@` when encountered:
 	"bool", "byte", "int", "string", "uint",
 
+	// `file` is a C# 11 contextual keyword reserved as a TYPE-name modifier: a type declared
+	// `partial struct file` is CS9056 ("Types and aliases cannot be named 'file'") — os's
+	// `type file struct{…}` cascaded ~30 errors. The '@' escape is valid in every position,
+	// so it is escaped like a full keyword.
+	"file",
+
 	// The remaining C# keywords overlap with Go keywords, so they do not need detection:
 	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if",
 	// "interface", "return", "select", "struct", "switch", "true", "var"
