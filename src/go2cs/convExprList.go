@@ -164,7 +164,19 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// a `static readonly UntypedInt`) poisons deferǃ's delegate inference — the type
 			// parameter resolves to the wrapper where the deferred method group takes the
 			// default type (CS0123 ×2, poll fd_windows' deferred Seek). Cast it to the
-			// constant's DEFAULT Go type; a literal is already a typed C# constant.
+			// constant's DEFAULT Go type; a literal is already a typed C# constant. An arg
+			// the defer machinery ALREADY cast to its parameter type (castArgToType) must
+			// stay — stacking the default-type cast on top re-poisons inference with the
+			// default where the parameter differs (syscall exec_windows'
+			// DUPLICATE_CLOSE_SOURCE, uint32 param — CS1503 regression on the first cut).
+			alreadyCast := false
+
+			if callContext != nil && callContext.castArgToType != nil {
+				if castType, ok := callContext.castArgToType[i]; ok && len(castType) > 0 {
+					alreadyCast = true
+				}
+			}
+
 			var constExpr ast.Expr
 
 			switch e := expr.(type) {
@@ -174,7 +186,7 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 				constExpr = e.Sel
 			}
 
-			if constExpr != nil {
+			if !alreadyCast && constExpr != nil {
 				if constIdent, ok := constExpr.(*ast.Ident); ok {
 					if constObj, ok := v.info.ObjectOf(constIdent).(*types.Const); ok {
 						if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 {
