@@ -244,6 +244,23 @@ internal static void Main() {
         break;
     }}
 
+    pace dur = 5;
+    switch (ᐧ) {
+    case {} when dur >= 6: {
+        fmt.Println("fast");
+        break;
+    }
+    case {} when dur == 5: {
+        fmt.Println("steady");
+        break;
+    }
+    default: {
+        fmt.Println("slow");
+        break;
+    }}
+
 }
+
+[GoType("num:int64")] partial struct pace;
 
 } // end main_package

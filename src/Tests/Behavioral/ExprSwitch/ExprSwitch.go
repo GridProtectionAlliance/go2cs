@@ -205,4 +205,20 @@ func main() {
 		fmt.Println("unreachable but compiled")
 	}
 
+
+	// A named-NUMERIC comparand in an expressionless switch: a relational/constant pattern
+	// (`dur is >= 0`) would type its literal against the wrapper STRUCT (CS9135, time
+	// Abs/round) - the lowering must keep the plain operator form (`dur >= 0`).
+	var dur pace = 5
+	switch {
+	case dur >= 6:
+		fmt.Println("fast")
+	case dur == 5:
+		fmt.Println("steady")
+	default:
+		fmt.Println("slow")
+	}
 }
+
+// pace is a named numeric - it emits as a [GoType] wrapper struct with no constant form.
+type pace int64
