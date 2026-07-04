@@ -147,7 +147,11 @@ func (v *Visitor) sparseArrayKey(key ast.Expr, context KeyValueContext) string {
 					// A uintptr-backed named numeric converts through TWO user-defined
 					// operators (named -> golib uintptr struct -> int), which C# rejects in a
 					// single cast (CS0030) - split the steps, keeping the symbolic operand.
-					if basic.Kind() == types.Uintptr {
+					// The UNSIGNED kinds share the gap: a named-over-nuint/uint/ulong key's
+					// single `(int)key` chains the wrapper operator into an explicit unsigned→
+					// int narrowing (reflect kindNames' ΔKind keys, num:nuint — CS0030 ×27).
+					switch basic.Kind() {
+					case types.Uintptr, types.Uint, types.Uint32, types.Uint64:
 						return fmt.Sprintf("(int)((%s)%s)", v.getCSTypeName(basic), keyExpr)
 					}
 

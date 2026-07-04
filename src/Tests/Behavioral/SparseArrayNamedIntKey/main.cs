@@ -28,6 +28,13 @@ internal static slice<@string> codeNames = new golib.SparseArray<@string>{
 
 [GoType("num:uintptr")] partial struct errno;
 
+[GoType("num:nuint")] partial struct kindT;
+
+internal static slice<@string> kindNames = new golib.SparseArray<@string>{
+    [1] = "one"u8,
+    [3] = "three"u8
+}.slice();
+
 internal static readonly errno errBase = /* 1 << 10 */ 1024;
 internal static readonly errno eBig = /* errBase + 1 */ 1025;
 internal static readonly errno eAcces = /* errBase + 2 */ 1026;
@@ -47,6 +54,7 @@ internal static void Main() {
     int64 cur = 2;
     uint32 u32 = 1;
     fmt.Println(data[(nint)(cur)], data[(nint)(u32)]);
+    fmt.Println(kindNames[3], len(kindNames));
 }
 
 internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};

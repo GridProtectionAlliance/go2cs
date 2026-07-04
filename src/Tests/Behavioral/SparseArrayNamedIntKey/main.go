@@ -42,6 +42,16 @@ var codeNames = []string{
 // named/underlying operand rendering has ambiguous operators, CS0034).
 type errno uintptr
 
+// kindT mirrors reflect Kind (named over uint): the same two-step key split as uintptr
+// (single (int)key chains the wrapper operator into an unsigned narrowing - CS0030 x27
+// on reflect kindNames).
+type kindT uint
+
+var kindNames = []string{
+	kindT(1): "one",
+	kindT(3): "three",
+}
+
 const (
 	errBase errno = 1 << 10
 	eBig    errno = errBase + 1
@@ -66,6 +76,7 @@ func main() {
 	var cur int64 = 2
 	var u32 uint32 = 1
 	fmt.Println(data[cur], data[u32]) // 30 20
+	fmt.Println(kindNames[kindT(3)], len(kindNames)) // three 4
 }
 
 // asciiSpace mirrors bytes.Fields: ESCAPED rune keys in an indexed array composite
