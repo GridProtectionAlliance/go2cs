@@ -15,10 +15,13 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	// the key name so this works for keyed literals regardless of field order.
 	var valueContexts []ExprContext
 	var structFieldIfaceType types.Type
+	var structFieldType types.Type
 
 	if context.source == StructSource {
 		if keyIdent, ok := keyValueExpr.Key.(*ast.Ident); ok {
 			if fieldObj := v.info.Uses[keyIdent]; fieldObj != nil {
+				structFieldType = fieldObj.Type()
+
 				if _, isPtr := fieldObj.Type().(*types.Pointer); isPtr {
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
@@ -42,6 +45,16 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 	}
 
 	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
+
+	// A NARROW-integer arithmetic value in a struct-FIELD initializer needs the same
+	// cast-back as the assignment forms — Go wraps the arithmetic at the operand width,
+	// C# promotes it to int (image/draw's RGBA64 literal `R: uint16(…)+srgba.R`,
+	// CS1503 ×4 against the generated ushort ctor parameter).
+	if structFieldType != nil {
+		if narrowCast := v.narrowArithmeticCastTypeFor(structFieldType, keyValueExpr.Value, valueExpr); len(narrowCast) > 0 {
+			valueExpr = fmt.Sprintf("(%s)(%s)", narrowCast, valueExpr)
+		}
+	}
 
 	if structFieldIfaceType != nil {
 		valueExpr = v.convertToInterfaceType(structFieldIfaceType, v.getExprType(keyValueExpr.Value), valueExpr)

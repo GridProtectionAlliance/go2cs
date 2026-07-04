@@ -49,6 +49,9 @@ func main() {
 
 	var wv word = 0xF0
 	fmt.Println(uint64(wv&0x30|word(0x01)), uint64(wv^word(0xFF))) // 49 15
+
+	c := blend(channels{R: 60000, G: 40000, B: 20000, A: 65535}, channels{R: 9000, G: 1, B: 2, A: 3}, 3, 4)
+	fmt.Println(c.R, c.G, c.B, c.A) // 54000 30001 15002 49154
 }
 
 func mask(t Tag) Tag { return t & 0xFF }
@@ -56,5 +59,21 @@ func mask(t Tag) Tag { return t & 0xFF }
 func maskFor(s uint) word {
 	m := word(1)<<s - 1
 	return m
+}
+
+// channels: NARROW-integer arithmetic in a struct-FIELD initializer needs the cast-back
+// (image/draw's RGBA64 literal `R: uint16(...)+srgba.R` met the generated ushort ctor
+// parameter as int, CS1503 x4).
+type channels struct {
+	R, G, B, A uint16
+}
+
+func blend(d, s channels, a, m uint32) channels {
+	return channels{
+		R: uint16(uint32(d.R)*a/m) + s.R,
+		G: uint16(uint32(d.G)*a/m) + s.G,
+		B: uint16(uint32(d.B)*a/m) + s.B,
+		A: uint16(uint32(d.A)*a/m) + s.A,
+	}
 }
 
