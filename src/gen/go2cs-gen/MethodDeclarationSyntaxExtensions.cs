@@ -26,6 +26,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Common;
 using static go2cs.Templates.TemplateBase;
 using static go2cs.Symbols;
 
@@ -109,7 +110,7 @@ public record MethodInfo
             return false;
 
         // Compare return types - convert ITypeSymbol to string representation
-        string returnTypeString = methodSymbol.ReturnType.ToDisplayString();
+        string returnTypeString = GlobalQualify(methodSymbol.ReturnType.ToDisplayString());
 
         if (ReturnType != returnTypeString)
             return false;
@@ -121,7 +122,7 @@ public record MethodInfo
         // Compare parameter types
         for (int i = 0; i < Parameters.Length; i++)
         {
-            string paramType = methodSymbol.Parameters[i].Type.ToDisplayString();
+            string paramType = GlobalQualify(methodSymbol.Parameters[i].Type.ToDisplayString());
 
             if (Parameters[i].type != paramType)
                 return false;
@@ -186,7 +187,7 @@ public static class MethodSyntaxExtensions
 
                 TypeInfo typeInfo = semanticModel.GetTypeInfo(param.Type);
                 ITypeSymbol? typeSymbol = typeInfo.Type;
-                string fullyQualifiedTypeName = typeSymbol?.ToDisplayString() ?? "object";
+                string fullyQualifiedTypeName = GlobalQualify(typeSymbol?.ToDisplayString() ?? "object");
 
                 return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
             }).ToArray(),
@@ -215,14 +216,14 @@ public static class MethodSyntaxExtensions
         TypeInfo typeInfo = semanticModel.GetTypeInfo(methodDeclaration.ReturnType);
         ITypeSymbol? typeSymbol = typeInfo.Type;
 
-        return typeSymbol?.ToDisplayString() ?? "object";
+        return GlobalQualify(typeSymbol?.ToDisplayString() ?? "object");
     }
 
     public static MethodInfo GetMethodInfo(this IMethodSymbol methodSymbol)
     {
         // Convert parameters to the required tuple format
         (string type, string name)[] parameters = methodSymbol.Parameters
-            .Select(parameter => (type: parameter.Type.ToDisplayString(), name: parameter.Name))
+            .Select(parameter => (type: GlobalQualify(parameter.Type.ToDisplayString()), name: parameter.Name))
             .ToArray();
 
         // Extract generic type parameters
@@ -262,7 +263,7 @@ public static class MethodSyntaxExtensions
         return new MethodInfo
         {
             Name = methodSymbol.Name,
-            ReturnType = methodSymbol.ReturnType.ToDisplayString(),
+            ReturnType = GlobalQualify(methodSymbol.ReturnType.ToDisplayString()),
             Parameters = parameters,
             GenericTypes = genericTypes,
             TypeConstraints = typeConstraints,

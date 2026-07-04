@@ -123,6 +123,19 @@ public static class Common
         return simpleName;
     }
 
+    // A generated reference that BEGINS with the root namespace must be global::-qualified:
+    // inside a package whose namespace nests a same-named segment (go/build/constraint →
+    // namespace go.go.build), C# binds the leading `go` RELATIVELY to go.go, so every
+    // `go.…` type reference in the generated adapter failed (CS0234 ×50 + CS0538 ×13).
+    // Qualifies each type-reference position (string start, after '<', '(', ',' or space);
+    // an interior `.go.` segment (go.go.build itself) is never touched.
+    private static readonly Regex s_rootTypeRefRegex = new(@"(^|[<(,\s])go\.", RegexOptions.Compiled);
+
+    public static string GlobalQualify(string typeName)
+    {
+        return s_rootTypeRefRegex.Replace(typeName, "$1global::go.");
+    }
+
     public static string GetFullTypeName(this ITypeSymbol? typeSymbol, bool useDisplayString = false)
     {
         switch (typeSymbol)

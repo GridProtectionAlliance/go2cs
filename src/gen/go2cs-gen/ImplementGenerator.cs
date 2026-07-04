@@ -108,7 +108,7 @@ public class ImplementGenerator : ISourceGenerator
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
 
             string structName = structType.GetFullTypeName();
-            string interfaceName = interfaceType.GetFullTypeName(true);
+            string interfaceName = GlobalQualify(interfaceType.GetFullTypeName(true));
 
             // Get the attribute's Promoted / Pointer argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -130,9 +130,9 @@ public class ImplementGenerator : ISourceGenerator
                     .Select(method => (name: iface.ToDisplayString(), method)))
                 .Select(info => new MethodInfo
                 {
-                    Name = promoted && !pointer && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{info.name}.{info.method.Name}",
-                    ReturnType = info.method.ReturnType.ToDisplayString(),
-                    Parameters = info.method.Parameters.Select(param => (type: param.Type.ToDisplayString(), name: param.Name)).ToArray(),
+                    Name = promoted && !pointer && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{GlobalQualify(info.name)}.{info.method.Name}",
+                    ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
+                    Parameters = info.method.Parameters.Select(param => (type: GlobalQualify(param.Type.ToDisplayString()), name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
                     TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray())
                 })
@@ -253,7 +253,7 @@ public class ImplementGenerator : ISourceGenerator
                     PackageName = packageName,
                     // FULLY-qualified for a foreign struct (no local using guarantees resolution;
                     // mirrors the value adapter's same-named-type shadow rationale).
-                    StructName = foreignStruct ? structType.GetFullTypeName(true) : structName,
+                    StructName = foreignStruct ? GlobalQualify(structType.GetFullTypeName(true)) : structName,
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
@@ -286,7 +286,7 @@ public class ImplementGenerator : ISourceGenerator
                     // FULLY-qualified: the bare name resolves to the LOCAL same-named type
                     // inside this package class (os's ΔSignal interface shadowed syscall's
                     // ΔSignal struct - the adapter field/ctor typed the wrong side).
-                    StructName = structType.GetFullTypeName(true),
+                    StructName = GlobalQualify(structType.GetFullTypeName(true)),
                     InterfaceName = interfaceName,
                     // Composes with Symbols.ValueAdapterInfix - the value sibling of the
                     // PointerPrefix-composed pointer adapters.
