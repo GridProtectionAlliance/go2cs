@@ -60,6 +60,8 @@ internal static void Main() {
     fmt.Println(r.Value, classify(r));
     fmt.Println(consume("abcd"u8));
     fmt.Println(sliceToArray(new byte[]{1, 2, 3, 4}.slice()));
+    var v2 = new view(new @base(a: 5, b: 6));
+    fmt.Println(v2.a + v2.b);
 }
 
 } // end main_package

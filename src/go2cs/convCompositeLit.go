@@ -122,6 +122,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	var namedMapComposite bool
 	var namedMapRender string
 	var aliasArrayComposite bool
+	var namedStructWrapRender string
 
 	// Check composite lit elements against struct fields
 	checkStructFields := func(structType *types.Struct) {
@@ -255,6 +256,19 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	case *types.Named:
 		if structType, ok := t.Underlying().(*types.Struct); ok {
 			checkStructFields(structType)
+
+			// A DEFINED type over a NAMED STRUCT type (`type decoder coder`) is emitted as
+			// a WRAPPER whose only ctor takes the underlying (`decoder(coder value)`) — its
+			// composite literal constructs the UNDERLYING and wraps:
+			// `new decoder(new coder(order: …))` (encoding/binary, CS1739 ×5). A type
+			// written directly over a struct LITERAL keeps its own keyed ctor (unchanged).
+			if rhs, okRHS := packageTypeSpecRHS[t.Obj()]; okRHS && rhs != nil {
+				if rhsNamed, ok := types.Unalias(rhs).(*types.Named); ok {
+					if _, isStruct := rhsNamed.Underlying().(*types.Struct); isStruct {
+						namedStructWrapRender = convertToCSTypeName(v.getTypeName(rhsNamed, false))
+					}
+				}
+			}
 		} else if arrayType, ok := t.Underlying().(*types.Array); ok {
 			// A named array type (e.g. `type d [3]rune`) lowers to a struct wrapping
 			// array<T>; its composite literal cannot use C# collection-initializer braces
@@ -465,6 +479,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// Open the named ctor around the concrete map literal; the ')' closes after the
 		// brace via compositeSuffix.
 		typeRender = fmt.Sprintf("%s(new %s", typeRender, namedMapRender)
+		compositeSuffix += ")"
+	}
+
+	if namedStructWrapRender != "" {
+		// Open the wrapper ctor around the underlying named struct's keyed ctor; the
+		// closing ')' follows the rbrace via compositeSuffix.
+		typeRender = fmt.Sprintf("%s(new %s", typeRender, namedStructWrapRender)
 		compositeSuffix += ")"
 	}
 

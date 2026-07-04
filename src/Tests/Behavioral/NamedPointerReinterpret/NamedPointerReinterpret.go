@@ -74,4 +74,10 @@ func main() {
 	fmt.Println(consume("abcd")) // abcd
 
 	fmt.Println(sliceToArray([]byte{1, 2, 3, 4})) // 6
+
+	// A composite literal of a DEFINED-over-NAMED-STRUCT type constructs the underlying
+	// and wraps (`new view(new base(a: 5, b: 6))` - encoding/binary's decoder/encoder
+	// over coder, CS1739 x5).
+	v2 := view{a: 5, b: 6}
+	fmt.Println(v2.a + v2.b) // 11
 }
