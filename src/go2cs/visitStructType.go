@@ -265,6 +265,15 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				continue
 			}
 
+			// A generic embed's MEMBER NAME is the base type name (Go promotes entry[K,V]'s
+			// embedded node[K,V] through the selector `.node`), so strip the type arguments —
+			// and do it BEFORE the selector dot-strip: the arguments may contain qualified
+			// types whose dots otherwise win the LastIndex (uniqueMap's
+			// `*concurrent.HashTrieMap[T, weak.Pointer[T]]` named its member `Pointer`).
+			if bracketIndex := strings.Index(goTypeName, "["); bracketIndex != -1 {
+				goTypeName = goTypeName[:bracketIndex]
+			}
+
 			if selectorType {
 				// Get index of last dot in go type name
 				dotIndex := strings.LastIndex(goTypeName, ".")
@@ -273,12 +282,6 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					// Get the name of the struct type
 					goTypeName = goTypeName[dotIndex+1:]
 				}
-			}
-
-			// A generic embed's MEMBER NAME is the base type name (Go promotes entry[K,V]'s
-			// embedded node[K,V] through the selector `.node`), so strip the type arguments.
-			if bracketIndex := strings.Index(goTypeName, "["); bracketIndex != -1 {
-				goTypeName = goTypeName[:bracketIndex]
 			}
 
 			// Lookup identity to determine if it's an interface
