@@ -67,6 +67,40 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			}
 		}
 
+		// A FUNCTION-LOCAL `var name, offset, abs = t.locabs()` (a grouped var spec is not a
+		// `:=`, so visitAssignStmt never sees it) deconstructs the same way — the per-name
+		// loop below assigned the WHOLE tuple to the first name and silently DEFAULTED the
+		// rest (CS0029; time appendFormat read a zero abs). Emit the C# tuple deconstruction
+		// (`var (name, offset, abs) = t.locabs();`), matching the `:=` form. Gated to specs
+		// with no heap-escaping name (an escaping name needs its `ref heap<T>` box decl —
+		// none in the corpus takes this shape yet).
+		if v.inFunction && valueSpec.Type == nil && len(valueSpec.Names) > 1 && len(valueSpec.Values) == 1 {
+			if _, isCall := valueSpec.Values[0].(*ast.CallExpr); isCall {
+				if _, isTuple := v.info.TypeOf(valueSpec.Values[0]).(*types.Tuple); isTuple {
+					allPlain := true
+
+					for _, ident := range valueSpec.Names {
+						if obj := v.info.Defs[ident]; obj != nil && v.identEscapesHeap[obj] {
+							allPlain = false
+							break
+						}
+					}
+
+					if allPlain {
+						names := make([]string, len(valueSpec.Names))
+
+						for i, ident := range valueSpec.Names {
+							names[i] = getSanitizedIdentifier(v.getIdentName(ident))
+						}
+
+						v.targetFile.WriteString(v.newline)
+						v.writeOutput("var (%s) = %s;", strings.Join(names, ", "), v.convExpr(valueSpec.Values[0], nil))
+						return
+					}
+				}
+			}
+		}
+
 		for i, ident := range valueSpec.Names {
 			var isAnyType bool
 			var isInterfaceType bool

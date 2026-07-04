@@ -25,4 +25,11 @@ func main() {
 	fmt.Println(defaultBox.v) // 7
 	fmt.Println(n, s)         // 42 hello
 	fmt.Println(calls)        // 1 - proves the initializer call ran exactly once
+
+	// FUNCTION-LOCAL grouped var spec deconstructing a multi-result call (time
+	// appendFormat's `var (name, offset, abs = t.locabs() ...)`): the per-name path
+	// assigned the whole tuple to the FIRST name and silently defaulted the rest
+	// (CS0029) - must emit `var (ln, ls) = pair();`.
+	var ln, ls = pair()
+	fmt.Println(ln, ls, calls) // 42 hello 2
 }

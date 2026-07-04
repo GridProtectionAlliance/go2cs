@@ -30,6 +30,9 @@ internal static void Main() {
     fmt.Println((~defaultBox).v);
     fmt.Println(n, s);
     fmt.Println(calls);
+
+    var (ln, ls) = pair();
+    fmt.Println(ln, ls, calls);
 }
 
 } // end main_package
