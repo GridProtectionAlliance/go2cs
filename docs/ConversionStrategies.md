@@ -1043,6 +1043,36 @@ C# does not allow inline or intra-function type definitions, so these are "lifte
 
 The **empty struct `struct{}` is never lifted** — it maps to the shared golib `EmptyStruct`, so a `struct{}{}` composite literal emits `new EmptyStruct()` and a `map[K]struct{}` ("set") emits `map<K, EmptyStruct>`. Lifting an empty struct would be doubly wrong: it has no fields to model, and the lift mis-attributes its name and identity. When the `struct{}{}` is the value assigned to a map element (`seen[k] = struct{}{}`), the enclosing assignment passes the **LHS ident** (`seen`) into the struct-conversion context to name the lift — so the empty struct was being lifted to `<func>_seen` *and registered under `seen`'s own type, the map* `map[K]struct{}`, in the lifted-type registry. That poisoned every later reference to that map type: the function parameter `seen map[K]struct{}` rendered as the phantom struct instead of `map<K, EmptyStruct>`, and its comma-ok deconstruction (`(_, ok) = seen[k]`) and two-arg indexer vanished (CS8130/CS0021), while real-map call sites mismatched (CS1503). `convStructType` now short-circuits an empty struct to `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard that `extractStructType` already applies everywhere else. (Guarded by the `EmptyStructMapSet` behavioral test; runtime hit this on `typesEqual`'s `seen map[_typePair]struct{}` parameter.)
 
+### Generic embedded fields
+A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as
+an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,
+pointer, and selector forms) and the member emits under the **base name** with type arguments
+stripped **before** the selector dot-strip — the arguments may contain qualified types whose
+dots otherwise win the LastIndex (`*concurrent.HashTrieMap[T, weak.Pointer[T]]` misnamed its
+member `Pointer` instead of `HashTrieMap`). The TypeGenerator's promoted accessors carry the
+type parameters on the instance param (`ref Δentry<K, V> instance`) and strip them from the
+member access (`instance.node.isEntry`). A promoted method call through a raw ж **box local**
+hops `X.Value` ahead of the cross-package pointer-embed hop
+(`m.Value.HashTrieMap.Value.Load(value)`, unique). BANKED: unqualified promoted METHOD calls
+through a generic embed (`w.show()`) — receiver wrappers resolve the embedded type by exact
+name; qualified calls work. Guarded by `GenericStructFields` (`wrapped[T]`/`tag[T]`) and
+`CrossPkgUser` (`holder[T]` embedding `*CrossPkgLib.Cache[T]`).
+
+### Named delegate types wrap mismatched initializers
+A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
+C# conversion: internal/concurrent's `keyHash: mapType.Hasher` feeds a `hashFunc` field from a
+`Func<…>` field. The composite-literal walk resolves each element's field BY NAME (keyed-aware)
+and wraps mismatched delegate values in the target delegate's constructor —
+`keyHash: new hashFunc((~mapType).Hasher)` (the wrap splits a C# named-argument label first).
+FuncLit and nil initializers stay bare. Guarded by `FirstClassFunctions`
+(`handler`/`provider`/`registry`).
+
+### Major-version import directories
+A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, and
+the emitted class follows the package NAME: consumers reference `math.rand.rand_package`, not
+the path-derived `v2_package` (CS0234). Centralized in `convertImportPathToNamespace`, so
+every consumer-side derivation (using aliases, attribute references, FQ renderings) agrees.
+
 ## Struct Type Embedding
 Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand). Both field and method promotion are **transitive through every embedding level**: when `top` embeds `mid` which embeds `inner`, `top` gets an accessor for `inner`'s field `n` (`top.n => ref mid.n`) and a forwarding receiver for `inner`'s method `describe` (`top.describe() => target.mid.describe()`), each resolving through `mid`'s own one-level promotion. The generator collects an embedded struct's members and methods recursively (following each field whose name equals its type's simple name — Go's embedding marker), with the closest declaration of a name winning, matching Go's promotion rules. **Pointer embeds promote too.** Go also embeds by pointer (`*traceBuf`), whose C# field type is `ж<traceBuf>`; its methods and fields are promoted exactly like a value embed (the field's ref-property is dereferenced — `target.traceBuf.Value.method()` — which binds the pointer-receiver method via the `[GoRecv]` `ж<T>` overload). The embedding-marker comparison dereferences the field type first, because a pointer field's simple name carries a `.Value` suffix (`traceBuf.Value`) that would never match the bare embed field name. This matters most *transitively*: `traceExpWriter` embeds `traceWriter` (value) which embeds `*traceBuf` (pointer), and `traceBuf`'s `varint`/`byte` must promote all the way up — without the deref-aware marker the nested pointer embed is skipped and the upper struct silently loses the method (CS1929). (Guarded by the `NestedEmbeddingPromotion` behavioral test for value embeds and the `PointerEmbeddingPromotion` test for one-level and two-level-transitive pointer embeds; runtime relies on the field case for `stackWorkBuf` → `stackWorkBufHdr` → `workbufhdr.nobj` and the pointer case for the trace writers.) Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
 
@@ -1437,6 +1467,26 @@ in the synthesized execution-context lambda, so a `ref T` receiver referenced in
 inside the wrapper (fmt `ss.Token`; guarded by `DeferCallOrder` `acc.add`).
 
 The same block also covers a **named-numeric pointer reinterpreted to its underlying *basic* type** — `(*uint64)(head)` where `head` is a `*lfstack` (`type lfstack uint64`). This is the runtime's atomic-on-a-named-integer pattern: `atomic.Load64((*uint64)(head))` / `atomic.Cas64((*uint64)(head), …)` on the named atomic types **`lfstack`** (uint64, `lfstack.go`), **`sweepClass`** (uint32, `mgcsweep.go`), **`profAtomic`** (uint64, `profbuf.go`), and **`sysMemStat`** (uint64, `mstats.go`). `ж<lfstack>` and `ж<uint64>` are distinct generic instantiations with no conversion (`CS0030`), so the same value-convert-and-re-box applies — `atomic.Load64(Ꮡ((uint64)(head)))` — using the `[GoType("num:uint64")]` wrapper's `lfstack → uint64` value conversion. The reinterpret condition is generalized from *Named↔Named* to also fire when the **result** elem is a **basic** type whose underlying equals a **named** argument elem's (`namedToBasic`); the result C# type name comes from the result elem directly (`uint64`/`uint32`). Because it boxes a copy, a **read** through the reinterpret is faithful (golib `Load64` reads `Ꮡptr.Value` = the copy = the value), which is verified against Go; a **write** through it (`atomic.Store64`/`Cas64`/`Xadd64`) targets the copy, but those intrinsics are asm stubs in the converted runtime, so there is no faithful write-through to lose. Cleared all 13 `lfstack`/`sweepClass`/`profAtomic`/`sysMemStat` `→ ж<primitive>` CS0030 (runtime 114 → 101). (Guarded by `NamedNumericPointerReinterpret` — the read path across uint64/uint32 named types, values verified vs Go.)
+
+### Slice-to-array conversions route golib's copy constructor
+Go's slice-to-array conversions both route through `array<T>(slice<T> source, nint length)` —
+a COPY constructor that panics Go-style on a short slice:
+- the Go 1.20 **value** form `[4]byte(slice)` emits `new array<byte>(s, 4)` (netip
+  `AddrFromSlice`, CS1955) — Go's conversion copies, so this is exactly faithful;
+- the Go 1.17 **pointer** form `(*[32]byte)(slice)` emits `Ꮡ(new array<byte>(x, 32))`
+  (edwards25519 `fiatScalarFromBytes`'s input, CS0030) — Go aliases the slice's backing here,
+  the boxed copy does not; reads back through the same pointer stay faithful, and the corpus
+  sites are read-only inputs. A NAMED-over-array target falls through unchanged (banked).
+Guarded by `NamedPointerReinterpret` (`sliceToArray`).
+
+### A direct-ж method on a value field-chain boxes through the &-machinery
+A direct-ж (box-receiver) method called on a field of a plain VALUE param — netip's
+`ip.addr.halves()`, where Go auto-addresses `&ip.addr` — routes the receiver through the
+&-machinery: `Ꮡ(ip).of(ΔAddr.Ꮡaddr).halves()`. This boxes a COPY, which is faithful because
+the enclosing Go value param is itself a copy: writes through the method could only ever reach
+the local copy in Go too. (Pointer-rooted chains and indexed elements take their own
+long-standing arms; this is the remaining value-rooted case.) Guarded by
+`StructPointerPromotionWithInterface` (`rig`/`probeRig`).
 
 ### Field address of a collision-renamed heap-boxed local uses the raw box name
 A heap box always keeps the RAW Go identifier (`ref var Δslice = ref heap<T>(out var <box>slice)`), so taking the address of a FIELD of a collision-renamed boxed local routes through `boxBaseName` -- the raw-name box, never the Δ-renamed alias (CS0103; reflect `SliceOf`'s `&slice.Type`). This matches the whole-value `&p` form and the renamed receiver/parameter boxes:

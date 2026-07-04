@@ -13,7 +13,26 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-04, ~90 commits)
+## Where things stand (2026-07-04 late, ~99 commits)
+
+- **WAVE (recon149, honest full-tree): 137 of 303 packages compile** (previous measured wave:
+  63) — 35 leaf-failing projects carrying 406 own-errors, ~131 packages blocked as dependents.
+  **ZERO CLUB 35**: +bufio (cross-embed ambiguity 768469444 + named-func-type tuple 774bf81e9),
+  +internal/concurrent (generic embeds emit f1fff3fed + generic accessors eb3c85caf +
+  named-delegate wrap 358ac0c5d), +unique (generic member naming e2f905c72 + box-local X.Value
+  hop d62e51736), +net/netip (+crypto/internal/edwards25519) (slice→array copy ctor 07f77d4aa +
+  direct-ж value-chain boxing 031a65b05), weak restored (pointer-instantiated type-param box
+  form de38255f4), /vN import naming e182aa15b, unbound-type-param record skip fa5a5c636.
+  **Leaf-failure census (top, by own-errors):** html 133, go/build/constraint 63, archive/tar
+  29, flag 23, compress/flate 20, encoding/binary 17, regexp/syntax 15, go/doc/comment 13,
+  go/token 10, context 10, socktest 8, math/big 8, hash/fnv 8, compress/lzw 7, x/text/transform
+  5, runtime/debug 5, ascii85 5, x/sys/cpu 4, dag 3, + ~16 small tails.
+  **NEXT CAMPAIGN (leverage-ordered): the dependency chokepoints** — encoding/binary (17),
+  context (10), go/token (10), math/big (8), regexp/syntax (15), compress/flate (20),
+  x/text/transform (5): clearing these releases most of the ~131 blocked dependents. html's 133
+  is likely one or two roots repeated (entity tables?) — check early, may be cheap.
+
+## Previous entry (2026-07-04, ~90 commits)
 
 - **ZERO CLUB 31.** New zeros this stretch: **os** (unalias-hop 785372b5d + gen hop-split
   1c7b07e43 + STRUCTURAL INTERFACE INHERITANCE a5f3b4e18/bacaec9bf + tuple-forward deconstruct
