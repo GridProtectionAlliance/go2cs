@@ -1379,8 +1379,14 @@ func (v *Visitor) recordConversionPackageUsing(t types.Type) {
 	case *types.Named:
 		if obj := t.Obj(); obj != nil {
 			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
+				// Register under the same qualifier the recorded conversion STRINGS carry:
+				// a Δ-renamed import (`Δsyscall`, internal/poll) records `Δsyscall.Sockaddr…`
+				// attribute type names, so the resolving using must declare that exact alias
+				// (`using Δsyscall = go.syscall_package;`) — the plain-name using left the
+				// attributes unresolvable (CS0246 ×4). Unrenamed imports are unchanged
+				// (importQualifier is the identity for them).
 				packageLock.Lock()
-				conversionPackageUsings[pkg.Name()] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
+				conversionPackageUsings[importQualifier(pkg.Name())] = convertImportPathToNamespace(pkg.Path(), PackageSuffix)
 				packageLock.Unlock()
 			}
 		}
