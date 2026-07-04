@@ -105,6 +105,20 @@ internal static void Main() {
     kind(p);
     kind("x");
     kind(3.14D);
+    fmt.Println(sizeOf((int32)5), sizeOf((int64)7));
+}
+
+internal static nint sizeOf(any v) {
+    switch (v.type()) {
+    case int32 t: {
+        nint sz = (nint)t + 1;
+        return sz;
+    }
+    case int64 t: {
+        nint sz = (nint)t + 2;
+        return sz;
+    }}
+    return 0;
 }
 
 } // end main_package

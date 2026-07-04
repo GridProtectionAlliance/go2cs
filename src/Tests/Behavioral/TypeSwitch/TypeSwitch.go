@@ -82,4 +82,20 @@ func main() {
 	kind(p)    // uintptr word — distinct dynamic type
 	kind("x")  // text
 	kind(3.14) // other
+	fmt.Println(sizeOf(int32(5)), sizeOf(int64(7))) // 6 9
+}
+
+// sizeOf: SIBLING case clauses each declare `sz :=` - each case body is its own braced
+// scope in the emitted C#, so BOTH need `var` (the shared-scope analysis made the second a
+// bare reassignment - CS0103 x2, poll sockaddrToRaw).
+func sizeOf(v any) int {
+	switch t := v.(type) {
+	case int32:
+		sz := int(t) + 1
+		return sz
+	case int64:
+		sz := int(t) + 2
+		return sz
+	}
+	return 0
 }

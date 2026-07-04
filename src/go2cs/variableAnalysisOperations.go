@@ -1349,7 +1349,45 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			tracker.processing = false
 
-			visitNode(node.Body)
+			// Each case body is its OWN implicit block: a `sz :=` in one clause must not make
+			// a sibling clause's `sz :=` a reassignment — the C# emission braces each case, so
+			// the sibling needs its own `var` (CS0103 ×2, poll sockaddrToRaw). The generic
+			// visitNode(node.Body) walk gave every clause the SHARED switch-body scope; mirror
+			// the plain-SwitchStmt per-case scopes instead.
+			for _, stmt := range node.Body.List {
+				if caseClause, ok := stmt.(*ast.CaseClause); ok {
+					pushScope(collectBlockLevelDecls(caseClause.Body))
+
+					blockTracker := registry.get(BlockTracker)
+					blockTracker.enter()
+					blockTracker.processing = true
+
+					for _, stmt := range caseClause.Body {
+						visitNode(stmt)
+					}
+
+					blockTracker.exit()
+					blockTracker.processing = blockTracker.level > 0
+
+					popScope()
+
+					// Ensure case clause identifiers in expressions are checked for shadowing
+					for _, expr := range caseClause.List {
+						ast.Inspect(expr, func(n ast.Node) bool {
+							if ident, ok := n.(*ast.Ident); ok {
+								if obj := v.info.Uses[ident]; obj != nil {
+									if varObj, ok := obj.(*types.Var); ok {
+										if adjustedName, ok := v.varNames[varObj]; ok {
+											v.identNames[ident] = adjustedName
+										}
+									}
+								}
+							}
+							return true
+						})
+					}
+				}
+			}
 
 			tracker.exit()
 			popScope()
