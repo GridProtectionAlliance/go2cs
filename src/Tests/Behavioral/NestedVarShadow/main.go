@@ -22,8 +22,42 @@ func f(x int) int {
 	return z
 }
 
+type tagErr struct{ tag string }
+
+func (e *tagErr) Error() string { return "tag:" + e.tag }
+
+func check(s string) (int, error) {
+	if s == "" {
+		return 0, &tagErr{tag: "empty"}
+	}
+	return len(s), nil
+}
+
+// g: the inner err is shadow-renamed (the function-level err below is declared LATER); the
+// rename must also reach idents inside a nested if-INIT's comma-ok type assert - the init
+// walk only visited single-CallExpr RHS shapes, so the asserted `err` kept its raw name
+// (fmt convertFloat's `if e, ok := err.(*strconv.NumError); ok`, CS0841/CS8130 x6).
+func g(s string) string {
+	if n := len(s); n >= 0 {
+		v, err := check("")
+		if err != nil {
+			if e, ok := err.(*tagErr); ok {
+				e.tag = "inner"
+			}
+			return err.Error()
+		}
+		_ = v
+	}
+	v, err := check(s)
+	if err != nil {
+		return "outer"
+	}
+	return fmt.Sprint(v)
+}
+
 func main() {
 	fmt.Println(f(10)) // 100
 	fmt.Println(f(3))  // 200
 	fmt.Println(f(1))  // 1
+	fmt.Println(g("ab")) // tag:inner
 }

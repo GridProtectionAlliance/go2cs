@@ -1176,16 +1176,14 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			tracker.processing = false
 
 			if node.Init != nil {
-				// Manually check for recover function in the init statement
+				// Visit ALL of the init statement's RHS expressions — shadow renames must reach
+				// idents inside them (a comma-ok type assert on a renamed variable:
+				// `if e, ok := err.(*strconv.NumError); ok` left `err` unrenamed — fmt
+				// convertFloat, CS0841/CS8130 x6), and the recover-detection walk needs any
+				// call expression (previously the ONLY visited RHS shape).
 				if assign, ok := node.Init.(*ast.AssignStmt); ok {
-					if assign.Tok == token.DEFINE {
-						if assign.Rhs != nil {
-							if len(assign.Rhs) == 1 {
-								if call, ok := assign.Rhs[0].(*ast.CallExpr); ok {
-									visitNode(call)
-								}
-							}
-						}
+					for _, rhs := range assign.Rhs {
+						visitNode(rhs)
 					}
 				}
 			}
@@ -1234,6 +1232,16 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 			tracker.processing = false
+
+			// Visit the init statement's RHS expressions (shadow renames must reach idents
+			// inside them — mirrors the IfStmt init walk above)
+			if node.Init != nil {
+				if assign, ok := node.Init.(*ast.AssignStmt); ok {
+					for _, rhs := range assign.Rhs {
+						visitNode(rhs)
+					}
+				}
+			}
 
 			// Visit tag and body
 			if node.Tag != nil {
