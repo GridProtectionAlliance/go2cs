@@ -86,7 +86,7 @@ public static partial class io_package
         private static readonly ReadByVal? s_ReadByVal;
 
         [DebuggerNonUserCode, MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public (int, error) Read(in slice<byte> p)
+        public (nint, error) Read(in slice<byte> p)
         {
             T target = m_target;
 

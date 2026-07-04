@@ -96,6 +96,58 @@ public static partial class io_package
     //
     // Implementations must not retain p.
     public partial interface Reader {
-        (int n, error err) Read(in slice<byte> p);
+        (nint n, error err) Read(in slice<byte> p);
+    }
+
+    // Writer is the interface that wraps the basic Write method.
+    //
+    // Write writes len(p) bytes from p to the underlying data stream.
+    // It returns the number of bytes written from p (0 <= n <= len(p))
+    // and any error encountered that caused the write to stop early.
+    // Write must return a non-nil error if it returns n < len(p).
+    // Write must not modify the slice data, even temporarily.
+    //
+    // Implementations must not retain p.
+    public partial interface Writer {
+        (nint n, error err) Write(in slice<byte> p);
+    }
+
+    // Copy copies from src to dst until either EOF is reached
+    // on src or an error occurs. It returns the number of bytes
+    // copied and the first error encountered while copying, if any.
+    //
+    // A successful Copy returns err == nil, not err == EOF, because
+    // Copy is defined to read from src until EOF.
+    public static (long written, error err) Copy(Writer dst, Reader src)
+    {
+        long written = 0;
+        slice<byte> buf = new(new byte[512]);
+
+        while (true)
+        {
+            (nint nr, error er) = src.Read(buf);
+
+            if (nr > 0)
+            {
+                (nint nw, error ew) = dst.Write(buf.Slice(0, nr));
+
+                if (nw < 0 || nr < nw)
+                {
+                    nw = 0;
+                    ew ??= errors.New("invalid write result");
+                }
+
+                written += nw;
+
+                if (ew is not null)
+                    return (written, ew);
+
+                if (nr != nw)
+                    return (written, ErrShortWrite);
+            }
+
+            if (er is not null)
+                return (written, EOF.Equals(er) ? default! : er);
+        }
     }
 }
