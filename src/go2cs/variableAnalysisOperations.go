@@ -990,9 +990,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			}
 
 		case *ast.FuncLit:
-			// Enter a new scope for the function literal (parameter scope; the body's own block
-			// scope is pushed when visitNode descends into node.Body).
-			pushScope(nil)
+			// The parameters live in the BODY's scope (Go: parameters are declared in the
+			// function block), so a body-level `fpath, err := ...` REUSES the parameter err.
+			// A separate param scope made that a shadow DECLARATION - `var (fpath, err)`
+			// beside later reuses (CS0841/CS0128 x5, os CopyFS's WalkDir literal). Push ONE
+			// scope holding params + body declarations, and visit the body's statements
+			// directly so no second block scope intervenes.
+			pushScope(collectBlockLevelDecls(node.Body.List))
 			tracker := registry.get(FuncTracker)
 			tracker.enter()
 			tracker.processing = true
@@ -1020,8 +1024,18 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			tracker.processing = false
 
-			// Visit the function body (will handle both shadowing and nested captures)
-			visitNode(node.Body)
+			// Visit the body STATEMENTS directly (the merged param+body scope above is the
+			// function block; visitNode(node.Body) would push a second, param-splitting scope).
+			blockTracker := registry.get(BlockTracker)
+			blockTracker.enter()
+			blockTracker.processing = true
+
+			for _, stmt := range node.Body.List {
+				visitNode(stmt)
+			}
+
+			blockTracker.exit()
+			blockTracker.processing = blockTracker.level > 0
 
 			// Exit lambda capture analysis context
 			v.lambdaCapture.analysisInLambda = false

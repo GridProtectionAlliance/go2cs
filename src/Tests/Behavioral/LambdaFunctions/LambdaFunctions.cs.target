@@ -21,7 +21,27 @@ internal static Stringy returnsAFunction() {
     };
 }
 
+internal static (nint, error) half(nint n) {
+    if (n % 2 != 0) {
+        return (0, fmt.Errorf("odd"u8));
+    }
+    return (n / 2, default!);
+}
+
 internal static void Main() {
+    var probe = (nint n, error errΔ1) => {
+        if (errΔ1 != default!) {
+            return errΔ1;
+        }
+        (var m, errΔ1) = half(n);
+        if (errΔ1 != default!) {
+            return errΔ1;
+        }
+        (var k, errΔ1) = half(m);
+        fmt.Println("halved", m, k);
+        return errΔ1;
+    };
+    fmt.Println(probe(8, default!), probe(3, default!));
     takesAFunction(foo);
     Stringy f = returnsAFunction();
     f();

@@ -19,7 +19,30 @@ func returnsAFunction() Stringy {
 	}
 }
 
+func half(n int) (int, error) {
+	if n%2 != 0 {
+		return 0, fmt.Errorf("odd")
+	}
+	return n / 2, nil
+}
+
 func main() {
+	// A body-level := that REUSES a lambda PARAMETER (os CopyFS WalkDir shape): only
+	// the new names declare; err stays the parameter (CS0841/CS0128 x5).
+	probe := func(n int, err error) error {
+		if err != nil {
+			return err
+		}
+		m, err := half(n)
+		if err != nil {
+			return err
+		}
+		k, err := half(m)
+		fmt.Println("halved", m, k)
+		return err
+	}
+	fmt.Println(probe(8, nil), probe(3, nil))
+
 	takesAFunction(foo)
 	var f Stringy = returnsAFunction()
 	f()
