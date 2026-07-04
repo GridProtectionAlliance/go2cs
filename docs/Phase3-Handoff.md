@@ -15,6 +15,27 @@
 
 ## Where things stand (2026-07-03)
 
+- **OS AT ~5 (2026-07-04 ~6am, ~64 commits).** Landed since the last entry: ctor-priority
+  e8e09bfb6 (OverloadResolutionPriority(-1) on the public-subset ctor, CS0121 x3); wrapper
+  operator ~ 420686563 (integer-gated, keeps the wrapper type - CS1503 x2 + rawConn/FileMode
+  cascades); declared-type-over-value-type 90bda6fa5 (os `var Kill Signal = syscall.SIGKILL`
+  emitted the concrete type; explicit specs keep the DECLARED type + interface-wrap constant
+  initializers).
+  **NEXT ROOT (designed, unimplemented): VALUE-form foreign interface implementation.** The
+  os.Signal interface is DOWNSTREAM of the concrete syscall.Signal, so neither assembly can
+  partial the other: syscall cannot know os.Signal; os cannot add a partial to syscall's
+  ΔSignal struct. The pointer form solved this with an ADAPTER CLASS in the interface's
+  assembly; the VALUE form needs the same - the ImplementGenerator should emit a VALUE
+  adapter (wrapping a COPY, Go value semantics) when a GoImplement record names a FOREIGN
+  struct + local interface, and the converter's recordable gate (isLocalImplType) must
+  permit recording when the INTERFACE is local even if the target is foreign. Sites:
+  exec_posix.cs:78 p.Signal(ΔKill) CS1503; the reverted CrossPkgUser guard (lab2 =
+  CrossPkgLib.GA - re-add with the fix: Grade implements Labeled by value, const GA).
+  Also remaining in os: fs.File->io.Reader CS1503 (dir.cs:186 - foreign-iface to
+  foreign-iface, may be the same value-adapter family with iface source), File Read/Write
+  CS1929 x2 (g.cs:24 - impl forwarding binds this.Read() where Read is an EXTENSION on
+  ж<File>), rawConn CS0266 + FileMode CS0030 (recheck post-~operator on next recon).
+
 - **OS AT 11 (2026-07-04 ~5am) - ~57 commits this session. The adapter trilogy landed:
   foreign-adapter reference (parseExportedPointerImplements + pointer-unwrap, CS0029 x38);
   file-local alias qualifier a6049e014 (user-ruled `fs.PathErrorжerror` style, ALSO fixed the
