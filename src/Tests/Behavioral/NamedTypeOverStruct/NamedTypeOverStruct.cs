@@ -71,7 +71,7 @@ internal static void Main() {
     var p = Ꮡe;
     bump(p.of(derived.Ꮡid));
     fmt.Println(e.id, e.tag, e.twice());
-    shadowed z = default!;
+    shadowed z = new(nil);
     z.ctxt.fn = 7;
     z.tag = 3;
     fmt.Println(z.ctxt.fn, z.tag);
