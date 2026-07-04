@@ -15,6 +15,22 @@
 
 ## Where things stand (2026-07-03)
 
+- **OS AT 11 (2026-07-04 ~5am) - ~57 commits this session. The adapter trilogy landed:
+  foreign-adapter reference (parseExportedPointerImplements + pointer-unwrap, CS0029 x38);
+  file-local alias qualifier a6049e014 (user-ruled `fs.PathErrorжerror` style, ALSO fixed the
+  bare-alias-name CS0246 x40); adapter scope symbol-OR-name both sides 8b20ca680 (CS0122 x40;
+  v1 interface-symbol-only broke same-assembly interfaces - full suite caught it). Plus
+  64b9a1e64 FuncLit params share the body scope (CS0841/CS0128 x5; caveat banked: emission
+  may shadow-rename the reused param (err->errΔ1) consistently - diverges from Go ONLY if a
+  defer captures the parameter). Emission dedup 33c2e8026 + the phase-gating discovery
+  (declaration errors hide body errors - os "8" was fiction, true 77).
+  **OS RESIDUE 11:** fileStat ctor CS0121 x3 (types_windows 87/124/140 - ambiguous generated
+  ctor overloads); File Read/Write CS1929 x2 (g.cs twins vs io interfaces); CS1503 x4
+  (int->ΔHandle x2 exec_windows:78; syscall.ΔSignal->os.ΔSignal exec_posix:78 SAME-NAME
+  cross-package named types; fs.File->io.Reader dir.cs:186); CS0266 rawConn tuple file.cs:749;
+  CS0030 nint->FileMode removeall_noat:124. fmt = os leak. Then netip 6 / concurrent 5 /
+  bufio 8 / edwards 1 -> FULL go-src-converted.sln measure.
+
 - **OS CAMPAIGN DEEP-DIVE (2026-07-04 ~4am) - THE "os=8" WAS ROSLYN PHASE-GATING, os TRUE
   RESIDUE = 77.** The dirEntry double-implementation (CS8646/CS0111, declaration-phase)
   SUPPRESSED all method-body binding diagnostics; fixing the duplication (33c2e8026, emission-
