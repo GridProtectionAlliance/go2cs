@@ -90,6 +90,16 @@ public static Reporter AsReporter(ж<Meter> Ꮡm) {
     return new MeterжReporter(Ꮡm);
 }
 
+[GoType] partial interface Sealed {
+    @string Label();
+    @string Seal();
+}
+
+[GoType] partial interface Rated {
+    @string Label();
+    nint Rating();
+}
+
 [GoType] partial struct ΔStatus {
     public nint Code;
 }

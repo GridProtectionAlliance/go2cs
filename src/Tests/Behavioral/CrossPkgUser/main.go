@@ -65,6 +65,24 @@ type emblem struct {
 func (e emblem) Label() string { return e.name }
 func (e emblem) Rank() int     { return e.rank }
 
+// certificate satisfies BOTH CrossPkgLib.Sealed and CrossPkgLib.Rated — which share Label
+// without subsuming each other — plus CrossPkgLib.Labeled (subsumed by either): the two
+// non-subsumed bases are inherited and the shared Label is RE-DECLARED to hide the two
+// inherited slots, keeping member lookup through certificate unambiguous (CS0121).
+type certificate interface {
+	Label() string
+	Seal() string
+	Rating() int
+	Serial() int
+}
+
+type cert struct{ id int }
+
+func (c cert) Label() string { return "cert" }
+func (c cert) Seal() string  { return "wax" }
+func (c cert) Rating() int   { return 9 }
+func (c cert) Serial() int   { return c.id }
+
 // relay's pointer receiver satisfies CrossPkgLib.Reporter; getReporter forwards the
 // multi-value call as its WHOLE result list, so the converter deconstructs the tuple and
 // converts the interface element — C# tuple conversions are not element-wise (os
@@ -214,6 +232,12 @@ func main() {
 
 	rp, rerr := getReporter()
 	fmt.Println(rp.Report(), rerr == nil) // relay:live true
+
+	var ct certificate = cert{id: 42}
+	fmt.Println(ct.Label(), ct.Seal(), ct.Rating(), ct.Serial()) // cert wax 9 42
+	var sd CrossPkgLib.Sealed = ct
+	var rt CrossPkgLib.Rated = ct
+	fmt.Println(sd.Label(), rt.Rating()) // cert 9
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

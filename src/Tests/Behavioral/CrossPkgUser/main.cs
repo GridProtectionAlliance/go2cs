@@ -32,7 +32,7 @@ internal static @string Label(this badge b) {
 }
 
 [GoType] partial interface namedLabel :
-    CrossPkgLib_package.Labeled
+    CrossPkgLib.Labeled
 {
     nint Rank();
 }
@@ -48,6 +48,34 @@ internal static @string Label(this emblem e) {
 
 internal static nint Rank(this emblem e) {
     return e.rank;
+}
+
+[GoType] partial interface certificate :
+    CrossPkgLib.Rated,
+    CrossPkgLib.Sealed
+{
+    @string Label();
+    nint Serial();
+}
+
+[GoType] partial struct cert {
+    internal nint id;
+}
+
+internal static @string Label(this cert c) {
+    return "cert"u8;
+}
+
+internal static @string Seal(this cert c) {
+    return "wax"u8;
+}
+
+internal static nint Rating(this cert c) {
+    return 9;
+}
+
+internal static nint Serial(this cert c) {
+    return c.id;
 }
 
 [GoType] partial struct relay {
@@ -149,6 +177,11 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(CrossPkgLib.Describe(nl), nl.Rank());
     var (rp, rerr) = getReporter();
     fmt.Println(rp.Report(), rerr == default!);
+    certificate ct = new cert(id: 42);
+    fmt.Println(ct.Label(), ct.Seal(), ct.Rating(), ct.Serial());
+    CrossPkgLib.Sealed sd = ct;
+    CrossPkgLib.Rated rt = ct;
+    fmt.Println(sd.Label(), rt.Rating());
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

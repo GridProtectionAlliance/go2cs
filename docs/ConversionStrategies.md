@@ -1162,9 +1162,15 @@ adapter wrapper) and zero-cost (os's `CopyFS` passes an `fs.File` to `io.Copy`, 
 Details: only the **minimal covering set** is listed (`ReadCloser` subsumes `Reader`/`Closer`);
 the strict-subset guard rules out inheritance cycles (equal method sets never inherit);
 candidates covered by a declared **embed** are skipped (the embed emission handles those);
-bases render **fully qualified** because the declaring file need not import the candidate's
-package (`fs.go` declares `File` without importing `io`); lifted/dyn and constraint interfaces
-are excluded. Consequently the converter **never records an interface-to-interface
+bases reference the **file-local package alias** (`io.ReadCloser`, user-ruled style) via
+getTypeName, which also registers the using — needed because the declaring Go file may not
+import the candidate's package (`fs.go` declares `File` without importing `io`); lifted/dyn
+and constraint interfaces are excluded. **Multiple non-subsuming bases sharing a method**
+(`CrossPkgLib.Sealed` and `.Rated` both carry `Label`): both are inherited, and the shared
+member is **re-declared** — a member covered by exactly one listed base is inherited/skipped,
+but one covered by two or more is re-declared so it hides both inherited slots and member
+lookup through the derived interface stays unambiguous (CS0121). Go needs only one method to
+satisfy all; the C# implementers satisfy every slot with the same public method. Consequently the converter **never records an interface-to-interface
 `GoImplement`** — the generator's impl types are structs, and an interface-typed record kills
 its whole run. Bounds (banked): candidates come from direct imports only — same-package
 structural pairs, the universe `error`, and non-imported-package pairs would still surface as

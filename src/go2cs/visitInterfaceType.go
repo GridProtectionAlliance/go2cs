@@ -390,7 +390,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	// listed; C# reaches the others through it). Equal-sized sets tie-break by index so
 	// mutual implementers cannot drop each other both ways.
 	baseNames := make([]string, 0, len(bases))
-	covered := HashSet[string]{}
+	coveredCounts := map[string]int{}
 
 	for i, candidate := range bases {
 		candidateIface := candidate.Underlying().(*types.Interface)
@@ -415,13 +415,28 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 			continue
 		}
 
-		// Fully-qualified rendering: the declaring FILE may not import the candidate's
-		// package (fs.go declares File without importing io), so no using alias exists
-		baseNames = append(baseNames, rootQualifySubNamespaceTypeRefs(convertToCSTypeName(v.getFullTypeName(candidate, false))))
+		// Reference through the file-local package ALIAS (`CrossPkgLib.Labeled`, user-ruled
+		// style, mirroring the foreign-adapter references): getTypeName both yields the
+		// aliased form and registers the file-local using — needed because the declaring
+		// Go FILE may not import the candidate's package (fs.go declares File without
+		// importing io).
+		baseNames = append(baseNames, convertToCSTypeName(v.getTypeName(candidate, false)))
 
 		// The base's FULL method set (embedded members included) is inherited
 		for k := 0; k < candidateIface.NumMethods(); k++ {
-			covered.Add(candidateIface.Method(k).Name())
+			coveredCounts[candidateIface.Method(k).Name()]++
+		}
+	}
+
+	// A member covered by exactly ONE listed base is inherited and skipped. A member covered
+	// by TWO OR MORE bases (interfaces that share a method without subsuming each other) is
+	// RE-DECLARED instead: the redeclaration hides both inherited slots, so a call through
+	// this interface stays unambiguous (CS0121) — Go needs only one method to satisfy all.
+	covered := HashSet[string]{}
+
+	for name, count := range coveredCounts {
+		if count == 1 {
+			covered.Add(name)
 		}
 	}
 

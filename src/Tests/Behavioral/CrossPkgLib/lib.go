@@ -100,6 +100,19 @@ func AsErr(a *Alarm) error { return a }
 func AsReporter(m *Meter) Reporter { return m }
 
 
+// Sealed and Rated share Label without subsuming each other: a consumer interface
+// satisfying BOTH inherits both and must RE-DECLARE the shared member (C# member lookup
+// through two bases carrying the same signature is ambiguous - CS0121).
+type Sealed interface {
+	Label() string
+	Seal() string
+}
+
+type Rated interface {
+	Label() string
+	Rating() int
+}
+
 // Ticks is an exported named INTEGER type (uintptr-based) - consumers define types over it
 // (the registry Key over syscall.Handle shape).
 // Status (the type) collides with the Sensor.Status method below, so it is exported
