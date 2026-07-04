@@ -126,4 +126,15 @@ func main() {
 	converted := (func(score) (score, bool))(stay)
 	result, turnIsOver := converted(score{player: 3, opponent: 5, thisTurn: 7})
 	fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver)
+
+	// A call through a NAMED func-type FIELD deconstructs as one tuple call - the named
+	// type's underlying signature carries the result count (bufio Scanner's split SplitFunc;
+	// the shattered form emitted one full call per LHS element, tripling side effects).
+	m := machine{split: func(s string) (int, string, error) { return len(s), s + "!", nil }}
+	n, out, serr := m.split("hi")
+	fmt.Println(n, out, serr == nil) // 2 hi! true
 }
+
+type splitter func(s string) (int, string, error)
+
+type machine struct{ split splitter }

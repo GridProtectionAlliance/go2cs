@@ -106,6 +106,15 @@ internal static void Main() {
     var converted = (Func<score, (score, bool)>)(stay);
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
+    var m = new machine(split: (@string s) => (len(s), s + "!", default!));
+    var (n, @out, serr) = m.split("hi");
+    fmt.Println(n, @out, serr == default!);
+}
+
+internal delegate (nint, @string, error) splitter(@string s);
+
+[GoType] partial struct machine {
+    internal splitter split;
 }
 
 } // end main_package

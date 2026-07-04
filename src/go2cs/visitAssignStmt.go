@@ -295,7 +295,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				funIsType = tv.IsType()
 			}
 
-			if signature, ok := funType.(*types.Signature); ok && !funIsType {
+			// Underlying: the callee may be typed by a NAMED func type — bufio Scanner's
+			// `split SplitFunc` field — whose TypeOf is the *types.Named, not the signature;
+			// the bare assertion missed it and the 3-tuple deconstruction SHATTERED into one
+			// full call per LHS element (triple side effects, CS0029/CS1503 x4).
+			if signature, ok := funType.Underlying().(*types.Signature); ok && !funIsType {
 				results := signature.Results()
 
 				if results != nil {
