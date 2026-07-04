@@ -561,8 +561,8 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 		// Most common scenario with expression switches
 		v.writeOutput("switch (%s) {%s", TrueMarker, v.newline)
 
-		for i, caseClause := range caseClauses {
-			if i > 0 {
+		for clauseIndex, caseClause := range caseClauses {
+			if clauseIndex > 0 {
 				v.targetFile.WriteString(v.newline)
 			}
 
@@ -594,7 +594,26 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 						v.targetFile.WriteRune('(')
 					}
 
-					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
+					// A constant-TRUE case condition ahead of other clauses (`switch {
+					// case true: … case cond: …}` — time parseStrictRFC3339 deliberately
+					// disabling its strict checks) makes every LATER case provably
+					// unreachable, which Go compiles as dead code but C# rejects (CS8120
+					// ×3). Emit the golib `ᐧᐧ` marker (a static readonly bool the compiler
+					// cannot fold) instead of the literal; a trailing constant-true clause
+					// keeps the literal (nothing follows to be unreachable — no churn).
+					caseIsFoldableTrue := false
+
+					if clauseIndex < len(caseClauses)-1 {
+						if tv, ok := v.info.Types[expr]; ok && tv.Value != nil && tv.Value.Kind() == constant.Bool && constant.BoolVal(tv.Value) {
+							caseIsFoldableTrue = true
+						}
+					}
+
+					if caseIsFoldableTrue {
+						v.targetFile.WriteString(OpaqueTrueMarker)
+					} else {
+						v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
+					}
 
 					if !usePattenMatch && caseClauseCount > 1 {
 						v.targetFile.WriteRune(')')

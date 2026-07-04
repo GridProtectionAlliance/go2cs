@@ -233,6 +233,17 @@ internal static void Main() {
         fmt.Println("Default case");
     }
 
+    nint v = 3;
+    switch (ᐧ) {
+    case {} when ᐧᐧ: {
+        fmt.Println("strict checks disabled");
+        break;
+    }
+    case {} when v is > 2: {
+        fmt.Println("unreachable but compiled");
+        break;
+    }}
+
 }
 
 } // end main_package

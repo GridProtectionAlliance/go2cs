@@ -100,6 +100,20 @@ public static class builtin
     public const bool ᐧ = true;
 
     /// <summary>
+    /// Opaque <c>true</c> for a <c>when</c> clause the compiler must NOT fold.
+    /// </summary>
+    /// <remarks>
+    /// A Go expressionless switch may lead with a constant-true case (<c>switch { case true:
+    /// ... }</c> - time parseStrictRFC3339 deliberately disabling its strict checks) whose LATER
+    /// cases Go compiles as dead code; a foldable <c>when true</c> makes C# reject those cases
+    /// outright (CS8120), so the converter emits this marker there instead. A separate marker is
+    /// required because the FOLDABILITY of the const <see cref="ᐧ"/> is itself load-bearing:
+    /// <c>case ᐧ when ...</c> label patterns need a constant, and an infinite 
+    /// <c>for (...; ᐧ ;...)</c> relies on the fold for reachability (CS0161).
+    /// </remarks>
+    public static readonly bool ᐧᐧ = true;
+
+    /// <summary>
     /// Defines a false constant used as a discriminator for accessing overloads with
     /// different return types.
     /// </summary>

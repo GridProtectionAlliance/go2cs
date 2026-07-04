@@ -194,4 +194,15 @@ func main() {
     default:
         fmt.Println("Default case")
 	}
+	// A leading constant-true case (time parseStrictRFC3339 disabling strict parsing):
+	// Go compiles the LATER cases as dead code; the C# lowering must not let the compiler
+	// prove that (CS8120) - the when-clause emits the opaque golib marker.
+	v := 3
+	switch {
+	case true:
+		fmt.Println("strict checks disabled")
+	case v > 2:
+		fmt.Println("unreachable but compiled")
+	}
+
 }

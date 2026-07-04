@@ -212,6 +212,7 @@ const ShadowVarMarker = "\u0394"              // Variants: Δ Ʌ ꞥ
 const CapturedVarMarker = "\u0297"            // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"                // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "\u1427"                   // Variants: ᐧ true
+const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
 const OverloadDiscriminator = "\uA7F7"        // Variants: ꟷ false
 const EllipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 const TypeAliasDot = "\uA4F8"                 // Variants: ꓸ
