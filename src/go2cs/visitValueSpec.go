@@ -401,6 +401,23 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			if valueSpec.Type != nil {
 				if declType := v.info.TypeOf(valueSpec.Type); declType != nil {
 					if needsCast, isEmpty := isInterface(declType); needsCast && !isEmpty {
+						// A constant initializer folds its own named conversion away
+						// (`Errno(errnoERROR_IO_PENDING)` renders as the bare reference), so
+						// the value loses the type that implements the interface - re-impose
+						// it before the interface conversion (syscall zsyscall_windows,
+						// UntypedInt -> error CS0029).
+						if named, ok := types.Unalias(tv.Type).(*types.Named); ok {
+							if _, isBasic := named.Underlying().(*types.Basic); isBasic {
+								namedCS := v.getCSTypeName(named)
+
+								// Skip when the render already leads with its own cast
+								// (`((errorString)(@string)"..."u8)` needs no second wrap).
+								if !strings.HasPrefix(csValue, "(("+namedCS+")") {
+									csValue = fmt.Sprintf("((%s)%s)", namedCS, csValue)
+								}
+							}
+						}
+
 						csValue = v.convertToInterfaceType(declType, tv.Type, csValue)
 					}
 				}
