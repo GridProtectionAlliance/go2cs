@@ -150,7 +150,7 @@ internal class StructTypeTemplate : TemplateBase
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
                     string typeScope = GetScope(GetSimpleName(memberName));
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
 
@@ -180,7 +180,11 @@ internal class StructTypeTemplate : TemplateBase
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
                     string typeScope = GetScope(GetSimpleName(memberName));
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
+                    // StructName (with type parameters), not NonGenericStructName — a GENERIC
+                    // struct's instance param must carry them (Δentry<K, V>, CS0305); the
+                    // promoted-struct MEMBER access strips its type arguments (the property is
+                    // `node`, not `node<K, V>` — internal/concurrent's entry[K,V]).
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
 
@@ -452,6 +456,14 @@ internal class StructTypeTemplate : TemplateBase
         }
 
         return result.ToString();
+    }
+
+    // StripTypeArgs reduces a generic type reference to its bare name (`node<K, V>` → `node`)
+    // for MEMBER access through an embed's promoted property.
+    private static string StripTypeArgs(string name)
+    {
+        int index = name.IndexOf('<');
+        return index == -1 ? name : name[..index];
     }
 
     private string FieldReferences
