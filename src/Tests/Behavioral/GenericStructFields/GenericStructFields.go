@@ -16,6 +16,23 @@ type Container struct {
 	Mappings     map[string]Result[bool] // Map with generic value type
 }
 
+// tag is a generic struct EMBEDDED (by value) into wrapped below
+type tag[T any] struct {
+	label T
+}
+
+func (t tag[T]) show() T { return t.label }
+
+// wrapped embeds the generic tag[T]: the embed field emits under the BASE name (`tag`)
+// with promoted accessors — a generic embed was silently DROPPED from the struct
+// entirely (internal/concurrent's entry[K,V] embedding node[K,V], CS0117 x12), and the
+// generated accessors needed the type-parameterized instance param + bare member access
+// (CS0305).
+type wrapped[T any] struct {
+	tag[T]
+	count int
+}
+
 func main() {
 	// Create a Container with various generic field types
 	container := Container{
@@ -50,6 +67,12 @@ func main() {
 	pl.items = append(pl.items, 7, 8)
 	v, ok := pl.take()
 	fmt.Println(v, ok, keeper{}.pool())
+
+	// NOTE: unqualified promoted METHOD calls through a generic embed (w.show()) are a
+	// separate banked root — the receiver-wrapper generation resolves the embedded type
+	// by exact name and misses generic instantiations. Qualified calls work.
+	w := wrapped[string]{tag: tag[string]{label: "gen"}, count: 2}
+	fmt.Println(w.label, w.tag.show(), w.count) // gen gen 2
 }
 
 type pool[T any] struct{ items []T }

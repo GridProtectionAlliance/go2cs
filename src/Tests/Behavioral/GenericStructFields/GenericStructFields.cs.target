@@ -16,6 +16,19 @@ partial class main_package {
     public map<@string, Result<bool>> Mappings;
 }
 
+[GoType] partial struct tag<T> {
+    internal T label;
+}
+
+internal static T show<T>(this tag<T> t) {
+    return t.label;
+}
+
+[GoType] partial struct wrapped<T> {
+    internal partial ref tag<T> tag { get; }
+    internal nint count;
+}
+
 internal static void Main() {
     var container = new Container(
         IntResult: new Result<nint>(
@@ -43,6 +56,8 @@ internal static void Main() {
     pl.items = append(pl.items, (nint)(7), (nint)(8));
     var (v, ok) = pl.take();
     fmt.Println(v, ok, new keeper(nil).pool());
+    var w = new wrapped<@string>(tag: new tag<@string>(label: "gen"u8), count: 2);
+    fmt.Println(w.label, w.tag.show(), w.count);
 }
 
 [GoType] partial struct Δpool<T> {

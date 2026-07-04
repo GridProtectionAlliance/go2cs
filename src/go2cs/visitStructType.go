@@ -222,22 +222,37 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 			var isIdentFieldType bool
 			var selectorType bool
 
-			if ident, ok = field.Type.(*ast.Ident); ok {
+			// A GENERIC embed (`node[K, V]` — internal/concurrent's entry) arrives as an
+			// IndexExpr/IndexListExpr over the base type expression; unwrap it (in both the
+			// plain and pointer forms below) so the embed emits — it was silently DROPPED
+			// (the struct lost the field entirely, every promoted access CS0117).
+			unwrapGeneric := func(expr ast.Expr) ast.Expr {
+				switch index := expr.(type) {
+				case *ast.IndexExpr:
+					return index.X
+				case *ast.IndexListExpr:
+					return index.X
+				}
+
+				return expr
+			}
+
+			if ident, ok = unwrapGeneric(field.Type).(*ast.Ident); ok {
 				isIdentFieldType = true
 			} else if ptrType, ok := field.Type.(*ast.StarExpr); ok {
-				if ident, ok = ptrType.X.(*ast.Ident); ok {
+				if ident, ok = unwrapGeneric(ptrType.X).(*ast.Ident); ok {
 					isIdentFieldType = true
 				}
 			}
 
 			if !isIdentFieldType {
-				if selectorExpr, ok := field.Type.(*ast.SelectorExpr); ok {
+				if selectorExpr, ok := unwrapGeneric(field.Type).(*ast.SelectorExpr); ok {
 					if ident, ok = selectorExpr.X.(*ast.Ident); ok {
 						isIdentFieldType = true
 						selectorType = true
 					}
 				} else if ptrType, ok := field.Type.(*ast.StarExpr); ok {
-					if selectorExpr, ok := ptrType.X.(*ast.SelectorExpr); ok {
+					if selectorExpr, ok := unwrapGeneric(ptrType.X).(*ast.SelectorExpr); ok {
 						if ident, ok = selectorExpr.X.(*ast.Ident); ok {
 							isIdentFieldType = true
 							selectorType = true
@@ -258,6 +273,12 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 					// Get the name of the struct type
 					goTypeName = goTypeName[dotIndex+1:]
 				}
+			}
+
+			// A generic embed's MEMBER NAME is the base type name (Go promotes entry[K,V]'s
+			// embedded node[K,V] through the selector `.node`), so strip the type arguments.
+			if bracketIndex := strings.Index(goTypeName, "["); bracketIndex != -1 {
+				goTypeName = goTypeName[:bracketIndex]
 			}
 
 			// Lookup identity to determine if it's an interface
