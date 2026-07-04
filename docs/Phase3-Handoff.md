@@ -13,7 +13,33 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-03)
+## Where things stand (2026-07-04, ~90 commits)
+
+- **ZERO CLUB 31.** New zeros this stretch: **os** (unalias-hop 785372b5d + gen hop-split
+  1c7b07e43 + STRUCTURAL INTERFACE INHERITANCE a5f3b4e18/bacaec9bf + tuple-forward deconstruct
+  ee3ec0eca), **fmt 36→0** (8 roots: star-deref-LHS-never-declares 350bc79fe; stale
+  print_Stringer.cs removed from the tree 99e532c1b — dead baseline-only support; deferred/go
+  string args (@string) cast e1977e005; if/switch-init RHS shadow walk 5f3a2f56e; type-switch
+  clause scope binds the guard ac6cfe2c3; basic→named pointer reinterpret 9c3309b4e; LOCAL
+  adapter for a foreign pointer pair 2d9b34736 — fmt records GoImplement<os.File, io.Reader>
+  (Pointer=true) itself and the generator binds forwarding from METADATA), **dnsmessage /
+  strconv / path** (measured zero on recon148 — cleared by the session's cross-cutting roots),
+  **bufio** (cross-embed AMBIGUITY rule 768469444 — Go drops names promoted from 2+ embeds; +
+  named func-type callee tuple detection 774bf81e9 — SplitFunc field call had SHATTERED into
+  one call per LHS), **internal/weak restored** (pointer-instantiated type-param args take the
+  box form de38255f4 — a type param reads as an interface via its constraint and dodged the
+  box treatment; `ptr = abi.Escape(ptr)`).
+  **Major strategy landed: structural interface satisfaction emits C# inheritance**
+  (`File : io.ReadCloser`, minimal covering set, strict-subset guard, shared-member re-declare
+  for non-subsuming bases, alias-form rendering) — see ConversionStrategies. Iface→iface
+  GoImplement records are now suppressed (one interface-typed record killed a package's whole
+  generator run).
+  **NEXT ROOT: internal/concurrent 12 — generic embedded-struct promotion accessors**
+  (`Δentry<K,V>` lacks `Ꮡnode`, CS0117 ×12; surfaced after clearing its two declaration-phase
+  families: /vN import class naming e182aa15b + unbound-type-param implicit-conv records
+  fa5a5c636). Then netip 6 (own-errors after deps cleared). Then the FULL
+  go-src-converted.sln packages-compiling measure. BANKED: edwards 1 (Go 1.17 slice→
+  array-pointer conversion `(*[32]byte)(x)` — golib view/copy design needed).
 
 - **OS AT ~5 (2026-07-04 ~6am, ~64 commits).** Landed since the last entry: ctor-priority
   e8e09bfb6 (OverloadResolutionPriority(-1) on the public-subset ctor, CS0121 x3); wrapper
