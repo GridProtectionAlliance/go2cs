@@ -39,6 +39,7 @@ using static go.main_package;
 
 // <InterfaceImplementations>
 [assembly: GoImplement<MyCustomError, Abser>(Promoted = true)]
+[assembly: GoImplement<deviceHandle, Describer>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

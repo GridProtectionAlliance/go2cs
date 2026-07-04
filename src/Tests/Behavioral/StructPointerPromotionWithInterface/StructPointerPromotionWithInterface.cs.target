@@ -28,6 +28,30 @@ public static float64 Time(this MyError myErr) {
     return (float64)myErr.When.Unix();
 }
 
+[GoType] partial struct Device {
+    internal @string name;
+    internal nint hits;
+}
+
+public static ж<nint> Tag(this ж<Device> Ꮡd) {
+    ref var d = ref Ꮡd.Value;
+
+    return Ꮡd.of(Device.Ꮡhits);
+}
+
+[GoRecv] public static @string Describe(this ref Device d) {
+    return d.name;
+}
+
+[GoType] partial interface Describer {
+    @string Describe();
+    ж<nint> Tag();
+}
+
+[GoType] partial struct deviceHandle {
+    public partial ref ж<Device> Device { get; }
+}
+
 [GoType] partial struct Inner {
     public @string Value;
 }
@@ -55,6 +79,12 @@ internal static void Main() {
     fmt.Println(middle.Value);
     var outer = new Outer(ptr: innerPtr);
     fmt.Println((~(outer.ptr.ValueSlot)).Value);
+    var dev = Ꮡ(new Device(name: "sensor"u8, hits: 3));
+    Describer dsc = new deviceHandle(Device: dev);
+    fmt.Println(dsc.Describe());
+    var p = dsc.Tag();
+    p.Value = 7;
+    fmt.Println((~dev).hits);
 }
 
 } // end main_package

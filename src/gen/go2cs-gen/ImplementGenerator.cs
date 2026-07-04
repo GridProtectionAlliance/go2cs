@@ -146,8 +146,14 @@ public class ImplementGenerator : ISourceGenerator
             // the same hop — `this.M()` has nothing to bind (CS1929). Gated to a SINGLE hop
             // (Go's promotion ambiguity rules make multi-embed satisfaction rare; extend when
             // the corpus surfaces one).
-            List<string> embedHops = structDecl?.GetEmbeddedPointerHopNames() ?? [];
-            string? embedHop = embedHops.Count == 1 ? embedHops[0] : null;
+            List<(string Name, string TypeName)> embedHops = structDecl?.GetEmbeddedPointerHopNames() ?? [];
+            string? embedHop = embedHops.Count == 1 ? embedHops[0].Name : null;
+
+            // Hop-target methods that are direct-ж primaries bind on the box FIELD itself
+            // (`this.File.Read(p)`) — deref'ing first strands the extension receiver (CS1929).
+            HashSet<string> embedHopBoxMethods = embedHops.Count == 1
+                ? StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(embedHops[0].TypeName, syntaxContext.SemanticModel.Compilation)
+                : [];
 
             if (pointer)
             {
@@ -176,7 +182,7 @@ public class ImplementGenerator : ISourceGenerator
                         string simpleName = GetSimpleName(method.Name);
 
                         if (!forwardReceivers.ContainsKey(simpleName))
-                            forwardReceivers[simpleName] = $"m_box.Value.{embedHops[0]}.Value";
+                            forwardReceivers[simpleName] = embedHopBoxMethods.Contains(simpleName) ? $"m_box.Value.{embedHop}" : $"m_box.Value.{embedHop}.Value";
                     }
                 }
 
@@ -268,6 +274,7 @@ public class ImplementGenerator : ISourceGenerator
                 Overrides = overrides,
                 Methods = methods,
                 EmbedHop = embedHop,
+                EmbedHopBoxMethods = embedHopBoxMethods,
                 UsingStatements = usingStatements
             }
             .Generate();

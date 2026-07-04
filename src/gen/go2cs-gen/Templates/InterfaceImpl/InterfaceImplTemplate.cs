@@ -18,6 +18,10 @@ internal class InterfaceImplTemplate : TemplateBase
     // converter's syntax-resolved promotion at Go call sites. Null when no (single) hop exists.
     public string? EmbedHop;
 
+    // Hop-target methods that are direct-ж primaries (extensions on ж<X> with no ref twin) bind
+    // the box field itself — `this.File.Read(p)`; deref'ing first strands the receiver (CS1929).
+    public HashSet<string> EmbedHopBoxMethods = [];
+
     public override string TemplateBody =>
         $$"""
              partial struct {{StructName}} : {{InterfaceName}}
@@ -58,7 +62,9 @@ internal class InterfaceImplTemplate : TemplateBase
                         result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' explicit implementation mapped to direct struct receiver method:\r\n        ");
                     }
 
-                    string receiver = !methodOverriden && EmbedHop is not null ? $"this.{EmbedHop}.Value" : "this";
+                    string receiver = !methodOverriden && EmbedHop is not null ?
+                        EmbedHopBoxMethods.Contains(simpleMethodName) ? $"this.{EmbedHop}" : $"this.{EmbedHop}.Value" :
+                        "this";
 
                     result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }

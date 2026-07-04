@@ -173,22 +173,25 @@ public static class StructDeclarationSyntaxExtensions
     }
 
     /// <summary>
-    /// Gets the names of embedded-POINTER hop properties on the struct — the `public partial ref
+    /// Gets the embedded-POINTER hop properties on the struct — the `public partial ref
     /// ж&lt;X&gt; F { get; }` members the converter emits for a Go embedded pointer field
-    /// (`type rtype struct { *abi.Type }`). Method promotion through such an embed is
-    /// syntax-resolved at Go call sites (the converter emits the hop `t.F.Value.M()`), so an
-    /// interface member with no direct struct method must forward through the hop the same way.
+    /// (`type rtype struct { *abi.Type }`) — as (property name, embedded type name) pairs.
+    /// Method promotion through such an embed is syntax-resolved at Go call sites (the converter
+    /// emits the hop `t.F.Value.M()`), so an interface member with no direct struct method must
+    /// forward through the hop the same way. The embedded type name lets the caller split the
+    /// hop receiver per method: direct-ж primaries bind the box field itself (`this.F.M()`).
     /// </summary>
-    public static List<string> GetEmbeddedPointerHopNames(this StructDeclarationSyntax structDeclaration)
+    public static List<(string Name, string TypeName)> GetEmbeddedPointerHopNames(this StructDeclarationSyntax structDeclaration)
     {
-        List<string> hops = [];
+        List<(string, string)> hops = [];
 
         foreach (PropertyDeclarationSyntax property in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
         {
             TypeSyntax type = property.Type is RefTypeSyntax refType ? refType.Type : property.Type;
+            string typeText = type.ToString();
 
-            if (type.ToString().StartsWith("ж<") && property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
-                hops.Add(property.Identifier.Text);
+            if (typeText.StartsWith("ж<") && typeText.EndsWith(">") && property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+                hops.Add((property.Identifier.Text, typeText.Substring(2, typeText.Length - 3)));
         }
 
         return hops;
@@ -219,7 +222,20 @@ public static class StructDeclarationSyntaxExtensions
         this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
-        string boxType = $"ж<{structDeclaration.Identifier.Text}>";
+        return GetBoxReceiverMethodNames(structDeclaration.Identifier.Text, compilation);
+    }
+
+    /// <summary>
+    /// Type-name form of <see cref="GetBoxReceiverMethodNames(StructDeclarationSyntax, Compilation)"/>
+    /// for types with no local declaration in hand — e.g. the TARGET of an embedded-pointer hop
+    /// (os's `fileWithoutWriteTo` embeds `*File`; File's `Read` is a direct-ж primary, so the hop
+    /// must bind `this.File.Read(p)`, not the deref'd value — CS1929). Only converter-emitted
+    /// primaries are visible in this compilation's syntax trees (sibling-generator ж-twins are
+    /// not), which is exactly the discrimination needed.
+    /// </summary>
+    public static HashSet<string> GetBoxReceiverMethodNames(string typeName, Compilation compilation)
+    {
+        string boxType = $"ж<{typeName}>";
 
         return new HashSet<string>(compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()

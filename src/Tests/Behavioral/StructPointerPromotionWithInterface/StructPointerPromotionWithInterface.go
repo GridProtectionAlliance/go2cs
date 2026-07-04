@@ -31,6 +31,30 @@ func (myErr MyError) Time() float64 {
 	return float64(myErr.When.Unix())
 }
 
+type Device struct {
+	name string
+	hits int
+}
+
+// Receiver escapes (address of a receiver field is returned), so the
+// converter emits the direct-ж primary form for this method
+func (d *Device) Tag() *int {
+	return &d.hits
+}
+
+func (d *Device) Describe() string {
+	return d.name
+}
+
+type Describer interface {
+	Describe() string
+	Tag() *int
+}
+
+type deviceHandle struct {
+	*Device
+}
+
 type Inner struct {
 	Value string
 }
@@ -64,4 +88,13 @@ func main() {
 	// Multiple pointers require explicit field access
 	outer := Outer{ptr: innerPtr}
 	fmt.Println((*outer.ptr).Value) // Prints "hello"
+
+	// Interface satisfied through a pointer embed: Tag's receiver escapes
+	// (direct-ж primary), Describe's does not — both must bind through the hop
+	dev := &Device{name: "sensor", hits: 3}
+	var dsc Describer = deviceHandle{Device: dev}
+	fmt.Println(dsc.Describe())
+	p := dsc.Tag()
+	*p = 7
+	fmt.Println(dev.hits) // Prints 7 - box aliasing through the hop
 }
