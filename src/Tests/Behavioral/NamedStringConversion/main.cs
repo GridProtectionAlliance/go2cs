@@ -13,7 +13,7 @@ internal static @string Error(this errorString e) {
 [GoType("@string")] partial struct label;
 
 internal static void Main() {
-    errorString e = ((errorString)(@string)"kaboom"u8);
+    error e = ((errorString)(@string)"kaboom"u8);
     fmt.Println(e.Error());
     @string l = ((label)(@string)"tag"u8);
     fmt.Println(l, len(l));

@@ -382,12 +382,29 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 			if isAnyType {
 				csTypeName = "any"
+			} else if valueSpec.Type != nil {
+				// An EXPLICITLY typed spec keeps its DECLARED type — this constant-initializer
+				// arm otherwise retypes the var from the VALUE (os's `var Kill Signal =
+				// syscall.SIGKILL` emitted syscall's ΔSignal where the os.Signal INTERFACE was
+				// declared — CS1503 at every Signal-typed use).
+				csTypeName = convertToCSTypeName(v.getTypeName(v.info.TypeOf(valueSpec.Type), false))
 			} else {
 				csTypeName = convertToCSTypeName(v.getTypeName(tv.Type, false))
 			}
 
 			goValue := tv.Value.ExactString()
 			csValue := v.convExpr(valueSpec.Values[i], []ExprContext{context})
+
+			// A declared INTERFACE type over a constant initializer wraps the value in the
+			// interface conversion (the constant's named type implements the interface —
+			// SIGKILL's syscall.Signal implementing os.Signal).
+			if valueSpec.Type != nil {
+				if declType := v.info.TypeOf(valueSpec.Type); declType != nil {
+					if needsCast, isEmpty := isInterface(declType); needsCast && !isEmpty {
+						csValue = v.convertToInterfaceType(declType, tv.Type, csValue)
+					}
+				}
+			}
 			typeLenDeviation := token.Pos(len(csTypeName) + len(csValue) + (len(csIDName) - len(goIDName)) + (len(csValue) - len(goValue)))
 
 			if v.inFunction {
