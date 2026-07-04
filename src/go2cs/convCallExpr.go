@@ -1263,7 +1263,11 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 
 				argTypeName := v.getCSTypeName(argType)
 
-				if targetTypeName != argTypeName {
+				// A pairing carrying UNBOUND type parameters cannot be recorded: an assembly
+				// attribute cannot name K/V (internal/concurrent's indirect[K,V] GoImplicitConv
+				// record emitted GoImplicitConv<Δindirect<K, V>, ж<Δindirect<K, V>>>, CS0246 x4
+				// - and one bad record kills the whole generator run).
+				if targetTypeName != argTypeName && !typeContainsTypeParams(argType) && !typeContainsTypeParams(funcType) {
 					// The recorded conversion type names use cross-package import aliases (e.g.
 					// `abi.Type`); register them so package_info.cs can emit a resolving `global using`.
 					v.recordConversionPackageUsing(argType)
@@ -1775,6 +1779,37 @@ func (v *Visitor) addImplicitSubStructConversions(sourceType types.Type, targetT
 			packageLock.Unlock()
 		}
 	}
+}
+
+// typeContainsTypeParams reports whether t contains any unbound type parameter, walking
+// pointers, containers, and generic instantiations' type arguments.
+func typeContainsTypeParams(t types.Type) bool {
+	switch typ := t.(type) {
+	case *types.TypeParam:
+		return true
+	case *types.Alias:
+		return typeContainsTypeParams(types.Unalias(typ))
+	case *types.Pointer:
+		return typeContainsTypeParams(typ.Elem())
+	case *types.Slice:
+		return typeContainsTypeParams(typ.Elem())
+	case *types.Array:
+		return typeContainsTypeParams(typ.Elem())
+	case *types.Chan:
+		return typeContainsTypeParams(typ.Elem())
+	case *types.Map:
+		return typeContainsTypeParams(typ.Key()) || typeContainsTypeParams(typ.Elem())
+	case *types.Named:
+		if args := typ.TypeArgs(); args != nil {
+			for i := range args.Len() {
+				if typeContainsTypeParams(args.At(i)) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
 }
 
 func getRootSubStructName(subStructName string) string {
