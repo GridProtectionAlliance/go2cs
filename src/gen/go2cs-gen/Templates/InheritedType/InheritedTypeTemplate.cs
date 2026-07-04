@@ -179,6 +179,14 @@ internal class InheritedTypeTemplate : TemplateBase
         }
     }
 
+    // The nil-constructed value of a defined-type-over-STRUCT wrapper must construct the wrapped
+    // struct through its own NilType constructor: the wrapped struct may carry promoted-embed
+    // boxes (readonly `ж<T>` fields only its constructors allocate), so a `default!` m_value
+    // would NRE on the first forwarded promoted-member access. Every other inherited kind
+    // (slice/map/array/numeric/…) keeps the plain default — its zero value is already correct.
+    private string NilValueExpression => ForwardedStructMembers is null || ForwardedStructMembers.Count == 0 ?
+        "default!" : $"new {TypeName}(nil)";
+
     // A C# constructor name must not carry the type's generic parameters (e.g. the constructor for
     // a generic named array type `vec<T>` is `vec(...)`, not `vec<T>(...)`). Non-generic types have
     // no '<' so ConstructorName equals ObjectName — emitting byte-identical output.
@@ -202,7 +210,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 
                 public {{ConstructorName}}({{TypeName}} value) => m_value = value;
 
-                public {{ConstructorName}}(NilType _) => m_value = default!;
+                public {{ConstructorName}}(NilType _) => m_value = {{NilValueExpression}};
 
         {{ValueProperty}}
                 public override string ToString() => {{ToStringImplementation}};

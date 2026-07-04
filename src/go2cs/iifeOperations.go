@@ -217,7 +217,16 @@ func (v *Visitor) namedReturnDeclLines(sig *types.Signature, indentLevel int) st
 
 	for i := range results.Len() {
 		param := results.At(i)
-		decls.WriteString(fmt.Sprintf("%s%s%s %s = default!;", v.newline, v.indent(indentLevel), v.getCSTypeName(param.Type()), v.namedResultName(param)))
+
+		// A promoted-embed struct result must construct through the NilType ctor — `default!`
+		// leaves the readonly embed boxes null (see structHasPromotedEmbeds).
+		zeroValue := "default!"
+
+		if v.structHasPromotedEmbeds(param.Type()) {
+			zeroValue = "new(nil)"
+		}
+
+		decls.WriteString(fmt.Sprintf("%s%s%s %s = %s;", v.newline, v.indent(indentLevel), v.getCSTypeName(param.Type()), v.namedResultName(param), zeroValue))
 	}
 
 	return decls.String()

@@ -186,6 +186,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								// types.Unalias or the local gets `default!` with a null backing
 								// array (NRE on first element write).
 								v.writeOutput("%s %s = new(%d);", csTypeName, csIDName, arrayType.Len())
+							} else if v.structHasPromotedEmbeds(def.Type()) {
+								// A struct with a promoted embed stores it in a readonly `ж<T>`
+								// box only the constructors initialize — `default!` leaves the
+								// box null and the first promoted-member access NREs, so the
+								// zero value must construct through the NilType ctor.
+								v.writeOutput("%s %s = new(nil);", csTypeName, csIDName)
 							} else {
 								v.writeOutput("%s %s = default!;", csTypeName, csIDName)
 							}
@@ -212,6 +218,12 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							arrayLenValue = strconv.FormatInt(arrayType.Len(), 10)
 						}
 
+						// A promoted-embed struct global has the same null-box hazard as the
+						// local branch above: the readonly `ж<T>` embed boxes only exist when
+						// a constructor runs, so the zero value must be `new(nil)`, not the
+						// field's implicit default.
+						hasPromotedEmbeds := v.structHasPromotedEmbeds(def.Type())
+
 						if v.isAddressedGlobal(ident) {
 							// Box an N-sized array, not the empty default, so writes through the
 							// pointer (and indexing) hit real storage.
@@ -219,11 +231,15 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 
 							if len(arrayLenValue) > 0 {
 								initExpr = fmt.Sprintf("new %s(%s)", csTypeName, arrayLenValue)
+							} else if hasPromotedEmbeds {
+								initExpr = fmt.Sprintf("new %s(nil)", csTypeName)
 							}
 
 							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, initExpr, isInherentlyHeapAllocatedType(v.getIdentType(ident)))
 						} else if len(arrayLenValue) > 0 {
 							v.writeOutput("%s static %s %s = new(%s);", access, csTypeName, csIDName, arrayLenValue)
+						} else if hasPromotedEmbeds {
+							v.writeOutput("%s static %s %s = new(nil);", access, csTypeName, csIDName)
 						} else {
 							v.writeOutput("%s static %s %s;", access, csTypeName, csIDName)
 						}

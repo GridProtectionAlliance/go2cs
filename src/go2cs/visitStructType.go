@@ -387,3 +387,86 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	return
 }
+
+// structHasPromotedEmbeds reports whether the type's underlying struct carries at least one
+// embedded field that the generated C# stores in a constructor-initialized readonly `ж<T>` box
+// (the StructTypeTemplate "Promoted Struct References"). A `default`-valued instance of such a
+// struct has null boxes, so the first promoted-member access throws NullReferenceException —
+// an uninitialized declaration must render `new T(nil)` instead of `default!`. The decision
+// mirrors the embedded-field emission above: an embed renders as a `partial ref` promotion
+// (and thus a box) unless it is a same-package interface, a builtin non-named embed (`int`),
+// or a pointer to a non-named type; a CROSS-PACKAGE embed always takes the promotion path
+// (the selector-type branch above bypasses every plain-field case, interfaces included).
+func (v *Visitor) structHasPromotedEmbeds(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	st, ok := t.Underlying().(*types.Struct)
+
+	if !ok {
+		return false
+	}
+
+	for i := range st.NumFields() {
+		field := st.Field(i)
+
+		if !field.Anonymous() {
+			continue
+		}
+
+		fieldType := field.Type()
+
+		// Resolve the embed's named type, through one syntactic pointer (`*X`).
+		named, _ := types.Unalias(fieldType).(*types.Named)
+
+		if named == nil {
+			if ptr, isPtr := fieldType.(*types.Pointer); isPtr {
+				named, _ = types.Unalias(ptr.Elem()).(*types.Named)
+			}
+		}
+
+		// A cross-package embed always renders as a promoted box.
+		if named != nil && named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
+			return true
+		}
+
+		// Same-package `*X` embed: any named pointee promotes (struct underlying and named
+		// non-struct both take the partial-ref path); `*int` (builtin pointee) stays plain.
+		if ptr, isPtr := fieldType.(*types.Pointer); isPtr {
+			if _, isNamed := types.Unalias(ptr.Elem()).(*types.Named); isNamed {
+				return true
+			}
+
+			continue
+		}
+
+		underlying := fieldType.Underlying()
+
+		// A same-package interface embed renders as a plain interface field — no box.
+		if _, isInterface := underlying.(*types.Interface); isInterface {
+			continue
+		}
+
+		// A named-pointer-type embed (`type P *T`) promotes only when the pointee is named.
+		if ptr, isPtr := underlying.(*types.Pointer); isPtr {
+			if _, isNamed := types.Unalias(ptr.Elem()).(*types.Named); isNamed {
+				return true
+			}
+
+			continue
+		}
+
+		// A value embed promotes when its underlying is a struct or the embed itself is a
+		// named type (`type RCode int` embeds as a partial-ref box despite the basic core).
+		if _, isStruct := underlying.(*types.Struct); isStruct {
+			return true
+		}
+
+		if named != nil {
+			return true
+		}
+	}
+
+	return false
+}

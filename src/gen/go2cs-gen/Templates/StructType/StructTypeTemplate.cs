@@ -429,19 +429,15 @@ internal class StructTypeTemplate : TemplateBase
         {
             StringBuilder result = new();
 
+            // Construct from nil: field initializers already ran (C# executes them in every explicitly
+            // declared constructor) and C# 11 auto-defaults any field the body leaves unassigned, so
+            // plain members need no assignment here — re-assigning `default!` would NULL an array
+            // field's `= new(N)` backing (a `[N]T` field of `S{}` NREd on first index). Only the
+            // promoted-embed boxes need construction: they are readonly `ж<T>` fields with no
+            // initializer, so a box exists only when a constructor allocates it.
             result.AppendLine($"public {NonGenericStructName}(NilType _)");
             result.AppendLine($"{TypeElemIndent}{{");
-
-            // Construct from nil
-            foreach ((string typeName, string memberName, _, bool isPromotedStruct) in StructMembers)
-            {
-                result.Append($"{TypeElemIndent}    ");
-
-                result.AppendLine(isPromotedStruct ?
-                    $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));" :
-                    $"this.{memberName} = default!;");
-            }
-
+            AppendPromotedBoxInitializers(result);
             result.AppendLine($"{TypeElemIndent}}}");
 
             // Parameterless constructor so C# RUNS the struct's field initializers — most importantly an
@@ -449,11 +445,13 @@ internal class StructTypeTemplate : TemplateBase
             // Without an EXPLICITLY declared parameterless constructor, `new S()` uses the implicit struct
             // constructor, which zeroes every field and SKIPS field initializers — leaving an array field's
             // backing null, so indexing/`len` on it throws NullReferenceException. (C# 11 auto-defaults any
-            // field lacking an initializer, so the empty body is sufficient and correct; a slice/map/etc.
-            // field — which has no `= new(N)` initializer — stays its nil zero value, matching Go.)
+            // field lacking an initializer; a slice/map/etc. field — which has no `= new(N)` initializer —
+            // stays its nil zero value, matching Go.) The promoted-embed boxes are allocated here too, so
+            // `new S()` — the zero value golib's `@new<T>()`/`heap()` materialize — is fully usable.
             result.AppendLine();
             result.AppendLine($"{TypeElemIndent}public {NonGenericStructName}()");
             result.AppendLine($"{TypeElemIndent}{{");
+            AppendPromotedBoxInitializers(result);
             result.AppendLine($"{TypeElemIndent}}}");
 
             // Generate exported constructor from public fields
@@ -467,6 +465,23 @@ internal class StructTypeTemplate : TemplateBase
             }
 
             return result.ToString();
+        }
+    }
+
+    // Allocates the readonly `ж<T>` box of every promoted embed with a nil-constructed value —
+    // shared by the NilType and parameterless constructors (the parameterized constructors box
+    // their incoming member values instead).
+    private void AppendPromotedBoxInitializers(StringBuilder result)
+    {
+        foreach ((string typeName, string memberName, _, bool isPromotedStruct) in StructMembers)
+        {
+            if (!isPromotedStruct)
+                continue;
+
+            result.Append($"{TypeElemIndent}    ");
+            // A keyword-named embed composes the box field from the UNESCAPED member name
+            // ('@' is only valid leading an identifier - 'Ꮡʗ@base' is CS1002).
+            result.AppendLine($"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));");
         }
     }
 

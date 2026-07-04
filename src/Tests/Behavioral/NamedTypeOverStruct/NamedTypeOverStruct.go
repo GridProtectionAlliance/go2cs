@@ -84,6 +84,19 @@ func main() {
 	p := &e
 	bump(&p.id)                         // address of a field promoted through the keyword embed
 	fmt.Println(e.id, e.tag, e.twice()) // 28 2 56 — the write through &p.id persisted
+
+	// Zero-value forms of a promoted-embed struct: the embedded ctxt lives in a readonly
+	// ж<ctxt> box only the generated constructors allocate, so `var z shadowed` must render
+	// `new shadowed(nil)` (a plain default! left the box null - first field access NREd) and
+	// `new(shadowed)` must materialize through the parameterless ctor (boxes allocated too).
+	var z shadowed
+	z.ctxt.fn = 7
+	z.tag = 3 // promoted (ctxt.tag)
+	fmt.Println(z.ctxt.fn, z.tag) // 7 3
+
+	np := new(shadowed)
+	np.tag = 11
+	fmt.Println(np.tag, np.ctxt.tag) // 11 11
 }
 
 type ctxt struct{ fn, tag int }

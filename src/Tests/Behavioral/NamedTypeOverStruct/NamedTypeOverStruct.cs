@@ -71,6 +71,13 @@ internal static void Main() {
     var p = Ꮡe;
     bump(p.of(derived.Ꮡid));
     fmt.Println(e.id, e.tag, e.twice());
+    shadowed z = default!;
+    z.ctxt.fn = 7;
+    z.tag = 3;
+    fmt.Println(z.ctxt.fn, z.tag);
+    var np = @new<shadowed>();
+    np.Value.tag = 11;
+    fmt.Println((~np).tag, (~np).ctxt.tag);
 }
 
 [GoType] partial struct ctxt {

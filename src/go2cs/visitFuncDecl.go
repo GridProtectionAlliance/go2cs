@@ -321,7 +321,16 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 						resultDeclTarget.WriteString(v.newline)
 
-						v.writeString(resultDeclTarget, "%s%s %s = default!;", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), paramName)
+						// A promoted-embed struct result must construct through the NilType
+						// ctor — `default!` leaves the readonly embed boxes null (see
+						// structHasPromotedEmbeds).
+						zeroValue := "default!"
+
+						if v.structHasPromotedEmbeds(param.Type()) {
+							zeroValue = "new(nil)"
+						}
+
+						v.writeString(resultDeclTarget, "%s%s %s = %s;", v.indent(v.indentLevel+1), v.getCSTypeName(param.Type()), paramName, zeroValue)
 
 						paramIndex++
 					}
