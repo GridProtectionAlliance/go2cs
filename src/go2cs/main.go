@@ -3716,8 +3716,12 @@ func convertToCSFullTypeName(typeName string) string {
 		remainingType := strings.TrimSpace(typeName[closingParenIndex+1:])
 
 		if len(remainingType) > 0 {
-			// Has explicit return type
-			csReturnType := convertToCSTypeName(remainingType)
+			// Has explicit return type. A PARENTHESIZED result list may carry Go NAMED
+			// results (`(importPath string, ok bool)` — go/doc/comment's LookupPackage
+			// func field): split the elements, strip the Go-ordered names, and rebuild —
+			// ONE result unwraps to its bare type (a C# 1-tuple is CS8124), several yield
+			// the C#-ordered named tuple `(@string importPath, bool ok)`.
+			csReturnType := convertToCSResultList(remainingType)
 
 			if len(csTypeNames) > 0 {
 				return fmt.Sprintf("Func<%s, %s>", strings.Join(csTypeNames, ", "), csReturnType)
@@ -3872,6 +3876,94 @@ func extractTypes(signature string) []string {
 	}
 
 	return types
+}
+
+// convertToCSResultList converts a Go func-type RESULT segment — a single bare type or a
+// parenthesized (possibly NAMED) result list — to its C# rendering. ONE result unwraps to
+// its bare type (a C# 1-tuple is CS8124); several yield the C#-ordered named tuple
+// (`(@string importPath, bool ok)`). Go result lists are all-named or all-unnamed; a leading
+// token is a NAME only when it is a plain identifier that is not a type-leading keyword
+// (`chan int` stays a type).
+func convertToCSResultList(resultType string) string {
+	if !strings.HasPrefix(resultType, "(") || !strings.HasSuffix(resultType, ")") {
+		return convertToCSTypeName(resultType)
+	}
+
+	inner := resultType[1 : len(resultType)-1]
+
+	// Depth-aware split on top-level commas (nested func/map/generic types carry their own).
+	var elements []string
+	depth := 0
+	start := 0
+
+	for i, ch := range inner {
+		switch ch {
+		case '(', '[', '{':
+			depth++
+		case ')', ']', '}':
+			depth--
+		case ',':
+			if depth == 0 {
+				elements = append(elements, strings.TrimSpace(inner[start:i]))
+				start = i + 1
+			}
+		}
+	}
+
+	elements = append(elements, strings.TrimSpace(inner[start:]))
+
+	isPlainIdentifier := func(s string) bool {
+		for i, ch := range s {
+			if !(unicode.IsLetter(ch) || ch == '_' || (i > 0 && unicode.IsDigit(ch))) {
+				return false
+			}
+		}
+
+		return len(s) > 0
+	}
+
+	typeLeadingKeywords := map[string]bool{"chan": true, "func": true, "map": true, "struct": true, "interface": true}
+
+	names := make([]string, len(elements))
+	allNamed := true
+
+	for i, element := range elements {
+		spaceIndex := strings.IndexFunc(element, unicode.IsSpace)
+
+		if spaceIndex <= 0 {
+			allNamed = false
+			break
+		}
+
+		name := element[:spaceIndex]
+
+		if !isPlainIdentifier(name) || typeLeadingKeywords[name] {
+			allNamed = false
+			break
+		}
+
+		names[i] = name
+	}
+
+	if len(elements) == 1 {
+		if allNamed {
+			return convertToCSTypeName(strings.TrimSpace(elements[0][len(names[0]):]))
+		}
+
+		return convertToCSTypeName(elements[0])
+	}
+
+	parts := make([]string, len(elements))
+
+	for i, element := range elements {
+		if allNamed {
+			parts[i] = convertToCSTypeName(strings.TrimSpace(element[len(names[i]):])) + " " + getSanitizedIdentifier(names[i])
+		} else {
+			parts[i] = convertToCSTypeName(element)
+		}
+	}
+
+	return "(" + strings.Join(parts, ", ") + ")"
 }
 
 // identHasHeapBox reports whether the local behind obj is backed by a `Ꮡname` heap box.

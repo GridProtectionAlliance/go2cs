@@ -145,6 +145,29 @@ func main() {
 	if err := wk.initWorker(0); err == nil {
 		fmt.Println(wk.run([]byte{1, 2}), *lastN) // 6 4
 	}
+
+	// Func-typed struct fields with NAMED tuple results (go/doc/comment's LookupPackage):
+	// the string-based Func<> render must strip the Go-ordered names — one named result
+	// unwraps to its bare type (a C# 1-tuple is CS8124), two become the C#-ordered named
+	// tuple ((@string importPath, bool ok)).
+	res := resolver{
+		lookupPackage: func(name string) (importPath string, ok bool) {
+			if name == "fmt" {
+				return "pkg/fmt", true
+			}
+			return "", false
+		},
+		lookupSym: func(recv string, name string) (ok bool) {
+			return recv == "" && name == "Printf"
+		},
+	}
+	ip, found := res.lookupPackage("fmt")
+	fmt.Println(ip, found, res.lookupSym("", "Printf"), res.lookupSym("T", "M")) // pkg/fmt true true false
+}
+
+type resolver struct {
+	lookupPackage func(name string) (importPath string, ok bool)
+	lookupSym     func(recv, name string) (ok bool)
 }
 
 type splitter func(s string) (int, string, error)

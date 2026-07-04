@@ -120,6 +120,27 @@ internal static void Main() {
             fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
         }
     }
+    var res = new resolver(
+        lookupPackage: (@string name) => {
+            @string importPath = default!;
+            bool ok = default!;
+            if (name == "fmt"u8) {
+                return ("pkg/fmt", true);
+            }
+            return ("", false);
+        },
+        lookupSym: (@string recv, @string name) => {
+            bool ok = default!;
+            return recv == ""u8 && name == "Printf"u8;
+        }
+    );
+    var (ip, found) = res.lookupPackage("fmt"u8);
+    fmt.Println(ip, found, res.lookupSym(""u8, "Printf"u8), res.lookupSym("T"u8, "M"u8));
+}
+
+[GoType] partial struct resolver {
+    internal Func<@string, (@string importPath, bool ok)> lookupPackage;
+    internal Func<@string, @string, bool> lookupSym;
 }
 
 internal delegate (nint, @string, error) splitter(@string s);
