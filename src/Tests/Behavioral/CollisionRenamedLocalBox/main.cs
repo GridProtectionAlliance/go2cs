@@ -24,6 +24,12 @@ internal static void setN(ж<box> Ꮡb, nint v) {
     b.n = v;
 }
 
+internal static void bump(ж<nint> Ꮡnp) {
+    ref var np = ref Ꮡnp.Value;
+
+    np += 100;
+}
+
 internal static nint usesTypeP() {
     Δp pv = default!;
     pv.id = 1;
@@ -37,6 +43,7 @@ internal static void Main() {
     Δp = new box(n: 0);
     setN(Ꮡp, 7);
     setN(Ꮡp, Δp.n + 3);
+    bump(Ꮡp.of(box.Ꮡn));
     fmt.Println(Δp.n, usesTypeP());
 }
 

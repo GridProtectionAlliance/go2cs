@@ -22,6 +22,8 @@ type box struct{ n int }
 
 func setN(b *box, v int) { b.n = v }
 
+func bump(np *int) { *np += 100 }
+
 // References the colliding type `p` and method `p` in a scope with no local `p` shadow.
 func usesTypeP() int {
 	var pv p
@@ -35,5 +37,9 @@ func main() {
 	p := box{n: 0} // local `p` collides with type `p` -> alias Δp, heap box Ꮡp
 	setN(&p, 7)    // &p -> Ꮡp (raw box), NOT ᏑΔp
 	setN(&p, p.n+3)
-	fmt.Println(p.n, usesTypeP()) // 10 1
+	// census F11: the address of a FIELD of the renamed heap-boxed local must also route
+	// through the RAW box - `Ꮡp.of(box.Ꮡn)`, not `ᏑΔp.of(...)` (CS0103 x2, reflect
+	// SliceOf/ArrayOf `&slice.Type` on the collision-renamed local `slice`).
+	bump(&p.n)
+	fmt.Println(p.n, usesTypeP()) // 110 1
 }

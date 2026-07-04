@@ -370,8 +370,17 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 
 						// The operand already has a heap-boxed pointer companion (e.g. an
-						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)".
-						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, structExpr, fieldRef)
+						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)". The box
+						// keeps the RAW identifier name — a collision-renamed local (`slice` →
+						// `Δslice`, reflect SliceOf) declares `ref heap<T>(out var Ꮡslice)`, so
+						// the companion is `Ꮡslice`, not `ᏑΔslice` (CS0103 ×2).
+						boxExpr := structExpr
+
+						if baseIdent, ok := selectorExpr.X.(*ast.Ident); ok {
+							boxExpr = v.boxBaseName(baseIdent)
+						}
+
+						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxExpr, fieldRef)
 					}
 
 					// The operand is an addressable value with no pointer companion (e.g.
