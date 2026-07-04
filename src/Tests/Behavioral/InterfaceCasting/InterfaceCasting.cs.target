@@ -79,7 +79,7 @@ public static @string Inc(this ж<Counter> Ꮡc) {
 }
 
 public static Animal Reversed(Animal a) {
-    return new reversedᴵAnimal(Ꮡ(new reversed(a)));
+    return new reversedжAnimal(Ꮡ(new reversed(a)));
 }
 
 internal static (Animal, @string) pick(nint kind) {
@@ -88,19 +88,19 @@ internal static (Animal, @string) pick(nint kind) {
     switch (kind) {
     case 0: {
         ref var d = ref heap(new Dog(), out var Ꮡd);
-        a = new DogᴵAnimal(Ꮡd);
+        a = new DogжAnimal(Ꮡd);
         name = "dog"u8;
         break;
     }
     case 1: {
         ref var c = ref heap(new Cat(), out var Ꮡc);
-        a = new CatᴵAnimal(Ꮡc);
+        a = new CatжAnimal(Ꮡc);
         name = "cat"u8;
         break;
     }
     default: {
         ref var l = ref heap(new Llama(), out var Ꮡl);
-        a = new LlamaᴵAnimal(Ꮡl);
+        a = new LlamaжAnimal(Ꮡl);
         name = "llama"u8;
         break;
     }}
@@ -111,19 +111,19 @@ internal static (Animal, @string) pick(nint kind) {
 public static Animal Self(this ж<Cat> Ꮡc) {
     ref var c = ref Ꮡc.Value;
 
-    return new CatᴵAnimal(Ꮡc);
+    return new CatжAnimal(Ꮡc);
 }
 
 internal static void Main() {
     error err = default!;
     err = new MyError("bar");
     fmt.Printf("%v %v\n"u8, f(), err);
-    var animals = new Animal[]{new DogᴵAnimal(@new<Dog>()), new CatᴵAnimal(@new<Cat>()), new Llama(nil), new JavaProgrammer(nil)}.slice();
+    var animals = new Animal[]{new DogжAnimal(@new<Dog>()), new CatжAnimal(@new<Cat>()), new Llama(nil), new JavaProgrammer(nil)}.slice();
     foreach (var (_, animal) in animals) {
         fmt.Println(animal.Speak());
     }
     var c = Ꮡ(new Counter(nil));
-    Incrementer inc = new CounterᴵIncrementer(c);
+    Incrementer inc = new CounterжIncrementer(c);
     inc.Inc();
     inc.Inc();
     fmt.Println("via pointer:", c.Total());
@@ -146,7 +146,7 @@ internal static void Main() {
     readers[0] = new fileRdr(name: "x"u8);
     fmt.Println(readers[0].read());
     slice<Animal> pack = default!;
-    pack = append(pack, (Animal)(new CatᴵAnimal(Ꮡ(new Cat(nil)))));
+    pack = append(pack, (Animal)(new CatжAnimal(Ꮡ(new Cat(nil)))));
     pack = append(pack, (Animal)(new Dog(nil)));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
     var cp = Ꮡ(new Cat(nil));

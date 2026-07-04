@@ -2274,7 +2274,8 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 }
 
 // adapterTypeRef renders the reference to the generated pointer-interface adapter class for a
-// *T → iface cast: `<struct>ᴵ<ifaceSimple>` (U+1D35), nested in the struct's package class like
+// *T → iface cast: `<struct>ж<ifaceSimple>` (PointerPrefix - user-ruled style; keep in
+// sync with the generator, which composes the same name via Symbols.PointerPrefix), nested in the struct's package class like
 // the struct itself, so a same-package reference is the bare name. The interface side uses its
 // SIMPLE name — the generator derives the same identifier via GetSimpleName, so both sides must
 // agree on last-dot-segment naming.
@@ -2285,7 +2286,7 @@ func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 		ifaceSimple = ifaceSimple[idx+1:]
 	}
 
-	return structTypeName + "ᴵ" + ifaceSimple
+	return structTypeName + PointerPrefix + ifaceSimple
 }
 
 func isDynamicStruct(t types.Type) bool {

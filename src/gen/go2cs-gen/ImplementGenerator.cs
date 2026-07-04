@@ -30,6 +30,7 @@ using go2cs.Templates.InterfaceImpl;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static go2cs.Common;
+using static go2cs.Symbols;
 
 #if DEBUG_GENERATOR
 using System.Diagnostics;
@@ -204,7 +205,9 @@ public class ImplementGenerator : ISourceGenerator
                     PackageName = packageName,
                     StructName = structName,
                     InterfaceName = interfaceName,
-                    AdapterName = $"{structName}ᴵ{GetSimpleName(interfaceName)}",
+                    // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
+                    // via Symbols.PointerPrefix so a future symbol change follows automatically.
+                    AdapterName = $"{structName}{PointerPrefix}{GetSimpleName(interfaceName)}",
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
