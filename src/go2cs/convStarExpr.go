@@ -139,6 +139,16 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		return fmt.Sprintf("(%s)%s", v.convExpr(starExpr.X, nil), derefAccessor)
 	}
 
+	// A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a
+	// naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`) —
+	// reflect MapOf's `**(**mapType)(unsafe.Pointer(&imap))` read the inner unsafe.Pointer's
+	// slot and left ж<mapType> unwrapped once (CS0029). Wrap the inner deref before
+	// dereferencing again. (A pointer PARAMETER's `**p` takes the shortcut above and never
+	// reaches here.)
+	if _, ok := starExpr.X.(*ast.StarExpr); ok {
+		return fmt.Sprintf("(%s)%s", v.convExpr(starExpr.X, nil), derefAccessor)
+	}
+
 	return v.convExpr(starExpr.X, nil) + derefAccessor
 }
 

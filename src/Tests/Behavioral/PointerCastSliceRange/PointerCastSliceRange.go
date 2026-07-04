@@ -31,4 +31,12 @@ func main() {
 	}
 
 	fmt.Println(sum, total, s[0])
+
+	// census F13: a DOUBLE deref of a double-pointer reinterpret - reflect MapOf's
+	// `**(**mapType)(unsafe.Pointer(&imap))` - the outer deref must parenthesize the
+	// inner `~`-form deref before appending .Value, or the postfix binds into the cast
+	// chain and reads the inner unsafe.Pointer slot (CS0029). Compile-shape only.
+	ip := &arr
+	back := **(**[4]int)(unsafe.Pointer(&ip))
+	_ = back
 }
