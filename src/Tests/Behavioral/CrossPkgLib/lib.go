@@ -88,6 +88,17 @@ type Status struct {
 
 func (s Sensor) Status() int { return int(s.Temp) }
 
+// snapshot is UNEXPORTED but exposed by the exported var Latest and the exported func
+// Peek - Go consumers hold the value and call its exported surface, so the C# type is
+// publicized (CS0052/CS0050, internal/poll ErrNetClosing).
+type snapshot struct {
+	At int
+}
+
+var Latest = snapshot{At: 42}
+
+func Peek() snapshot { return Latest }
+
 type Ticks uintptr
 
 // Device embeds Sensor BY VALUE - a consumer embedding Device promotes Sensor fields

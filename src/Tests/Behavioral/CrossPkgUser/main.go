@@ -138,6 +138,7 @@ func main() {
 	fmt.Println(g1.Code, c1) // 6 5
 	mb := meterBox{st: CrossPkgLib.Status{Code: 3}, sat: 1}
 	fmt.Println(mb.st.Code + mb.sat) // 4
+	fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At) // 42 42
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

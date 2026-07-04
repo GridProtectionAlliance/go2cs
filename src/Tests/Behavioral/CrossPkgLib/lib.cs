@@ -70,6 +70,16 @@ public static nint Status(this Sensor s) {
     return (nint)(float64)s.Temp;
 }
 
+[GoType] public partial struct snapshot {
+    public nint At;
+}
+
+public static snapshot Latest = new snapshot(At: 42);
+
+public static snapshot Peek() {
+    return Latest;
+}
+
 [GoType("num:uintptr")] partial struct Ticks;
 
 [GoType] partial struct Device {

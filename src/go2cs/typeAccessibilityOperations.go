@@ -26,28 +26,57 @@ func collectPublicizedTypes(pkg *types.Package) {
 	scope := pkg.Scope()
 
 	for _, name := range scope.Names() {
-		typeName, ok := scope.Lookup(name).(*types.TypeName)
+		obj := scope.Lookup(name)
 
-		if !ok {
-			continue
-		}
+		switch obj := obj.(type) {
+		case *types.TypeName:
+			structType, ok := obj.Type().Underlying().(*types.Struct)
 
-		structType, ok := typeName.Type().Underlying().(*types.Struct)
-
-		if !ok {
-			continue
-		}
-
-		for i := range structType.NumFields() {
-			field := structType.Field(i)
-
-			// Only an exported field forces its type to be at least as accessible; an unexported
-			// (internal) field of an internal type is fine.
-			if !field.Exported() {
+			if !ok {
 				continue
 			}
 
-			collectUnexportedNamedTypes(field.Type(), pkg)
+			for i := range structType.NumFields() {
+				field := structType.Field(i)
+
+				// Only an exported field forces its type to be at least as accessible; an
+				// unexported (internal) field of an internal type is fine.
+				if !field.Exported() {
+					continue
+				}
+
+				collectUnexportedNamedTypes(field.Type(), pkg)
+			}
+		case *types.Var, *types.Const:
+			// An EXPORTED package-level var (or typed const) of an unexported type — Go's
+			// `var ErrNetClosing = errNetClosing{}` (internal/poll) — emits a public static
+			// field whose type must be at least as accessible (CS0052). Go consumers can
+			// legally hold the value and call its exported methods, so publicizing the type
+			// is the faithful mapping.
+			if obj.Exported() {
+				collectUnexportedNamedTypes(obj.Type(), pkg)
+			}
+		case *types.Func:
+			// An EXPORTED function's parameter/result types face the same rule on the public
+			// static method (CS0050/CS0051) — `func Peek() snapshot` with `snapshot`
+			// unexported.
+			if !obj.Exported() {
+				continue
+			}
+
+			if sig, ok := obj.Type().(*types.Signature); ok {
+				if params := sig.Params(); params != nil {
+					for i := range params.Len() {
+						collectUnexportedNamedTypes(params.At(i).Type(), pkg)
+					}
+				}
+
+				if results := sig.Results(); results != nil {
+					for i := range results.Len() {
+						collectUnexportedNamedTypes(results.At(i).Type(), pkg)
+					}
+				}
+			}
 		}
 	}
 }
