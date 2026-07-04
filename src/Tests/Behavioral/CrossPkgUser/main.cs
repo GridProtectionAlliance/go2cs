@@ -209,7 +209,7 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLib.Rated rt = ct;
     fmt.Println(sd.Label(), rt.Rating());
     var pr = Ꮡ(new CrossPkgLib.Probe(nil));
-    CrossPkgLib.Sampler sam = new ProbeжSampler(pr);
+    CrossPkgLib.Sampler sam = new CrossPkgLib_ProbeжSampler(pr);
     fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
     var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"u8));
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);

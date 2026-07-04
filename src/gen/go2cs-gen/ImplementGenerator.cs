@@ -358,8 +358,12 @@ public class ImplementGenerator : ISourceGenerator
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
-                    // A foreign struct's qualified name reduces to its SIMPLE name (FileжReader).
-                    AdapterName = $"{(foreignStruct ? GetSimpleName(structName) : structName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
+                    // A FOREIGN struct's name is PACKAGE-QUALIFIED (os_FileжReader): two
+                    // same-named foreign structs adapting to one interface otherwise compose
+                    // a single colliding class (math/big records both bytes.Reader and
+                    // strings.Reader against io.ByteScanner - CS0102/CS0111/CS8646). The
+                    // package name comes from the containing package class (bytes_package).
+                    AdapterName = $"{(foreignStruct ? $"{ForeignPackagePrefix(structType)}{GetSimpleName(structName)}" : structName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
@@ -399,8 +403,10 @@ public class ImplementGenerator : ISourceGenerator
                     StructName = GlobalQualify(structType.GetFullTypeName(true)),
                     InterfaceName = interfaceName,
                     // Composes with Symbols.ValueAdapterInfix - the value sibling of the
-                    // PointerPrefix-composed pointer adapters.
-                    AdapterName = $"{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}",
+                    // PointerPrefix-composed pointer adapters. A FOREIGN struct's name is
+                    // PACKAGE-QUALIFIED (syscall_ΔSignalᴠΔSignal), mirroring the pointer arm's
+                    // same-simple-name collision guard; a LOCAL delegate stays bare.
+                    AdapterName = $"{(structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly) ? ForeignPackagePrefix(structType) : "")}{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}",
                     AdapterScope = valueAdapterScope,
                     ImplementsFormattable = implementsFormattable,
                     Methods = methods,
@@ -435,6 +441,21 @@ public class ImplementGenerator : ISourceGenerator
             // Add the source code to the compilation
             context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}.g.cs")), generatedSource);
         }
+    }
+
+    /// <summary>
+    /// Gets the disambiguating package prefix ("bytes_") for a FOREIGN struct's local adapter
+    /// class name, derived from its containing package class ("bytes_package") — matching the
+    /// converter's <c>getSanitizedIdentifier(pkg.Name()) + "_"</c> composition at the cast site.
+    /// </summary>
+    private static string ForeignPackagePrefix(ITypeSymbol structType)
+    {
+        string? packageClassName = structType.ContainingType?.Name;
+
+        if (packageClassName is null || !packageClassName.EndsWith("_package"))
+            return string.Empty;
+
+        return $"{packageClassName.Substring(0, packageClassName.Length - "_package".Length)}_";
     }
 
     private static string? GetNamespace(FileScopedNamespaceDeclarationSyntax? namespaceSyntax)

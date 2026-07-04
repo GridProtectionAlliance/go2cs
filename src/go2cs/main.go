@@ -2361,10 +2361,26 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// The old `~box` deref boxed a COPY into the C# interface (aliasing divergence) and could
 	// not serve direct-ж members at all (math/rand lockedSource CS1929/CS1503). Non-local impl
 	// types keep the deref-copy form below (their adapter is not generated in this assembly).
-	// A recorded VALUE-form foreign conversion references the LOCAL value adapter
-	// (`new ΔSignalᴠΔSignal(sig)` - same package, bare name).
+	// A recorded VALUE-form foreign conversion references the LOCAL value adapter. Its class
+	// name is PACKAGE-QUALIFIED (`new syscall_ΔSignalᴠΔSignal(sig)`) for the same reason as
+	// the local pointer adapters: two same-named foreign types adapting to one interface
+	// otherwise compose a single colliding class (math/big's bytes.Reader + strings.Reader).
 	if recordableValueForeign && exprResult != "" {
-		return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+		qualifiedTarget := targetTypeName
+
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+				simpleTarget := targetTypeName
+
+				if idx := strings.LastIndex(simpleTarget, "."); idx >= 0 {
+					simpleTarget = simpleTarget[idx+1:]
+				}
+
+				qualifiedTarget = getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget
+			}
+		}
+
+		return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(qualifiedTarget, interfaceTypeName), exprResult)
 	}
 
 	// A LOCAL NAMED FUNC type with methods (flag's funcValue implementing Value): a C#
@@ -2423,9 +2439,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				// NO exported adapter — the defining package never converts this pair itself
 				// (os never casts *File to io.Reader). Record the pairing LOCALLY: the
 				// generator emits a LOCAL adapter class for the foreign struct, binding its
-				// methods from metadata, referenced by its simple composed name (fmt's
-				// Fscan(os.Stdin, …), CS1503 ×3). Aliasing is faithful — the adapter wraps
-				// the ж<T> box itself, unlike the deref-COPY fallback this replaces.
+				// methods from metadata (fmt's Fscan(os.Stdin, …), CS1503 ×3). Aliasing is
+				// faithful — the adapter wraps the ж<T> box itself, unlike the deref-COPY
+				// fallback this replaces. The class name is PACKAGE-QUALIFIED
+				// (`os_FileжReader`): two same-named foreign structs adapting to the same
+				// interface otherwise compose ONE colliding class (math/big records both
+				// bytes.Reader and strings.Reader against io.ByteScanner — CS0102/CS0111).
 				if recordableBase && exprResult != "" {
 					recordName := PointerPrefix + "<" + targetTypeName + ">"
 
@@ -2445,7 +2464,9 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 						simpleTarget = simpleTarget[idx+1:]
 					}
 
-					return fmt.Sprintf("new %s(%s)", adapterTypeRef(simpleTarget, interfaceTypeName), exprResult)
+					qualifiedTarget := getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget
+
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(qualifiedTarget, interfaceTypeName), exprResult)
 				}
 			}
 		}

@@ -1237,13 +1237,18 @@ A pointer-sourced cast to an interface implemented by a FOREIGN type references 
 converts the pair itself (os never casts `*File` to `io.Reader`, so no record exists to
 reference), the converting package records `GoImplement<os_package.File, io_package.Reader>(Pointer
 = true)` **locally** and the generator emits a **local adapter class** for the foreign struct
-(`internal sealed class FileжReader`, simple composed name; the `m_box` field is fully qualified).
-Forwarding decisions come from **metadata** — the compiled foreign assembly exposes every
-converter and sibling-generator form as real symbols, so an extension on `ж<T>` binds the box
-(`m_box.Read(p)`) and everything else binds the deref'd value (`m_box.Value.M()`, ref extensions
-bind through the ref-returning `Value`). This replaces the old deref-COPY fallback, so aliasing is
-faithful: fmt's `Fscan(os.Stdin, …)` emits `Fscan(new FileжReader(os.Stdin), …)` (CS1503 ×3, the
-last fmt family). Guarded by `CrossPkgUser` (`*Probe → Sampler`, mutation read back through the
+(`internal sealed class os_FileжReader`; the `m_box` field is fully qualified). The class name is
+**package-qualified** (`{pkg}_{Struct}ж{Iface}`): two same-named foreign structs adapting to one
+interface otherwise compose a single colliding class — math/big records both `bytes.Reader` and
+`strings.Reader` against `io.ByteScanner` (CS0102/CS0111/CS8646 ×8). The local VALUE adapters for
+foreign structs qualify the same way (`syscall_ΔSignalᴠΔSignal`); a LOCAL delegate's value adapter
+stays bare (`funcValueᴠValue`). Forwarding decisions come from **metadata** — the compiled foreign
+assembly exposes every converter and sibling-generator form as real symbols, so an extension on
+`ж<T>` binds the box (`m_box.Read(p)`) and everything else binds the deref'd value
+(`m_box.Value.M()`, ref extensions bind through the ref-returning `Value`). This replaces the old
+deref-COPY fallback, so aliasing is faithful: fmt's `Fscan(os.Stdin, …)` emits
+`Fscan(new os_FileжReader(os.Stdin), …)` (CS1503 ×3, the last fmt family). Guarded by
+`CrossPkgUser` (`*Probe → Sampler` via `CrossPkgLib_ProbeжSampler`, mutation read back through the
 original pointer).
 
 ### Cross-package value-to-interface conversions use the local VALUE adapter
@@ -1251,9 +1256,10 @@ A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` i
 DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records
 `GoImplement<foreign, localIface>` locally; the `ImplementGenerator` detects the foreign struct
 (different containing assembly, no local declaration) and emits a **value adapter class**
-`{Struct}ᴠ{Iface}` (composed with `Symbols.ValueAdapterInfix`) wrapping a **COPY** of the struct
+`{pkg}_{Struct}ᴠ{Iface}` (composed with `Symbols.ValueAdapterInfix`; package-qualified for a
+FOREIGN struct — see the pointer-adapter collision note above) wrapping a **COPY** of the struct
 — exactly as a Go interface holds a value — with value equality. The conversion site emits
-`new SignalᴠSignal(sig)` with simple names. The adapter's struct field is **fully qualified**
+`new syscall_ΔSignalᴠΔSignal(sig)`. The adapter's struct field is **fully qualified**
 (`GetFullTypeName(true)`): the bare name resolved to the LOCAL same-named type when os's
 `ΔSignal` interface shadowed syscall's `ΔSignal` struct.
 
@@ -1271,7 +1277,7 @@ the converter first consults the imported package_info records (`parseExportedVa
 plain or `Promoted` `GoImplement` forms): if the defining assembly already implements the pair,
 the bare value converts implicitly and nothing is recorded. Otherwise the pair is recorded
 locally and the conversion site wraps in the locally generated value adapter
-(`new bigEndianᴠByteOrder(binary.BigEndian)`) — the value sibling of the both-foreign pointer
+(`new binary_bigEndianᴠByteOrder(binary.BigEndian)`) — the value sibling of the both-foreign pointer
 adapter above.
 
 ### Publicized unexported types make their exported methods public
