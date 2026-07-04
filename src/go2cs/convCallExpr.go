@@ -393,6 +393,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				// and for a plain `arenaIdx(yArenaIdx)`. Wrapping the already-typed expr in another
 				// `((arenaIdx)…)` cast just doubles it; return the converted arg as-is.
 				if argType != nil && types.Identical(argType, named) {
+					// EXCEPT a plain CONSTANT arg: go/types types the constant AS the target
+					// (identity), but convExpr rendered the bare literal (`Word(1)` → `1`),
+					// which under a binary operator resolves as int and degrades the whole
+					// expression (math/big's `mask := Word(1)<<s - 1`, CS0029 ×3). Re-impose
+					// the named cast — the := declaration patch in visitAssignStmt covered
+					// only the direct-RHS position.
+					if tv, ok := v.info.Types[callExpr]; ok && tv.Value != nil {
+						namedCS := convertToCSTypeName(v.getTypeName(named, false))
+
+						if !strings.HasPrefix(expr, "(("+namedCS+")") && !strings.HasPrefix(expr, "("+namedCS+")") && !strings.HasPrefix(expr, "new ") {
+							return fmt.Sprintf("((%s)%s)", namedCS, expr)
+						}
+					}
+
 					return expr
 				}
 
