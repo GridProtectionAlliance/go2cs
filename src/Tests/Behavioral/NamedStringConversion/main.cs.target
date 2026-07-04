@@ -17,6 +17,10 @@ internal static void Main() {
     fmt.Println(e.Error());
     @string l = ((label)(@string)"tag"u8);
     fmt.Println(l, len(l));
+    @string st = ((label)(@string)"json,omitempty"u8);
+    fmt.Println(st[0], st[4]);
+    @string name = st[0..4];
+    fmt.Println(name, name != ""u8, name == "json"u8);
 }
 
 } // end main_package

@@ -114,6 +114,27 @@ internal class InheritedTypeTemplate : TemplateBase
 
         """;
 
+    // A named type over `string` is indexed and sub-sliced in Go (`tag[i]`, `tag[i:j]` -
+    // reflect StructTag.Get); C# indexing never applies user-defined conversions, so the
+    // wrapper forwards the @string surface: element indexers, a Range indexer returning the
+    // WRAPPER (a Go sub-slice of a named string keeps the named type), Length for len(), and
+    // the u8-literal bridge so span comparisons/assignments bind (census F5, CS0021 x14 +
+    // CS0019 x2).
+    private string StringSurfaceMembers => TypeName != "@string" ? "" :
+        $$"""
+
+                public byte this[int index] => {{Value}}[index];
+
+                public byte this[nint index] => {{Value}}[index];
+
+                public {{ObjectName}} this[Range range] => new {{ObjectName}}({{Value}}[range]);
+
+                public nint Length => {{Value}}.Length;
+
+                public static implicit operator {{ObjectName}}(ReadOnlySpan<byte> value) => new {{ObjectName}}(new @string(value));
+
+        """;
+
     private string ToStringImplementation => TypeClass switch
     {
         "bool" => $"{Value}.ToString().ToLowerInvariant()",
@@ -191,7 +212,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
         {{UnderlyingConversionOperators}}
-                    {{UintptrBridgeOperators}}
+                    {{UintptrBridgeOperators}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => value.Equals(default({{ObjectName}}));
         

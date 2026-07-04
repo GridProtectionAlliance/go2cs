@@ -20,4 +20,11 @@ func main() {
 
 	l := label("tag")
 	fmt.Println(l, len(l)) // tag 3
+
+	// The @string wrapper surface (reflect StructTag.Get shape - census F5): element
+	// indexing, sub-slicing (stays the named type), and comparison against a literal.
+	st := label("json,omitempty")
+	fmt.Println(st[0], st[4]) // 106 44
+	name := st[0:4]
+	fmt.Println(name, name != "", name == "json") // json true true
 }
