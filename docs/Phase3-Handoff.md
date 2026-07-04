@@ -15,6 +15,28 @@
 
 ## Where things stand (2026-07-03)
 
+- **OS CAMPAIGN DEEP-DIVE (2026-07-04 ~4am) - THE "os=8" WAS ROSLYN PHASE-GATING, os TRUE
+  RESIDUE = 77.** The dirEntry double-implementation (CS8646/CS0111, declaration-phase)
+  SUPPRESSED all method-body binding diagnostics; fixing the duplication (33c2e8026, emission-
+  time alias/qualified dedup - ALIAS record wins; record-key normalization was twice wrong:
+  qualified attr names break generator resolution AND the alias-locality gate) revealed 69
+  body errors. Empirically verified: both-attrs=8, either-alone=77, twin g.cs outputs byte-
+  identical. LESSON: declaration-phase errors HIDE body errors - a package is not measured
+  until its declaration errors are zero.
+  **NEXT ROOT (analyzed, unimplemented): CS0029 x38 - `err = &PathError{...}` emits BARE
+  `new PathError(...)`: the pointer-to-interface ADAPTER wrap in convertToInterfaceType is
+  gated on isLocalImplType (main.go ~2138 recordable), so a CROSS-PACKAGE pointer target
+  (os assigning fs.PathError, whose PathErrorжerror adapter IS generated in io/fs from its
+  own GoImplement<PathError, error>(Pointer = true) record, line 44 of io/fs package_info,
+  and is PUBLIC since PathError is exported) falls through to the bare value. FIX: the
+  adapter-ctor emission must reference the FOREIGN adapter class - qualify adapterTypeRef
+  with the foreign package (fs_package.PathErrorжerror) when the target type is not local;
+  assignment path = visitAssignStmt convertExprToInterfaceType -> convertToInterfaceType
+  (the arg/return positions 448473009/convExprList presumably share the gate - fix at the
+  convertToInterfaceType layer once). os residue after: CS8716 x18 (no target type for
+  default literal - likely same-family cascade), CS1662 x5, CS0128/CS0841 err x5, CS0121
+  fileStat ctor x3, CS1929 File Read/Write x2, CS1503 x4.**
+
 - **POLL CAMPAIGN (2026-07-04, cont) - 34 commits. CS0052 publicize root bf5dcdcb7 (exported
   vars/consts/func sigs publicize their unexported types; CrossPkgLib snapshot guard) +
   CS0030 named-over-pointer hop 297e84e5b (((Pointer)(zh<EmptyStruct>)(uintptr)(x));
