@@ -50,4 +50,14 @@ func main() {
 		return unsafe.Pointer(ip)
 	}
 	_ = pick(true)
+
+	// A NAMED-over-pointer conversion from a raw address (syscall.Pointer shape,
+	// internal/poll WSAMsg.Name CS0030 x6): hops uintptr then the named operator -
+	// ((opaque)(zh<nint>)(uintptr)(...)). Compile-shape only.
+	op := opaque(unsafe.Pointer(ip))
+	_ = op
 }
+
+// opaque mirrors syscall.Pointer: a named type whose underlying is a pointer.
+type opaque *[4]int
+

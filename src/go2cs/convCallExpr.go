@@ -181,6 +181,23 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			return fmt.Sprintf("(%s)(uintptr)(%s)", targetTypeName, expr)
 		}
 
+		// A NAMED-over-pointer target from a RAW-ADDRESS source — `syscall.Pointer(unsafe.
+		// Pointer(x))`, where `type Pointer *struct{}` emits as a ж<EmptyStruct>-wrapping
+		// class — needs the same uintptr reinterpret hop as the `(*T)(p)` form above, then
+		// the named type's own operator from its underlying box:
+		// `((Pointer)(ж<EmptyStruct>)(uintptr)(x))`. The direct cast chained two
+		// user-defined conversions (CS0030 ×6, internal/poll's WSAMsg.Name assignments).
+		if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if ptrUnder, ok := named.Underlying().(*types.Pointer); ok {
+				if argType := v.info.TypeOf(arg); argType != nil {
+					if basic, ok := argType.Underlying().(*types.Basic); ok && (basic.Kind() == types.UnsafePointer || basic.Kind() == types.Uintptr) {
+						elemCS := convertToCSTypeName(v.getTypeName(ptrUnder.Elem(), false))
+						return fmt.Sprintf("((%s)(%s<%s>)(uintptr)(%s))", targetTypeName, PointerPrefix, elemCS, expr)
+					}
+				}
+			}
+		}
+
 		// unsafe.Pointer(ptr) where ptr is a Go pointer (`*T`, emitted as the managed box `ж<T>`).
 		// A managed box has no conversion to the numeric Pointer (`ж<uintptr>`), so a plain cast is
 		// CS0030 — e.g. `unsafe.Pointer(&u.value)` → `(@unsafe.Pointer)(Ꮡu.of(…))`. Pin the

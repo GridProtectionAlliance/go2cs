@@ -33,6 +33,10 @@ internal static unsafe void Main() {
         return new @unsafe.Pointer(ipʗ1);
     };
     _ = (uintptr)pick(true);
+    var op = ((opaque)(ж<array<nint>>)(uintptr)(new @unsafe.Pointer(ip)));
+    _ = op;
 }
+
+[GoType("ж<array<nint>>")] partial class opaque;
 
 } // end main_package
