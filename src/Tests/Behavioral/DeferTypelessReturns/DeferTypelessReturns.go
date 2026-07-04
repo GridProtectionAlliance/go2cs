@@ -40,6 +40,21 @@ func first(value [4]byte) byte {
 	return *p
 }
 
+var errNil error
+
+func width() uint32 { return 9 }
+
+// mixedRet: a constant-element return (`return 0, ...` types its C# tuple (int, error))
+// beside a fully-typed return - ANY unreliable return forces the explicit func<T> wrapper,
+// or C# lambda inference fails and binds the void overload (CS8030 x2, poll GetFileType).
+func mixedRet(ok bool) (uint32, error) {
+	defer closeIt(nil, 4)
+	if !ok {
+		return 0, fmt.Errorf("nope")
+	}
+	return width(), errNil
+}
+
 func main() {
 	defer closeIt(nil, 3)
 	// A no-arg deferred METHOD whose signature RETURNS a value (registry Key.Close in
@@ -47,6 +62,10 @@ func main() {
 	// the lambda form discards the result, matching Go deferred-call semantics.
 	h := res{id: 4}
 	defer h.close()
+	w, werr := mixedRet(true)
+	fmt.Println(w, werr == nil)
+	_, werr2 := mixedRet(false)
+	fmt.Println(werr2)
 	xs := []item{{1}, {2}}
 	p, err := find(xs, 2)
 	fmt.Println(p != nil, err == nil)

@@ -44,12 +44,30 @@ internal static byte first(array<byte> value) {
     return p.Value;
 }
 
+internal static error errNil;
+
+internal static uint32 width() {
+    return 9;
+}
+
+internal static (uint32, error) mixedRet(bool ok) => func<(uint32, error)>((defer, recover) => {
+    deferǃ(closeIt, (ж<nint>)(nil), (nint)(4), defer);
+    if (!ok) {
+        return (0, fmt.Errorf("nope"u8));
+    }
+    return (width(), errNil);
+});
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(closeIt, (ж<nint>)(nil), (nint)(3), defer);
     ref var h = ref heap<res>(out var Ꮡh);
     h = new res(id: 4);
     var hʗ1 = h;
     defer(() => hʗ1.close());
+    var (w, werr) = mixedRet(true);
+    fmt.Println(w, werr == default!);
+    var (_, werr2) = mixedRet(false);
+    fmt.Println(werr2);
     var xs = new item[]{new(1), new(2)}.slice();
     var (p, err) = find(xs, 2);
     fmt.Println(p != nil, err == default!);

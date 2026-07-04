@@ -638,10 +638,10 @@ func (v *Visitor) allExecWrapperReturnsAreTypeless(funcDecl *ast.FuncDecl) bool 
 		return false
 	}
 
-	typedReturnFound := false
+	unreliableReturnFound := false
 
 	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
-		if typedReturnFound {
+		if unreliableReturnFound {
 			return false
 		}
 
@@ -660,16 +660,29 @@ func (v *Visitor) allExecWrapperReturnsAreTypeless(funcDecl *ast.FuncDecl) bool 
 		}
 
 		for _, result := range returnStmt.Results {
-			if tv, ok := v.info.Types[result]; ok && tv.IsNil() {
-				return true // this return contributes no type; keep scanning
+			tv, ok := v.info.Types[result]
+
+			if !ok {
+				continue
+			}
+
+			// A Go-nil result renders `default!` (no natural type). A CONSTANT result
+			// renders as a bare literal typed by C#'s defaults (`return 0, err` in a
+			// (uint32, error) function types its tuple as (int, error)) — either way this
+			// return's natural type can DISAGREE with the declared results, and C# lambda
+			// inference needs every return to agree (one poisoned return binds the void
+			// GoAction overload — CS8030 ×2, poll GetFileType's `return 0, err` beside a
+			// fully-typed call return). ANY such result forces the explicit form.
+			if tv.IsNil() || tv.Value != nil {
+				unreliableReturnFound = true
+				return false
 			}
 		}
 
-		typedReturnFound = true
-		return false
+		return true
 	})
 
-	return !typedReturnFound
+	return unreliableReturnFound
 }
 
 // identIsParameter checks if the given identifier is a parameter in the current function.
