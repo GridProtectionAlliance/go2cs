@@ -2323,7 +2323,13 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				packageLock.Unlock()
 
 				if foreignAdapterExists {
-					return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+					// Reference through the file-local package ALIAS (`CrossPkgLib.Meter` +
+					// adapter suffix), not the raw package-class qualifier
+					// (`CrossPkgLib_package.…`) - user-ruled style; getTypeName both yields
+					// the aliased form and registers the file-local using for it.
+					adapterBase := convertToCSTypeName(v.getTypeName(named, false))
+
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(adapterBase, interfaceTypeName), exprResult)
 				}
 			}
 		}

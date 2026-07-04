@@ -102,7 +102,7 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(l1.Label(), l2.Label());
     CrossPkgLib.Reporter rep = default!;
     var mtr = CrossPkgLib.NewMeter();
-    rep = new CrossPkgLib_package.MeterжReporter(mtr);
+    rep = new CrossPkgLib.MeterжReporter(mtr);
     fmt.Println(rep.Report());
 });
 
