@@ -40,11 +40,27 @@ func main() {
 	fmt.Println("prefix too long:", prefixMatch(str, "hello world"))
 	fmt.Println("last(string):", lastByte(str))
 	fmt.Println("last([]byte):", lastByte(bs))
+	fmt.Println("sum:", digitSum("12:34"), digitSum([]byte("56:78")))
 }
 
 // lastByte uses the REVERSED union order - `[]byte | string` (time/format.go appendNano):
 // the slice term leads, which previously matched the ISlice branch and leaked the raw
 // union as the element type (ISlice<byte | string> - CS1003 cascade).
+// digitSum mirrors time format_rfc3339 parseStrictRFC3339: a CLOSURE parameter typed as
+// the union type param (renders IByteSeq<byte> - a lambda has no where-clause) receiving
+// SUB-SLICES of the constrained value, plus the []byte(s) conversion inside (shares for a
+// slice instantiation, copies for string).
+func digitSum[T []byte | string](s T) int {
+	parse := func(part T) int {
+		n := 0
+		for _, c := range []byte(part) {
+			n = n*10 + int(c-'0')
+		}
+		return n
+	}
+	return parse(s[0:2]) + parse(s[3:5])
+}
+
 func lastByte[T []byte | string](s T) byte {
 	return s[len(s)-1]
 }

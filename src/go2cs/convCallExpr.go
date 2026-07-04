@@ -933,6 +933,19 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 	// the `[]byte` case.
 	callExprContext.sourceIsRuneArray = funcTypeName == "[]rune" || funcTypeName == "[]byte"
 
+	// A `[]byte(s)` conversion of a `string | []byte` union-constrained value (rendered
+	// IByteSeq<byte> at lambda params — time format_rfc3339's parseUint): the usual route
+	// binds golib's slice<T>(T[])/slice(@string) builtins, neither of which accepts the
+	// interface — and ADDING a builtin IByteSeq overload makes @string args ambiguous
+	// (CS0121, both conversions applicable). Emit the slice<byte>(IByteSeq<byte>)
+	// CONSTRUCTOR directly: for the interface-typed arg only it is applicable, sharing a
+	// boxed slice's backing and copying a string — Go's per-instantiation semantics.
+	if funcTypeName == "[]byte" && len(callExpr.Args) == 1 {
+		if tp, ok := types.Unalias(v.getType(callExpr.Args[0], false)).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
+			return fmt.Sprintf("new slice<byte>(%s)", v.convExpr(callExpr.Args[0], nil))
+		}
+	}
+
 	if len(callExpr.Args) == 1 {
 		argTypeName := v.getExprTypeName(callExpr.Args[0], true)
 

@@ -311,6 +311,50 @@ func typeParamIsInteger(tp *types.TypeParam) bool {
 	return found
 }
 
+// typeParamIsStringByteUnion reports whether the type parameter's constraint is exactly Go's
+// `string | []byte` union (in either order) — the shape golib's IByteSeq<byte> models. Used to
+// widen a FUNC-LITERAL parameter of that type to the interface (a lambda has no where-clause).
+func typeParamIsStringByteUnion(tp *types.TypeParam) bool {
+	iface, ok := tp.Constraint().Underlying().(*types.Interface)
+
+	if !ok {
+		return false
+	}
+
+	sawString, sawByteSlice, terms := false, false, 0
+
+	for i := range iface.NumEmbeddeds() {
+		union, ok := iface.EmbeddedType(i).(*types.Union)
+
+		if !ok {
+			return false
+		}
+
+		for j := range union.Len() {
+			terms++
+
+			switch u := union.Term(j).Type().Underlying().(type) {
+			case *types.Basic:
+				if u.Info()&types.IsString != 0 {
+					sawString = true
+				} else {
+					return false
+				}
+			case *types.Slice:
+				if basic, ok := u.Elem().Underlying().(*types.Basic); ok && basic.Kind() == types.Byte {
+					sawByteSlice = true
+				} else {
+					return false
+				}
+			default:
+				return false
+			}
+		}
+	}
+
+	return sawString && sawByteSlice && terms == 2
+}
+
 // typeParamMapCore returns the map CORE type of a type parameter constrained `~map[K]V` (all of
 // the constraint's type-set terms share the map underlying), or nil. Mirrors typeParamSliceCore.
 func typeParamMapCore(tp *types.TypeParam) *types.Map {

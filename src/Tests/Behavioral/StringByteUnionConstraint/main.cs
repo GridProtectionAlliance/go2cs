@@ -37,6 +37,20 @@ internal static void Main() {
     fmt.Println("prefix too long:", prefixMatch(str, (@string)"hello world"));
     fmt.Println("last(string):", lastByte(str));
     fmt.Println("last([]byte):", lastByte(bs));
+    fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>((@string)"56:78")));
+}
+
+internal static nint digitSum<T>(T s)
+    where T : /* []byte | string */ IByteSeq<byte>, new()
+{
+    var parse = (IByteSeq<byte> part) => {
+        nint n = 0;
+        foreach (var (_, c) in new slice<byte>(part)) {
+            n = n * 10 + (nint)(c - (rune)'0');
+        }
+        return n;
+    };
+    return parse(s[0..2]) + parse(s[3..5]);
 }
 
 internal static byte lastByte<T>(T s)

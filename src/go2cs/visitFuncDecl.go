@@ -821,7 +821,23 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			result.WriteRune(' ')
 			result.WriteString(getVariadicParamName(param))
 		} else {
-			result.WriteString(v.getCSTypeName(param.Type()))
+			paramTypeName := v.getCSTypeName(param.Type())
+
+			// A FUNC-LITERAL parameter typed as a `string | []byte`-union TYPE PARAMETER
+			// renders as the constraint interface (IByteSeq<byte>): a lambda has no
+			// where-clause, and the interface-typed sub-slices of the enclosing method's
+			// constrained value cannot convert INTO a bare type parameter (time
+			// format_rfc3339's parseUint closure — CS1503 ×8). Gated to the addRecv=false
+			// path (func literals / delegate decls / interface sigs — only literals can
+			// carry a method's type param); declared METHODS keep the generic form for
+			// exact instantiation.
+			if !addRecv {
+				if tp, ok := types.Unalias(param.Type()).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
+					paramTypeName = "IByteSeq<byte>"
+				}
+			}
+
+			result.WriteString(paramTypeName)
 			result.WriteRune(' ')
 
 			paramName := param.Name()

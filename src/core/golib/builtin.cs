@@ -1517,6 +1517,7 @@ public static class builtin
         return source;
     }
 
+
     /// <summary>
     /// Converts value to a complex64 imaginary number.
     /// </summary>
@@ -1566,6 +1567,7 @@ public static class builtin
     /// </summary>
     /// <param name="source">C# source string.</param>
     /// <returns>Slice of bytes from Go string</returns>
+
     public static slice<byte> slice(@string source)
     {
         return source.Slice(0, len(source));

@@ -156,6 +156,33 @@ public readonly struct slice<T> : ISlice<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_capacity = m_array.Length;
     }
 
+    /// <summary>
+    /// Creates a slice from a read-only byte-sequence view - the `[]byte(s)` conversion of a
+    /// `string | []byte` union-constrained value (time format_rfc3339 parseUint). Matches Go
+    /// exactly per instantiation: a boxed slice SHARES its backing (Go `[]byte([]byte)` is the
+    /// same slice), while an @string (or foreign) sequence materializes a COPY (Go
+    /// `[]byte(string)` copies).
+    /// </summary>
+    /// <param name="seq">Byte-sequence view.</param>
+    public slice(IByteSeq<T> seq)
+    {
+        if (seq is slice<T> other)
+        {
+            this = other;
+            return;
+        }
+
+        T[] copy = new T[seq.Length];
+
+        for (nint i = 0; i < copy.Length; i++)
+            copy[i] = seq[i];
+
+        m_array = copy;
+        m_low = 0;
+        m_length = copy.Length;
+        m_capacity = copy.Length;
+    }
+
     public slice(T[]? array, nint low = 0, nint high = -1)
     {
         if (array is null)
