@@ -1502,6 +1502,37 @@ inside the wrapper (fmt `ss.Token`; guarded by `DeferCallOrder` `acc.add`).
 
 The same block also covers a **named-numeric pointer reinterpreted to its underlying *basic* type** — `(*uint64)(head)` where `head` is a `*lfstack` (`type lfstack uint64`). This is the runtime's atomic-on-a-named-integer pattern: `atomic.Load64((*uint64)(head))` / `atomic.Cas64((*uint64)(head), …)` on the named atomic types **`lfstack`** (uint64, `lfstack.go`), **`sweepClass`** (uint32, `mgcsweep.go`), **`profAtomic`** (uint64, `profbuf.go`), and **`sysMemStat`** (uint64, `mstats.go`). `ж<lfstack>` and `ж<uint64>` are distinct generic instantiations with no conversion (`CS0030`), so the same value-convert-and-re-box applies — `atomic.Load64(Ꮡ((uint64)(head)))` — using the `[GoType("num:uint64")]` wrapper's `lfstack → uint64` value conversion. The reinterpret condition is generalized from *Named↔Named* to also fire when the **result** elem is a **basic** type whose underlying equals a **named** argument elem's (`namedToBasic`); the result C# type name comes from the result elem directly (`uint64`/`uint32`). Because it boxes a copy, a **read** through the reinterpret is faithful (golib `Load64` reads `Ꮡptr.Value` = the copy = the value), which is verified against Go; a **write** through it (`atomic.Store64`/`Cas64`/`Xadd64`) targets the copy, but those intrinsics are asm stubs in the converted runtime, so there is no faithful write-through to lose. Cleared all 13 `lfstack`/`sweepClass`/`profAtomic`/`sysMemStat` `→ ж<primitive>` CS0030 (runtime 114 → 101). (Guarded by `NamedNumericPointerReinterpret` — the read path across uint64/uint32 named types, values verified vs Go.)
 
+### The club-41 mop-up batch (flag/flate/binary/syntax roots)
+Nine coupled rules from the shallow-stack campaign:
+- **Named func types implementing interfaces** (flag's `funcValue`): a delegate cannot be a
+  partial struct — the generator routes Delegate records to the VALUE adapter
+  (`new funcValueᴠValue(v)`), whose Go methods are package extensions binding on the wrapped
+  copy; non-struct record kinds SKIP rather than throw (a throw kills the package's entire
+  generator run). Guarded by `FirstClassFunctions` (`handler.tag`).
+- **Ref receivers never take box renders**: a `[GoRecv] ref` receiver has NO box — the
+  escape-heap and lambda-capture convIdent arms fall through to the value alias (flate init's
+  `d.fill = (*compressor).fillStore` emitted a nonexistent `Ꮡd`, CS0103). Guarded by
+  `FirstClassFunctions` (`worker`).
+- **Func-field callees drive argument treatment**: `getFunctionSignature` resolves a
+  FUNC-typed field's signature (`d.fill(d, b)` — the receiver arg renders as the box for a
+  `ж<T>` slot, CS1503).
+- **Integer wrappers carry the UntypedInt bridge** (`(token)(endBlockMarker)` — C# never
+  chains two user conversions, CS0030). Guarded by `SortArrayType` (`levelToken`).
+- **Package aliases shadowed by method names** qualify through the `_package` class
+  (`sort_package.Sort(…)` — flate's `byLiteral.sort` bound the method group, CS0119).
+  Guarded by `SortArrayType` (`PeopleByAge.sort`).
+- **Blank params synthesize names when the body discards** (`_ = b[7]` bound the blank
+  `littleEndian` receiver, CS0029) — encoding/binary's bounds-check hints. Guarded by
+  `TypeSwitch` (`marker.tag`).
+- **Defined-over-named-struct composites wrap the underlying** (`decoder{order: o}` →
+  `new decoder(new coder(order: o))`, CS1739). Guarded by `NamedPointerReinterpret` (`view{}`).
+- **Labeled switches declare their break target** (`break_BigSwitch:;` after the switch —
+  both switch visitors now mirror visitForStmt, CS0159). Guarded by `SwitchBreakInCase`
+  (`pick`).
+- **Short declarations keep the named-numeric cast** (`p := printFlags(0)` re-imposes
+  `((printFlags)0)`, CS1503) and **empty-interface switch tags compare via AreEqual**
+  (`switch err := recover(); err { case ErrLarge: }`, CS0019).
+
 ### Slice-to-array conversions route golib's copy constructor
 Go's slice-to-array conversions both route through `array<T>(slice<T> source, nint length)` —
 a COPY constructor that panics Go-style on a short slice:

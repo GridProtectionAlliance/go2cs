@@ -13,7 +13,23 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-04 evening, ~107 commits)
+## Where things stand (2026-07-04 night, ~120 commits)
+
+- **WAVE: 146/303 packages compile, 41 leaf-failing** (deeper packages now REACHABLE and
+  surfacing own errors — progress even where the leaf count grew). **ZERO CLUB 41**: +flag
+  (named func types → value adapters d4a30f6ec/2bac754e3), +compress/flate (ref-receiver box
+  gates e4b476dac + func-field signatures a31e1dfab + UntypedInt bridge 15b98d3c8 +
+  package-alias shadows 950c0ae7e), +encoding/binary (blank-discard synthesis ef9715e23 +
+  defined-over-named-struct composite wrap b944e334c), +regexp/syntax (labeled-switch break
+  targets ea0cc8d76 + short-decl named cast b7311d89b + empty-interface AreEqual c7a16f89f).
+  **Fresh census (top):** debug/plan9obj 141 (likely 1-2 roots — the html pattern),
+  internal/zstd 31, x/crypto/chacha20 27, debug/dwarf 27, go/doc/comment 13, archive/zip 12,
+  poly1305 10, context 10, gzip 10, socktest 8, math/big 8, lzw 7, gob 6, zlib 6,
+  runtime/debug 5, ascii85 5, cpu 4, base64 4, quick/regexp/dag 3, ~14 tails.
+  **NEXT: plan9obj 141 (check the one-root hypothesis first) → zstd/chacha20/dwarf → context
+  (chokepoint) → tails.**
+
+## Previous entry (2026-07-04 evening, ~107 commits)
 
 - **WAVE (recon150): 141/303 packages compile, 172 errors across ~28 leaf projects** (prior:
   137/303, 406 errors). **ZERO CLUB 37+**: +html (astral rune literals f6abbcacd — one root,
