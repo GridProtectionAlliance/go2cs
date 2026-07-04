@@ -381,7 +381,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 				tagNeedsAreEqual := false
 
 				if !usePattenMatch && tag != nil {
-					if tagIface, tagEmpty := isInterface(v.getType(tag, false)); tagIface && !tagEmpty {
+					// EMPTY interfaces included: `switch err := recover(); err { case ErrLarge: }`
+					// compares object against a named-string value — no C# operator either
+					// (regexp/syntax parse.go, CS0019 ×2).
+					if tagIface, _ := isInterface(v.getType(tag, false)); tagIface {
 						tagNeedsAreEqual = true
 					}
 				}
