@@ -89,6 +89,26 @@ func main() {
 	scanInto(&flag)
 	scanInto(&num)
 	fmt.Println(flag, num) // true 42
+
+	fmt.Println(probe(true), probe(7), probe("ab")) // bool one many
+}
+
+// probe: an expression-switch INIT inside a type-switch clause re-declares the guard
+// name - the clause scope implicitly binds the guard, so the inner v must shadow-rename
+// (fmt scanOne's inner `switch v := ptr.Elem(); v.Kind()`, CS0136).
+func probe(x any) string {
+	switch v := x.(type) {
+	case bool:
+		_ = v
+		return "bool"
+	default:
+		switch v := len(fmt.Sprint(v)); v {
+		case 1:
+			return "one"
+		default:
+			return "many"
+		}
+	}
 }
 
 // scanInto: POINTER case clauses write through the case var (`*t = ...`) - a star-deref

@@ -1376,9 +1376,35 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// the sibling needs its own `var` (CS0103 ×2, poll sockaddrToRaw). The generic
 			// visitNode(node.Body) walk gave every clause the SHARED switch-body scope; mirror
 			// the plain-SwitchStmt per-case scopes instead.
+			var guardIdent *ast.Ident
+
+			if assign, ok := node.Assign.(*ast.AssignStmt); ok && assign.Tok == token.DEFINE && len(assign.Lhs) == 1 {
+				if lhsIdent, ok := assign.Lhs[0].(*ast.Ident); ok && !isDiscardedVar(lhsIdent.Name) {
+					guardIdent = lhsIdent
+				}
+			}
+
 			for _, stmt := range node.Body.List {
 				if caseClause, ok := stmt.(*ast.CaseClause); ok {
 					pushScope(collectBlockLevelDecls(caseClause.Body))
+
+					// The clause implicitly BINDS the guard (C# emits `case T v:` pattern vars /
+					// the default arm's binding), so it must live in the clause scope — a nested
+					// `v := …` in the body otherwise sees no collision and skips its rename
+					// (fmt scanOne's inner `switch v := ptr.Elem(); v.Kind()`, CS0136).
+					if guardIdent != nil {
+						if implicitVar, ok := v.info.Implicits[caseClause].(*types.Var); ok {
+							// Its varNames entry must exist too: reassignVar resolves body
+							// references through it, and a missing entry becomes an EMPTY
+							// emitted name. The guard-shadow arm above may have already
+							// recorded a renamed form — keep it.
+							if _, exists := v.varNames[implicitVar]; !exists {
+								v.varNames[implicitVar] = guardIdent.Name
+							}
+
+							v.scopeStack[len(v.scopeStack)-1][guardIdent.Name] = implicitVar
+						}
+					}
 
 					blockTracker := registry.get(BlockTracker)
 					blockTracker.enter()

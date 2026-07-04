@@ -111,6 +111,30 @@ internal static void Main() {
     scanInto(Ꮡflag);
     scanInto(Ꮡnum);
     fmt.Println(flag, num);
+    fmt.Println(probe(true), probe(7), probe("ab"));
+}
+
+internal static @string probe(any x) {
+    switch (x.type()) {
+    case bool v: {
+        _ = v;
+        return "bool"u8;
+    }
+    default: {
+        var v = x.type();
+        {
+            nint vΔ1 = len(fmt.Sprint(v));
+            switch (vΔ1) {
+            case 1: {
+                return "one"u8;
+            }
+            default: {
+                return "many"u8;
+            }}
+        }
+
+        break;
+    }}
 }
 
 internal static void scanInto(any v) {
