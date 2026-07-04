@@ -10,6 +10,13 @@ import (
 	"CrossPkgLib"
 )
 
+// CheckFunc is a FUNC-TYPED package var whose signature names a cross-package
+// DELTA-RENAMED type (the internal/poll hook_windows shape) - the delegate type must
+// render the recorded alias (CrossPkgLibꓸStatus), not the raw qualified name.
+var CheckFunc func(CrossPkgLib.Status) int = func(st CrossPkgLib.Status) int {
+	return st.Code * 2
+}
+
 func main() {
 	b := CrossPkgLib.Boiling()
 	r := b.Add(10)
@@ -112,6 +119,8 @@ func main() {
 	// string(<cross-package untyped rune const>) - the wrapper needs the default-type hop
 	// (string(utf8.RuneError), time format.cs CS0030).
 	fmt.Println("a" + string(CrossPkgLib.Sep) + "b")
+
+	fmt.Println(CheckFunc(CrossPkgLib.Status{Code: 21}), CrossPkgLib.Sensor{Temp: 9}.Status())
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

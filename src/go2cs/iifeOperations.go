@@ -139,7 +139,7 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	typeArgs := make([]string, 0, params.Len()+1)
 
 	for i := range params.Len() {
-		typeArgs = append(typeArgs, v.getCSTypeName(params.At(i).Type()))
+		typeArgs = append(typeArgs, v.aliasedElementTypeName(params.At(i).Type()))
 	}
 
 	if results.Len() == 0 {
@@ -153,12 +153,12 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	var resultType string
 
 	if results.Len() == 1 {
-		resultType = v.getCSTypeName(results.At(0).Type())
+		resultType = v.aliasedElementTypeName(results.At(0).Type())
 	} else {
 		resultTypes := make([]string, results.Len())
 
 		for i := range results.Len() {
-			resultTypes[i] = v.getCSTypeName(results.At(i).Type())
+			resultTypes[i] = v.aliasedElementTypeName(results.At(i).Type())
 		}
 
 		resultType = "(" + strings.Join(resultTypes, ", ") + ")"
@@ -171,6 +171,37 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 
 // namedResultName returns the C# identifier the body uses for a named result parameter
 // (honoring shadow-renames recorded by variable analysis).
+// aliasedElementTypeName renders a delegate element type, substituting the file-local
+// ꓸ-alias form for a cross-package named type that is Δ-RENAMED inside its own package -
+// `syscall.Handle` declares `ΔHandle`, so the raw qualified render (`Δsyscall.Handle`)
+// names a type that does not exist (CS0426 x26, internal/poll's hook_windows func-typed
+// globals). The imported-type-alias registry already records the foreign rename
+// (`global using syscallꓸHandle = go.syscall_package.ΔHandle`); a type without a
+// registered alias, a generic instantiation, and every non-named element keep the plain
+// getCSTypeName render (no churn). Pointer elements recurse so `*syscall.Overlapped`
+// becomes `ж<syscallꓸOverlapped>`.
+func (v *Visitor) aliasedElementTypeName(t types.Type) string {
+	if ptr, ok := types.Unalias(t).(*types.Pointer); ok {
+		return fmt.Sprintf("%s<%s>", PointerPrefix, v.aliasedElementTypeName(ptr.Elem()))
+	}
+
+	if named, ok := types.Unalias(t).(*types.Named); ok {
+		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg && named.TypeArgs().Len() == 0 {
+			plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
+
+			packageLock.Lock()
+			_, exists := importedTypeAliases[plainKey]
+			packageLock.Unlock()
+
+			if exists {
+				return getAliasedTypeName(plainKey)
+			}
+		}
+	}
+
+	return v.getCSTypeName(t)
+}
+
 func (v *Visitor) namedResultName(param *types.Var) string {
 	if ident := v.getVarIdent(param); ident != nil {
 		return getSanitizedIdentifier(v.getIdentName(ident))

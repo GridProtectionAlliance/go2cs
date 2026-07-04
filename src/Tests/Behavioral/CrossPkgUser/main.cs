@@ -5,6 +5,8 @@ using CrossPkgLib = CrossPkgLib_package;
 
 partial class main_package {
 
+public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
+
 internal static void Main() {
     var b = CrossPkgLib.Boiling();
     var r = b.Add(10);
@@ -61,6 +63,7 @@ internal static void Main() {
     }
 
     fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
+    fmt.Println(CheckFunc(new CrossPkgLibꓸStatus(Code: 21)), new CrossPkgLib.Sensor(Temp: 9).Status());
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

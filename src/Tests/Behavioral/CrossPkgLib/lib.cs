@@ -62,6 +62,14 @@ public static ж<Meter> NewMeter() {
     return Ꮡ(new Meter(nil));
 }
 
+[GoType] partial struct ΔStatus {
+    public nint Code;
+}
+
+public static nint Status(this Sensor s) {
+    return (nint)(float64)s.Temp;
+}
+
 [GoType("num:uintptr")] partial struct Ticks;
 
 [GoType] partial struct Device {

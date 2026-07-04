@@ -79,6 +79,15 @@ func NewMeter() *Meter { return &Meter{} }
 
 // Ticks is an exported named INTEGER type (uintptr-based) - consumers define types over it
 // (the registry Key over syscall.Handle shape).
+// Status (the type) collides with the Sensor.Status method below, so it is exported
+// DELTA-RENAMED - a consumer referencing it inside a func-typed global signature must
+// use the recorded alias, not the raw qualified name (internal/poll hook_windows CS0426).
+type Status struct {
+	Code int
+}
+
+func (s Sensor) Status() int { return int(s.Temp) }
+
 type Ticks uintptr
 
 // Device embeds Sensor BY VALUE - a consumer embedding Device promotes Sensor fields
