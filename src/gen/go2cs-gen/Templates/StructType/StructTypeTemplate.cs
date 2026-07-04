@@ -88,12 +88,15 @@ internal class StructTypeTemplate : TemplateBase
 
             StringBuilder result = new();
 
+            // The composed box-field name must use the unescaped member name — a C#-keyword embed
+            // (`type base struct{…}`) arrives escaped `@base`, but `Ꮡʗ@base` is invalid ('@' only
+            // leads an identifier). The standalone member ACCESS sites keep `@base`.
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
             {
                 if (result.Length > 0)
                     result.Append($"\r\n{TypeElemIndent}");
 
-                result.Append($"private readonly {PointerPrefix}<{typeName}> {AddressPrefix}{CapturedVarMarker}{memberName};");
+                result.Append($"private readonly {PointerPrefix}<{typeName}> {AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)};");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Accessors");
@@ -101,7 +104,7 @@ internal class StructTypeTemplate : TemplateBase
             foreach ((string typeName, string memberName, _, _) in promotedStructs)
             {
                 string typeScope = GetScope(GetSimpleName(typeName));
-                result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{memberName}.Value;");
+                result.Append($"\r\n{TypeElemIndent}{typeScope} partial ref {typeName} {memberName} => ref {AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)}.Value;");
             }
 
             result.Append($"\r\n\r\n{TypeElemIndent}// Promoted Struct Field Accessors");
@@ -434,8 +437,8 @@ internal class StructTypeTemplate : TemplateBase
             {
                 result.Append($"{TypeElemIndent}    ");
 
-                result.AppendLine(isPromotedStruct ? 
-                    $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));" : 
+                result.AppendLine(isPromotedStruct ?
+                    $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>(new {typeName}(nil));" :
                     $"this.{memberName} = default!;");
             }
 
@@ -483,7 +486,7 @@ internal class StructTypeTemplate : TemplateBase
             result.Append($"{TypeElemIndent}    ");
 
             result.AppendLine(isPromotedStruct ?
-                $"{AddressPrefix}{CapturedVarMarker}{memberName} = new {PointerPrefix}<{typeName}>({memberName});" :
+                $"{AddressPrefix}{CapturedVarMarker}{GetUnsanitizedIdentifier(memberName)} = new {PointerPrefix}<{typeName}>({memberName});" :
                 $"this.{memberName} = {memberName};");
         }
 

@@ -38,6 +38,24 @@ func readBack(b *box) int64 {
 //go:noinline
 func bump(p *int64) { *p = *p + 7 }
 
+// base is a struct whose NAME is a C# keyword. Embedding it composes generated identifiers
+// from the '@'-escaped member name ('@base'); the promoted-struct box field ('Ꮡʗ' + name)
+// must strip the escape — 'Ꮡʗ@base' is invalid C# ('@' is only valid leading an identifier).
+type base struct {
+	id int64
+}
+
+func (b base) twice() int64 {
+	return b.id * 2
+}
+
+// derived embeds the keyword-named struct: the TypeGenerator emits the ж<base> box field,
+// the promoted '@base' accessor, promoted field/method forwarding, and both constructors.
+type derived struct {
+	base
+	tag int64
+}
+
 func main() {
 	var b box
 	fill(&b)
@@ -56,6 +74,16 @@ func main() {
 	s.ctxt.fn = 7
 	s.tag = 9
 	fmt.Println(s.fn, s.ctxt.fn, s.tag) // 5 7 9
+
+	d := derived{}
+	d.id = 5 // promoted field write through the keyword-named embed
+	d.tag = 1
+	fmt.Println(d.id, d.tag, d.twice()) // 5 1 10 — promoted method forwarded via '@base'
+
+	e := derived{base: base{id: 21}, tag: 2} // composite literal keyed by the keyword name
+	p := &e
+	bump(&p.id)                         // address of a field promoted through the keyword embed
+	fmt.Println(e.id, e.tag, e.twice()) // 28 2 56 — the write through &p.id persisted
 }
 
 type ctxt struct{ fn, tag int }

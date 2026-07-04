@@ -36,6 +36,19 @@ internal static void bump(ж<int64> Ꮡp) {
     p = p + 7;
 }
 
+[GoType] partial struct @base {
+    internal int64 id;
+}
+
+internal static int64 twice(this @base b) {
+    return b.id * 2;
+}
+
+[GoType] partial struct derived {
+    internal partial ref @base @base { get; }
+    internal int64 tag;
+}
+
 internal static void Main() {
     ref var b = ref heap(new box(), out var Ꮡb);
     fill(Ꮡb);
@@ -49,6 +62,15 @@ internal static void Main() {
     s.ctxt.fn = 7;
     s.tag = 9;
     fmt.Println(s.fn, s.ctxt.fn, s.tag);
+    var d = new derived(nil);
+    d.id = 5;
+    d.tag = 1;
+    fmt.Println(d.id, d.tag, d.twice());
+    ref var e = ref heap<derived>(out var Ꮡe);
+    e = new derived(@base: new @base(id: 21), tag: 2);
+    var p = Ꮡe;
+    bump(p.of(derived.Ꮡid));
+    fmt.Println(e.id, e.tag, e.twice());
 }
 
 [GoType] partial struct ctxt {
