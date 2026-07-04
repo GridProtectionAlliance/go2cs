@@ -128,7 +128,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -157,6 +157,50 @@ type captureCandidate struct {
 // captureModeCandidates holds every pointer-receiver method seen while scanning the package and
 // its imports, used by the transitive fixpoint in collectCaptureModeMethods.
 var captureModeCandidates []*captureCandidate
+
+// bodyWrappedInDeferContext reports whether the method's body will be emitted inside the
+// synthesized defer/recover execution-context lambda (`func((defer, recover) => { … })`) while
+// still referencing the receiver. Any FUNCTION-LEVEL defer or recover wraps the WHOLE body in
+// that lambda, so a `ref T` receiver reference inside it is CS1628 — the method must take the
+// direct-ж receiver, whose deref alias is emitted INSIDE the wrapper (fmt ss.Token's
+// `defer func(){ recover() }()` + `s.buf`, CS1628 ×3). Defer/recover inside a nested function
+// literal belongs to that literal (mirrors funcBodyDeferRecover) and does not wrap this body.
+func bodyWrappedInDeferContext(body *ast.BlockStmt, recvName string) bool {
+	hasDeferRecover := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		switch n := node.(type) {
+		case *ast.FuncLit:
+			return false
+		case *ast.DeferStmt:
+			hasDeferRecover = true
+			return false
+		case *ast.CallExpr:
+			if ident, ok := n.Fun.(*ast.Ident); ok && ident.Name == "recover" {
+				hasDeferRecover = true
+				return false
+			}
+		}
+
+		return !hasDeferRecover
+	})
+
+	if !hasDeferRecover {
+		return false
+	}
+
+	referencesReceiver := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if ident, ok := node.(*ast.Ident); ok && ident.Name == recvName {
+			referencesReceiver = true
+		}
+
+		return !referencesReceiver
+	})
+
+	return referencesReceiver
+}
 
 // bodyCallsDirectBoxMethodOnReceiver reports whether the body calls a direct-ж method on the
 // receiver itself (`recvName.someDirectBoxMethod(...)`). The caller must then also be direct-ж so
