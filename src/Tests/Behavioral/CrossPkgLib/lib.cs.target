@@ -4,6 +4,8 @@ namespace go;
 
 partial class CrossPkgLib_package {
 
+public static readonly UntypedInt Precision = 2;
+
 [GoType("num:float64")] partial struct Celsius;
 
 public static Celsius Boiling() {

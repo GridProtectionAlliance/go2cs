@@ -49,6 +49,17 @@ internal static void Main() {
     fmt.Println(rg.Device.Sensor.Hot());
     Ꮡ(rg).of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(3);
     fmt.Println((float64)rg.Device.Sensor.Temp);
+    var exprᴛ1 = CrossPkgLib.Precision;
+    if (exprᴛ1 == 1) {
+        fmt.Println("coarse");
+    }
+    else if (exprᴛ1 == 2) {
+        fmt.Println("fine");
+    }
+    else { /* default: */
+        fmt.Println("unknown");
+    }
+
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

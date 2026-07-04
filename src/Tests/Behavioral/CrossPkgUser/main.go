@@ -96,6 +96,18 @@ func main() {
 	// reflect's sliceType -> abi.SliceType -> abi.Type Common()/Uncommon() sites (CS1929 x4).
 	rg.Calibrate(3)
 	fmt.Println(float64(rg.Device.Sensor.Temp))
+
+	// census F10: a switch whose TAG is a cross-package untyped constant (the goarch.PtrSize
+	// shape, reflect abi.go) - the static readonly UntypedInt wrapper cannot govern a C#
+	// switch nor an `is` constant pattern (CS9135 x2); the if-else lowering compares ==.
+	switch CrossPkgLib.Precision {
+	case 1:
+		fmt.Println("coarse")
+	case 2:
+		fmt.Println("fine")
+	default:
+		fmt.Println("unknown")
+	}
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

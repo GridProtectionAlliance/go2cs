@@ -5,6 +5,10 @@
 package CrossPkgLib
 
 // Celsius is an exported named numeric type (Phase 1: plain exported type + function + method).
+// Precision is an exported UNTYPED constant - it emits as a `static readonly UntypedInt`
+// wrapper in C#, the shape behind the census F10 switch-tag lowering (goarch.PtrSize).
+const Precision = 2
+
 type Celsius float64
 
 // Temperature is an exported package-level TYPE ALIAS over Celsius (Phase 2: the GoTypeAlias /

@@ -118,6 +118,24 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 	hasFallthroughs := false
 	defaultCaseFallsThrough := false
 
+	// A TAG that is itself a CONSTANT emitted as `static readonly` — an untyped const's
+	// UntypedInt wrapper (`switch goarch.PtrSize`, reflect abi.go) or a uintptr-struct const —
+	// cannot govern a C# switch: the int case labels are not constants OF the wrapper struct
+	// type (CS9135 ×2). Force the if-else (==) form, whose wrapper == operators compare
+	// cleanly. The recorded tag TYPE is no help here (go/types records the untyped constant's
+	// DEFAULT type in tag position), so gate on the object resolution: a constant-valued tag
+	// that is not a true C# const. A variable tag (Value == nil) stays switchable. The same
+	// tag also disables the `is` constant-pattern form below (`exprᴛ1 is 4` needs 4 to be a
+	// constant OF the wrapper type — same CS9135); only the `==` operator compares cleanly.
+	tagIsStaticReadonlyConst := false
+
+	if tag != nil {
+		if tv, ok := v.info.Types[tag]; ok && tv.Value != nil && !v.isCSharpConstantExpr(tag) {
+			allConst = false
+			tagIsStaticReadonlyConst = true
+		}
+	}
+
 	for i, caseClause := range caseClauses {
 		if caseClause.List == nil {
 			if i > 0 && caseHasFallthroughStmt[i-1] {
@@ -333,7 +351,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 
 				v.targetFile.WriteString("if (")
 
-				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
+				usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
 
 				if caseFallsThrough {
 					v.targetFile.WriteString(fmt.Sprintf("fallthrough || !%s && ", matchVarName))
@@ -554,7 +572,7 @@ func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
 				// Use pattern match when all case list expressions are
 				// use comparison operators and the same target
 				caseClauseCount := len(caseClause.List)
-				usePattenMatch := !namedTypes && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
+				usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
 
 				for i, expr := range caseClause.List {
 					if i == 0 {
