@@ -217,11 +217,26 @@ func resolveGorootVendoredPath(importPath string) string {
 	return importPath
 }
 
+// majorVersionSegmentRegex matches a Go module major-version path segment (v2, v3, …).
+var majorVersionSegmentRegex = regexp.MustCompile(`^v[0-9]+$`)
+
 func convertImportPathToNamespace(importPath string, packageSuffix string) string {
 	importPath = resolveGorootVendoredPath(importPath)
 
 	// Split import path by "/"
 	importPathParts := strings.Split(importPath, "/")
+
+	// A MAJOR-VERSION directory (`math/rand/v2`): the Go package is named for the PARENT
+	// segment (`rand`), and the emitted class follows the package NAME — namespace
+	// go.math.rand + class rand_package. The path-derived v2_package exists nowhere
+	// (CS0234, internal/concurrent importing math/rand/v2). Convention-based: a /vN dir
+	// hosts the parent-named package (true stdlib-wide; a package literally named vN
+	// would need the type-graph name instead).
+	if len(importPathParts) > 1 {
+		if last := importPathParts[len(importPathParts)-1]; majorVersionSegmentRegex.MatchString(last) {
+			importPathParts[len(importPathParts)-1] = importPathParts[len(importPathParts)-2]
+		}
+	}
 
 	// Update all import path parts to sanitized identifiers
 	for i, part := range importPathParts {
