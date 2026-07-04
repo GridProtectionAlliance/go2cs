@@ -50,6 +50,24 @@ internal static nint Rank(this emblem e) {
     return e.rank;
 }
 
+[GoType] partial interface stamped :
+    CrossPkgLib.Labeled
+{
+    @string Stamp();
+}
+
+[GoType] partial struct seal {
+    internal @string name;
+}
+
+internal static @string Label(this seal s) {
+    return s.name;
+}
+
+internal static @string Stamp(this seal s) {
+    return "ok:"u8 + s.name;
+}
+
 [GoType] partial interface certificate :
     CrossPkgLib.Rated,
     CrossPkgLib.Sealed
@@ -180,6 +198,9 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println((uint64)(uintptr)tk);
     namedLabel nl = new emblem(name: "gold"u8, rank: 1);
     fmt.Println(CrossPkgLib.Describe(nl), nl.Rank());
+    stamped st = new seal(name: "notary"u8);
+    CrossPkgLib.Labeled lb = new seal(name: "base"u8);
+    fmt.Println(st.Label(), st.Stamp(), CrossPkgLib.Describe(st), lb.Label());
     var (rp, rerr) = getReporter();
     fmt.Println(rp.Report(), rerr == default!);
     certificate ct = new cert(id: 42);

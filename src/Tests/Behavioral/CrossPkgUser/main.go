@@ -65,6 +65,21 @@ type emblem struct {
 func (e emblem) Label() string { return e.name }
 func (e emblem) Rank() int     { return e.rank }
 
+// stamped EMBEDS the foreign CrossPkgLib.Labeled explicitly (zip's fileInfoDirEntry
+// embedding fs.FileInfo): a struct recorded against BOTH the derived local interface
+// and the foreign base must have the base record pruned — the inheritance tracking
+// stores the CANONICAL interface name so the prune's implementation-map lookup matches
+// (headerFileInfo implemented fs.FileInfo twice, CS8646 ×6/CS0111 ×2).
+type stamped interface {
+	CrossPkgLib.Labeled
+	Stamp() string
+}
+
+type seal struct{ name string }
+
+func (s seal) Label() string { return s.name }
+func (s seal) Stamp() string { return "ok:" + s.name }
+
 // certificate satisfies BOTH CrossPkgLib.Sealed and CrossPkgLib.Rated — which share Label
 // without subsuming each other — plus CrossPkgLib.Labeled (subsumed by either): the two
 // non-subsumed bases are inherited and the shared Label is RE-DECLARED to hide the two
@@ -238,6 +253,10 @@ func main() {
 
 	var nl namedLabel = emblem{name: "gold", rank: 1}
 	fmt.Println(CrossPkgLib.Describe(nl), nl.Rank()) // gold 1
+
+	var st stamped = seal{name: "notary"}
+	var lb CrossPkgLib.Labeled = seal{name: "base"}
+	fmt.Println(st.Label(), st.Stamp(), CrossPkgLib.Describe(st), lb.Label()) // notary ok:notary notary base
 
 	rp, rerr := getReporter()
 	fmt.Println(rp.Report(), rerr == nil) // relay:live true

@@ -116,6 +116,7 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	v.writeDocString(target, doc, interfaceType.Pos())
 
 	var structuralBases []string
+	var canonicalStructuralBases []string
 	structuralCovered := HashSet[string]{}
 
 	// Structural (non-embedded) satisfaction of an imported interface is emitted as C#
@@ -138,12 +139,13 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		}
 
 		if !hasConstraint {
-			structuralBases, structuralCovered = v.getStructuralInterfaceBases(interfaceType, identType)
+			structuralBases, canonicalStructuralBases, structuralCovered = v.getStructuralInterfaceBases(interfaceType, identType)
 		}
 	}
 
 	result := &strings.Builder{}
 	inheritedInterfaces := []string{}
+	canonicalInheritedInterfaces := []string{}
 	typeConstraints := HashSet[ConstraintType]{}
 	var operatorSets HashSet[OperatorSet]
 	outerIndent := v.indent(v.indentLevel)
@@ -212,6 +214,20 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 				inheritedInterfaces = append(inheritedInterfaces, v.convExpr(method.Type, nil))
 
+				// Track the CANONICAL (full-name) render too: the duplicate-implementation
+				// prune keys interfaceImplementations by getFullTypeName (a FOREIGN embed
+				// records `go.io.fs_package.FileInfo`), so the alias render alone
+				// (`fs.FileInfo`) never matches and both the derived and base impls emit
+				// the same explicit members (zip headerFileInfo : fileInfoDirEntry +
+				// fs.FileInfo, CS8646 ×6/CS0111 ×2).
+				if embedType := v.getType(method.Type, false); embedType != nil {
+					canonicalName := convertToCSTypeName(v.getFullTypeName(embedType, false))
+
+					if canonicalName != "" {
+						canonicalInheritedInterfaces = append(canonicalInheritedInterfaces, canonicalName)
+					}
+				}
+
 				if isDynamicInterface {
 					v.indentLevel++
 					v.targetFile.WriteString(v.newline)
@@ -277,10 +293,17 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 		inheritedResult += v.newline + outerIndent
 
-		// Track which interfaces this interface inherits from so
-		// duplicate interface implementations can be avoided
+		// Track which interfaces this interface inherits from so duplicate interface
+		// implementations can be avoided. The set carries BOTH the alias render (emission
+		// form) and the canonical full-name render — the prune's implementation-map keys
+		// are canonical, so the alias form alone never matched a foreign base (zip's
+		// headerFileInfo implemented fs.FileInfo twice, CS8646 x6).
+		trackedInheritances := append([]string{}, inheritedInterfaces...)
+		trackedInheritances = append(trackedInheritances, canonicalInheritedInterfaces...)
+		trackedInheritances = append(trackedInheritances, canonicalStructuralBases...)
+
 		packageLock.Lock()
-		interfaceInheritances[interfaceTypeName] = NewHashSet(inheritedInterfaces)
+		interfaceInheritances[interfaceTypeName] = NewHashSet(trackedInheritances)
 		packageLock.Unlock()
 	} else {
 		inheritedResult += " "
@@ -312,17 +335,17 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 // skipped (the embed emission handles those, and a second differently-rendered base of the
 // same type would be a duplicate-interface error). Returns the rendered base type names and
 // the covered method names.
-func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, HashSet[string]) {
+func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, []string, HashSet[string]) {
 	named, ok := identType.(*types.Named)
 
 	if !ok {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	iface, ok := named.Underlying().(*types.Interface)
 
 	if !ok || iface.NumMethods() == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	var embeddedTypes []types.Type
@@ -382,7 +405,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	}
 
 	if len(bases) == 0 {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	// Keep the minimal covering set: drop a base another chosen base already implements
@@ -390,6 +413,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 	// listed; C# reaches the others through it). Equal-sized sets tie-break by index so
 	// mutual implementers cannot drop each other both ways.
 	baseNames := make([]string, 0, len(bases))
+	canonicalBaseNames := make([]string, 0, len(bases))
 	coveredCounts := map[string]int{}
 
 	for i, candidate := range bases {
@@ -422,6 +446,10 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 		// importing io).
 		baseNames = append(baseNames, convertToCSTypeName(v.getTypeName(candidate, false)))
 
+		// The CANONICAL (full-name) render feeds the duplicate-implementation prune,
+		// which keys interfaceImplementations by getFullTypeName (see visit tracking).
+		canonicalBaseNames = append(canonicalBaseNames, convertToCSTypeName(v.getFullTypeName(candidate, false)))
+
 		// The base's FULL method set (embedded members included) is inherited
 		for k := 0; k < candidateIface.NumMethods(); k++ {
 			coveredCounts[candidateIface.Method(k).Name()]++
@@ -440,7 +468,7 @@ func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, 
 		}
 	}
 
-	return baseNames, covered
+	return baseNames, canonicalBaseNames, covered
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {
