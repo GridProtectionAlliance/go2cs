@@ -23,7 +23,7 @@ internal static void Main() {
     CaseRange cr = default!;
     cr.Lo = 65;
     cr.Item = new inner(v: 9);
-    cr.Lvl = 3;
+    cr.Lvl = ((level)3);
     fmt.Println(cr.Lo);
     fmt.Println(cr.Delta[0]);
     fmt.Println(cr.Item.v);

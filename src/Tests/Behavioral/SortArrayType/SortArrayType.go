@@ -211,6 +211,19 @@ func main() {
 	sort.Sort(PeopleByAge(people))
 	fmt.Println(people)
 
+	// Slicing a NAMED slice type keeps the named type (math/big's `u[s:].norm()` bound
+	// the raw slice<Word> — CS1929 ×21): calling the named type's method directly on
+	// the slice expression must bind.
+	byAge := PeopleByAge(people)
+	fmt.Println(byAge[0:3].Len(), byAge[2:].Len()) // 3 3
+
+	// A method with a VALUE receiver called through a POINTER local (math/big's
+	// `z := new(nat); z.make(n)` — Go auto-derefs; the box cannot bind the value
+	// extension, CS1929 ×9).
+	pb := new(PeopleByAge)
+	*pb = byAge[1:4]
+	fmt.Println(pb.Len()) // 3
+
     x = `
         SELECT *
         FROM ` + "`Role`"

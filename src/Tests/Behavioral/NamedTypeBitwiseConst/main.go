@@ -39,7 +39,22 @@ func main() {
 	// ^Tag(0) - the all-ones idiom passed to a named-typed parameter (os exec_windows
 	// ^syscall.Handle(0), CS1503 x2): the folded constant must re-impose the named type.
 	fmt.Println(uint8(mask(^Tag(0)))) // 255
+
+	// The math/big Word-arithmetic shape: a NAMED conversion of a CONSTANT inside a
+	// binary expression (`Word(1)<<s - 1`) must keep its named cast - the identity-arm
+	// fold rendered the bare literal and the whole expression degraded to int (CS0029
+	// x3) - and the generated wrapper's shift/bitwise operators keep the wrapper type
+	// (CS0266 x45 without them).
+	fmt.Println(uint64(maskFor(4)), uint64(maskFor(19))) // 15 524287
+
+	var wv word = 0xF0
+	fmt.Println(uint64(wv&0x30|word(0x01)), uint64(wv^word(0xFF))) // 49 15
 }
 
 func mask(t Tag) Tag { return t & 0xFF }
+
+func maskFor(s uint) word {
+	m := word(1)<<s - 1
+	return m
+}
 

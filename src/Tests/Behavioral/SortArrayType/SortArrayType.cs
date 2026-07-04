@@ -178,6 +178,11 @@ internal static void Main() {
     fmt.Println(people);
     sort_package.Sort(((PeopleByAge)people));
     fmt.Println(people);
+    var byAge = ((PeopleByAge)people);
+    fmt.Println(byAge[0..3].Len(), byAge[2..].Len());
+    var pb = @new<PeopleByAge>();
+    pb.ValueSlot = byAge[1..4];
+    fmt.Println((~pb).Len());
     x = """
 
         SELECT *

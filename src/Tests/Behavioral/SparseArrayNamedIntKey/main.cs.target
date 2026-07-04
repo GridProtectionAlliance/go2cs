@@ -54,7 +54,7 @@ internal static void Main() {
     int64 cur = 2;
     uint32 u32 = 1;
     fmt.Println(data[(nint)(cur)], data[(nint)(u32)]);
-    fmt.Println(kindNames[3], len(kindNames));
+    fmt.Println(kindNames[((kindT)3)], len(kindNames));
 }
 
 internal static array<uint8> asciiSpace = new array<uint8>(256){[(rune)'\t'] = 1, [(rune)'\n'] = 1, [(rune)'\v'] = 1, [(rune)'\f'] = 1, [(rune)'\r'] = 1, [(rune)' '] = 1};

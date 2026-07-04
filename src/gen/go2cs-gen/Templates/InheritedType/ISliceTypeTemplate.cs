@@ -34,17 +34,20 @@ internal static class ISliceTypeTemplate
                     
                 public ref {{targetTypeName}} this[nint index] => ref m_value[index];
         
-                public slice<{{targetTypeName}}> this[Range range] => m_value[range];
+                // Slicing a named slice KEEPS the named type (Go: nat[a:b] IS a nat - math/big's
+                // `u[s:].norm()` bound slice<Word> instead, CS1929 x21); the wrapper shares the
+                // same backing window.
+                public {{structName}} this[Range range] => new {{structName}}(m_value[range]);
                 
-                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[Range range] => this[range];
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.this[Range range] => m_value[range];
                 
-                public slice<{{targetTypeName}}> Slice(int start, int length) => m_value.Slice(start, length);
+                public {{structName}} Slice(int start, int length) => new {{structName}}(m_value.Slice(start, length));
                 
-                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(int start, int length) => Slice(start, length);
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(int start, int length) => m_value.Slice(start, length);
                 
-                public slice<{{targetTypeName}}> Slice(nint start, nint length) => m_value.Slice(start, length);
+                public {{structName}} Slice(nint start, nint length) => new {{structName}}(m_value.Slice(start, length));
                 
-                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => Slice(start, length);
+                ISlice<{{targetTypeName}}> ISlice<{{targetTypeName}}>.Slice(nint start, nint length) => m_value.Slice(start, length);
         
                 public Span<{{targetTypeName}}> {{EllipsisOperator}} => ToSpan();
                 

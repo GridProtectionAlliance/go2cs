@@ -10,12 +10,12 @@ partial class main_package {
 
 internal static void Main() {
     nint n = 0;
-    for (idx c = 0; c < 5; c++) {
+    for (idx c = ((idx)0); c < ((idx)5); c++) {
         n++;
     }
     fmt.Println(n);
     nint m = 0;
-    for (idx c = 4; c > 0; c--) {
+    for (idx c = ((idx)4); c > ((idx)0); c--) {
         m++;
     }
     fmt.Println(m);
@@ -23,7 +23,7 @@ internal static void Main() {
     d++;
     d++;
     d--;
-    fmt.Println(d == 4);
+    fmt.Println(d == ((sidx)4));
 }
 
 } // end main_package

@@ -181,7 +181,7 @@ internal static void Main() => func((defer, recover) => {
     var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
     fmt.Println(mb.st.Code + mb.sat);
     fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At);
-    CrossPkgLibꓸGrade gv = 7;
+    CrossPkgLibꓸGrade gv = ((CrossPkgLibꓸGrade)7);
     CrossPkgLibꓸStatus stv = default!;
     stv.Code = (nint)gv;
     fmt.Println(stv.Code);
