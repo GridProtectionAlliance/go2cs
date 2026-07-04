@@ -47,11 +47,26 @@ public static U Convert<T, U>(T value, Func<T, U> converter) {
     return converter(value);
 }
 
+internal static T escape<T>(T x) {
+    return x;
+}
+
+internal static ж<nint> renew(ж<nint> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    Ꮡp = escape(Ꮡp); p = ref Ꮡp.Value;
+    p += 10;
+    return Ꮡp;
+}
+
 internal static void Main() {
     nint minValue = Min<nint>(42, 17);
     fmt.Printf("Min value: %d\n"u8, minValue);
     nint strLength = Convert<@string, nint>("hello"u8, (@string s) => len(s));
     fmt.Printf("String length: %d\n"u8, strLength);
+    ref var n = ref heap<nint>(out var Ꮡn);
+    n = 5;
+    fmt.Println(renew(Ꮡn).Value);
 }
 
 } // end main_package

@@ -35,6 +35,18 @@ func Convert[T, U any](value T, converter func(T) U) U {
 	return converter(value)
 }
 
+func escape[T any](x T) T { return x }
+
+// renew reassigns a pointer PARAM from a generic call instantiated at T = *int: the arg
+// must render as the box (a type parameter reads as an interface via its constraint, which
+// routed the arg away from the box treatment - internal/weak's `ptr = abi.Escape(ptr)`,
+// CS0029).
+func renew(p *int) *int {
+	p = escape(p)
+	*p += 10
+	return p
+}
+
 func main() {
 	// CallExpr with explicit type argument for a single type parameter
 	minValue := Min[int](42, 17)
@@ -46,4 +58,7 @@ func main() {
 		return len(s)
 	})
 	fmt.Printf("String length: %d\n", strLength)
+
+	n := 5
+	fmt.Println(*renew(&n)) // 15
 }

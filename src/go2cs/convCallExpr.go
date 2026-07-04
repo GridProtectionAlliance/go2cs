@@ -693,7 +693,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
-			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast {
+			// A TYPE PARAMETER reads as an interface (its underlying is the constraint), which
+			// routed a pointer-instantiated generic param into the interface arm and away from
+			// the box treatment (`ptr = abi.Escape(ptr)` instantiating T = *T passed the
+			// deref'd value alias - internal/weak Make, CS0029). When the instantiation is a
+			// pointer, fall through to the pointer arm below.
+			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast && !v.instantiatedParamIsPointer(callExpr, paramType, i) {
 				callExprContext.u8StringArgOK[i] = false
 
 				if !isEmpty {
@@ -2101,6 +2106,33 @@ func stripTrailingTypeArgs(funcName string) string {
 func (v *Visitor) instantiatedParamIsPointer(callExpr *ast.CallExpr, declaredParam types.Type, i int) bool {
 	if _, isTP := types.Unalias(declaredParam).(*types.TypeParam); !isTP {
 		return false
+	}
+
+	// The Fun expression's recorded type can be the UNINSTANTIATED signature — its param
+	// still the bare type parameter — with the instantiation living in info.Instances,
+	// keyed by the Fun's identifier (`ptr = abi.Escape(ptr)` instantiating T = *T left the
+	// arg as the deref'd value alias, internal/weak Make CS0029).
+	funIdent, _ := callExpr.Fun.(*ast.Ident)
+
+	if sel, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+		funIdent = sel.Sel
+	} else if idx, ok := callExpr.Fun.(*ast.IndexExpr); ok {
+		// Explicitly instantiated form: escape[*int](p) / pkg.Escape[*int](p)
+		if id, ok := idx.X.(*ast.Ident); ok {
+			funIdent = id
+		} else if sel, ok := idx.X.(*ast.SelectorExpr); ok {
+			funIdent = sel.Sel
+		}
+	}
+
+	if funIdent != nil {
+		if inst, ok := v.info.Instances[funIdent]; ok {
+			if sig, ok := inst.Type.(*types.Signature); ok {
+				if paramType, ok := getParameterType(sig, i); ok {
+					return isPointer(paramType)
+				}
+			}
+		}
 	}
 
 	instSig, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature)
