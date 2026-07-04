@@ -16,7 +16,7 @@ internal static void testTypeSwitch(error err) {
         break;
     }
     default: {
-        var x = err.type();
+        var x = err;
         fmt.Println("TypeSwitch: No match");
         break;
     }}

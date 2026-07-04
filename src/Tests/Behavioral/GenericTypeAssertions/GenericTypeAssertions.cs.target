@@ -48,7 +48,7 @@ internal static void Main() {
         break;
     }
     default: {
-        var v = GetValue(1).type();
+        var v = GetValue(1);
         fmt.Println("Unknown box type");
         break;
     }}

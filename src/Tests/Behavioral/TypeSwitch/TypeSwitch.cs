@@ -32,7 +32,7 @@ internal static void Main() {
             break;
         }
         default: {
-            var t = i.type();
+            var t = i;
             fmt.Printf("Don't know type %T\n"u8, t);
             break;
         }}
@@ -121,7 +121,7 @@ internal static @string probe(any x) {
         return "bool"u8;
     }
     default: {
-        var v = x.type();
+        var v = x;
         {
             nint vΔ1 = len(fmt.Sprint(v));
             switch (vΔ1) {

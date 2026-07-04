@@ -30,7 +30,7 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 	v.writeOutput("switch (")
 
-	var targetIdent, typeVar string
+	var targetIdent, typeVar, guardExpr string
 	assign := typeSwitchStmt.Assign
 
 	// Check if the assignment statement is a ExprStmt
@@ -40,6 +40,14 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 		assignStmt := assign.(*ast.AssignStmt)
 		targetIdent = v.convExpr(assignStmt.Lhs[0], nil)
 		typeVar = v.convExpr(assignStmt.Rhs[0], nil)
+
+		// The DEFAULT arm re-binds the guard to the ORIGINAL interface value: the switch
+		// operand form (`x.type()`) is object, which cannot flow back out as the interface
+		// (go/build/constraint pushNot's `default: return x`, CS0266).
+		if typeAssert, ok := assignStmt.Rhs[0].(*ast.TypeAssertExpr); ok {
+			guardExpr = v.convExpr(typeAssert.X, nil)
+		}
+
 		v.targetFile.WriteString(typeVar)
 	}
 
@@ -109,13 +117,19 @@ func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
 			if len(targetIdent) > 0 {
 				v.targetFile.WriteString(v.newline)
 
-				if v.options.preferVarDecl {
+				boundExpr := typeVar
+
+				if guardExpr != "" {
+					boundExpr = guardExpr
+				}
+
+				if v.options.preferVarDecl || guardExpr != "" {
 					v.writeOutput("var")
 				} else {
 					v.writeOutput("object")
 				}
 
-				v.targetFile.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, typeVar))
+				v.targetFile.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, boundExpr))
 			}
 
 			for _, stmt := range caseClause.Body {
