@@ -39,4 +39,15 @@ func main() {
 	ip := &arr
 	back := **(**[4]int)(unsafe.Pointer(&ip))
 	_ = back
+
+	// census F14: a literal with an unsafe.Pointer result whose arms return different
+	// C#-typed expressions defeats lambda return inference (CS8917, reflect deepEqual
+	// ptrval); the emitted lambda states its return type explicitly.
+	pick := func(u bool) unsafe.Pointer {
+		if u {
+			return unsafe.Pointer(uintptr(0))
+		}
+		return unsafe.Pointer(ip)
+	}
+	_ = pick(true)
 }

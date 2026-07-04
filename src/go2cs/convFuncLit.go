@@ -215,7 +215,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// delegate-cast in convCallExpr supplies the types).
 		result.WriteString(v.iifeParamNames(litSig) + " => " + inner)
 	} else {
-		result.WriteString("(" + parameterSignature + ") => " + inner)
+		// A literal with a single unsafe.Pointer result can mix return arms of DIFFERENT C#
+		// types — reflect deepEqual's ptrval returns `(uintptr)v.pointer()` on one arm and the
+		// raw `v.ptr` on the other — which defeats C# lambda return-type inference (CS8917).
+		// State the return type explicitly (`@unsafe.Pointer (ΔValue v) => …`); each arm then
+		// converts implicitly through the golib operators.
+		returnTypePrefix := ""
+
+		if results := litSig.Results(); results != nil && results.Len() == 1 {
+			if basic, ok := results.At(0).Type().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
+				returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+			}
+		}
+
+		result.WriteString(returnTypePrefix + "(" + parameterSignature + ") => " + inner)
 	}
 
 	return result.String()
