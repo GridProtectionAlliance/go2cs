@@ -43,6 +43,11 @@ type badge struct{ name string }
 
 func (b badge) Label() string { return "badge:" + b.name }
 
+// tick aliases the foreign named numeric: a conversion from a DIFFERING basic must hop
+// through the underlying even when the target arrives as a *types.Alias (os FileMode,
+// CS0030 removeall_noat).
+type tick = CrossPkgLib.Ticks
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -172,6 +177,8 @@ func main() {
 	fmt.Println(rep.Report())
 	var boom error = &CrossPkgLib.Alarm{Msg: "boom"}
 	fmt.Println(boom.Error())
+	tk := tick(3 | int(gv))
+	fmt.Println(uint64(tk)) // 7
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

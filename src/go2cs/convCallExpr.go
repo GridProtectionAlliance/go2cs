@@ -342,8 +342,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// named type and its EXACT underlying (`nuint` / `uint64`), so a plain `(arenaIdx)(intExpr)`
 		// is CS0030. Coerce through the underlying first — `((arenaIdx)(nuint)(1 << b))` — a numeric
 		// C# cast that is exactly Go's conversion semantics. Skipped when the arg is already the
-		// underlying basic (the existing cast already binds → no churn).
-		if named, ok := v.info.TypeOf(callExpr).(*types.Named); ok {
+		// underlying basic (the existing cast already binds → no churn). types.Unalias: os's
+		// `type FileMode = fs.FileMode` arrives as a *types.Alias, and the bare assertion
+		// skipped the hop (direct nint cast into the foreign wrapper, CS0030 removeall_noat).
+		if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
 			if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {
 				argType := v.info.TypeOf(arg)
 

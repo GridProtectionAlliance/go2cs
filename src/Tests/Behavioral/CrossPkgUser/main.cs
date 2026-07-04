@@ -1,4 +1,5 @@
 global using Tagged = go.CrossPkgLib_package.Labeled;
+global using tick = go.CrossPkgLib_package.Ticks;
 
 namespace go;
 
@@ -106,6 +107,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(rep.Report());
     error boom = new CrossPkgLib.Alarmжerror(Ꮡ(new CrossPkgLib.Alarm(Msg: "boom"u8)));
     fmt.Println(boom.Error());
+    var tk = ((tick)(uintptr)((nint)(3 | (nint)gv)));
+    fmt.Println((uint64)(uintptr)tk);
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;
