@@ -70,6 +70,20 @@ public static ж<Meter> NewMeter() {
     return "count"u8;
 }
 
+[GoType] partial struct Alarm {
+    public @string Msg;
+}
+
+[GoRecv] public static @string Error(this ref Alarm a) {
+    return a.Msg;
+}
+
+public static error AsErr(ж<Alarm> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    return new Alarmжerror(Ꮡa);
+}
+
 public static Reporter AsReporter(ж<Meter> Ꮡm) {
     ref var m = ref Ꮡm.Value;
 

@@ -197,7 +197,15 @@ public class ImplementGenerator : ISourceGenerator
                     }
                 }
 
-                string adapterScope = GetScope(structName) == "public" && GetScope(GetSimpleName(interfaceName)) == "public" ? "public" : "internal";
+                // STRUCT scope by name-exportedness OR declared syntax modifier (the TypeGenerator's
+                // `public partial` is a SIBLING generator's output - invisible to this one's symbol,
+                // the single-pass limitation); INTERFACE scope by symbol:
+                // the golib `error` interface is lowercase yet PUBLIC (its symbol comes from
+                // METADATA, so DeclaredAccessibility is reliable), and the name heuristic
+                // made io/fs's PathErrorжerror internal - unreachable from os (CS0122 x40).
+                // Interface side is symbol-OR-name for the same reason: a SAME-assembly interface
+                // (CrossPkgLib.Reporter) gets its public modifier from a sibling generator too.
+                string adapterScope = (GetScope(structName) == "public" || structType.DeclaredAccessibility == Accessibility.Public) && (interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public") ? "public" : "internal";
 
                 string adapterSource = new AdapterImplTemplate
                 {

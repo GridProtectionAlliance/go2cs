@@ -104,6 +104,8 @@ internal static void Main() => func((defer, recover) => {
     var mtr = CrossPkgLib.NewMeter();
     rep = new CrossPkgLib.MeterжReporter(mtr);
     fmt.Println(rep.Report());
+    error boom = new CrossPkgLib.Alarmжerror(Ꮡ(new CrossPkgLib.Alarm(Msg: "boom"u8)));
+    fmt.Println(boom.Error());
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

@@ -85,6 +85,17 @@ type Reporter interface {
 
 func (m *Meter) Report() string { return "count" }
 
+// Alarm implements error by POINTER receiver: the adapter must be PUBLIC even though
+// `error` is lowercase (the golib interface is public metadata - os PathError CS0122 x40).
+type Alarm struct {
+	Msg string
+}
+
+func (a *Alarm) Error() string { return a.Msg }
+
+// AsErr converts INSIDE the package, creating the pointer-implement record for error.
+func AsErr(a *Alarm) error { return a }
+
 // AsReporter converts INSIDE the package, creating the pointer-implement record.
 func AsReporter(m *Meter) Reporter { return m }
 

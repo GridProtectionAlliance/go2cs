@@ -170,6 +170,8 @@ func main() {
 	mtr := CrossPkgLib.NewMeter()
 	rep = mtr
 	fmt.Println(rep.Report())
+	var boom error = &CrossPkgLib.Alarm{Msg: "boom"}
+	fmt.Println(boom.Error())
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
