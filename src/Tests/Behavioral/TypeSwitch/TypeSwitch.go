@@ -83,6 +83,24 @@ func main() {
 	kind("x")  // text
 	kind(3.14) // other
 	fmt.Println(sizeOf(int32(5)), sizeOf(int64(7))) // 6 9
+
+	var flag bool
+	var num int
+	scanInto(&flag)
+	scanInto(&num)
+	fmt.Println(flag, num) // true 42
+}
+
+// scanInto: POINTER case clauses write through the case var (`*t = ...`) - a star-deref
+// LHS is existing storage, never a declaration, even though the clause-scoped binding has
+// no reassignment record (fmt scanOne took a spurious `var` prefix - CS1003 x18).
+func scanInto(v any) {
+	switch t := v.(type) {
+	case *bool:
+		*t = true
+	case *int:
+		*t = 42
+	}
 }
 
 // sizeOf: SIBLING case clauses each declare `sz :=` - each case body is its own braced

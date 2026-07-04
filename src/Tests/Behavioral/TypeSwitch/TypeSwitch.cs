@@ -106,6 +106,23 @@ internal static void Main() {
     kind("x");
     kind(3.14D);
     fmt.Println(sizeOf((int32)5), sizeOf((int64)7));
+    ref var flag = ref heap(new bool(), out var Ꮡflag);
+    ref var num = ref heap(new nint(), out var Ꮡnum);
+    scanInto(Ꮡflag);
+    scanInto(Ꮡnum);
+    fmt.Println(flag, num);
+}
+
+internal static void scanInto(any v) {
+    switch (v.type()) {
+    case ж<bool> t: {
+        t.Value = true;
+        break;
+    }
+    case ж<nint> t: {
+        t.Value = 42;
+        break;
+    }}
 }
 
 internal static nint sizeOf(any v) {

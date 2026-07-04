@@ -360,7 +360,13 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				lhsTypeIsInterface[i] = isInterface && !isEmpty
 			}
 		} else {
-			if v.isReassignment(ident) {
+			// A STAR-DEREF LHS (`*v = …`) writes through EXISTING storage — never a
+			// declaration, even when the base ident is a fresh clause-scoped binding whose
+			// object the analysis has no reassignment record for (a type-switch case var:
+			// fmt scanOne's `*v = s.scanBool(verb)` took a spurious `var` prefix, CS1003 x18).
+			if _, isStarDeref := lhs.(*ast.StarExpr); isStarDeref {
+				reassignedCount++
+			} else if v.isReassignment(ident) {
 				reassignedCount++
 			} else {
 				obj := v.info.ObjectOf(ident)
