@@ -132,9 +132,11 @@ func (v *Visitor) visitStmt(stmt ast.Stmt, contexts []StmtContext) {
 		format := getStmtContext[FormattingContext](contexts)
 		v.visitSendStmt(stmtType, format)
 	case *ast.SwitchStmt:
-		v.visitSwitchStmt(stmtType)
+		target := getStmtContext[LabeledStmtContext](contexts)
+		v.visitSwitchStmt(stmtType, target)
 	case *ast.TypeSwitchStmt:
-		v.visitTypeSwitchStmt(stmtType)
+		target := getStmtContext[LabeledStmtContext](contexts)
+		v.visitTypeSwitchStmt(stmtType, target)
 	case *ast.BadStmt:
 		v.showWarning("@visitStmt - BadStmt encountered: %#v", stmtType)
 	case *ast.EmptyStmt:

@@ -35,7 +35,32 @@ internal static @string classify(nint n, bool flag) {
     return result;
 }
 
+internal static @string pick(nint x, nint y) {
+    @string @out = "none"u8;
+Big:
+    switch (x) {
+    case 1: {
+        switch (y) {
+        case 2: {
+            @out = "one-two"u8;
+            goto break_Big;
+            break;
+        }}
+
+        @out = "one-other"u8;
+        break;
+    }
+    case 3: {
+        @out = "three"u8;
+        break;
+    }}
+
+    break_Big:;
+    return @out;
+}
+
 internal static void Main() {
+    fmt.Println(pick(1, 2), pick(1, 5), pick(3, 0));
     fmt.Println(classify(stateA, true));
     fmt.Println(classify(stateA, false));
     fmt.Println(classify(stateB, true));

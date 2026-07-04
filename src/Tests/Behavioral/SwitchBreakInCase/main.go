@@ -33,7 +33,28 @@ func classify(n int, flag bool) string {
 	return result
 }
 
+// pick: a LABELED switch with `break Big` from a NESTED switch - the goto's target
+// label must be DECLARED after the labeled switch (regexp/syntax parse.go's BigSwitch,
+// CS0159 x11).
+func pick(x, y int) string {
+	out := "none"
+Big:
+	switch x {
+	case 1:
+		switch y {
+		case 2:
+			out = "one-two"
+			break Big
+		}
+		out = "one-other"
+	case 3:
+		out = "three"
+	}
+	return out
+}
+
 func main() {
+	fmt.Println(pick(1, 2), pick(1, 5), pick(3, 0)) // one-two one-other three
 	fmt.Println(classify(stateA, true))   // break -> none
 	fmt.Println(classify(stateA, false))  // a
 	fmt.Println(classify(stateB, true))   // b (break before the override)

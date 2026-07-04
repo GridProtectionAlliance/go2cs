@@ -87,7 +87,20 @@ func isTerminatingStmtList(list []ast.Stmt) bool {
 	return false
 }
 
-func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt) {
+// visitSwitchStmt wraps the core emission with the labeled-statement break target: a
+// LABELED switch's `break Label` statements emit `goto break_Label` (a bare C# break
+// exits only the innermost construct), so the label must be DECLARED after the switch
+// (regexp/syntax parse.go's BigSwitch, CS0159 x11). Switches take no continue label.
+func (v *Visitor) visitSwitchStmt(switchStmt *ast.SwitchStmt, target LabeledStmtContext) {
+	v.visitSwitchStmtCore(switchStmt)
+
+	if len(target.label) > 0 {
+		v.targetFile.WriteString(v.newline)
+		v.writeOutput("%s:;", getBreakLabelName(target.label))
+	}
+}
+
+func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 	// A tagged switch whose tag is the CONSTANT `true` (`switch c := s[i]; true { case cond: … }`
 	// — strconv readFloat) is Go's idiom for an expressionless switch with an init statement:
 	// each boolean case CONDITION matches when it holds. Normalize to the expressionless form

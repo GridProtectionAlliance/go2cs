@@ -6,7 +6,18 @@ import (
 	"strings"
 )
 
-func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt) {
+// visitTypeSwitchStmt wraps the core emission with the labeled-statement break target
+// (see visitSwitchStmt - same CS0159 rule).
+func (v *Visitor) visitTypeSwitchStmt(typeSwitchStmt *ast.TypeSwitchStmt, target LabeledStmtContext) {
+	v.visitTypeSwitchStmtCore(typeSwitchStmt)
+
+	if len(target.label) > 0 {
+		v.targetFile.WriteString(v.newline)
+		v.writeOutput("%s:;", getBreakLabelName(target.label))
+	}
+}
+
+func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 	var caseClauses []*ast.CaseClause
 
 	for _, stmt := range typeSwitchStmt.Body.List {
