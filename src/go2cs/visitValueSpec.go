@@ -48,6 +48,14 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					Body: &ast.BlockStmt{List: stmts},
 				}
 
+				// performVariableAnalysis writes v.varNames, which visitFuncDecl allocates
+				// per REAL function — a global func-literal var declared BEFORE any function
+				// in the file hit a nil map (recovered panic that silently DROPPED the rest
+				// of the file, csproj references included — CrossPkgUser's CheckFunc), and
+				// one declared after inherited the PREVIOUS function's stale rename table.
+				// Give the synthetic decl its own fresh table.
+				v.varNames = make(map[*types.Var]string)
+
 				v.performVariableAnalysis(syntheticDecl, types.NewSignatureType(nil, nil, nil, nil, nil, false))
 			}
 		}
