@@ -15,6 +15,19 @@
 
 ## Where things stand (2026-07-03)
 
+- **REFLECT CENSUS COMPLETE (9-agent workflow) — 154 errors → 14 mechanism families, ZERO
+  raw-metal (all fixable emission bugs with named existing machinery). Full census:
+  [docs/Reflect-Census.md](Reflect-Census.md). Attack order: Wave A = StructTypeTemplate triple
+  (F2 promoted-accessor scope from MEMBER name → F1 metadata fallback yields ref-PROPERTIES too
+  → F9 promoted-shim receiver kind), −69; then F3 sparseArrayKey Uint gate widen −27 (one line);
+  F5 @string wrapper indexer/Range/span surface −16 (gen); F4 getTypeName composite-star
+  structural recursion −17 (also fixes SILENT wrong-type asserts); F6 generic args from
+  Instances −11; tail sweep −13; F12 (inc/dec operators, golden churn) last −1. One Phase-4
+  flag: F4 sites route managed ж<abi.Type> through nuint round-trips — compiles post-fix but
+  is a GC-hazard audit item (guintptr class). fmt remeasure after Wave A (its 178 is the leak).
+  ALSO IN FLIGHT: time IByteSeq root (golib slice(IByteSeq<T>) ctor + builtin overload + lambda
+  params of union type-params render IByteSeq<byte>) — suite gate running.
+
 - **recon116 WAVE — bytes AND strings AT ZERO (club = 20). GPG-BLOCKED: the reflect gen pair
   (CS0057 relocation + nuint hop; CS0102/0111 promotion shadow-skip) is VERIFIED (suite 220/220,
   reflect generated files at zero) and STAGED but uncommitted — pinentry needs the user
