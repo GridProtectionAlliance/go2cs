@@ -48,6 +48,14 @@ public static ж<nint> Tag(this ж<Device> Ꮡd) {
     ж<nint> Tag();
 }
 
+[GoType] partial struct rig {
+    internal Device dev;
+}
+
+internal static nint probeRig(rig r) {
+    return Ꮡ(r).of(rig.Ꮡdev).Tag().Value;
+}
+
 [GoType] partial struct deviceHandle {
     public partial ref ж<Device> Device { get; }
 }
@@ -108,6 +116,7 @@ internal static void Main() {
     fmt.Println((~dev).hits);
     var pw = new pair(new leftSide(tag: "a"u8), new rightSide(tag: "b"u8));
     fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());
+    fmt.Println(probeRig(new rig(dev: new Device(name: "r"u8, hits: 42))));
 }
 
 } // end main_package

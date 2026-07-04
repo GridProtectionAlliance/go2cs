@@ -51,6 +51,16 @@ type Describer interface {
 	Tag() *int
 }
 
+// rig holds a Device by VALUE; probeRig's param is a VALUE too, so Tag() (a direct-ж
+// method - its receiver escapes) has no box to bind: the call routes the value field-chain
+// through the &-machinery, boxing a COPY (faithful: the Go value param is itself a copy;
+// netip's ip.addr.halves(), CS1929).
+type rig struct{ dev Device }
+
+func probeRig(r rig) int {
+	return *r.dev.Tag()
+}
+
 type deviceHandle struct {
 	*Device
 }
@@ -117,4 +127,6 @@ func main() {
 	// Ambiguous promotions are not emitted; only the qualified selectors compile
 	pw := pair{leftSide{tag: "a"}, rightSide{tag: "b"}}
 	fmt.Println(pw.leftSide.tag, pw.rightSide.Ping()) // a R
+
+	fmt.Println(probeRig(rig{dev: Device{name: "r", hits: 42}})) // 42
 }

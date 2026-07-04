@@ -1116,6 +1116,23 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		return getAliasedTypeName(fmt.Sprintf("%s.%s", elemAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 	}
 
+	// A DIRECT-ж (box-receiver) method called on a remaining VALUE field-chain — a field of a
+	// plain VALUE param (`ip.addr.halves()`, netip's uint128: Go auto-addresses &ip.addr,
+	// CS1929 ×2). The pointer-rooted chains took the arms above; this one routes the value
+	// chain through the &-machinery, which boxes a COPY for an unaddressable value-param
+	// field — faithful here, because the enclosing receiver is itself a copy (Go value-param
+	// semantics: writes through the halves would only ever reach the local copy in Go too).
+	if context.isCallExpr && v.selectorCallsDirectBoxMethod(selectorExpr) && !v.exprIsAlreadyBoxedPointerFieldOrElement(selectorExpr.X) {
+		if _, isFieldChain := selectorExpr.X.(*ast.SelectorExpr); isFieldChain {
+			if exprType := v.getType(selectorExpr.X, false); exprType != nil {
+				if _, isPtr := exprType.Underlying().(*types.Pointer); !isPtr {
+					fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
+					return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+				}
+			}
+		}
+	}
+
 	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 }
 
