@@ -39,8 +39,8 @@ internal static void Main() {
     @unsafe.Pointer p = @unsafe.Pointer.FromRef(ref (Ꮡbacking).Value);
     writeBarrier(p, p);
     _ = (uintptr)indirectKey(p);
-    Action fslot = default!;
-    var (_, ok) = funcAt(new @unsafe.Pointer(Ꮡ(fslot)));
+    ref var fslot = ref heap<Action>(out var Ꮡfslot);
+    var (_, ok) = funcAt(new @unsafe.Pointer(Ꮡfslot));
     _ = ok;
     ref var pair = ref heap(new array<uint64>(2), out var Ꮡpair);
     _ = zeroPair(new @unsafe.Pointer(Ꮡpair));

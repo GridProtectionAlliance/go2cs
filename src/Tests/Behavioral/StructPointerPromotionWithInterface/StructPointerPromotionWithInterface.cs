@@ -129,8 +129,9 @@ internal static void Main() {
     fmt.Println("MyError What =", e.What);
     fmt.Println("MyCustomError What =", a.What);
     fmt.Println("MyCustomError method =", a.Time());
-    var inner = Ꮡ(new Inner(Value: "hello"u8));
-    var innerPtr = Ꮡ(inner);
+    ref var inner = ref heap<ж<Inner>>(out var Ꮡinner);
+    inner = Ꮡ(new Inner(Value: "hello"u8));
+    var innerPtr = Ꮡinner;
     var middle = new Middle(Inner: inner);
     fmt.Println(middle.Value);
     var outer = new Outer(ptr: innerPtr);

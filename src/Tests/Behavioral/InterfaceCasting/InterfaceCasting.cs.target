@@ -151,6 +151,17 @@ internal static void Main() {
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
     var cp = Ꮡ(new Cat(nil));
     fmt.Println(cp.Self().Speak());
+    ref var swapped = ref heap<Animal>(out var Ꮡswapped);
+
+    swapped = new Dog(nil);
+    replaceAnimal(Ꮡswapped);
+    fmt.Println("replaced:", swapped.Speak());
+}
+
+internal static void replaceAnimal(ж<Animal> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    a = new CatжAnimal(Ꮡ(new Cat(nil)));
 }
 
 [GoType] partial interface rdr {

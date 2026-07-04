@@ -393,8 +393,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				}
 			}
 
-			isInterface, isEmpty := v.isInterface(ident)
-			lhsTypeIsInterface[i] = isInterface && !isEmpty
+			// A STAR-DEREF LHS writes the POINTED-TO storage, so interface-ness (and the RHS
+			// interface wrap it gates) comes from the deref'd expression type, not the pointer
+			// ident (dwarf zeroArray's `*t = &tt` with `t *Type` — the ж<ArrayType> RHS missed
+			// the pointer-adapter wrap, CS0266).
+			if _, isStarDeref := lhs.(*ast.StarExpr); isStarDeref {
+				lhsIsIface, isEmpty := isInterface(v.getType(lhs, false))
+				lhsTypeIsInterface[i] = lhsIsIface && !isEmpty
+			} else {
+				lhsIsIface, isEmpty := v.isInterface(ident)
+				lhsTypeIsInterface[i] = lhsIsIface && !isEmpty
+			}
+
 			typeName := v.getExprTypeName(ident, true)
 
 			lhsTypeIsString[i] = typeName == "string"

@@ -67,6 +67,11 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// (`Δp`) — an escaping local is `ref var Δp = ref heap(new T(), out var Ꮡp)`, a deref'd
 		// pointer param `ref var Δp = ref Ꮡp.Value` — so reference it by the raw name, not `ᏑΔp`
 		// (not in scope → CS0103). boxBaseName is a no-op when nothing is shadow-renamed (no churn).
+		// NOTE: this arm renders the ident's POINTER-form for a VALUE-type local (its box) — an
+		// inherently heap-allocated local stays on the plain render even when it now owns an
+		// address-taken box (identHasHeapBox): here the pointer VALUE is the ident itself
+		// (`new Middle(Inner: inner)`), and `Ꮡinner` (the ж<ж<T>> box) is only what an explicit
+		// `&inner` wants — that renders through convUnaryExpr.
 		if !isCurrentRefReceiver {
 			if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
 				return AddressPrefix + v.boxBaseName(ident)

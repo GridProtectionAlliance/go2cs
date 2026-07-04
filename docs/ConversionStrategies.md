@@ -390,6 +390,39 @@ Without this, `&list` emits `Ꮡlist` with no box (CS0103), and the `Ꮡ(value)`
 
 A subtler case: a newly-declared tuple element can be flagged *escaping* by analysis yet need **no** heap box — typically an already-pointer local that is merely returned (`pp, now := pidleget(now)`, where `pp` is a `*p` that the function returns). The heap-decl path above only owns elements that produce an actual `ref var … = ref heap(…)`; an escaping element with no such declaration must still be counted as newly-declared so it receives its `var`, or the deconstruction emits `(pp, now) = …` with `pp` declared nowhere (CS0103). Both the mixed (`(var pp, now) = …`, reusing the value parameter `now`) and the all-shadowing (`var (ppΔ1, gpΔ1) = …`) forms are handled. (Guarded by the `TupleMixedDeclareReassign` behavioral test; runtime hits it in `pidlegetSpinning` and `findRunnable`.)
 
+### An address-taken reference-typed local heap-boxes too — `Ꮡ(value)` copies are only for reads
+An INHERENTLY heap-allocated local (interface/pointer/slice/map/chan/func) is already a
+reference, so escape analysis blanket-marks it and the box machinery historically skipped it —
+`&local` fell back to the `Ꮡ(value)` **copy** constructor. That is only sound when nothing
+writes through the pointer: dwarf's `zeroArray(&typ)` (with `typ Type`, an interface local)
+writes `*t = &tt` in the callee, and the copy-box silently dropped the write (C# printed the
+un-replaced value — a behavioral divergence, not a compile error). The box predicate
+(`identHasHeapBox`) now boxes such a local when its address is **genuinely taken** — by a
+capturing closure (the pre-existing box-ref-var case) or anywhere in the current function
+(memoized `&ident` scan) — so `&swapped` references a real aliasing box:
+
+```go
+var swapped Animal = Dog{}
+replaceAnimal(&swapped)      // callee: *a = &Cat{}
+```
+```csharp
+ref var swapped = ref heap<Animal>(out var Ꮡswapped);
+swapped = new Dog(nil);
+replaceAnimal(Ꮡswapped);     // callee writes through the SAME box — "Meow!"
+```
+
+Details: the box declaration always uses the parameterless `heap<T>(out …)` form for these
+(`new Animal()` on an interface is CS0144, and the reference-like zero value is exactly what
+the box provides); a `[]T` slice local routes to `heap<slice<T>>` (the array-branch prefix
+test mistook `[]` for an array and emitted a mismatching `heap<array<T>>`); and the
+pointer-form ident render in convIdent deliberately keeps the PLAIN value render for these
+locals (`new Middle(Inner: inner)` wants the held pointer; only an explicit `&inner` wants
+the `ж<ж<T>>` box, via convUnaryExpr). Non-escaping and never-addressed reference locals are
+unchanged (no churn). (Guarded by `InterfaceCasting`'s `replaceAnimal` — the swap is visible
+through the original variable; the churned goldens `PointerToPointer`,
+`UnsafePointerReinterpret`, `DerefPointerToField`, `PointerCastSliceRange`,
+`EscapedLoopVarSiblingIndex` all re-verified against Go.)
+
 A **blank-identifier element** in a split multi-assign is a C# discard, never a declaration. Go's `_, _, _, _ = a, b, c, d` (a common "mark these used" idiom) is emitted as one bare discard per element with **no** `var` — the per-element discard test keys off each LHS ident, not just the single-LHS case, so every blank stays a discard:
 
 ```go

@@ -149,6 +149,10 @@ type Visitor struct {
 	currentFuncPrefix    *strings.Builder
 	paramNames           HashSet[string]
 	paramObjects         map[types.Object]bool
+	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
+	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
+	// from prior functions are simply never consulted again.
+	identAddressTakenCache map[types.Object]bool
 	// nilSafePtrParamNames holds the raw names of pointer PARAMETERS that are compared with `==`/
 	// `!=` (against nil or another pointer) anywhere in the current function body — i.e. params
 	// walked to a nil terminator (`for p != nil { …; p = p.next }`). For these, the deref-alias and
@@ -3870,6 +3874,62 @@ func extractTypes(signature string) []string {
 	return types
 }
 
+// identHasHeapBox reports whether the local behind obj is backed by a `Ꮡname` heap box.
+// An escaping VALUE-type local always boxes. An INHERENTLY heap-allocated local (pointer/
+// slice/map/chan/interface/func — already a reference, and blanket-marked escaping by the
+// escape analysis) normally needs no box; it boxes only when its address is genuinely
+// taken — by a capturing closure (a box-ref var: the closure writes through `&name` must
+// reach the outer storage) or ANYWHERE in the current function (`zeroArray(&typ)` with
+// `typ Type` — the `Ꮡ(typ)` copy-box fallback silently loses the callee's write through
+// the pointer; dwarf zeroArray / InterfaceCasting replaceAnimal).
+func (v *Visitor) identHasHeapBox(obj types.Object, identType types.Type) bool {
+	if !v.identEscapesHeap[obj] {
+		return false
+	}
+
+	if !isInherentlyHeapAllocatedType(identType) {
+		return true
+	}
+
+	return v.isLambdaBoxRefVar(obj) || v.identAddressTaken(obj)
+}
+
+// identAddressTaken reports whether `&ident` occurs for obj anywhere in the current
+// function (including nested function literals). Memoized per object.
+func (v *Visitor) identAddressTaken(obj types.Object) bool {
+	if v.currentFuncDecl == nil || obj == nil {
+		return false
+	}
+
+	if taken, found := v.identAddressTakenCache[obj]; found {
+		return taken
+	}
+
+	taken := false
+
+	ast.Inspect(v.currentFuncDecl, func(n ast.Node) bool {
+		if taken {
+			return false
+		}
+
+		if unaryExpr, ok := n.(*ast.UnaryExpr); ok && unaryExpr.Op == token.AND {
+			if id, ok := unaryExpr.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+				taken = true
+				return false
+			}
+		}
+
+		return true
+	})
+
+	if v.identAddressTakenCache == nil {
+		v.identAddressTakenCache = make(map[types.Object]bool)
+	}
+
+	v.identAddressTakenCache[obj] = taken
+	return taken
+}
+
 func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string {
 	identType := v.info.TypeOf(ident)
 
@@ -3880,21 +3940,8 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 		obj = v.info.Uses[ident]
 	}
 
-	if obj != nil {
-		escapesHeap := v.identEscapesHeap[obj]
-
-		// An inherently heap-allocated local (pointer/slice/map/chan/interface/func) is already a
-		// reference, so it normally needs no heap box. The exception is a local captured by a closure
-		// whose address is taken INSIDE that closure (a box-ref var): the closure references it through
-		// a shared box `Ꮡname` so that writes made through `&name` inside the closure reach the outer
-		// function's storage (`mToFlush := &node{…}; run(func(){ prev := &mToFlush; *prev = … })`). A
-		// `Ꮡ(name)` copy would box a throwaway snapshot and silently lose those writes. The box must be
-		// declared here; the closure already emits `Ꮡname`/`Ꮡname.Value` references for it (CS0103 until
-		// it is declared). So emit the heap box for a box-ref var even when the type is inherently
-		// heap-allocated — the same-function `&ptr` case (no closure) stays a copy box (PointerToPointer).
-		if !escapesHeap || (isInherentlyHeapAllocatedType(identType) && !v.isLambdaBoxRefVar(obj)) {
-			return ""
-		}
+	if obj != nil && !v.identHasHeapBox(obj, identType) {
+		return ""
 	}
 
 	goTypeName := v.getDisplayTypeName(identType, false)
@@ -3910,9 +3957,10 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	// (`Ꮡbase` is already a valid identifier and is how its address is emitted everywhere).
 	varName := getSanitizedIdentifier(csIDName)
 
-	// Handle array types
-	if strings.HasPrefix(goTypeName, "[") {
-		arrayLen := strings.Split(goTypeName[1:], "]")[0]
+	// Handle array types. A SLICE (`[]T` — empty length) is NOT an array: it must fall
+	// through to the generic path (`heap<slice<T>>`), or the boxed ref-local's type
+	// mismatches every use (a `[]nint` local boxed as `heap<array<nint>>`, CS0029).
+	if arrayLen := strings.Split(strings.TrimPrefix(goTypeName, "["), "]")[0]; strings.HasPrefix(goTypeName, "[") && arrayLen != "" {
 
 		// Get array element type
 		arrayType := convertToCSTypeName(goTypeName[strings.Index(goTypeName, "]")+1:])
@@ -3933,6 +3981,13 @@ func (v *Visitor) convertToHeapTypeDecl(ident *ast.Ident, createNew bool) string
 	}
 
 	csTypeName := convertToCSTypeName(goTypeName)
+
+	// An inherently heap-allocated type (interface/pointer/slice/map/chan/func) takes the
+	// parameterless box form: `new Animal()` is invalid for an interface (CS0144), and the
+	// reference-like zero value is exactly what `heap<T>(out …)` provides.
+	if isInherentlyHeapAllocatedType(identType) {
+		createNew = false
+	}
 
 	if v.options.preferVarDecl {
 		if createNew {

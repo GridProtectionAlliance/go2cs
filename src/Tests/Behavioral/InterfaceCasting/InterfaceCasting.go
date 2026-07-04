@@ -166,6 +166,18 @@ func main() {
 	fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak())
 	cp := &Cat{}
 	fmt.Println(cp.Self().Speak())
+
+	// Writing a POINTER through a *interface param: `*a = &Cat{}` assigns a ж<Cat> into
+	// the deref'd interface storage — the RHS must take the pointer-adapter wrap (dwarf
+	// zeroArray's `*t = &tt` with t *Type, CS0266). Interface-ness of a star-deref LHS
+	// comes from the deref'd type, not the pointer ident.
+	var swapped Animal = Dog{}
+	replaceAnimal(&swapped)
+	fmt.Println("replaced:", swapped.Speak()) // Meow!
+}
+
+func replaceAnimal(a *Animal) {
+	*a = &Cat{}
 }
 
 // rdCloser mirrors io.ReadCloser: an interface INHERITING other interfaces. A concrete type

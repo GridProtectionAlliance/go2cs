@@ -26,10 +26,11 @@ internal static nint readVal(ж<holder> Ꮡh) {
 }
 
 internal static void Main() {
-    var xs = new nint[]{10, 20, 30}.slice();
+    ref var xs = ref heap<slice<nint>>(out var Ꮡxs);
+    xs = new nint[]{10, 20, 30}.slice();
     ref var c = ref heap<nint>(out var Ꮡc);
     c = 7;
-    var h = Ꮡ(new holder(xs: Ꮡ(xs), cnt: Ꮡc));
+    var h = Ꮡ(new holder(xs: Ꮡxs, cnt: Ꮡc));
     fmt.Println(sumRange(h));
     fmt.Println(readVal(h));
 }

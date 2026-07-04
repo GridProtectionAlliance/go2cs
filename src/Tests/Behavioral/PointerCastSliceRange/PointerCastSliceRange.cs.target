@@ -22,8 +22,9 @@ internal static unsafe void Main() {
         ps.Value += 1;
     }
     fmt.Println(sum, total, s[0]);
-    var ip = Ꮡarr;
-    var back = (~(ж<ж<array<nint>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡ(ip)).Value))).Value;
+    ref var ip = ref heap<ж<array<nint>>>(out var Ꮡip);
+    ip = Ꮡarr;
+    var back = (~(ж<ж<array<nint>>>)(uintptr)(@unsafe.Pointer.FromRef(ref (Ꮡip).Value))).Value;
     _ = back;
     var ipʗ1 = ip;
     var pick = @unsafe.Pointer (bool u) => {

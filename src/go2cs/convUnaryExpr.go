@@ -105,7 +105,7 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 		return false
 	}
 
-	return v.identEscapesHeap[obj] && !isInherentlyHeapAllocatedType(v.getIdentType(ident))
+	return v.identHasHeapBox(obj, v.getIdentType(ident))
 }
 
 // boxBaseName returns the base name (without the `Ꮡ` prefix) of an address-taken var's heap box.
@@ -606,7 +606,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
 		}
 
-		var escapesHeap bool
+		var hasHeapBox bool
 		ident := getIdentifier(unaryExpr.X)
 
 		obj := v.info.Defs[ident]
@@ -616,7 +616,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		}
 
 		if obj != nil {
-			escapesHeap = v.identEscapesHeap[obj]
+			hasHeapBox = v.identHasHeapBox(obj, v.getIdentType(ident))
 		}
 
 		// A package-level var whose address is taken is backed by a heap box, so its
@@ -627,7 +627,7 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 			return AddressPrefix + strings.TrimPrefix(v.convExpr(unaryExpr.X, nil), "@")
 		}
 
-		if escapesHeap && !isInherentlyHeapAllocatedType(v.getIdentType(ident)) {
+		if hasHeapBox {
 			// If the variable escapes to heap, its `Ꮡname` box already exists. The box keeps the
 			// RAW Go name (`ref var Δp = ref heap(new T(), out var Ꮡp)`), so reference it by the raw
 			// name — `convExpr` yields the shadow-renamed value alias (`Δp`), giving `ᏑΔp` which is

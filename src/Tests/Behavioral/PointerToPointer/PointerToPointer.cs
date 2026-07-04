@@ -15,13 +15,13 @@ internal const int8 opInvalid = 0;
 
 internal static void Main() {
     ref var a = ref heap(new nint(), out var Ꮡa);
-    ж<nint> ptr = default!;
-    ж<ж<nint>> pptr = default!;
+    ref var ptr = ref heap<ж<nint>>(out var Ꮡptr);
+    ref var pptr = ref heap<ж<ж<nint>>>(out var Ꮡpptr);
     ж<ж<ж<nint>>> ppptr = default!;
     a = 3000;
     ptr = Ꮡa;
-    pptr = Ꮡ(ptr);
-    ppptr = Ꮡ(pptr);
+    pptr = Ꮡptr;
+    ppptr = Ꮡpptr;
     fmt.Printf("Value of a = %d\n"u8, a);
     PrintValPtr(ptr);
     fmt.Printf("Main-function return value available at *ptr = %d\n"u8, EscapePrintValPtr(ptr).Value);
