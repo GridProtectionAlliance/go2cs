@@ -77,6 +77,18 @@ func (m *Meter) Bump() int {
 // NewMeter returns a fresh *Meter (count is unexported, so consumers need a constructor).
 func NewMeter() *Meter { return &Meter{} }
 
+// Reporter is implemented by *Meter ONLY (pointer receiver): the pointer-sourced
+// GoImplement record generates the PUBLIC Meter-adapter this package exports.
+type Reporter interface {
+	Report() string
+}
+
+func (m *Meter) Report() string { return "count" }
+
+// AsReporter converts INSIDE the package, creating the pointer-implement record.
+func AsReporter(m *Meter) Reporter { return m }
+
+
 // Ticks is an exported named INTEGER type (uintptr-based) - consumers define types over it
 // (the registry Key over syscall.Handle shape).
 // Status (the type) collides with the Sensor.Status method below, so it is exported

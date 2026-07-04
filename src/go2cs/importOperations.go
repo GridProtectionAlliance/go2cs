@@ -369,6 +369,22 @@ func loadImportedTypeAliases(info PackageInfo) {
 			importedTypeAliases[alias] = typeName
 			packageLock.Unlock()
 		}
+
+		// Record the imported package's POINTER-sourced GoImplement pairs: their generated
+		// adapter classes (TжIface) are public members of the foreign package class, so a
+		// cross-package pointer-to-interface conversion here can reference them by qualified
+		// name (io/fs's PathErrorжerror consumed by os - CS0029 x38).
+		if pairs, err := parseExportedPointerImplements(packageInfoFile); err == nil {
+			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
+
+			packageLock.Lock()
+
+			for _, pair := range pairs {
+				importedPointerImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], pair[1]))
+			}
+
+			packageLock.Unlock()
+		}
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
@@ -426,4 +442,49 @@ func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {
 	}
 
 	return aliases, nil
+}
+
+// parseExportedPointerImplements parses a package info file for `GoImplement<T, Iface>(Pointer
+// = true)` assembly attributes, returning (T-simple, Iface-simple) pairs - the adapter-class
+// existence records for cross-package pointer-to-interface conversions.
+func parseExportedPointerImplements(packageInfoFile string) ([][2]string, error) {
+	file, err := os.Open(packageInfoFile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	var pairs [][2]string
+
+	pattern := regexp.MustCompile(`\[assembly: GoImplement<(.+), (.+)>\(Pointer = true\)\]`)
+
+	for scanner.Scan() {
+		matches := pattern.FindStringSubmatch(scanner.Text())
+
+		if matches == nil {
+			continue
+		}
+
+		// Both sides reduce to their SIMPLE (last-dot-segment) names - the adapter class
+		// name composes from exactly those (see adapterTypeRef / the ImplementGenerator).
+		tName := matches[1]
+
+		if idx := strings.LastIndex(tName, "."); idx >= 0 {
+			tName = tName[idx+1:]
+		}
+
+		ifaceName := matches[2]
+
+		if idx := strings.LastIndex(ifaceName, "."); idx >= 0 {
+			ifaceName = ifaceName[idx+1:]
+		}
+
+		pairs = append(pairs, [2]string{tName, ifaceName})
+	}
+
+	return pairs, scanner.Err()
 }

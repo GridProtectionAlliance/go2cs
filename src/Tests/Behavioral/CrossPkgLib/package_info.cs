@@ -41,6 +41,7 @@ using static go.CrossPkgLib_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<Meter, Reporter>(Pointer = true)]
 [assembly: GoImplement<Sensor, Labeled>]
 // </InterfaceImplementations>
 

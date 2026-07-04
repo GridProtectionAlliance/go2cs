@@ -100,6 +100,10 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLib.Labeled l1 = new badge(name: "a"u8);
     Tagged l2 = new badge(name: "b"u8);
     fmt.Println(l1.Label(), l2.Label());
+    CrossPkgLib.Reporter rep = default!;
+    var mtr = CrossPkgLib.NewMeter();
+    rep = new CrossPkgLib_package.MeterжReporter(mtr);
+    fmt.Println(rep.Report());
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

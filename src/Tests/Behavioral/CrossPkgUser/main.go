@@ -164,6 +164,12 @@ func main() {
 	var l1 CrossPkgLib.Labeled = badge{name: "a"}
 	var l2 Tagged = badge{name: "b"}
 	fmt.Println(l1.Label(), l2.Label())
+	// Cross-package POINTER-to-interface assignment: the conversion references the
+	// FOREIGN assembly's public adapter (os err = &PathError{...}, CS0029 x38).
+	var rep CrossPkgLib.Reporter
+	mtr := CrossPkgLib.NewMeter()
+	rep = mtr
+	fmt.Println(rep.Report())
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

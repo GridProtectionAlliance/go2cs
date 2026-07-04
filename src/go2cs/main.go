@@ -289,6 +289,13 @@ var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var importedTypeAliases map[string]string
 
+// importedPointerImplements records `[assembly: GoImplement<T, Iface>(Pointer = true)]` lines
+// parsed from IMPORTED packages' package_info files, keyed "pkgName|T|ifaceSimple" - the
+// existence proof that the foreign assembly generated the public TжIface adapter class
+// (io/fs's PathErrorжerror), so a cross-package pointer-to-interface conversion can
+// reference it (os's `err = &PathError{...}`, CS0029 x38).
+var importedPointerImplements HashSet[string]
+
 // importPackageDirs maps a directly-imported package's import path to its on-disk source directory
 // and Go package name, captured from the MODULE-AWARE go/packages graph at load time. It is the
 // fallback resolver for cross-package references to a LOCAL/USER module (a `replace`d or co-located
@@ -598,6 +605,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
 		importedTypeAliases = make(map[string]string)
+		importedPointerImplements = HashSet[string]{}
 		constImportedTypeAliases = NewHashSet([]string{})
 		parsedPackageInfoFiles = NewHashSet([]string{})
 		interfaceImplementations = make(map[string]HashSet[string])
@@ -2284,6 +2292,41 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// types keep the deref-copy form below (their adapter is not generated in this assembly).
 	if pointerTarget && recordable && exprResult != "" {
 		return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+	}
+
+	// A POINTER-sourced cast to an interface implemented by a FOREIGN type routes through the
+	// foreign assembly's PUBLIC adapter when that package recorded the same pointer-implement
+	// pair (parsed from its package_info) - os's `err = &PathError{...}` references io/fs's
+	// generated `io.fs_package.PathErrorжerror` (the bare value emission was CS0029 x38: the
+	// foreign VALUE struct does not implement the interface; only its pointer adapter does).
+	if pointerTarget && !recordable && exprResult != "" {
+		// The pointer-sourced target arrives as the *types.Pointer - unwrap to its named elem.
+		namedTarget := targetType
+
+		if ptr, ok := namedTarget.(*types.Pointer); ok {
+			namedTarget = ptr.Elem()
+		}
+
+		if named, ok := types.Unalias(namedTarget).(*types.Named); ok {
+			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+				ifaceSimple := interfaceTypeName
+
+				if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+					ifaceSimple = ifaceSimple[idx+1:]
+				}
+
+				key := fmt.Sprintf("%s|%s|%s", getSanitizedIdentifier(pkg.Name()),
+					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())), ifaceSimple)
+
+				packageLock.Lock()
+				foreignAdapterExists := importedPointerImplements.Contains(key)
+				packageLock.Unlock()
+
+				if foreignAdapterExists {
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+				}
+			}
+		}
 	}
 
 	// Handle special case for pointer dereference of immediate address of operation, this

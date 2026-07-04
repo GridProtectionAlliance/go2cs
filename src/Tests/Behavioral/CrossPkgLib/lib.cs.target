@@ -62,6 +62,20 @@ public static ж<Meter> NewMeter() {
     return Ꮡ(new Meter(nil));
 }
 
+[GoType] partial interface Reporter {
+    @string Report();
+}
+
+[GoRecv] public static @string Report(this ref Meter m) {
+    return "count"u8;
+}
+
+public static Reporter AsReporter(ж<Meter> Ꮡm) {
+    ref var m = ref Ꮡm.Value;
+
+    return new MeterжReporter(Ꮡm);
+}
+
 [GoType] partial struct ΔStatus {
     public nint Code;
 }
