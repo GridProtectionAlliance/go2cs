@@ -15,6 +15,27 @@
 
 ## Where things stand (2026-07-03)
 
+- **POLL CAMPAIGN (2026-07-04, cont) - 34 commits. CS0052 publicize root bf5dcdcb7 (exported
+  vars/consts/func sigs publicize their unexported types; CrossPkgLib snapshot guard) +
+  CS0030 named-over-pointer hop 297e84e5b (((Pointer)(zh<EmptyStruct>)(uintptr)(x));
+  PointerCastSliceRange opaque guard). PROBE-SKEW LESSON HARDENED: recon125 "poll=1" was
+  pair-probe FICTION (probe content differed from full-recon content by ZERO bytes for
+  fd_windows yet the probe BUILD saw different errors via its own skewed DEPS) - measure
+  only on full-recon overlays. POLL RESIDUE = 8, four banked families (fd_windows):
+  (1) CS8030 x2 @1103/1107 - GetFileType expression-bodied `=> func((defer, recover) => ...)`
+  wrapper chose the VOID GoFunc overload for a value-returning function (tuple result);
+  (2) CS0103 sz x2 @1231-2 - type-switch sibling cases each declare `sz :=` but later cases
+  dropped `var` (per-case bodies ARE braced scopes; the variable analysis flat-map saw the
+  name as declared - sibling case scopes need independent declarations);
+  (3) CS0123 Seek x2 @558/800 - `deferǃ(Δsyscall.Seek, Sysfd, curoffset, io.SeekStart, defer)`
+  method group does not match the inferred Func delegate (inspect full error - likely the
+  result-tuple shape or an alias-vs-raw param type mismatch);
+  (4) CS0426 x2 @1263/1420 - conversion TARGETS still render raw `Δsyscall.Handle`/
+  `.Sockaddr` (the conversion-target naming path bypasses getCSTypeName - route it through
+  the same alias check as 8b5bf94c6/60bd5957d).
+  After poll: os/fmt own residue (~1 each), io/fs 1, filepathlite 1, netip 6, concurrent 5,
+  bufio 8, edwards 1.
+
 - **TIME AT ZERO + POLL AT ONE (2026-07-04 early) - CLUB = 22, THIRTY-ONE commits this session.**
   Post-census wave, in order: e3263718e union sub-slice cast (time 15->9); b0b7b6e32 opaque
   `ᐧᐧ` marker for leading constant-true cases (CS8120; the const `ᐧ` foldability is LOAD-BEARING
