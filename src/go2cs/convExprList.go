@@ -66,7 +66,13 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			// Index out of bounds default to false here, so variadic params are handled correctly
 			basicLitContext.u8StringOK = callContext.u8StringArgOK[i] && callArgs == nil
 			basicLitContext.sourceIsRuneArray = callContext.sourceIsRuneArray
-			basicLitContext.castToGoString = callContext.useGoStringArg[i] && callArgs == nil
+
+			// A DEFERRED call's args feed generic deferǃ type parameters: a u8 span cannot be
+			// a generic type argument (u8StringOK forced off above), so a Go-string literal arg
+			// takes the explicit (@string) cast instead — otherwise the parameter infers as C#
+			// string and the method-group-to-Action conversion fails (fmt's
+			// `defer p.catchPanic(p.arg, verb, "Format")`, CS0123 x4).
+			basicLitContext.castToGoString = callContext.useGoStringArg[i] || (callArgs != nil && callContext.u8StringArgOK[i])
 
 			// Check if the argument is a pointer type
 			identContext.isPointer = callContext.argTypeIsPtr[i]

@@ -12,7 +12,7 @@ internal static void Main() {
     var f1 = fmt.Println;
     var f1ʗ1 = f1;
     goǃ(ᴛ1 => f1ʗ1(ᴛ1), "Fourth");
-    goǃ(GetPrintLn(), "Fifth");
+    goǃ(GetPrintLn(), (@string)"Fifth");
     goǃ((ᴛ1, ᴛ2) => fmt.Println(ᴛ1, ᴛ2), "Function result:", add(3, 4));
     printSquare(5);
     nint count = 1;

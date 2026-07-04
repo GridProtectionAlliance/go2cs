@@ -11,7 +11,7 @@ internal static void Main() => func((defer, recover) => {
     var f1 = fmt.Println;
     var f1ʗ1 = f1;
     deferǃ(ᴛ1 => f1ʗ1(ᴛ1), "Fourth", defer);
-    deferǃ(GetPrintLn(), "Fifth", defer);
+    deferǃ(GetPrintLn(), (@string)"Fifth", defer);
     fmt.Println("Main function");
 });
 
