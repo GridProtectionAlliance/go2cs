@@ -1183,6 +1183,20 @@ not), which is exactly the needed split. Applied to both the value-form partial 
 adapter's hop arm. Guarded by `StructPointerPromotionWithInterface` (`Describer` over
 `deviceHandle{*Device}`).
 
+### A forwarded multi-value call deconstructs when tuple elements need interface conversion
+`return newRawConn(f)` forwards a `(*rawConn, error)` tuple into a `(syscall.RawConn, error)`
+result list — C# tuple conversions do not consult user conversions element-wise (CS0266). The
+converter deconstructs into temps and converts each element through the usual interface
+machinery (which also records the `GoImplement` pairing):
+
+```csharp
+var (ᴛ1, ᴛ2) = makeRelay();
+return (new relayжReporter(ᴛ1), ᴛ2);
+```
+
+Elements whose actual type is itself an interface are left alone (structural inheritance
+covers those). Guarded by `CrossPkgUser` (`getReporter` forwarding `makeRelay`).
+
 ### Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
 

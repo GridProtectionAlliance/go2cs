@@ -50,6 +50,23 @@ internal static nint Rank(this emblem e) {
     return e.rank;
 }
 
+[GoType] partial struct relay {
+    internal @string tag;
+}
+
+[GoRecv] internal static @string Report(this ref relay r) {
+    return "relay:"u8 + r.tag;
+}
+
+internal static (ж<relay>, error) makeRelay() {
+    return (Ꮡ(new relay(tag: "live"u8)), default!);
+}
+
+internal static (CrossPkgLib.Reporter, error) getReporter() {
+    var (ᴛ1, ᴛ2) = makeRelay();
+    return (new relayжReporter(ᴛ1), ᴛ2);
+}
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(note, (nint)CrossPkgLib.Precision, defer);
     var b = CrossPkgLib.Boiling();
@@ -130,6 +147,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println((uint64)(uintptr)tk);
     namedLabel nl = new emblem(name: "gold"u8, rank: 1);
     fmt.Println(CrossPkgLib.Describe(nl), nl.Rank());
+    var (rp, rerr) = getReporter();
+    fmt.Println(rp.Report(), rerr == default!);
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

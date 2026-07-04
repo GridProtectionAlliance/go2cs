@@ -65,6 +65,18 @@ type emblem struct {
 func (e emblem) Label() string { return e.name }
 func (e emblem) Rank() int     { return e.rank }
 
+// relay's pointer receiver satisfies CrossPkgLib.Reporter; getReporter forwards the
+// multi-value call as its WHOLE result list, so the converter deconstructs the tuple and
+// converts the interface element — C# tuple conversions are not element-wise (os
+// SyscallConn returning (*rawConn, error) as (syscall.RawConn, error), CS0266).
+type relay struct{ tag string }
+
+func (r *relay) Report() string { return "relay:" + r.tag }
+
+func makeRelay() (*relay, error) { return &relay{tag: "live"}, nil }
+
+func getReporter() (CrossPkgLib.Reporter, error) { return makeRelay() }
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -199,6 +211,9 @@ func main() {
 
 	var nl namedLabel = emblem{name: "gold", rank: 1}
 	fmt.Println(CrossPkgLib.Describe(nl), nl.Rank()) // gold 1
+
+	rp, rerr := getReporter()
+	fmt.Println(rp.Report(), rerr == nil) // relay:live true
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

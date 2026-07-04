@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
@@ -217,112 +218,181 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 		resultParamIsInterface := paramsAreInterfaces(resultParams, true)
 		resultParamIsPointer := paramsArePointers(resultParams)
 
-		for i, expr := range returnStmt.Results {
-			if i > 0 {
-				result.WriteString(", ")
-			}
+		// A single multi-value CALL forwarded as the whole result list (`return newRawConn(f)`)
+		// whose tuple elements need an interface conversion cannot convert in place — C# tuple
+		// conversions do not consult user conversions element-wise (os SyscallConn returning
+		// (*rawConn, error) as (syscall.RawConn, error), CS0266). Deconstruct into temps and
+		// convert each element through the usual interface machinery (which also records the
+		// GoImplement pairing). Elements whose actual type is itself an interface are left to
+		// the structural-inheritance emission (see getStructuralInterfaceBases).
+		forwarded := false
 
-			var replacementVal string
+		if len(returnStmt.Results) == 1 && resultParams != nil && resultParams.Len() > 1 {
+			if tuple, ok := v.getType(returnStmt.Results[0], false).(*types.Tuple); ok && tuple.Len() == resultParams.Len() {
+				needsConversion := false
 
-			if resultParams != nil && i < resultParams.Len() {
-				argType := v.getType(expr, false)
-				targetType := resultParams.At(i).Type()
-				replacementVal = v.checkForDynamicStructs(argType, targetType)
-			}
+				for i := range tuple.Len() {
+					declared := resultParams.At(i).Type()
+					actual := tuple.At(i).Type()
 
-			lambdaContext.deferredDecls = &strings.Builder{}
-
-			// A POINTER value converting to an INTERFACE result must render as the box —
-			// `Ꮡf`, not the deref-aliased receiver `f` — since the pointer-adapter wraps the
-			// ж<T> itself (`new subFSᴵFS(Ꮡf)`; io/fs subFS.Sub returning its own receiver,
-			// CS1503). Mirrors the argument-position rule in convExprList.
-			exprContexts := []ExprContext{basicLitContext, lambdaContext}
-
-			if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
-				if _, isPtr := v.getType(expr, false).(*types.Pointer); isPtr {
-					identContext := DefaultIdentContext()
-					identContext.isPointer = true
-					exprContexts = []ExprContext{basicLitContext, identContext, lambdaContext}
-				}
-			}
-
-			resultExpr := v.convExpr(expr, exprContexts)
-
-			if len(replacementVal) > 0 {
-				resultExpr = strings.ReplaceAll(replacementVal, DynamicCastArgMarker, resultExpr)
-			}
-
-			if lambdaContext.deferredDecls.Len() > 0 {
-				deferredDecls.WriteString(lambdaContext.deferredDecls.String())
-			}
-
-			if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
-				resultParamType := resultParams.At(i).Type()
-				result.WriteString(v.convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
-			} else {
-				if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
-					// A deref-aliased pointer parameter returned WHOLE (`return p`) must yield its box
-					// `Ꮡp` (the value alias cannot bind the pointer result). Use a DIRECT ident check,
-					// not getIdentifier (which digs through a selector/index to the root): `return it.key`
-					// — a field of a pointer param — returns the FIELD value, so prefixing `Ꮡ` would
-					// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061). The box form applies
-					// only to a GENUINE `*T` parameter (deref-aliased, so a box `Ꮡp` exists): an
-					// `unsafe.Pointer` parameter counts as a pointer result type (isPointer includes the
-					// UnsafePointer basic) but renders as a plain VALUE param with NO box — prefixing `Ꮡ`
-					// referenced a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103; runtime map.go
-					// `mapaccess1_fat`'s `return zero`, mem_windows.go, panic.go `readvarintUnsafe`).
-					if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
-						if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
-							result.WriteString(AddressPrefix)
-							resultExpr = strings.TrimPrefix(resultExpr, "@")
+					if declaredIsIface, _ := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
+						if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
+							needsConversion = true
+							break
 						}
 					}
 				}
 
-				var narrowCast string
-				var lambdaConstCast string
-				var crossBaseCast string
-				if resultParams != nil && i < resultParams.Len() {
-					narrowCast = v.narrowArithmeticCastTypeFor(resultParams.At(i).Type(), expr, resultExpr)
+				if needsConversion {
+					lambdaContext.deferredDecls = &strings.Builder{}
+					callExpr := v.convExpr(returnStmt.Results[0], []ExprContext{basicLitContext, lambdaContext})
 
-					if len(narrowCast) == 0 {
-						lambdaConstCast = v.lambdaConstReturnCastType(resultParams.At(i).Type(), expr)
+					if lambdaContext.deferredDecls.Len() > 0 {
+						deferredDecls.WriteString(lambdaContext.deferredDecls.String())
 					}
 
-					if len(narrowCast) == 0 && len(lambdaConstCast) == 0 {
-						crossBaseCast = v.crossBaseConstCastFor(resultParams.At(i).Type(), expr)
-					}
-				}
+					tempNames := make([]string, tuple.Len())
 
-				if recvIndex != -1 && i == recvIndex {
-					result.WriteString(capturedRecvName)
-				} else if len(crossBaseCast) > 0 {
-					// A CONSTANT result whose type is defined over a CROSS-PACKAGE named base
-					// (`return 0, err` with a registry Key result) hops through the base — the
-					// [GoType("syscall_package.ΔHandle")] wrapper has no numeric bridge (CS0029).
-					result.WriteString(crossBaseCast + "(" + resultExpr + ")")
-				} else if len(lambdaConstCast) > 0 {
-					// A constant integer-literal return inside a lambda whose result is an unsigned/
-					// pointer-sized integer must be cast to that type so the delegate return type is
-					// inferable (CS8917) — see lambdaConstReturnCastType.
-					result.WriteString("(" + lambdaConstCast + ")(" + resultExpr + ")")
-				} else if len(narrowCast) > 0 {
-					// A narrow-integer (byte/int8/uint8/int16/uint16) arithmetic RESULT is promoted to
-					// `int` by C#, so returning it from a narrow-typed function needs the cast back to
-					// compile and to preserve Go's wrap (CS0266) — `func lowerASCII(c byte) byte { return
-					// c + ('a'-'A') }`. The assignment / value-spec paths already narrow such a result;
-					// the return path had omitted it. narrowArithmeticCastTypeFor gates on a binary/unary
-					// arith RHS whose Go type matches the (narrow) result type, and skips a whole-expr
-					// already-cast RHS — so a bare ident / call / already-narrowed return is untouched.
-					result.WriteString("(" + narrowCast + ")(" + resultExpr + ")")
-				} else {
-					result.WriteString(resultExpr)
+					for i := range tuple.Len() {
+						tempNames[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+					}
+
+					deferredDecls.WriteString(v.newline)
+					deferredDecls.WriteString(v.indent(v.indentLevel))
+					deferredDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), callExpr))
+					deferredDecls.WriteString(v.newline)
+
+					result.WriteRune('(')
+
+					for i := range tuple.Len() {
+						if i > 0 {
+							result.WriteString(", ")
+						}
+
+						declared := resultParams.At(i).Type()
+						actual := tuple.At(i).Type()
+
+						if declaredIsIface, _ := isInterface(declared); declaredIsIface && !types.Identical(declared, actual) {
+							result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
+						} else {
+							result.WriteString(tempNames[i])
+						}
+					}
+
+					result.WriteRune(')')
+					forwarded = true
 				}
 			}
 		}
 
-		if len(returnStmt.Results) > 1 {
-			result.WriteRune(')')
+		if !forwarded {
+			for i, expr := range returnStmt.Results {
+				if i > 0 {
+					result.WriteString(", ")
+				}
+
+				var replacementVal string
+
+				if resultParams != nil && i < resultParams.Len() {
+					argType := v.getType(expr, false)
+					targetType := resultParams.At(i).Type()
+					replacementVal = v.checkForDynamicStructs(argType, targetType)
+				}
+
+				lambdaContext.deferredDecls = &strings.Builder{}
+
+				// A POINTER value converting to an INTERFACE result must render as the box —
+				// `Ꮡf`, not the deref-aliased receiver `f` — since the pointer-adapter wraps the
+				// ж<T> itself (`new subFSᴵFS(Ꮡf)`; io/fs subFS.Sub returning its own receiver,
+				// CS1503). Mirrors the argument-position rule in convExprList.
+				exprContexts := []ExprContext{basicLitContext, lambdaContext}
+
+				if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
+					if _, isPtr := v.getType(expr, false).(*types.Pointer); isPtr {
+						identContext := DefaultIdentContext()
+						identContext.isPointer = true
+						exprContexts = []ExprContext{basicLitContext, identContext, lambdaContext}
+					}
+				}
+
+				resultExpr := v.convExpr(expr, exprContexts)
+
+				if len(replacementVal) > 0 {
+					resultExpr = strings.ReplaceAll(replacementVal, DynamicCastArgMarker, resultExpr)
+				}
+
+				if lambdaContext.deferredDecls.Len() > 0 {
+					deferredDecls.WriteString(lambdaContext.deferredDecls.String())
+				}
+
+				if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
+					resultParamType := resultParams.At(i).Type()
+					result.WriteString(v.convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
+				} else {
+					if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
+						// A deref-aliased pointer parameter returned WHOLE (`return p`) must yield its box
+						// `Ꮡp` (the value alias cannot bind the pointer result). Use a DIRECT ident check,
+						// not getIdentifier (which digs through a selector/index to the root): `return it.key`
+						// — a field of a pointer param — returns the FIELD value, so prefixing `Ꮡ` would
+						// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061). The box form applies
+						// only to a GENUINE `*T` parameter (deref-aliased, so a box `Ꮡp` exists): an
+						// `unsafe.Pointer` parameter counts as a pointer result type (isPointer includes the
+						// UnsafePointer basic) but renders as a plain VALUE param with NO box — prefixing `Ꮡ`
+						// referenced a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103; runtime map.go
+						// `mapaccess1_fat`'s `return zero`, mem_windows.go, panic.go `readvarintUnsafe`).
+						if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
+							if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
+								result.WriteString(AddressPrefix)
+								resultExpr = strings.TrimPrefix(resultExpr, "@")
+							}
+						}
+					}
+
+					var narrowCast string
+					var lambdaConstCast string
+					var crossBaseCast string
+					if resultParams != nil && i < resultParams.Len() {
+						narrowCast = v.narrowArithmeticCastTypeFor(resultParams.At(i).Type(), expr, resultExpr)
+
+						if len(narrowCast) == 0 {
+							lambdaConstCast = v.lambdaConstReturnCastType(resultParams.At(i).Type(), expr)
+						}
+
+						if len(narrowCast) == 0 && len(lambdaConstCast) == 0 {
+							crossBaseCast = v.crossBaseConstCastFor(resultParams.At(i).Type(), expr)
+						}
+					}
+
+					if recvIndex != -1 && i == recvIndex {
+						result.WriteString(capturedRecvName)
+					} else if len(crossBaseCast) > 0 {
+						// A CONSTANT result whose type is defined over a CROSS-PACKAGE named base
+						// (`return 0, err` with a registry Key result) hops through the base — the
+						// [GoType("syscall_package.ΔHandle")] wrapper has no numeric bridge (CS0029).
+						result.WriteString(crossBaseCast + "(" + resultExpr + ")")
+					} else if len(lambdaConstCast) > 0 {
+						// A constant integer-literal return inside a lambda whose result is an unsigned/
+						// pointer-sized integer must be cast to that type so the delegate return type is
+						// inferable (CS8917) — see lambdaConstReturnCastType.
+						result.WriteString("(" + lambdaConstCast + ")(" + resultExpr + ")")
+					} else if len(narrowCast) > 0 {
+						// A narrow-integer (byte/int8/uint8/int16/uint16) arithmetic RESULT is promoted to
+						// `int` by C#, so returning it from a narrow-typed function needs the cast back to
+						// compile and to preserve Go's wrap (CS0266) — `func lowerASCII(c byte) byte { return
+						// c + ('a'-'A') }`. The assignment / value-spec paths already narrow such a result;
+						// the return path had omitted it. narrowArithmeticCastTypeFor gates on a binary/unary
+						// arith RHS whose Go type matches the (narrow) result type, and skips a whole-expr
+						// already-cast RHS — so a bare ident / call / already-narrowed return is untouched.
+						result.WriteString("(" + narrowCast + ")(" + resultExpr + ")")
+					} else {
+						result.WriteString(resultExpr)
+					}
+				}
+			}
+
+			if len(returnStmt.Results) > 1 {
+				result.WriteRune(')')
+			}
 		}
 	}
 
