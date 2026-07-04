@@ -24,6 +24,14 @@ func setN(b *box, v int) { b.n = v }
 
 func bump(np *int) { *np += 100 }
 
+// counter (the GLOBAL var) collides with the method counter below - the var is Δ-renamed
+// AND, being addressed, its static box companion is declared with the RENAMED identifier
+// (the opposite of a local box, which keeps the raw name): &counter.n must emit
+// the renamed box, not the raw one (CS0103 x151, runtime `var sweep sweepdata`).
+var counter box
+
+func (tagger) counter() int { return 1 }
+
 // References the colliding type `p` and method `p` in a scope with no local `p` shadow.
 func usesTypeP() int {
 	var pv p
@@ -41,5 +49,7 @@ func main() {
 	// through the RAW box - `Ꮡp.of(box.Ꮡn)`, not `ᏑΔp.of(...)` (CS0103 x2, reflect
 	// SliceOf/ArrayOf `&slice.Type` on the collision-renamed local `slice`).
 	bump(&p.n)
+	bump(&counter.n)
+	fmt.Println(counter.n)
 	fmt.Println(p.n, usesTypeP()) // 110 1
 }

@@ -370,14 +370,19 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 						}
 
 						// The operand already has a heap-boxed pointer companion (e.g. an
-						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)". The box
-						// keeps the RAW identifier name — a collision-renamed local (`slice` →
-						// `Δslice`, reflect SliceOf) declares `ref heap<T>(out var Ꮡslice)`, so
-						// the companion is `Ꮡslice`, not `ᏑΔslice` (CS0103 ×2).
+						// escaping local `Ꮡs`): use the identifier form "Ꮡs.of(...)". A LOCAL's
+						// box keeps the RAW identifier name — a collision-renamed local (`slice`
+						// → `Δslice`, reflect SliceOf) declares `ref heap<T>(out var Ꮡslice)`,
+						// so the companion is `Ꮡslice`, not `ᏑΔslice` (CS0103 ×2). An addressed
+						// GLOBAL is the OPPOSITE: its static box companion is declared with the
+						// renamed identifier (runtime's `var sweep sweepdata` Δ-renames to
+						// `Δsweep` and boxes as `ᏑΔsweep`), so a global keeps the rendered name.
 						boxExpr := structExpr
 
 						if baseIdent, ok := selectorExpr.X.(*ast.Ident); ok {
-							boxExpr = v.boxBaseName(baseIdent)
+							if obj := v.info.ObjectOf(baseIdent); obj != nil && (obj.Pkg() == nil || obj.Parent() != obj.Pkg().Scope()) {
+								boxExpr = v.boxBaseName(baseIdent)
+							}
 						}
 
 						return fmt.Sprintf("%s%s.of(%s)", AddressPrefix, boxExpr, fieldRef)

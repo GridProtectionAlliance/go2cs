@@ -30,6 +30,13 @@ internal static void bump(ж<nint> Ꮡnp) {
     np += 100;
 }
 
+internal static ж<box> ᏑΔcounter = new(default(box));
+internal static ref box Δcounter => ref ᏑΔcounter.Value;
+
+internal static nint counter(this tagger _) {
+    return 1;
+}
+
 internal static nint usesTypeP() {
     Δp pv = default!;
     pv.id = 1;
@@ -44,6 +51,8 @@ internal static void Main() {
     setN(Ꮡp, 7);
     setN(Ꮡp, Δp.n + 3);
     bump(Ꮡp.of(box.Ꮡn));
+    bump(ᏑΔcounter.of(box.Ꮡn));
+    fmt.Println(Δcounter.n);
     fmt.Println(Δp.n, usesTypeP());
 }
 
