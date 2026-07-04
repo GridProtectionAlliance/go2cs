@@ -42,7 +42,17 @@ internal static class NumericTypeTemplate
 
                 public static {{targetTypeName}} operator ++({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value + ({{typeName}})1);
 
-                public static {{targetTypeName}} operator --({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value - ({{typeName}})1);
+                public static {{targetTypeName}} operator --({{targetTypeName}} value) => ({{targetTypeName}})(value.m_value - ({{typeName}})1);{{GetComplementOperator(typeName, targetTypeName)}}
+        """;
+
+    // Bitwise complement keeps the WRAPPER type (Go `^T(0)` all-ones idiom - os exec_windows'
+    // ^syscall.Handle(0) passed to a Handle parameter; the implicit-to-underlying conversion
+    // made `~x` the raw numeric, CS1503). Integer underlyings only - `~` is invalid on floats.
+    private static string GetComplementOperator(string typeName, string targetTypeName) => typeName.StartsWith("float") || typeName.StartsWith("complex") ? "" :
+       $"""
+        
+        
+                public static {targetTypeName} operator ~({targetTypeName} value) => ({targetTypeName})(~value.m_value);
         """;
 
     private static string GetUnaryNegationOperator(string typeName, string targetTypeName) => IsUnsignedType(typeName) ? "" : 
