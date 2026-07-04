@@ -114,6 +114,17 @@ internal class InheritedTypeTemplate : TemplateBase
 
         """;
 
+    // A named type over a plain INTEGER needs the UntypedInt bridge for named untyped
+    // consts: `(token)(endBlockMarker)` (compress/flate, CS0030 ×2) would otherwise chain
+    // two user-defined conversions (UntypedInt→uint32, uint32→token), which C# never
+    // composes. Floats keep their existing routes (untyped float consts render literally).
+    private string UntypedIntBridgeOperator => TypeName is "byte" or "uint8" or "uint16" or "uint32" or "uint64" or "int8" or "int16" or "int32" or "int64" or "nint" or "nuint" or "rune" ?
+        $"""
+
+                public static implicit operator {ObjectName}(UntypedInt value) => new {ObjectName}(({TypeName})value);
+
+        """ : "";
+
     // A named type over `string` is indexed and sub-sliced in Go (`tag[i]`, `tag[i:j]` -
     // reflect StructTag.Get); C# indexing never applies user-defined conversions, so the
     // wrapper forwards the @string surface: element indexers, a Range indexer returning the
@@ -220,7 +231,7 @@ internal class InheritedTypeTemplate : TemplateBase
                 public static bool operator !=({{ObjectName}} left, {{ObjectName}} right) => !(left == right);
         
         {{UnderlyingConversionOperators}}
-                    {{UintptrBridgeOperators}}{{StringSurfaceMembers}}
+                    {{UintptrBridgeOperators}}{{UntypedIntBridgeOperator}}{{StringSurfaceMembers}}
                 // Handle comparisons between 'nil' and {{ObjectKind}} '{{ObjectName}}'
                 public static bool operator ==({{ObjectName}} value, NilType nil) => value.Equals(default({{ObjectName}}));
         
