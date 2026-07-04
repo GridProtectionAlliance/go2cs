@@ -108,8 +108,13 @@ public class ImplementGenerator : ISourceGenerator
             if (structType is null || interfaceType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
 
-            if (structType.TypeKind != TypeKind.Struct)
-                throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, first generic type argument must be a struct.");
+            // A NAMED FUNC type with methods (flag's `type funcValue func(string) error`
+            // implementing Value) arrives as a DELEGATE — it cannot be a partial struct, so
+            // it routes to the VALUE adapter below. Anything else non-struct is a converter
+            // bug worth failing loudly on — but NOT by throwing, which kills the entire
+            // generator run for the package (flag lost all 11 of its adapters, CS0246 ×19).
+            if (structType.TypeKind != TypeKind.Struct && structType.TypeKind != TypeKind.Delegate)
+                continue;
 
             if (interfaceType.TypeKind != TypeKind.Interface)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
@@ -291,10 +296,18 @@ public class ImplementGenerator : ISourceGenerator
             // assembly) with a value conversion takes the VALUE adapter: a class wrapping a
             // COPY (Go value semantics), forwarding through the foreign package's extension
             // methods via the file's usings (os's Signal interface over syscall.Signal -
-            // neither assembly can partial the other, exec_posix CS1503).
-            if (structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly))
+            // neither assembly can partial the other, exec_posix CS1503). A local NAMED FUNC
+            // type (a DELEGATE - flag's funcValue) takes the same route: a delegate cannot
+            // be a partial struct, and its Go methods are package extension methods that
+            // bind on the wrapped copy.
+            if (structType.TypeKind == TypeKind.Delegate ||
+                (structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly)))
             {
-                string valueAdapterScope = interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public" ? "public" : "internal";
+                // Symbol-OR-name on BOTH sides (mirrors the pointer arm): a public adapter
+                // whose ctor takes an INTERNAL wrapped type is CS0051 (flag's internal
+                // funcValue delegate under the public Value interface).
+                string valueAdapterScope = (interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public") &&
+                                           (structType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(structName)) == "public") ? "public" : "internal";
 
                 string valueAdapterSource = new ValueAdapterImplTemplate
                 {
