@@ -51,6 +51,10 @@ internal static void Main() {
     var (t1, ok1) = lookup(reg, 2);
     var (t2, ok2) = lookup(reg, 9);
     fmt.Println(t1, ok1, t2, ok2);
+    var reg2 = new registry(4);
+    reg2[7] = new entry(tag: "cap"u8, size: 1);
+    var (e7, ok7) = lookup(reg2, 7);
+    fmt.Println(len(reg2), e7, ok7);
     var done = new channel<EmptyStruct>(1);
     any anyDone = done;
     var (ch, chOK) = anyDone._<channel<EmptyStruct>>(ᐧ);

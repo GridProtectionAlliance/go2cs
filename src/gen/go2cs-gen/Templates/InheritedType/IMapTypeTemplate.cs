@@ -13,7 +13,10 @@ internal static class IMapTypeTemplate
                 
                 /// <summary>ISupportMake factory — a made named map wraps a made concrete map.</summary>
                 public static {{structName}} Make(nint p1, nint p2) => new {{structName}}(map<{{keyTypeName}}, {{valueTypeName}}>.Make(p1, p2));
-                
+
+                /// <summary>Capacity form — `make(NamedMap, n)` emits `new NamedMap(n)` (socktest's Sockets).</summary>
+                public {{structName}}(nint size) => m_value = new map<{{keyTypeName}}, {{valueTypeName}}>(size);
+
                 public int Count => m_value.Count;
                 
                 public {{valueTypeName}} this[{{keyTypeName}} key]

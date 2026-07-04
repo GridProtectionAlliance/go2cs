@@ -76,6 +76,13 @@ func main() {
 	t2, ok2 := lookup(reg, 9)
 	fmt.Println(t1, ok1, t2, ok2) // leaf true missing false
 
+	// A CAPACITY make of a NAMED map type (socktest's `make(Sockets, len(tab))`):
+	// the generated wrapper needs the (nint) ctor — `new registry(4)` (CS1503).
+	reg2 := make(registry, 4)
+	reg2[7] = entry{tag: "cap", size: 1}
+	e7, ok7 := lookup(reg2, 7)
+	fmt.Println(len(reg2), e7, ok7) // 1 cap true
+
 	// A TYPE ASSERT to `chan struct{}` (context's cancelCtx done channel): the assert's
 	// type render must not re-sanitize the machinery's own EmptyStruct into the
 	// reserved-Δ form (`channel<ΔEmptyStruct>`, CS0246 ×4).
