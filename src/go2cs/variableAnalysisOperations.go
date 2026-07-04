@@ -262,6 +262,24 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// const is left unchanged (no churn).
 	constShadowNames := make(map[types.Object]string)
 
+	// Imported PACKAGE names referenced in THIS function (`bits.LeadingZeros16(…)`). A local
+	// variable sharing such a name is fine in Go — a reference before the local's declaration
+	// point still resolves to the package — but C# scoping makes the local own the simple name
+	// for the WHOLE block, so the earlier package reference binds to the not-yet-declared local
+	// (internal/zstd fse's `bits := tableBits - highBit` after `bits.LeadingZeros16`, CS0841).
+	// declareVar shadow-renames such locals.
+	usedPackageNames := HashSet[string]{}
+
+	ast.Inspect(funcDecl, func(n ast.Node) bool {
+		if ident, ok := n.(*ast.Ident); ok {
+			if _, isPkg := v.info.Uses[ident].(*types.PkgName); isPkg {
+				usedPackageNames.Add(ident.Name)
+			}
+		}
+
+		return true
+	})
+
 	// Initialize tracker registry for different statement types
 	registry := newTrackerRegistry()
 
@@ -626,6 +644,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// But in C# the built-in is a `using static go.builtin` method, so a same-named
 			// local shadows it and the call `len(...)` binds to the (non-invocable) local
 			// (CS0149 / CS0841). Rename the local so the built-in call stays valid.
+			adjustedName = getShadowedVarName(varName)
+		} else if usedPackageNames.Contains(varName) {
+			// A local sharing an IMPORTED PACKAGE name this function references: C#'s
+			// whole-block scoping binds the package reference to the local even before its
+			// declaration (CS0841/CS0119) — rename the local, the package alias stays.
 			adjustedName = getShadowedVarName(varName)
 		} else if forcedShadowVars[varObj] {
 			// A loop var sharing its container's hoisted-box name (second pass above) — an escaped

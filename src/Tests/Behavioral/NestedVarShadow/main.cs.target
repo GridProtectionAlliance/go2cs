@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using strings = strings_package;
 
 partial class main_package {
 
@@ -55,11 +56,18 @@ internal static @string g(@string s) {
     return fmt.Sprint(v);
 }
 
+internal static @string pkgShadow(@string s) {
+    @string doubled = strings.Join(new @string[]{s, s}.slice(), "-"u8);
+    nint stringsΔ1 = len(doubled);
+    return fmt.Sprint(stringsΔ1);
+}
+
 internal static void Main() {
     fmt.Println(f(10));
     fmt.Println(f(3));
     fmt.Println(f(1));
     fmt.Println(g("ab"u8));
+    fmt.Println(pkgShadow("xy"u8));
 }
 
 } // end main_package

@@ -6,7 +6,10 @@
 // the math/j0 J0/Y0 (and j1) `var z float64` + later `z := x*x` pattern.
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func f(x int) int {
 	if x >= 2 {
@@ -55,9 +58,21 @@ func g(s string) string {
 	return fmt.Sprint(v)
 }
 
+// pkgShadow: a local named after an IMPORTED PACKAGE the function uses. Go resolves
+// `strings.Repeat` before the local's declaration; C#'s whole-block scoping binds the
+// simple name to the local for the entire method, so the package reference would hit the
+// not-yet-declared local (internal/zstd fse's `bits := tableBits - highBit` after
+// `bits.LeadingZeros16(...)`, CS0841). The local is shadow-renamed (stringsD1).
+func pkgShadow(s string) string {
+	doubled := strings.Join([]string{s, s}, "-")
+	strings := len(doubled)
+	return fmt.Sprint(strings)
+}
+
 func main() {
 	fmt.Println(f(10)) // 100
 	fmt.Println(f(3))  // 200
 	fmt.Println(f(1))  // 1
 	fmt.Println(g("ab")) // tag:inner
+	fmt.Println(pkgShadow("xy")) // 5
 }
