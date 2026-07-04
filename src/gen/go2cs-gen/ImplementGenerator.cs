@@ -240,7 +240,10 @@ public class ImplementGenerator : ISourceGenerator
                 {
                     PackageNamespace = packageNamespace,
                     PackageName = packageName,
-                    StructName = structName,
+                    // FULLY-qualified: the bare name resolves to the LOCAL same-named type
+                    // inside this package class (os's ΔSignal interface shadowed syscall's
+                    // ΔSignal struct - the adapter field/ctor typed the wrong side).
+                    StructName = structType.GetFullTypeName(true),
                     InterfaceName = interfaceName,
                     // Composes with Symbols.ValueAdapterInfix - the value sibling of the
                     // PointerPrefix-composed pointer adapters.
