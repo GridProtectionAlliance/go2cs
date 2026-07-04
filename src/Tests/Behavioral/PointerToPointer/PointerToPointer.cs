@@ -39,6 +39,7 @@ internal static void Main() {
     b = new Buffer(nil);
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
     PrintValPtr(Ꮡb.of(Buffer.Ꮡoff));
+    derefElements();
 }
 
 [GoRecv] public static (nint n, error err) Read(this ref Buffer b, slice<byte> p) {
@@ -89,6 +90,21 @@ public static void PrintValPtr2Ptr2Ptr(ж<ж<ж<nint>>> Ꮡppptr) {
     ref var ppptr = ref Ꮡppptr.Value;
 
     fmt.Printf("Value available at ***pptr = %d\n"u8, ppptr.ValueSlot.Value);
+}
+
+internal static void derefElements() {
+    ref var a1 = ref heap<nint>(out var Ꮡa1);
+    a1 = 10;
+    ref var a2 = ref heap<nint>(out var Ꮡa2);
+    a2 = 20;
+    var boxes = new ж<nint>[]{Ꮡa1, Ꮡa2}.slice();
+    boxes[0].Value = boxes[0].Value + 5;
+    boxes[1].Value = readBox(boxes, 1) * 3;
+    fmt.Println(a1, a2, boxes[0].Value);
+}
+
+internal static nint readBox(slice<ж<nint>> items, nint i) {
+    return items[i].Value;
 }
 
 } // end main_package

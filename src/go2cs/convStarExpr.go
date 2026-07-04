@@ -40,16 +40,24 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 			}
 		}
 
-		// A pointer parameter is dereferenced in the function body via a `ref var p = ref
-		// Ꮡp.Value` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
-		// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
-		// the heap box parameter directly (`Ꮡp.Value`), which is a capturable reference type.
-		if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
-			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + derefAccessor
-		}
+		// The remaining shortcut applies only when the operand IS the parameter ident itself
+		// (`*p` → the deref-aliased ref-local `p`). Any other operand rooted at a parameter —
+		// an INDEX like `*temps[depth]` (math/big natdiv's `qhat := *temps[depth]`, a
+		// slice-of-pointers ELEMENT deref) — is a distinct lvalue that still needs its own
+		// dereference; eliding it left the raw ж<nat> flowing into every use (CS1929/CS1503
+		// ×29). Mirrors the earlier `*p.field` selector exclusion.
+		if _, isDirectIdent := starExpr.X.(*ast.Ident); isDirectIdent {
+			// A pointer parameter is dereferenced in the function body via a `ref var p = ref
+			// Ꮡp.Value` local. That ref-local cannot be captured by a lambda/closure (CS8175 —
+			// "cannot use ref local inside an anonymous method"), so inside a lambda dereference
+			// the heap box parameter directly (`Ꮡp.Value`), which is a capturable reference type.
+			if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda {
+				return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@") + derefAccessor
+			}
 
-		// Prefer to use local reference instead of dereferencing a pointer
-		return v.convExpr(starExpr.X, nil)
+			// Prefer to use local reference instead of dereferencing a pointer
+			return v.convExpr(starExpr.X, nil)
+		}
 	}
 
 	// Special handling for field access (e.g., outer.ptr)

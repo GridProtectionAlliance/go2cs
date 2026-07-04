@@ -48,6 +48,8 @@ func main() {
 	b := Buffer{}
 	PrintValPtr(&b.off)
 	PrintValPtr(&b.off)
+
+	derefElements()
 }
 
 func (b *Buffer) Read(p []byte) (n int, err error) {
@@ -86,4 +88,19 @@ func PrintValPtr2Ptr(pptr **int) {
 
 func PrintValPtr2Ptr2Ptr(ppptr ***int) {
 	fmt.Printf("Value available at ***pptr = %d\n", ***ppptr)
+}
+
+// derefElements: a deref of a SLICE-OF-POINTERS element (`*temps[depth]`, math/big
+// natdiv): the param-deref shortcut must not elide the element's own dereference (the
+// raw ж<T> leaked into every use, CS1929/CS1503 ×29). Write through and read back.
+func derefElements() {
+	a1, a2 := 10, 20
+	boxes := []*int{&a1, &a2}
+	*boxes[0] = *boxes[0] + 5
+	*boxes[1] = readBox(boxes, 1) * 3
+	fmt.Println(a1, a2, *boxes[0]) // 15 60 15
+}
+
+func readBox(items []*int, i int) int {
+	return *items[i]
 }
