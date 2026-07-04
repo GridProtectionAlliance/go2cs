@@ -992,8 +992,35 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			// A ж<T>-wrapped implementation records a POINTER-sourced cast (`var s Iface = &t`) —
 			// unwrap it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter
 			// wrapper (interface aliases the receiver box) instead of the value-boxing partial.
+			//
+			// De-duplicate implementations recorded under BOTH a package type ALIAS and the
+			// aliased type's qualified name (os converts dirEntry to fs.DirEntry through its own
+			// `type DirEntry = fs.DirEntry` AND through the io/fs name): two GoImplement
+			// attributes for ONE interface make the generator emit the explicit interface
+			// implementation twice (CS8646 ×4 + CS0111 ×4, os dirEntry). The ALIASED record wins
+			// — its simple name resolves via the package usings and keeps the generator's
+			// last-dot-segment naming; the QUALIFIED duplicate is skipped. (Normalizing the
+			// RECORDS to the qualified form instead regressed os 8→77: the qualified interface
+			// name broke generator resolution and flipped the alias-locality gate.)
+			aliasCoveredImplementations := HashSet[string]{}
+
+			for alias, typeName := range exportedTypeAliases {
+				if implementations, ok := interfaceImplementations[alias]; ok {
+					canonIface := strings.TrimPrefix(typeName, RootNamespace+".")
+
+					for implementation := range implementations {
+						aliasCoveredImplementations.Add(canonIface + "|" + implementation)
+					}
+				}
+			}
+
 			for interfaceName, implementations := range interfaceImplementations {
 				for implementation := range implementations {
+					canonKey := strings.TrimPrefix(interfaceName, RootNamespace+".") + "|" + implementation
+
+					if aliasCoveredImplementations.Contains(canonKey) {
+						continue
+					}
 					if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
 						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", rootQualifySubNamespaceTypeRefs(strings.TrimSuffix(inner, ">")), rootQualifySubNamespaceTypeRefs(interfaceName)))
 						continue
@@ -2118,13 +2145,9 @@ func (v *Visitor) isLocalImplType(t types.Type) bool {
 
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
-	// to properly handle duck typed Go interface implementations. The KEY resolves through
-	// types.Unalias: os records DirEntry implementations both through its own alias
-	// (`type DirEntry = fs.DirEntry` → "DirEntry") and through the io/fs name — two records
-	// for ONE interface made the generator emit the explicit implementation twice (CS8646 ×4
-	// + CS0111 ×4, os dirEntry/dir_windows).
-	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(types.Unalias(interfaceType), false))
-	targetTypeName := convertToCSTypeName(v.getFullTypeName(types.Unalias(targetType), false))
+	// to properly handle duck typed Go interface implementations
+	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
+	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
 
 	if targetTypeName == "" || targetTypeName == "nil" || targetTypeName == "any" {
 		return exprResult
