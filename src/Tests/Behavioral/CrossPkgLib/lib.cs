@@ -60,4 +60,9 @@ public static ж<Meter> NewMeter() {
 
 [GoType("num:uintptr")] partial struct Ticks;
 
+[GoType] partial struct Device {
+    public partial ref Sensor Sensor { get; }
+    public nint Serial;
+}
+
 } // end CrossPkgLib_package

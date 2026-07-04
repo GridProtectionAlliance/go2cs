@@ -42,6 +42,11 @@ internal static void Main() {
     var (st1, err1) = stampOrErr(false);
     var (st2, err2) = stampOrErr(true);
     fmt.Println(st1 == st2, err1 != default!, st2 == bigStamp, err2 == default!);
+    var rg = new rig(Device: new CrossPkgLib.Device(Sensor: new CrossPkgLib.Sensor(Name: "deep"u8, Temp: 55), Serial: 9), id: 1);
+    fmt.Println((float64)rg.Temp, rg.Serial, rg.id);
+    rg.Temp = 66;
+    fmt.Println((float64)rg.Device.Sensor.Temp);
+    fmt.Println(rg.Device.Sensor.Hot());
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;
@@ -77,6 +82,11 @@ internal static @string Meter(this tagged t) {
 
 [GoType] partial struct counter {
     public partial ref ж<CrossPkgLib_package.Meter> Meter { get; }
+}
+
+[GoType] partial struct rig {
+    public partial ref CrossPkgLib_package.Device Device { get; }
+    internal nint id;
 }
 
 } // end main_package

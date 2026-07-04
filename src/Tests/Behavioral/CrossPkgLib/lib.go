@@ -72,3 +72,10 @@ func NewMeter() *Meter { return &Meter{} }
 // Ticks is an exported named INTEGER type (uintptr-based) - consumers define types over it
 // (the registry Key over syscall.Handle shape).
 type Ticks uintptr
+
+// Device embeds Sensor BY VALUE - a consumer embedding Device promotes Sensor fields
+// and methods through TWO cross-package levels (reflect structType-abi.StructType-abi.Type).
+type Device struct {
+	Sensor
+	Serial int
+}

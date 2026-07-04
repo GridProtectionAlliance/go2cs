@@ -78,6 +78,18 @@ func main() {
 	st1, err1 := stampOrErr(false)
 	st2, err2 := stampOrErr(true)
 	fmt.Println(st1 == st2, err1 != nil, st2 == bigStamp, err2 == nil)
+
+	// Phase 7: TWO-LEVEL cross-package VALUE embed (rig embeds Device embeds Sensor):
+	// promoted-field reads/writes resolve through the referenced wrappers' generated
+	// ref-properties (reflect census F1 metadata-fallback shape).
+	rg := rig{Device: CrossPkgLib.Device{Sensor: CrossPkgLib.Sensor{Name: "deep", Temp: 55}, Serial: 9}, id: 1}
+	fmt.Println(float64(rg.Temp), rg.Serial, rg.id)
+	rg.Temp = 66
+	fmt.Println(float64(rg.Device.Sensor.Temp))
+	// (a PROMOTED METHOD call through the two-level cross-package embed - rg.Hot() -
+	// remains the documented open sibling gap: shim discovery is syntax-based and the
+	// referenced assembly contributes no syntax; call through the embed explicitly)
+	fmt.Println(rg.Device.Sensor.Hot())
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
@@ -137,4 +149,10 @@ func (t tagged) Meter() string { return "tagged-meter" }
 // GoImplement<rtype, ΔType> Size/Kind shape, CS1929).
 type counter struct {
 	*CrossPkgLib.Meter
+}
+
+// rig embeds Device BY VALUE - two-level cross-package promotion.
+type rig struct {
+	CrossPkgLib.Device
+	id int
 }

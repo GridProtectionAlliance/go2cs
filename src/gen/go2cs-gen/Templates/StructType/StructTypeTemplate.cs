@@ -125,7 +125,10 @@ internal class StructTypeTemplate : TemplateBase
                     if (declaredMemberNames.Contains(GetSimpleName(memberName)))
                         continue;
 
-                    string typeScope = GetScope(GetSimpleName(typeName));
+                    // Scope derives from the MEMBER name (its exportedness), matching the box-field
+                    // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
+                    // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
+                    string typeScope = GetScope(GetSimpleName(memberName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
             }
@@ -148,7 +151,10 @@ internal class StructTypeTemplate : TemplateBase
                     // The Ꮡ-prefixed accessor NAME must use the unescaped member name — a C#-keyword
                     // field is escaped `@base`, but `Ꮡ@base` is invalid ('@' only leads). The member
                     // ACCESS on the right keeps `@base`.
-                    string typeScope = GetScope(GetSimpleName(typeName));
+                    // Scope derives from the MEMBER name (its exportedness), matching the box-field
+                    // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
+                    // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
+                    string typeScope = GetScope(GetSimpleName(memberName));
                     result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {NonGenericStructName} instance) => ref instance.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{memberName};");
                 }
             }
@@ -251,6 +257,24 @@ internal class StructTypeTemplate : TemplateBase
 
                         yield return (field.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), field.Name);
                     }
+
+                    // A REFERENCED assembly's generated wrapper exposes its embedded member and its
+                    // transitively-promoted fields as public REF-RETURNING PROPERTIES (the embed
+                    // accessor `public partial ref Type Type` and the promoted accessors) - the
+                    // fields-only enumeration missed them, so a struct embedding a cross-package
+                    // wrapper (reflect's structType over abi.StructType over abi.Type) promoted
+                    // NOTHING from the deeper levels (CS1061 x32 + CS0117 x13). Yield them too;
+                    // the standard single-hop `X => ref Embed.X` emission handles both shapes.
+                    foreach (IPropertySymbol property in typeSymbol.GetMembers().OfType<IPropertySymbol>())
+                    {
+                        if (property.DeclaredAccessibility != Accessibility.Public || property.IsStatic || !property.ReturnsByRef)
+                            continue;
+
+                        if (property.IsIndexer || GetSimpleName(property.Name) == "_")
+                            continue;
+
+                        yield return (property.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat), property.Name);
+                    }
                 }
             }
         }
@@ -327,7 +351,10 @@ internal class StructTypeTemplate : TemplateBase
                 // Add ref extension method
                 string methodScope = Scope ?? "public";
                 methodScope = method.ReturnType == "void" ? methodScope : GetScope(GetSimpleName(method.ReturnType)) == "public" ? methodScope : "internal";
-                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this ref {StructName} target");
+                // The shim mirrors the SOURCE receiver kind: a by-value method stays by-value
+                // so an RVALUE receiver binds (reflect v.Elem().kind() - CS1510 on forced ref).
+                string recvMod = method.IsRefRecv ? "ref " : "";
+                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this {recvMod}{StructName} target");
 
                 if (method.Parameters.Length > 1)
                 {
