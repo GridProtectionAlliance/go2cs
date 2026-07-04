@@ -38,5 +38,9 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	context := DefaultIdentContext()
 	context.isType = true
 
-	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), convertToCSTypeName(v.convExpr(typeAssertExpr.Type, []ExprContext{context})), safeAssertDescriminator)
+	// convExpr on the TYPE expression already yields the C# form — do NOT run it through
+	// convertToCSTypeName again: the conversion is not idempotent, re-sanitizing machinery
+	// names inside generic args (`d.(chan struct{})` → `channel<EmptyStruct>` whose inner
+	// arg re-sanitized to the reserved-Δ `ΔEmptyStruct` — context CS0246 ×4/CS0019).
+	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), v.convExpr(typeAssertExpr.Type, []ExprContext{context}), safeAssertDescriminator)
 }

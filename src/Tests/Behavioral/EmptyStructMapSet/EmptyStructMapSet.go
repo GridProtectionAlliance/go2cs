@@ -75,4 +75,14 @@ func main() {
 	t1, ok1 := lookup(reg, 2)
 	t2, ok2 := lookup(reg, 9)
 	fmt.Println(t1, ok1, t2, ok2) // leaf true missing false
+
+	// A TYPE ASSERT to `chan struct{}` (context's cancelCtx done channel): the assert's
+	// type render must not re-sanitize the machinery's own EmptyStruct into the
+	// reserved-Δ form (`channel<ΔEmptyStruct>`, CS0246 ×4).
+	done := make(chan struct{}, 1)
+	var anyDone any = done
+	ch, chOK := anyDone.(chan struct{})
+	ch <- struct{}{}
+	<-done
+	fmt.Println("chan assert:", chOK, len(done)) // chan assert: true 0
 }

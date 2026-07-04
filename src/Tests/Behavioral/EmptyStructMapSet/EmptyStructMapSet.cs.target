@@ -51,6 +51,12 @@ internal static void Main() {
     var (t1, ok1) = lookup(reg, 2);
     var (t2, ok2) = lookup(reg, 9);
     fmt.Println(t1, ok1, t2, ok2);
+    var done = new channel<EmptyStruct>(1);
+    any anyDone = done;
+    var (ch, chOK) = anyDone._<channel<EmptyStruct>>(ᐧ);
+    ch.ᐸꟷ(new EmptyStruct());
+    ᐸꟷ(done);
+    fmt.Println("chan assert:", chOK, len(done));
 }
 
 } // end main_package
