@@ -17,6 +17,12 @@ var CheckFunc func(CrossPkgLib.Status) int = func(st CrossPkgLib.Status) int {
 	return st.Code * 2
 }
 
+// gauge locks the general signature path: the DELTA-renamed foreign type as a METHOD
+// parameter and result-tuple element (internal/poll fd_windows CS0426 x19).
+func gauge(st CrossPkgLib.Status) (CrossPkgLib.Status, int) {
+	return CrossPkgLib.Status{Code: st.Code + 1}, st.Code
+}
+
 func main() {
 	b := CrossPkgLib.Boiling()
 	r := b.Add(10)
@@ -121,6 +127,8 @@ func main() {
 	fmt.Println("a" + string(CrossPkgLib.Sep) + "b")
 
 	fmt.Println(CheckFunc(CrossPkgLib.Status{Code: 21}), CrossPkgLib.Sensor{Temp: 9}.Status())
+	g1, c1 := gauge(CrossPkgLib.Status{Code: 5})
+	fmt.Println(g1.Code, c1) // 6 5
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
