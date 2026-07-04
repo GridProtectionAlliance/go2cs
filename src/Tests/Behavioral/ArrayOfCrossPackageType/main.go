@@ -28,9 +28,26 @@ type counters struct {
 
 func touch(p *atomic.Int32) {}
 
+// A SLICE of POINTERS to a cross-package type - `[]*atomic.Int32` - was rendered from the
+// package-qualified string `[]*sync/atomic.Int32`, whose cross-package slash-strip ate
+// everything before the last slash INCLUDING the `*`, silently dropping the pointer marker
+// (`slice<atomic.Int32>` instead of `slice<ж<atomic.Int32>>` - reflect's `[]*abi.Type`
+// fields/asserts, CS1503 x16 plus type asserts that compiled against the WRONG type). The
+// type assert and the var declaration below both exercise that render path.
+func last(vals any) *atomic.Int32 {
+	ptrs := vals.([]*atomic.Int32)
+	return ptrs[len(ptrs)-1]
+}
+
 func main() {
 	var x counters
 	touch(&x.c[0])
 	touch(&x.c[2])
-	fmt.Println(len(x.c), len(x.d))
+
+	var ptrs []*atomic.Int32
+	for i := range x.c {
+		ptrs = append(ptrs, &x.c[i])
+	}
+	last(ptrs).Store(7)
+	fmt.Println(len(x.c), len(x.d), x.c[2].Load())
 }

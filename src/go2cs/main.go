@@ -3008,6 +3008,20 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return name
 	}
 
+	// An array/slice type is rendered structurally — the `[N]`/`[]` marker plus the recursively
+	// resolved element — rather than via t.String() below (mirrors getFullTypeName). t.String()
+	// yields a path-qualified string (`[]*internal/abi.Type`) whose cross-package last-segment
+	// slash-strip eats everything before the slash INCLUDING a pointer marker, so the element's
+	// `*` is silently dropped (`slice<abi.Type>` instead of `slice<ж<abi.Type>>` — reflect
+	// CS1503 ×16, plus SILENTLY WRONG type asserts that compiled). Recursing on the element also
+	// resolves a lifted element and a cross-package generic element through their own arms.
+	switch composite := t.(type) {
+	case *types.Array:
+		return fmt.Sprintf("[%d]%s", composite.Len(), v.getTypeName(composite.Elem(), isUnderlying))
+	case *types.Slice:
+		return "[]" + v.getTypeName(composite.Elem(), isUnderlying)
+	}
+
 	// A cross-package INSTANTIATED generic (e.g. `internal/runtime/atomic.Pointer[func(string,
 	// string)]`) must be rendered structurally — `pkg.Name() + "." + Name[args…]` with each arg
 	// recursively named — rather than from t.String(). The string form keeps the full import path,
@@ -3055,41 +3069,6 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	typeName := strings.ReplaceAll(t.String(), "..", "")
 	packagePathPrefix := v.pkg.Path() + "."
 
-	var prefix string
-
-	// Check for slice or array prefix
-	if strings.HasPrefix(typeName, "[") {
-		endBracket := strings.Index(typeName, "]")
-
-		if endBracket != -1 {
-			prefix = typeName[:endBracket+1]
-			typeName = typeName[endBracket+1:]
-		}
-	}
-
-	// An array/slice whose ELEMENT was lifted to a named type — an anonymous struct/interface
-	// (`[61]struct{…}` → `array<BySizeᴛ1>`) OR a function-LOCAL named type (`[]untracedG`, where
-	// `untracedG` is `type untracedG struct{…}` declared inside a func and lifted to
-	// `<func>_untracedG`). liftedTypeMap is keyed by the element type, so the whole-array lookup
-	// above missed it; the element keeps its raw/short name and fails to resolve (a raw `struct{…}`
-	// literal, or a CS0246 on the short local-type name). Resolve the element through liftedTypeMap.
-	if prefix != "" {
-		var elem types.Type
-
-		switch composite := t.(type) {
-		case *types.Array:
-			elem = composite.Elem()
-		case *types.Slice:
-			elem = composite.Elem()
-		}
-
-		if elem != nil {
-			if name, ok := v.liftedTypeMap[elem]; ok {
-				return prefix + name
-			}
-		}
-	}
-
 	// Remove the current package's path prefix from the type name. Use ReplaceAll, not a
 	// single replace: a composite type (e.g. map[K]V) can name two current-package types, and
 	// stripping only the first leaves a self-qualified one (which then also trips the slash
@@ -3119,10 +3098,10 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 			typeName = typeName[len(plainPkgPrefix):]
 		}
 
-		return prefix + pkgPrefix + typeName
+		return pkgPrefix + typeName
 	}
 
-	return prefix + typeName
+	return typeName
 }
 
 func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
