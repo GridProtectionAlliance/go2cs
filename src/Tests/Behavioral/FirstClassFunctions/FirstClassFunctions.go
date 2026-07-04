@@ -133,8 +133,22 @@ func main() {
 	m := machine{split: func(s string) (int, string, error) { return len(s), s + "!", nil }}
 	n, out, serr := m.split("hi")
 	fmt.Println(n, out, serr == nil) // 2 hi! true
+
+	p := provider{produce: func(x int) int { return x * 2 }}
+	r := registry{h: p.produce}
+	fmt.Println(r.h(21)) // 42
 }
 
 type splitter func(s string) (int, string, error)
 
 type machine struct{ split splitter }
+
+// handler is a NAMED func type; registry's field takes a value of a DIFFERENT delegate
+// type (provider's plain func-typed field), which C# cannot convert implicitly — the
+// composite literal wraps it in the target delegate's constructor (internal/concurrent's
+// `keyHash: mapType.Hasher`, CS1503 x3).
+type handler func(int) int
+
+type provider struct{ produce func(int) int }
+
+type registry struct{ h handler }

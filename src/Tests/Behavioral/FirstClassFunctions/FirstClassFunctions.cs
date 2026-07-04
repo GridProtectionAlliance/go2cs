@@ -109,12 +109,25 @@ internal static void Main() {
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
     var (n, @out, serr) = m.split("hi");
     fmt.Println(n, @out, serr == default!);
+    var p = new provider(produce: (nint x) => x * 2);
+    var r = new registry(h: new handler(p.produce));
+    fmt.Println(r.h(21));
 }
 
 internal delegate (nint, @string, error) splitter(@string s);
 
 [GoType] partial struct machine {
     internal splitter split;
+}
+
+internal delegate nint handler(nint _);
+
+[GoType] partial struct provider {
+    internal Func<nint, nint> produce;
+}
+
+[GoType] partial struct registry {
+    internal handler h;
 }
 
 } // end main_package

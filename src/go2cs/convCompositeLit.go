@@ -152,6 +152,71 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				}
 			}
 		}
+
+		// A NAMED FUNC-type field initialized with a value of a DIFFERENT delegate type must
+		// wrap in the target delegate's constructor — C# has no implicit conversion between
+		// distinct delegate types (internal/concurrent's `keyHash: mapType.Hasher` feeding a
+		// hashFunc field from a Func<…,…> field, CS1503 ×3). Keyed-aware: elements resolve
+		// their field by NAME, so a reordered/partial literal maps correctly. FuncLit values
+		// (anonymous-method conversion applies) and nil stay bare.
+		fieldByName := map[string]*types.Var{}
+
+		for i := range structType.NumFields() {
+			fieldByName[structType.Field(i).Name()] = structType.Field(i)
+		}
+
+		for i, elt := range compositeLit.Elts {
+			var fieldVar *types.Var
+			var valueExpr ast.Expr
+
+			if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
+				if keyIdent, ok := keyValue.Key.(*ast.Ident); ok {
+					fieldVar = fieldByName[keyIdent.Name]
+				}
+
+				valueExpr = keyValue.Value
+			} else {
+				if i < structType.NumFields() {
+					fieldVar = structType.Field(i)
+				}
+
+				valueExpr = elt
+			}
+
+			if fieldVar == nil || valueExpr == nil {
+				continue
+			}
+
+			named, ok := types.Unalias(fieldVar.Type()).(*types.Named)
+
+			if !ok {
+				continue
+			}
+
+			if _, isSig := named.Underlying().(*types.Signature); !isSig {
+				continue
+			}
+
+			if _, isLit := valueExpr.(*ast.FuncLit); isLit {
+				continue
+			}
+
+			if tv, ok := v.info.Types[valueExpr]; ok && tv.IsNil() {
+				continue
+			}
+
+			valueType := v.info.TypeOf(valueExpr)
+
+			if valueType == nil || types.Identical(types.Unalias(valueType), types.Unalias(fieldVar.Type())) {
+				continue
+			}
+
+			if callContext.wrapArgWithNew == nil {
+				callContext.wrapArgWithNew = make(map[int]string)
+			}
+
+			callContext.wrapArgWithNew[i] = v.getCSTypeName(fieldVar.Type())
+		}
 	}
 
 	// Dispatch on the UNALIASED type (*types.Alias, Go 1.22+): an alias to an unnamed array

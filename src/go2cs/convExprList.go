@@ -6,7 +6,28 @@ import (
 	"go/token"
 	"go/types"
 	"strings"
+	"unicode"
 )
+
+// isSimpleIdentifierName reports whether s is a bare (possibly @-escaped) identifier —
+// used to recognize a C# named-argument label ahead of a `: ` separator.
+func isSimpleIdentifierName(s string) bool {
+	s = strings.TrimPrefix(s, "@")
+
+	if s == "" {
+		return false
+	}
+
+	for i, r := range s {
+		if unicode.IsLetter(r) || r == '_' || (i > 0 && unicode.IsDigit(r)) {
+			continue
+		}
+
+		return false
+	}
+
+	return true
+}
 
 func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callContext *CallExprContext) string {
 	if len(exprs) == 0 {
@@ -127,7 +148,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// (the source is interface-constrained; C# forbids user conversions from interfaces).
 		if callContext != nil && callContext.wrapArgWithNew != nil {
 			if newType, ok := callContext.wrapArgWithNew[i]; ok && len(newType) > 0 {
-				resultExpr = fmt.Sprintf("new %s(%s)", newType, resultExpr)
+				// A KEYED struct-literal element renders as a C# named argument
+				// (`keyHash: value`) — the constructor wrap applies to the VALUE only
+				// (wrapping the label was CS0149, internal/concurrent's hashFunc fields).
+				if label, value, found := strings.Cut(resultExpr, ": "); found && isSimpleIdentifierName(label) {
+					resultExpr = fmt.Sprintf("%s: new %s(%s)", label, newType, value)
+				} else {
+					resultExpr = fmt.Sprintf("new %s(%s)", newType, resultExpr)
+				}
 			}
 		}
 
