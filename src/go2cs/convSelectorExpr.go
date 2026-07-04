@@ -854,6 +854,42 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// method's receiver) appends an `.of(abi.SliceType.ᏑType)` view per extra hop (CS1929 ×4). A
 	// deeper chain with a POINTER embed past the first hop falls through unchanged. A non-promoted
 	// call (Index len 1) and an explicit `x.field.method` (also len 1) never match here.
+	// A method CALL with a VALUE receiver reached through a POINTER expression — Go auto-derefs
+	// (`z := new(nat); z.make(n)` calls make on *z). A deref-aliased pointer PARAM or RECEIVER
+	// already renders as its value alias, but a pointer LOCAL (or other pointer-valued expr)
+	// renders as the box, which the value-receiver extension cannot bind (math/big's nat
+	// CS1929 ×9). Emit the value deref: `(~z).make(n)`. Direct (Index len 1) methods only —
+	// promoted chains keep their own `.of()` hop machinery below.
+	if context.isCallExpr {
+		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 1 {
+			if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+				if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+					_, isPtrRecvMethod := sig.Recv().Type().(*types.Pointer)
+
+					if !isPtrRecvMethod && !types.IsInterface(sig.Recv().Type()) {
+						if _, exprIsPtr := v.getExprType(selectorExpr.X).(*types.Pointer); exprIsPtr {
+							needsDeref := true
+
+							if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+								if v.identIsParameter(ident) {
+									needsDeref = false
+								}
+
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+									needsDeref = false
+								}
+							}
+
+							if needsDeref {
+								return fmt.Sprintf("(%s%s).%s", PointerDerefOp, v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) {
 		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) >= 2 {
 			recvType := v.info.TypeOf(selectorExpr.X)
