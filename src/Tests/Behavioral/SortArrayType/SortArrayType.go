@@ -92,6 +92,20 @@ type PeopleByShoeSize []Person // Person slice for shoe size sorting
 
 type PeopleByAge []Person
 
+// levelToken/markerConst: a NAMED untyped const renders as a golib UntypedInt static -
+// casting it to a named-numeric wrapper needs the wrapper's UntypedInt bridge (C# never
+// chains two user conversions; compress/flate's (token)(endBlockMarker), CS0030 x2).
+type levelToken uint32
+
+const markerConst = 256
+
+// sort (the METHOD) shadows the `sort` package using-alias inside the package class -
+// the qualified call inside must route through sort_package (compress/flate's
+// byLiteral.sort, CS0119 x2).
+func (p PeopleByAge) sort() {
+	sort.Sort(p)
+}
+
 func (p PeopleByShoeSize) Len() int {
 	return len(p)
 }
@@ -143,6 +157,13 @@ func Testing() (E2 int, p string) {
 }
 
 func main() {
+	agesDemo := PeopleByAge{{"Zed", 30, 11.5}, {"Amy", 25, 7.0}}
+	agesDemo.sort()
+	fmt.Println(agesDemo[0].Name)
+
+	lt := levelToken(markerConst)
+	fmt.Println(uint32(lt) + 1) // 257
+
     fmt.Println(MultiLine)
     fmt.Println(MultiLine2)
     fmt.Println(MultiLine3)

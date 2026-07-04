@@ -147,5 +147,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		}
 	}
 
+	// A PACKAGE ident whose using-alias is shadowed by a same-package method/function name
+	// (`func (s *byLiteral) sort(…)` vs `import "sort"` — the member lookup binds the method
+	// group before the alias, CS0119, compress/flate) qualifies through the _package class.
+	if packageFuncMethodNames != nil && packageFuncMethodNames[ident.Name] {
+		if pkgName, ok := v.info.ObjectOf(ident).(*types.PkgName); ok {
+			return rootQualifyIfAmbiguous(convertImportPathToNamespace(pkgName.Imported().Path(), PackageSuffix))
+		}
+	}
+
 	return getSanitizedIdentifier(v.getIdentName(ident))
 }

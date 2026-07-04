@@ -74,6 +74,16 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 		}
 	}
 
+	// A method/function name can also shadow an IMPORTED PACKAGE's using-alias inside the
+	// package class (`func (s *byLiteral) sort(…)` vs `import "sort"` — `sort.Sort(…)`
+	// bound the method group, CS0119, compress/flate). Record every method/function name;
+	// the package-ident emission qualifies through the _package class when shadowed.
+	packageFuncMethodNames = make(map[string]bool)
+
+	for name := range methodNames {
+		packageFuncMethodNames[name] = true
+	}
+
 	// Find collisions (names that appear in both sets)
 	for name, isType := range namedElementNames {
 		if methodNames[name] {

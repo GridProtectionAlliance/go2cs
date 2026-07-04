@@ -76,6 +76,14 @@ internal static nint dynamicFn1() {
 
 [GoType("[]Person")] partial struct PeopleByAge;
 
+[GoType("num:uint32")] partial struct levelToken;
+
+internal static readonly UntypedInt markerConst = 256;
+
+internal static void sort(this PeopleByAge p) {
+    sort_package.Sort(p);
+}
+
 public static nint Len(this PeopleByShoeSize p) {
     return len(p);
 }
@@ -127,6 +135,11 @@ public static (nint E2, @string p) Testing() {
 }
 
 internal static void Main() {
+    var agesDemo = new PeopleByAge(new Person[]{new("Zed"u8, 30, 11.5F), new("Amy"u8, 25, 7.0F)}.slice());
+    agesDemo.sort();
+    fmt.Println(agesDemo[0].Name);
+    var lt = markerConst;
+    fmt.Println((uint32)lt + 1);
     fmt.Println(MultiLine);
     fmt.Println(MultiLine2);
     fmt.Println(MultiLine3);
@@ -161,9 +174,9 @@ internal static void Main() {
         )
     }.slice();
     fmt.Println(people);
-    sort.Sort(((PeopleByShoeSize)people));
+    sort_package.Sort(((PeopleByShoeSize)people));
     fmt.Println(people);
-    sort.Sort(((PeopleByAge)people));
+    sort_package.Sort(((PeopleByAge)people));
     fmt.Println(people);
     x = """
 

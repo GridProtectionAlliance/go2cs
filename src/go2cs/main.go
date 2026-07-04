@@ -335,6 +335,12 @@ var nameCollisions map[string]bool
 // A built-in call whose name is in this set is therefore emitted qualified as `builtin.<name>(…)`.
 var packageBuiltinShadows map[string]bool
 
+// packageFuncMethodNames holds every method/function name declared in the current package —
+// a name matching an imported package's using-alias shadows it inside the package class
+// (compress/flate's byLiteral.sort vs `import "sort"`, CS0119); the package-ident emission
+// qualifies through the _package class instead.
+var packageFuncMethodNames map[string]bool
+
 // goBuiltinNames is the set of Go universe built-in function names that golib implements as static
 // methods on `go.builtin`. Used to detect a package method/function that shadows one of them.
 var goBuiltinNames = map[string]bool{
