@@ -55,6 +55,22 @@ type deviceHandle struct {
 	*Device
 }
 
+type leftSide struct{ tag string }
+
+func (l leftSide) Ping() string { return "L" }
+
+type rightSide struct{ tag string }
+
+func (r rightSide) Ping() string { return "R" }
+
+// pair embeds BOTH: tag and Ping are AMBIGUOUS at depth 1 (Go forbids the unqualified
+// selector), so the TypeGenerator must not promote either — the duplicate members were
+// CS0102/CS0111 x8 (bufio ReadWriter's Reader/Writer err/buf and Size/Buffered).
+type pair struct {
+	leftSide
+	rightSide
+}
+
 type Inner struct {
 	Value string
 }
@@ -97,4 +113,8 @@ func main() {
 	p := dsc.Tag()
 	*p = 7
 	fmt.Println(dev.hits) // Prints 7 - box aliasing through the hop
+
+	// Ambiguous promotions are not emitted; only the qualified selectors compile
+	pw := pair{leftSide{tag: "a"}, rightSide{tag: "b"}}
+	fmt.Println(pw.leftSide.tag, pw.rightSide.Ping()) // a R
 }

@@ -115,6 +115,21 @@ internal class StructTypeTemplate : TemplateBase
             // (CS0102) and a duplicate Ꮡfn reference (CS0111).
             HashSet<string> declaredMemberNames = new(StructMembers.Select(m => GetSimpleName(m.memberName)));
 
+            // Go's AMBIGUITY rule: a member name promoted from TWO OR MORE embeds at the same
+            // depth is not promoted at all (selecting it unqualified is a Go compile error) —
+            // bufio's ReadWriter embeds *Reader AND *Writer, which both carry err/buf fields;
+            // emitting both accessors was CS0102/CS0111.
+            Dictionary<string, int> promotedFieldCounts = new(StringComparer.Ordinal);
+
+            foreach ((string promotedStructType, _, _, _) in promotedStructs)
+            {
+                foreach ((_, string memberName) in getStructMembers(promotedStructType))
+                {
+                    string simpleName = GetSimpleName(memberName);
+                    promotedFieldCounts[simpleName] = promotedFieldCounts.TryGetValue(simpleName, out int count) ? count + 1 : 1;
+                }
+            }
+
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
                 foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
@@ -126,6 +141,9 @@ internal class StructTypeTemplate : TemplateBase
                         continue;
 
                     if (declaredMemberNames.Contains(GetSimpleName(memberName)))
+                        continue;
+
+                    if (promotedFieldCounts[GetSimpleName(memberName)] > 1)
                         continue;
 
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
@@ -149,6 +167,10 @@ internal class StructTypeTemplate : TemplateBase
 
                     // Own-field shadowing — see the accessor loop above (CS0111 on Ꮡfn).
                     if (declaredMemberNames.Contains(GetSimpleName(memberName)))
+                        continue;
+
+                    // Cross-embed ambiguity — see the counting pass above (CS0111 on Ꮡerr).
+                    if (promotedFieldCounts[GetSimpleName(memberName)] > 1)
                         continue;
 
                     // The Ꮡ-prefixed accessor NAME must use the unescaped member name — a C#-keyword
@@ -300,6 +322,41 @@ internal class StructTypeTemplate : TemplateBase
         IEnumerable<MethodInfo>? structMethods = structDecl is null ? [] : structDecl.GetExtensionMethods(compilation!);
         HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
+        // Go's AMBIGUITY rule: a method name promoted from TWO OR MORE embeds at the same depth
+        // is not promoted at all — bufio ReadWriter's Reader.Size vs Writer.Size (Go requires the
+        // qualified rw.Reader.Size(); both generated wrappers were CS0111).
+        Dictionary<string, int> promotedMethodCounts = new(StringComparer.Ordinal);
+
+        foreach ((string promotedStructType, _, _, _) in promotedStructs)
+        {
+            HashSet<string> embedMethodNames = new(StringComparer.Ordinal);
+
+            countPromotedMethods(promotedStructType, []);
+
+            foreach (string name in embedMethodNames)
+                promotedMethodCounts[name] = promotedMethodCounts.TryGetValue(name, out int count) ? count + 1 : 1;
+
+            void countPromotedMethods(string typeName, HashSet<string> seenTypes)
+            {
+                if (!seenTypes.Add(typeName))
+                    return;
+
+                (StructDeclarationSyntax? decl, Compilation? comp) = Context.GetStructDeclaration(typeName);
+
+                if (decl is null)
+                    return;
+
+                foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
+                    embedMethodNames.Add(m.Name);
+
+                foreach ((string memberType, _, _, bool isEmbedded) in decl.GetStructMembers(comp!, true))
+                {
+                    if (isEmbedded)
+                        countPromotedMethods(memberType, seenTypes);
+                }
+            }
+        }
+
         foreach ((string promotedStructType, _, _, _) in promotedStructs)
         {
             // Collect the embedded struct's methods TRANSITIVELY — its own plus those promoted into
@@ -348,6 +405,12 @@ internal class StructTypeTemplate : TemplateBase
                 if (structMethodNames.Contains(method.Name))
                 {
                     result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' method mapped to overridden '{NonGenericStructName}' receiver method");
+                    continue;
+                }
+
+                if (promotedMethodCounts.TryGetValue(method.Name, out int nameCount) && nameCount > 1)
+                {
+                    result.Append($"\r\n    // '{GetSimpleName(promotedStructType)}.{method.Name}' promotion is AMBIGUOUS across embeds (Go requires the qualified selector) - not promoted");
                     continue;
                 }
 

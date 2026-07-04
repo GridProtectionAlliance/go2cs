@@ -52,6 +52,27 @@ public static ж<nint> Tag(this ж<Device> Ꮡd) {
     public partial ref ж<Device> Device { get; }
 }
 
+[GoType] partial struct leftSide {
+    internal @string tag;
+}
+
+internal static @string Ping(this leftSide l) {
+    return "L"u8;
+}
+
+[GoType] partial struct rightSide {
+    internal @string tag;
+}
+
+internal static @string Ping(this rightSide r) {
+    return "R"u8;
+}
+
+[GoType] partial struct pair {
+    internal partial ref leftSide leftSide { get; }
+    internal partial ref rightSide rightSide { get; }
+}
+
 [GoType] partial struct Inner {
     public @string Value;
 }
@@ -85,6 +106,8 @@ internal static void Main() {
     var p = dsc.Tag();
     p.Value = 7;
     fmt.Println((~dev).hits);
+    var pw = new pair(new leftSide(tag: "a"u8), new rightSide(tag: "b"u8));
+    fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());
 }
 
 } // end main_package
