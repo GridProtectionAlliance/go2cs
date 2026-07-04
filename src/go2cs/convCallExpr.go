@@ -81,6 +81,13 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				_, resultIsBasic := resultElem.(*types.Basic)
 				namedToBasic := resultIsBasic && okDefNamed && types.Identical(resultElem, defNamed.Underlying())
 
+				// The third direction — BASIC → Named over that basic: `(*stringReader)(&str)`
+				// where `type stringReader string` (fmt's Sscan family, CS0030 x3). Same
+				// value-convert-and-re-box; writes through the box hit the copy, which is
+				// faithful for this pattern (the source string is never re-read).
+				_, argIsBasic := argElem.(*types.Basic)
+				basicToNamed := okBaseNamed && argIsBasic && types.Identical(argElem, baseNamed.Underlying())
+
 				// `(*[4]uint64)(&s.s)` / `(*fiatScalarNonMontgomeryDomainFieldElement)(&s.s)` — pointer
 				// reinterprets of an array-backed DEFINED type (crypto/internal/edwards25519 scalar.go):
 				// to its unnamed underlying array, or to a SIBLING defined type written over the SAME
@@ -135,20 +142,30 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					return fmt.Sprintf("%s((%s)(%s.Value))", AddressPrefix, baseName, argExpr)
 				}
 
-				if namedToNamed || namedToBasic {
+				if namedToNamed || namedToBasic || basicToNamed {
 					baseName := convertToCSTypeName(v.getTypeName(resultElem, false))
-					argExpr := v.convExpr(arg, nil)
+					var argExpr string
 
-					// The [GoType] VALUE conversion `(Base)(Def)` operates on the underlying VALUE. A
-					// deref-aliased pointer param/receiver already renders as that value (`Δp`/`head`), so
-					// it casts directly. But a genuine pointer expression — a call result (`newMarkBits(…)`
-					// returning `*gcBits`), a local box, a pointer field — renders as the box `ж<Def>`,
-					// which has no conversion to the Base VALUE (CS0030, runtime/pinner
-					// `(*pinnerBits)(newMarkBits(…))`). Dereference the box first so the value conversion
-					// binds. Both forms then box a COPY (`Ꮡ`) — the shared-underlying value has no
-					// write-through to lose (the atomic intrinsics are asm stubs).
-					if !v.exprIsDerefAliasedPointer(arg) {
-						argExpr = fmt.Sprintf("%s%s", PointerDerefOp, argExpr)
+					if unary, ok := arg.(*ast.UnaryExpr); ok && unary.Op == token.AND && basicToNamed {
+						// `(*stringReader)(&str)` — the address-of collapses with the value
+						// deref: the conversion operates on `str` directly, then re-boxes.
+						// (Restricted to the new basicToNamed arm so the long-guarded
+						// namedToNamed/namedToBasic emissions stay byte-identical.)
+						argExpr = v.convExpr(unary.X, nil)
+					} else {
+						argExpr = v.convExpr(arg, nil)
+
+						// The [GoType] VALUE conversion `(Base)(Def)` operates on the underlying VALUE. A
+						// deref-aliased pointer param/receiver already renders as that value (`Δp`/`head`), so
+						// it casts directly. But a genuine pointer expression — a call result (`newMarkBits(…)`
+						// returning `*gcBits`), a local box, a pointer field — renders as the box `ж<Def>`,
+						// which has no conversion to the Base VALUE (CS0030, runtime/pinner
+						// `(*pinnerBits)(newMarkBits(…))`). Dereference the box first so the value conversion
+						// binds. Both forms then box a COPY (`Ꮡ`) — the shared-underlying value has no
+						// write-through to lose (the atomic intrinsics are asm stubs).
+						if !v.exprIsDerefAliasedPointer(arg) {
+							argExpr = fmt.Sprintf("%s%s", PointerDerefOp, argExpr)
+						}
 					}
 
 					return fmt.Sprintf("%s((%s)(%s))", AddressPrefix, baseName, argExpr)

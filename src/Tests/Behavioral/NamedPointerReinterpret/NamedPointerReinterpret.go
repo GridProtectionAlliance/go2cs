@@ -23,6 +23,25 @@ func makeBase() *base {
 // with nil-conversions (`intRef(nil)`), any-boxing comparisons, and derefs working through it.
 type intRef *int64
 
+// tail is a DEFINED type over the BASIC string: (*tail)(&s) is the third reinterpret
+// direction, basic -> named (fmt's `(*stringReader)(&str)` Sscan family, CS0030 x3). The
+// address-of collapses with the value deref and re-boxes a copy; all reads and writes go
+// back through the same pointer, so the copy semantics are faithful.
+type tail string
+
+func (t *tail) chop() byte {
+	b := (*t)[0]
+	*t = (*t)[1:]
+	return b
+}
+
+func consume(s string) string {
+	t := (*tail)(&s)
+	b1 := t.chop()
+	b2 := t.chop()
+	return string([]byte{b1, b2}) + string(*t)
+}
+
 func classify(v any) string {
 	if v == intRef(nil) {
 		return "nilref"
@@ -41,4 +60,6 @@ func main() {
 	n := int64(5)
 	var r intRef = &n
 	fmt.Println(*r, classify(r))
+
+	fmt.Println(consume("abcd")) // abcd
 }

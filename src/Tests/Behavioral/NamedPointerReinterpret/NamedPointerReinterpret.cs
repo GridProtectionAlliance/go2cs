@@ -19,6 +19,21 @@ internal static ж<@base> makeBase() {
 
 [GoType("ж<int64>")] partial class intRef;
 
+[GoType("@string")] partial struct tail;
+
+[GoRecv] internal static byte chop(this ref tail t) {
+    var b = (t)[0];
+    t = (t)[1..];
+    return b;
+}
+
+internal static @string consume(@string s) {
+    var t = Ꮡ((tail)(s));
+    var b1 = t.chop();
+    var b2 = t.chop();
+    return ((@string)new byte[]{b1, b2}.slice()) + ((@string)(t.Value));
+}
+
 internal static @string classify(any v) {
     if (v == ((intRef)default!)) {
         return "nilref"u8;
@@ -37,6 +52,7 @@ internal static void Main() {
     n = (int64)5;
     intRef r = Ꮡn;
     fmt.Println(r.Value, classify(r));
+    fmt.Println(consume("abcd"u8));
 }
 
 } // end main_package
