@@ -23,6 +23,13 @@ func gauge(st CrossPkgLib.Status) (CrossPkgLib.Status, int) {
 	return CrossPkgLib.Status{Code: st.Code + 1}, st.Code
 }
 
+// meterBox locks the struct-FIELD display path: the renamed foreign type as a named
+// field's declared type (internal/poll's `Sysfd syscall.Handle`, CS0426).
+type meterBox struct {
+	st  CrossPkgLib.Status
+	sat int
+}
+
 func main() {
 	b := CrossPkgLib.Boiling()
 	r := b.Add(10)
@@ -129,6 +136,8 @@ func main() {
 	fmt.Println(CheckFunc(CrossPkgLib.Status{Code: 21}), CrossPkgLib.Sensor{Temp: 9}.Status())
 	g1, c1 := gauge(CrossPkgLib.Status{Code: 5})
 	fmt.Println(g1.Code, c1) // 6 5
+	mb := meterBox{st: CrossPkgLib.Status{Code: 3}, sat: 1}
+	fmt.Println(mb.st.Code + mb.sat) // 4
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

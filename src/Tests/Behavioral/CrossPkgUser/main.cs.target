@@ -11,6 +11,11 @@ internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
     return (new CrossPkgLibꓸStatus(Code: st.Code + 1), st.Code);
 }
 
+[GoType] partial struct meterBox {
+    internal CrossPkgLibꓸStatus st;
+    internal nint sat;
+}
+
 internal static void Main() {
     var b = CrossPkgLib.Boiling();
     var r = b.Add(10);
@@ -70,6 +75,8 @@ internal static void Main() {
     fmt.Println(CheckFunc(new CrossPkgLibꓸStatus(Code: 21)), new CrossPkgLib.Sensor(Temp: 9).Status());
     var (g1, c1) = gauge(new CrossPkgLibꓸStatus(Code: 5));
     fmt.Println(g1.Code, c1);
+    var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
+    fmt.Println(mb.st.Code + mb.sat);
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

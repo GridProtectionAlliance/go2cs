@@ -3233,6 +3233,25 @@ func (v *Visitor) collectCrossPackagePaths(t types.Type, paths HashSet[string]) 
 // staying compilable. NOT for GoType attribute strings or other generator-consumed strings, which live
 // in alias-less generated files and must always use getFullTypeName.
 func (v *Visitor) getDisplayTypeName(t types.Type, isUnderlying bool) string {
+	// A foreign type RENAMED inside its own package (syscall's `ΔHandle`) displays as the
+	// recorded imported-type alias (`syscallꓸHandle`) — the raw qualified render
+	// (`Δsyscall.Handle`) names a type that does not exist (CS0426, internal/poll's struct
+	// FIELDS: `Sysfd syscall.Handle`). Same rationale and gates as getCSTypeName; this is
+	// the display layer, so promoted-member naming (getFullTypeName consumers) is untouched.
+	if named, ok := types.Unalias(t).(*types.Named); ok && (named.TypeArgs() == nil || named.TypeArgs().Len() == 0) {
+		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
+
+			packageLock.Lock()
+			_, aliasExists := importedTypeAliases[plainKey]
+			packageLock.Unlock()
+
+			if aliasExists {
+				return getAliasedTypeName(plainKey)
+			}
+		}
+	}
+
 	paths := HashSet[string]{}
 	v.collectCrossPackagePaths(t, paths)
 
