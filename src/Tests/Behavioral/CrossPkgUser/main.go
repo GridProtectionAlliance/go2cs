@@ -90,6 +90,12 @@ func main() {
 	// remains the documented open sibling gap: shim discovery is syntax-based and the
 	// referenced assembly contributes no syntax; call through the embed explicitly)
 	fmt.Println(rg.Device.Sensor.Hot())
+	// A promoted POINTER-RECEIVER method through the two-level VALUE-embed chain IS
+	// converter-emitted (census F7): the hop descends per level -
+	// Ꮡrg.of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(...) - mirroring
+	// reflect's sliceType -> abi.SliceType -> abi.Type Common()/Uncommon() sites (CS1929 x4).
+	rg.Calibrate(3)
+	fmt.Println(float64(rg.Device.Sensor.Temp))
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

@@ -47,6 +47,8 @@ internal static void Main() {
     rg.Temp = 66;
     fmt.Println((float64)rg.Device.Sensor.Temp);
     fmt.Println(rg.Device.Sensor.Hot());
+    Ꮡ(rg).of(rig.ᏑDevice).of(CrossPkgLib.Device.ᏑSensor).Calibrate(3);
+    fmt.Println((float64)rg.Device.Sensor.Temp);
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

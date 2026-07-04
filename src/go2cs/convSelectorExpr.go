@@ -849,11 +849,13 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// (CS1929). Descend into the embedded field's box via the &-machinery — `t.of(timeTimer.Ꮡtimer)` —
 	// exactly as the *explicit* `t.timer.modify(…)` already renders (the `&receiver.field` branch in
 	// convUnaryExpr handles the pointer-param-vs-local box distinction: `Ꮡt` for a deref'd param, `t`
-	// for a pointer local). Gated to a SINGLE embed hop (Selection.Index == [embeddedField, method]) — a
-	// deeper promotion chain falls through unchanged (no regression). A non-promoted call (Index len 1)
-	// and an explicit `x.field.method` (also Index len 1, method direct on the field) never match here.
+	// for a pointer local). An ALL-VALUE promotion chain of any depth descends hop by hop —
+	// `tt.Common()` on reflect's `sliceType` (embeds `abi.SliceType`, which embeds `abi.Type`, the
+	// method's receiver) appends an `.of(abi.SliceType.ᏑType)` view per extra hop (CS1929 ×4). A
+	// deeper chain with a POINTER embed past the first hop falls through unchanged. A non-promoted
+	// call (Index len 1) and an explicit `x.field.method` (also len 1) never match here.
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) {
-		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 2 {
+		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) >= 2 {
 			recvType := v.info.TypeOf(selectorExpr.X)
 
 			if ptr, ok := recvType.Underlying().(*types.Pointer); ok {
@@ -879,7 +881,9 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						// `[GoRecv] ref` extension binds addressably. A same-package pointer embed
 						// keeps its generated forwarder (no churn).
 						if named, ok := ptr.Elem().(*types.Named); ok {
-							if named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
+							// The pointer-embed hop stays single-level (Index == [embed, method]);
+							// a deeper chain THROUGH a pointer embed falls through unchanged.
+							if len(sel.Index()) == 2 && named.Obj().Pkg() != nil && named.Obj().Pkg() != v.pkg {
 								// The hop names the FIELD, which is struct-scoped: a field named
 								// like a Δ-renamed package type (rtype's embedded `Type` vs the
 								// reflectlite `Type` interface) is DECLARED unrenamed, so the hop
@@ -899,28 +903,75 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							}
 						}
 					} else {
-						// When the base is the current method's OWN receiver and that method is NOT
-						// direct-ж, the receiver renders as `this ref T` with NO box — the descent's
-						// `Ꮡrecv.of(…)` references a nonexistent `Ꮡrecv` (CS0103; runtime mgcscavenge
-						// `sc.setEmpty()` inside `(*scavChunkData).alloc/free`). No box is needed
-						// either: the embedded field of a `ref` receiver is addressable, so the
-						// promoted method's `[GoRecv] ref` overload binds on the explicit field call
-						// `recv.embedField.method(…)`. (A direct-ж TARGET on the bare receiver would
-						// have promoted the enclosing method via the capture-mode fixpoint, so this
-						// arm's target always has the `ref` overload.) The rendered==raw check keeps
-						// an inner binding that shadows the receiver name (Δ-renamed) on the descent
-						// path.
-						if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
-							if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && recvIdent.Name == recvName &&
-								v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
-								return getAliasedTypeName(fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, nil),
-									v.structFieldBoxName(&ast.Ident{Name: embedField.Name()}, selectorExpr.X), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+						// Resolve the FULL promotion chain: every hop (all Index entries but the
+						// method's) must be an embedded VALUE struct field. A chain broken by a
+						// pointer embed or a non-struct hop falls through unchanged.
+						hopFields := []*types.Var{embedField}
+						hopStruct, hopOK := embedField.Type().Underlying().(*types.Struct)
+						allValueChain := true
+
+						for _, idx := range sel.Index()[1 : len(sel.Index())-1] {
+							if !hopOK {
+								allValueChain = false
+								break
 							}
+
+							hop := hopStruct.Field(idx)
+
+							if !hop.Embedded() {
+								allValueChain = false
+								break
+							}
+
+							if _, isPtr := hop.Type().Underlying().(*types.Pointer); isPtr {
+								allValueChain = false
+								break
+							}
+
+							hopFields = append(hopFields, hop)
+							hopStruct, hopOK = hop.Type().Underlying().(*types.Struct)
 						}
 
-						embedSel := &ast.SelectorExpr{X: selectorExpr.X, Sel: &ast.Ident{Name: embedField.Name()}}
-						fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: embedSel}, DefaultUnaryExprContext())
-						return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+						if allValueChain {
+							// When the base is the current method's OWN receiver and that method is NOT
+							// direct-ж, the receiver renders as `this ref T` with NO box — the descent's
+							// `Ꮡrecv.of(…)` references a nonexistent `Ꮡrecv` (CS0103; runtime mgcscavenge
+							// `sc.setEmpty()` inside `(*scavChunkData).alloc/free`). No box is needed
+							// either: the embedded field(s) of a `ref` receiver are addressable, so the
+							// promoted method's `[GoRecv] ref` overload binds on the explicit field call
+							// `recv.embedField(…).method(…)`. (A direct-ж TARGET on the bare receiver would
+							// have promoted the enclosing method via the capture-mode fixpoint, so this
+							// arm's target always has the `ref` overload.) The rendered==raw check keeps
+							// an inner binding that shadows the receiver name (Δ-renamed) on the descent
+							// path.
+							if recvIdent, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && recvIdent.Name == recvName &&
+									v.getIdentName(recvIdent) == recvIdent.Name && !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+									hopPath := make([]string, 0, len(hopFields))
+
+									for _, hop := range hopFields {
+										hopPath = append(hopPath, v.structFieldBoxName(&ast.Ident{Name: hop.Name()}, selectorExpr.X))
+									}
+
+									return getAliasedTypeName(fmt.Sprintf("%s.%s.%s", v.convExpr(selectorExpr.X, nil),
+										strings.Join(hopPath, "."), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								}
+							}
+
+							// First hop through the &-machinery (box-vs-param distinction), then one
+							// `.of(<Owner>.Ꮡ<field>)` view per additional hop — the ж<T> field view
+							// composes, landing on the ж<> box of the method's receiver type.
+							embedSel := &ast.SelectorExpr{X: selectorExpr.X, Sel: &ast.Ident{Name: embedField.Name()}}
+							fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: embedSel}, DefaultUnaryExprContext())
+
+							for k := 1; k < len(hopFields); k++ {
+								ownerTypeName := convertToCSTypeName(v.getTypeName(hopFields[k-1].Type(), false))
+								fieldAddr = fmt.Sprintf("%s.of(%s.%s%s)", fieldAddr, boxAccessorType(ownerTypeName, ""),
+									AddressPrefix, v.structFieldBoxName(&ast.Ident{Name: hopFields[k].Name()}, selectorExpr.X))
+							}
+
+							return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+						}
 					}
 				}
 			}
