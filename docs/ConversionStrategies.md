@@ -711,6 +711,20 @@ An already-interface-typed element stays bare. Guarded by `InterfaceCasting`.
 ### Named-string wrapper surface (indexing, sub-slicing, span bridge)
 A named type over `string` is indexed and sub-sliced in Go (`tag[i]`, `tag[i:j]` -- reflect `StructTag.Get`), but C# indexing never applies user-defined conversions. The `InheritedType` template therefore forwards the `@string` surface on every named-string wrapper: `byte this[int]` / `byte this[nint]` indexers, a `Range` indexer returning the WRAPPER (a Go sub-slice of a named string keeps the named type), `nint Length` for `len()`, and an implicit `ReadOnlySpan<byte>` operator so `u8`-literal comparisons and assignments bind. Guarded by `NamedStringConversion`.
 
+### A grouped var spec with one multi-result call deconstructs
+A grouped `var (name, offset, abs = t.locabs() ...)` spec is not a `:=`, so the assignment tuple machinery never saw it -- the per-name path assigned the WHOLE result tuple to the first name and silently DEFAULTED the rest (time appendFormat read a zero abs; a silent-wrongness class beyond the CS0029 that exposed it). Function-local specs now emit the C# tuple deconstruction, matching the `:=` form; package-level specs use the once-evaluated hidden-field component reads:
+```csharp
+var (ln, ls) = pair();
+```
+Guarded by `GlobalTupleVarDecl` (both levels, with a call-count check proving single evaluation).
+
+### `string()` of an untyped constant reference hops through the default type
+`string(utf8.RuneError)` renders the argument as its cross-package `static readonly` Untyped* wrapper, from which `@string` has no conversion (CS0030). The conversion hops through the constant's DEFAULT Go type first -- exactly Go's conversion semantics; a plain literal is already a C# constant and keeps its direct form:
+```csharp
+fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
+```
+Guarded by `CrossPkgUser` (`string(CrossPkgLib.Sep)`).
+
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 
@@ -795,6 +809,17 @@ Guarded by `GenericTypeInference` (`seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[
 The golib `uintptr` struct declares the full generic-math interface set the lifted numeric constraints demand (`IAdditionOperators` through `IComparisonOperators`, `IShiftOperators<uintptr, int, uintptr>` with a `>>>` operator, `IIncrementOperators`/`IDecrementOperators`) -- matching operators alone never satisfy a C# where-clause (CS0315 at reflect's `rangeNum<uintptr, uint64>`). At runtime, `ConvertToType`/`ConvertToUInt64` have `uintptr` fast paths, and the reflection-cached `TypeParamCaster` probes a public `Value` FIELD as well as the generated wrappers' `Value` property (hand-written wrappers keep a field for `Interlocked`/`Volatile` `ref x.Value` seams). Guarded by `GenericTypeInference` (`growShrink[U ~uint32 | ~uintptr]`).
 
 > **Latent gap (banked):** generated `[GoType("num:*")]` wrapper structs do NOT yet declare the generic-math interfaces -- a NAMED numeric wrapper used as a union-generic type argument would CS0315. No corpus site hits this yet.
+
+### Union-constrained sub-slices cast back to the type parameter
+A sub-slice of a `string | []byte` union-constrained value goes through the `IByteSeq<byte>` Range indexer, which returns the INTERFACE -- but Go types the result as the type parameter again, so it assigns back to, passes as, and returns as the parameter (time format_rfc3339, CS0266/CS0310/CS0029). The emission wraps the range forms in the explicit interface-to-type-parameter conversion -- a runtime-checked unbox that shares backing for the `[]byte` instantiation:
+```csharp
+return parse(((T)(s[0..2]))) + parse(((T)(s[3..5])));
+```
+Func-literal parameters typed as the union type parameter render as the parameter itself (the enclosing method's type parameter is in scope inside a lambda), matching the Go:
+```csharp
+var parse = (T part) => {
+```
+Guarded by `StringByteUnionConstraint` (`trimHead`/`headSum`; `digitSum`).
 
 ## Type Aliasing
 Go supports two kinds of [type aliasing](https://go101.org/article/type-system-overview.html#type-definition): a "type definition" and a "type alias declaration".
@@ -918,6 +943,13 @@ A function that neither directly nor indirectly (through a deferred lambda) uses
 
 A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple referenced undeclared names (CS0103 — the `iter` package's last wave-1 errors). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *outside* the `func((defer, recover) => …)` wrapper, returned after it. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
 
+### Deferred calls whose callee returns a value take the lambda form
+The no-arg defer arm passes a bare method group (`defer(k.Close)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
+```csharp
+defer(() => hʗ1.close());
+```
+Guarded by `DeferTypelessReturns`.
+
 ## Expression Switch Statements
 Go expression-based `switch` statements are flexible: cases do not fall through automatically (no `break` needed), and the `fallthrough` keyword runs the next case body bypassing its expression. Based on the [Manual Tour of Go Conversions](https://github.com/GridProtectionAlliance/go2cs/tree/master/src/Examples/Manual%20Tour%20of%20Go%20Conversions), converting to `if / else if / else` is the best choice for most cases. When every case label is a C# **compile-time constant** and there is no `fallthrough`, a traditional C# `switch` works. "Constant" here means a C# `const` — a literal, a computed literal expression (`a + b`), or a *typed* basic-type const — not merely a Go constant. A case label that references a plain variable, a struct field (`case frame.fp`), an *untyped* / named-type / cross-package const emitted as `static readonly` (`case goarch.PtrSize`), or an address-of expression (`case &g`) is **not** a C# constant, so a C# `switch` case label there is invalid (CS9135 / CS0150). Such switches fall back to the `if / else if` form comparing the tag with `==` (a temp captures the tag: `var exprᴛ1 = tag; if (exprᴛ1 == frame.fp) …`). The same constant-vs-runtime-value test also chooses `is` (constant pattern) vs `==` for a single-value case within the if-else form. A Go `break` inside a case exits the *switch* (skipping the rest of the case); in the `if / else if` form there is no enclosing C# switch for it to target (CS0139), so a case body that contains such a break is wrapped in a `do { … } while (false)` — the break exits that one-shot loop, i.e. the case. The wrap is emitted only for a case whose body actually has a switch-targeting `break` (one not caught by a nested loop/switch/select), so every other case is unchanged. (A `break` inside a *nested* loop within the case still targets that loop, as in Go.) For cases that use `fallthrough`, the cases are expanded to standalone `if` statements with a local fall-through flag and `goto` to handle break-style exits — the most complex (and least pretty) scenario. In that if-chain form a **trailing `default:` reached via fallthrough** is emitted as a *guarded* `if (fallthrough || !match) { … }` — the guard is needed so the default does not run after a matched-but-non-fallthrough case, but C# cannot prove it always executes. So when such a guarded-default switch is the last statement of a **value-returning** function and every case is terminal, C# reports CS0161 ("not all code paths return a value") even though the Go `default` makes the switch exhaustive (runtime `startpanic_m`). Because a guarded-terminal-default switch cannot be legally followed by reachable Go code (it always returns/exits), the converter emits an unreachable `return default!;` after the if-chain to satisfy C#'s definite-return analysis — gated on the enclosing function/literal actually returning a value (via its own return signature), so a `void` function or a switch that isn't terminal is unaffected. (Guarded by the `SwitchFallthroughDefaultReturn` behavioral test; cleared runtime's CS0161.) A comparison case may use a C# relational/constant pattern (`case {} when x is < 0`) only when the compared-to operand is a C# compile-time constant; for a variable (`case x == y`) or a `static readonly` const (untyped/cross-package), it falls back to a `when` guard (`case {} when x == y`) — a relational pattern there is invalid (CS9135).
 
@@ -928,6 +960,16 @@ var exprᴛ1 = CrossPkgLib.Precision;
 if (exprᴛ1 == 1) {
 ```
 A variable tag stays switchable. Guarded by `CrossPkgUser` / `CrossPkgLib`.
+
+### A leading constant-true case stays opaque to the compiler
+Go's `switch { case true: ... case cond: ... }` (time parseStrictRFC3339 deliberately disabling its strict checks) compiles the LATER cases as dead code; a foldable `when true` makes C# reject them outright (CS8120). A constant-true case condition on a NON-LAST clause therefore emits the golib `ᐧᐧ` marker -- a `static readonly bool` the compiler cannot fold:
+```csharp
+case {} when ᐧᐧ: {
+```
+The marker is deliberately SEPARATE from the const `ᐧ` switch governor: that const's foldability is itself load-bearing (`case ᐧ when ...` label patterns need a constant, and an infinite `for (...; ᐧ ;...)` relies on the fold for reachability proofs -- CS9135/CS0161 when it was made readonly in place). Guarded by `ExprSwitch`.
+
+### No constant pattern against a named-numeric wrapper
+A constant expression whose CONTEXTUAL type is a wrapper struct -- golib `uintptr` or any `[GoType("num:...")]` named numeric (time's `Duration`) -- can never be a C# constant, so no constant/relational pattern can compare against it: `d is >= 0` types the literal 0 as Duration (CS9135). The lowering keeps the plain operator form (`d >= 0`, the wrapper's operators). Guarded by `ExprSwitch` (the `pace` switch).
 
 ## Type Switch Statements
 For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
@@ -1426,6 +1468,14 @@ A range variable that is only *read* keeps binding directly to the `foreach` tup
 golib's hand-written support types (`SparseArray<T>`, `PinnedBuffer`, `TypeExtensions`, `HashCode`, `FatalError`, …) live in the **`go.golib`** child namespace — deliberately NOT `go.<any Go package name>`. The namespace was originally `go.runtime`, which collides with the real `runtime` package: converted code imports runtime as `using runtime = runtime_package;` inside `namespace go`, and a child namespace `go.runtime` visible from any referenced assembly (golib is referenced by *every* project) wins simple-name lookup over the alias — CS0576 at every `runtime.X` use (surfaced by `iter`/`internal/weak` in wave 1). The same reasoning forbids `go.internal`, `go.sync`, etc.; `golib` is not a Go stdlib package name, so the child namespace can never collide with an import alias. Emitted code references these types via the child namespace (`new golib.SparseArray<T>{…}`), which resolves inside `namespace go` with no using directive.
 
 The general form of this collision — a REAL parent/child package pair — is handled by **Δ-renaming the import alias**. A C# using alias declared inside a namespace conflicts with a same-named child namespace visible from ANY transitively referenced assembly (CS0576 at every use), and transitivity makes this common: `runtime.csproj` itself references `runtime/internal/math|sys` (namespace `go.runtime.@internal`), so *every* package importing `runtime` sees a `go.runtime` child namespace — `iter` and `internal/weak` surfaced it in wave 1 (`weak`, in namespace `go.@internal`, collides with `go.@internal.runtime` from `internal/runtime/*` instead). A pre-pass computes the package's transitive Go import closure (exactly mirroring MSBuild's transitive ProjectReference visibility), derives every child-namespace chain it contributes, and Δ-renames any import alias the current package's namespace would capture: `using Δruntime = runtime_package;` with uses `Δruntime.Goexit()` — the established collision marker. The rename propagates through one lookup to the using emission, package-qualifier identifiers, and cross-package type-name prefixes; a package with no collision emits byte-identically. (The behavioral corpus sees this on `io` — the real Go closure contains `os → io/fs`, hence `go.io` — captured in the `AnonymousInterfaces` golden as `Δio`.)
+
+### Foreign renamed types reference the recorded imported-type alias
+A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declares `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSTypeName` (delegate elements, parameters, results) and `getDisplayTypeName` (named struct fields) -- and deliberately NOT in `getTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
+```csharp
+public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
+internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
+```
+Guarded by `CrossPkgUser` (`CheckFunc`/`gauge`/`meterBox` -- delegate, signature, and field positions).
 
 ## Source Generators
 Several Go semantics cannot be written directly in C#, so the converter emits compact, attributed partial declarations and lets a set of Roslyn source generators (`src/gen/go2cs-gen/`, referenced as an analyzer by every converted project) synthesize the rest at compile time. This keeps the visible converted code close to the Go original. The principal generators and attributes:

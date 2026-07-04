@@ -15,6 +15,39 @@
 
 ## Where things stand (2026-07-03)
 
+- **TIME AT ZERO + POLL AT ONE (2026-07-04 early) - CLUB = 22, THIRTY-ONE commits this session.**
+  Post-census wave, in order: e3263718e union sub-slice cast (time 15->9); b0b7b6e32 opaque
+  `ᐧᐧ` marker for leading constant-true cases (CS8120; the const `ᐧ` foldability is LOAD-BEARING
+  - case-label patterns + infinite-for reachability - first cut broke both); a6f9ad5a6
+  user-flagged `(T part)` lambda params; chips a126f25f1 (keyword-embed unescape) + 46ab7cc0f
+  (promoted-embed zero-value ctors) + 2adfad1dc regolden - conflict resolution COMBINED both
+  (AppendPromotedBoxInitializers applies GetUnsanitizedIdentifier); 080fafbb7 CS9135 wrapper
+  screen (any named-numeric, not just uintptr); db75e3210 defer lambda for value-returning
+  callees; 69489ade2 function-local grouped-var tuple deconstruction (SILENT-wrongness);
+  eb618739a string(untyped-const-ref) default-type hop (TIME -> 0); b5e4928ee nil-map fresh
+  varNames for the synthetic global-func-literal analysis (RECOVERED-PANIC SILENT-DROP #2 -
+  dropped the rest of the file INCLUDING csproj references); 872f5a02c + 8b5bf94c6 + 60bd5957d
+  foreign-rename ꓸ-alias routing (delegates -> getCSTypeName -> getDisplayTypeName; the
+  getTypeName-layer first cut REGRESSED reflect CS8799 - Go-shaped names feed MEMBER naming);
+  7c6c312b1 conversion-using qualifier match (CS0246 x4).
+  **Frontier (recon125 + poll probe): internal/poll 1, os/fmt 6 (5 = poll leak), io/fs 1,
+  filepathlite 1, netip 6, concurrent 5, bufio 8, edwards 1.**
+  **NEXT ROOT - poll CS0052 (design analysis banked):** `var ErrNetClosing = errNetClosing{}`
+  - an EXPORTED var of an UNEXPORTED type. Go consumers legally call its exported methods
+  cross-package, so the faithful C# is to PROMOTE the type to public when an exported
+  package-level var (later: exported func results) exposes it. DANGER: the TypeGenerator
+  derives partial-member scope from the type NAME - a converter-side `public partial struct`
+  with generator-side internal companions is CS8799/CS0261; the generator must read the
+  DECLARED modifier from syntax (it has it) or the promotion set must reach both sides.
+  Same mechanism will later serve exported-func-returns-unexported-type (CS0050 family).
+  **Lessons (memorized): behavioral zero-churn does NOT clear corpus regressions - corpus
+  reflect/abi spot-builds are a REQUIRED gate for type-NAMING changes; measurement needs
+  full-recon consistency (pair probes only for the exact packages measured, syscall must
+  accompany its dependents); transpiling CrossPkg* regenerates csprojs - a converter panic
+  mid-file silently DROPS the sibling ProjectReference. NEXT-SESSION IDEA: full transpile
+  with the per-file recover DISABLED = corpus-wide latent-panic sweep (two silent-drop
+  instances found by accident so far).**
+
 - **REFLECT AT ZERO (2026-07-03) - THE CENSUS CAMPAIGN IS COMPLETE (154 -> 0), CLUB = 21.**
   Eleven roots this session, in commit order: F5 `d2ab3ff76` (@string wrapper surface, gen);
   F4 `6f7c3f82b` (getTypeName structural slice/array recursion - also killed SILENT wrong-type
