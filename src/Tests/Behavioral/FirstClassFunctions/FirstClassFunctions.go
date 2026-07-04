@@ -137,6 +137,9 @@ func main() {
 	p := provider{produce: func(x int) int { return x * 2 }}
 	r := registry{h: p.produce}
 	fmt.Println(r.h(21)) // 42
+
+	var tg tagged = r.h
+	fmt.Println(tg.tag(), r.h(1)) // handler 2
 }
 
 type splitter func(s string) (int, string, error)
@@ -148,6 +151,14 @@ type machine struct{ split splitter }
 // composite literal wraps it in the target delegate's constructor (internal/concurrent's
 // `keyHash: mapType.Hasher`, CS1503 x3).
 type handler func(int) int
+
+// tag is a METHOD ON A FUNC TYPE - a C# delegate cannot be a partial struct, so the
+// interface satisfaction routes through the generated VALUE adapter (flag's funcValue
+// implementing Value; the struct-only throw had killed the package's whole generator run,
+// CS0246 x19).
+func (h handler) tag() string { return "handler" }
+
+type tagged interface{ tag() string }
 
 type provider struct{ produce func(int) int }
 

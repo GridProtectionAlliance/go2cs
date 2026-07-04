@@ -2322,6 +2322,17 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
 	}
 
+	// A LOCAL NAMED FUNC type with methods (flag's funcValue implementing Value): a C#
+	// delegate cannot be a partial struct, so the generator emits a VALUE adapter class —
+	// reference it at the conversion site (the record fires via the recordable arm above).
+	if recordable && !pointerTarget && exprResult != "" {
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if _, isSig := named.Underlying().(*types.Signature); isSig {
+				return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+			}
+		}
+	}
+
 	if pointerTarget && recordable && exprResult != "" {
 		return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
 	}

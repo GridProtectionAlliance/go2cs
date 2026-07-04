@@ -112,6 +112,8 @@ internal static void Main() {
     var p = new provider(produce: (nint x) => x * 2);
     var r = new registry(h: new handler(p.produce));
     fmt.Println(r.h(21));
+    tagged tg = new handlerᴠtagged(r.h);
+    fmt.Println(tg.tag(), r.h(1));
 }
 
 internal delegate (nint, @string, error) splitter(@string s);
@@ -121,6 +123,14 @@ internal delegate (nint, @string, error) splitter(@string s);
 }
 
 internal delegate nint handler(nint _);
+
+internal static @string tag(this handler h) {
+    return "handler"u8;
+}
+
+[GoType] partial interface tagged {
+    @string tag();
+}
 
 [GoType] partial struct provider {
     internal Func<nint, nint> produce;

@@ -38,6 +38,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<handler, tagged>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
