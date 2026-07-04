@@ -26,6 +26,11 @@ internal static void Main() {
     sink w = default!;
     w = append(w, (byte)((rune)'h'), (byte)((rune)'i'));
     fmt.Println(((@string)(slice<byte>)w), len(w));
+    var glyphs = new map<@string, rune>{
+        ["frak"u8] = (rune)0x1D504,
+        ["ae"u8] = (rune)'\U000000C6'
+    };
+    fmt.Println(glyphs["frak"u8], glyphs["ae"u8], ((@string)glyphs["frak"u8]));
 }
 
 [GoType("[]byte")] partial struct sink;

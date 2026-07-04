@@ -174,7 +174,21 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 				result.WriteString(fmt.Sprintf("0x%X", intVal))
 			}
 		} else {
-			result.WriteString(fmt.Sprintf("(rune)%s", value))
+			// A QUOTED rune literal beyond the BMP ('\U0001D504') cannot be a C# char
+			// literal (html's entity table, CS1012 ×133) — emit the code point instead.
+			// BMP literals keep their source text verbatim (zero churn).
+			emitted := false
+
+			if len(value) >= 2 && value[0] == '\'' && value[len(value)-1] == '\'' {
+				if r, _, _, uerr := strconv.UnquoteChar(value[1:len(value)-1], '\''); uerr == nil && r > 0xFFFF {
+					result.WriteString(fmt.Sprintf("(rune)0x%X", r))
+					emitted = true
+				}
+			}
+
+			if !emitted {
+				result.WriteString(fmt.Sprintf("(rune)%s", value))
+			}
 		}
 	case token.STRING:
 		strVal, isRawStr := v.getStringLiteral(value)

@@ -53,6 +53,15 @@ func main() {
 	var w sink
 	w = append(w, 'h', 'i')
 	fmt.Println(string(w), len(w)) // hi 2
+
+	// An ASTRAL rune literal (beyond the BMP) cannot be a C# char literal - it emits as
+	// the code point (html's entity table, CS1012 x133); BMP literals keep their source
+	// text verbatim.
+	glyphs := map[string]rune{
+		"frak": '\U0001D504',
+		"ae":   '\U000000C6',
+	}
+	fmt.Println(glyphs["frak"], glyphs["ae"], string(glyphs["frak"])) // 120068 198 𝔄
 }
 
 // sink mirrors strings.appendSliceWriter: a named byte slice converted to string.
