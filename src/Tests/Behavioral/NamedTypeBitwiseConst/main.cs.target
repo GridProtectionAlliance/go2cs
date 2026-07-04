@@ -32,6 +32,11 @@ internal static void Main() {
     fmt.Println((uint8)t.Context());
     word w = 0xABCDEF012345UL;
     fmt.Println((uint64)w.low());
+    fmt.Println((uint8)mask((Tag)(~((Tag)0))));
+}
+
+internal static Tag mask(Tag t) {
+    return (Tag)(t & 0xFF);
 }
 
 } // end main_package

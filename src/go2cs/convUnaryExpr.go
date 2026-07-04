@@ -661,7 +661,21 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 	}
 
 	if unaryExpr.Op == token.XOR {
-		return "~" + v.convExpr(unaryExpr.X, nil)
+		operand := v.convExpr(unaryExpr.X, nil)
+
+		// `^T(0)` — the all-ones idiom (os exec_windows' `^syscall.Handle(0)`): the constant
+		// conversion folds to the bare literal, so `~0` loses the named type where the
+		// parameter needs T (CS1503 ×2). Re-impose the named wrapper on a CONSTANT operand;
+		// a plain-basic constant keeps the bare form (no churn).
+		if tv, ok := v.info.Types[unaryExpr.X]; ok && tv.Value != nil {
+			if named, ok := types.Unalias(tv.Type).(*types.Named); ok {
+				if _, isBasic := named.Underlying().(*types.Basic); isBasic {
+					return fmt.Sprintf("~((%s)%s)", v.getCSTypeName(named), operand)
+				}
+			}
+		}
+
+		return "~" + operand
 	}
 
 	// A negated integer-valued float constant used in an integer context — `math.Inf(-1.0)`,

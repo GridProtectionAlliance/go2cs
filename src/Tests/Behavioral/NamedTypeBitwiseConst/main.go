@@ -35,4 +35,11 @@ func main() {
 
 	var w word = 0xABCDEF012345
 	fmt.Println(uint64(w.low())) // low 19 bits: 0x12345 = 74565
+
+	// ^Tag(0) - the all-ones idiom passed to a named-typed parameter (os exec_windows
+	// ^syscall.Handle(0), CS1503 x2): the folded constant must re-impose the named type.
+	fmt.Println(uint8(mask(^Tag(0)))) // 255
 }
+
+func mask(t Tag) Tag { return t & 0xFF }
+
