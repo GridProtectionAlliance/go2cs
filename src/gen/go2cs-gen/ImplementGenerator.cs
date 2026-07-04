@@ -241,6 +241,36 @@ public class ImplementGenerator : ISourceGenerator
                     }
                 }
 
+                // Interface members may also promote through an embedded INTERFACE field —
+                // zip's `type nopCloser struct { io.Writer }`: Write lives on the FIELD's
+                // interface value (Go promotes its method set), Close on the struct. Forward
+                // still-unbound members that the field's interface declares through the field:
+                // `m_box.Value.Writer.Write(…)`. Semantic detection (field name equals its
+                // interface type's simple name) — the converter emits embeds as real fields,
+                // so the symbol sees them. Gated to a SINGLE embedded interface field.
+                IFieldSymbol[] embeddedIfaceFields = structType.GetMembers()
+                    .OfType<IFieldSymbol>()
+                    .Where(field => !field.IsStatic && field.Type.TypeKind == TypeKind.Interface && field.Name == field.Type.Name)
+                    .ToArray();
+
+                if (embeddedIfaceFields.Length == 1 && embeddedIfaceFields[0].Type is INamedTypeSymbol ifaceFieldType)
+                {
+                    string fieldName = embeddedIfaceFields[0].Name;
+
+                    HashSet<string> fieldMembers = new(ifaceFieldType.AllInterfaces
+                        .Concat([ifaceFieldType])
+                        .SelectMany(iface => iface.GetMembers().OfType<IMethodSymbol>())
+                        .Select(method => method.Name), StringComparer.Ordinal);
+
+                    foreach (MethodInfo method in methods)
+                    {
+                        string simpleName = GetSimpleName(method.Name);
+
+                        if (!forwardReceivers.ContainsKey(simpleName) && fieldMembers.Contains(simpleName))
+                            forwardReceivers[simpleName] = $"m_box.Value.{fieldName}";
+                    }
+                }
+
                 // Interface members may instead promote through embedded VALUE struct(s) whose
                 // methods are pointer-receiver extensions — dwarf's `type VoidType struct
                 // { CommonType }` with `func (c *CommonType) Common()`, including CHAINED embeds

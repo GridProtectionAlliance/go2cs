@@ -50,6 +50,8 @@ using static go.main_package;
 [assembly: GoImplement<reversed, Animal>(Pointer = true)]
 [assembly: GoImplement<reversed, Animal>(Promoted = true)]
 [assembly: GoImplement<strRdr, rdr>]
+[assembly: GoImplement<wrapSink, Animal>(Promoted = true)]
+[assembly: GoImplement<wrapSink, speakShutter>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

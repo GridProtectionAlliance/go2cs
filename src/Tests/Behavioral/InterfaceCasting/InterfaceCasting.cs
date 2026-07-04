@@ -156,12 +156,27 @@ internal static void Main() {
     swapped = new Dog(nil);
     replaceAnimal(Ꮡswapped);
     fmt.Println("replaced:", swapped.Speak());
+    speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
+    fmt.Println(ss.Speak(), ss.Shut());
 }
 
 internal static void replaceAnimal(ж<Animal> Ꮡa) {
     ref var a = ref Ꮡa.Value;
 
     a = new CatжAnimal(Ꮡ(new Cat(nil)));
+}
+
+[GoType] partial interface speakShutter {
+    @string Speak();
+    @string Shut();
+}
+
+[GoType] partial struct wrapSink {
+    public Animal Animal;
+}
+
+internal static @string Shut(this wrapSink w) {
+    return "shut"u8;
 }
 
 [GoType] partial interface rdr {

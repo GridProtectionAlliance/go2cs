@@ -174,11 +174,29 @@ func main() {
 	var swapped Animal = Dog{}
 	replaceAnimal(&swapped)
 	fmt.Println("replaced:", swapped.Speak()) // Meow!
+
+	// wrapSink embeds an INTERFACE field (zip's nopCloser{io.Writer}): Speak comes from
+	// the field's interface value, Shut is the struct's own. A POINTER cast to the wider
+	// local interface must forward Speak through the FIELD in the generated adapter
+	// (m_box.Value.Animal.Speak() — CS1929 with no forward).
+	var ss speakShutter = &wrapSink{Animal: Dog{}}
+	fmt.Println(ss.Speak(), ss.Shut()) // Woof! shut
 }
 
 func replaceAnimal(a *Animal) {
 	*a = &Cat{}
 }
+
+type speakShutter interface {
+	Speak() string
+	Shut() string
+}
+
+type wrapSink struct {
+	Animal
+}
+
+func (w wrapSink) Shut() string { return "shut" }
 
 // rdCloser mirrors io.ReadCloser: an interface INHERITING other interfaces. A concrete type
 // returned as the inheriting interface (open below) records GoImplement<fileRdr, rdCloser>;
