@@ -2171,7 +2171,15 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		prefix = PointerDerefOp
 	}
 
-	recordableBase := interfaceTypeName != "" && interfaceTypeName != "nil" &&
+	// An interface-to-interface conversion is never recorded: it is satisfied by the C#
+	// inheritance emitted at the interface DECLARATION (structural bases — see
+	// getStructuralInterfaceBases), not by a generated impl partial. The generator's impl
+	// types are structs; an interface-typed record kills its whole run (every other
+	// GoImplement partial in the package vanishes — CrossPkgUser counter CS0029).
+	targetIsIface, _ := isInterface(targetType)
+
+	recordableBase := !targetIsIface &&
+		interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
 		interfaceTypeName != "any" &&
 		!strings.Contains(targetTypeName, "interface{")

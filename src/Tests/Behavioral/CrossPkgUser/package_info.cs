@@ -45,6 +45,7 @@ using static go.main_package;
 // <InterfaceImplementations>
 [assembly: GoImplement<badge, Tagged>]
 [assembly: GoImplement<counter, ΔMeter>]
+[assembly: GoImplement<emblem, namedLabel>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

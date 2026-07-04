@@ -31,6 +31,25 @@ internal static @string Label(this badge b) {
     return "badge:"u8 + b.name;
 }
 
+[GoType] partial interface namedLabel :
+    CrossPkgLib_package.Labeled
+{
+    nint Rank();
+}
+
+[GoType] partial struct emblem {
+    internal @string name;
+    internal nint rank;
+}
+
+internal static @string Label(this emblem e) {
+    return e.name;
+}
+
+internal static nint Rank(this emblem e) {
+    return e.rank;
+}
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(note, (nint)CrossPkgLib.Precision, defer);
     var b = CrossPkgLib.Boiling();
@@ -109,6 +128,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(boom.Error());
     var tk = ((tick)(uintptr)((nint)(3 | (nint)gv)));
     fmt.Println((uint64)(uintptr)tk);
+    namedLabel nl = new emblem(name: "gold"u8, rank: 1);
+    fmt.Println(CrossPkgLib.Describe(nl), nl.Rank());
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

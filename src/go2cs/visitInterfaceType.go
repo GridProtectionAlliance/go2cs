@@ -5,6 +5,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"slices"
 	"strings"
 )
 
@@ -114,6 +115,33 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	v.writeDocString(target, doc, interfaceType.Pos())
 
+	var structuralBases []string
+	structuralCovered := HashSet[string]{}
+
+	// Structural (non-embedded) satisfaction of an imported interface is emitted as C#
+	// interface inheritance: Go converts fs.File to io.Reader implicitly because the method
+	// set suffices, but C# interfaces are nominal, so the declaration site must carry the
+	// link (os's CopyFS passes an fs.File to io.Copy — CS1503). Inheritance is
+	// identity-preserving (no adapter wrapper — the dynamic value flows through type asserts)
+	// and free at every downstream conversion site. Skipped for lifted/dyn interfaces
+	// (reflection-implemented) and for constraint interfaces (generic machinery).
+	if !lifted && identType != nil {
+		hasConstraint := false
+
+		for _, method := range interfaceType.Methods.List {
+			if len(method.Names) == 0 && method.Type != nil {
+				if isConstraint, _ := v.isTypeConstraint(method.Type); isConstraint {
+					hasConstraint = true
+					break
+				}
+			}
+		}
+
+		if !hasConstraint {
+			structuralBases, structuralCovered = v.getStructuralInterfaceBases(interfaceType, identType)
+		}
+	}
+
 	result := &strings.Builder{}
 	inheritedInterfaces := []string{}
 	typeConstraints := HashSet[ConstraintType]{}
@@ -129,6 +157,14 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 
 	for _, method := range interfaceType.Methods.List {
 		if len(method.Names) == 1 {
+			// A declared member covered by a structural base is inherited, not re-declared —
+			// redeclaring would HIDE the base member (distinct C# members, implementers would
+			// need both). Its signature is guaranteed compatible: the base was only chosen
+			// because types.Implements matched the full method set.
+			if structuralCovered.Contains(method.Names[0].Name) {
+				continue
+			}
+
 			v.writeDocString(result, method.Doc, method.Pos())
 
 			goMethodName := method.Names[0].Name
@@ -190,6 +226,13 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	result.WriteString(v.indent(v.indentLevel))
 	result.WriteRune('}')
 	result.WriteString(v.newline)
+
+	// Structural bases follow declared embeds, deduplicated against them
+	for _, base := range structuralBases {
+		if !slices.Contains(inheritedInterfaces, base) {
+			inheritedInterfaces = append(inheritedInterfaces, base)
+		}
+	}
 
 	inheritedResult := ""
 
@@ -259,6 +302,130 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	}
 
 	return
+}
+
+// getStructuralInterfaceBases finds EXPORTED method interfaces from directly imported packages
+// whose method sets are STRICT subsets of the declared interface's — Go satisfies such
+// conversions structurally, so the C# declaration inherits them and skips re-declaring the
+// covered members. The strict-subset guard also rules out inheritance cycles (equal method
+// sets can never inherit each other). Candidates already covered by a declared EMBED are
+// skipped (the embed emission handles those, and a second differently-rendered base of the
+// same type would be a duplicate-interface error). Returns the rendered base type names and
+// the covered method names.
+func (v *Visitor) getStructuralInterfaceBases(interfaceType *ast.InterfaceType, identType types.Type) ([]string, HashSet[string]) {
+	named, ok := identType.(*types.Named)
+
+	if !ok {
+		return nil, nil
+	}
+
+	iface, ok := named.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() == 0 {
+		return nil, nil
+	}
+
+	var embeddedTypes []types.Type
+
+	for _, method := range interfaceType.Methods.List {
+		if len(method.Names) == 0 && method.Type != nil {
+			if embedType := v.getType(method.Type, false); embedType != nil {
+				if _, isIface := embedType.Underlying().(*types.Interface); isIface {
+					embeddedTypes = append(embeddedTypes, embedType)
+				}
+			}
+		}
+	}
+
+	var bases []*types.Named
+
+	for _, imported := range v.pkg.Imports() {
+		scope := imported.Scope()
+
+		for _, name := range scope.Names() {
+			typeName, ok := scope.Lookup(name).(*types.TypeName)
+
+			if !ok || !typeName.Exported() || typeName.IsAlias() {
+				continue
+			}
+
+			candidate, ok := typeName.Type().(*types.Named)
+
+			if !ok || candidate.TypeParams().Len() > 0 {
+				continue
+			}
+
+			candidateIface, ok := candidate.Underlying().(*types.Interface)
+
+			if !ok || candidateIface.NumMethods() == 0 || candidateIface.NumMethods() >= iface.NumMethods() || !candidateIface.IsMethodSet() {
+				continue
+			}
+
+			if !types.Implements(named, candidateIface) {
+				continue
+			}
+
+			// A declared embed that implements the candidate already carries its members
+			coveredByEmbed := false
+
+			for _, embedType := range embeddedTypes {
+				if types.Implements(embedType, candidateIface) {
+					coveredByEmbed = true
+					break
+				}
+			}
+
+			if !coveredByEmbed {
+				bases = append(bases, candidate)
+			}
+		}
+	}
+
+	if len(bases) == 0 {
+		return nil, nil
+	}
+
+	// Keep the minimal covering set: drop a base another chosen base already implements
+	// (fs.File satisfies io.Reader, io.Closer AND io.ReadCloser — only ReadCloser is
+	// listed; C# reaches the others through it). Equal-sized sets tie-break by index so
+	// mutual implementers cannot drop each other both ways.
+	baseNames := make([]string, 0, len(bases))
+	covered := HashSet[string]{}
+
+	for i, candidate := range bases {
+		candidateIface := candidate.Underlying().(*types.Interface)
+		subsumed := false
+
+		for j, other := range bases {
+			if i == j {
+				continue
+			}
+
+			otherIface := other.Underlying().(*types.Interface)
+
+			if (otherIface.NumMethods() > candidateIface.NumMethods() ||
+				(otherIface.NumMethods() == candidateIface.NumMethods() && j < i)) &&
+				types.Implements(other, candidateIface) {
+				subsumed = true
+				break
+			}
+		}
+
+		if subsumed {
+			continue
+		}
+
+		// Fully-qualified rendering: the declaring FILE may not import the candidate's
+		// package (fs.go declares File without importing io), so no using alias exists
+		baseNames = append(baseNames, rootQualifySubNamespaceTypeRefs(convertToCSTypeName(v.getFullTypeName(candidate, false))))
+
+		// The base's FULL method set (embedded members included) is inherited
+		for k := 0; k < candidateIface.NumMethods(); k++ {
+			covered.Add(candidateIface.Method(k).Name())
+		}
+	}
+
+	return baseNames, covered
 }
 
 func (v *Visitor) getSourceParameterSignatureLen(signature *types.Signature) int {

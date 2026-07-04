@@ -48,6 +48,23 @@ func (b badge) Label() string { return "badge:" + b.name }
 // CS0030 removeall_noat).
 type tick = CrossPkgLib.Ticks
 
+// namedLabel structurally contains CrossPkgLib.Labeled (a strict superset of its method
+// set), so the converter emits C# interface inheritance and the Describe call in main is
+// an implicit reference conversion — no adapter, identity preserved (os CopyFS passing an
+// fs.File to io.Copy, CS1503).
+type namedLabel interface {
+	Label() string
+	Rank() int
+}
+
+type emblem struct {
+	name string
+	rank int
+}
+
+func (e emblem) Label() string { return e.name }
+func (e emblem) Rank() int     { return e.rank }
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -179,6 +196,9 @@ func main() {
 	fmt.Println(boom.Error())
 	tk := tick(3 | int(gv))
 	fmt.Println(uint64(tk)) // 7
+
+	var nl namedLabel = emblem{name: "gold", rank: 1}
+	fmt.Println(CrossPkgLib.Describe(nl), nl.Rank()) // gold 1
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

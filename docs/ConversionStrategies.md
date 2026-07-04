@@ -1130,6 +1130,59 @@ Two rules govern how these are emitted:
 ### Cross-package pointer-to-interface conversions use the foreign adapter
 A pointer-sourced cast to an interface implemented by a FOREIGN type references the foreign assembly's PUBLIC adapter class - os's `err = &PathError{...}` emits `new fs.PathErrorжerror(Ꮡ(new PathError(...)))`, io/fs having generated the adapter from its own `GoImplement<PathError, error>(Pointer = true)` record. The record's existence is read from the imported package's package_info (`parseExportedPointerImplements`, the same imported-records pattern as GoTypeAlias); targets without a record keep the deref-copy form. The reference goes through the file-local package ALIAS (`fs.PathErrorжerror`, user-ruled style) via getTypeName, which also registers the using. Guarded by `CrossPkgUser` (`rep = mtr` -> `new CrossPkgLib.MeterжReporter(mtr)`; `&CrossPkgLib.Alarm{}` -> error).
 
+### Cross-package value-to-interface conversions use the local VALUE adapter
+A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
+DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records
+`GoImplement<foreign, localIface>` locally; the `ImplementGenerator` detects the foreign struct
+(different containing assembly, no local declaration) and emits a **value adapter class**
+`{Struct}ᴠ{Iface}` (composed with `Symbols.ValueAdapterInfix`) wrapping a **COPY** of the struct
+— exactly as a Go interface holds a value — with value equality and method forwarding through
+the file usings. The conversion site emits `new SignalᴠSignal(sig)` with simple names. The
+adapter's struct field is **fully qualified** (`GetFullTypeName(true)`): the bare name resolved
+to the LOCAL same-named type when os's `ΔSignal` interface shadowed syscall's `ΔSignal` struct.
+
+### Structural interface satisfaction emits C# interface inheritance
+Go converts `fs.File` to `io.Reader` implicitly because the method set suffices; C# interfaces
+are nominal. When a declared interface's method set **strictly contains** an EXPORTED method
+interface from a **directly imported** package (checked with `types.Implements`), the converter
+emits real C# inheritance at the declaration and **skips re-declaring the covered members**
+(redeclaring would HIDE the base member — implementers would need both):
+
+```csharp
+[GoType] partial interface File :
+    io_package.ReadCloser
+{
+    (FileInfo, error) Stat();
+}
+```
+
+Every downstream interface-to-interface conversion then becomes an implicit reference
+conversion — identity-preserving (the dynamic value flows through type asserts, unlike an
+adapter wrapper) and zero-cost (os's `CopyFS` passes an `fs.File` to `io.Copy`, CS1503).
+Details: only the **minimal covering set** is listed (`ReadCloser` subsumes `Reader`/`Closer`);
+the strict-subset guard rules out inheritance cycles (equal method sets never inherit);
+candidates covered by a declared **embed** are skipped (the embed emission handles those);
+bases render **fully qualified** because the declaring file need not import the candidate's
+package (`fs.go` declares `File` without importing `io`); lifted/dyn and constraint interfaces
+are excluded. Consequently the converter **never records an interface-to-interface
+`GoImplement`** — the generator's impl types are structs, and an interface-typed record kills
+its whole run. Bounds (banked): candidates come from direct imports only — same-package
+structural pairs, the universe `error`, and non-imported-package pairs would still surface as
+compile errors and would need the adapter complement. Guarded by `CrossPkgUser` (`namedLabel :
+CrossPkgLib_package.Labeled`, passed to `CrossPkgLib.Describe`).
+
+### Embedded-pointer hop receivers split per method
+An interface member satisfied by promotion through an embedded POINTER field forwards through
+the hop — but the receiver form depends on the target method: a `[GoRecv]` ref extension (or
+struct method) binds the deref'd value (`this.File.Value.Name()`), while a **direct-ж primary**
+(an extension on `ж<X>` emitted when the receiver escapes — os's `File.Read`/`Write`) binds the
+box FIELD itself (`this.File.Read(p)`; deref'ing first strands the receiver, CS1929). The
+generator discriminates by scanning the compilation for `this ж<X>` extensions — only
+converter-emitted primaries are visible to the single-pass scan (sibling-generator ж-twins are
+not), which is exactly the needed split. Applied to both the value-form partial and the pointer
+adapter's hop arm. Guarded by `StructPointerPromotionWithInterface` (`Describer` over
+`deviceHandle{*Device}`).
+
 ### Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
 
