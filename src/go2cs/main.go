@@ -2118,9 +2118,13 @@ func (v *Visitor) isLocalImplType(t types.Type) bool {
 
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
-	// to properly handle duck typed Go interface implementations
-	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
-	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
+	// to properly handle duck typed Go interface implementations. The KEY resolves through
+	// types.Unalias: os records DirEntry implementations both through its own alias
+	// (`type DirEntry = fs.DirEntry` → "DirEntry") and through the io/fs name — two records
+	// for ONE interface made the generator emit the explicit implementation twice (CS8646 ×4
+	// + CS0111 ×4, os dirEntry/dir_windows).
+	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(types.Unalias(interfaceType), false))
+	targetTypeName := convertToCSTypeName(v.getFullTypeName(types.Unalias(targetType), false))
 
 	if targetTypeName == "" || targetTypeName == "nil" || targetTypeName == "any" {
 		return exprResult

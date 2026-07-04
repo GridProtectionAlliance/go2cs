@@ -1,3 +1,5 @@
+global using Tagged = go.CrossPkgLib_package.Labeled;
+
 namespace go;
 
 using fmt = fmt_package;
@@ -18,6 +20,14 @@ internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
 
 internal static void note(nint n) {
     fmt.Println("noted", n);
+}
+
+[GoType] partial struct badge {
+    internal @string name;
+}
+
+internal static @string Label(this badge b) {
+    return "badge:"u8 + b.name;
 }
 
 internal static void Main() => func((defer, recover) => {
@@ -87,6 +97,9 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLibꓸStatus stv = default!;
     stv.Code = (nint)gv;
     fmt.Println(stv.Code);
+    CrossPkgLib.Labeled l1 = new badge(name: "a"u8);
+    Tagged l2 = new badge(name: "b"u8);
+    fmt.Println(l1.Label(), l2.Label());
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

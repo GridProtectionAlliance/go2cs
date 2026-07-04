@@ -31,6 +31,7 @@ using static go.main_package;
 
 // <ExportedTypeAliases>
 [assembly: GoTypeAlias("Meter", "ΔMeter")]
+[assembly: GoTypeAlias("Tagged", "go.CrossPkgLib_package.Labeled")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter
@@ -42,6 +43,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<badge, CrossPkgLib_package.Labeled>]
 [assembly: GoImplement<counter, ΔMeter>]
 // </InterfaceImplementations>
 

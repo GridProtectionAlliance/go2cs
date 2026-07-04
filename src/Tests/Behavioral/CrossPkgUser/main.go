@@ -34,6 +34,15 @@ type meterBox struct {
 // DEFAULT type, not the UntypedInt wrapper (CS0123, poll deferred Seek).
 func note(n int) { fmt.Println("noted", n) }
 
+// Tagged aliases the foreign interface: an implementation converted through BOTH the
+// alias and the original name must record ONCE (types.Unalias key - os DirEntry alias,
+// CS8646 x4 double explicit implementation).
+type Tagged = CrossPkgLib.Labeled
+
+type badge struct{ name string }
+
+func (b badge) Label() string { return "badge:" + b.name }
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -152,6 +161,9 @@ func main() {
 	var stv CrossPkgLib.Status
 	stv.Code = int(gv)
 	fmt.Println(stv.Code) // 7
+	var l1 CrossPkgLib.Labeled = badge{name: "a"}
+	var l2 Tagged = badge{name: "b"}
+	fmt.Println(l1.Label(), l2.Label())
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
