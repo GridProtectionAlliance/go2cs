@@ -1213,10 +1213,39 @@ DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) recor
 `GoImplement<foreign, localIface>` locally; the `ImplementGenerator` detects the foreign struct
 (different containing assembly, no local declaration) and emits a **value adapter class**
 `{Struct}ᴠ{Iface}` (composed with `Symbols.ValueAdapterInfix`) wrapping a **COPY** of the struct
-— exactly as a Go interface holds a value — with value equality and method forwarding through
-the file usings. The conversion site emits `new SignalᴠSignal(sig)` with simple names. The
-adapter's struct field is **fully qualified** (`GetFullTypeName(true)`): the bare name resolved
-to the LOCAL same-named type when os's `ΔSignal` interface shadowed syscall's `ΔSignal` struct.
+— exactly as a Go interface holds a value — with value equality. The conversion site emits
+`new SignalᴠSignal(sig)` with simple names. The adapter's struct field is **fully qualified**
+(`GetFullTypeName(true)`): the bare name resolved to the LOCAL same-named type when os's
+`ΔSignal` interface shadowed syscall's `ΔSignal` struct.
+
+Method forwarding uses the **container-qualified static form** —
+`global::go.encoding.binary_package.Uint32(m_value, b)` rather than `m_value.Uint32(b)`:
+converted Go methods are extension methods on the package class the struct nests in, and the
+instance form only resolves when the generated file has a `using` for that namespace (`using go;`
+covers root-namespace packages like io/os, but a sub-namespace package like `encoding/binary`
+never resolved — debug/plan9obj CS1061 ×6). The static form is exactly equivalent and needs no
+using at all.
+
+**BOTH-FOREIGN value pairs take the same route.** When the interface is foreign too
+(debug/plan9obj passes `binary.BigEndian`, an `encoding/binary` value, as `binary.ByteOrder`),
+the converter first consults the imported package_info records (`parseExportedValueImplements`,
+plain or `Promoted` `GoImplement` forms): if the defining assembly already implements the pair,
+the bare value converts implicitly and nothing is recorded. Otherwise the pair is recorded
+locally and the conversion site wraps in the locally generated value adapter
+(`new bigEndianᴠByteOrder(binary.BigEndian)`) — the value sibling of the both-foreign pointer
+adapter above.
+
+### Publicized unexported types make their exported methods public
+An unexported Go type reachable through an exported surface (an exported var — `var BigEndian
+bigEndian` — an exported field, or an exported function's signature) is emitted `public`
+(`packagePublicizedTypes`, CS0052/CS0050). Its **exported methods** must then be public too —
+Go callers hold such values through the exported var and call the methods cross-package, but the
+receiver-based access rule alone rendered them `internal` (extension methods invisible outside
+the assembly: `binary.BigEndian.Uint32(...)` CS1061). The receiver-access checks in
+`visitFuncDecl` treat a publicized receiver as public, and `collectPublicizedTypes` **cascades**
+through the publicized types' exported method signatures to a fixpoint (a newly public method's
+unexported parameter/result types get publicized in turn, or the public method would be CS0050).
+Unexported methods stay `internal` regardless.
 
 ### Structural interface satisfaction emits C# interface inheritance
 Go converts `fs.File` to `io.Reader` implicitly because the method set suffices; C# interfaces

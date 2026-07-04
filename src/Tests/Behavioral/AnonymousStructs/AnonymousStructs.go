@@ -80,4 +80,26 @@ func main() {
 	pRetries := &settings.Retries
 	*pRetries = 5
 	fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n", *pRetries, settings.Retries)
+
+	// An IN-FUNCTION `var` decl over a slice of an anonymous struct: the declared type
+	// must resolve to the lifted struct name (the initializer's conversion lifts it),
+	// not raw `struct{…}` Go syntax (debug/plan9obj NewFile).
+	fmt.Println("\n=== In-Function var Slice of Anonymous Struct ===")
+
+	var sects = []struct {
+		name string
+		size uint32
+	}{
+		{"text", 100},
+		{"data", 200},
+		{"syms", 300},
+	}
+
+	total := uint32(0)
+
+	for _, sect := range sects {
+		total += sect.size
+	}
+
+	fmt.Printf("sections=%d total=%d first=%s\n", len(sects), total, sects[0].name)
 }

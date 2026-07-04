@@ -322,8 +322,8 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						}
 					}
 
-					csTypeName := v.getCSTypeName(def.Type())
-					typeLenDeviation := token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
+					var csTypeName string
+					var typeLenDeviation token.Pos
 
 					if v.inFunction {
 						// A func-literal initializer (`var f T = func(){ …capture… }`) emits its
@@ -334,6 +334,13 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 						v.hoistedDecls = hoistBuf
 						valExpr := v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context)
 						v.hoistedDecls = savedHoist
+
+						// Render the declared type only AFTER converting the initializer: a
+						// composite literal over an anonymous struct (`var sects = []struct{…}{…}`)
+						// lifts the struct type during value conversion, so the declaration
+						// resolves to the lifted name instead of raw `struct{…}` Go syntax.
+						csTypeName = v.getCSTypeName(def.Type())
+						typeLenDeviation = token.Pos(len(csTypeName) + (len(csIDName) - len(goIDName)))
 
 						// A narrow-integer arithmetic initializer (`var x uint8 = a + b`) needs the
 						// same cast back to the declared type as the assignment forms — Go wraps the
@@ -359,8 +366,10 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 							v.writeOutput("%s %s = %s;", csTypeName, csIDName, valExpr)
 						}
 					} else {
+						csTypeName = v.getCSTypeName(def.Type())
+
 						access := getAccess(goIDName)
-						typeLenDeviation -= token.Pos(len(access) + 9)
+						typeLenDeviation = token.Pos(len(csTypeName)+(len(csIDName)-len(goIDName))) - token.Pos(len(access)+9)
 
 						if v.isAddressedGlobal(ident) {
 							v.writeAddressedGlobalDecl(access, csTypeName, csIDName, v.convInterfaceDeclValue(valueSpec.Values[i], ifaceDeclType, context), isInherentlyHeapAllocatedType(v.getIdentType(ident)))

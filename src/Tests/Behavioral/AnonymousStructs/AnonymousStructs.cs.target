@@ -46,6 +46,11 @@ internal static void processAnonymousStruct(processAnonymousStruct_data data) {
     public nint Age;
 }
 
+[GoType("dyn")] partial struct main_typeᴛ2 {
+    internal @string name;
+    internal uint32 size;
+}
+
 internal static void Main() {
     var namedPerson = new Person(Name: "Alice"u8, Age: 30);
     var anonPerson = new main_anonPerson(Name: "Bob"u8, Age: 25);
@@ -64,6 +69,17 @@ internal static void Main() {
     var pRetries = Ꮡsettings.of(settingsᴛ1.ᏑRetries);
     pRetries.Value = 5;
     fmt.Printf("after &settings.Retries=5: *p=%d global=%d\n"u8, pRetries.Value, settings.Retries);
+    fmt.Println("\n=== In-Function var Slice of Anonymous Struct ===");
+    slice<main_typeᴛ2> sects = new main_typeᴛ2[]{
+        new("text"u8, 100),
+        new("data"u8, 200),
+        new("syms"u8, 300)
+    }.slice();
+    var total = (uint32)0;
+    foreach (var (_, sect) in sects) {
+        total += sect.size;
+    }
+    fmt.Printf("sections=%d total=%d first=%s\n"u8, len(sects), total, sects[0].name);
 }
 
 } // end main_package

@@ -385,6 +385,22 @@ func loadImportedTypeAliases(info PackageInfo) {
 
 			packageLock.Unlock()
 		}
+
+		// Record the imported package's VALUE-form GoImplement pairs (plain or Promoted): the
+		// foreign struct's own assembly implements the interface, so a value cast here converts
+		// implicitly and needs no local adapter (see the both-foreign value arm in
+		// convertToInterfaceType).
+		if pairs, err := parseExportedValueImplements(packageInfoFile); err == nil {
+			rootPackageName := getSanitizedIdentifier(info.RootPackageName)
+
+			packageLock.Lock()
+
+			for _, pair := range pairs {
+				importedValueImplements.Add(fmt.Sprintf("%s|%s|%s", rootPackageName, pair[0], pair[1]))
+			}
+
+			packageLock.Unlock()
+		}
 	} else {
 		showWarning("Failed to parse exported type aliases from package info file \"%s\": %s", packageInfoFile, err)
 	}
@@ -471,6 +487,56 @@ func parseExportedPointerImplements(packageInfoFile string) ([][2]string, error)
 
 		// Both sides reduce to their SIMPLE (last-dot-segment) names - the adapter class
 		// name composes from exactly those (see adapterTypeRef / the ImplementGenerator).
+		tName := matches[1]
+
+		if idx := strings.LastIndex(tName, "."); idx >= 0 {
+			tName = tName[idx+1:]
+		}
+
+		ifaceName := matches[2]
+
+		if idx := strings.LastIndex(ifaceName, "."); idx >= 0 {
+			ifaceName = ifaceName[idx+1:]
+		}
+
+		pairs = append(pairs, [2]string{tName, ifaceName})
+	}
+
+	return pairs, scanner.Err()
+}
+
+// parseExportedValueImplements parses a package info file for VALUE-form `GoImplement<T, Iface>`
+// assembly attributes (plain or `(Promoted = true)`), returning (T-simple, Iface-simple) pairs -
+// records that the defining assembly itself implements the interface on the value type.
+func parseExportedValueImplements(packageInfoFile string) ([][2]string, error) {
+	file, err := os.Open(packageInfoFile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+
+	var pairs [][2]string
+
+	pattern := regexp.MustCompile(`\[assembly: GoImplement<(.+), (.+)>(?:\(Promoted = true\))?\]`)
+
+	for scanner.Scan() {
+		matches := pattern.FindStringSubmatch(scanner.Text())
+
+		if matches == nil {
+			continue
+		}
+
+		// A Pointer-form record is the ADAPTER existence signal, not a value implementation.
+		if strings.Contains(scanner.Text(), "(Pointer = true)") {
+			continue
+		}
+
+		// Both sides reduce to their SIMPLE (last-dot-segment) names - matching the key
+		// composition at the conversion site (see convertToInterfaceType).
 		tName := matches[1]
 
 		if idx := strings.LastIndex(tName, "."); idx >= 0 {

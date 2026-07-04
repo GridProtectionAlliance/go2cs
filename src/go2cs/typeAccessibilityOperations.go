@@ -25,6 +25,8 @@ func collectPublicizedTypes(pkg *types.Package) {
 
 	scope := pkg.Scope()
 
+	defer cascadePublicizedMethodTypes()
+
 	for _, name := range scope.Names() {
 		obj := scope.Lookup(name)
 
@@ -79,6 +81,74 @@ func collectPublicizedTypes(pkg *types.Package) {
 			}
 		}
 	}
+}
+
+// cascadePublicizedMethodTypes extends the publicized set through method signatures: a publicized
+// type's EXPORTED methods are emitted public (see the receiver-access logic in visitFuncDecl), so
+// their parameter/result types face the same accessibility rule (CS0050/CS0051). Runs to a fixpoint
+// since each newly publicized type exposes its own exported methods.
+func cascadePublicizedMethodTypes() {
+	for {
+		before := len(packagePublicizedTypes)
+
+		for obj := range packagePublicizedTypes {
+			named, ok := types.Unalias(obj.Type()).(*types.Named)
+
+			if !ok {
+				continue
+			}
+
+			for i := range named.NumMethods() {
+				method := named.Method(i)
+
+				if !method.Exported() {
+					continue
+				}
+
+				sig, ok := method.Type().(*types.Signature)
+
+				if !ok {
+					continue
+				}
+
+				if params := sig.Params(); params != nil {
+					for j := range params.Len() {
+						collectUnexportedNamedTypes(params.At(j).Type(), obj.Pkg())
+					}
+				}
+
+				if results := sig.Results(); results != nil {
+					for j := range results.Len() {
+						collectUnexportedNamedTypes(results.At(j).Type(), obj.Pkg())
+					}
+				}
+			}
+		}
+
+		if len(packagePublicizedTypes) == before {
+			break
+		}
+	}
+}
+
+// receiverTypeIsPublicized reports whether the (possibly pointer-wrapped) receiver type is an
+// unexported named type that is nonetheless emitted `public` (see packagePublicizedTypes). Its
+// exported methods must then be public too, or a cross-assembly caller holding the value through
+// the exported var/field/return cannot call them (encoding/binary's BigEndian.Uint32 — CS1061).
+func receiverTypeIsPublicized(t types.Type) bool {
+	if packagePublicizedTypes == nil {
+		return false
+	}
+
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+
+	if named, ok := types.Unalias(t).(*types.Named); ok {
+		return packagePublicizedTypes[named.Obj()]
+	}
+
+	return false
 }
 
 // collectUnexportedNamedTypes records the unexported named types of this package that the given

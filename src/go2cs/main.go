@@ -297,6 +297,12 @@ var importedTypeAliases map[string]string
 // reference it (os's `err = &PathError{...}`, CS0029 x38).
 var importedPointerImplements HashSet[string]
 
+// importedValueImplements records VALUE-form `[assembly: GoImplement<T, Iface>]` lines (plain or
+// Promoted) parsed from IMPORTED packages' package_info files, keyed "pkgName|T|ifaceSimple" -
+// the existence proof that the foreign assembly itself implements the interface on the value
+// type, so a both-foreign value cast here converts implicitly and skips the local adapter.
+var importedValueImplements HashSet[string]
+
 // importPackageDirs maps a directly-imported package's import path to its on-disk source directory
 // and Go package name, captured from the MODULE-AWARE go/packages graph at load time. It is the
 // fallback resolver for cross-package references to a LOCAL/USER module (a `replace`d or co-located
@@ -613,6 +619,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		exportedTypeAliases = make(map[string]string)
 		importedTypeAliases = make(map[string]string)
 		importedPointerImplements = HashSet[string]{}
+		importedValueImplements = HashSet[string]{}
 		constImportedTypeAliases = NewHashSet([]string{})
 		parsedPackageInfoFiles = NewHashSet([]string{})
 		interfaceImplementations = make(map[string]HashSet[string])
@@ -2207,6 +2214,34 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	}
 
 	recordableValueForeign := recordableBase && !pointerTarget && targetIsForeignNamed && !v.isLocalImplType(targetType) && v.isLocalImplType(interfaceType)
+
+	// A VALUE conversion where BOTH sides are FOREIGN (encoding/binary's `BigEndian` passed as
+	// binary.ByteOrder from debug/plan9obj): when the defining assembly already implements the
+	// pair (its package_info carries the value-form GoImplement record), the bare value converts
+	// implicitly — otherwise record the pair locally so the generator emits the LOCAL value
+	// adapter for the foreign struct (same route as the local-interface case above).
+	if recordableBase && !pointerTarget && targetIsForeignNamed && !v.isLocalImplType(interfaceType) {
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+				ifaceSimple := interfaceTypeName
+
+				if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+					ifaceSimple = ifaceSimple[idx+1:]
+				}
+
+				key := fmt.Sprintf("%s|%s|%s", getSanitizedIdentifier(pkg.Name()),
+					removeSanitizationMarker(getCoreSanitizedIdentifier(named.Obj().Name())), ifaceSimple)
+
+				packageLock.Lock()
+				foreignValueImplExists := importedValueImplements.Contains(key)
+				packageLock.Unlock()
+
+				if !foreignValueImplExists {
+					recordableValueForeign = true
+				}
+			}
+		}
+	}
 
 	if recordable || recordableValueForeign {
 		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
