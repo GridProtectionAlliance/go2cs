@@ -799,6 +799,28 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			rhsExpr := v.convExpr(rhs, contexts)
 
+			// A `:=` DECLARATION whose RHS is a constant-folded NAMED-NUMERIC conversion
+			// (`p := printFlags(0)` renders the bare `0`) loses the type the declaration
+			// infers from — re-impose the named cast (regexp/syntax writeRegexp's p,
+			// CS1503 ×2). The same fold is harmless in already-typed positions.
+			if assignStmt.Tok == token.DEFINE && ident != nil && !v.isReassignment(ident) {
+				if callExpr, ok := rhs.(*ast.CallExpr); ok {
+					if tv, ok := v.info.Types[rhs]; ok && tv.Value != nil {
+						if isConv, _ := v.isTypeConversion(callExpr); isConv {
+							if named, ok := types.Unalias(tv.Type).(*types.Named); ok {
+								if _, isBasic := named.Underlying().(*types.Basic); isBasic {
+									namedCS := v.getCSTypeName(named)
+
+									if !strings.HasPrefix(rhsExpr, "(("+namedCS+")") && !strings.HasPrefix(rhsExpr, "("+namedCS+")") && !strings.HasPrefix(rhsExpr, "new ") {
+										rhsExpr = fmt.Sprintf("((%s)%s)", namedCS, rhsExpr)
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 			// Narrow-integer arithmetic RHS assigned to a narrow LHS needs a cast back to the LHS
 			// type (see narrowArithmeticCastType). The existing bitwise-assign / `&^=` wrappers take
 			// precedence (their own cast already applies).

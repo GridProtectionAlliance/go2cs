@@ -138,7 +138,7 @@ internal static void Main() {
     var agesDemo = new PeopleByAge(new Person[]{new("Zed"u8, 30, 11.5F), new("Amy"u8, 25, 7.0F)}.slice());
     agesDemo.sort();
     fmt.Println(agesDemo[0].Name);
-    var lt = markerConst;
+    var lt = ((levelToken)markerConst);
     fmt.Println((uint32)lt + 1);
     fmt.Println(MultiLine);
     fmt.Println(MultiLine2);
