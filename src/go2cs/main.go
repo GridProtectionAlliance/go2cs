@@ -213,6 +213,7 @@ const CapturedVarMarker = "\u0297"            // Variants: ʗ ɔ ᴄ
 const TempVarMarker = "\u1D1B"                // Variants: ᴛ Ŧ ᵀ
 const TrueMarker = "\u1427"                   // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
+const ValueAdapterInfix = "ᴠ"          // ᴠ - value-form foreign adapter infix (keep in sync with Symbols.ValueAdapterInfix)
 const OverloadDiscriminator = "\uA7F7"        // Variants: ꟷ false
 const EllipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
 const TypeAliasDot = "\uA4F8"                 // Variants: ꓸ
@@ -2170,13 +2171,30 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		prefix = PointerDerefOp
 	}
 
-	recordable := interfaceTypeName != "" && interfaceTypeName != "nil" &&
+	recordableBase := interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
 		interfaceTypeName != "any" &&
-		!strings.Contains(targetTypeName, "interface{") &&
-		v.isLocalImplType(targetType)
+		!strings.Contains(targetTypeName, "interface{")
 
-	if recordable {
+	recordable := recordableBase && v.isLocalImplType(targetType)
+
+	// A VALUE conversion of a FOREIGN type to a LOCAL interface (os.Signal is DOWNSTREAM
+	// of syscall.Signal - neither assembly can partial the other) records too: the
+	// generator emits a local VALUE ADAPTER class wrapping a COPY (Go value semantics)
+	// instead of the impossible foreign partial (exec_posix p.Signal(Kill), CS1503).
+	// Gate to a NAMED foreign type - tuples/other shapes must not record (the first cut
+	// wrapped a destructured tuple result in a phantom adapter).
+	targetIsForeignNamed := false
+
+	if named, ok := types.Unalias(targetType).(*types.Named); ok {
+		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			targetIsForeignNamed = true
+		}
+	}
+
+	recordableValueForeign := recordableBase && !pointerTarget && targetIsForeignNamed && !v.isLocalImplType(targetType) && v.isLocalImplType(interfaceType)
+
+	if recordable || recordableValueForeign {
 		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
 		// it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter wrapper
 		// instead of the value-boxing partial struct (see convert-to-interface emission below).
@@ -2290,6 +2308,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// The old `~box` deref boxed a COPY into the C# interface (aliasing divergence) and could
 	// not serve direct-ж members at all (math/rand lockedSource CS1929/CS1503). Non-local impl
 	// types keep the deref-copy form below (their adapter is not generated in this assembly).
+	// A recorded VALUE-form foreign conversion references the LOCAL value adapter
+	// (`new ΔSignalᴠΔSignal(sig)` - same package, bare name).
+	if recordableValueForeign && exprResult != "" {
+		return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
+	}
+
 	if pointerTarget && recordable && exprResult != "" {
 		return fmt.Sprintf("new %s(%s)", adapterTypeRef(targetTypeName, interfaceTypeName), exprResult)
 	}
@@ -2355,6 +2379,25 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 // the struct itself, so a same-package reference is the bare name. The interface side uses its
 // SIMPLE name — the generator derives the same identifier via GetSimpleName, so both sides must
 // agree on last-dot-segment naming.
+// valueAdapterTypeRef renders the reference to the generated VALUE-form foreign adapter
+// class: `<structSimple>ᴠ<ifaceSimple>` (ValueAdapterInfix), emitted in the INTERFACE's
+// package (the converting package), so the reference is the bare composed name.
+func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string {
+	structSimple := structTypeName
+
+	if idx := strings.LastIndex(structSimple, "."); idx >= 0 {
+		structSimple = structSimple[idx+1:]
+	}
+
+	ifaceSimple := interfaceTypeName
+
+	if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+		ifaceSimple = ifaceSimple[idx+1:]
+	}
+
+	return structSimple + ValueAdapterInfix + ifaceSimple
+}
+
 func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 	ifaceSimple := interfaceTypeName
 

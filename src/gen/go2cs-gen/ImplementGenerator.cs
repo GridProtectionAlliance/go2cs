@@ -227,6 +227,34 @@ public class ImplementGenerator : ISourceGenerator
                 continue;
             }
 
+            // A FOREIGN struct (no local declaration to partial - it lives in another
+            // assembly) with a value conversion takes the VALUE adapter: a class wrapping a
+            // COPY (Go value semantics), forwarding through the foreign package's extension
+            // methods via the file's usings (os's Signal interface over syscall.Signal -
+            // neither assembly can partial the other, exec_posix CS1503).
+            if (structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly))
+            {
+                string valueAdapterScope = interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public" ? "public" : "internal";
+
+                string valueAdapterSource = new ValueAdapterImplTemplate
+                {
+                    PackageNamespace = packageNamespace,
+                    PackageName = packageName,
+                    StructName = structName,
+                    InterfaceName = interfaceName,
+                    // Composes with Symbols.ValueAdapterInfix - the value sibling of the
+                    // PointerPrefix-composed pointer adapters.
+                    AdapterName = $"{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}",
+                    AdapterScope = valueAdapterScope,
+                    Methods = methods,
+                    UsingStatements = usingStatements
+                }
+                .Generate();
+
+                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-val.g.cs")), valueAdapterSource);
+                continue;
+            }
+
             string generatedSource = new InterfaceImplTemplate
             {
                 PackageNamespace = packageNamespace,

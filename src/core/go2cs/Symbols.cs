@@ -41,4 +41,7 @@ public static class Symbols
     public const string EllipsisOperator = "ꓸꓸꓸ";
     public const string CapturedVarMarker = "ʗ";
     public const string TempVarMarker = "ᴛ";
+    // Composes VALUE-form foreign interface adapter class names ({Struct}ᴠ{Iface}) - the
+    // value sibling of the ж-composed pointer adapters (wraps a COPY, Go value semantics).
+    public const string ValueAdapterInfix = "ᴠ";
 }
