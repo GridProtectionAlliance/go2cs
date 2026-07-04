@@ -65,8 +65,17 @@ public static partial class strings_package
         return (n, err);
     }
 
-    public static @string Join(in slice<@string> source, @string separator) => 
-        string.Join(separator, source);
+    // Join the ELEMENTS — passing the slice itself binds string.Join's `params object?[]`
+    // overload, which Go-formats the whole slice as one item ("[xy xy]").
+    public static @string Join(in slice<@string> source, @string separator)
+    {
+        string[] parts = new string[source.Length];
+
+        for (nint i = 0; i < source.Length; i++)
+            parts[i] = source[i];
+
+        return string.Join(separator, parts);
+    }
 
     public static bool HasPrefix(@string s, @string prefix) => 
         s.ToString().StartsWith(prefix, StringComparison.Ordinal);
