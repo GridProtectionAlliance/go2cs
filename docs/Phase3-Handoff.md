@@ -15,6 +15,31 @@
 
 ## Where things stand (2026-07-03)
 
+- **REFLECT AT ZERO (2026-07-03) - THE CENSUS CAMPAIGN IS COMPLETE (154 -> 0), CLUB = 21.**
+  Eleven roots this session, in commit order: F5 `d2ab3ff76` (@string wrapper surface, gen);
+  F4 `6f7c3f82b` (getTypeName structural slice/array recursion - also killed SILENT wrong-type
+  asserts); F6 `d7b1cf75f` (explicit generic args from info.Instances); golib-uintptr `3ce524fd1`
+  (generic-math interfaces + >>> + ConvertToType fast paths + TypeParamCaster Value-FIELD probe);
+  F7 `00284b358` (multi-hop value-embed promoted pointer-method descent); F8 `219bdb459`
+  (interface-slice append element cast); F10 `15955155b` (static-readonly const switch tag ->
+  if-else, `is` pattern disabled); F11 `c8d023ada` (raw box name at heap-boxed &field arm);
+  F13 `e64879847` (nested deref paren-wrap); F14 `ec7ce4ad9` (explicit lambda return type for
+  unsafe.Pointer literals); F12 `f7e52b44a` (IIncrement/IDecrement lift into the Arithmetic set
+  in BOTH constraintOperations.go and InterfaceTypeTemplate.cs + golib uintptr declarations).
+  Every root has a behavioral guard; all census entries are documented in ConversionStrategies.md
+  (same-day batch). recon118 (301 csprojs, full) is fresh - overlay + frontier remeasure is the
+  next step: expect a BIG fmt drop (its 74 was mostly reflect leak); time Duration-CS9135 x2 is
+  possibly F10-cleared; then os 15 / time 15 / netip 6 / concurrent 5 / bufio 8 / edwards 1.
+  **Banked latents:** (1) F15-latent: generated [GoType("num:*")] wrappers do NOT declare
+  generic-math interfaces - a NAMED numeric wrapper as a union-generic type arg would CS0315
+  (no corpus site yet; fix = mirror the golib uintptr interface list into the num template).
+  (2) Phase-4 GC-hazard audit: F4-family sites route managed pointers through nuint round-trips
+  (compiles, but the guintptr-class hazard stands). **Measurement lessons reconfirmed:** trust
+  the "N Error(s)" SUMMARY line, never `grep -c "error CS"` (an MSBuild race made a 5-error build
+  count as 0 - PHANTOM-ZERO); the behavioral runner builds RELEASE (a `dotnet run -c Debug` runs
+  STALE binaries - false silent-truncation diagnosis); powershell -File needs cd to
+  src/Tests/Behavioral first.
+
 - **REFLECT CENSUS COMPLETE (9-agent workflow) — 154 errors → 14 mechanism families, ZERO
   raw-metal (all fixable emission bugs with named existing machinery). Full census:
   [docs/Reflect-Census.md](Reflect-Census.md). Attack order: Wave A = StructTypeTemplate triple
