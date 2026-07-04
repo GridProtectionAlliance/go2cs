@@ -21,7 +21,7 @@ internal static bool prefixMatch<T>(T s, T sep)
     if (len(s) < n) {
         return false;
     }
-    return new @string(s[..(int)(n)]) == new @string(sep);
+    return new @string(((T)(s[..(int)(n)]))) == new @string(sep);
 }
 
 internal static void Main() {
@@ -38,6 +38,7 @@ internal static void Main() {
     fmt.Println("last(string):", lastByte(str));
     fmt.Println("last([]byte):", lastByte(bs));
     fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>((@string)"56:78")));
+    fmt.Println("head:", headSum((@string)"x98:76"), headSum(slice<byte>((@string)"y10:23")));
 }
 
 internal static nint digitSum<T>(T s)
@@ -50,7 +51,24 @@ internal static nint digitSum<T>(T s)
         }
         return n;
     };
-    return parse(s[0..2]) + parse(s[3..5]);
+    return parse(((T)(s[0..2]))) + parse(((T)(s[3..5])));
+}
+
+internal static T trimHead<T>(T s, nint n)
+    where T : /* []byte | string */ IByteSeq<byte>, new()
+{
+    for (nint i = 0; i < n; i++) {
+        if (len(s) > 1) {
+            s = ((T)(s[1..]));
+        }
+    }
+    return ((T)(s[0..]));
+}
+
+internal static nint headSum<T>(T s)
+    where T : /* []byte | string */ IByteSeq<byte>, new()
+{
+    return digitSum(trimHead(s, 1));
 }
 
 internal static byte lastByte<T>(T s)

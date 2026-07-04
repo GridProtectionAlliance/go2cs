@@ -40,6 +40,31 @@ func (v *Visitor) convSliceExpr(sliceExpr *ast.SliceExpr) string {
 
 			return fmt.Sprintf("subslice<%s, %s>(%s, %s, %s)", getSanitizedIdentifier(tp.Obj().Name()), elemType, ident, low, high)
 		}
+
+		// A sub-slice of a `string | []byte` UNION-constrained value goes through the
+		// IByteSeq<byte> Range indexer, which returns the INTERFACE — but Go types the result
+		// as the type parameter again, so it assigns back to / passes as / returns as `bytes`
+		// (time format_rfc3339, CS0266/CS0310/CS0029 ×6). C# permits the explicit interface →
+		// type-parameter conversion (a runtime-checked unbox to @string / slice<byte>; the
+		// slice case shares backing, matching Go). A 3-index slice cannot occur on a
+		// string-including union (Go forbids it on strings), so only the range forms cast.
+		if typeParamIsStringByteUnion(tp) && !sliceExpr.Slice3 {
+			name := getSanitizedIdentifier(tp.Obj().Name())
+			var inner string
+
+			switch {
+			case sliceExpr.Low == nil && sliceExpr.High == nil:
+				inner = ident + "[..]"
+			case sliceExpr.High == nil:
+				inner = ident + "[" + v.getRangeIndexer(sliceExpr.Low) + "..]"
+			case sliceExpr.Low == nil:
+				inner = ident + "[.." + v.getRangeIndexer(sliceExpr.High) + "]"
+			default:
+				inner = ident + "[" + v.getRangeIndexer(sliceExpr.Low) + ".." + v.getRangeIndexer(sliceExpr.High) + "]"
+			}
+
+			return fmt.Sprintf("((%s)(%s))", name, inner)
+		}
 	}
 
 	// When converting a pointer expression to a slice, we use special handling

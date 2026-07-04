@@ -41,6 +41,7 @@ func main() {
 	fmt.Println("last(string):", lastByte(str))
 	fmt.Println("last([]byte):", lastByte(bs))
 	fmt.Println("sum:", digitSum("12:34"), digitSum([]byte("56:78")))
+	fmt.Println("head:", headSum("x98:76"), headSum([]byte("y10:23")))
 }
 
 // lastByte uses the REVERSED union order - `[]byte | string` (time/format.go appendNano):
@@ -59,6 +60,23 @@ func digitSum[T []byte | string](s T) int {
 		return n
 	}
 	return parse(s[0:2]) + parse(s[3:5])
+}
+
+// trimHead mirrors time format_rfc3339 parseStrictRFC3339/atoi: a sub-slice of the
+// constrained value ASSIGNED BACK to the type-param variable, passed to another
+// constrained generic, and RETURNED as the type param - each position needs the
+// IByteSeq-to-type-param cast (CS0266/CS0310/CS0029 x6, time).
+func trimHead[T []byte | string](s T, n int) T {
+	for i := 0; i < n; i++ {
+		if len(s) > 1 {
+			s = s[1:]
+		}
+	}
+	return s[0:]
+}
+
+func headSum[T []byte | string](s T) int {
+	return digitSum(trimHead(s, 1))
 }
 
 func lastByte[T []byte | string](s T) byte {
