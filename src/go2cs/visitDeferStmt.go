@@ -68,8 +68,19 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	if paramCount == 0 {
 		result.WriteString("defer(")
 
-		// C# `defer` method implementation expects an Action delegate
-		if strings.HasSuffix(callExpr, "()") {
+		// C# `defer` method implementation expects an Action delegate. The bare
+		// method-group form (`defer(k.Close)`) binds only when the callee returns VOID —
+		// an error-returning method (`defer k.Close()`, registry Key.Close in time's
+		// zoneinfo_windows) is a Func<error> method group (CS1503 ×2). Keep the lambda
+		// form there so the call's result is discarded, exactly Go's deferred-call
+		// semantics.
+		hasResults := false
+
+		if sig, ok := v.getType(deferStmt.Call.Fun, false).(*types.Signature); ok && sig.Results() != nil && sig.Results().Len() > 0 {
+			hasResults = true
+		}
+
+		if !hasResults && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()")
 		} else {
 			callExpr = "() => " + callExpr

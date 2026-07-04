@@ -46,6 +46,10 @@ internal static byte first(array<byte> value) {
 
 internal static void Main() => func((defer, recover) => {
     deferǃ(closeIt, (ж<nint>)(nil), (nint)(3), defer);
+    ref var h = ref heap<res>(out var Ꮡh);
+    h = new res(id: 4);
+    var hʗ1 = h;
+    defer(() => hʗ1.close());
     var xs = new item[]{new(1), new(2)}.slice();
     var (p, err) = find(xs, 2);
     fmt.Println(p != nil, err == default!);
@@ -55,5 +59,14 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(big.idx());
     fmt.Println(invalid == big, invalid == invalid);
 });
+
+[GoType] partial struct res {
+    internal nint id;
+}
+
+internal static error close(this res h) {
+    fmt.Println("closed", h.id);
+    return default!;
+}
 
 } // end main_package

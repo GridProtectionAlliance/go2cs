@@ -42,6 +42,11 @@ func first(value [4]byte) byte {
 
 func main() {
 	defer closeIt(nil, 3)
+	// A no-arg deferred METHOD whose signature RETURNS a value (registry Key.Close in
+	// time's zoneinfo_windows): the bare method-group form is a Func<error> (CS1503) -
+	// the lambda form discards the result, matching Go deferred-call semantics.
+	h := res{id: 4}
+	defer h.close()
 	xs := []item{{1}, {2}}
 	p, err := find(xs, 2)
 	fmt.Println(p != nil, err == nil)
@@ -50,4 +55,12 @@ func main() {
 	fmt.Println(first([4]byte{7, 8, 9, 10}))
 	fmt.Println(big.idx())
 	fmt.Println(invalid == big, invalid == invalid)
+}
+
+// res.close returns error - the defer must not bind it as a bare method group.
+type res struct{ id int }
+
+func (h res) close() error {
+	fmt.Println("closed", h.id)
+	return nil
 }
