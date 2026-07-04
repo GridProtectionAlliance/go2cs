@@ -87,6 +87,18 @@ public readonly struct array<T> : IArray<T>, IList<T>, IReadOnlyList<T>, IEquata
         m_array = array ?? [];
     }
 
+    // Go 1.20 slice-to-array conversion (`[4]byte(s)`): copies exactly 'length' elements,
+    // panicking like Go when the slice is too short. The pointer form (`(*[4]byte)(s)`,
+    // Go 1.17) boxes this copy - aliasing stays faithful for reads back through the same
+    // pointer (see ConversionStrategies).
+    public array(slice<T> source, nint length)
+    {
+        if (source.Length < length)
+            throw new IndexOutOfRangeException($"runtime error: cannot convert slice with length {source.Length} to array or pointer to array with length {length}");
+
+        m_array = source.ToSpan()[..(int)length].ToArray();
+    }
+
     public array(Span<T> source)
     {
         m_array = source.ToArray();

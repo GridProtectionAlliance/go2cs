@@ -42,6 +42,16 @@ func consume(s string) string {
 	return string([]byte{b1, b2}) + string(*t)
 }
 
+// sliceToArray: Go's slice-to-array conversions route through golib's copy ctor - the 1.20
+// VALUE form copies exactly as Go does (CS1955, netip AddrFromSlice), and the 1.17 POINTER
+// form boxes the same copy (CS0030, edwards25519); reads back through the pointer are
+// faithful.
+func sliceToArray(s []byte) int {
+	a := [4]byte(s)
+	p := (*[2]byte)(s)
+	return int(a[3]) + int(p[1])
+}
+
 func classify(v any) string {
 	if v == intRef(nil) {
 		return "nilref"
@@ -62,4 +72,6 @@ func main() {
 	fmt.Println(*r, classify(r))
 
 	fmt.Println(consume("abcd")) // abcd
+
+	fmt.Println(sliceToArray([]byte{1, 2, 3, 4})) // 6
 }

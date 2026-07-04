@@ -34,6 +34,12 @@ internal static @string consume(@string s) {
     return ((@string)new byte[]{b1, b2}.slice()) + ((@string)(t.Value));
 }
 
+internal static nint sliceToArray(slice<byte> s) {
+    var a = new array<byte>(s, 4);
+    var p = Ꮡ(new array<byte>(s, 2));
+    return (nint)a[3] + (nint)p.Value[1];
+}
+
 internal static @string classify(any v) {
     if (v == ((intRef)default!)) {
         return "nilref"u8;
@@ -53,6 +59,7 @@ internal static void Main() {
     intRef r = Ꮡn;
     fmt.Println(r.Value, classify(r));
     fmt.Println(consume("abcd"u8));
+    fmt.Println(sliceToArray(new byte[]{1, 2, 3, 4}.slice()));
 }
 
 } // end main_package

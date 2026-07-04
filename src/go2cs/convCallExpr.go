@@ -173,6 +173,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// Go's slice-to-ARRAY conversions route through golib's array<T>(slice<T>, nint)
+		// COPY ctor (which panics Go-style on a short slice): the 1.20 VALUE form
+		// `[4]byte(slice)` copies exactly as Go does (netip AddrFromSlice, CS1955 ×5); the
+		// 1.17 POINTER form `(*[32]byte)(slice)` boxes the same copy (edwards25519
+		// fiatScalarFromBytes' input, CS0030) — reads back through the pointer stay
+		// faithful. A NAMED-over-array target falls through unchanged (none in the corpus).
+		if _, argIsSlice := v.getType(arg, false).Underlying().(*types.Slice); argIsSlice {
+			if resultArr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Array); ok {
+				elemName := convertToCSTypeName(v.getTypeName(resultArr.Elem(), false))
+				return fmt.Sprintf("new array<%s>(%s, %d)", elemName, v.convExpr(arg, nil), resultArr.Len())
+			}
+
+			if resultPtr, ok := v.info.TypeOf(callExpr).(*types.Pointer); ok {
+				if resultArr, ok := types.Unalias(resultPtr.Elem()).(*types.Array); ok {
+					elemName := convertToCSTypeName(v.getTypeName(resultArr.Elem(), false))
+					return fmt.Sprintf("%s(new array<%s>(%s, %d))", AddressPrefix, elemName, v.convExpr(arg, nil), resultArr.Len())
+				}
+			}
+		}
+
 		targetTypeName = convertToCSTypeName(targetTypeName)
 
 		// A conversion TARGET that is a foreign RENAMED type routes through the recorded
@@ -1583,6 +1603,15 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 					}
 				}
 
+				// Go 1.17 slice-to-array-POINTER — `(*[32]byte)(x)` with a SLICE argument
+				// (edwards25519 fiatScalarFromBytes' input, CS0030): claimed so the
+				// slice-to-array conversion arm boxes the golib copy.
+				if slc, ok := argType.Underlying().(*types.Slice); ok {
+					if arrType, ok := types.Unalias(elemType).(*types.Array); ok && types.Identical(arrType.Elem(), slc.Elem()) {
+						return true, "*" + v.getTypeName(elemType, false)
+					}
+				}
+
 				return false, ""
 			}
 			targetExpr = nil
@@ -1612,6 +1641,15 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 
 			if targetType == nil || argType == nil {
 				return false, ""
+			}
+
+			// Go 1.20 slice-to-ARRAY value conversion — `[4]byte(slice)` (netip
+			// AddrFromSlice, CS1955): claimed so the slice-to-array conversion arm emits
+			// the golib copy ctor.
+			if arrType, ok := types.Unalias(targetType).(*types.Array); ok {
+				if slc, ok := argType.Underlying().(*types.Slice); ok && types.Identical(arrType.Elem(), slc.Elem()) {
+					return true, v.getTypeName(targetType, false)
+				}
 			}
 
 			if !types.Identical(targetType.Underlying(), argType.Underlying()) {
