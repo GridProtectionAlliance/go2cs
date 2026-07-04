@@ -58,7 +58,15 @@ internal static int64 twice(this @base b) {
     return f.fd;
 }
 
+[GoType] partial struct mixed {
+    public nint Pub;
+    internal nint sec;
+}
+
 internal static void Main() {
+    var mx = new mixed(Pub: 3);
+    mx.sec = 4;
+    fmt.Println(mx.Pub + mx.sec);
     ref var b = ref heap(new box(), out var Ꮡb);
     fill(Ꮡb);
     fmt.Println(b.w.a, b.w.b);

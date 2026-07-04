@@ -454,7 +454,14 @@ internal class StructTypeTemplate : TemplateBase
             AppendPromotedBoxInitializers(result);
             result.AppendLine($"{TypeElemIndent}}}");
 
-            // Generate exported constructor from public fields
+            // Generate exported constructor from public fields. When an ALL-fields internal
+            // ctor follows (mixed-visibility struct), a same-assembly named-args call matching
+            // the public subset is ambiguous between the two all-optional overloads (CS0121,
+            // os fileStat) - deprioritize the subset so same-assembly calls bind the full ctor;
+            // cross-assembly callers never see the internal one, so resolution there is unaffected.
+            if (PublicStructMembers.Count != StructMembers.Count && PublicStructMembers.Count > 0)
+                result.AppendLine($"{TypeElemIndent}[global::System.Runtime.CompilerServices.OverloadResolutionPriority(-1)]");
+
             GenerateConstructor("public", PublicStructMembers, result);
 
             // Generate internal constructor with all fields

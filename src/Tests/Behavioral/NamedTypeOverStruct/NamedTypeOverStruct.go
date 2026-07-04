@@ -67,7 +67,20 @@ func (f *file) bump() int64 {
 	return f.fd
 }
 
+// mixed has PUBLIC and internal fields: the generator emits a public-subset ctor AND an
+// all-fields internal ctor - a same-assembly named-args call matching the subset was
+// ambiguous between the two all-optional overloads (CS0121 x3, os fileStat); the subset
+// is deprioritized via OverloadResolutionPriority.
+type mixed struct {
+	Pub int
+	sec int
+}
+
 func main() {
+	mx := mixed{Pub: 3}
+	mx.sec = 4
+	fmt.Println(mx.Pub + mx.sec) // 7
+
 	var b box
 	fill(&b)
 	fmt.Println(b.w.a, b.w.b) // 10 20 — write-through the forwarded fields persisted
