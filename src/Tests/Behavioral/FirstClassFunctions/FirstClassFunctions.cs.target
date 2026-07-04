@@ -107,19 +107,67 @@ internal static void Main() {
     var (result, turnIsOver) = converted(new score(player: 3, opponent: 5, thisTurn: 7));
     fmt.Println("converted func type call:", result.player, result.opponent, result.thisTurn, turnIsOver);
     var m = new machine(split: (@string s) => (len(s), s + "!", default!));
-    var (n, @out, serr) = m.split("hi");
+    var (n, @out, serr) = m.split("hi"u8);
     fmt.Println(n, @out, serr == default!);
     var p = new provider(produce: (nint x) => x * 2);
     var r = new registry(h: new handler(p.produce));
     fmt.Println(r.h(21));
     tagged tg = new handlerᴠtagged(r.h);
     fmt.Println(tg.tag(), r.h(1));
+    var wk = Ꮡ(new worker(n: 3));
+    {
+        var err = wk.initWorker(0); if (err == default!) {
+            fmt.Println(wk.run(new byte[]{1, 2}.slice()), lastN.Value);
+        }
+    }
 }
 
 internal delegate (nint, @string, error) splitter(@string s);
 
 [GoType] partial struct machine {
     internal splitter split;
+}
+
+[GoType] partial struct worker {
+    internal Func<ж<worker>, slice<byte>, nint> fill;
+    internal Action<ж<worker>> step;
+    internal nint n;
+}
+
+internal static ж<nint> lastN;
+
+internal static nint fillFast(this ж<worker> Ꮡw, slice<byte> b) {
+    ref var w = ref Ꮡw.Value;
+
+    lastN = Ꮡw.of(worker.Ꮡn);
+    return len(b) + w.n;
+}
+
+[GoRecv] internal static void bump(this ref worker w) {
+    w.n++;
+}
+
+[GoRecv] internal static error /*err*/ initWorker(this ref worker w, nint level) {
+    error err = default!;
+
+    switch (ᐧ) {
+    case {} when level is 0: {
+        w.fill = (Func<ж<worker>, slice<byte>, nint>)(fillFast);
+        w.step = (Action<ж<worker>>)(bump);
+        break;
+    }
+    default: {
+        return fmt.Errorf("bad level %d"u8, level);
+    }}
+
+    return default!;
+}
+
+internal static nint run(this ж<worker> Ꮡw, slice<byte> b) {
+    ref var w = ref Ꮡw.Value;
+
+    w.step(Ꮡw);
+    return w.fill(Ꮡw, b);
 }
 
 internal delegate nint handler(nint _);

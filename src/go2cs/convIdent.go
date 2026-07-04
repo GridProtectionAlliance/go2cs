@@ -51,14 +51,26 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 
 		identType := v.getIdentType(ident)
 
+		// The current method's REF receiver has NO box — only a direct-ж method carries
+		// Ꮡrecv (handled above), and receivers are never heap-decl'd. An ESCAPE-MARKED
+		// receiver must not take the heap-box render below: flate init's
+		// `d.fill = (*compressor).fillStore` emitted a nonexistent Ꮡd (CS0103 ×11).
+		isCurrentRefReceiver := false
+
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+			isCurrentRefReceiver = true
+		}
+
 		// Check if the identifier is not already a pointer type or is a parameter or escapes heap,
 		// in these cases, we need to add the address operator to reference the pointer variable.
 		// The box keeps the RAW Go name (`Ꮡp`), even when the value alias is collision-renamed
 		// (`Δp`) — an escaping local is `ref var Δp = ref heap(new T(), out var Ꮡp)`, a deref'd
 		// pointer param `ref var Δp = ref Ꮡp.Value` — so reference it by the raw name, not `ᏑΔp`
 		// (not in scope → CS0103). boxBaseName is a no-op when nothing is shadow-renamed (no churn).
-		if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
-			return AddressPrefix + v.boxBaseName(ident)
+		if !isCurrentRefReceiver {
+			if _, ok := identType.(*types.Pointer); !ok || v.identIsParameter(ident) || (identEscapesHeap && !isInherentlyHeapAllocatedType(identType)) {
+				return AddressPrefix + v.boxBaseName(ident)
+			}
 		}
 	}
 
@@ -93,16 +105,29 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	// deref the box directly (`Ꮡm.Value`). The box `Ꮡm` is a capturable reference. Address uses
 	// (`&m`, `&m.field`) are rendered from the box name in convUnaryExpr, bypassing this rewrite.
 	if v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda && v.isLambdaBoxRefVar(v.info.ObjectOf(ident)) {
-		// For a box-of-POINTER (or other inherently-heap) local — `Ꮡm` is a `ж<ж<T>>` — reading the box
-		// is reading the HELD pointer value, not a dereference of it, so it must use `.ValueSlot` (no
-		// nil-pointer-dereference check): in Go reading `*(&p)` for a nil `*T`/slice/map yields the nil
-		// value, no panic. The box of a value-struct local (`ж<box>`) or a deref'd pointer PARAMETER
-		// (`ж<pointed-to-T>`) is a genuine dereference, so it keeps the strict `.Value`.
-		valAccessor := ".Value"
-		if v.isBoxedPointerLocal(ident) {
-			valAccessor = ".ValueSlot"
+		// The current method's REF receiver has NO box — a genuine closure capture would
+		// have promoted the method direct-ж (bodyCapturesReceiverInClosure); reaching here
+		// as a ref receiver means a PSEUDO-lambda conversion context (a method-value assign)
+		// touched an escape-marked receiver, and the box render is a nonexistent name
+		// (flate init's `d.fill = (*compressor).fillStore`, CS0103 ×11).
+		isRefReceiver := false
+
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+			isRefReceiver = !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 		}
-		return AddressPrefix + v.boxBaseName(ident) + valAccessor
+
+		if !isRefReceiver {
+			// For a box-of-POINTER (or other inherently-heap) local — `Ꮡm` is a `ж<ж<T>>` — reading the box
+			// is reading the HELD pointer value, not a dereference of it, so it must use `.ValueSlot` (no
+			// nil-pointer-dereference check): in Go reading `*(&p)` for a nil `*T`/slice/map yields the nil
+			// value, no panic. The box of a value-struct local (`ж<box>`) or a deref'd pointer PARAMETER
+			// (`ж<pointed-to-T>`) is a genuine dereference, so it keeps the strict `.Value`.
+			valAccessor := ".Value"
+			if v.isBoxedPointerLocal(ident) {
+				valAccessor = ".ValueSlot"
+			}
+			return AddressPrefix + v.boxBaseName(ident) + valAccessor
+		}
 	}
 
 	// A same-package GLOBAL variable reference shadowed by a same-named function-level LOCAL: C# locals

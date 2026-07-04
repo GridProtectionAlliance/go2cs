@@ -140,11 +140,48 @@ func main() {
 
 	var tg tagged = r.h
 	fmt.Println(tg.tag(), r.h(1)) // handler 2
+
+	wk := &worker{n: 3}
+	if err := wk.initWorker(0); err == nil {
+		fmt.Println(wk.run([]byte{1, 2}), *lastN) // 6 4
+	}
 }
 
 type splitter func(s string) (int, string, error)
 
 type machine struct{ split splitter }
+
+// worker mirrors compress/flate's compressor: METHOD EXPRESSIONS assigned into func
+// fields (`w.fill = (*worker).fillFast`) and invoked with the receiver as the first arg
+// (`w.fill(w, b)`). The ref receiver must never take a box render (CS0103 x11 on Ꮡd),
+// and the func-FIELD callee's signature drives the box form of the receiver arg
+// (CS1503 x5).
+type worker struct {
+	fill func(*worker, []byte) int
+	step func(*worker)
+	n    int
+}
+
+var lastN *int
+
+func (w *worker) fillFast(b []byte) int { lastN = &w.n; return len(b) + w.n }
+func (w *worker) bump()                 { w.n++ }
+
+func (w *worker) initWorker(level int) (err error) {
+	switch {
+	case level == 0:
+		w.fill = (*worker).fillFast
+		w.step = (*worker).bump
+	default:
+		return fmt.Errorf("bad level %d", level)
+	}
+	return nil
+}
+
+func (w *worker) run(b []byte) int {
+	w.step(w)
+	return w.fill(w, b)
+}
 
 // handler is a NAMED func type; registry's field takes a value of a DIFFERENT delegate
 // type (provider's plain func-typed field), which C# cannot convert implicitly — the
