@@ -144,6 +144,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 						if eltType != nil {
 							if _, ok := eltType.Underlying().(*types.Struct); ok || field.Embedded() {
 								v.convertToInterfaceType(fieldType, eltType, "")
+
+								// Route the element through the interface conversion at RENDER
+								// too — the record-only call above can miss paths that bypass
+								// it, and the ctor's interface param cannot take the bare
+								// struct without its partial (archive/tar's lifted
+								// `struct{ io.Reader }{fr}`, CS1503 ×3).
+								callContext.interfaceTypes[i] = fieldType
 							}
 						}
 					} else if ok := isPointer(fieldType); ok {

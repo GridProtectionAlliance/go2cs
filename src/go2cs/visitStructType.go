@@ -284,8 +284,22 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				}
 			}
 
-			// Lookup identity to determine if it's an interface
+			// Lookup identity to determine if it's an interface — for a SELECTOR embed
+			// (io.Writer) resolve the SEL, not the package ident: a cross-package
+			// INTERFACE embed otherwise took the promoted-STRUCT property form, and the
+			// generator tried to construct the interface (archive/tar's lifted
+			// `struct{ io.Writer }`, CS0144 ×8 + CS1929 ×4).
 			identObj := v.info.ObjectOf(ident)
+
+			if selectorType {
+				if selectorExpr, ok := unwrapGeneric(field.Type).(*ast.SelectorExpr); ok {
+					identObj = v.info.ObjectOf(selectorExpr.Sel)
+				} else if ptrType, ok := field.Type.(*ast.StarExpr); ok {
+					if selectorExpr, ok := unwrapGeneric(ptrType.X).(*ast.SelectorExpr); ok {
+						identObj = v.info.ObjectOf(selectorExpr.Sel)
+					}
+				}
+			}
 
 			if identObj == nil {
 				continue // Could not find the object of ident

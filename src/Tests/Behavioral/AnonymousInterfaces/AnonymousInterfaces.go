@@ -83,6 +83,54 @@ func (fakeError) Error() string     { return "fake error" }
 func (fakeError) Unwrap() error     { return io.EOF }
 func (fakeError) Is(err error) bool { return err == io.EOF }
 
+type tally struct{ total int }
+
+func (t *tally) Write(p []byte) (int, error) {
+	t.total += len(p)
+	return len(p), nil
+}
+
+// fill mirrors archive/tar's ReadFrom-hiding shape: a LIFTED anonymous struct embedding
+// io.Writer, built from the POINTER receiver - the embed emits as a real interface field
+// (not a promoted-struct property), the receiver goes direct-ж so its box feeds the
+// pointer adapter, and the ctor routes the element through the interface conversion
+// (archive/tar CS0144/CS1929/CS1503).
+func (t *tally) fill(r io.Reader) (int64, error) {
+	return io.Copy(struct{ io.Writer }{t}, r)
+}
+
+type byteRepeat struct{ left int }
+
+func (b *byteRepeat) Read(p []byte) (int, error) {
+	if b.left == 0 {
+		return 0, io.EOF
+	}
+	n := 0
+	for i := range p {
+		if b.left == 0 {
+			break
+		}
+		p[i] = 'x'
+		b.left--
+		n++
+	}
+	return n, nil
+}
+
+// quad/frame: slicing a NAMED-array field (f.data[:]) needs the wrapper's Range indexer
+// (archive/tar's tr.blk[..], CS1503).
+type quad [4]byte
+
+type frame struct{ data quad }
+
+func checksum(f *frame) int {
+	s := 0
+	for _, v := range f.data[:] {
+		s += int(v)
+	}
+	return s
+}
+
 func main() {
 	testTypeSwitch(fakeError{})
 	testTypeAssertion(fakeError{})
@@ -90,4 +138,11 @@ func main() {
 	testCompositeLiteral()
 	testInlineField()
 	testInterfaceEmbedding(embeddedImpl{})
+
+	tl := &tally{}
+	n, err := tl.fill(&byteRepeat{left: 10})
+	fmt.Println(n, err == nil, tl.total) // 10 true 10
+
+	fr := frame{data: quad{1, 2, 3, 4}}
+	fmt.Println(checksum(&fr)) // 10
 }

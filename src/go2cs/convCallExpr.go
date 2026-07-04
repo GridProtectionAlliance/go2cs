@@ -718,6 +718,31 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			// the box treatment (`ptr = abi.Escape(ptr)` instantiating T = *T passed the
 			// deref'd value alias - internal/weak Make, CS0029). When the instantiation is a
 			// pointer, fall through to the pointer arm below.
+			// A NAMED FUNC-type parameter receiving a value of a DIFFERENT delegate type
+			// wraps in the target delegate's constructor — C# has no implicit conversion
+			// between distinct delegate types (mirrors the composite-literal field rule;
+			// archive/tar templateV7Plus's stringFormatter args, CS1503). Method groups and
+			// func literals convert natively and are left bare.
+			if paramHasArg {
+				if paramNamed, ok := types.Unalias(paramType).(*types.Named); ok {
+					if _, isSig := paramNamed.Underlying().(*types.Signature); isSig {
+						if argType := v.getType(callExpr.Args[i], false); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(paramType)) {
+							if _, argIsSig := argType.Underlying().(*types.Signature); argIsSig {
+								// A GENERIC named delegate param renders unsubstituted type
+								// params at the call site — leave it to native conversion.
+								if _, isLit := callExpr.Args[i].(*ast.FuncLit); !isLit && !typeContainsTypeParams(paramType) {
+									if callExprContext.wrapArgWithNew == nil {
+										callExprContext.wrapArgWithNew = make(map[int]string)
+									}
+
+									callExprContext.wrapArgWithNew[i] = v.getCSTypeName(paramType)
+								}
+							}
+						}
+					}
+				}
+			}
+
 			if needsInterfaceCast, isEmpty := isInterface(paramType); needsInterfaceCast && !v.instantiatedParamIsPointer(callExpr, paramType, i) {
 				callExprContext.u8StringArgOK[i] = false
 

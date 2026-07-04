@@ -38,11 +38,15 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<byteRepeat, io_package.Reader>(Pointer = true)]
 [assembly: GoImplement<embeddedImpl, InlineEmbed>]
 [assembly: GoImplement<fakeError, error>]
 [assembly: GoImplement<fakeReader, WithInlineField_R>]
 [assembly: GoImplement<fakeReader, takesReader_r>]
 [assembly: GoImplement<fakeReader, testCompositeLiteral_readers>]
+[assembly: GoImplement<fill_dst, io_package.Writer>(Promoted = true)]
+[assembly: GoImplement<fill_dst, io_package.Writer>]
+[assembly: GoImplement<tally, io_package.Writer>(Pointer = true)]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

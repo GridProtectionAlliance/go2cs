@@ -42,7 +42,7 @@ internal static void Main() {
         return errΔ1;
     };
     fmt.Println(probe(8, default!), probe(3, default!));
-    takesAFunction(foo);
+    takesAFunction(new Stringy(foo));
     Stringy f = returnsAFunction();
     f();
     Stringy baz = () => "anonymous stringy\n"u8;

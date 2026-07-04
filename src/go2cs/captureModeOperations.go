@@ -521,6 +521,18 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 							found = true
 							return false
 						}
+
+						// An INTERFACE-typed field also captures the receiver AS the pointer
+						// (Go's interface holds the *T): archive/tar's WriteTo builds
+						// `struct{ io.Reader }{fr}` — the pointer adapter wraps the box,
+						// which only exists when the method is direct-ж (CS1503 ×4). This
+						// was previously excluded because the old (broken) lifted-anon-embed
+						// emission compiled without it; the embed is a real interface member
+						// now, so the conversion genuinely needs the box.
+						if fieldIface, isEmpty := isInterface(structType.Field(fieldIdx).Type()); fieldIface && !isEmpty {
+							found = true
+							return false
+						}
 					}
 				}
 			}
