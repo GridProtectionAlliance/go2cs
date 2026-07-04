@@ -1043,6 +1043,40 @@ C# does not allow inline or intra-function type definitions, so these are "lifte
 
 The **empty struct `struct{}` is never lifted** — it maps to the shared golib `EmptyStruct`, so a `struct{}{}` composite literal emits `new EmptyStruct()` and a `map[K]struct{}` ("set") emits `map<K, EmptyStruct>`. Lifting an empty struct would be doubly wrong: it has no fields to model, and the lift mis-attributes its name and identity. When the `struct{}{}` is the value assigned to a map element (`seen[k] = struct{}{}`), the enclosing assignment passes the **LHS ident** (`seen`) into the struct-conversion context to name the lift — so the empty struct was being lifted to `<func>_seen` *and registered under `seen`'s own type, the map* `map[K]struct{}`, in the lifted-type registry. That poisoned every later reference to that map type: the function parameter `seen map[K]struct{}` rendered as the phantom struct instead of `map<K, EmptyStruct>`, and its comma-ok deconstruction (`(_, ok) = seen[k]`) and two-arg indexer vanished (CS8130/CS0021), while real-map call sites mismatched (CS1503). `convStructType` now short-circuits an empty struct to `EmptyStruct` before any lift, mirroring the `!isEmptyStruct` guard that `extractStructType` already applies everywhere else. (Guarded by the `EmptyStructMapSet` behavioral test; runtime hit this on `typesEqual`'s `seen map[_typePair]struct{}` parameter.)
 
+### Lifted anonymous structs embedding an interface
+archive/tar's ReadFrom-hiding shape — `io.Copy(struct{ io.Writer }{tw}, r)` — exercises four
+coupled rules: a SELECTOR embed's interface check resolves the **Sel** (`Writer`), not the
+package ident (`io`), so the cross-package interface embed emits as a plain interface FIELD
+(the promoted-struct property form made the generator construct the interface — CS0144); the
+composite literal routes the element through the interface conversion **at render**
+(`interfaceTypes[i]`, not just the record-only call); a receiver placed into an
+INTERFACE-typed composite field triggers **direct-ж** (Go's interface holds the `*T`, so the
+pointer adapter wraps the box `Ꮡfr`); and the generator emits ONE value-form impl per
+(struct, interface) pair, folding a Promoted duplicate in (CS0111). ARGUMENT-position values
+of a mismatched delegate type wrap in the named delegate's constructor exactly like
+composite-literal fields (generic delegate params stay native — unsubstituted type params
+cannot render). Guarded by `AnonymousInterfaces` (`tally`/`fill`, `byteRepeat`, and the
+named-array `quad`/`frame` Range slice).
+
+### Astral rune literals
+A quoted rune literal beyond the BMP (`'\U0001D504'`) cannot be a C# char literal — it emits
+the code point (`(rune)0x1D504`); BMP literals keep their source text verbatim (html's entity
+table, CS1012 ×133). Guarded by `StringConvPostfix` (`glyphs`).
+
+### Type-switch default arm binds the interface value
+The default clause binds the guard to the ORIGINAL guarded expression (`var x = err;`), whose
+static type is the interface — the switch-operand form (`err.type()`) is object and cannot
+flow back out (`default: return x`, go/build/constraint's pushNot, CS0266). BANKED: a
+call-operand type switch still evaluates the operand in both the header and the default arm.
+
+### Generated code global::-qualifies root-namespace references
+Inside a package whose namespace nests a same-named segment (go/build/constraint emits into
+`namespace go.go.build`), C# binds a generated reference's leading `go` RELATIVELY to `go.go`
+(CS0234). The generators qualify every type-reference position via `GlobalQualify`
+(Common.cs); generated signatures also carry parameter REF KINDS (`in slice<byte>`) and a
+canned `System.IFormattable` impl where the interface inherits it (the hand-finished io
+stub's dyn machinery).
+
 ### Generic embedded fields
 A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as
 an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,

@@ -13,7 +13,22 @@
 > `go-src-converted` religiously. See [`Baseline-vs-FullConversion.md`](Baseline-vs-FullConversion.md)
 > *The corrected end-state* and [`Phase3-AutonomousLoop.md`](Phase3-AutonomousLoop.md) *S1 is a FORK*.
 
-## Where things stand (2026-07-04 late, ~99 commits)
+## Where things stand (2026-07-04 evening, ~107 commits)
+
+- **WAVE (recon150): 141/303 packages compile, 172 errors across ~28 leaf projects** (prior:
+  137/303, 406 errors). **ZERO CLUB 37+**: +html (astral rune literals f6abbcacd — one root,
+  133 errors), +go/build/constraint (GlobalQualify b59c7b78d + type-switch default-arm binding
+  6bbed4b8f), +archive/tar (the lifted-anon-interface-embed batch: io stub Writer+Copy+nint
+  62a2920b2; gen adapter fidelity 7a30c7a1b — pair dedup/Range indexer/ref kinds/IFormattable;
+  converter 20815c4f5 — SEL-embed interface check, render-time interface routing, arg-position
+  delegate wrap, receiver-into-interface-field direct-ж), +go/token (cleared by the shared
+  families). **Fresh census:** flag 23, compress/flate 20, encoding/binary 17, regexp/syntax
+  15, go/doc/comment 13, context 10, socktest 8, math/big 8, hash/fnv 8, compress/lzw 7,
+  x/text/transform 5, runtime/debug 5, ascii85 5, x/sys/cpu 4, dag 3, hpack/template-parse/
+  xml/embed 2 each, ~8 singles. NEXT: flag 23 → compress/flate 20 → encoding/binary 17
+  (binary unblocks the largest dependent swath).
+
+## Previous entry (2026-07-04 late, ~99 commits)
 
 - **WAVE (recon149, honest full-tree): 137 of 303 packages compile** (previous measured wave:
   63) — 35 leaf-failing projects carrying 406 own-errors, ~131 packages blocked as dependents.
