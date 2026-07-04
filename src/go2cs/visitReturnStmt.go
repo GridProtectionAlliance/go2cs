@@ -232,7 +232,21 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 			lambdaContext.deferredDecls = &strings.Builder{}
 
-			resultExpr := v.convExpr(expr, []ExprContext{basicLitContext, lambdaContext})
+			// A POINTER value converting to an INTERFACE result must render as the box —
+			// `Ꮡf`, not the deref-aliased receiver `f` — since the pointer-adapter wraps the
+			// ж<T> itself (`new subFSᴵFS(Ꮡf)`; io/fs subFS.Sub returning its own receiver,
+			// CS1503). Mirrors the argument-position rule in convExprList.
+			exprContexts := []ExprContext{basicLitContext, lambdaContext}
+
+			if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
+				if _, isPtr := v.getType(expr, false).(*types.Pointer); isPtr {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+					exprContexts = []ExprContext{basicLitContext, identContext, lambdaContext}
+				}
+			}
+
+			resultExpr := v.convExpr(expr, exprContexts)
 
 			if len(replacementVal) > 0 {
 				resultExpr = strings.ReplaceAll(replacementVal, DynamicCastArgMarker, resultExpr)

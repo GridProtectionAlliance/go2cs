@@ -111,6 +111,10 @@ func pick(kind int) (Animal, string) {
 	return a, name
 }
 
+// Self returns the POINTER RECEIVER as an interface - the adapter must wrap the box
+// (new CatᴵAnimal(Ꮡc)), not the deref-aliased receiver (io/fs subFS.Sub, CS1503).
+func (c *Cat) Self() Animal { return c }
+
 func main() {
 	var err error
 
@@ -160,6 +164,8 @@ func main() {
 	pack = append(pack, &Cat{})
 	pack = append(pack, Dog{})
 	fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak())
+	cp := &Cat{}
+	fmt.Println(cp.Self().Speak())
 }
 
 // rdCloser mirrors io.ReadCloser: an interface INHERITING other interfaces. A concrete type

@@ -108,6 +108,12 @@ internal static (Animal, @string) pick(nint kind) {
     return (a, name);
 }
 
+public static Animal Self(this ж<Cat> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return new CatᴵAnimal(Ꮡc);
+}
+
 internal static void Main() {
     error err = default!;
     err = new MyError("bar");
@@ -143,6 +149,8 @@ internal static void Main() {
     pack = append(pack, (Animal)(new CatᴵAnimal(Ꮡ(new Cat(nil)))));
     pack = append(pack, (Animal)(new Dog(nil)));
     fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
+    var cp = Ꮡ(new Cat(nil));
+    fmt.Println(cp.Self().Speak());
 }
 
 [GoType] partial interface rdr {
