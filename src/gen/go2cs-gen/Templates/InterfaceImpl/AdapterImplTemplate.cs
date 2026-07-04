@@ -60,7 +60,7 @@ internal class AdapterImplTemplate : TemplateBase
     public override string TemplateBody =>
         $$"""
              /// <summary>
-             /// Pointer-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for 'ж<{{StructName}}>' —
+             /// Pointer-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for 'ж&lt;{{StructName}}&gt;' —
              /// the interface value aliases the wrapped receiver box exactly as Go's interface holds the '*T'.
              /// </summary>
              {{AdapterScope}} sealed class {{AdapterName}} : {{InterfaceName}}, IжAdapter
