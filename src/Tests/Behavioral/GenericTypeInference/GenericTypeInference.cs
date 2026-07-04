@@ -201,6 +201,24 @@ internal static void Main() {
     var (i32, ok32) = bsearchLike(new uint32[]{10, 20, 30}.slice(), (uint32)25);
     fmt.Println(i16, ok16, i32, ok32, halve((uint16)6), halve((uint32)100));
     fmt.Println(halveN((int32)10), halveN((int64)(-3)));
+    var ssum = (int64)0;
+    foreach (var v in range<int64>(seqOf<int64, int32>((int32)4).Invoke)) {
+        ssum += v;
+    }
+    fmt.Println(ssum);
+}
+
+internal static Seq<T> seqOf<T, N>(N n)
+    where T : /* ~int64 */ IAdditionOperators<T, T, T>, ISubtractionOperators<T, T, T>, IMultiplyOperators<T, T, T>, IDivisionOperators<T, T, T>, IModulusOperators<T, T, T>, IBitwiseOperators<T, T, T>, IShiftOperators<T, int, T>, IEqualityOperators<T, T, bool>, IComparisonOperators<T, T, bool>, new()
+    where N : /* ~int32 | ~int64 */ IAdditionOperators<N, N, N>, ISubtractionOperators<N, N, N>, IMultiplyOperators<N, N, N>, IDivisionOperators<N, N, N>, IModulusOperators<N, N, N>, IBitwiseOperators<N, N, N>, IShiftOperators<N, int, N>, IEqualityOperators<N, N, bool>, IComparisonOperators<N, N, bool>, new()
+{
+    return (Func<T, bool> yield) => {
+        for (var i = ConvertToType<T>(0); i < ConvertToType<T>(ConvertToUInt64<N>(n)); i = i + ConvertToType<T>(1)) {
+            if (!yield(i)) {
+                return;
+            }
+        }
+    };
 }
 
 internal static (nint, bool) bsearchLike<S, E>(S s, E v)

@@ -850,10 +850,28 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 		if named, ok := resultType.(*types.Named); ok && (funIsType || calleeIsGeneric) {
 			if named.TypeArgs().Len() > 0 {
+				typeArgs := named.TypeArgs()
+
+				// A GENERIC FUNCTION's explicit arguments must come from the CALLEE's resolved
+				// instantiation (info.Instances), not the RESULT type's arguments — the lists
+				// differ whenever the callee has more type parameters than the result names
+				// (reflect's `rangeNum[T, N](num N) iter.Seq[T]` called `rangeNum[int8](v)`: the
+				// result Seq[T] carries ONE argument where the method needs TWO — CS0305 ×11).
+				// The result's OWN arguments still gate WHETHER to emit (a generic callee
+				// returning a plain named type keeps C# inference — no churn); the conversion/
+				// constructor form (funIsType) keeps the result's arguments outright.
+				if calleeIsGeneric && !funIsType {
+					if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
+						if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil {
+							typeArgs = instance.TypeArgs
+						}
+					}
+				}
+
 				var typeParams []string
 
-				for i := range named.TypeArgs().Len() {
-					typeParams = append(typeParams, v.getCSTypeName(named.TypeArgs().At(i)))
+				for i := range typeArgs.Len() {
+					typeParams = append(typeParams, v.getCSTypeName(typeArgs.At(i)))
 				}
 
 				typeParamExpr = fmt.Sprintf("<%s>", strings.Join(typeParams, ", "))

@@ -187,6 +187,26 @@ func main() {
 	i32, ok32 := bsearchLike([]uint32{10, 20, 30}, uint32(25))
 	fmt.Println(i16, ok16, i32, ok32, halve(uint16(6)), halve(uint32(100)))
 	fmt.Println(halveN(int32(10)), halveN(int64(-3)))
+	ssum := int64(0)
+	for v := range seqOf[int64](int32(4)) {
+		ssum += v
+	}
+	fmt.Println(ssum)
+}
+
+// seqOf mirrors reflect's rangeNum[T, N]: TWO type parameters where the call supplies only T
+// explicitly and N is inferred from the argument, returning a generic named type parameterized
+// by T ALONE. The emitted C# call must carry the CALLEE's full resolved instantiation
+// (info.Instances - both arguments), not the result Seq[T]'s single argument (CS0305 x11,
+// reflect iter.go).
+func seqOf[T ~int64, N ~int32 | ~int64](n N) Seq[T] {
+	return func(yield func(T) bool) {
+		for i := T(0); i < T(n); i = i + 1 {
+			if !yield(i) {
+				return
+			}
+		}
+	}
 }
 
 // bsearchLike mirrors strconv's bsearch: a ~uint16|~uint32 union whose lifted Integer set
