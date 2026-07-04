@@ -60,6 +60,7 @@ internal static void Main() {
         fmt.Println("unknown");
     }
 
+    fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 }
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

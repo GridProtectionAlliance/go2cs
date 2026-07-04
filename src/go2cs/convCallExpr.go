@@ -453,6 +453,20 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		basicTarget, _ := v.info.TypeOf(callExpr).(*types.Basic)
 		targetIsBasic := basicTarget != nil && basicTarget.Kind() != types.String
 
+		// A conversion to STRING whose arg is an UNTYPED constant REFERENCE
+		// (`string(utf8.RuneError)`, time format.cs) renders the arg as its cross-package
+		// `static readonly` Untyped* wrapper, from which @string has no conversion (CS0030).
+		// Hop through the constant's DEFAULT Go type first (`((@string)(rune)runeError)`) —
+		// exactly Go's conversion semantics. A plain literal is already a C# constant and
+		// keeps its direct form (no churn).
+		if basicTarget != nil && basicTarget.Kind() == types.String {
+			if tvArg, ok := v.info.Types[arg]; ok && tvArg.Value != nil {
+				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
+					expr = fmt.Sprintf("(%s)%s", v.getCSTypeName(types.Default(argBasic).(*types.Basic)), expr)
+				}
+			}
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			if targetIsBasic {

@@ -6,6 +6,8 @@ partial class CrossPkgLib_package {
 
 public static readonly UntypedInt Precision = 2;
 
+public static readonly UntypedInt Sep = /* ':' */ 58;
+
 [GoType("num:float64")] partial struct Celsius;
 
 public static Celsius Boiling() {

@@ -108,6 +108,10 @@ func main() {
 	default:
 		fmt.Println("unknown")
 	}
+
+	// string(<cross-package untyped rune const>) - the wrapper needs the default-type hop
+	// (string(utf8.RuneError), time format.cs CS0030).
+	fmt.Println("a" + string(CrossPkgLib.Sep) + "b")
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

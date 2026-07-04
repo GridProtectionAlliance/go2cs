@@ -9,6 +9,10 @@ package CrossPkgLib
 // wrapper in C#, the shape behind the census F10 switch-tag lowering (goarch.PtrSize).
 const Precision = 2
 
+// Sep is an exported UNTYPED RUNE constant - referenced in a string() conversion it
+// renders as the static readonly Untyped wrapper, needing the default-type hop.
+const Sep = ':'
+
 type Celsius float64
 
 // Temperature is an exported package-level TYPE ALIAS over Celsius (Phase 2: the GoTypeAlias /
