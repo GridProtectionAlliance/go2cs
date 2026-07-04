@@ -30,7 +30,13 @@ type meterBox struct {
 	sat int
 }
 
+// note receives a deferred untyped-const-reference arg - deferǃ inference must see the
+// DEFAULT type, not the UntypedInt wrapper (CS0123, poll deferred Seek).
+func note(n int) { fmt.Println("noted", n) }
+
 func main() {
+	defer note(CrossPkgLib.Precision)
+
 	b := CrossPkgLib.Boiling()
 	r := b.Add(10)
 	fmt.Println(float64(b))

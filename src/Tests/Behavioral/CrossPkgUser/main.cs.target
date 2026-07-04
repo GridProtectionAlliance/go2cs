@@ -16,7 +16,12 @@ internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
     internal nint sat;
 }
 
-internal static void Main() {
+internal static void note(nint n) {
+    fmt.Println("noted", n);
+}
+
+internal static void Main() => func((defer, recover) => {
+    deferǃ(note, (nint)CrossPkgLib.Precision, defer);
     var b = CrossPkgLib.Boiling();
     var r = b.Add(10);
     fmt.Println((float64)b);
@@ -82,7 +87,7 @@ internal static void Main() {
     CrossPkgLibꓸStatus stv = default!;
     stv.Code = (nint)gv;
     fmt.Println(stv.Code);
-}
+});
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;
 

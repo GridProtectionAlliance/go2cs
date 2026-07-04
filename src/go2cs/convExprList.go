@@ -160,6 +160,32 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		if callArgs == nil {
 			result.WriteString(arg.String())
 		} else {
+			// A deferred-call argument that is an UNTYPED-constant REFERENCE (`io.SeekStart`,
+			// a `static readonly UntypedInt`) poisons deferǃ's delegate inference — the type
+			// parameter resolves to the wrapper where the deferred method group takes the
+			// default type (CS0123 ×2, poll fd_windows' deferred Seek). Cast it to the
+			// constant's DEFAULT Go type; a literal is already a typed C# constant.
+			var constExpr ast.Expr
+
+			switch e := expr.(type) {
+			case *ast.Ident:
+				constExpr = e
+			case *ast.SelectorExpr:
+				constExpr = e.Sel
+			}
+
+			if constExpr != nil {
+				if constIdent, ok := constExpr.(*ast.Ident); ok {
+					if constObj, ok := v.info.ObjectOf(constIdent).(*types.Const); ok {
+						if basic, ok := constObj.Type().(*types.Basic); ok && basic.Info()&types.IsUntyped != 0 {
+							wrapped := fmt.Sprintf("(%s)%s", v.getCSTypeName(types.Default(basic).(*types.Basic)), arg.String())
+							arg.Reset()
+							arg.WriteString(wrapped)
+						}
+					}
+				}
+			}
+
 			result.WriteString(fmt.Sprintf("%s%d", TempVarMarker, i+1))
 			callArgs[i] = arg.String()
 		}
