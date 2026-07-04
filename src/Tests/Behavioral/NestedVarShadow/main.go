@@ -69,10 +69,23 @@ func pkgShadow(s string) string {
 	return fmt.Sprint(strings)
 }
 
+// pkgParamShadow: a POINTER PARAMETER named after an imported package that the
+// function's SIGNATURE references (math/big's `random(rand *rand.Rand, ...)`): the
+// analysis shadow-renames the body uses (randD1), so the deref-ALIAS declaration line
+// must use the ANALYZED name too, or every use references an undeclared name (CS0103 x3).
+func pkgParamShadow(strings *strings.Reader) (int, string) {
+	buf := make([]byte, 2)
+	n, _ := strings.Read(buf)
+	return n, string(buf)
+}
+
 func main() {
 	fmt.Println(f(10)) // 100
 	fmt.Println(f(3))  // 200
 	fmt.Println(f(1))  // 1
 	fmt.Println(g("ab")) // tag:inner
 	fmt.Println(pkgShadow("xy")) // 5
+	rd := strings.NewReader("hi")
+	rn, rs := pkgParamShadow(rd)
+	fmt.Println(rn, rs) // 2 hi
 }

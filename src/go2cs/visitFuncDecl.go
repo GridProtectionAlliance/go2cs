@@ -372,8 +372,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			param := parameters.At(i)
 
 			// For any array parameters, Go copies the array by value
+			// The BODY-side name of a parameter may be shadow-renamed by the analysis (a param
+			// sharing an imported package name the function uses — math/big's `rand *rand.Rand`
+			// → randΔ1): every alias/clone declared here must use the ANALYZED name or the
+			// renamed body uses reference a name that was never declared (CS0103 ×3). The box
+			// (`Ꮡrand`) keeps the RAW name, as everywhere else.
+			analyzedName := param.Name()
+
+			if renamed, ok := v.varNames[param]; ok && renamed != "" {
+				analyzedName = renamed
+			}
+
 			if _, ok := param.Type().(*types.Array); ok {
-				v.writeString(arrayClones, "%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getSanitizedIdentifier(param.Name()))
+				v.writeString(arrayClones, "%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), getSanitizedIdentifier(analyzedName))
 			}
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
@@ -402,9 +413,9 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 				}
 
 				if v.options.preferVarDecl {
-					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name(), derefAccessor)
+					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), AddressPrefix, param.Name(), derefAccessor)
 				} else {
-					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), getSanitizedIdentifier(param.Name()), AddressPrefix, param.Name(), derefAccessor)
+					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), getSanitizedIdentifier(analyzedName), AddressPrefix, param.Name(), derefAccessor)
 				}
 			}
 

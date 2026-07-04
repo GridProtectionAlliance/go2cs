@@ -62,12 +62,23 @@ internal static @string pkgShadow(@string s) {
     return fmt.Sprint(stringsΔ1);
 }
 
+internal static (nint, @string) pkgParamShadow(ж<strings.Reader> Ꮡstrings) {
+    ref var stringsΔ1 = ref Ꮡstrings.Value;
+
+    var buf = new slice<byte>(2);
+    var (n, _) = stringsΔ1.Read(buf);
+    return (n, ((@string)buf));
+}
+
 internal static void Main() {
     fmt.Println(f(10));
     fmt.Println(f(3));
     fmt.Println(f(1));
     fmt.Println(g("ab"u8));
     fmt.Println(pkgShadow("xy"u8));
+    var rd = strings.NewReader("hi"u8);
+    var (rn, rs) = pkgParamShadow(rd);
+    fmt.Println(rn, rs);
 }
 
 } // end main_package
