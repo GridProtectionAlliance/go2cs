@@ -571,11 +571,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 		escaping := make([]bool, lhsLen)
 		escapingHeapDecls := ""
 
-		// Only a pure new-declaration tuple (`:=`, no reassigned element). Escaping elements are not
-		// counted in declaredCount (the heap-decl path owns them), so the gate is reassignedCount.
-		if assignStmt.Tok == token.DEFINE && reassignedCount == 0 && lhsLen > 1 {
+		// Any `:=` tuple with a NEWLY-DECLARED escaping element — including a MIXED redeclaration
+		// (`rbr2, err := r.makeReverseBitReader(…)` where only `err` is reused): the escaping
+		// element is not counted in declaredCount (the heap-decl path owns it), so without this
+		// pass it would never be declared at all (internal/zstd literals, CS0103 ×9). A REASSIGNED
+		// element is skipped — its box already exists from its original declaration.
+		if assignStmt.Tok == token.DEFINE && lhsLen > 1 {
 			for i := range lhsExprs {
-				if ident := getIdentifier(lhsExprs[i]); ident != nil {
+				if ident := getIdentifier(lhsExprs[i]); ident != nil && !v.isReassignment(ident) {
 					if decl := v.convertToHeapTypeDecl(ident, false); decl != "" {
 						escaping[i] = true
 						escapingHeapDecls += decl + v.newline + v.indent(v.indentLevel)

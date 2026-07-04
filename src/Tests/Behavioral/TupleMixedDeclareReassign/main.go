@@ -41,9 +41,45 @@ func shadow() (*int, *int) {
 	return px, py
 }
 
+type cursor struct {
+	pos int
+	tag string
+}
+
+func makeCursor(pos int, tag string) (cursor, error) {
+	return cursor{pos: pos, tag: tag}, nil
+}
+
+func bump(c *cursor) {
+	c.pos++
+}
+
+// streams exercises a MIXED short-declaration tuple whose NEW element needs a HEAP BOX:
+// `rbr2, err := makeCursor(…)` reuses `err` and newly declares the struct value `rbr2`,
+// whose address is later taken (`bump(&rbr2)`) — the element must get its heap decl
+// (`ref var rbr2 = ref heap<cursor>(out var Ꮡrbr2);`) before the deconstruction
+// assignment. Earlier the escaping-element pass only ran for ALL-new tuples, so `rbr2`
+// was never declared at all (internal/zstd's reverse bit readers, CS0103 ×9).
+func streams() (int, int) {
+	rbr1, err := makeCursor(10, "one")
+	if err != nil {
+		return 0, 0
+	}
+	rbr2, err := makeCursor(20, "two")
+	if err != nil {
+		return 0, 0
+	}
+	bump(&rbr1)
+	bump(&rbr2)
+	bump(&rbr2)
+	return rbr1.pos, rbr2.pos
+}
+
 func main() {
 	a, b := step(5)
 	fmt.Println(*a, b)
 	c, d := shadow()
 	fmt.Println(*c, *d)
+	e, f := streams()
+	fmt.Println(e, f)
 }

@@ -39,11 +39,45 @@ internal static (ж<nint>, ж<nint>) shadow() {
     return (px, py);
 }
 
+[GoType] partial struct cursor {
+    internal nint pos;
+    internal @string tag;
+}
+
+internal static (cursor, error) makeCursor(nint pos, @string tag) {
+    return (new cursor(pos: pos, tag: tag), default!);
+}
+
+internal static void bump(ж<cursor> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    c.pos++;
+}
+
+internal static (nint, nint) streams() {
+    ref var rbr1 = ref heap<cursor>(out var Ꮡrbr1);
+    (rbr1, var err) = makeCursor(10, "one"u8);
+    if (err != default!) {
+        return (0, 0);
+    }
+    ref var rbr2 = ref heap<cursor>(out var Ꮡrbr2);
+    (rbr2, err) = makeCursor(20, "two"u8);
+    if (err != default!) {
+        return (0, 0);
+    }
+    bump(Ꮡrbr1);
+    bump(Ꮡrbr2);
+    bump(Ꮡrbr2);
+    return (rbr1.pos, rbr2.pos);
+}
+
 internal static void Main() {
     var (a, b) = step(5);
     fmt.Println(a.Value, b);
     var (c, d) = shadow();
     fmt.Println(c.Value, d.Value);
+    var (e, f) = streams();
+    fmt.Println(e, f);
 }
 
 } // end main_package
