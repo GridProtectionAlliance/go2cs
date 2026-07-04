@@ -3062,25 +3062,6 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg != v.pkg {
-			// A cross-package type that is RENAMED (or Go-aliased) inside its own package —
-			// syscall declares `ΔHandle` for its type-vs-method-colliding `Handle` — must be
-			// referenced through the recorded imported-type alias (`syscallꓸHandle` =
-			// `go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`)
-			// names a type that does not exist (CS0426 ×19 in internal/poll's method
-			// parameter/result signatures). A type without a registered alias, and every
-			// generic instantiation, keeps the plain render (no churn).
-			if named.TypeArgs() == nil || named.TypeArgs().Len() == 0 {
-				plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(obj.Name()))
-
-				packageLock.Lock()
-				_, aliasExists := importedTypeAliases[plainKey]
-				packageLock.Unlock()
-
-				if aliasExists {
-					return getAliasedTypeName(plainKey)
-				}
-			}
-
 			pkgPrefix = importQualifier(pkg.Name()) + "."
 			plainPkgPrefix = pkg.Name() + "."
 		}
@@ -3308,6 +3289,29 @@ func (v *Visitor) getCSTypeName(t types.Type) string {
 	// (`type Stringy func() string`, a *types.Named) keeps its delegate name via the normal path.
 	if sig, ok := t.(*types.Signature); ok {
 		return v.iifeDelegateType(sig)
+	}
+
+	// A cross-package type that is RENAMED (or Go-aliased) inside its own package — syscall
+	// declares `ΔHandle` for its type-vs-method-colliding `Handle` — must be referenced
+	// through the recorded imported-type alias (`syscallꓸHandle` = `go.syscall_package.
+	// ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not
+	// exist (CS0426 ×19, internal/poll's method parameter/result signatures). This lives at
+	// the C#-NAME layer, NOT in getTypeName: the Go-shaped name also feeds promoted-embed
+	// MEMBER naming, where the alias substitution renamed and rescoped the generated
+	// accessors (reflect CS8799 ×3 regression on the first cut). A type without a registered
+	// alias, and every generic instantiation, keeps the plain render (no churn).
+	if named, ok := types.Unalias(t).(*types.Named); ok && (named.TypeArgs() == nil || named.TypeArgs().Len() == 0) {
+		if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+			plainKey := fmt.Sprintf("%s.%s", getSanitizedIdentifier(pkg.Name()), getCoreSanitizedIdentifier(named.Obj().Name()))
+
+			packageLock.Lock()
+			_, aliasExists := importedTypeAliases[plainKey]
+			packageLock.Unlock()
+
+			if aliasExists {
+				return getAliasedTypeName(plainKey)
+			}
+		}
 	}
 
 	return convertToCSTypeName(v.getTypeName(t, false))
