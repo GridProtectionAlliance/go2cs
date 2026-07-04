@@ -15,8 +15,11 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		// PARAMETER with a map core (`M ~map[K]V` — the maps package) indexes through the same
 		// IMap<K, V> surface (its comma-ok two-value indexer is on the interface), so it takes
 		// this branch too; the concrete *types.Map check alone missed it, emitting a single-arg
-		// index whose V result failed the (v, ok) deconstruction (CS8130/CS8129).
-		mapType, isMap := typeAndVal.Type.(*types.Map)
+		// index whose V result failed the (v, ok) deconstruction (CS8130/CS8129). Underlying:
+		// a NAMED map type (dwarf's `type abbrevTable map[uint32]abbrev`) indexes through the
+		// same generated map-wrapper surface — the bare assertion missed it, emitting a
+		// single-value index under a (v, ok) deconstruction (CS8129 on the struct element).
+		mapType, isMap := typeAndVal.Type.Underlying().(*types.Map)
 
 		if !isMap {
 			if tp, isTypeParam := types.Unalias(typeAndVal.Type).(*types.TypeParam); isTypeParam {

@@ -25,6 +25,25 @@ func contains(seen map[int]struct{}, k int) bool {
 	return ok
 }
 
+// entry/abbrevTable: a NAMED map type (dwarf's `type abbrevTable map[uint32]abbrev`)
+// indexed with the comma-ok form. The two-value indexer detection asserted the concrete
+// *types.Map, so the NAMED type emitted a single-value index under a (v, ok)
+// deconstruction (CS8129 Deconstruct on the struct element / CS8130).
+type entry struct {
+	tag  string
+	size int
+}
+
+type registry map[uint32]entry
+
+func lookup(reg registry, id uint32) (string, bool) {
+	e, ok := reg[id]
+	if !ok {
+		return "missing", false
+	}
+	return e.tag, true
+}
+
 func main() {
 	seen := make(map[int]struct{})
 
@@ -51,4 +70,9 @@ func main() {
 		_, ok := lit[s]
 		fmt.Printf("lit[%s] = %t\n", s, ok)
 	}
+
+	reg := registry{2: {tag: "leaf", size: 8}}
+	t1, ok1 := lookup(reg, 2)
+	t2, ok2 := lookup(reg, 9)
+	fmt.Println(t1, ok1, t2, ok2) // leaf true missing false
 }

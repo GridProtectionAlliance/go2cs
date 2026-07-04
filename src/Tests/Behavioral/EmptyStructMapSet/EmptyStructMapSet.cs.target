@@ -13,6 +13,21 @@ internal static bool contains(map<nint, EmptyStruct> seen, nint k) {
     return ok;
 }
 
+[GoType] partial struct entry {
+    internal @string tag;
+    internal nint size;
+}
+
+[GoType("map[uint32, entry]")] partial struct registry;
+
+internal static (@string, bool) lookup(registry reg, uint32 id) {
+    var (e, ok) = reg[id, ꟷ];
+    if (!ok) {
+        return ("missing", false);
+    }
+    return (e.tag, true);
+}
+
 internal static void Main() {
     var seen = new map<nint, EmptyStruct>();
     add(seen, 3);
@@ -32,6 +47,10 @@ internal static void Main() {
         var (_, ok) = lit[s, ꟷ];
         fmt.Printf("lit[%s] = %t\n"u8, s, ok);
     }
+    var reg = new registry(new map<uint32, entry>{[2] = new(tag: "leaf"u8, size: 8)});
+    var (t1, ok1) = lookup(reg, 2);
+    var (t2, ok2) = lookup(reg, 9);
+    fmt.Println(t1, ok1, t2, ok2);
 }
 
 } // end main_package
