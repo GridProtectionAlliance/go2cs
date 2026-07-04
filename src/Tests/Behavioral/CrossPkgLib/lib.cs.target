@@ -90,6 +90,19 @@ public static Reporter AsReporter(ж<Meter> Ꮡm) {
     return new MeterжReporter(Ꮡm);
 }
 
+[GoType] partial struct Probe {
+    public nint Hits;
+}
+
+[GoRecv] public static nint Sample(this ref Probe p) {
+    p.Hits++;
+    return p.Hits;
+}
+
+[GoType] partial interface Sampler {
+    nint Sample();
+}
+
 [GoType] partial interface Sealed {
     @string Label();
     @string Seal();

@@ -1128,7 +1128,20 @@ Two rules govern how these are emitted:
 * **Multi-segment interface references are root-qualified.** The `GoImplement` attributes are emitted before the file's `namespace` with only `using go;` in scope; that directive imports the *types* of namespace `go` (so a top-level `io_package.Writer` resolves unqualified) but **not** its nested namespaces. A multi-segment package class such as `container.heap_package.Interface` is therefore root-qualified to `go.container.heap_package.Interface` so it resolves; single-segment refs (`io_package`, `sort_package`) are left unchanged.
 
 ### Cross-package pointer-to-interface conversions use the foreign adapter
-A pointer-sourced cast to an interface implemented by a FOREIGN type references the foreign assembly's PUBLIC adapter class - os's `err = &PathError{...}` emits `new fs.PathErrorжerror(Ꮡ(new PathError(...)))`, io/fs having generated the adapter from its own `GoImplement<PathError, error>(Pointer = true)` record. The record's existence is read from the imported package's package_info (`parseExportedPointerImplements`, the same imported-records pattern as GoTypeAlias); targets without a record keep the deref-copy form. The reference goes through the file-local package ALIAS (`fs.PathErrorжerror`, user-ruled style) via getTypeName, which also registers the using. Guarded by `CrossPkgUser` (`rep = mtr` -> `new CrossPkgLib.MeterжReporter(mtr)`; `&CrossPkgLib.Alarm{}` -> error).
+A pointer-sourced cast to an interface implemented by a FOREIGN type references the foreign assembly's PUBLIC adapter class - os's `err = &PathError{...}` emits `new fs.PathErrorжerror(Ꮡ(new PathError(...)))`, io/fs having generated the adapter from its own `GoImplement<PathError, error>(Pointer = true)` record. The record's existence is read from the imported package's package_info (`parseExportedPointerImplements`, the same imported-records pattern as GoTypeAlias). The reference goes through the file-local package ALIAS (`fs.PathErrorжerror`, user-ruled style) via getTypeName, which also registers the using. Guarded by `CrossPkgUser` (`rep = mtr` -> `new CrossPkgLib.MeterжReporter(mtr)`; `&CrossPkgLib.Alarm{}` -> error).
+
+**No exported adapter — the LOCAL adapter for a foreign pair.** When the defining package never
+converts the pair itself (os never casts `*File` to `io.Reader`, so no record exists to
+reference), the converting package records `GoImplement<os_package.File, io_package.Reader>(Pointer
+= true)` **locally** and the generator emits a **local adapter class** for the foreign struct
+(`internal sealed class FileжReader`, simple composed name; the `m_box` field is fully qualified).
+Forwarding decisions come from **metadata** — the compiled foreign assembly exposes every
+converter and sibling-generator form as real symbols, so an extension on `ж<T>` binds the box
+(`m_box.Read(p)`) and everything else binds the deref'd value (`m_box.Value.M()`, ref extensions
+bind through the ref-returning `Value`). This replaces the old deref-COPY fallback, so aliasing is
+faithful: fmt's `Fscan(os.Stdin, …)` emits `Fscan(new FileжReader(os.Stdin), …)` (CS1503 ×3, the
+last fmt family). Guarded by `CrossPkgUser` (`*Probe → Sampler`, mutation read back through the
+original pointer).
 
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
@@ -1411,6 +1424,17 @@ internal static ж<pinnerBits> newPinnerBits(this ref mspan s) {
 }
 ```
 The argument is **dereferenced first** (`~box`) when it renders as a genuine pointer box — a call result, a local box, or a pointer field — because the value conversion operates on the underlying value, not on `ж<Def>` (a plain `(pinnerBits)(ж<gcBits>)` is `CS0030`). A deref-aliased pointer **parameter/receiver** already renders as the pointed-to value (`Δp`, not a box), so it value-converts directly with no `~` — the original `(*atomic.Uint32)(p)` receiver case (runtime/mprof `goroutineProfileStateHolder`). Both forms box a **copy** (`Ꮡ`): the shared underlying is the wrapped value, and a defined-over-struct wrapper holds it in a `readonly` field, so there is no write-through to lose; this matches the long-standing copy semantics of this branch (the runtime intrinsics behind these are assembly stubs). Both ships stay in managed `ж<>` land — no raw-address round-trip. (Guarded by `NamedPointerReinterpret`.)
+
+The **third direction** — a pointer to a BASIC type reinterpreted to a defined type over that
+basic — takes the same value-convert-and-re-box route: fmt's `(*stringReader)(&str)` (`type
+stringReader string`) emits `Ꮡ((stringReader)(str))` — the address-of collapses with the value
+deref, restricted to this arm so the long-guarded emissions stay byte-identical. Writes through
+the box hit the copy, which is faithful for the pattern (the source string is never re-read).
+Guarded by `NamedPointerReinterpret` (`tail`/`consume`). The **defer-wrapper receiver rule** is a
+sibling of these box-form decisions: any function-level defer/recover wraps the whole method body
+in the synthesized execution-context lambda, so a `ref T` receiver referenced inside is CS1628 —
+`bodyWrappedInDeferContext` flips the method to the direct-ж receiver, whose deref alias emits
+inside the wrapper (fmt `ss.Token`; guarded by `DeferCallOrder` `acc.add`).
 
 The same block also covers a **named-numeric pointer reinterpreted to its underlying *basic* type** — `(*uint64)(head)` where `head` is a `*lfstack` (`type lfstack uint64`). This is the runtime's atomic-on-a-named-integer pattern: `atomic.Load64((*uint64)(head))` / `atomic.Cas64((*uint64)(head), …)` on the named atomic types **`lfstack`** (uint64, `lfstack.go`), **`sweepClass`** (uint32, `mgcsweep.go`), **`profAtomic`** (uint64, `profbuf.go`), and **`sysMemStat`** (uint64, `mstats.go`). `ж<lfstack>` and `ж<uint64>` are distinct generic instantiations with no conversion (`CS0030`), so the same value-convert-and-re-box applies — `atomic.Load64(Ꮡ((uint64)(head)))` — using the `[GoType("num:uint64")]` wrapper's `lfstack → uint64` value conversion. The reinterpret condition is generalized from *Named↔Named* to also fire when the **result** elem is a **basic** type whose underlying equals a **named** argument elem's (`namedToBasic`); the result C# type name comes from the result elem directly (`uint64`/`uint32`). Because it boxes a copy, a **read** through the reinterpret is faithful (golib `Load64` reads `Ꮡptr.Value` = the copy = the value), which is verified against Go; a **write** through it (`atomic.Store64`/`Cas64`/`Xadd64`) targets the copy, but those intrinsics are asm stubs in the converted runtime, so there is no faithful write-through to lose. Cleared all 13 `lfstack`/`sweepClass`/`profAtomic`/`sysMemStat` `→ ж<primitive>` CS0030 (runtime 114 → 101). (Guarded by `NamedNumericPointerReinterpret` — the read path across uint64/uint32 named types, values verified vs Go.)
 

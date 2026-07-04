@@ -238,6 +238,13 @@ func main() {
 	var sd CrossPkgLib.Sealed = ct
 	var rt CrossPkgLib.Rated = ct
 	fmt.Println(sd.Label(), rt.Rating()) // cert 9
+
+	// *Probe -> Sampler: no exported adapter in the lib (it never converts the pair) - the
+	// conversion records locally and the LOCAL ProbeжSampler adapter wraps the box, so the
+	// mutation through the interface aliases pr (reads back 2, not a copy's 0).
+	pr := &CrossPkgLib.Probe{}
+	var sam CrossPkgLib.Sampler = pr
+	fmt.Println(sam.Sample(), sam.Sample(), pr.Hits) // 1 2 2
 }
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.

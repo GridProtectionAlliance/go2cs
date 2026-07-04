@@ -43,6 +43,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<CrossPkgLib_package.Probe, CrossPkgLib_package.Sampler>(Pointer = true)]
 [assembly: GoImplement<badge, Tagged>]
 [assembly: GoImplement<cert, certificate>]
 [assembly: GoImplement<counter, ΔMeter>]

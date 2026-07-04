@@ -173,6 +173,40 @@ public class ImplementGenerator : ISourceGenerator
                 foreach (string boxReceiverName in structDecl?.GetBoxReceiverMethodNames(compilation!) ?? [])
                     forwardReceivers[boxReceiverName] = "m_box"; // direct-ж primary form binds the box itself
 
+                // A FOREIGN struct (no local declaration — the pair is recorded locally because
+                // the defining package never converts it: os never casts *File to io.Reader, so
+                // fmt's Fscan(os.Stdin, …) has no exported adapter to reference — CS1503). Bind
+                // forwarding from METADATA: the compiled assembly exposes every converter and
+                // sibling-generator form as real symbols, so an extension on ж<T> binds the box
+                // and everything else binds the deref'd value (ref extensions bind through the
+                // ref-returning .Value).
+                bool foreignStruct = structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly);
+
+                if (foreignStruct && structType.ContainingType is INamedTypeSymbol packageClass)
+                {
+                    HashSet<string> boxBound = new(StringComparer.Ordinal);
+
+                    foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+                    {
+                        if (!method.IsStatic || method.Parameters.Length == 0)
+                            continue;
+
+                        if (method.Parameters[0].Type is INamedTypeSymbol recvType &&
+                            recvType.Name == "ж" &&
+                            recvType.TypeArguments.Length == 1 &&
+                            SymbolEqualityComparer.Default.Equals(recvType.TypeArguments[0], structType))
+                        {
+                            boxBound.Add(method.Name);
+                        }
+                    }
+
+                    foreach (MethodInfo method in methods)
+                    {
+                        string simpleName = GetSimpleName(method.Name);
+                        forwardReceivers[simpleName] = boxBound.Contains(simpleName) ? "m_box" : "m_box.Value";
+                    }
+                }
+
                 // Interface members with NO struct method forward through a single embedded-pointer
                 // hop, mirroring the value-form template (Go method promotion through `*abi.Type`).
                 if (embedHops.Count == 1)
@@ -217,11 +251,14 @@ public class ImplementGenerator : ISourceGenerator
                 {
                     PackageNamespace = packageNamespace,
                     PackageName = packageName,
-                    StructName = structName,
+                    // FULLY-qualified for a foreign struct (no local using guarantees resolution;
+                    // mirrors the value adapter's same-named-type shadow rationale).
+                    StructName = foreignStruct ? structType.GetFullTypeName(true) : structName,
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
-                    AdapterName = $"{structName}{PointerPrefix}{GetSimpleName(interfaceName)}",
+                    // A foreign struct's qualified name reduces to its SIMPLE name (FileжReader).
+                    AdapterName = $"{(foreignStruct ? GetSimpleName(structName) : structName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,

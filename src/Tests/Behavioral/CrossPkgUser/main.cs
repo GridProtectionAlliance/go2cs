@@ -182,6 +182,9 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLib.Sealed sd = ct;
     CrossPkgLib.Rated rt = ct;
     fmt.Println(sd.Label(), rt.Rating());
+    var pr = Ꮡ(new CrossPkgLib.Probe(nil));
+    CrossPkgLib.Sampler sam = new ProbeжSampler(pr);
+    fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
 });
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;

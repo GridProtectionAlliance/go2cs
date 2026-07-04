@@ -2363,6 +2363,34 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 
 					return fmt.Sprintf("new %s(%s)", adapterTypeRef(adapterBase, interfaceTypeName), exprResult)
 				}
+
+				// NO exported adapter — the defining package never converts this pair itself
+				// (os never casts *File to io.Reader). Record the pairing LOCALLY: the
+				// generator emits a LOCAL adapter class for the foreign struct, binding its
+				// methods from metadata, referenced by its simple composed name (fmt's
+				// Fscan(os.Stdin, …), CS1503 ×3). Aliasing is faithful — the adapter wraps
+				// the ж<T> box itself, unlike the deref-COPY fallback this replaces.
+				if recordableBase && exprResult != "" {
+					recordName := PointerPrefix + "<" + targetTypeName + ">"
+
+					packageLock.Lock()
+
+					if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
+						implementations.Add(recordName)
+					} else {
+						interfaceImplementations[interfaceTypeName] = NewHashSet([]string{recordName})
+					}
+
+					packageLock.Unlock()
+
+					simpleTarget := targetTypeName
+
+					if idx := strings.LastIndex(simpleTarget, "."); idx >= 0 {
+						simpleTarget = simpleTarget[idx+1:]
+					}
+
+					return fmt.Sprintf("new %s(%s)", adapterTypeRef(simpleTarget, interfaceTypeName), exprResult)
+				}
 			}
 		}
 	}

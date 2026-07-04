@@ -100,6 +100,16 @@ func AsErr(a *Alarm) error { return a }
 func AsReporter(m *Meter) Reporter { return m }
 
 
+// Probe/Sampler: the lib never converts *Probe to Sampler itself, so no exported adapter
+// record exists - a consumer's pointer conversion records the pair LOCALLY and emits its
+// own ProbeжSampler adapter with metadata-bound forwarding (fmt Fscan(os.Stdin, ...),
+// CS1503 x3).
+type Probe struct{ Hits int }
+
+func (p *Probe) Sample() int { p.Hits++; return p.Hits }
+
+type Sampler interface{ Sample() int }
+
 // Sealed and Rated share Label without subsuming each other: a consumer interface
 // satisfying BOTH inherits both and must RE-DECLARE the shared member (C# member lookup
 // through two bases carrying the same signature is ambiguous - CS0121).
