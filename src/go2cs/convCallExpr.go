@@ -1921,6 +1921,17 @@ func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature 
 			if fn, ok := sel.Obj().(*types.Func); ok {
 				return fn.Type().(*types.Signature)
 			}
+
+			// A FUNC-typed FIELD callee — `d.fill(d, b)` on flate compressor's
+			// method-expression fields: its signature drives the same per-argument
+			// treatment (the receiver arg must render as the box for a ж<T> slot,
+			// CS1503 ×5). Underlying looks through a NAMED func type.
+			if vr, ok := sel.Obj().(*types.Var); ok {
+				if sig, ok := vr.Type().Underlying().(*types.Signature); ok {
+					return sig
+				}
+			}
+
 			return nil
 		}
 
