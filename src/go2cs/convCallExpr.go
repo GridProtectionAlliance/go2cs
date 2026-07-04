@@ -203,6 +203,29 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 		expr := v.checkForImplicitConversion(funcType, arg, targetTypeName)
 
+		// A conversion whose TARGET is a non-empty INTERFACE and whose SOURCE is a POINTER —
+		// `image.Image(dst)` with `dst *image.RGBA` (image/draw) — is Go's ordinary
+		// pointer-to-interface conversion in explicit clothing: route it through the same
+		// machinery as implicit interface casts (the exported/local ж-adapter), re-rendering
+		// the argument in its BOX form (the adapter wraps the box). The constructor fallback
+		// instantiated the interface (`new image.Image(dst)`, CS0144 ×2). Interface and value
+		// sources keep their existing plain-cast/partial-impl routes (no churn).
+		if callTargetType := v.info.TypeOf(callExpr); callTargetType != nil {
+			if targetIsIface, isEmpty := isInterface(callTargetType); targetIsIface && !isEmpty {
+				if argPtrType, srcIsPtr := v.getType(arg, false).(*types.Pointer); srcIsPtr {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+
+					// The result is CAST to the interface: the adapter implements its members
+					// EXPLICITLY, so a chained member access on the conversion result
+					// (`CrossPkgLib.Labeled(sp).Label()`) cannot bind on the adapter class
+					// itself (CS1929) — the cast is an implicit reference conversion that
+					// exposes the interface view.
+					return fmt.Sprintf("((%s)%s)", targetTypeName, v.convertToInterfaceType(callTargetType, argPtrType, v.convExpr(arg, []ExprContext{identContext})))
+				}
+			}
+		}
+
 		// In a pointer cast, we need to intermediately cast the target expression to an uintptr.
 		// This is required since unsafe.Pointer is in its own library and no implicit cast can
 		// be added for it on the pointer class (ж<T>) in the core library without creating a
@@ -1735,6 +1758,7 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 
 	// Get the type of the argument
 	argType := v.info.TypeOf(callExpr.Args[0])
+	originalArgType := argType
 
 	// Check if the argument is a pointer
 	if pointer, ok := argType.(*types.Pointer); ok {
@@ -1747,8 +1771,22 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 		typeName = "*" + typeName
 	}
 
-	// Check if the argument type is convertible to the target type
-	return types.ConvertibleTo(argType, targetType), typeName
+	// Check if the argument type is convertible to the target type. For an INTERFACE target
+	// the ORIGINAL (pointer) argument type is probed too: a pointer-to-interface conversion —
+	// `image.Image(dst)` with `dst *image.RGBA` (image/draw) — converts through the POINTER's
+	// method set (the value type alone does not implement the interface), so the elem-only
+	// probe misread the conversion as a constructor call (`new image.Image(dst)`, CS0144 ×2).
+	// Gated to interface targets: widening every target reroutes `unsafe.Pointer(ptr)`
+	// constructor forms into the conversion arm (13-project churn).
+	convertible := types.ConvertibleTo(argType, targetType)
+
+	if !convertible && originalArgType != nil {
+		if targetIsIface, _ := isInterface(targetType); targetIsIface {
+			convertible = types.ConvertibleTo(originalArgType, targetType)
+		}
+	}
+
+	return convertible, typeName
 }
 
 func (v *Visitor) needsParentheses(expr ast.Expr) bool {
