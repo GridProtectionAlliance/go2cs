@@ -37,7 +37,7 @@ internal static void testTypeAssertion(error err) {
 }
 
 [GoType("dyn")] partial interface takesReader_r {
-    (nint, error) Read(slice<byte> _);
+    (nint, error) Read(slice<byte> _Δp0);
 }
 
 internal static void takesReader(takesReader_r r) {
@@ -47,7 +47,7 @@ internal static void takesReader(takesReader_r r) {
 }
 
 [GoType("dyn")] partial interface testCompositeLiteral_readers {
-    (nint, error) Read(slice<byte> _);
+    (nint, error) Read(slice<byte> _Δp0);
 }
 
 internal static void testCompositeLiteral() {
@@ -58,7 +58,7 @@ internal static void testCompositeLiteral() {
 }
 
 [GoType("dyn")] partial interface WithInlineField_R {
-    (nint, error) Read(slice<byte> _);
+    (nint, error) Read(slice<byte> _Δp0);
 }
 
 [GoType] partial struct WithInlineField {

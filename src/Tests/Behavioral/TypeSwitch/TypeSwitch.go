@@ -91,6 +91,9 @@ func main() {
 	fmt.Println(flag, num) // true 42
 
 	fmt.Println(probe(true), probe(7), probe("ab")) // bool one many
+
+	var mk marker
+	fmt.Println(mk.tag([]byte{7, 8})) // 7
 }
 
 // probe: an expression-switch INIT inside a type-switch clause re-declares the guard
@@ -109,6 +112,16 @@ func probe(x any) string {
 			return "many"
 		}
 	}
+}
+
+// marker.tag: a BLANK receiver whose body uses `_ = b[1]` discards - a parameter named
+// `_` hijacks C# discard statements, so the blank synthesizes a placeholder name
+// (encoding/binary's bounds-check hints, CS0029 x12).
+type marker byte
+
+func (marker) tag(b []byte) byte {
+	_ = b[1]
+	return b[0]
 }
 
 // scanInto: POINTER case clauses write through the case var (`*t = ...`) - a star-deref

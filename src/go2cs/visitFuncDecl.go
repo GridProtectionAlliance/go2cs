@@ -41,6 +41,34 @@ func hasDuplicateBlankParams(parameters *types.Tuple) bool {
 	return false
 }
 
+// bodyUsesBlankDiscard reports whether the function's body contains a `_ = …` discard
+// (single or tuple position). A LONE blank param normally keeps the literal `_` name
+// (visually Go-like), but a parameter named `_` HIJACKS the body's C# discards —
+// encoding/binary's bounds-check hints (`_ = b[7]`) assigned a byte to the blank
+// littleEndian receiver (CS0029 ×12), so such functions synthesize blank names instead.
+func bodyUsesBlankDiscard(funcDecl *ast.FuncDecl) bool {
+	if funcDecl == nil || funcDecl.Body == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(funcDecl.Body, func(node ast.Node) bool {
+		if assign, ok := node.(*ast.AssignStmt); ok {
+			for _, lhs := range assign.Lhs {
+				if ident, ok := lhs.(*ast.Ident); ok && ident.Name == "_" {
+					found = true
+					return false
+				}
+			}
+		}
+
+		return !found
+	})
+
+	return found
+}
+
 // variadicElementType returns the C# element type name for a variadic parameter and whether it must
 // be emitted inline as `Span<T>` rather than via a `using ꓸꓸꓸT = Span<T>` alias. Both the alias and
 // the inline form sit at namespace scope, so a SAME-PACKAGE named element type must be qualified with
@@ -415,7 +443,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			blockPrefix += implicitPointers.String()
 
 			updatedSignature := strings.Builder{}
-			dupBlankParams := hasDuplicateBlankParams(parameters)
+			dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(funcDecl)
 
 			for i := 0; i < parameters.Len(); i++ {
 				param := parameters.At(i)
@@ -446,7 +474,21 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					} else {
 						updatedSignature.WriteString(recvTypeName)
 						updatedSignature.WriteRune(' ')
-						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+
+						recvParamName := param.Name()
+
+						// A BLANK receiver keeps the literal `_` only when the body has no
+						// `_ = …` discard — a parameter named `_` hijacks C# discards
+						// (encoding/binary's bounds-check hints, CS0029 ×12).
+						if recvParamName == "" || recvParamName == "_" {
+							if dupBlankParams {
+								recvParamName = fmt.Sprintf("_Δp%d", i)
+							} else {
+								recvParamName = "_"
+							}
+						}
+
+						updatedSignature.WriteString(getSanitizedIdentifier(recvParamName))
 					}
 
 					continue
@@ -787,7 +829,7 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 	result := strings.Builder{}
 	var receiverAccess string
-	dupBlankParams := hasDuplicateBlankParams(parameters)
+	dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(v.currentFuncDecl)
 
 	for i := 0; i < parameters.Len(); i++ {
 		param := parameters.At(i)
@@ -806,8 +848,12 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 
 			paramName := param.Name()
 
-			if paramName == "" {
-				paramName = "_"
+			if paramName == "" || paramName == "_" {
+				if dupBlankParams {
+					paramName = fmt.Sprintf("_Δp%d", i)
+				} else {
+					paramName = "_"
+				}
 			}
 
 			result.WriteString(getSanitizedIdentifier(paramName))

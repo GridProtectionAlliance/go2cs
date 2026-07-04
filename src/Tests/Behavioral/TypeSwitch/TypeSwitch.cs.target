@@ -112,6 +112,8 @@ internal static void Main() {
     scanInto(Ꮡnum);
     fmt.Println(flag, num);
     fmt.Println(probe(true), probe(7), probe("ab"));
+    marker mk = default!;
+    fmt.Println(mk.tag(new byte[]{7, 8}.slice()));
 }
 
 internal static @string probe(any x) {
@@ -135,6 +137,13 @@ internal static @string probe(any x) {
 
         break;
     }}
+}
+
+[GoType("num:byte")] partial struct marker;
+
+internal static byte tag(this marker _Δp0, slice<byte> b) {
+    _ = b[1];
+    return b[0];
 }
 
 internal static void scanInto(any v) {
