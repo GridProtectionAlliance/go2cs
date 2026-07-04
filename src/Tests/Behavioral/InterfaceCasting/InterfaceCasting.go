@@ -151,6 +151,15 @@ func main() {
 	readers := []rdr{strRdr{}}
 	readers[0] = fileRdr{name: "x"} // index-element interface assignment (io eofReader shape)
 	fmt.Println(readers[0].read())
+
+	// census F8: appending a POINTER value to an interface-typed slice - the *T-to-iface
+	// ADAPTER-ctor form (`new CatᴵAnimal(...)`) leaves both builtin append overloads
+	// applicable at the adapter class type (CS0121, reflect Method construction x3); the
+	// element is cast to the interface type so the slice<T> overload binds.
+	var pack []Animal
+	pack = append(pack, &Cat{})
+	pack = append(pack, Dog{})
+	fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak())
 }
 
 // rdCloser mirrors io.ReadCloser: an interface INHERITING other interfaces. A concrete type

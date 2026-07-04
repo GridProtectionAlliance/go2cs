@@ -803,6 +803,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							}
 						}
 					}
+
+					// An INTERFACE element appended from a value of a DIFFERENT type — a pointer
+					// rendering as the *T→iface ADAPTER ctor (`new rtypeᴵΔType(Ꮡt)`) or a raw
+					// struct value (`new Dog(nil)`) — leaves both append overloads applicable
+					// (`append<T>(ISlice, params T[])` infers the concrete/adapter type,
+					// `append<T>(slice<T>, params Span<T>)` infers the interface — CS0121 ×3,
+					// reflect Method construction). Cast the element to the interface type so the
+					// slice<T> overload binds; an already-interface-typed element stays bare.
+					if needsCast, isEmpty := isInterface(sliceUnder.Elem()); needsCast && !isEmpty {
+						elemCSType := convertToCSTypeName(v.getTypeName(sliceUnder.Elem(), false))
+
+						for i := 1; i < len(callExpr.Args); i++ {
+							if argType := v.info.TypeOf(callExpr.Args[i]); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(sliceUnder.Elem())) {
+								if callExprContext.castArgToType == nil {
+									callExprContext.castArgToType = make(map[int]string)
+								}
+								callExprContext.castArgToType[i] = elemCSType
+							}
+						}
+					}
 				}
 			}
 		}

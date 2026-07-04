@@ -139,6 +139,10 @@ internal static void Main() {
     var readers = new rdr[]{new strRdr(nil)}.slice();
     readers[0] = new fileRdr(name: "x"u8);
     fmt.Println(readers[0].read());
+    slice<Animal> pack = default!;
+    pack = append(pack, (Animal)(new CatᴵAnimal(Ꮡ(new Cat(nil)))));
+    pack = append(pack, (Animal)(new Dog(nil)));
+    fmt.Println(len(pack), pack[0].Speak(), pack[1].Speak());
 }
 
 [GoType] partial interface rdr {
