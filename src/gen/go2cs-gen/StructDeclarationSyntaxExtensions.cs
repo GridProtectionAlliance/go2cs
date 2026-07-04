@@ -197,6 +197,38 @@ public static class StructDeclarationSyntaxExtensions
         return hops;
     }
 
+    /// <summary>
+    /// Gets the (field name, embedded type name) pairs for embedded VALUE struct fields — the
+    /// converter emits an embed as a <c>partial ref</c> property whose name matches its type's
+    /// simple name (<c>public partial ref CommonType CommonType {{ get; }}</c>). The TypeGenerator
+    /// heap-boxes the field and emits a public static ref accessor (<c>Ꮡ{Embed}</c>), so a
+    /// pointer-interface adapter can project the receiver box onto the embedded field's box.
+    /// </summary>
+    public static List<(string Name, string TypeName)> GetEmbeddedValueHopNames(this StructDeclarationSyntax structDeclaration)
+    {
+        List<(string, string)> hops = [];
+
+        foreach (PropertyDeclarationSyntax property in structDeclaration.Members.OfType<PropertyDeclarationSyntax>())
+        {
+            TypeSyntax type = property.Type is RefTypeSyntax refType ? refType.Type : property.Type;
+            string typeText = type.ToString();
+
+            if (typeText.StartsWith("ж<") || typeText.Contains('<') || !property.Modifiers.Any(m => m.IsKind(SyntaxKind.PartialKeyword)))
+                continue;
+
+            string simpleTypeName = typeText;
+            int lastDot = simpleTypeName.LastIndexOf('.');
+
+            if (lastDot >= 0)
+                simpleTypeName = simpleTypeName.Substring(lastDot + 1);
+
+            if (simpleTypeName == property.Identifier.Text)
+                hops.Add((property.Identifier.Text, typeText));
+        }
+
+        return hops;
+    }
+
     private static bool IsExtensionMethodForStruct(this MethodDeclarationSyntax method, string structName)
     {
         ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();

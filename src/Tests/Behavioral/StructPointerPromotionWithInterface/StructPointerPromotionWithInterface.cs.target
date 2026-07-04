@@ -43,6 +43,33 @@ public static ж<nint> Tag(this ж<Device> Ꮡd) {
     return d.name;
 }
 
+[GoType] partial struct meta {
+    internal @string label;
+    internal nint count;
+}
+
+[GoRecv] internal static @string Stamp(this ref meta m) {
+    m.count++;
+    return m.label;
+}
+
+[GoRecv] internal static nint Hits(this ref meta m) {
+    return m.count;
+}
+
+[GoType] partial struct kindBase {
+    internal partial ref meta meta { get; }
+}
+
+[GoType] partial struct counterKind {
+    internal partial ref kindBase kindBase { get; }
+}
+
+[GoType] partial interface stamper {
+    @string Stamp();
+    nint Hits();
+}
+
 [GoType] partial interface Describer {
     @string Describe();
     ж<nint> Tag();
@@ -117,6 +144,10 @@ internal static void Main() {
     var pw = new pair(new leftSide(tag: "a"u8), new rightSide(tag: "b"u8));
     fmt.Println(pw.leftSide.tag, pw.rightSide.Ping());
     fmt.Println(probeRig(new rig(dev: new Device(name: "r"u8, hits: 42))));
+    var ck = Ꮡ(new counterKind(nil));
+    ck.Value.label = "k9"u8;
+    stamper st = new counterKindжstamper(ck);
+    fmt.Println(st.Stamp(), st.Stamp(), st.Hits());
 }
 
 } // end main_package

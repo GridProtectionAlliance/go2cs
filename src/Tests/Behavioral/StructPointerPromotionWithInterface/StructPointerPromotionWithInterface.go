@@ -46,6 +46,38 @@ func (d *Device) Describe() string {
 	return d.name
 }
 
+// stamp/labelKind/counterKind: a POINTER-interface cast satisfied only through CHAINED
+// VALUE embeds with pointer-receiver methods (dwarf's UintType -> BasicType -> CommonType
+// with func (c *CommonType) Common(); CS1929 x18). The generated adapter must project the
+// receiver box hop by hop onto the embedded field's box:
+// m_box.of(counterKind.PkindBase).of(kindBase.Pmeta).Stamp().
+type meta struct {
+	label string
+	count int
+}
+
+func (m *meta) Stamp() string {
+	m.count++
+	return m.label
+}
+
+func (m *meta) Hits() int {
+	return m.count
+}
+
+type kindBase struct {
+	meta
+}
+
+type counterKind struct {
+	kindBase
+}
+
+type stamper interface {
+	Stamp() string
+	Hits() int
+}
+
 type Describer interface {
 	Describe() string
 	Tag() *int
@@ -129,4 +161,11 @@ func main() {
 	fmt.Println(pw.leftSide.tag, pw.rightSide.Ping()) // a R
 
 	fmt.Println(probeRig(rig{dev: Device{name: "r", hits: 42}})) // 42
+
+	// Chained value-embed promotion through a pointer-interface cast: Stamp() mutates
+	// through the projected boxes, so the count must be visible through the SAME pointer.
+	ck := &counterKind{}
+	ck.label = "k9"
+	var st stamper = ck
+	fmt.Println(st.Stamp(), st.Stamp(), st.Hits()) // k9 k9 2
 }

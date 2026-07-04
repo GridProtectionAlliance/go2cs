@@ -241,6 +241,56 @@ public class ImplementGenerator : ISourceGenerator
                     }
                 }
 
+                // Interface members may instead promote through embedded VALUE struct(s) whose
+                // methods are pointer-receiver extensions — dwarf's `type VoidType struct
+                // { CommonType }` with `func (c *CommonType) Common()`, including CHAINED embeds
+                // (`UintType → BasicType → CommonType`) — CS1929 ×18. The TypeGenerator heap-boxes
+                // each embedded field with a public static ref accessor, so the adapter projects
+                // the receiver box hop by hop onto the field's box:
+                // `m_box.of(UintType.ᏑBasicType).of(BasicType.ᏑCommonType).Common()`. Direct-ж
+                // methods bind on the projected box; everything else binds through its deref'd
+                // .Value (ref extensions bind on the ref-returning Value, matching the pointer-hop
+                // dichotomy above). Each level follows a SINGLE value embed (Go's promotion
+                // ambiguity rules make multi-embed satisfaction rare), bounded to 4 hops.
+                foreach (MethodInfo method in methods)
+                {
+                    string methodName = GetSimpleName(method.Name);
+
+                    if (forwardReceivers.ContainsKey(methodName))
+                        continue;
+
+                    string receiver = "m_box";
+                    StructDeclarationSyntax? currentDecl = structDecl;
+                    string currentTypeName = structName;
+
+                    for (int depth = 0; depth < 4 && currentDecl is not null; depth++)
+                    {
+                        List<(string Name, string TypeName)> valueEmbedHops = currentDecl.GetEmbeddedValueHopNames();
+
+                        if (valueEmbedHops.Count != 1)
+                            break;
+
+                        (string embedName, string embedTypeName) = valueEmbedHops[0];
+
+                        receiver = $"{receiver}.of({currentTypeName}.{AddressPrefix}{embedName})";
+                        (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
+                        currentTypeName = embedTypeName;
+
+                        if (StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(embedTypeName, syntaxContext.SemanticModel.Compilation).Contains(methodName))
+                        {
+                            forwardReceivers[methodName] = receiver;
+                            break;
+                        }
+
+                        if (currentDecl is not null && embedCompilation is not null &&
+                            currentDecl.GetExtensionMethods(embedCompilation).Any(m => GetSimpleName(m.Name) == methodName))
+                        {
+                            forwardReceivers[methodName] = $"{receiver}.Value";
+                            break;
+                        }
+                    }
+                }
+
                 // PROMOTED members (an embedded INTERFACE field — sort's `type reverse struct
                 // { Interface }`) forward through the interface field itself, mirroring the
                 // value-form template's promoted arm (`m_box.Len()` has nothing to bind — CS1929).
