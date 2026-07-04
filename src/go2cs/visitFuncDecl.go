@@ -824,19 +824,13 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 			paramTypeName := v.getCSTypeName(param.Type())
 
 			// A FUNC-LITERAL parameter typed as a `string | []byte`-union TYPE PARAMETER
-			// renders as the constraint interface (IByteSeq<byte>): a lambda has no
-			// where-clause, and the interface-typed sub-slices of the enclosing method's
-			// constrained value cannot convert INTO a bare type parameter (time
-			// format_rfc3339's parseUint closure — CS1503 ×8). Gated to the addRecv=false
-			// path (func literals / delegate decls / interface sigs — only literals can
-			// carry a method's type param); declared METHODS keep the generic form for
-			// exact instantiation.
-			if !addRecv {
-				if tp, ok := types.Unalias(param.Type()).(*types.TypeParam); ok && typeParamIsStringByteUnion(tp) {
-					paramTypeName = "IByteSeq<byte>"
-				}
-			}
-
+			// renders as the type parameter itself (`(T part) => ...`): the enclosing
+			// method's type parameter is in scope inside a lambda, and every union-typed
+			// argument renders T-typed too (sub-slices cast back to the type param in
+			// convSliceExpr), so the inferred delegate binds exactly and the emission
+			// matches the Go. (A historical IByteSeq<byte> widening here worked around
+			// the interface-typed sub-slice arguments - obsolete once the sub-slice cast
+			// landed, and it hid the type identity: user-flagged.)
 			result.WriteString(paramTypeName)
 			result.WriteRune(' ')
 

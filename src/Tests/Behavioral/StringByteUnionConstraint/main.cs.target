@@ -44,7 +44,7 @@ internal static void Main() {
 internal static nint digitSum<T>(T s)
     where T : /* []byte | string */ IByteSeq<byte>, new()
 {
-    var parse = (IByteSeq<byte> part) => {
+    var parse = (T part) => {
         nint n = 0;
         foreach (var (_, c) in new slice<byte>(part)) {
             n = n * 10 + (nint)(c - (rune)'0');
