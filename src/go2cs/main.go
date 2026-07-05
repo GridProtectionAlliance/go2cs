@@ -3555,6 +3555,22 @@ func getAliasedTypeName(typeName string) string {
 		return strings.ReplaceAll(typeName, ".", TypeAliasDot)
 	}
 
+	// A Δ-renamed IMPORT qualifier (gif's `color` import arrives shadow-renamed `Δcolor`)
+	// must consult the alias map by the RAW package name — the global-using alias
+	// (`colorꓸRGBA = go.image.color_package.ΔRGBA`) resolves namespace-wide regardless of
+	// the file-local rename; the composed `Δcolor.RGBA` missed the map and kept the RAW
+	// foreign type name, which is Δ-renamed in image/color (CS0426 ×4, image/gif). A type
+	// the map does NOT rename (Δcolor.Palette) keeps the renamed-import qualifier.
+	if strings.Contains(typeName, ".") {
+		parts := strings.SplitN(typeName, ".", 2)
+
+		if raw, wasShadow := strings.CutPrefix(parts[0], ShadowVarMarker); wasShadow {
+			if resolved := getAliasedTypeName(raw + "." + parts[1]); resolved != raw+"."+parts[1] {
+				return resolved
+			}
+		}
+	}
+
 	return typeName
 }
 
