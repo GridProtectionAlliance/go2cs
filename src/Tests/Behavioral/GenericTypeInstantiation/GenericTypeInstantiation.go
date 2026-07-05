@@ -42,6 +42,17 @@ func consume[K, V any](s Seq2Like[K, V], k K, v V) bool {
 	return s(k, v)
 }
 
+// describe is a generic FUNCTION. Calling it with a QUALIFIED (cross-package) type argument —
+// `describe[fmt.Stringer]` — is the reflect.TypeFor[encoding.BinaryMarshaler] shape (gob): a
+// generic-function IndexExpr whose type argument is a SelectorExpr, not a bare Ident. The
+// Ident-only type-argument check kept the Go bracket form while the call machinery also
+// appended the C# `<…>`, emitting `describe[fmt.Stringer]<fmt.Stringer>(…)` (CS1525).
+func describe[T any](label string) string {
+	var zero T
+	_ = zero
+	return label
+}
+
 func main() {
 	// Type instantiation with a single type argument (IndexExpr)
 	intStack := Stack[int]{}
@@ -60,4 +71,7 @@ func main() {
 	// Generic defined function type: declare, instantiate, invoke
 	pair := Seq2Like[string, int](func(k string, v int) bool { return len(k) == v })
 	fmt.Println(consume(pair, "four", 4), pair("nope", 3))
+
+	// Generic-function call with a cross-package qualified type argument (SelectorExpr).
+	fmt.Println(describe[fmt.Stringer]("stringer"))
 }

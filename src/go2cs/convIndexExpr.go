@@ -131,6 +131,16 @@ func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {
 			_, isTypeName := obj.(*types.TypeName)
 			return isTypeName
 		}
+	case *ast.SelectorExpr:
+		// A CROSS-PACKAGE qualified type argument — `reflect.TypeFor[encoding.BinaryMarshaler]`
+		// (encoding/gob). Without this the Ident-only check missed it and the generic
+		// instantiation kept the Go bracket form while convCallExpr also appended the C#
+		// `<...>` from info.Instances, emitting `TypeFor[encoding.BinaryMarshaler]<…>()`
+		// (CS1525). The Sel resolving to a TypeName routes it through the `<T>` branch.
+		if obj := v.info.Uses[index.Sel]; obj != nil {
+			_, isTypeName := obj.(*types.TypeName)
+			return isTypeName
+		}
 	}
 
 	return false
