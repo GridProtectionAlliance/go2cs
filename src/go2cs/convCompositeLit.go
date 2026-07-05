@@ -32,7 +32,20 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				// `ж<T>`, whose constructor has no such field params (CS1739).
 				if _, ok := u.Elem().Underlying().(*types.Struct); ok {
 					structName := v.getCSTypeName(u.Elem())
-					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+
+					// Thread the pointed-to struct type so a keyed field named like its OWN struct type
+					// takes the CS0542 type-colliding rename in the generated ctor (net/mail's
+					// `[]*Address{{Address: …}}` kept the unrenamed `Address:` key, CS1739). Set
+					// u8StringArgOK per element to match the nil-context default (an empty map would
+					// silently strip the u8 suffix from string-literal element values).
+					ptrElidedContext := DefaultCallExprContext()
+					ptrElidedContext.keyValueCompositeType = u.Elem()
+
+					for i := range compositeLit.Elts {
+						ptrElidedContext.u8StringArgOK[i] = true
+					}
+
+					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext))
 				}
 			case *types.Map:
 				// A MAP element type — the inner `{"domain": 53}` of a

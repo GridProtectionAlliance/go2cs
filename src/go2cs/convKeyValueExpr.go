@@ -99,7 +99,16 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 			// must name the renamed ctor parameter too — the unrenamed key was CS1739 ×57. Only a
 			// PACKAGE-LEVEL named type keeps its Go name as the C# type name (the same gate
 			// fieldCollidesWithType applies for selector emission).
-			if named, ok := types.Unalias(context.compositeType).(*types.Named); ok {
+			// An ELIDED pointer-composite (`[]*Address{{Address: …}}`, net/mail) carries the slice's
+			// element type *Address; unwrap the pointer so the type-colliding-field check sees the
+			// underlying struct (else the keyed literal kept the unrenamed `Address:`, CS1739).
+			collisionType := types.Unalias(context.compositeType)
+
+			if ptr, isPtr := collisionType.(*types.Pointer); isPtr {
+				collisionType = types.Unalias(ptr.Elem())
+			}
+
+			if named, ok := collisionType.(*types.Named); ok {
 				obj := named.Obj()
 
 				if obj.Pkg() != nil && obj.Parent() == obj.Pkg().Scope() && getSanitizedIdentifier(keyIdent.Name) == getSanitizedIdentifier(obj.Name()) {

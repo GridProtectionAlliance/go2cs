@@ -30,6 +30,16 @@ func localCollision() int {
 	return a.u + b.u
 }
 
+// buildList returns a []*Node built with ELIDED pointer elements (`{…}` = `&Node{…}`) whose KEYED
+// fields include the type-colliding `Node`. The elided-pointer composite must still rename that key
+// to ΔNode in the generated ctor (net/mail's `[]*Address{{Address: …}}`, CS1739 otherwise).
+func buildList() []*Node {
+	return []*Node{
+		{value: 10, Node: nil},
+		{value: 20, Nodes: nil},
+	}
+}
+
 func main() {
 	root := Node{value: 1}
 	a := Node{value: 2}
@@ -45,4 +55,7 @@ func main() {
 	fmt.Println(len(root.Nodes))     // 2
 	fmt.Println(root.Nodes[1].value) // 3
 	fmt.Println(localCollision())    // 13 (9 + 4)
+
+	list := buildList()                                 // elided []*Node with a keyed `Node:` field
+	fmt.Println(len(list), list[0].value, list[1].value) // 2 10 20
 }

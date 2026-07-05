@@ -20,6 +20,13 @@ internal static nint localCollision() {
     return a.u + b.u;
 }
 
+internal static slice<ж<Node>> buildList() {
+    return new ж<Node>[]{
+        Ꮡ(new Node(value: 10, ΔNode: nil)),
+        Ꮡ(new Node(value: 20, Nodes: default!))
+    }.slice();
+}
+
 internal static void Main() {
     var root = new Node(value: 1);
     ref var a = ref heap<Node>(out var Ꮡa);
@@ -35,6 +42,8 @@ internal static void Main() {
     fmt.Println(len(root.Nodes));
     fmt.Println(root.Nodes[1].value);
     fmt.Println(localCollision());
+    var list = buildList();
+    fmt.Println(len(list), (~list[0]).value, (~list[1]).value);
 }
 
 } // end main_package
