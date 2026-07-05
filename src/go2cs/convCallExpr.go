@@ -617,6 +617,16 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				if argBasic, ok := tvArg.Type.(*types.Basic); ok && argBasic.Info()&types.IsUntyped != 0 && !v.isCSharpConstantExpr(arg) {
 					expr = fmt.Sprintf("(%s)%s", v.getCSTypeName(types.Default(argBasic).(*types.Basic)), expr)
 				}
+			} else if argType := v.info.TypeOf(arg); argType != nil {
+				// A NAMED integer type (`type Delim rune`, encoding/json's `string(d)`) renders as a
+				// [GoType] wrapper struct with no direct @string conversion (CS0030). Go's string(intType)
+				// is a code-point → UTF-8 conversion; hop through the underlying integer so the wrapper's
+				// implicit operator yields it first, then @string converts the code point.
+				if named, ok := types.Unalias(argType).(*types.Named); ok {
+					if u, ok := named.Underlying().(*types.Basic); ok && u.Info()&types.IsInteger != 0 {
+						expr = fmt.Sprintf("(%s)%s", v.getCSTypeName(u), expr)
+					}
+				}
 			}
 		}
 

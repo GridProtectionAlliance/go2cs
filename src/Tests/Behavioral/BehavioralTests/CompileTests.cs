@@ -609,6 +609,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringConvNamedInt() => CheckTarget("StringConvNamedInt");
+
+    [TestMethod]
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
 
     [TestMethod]

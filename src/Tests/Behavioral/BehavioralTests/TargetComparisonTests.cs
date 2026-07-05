@@ -611,6 +611,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStringByteUnionConstraint() => CheckTarget("StringByteUnionConstraint");
 
     [TestMethod]
+    public void CheckStringConvNamedInt() => CheckTarget("StringConvNamedInt");
+
+    [TestMethod]
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
 
     [TestMethod]
