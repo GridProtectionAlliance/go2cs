@@ -70,6 +70,18 @@ internal static (nint, @string) pkgParamShadow(ж<strings.Reader> Ꮡstrings) {
     return (n, ((@string)buf));
 }
 
+[GoType] partial struct @file {
+    internal ж<strings.Reader> Δfile;
+    internal nint n;
+}
+
+[GoRecv] internal static nint readOne(this ref @file f) {
+    var buf = new slice<byte>(1);
+    var (k, _) = f.Δfile.Read(buf);
+    f.n += k;
+    return f.n;
+}
+
 internal static void Main() {
     fmt.Println(f(10));
     fmt.Println(f(3));
@@ -79,6 +91,8 @@ internal static void Main() {
     var rd = strings.NewReader("hi"u8);
     var (rn, rs) = pkgParamShadow(rd);
     fmt.Println(rn, rs);
+    var fl = Ꮡ(new @file(Δfile: strings.NewReader("xyz"u8)));
+    fmt.Println(fl.readOne(), fl.readOne());
 }
 
 } // end main_package

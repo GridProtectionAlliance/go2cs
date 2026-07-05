@@ -11,7 +11,10 @@ import (
 // typeCollidingFieldName renames a struct field whose C# name would equal its enclosing
 // struct's type name (C# forbids it — CS0542) by prefixing the disambiguation marker.
 func typeCollidingFieldName(name string) string {
-	return ShadowVarMarker + name
+	// A Δ-prefixed name can never be a C# keyword, so a leading '@' keyword-escape is
+	// dropped before composing — `Δ@file` is not a valid identifier ('@' only leads a
+	// token; net parse.go's `type file struct{ file *os.File }`, CS1003 ×4).
+	return ShadowVarMarker + strings.TrimPrefix(name, "@")
 }
 
 // fieldCollidesWithType reports whether a field selector's name equals the C# type name of the

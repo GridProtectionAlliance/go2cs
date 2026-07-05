@@ -79,6 +79,21 @@ func pkgParamShadow(strings *strings.Reader) (int, string) {
 	return n, string(buf)
 }
 
+// file: the type's OWN name is a C# reserved type name (CS9056 → @-escape) AND its field
+// shares the name — the type-colliding rename must compose Δ + RAW name (Δfile), never
+// Δ@file ('@' only leads a token; net parse.go, CS1003 x4).
+type file struct {
+	file *strings.Reader
+	n    int
+}
+
+func (f *file) readOne() int {
+	buf := make([]byte, 1)
+	k, _ := f.file.Read(buf)
+	f.n += k
+	return f.n
+}
+
 func main() {
 	fmt.Println(f(10)) // 100
 	fmt.Println(f(3))  // 200
@@ -88,4 +103,7 @@ func main() {
 	rd := strings.NewReader("hi")
 	rn, rs := pkgParamShadow(rd)
 	fmt.Println(rn, rs) // 2 hi
+
+	fl := &file{file: strings.NewReader("xyz")}
+	fmt.Println(fl.readOne(), fl.readOne()) // 1 2
 }
