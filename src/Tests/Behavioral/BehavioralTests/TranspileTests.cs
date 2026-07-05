@@ -492,6 +492,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]
+    public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]

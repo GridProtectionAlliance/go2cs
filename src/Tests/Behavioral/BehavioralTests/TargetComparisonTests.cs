@@ -494,6 +494,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
 
     [TestMethod]
+    public void CheckPackageShadowPointerParam() => CheckTarget("PackageShadowPointerParam");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]

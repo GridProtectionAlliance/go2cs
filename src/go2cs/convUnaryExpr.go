@@ -124,6 +124,20 @@ func (v *Visitor) isHeapBoxedExpr(expr ast.Expr) bool {
 func (v *Visitor) boxBaseName(ident *ast.Ident) string {
 	base := strings.TrimPrefix(getSanitizedIdentifier(v.getIdentName(ident)), "@")
 
+	// A deref-aliased pointer PARAMETER keeps its box under the RAW parameter name, whether the value
+	// alias was collision-renamed (`Δp`) or SHADOW-renamed (`randΔ1`): the deref is
+	// `ref var randΔ1 = ref Ꮡrand.Value` — the box `Ꮡrand` is named for the raw parameter, not the
+	// value alias. This is UNLIKE an escaping LOCAL, whose shadow box keeps the RENDERED name
+	// (`ᏑiΔ1`, handled by the alias-derived `base` below). So a shadow-renamed pointer param passed
+	// as a pointer must reference `Ꮡrand`, not `ᏑrandΔ1` — testing/quick's `rand` (shadowing the
+	// `rand` package) and crypto/rsa (CS0103, ~50 sites). The collision case already resolved to the
+	// raw name via the `base` check below; this generalizes it to the shadow-rename case for params.
+	if v.identIsParameter(ident) {
+		if _, isPointer := v.getIdentType(ident).(*types.Pointer); isPointer {
+			return ident.Name
+		}
+	}
+
 	if base == ShadowVarMarker+ident.Name {
 		return ident.Name
 	}

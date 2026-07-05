@@ -585,7 +585,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 							updatedSignature.WriteString("_")
 						}
 					} else {
-						updatedSignature.WriteString(getSanitizedIdentifier(param.Name()))
+						// A shadow-renamed value parameter must emit its renamed name so the declaration
+						// matches its usages (see generateParametersSignature) — this rebuilt-signature
+						// path is taken for a function that ALSO has a pointer param (crypto/rsa's
+						// `EncryptOAEP(hash hash.Hash, …, *PublicKey)`, where `hash` shadows the `hash`
+						// package → `hashΔ1`), so it bypassed the generateParametersSignature lookup and
+						// left the decl raw (`hash.Hash hash`) while its uses were `hashΔ1` (CS0103).
+						paramName := param.Name()
+
+						if adjusted, ok := v.varNames[param]; ok && adjusted != "" {
+							paramName = adjusted
+						}
+
+						updatedSignature.WriteString(getSanitizedIdentifier(paramName))
 					}
 				}
 			}
