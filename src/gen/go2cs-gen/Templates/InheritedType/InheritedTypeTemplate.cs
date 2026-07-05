@@ -36,7 +36,14 @@ internal class InheritedTypeTemplate : TemplateBase
         "Channel" => $" : IChannel<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Array" => $" : IArray<{TargetTypeName}>, ISupportMake<{ObjectName}>",
         "Pointer" => $" : IPointer<{TargetTypeName}>",
-        "Numeric" => $" : IEquatable<{TargetTypeName}>",
+        // Generic-math declarations so a [GoType num:] wrapper satisfies converter-emitted
+        // numeric constraints as a type ARGUMENT — slices.Sort's `cmp.Ordered` maps to
+        // IAddition/IEquality/IComparisonOperators (time.Duration in runtime/debug's
+        // SetGCPercent sort was CS0315 ×3); the operators below already exist for every
+        // numeric kind, only the interface declarations were missing (the golib uintptr
+        // struct precedent). Modulus/bitwise/shift stay undeclared — their operators are
+        // kind-gated.
+        "Numeric" => $" : IEquatable<{TargetTypeName}>, System.Numerics.IAdditionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.ISubtractionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IMultiplyOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IDivisionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IEqualityOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IComparisonOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IIncrementOperators<{TargetTypeName}>, System.Numerics.IDecrementOperators<{TargetTypeName}>",
         _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
     };
 
