@@ -78,5 +78,14 @@ func main() {
 		}()
 		panic("from-iife")
 	}()
+	// A result-RETURNING literal with defer (net lookup_windows' getaddr): the value
+	// execution context func<T>((defer, recover) => ...) carries the return (CS8030 x4).
+	fetch := func() (int, error) {
+		defer fmt.Println("fetch deferred")
+		return 42, nil
+	}
+	v, err := fetch()
+	fmt.Println("fetched:", v, err)
+
 	fmt.Println("done")
 }

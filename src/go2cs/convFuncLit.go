@@ -205,7 +205,14 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			v.newline, v.indent(v.indentLevel+1), returnExpr,
 			v.newline, v.indent(v.indentLevel))
 	case litHasDefer || litHasRecover:
-		inner = wrapIIFEFuncContext(body, litHasDefer, litHasRecover)
+		// A result-RETURNING literal wraps in the VALUE execution context — the void
+		// `func((defer, recover) => …)` cannot return a value (CS8030 ×4, net
+		// lookup_windows' `getaddr := func() ([]IPAddr, error) { defer …; return … }`).
+		if litSig != nil && litSig.Results() != nil && litSig.Results().Len() > 0 && !litHasNamedResults {
+			inner = fmt.Sprintf("func<%s>((defer, recover) => %s)", v.generateResultSignature(litSig), body)
+		} else {
+			inner = wrapIIFEFuncContext(body, litHasDefer, litHasRecover)
+		}
 	default:
 		inner = body
 	}

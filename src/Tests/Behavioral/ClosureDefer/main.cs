@@ -76,6 +76,12 @@ internal static void Main() {
         });
         throw panic("from-iife");
     })))();
+    var fetch = () => func<(nint, error)>((defer, recover) => {
+        deferǃ(ᴛ1 => fmt.Println(ᴛ1), "fetch deferred", defer);
+        return (42, default!);
+    });
+    var (v, err) = fetch();
+    fmt.Println("fetched:", v, err);
     fmt.Println("done");
 }
 
