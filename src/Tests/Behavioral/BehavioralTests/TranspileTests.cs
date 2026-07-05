@@ -387,6 +387,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]
+    public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
+
+    [TestMethod]
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]

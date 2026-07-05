@@ -349,6 +349,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]
+    public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
+
+    [TestMethod]
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]

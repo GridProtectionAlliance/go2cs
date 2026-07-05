@@ -171,6 +171,7 @@
     <Project Path="Tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
+    <Project Path="Tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
