@@ -142,7 +142,10 @@ public class ImplementGenerator : ISourceGenerator
                     .Select(method => (name: iface.ToDisplayString(), method)))
                 .Select(info => new MethodInfo
                 {
-                    Name = promoted && !pointer && !overrides.Contains(GetSimpleName(info.method.Name)) ? info.method.Name : $"{GlobalQualify(info.name)}.{info.method.Name}",
+                    // A keyword method name (gob's `string()`) read from the interface symbol is
+                    // UNescaped; escape it so both the explicit-interface signature and the
+                    // forwarding call emit `@string` (bare `string` is a parse error, CS1525/0539).
+                    Name = promoted && !pointer && !overrides.Contains(GetSimpleName(EscapeCsKeyword(info.method.Name))) ? EscapeCsKeyword(info.method.Name) : $"{GlobalQualify(info.name)}.{EscapeCsKeyword(info.method.Name)}",
                     ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
                     // Carry the parameter REF KIND: an interface member declared with an `in`
                     // param (the hand-finished io stub's Reader.Read(in slice<byte>)) is a

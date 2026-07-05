@@ -175,6 +175,26 @@ internal static void Main() {
     fmt.Println("plumbed:", runPlumbing());
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
+    labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id"u8, num: 9)));
+    fmt.Println("keyword-method:", lb.@string(), lb.@int());
+}
+
+[GoType] partial interface labeler {
+    @string @string();
+    nint @int();
+}
+
+[GoType] partial struct badge {
+    internal @string text;
+    internal nint num;
+}
+
+[GoRecv] internal static @string @string(this ref badge b) {
+    return b.text;
+}
+
+[GoRecv] internal static nint @int(this ref badge b) {
+    return b.num;
 }
 
 internal static void replaceAnimal(ж<Animal> Ꮡa) {

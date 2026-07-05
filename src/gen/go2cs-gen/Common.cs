@@ -255,6 +255,18 @@ public static class Common
         return identifier.StartsWith("@") ? identifier[1..] : identifier;
     }
 
+    // A Go method/field name that is a C# reserved keyword (encoding/gob's `string()` method)
+    // must be `@`-escaped to be a valid C# identifier. Symbol names read from Roslyn
+    // (IMethodSymbol.Name) arrive UNescaped, unlike syntax Identifier.Text; escape them before
+    // they reach emitted C# (an explicit interface impl `ΔgobType.string()` was a parse error).
+    public static string EscapeCsKeyword(string identifier)
+    {
+        if (identifier.StartsWith("@"))
+            return identifier;
+
+        return SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None ? $"@{identifier}" : identifier;
+    }
+
     public static string GetScope(string identifier)
     {
         char firstChar = identifier[0];

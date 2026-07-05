@@ -208,7 +208,28 @@ func main() {
 	// (m_box.Value.Animal.Speak() — CS1929 with no forward).
 	var ss speakShutter = &wrapSink{Animal: Dog{}}
 	fmt.Println(ss.Speak(), ss.Shut()) // Woof! shut
+
+	// An interface method whose name is a C# KEYWORD (`string`/`int`), implemented by a
+	// POINTER receiver — encoding/gob's `gobType.string()` shape. The generated pointer
+	// adapter must @-escape the method in BOTH the explicit-interface signature and the
+	// forwarding call; bare `labeler.string()` was a C# parse error (CS1525/CS0539/CS0501).
+	var lb labeler = &badge{text: "id", num: 9}
+	fmt.Println("keyword-method:", lb.string(), lb.int()) // keyword-method: id 9
 }
+
+// labeler has C#-keyword method names (`string`, `int`) — legal Go identifiers.
+type labeler interface {
+	string() string
+	int() int
+}
+
+type badge struct {
+	text string
+	num  int
+}
+
+func (b *badge) string() string { return b.text }
+func (b *badge) int() int       { return b.num }
 
 func replaceAnimal(a *Animal) {
 	*a = &Cat{}

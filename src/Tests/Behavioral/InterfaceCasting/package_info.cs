@@ -46,6 +46,7 @@ using static go.main_package;
 [assembly: GoImplement<Llama, Animal>(Pointer = true)]
 [assembly: GoImplement<Llama, Animal>]
 [assembly: GoImplement<MyError, error>]
+[assembly: GoImplement<badge, labeler>(Pointer = true)]
 [assembly: GoImplement<basin, sink>]
 [assembly: GoImplement<fileRdr, rdCloser>]
 [assembly: GoImplement<reversed, Animal>(Pointer = true)]
