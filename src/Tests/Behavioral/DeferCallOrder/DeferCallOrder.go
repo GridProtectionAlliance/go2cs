@@ -49,6 +49,8 @@ func main() {
 	acquireAndWork(sm)
 	fmt.Println("after:", sm.held) // after: false
 
+	fmt.Println("notify:", notifyAll(1, 2, 3)) // notified / notify: 6
+
 	fmt.Println("Main function")
 }
 
@@ -68,6 +70,18 @@ func acquireAndWork(s *sema) {
 	s.held = true
 	defer s.release()
 	fmt.Println("working, held:", s.held)
+}
+
+// notifyAll mirrors os/signal's Notify: a VARIADIC function with defer — the params-span
+// prologue (`var vals = valsʗp.slice();`) hoists OUTSIDE the execution wrapper in a block
+// body (a ref-like span param cannot be touched inside a lambda, CS9108).
+func notifyAll(vals ...int) int {
+	defer fmt.Println("notified")
+	total := 0
+	for _, v := range vals {
+		total += v
+	}
+	return total
 }
 
 type acc struct{ total int }

@@ -1,6 +1,7 @@
 namespace go;
 
 using fmt = fmt_package;
+using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
@@ -43,6 +44,7 @@ internal static void Main() => func((defer, recover) => {
     var sm = Ꮡ(new sema(nil));
     acquireAndWork(sm);
     fmt.Println("after:", (~sm).held);
+    fmt.Println("notify:", notifyAll(1, 2, 3));
     fmt.Println("Main function");
 });
 
@@ -62,6 +64,18 @@ internal static void acquireAndWork(ж<sema> Ꮡs) => func((defer, recover) => {
     defer(Ꮡs.release);
     fmt.Println("working, held:", s.held);
 });
+
+internal static nint notifyAll(params ꓸꓸꓸnint valsʗp) {
+    var vals = valsʗp.slice();
+    return func((defer, recover) => {
+        deferǃ(ᴛ1 => fmt.Println(ᴛ1), "notified", defer);
+        nint total = 0;
+        foreach (var (_, v) in vals) {
+            total += v;
+        }
+        return total;
+    });
+}
 
 [GoType] partial struct acc {
     internal nint total;

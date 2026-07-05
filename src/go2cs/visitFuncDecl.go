@@ -285,19 +285,29 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		// In namedReturnDeferMode the func() wrapper is nested inside an extra block body, so
 		// the lambda body sits one level deeper. Bump the indent across the body visit so the
 		// statements (and the closing `}` that the `);` attaches to) align under `func(…`.
-		if v.namedReturnDeferMode {
+		// A VARIADIC function with defer/recover takes the same block form: its params-span
+		// prologue must hoist OUTSIDE the wrapper (a ref-like span param cannot be touched
+		// inside a lambda — CS9108, os/signal's Notify).
+		bodyInBlockForm := v.namedReturnDeferMode || ((v.hasDefer || v.hasRecover) && signature.Variadic())
+
+		if bodyInBlockForm {
 			v.indentLevel++
 		}
 
 		v.visitBlockStmt(funcDecl.Body, blockContext)
 
-		if v.namedReturnDeferMode {
+		if bodyInBlockForm {
 			v.indentLevel--
 		}
 	}
 
 	signatureOnly := funcDecl.Body == nil
 	useFuncExecutionContext := v.hasDefer || v.hasRecover
+	// A VARIADIC function with an execution wrapper hoists its params-span prologue
+	// (`var sig = sigʗp.slice();`) OUTSIDE the wrapper in a block body — a ref-like span
+	// parameter cannot be used inside a lambda (CS9108, os/signal's Notify).
+	variadicHoistMode := useFuncExecutionContext && signature.Variadic()
+	variadicPrologueStr := ""
 	parameterSignature, receiverAccess := v.generateParametersSignature(signature, true)
 	blockPrefix := ""
 	// In namedReturnDeferMode this holds the named-return declarations, emitted outside the
@@ -421,10 +431,21 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			// Check if parameter is variadic, in this case parameter is a C# params array that needs to be converted to a Go slice<T>
 			if i == parameters.Len()-1 && signature.Variadic() {
+				variadicDecls := resultParameters
+
+				if variadicHoistMode {
+					// Hoisted OUTSIDE the execution wrapper (block form) — see variadicHoistMode.
+					variadicDecls = &strings.Builder{}
+				}
+
 				if v.options.preferVarDecl {
-					v.writeString(resultParameters, "%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					v.writeString(variadicDecls, "%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
 				} else {
-					v.writeString(resultParameters, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+					v.writeString(variadicDecls, "%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+				}
+
+				if variadicHoistMode {
+					variadicPrologueStr = variadicDecls.String()
 				}
 			}
 		}
@@ -618,8 +639,25 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		if v.namedReturnDeferMode {
 			// Open a block body, declare the named returns outside the wrapper (so defers/recover
 			// mutate them by closure), then open the void func() wrapper. The trailing
-			// `return <named>;` and block close are emitted after the body below.
-			funcExecutionContext = fmt.Sprintf(" {%s%s%sfunc((%s, %s) =>", namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), deferParam, recoverParam)
+			// `return <named>;` and block close are emitted after the body below. A variadic
+			// function's hoisted params-span prologue joins the outside-the-wrapper decls.
+			funcExecutionContext = fmt.Sprintf(" {%s%s%s%sfunc((%s, %s) =>", variadicPrologueStr, namedReturnDeclsStr, v.newline, v.indent(v.indentLevel+1), deferParam, recoverParam)
+		} else if variadicHoistMode {
+			// Block form: the params-span prologue sits outside the wrapper (CS9108); a
+			// value-returning function returns the wrapper call's result.
+			returnPrefix := ""
+
+			if signature.Results().Len() > 0 {
+				returnPrefix = "return "
+			}
+
+			resultTypeArg := ""
+
+			if signature.Results().Len() > 0 && v.allExecWrapperReturnsAreTypeless(funcDecl) {
+				resultTypeArg = fmt.Sprintf("<%s>", v.generateResultSignature(signature))
+			}
+
+			funcExecutionContext = fmt.Sprintf(" {%s%s%s%sfunc%s((%s, %s) =>", variadicPrologueStr, v.newline, v.indent(v.indentLevel+1), returnPrefix, resultTypeArg, deferParam, recoverParam)
 		} else {
 			// C# infers the value-returning wrapper's T (func<T>, builtin.cs GoFunction) from the
 			// lambda's return statements; a return whose expression contains a typeless `default!`
@@ -666,6 +704,14 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			v.indentLevel = 0
 			v.writeOutputLn(");")
 			v.writeOutputLn("%sreturn %s;", indentInner, returnExpr)
+			v.writeOutputLn("%s}", indentOuter)
+			v.indentLevel = savedIndent
+		} else if variadicHoistMode {
+			// Close the wrapper call, then the block body opened by the hoist form.
+			indentOuter := v.indent(v.indentLevel)
+			savedIndent := v.indentLevel
+			v.indentLevel = 0
+			v.writeOutputLn(");")
 			v.writeOutputLn("%s}", indentOuter)
 			v.indentLevel = savedIndent
 		} else {
