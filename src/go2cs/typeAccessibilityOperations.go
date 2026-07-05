@@ -32,6 +32,16 @@ func collectPublicizedTypes(pkg *types.Package) {
 
 		switch obj := obj.(type) {
 		case *types.TypeName:
+			// An EXPORTED defined type over an unexported NAMED type — `type EncoderBuffer
+			// encoder` (image/png). Its [GoType("encoder")] wrapper's Value property, ctor,
+			// and implicit operators all expose the wrapped `encoder`; a public wrapper over
+			// an internal type is CS0051/CS0053/CS0056/CS0057 (and C# conversion operators
+			// MUST be public, CS0558, so an internal wrapper is not an option). Publicize the
+			// written RHS to match the wrapper's accessibility.
+			if obj.Exported() {
+				collectPublicizedWrapperRHS(obj, pkg)
+			}
+
 			structType, ok := obj.Type().Underlying().(*types.Struct)
 
 			if !ok {
@@ -123,11 +133,39 @@ func cascadePublicizedMethodTypes() {
 					}
 				}
 			}
+
+			// A publicized WRAPPER (an unexported `type A b` reached here through the field/
+			// method cascade) also exposes its wrapped RHS through the public wrapper —
+			// propagate through the RHS, same as the exported-wrapper seed below.
+			if tn, ok := obj.(*types.TypeName); ok {
+				collectPublicizedWrapperRHS(tn, obj.Pkg())
+			}
 		}
 
 		if len(packagePublicizedTypes) == before {
 			break
 		}
+	}
+}
+
+// collectPublicizedWrapperRHS publicizes the written RHS of a defined type whose [GoType]
+// wrapper is emitted public (exported, or unexported-but-publicized). `type EncoderBuffer
+// encoder` exposes `encoder` through the wrapper's Value/ctor/implicit operators, so the
+// wrapped named type must be at least as accessible. Only a NAMED, in-package, unexported RHS
+// needs it — an unnamed RHS (array/struct literal) has no accessibility of its own.
+func collectPublicizedWrapperRHS(tn *types.TypeName, pkg *types.Package) {
+	if packageTypeSpecRHS == nil {
+		return
+	}
+
+	rhs, ok := packageTypeSpecRHS[tn]
+
+	if !ok || rhs == nil {
+		return
+	}
+
+	if _, isNamed := types.Unalias(rhs).(*types.Named); isNamed {
+		collectUnexportedNamedTypes(rhs, pkg)
 	}
 }
 

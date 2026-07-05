@@ -30,6 +30,20 @@ type CaseRange struct {
 	Lvl   level
 }
 
+// coder is an UNEXPORTED struct type. EncBuffer is an EXPORTED defined type OVER it
+// (`type EncBuffer coder`) — image/png's `type EncoderBuffer encoder` shape. The generated
+// [GoType("coder")] wrapper for EncBuffer is public (EncBuffer is exported), so its Value property,
+// constructor, and implicit operators all expose `coder`; the wrapped type must therefore be
+// public too — a public member exposing an internal type is CS0051/CS0053/CS0056/CS0057, and
+// C# conversion operators are required to be public (CS0558), so an internal wrapper is not an
+// option. The converter now publicizes the written RHS of an exported wrapper.
+type coder struct {
+	tag string
+	seq int
+}
+
+type EncBuffer coder
+
 func main() {
 	var cr CaseRange
 	cr.Lo = 65
@@ -40,4 +54,11 @@ func main() {
 	fmt.Println(cr.Delta[0]) // 0 (zero value of the array element)
 	fmt.Println(cr.Item.v)   // 9
 	fmt.Println(cr.Lvl)      // 3
+
+	// Exercise the exported-wrapper-over-unexported surface: merely DECLARING the exported
+	// wrapper over the unexported struct forces the generated wrapper's public Value/ctor/
+	// operators to reference `coder`, reproducing the accessibility failure; the composite
+	// literal and field reads confirm the wrapper still works end-to-end.
+	b := EncBuffer{tag: "png", seq: 7}
+	fmt.Println(b.tag, b.seq) // png 7
 }

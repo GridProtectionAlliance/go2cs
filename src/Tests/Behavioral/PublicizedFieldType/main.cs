@@ -19,6 +19,13 @@ partial class main_package {
     public level Lvl;
 }
 
+[GoType] public partial struct coder {
+    internal @string tag;
+    internal nint seq;
+}
+
+[GoType("coder")] partial struct EncBuffer;
+
 internal static void Main() {
     CaseRange cr = default!;
     cr.Lo = 65;
@@ -28,6 +35,8 @@ internal static void Main() {
     fmt.Println(cr.Delta[0]);
     fmt.Println(cr.Item.v);
     fmt.Println(cr.Lvl);
+    var b = new EncBuffer(new coder(tag: "png"u8, seq: 7));
+    fmt.Println(b.tag, b.seq);
 }
 
 } // end main_package
