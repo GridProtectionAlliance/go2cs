@@ -368,7 +368,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			// declaration, even when the base ident is a fresh clause-scoped binding whose
 			// object the analysis has no reassignment record for (a type-switch case var:
 			// fmt scanOne's `*v = s.scanBool(verb)` took a spurious `var` prefix, CS1003 x18).
+			// An INDEX-expression LHS (`hw[i], ok = xtoi2(…)`, net mac.go) is the same: an
+			// ELEMENT write to existing storage — getIdentifier digs to the CONTAINER ident
+			// (`hw`, a named RESULT with no reassignment record), which was counted as a new
+			// declaration and the tuple element took a `var hw[i]` prefix (46-error cascade).
+			// Counting it REASSIGNED (not ident=nil) keeps the parallel-tuple path selection
+			// (`p[i], p[j] = p[j], p[i]` must stay a simultaneous deconstruction).
 			if _, isStarDeref := lhs.(*ast.StarExpr); isStarDeref {
+				reassignedCount++
+			} else if _, isIndexWrite := lhs.(*ast.IndexExpr); isIndexWrite {
 				reassignedCount++
 			} else if v.isReassignment(ident) {
 				reassignedCount++
@@ -716,7 +724,11 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			// Per-element `var` for the newly-declared members of a mixed redeclaration tuple. An
 			// escaping element is already declared by its heap decl above, so it takes no `var`.
-			if mixedDeclare && ident != nil && ident.Name != "_" && !v.isReassignment(ident) && !escaping[i] {
+			// Only a DIRECT ident element can declare — an index/selector/star element assigns
+			// to existing storage (`var hw[i]` is a syntax error; net mac.go).
+			_, lhsIsDirectIdent := lhsExprs[i].(*ast.Ident)
+
+			if mixedDeclare && lhsIsDirectIdent && ident != nil && ident.Name != "_" && !v.isReassignment(ident) && !escaping[i] {
 				result.WriteString("var ")
 			}
 

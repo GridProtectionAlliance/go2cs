@@ -71,6 +71,27 @@ internal static (nint, nint) streams() {
     return (rbr1.pos, rbr2.pos);
 }
 
+internal static (nint, bool) pairAt(nint i) {
+    return (i * 11, i % 2 == 0);
+}
+
+internal static (slice<nint> hw, nint count) fill(nint n) {
+    slice<nint> hw = default!;
+    nint count = default!;
+
+    hw = new slice<nint>(n);
+    bool ok = default!;
+    for (nint i = 0; i < n; i++) {
+        {
+            (hw[i], ok) = pairAt(i); if (!ok) {
+                continue;
+            }
+        }
+        count++;
+    }
+    return (hw, count);
+}
+
 internal static void Main() {
     var (a, b) = step(5);
     fmt.Println(a.Value, b);
@@ -78,6 +99,8 @@ internal static void Main() {
     fmt.Println(c.Value, d.Value);
     var (e, f) = streams();
     fmt.Println(e, f);
+    var (vals, evens) = fill(4);
+    fmt.Println(vals[1], vals[3], evens);
 }
 
 } // end main_package

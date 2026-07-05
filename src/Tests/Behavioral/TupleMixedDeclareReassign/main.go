@@ -75,6 +75,26 @@ func streams() (int, int) {
 	return rbr1.pos, rbr2.pos
 }
 
+// fill mirrors net mac.go's ParseMAC: an INDEX-expression element in a mixed tuple
+// assignment (`hw[i], ok = xtoi2(...)` — hw a NAMED RESULT with no reassignment record).
+// The element writes EXISTING storage; counting it as a declaration emitted the invalid
+// `(var hw[i], ok) = ...` (46-error syntax cascade across net).
+func pairAt(i int) (int, bool) {
+	return i * 11, i%2 == 0
+}
+
+func fill(n int) (hw []int, count int) {
+	hw = make([]int, n)
+	var ok bool
+	for i := 0; i < n; i++ {
+		if hw[i], ok = pairAt(i); !ok {
+			continue
+		}
+		count++
+	}
+	return hw, count
+}
+
 func main() {
 	a, b := step(5)
 	fmt.Println(*a, b)
@@ -82,4 +102,6 @@ func main() {
 	fmt.Println(*c, *d)
 	e, f := streams()
 	fmt.Println(e, f)
+	vals, evens := fill(4)
+	fmt.Println(vals[1], vals[3], evens) // 11 33 2
 }
