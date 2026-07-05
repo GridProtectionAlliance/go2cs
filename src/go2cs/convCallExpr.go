@@ -9,6 +9,28 @@ import (
 	"strings"
 )
 
+// csharpKeywordCastTypes are the C# keyword primitive type names for which `(T)-value` is
+// unambiguously a cast. Every other cast target the converter emits is either a using-ALIAS
+// (int64=long, uint64=ulong, rune=int, …) or a `[GoType]` NAMED type (level, Class) — for those,
+// `(T)-1` parses as `T MINUS 1` (CS0075 "to cast a negative value … enclose in parentheses" /
+// CS0119 "T is a type, not valid in the given context"), so the operand must be parenthesized.
+var csharpKeywordCastTypes = NewHashSet([]string{
+	"int", "uint", "long", "ulong", "short", "ushort", "byte", "sbyte",
+	"nint", "nuint", "float", "double", "decimal", "bool", "char",
+})
+
+// castOperandNeedsParens reports whether a cast operand must be wrapped in parentheses — it leads
+// with a unary `+`/`-` AND the cast target is not a C# keyword type (see csharpKeywordCastTypes), so
+// `(T)-value` would otherwise mis-parse as a subtraction rather than a cast (x/text/unicode/bidi's
+// `level(-1)`, archive/tar's `int64(-1)`).
+func castOperandNeedsParens(typeName, expr string) bool {
+	if !strings.HasPrefix(expr, "-") && !strings.HasPrefix(expr, "+") {
+		return false
+	}
+
+	return !csharpKeywordCastTypes.Contains(typeName)
+}
+
 // isNarrowIntegerKind reports whether the basic kind is a sub-`int`-width integer (int8/uint8/
 // int16/uint16). C# promotes arithmetic on these to `int`, whereas Go evaluates them at their own
 // width (with overflow wrapping), so a narrow-typed result needs an explicit cast back.
@@ -479,6 +501,10 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 						namedCS := convertToCSTypeName(v.getTypeName(named, false))
 
 						if !strings.HasPrefix(expr, "(("+namedCS+")") && !strings.HasPrefix(expr, "("+namedCS+")") && !strings.HasPrefix(expr, "new ") {
+							if castOperandNeedsParens(namedCS, expr) {
+								return fmt.Sprintf("((%s)(%s))", namedCS, expr)
+							}
+
 							return fmt.Sprintf("((%s)%s)", namedCS, expr)
 						}
 					}
@@ -660,7 +686,15 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		}
 
 		if targetIsBasic {
+			if castOperandNeedsParens(targetTypeName, expr) {
+				return fmt.Sprintf("(%s)(%s)", targetTypeName, expr)
+			}
+
 			return fmt.Sprintf("(%s)%s", targetTypeName, expr)
+		}
+
+		if castOperandNeedsParens(targetTypeName, expr) {
+			return fmt.Sprintf("((%s)(%s))", targetTypeName, expr)
 		}
 
 		return fmt.Sprintf("((%s)%s)", targetTypeName, expr)
