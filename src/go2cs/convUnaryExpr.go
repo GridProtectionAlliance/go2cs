@@ -603,7 +603,18 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 
 		// Check if unary target is not a variable or a field
 		if _, ok := unaryExpr.X.(*ast.Ident); !ok {
-			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, nil))
+			// Thread the enclosing statement's hoist target into the operand — a
+			// `&composite` with a func-literal FIELD value otherwise dumps its capture
+			// decls inline in the ctor argument list (elf file.go, CS1003 ×6).
+			var xContexts []ExprContext
+
+			if context.deferredDecls != nil {
+				hoistLambdaContext := DefaultLambdaContext()
+				hoistLambdaContext.deferredDecls = context.deferredDecls
+				xContexts = []ExprContext{hoistLambdaContext}
+			}
+
+			return fmt.Sprintf("%s(%s)", AddressPrefix, v.convExpr(unaryExpr.X, xContexts))
 		}
 
 		var hasHeapBox bool

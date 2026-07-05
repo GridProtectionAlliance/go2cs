@@ -85,7 +85,23 @@ func main() {
 		return 42, nil
 	}
 	v, err := fetch()
+	tk := makeTask(5)
+	fmt.Println("task:", tk.fn(), tk.name) // task: 11 t
 	fmt.Println("fetched:", v, err)
 
 	fmt.Println("done")
+}
+
+type task struct {
+	fn   func() int
+	name string
+}
+
+// makeTask mirrors elf file.go's `return &readSeekerFromReader{reset: func() {…zrd…}}`:
+// a func-literal FIELD value capturing a local, in RETURN position — the capture snapshot
+// decl must hoist before the statement (inline in the ctor argument list was a CS1003
+// syntax cascade ×6).
+func makeTask(base int) *task {
+	bonus := base * 2
+	return &task{fn: func() int { return bonus + 1 }, name: "t"}
 }

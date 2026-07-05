@@ -81,8 +81,20 @@ internal static void Main() {
         return (42, default!);
     });
     var (v, err) = fetch();
+    var tk = makeTask(5);
+    fmt.Println("task:", (~tk).fn(), (~tk).name);
     fmt.Println("fetched:", v, err);
     fmt.Println("done");
+}
+
+[GoType] partial struct task {
+    internal Func<nint> fn;
+    internal @string name;
+}
+
+internal static ж<task> makeTask(nint @base) {
+    nint bonus = @base * 2;
+    return Ꮡ(new task(fn: () => bonus + 1, name: "t"u8));
 }
 
 } // end main_package

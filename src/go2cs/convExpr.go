@@ -152,6 +152,11 @@ func (c LambdaContext) getDefault() StmtContext {
 
 type UnaryExprContext struct {
 	isTupleResult bool
+
+	// deferredDecls threads the enclosing statement's hoist target through `&composite`
+	// operands so a func-literal FIELD value's capture decls hoist (elf file.go's
+	// `&readSeekerFromReader{reset: func() {…}}` in return position, CS1003 ×6).
+	deferredDecls *strings.Builder
 }
 
 func DefaultUnaryExprContext() UnaryExprContext {
@@ -206,6 +211,12 @@ func (c IdentContext) getDefault() StmtContext {
 }
 
 type KeyValueContext struct {
+	// deferredDecls threads the enclosing statement's hoist target into a KEYED composite
+	// VALUE's conversion — a func-literal field value with captures otherwise dumps its
+	// snapshot decls INLINE in the argument list (elf file.go's readSeekerFromReader{reset:
+	// func() {…zrd…}}, CS1003 syntax cascade ×6).
+	deferredDecls *strings.Builder
+
 	source      KeyValueSource
 	ident       *ast.Ident
 	arrayBacked bool
@@ -298,6 +309,17 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convChanType(exprType)
 	case *ast.CompositeLit:
 		context := getExprContext[KeyValueContext](contexts)
+
+		// Adopt the ambient LambdaContext's hoist target when the KeyValueContext carries
+		// none — a `&composite` in RETURN position arrives without a KeyValueContext, and a
+		// func-literal FIELD value's capture decls otherwise dump inline (elf file.go's
+		// `&readSeekerFromReader{reset: func() {…}}`, CS1003 cascade ×6).
+		if context.deferredDecls == nil {
+			if lambdaContext := getExprContext[LambdaContext](contexts); lambdaContext.deferredDecls != nil {
+				context.deferredDecls = lambdaContext.deferredDecls
+			}
+		}
+
 		return v.convCompositeLit(exprType, context)
 	case *ast.FuncLit:
 		context := getExprContext[LambdaContext](contexts)
@@ -340,6 +362,14 @@ func (v *Visitor) convExpr(expr ast.Expr, contexts []ExprContext) string {
 		return v.convInterfaceType(exprType, context)
 	case *ast.UnaryExpr:
 		context := getExprContext[UnaryExprContext](contexts)
+
+		// Adopt the ambient hoist target (see UnaryExprContext.deferredDecls).
+		if context.deferredDecls == nil {
+			if lambdaContext := getExprContext[LambdaContext](contexts); lambdaContext.deferredDecls != nil {
+				context.deferredDecls = lambdaContext.deferredDecls
+			}
+		}
+
 		return v.convUnaryExpr(exprType, context)
 	case *ast.BadExpr:
 		v.showWarning("@convExpr - BadExpr encountered: %#v", exprType)

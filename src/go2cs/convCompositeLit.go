@@ -116,6 +116,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	arrayTypeContext := DefaultArrayTypeContext()
 	callContext := DefaultCallExprContext()
+	// Thread the enclosing statement's hoist target through the composite so a
+	// func-literal FIELD value's capture decls hoist (see KeyValueContext.deferredDecls).
+	callContext.deferredDecls = context.deferredDecls
 	callContext.keyValueIdent = context.ident
 
 	// Thread the composite's RESOLVED type to the keyed-field emission so a field named like

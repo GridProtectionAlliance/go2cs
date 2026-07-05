@@ -44,6 +44,15 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		}
 	}
 
+	// Thread the enclosing statement's hoist target so a func-literal VALUE's capture
+	// snapshot decls hoist instead of dumping inline in the argument list (elf file.go's
+	// readSeekerFromReader{reset: func() {…}}, CS1003 cascade ×6).
+	if context.deferredDecls != nil {
+		hoistLambdaContext := DefaultLambdaContext()
+		hoistLambdaContext.deferredDecls = context.deferredDecls
+		valueContexts = append(valueContexts, hoistLambdaContext)
+	}
+
 	valueExpr := v.convExpr(keyValueExpr.Value, valueContexts)
 
 	// A NARROW-integer arithmetic value in a struct-FIELD initializer needs the same
