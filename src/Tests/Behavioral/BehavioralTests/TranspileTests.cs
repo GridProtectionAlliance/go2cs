@@ -324,6 +324,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]
+    public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

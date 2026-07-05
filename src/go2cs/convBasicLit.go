@@ -21,6 +21,99 @@ func getOctalCharRegex() *regexp.Regexp {
 	return octalCharRegex
 }
 
+// stringLiteralNeedsByteArray reports whether a Go interpreted (double-quoted) string literal token
+// must be emitted as a byte-array-backed @string rather than a C# string/u8 literal. It scans the
+// token's `\xHH` escapes — Go's `\x` is EXACTLY two hex digits denoting one raw byte; C#'s `\x` is a
+// GREEDY 1-to-4-hex-digit code-UNIT escape, and a C# `"…"u8` literal UTF-8-re-encodes its content.
+// An escape forces the byte-array form when EITHER:
+//   (1) its byte value is >= 0x80 — a C# string/u8 literal UTF-8-re-encodes such a byte to a
+//       multi-byte sequence (or, when the escape greedily forms a lone surrogate, fails to encode at
+//       all — CS9026), so @string byte indexing / len would not match Go; or
+//   (2) it is immediately followed by a third hex digit — C# greedily folds e.g. `\xdb50` into the
+//       single code unit U+DB50, changing the decoded content even if every resulting byte is ASCII.
+// Only `\xHH` ESCAPES are inspected: a literal written with actual UTF-8 characters (`"Michał"`,
+// `"白鵬翔"`) round-trips exactly through C#'s `"…"u8` encoding and keeps the readable string form, as
+// does an all-ASCII escape sequence with no greedy extension (image/jpeg's `"\x00\x10\x01\x11"u8[i]`).
+// Only raw-byte data expressed with high/greedy `\x` escapes (zip blobs, embedded tzdata) is routed
+// to the byte array. A raw (backtick) literal has no escapes and never trips this (checked by caller).
+func stringLiteralNeedsByteArray(token string) bool {
+	if _, err := strconv.Unquote(token); err != nil {
+		return false
+	}
+
+	backslashes := 0
+
+	for i := 0; i < len(token); i++ {
+		c := token[i]
+
+		if c == '\\' {
+			backslashes++
+			continue
+		}
+
+		if (c == 'x' || c == 'X') && backslashes%2 == 1 && i+2 < len(token) && isHexDigit(token[i+1]) && isHexDigit(token[i+2]) {
+			b := hexValue(token[i+1])<<4 | hexValue(token[i+2])
+
+			if b >= 0x80 || (i+3 < len(token) && isHexDigit(token[i+3])) {
+				return true
+			}
+		}
+
+		backslashes = 0
+	}
+
+	return false
+}
+
+// isHexDigit reports whether b is an ASCII hexadecimal digit.
+func isHexDigit(b byte) bool {
+	return (b >= '0' && b <= '9') || (b >= 'a' && b <= 'f') || (b >= 'A' && b <= 'F')
+}
+
+// hexValue returns the numeric value (0-15) of an ASCII hex digit; callers guard with isHexDigit.
+func hexValue(b byte) int {
+	switch {
+	case b >= '0' && b <= '9':
+		return int(b - '0')
+	case b >= 'a' && b <= 'f':
+		return int(b-'a') + 10
+	default:
+		return int(b-'A') + 10
+	}
+}
+
+// emitByteArrayString decodes a Go interpreted string literal token to its exact byte sequence and
+// emits a PARENTHESIZED byte-array-backed C# @string — `((@string)(new byte[]{ 0xNN, ... }))`. This
+// is the faithful representation for a Go string holding raw bytes (see stringLiteralNeedsByteArray):
+// it preserves the exact bytes that C#'s UTF-16 string literal / greedy `\x` escape would otherwise
+// mangle, and the @string's byte indexing (`s[i]`) then matches Go. The outer parentheses are load-
+// bearing: an INLINE-indexed literal (`"…"[i]`) would otherwise bind `[i]` to the inner `byte[]`
+// (postfix `[]` outranks the cast), indexing the raw array instead of the @string. Returns
+// ("", false) if the token cannot be decoded as a Go string literal (caller falls back to the
+// ordinary string-literal path).
+func emitByteArrayString(token string) (string, bool) {
+	decoded, err := strconv.Unquote(token)
+
+	if err != nil {
+		return "", false
+	}
+
+	builder := &strings.Builder{}
+	builder.WriteString("((@string)(new byte[]{")
+
+	for i := 0; i < len(decoded); i++ {
+		if i > 0 {
+			builder.WriteString(", ")
+		}
+
+		fmt.Fprintf(builder, "0x%02x", decoded[i])
+	}
+
+	builder.WriteString("}))")
+
+	return builder.String(), true
+}
+
 func replaceOctalChars(value string) string {
 	octals := getOctalCharRegex().FindAllString(value, -1)
 
@@ -195,6 +288,19 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			}
 		}
 	case token.STRING:
+		// A Go interpreted string literal that carries a `\xHH` raw-byte escape is binary data
+		// (zip blobs, embedded tzdata). C#'s `\x` escape is greedy (1-4 hex digits) and a C# UTF-16
+		// string re-encodes bytes >= 0x80 to two UTF-8 bytes, so re-emitting the token as a C#
+		// string literal both mis-parses (`\xdb50` -> lone surrogate U+DB50, CS9026) and corrupts
+		// the bytes. Emit these as a byte-array-backed @string so the exact bytes are preserved and
+		// @string byte indexing matches Go. Text-only literals keep the readable string form.
+		if !strings.HasPrefix(value, "`") && stringLiteralNeedsByteArray(value) {
+			if byteArray, ok := emitByteArrayString(value); ok {
+				result.WriteString(byteArray)
+				break
+			}
+		}
+
 		strVal, isRawStr := v.getStringLiteral(value)
 
 		if !isRawStr {

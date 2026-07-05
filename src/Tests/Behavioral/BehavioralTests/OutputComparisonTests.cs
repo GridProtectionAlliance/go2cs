@@ -298,6 +298,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]
+    public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
+
+    [TestMethod]
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]

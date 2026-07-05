@@ -326,6 +326,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]
+    public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]
