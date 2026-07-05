@@ -1018,7 +1018,10 @@ func (v *Visitor) generateResultSignature(signature *types.Signature) string {
 
 		result.WriteString(v.getCSTypeName(param.Type()))
 
-		if param.Name() != "" {
+		// A BLANK Go result name (`func match(x, y Value) (_, _ Value)`, go/constant) must NOT
+		// become a C# tuple element name — two `_` elements collide (CS8127). Emit the type
+		// only; C# permits a mixed named/unnamed tuple, so real names are still kept.
+		if param.Name() != "" && param.Name() != "_" {
 			result.WriteRune(' ')
 			result.WriteString(getSanitizedIdentifier(param.Name()))
 		}

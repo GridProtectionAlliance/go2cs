@@ -4109,7 +4109,16 @@ func convertToCSResultList(resultType string) string {
 
 	for i, element := range elements {
 		if allNamed {
-			parts[i] = convertToCSTypeName(strings.TrimSpace(element[len(names[i]):])) + " " + getSanitizedIdentifier(names[i])
+			elemType := convertToCSTypeName(strings.TrimSpace(element[len(names[i]):]))
+
+			// A BLANK Go result name (`func match(x, y Value) (_, _ Value)`, go/constant) must
+			// NOT become a C# tuple element name — two `_` elements collide (CS8127). Emit the
+			// type only; C# allows a mixed named/unnamed tuple, so real names are kept.
+			if names[i] == "_" {
+				parts[i] = elemType
+			} else {
+				parts[i] = elemType + " " + getSanitizedIdentifier(names[i])
+			}
 		} else {
 			parts[i] = convertToCSTypeName(element)
 		}
