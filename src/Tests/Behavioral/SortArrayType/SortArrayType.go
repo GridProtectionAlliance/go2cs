@@ -92,6 +92,10 @@ type PeopleByShoeSize []Person // Person slice for shoe size sorting
 
 type PeopleByAge []Person
 
+type Roster []Person
+
+func (r Roster) headcount() int { return len(r) }
+
 // levelToken/markerConst: a NAMED untyped const renders as a golib UntypedInt static -
 // casting it to a named-numeric wrapper needs the wrapper's UntypedInt bridge (C# never
 // chains two user conversions; compress/flate's (token)(endBlockMarker), CS0030 x2).
@@ -223,6 +227,12 @@ func main() {
 	pb := new(PeopleByAge)
 	*pb = byAge[1:4]
 	fmt.Println(pb.Len()) // 3
+
+	// A conversion between two NAMED slice types sharing []Person (tar's
+	// sparseElem(sparseArray-slice)): the named-slice slicing wrapper makes the arg the
+	// NAMED wrapper, so the conversion must hop through the underlying slice (CS0030).
+	ros := Roster(byAge[0:2])
+	fmt.Println(ros.headcount(), len(ros)) // 2 2
 
     x = `
         SELECT *

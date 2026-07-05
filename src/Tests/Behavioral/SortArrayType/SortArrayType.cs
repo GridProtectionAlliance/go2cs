@@ -76,6 +76,12 @@ internal static nint dynamicFn1() {
 
 [GoType("[]Person")] partial struct PeopleByAge;
 
+[GoType("[]Person")] partial struct Roster;
+
+internal static nint headcount(this Roster r) {
+    return len(r);
+}
+
 [GoType("num:uint32")] partial struct levelToken;
 
 internal static readonly UntypedInt markerConst = 256;
@@ -183,6 +189,8 @@ internal static void Main() {
     var pb = @new<PeopleByAge>();
     pb.ValueSlot = byAge[1..4];
     fmt.Println((~pb).Len());
+    var ros = ((Roster)(slice<Person>)(byAge[0..2]));
+    fmt.Println(ros.headcount(), len(ros));
     x = """
 
         SELECT *

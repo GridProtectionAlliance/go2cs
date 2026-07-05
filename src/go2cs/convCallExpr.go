@@ -402,6 +402,22 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// named type and its EXACT underlying (`nuint` / `uint64`), so a plain `(arenaIdx)(intExpr)`
 		// is CS0030. Coerce through the underlying first — `((arenaIdx)(nuint)(1 << b))` — a numeric
 		// C# cast that is exactly Go's conversion semantics. Skipped when the arg is already the
+		// A conversion between two NAMED SLICE types sharing an identical underlying — tar's
+		// `sparseElem(s[i*24:])` where s is sparseArray (both `[]byte`): the named-slice
+		// slicing wrapper-return makes the arg the NAMED wrapper, and a direct
+		// `(sparseElem)(sparseArray)` cast chains two user-defined operators (CS0030). Hop
+		// through the shared underlying slice: `((sparseElem)(slice<byte>)(…))`.
+		if named, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if sliceUnder, ok := named.Underlying().(*types.Slice); ok {
+				if argNamed, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Named); ok && argNamed != named {
+					if _, argIsSlice := argNamed.Underlying().(*types.Slice); argIsSlice && types.Identical(argNamed.Underlying(), named.Underlying()) {
+						underlyingCS := convertToCSTypeName(v.getTypeName(sliceUnder, false))
+						return fmt.Sprintf("((%s)(%s)(%s))", targetTypeName, underlyingCS, expr)
+					}
+				}
+			}
+		}
+
 		// underlying basic (the existing cast already binds → no churn). types.Unalias: os's
 		// `type FileMode = fs.FileMode` arrives as a *types.Alias, and the bare assertion
 		// skipped the hop (direct nint cast into the foreign wrapper, CS0030 removeall_noat).
