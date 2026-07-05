@@ -1632,7 +1632,20 @@ func (v *Visitor) makeLenArgs(args []ast.Expr) string {
 		argStr := v.convExpr(arg, nil)
 
 		if v.makeLenArgNeedsNintCast(arg) {
-			argStr = "(nint)(" + argStr + ")"
+			// A NAMED numeric type (`type Hash uint`, crypto's maxHash in `make([]T, maxHash)`) renders
+			// as a [GoType] wrapper struct with implicit conversions only to/from its UNDERLYING, so a
+			// direct `(nint)(Hash)` has no conversion (CS0030). Route the cast through the underlying
+			// numeric so the wrapper's implicit operator applies first: `(nint)(nuint)(maxHash)`.
+			if argType := v.info.TypeOf(arg); argType != nil {
+				if _, isNamed := types.Unalias(argType).(*types.Named); isNamed {
+					underlyingCS := convertToCSTypeName(v.getTypeName(argType.Underlying(), false))
+					argStr = fmt.Sprintf("(nint)(%s)(%s)", underlyingCS, argStr)
+				} else {
+					argStr = "(nint)(" + argStr + ")"
+				}
+			} else {
+				argStr = "(nint)(" + argStr + ")"
+			}
 		}
 
 		parts[i] = argStr

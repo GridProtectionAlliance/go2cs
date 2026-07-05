@@ -365,6 +365,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
+
+    [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]

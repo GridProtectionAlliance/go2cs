@@ -363,6 +363,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
+
+    [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]

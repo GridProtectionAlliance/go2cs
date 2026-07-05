@@ -163,6 +163,7 @@
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />
+    <Project Path="Tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
     <Project Path="Tests/Behavioral/MethodGroupGenericArg/MethodGroupGenericArg.csproj" />

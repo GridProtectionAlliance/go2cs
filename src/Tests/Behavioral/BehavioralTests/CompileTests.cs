@@ -363,6 +363,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckLocalTypeSliceElement() => CheckTarget("LocalTypeSliceElement");
 
     [TestMethod]
+    public void CheckMakeLenNamedNumeric() => CheckTarget("MakeLenNamedNumeric");
+
+    [TestMethod]
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
