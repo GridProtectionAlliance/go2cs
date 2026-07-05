@@ -67,6 +67,7 @@ internal static void Main() {
     var pair = new Seq2Like<@string, nint>((@string k, nint v) => len(k) == v);
     fmt.Println(consume(pair, (@string)"four", 4), pair("nope"u8, 3));
     fmt.Println(describe<fmt.Stringer>("stringer"u8));
+    fmt.Println(describe<ж<nint>>("ptr-int"u8));
 }
 
 } // end main_package

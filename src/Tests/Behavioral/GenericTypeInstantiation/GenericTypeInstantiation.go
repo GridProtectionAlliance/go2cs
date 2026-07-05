@@ -74,4 +74,9 @@ func main() {
 
 	// Generic-function call with a cross-package qualified type argument (SelectorExpr).
 	fmt.Println(describe[fmt.Stringer]("stringer"))
+
+	// Generic-function call with a POINTER type argument (StarExpr) — internal/xcoff's
+	// `saferio.SliceCap[*Section]` shape. The type argument is `*int`, not a bare Ident, so the
+	// converter used to keep the Go bracket form AND append the C# `<…>` (CS0021/CS0119).
+	fmt.Println(describe[*int]("ptr-int"))
 }

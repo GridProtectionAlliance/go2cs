@@ -147,6 +147,15 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 }
 
 func (v *Visitor) isGenericTypeArgument(indexExpr *ast.IndexExpr) bool {
+	// The index being a TYPE expression of ANY form — `T`, `*T`, `[]T`, `map[K]V`, `pkg.T` —
+	// marks a generic instantiation (internal/xcoff's `saferio.SliceCap[*Section]`, a POINTER
+	// type argument, which the Ident/Selector cases below miss). go/types records this on the
+	// expression directly; without it the Go bracket form survived while convCallExpr also
+	// appended the resolved `<...>`, emitting `SliceCap[ж<…>]<ж<…>>(…)` (CS0021/CS0119).
+	if tv, ok := v.info.Types[indexExpr.Index]; ok && tv.IsType() {
+		return true
+	}
+
 	switch index := indexExpr.Index.(type) {
 	case *ast.Ident:
 		// Check if this identifier refers to a type
