@@ -188,6 +188,7 @@
     <Project Path="Tests/Behavioral/NestedFieldElementAddr/NestedFieldElementAddr.csproj" />
     <Project Path="Tests/Behavioral/NestedFieldPointerAssign/NestedFieldPointerAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedGenericTypes/NestedGenericTypes.csproj" />
+    <Project Path="Tests/Behavioral/NestedMapAssign/NestedMapAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/PanicRecover/PanicRecover.csproj" />

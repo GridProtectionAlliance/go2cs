@@ -440,6 +440,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]
+    public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

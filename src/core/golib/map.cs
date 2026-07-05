@@ -99,6 +99,19 @@ public readonly struct map<TKey, TValue> : IMap<TKey, TValue>, ISupportMake<map<
         m_map.Add(key, value);
     }
 
+    // Set writes a key with Go's OVERWRITE semantics (unlike Add, which throws on a duplicate
+    // key). It exists so a nested map assignment `m[k1][k2] = v` can emit as
+    // `m[k1].Set(k2, v)`: `m[k1]` returns a map VALUE (readonly struct), and a C# indexer
+    // SETTER cannot run on that rvalue (CS1612) — but a METHOD can, and it mutates the shared
+    // backing dictionary, so the write is visible through the original (internal/dag).
+    public void Set(TKey key, TValue value)
+    {
+        if (m_map is null)
+            throw new PanicException("assignment to entry in nil map");
+
+        m_map[key] = value;
+    }
+
     /// <inheritdoc />
     public bool Remove(TKey key)
     {

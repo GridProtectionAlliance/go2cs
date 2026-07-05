@@ -256,6 +256,39 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 	lhsLen := len(lhsExprs)
 	rhsLen := len(rhsExprs)
 
+	// A NESTED map assignment `m[k1][k2] = v` — the outer index `m[k1]` returns a map VALUE
+	// (golib map is a readonly struct), so a C# indexer SETTER on that rvalue is CS1612
+	// (internal/dag's `g.edges[from][to] = true`). Emit `m[k1].Set(k2, v)`: a method call runs
+	// on the rvalue and mutates the shared backing dictionary, so the write is visible through
+	// the original. Only a plain `=` whose LHS is a map-index over a map-index base needs it.
+	if lhsLen == 1 && rhsLen == 1 && assignStmt.Tok == token.ASSIGN {
+		if outerIndex, ok := lhsExprs[0].(*ast.IndexExpr); ok {
+			if _, baseIsIndex := outerIndex.X.(*ast.IndexExpr); baseIsIndex {
+				if baseType := v.getType(outerIndex.X, false); baseType != nil {
+					if _, isMap := baseType.Underlying().(*types.Map); isMap {
+						outerExpr := v.convExpr(outerIndex.X, nil)
+						keyExpr := v.convExpr(outerIndex.Index, nil)
+						valExpr := v.convExpr(rhsExprs[0], nil)
+						result.WriteString(fmt.Sprintf("%s.Set(%s, %s);", outerExpr, keyExpr, valExpr))
+
+						if hoistBuf != nil && hoistBuf.Len() > 0 {
+							v.targetFile.WriteString(hoistBuf.String())
+						} else if format.useNewLine {
+							v.targetFile.WriteString(v.newline)
+						}
+
+						if format.useIndent {
+							v.targetFile.WriteString(v.indent(v.indentLevel))
+						}
+
+						v.targetFile.WriteString(result.String())
+						return
+					}
+				}
+			}
+		}
+	}
+
 	reassignedCount := 0
 	declaredCount := 0
 

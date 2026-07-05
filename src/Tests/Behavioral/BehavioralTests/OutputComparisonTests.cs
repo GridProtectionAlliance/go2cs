@@ -400,6 +400,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]
+    public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]

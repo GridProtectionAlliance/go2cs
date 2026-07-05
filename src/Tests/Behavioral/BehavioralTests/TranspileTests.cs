@@ -438,6 +438,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]
+    public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
+
+    [TestMethod]
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
