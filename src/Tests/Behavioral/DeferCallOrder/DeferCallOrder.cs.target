@@ -4,6 +4,15 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+internal delegate void stopFn();
+
+internal static stopFn makeStop(@string tag, channel/*<-*/<@string> @out) {
+    var outʗ1 = @out;
+    return () => {
+        outʗ1.ᐸꟷ(tag);
+    };
+}
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), "First", defer);
     deferǃ(ᴛ1 => fmt.Println(ᴛ1), "Second", defer);
@@ -11,6 +20,13 @@ internal static void Main() => func((defer, recover) => {
     var f1 = fmt.Println;
     var f1ʗ1 = f1;
     deferǃ(ᴛ1 => f1ʗ1(ᴛ1), "Fourth", defer);
+    var msgs = new channel<@string>(2);
+    var cancel = makeStop("stopped"u8, msgs);
+    var cancelʗ1 = cancel;
+    defer(() => cancelʗ1());
+    var msgsʗ1 = msgs;
+    goǃ(() => makeStop("go-stopped"u8, msgsʗ1)());
+    fmt.Println(ᐸꟷ(msgs));
     deferǃ(GetPrintLn(), (@string)"Fifth", defer);
     var c = Ꮡ(new acc(nil));
     var (s1, e1) = c.add(5);

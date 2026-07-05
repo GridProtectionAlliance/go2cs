@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/types"
 	"strings"
 )
 
@@ -72,9 +73,23 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	result.WriteString("go\u01C3(")
 
 	if paramCount == 0 {
+		// A NAMED func-type callee (context.CancelFunc) is a DISTINCT C# delegate with no
+		// conversion to Action — keep the invocation in lambda form (mirrors the defer arm).
+		namedFuncType := false
+
+		if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
+			if named, ok := types.Unalias(funType).(*types.Named); ok {
+				if _, isSig := named.Underlying().(*types.Signature); isSig {
+					namedFuncType = true
+				}
+			}
+		}
+
 		// C# `go` method implementation expects an Action (or WaitCallback delegate)
-		if strings.HasSuffix(callExpr, "()") {
+		if !namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
+		} else if namedFuncType && strings.HasSuffix(callExpr, "()") {
+			callExpr = "() => " + callExpr // Action lambda over the named delegate's invocation
 		} else {
 			callExpr = "_ => " + callExpr // WaitCallback delegate
 		}

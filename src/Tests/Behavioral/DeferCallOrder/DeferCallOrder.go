@@ -4,6 +4,15 @@ import (
 	"fmt"
 )
 
+// stopFn: a NAMED func type deferred/goroutine'd by VALUE (context.CancelFunc in net
+// dial) — a distinct C# delegate has no conversion to Action, so the emission keeps the
+// lambda form `defer(() => cancel())` instead of the bare trimmed delegate (CS1503 x5).
+type stopFn func()
+
+func makeStop(tag string, out chan<- string) stopFn {
+	return func() { out <- tag }
+}
+
 func main() {
 	defer fmt.Println("First")
 	defer fmt.Println("Second")
@@ -11,6 +20,12 @@ func main() {
 
 	f1 := fmt.Println
 	defer f1("Fourth")
+
+	msgs := make(chan string, 2)
+	cancel := makeStop("stopped", msgs)
+	defer cancel()
+	go makeStop("go-stopped", msgs)()
+	fmt.Println(<-msgs) // go-stopped
 
 	defer GetPrintLn()("Fifth")
 

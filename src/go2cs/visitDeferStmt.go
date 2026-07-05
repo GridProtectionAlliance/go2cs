@@ -75,12 +75,24 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		// form there so the call's result is discarded, exactly Go's deferred-call
 		// semantics.
 		hasResults := false
+		namedFuncType := false
 
-		if sig, ok := v.getType(deferStmt.Call.Fun, false).(*types.Signature); ok && sig.Results() != nil && sig.Results().Len() > 0 {
-			hasResults = true
+		if funType := v.getType(deferStmt.Call.Fun, false); funType != nil {
+			if sig, ok := funType.(*types.Signature); ok && sig.Results() != nil && sig.Results().Len() > 0 {
+				hasResults = true
+			}
+
+			// A NAMED func-type callee (context.CancelFunc) is a DISTINCT C# delegate with
+			// no conversion to Action — the bare trimmed form was CS1503 ×5 (net dial's
+			// `defer cancel()`); keep the lambda so the invocation converts.
+			if named, ok := types.Unalias(funType).(*types.Named); ok {
+				if _, isSig := named.Underlying().(*types.Signature); isSig {
+					namedFuncType = true
+				}
+			}
 		}
 
-		if !hasResults && strings.HasSuffix(callExpr, "()") {
+		if !hasResults && !namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()")
 		} else {
 			callExpr = "() => " + callExpr
