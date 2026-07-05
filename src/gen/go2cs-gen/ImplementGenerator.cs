@@ -78,6 +78,16 @@ public class ImplementGenerator : ISourceGenerator
         // promotedPairs pre-index already folds the Promoted flag into the first emission.
         HashSet<string> emittedValuePairs = new(StringComparer.Ordinal);
 
+        // Emit each explicit interface MEMBER once per struct across its partial-struct impls.
+        // A type implementing both an interface AND a super-interface that EMBEDS it (File :
+        // io.Closer, mime/multipart's sectionReadCloser) would emit the inherited member's
+        // explicit impl (io_package.Closer.Close()) in BOTH the io.Closer partial and the File
+        // partial → CS0111/CS8646. The earlier partial's explicit impl already satisfies the
+        // member for the whole struct, so later partials skip it. Keyed by (struct, member) and
+        // scoped to the partial-struct path — adapter classes (structNameжInterfaceName) are
+        // distinct per interface and must keep their full method set, so they do not consult it.
+        HashSet<string> emittedPartialMembers = new(StringComparer.Ordinal);
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, _, _) in attributeFinder.TargetAttributes)
         {
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -495,6 +505,14 @@ public class ImplementGenerator : ISourceGenerator
             if (!emittedValuePairs.Add($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"))
                 continue;
 
+            // Drop members already emitted in an earlier partial of the SAME struct (a member
+            // inherited from an embedded interface shared by two implemented interfaces — see
+            // emittedPartialMembers). The earlier partial's impl satisfies it for the whole struct;
+            // re-declaring it here is CS0111/CS8646. An empty resulting partial is valid.
+            List<MethodInfo> partialMethods = methods
+                .Where(method => emittedPartialMembers.Add($"{structType.ToDisplayString()}|{method.Name}"))
+                .ToList();
+
             string generatedSource = new InterfaceImplTemplate
             {
                 PackageNamespace = packageNamespace,
@@ -503,7 +521,7 @@ public class ImplementGenerator : ISourceGenerator
                 InterfaceName = interfaceName,
                 Promoted = promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"),
                 Overrides = overrides,
-                Methods = methods,
+                Methods = partialMethods,
                 EmbedHop = embedHop,
                 EmbedHopBoxMethods = embedHopBoxMethods,
                 EmbedHopDeepPaths = embedHopDeepPaths,

@@ -232,6 +232,7 @@
     <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
     <Project Path="Tests/Behavioral/ShadowedPointerParam/ShadowedPointerParam.csproj" />
     <Project Path="Tests/Behavioral/ShadowedVarMethodCallLHS/ShadowedVarMethodCallLHS.csproj" />
+    <Project Path="Tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="Tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />
     <Project Path="Tests/Behavioral/Slice3IndexWideBound/Slice3IndexWideBound.csproj" />
     <Project Path="Tests/Behavioral/SliceAliasing/SliceAliasing.csproj" />
