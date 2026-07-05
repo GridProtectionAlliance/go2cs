@@ -169,6 +169,23 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 	v.packageImports.WriteString(v.newline)
 }
 
+// rootQualified prefixes ns with the root namespace, using `global::go.` instead of a bare `go.`
+// when the CURRENT package's own namespace shadows the root — a `go/*` stdlib package (go/token,
+// go/ast, go/doc, go/build, …) lands in `namespace go.go.<pkg>`, so a bare `go.X` reference binds the
+// leading `go` to the enclosing `go.go` namespace and resolves e.g. `go.sync` to the nonexistent
+// `go.go.sync` (CS0234). `global::` forces resolution from the global namespace. Every other package
+// (whose namespace's second segment is not `go`) keeps the bare `go.` prefix — `global::` there would
+// be needless golden churn.
+func rootQualified(ns string) string {
+	segs := strings.Split(packageNamespace, ".")
+
+	if len(segs) >= 2 && segs[0] == RootNamespace && segs[1] == RootNamespace {
+		return "global::" + RootNamespace + "." + ns
+	}
+
+	return RootNamespace + "." + ns
+}
+
 // rootQualifyIfAmbiguous prefixes an imported namespace with the root namespace ("go.") when its
 // leading segment also appears in the current package's namespace path. Without this, C# relative
 // name resolution binds the leading segment to the closer (current-namespace) match instead of the
@@ -195,12 +212,12 @@ func rootQualifyIfAmbiguous(ns string) string {
 	// namespace (`io_package`) has no leading qualifier to shadow, so this applies only to multi-segment
 	// (sub-package) targets.
 	if firstSeg != ns && packageImportLeadingSegments[firstSeg] {
-		return RootNamespace + "." + ns
+		return rootQualified(ns)
 	}
 
 	for _, seg := range strings.Split(packageNamespace, ".") {
 		if seg != RootNamespace && seg == firstSeg {
-			return RootNamespace + "." + ns
+			return rootQualified(ns)
 		}
 	}
 
@@ -216,7 +233,7 @@ func rootQualifyIfAmbiguous(ns string) string {
 
 	for prefix != "" && prefix != RootNamespace {
 		if packageChildNamespaces[prefix+"."+firstSeg] {
-			return RootNamespace + "." + ns
+			return rootQualified(ns)
 		}
 
 		if dot := strings.LastIndex(prefix, "."); dot != -1 {
