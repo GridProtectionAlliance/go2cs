@@ -13,8 +13,16 @@ import (
 func typeCollidingFieldName(name string) string {
 	// A Δ-prefixed name can never be a C# keyword, so a leading '@' keyword-escape is
 	// dropped before composing — `Δ@file` is not a valid identifier ('@' only leads a
-	// token; net parse.go's `type file struct{ file *os.File }`, CS1003 ×4).
-	return ShadowVarMarker + strings.TrimPrefix(name, "@")
+	// token; net parse.go's `type file struct{ file *os.File }`, CS1003 ×4). A
+	// KEYWORD-family name (arrived '@'-escaped) has its enclosing TYPE Δ-renamed too
+	// (`partial struct Δfile`, CS9056), so the member doubles the marker (ΔΔfile) to
+	// still differ from the type (CS0542). Deterministic from the name alone, keeping
+	// every declaration/access site consistent.
+	if raw, wasEscaped := strings.CutPrefix(name, "@"); wasEscaped {
+		return ShadowVarMarker + ShadowVarMarker + raw
+	}
+
+	return ShadowVarMarker + name
 }
 
 // fieldCollidesWithType reports whether a field selector's name equals the C# type name of the

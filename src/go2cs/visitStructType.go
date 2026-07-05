@@ -389,10 +389,14 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 						}
 
 						prevNameDiscardedCount++
-					} else if fieldName == structTypeName {
+					} else if strings.TrimPrefix(fieldName, "@") == strings.TrimPrefix(strings.TrimPrefix(structTypeName, ShadowVarMarker), "@") {
 						// C# forbids a member sharing its enclosing type's name (CS0542), so rename a
 						// field whose name equals the struct type with the disambiguation marker. Field
-						// accesses are renamed to match (see convSelectorExpr / convIdent).
+						// accesses are renamed to match (see convSelectorExpr / convIdent). Both sides
+						// compare RAW (escape/rename markers stripped): net parse.go's `type file
+						// struct{ file *os.File }` renames the TYPE to Δfile (CS9056) and escapes the
+						// FIELD to @file — the literal compare missed, declaring `@file` while every
+						// access site emitted `Δfile` (CS1061 ×3).
 						fieldName = typeCollidingFieldName(fieldName)
 					}
 
