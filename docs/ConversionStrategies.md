@@ -384,6 +384,20 @@ case boolVal y: {
 
 Binary `&&`/`||` take the parallel form `((boolVal)((bool)x && (bool)y))`. A predeclared-`bool` operand keeps the bare `!x` / `x && y` form (no golden churn). (Guarded by the `NamedBooleanLogic` behavioral test.)
 
+### Casting a negative value to a non-keyword type parenthesizes the operand
+C# parses `(T)-value` as a cast only when `T` is a keyword primitive (`int`, `long`, `nint`, `byte`, …). For a using-**alias** (`int64`=`long`, `uint64`=`ulong`, `rune`=`int`, …) or a `[GoType]` **named** type (`level`), `(int64)-1` / `(level)-1` is instead parsed as `type MINUS value` — CS0075 ("to cast a negative value, you must enclose the value in parentheses") and CS0119 ("'long' is a type, not valid in the given context"). So a cast whose operand leads with a unary `+`/`-` and whose target is not a C# keyword type parenthesizes the operand:
+
+```go
+lvl := level(-1)              // named conversion
+mask := -1 << uint(bits)      // int64-typed wide shift
+```
+```csharp
+var lvl = ((level)(-1));
+var mask = ((int64)(-1) << (int)((nuint)bits));
+```
+
+Two emission sites carry it: the type-conversion cast (convCallExpr, `castOperandNeedsParens`) covers `level(-1)`/`int64(-1)`, and the wide-shift left-operand cast (convBinaryExpr) covers `-1 << bits` (a wide shift type does not promote to `int`, so its left operand is cast to that type). A keyword target (`(int)-1`, `(nint)-1`) and a non-negative operand keep the bare form (no golden churn). (Guarded by the `CastNegativeNamedType` and `ShiftNegativeWideConst` behavioral tests.)
+
 ## The "nil" Value
 In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses the golib [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/NilType.cs) with a default instance called `nil` (defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs)). `NilType` provides comparison operators so `x == nil` / `x != nil` work across the runtime types (slices, maps, channels, pointers, interfaces), each of which defines what "nil" means for it (e.g. a `map<K,V>` whose backing dictionary is null is the nil map: reads return the zero value, `len` is 0, ranging yields nothing, and a write panics — matching Go).
 
@@ -569,6 +583,18 @@ The same raw-box-name rule applies when such a shadow-renamed pointer is **captu
 A closure that captures an outer variable is emitted with a snapshot copy declared before the lambda — `var sʗ1 = s;` — and uses of the captured variable inside the lambda are rewritten to that capture name `sʗ1`. The capture-name mapping is keyed by **name**, which breaks on a **self-shadowing initializer inside the closure**: runtime `mgcsweep`'s `systemstack(func() { s := spanOf(uintptr(unsafe.Pointer(s.largeType))); … })` declares an inner `s` whose initializer reads the *outer* captured `s`. Both the captured use (the RHS `s.largeType`) and the distinct inner binding were mapped to the same `sʗ3`, so the inner declaration emitted `var sʗ3 = …(~sʗ3)…` — its RHS binding to the not-yet-initialized inner variable (CS0841). The fix records the captured **object** alongside the name, and applies the capture name only when an ident resolves to that exact outer object; the inner binding falls through to its own (shadow-renamed) name. The emission is `var sΔ1 = spanOf(…(~sʗ3)…)` — the inner `s` shadow-renamed to `sΔ1` (distinct from the capture `sʗ3`), its RHS correctly reading the captured `sʗ3`, and later uses of the inner `s` using `sΔ1`. Because the object check passes for every non-shadowing capture (the ident *is* the captured variable), it changes nothing outside this self-shadow case (zero golden churn). (Guarded by the `ClosureSelfShadowCapture` behavioral test — a captured pointer with an inner `s := f(s)` in a `systemstack`-shaped call-argument closure, output verified vs Go; cleared runtime `mgcsweep`'s CS0841.)
 
 The same rule applies to an **escaping local** whose address is taken — `var p _panic; … preprintpanics(&p)` in runtime's `gopanic`, where `p` collides with the type `p`. The heap allocation is `ref var Δp = ref heap(new _panic(), out var Ꮡp)`, so the box is `Ꮡp` (raw) and `&p` must emit `Ꮡp`, not `ᏑΔp`. **Crucially, the box-name rule is keyed to the rename *kind*, because the two kinds name their boxes differently:** a type-**collision** rename prepends the marker (`p` → `Δp`) but keeps the raw box (`Ꮡp`), whereas a nested-scope **shadow** rename appends the marker plus a counter (`i` → `iΔ1`, `iΔ2`) and keeps the *shadow* box (`ref var iΔ1 = ref heap<nint>(out var ᏑiΔ1)`, so `&i` correctly emits `ᏑiΔ1`). The converter therefore rewrites to the raw name *only* when the alias is exactly `Δ`+rawname (the collision form); a shadow-renamed or non-renamed var keeps its existing box name. (Guarded by the `CollisionRenamedLocalBox` behavioral test, with `ForVariants`/`NestedVarShadow` covering the shadow-rename form left unchanged.)
+
+### A parameter that shadows an imported package is renamed at its declaration too
+A function parameter whose name equals an imported package the function references — crypto/rsa's `func emsaPSSEncode(…, hash hash.Hash)`, where `hash` shadows the `hash` package named in the signature type `hash.Hash` — is shadow-renamed by the variable analysis (`hash` → `hashΔ1`) so it does not bind the `using hash = hash_package;` alias. Every **usage** already rendered the renamed name (convIdent reads `v.varNames`), but the parameter **declaration** was emitted from the raw `param.Name()`, so the signature kept `hash.Hash hash` while its uses were `hashΔ1` — CS0103 at every use (40 sites in crypto/rsa, 27 in testing/quick's `rand`). The declaration now resolves through the same `v.varNames` map, so it matches the usages:
+
+```go
+func emsaPSSEncode(mHash []byte, emBits int, salt []byte, hash hash.Hash) { … hash.Size() … }
+```
+```csharp
+internal static (…) emsaPSSEncode(slice<byte> mHash, nint emBits, slice<byte> salt, hash.Hash hashΔ1) { … hashΔ1.Size() … }
+```
+
+A non-shadowed parameter maps to its own raw name (no churn). (A shadow-renamed **pointer** parameter, whose box `Ꮡhash` diverges from the renamed value alias, is a separate open case.) (Guarded by the `PackageShadowParam` behavioral test.)
 
 ## Return Tuples
 Many Go functions return either a single value or a "value, ok"/"value, error" tuple, where only the declared return arity selects the behavior. You cannot differentiate C# overloads by return type alone, so the runtime types expose a second overload distinguished by an extra discard argument. For map access, the "comma-ok" read routes through a two-value indexer using the discard sentinel `ꟷ`:
@@ -1226,6 +1252,19 @@ Inside a package whose namespace nests a same-named segment (go/build/constraint
 canned `System.IFormattable` impl where the interface inherits it (the hand-finished io
 stub's dyn machinery).
 
+The **converter** faces the same `go.go` shadowing in the import `using` directives it emits for a
+`go/*` package (go/token lands in `namespace go.go`, imports `sync`/`unicode` sub-namespaces): a
+rooted `using atomic = go.sync.atomic_package;` / `using go.sync;` binds its leading `go` to the
+enclosing `go.go` namespace, resolving `go.sync` to the nonexistent `go.go.sync` (CS0234). `rootQualifyIfAmbiguous` routes its rooting returns through `rootQualified`, which emits `global::go.`
+instead of a bare `go.` when the package's namespace second segment is itself `go`:
+
+```csharp
+using atomic = global::go.sync.atomic_package;
+using global::go.sync;
+```
+
+Every other package (namespace second segment ≠ `go`, including all behavioral tests) keeps the bare `go.` prefix, so there is no golden churn. Cleared go/token, go/doc/comment, go/build/constraint. (Behavioral guard owed — a `namespace go.go.*` package needs a `go/X` module path, absent from single-file behavioral tests.)
+
 ### Generic embedded fields
 A GENERIC embed (`entry[K,V]` embedding `node[K,V]`, internal/concurrent) arrives in the AST as
 an `IndexExpr`/`IndexListExpr` over the base type; the anonymous-field walk unwraps it (plain,
@@ -1421,6 +1460,25 @@ the bare value converts implicitly and nothing is recorded. Otherwise the pair i
 locally and the conversion site wraps in the locally generated value adapter
 (`new binary_bigEndianᴠByteOrder(binary.BigEndian)`) — the value sibling of the both-foreign pointer
 adapter above.
+
+### An exported func type publicizes the unexported types in its signature
+An EXPORTED named func type becomes a `public` C# delegate; an unexported type in its signature —
+x/text/unicode/bidi's `type Option func(*options)`, where `options` is package-private — is then
+less accessible than the delegate (CS0059, "inconsistent accessibility"). The type-accessibility
+pass, which already publicizes the unexported types exposed by an exported struct field / package
+var / method signature, also walks an exported named type whose underlying is a `*types.Signature`
+and publicizes the unexported named types in its parameters and results:
+
+```go
+type options struct{ … }        // unexported
+type Option func(*options)       // exported -> public delegate
+```
+```csharp
+[GoType] public partial struct options { … }   // publicized to match the delegate
+public delegate void Option(ж<options> _);
+```
+
+Only a package with an exported func type over an unexported type is affected (no golden churn). (Guarded by the `PublicizedFuncTypeParam` behavioral test.)
 
 ### Publicized unexported types make their exported methods public
 An unexported Go type reachable through an exported surface (an exported var — `var BigEndian
