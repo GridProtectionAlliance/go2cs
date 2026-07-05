@@ -98,9 +98,36 @@ internal static @string keepAlive(nint idle, nint interval) {
     return "both-or-idle"u8;
 }
 
+internal static nint leadingDefault(nint n) {
+    nint v = 0;
+    var exprᴛ1 = n;
+    var matchᴛ1 = false;
+    var matchᴛ2 = exprᴛ1 is 3 || exprᴛ1 is 2 || exprᴛ1 is 1;
+    if (!matchᴛ2) { /* default: */
+        v |= (nint)(8);
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 3) { matchᴛ1 = true;
+        v |= (nint)(4);
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 2) {
+        v |= (nint)(2);
+        fallthrough = true;
+    }
+    if (fallthrough || !matchᴛ1 && exprᴛ1 is 1) { matchᴛ1 = true;
+        v |= (nint)(1);
+    }
+
+    return v;
+}
+
 internal static void Main() {
     foreach (var (_, n) in new nint[]{0, 1, 2, 3}.slice()) {
         fmt.Println(classify(n));
+    }
+    foreach (var (_, n) in new nint[]{0, 1, 2, 3, 4}.slice()) {
+        fmt.Println(leadingDefault(n));
     }
     fmt.Println(keepAlive(-1, 5), keepAlive(-1, -1), keepAlive(3, 5));
     foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {

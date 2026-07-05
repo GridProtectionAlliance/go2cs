@@ -100,9 +100,37 @@ func keepAlive(idle, interval int) string {
 	return "both-or-idle"
 }
 
+// leadingDefault mirrors encoding/ascii85 Encode: the `default:` comes FIRST and itself falls
+// through, so the bodies must run in SOURCE order (default→3→2→1 for the unmatched value) while
+// the default still runs only when NO case matches. The converter precomputes a second match var
+// (`var matchᴛ2 = <OR of all case conditions>;`) to guard the leading default; without the
+// default's own fallthrough being scanned the next case emitted `else if` (CS8641 cascade).
+//
+//go:noinline
+func leadingDefault(n int) int {
+	v := 0
+	switch n {
+	default:
+		v |= 8
+		fallthrough
+	case 3:
+		v |= 4
+		fallthrough
+	case 2:
+		v |= 2
+		fallthrough
+	case 1:
+		v |= 1
+	}
+	return v
+}
+
 func main() {
 	for _, n := range []int{0, 1, 2, 3} {
 		fmt.Println(classify(n))
+	}
+	for _, n := range []int{0, 1, 2, 3, 4} {
+		fmt.Println(leadingDefault(n)) // 15, 1, 3, 7, 15
 	}
 	fmt.Println(keepAlive(-1, 5), keepAlive(-1, -1), keepAlive(3, 5)) // interval-only none both-or-idle
 	// zero / one / many (fallthrough) / many (default)

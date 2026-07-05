@@ -7,6 +7,7 @@ import (
 	"go/token"
 	"go/types"
 	"slices"
+	"strings"
 )
 
 // caseBodyHasSwitchBreak reports whether a switch case body contains a bare `break` that targets the
@@ -154,6 +155,19 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			if i > 0 && caseHasFallthroughStmt[i-1] {
 				defaultCaseFallsThrough = true
 			}
+
+			// A LEADING/MIDDLE default can itself fall through (ascii85's
+			// `default: … fallthrough; case 3:`) — without recording it the next case
+			// emitted `else if` after the bare default block (CS8641 cascade ×5).
+			if caseClause.Body != nil {
+				for _, stmt := range caseClause.Body {
+					if branchStmt, ok := stmt.(*ast.BranchStmt); ok && branchStmt.Tok == token.FALLTHROUGH {
+						hasFallthroughs = true
+						caseHasFallthroughStmt[i] = true
+					}
+				}
+			}
+
 			continue
 		}
 
@@ -292,6 +306,106 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			matchVarName = v.getTempVarName("match")
 		}
 
+		// A NON-TRAILING default participating in fallthrough (ascii85's leading
+		// `default: … fallthrough`) must run only when NO case matches while executing in
+		// SOURCE order — so a SECOND var PRECOMPUTES the OR of every case condition and the
+		// default emits as `if (!anyMatch) { … }`. The running match flag keeps its exact
+		// false-init + per-case set semantics (each case's `!match &&` prefix reads it, so
+		// it cannot double as the precomputed predicate). Conditions are rendered ONCE here
+		// (convExpr has side effects) and consumed by the emission loop below.
+		nonTrailingDefaultFallsThrough := false
+
+		for ci, cc := range caseClauses {
+			if cc.List == nil && ci < len(caseClauses)-1 && caseHasFallthroughStmt[ci] {
+				nonTrailingDefaultFallsThrough = true
+			}
+		}
+
+		var anyMatchVarName string
+
+		if nonTrailingDefaultFallsThrough {
+			anyMatchVarName = v.getTempVarName("match")
+		}
+
+		caseConds := make([]string, len(caseClauses))
+		caseUsesPattern := make([]bool, len(caseClauses))
+
+		for ci, cc := range caseClauses {
+			if cc.List == nil {
+				continue
+			}
+
+			caseClauseCount := len(cc.List)
+			usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && v.canUsePatternMatch(caseClauseCount, cc, tag != nil)
+			caseUsesPattern[ci] = usePattenMatch
+
+			tagNeedsAreEqual := false
+
+			if !usePattenMatch && tag != nil {
+				if tagIface, _ := isInterface(v.getType(tag, false)); tagIface {
+					tagNeedsAreEqual = true
+				}
+			}
+
+			cond := &strings.Builder{}
+
+			for li, expr := range cc.List {
+				needAreEqualClose := false
+
+				if li == 0 {
+					if tag != nil {
+						if usePattenMatch {
+							cond.WriteString(exprVarName)
+							cond.WriteString(" is ")
+						} else if tagNeedsAreEqual {
+							cond.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
+							needAreEqualClose = true
+						} else {
+							cond.WriteString(exprVarName)
+							cond.WriteString(" == ")
+						}
+					}
+				} else {
+					if usePattenMatch {
+						cond.WriteString(" or ")
+					} else {
+						cond.WriteString(" || ")
+
+						if tag != nil {
+							if tagNeedsAreEqual {
+								cond.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
+								needAreEqualClose = true
+							} else {
+								cond.WriteString(exprVarName)
+								cond.WriteString(" == ")
+							}
+						}
+					}
+				}
+
+				context := DefaultPatternMatchExprContext()
+
+				if usePattenMatch {
+					context.usePattenMatch = true
+					context.declareIsExpr = li == 0
+				} else if caseClauseCount > 1 && tag == nil {
+					cond.WriteRune('(')
+				}
+
+				cond.WriteString(v.convExpr(expr, []ExprContext{context}))
+
+				if needAreEqualClose {
+					cond.WriteRune(')')
+				}
+
+				if !usePattenMatch && caseClauseCount > 1 && tag == nil {
+					cond.WriteRune(')')
+				}
+			}
+
+			caseConds[ci] = cond.String()
+		}
+
 		if tag != nil {
 			if v.options.preferVarDecl {
 				v.writeOutput("var ")
@@ -316,6 +430,38 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 			v.targetFile.WriteString(matchVarName)
 			v.targetFile.WriteString(" = false;" + v.newline)
+
+			if nonTrailingDefaultFallsThrough {
+				// Precomputed any-case-match (see above). Note this evaluates every case
+				// label up front — a side-effecting label would reorder; Go tagged-switch
+				// labels are near-universally constants.
+				parts := make([]string, 0, len(caseClauses))
+
+				for ci, cc := range caseClauses {
+					if cc.List == nil {
+						continue
+					}
+
+					condPart := caseConds[ci]
+
+					if len(cc.List) > 1 || strings.Contains(condPart, " || ") {
+						condPart = "(" + condPart + ")"
+					}
+
+					parts = append(parts, condPart)
+				}
+
+				if v.options.preferVarDecl {
+					v.writeOutput("var ")
+				} else {
+					v.writeOutput("bool ")
+				}
+
+				v.targetFile.WriteString(anyMatchVarName)
+				v.targetFile.WriteString(" = ")
+				v.targetFile.WriteString(strings.Join(parts, " || "))
+				v.targetFile.WriteString(";" + v.newline)
+			}
 		}
 
 		// A `default:` reached via fallthrough is emitted as a GUARDED `if (fallthrough || !match)` block
@@ -356,6 +502,10 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					if i == len(caseClauses)-1 {
 						guardedTerminalDefault = true
 					}
+				} else if nonTrailingDefaultFallsThrough && i < len(caseClauses)-1 {
+					// A leading/middle default runs only when NO case matches (anyMatch is
+					// precomputed above); its own `fallthrough` chains into the next case.
+					v.targetFile.WriteString(fmt.Sprintf("if (!%s) { /* default: */", anyMatchVarName))
 				} else {
 					v.targetFile.WriteString("{ /* default: */")
 				}
@@ -364,7 +514,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 				v.targetFile.WriteString("if (")
 
-				usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && v.canUsePatternMatch(caseClauseCount, caseClause, tag != nil)
+				usePattenMatch := caseUsesPattern[i]
 
 				if caseFallsThrough {
 					v.targetFile.WriteString(fmt.Sprintf("fallthrough || !%s && ", matchVarName))
@@ -374,94 +524,26 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					}
 				}
 
-				// An INTERFACE-typed tag compared against concrete case labels (`switch e {
-				// case ERROR_FILE_NOT_FOUND:` where e is error and the labels are Errno) has no
-				// C# operator — route the equality through AreEqual, mirroring convBinaryExpr's
-				// interface-vs-concrete compare arm (syscall syscall_windows CS0019).
-				tagNeedsAreEqual := false
+				// Condition pre-rendered above (single convExpr per label).
+				v.targetFile.WriteString(caseConds[i])
 
-				if !usePattenMatch && tag != nil {
-					// EMPTY interfaces included: `switch err := recover(); err { case ErrLarge: }`
-					// compares object against a named-string value — no C# operator either
-					// (regexp/syntax parse.go, CS0019 ×2).
-					if tagIface, _ := isInterface(v.getType(tag, false)); tagIface {
-						tagNeedsAreEqual = true
-					}
-				}
-
-				for i, expr := range caseClause.List {
-					needAreEqualClose := false
-
-					if i == 0 {
-						if tag != nil {
-							if usePattenMatch {
-								v.targetFile.WriteString(exprVarName)
-								v.targetFile.WriteString(" is ")
-							} else if tagNeedsAreEqual {
-								v.targetFile.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
-								needAreEqualClose = true
-							} else {
-								v.targetFile.WriteString(exprVarName)
-								v.targetFile.WriteString(" == ")
-							}
-						}
-					} else {
-						if usePattenMatch {
-							v.targetFile.WriteString(" or ")
-						} else {
-							v.targetFile.WriteString(" || ")
-
-							if tag != nil {
-								if tagNeedsAreEqual {
-									v.targetFile.WriteString(fmt.Sprintf("AreEqual(%s, ", exprVarName))
-									needAreEqualClose = true
-								} else {
-									v.targetFile.WriteString(exprVarName)
-									v.targetFile.WriteString(" == ")
-								}
-							}
-						}
-					}
-
-					context := DefaultPatternMatchExprContext()
-
-					if usePattenMatch {
-						context.usePattenMatch = true
-						context.declareIsExpr = i == 0
-					} else if caseClauseCount > 1 && tag == nil {
-						v.targetFile.WriteRune('(')
-					}
-
-					v.targetFile.WriteString(v.convExpr(expr, []ExprContext{context}))
-
-					if needAreEqualClose {
+				if hasFallthroughs {
+					// Only close the wrapping paren when it was actually opened above
+					// (same guard as the matching '(' write). Otherwise a fallthrough
+					// case with a single pattern-matched value emits an unbalanced ')'.
+					if caseFallsThrough && (caseClauseCount > 1 || !usePattenMatch && tag == nil) {
 						v.targetFile.WriteRune(')')
 					}
 
-					if !usePattenMatch && caseClauseCount > 1 && tag == nil {
-						v.targetFile.WriteRune(')')
+					v.targetFile.WriteString(") {")
+
+					if !nextClauseIsDefault || defaultCaseFallsThrough {
+						v.targetFile.WriteRune(' ')
+						v.targetFile.WriteString(matchVarName)
+						v.targetFile.WriteString(" = true;")
 					}
-
-					if i == caseClauseCount-1 {
-						if hasFallthroughs {
-							// Only close the wrapping paren when it was actually opened above
-							// (same guard as the matching '(' write). Otherwise a fallthrough
-							// case with a single pattern-matched value emits an unbalanced ')'.
-							if caseFallsThrough && (caseClauseCount > 1 || !usePattenMatch && tag == nil) {
-								v.targetFile.WriteRune(')')
-							}
-
-							v.targetFile.WriteString(") {")
-
-							if !nextClauseIsDefault || defaultCaseFallsThrough {
-								v.targetFile.WriteRune(' ')
-								v.targetFile.WriteString(matchVarName)
-								v.targetFile.WriteString(" = true;")
-							}
-						} else {
-							v.targetFile.WriteString(") {")
-						}
-					}
+				} else {
+					v.targetFile.WriteString(") {")
 				}
 			}
 
