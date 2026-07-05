@@ -85,8 +85,14 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			}
 		}
 
+		// A pointer-receiver nullary callee binds the BOX method group (see
+		// pointerReceiverBoxMethodGroup — the trimmed deref-alias form is CS1113).
+		boxGroup := v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun)
+
 		// C# `go` method implementation expects an Action (or WaitCallback delegate)
-		if !namedFuncType && strings.HasSuffix(callExpr, "()") {
+		if boxGroup != "" {
+			callExpr = boxGroup
+		} else if !namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
 		} else if namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = "() => " + callExpr // Action lambda over the named delegate's invocation

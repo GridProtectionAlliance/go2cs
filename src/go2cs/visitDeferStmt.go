@@ -102,7 +102,21 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 			}
 		}
 
-		if !hasResults && !namedFuncType && strings.HasSuffix(callExpr, "()") {
+		// A nullary deferred call on a POINTER-receiver method whose receiver is already a
+		// pointer binds the BOX method group — the plain-call trim leaves the deref-alias form
+		// (`Ꮡconf.Value.releaseSema`, net nss.go's `defer conf.releaseSema()`), a struct
+		// VALUE against the [GoRecv] ref extension, which cannot create a delegate (CS1113).
+		// `Ꮡconf.releaseSema` binds the ж<T> overload and captures the receiver at defer
+		// time — exactly Go's binding.
+		boxGroup := ""
+
+		if !hasResults && !namedFuncType {
+			boxGroup = v.pointerReceiverBoxMethodGroup(deferStmt.Call.Fun)
+		}
+
+		if boxGroup != "" {
+			callExpr = boxGroup
+		} else if !hasResults && !namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()")
 		} else {
 			callExpr = "() => " + callExpr
@@ -161,4 +175,71 @@ func (v *Visitor) getFunctionParamCount(expr ast.Expr) int {
 	}
 
 	return sig.Params().Len()
+}
+
+// pointerReceiverBoxMethodGroup renders `X.M` as a BOX-bound method group for a nullary
+// defer/go call whose method has a POINTER receiver and whose receiver ident is already
+// pointer-typed (`defer conf.releaseSema()` with `conf *resolverConfig`): the plain call
+// render deref-aliases the receiver (`Ꮡconf.Value.releaseSema()`), whose method-group
+// trim is a struct VALUE against the [GoRecv] ref extension (CS1113). The box form binds
+// the ж<T> overload and captures the receiver when the delegate is created — Go's
+// binding time. Non-ident receivers keep the existing emission.
+func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
+	selectorExpr, ok := fun.(*ast.SelectorExpr)
+
+	if !ok {
+		return ""
+	}
+
+	funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func)
+
+	if !ok {
+		return ""
+	}
+
+	sig, ok := funcObj.Type().(*types.Signature)
+
+	if !ok || sig.Recv() == nil {
+		return ""
+	}
+
+	// A result-returning method group is a Func<...>, which neither defer(Action) nor
+	// go(Action) accepts - those keep the lambda form.
+	if sig.Results() != nil && sig.Results().Len() > 0 {
+		return ""
+	}
+
+	if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); !isPtrRecv {
+		return ""
+	}
+
+	identX, ok := selectorExpr.X.(*ast.Ident)
+
+	if !ok {
+		return ""
+	}
+
+	recvType := v.getType(selectorExpr.X, false)
+
+	if recvType == nil {
+		return ""
+	}
+
+	xPtr, alreadyPtr := recvType.(*types.Pointer)
+
+	if !alreadyPtr {
+		return ""
+	}
+
+	// A PROMOTED method (net interface.go's `defer zc.Unlock()` — Unlock declared on the
+	// embedded sync.RWMutex) has no extension on the OUTER box type (CS1061); only a method
+	// declared directly on the pointee takes the box group.
+	if recvPtr, ok := sig.Recv().Type().(*types.Pointer); !ok || !types.Identical(recvPtr.Elem(), xPtr.Elem()) {
+		return ""
+	}
+
+	ptrContext := DefaultIdentContext()
+	ptrContext.isPointer = true
+
+	return v.convIdent(identX, ptrContext) + "." + v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))
 }

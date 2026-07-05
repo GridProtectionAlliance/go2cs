@@ -40,7 +40,27 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(s1, e1);
     var (s2, e2) = c.add(-1);
     fmt.Println(s2, e2, (~c).total);
+    var sm = Ꮡ(new sema(nil));
+    acquireAndWork(sm);
+    fmt.Println("after:", (~sm).held);
     fmt.Println("Main function");
+});
+
+[GoType] partial struct sema {
+    internal bool held;
+}
+
+[GoRecv] internal static void release(this ref sema s) {
+    s.held = false;
+    fmt.Println("sema released");
+}
+
+internal static void acquireAndWork(ж<sema> Ꮡs) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    s.held = true;
+    defer(Ꮡs.release);
+    fmt.Println("working, held:", s.held);
 });
 
 [GoType] partial struct acc {

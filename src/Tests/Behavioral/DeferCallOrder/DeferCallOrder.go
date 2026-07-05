@@ -45,7 +45,29 @@ func main() {
 	s2, e2 := c.add(-1)
 	fmt.Println(s2, e2, c.total)
 
+	sm := &sema{}
+	acquireAndWork(sm)
+	fmt.Println("after:", sm.held) // after: false
+
 	fmt.Println("Main function")
+}
+
+type sema struct{ held bool }
+
+func (s *sema) release() {
+	s.held = false
+	fmt.Println("sema released")
+}
+
+// acquireAndWork mirrors net nss.go's `defer conf.releaseSema()`: a NULLARY pointer-receiver
+// method deferred through an already-pointer receiver binds the BOX method group
+// (`defer(Ꮡs.release)`) — the deref-alias trim was a struct VALUE against the [GoRecv] ref
+// extension, which cannot create a delegate (CS1113 ×2). A PROMOTED method (declared on an
+// embedded type) keeps the prior emission — no extension exists on the outer box (CS1061).
+func acquireAndWork(s *sema) {
+	s.held = true
+	defer s.release()
+	fmt.Println("working, held:", s.held)
 }
 
 type acc struct{ total int }
