@@ -195,6 +195,16 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		goFullTypeName := v.getFullTypeName(fieldType, false)
 		csFullTypeName := convertToCSTypeName(goFullTypeName)
 
+		// The fully-qualified form for emission INTO this source file's body. csFullTypeName is a
+		// RELATIVE dotted name (`io.fs_package.FS`); when its leading segment is also imported as a
+		// package alias in this file (`using io = io_package;`) C# binds it to that TYPE alias, so the
+		// name resolves to the nonexistent nested type `io_package.fs_package.FS` (CS0426). Root-qualify
+		// (`go.io.fs_package.FS`) so the leading segment resolves as the child NAMESPACE it names. The
+		// unqualified csFullTypeName is kept below as the promotedInterfaceImplementations map KEY, which
+		// feeds generator-consumed strings that live in alias-less files (where the relative form
+		// resolves and the key must stay stable).
+		csEmitTypeName := rootQualifyIfAmbiguous(csFullTypeName)
+
 		// For the actual NAMED-field declaration, prefer the readable file-local package alias
 		// (`atomic.Int32` over `sync.atomic_package.Int32`) when this file imports the type's
 		// package — keeping the emitted field visually close to the Go source. The fully-qualified
@@ -338,19 +348,19 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				packageLock.Unlock()
 
-				v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+				v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, getCoreSanitizedIdentifier(goTypeName))
 			} else {
 				var handled bool
 
 				if _, ok := identObj.(*types.PkgName); !ok {
 					if ptrType, ok := identType.(*types.Pointer); ok {
 						if _, ok = ptrType.Elem().(*types.Named); !ok {
-							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, getCoreSanitizedIdentifier(goTypeName))
 							handled = true
 						}
 					} else if _, ok = identType.(*types.Struct); !ok {
 						if _, ok := identObj.Type().(*types.Named); !ok {
-							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+							v.writeString(target, "%s %s %s;", getAccess(goTypeName), csEmitTypeName, getCoreSanitizedIdentifier(goTypeName))
 							handled = true
 						}
 					}
@@ -358,7 +368,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				// Handle promoted struct implementations
 				if !handled {
-					v.writeString(target, "%s partial ref %s %s { get; }", getAccess(goTypeName), csFullTypeName, getCoreSanitizedIdentifier(goTypeName))
+					v.writeString(target, "%s partial ref %s %s { get; }", getAccess(goTypeName), csEmitTypeName, getCoreSanitizedIdentifier(goTypeName))
 				}
 			}
 

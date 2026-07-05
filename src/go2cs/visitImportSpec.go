@@ -187,6 +187,17 @@ func rootQualifyIfAmbiguous(ns string) string {
 		firstSeg = ns[:dot]
 	}
 
+	// A relative target ALSO mis-binds when its leading segment is bound as a using-alias by a
+	// same-package import — a sub-package import (`io/fs` → `io.fs_package`) whose parent (`io`) is
+	// also imported (`using io = io_package;`) would otherwise bind `io` to that TYPE alias and
+	// resolve `io.fs_package` to the nonexistent nested type `io_package.fs_package` (CS0426);
+	// `go.io.fs_package` makes `io` resolve as the child namespace it was meant to be. A single-segment
+	// namespace (`io_package`) has no leading qualifier to shadow, so this applies only to multi-segment
+	// (sub-package) targets.
+	if firstSeg != ns && packageImportLeadingSegments[firstSeg] {
+		return RootNamespace + "." + ns
+	}
+
 	for _, seg := range strings.Split(packageNamespace, ".") {
 		if seg != RootNamespace && seg == firstSeg {
 			return RootNamespace + "." + ns

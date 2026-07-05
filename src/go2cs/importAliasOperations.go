@@ -24,6 +24,16 @@ var packageImportAliasRenames map[string]string
 // is not a namespace). Mirrors MSBuild's transitive ProjectReference visibility.
 var packageChildNamespaces map[string]bool
 
+// packageImportLeadingSegments holds the C# using-alias identifier bound by every DIRECT import in
+// the current package (an unaliased import's canonical name, or an explicit alias). A sub-package
+// import path (`io/fs`) emits a RELATIVE namespace target (`io.fs_package`); if the leading segment
+// (`io`) is also imported (`using io = io_package;`), C# binds that segment to the TYPE alias, so
+// `io.fs_package` resolves to the nonexistent nested type `io_package.fs_package` (CS0426). Recording
+// the bound leading identifiers lets rootQualifyIfAmbiguous prefix "go." onto such a target
+// (`go.io.fs_package`) so the segment resolves as the child NAMESPACE it was meant to be. Populated by
+// computeImportAliasRenames' synchronous pre-pass; read-only during concurrent file visiting.
+var packageImportLeadingSegments map[string]bool
+
 // computeImportAliasRenames populates the two maps above for the package being converted.
 // packageNS is the emission namespace of the current package (e.g. "go", "go.@internal").
 func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS string) {
@@ -58,7 +68,14 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 
 	// Canonical (unaliased) import names across the package.
 	for _, imp := range pkg.Imports() {
-		if name := imp.Name(); collides(name) {
+		name := imp.Name()
+
+		// Every canonically-imported package binds its name as a using-alias — record the SANITIZED
+		// form (matching how namespace segments are rendered) so a sub-package's relative namespace
+		// whose leading segment equals it gets root-qualified.
+		packageImportLeadingSegments[getSanitizedImport(name)] = true
+
+		if collides(name) {
 			packageImportAliasRenames[name] = ShadowVarMarker + name
 		}
 	}
@@ -75,6 +92,9 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 			if alias == "." || alias == "_" {
 				continue
 			}
+
+			// An explicit alias binds THAT (sanitized) identifier as the file-local using-alias.
+			packageImportLeadingSegments[getSanitizedImport(alias)] = true
 
 			if collides(alias) {
 				packageImportAliasRenames[alias] = ShadowVarMarker + alias
