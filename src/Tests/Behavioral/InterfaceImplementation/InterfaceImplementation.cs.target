@@ -31,6 +31,8 @@ internal static void Main() {
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], f));
     fmt.Printf("Iface cmp result = %v\n"u8, AreEqual(zoo[0], zoo[0]));
     fmt.Printf("Iface cmp result = %v\n"u8, !AreEqual(zoo[0], t));
+    any stored = "gob";
+    fmt.Printf("any cmp = %v %v\n"u8, !AreEqual(stored, "gob"), !AreEqual(stored, "xml"));
     checkErr(1);
     checkErr(0);
     useAndRelease();

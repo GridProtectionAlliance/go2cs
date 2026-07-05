@@ -452,7 +452,7 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			}
 
 			if (lhsIsInterface && !isEmpty && rhsIsPointer) || (rhsIsInterface && !rhsIsEmpty && lhsIsPointer) || (lhsIsInterface && rhsIsInterface) ||
-				(lhsIsInterface && !isEmpty && concreteOperand(rhsType)) || (rhsIsInterface && !rhsIsEmpty && concreteOperand(lhsType)) {
+				(lhsIsInterface && concreteOperand(rhsType)) || (rhsIsInterface && concreteOperand(lhsType)) {
 				// Handle interface comparison with special runtime function
 				if binaryOp == "==" {
 					return fmt.Sprintf("AreEqual(%s, %s)", leftOperand, rightOperand)

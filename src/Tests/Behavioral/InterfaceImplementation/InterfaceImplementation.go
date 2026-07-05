@@ -30,6 +30,13 @@ func main() {
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] == zoo[0])
 	fmt.Printf("Iface cmp result = %v\n", zoo[0] != t)
 
+	// An `any` (EMPTY interface) compared with a concrete string via != — encoding/gob's
+	// registerName `n != name`, where n is `any` from sync.Map.LoadOrStore. Go compares the
+	// interface's dynamic value; C# has no operator between `object` and the golib `@string`
+	// value type (CS0019), so the converter routes empty-interface-vs-concrete through AreEqual.
+	var stored any = "gob"
+	fmt.Printf("any cmp = %v %v\n", stored != "gob", stored != "xml") // false true
+
 	checkErr(1) // got again + switch: again
 	checkErr(0) // not again + switch: nil
 	useAndRelease()
