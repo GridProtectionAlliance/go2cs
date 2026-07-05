@@ -691,6 +691,15 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				needsShadowing = declaredPos[funcLevelVar] > ident.Pos()
 			}
 
+			// A name declared LATER in an ENCLOSING block still collides — C#'s CS0136 is
+			// order-independent. mime mediatype.go: the nested `v, ok :=` (207) preceded a
+			// for-body-level `v, ok :=` (213); the position fallback saw no shadow and both
+			// stayed plain (nested + enclosing 'ok', CS0136). The final else-if arm already
+			// consults the forward set; this arm preempted it for function-level names.
+			if !needsShadowing {
+				needsShadowing = isForwardDeclaredInOuterBlocks(varName)
+			}
+
 			if needsShadowing {
 				adjustedName = getShadowedVarName(varName)
 			} else {

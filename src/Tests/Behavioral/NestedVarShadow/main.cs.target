@@ -93,6 +93,30 @@ internal static void Main() {
     fmt.Println(rn, rs);
     var fl = Ꮡ(new @file(ΔΔfile: strings.NewReader("xyz"u8)));
     fmt.Println(fl.readOne(), fl.readOne());
+    fmt.Println(forwardOk());
+}
+
+internal static nint forwardOk() {
+    var m = new map<@string, nint>{["a"u8] = 1, ["b"u8] = 2, ["c"u8] = 3};
+    nint total = 0;
+    var (v, ok) = m["a"u8, ꟷ];
+    if (ok) {
+        total += v;
+    }
+    for (nint n = 0; n < 2; n++) {
+        {
+            var (vΔ1, okΔ1) = m["b"u8, ꟷ]; if (okΔ1) {
+                total += vΔ1;
+                continue;
+            }
+        }
+        var (vΔ2, okΔ2) = m["c"u8, ꟷ];
+        if (!okΔ2) {
+            break;
+        }
+        total += vΔ2;
+    }
+    return total;
 }
 
 } // end main_package

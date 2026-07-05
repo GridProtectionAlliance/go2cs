@@ -106,4 +106,32 @@ func main() {
 
 	fl := &file{file: strings.NewReader("xyz")}
 	fmt.Println(fl.readOne(), fl.readOne()) // 1 2
+
+	fmt.Println(forwardOk()) // 5
+}
+
+// forwardOk mirrors mime mediatype.go's ParseMediaType tail: `ok` is declared at FUNCTION
+// level first, then a NESTED comma-ok (in an if inside a for) precedes a for-body-LEVEL
+// comma-ok — C#'s CS0136 is order-independent, so the nested decl must shadow-rename even
+// though the for-body decl appears LATER (the position-based fallback saw no shadow and
+// both stayed plain).
+func forwardOk() int {
+	m := map[string]int{"a": 1, "b": 2, "c": 3}
+	total := 0
+	v, ok := m["a"]
+	if ok {
+		total += v
+	}
+	for n := 0; n < 2; n++ {
+		if v, ok := m["b"]; ok {
+			total += v
+			continue
+		}
+		v, ok := m["c"]
+		if !ok {
+			break
+		}
+		total += v
+	}
+	return total
 }
