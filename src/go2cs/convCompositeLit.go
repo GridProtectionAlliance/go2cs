@@ -151,11 +151,26 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				// Check if field is an embedded interface
 				if fieldType := field.Type(); fieldType != nil {
 					if needsInterfaceCast, isEmpty := isInterface(fieldType); needsInterfaceCast && !isEmpty {
-						// Record implementation
+						// Record implementation. A KEYED composite resolves the element by FIELD
+						// NAME — blindly pairing Elts[0]'s value with EVERY interface field
+						// recorded a BOGUS GoImplement (gif's `encoder{g: *g}`: field 0 is
+						// `w writer`, the first value is a GIF → GoImplement<GIF, writer>,
+						// CS1929 ×3 in the generated impl for methods GIF never had).
 						var eltType types.Type
+						eltIndex := i
 
-						if keyValueExpr, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
-							eltType = v.info.TypeOf(keyValueExpr.Value)
+						if _, ok := compositeLit.Elts[0].(*ast.KeyValueExpr); ok {
+							eltIndex = -1
+
+							for ei, elt := range compositeLit.Elts {
+								if kv, ok := elt.(*ast.KeyValueExpr); ok {
+									if keyIdent, ok := kv.Key.(*ast.Ident); ok && keyIdent.Name == field.Name() {
+										eltType = v.info.TypeOf(kv.Value)
+										eltIndex = ei
+										break
+									}
+								}
+							}
 						} else {
 							eltType = v.info.TypeOf(compositeLit.Elts[i])
 						}
@@ -169,7 +184,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 								// it, and the ctor's interface param cannot take the bare
 								// struct without its partial (archive/tar's lifted
 								// `struct{ io.Reader }{fr}`, CS1503 ×3).
-								callContext.interfaceTypes[i] = fieldType
+								if eltIndex >= 0 {
+									callContext.interfaceTypes[eltIndex] = fieldType
+								}
 							}
 						}
 					} else if ok := isPointer(fieldType); ok {
