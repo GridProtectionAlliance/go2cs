@@ -270,10 +270,24 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 	// declareVar shadow-renames such locals.
 	usedPackageNames := HashSet[string]{}
 
+	// PACKAGE-LEVEL vars referenced in THIS function. A local sharing such a name is fine in
+	// Go — a reference before the local's declaration point (including the local's OWN
+	// initializer: `if hosts, ok := hosts.byAddr[addr]; ok`, net hosts.go) still resolves to
+	// the package var — but C#'s whole-block scoping binds the earlier reference to the
+	// not-yet-declared local (CS0841/CS8130). declareVar shadow-renames such locals; the
+	// package var keeps the simple name.
+	usedPackageVarNames := HashSet[string]{}
+
 	ast.Inspect(funcDecl, func(n ast.Node) bool {
 		if ident, ok := n.(*ast.Ident); ok {
 			if _, isPkg := v.info.Uses[ident].(*types.PkgName); isPkg {
 				usedPackageNames.Add(ident.Name)
+			}
+
+			if varObj, isVar := v.info.Uses[ident].(*types.Var); isVar {
+				if globalObj, isGlobal := v.globalScope[ident.Name]; isGlobal && globalObj == varObj {
+					usedPackageVarNames.Add(ident.Name)
+				}
 			}
 		}
 
@@ -649,6 +663,10 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 			// A local sharing an IMPORTED PACKAGE name this function references: C#'s
 			// whole-block scoping binds the package reference to the local even before its
 			// declaration (CS0841/CS0119) — rename the local, the package alias stays.
+			adjustedName = getShadowedVarName(varName)
+		} else if usedPackageVarNames.Contains(varName) {
+			// A local sharing a referenced PACKAGE-LEVEL var's name (pre-scan above):
+			// rename the local so the package var's references keep resolving (CS0841).
 			adjustedName = getShadowedVarName(varName)
 		} else if forcedShadowVars[varObj] {
 			// A loop var sharing its container's hoisted-box name (second pass above) — an escaped
@@ -1606,6 +1624,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 						)
 						processor.processAssignStmt(comm)
 						tracker.processing = false
+					} else if commClause.Comm != nil {
+						// A SEND comm (`case ch <- dialResult{…, primary: primary}:`) or a bare
+						// RECEIVE (`case <-done:`) was never visited, so idents inside its
+						// expressions got no identNames mapping — a Δ-renamed lambda param used
+						// in the send value emitted its RAW name (net dial.go's startRacer,
+						// CS0841).
+						visitNode(commClause.Comm)
 					}
 
 					// Enter a new scope; a comm-clause body is an implicit block, so pre-scan its

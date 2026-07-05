@@ -63,9 +63,25 @@ func nestedBlockShadow(kind int) int {
 	return total
 }
 
+// hosts mirrors net hosts.go's cache global: a package var whose name a LOCAL shadows in
+// the local's OWN tuple initializer — `if hosts, ok := hosts.byAddr[addr]; ok` — where Go
+// resolves the initializer's `hosts` to the package var (the local isn't in scope yet) but
+// C#'s whole-block scoping bound it to the not-yet-declared local (CS0841/CS8130 ×2). The
+// local is shadow-renamed (`hostsΔ1`); the package var keeps the simple name.
+var hosts = map[string][]string{"a": {"x", "y"}}
+
+//go:noinline
+func tupleInitShadow(key string) int {
+	if hosts, ok := hosts[key]; ok {
+		return len(hosts)
+	}
+	return -1
+}
+
 func main() {
 	fmt.Println(collisionGlobalShadow()) // 49
 	fmt.Println(plainGlobalShadow())     // 205
 	fmt.Println(trace.addr, plainCounter) // 42 100 (globals unchanged)
 	fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1)) // 70 50
+	fmt.Println(tupleInitShadow("a"), tupleInitShadow("z")) // 2 -1
 }
