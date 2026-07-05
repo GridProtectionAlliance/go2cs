@@ -3287,6 +3287,20 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return fmt.Sprintf("[%d]%s", composite.Len(), v.getTypeName(composite.Elem(), isUnderlying))
 	case *types.Slice:
 		return "[]" + v.getTypeName(composite.Elem(), isUnderlying)
+	case *types.Chan:
+		// Structural like slices/arrays so a LIFTED element resolves - `make(chan dialResult)`
+		// where dialResult is a FUNCTION-LOCAL type (net dialParallel) rendered
+		// `channel<dialResult>` while every composite used the lifted name (CS0246).
+		elem := v.getTypeName(composite.Elem(), isUnderlying)
+
+		switch composite.Dir() {
+		case types.RecvOnly:
+			return "<-chan " + elem
+		case types.SendOnly:
+			return "chan<- " + elem
+		default:
+			return "chan " + elem
+		}
 	}
 
 	// A cross-package INSTANTIATED generic (e.g. `internal/runtime/atomic.Pointer[func(string,
@@ -3395,6 +3409,18 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		return fmt.Sprintf("[%d]%s", composite.Len(), v.getFullTypeName(composite.Elem(), isUnderlying))
 	case *types.Slice:
 		return "[]" + v.getFullTypeName(composite.Elem(), isUnderlying)
+	case *types.Chan:
+		// Mirrors getTypeName's Chan arm (lifted channel elements; net dialParallel).
+		elem := v.getFullTypeName(composite.Elem(), isUnderlying)
+
+		switch composite.Dir() {
+		case types.RecvOnly:
+			return "<-chan " + elem
+		case types.SendOnly:
+			return "chan<- " + elem
+		default:
+			return "chan " + elem
+		}
 	}
 
 	if named, ok := t.(*types.Named); ok {
