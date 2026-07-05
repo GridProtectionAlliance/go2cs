@@ -37,6 +37,15 @@ func rootQualifySubNamespaceTypeRefs(name string) string {
 			if strings.HasSuffix(seg, PackageSuffix) {
 				// Only a sub-namespace package class (not the leading segment) needs rooting.
 				if i > 0 {
+					// A Δ-renamed import alias (io -> Δio, which collides with the `io` CHILD
+					// namespace) is a FILE-LOCAL device; the rooted `go.` path needs the REAL
+					// namespace segment — `go.io.fs_package.DirEntry`, not `go.Δio.fs_package…`
+					// (CS0234, embed's GoImplement<@file, io/fs.DirEntry> lines). Strip the
+					// collision marker from the leading segment.
+					if raw, wasShadow := strings.CutPrefix(match, ShadowVarMarker); wasShadow {
+						return RootNamespace + "." + raw
+					}
+
 					return RootNamespace + "." + match
 				}
 
