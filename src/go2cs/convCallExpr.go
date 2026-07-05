@@ -630,6 +630,26 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// A conversion between two DIFFERENT NAMED types that share a COMPOSITE underlying (net/mail
+		// textproto.MIMEHeader(h) where Header and MIMEHeader both wrap map[string][]string): each is a
+		// [GoType] wrapper with implicit conversions only to/from its OWN underlying, and C# will not
+		// chain Header->map->MIMEHeader in one cast (CS0030). Hop through the shared underlying so each
+		// wrapper implicit operator applies: (MIMEHeader)(map<@string, slice<@string>>)h.
+		if targetNamed, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Named); ok {
+			if convArgType := v.info.TypeOf(arg); convArgType != nil {
+				if argNamed, ok := types.Unalias(convArgType).(*types.Named); ok && !types.Identical(targetNamed, argNamed) && types.Identical(targetNamed.Underlying(), argNamed.Underlying()) {
+					// Map/slice/array underlyings have a nameable C# cast target (map<K,V>, slice<T>,
+					// array<T>). A STRUCT underlying is anonymous (struct{...} — not a valid cast term,
+					// CS1525) AND is the reverse *underlying->*named REINTERPRET case (NamedPointerReinterpret),
+					// so it is excluded.
+					switch targetNamed.Underlying().(type) {
+					case *types.Map, *types.Slice, *types.Array:
+						expr = fmt.Sprintf("(%s)%s", convertToCSTypeName(v.getTypeName(targetNamed.Underlying(), false)), expr)
+					}
+				}
+			}
+		}
+
 		// Determine if we need parentheses around the expression
 		if v.needsParentheses(arg) {
 			if targetIsBasic {

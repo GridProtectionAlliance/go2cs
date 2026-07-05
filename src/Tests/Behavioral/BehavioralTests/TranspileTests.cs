@@ -570,6 +570,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
+    public void CheckSameUnderlyingNamedConv() => CheckTarget("SameUnderlyingNamedConv");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]

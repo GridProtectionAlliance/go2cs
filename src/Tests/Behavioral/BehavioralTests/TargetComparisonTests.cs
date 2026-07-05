@@ -572,6 +572,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRingPointerMethods() => CheckTarget("RingPointerMethods");
 
     [TestMethod]
+    public void CheckSameUnderlyingNamedConv() => CheckTarget("SameUnderlyingNamedConv");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]
