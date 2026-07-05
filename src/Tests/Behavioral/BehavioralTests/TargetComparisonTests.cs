@@ -395,6 +395,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueReassignCapture() => CheckTarget("MethodValueReassignCapture");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

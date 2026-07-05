@@ -393,6 +393,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMethodSelector() => CheckTarget("MethodSelector");
 
     [TestMethod]
+    public void CheckMethodValueReassignCapture() => CheckTarget("MethodValueReassignCapture");
+
+    [TestMethod]
     public void CheckMinMaxBuiltin() => CheckTarget("MinMaxBuiltin");
 
     [TestMethod]

@@ -902,9 +902,20 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					// First prepare the captures
 					v.prepareStmtCaptures(selectorExpr)
 
-					// Then generate declarations
+					// Then generate declarations. In this combined LHS/RHS block the LHS and the
+					// `=` operator are ALREADY written to `result` by the time the RHS loop reaches
+					// here, so writing the capture snapshot decl (`var nvcʗ1 = nvc;` — a statement)
+					// into `result` splits the assignment (`checker = <newline> var nvcʗ1 = nvc;
+					// <newline> (lambda)`, CS1002). Route it to the hoist buffer instead so it is
+					// emitted BEFORE the whole statement (matching the `:=`-define path, which hoists
+					// method-value captures the same way). The reassignment block below can write to
+					// `result` directly because there it precedes the LHS.
 					if decls := v.generateCaptureDeclarations(); decls != "" {
-						result.WriteString(decls)
+						if hoistBuf != nil {
+							hoistBuf.WriteString(decls)
+						} else {
+							result.WriteString(decls)
+						}
 					}
 				}
 			}
