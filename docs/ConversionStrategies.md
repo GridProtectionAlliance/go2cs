@@ -89,6 +89,23 @@ var _ Labeled = Sensor{}   // in CrossPkgLib — records GoImplement<Sensor, Lab
 
 With that, the library emits `[assembly: GoImplement<Sensor, Labeled>]`, `Sensor : Labeled` is realized in the library assembly, and a consumer's `var l CrossPkgLib.Labeled = s` / `CrossPkgLib.Describe(s)` compile as ordinary upcasts. (A library that returns the interface from a constructor — `func New(...) Labeled { return Sensor{…} }` — witnesses it the same way.) A type that satisfies an interface but is *never* used as it within its own package is not yet auto-realized cross-package; proactively recording every local concrete→local interface structural match is a possible future enhancement, weighed against the extra generated glue it would add to every package. Also guarded by the `CrossPkgLib`/`CrossPkgUser` pair (Phase 3: struct field access + interface satisfaction).
 
+#### A sub-package import whose leading segment is a package alias root-qualifies
+When a package imports both a parent package and its sub-package — testing/fstest importing `io` **and** `io/fs` — the converter emits `using io = io_package;` (a **type** alias for the io package class) and, for io/fs, a **relative** namespace target `io.fs_package`. In C# the leading `io` segment of `io.fs_package` binds to that type alias, so `io.fs_package[.FS]` resolves to the nonexistent nested type `io_package.fs_package[.FS]` — CS0426 (the `using fs = …` alias line, the embedded `fs.FS` getter, and the generated `TypeGenerator` copies). The converter records every direct-import using-alias identifier bound in the package and prefixes `go.` onto any multi-segment relative namespace/type whose leading segment is one of them, so the segment resolves as the child **namespace** it names:
+
+```go
+import (
+    "io"
+    "io/fs"
+)
+type fsOnly struct{ fs.FS }
+```
+```csharp
+using fs = go.io.fs_package;
+public go.io.fs_package.FS FS;
+```
+
+The unqualified `io.fs_package.FS` is retained as the `promotedInterfaceImplementations` map **key** (which feeds alias-less generator files where the relative form resolves). This complements the existing alias-vs-child-namespace Δ-rename, which only catches `<currentNS>.<alias>` collisions. (Recurs for any parent+sub-package import pair; a behavioral guard is owed — the io/fs embedded-interface pattern needs a parent+sub-package pair absent from the core baseline stdlib.)
+
 ### Standard-library solution file (`.slnx`)
 
 A whole-standard-library run (`go2cs -stdlib`) also emits a Visual Studio solution — **`go-src-converted.slnx`** — at the output root (`-go2cspath`), so the freshly converted stdlib is openable / buildable as **one unit** immediately after a run, rather than depending on a hand-maintained solution that drifts. It is the auto-generated counterpart of `src/go-src-converted.sln`, and its XML mirrors the format of `src/go2cs.slnx` (a `<Configurations>` block plus `<Folder>`/`<Project>` entries, CRLF line endings, no BOM). It references:
@@ -351,6 +368,21 @@ h.Value.flags &= unchecked((uint8)~hashWriting);
 ```
 
 An LHS type that `int` widens to implicitly (`int`/`int32`/`int64`) needs no cast and stays `a &= ~b`. (Guarded by the `AndNotAssignNarrow` behavioral test, which exercises both an ident LHS and a struct-field LHS — they route through different assignment-emission paths.)
+
+### Logical operators on a named boolean type cast through `bool`
+A Go defined type whose underlying type is `bool` (`type boolVal bool`) is modeled as a `[GoType("bool")]` struct with an implicit `bool` conversion but no logical operators. Go's `!`, `&&`, and `||` on such a value yield that **same named type**, so `return !y` / `return x && y` in a function returning an interface the type implements (go/constant's `UnaryOp`/`BinaryOp`, returning the `Value` interface) still satisfies the interface. A bare `!y` / `x && y` in C# collapses to a plain `bool` — which cannot implicitly convert to the interface (CS0029), and `!` has no operator on the struct (CS0023). The converter casts each operand through `bool`, applies the operator, then casts the result back to the named type so it keeps satisfying the interface:
+
+```go
+case boolVal:
+    return !y          // y is boolVal, result must be the Value interface
+```
+```csharp
+case boolVal y: {
+    return ((boolVal)(!(bool)y));
+}
+```
+
+Binary `&&`/`||` take the parallel form `((boolVal)((bool)x && (bool)y))`. A predeclared-`bool` operand keeps the bare `!x` / `x && y` form (no golden churn). (Guarded by the `NamedBooleanLogic` behavioral test.)
 
 ## The "nil" Value
 In Go, `nil` is the equivalent of C# `null`. Where possible, converted code uses the golib [`NilType`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/NilType.cs) with a default instance called `nil` (defined in [`go.builtin`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/builtin.cs)). `NilType` provides comparison operators so `x == nil` / `x != nil` work across the runtime types (slices, maps, channels, pointers, interfaces), each of which defines what "nil" means for it (e.g. a `map<K,V>` whose backing dictionary is null is the nil map: reads return the zero value, `len` is 0, ranging yields nothing, and a write panics — matching Go).
@@ -746,6 +778,18 @@ return ((errorString)(@string)"kaboom"u8);
 
 This is the form the runtime uses for every `panic(errorString("…"))` / `plainError("…")`. (Guarded by the behavioral test `NamedStringConversion`.)
 
+### A string literal with high/greedy `\x` escapes emits a byte-array `@string`
+Go's `\x` escape is **exactly two** hex digits denoting one raw byte; C#'s `\x` escape is a **greedy** 1-to-4-hex-digit code-*unit* escape, and a C# `"…"u8` literal UTF-8-re-encodes its content. So re-emitting a Go token verbatim as a C# string literal both (a) mis-parses `\xdb` followed by ASCII `"5""0"` (the token `\xdb50`) as the single code unit U+DB50 — a lone high surrogate that cannot UTF-8-encode into a golib `@string` (CS9026, time/tzdata's embedded zip blob) — and (b) silently widens every byte ≥ 0x80 to two UTF-8 bytes, so `@string` byte indexing / `len` would not match Go. Such literals are emitted as the exact bytes in a **parenthesized** byte-array-backed `@string`:
+
+```go
+const zipdata = "\x50\x4b\x03\x04\xdb50\xff\x92\x00LMT"   // raw bytes
+```
+```csharp
+internal static readonly @string zipdata = ((@string)(new byte[]{0x50, 0x4b, 0x03, 0x04, 0xdb, 0x35, 0x30, 0xff, 0x92, 0x00, 0x4c, 0x4d, 0x54}));
+```
+
+The outer parentheses are load-bearing: an inline-indexed literal (`"…"[i]`) would otherwise bind `[i]` to the inner `byte[]`. Only a `\xHH` **escape** with a byte value ≥ 0x80 or a trailing hex digit trips it — a literal written with actual UTF-8 characters (`"Michał"`, `"白鵬翔"`) round-trips through `"…"u8` and keeps the readable string form, as does an all-ASCII escape run with no greedy extension (image/jpeg's `"\x00\x10\x01\x11"u8[i]`) — so no behavioral-golden churn. (Guarded by the `HexByteStringLiteral` behavioral test.)
+
 ### Composite types render structurally (`[]*T` keeps the pointer)
 A slice/array type is rendered structurally in every type-name path: the `[N]`/`[]` marker plus the recursively resolved element, never from the `go/types` string form. The string form is path-qualified (`[]*internal/abi.Type`), and the cross-package last-segment strip would eat everything before the slash *including the pointer marker*, silently dropping the `ж<>` (reflect's `[]*abi.Type` fields compiled against the WRONG element type). The recursion also resolves lifted anonymous elements and cross-package generic elements:
 ```go
@@ -939,6 +983,38 @@ func main() {
 }
 ```
 This prints `Name = James` twice ([run it](https://play.golang.org/p/d-A5re1dfs8)) — `f1` bound a copy of `d`, so the later mutation is not observed. To preserve this semantic, the converter copies the receiver value into the delegate's capture rather than capturing the variable by reference, so the delegate executes against the snapshot taken at assignment time.
+
+### A method value reassigned via `=` hoists its receiver capture
+The receiver-snapshot decl above is emitted as a full statement (`var dʗ1 = d;`) before the lambda. In a `:=` **declaration** this hoists naturally, but a plain `=` **reassignment** to a pre-declared variable — database/sql's `checker = nvc.CheckNamedValue` — already wrote the LHS and `=` operator by the time the snapshot is generated, so writing it inline split the assignment into three token-broken pieces (CS1002). The converter routes the snapshot to the statement hoist buffer so it precedes the whole statement:
+
+```go
+var checker func(*driver.NamedValue) error
+checker = nvc.CheckNamedValue   // reassign a method value
+```
+```csharp
+var nvcʗ1 = nvc;
+checker = (ж<driver.NamedValue> p1) => nvcʗ1.CheckNamedValue(p1);
+```
+
+This matches the `:=`-define path (which already hoists) and also covers a reassignment inside a tagless `switch` case. (Guarded by the `MethodValueReassignCapture` behavioral test.)
+
+### A bare function value in `:=` takes its named delegate type, not `var`
+Go's short-declaration from a bare function value whose type is a **named** func type — text/template/parse's `state := lexText`, where `lexText` is `func(*lexer) stateFn` and `type stateFn func(*lexer) stateFn` (the classic self-referential state machine) — infers the local as the *unnamed* signature. The converter cannot emit `var state = lexText;` (a C# method group has no `var`-inferable delegate type — CS8917), and typing the local structurally as `Func<ж<lexer>, stateFn>` makes it a **distinct** C# delegate from the `stateFn` the method group produces and that each `state = state(l)` reassignment yields (CS0029). It declares the local with the matching package named delegate instead:
+
+```go
+state := lexText
+for state != nil {
+    state = state(l)
+}
+```
+```csharp
+stateFn state = lexText;
+while (state != default!) {
+    state = state(l);
+}
+```
+
+A `:=` from a method group whose signature matches no package named func type keeps the existing path. (Guarded by the `NamedFuncTypeStateMachine` behavioral test.)
 
 ## Defer / Panic / Recover
 
@@ -1174,6 +1250,30 @@ and wraps mismatched delegate values in the target delegate's constructor —
 FuncLit and nil initializers stay bare. Guarded by `FirstClassFunctions`
 (`handler`/`provider`/`registry`).
 
+### Func-typed fields with a cross-package (slash-path) type render structurally
+A func-typed struct field whose signature names a type from a **multi-segment** import path —
+testing/quick's `Config.Values func([]reflect.Value, *rand.Rand)`, where `rand` is `math/rand` —
+must render as a structural `Action`/`Func<…>` delegate via `getCSTypeName`, not through the
+string display path. The display path stringifies the signature as `func([]reflect.Value,
+*math/rand.Rand)` and splits the slash-bearing import path on `/`, emitting the dotted
+`math.rand.Rand`; but `math` aliases to `math_package`, so `math.rand` resolves to the nonexistent
+`math_package.rand` (CS0426). The structural renderer recurses per signature element and qualifies
+each named type by its package **name**:
+
+```go
+type Config struct {
+    Values func([]reflect.Value, *rand.Rand)   // rand is math/rand
+}
+```
+```csharp
+public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
+```
+
+The re-routing is gated on the signature string containing `/`: a func field with no cross-package
+import (`func(string) (importPath string, ok bool)`) keeps the display path, which preserves its
+named tuple elements that the structural renderer drops. (Guarded by the `FuncTypeParam` behavioral
+test's `runner.gen` field.)
+
 ### Major-version import directories
 A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, and
 the emitted class follows the package NAME: consumers reference `math.rand.rand_package`, not
@@ -1404,6 +1504,16 @@ os converts dirEntry to fs.DirEntry both through its own alias (`type DirEntry =
 
 ### Function-literal parameters share the body scope
 Go declares parameters in the function block, so a body-level `fpath, err := ...` REUSES a literal's `err` parameter. The variable analysis gives literals ONE merged scope (params + body declarations) mirroring real function declarations; a separate param scope had made the `:=` a shadow declaration beside later reuses (CS0841/CS0128, os CopyFS's WalkDir literal). Guarded by `LambdaFunctions` (`probe`).
+
+### System-colliding local type names are root-qualified in assembly attributes
+A Go package can name one of its own exported types after a top-level C# `System` type — internal/profile's `ValueType`, go/ast's `Object`, bytes' `Buffer`. The `GoImplement`/`GoImplicitConv` assembly attributes generated in `package_info.cs` sit at **file scope**, before the `namespace` line, where both `using System;` (a csproj global using) and `using static go.<pkg>_package;` are active — so a bare `ValueType` is ambiguous between `System.ValueType` and the package type (CS0104). The emitter root-qualifies any bare, dotless type name matching a curated set of `System` top-level names at the package class:
+
+```csharp
+[assembly: GoImplement<go.@internal.profile_package.ValueType, message>]
+[assembly: GoImplicitConv<go.@internal.profile_package.ValueType, ж<go.@internal.profile_package.ValueType>>(Indirect = true)]
+```
+
+Foreign types are always package-qualified already (dotted) and are left untouched; no non-colliding name changes, so every non-colliding attribute emits byte-identically. (Guarded by the `SystemCollidingTypeName` behavioral test.)
 
 ## Pointers
 Pointer conversions use the golib heap box [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) (read "zhe"). Taking the address of a value uses the address-of operator `Ꮡ` (e.g. `Ꮡx`); an escaping local is allocated via `heap(...)`, and addresses of a struct field or array element are taken through `.of(Type.ᏑField)` / `.at<T>(index)`.
