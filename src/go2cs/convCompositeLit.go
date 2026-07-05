@@ -34,6 +34,24 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 					structName := v.getCSTypeName(u.Elem())
 					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
 				}
+			case *types.Map:
+				// A MAP element type — the inner `{"domain": 53}` of a
+				// `map[string]map[string]int{…}` (net lookup.go) — takes the map
+				// collection-initializer form with `[key] = value` elements; the `new(…)` ctor
+				// fallback rendered STRUCT-style named args (`"domain"u8: 53`, a 30-error
+				// syntax cascade).
+				mapContext := DefaultCallExprContext()
+				mapContext.keyValueSource = MapSource
+				mapContext.keyValueCompositeType = inferred
+
+				for i := range compositeLit.Elts {
+					mapContext.u8StringArgOK[i] = true
+				}
+
+				keyCS := convertToCSTypeName(v.getTypeName(u.Key(), false))
+				valCS := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+
+				return fmt.Sprintf("new map<%s, %s>{%s}", keyCS, valCS, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, mapContext))
 			}
 		}
 

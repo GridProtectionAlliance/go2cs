@@ -55,6 +55,14 @@ internal static void Main() {
     reg2[7] = new entry(tag: "cap"u8, size: 1);
     var (e7, ok7) = lookup(reg2, 7);
     fmt.Println(len(reg2), e7, ok7);
+    var ports = new map<@string, map<@string, nint>>{
+        ["udp"u8] = new map<@string, nint>{
+            ["domain"u8] = 53},
+        ["tcp"u8] = new map<@string, nint>{
+            ["smtp"u8] = 25,
+            ["ssh"u8] = 22}
+    };
+    fmt.Println(ports["tcp"u8]["ssh"u8], ports["udp"u8]["domain"u8], len(ports["tcp"u8]));
     var done = new channel<EmptyStruct>(1);
     any anyDone = done;
     var (ch, chOK) = anyDone._<channel<EmptyStruct>>(ᐧ);

@@ -86,6 +86,20 @@ func main() {
 	// A TYPE ASSERT to `chan struct{}` (context's cancelCtx done channel): the assert's
 	// type render must not re-sanitize the machinery's own EmptyStruct into the
 	// reserved-Δ form (`channel<ΔEmptyStruct>`, CS0246 ×4).
+	// A NESTED map literal (net lookup.go's map[string]map[string]int services): the
+	// typeless INNER composite must take the map collection-initializer form, not
+	// struct-style named args ("smtp"u8: 25, a 30-error syntax cascade).
+	ports := map[string]map[string]int{
+		"udp": {
+			"domain": 53,
+		},
+		"tcp": {
+			"smtp": 25,
+			"ssh":  22,
+		},
+	}
+	fmt.Println(ports["tcp"]["ssh"], ports["udp"]["domain"], len(ports["tcp"])) // 22 53 2
+
 	done := make(chan struct{}, 1)
 	var anyDone any = done
 	ch, chOK := anyDone.(chan struct{})
