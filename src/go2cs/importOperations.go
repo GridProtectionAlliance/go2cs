@@ -323,6 +323,19 @@ func (v *Visitor) loadImportedTypeAliases(projectImport string) {
 	}
 }
 
+// isCSharpBuiltinTypeName reports whether an exported type-alias TARGET is a C# built-in type
+// keyword (object from a defined type over the empty interface, or a numeric/bool/string/char
+// primitive) rather than a package-local named type. Such a target is imported BARE.
+func isCSharpBuiltinTypeName(name string) bool {
+	switch name {
+	case "object", "string", "bool", "char", "decimal",
+		"byte", "sbyte", "short", "ushort", "int", "uint", "long", "ulong",
+		"float", "double", "nint", "nuint":
+		return true
+	}
+	return false
+}
+
 func loadImportedTypeAliases(info PackageInfo) {
 	packageInfoFile := filepath.Join(info.TargetDir, PackageInfoFileName)
 
@@ -355,7 +368,14 @@ func loadImportedTypeAliases(info PackageInfo) {
 			alias := fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))
 			typeName := getCoreSanitizedIdentifier(result[1])
 
-			if strings.HasPrefix(typeName, "const:") {
+			if isCSharpBuiltinTypeName(result[1]) {
+				// A C# BUILT-IN type target (`object` from `type X any`, or a numeric/bool/string
+				// primitive) is NOT a package member — import it BARE, never @-escaped or
+				// go.<pkg>_package.-qualified. crypto's `type PublicKey any` exports "object"; an
+				// importer qualified it to `go.crypto_package.@object`, a nonexistent nested type
+				// (CS0426, crypto/md5 + crypto/internal/boring + every crypto importer).
+				typeName = result[1]
+			} else if strings.HasPrefix(typeName, "const:") {
 				typeName = strings.TrimPrefix(typeName, "const:")
 
 				packageLock.Lock()
