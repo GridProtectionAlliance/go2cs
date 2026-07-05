@@ -28,6 +28,32 @@ public static float64 Time(this MyError myErr) {
     return (float64)myErr.When.Unix();
 }
 
+[GoType] partial struct core {
+    internal nint pings;
+}
+
+[GoRecv] internal static @string Ping(this ref core c) {
+    c.pings++;
+    return "pong"u8;
+}
+
+[GoType] partial struct Station {
+    internal partial ref core core { get; }
+    internal @string id;
+}
+
+[GoType] partial struct noop {
+}
+
+[GoType] partial struct link {
+    internal partial ref noop noop { get; }
+    public partial ref ж<Station> Station { get; }
+}
+
+[GoType] partial interface Pinger {
+    @string Ping();
+}
+
 [GoType] partial struct Device {
     internal @string name;
     internal nint hits;
@@ -149,6 +175,9 @@ internal static void Main() {
     ck.Value.label = "k9"u8;
     stamper st = new counterKindжstamper(ck);
     fmt.Println(st.Stamp(), st.Stamp(), st.Hits());
+    var stn = Ꮡ(new Station(id: "s1"u8));
+    Pinger pg = new link(Station: stn);
+    fmt.Println(pg.Ping(), pg.Ping(), (~stn).pings);
 }
 
 } // end main_package

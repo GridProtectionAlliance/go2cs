@@ -174,6 +174,13 @@ func main() {
 	g.Temp = 60
 	fmt.Println(float64(g.Temp), g.Sensor.Hot()) // 60 true
 
+	// A LOCAL interface satisfied PURELY by promotion through the cross-package VALUE
+	// embed — Label is Sensor's VALUE-receiver method (net's addrPortUDPAddr
+	// {netip.AddrPort} String shape, CS1929): the generated impl calls the foreign
+	// package-class static directly (alias usings import no extensions).
+	var lb2 Labeled = g
+	fmt.Println("promoted label:", lb2.Label()) // promoted label: cellar
+
 	// Phase 5: the reflectlite rtype shape. counter embeds *CrossPkgLib.Meter; the local Meter
 	// INTERFACE is Δ-renamed (collides with tagged's Meter method), but the embed FIELD keeps its
 	// unrenamed struct-scoped name — the promoted-call hop must render `c.Meter.Value.Bump()`,

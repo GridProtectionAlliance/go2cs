@@ -31,6 +31,31 @@ func (myErr MyError) Time() float64 {
 	return float64(myErr.When.Unix())
 }
 
+// core/Station/link: the DEEP pointer hop — link embeds *Station, Station value-embeds
+// core, and Ping lives on *core. The value-form interface impl must project the field's
+// box through the generated ref accessor (this.Station.of(Station.Ꮡcore).Ping() — net's
+// tcpConnWithoutWriteTo{*TCPConn} with Read on the zh<conn> extension, CS1929 x2).
+type core struct{ pings int }
+
+func (c *core) Ping() string {
+	c.pings++
+	return "pong"
+}
+
+type Station struct {
+	core
+	id string
+}
+
+type noop struct{}
+
+type link struct {
+	noop
+	*Station
+}
+
+type Pinger interface{ Ping() string }
+
 type Device struct {
 	name string
 	hits int
@@ -168,4 +193,10 @@ func main() {
 	ck.label = "k9"
 	var st stamper = ck
 	fmt.Println(st.Stamp(), st.Stamp(), st.Hits()) // k9 k9 2
+
+	// Deep pointer hop (see core/Station/link above): mutation through the projected
+	// boxes must land on the ORIGINAL Station.
+	stn := &Station{id: "s1"}
+	var pg Pinger = link{Station: stn}
+	fmt.Println(pg.Ping(), pg.Ping(), stn.pings) // pong pong 2
 }

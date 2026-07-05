@@ -52,6 +52,7 @@ using static go.main_package;
 [assembly: GoImplement<relay, CrossPkgLib_package.Reporter>(Pointer = true)]
 [assembly: GoImplement<seal, Labeled>]
 [assembly: GoImplement<seal, stamped>]
+[assembly: GoImplement<tagged, Labeled>]
 // </InterfaceImplementations>
 
 // <ImplicitConversions>

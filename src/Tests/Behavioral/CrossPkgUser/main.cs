@@ -148,6 +148,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(g.Name, (float64)g.Temp, g.n);
     g.Temp = 60;
     fmt.Println((float64)g.Temp, g.Sensor.Hot());
+    Labeled lb2 = g;
+    fmt.Println("promoted label:", lb2.Label());
     var c = new counter(Meter: CrossPkgLib.NewMeter());
     fmt.Println(c.Meter.Value.Bump());
     ΔMeter m = c;
