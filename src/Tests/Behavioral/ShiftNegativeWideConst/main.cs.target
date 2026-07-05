@@ -1,0 +1,21 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+internal static int64 mask(nint bits) {
+    return ((int64)(-1) << (int)((nuint)bits));
+}
+
+internal static uint64 umask(nuint bits) {
+    return (~(uint64)0 << (int)(bits));
+}
+
+internal static void Main() {
+    fmt.Println(mask(4));
+    fmt.Println(mask(8));
+    fmt.Println(umask(60));
+}
+
+} // end main_package

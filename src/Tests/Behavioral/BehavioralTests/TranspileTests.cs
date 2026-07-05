@@ -603,6 +603,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]
+    public void CheckShiftNegativeWideConst() => CheckTarget("ShiftNegativeWideConst");
+
+    [TestMethod]
     public void CheckShiftPrecedenceUnsigned() => CheckTarget("ShiftPrecedenceUnsigned");
 
     [TestMethod]

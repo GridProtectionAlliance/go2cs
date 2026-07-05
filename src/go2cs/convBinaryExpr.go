@@ -8,6 +8,7 @@ import (
 	"go/types"
 	"math"
 	"strconv"
+	"strings"
 )
 
 // isComputedConstOperand reports whether expr is a COMPUTED constant expression — one that carries a
@@ -491,7 +492,17 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 							// casting the result would not help, as `1 << 63` already overflowed
 							// `int` to a negative value before the cast (e.g. `(uint64)(1 << 63)`
 							// → CS0221). `((uint64)1) << 63` shifts in uint64.
-							shiftExpr = fmt.Sprintf("((%s)%s %s %s)", underlyingCS, leftOperand, binaryOp, rightOperand)
+							// A LEFT operand that leads with a unary +/- (`-1 << bits`, archive/tar,
+							// debug/dwarf) must be parenthesized: `(int64)-1` is parsed as the type
+							// `int64` MINUS `1` (CS0119), not a cast, because the width type is a
+							// using-ALIAS (int64=long, …) not a C# keyword. `(int64)(-1)` is unambiguous.
+							castLeftOperand := leftOperand
+
+							if strings.HasPrefix(leftOperand, "-") || strings.HasPrefix(leftOperand, "+") {
+								castLeftOperand = "(" + leftOperand + ")"
+							}
+
+							shiftExpr = fmt.Sprintf("((%s)%s %s %s)", underlyingCS, castLeftOperand, binaryOp, rightOperand)
 
 							if isNamed {
 								shiftExpr = fmt.Sprintf("(%s)%s", resolvedCS, shiftExpr)
