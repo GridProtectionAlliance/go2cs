@@ -84,10 +84,27 @@ func namedDefer(n int) (r int, ok bool) {
 	}
 }
 
+// keepAlive mirrors net tcpsockopt_windows.go's setKeepAliveIdleAndInterval: an expressionless
+// switch whose FINAL case body is comment-only — earlier returning cases leave the stale
+// last-statement-was-return flag set at the SAME indent, which suppressed the final section's
+// mandatory `break;` (CS8070).
+func keepAlive(idle, interval int) string {
+	switch {
+	case idle < 0 && interval >= 0:
+		return "interval-only"
+	case idle < 0 && interval < 0:
+		return "none"
+	case idle >= 0 && interval >= 0:
+		// Nothing to do, both provided.
+	}
+	return "both-or-idle"
+}
+
 func main() {
 	for _, n := range []int{0, 1, 2, 3} {
 		fmt.Println(classify(n))
 	}
+	fmt.Println(keepAlive(-1, 5), keepAlive(-1, -1), keepAlive(3, 5)) // interval-only none both-or-idle
 	// zero / one / many (fallthrough) / many (default)
 	for _, n := range []int{0, 1, 2} {
 		fmt.Println(nonTerminal(n)) // 10, 21, 22 — the real acc+n, never the zero value

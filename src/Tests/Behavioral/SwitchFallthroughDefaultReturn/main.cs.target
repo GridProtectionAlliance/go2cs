@@ -83,10 +83,26 @@ internal static (nint r, bool ok) namedDefer(nint n) {
     return (r, ok);
 }
 
+internal static @string keepAlive(nint idle, nint interval) {
+    switch (ᐧ) {
+    case {} when idle < 0 && interval >= 0: {
+        return "interval-only"u8;
+    }
+    case {} when idle < 0 && interval < 0: {
+        return "none"u8;
+    }
+    case {} when idle >= 0 && interval >= 0: {
+        break;
+    }}
+
+    return "both-or-idle"u8;
+}
+
 internal static void Main() {
     foreach (var (_, n) in new nint[]{0, 1, 2, 3}.slice()) {
         fmt.Println(classify(n));
     }
+    fmt.Println(keepAlive(-1, 5), keepAlive(-1, -1), keepAlive(3, 5));
     foreach (var (_, n) in new nint[]{0, 1, 2}.slice()) {
         fmt.Println(nonTerminal(n));
     }

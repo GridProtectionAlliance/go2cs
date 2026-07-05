@@ -557,6 +557,12 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 
 			v.indentLevel++
 
+			// visitStmt resets this per statement, but an EMPTY case body (a comment-only final
+			// `case idle >= 0 && interval >= 0:` — net tcpsockopt_windows) never calls visitStmt,
+			// so the flag would carry the PREVIOUS clause's terminal `return` at the SAME indent
+			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
+			v.lastStatementWasReturn = false
+
 			for _, stmt := range caseClause.Body {
 				v.visitStmt(stmt, []StmtContext{})
 			}
@@ -642,6 +648,12 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			}
 
 			v.indentLevel++
+
+			// visitStmt resets this per statement, but an EMPTY case body (a comment-only final
+			// `case idle >= 0 && interval >= 0:` — net tcpsockopt_windows) never calls visitStmt,
+			// so the flag would carry the PREVIOUS clause's terminal `return` at the SAME indent
+			// and suppress the mandatory `break;` (CS8070 on a final case, CS0163 otherwise).
+			v.lastStatementWasReturn = false
 
 			for _, stmt := range caseClause.Body {
 				v.visitStmt(stmt, []StmtContext{})
