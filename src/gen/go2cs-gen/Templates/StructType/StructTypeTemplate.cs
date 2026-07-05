@@ -342,6 +342,15 @@ internal class StructTypeTemplate : TemplateBase
         IEnumerable<MethodInfo>? structMethods = structDecl is null ? [] : structDecl.GetExtensionMethods(compilation!);
         HashSet<string> structMethodNames = new(structMethods?.Select(method => method.Name) ?? [], StringComparer.Ordinal);
 
+        // A POINTER-receiver method emitted ONLY as its box primary `M(this ж<T> …)` — Go's
+        // `func (s *structType) string()` becomes a direct-ж extension when it takes the address
+        // of a receiver field — is invisible to IsExtensionMethodForStruct (value-receiver forms
+        // only). Without folding those names in, a same-named method promoted from an embed
+        // (encoding/gob's structType embeds CommonType, both declaring string()/safeString()) is
+        // not suppressed and its promoted box overload duplicates the direct one (CS0111).
+        if (structDecl is not null)
+            structMethodNames.UnionWith(structDecl.GetBoxReceiverMethodNames(compilation!));
+
         // Go's AMBIGUITY rule: a method name promoted from TWO OR MORE embeds at the same depth
         // is not promoted at all — bufio ReadWriter's Reader.Size vs Writer.Size (Go requires the
         // qualified rw.Reader.Size(); both generated wrappers were CS0111).

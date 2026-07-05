@@ -35,6 +35,27 @@ public static bool IsDr(this Record p) {
     return strings.HasPrefix(p.name, "Dr"u8) && p.age > 18;
 }
 
+[GoType] partial struct commonBase {
+    internal @string tag;
+}
+
+[GoRecv] internal static @string describe(this ref commonBase c) {
+    return "base:"u8 + c.tag;
+}
+
+[GoType] partial struct ledger {
+    internal partial ref commonBase commonBase { get; }
+    internal nint seq;
+}
+
+internal static @string describe(this ж<ledger> Ꮡl) {
+    ref var l = ref Ꮡl.Value;
+
+    var p = Ꮡl.of(ledger.Ꮡseq);
+    p.Value++;
+    return "ledger:"u8 + l.tag;
+}
+
 internal static void Main() {
     var person = new Person(name: "Dr. Michał"u8, age: 29);
     fmt.Println(person);
@@ -50,6 +71,9 @@ internal static void Main() {
     fmt.Println(record.IsAdult());
     fmt.Println(record.IsManager());
     fmt.Println(record.IsDr());
+    var l = Ꮡ(new ledger(nil));
+    l.Value.tag = "x"u8;
+    fmt.Println(l.describe(), l.describe(), (~l).seq);
 }
 
 } // end main_package
