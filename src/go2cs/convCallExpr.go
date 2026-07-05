@@ -1030,6 +1030,31 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 							}
 						}
 					}
+
+					// A NAMED-COMPOSITE element type (slice/struct/map — NOT interface or basic, those are
+					// handled by the branches above) appended from a value of a DIFFERENT type: crypto/x509/pkix
+					// append(rdns, s) where rdns is RDNSequence ([]RelativeDistinguishedNameSET) and s is
+					// []AttributeTypeAndValue (the element UNDERLYING). Go implicitly converts s to the element
+					// type; C# append otherwise infers the element as slice<ATV>, so the result slice<slice<ATV>>
+					// does not bind RDNSequence (CS0029). Cast the differing arg to the named element type.
+					if named, isNamed := sliceUnder.Elem().(*types.Named); isNamed {
+						switch named.Underlying().(type) {
+						case *types.Basic, *types.Interface:
+							// numeric / interface element casts are handled above
+						default:
+							elemCSType := convertToCSTypeName(v.getTypeName(sliceUnder.Elem(), false))
+
+							for i := 1; i < len(callExpr.Args); i++ {
+								if argType := v.info.TypeOf(callExpr.Args[i]); argType != nil && !types.Identical(types.Unalias(argType), types.Unalias(sliceUnder.Elem())) {
+									if callExprContext.castArgToType == nil {
+										callExprContext.castArgToType = make(map[int]string)
+									}
+
+									callExprContext.castArgToType[i] = elemCSType
+								}
+							}
+						}
+					}
 				}
 			}
 		}

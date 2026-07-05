@@ -56,6 +56,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
+
+    [TestMethod]
     public void CheckAppendUntypedConst() => CheckTarget("AppendUntypedConst");
 
     [TestMethod]
