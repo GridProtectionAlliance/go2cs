@@ -69,6 +69,10 @@ public static @string Inc(this ж<Counter> Ꮡc) {
     return c.n;
 }
 
+internal static (ж<Counter>, error) makeCounter() {
+    return (Ꮡ(new Counter(n: 5)), default!);
+}
+
 [GoType] partial interface Incrementer {
     @string Inc();
     nint Total();
@@ -156,6 +160,11 @@ internal static void Main() {
     swapped = new Dog(nil);
     replaceAnimal(Ꮡswapped);
     fmt.Println("replaced:", swapped.Speak());
+    Incrementer inc2 = default!;
+    var (ᴛ1, ᴛ2) = makeCounter();
+    (inc2, err) = (new CounterжIncrementer(ᴛ1), ᴛ2);
+    inc2.Inc();
+    fmt.Println("deconstructed into iface:", inc2.Total(), err == default!);
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
 }

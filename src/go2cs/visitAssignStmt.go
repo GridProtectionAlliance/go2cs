@@ -741,12 +741,88 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 		result.WriteString(operator)
 
+		// A tuple DECONSTRUCTION (one call RHS, several LHS) whose call components need an
+		// INTERFACE conversion the C# tuple assignment cannot perform implicitly — a pointer
+		// component satisfies the target interface only through its generated adapter, an
+		// EXPLICIT conversion (`(c, err) = Ꮡsd.dialTCP(…)` with `var c Conn`, net dial.go,
+		// CS0266 ×11). Mirror visitReturnStmt's tuple-conversion arm: hoist the call into
+		// temps, then convert each component (`var (ᴛ1, ᴛ2) = call; (c, err) = (~ᴛ1, ᴛ2);`).
+		tupleConverted := false
+
+		if rhsLen == 1 && lhsLen > 1 && v.hoistedDecls != nil {
+			if tuple, ok := v.getType(rhsExprs[0], false).(*types.Tuple); ok && tuple.Len() == lhsLen {
+				needsConversion := false
+
+				for i := range tuple.Len() {
+					if !lhsTypeIsInterface[i] {
+						continue
+					}
+
+					declared := v.getType(lhsExprs[i], false)
+					actual := tuple.At(i).Type()
+
+					if declared != nil && !types.Identical(declared, actual) {
+						if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
+							needsConversion = true
+							break
+						}
+					}
+				}
+
+				if needsConversion {
+					tupleLambdaContext := DefaultLambdaContext()
+					tupleLambdaContext.isAssignment = true
+					callExpr := v.convExpr(rhsExprs[0], []ExprContext{tupleLambdaContext})
+
+					tempNames := make([]string, lhsLen)
+
+					for i := range lhsLen {
+						tempNames[i] = fmt.Sprintf("%s%d", TempVarMarker, i+1)
+					}
+
+					v.hoistedDecls.WriteString(v.newline)
+					v.hoistedDecls.WriteString(v.indent(v.indentLevel))
+					v.hoistedDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), callExpr))
+					v.hoistedDecls.WriteString(v.newline)
+
+					result.WriteRune('(')
+
+					for i := range lhsLen {
+						if i > 0 {
+							result.WriteString(", ")
+						}
+
+						declared := v.getType(lhsExprs[i], false)
+						actual := tuple.At(i).Type()
+						converted := false
+
+						if lhsTypeIsInterface[i] && declared != nil && !types.Identical(declared, actual) {
+							if _, actualIsIface := actual.Underlying().(*types.Interface); !actualIsIface {
+								result.WriteString(v.convertToInterfaceType(declared, actual, tempNames[i]))
+								converted = true
+							}
+						}
+
+						if !converted {
+							result.WriteString(tempNames[i])
+						}
+					}
+
+					result.WriteRune(')')
+					tupleConverted = true
+				}
+			}
+		}
+
 		// Handle RHS
-		if rhsLen > 1 {
+		if !tupleConverted && rhsLen > 1 {
 			result.WriteRune('(')
 		}
 
 		for i, rhs := range rhsExprs {
+			if tupleConverted {
+				break
+			}
 			var lhs ast.Expr
 
 			if i < lhsLen {
@@ -909,7 +985,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 		}
 
-		if rhsLen > 1 {
+		if !tupleConverted && rhsLen > 1 {
 			result.WriteRune(')')
 		}
 

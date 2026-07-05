@@ -69,6 +69,10 @@ func (c *Counter) Total() int {
 	return c.n
 }
 
+func makeCounter() (*Counter, error) {
+	return &Counter{n: 5}, nil
+}
+
 type Incrementer interface {
 	Inc() string
 	Total() int
@@ -174,6 +178,16 @@ func main() {
 	var swapped Animal = Dog{}
 	replaceAnimal(&swapped)
 	fmt.Println("replaced:", swapped.Speak()) // Meow!
+
+	// A tuple DECONSTRUCTION whose call component needs the pointer-adapter interface
+	// conversion: `inc2, err = makeCounter()` assigns a *Counter into an Incrementer —
+	// the C# tuple assignment can't convert implicitly, so the call hoists into temps and
+	// each component converts (net dial.go's `c, err = sd.dialTCP(…)` with `var c Conn`,
+	// CS0266 x11).
+	var inc2 Incrementer
+	inc2, err = makeCounter()
+	inc2.Inc()
+	fmt.Println("deconstructed into iface:", inc2.Total(), err == nil) // 6 true
 
 	// wrapSink embeds an INTERFACE field (zip's nopCloser{io.Writer}): Speak comes from
 	// the field's interface value, Shut is the struct's own. A POINTER cast to the wider
