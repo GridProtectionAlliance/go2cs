@@ -25,6 +25,17 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		return "default!"
 	}
 
+	// `true`/`false` are C# KEYWORDS but Go PREDECLARED identifiers (universe scope). A VALUE
+	// use resolves to that universe-scope const — emit the bare C# literal. A shadowing
+	// VARIABLE/parameter named `true`/`false` (text/template/parse's `newBool(pos Pos, true
+	// bool)`) has a package-scoped object and falls through to the escaped `@true`/`@false`
+	// below (`true`/`false` are in the keyword-escape set).
+	if ident.Name == "true" || ident.Name == "false" {
+		if c, ok := v.info.ObjectOf(ident).(*types.Const); ok && c.Pkg() == nil {
+			return ident.Name
+		}
+	}
+
 	if context.isPointer {
 		// Check if the identifier is an unsafe pointer
 		if basic, ok := v.getIdentType(ident).(*types.Basic); ok && basic.Kind() == types.UnsafePointer {

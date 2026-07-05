@@ -262,9 +262,14 @@ var keywords = NewHashSet([]string{
 	// so it is escaped like a full keyword.
 	"file",
 
-	// The remaining C# keywords overlap with Go keywords, so they do not need detection:
-	// "break", "case", "const", "continue", "default", "else", "false", "for" "goto", "if",
-	// "interface", "return", "select", "struct", "switch", "true", "var"
+	// `true`/`false` are C# KEYWORDS but Go PREDECLARED IDENTIFIERS (not keywords) — a Go
+	// parameter/variable may shadow them (`func (t *Tree) newBool(pos Pos, true bool)`,
+	// text/template/parse), so the raw `bool true` is a C# syntax error (CS1001/CS1003). Escape.
+	"true", "false",
+
+	// The remaining C# keywords overlap with Go keywords (true keywords in Go too), so they
+	// do not need detection: "break", "case", "const", "continue", "default", "else", "for",
+	// "goto", "if", "interface", "return", "select", "struct", "switch", "var"
 })
 
 // The following names are reserved by go2cs or C#, if encountered in Go code, prefix with `Δ`:

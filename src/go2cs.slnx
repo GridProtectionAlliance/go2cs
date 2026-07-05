@@ -156,6 +156,7 @@
     <Project Path="Tests/Behavioral/InterfaceInheritance/InterfaceInheritance.csproj" />
     <Project Path="Tests/Behavioral/InterfaceIntraFunction/InterfaceIntraFunction.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
+    <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />

@@ -304,6 +304,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
 
     [TestMethod]
+    public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]

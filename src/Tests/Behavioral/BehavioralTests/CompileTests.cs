@@ -342,6 +342,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
 
     [TestMethod]
+    public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
