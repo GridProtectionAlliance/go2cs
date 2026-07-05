@@ -486,6 +486,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]

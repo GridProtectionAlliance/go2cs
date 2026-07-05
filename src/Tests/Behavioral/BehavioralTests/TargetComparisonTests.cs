@@ -488,6 +488,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
+    public void CheckPackageShadowParam() => CheckTarget("PackageShadowParam");
+
+    [TestMethod]
     public void CheckPanicRecover() => CheckTarget("PanicRecover");
 
     [TestMethod]

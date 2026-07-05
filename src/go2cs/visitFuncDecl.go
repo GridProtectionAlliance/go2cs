@@ -975,6 +975,15 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				} else {
 					paramName = "_"
 				}
+			} else if adjusted, ok := v.varNames[param]; ok && adjusted != "" {
+				// A parameter whose name was shadow-renamed by the variable analysis — because it
+				// shadows an imported package, a called builtin, a function, or an outer-scope var —
+				// must emit the RENAMED name so it matches every usage, which convIdent renders from
+				// v.varNames. crypto/rsa's `func emsaPSSEncode(…, hash hash.Hash)` param `hash` shadows
+				// the `hash` package (`using hash = hash_package;`); the declaration kept the raw
+				// `hash` while its uses rendered `hashΔ1`, so every use was CS0103 (40 sites in
+				// crypto/rsa, 27 in testing/quick's `rand`). Mirrors iifeParamName's lookup.
+				paramName = adjusted
 			}
 
 			result.WriteString(getSanitizedIdentifier(paramName))
