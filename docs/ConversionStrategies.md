@@ -924,6 +924,16 @@ func main() {
 This prints `Name = James` twice ([run it](https://play.golang.org/p/d-A5re1dfs8)) — `f1` bound a copy of `d`, so the later mutation is not observed. To preserve this semantic, the converter copies the receiver value into the delegate's capture rather than capturing the variable by reference, so the delegate executes against the snapshot taken at assignment time.
 
 ## Defer / Panic / Recover
+
+### Named-delegate and builtin callees keep the lambda form
+A zero-argument deferred/goroutine'd call whose callee is a **named func type** (`defer cancel()`
+with `cancel context.CancelFunc`, net dial) cannot take the bare trimmed method-group form —
+the named type is a DISTINCT C# delegate with no conversion to the `Action` golib expects
+(CS1503) — so the invocation stays wrapped: `defer(() => cancelʗ1())` / `goǃ(() => f())`.
+A **builtin** deferred WITH arguments (`defer close(returned)`) is generic with `in` parameters,
+so its method group neither infers nor converts to `Action<T>`; the temp-param lambda keeps
+deferǃ's eager-argument evaluation: `deferǃ(ᴛ1 => builtin.close(ᴛ1), returned, defer)`.
+(Guarded by `DeferCallOrder`'s stopFn + close(drained) shapes, output-compared vs Go.)
 Handling Go `defer` / `panic` / `recover` requires that the converted function run inside a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs). The context provides the [`defer`](https://golang.org/ref/spec#Defer_statements) call stack and the [`recover`](https://golang.org/pkg/builtin/#recover) handling; `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in (a `using static go.builtin`). The body is emitted as a lambda taking two parameters, `defer` and `recover`:
 
 ```go

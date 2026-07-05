@@ -37,6 +37,16 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 		// If call expression parameter counts match those of target function signature,
 		// we can render call without lambda parameters
 		renderLambdaParams = paramCount != v.getFunctionParamCount(deferStmt.Call.Fun)
+
+		// A BUILTIN callee (`defer close(returned)`, net dial) is generic with `in`
+		// parameters — its method group neither infers nor converts to Action<T>
+		// (CS1503). Render the temp-param lambda (`deferǃ(ᴛ1 => close(ᴛ1), returned,
+		// defer)`) so the eager-argument form still evaluates the argument at defer time.
+		if calleeIdent, ok := deferStmt.Call.Fun.(*ast.Ident); ok && paramCount > 0 {
+			if _, isBuiltin := v.info.ObjectOf(calleeIdent).(*types.Builtin); isBuiltin {
+				renderLambdaParams = true
+			}
+		}
 	}
 
 	if paramCount > 0 {

@@ -27,6 +27,16 @@ func main() {
 	go makeStop("go-stopped", msgs)()
 	fmt.Println(<-msgs) // go-stopped
 
+	// A BUILTIN deferred with arguments (`defer close(returned)`, net dial): the generic
+	// in-param method group binds neither Action<T> nor inference — the temp-param lambda
+	// keeps the eager-argument deferǃ form (CS1503).
+	drained := make(chan int, 1)
+	defer func() {
+		v, open := <-drained
+		fmt.Println("after close:", v, open) // after close: 0 false
+	}()
+	defer close(drained)
+
 	defer GetPrintLn()("Fifth")
 
 	c := &acc{}

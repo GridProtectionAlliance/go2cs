@@ -27,6 +27,13 @@ internal static void Main() => func((defer, recover) => {
     var msgsʗ1 = msgs;
     goǃ(() => makeStop("go-stopped"u8, msgsʗ1)());
     fmt.Println(ᐸꟷ(msgs));
+    var drained = new channel<nint>(1);
+    var drainedʗ1 = drained;
+    defer(() => {
+        var (v, open) = ᐸꟷ(drainedʗ1, ꟷ);
+        fmt.Println("after close:", v, open);
+    });
+    deferǃ(ᴛ1 => close(ᴛ1), drained, defer);
     deferǃ(GetPrintLn(), (@string)"Fifth", defer);
     var c = Ꮡ(new acc(nil));
     var (s1, e1) = c.add(5);
