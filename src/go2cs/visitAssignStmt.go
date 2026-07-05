@@ -1302,7 +1302,27 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							format.heapTypeDeclTarget.WriteString(heapTypeDecl)
 						}
 					} else {
-						if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
+						// A `:=` declaration initialized from a bare function/method reference (a C#
+						// METHOD GROUP, e.g. `state := lexText`) cannot be typed with `var` — C# cannot
+						// infer a delegate type from a method group (CS8917). Go infers the local's type
+						// as the UNNAMED signature `func(*lexer) stateFn`; naming it structurally emits a
+						// `Func<…>` delegate that is a DISTINCT C# type from the `stateFn` delegate the
+						// method group produces and that later `state = state(l)` assignments yield
+						// (CS0029). When the signature matches a package named func type, declare the
+						// local with that named delegate so the method group binds and same-type
+						// reassignments stay interconvertible. See namedFuncTypeNameForSignature.
+						methodGroupDelegateType := ""
+
+						if !v.isReassignment(ident) && v.exprIsMethodGroup(rhs) {
+							if sig, ok := v.getExprType(rhs).(*types.Signature); ok {
+								methodGroupDelegateType = v.namedFuncTypeNameForSignature(sig)
+							}
+						}
+
+						if methodGroupDelegateType != "" {
+							result.WriteString(methodGroupDelegateType)
+							result.WriteRune(' ')
+						} else if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
 							// A blank-identifier LHS is a C# discard, never a declaration — emit `_ = x;`
 							// with no `var`. Testing the current per-element `ident` (not just the
 							// single-LHS case) keeps each `_` in a split multi-assign like

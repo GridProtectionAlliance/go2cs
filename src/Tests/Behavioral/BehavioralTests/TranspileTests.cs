@@ -411,6 +411,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]

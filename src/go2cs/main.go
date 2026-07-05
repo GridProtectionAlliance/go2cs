@@ -3707,6 +3707,83 @@ func (v *Visitor) foreignAliasedTypeName(t types.Type) (string, bool) {
 	return getAliasedTypeName(plainKey), true
 }
 
+// namedFuncTypeNameForSignature returns the C# delegate name of a package-level named func type whose
+// underlying signature is identical to sig, or "" if none exists. Go's `:=` on a bare function value
+// (`state := lexText`, where `lexText` returns the named func type `stateFn`) infers the variable's
+// type as the UNNAMED signature `func(*lexer) stateFn`, not the named `stateFn` — so naming the local
+// structurally emits a `Func<…>` delegate that is a DISTINCT C# type from the `stateFn` delegate the
+// function group actually produces and that later `state = state(l)` assignments yield (CS0029, no
+// implicit conversion between two delegate types). Recovering the named delegate lets the local take
+// the single interconvertible delegate type (the classic self-referential state-machine func type).
+func (v *Visitor) namedFuncTypeNameForSignature(sig *types.Signature) string {
+	if sig == nil || v.pkg == nil {
+		return ""
+	}
+
+	// A generic signature (type params or receiver) is never a plain named func type match.
+	if sig.TypeParams() != nil || sig.RecvTypeParams() != nil || sig.Recv() != nil {
+		return ""
+	}
+
+	scope := v.pkg.Scope()
+
+	if scope == nil {
+		return ""
+	}
+
+	for _, name := range scope.Names() {
+		obj := scope.Lookup(name)
+
+		typeName, ok := obj.(*types.TypeName)
+
+		if !ok {
+			continue
+		}
+
+		named, ok := typeName.Type().(*types.Named)
+
+		if !ok || named.TypeParams() != nil {
+			continue
+		}
+
+		underlyingSig, ok := named.Underlying().(*types.Signature)
+
+		if !ok {
+			continue
+		}
+
+		if types.Identical(underlyingSig, sig) {
+			return getSanitizedIdentifier(named.Obj().Name())
+		}
+	}
+
+	return ""
+}
+
+// exprIsMethodGroup reports whether expr is a bare reference to a function or method value (a C#
+// method group), i.e. an identifier or selector whose resolved object is a *types.Func and which is
+// not itself the call in a call expression. Such a value has no inferable delegate type under `var`.
+func (v *Visitor) exprIsMethodGroup(expr ast.Expr) bool {
+	var ident *ast.Ident
+
+	switch e := expr.(type) {
+	case *ast.Ident:
+		ident = e
+	case *ast.SelectorExpr:
+		ident = e.Sel
+	default:
+		return false
+	}
+
+	if ident == nil {
+		return false
+	}
+
+	_, isFunc := v.info.ObjectOf(ident).(*types.Func)
+
+	return isFunc
+}
+
 func convertToCSTypeName(typeName string) string {
 	fullTypeName := convertToCSFullTypeName(typeName)
 
