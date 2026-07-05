@@ -159,6 +159,19 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		// Find return statement in string and remove it
 		returnIndex := strings.Index(body, "return ")
 
+		// The visited block can carry HOISTED statements ahead of the return —
+		// visitReturnStmt's tuple-conversion arm writes `var (ᴛ1, ᴛ2) = call;` before
+		// `return (ᴛ1, ᴛ2);` (net lookup.go's `DoChan(key, func() (any, error) {
+		// return testHookLookupIP(…) })`). Chopping at "return " dropped the call and
+		// left the bare markers (CS0103 ×2). Collapse only when nothing but the block's
+		// opening brace precedes the return; otherwise keep the block body.
+		if returnIndex != -1 {
+			if prefix := strings.TrimSpace(body[:returnIndex]); prefix != "{" && prefix != "" {
+				returnIndex = -1
+				body = strings.TrimSpace(body)
+			}
+		}
+
 		if returnIndex != -1 {
 			body = body[returnIndex+7:]
 

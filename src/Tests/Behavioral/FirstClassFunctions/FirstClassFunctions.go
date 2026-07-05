@@ -163,7 +163,17 @@ func main() {
 	}
 	ip, found := res.lookupPackage("fmt")
 	fmt.Println(ip, found, res.lookupSym("", "Printf"), res.lookupSym("T", "M")) // pkg/fmt true true false
+
+	// A single-return literal whose returned tuple call needs a per-element interface
+	// conversion hoists `var (ᴛ1, ᴛ2) = call;` ahead of the return — the expression-lambda
+	// collapse must NOT fire there (net lookup.go's DoChan literal `func() (any, error) {
+	// return testHookLookupIP(…) }` kept only the bare markers, CS0103 x2).
+	fetch := func() (any, error) { return fetchPair() }
+	got, gerr := fetch()
+	fmt.Println("collapse hoist:", got, gerr == nil) // collapse hoist: pair true
 }
+
+func fetchPair() (string, error) { return "pair", nil }
 
 type resolver struct {
 	lookupPackage func(name string) (importPath string, ok bool)

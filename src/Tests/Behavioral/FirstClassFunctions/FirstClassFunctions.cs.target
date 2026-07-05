@@ -136,6 +136,16 @@ internal static void Main() {
     );
     var (ip, found) = res.lookupPackage("fmt"u8);
     fmt.Println(ip, found, res.lookupSym(""u8, "Printf"u8), res.lookupSym("T"u8, "M"u8));
+    var fetch = () => {
+        var (ᴛ1, ᴛ2) = fetchPair();
+        return (ᴛ1, ᴛ2);
+    };
+    var (got, gerr) = fetch();
+    fmt.Println("collapse hoist:", got, gerr == default!);
+}
+
+internal static (@string, error) fetchPair() {
+    return ("pair", default!);
 }
 
 [GoType] partial struct resolver {
