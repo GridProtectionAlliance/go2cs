@@ -236,6 +236,7 @@
     <Project Path="Tests/Behavioral/StdLibInternalAbi/StdLibInternalAbi.csproj" />
     <Project Path="Tests/Behavioral/StringByteUnionConstraint/StringByteUnionConstraint.csproj" />
     <Project Path="Tests/Behavioral/StringConvPostfix/StringConvPostfix.csproj" />
+    <Project Path="Tests/Behavioral/StringLiteralIndexLoop/StringLiteralIndexLoop.csproj" />
     <Project Path="Tests/Behavioral/StringLiteralSliceConversion/StringLiteralSliceConversion.csproj" />
     <Project Path="Tests/Behavioral/StringPassByValue/StringPassByValue.csproj" />
     <Project Path="Tests/Behavioral/StringSliceAndUnsignedConst/StringSliceAndUnsignedConst.csproj" />

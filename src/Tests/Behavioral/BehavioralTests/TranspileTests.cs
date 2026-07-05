@@ -582,6 +582,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
 
     [TestMethod]
+    public void CheckStringLiteralIndexLoop() => CheckTarget("StringLiteralIndexLoop");
+
+    [TestMethod]
     public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
 
     [TestMethod]

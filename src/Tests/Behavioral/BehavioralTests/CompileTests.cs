@@ -582,6 +582,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
 
     [TestMethod]
+    public void CheckStringLiteralIndexLoop() => CheckTarget("StringLiteralIndexLoop");
+
+    [TestMethod]
     public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
 
     [TestMethod]

@@ -584,6 +584,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStringConvPostfix() => CheckTarget("StringConvPostfix");
 
     [TestMethod]
+    public void CheckStringLiteralIndexLoop() => CheckTarget("StringLiteralIndexLoop");
+
+    [TestMethod]
     public void CheckStringLiteralSliceConversion() => CheckTarget("StringLiteralSliceConversion");
 
     [TestMethod]

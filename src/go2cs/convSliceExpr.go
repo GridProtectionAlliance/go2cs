@@ -208,6 +208,30 @@ func (v *Visitor) castWideIntegerToInt(expr ast.Expr) string {
 	return converted
 }
 
+// castStringLiteralIndexToInt is castWideIntegerToInt plus the plain `int` kind, for a string
+// LITERAL base. A string literal renders as a `"…"u8` ReadOnlySpan<byte> whose indexer is
+// int-ONLY, and Go's `int` maps to C# `nint`, which does not implicitly narrow to int
+// (image/jpeg writer.go's `"\x00\x10\x01\x11"u8[i]`, i a range int; CS1503). A CONSTANT index
+// is already a C# int literal (implicit conversion), so it is left unchanged to avoid churn.
+func (v *Visitor) castStringLiteralIndexToInt(expr ast.Expr) string {
+	converted := v.convExpr(expr, nil)
+
+	if tv, ok := v.info.Types[expr]; ok && tv.Value != nil {
+		return converted
+	}
+
+	if exprType := v.getType(expr, false); exprType != nil {
+		if basic, ok := exprType.Underlying().(*types.Basic); ok {
+			switch basic.Kind() {
+			case types.Int, types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
+				return v.intCastOperand(expr, converted)
+			}
+		}
+	}
+
+	return converted
+}
+
 func (v *Visitor) intCastOperand(expr ast.Expr, converted string) string {
 	if named, ok := v.getType(expr, false).(*types.Named); ok {
 		if basic, ok := named.Underlying().(*types.Basic); ok && basic.Info()&types.IsNumeric != 0 {

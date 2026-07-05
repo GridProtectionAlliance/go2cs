@@ -103,7 +103,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	// both renders; an int/small-integer index is emitted unchanged (no churn).
 	if baseType := v.getType(indexExpr.X, false); baseType != nil {
 		if basic, ok := baseType.Underlying().(*types.Basic); ok && basic.Info()&types.IsString != 0 {
-			index = v.castWideIntegerToInt(indexExpr.Index)
+			// A string LITERAL base (`"…"u8`) is an int-only-indexed ReadOnlySpan<byte>, so a
+			// plain Go `int` index (→ C# nint) needs the (int) cast too; an @string variable's
+			// indexer accepts nint, so it keeps the wide-only cast (no churn on int indices).
+			if _, isLit := indexExpr.X.(*ast.BasicLit); isLit {
+				index = v.castStringLiteralIndexToInt(indexExpr.Index)
+			} else {
+				index = v.castWideIntegerToInt(indexExpr.Index)
+			}
 		}
 
 		// A SLICE/ARRAY base indexed by a PLAIN BASIC integer kind with no implicit
