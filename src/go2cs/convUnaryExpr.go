@@ -712,5 +712,36 @@ func (v *Visitor) convUnaryExpr(unaryExpr *ast.UnaryExpr, context UnaryExprConte
 		return fmt.Sprintf("((%s)0 - %s)", typeName, v.convExpr(unaryExpr.X, nil))
 	}
 
+	if unaryExpr.Op == token.NOT && v.isNamedBooleanType(unaryExpr.X) {
+		// C# forbids `!` on a NAMED boolean type (a defined type whose underlying is `bool`,
+		// e.g. go/constant's `boolVal`), because the `[GoType("bool")]` struct that models it
+		// has an implicit `bool` conversion but no `operator!` (CS0023). Go's `!y` on such a
+		// value negates and KEEPS the named type (`case boolVal: return !y`, returned as the
+		// `Value` interface). Emit `(T)(!(bool)y)` — cast to the underlying `bool`, negate, then
+		// cast back to T — which preserves the named type so the result still satisfies the
+		// interface. A plain `bool` operand keeps the bare `!x` form below (no golden churn).
+		typeName := convertToCSTypeName(v.getTypeName(v.getType(unaryExpr.X, false), false))
+		return fmt.Sprintf("((%s)(!(bool)%s))", typeName, v.convExpr(unaryExpr.X, nil))
+	}
+
 	return unaryExpr.Op.String() + v.convExpr(unaryExpr.X, nil)
+}
+
+// isNamedBooleanType reports whether the expression's DECLARED type is a defined (named) type
+// whose underlying type is `bool` — e.g. `type boolVal bool`. The predeclared `bool` itself, and
+// untyped bool constants, return false: C#'s `!`/`&&`/`||` apply to those directly, so only a named
+// bool (modeled as a `[GoType("bool")]` struct with no logical operators) needs the cast-through-bool
+// form. Shared by convUnaryExpr (`!`) and convBinaryExpr (`&&`/`||`).
+func (v *Visitor) isNamedBooleanType(expr ast.Expr) bool {
+	if tv, ok := v.info.Types[expr]; ok && tv.Type != nil {
+		if _, isNamed := tv.Type.(*types.Named); !isNamed {
+			return false
+		}
+
+		if basic, ok := tv.Type.Underlying().(*types.Basic); ok {
+			return basic.Info()&types.IsBoolean != 0
+		}
+	}
+
+	return false
 }

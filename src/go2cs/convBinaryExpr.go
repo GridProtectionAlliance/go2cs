@@ -685,6 +685,19 @@ func (v *Visitor) convBinaryExpr(binaryExpr *ast.BinaryExpr, context PatternMatc
 			}
 		}
 
+		// Go's `&&`/`||` on a NAMED boolean type (`type boolVal bool`) yields that named type,
+		// which satisfies an interface return (`case boolVal: return x && y` in go/constant's
+		// BinaryOp, returned as the `Value` interface). In C# the `[GoType("bool")]` struct that
+		// models the named type has no logical operators, so `left && right` collapses to a bare
+		// `bool` — returning it where the named type/interface is expected is CS0029. Cast each
+		// operand to `bool`, apply the operator, then cast back to the named type so the result
+		// keeps satisfying the interface. Mirrors the unary `!` handling in convUnaryExpr; a
+		// predeclared-`bool` result keeps the bare form below (no golden churn).
+		if (binaryExpr.Op == token.LAND || binaryExpr.Op == token.LOR) && v.isNamedBooleanType(binaryExpr) {
+			typeName := convertToCSTypeName(v.getTypeName(v.getType(binaryExpr, false), false))
+			return fmt.Sprintf("((%s)((bool)%s %s (bool)%s))", typeName, leftOperand, binaryOp, rightOperand)
+		}
+
 		return fmt.Sprintf("%s%s%s", leftOperand, binaryOp, rightOperand)
 	}
 
