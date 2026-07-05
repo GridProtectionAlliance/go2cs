@@ -83,8 +83,15 @@ func collectAddressedGlobals(files []FileEntry, pkg *types.Package, info *types.
 						}
 					}
 
-					if s, ok := recv.(*ast.SelectorExpr); ok {
-						recv = s.X
+					switch r := recv.(type) {
+					case *ast.SelectorExpr:
+						recv = r.X
+						continue
+					case *ast.IndexExpr:
+						// A package-level value ARRAY whose element has a pointer-receiver method called on
+						// it (`matchPool[i].Get()`, regexp's [N]sync.Pool) needs the array boxed so the
+						// element address `Ꮡmatchpool.at<T>(i)` resolves (CS0103).
+						recv = r.X
 						continue
 					}
 

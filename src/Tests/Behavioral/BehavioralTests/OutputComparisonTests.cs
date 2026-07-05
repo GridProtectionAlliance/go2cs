@@ -262,6 +262,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalArrayElementFieldAddress() => CheckTarget("GlobalArrayElementFieldAddress");
 
     [TestMethod]
+    public void CheckGlobalArrayElementMethod() => CheckTarget("GlobalArrayElementMethod");
+
+    [TestMethod]
     public void CheckGlobalAtomicDefer() => CheckTarget("GlobalAtomicDefer");
 
     [TestMethod]

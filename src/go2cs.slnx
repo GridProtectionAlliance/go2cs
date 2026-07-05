@@ -138,6 +138,7 @@
     <Project Path="Tests/Behavioral/GenericVariadicFunc/GenericVariadicFunc.csproj" />
     <Project Path="Tests/Behavioral/GlobalCapturedInClosure/GlobalCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/GlobalArrayElementFieldAddress/GlobalArrayElementFieldAddress.csproj" />
+    <Project Path="Tests/Behavioral/GlobalArrayElementMethod/GlobalArrayElementMethod.csproj" />
     <Project Path="Tests/Behavioral/GlobalAtomicDefer/GlobalAtomicDefer.csproj" />
     <Project Path="Tests/Behavioral/GlobalAtomicFieldMethod/GlobalAtomicFieldMethod.csproj" />
     <Project Path="Tests/Behavioral/GlobalNestedFieldAddress/GlobalNestedFieldAddress.csproj" />
