@@ -422,6 +422,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]
+    public void CheckNamedNumericConstCast() => CheckTarget("NamedNumericConstCast");
+
+    [TestMethod]
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]

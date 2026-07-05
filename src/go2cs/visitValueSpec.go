@@ -608,8 +608,17 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 			namedUintptrType := false
 
 			if isNamedType {
-				if basic, ok := c.Type().Underlying().(*types.Basic); ok && basic.Kind() == types.Uintptr {
-					namedUintptrType = true
+				if basic, ok := c.Type().Underlying().(*types.Basic); ok {
+					// A named type over a WIDE UNSIGNED integer (uintptr / uint / uint64) whose folded
+					// constant value exceeds int32 needs the same unchecked cast as a native-int const:
+					// `^Class(0)` (bidi) / `^big.Word(0)` (go/constant) fold to the underlying's all-ones
+					// value (a `ulong` literal in C#), which has no implicit conversion to the named
+					// `[GoType]` wrapper (CS0266). Narrow-unsigned underlyings (byte/uint16) fold to
+					// small values that the wrapper's int operator still accepts, so they are excluded.
+					switch basic.Kind() {
+					case types.Uintptr, types.Uint, types.Uint64:
+						namedUintptrType = true
+					}
 				}
 			}
 

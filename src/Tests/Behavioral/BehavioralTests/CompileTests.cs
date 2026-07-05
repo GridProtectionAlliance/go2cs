@@ -420,6 +420,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]
+    public void CheckNamedNumericConstCast() => CheckTarget("NamedNumericConstCast");
+
+    [TestMethod]
     public void CheckNamedNumericConversion() => CheckTarget("NamedNumericConversion");
 
     [TestMethod]
