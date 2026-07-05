@@ -551,6 +551,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]
+    public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

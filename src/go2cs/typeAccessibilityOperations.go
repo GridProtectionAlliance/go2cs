@@ -49,6 +49,24 @@ func collectPublicizedTypes(pkg *types.Package) {
 				if named, ok := obj.Type().(*types.Named); ok {
 					collectMethodSignatureUnexportedTypes(named, pkg)
 				}
+
+				// An EXPORTED named FUNC type is emitted as a public C# delegate; an unexported
+				// type in its signature is then less accessible than the delegate (CS0059,
+				// x/text/unicode/bidi's `type Option func(*options)` → `public delegate void
+				// Option(ж<options> _)`). Publicize those signature types like an exported method's.
+				if sig, ok := obj.Type().Underlying().(*types.Signature); ok {
+					if params := sig.Params(); params != nil {
+						for i := range params.Len() {
+							collectUnexportedNamedTypes(params.At(i).Type(), pkg)
+						}
+					}
+
+					if results := sig.Results(); results != nil {
+						for i := range results.Len() {
+							collectUnexportedNamedTypes(results.At(i).Type(), pkg)
+						}
+					}
+				}
 			}
 
 			structType, ok := obj.Type().Underlying().(*types.Struct)

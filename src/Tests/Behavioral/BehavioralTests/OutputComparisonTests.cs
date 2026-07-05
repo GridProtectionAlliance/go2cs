@@ -508,6 +508,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]
+    public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
+
+    [TestMethod]
     public void CheckRangeVarHeapBox() => CheckTarget("RangeVarHeapBox");
 
     [TestMethod]
