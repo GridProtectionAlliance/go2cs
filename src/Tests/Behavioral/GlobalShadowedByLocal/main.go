@@ -84,4 +84,17 @@ func main() {
 	fmt.Println(trace.addr, plainCounter) // 42 100 (globals unchanged)
 	fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1)) // 70 50
 	fmt.Println(tupleInitShadow("a"), tupleInitShadow("z")) // 2 -1
+
+	bi := buildRec{Main: "mod/a", Path: "p"}
+	fmt.Println("main field:", bi.Main, mainField(bi)) // main field: mod/a mod/a
 }
+
+// buildRec mirrors runtime/debug's BuildInfo: a struct FIELD named Main. The field access
+// must not take the function-name Main→ΔMain special (that reservation is for METHODS —
+// C#'s entry point); the declaration is raw `Main`, so the Δ'd access was CS1061 ×2.
+type buildRec struct {
+	Main string
+	Path string
+}
+
+func mainField(b buildRec) string { return b.Main }

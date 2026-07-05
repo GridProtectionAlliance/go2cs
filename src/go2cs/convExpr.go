@@ -186,6 +186,10 @@ func (c IndexExprContext) getDefault() StmtContext {
 }
 
 type IdentContext struct {
+	// isField marks a FIELD selection (vs a method/function name) — fields skip the
+	// function-name Main→ΔMain special (see convIdent's isMethod arm).
+	isField bool
+
 	isPointer bool
 	isType    bool
 	isMethod  bool

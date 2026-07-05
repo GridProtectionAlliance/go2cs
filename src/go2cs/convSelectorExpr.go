@@ -1263,6 +1263,7 @@ func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContex
 	// Flag a field selector whose name collides with its enclosing struct's type name so the
 	// access is renamed to match the renamed field declaration (CS0542).
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.FieldVal {
+		context.isField = true
 		context.fieldCollidesWithType = v.fieldCollidesWithType(selectorExpr.Sel, selectorExpr.X)
 	}
 

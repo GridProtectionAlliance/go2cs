@@ -71,6 +71,17 @@ internal static void Main() {
     fmt.Println(Δtrace.addr, plainCounter);
     fmt.Println(nestedBlockShadow(2), nestedBlockShadow(1));
     fmt.Println(tupleInitShadow("a"u8), tupleInitShadow("z"u8));
+    var bi = new buildRec(Main: "mod/a"u8, Path: "p"u8);
+    fmt.Println("main field:", bi.Main, mainField(bi));
+}
+
+[GoType] partial struct buildRec {
+    public @string Main;
+    public @string Path;
+}
+
+internal static @string mainField(buildRec b) {
+    return b.Main;
 }
 
 } // end main_package

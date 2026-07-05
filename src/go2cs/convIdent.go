@@ -94,7 +94,18 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 	}
 
 	if context.isMethod {
-		name := getSanitizedFunctionName(v.getIdentName(ident))
+		var name string
+
+		// A FIELD selection must not take the function-name Main→ΔMain special (the C#
+		// entry-point reservation applies to METHODS): runtime/debug's BuildInfo.Main
+		// field access emitted `bi.ΔMain` against the raw `Main` declaration (CS1061 ×2).
+		// Fields otherwise share the function-name path (core sanitize, no package-level
+		// nameCollisions Δ — a field is struct-scoped and declared unrenamed).
+		if context.isField {
+			name = getCoreSanitizedIdentifier(v.getIdentName(ident))
+		} else {
+			name = getSanitizedFunctionName(v.getIdentName(ident))
+		}
 
 		// A field whose name equals its enclosing struct's type name is renamed with the
 		// disambiguation marker (CS0542); match the renamed declaration at the access site.
