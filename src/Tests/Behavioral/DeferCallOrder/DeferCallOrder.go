@@ -49,16 +49,40 @@ func main() {
 	acquireAndWork(sm)
 	fmt.Println("after:", sm.held) // after: false
 
+	watchAndSend(sm)
+	fmt.Println("sent:", <-sm.out, "| held:", sm.held) // sent: 9 | held: false
+
 	fmt.Println("notify:", notifyAll(1, 2, 3)) // notified / notify: 6
 
 	fmt.Println("Main function")
 }
 
-type sema struct{ held bool }
+type sema struct {
+	held bool
+	out  chan int
+}
 
 func (s *sema) release() {
 	s.held = false
 	fmt.Println("sema released")
+}
+
+func (s *sema) send(n int) {
+	s.out <- n
+}
+
+// watchAndSend mirrors os/exec's `go c.watchCtx(resultc)`: a pointer-receiver method group
+// WITH matching-arity arguments deferred/goroutine'd through an already-pointer receiver has
+// the same CS1113 as the nullary form — both `goǃ` and `deferǃ` bind the BOX overload
+// (`goǃ(Ꮡs.send, 7)`), not the deref-alias value trim.
+func watchAndSend(s *sema) {
+	s.out = make(chan int, 2)
+	s.held = true
+	go s.send(7)
+	fmt.Println("sent-first:", <-s.out) // sent-first: 7 (synchronizes the goroutine)
+	defer s.send(9)                     // LIFO: release() runs first, then send(9)
+	defer s.release()
+	fmt.Println("watching, held:", s.held)
 }
 
 // acquireAndWork mirrors net nss.go's `defer conf.releaseSema()`: a NULLARY pointer-receiver

@@ -120,6 +120,13 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 			}
 
 			result.WriteString(" => ")
+		} else {
+			// A matching-arity pointer-receiver method group has the same CS1113 as the
+			// nullary form — the deref-alias render is a struct VALUE against the [GoRecv]
+			// ref extension (os/exec's `go c.watchCtx(resultc)`); bind the BOX overload.
+			if boxGroup := v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun); boxGroup != "" {
+				callExpr = boxGroup
+			}
 		}
 
 		result.WriteString(callExpr)

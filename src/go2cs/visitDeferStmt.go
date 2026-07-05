@@ -145,6 +145,12 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 			}
 
 			result.WriteString(" => ")
+		} else {
+			// A matching-arity pointer-receiver method group has the same CS1113 as the
+			// nullary form (see above) — bind the BOX overload here too.
+			if boxGroup := v.pointerReceiverBoxMethodGroup(deferStmt.Call.Fun); boxGroup != "" {
+				callExpr = boxGroup
+			}
 		}
 
 		result.WriteString(callExpr)

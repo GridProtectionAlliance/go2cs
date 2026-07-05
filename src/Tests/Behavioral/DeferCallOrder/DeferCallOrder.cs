@@ -44,18 +44,37 @@ internal static void Main() => func((defer, recover) => {
     var sm = Ꮡ(new sema(nil));
     acquireAndWork(sm);
     fmt.Println("after:", (~sm).held);
+    watchAndSend(sm);
+    fmt.Println("sent:", ᐸꟷ((~sm).@out), "| held:", (~sm).held);
     fmt.Println("notify:", notifyAll(1, 2, 3));
     fmt.Println("Main function");
 });
 
 [GoType] partial struct sema {
     internal bool held;
+    internal channel<nint> @out;
 }
 
 [GoRecv] internal static void release(this ref sema s) {
     s.held = false;
     fmt.Println("sema released");
 }
+
+[GoRecv] internal static void send(this ref sema s, nint n) {
+    s.@out.ᐸꟷ(n);
+}
+
+internal static void watchAndSend(ж<sema> Ꮡs) => func((defer, recover) => {
+    ref var s = ref Ꮡs.Value;
+
+    s.@out = new channel<nint>(2);
+    s.held = true;
+    goǃ(Ꮡs.send, (nint)(7));
+    fmt.Println("sent-first:", ᐸꟷ(s.@out));
+    deferǃ(Ꮡs.send, (nint)(9), defer);
+    defer(Ꮡs.release);
+    fmt.Println("watching, held:", s.held);
+});
 
 internal static void acquireAndWork(ж<sema> Ꮡs) => func((defer, recover) => {
     ref var s = ref Ꮡs.Value;
