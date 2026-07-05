@@ -610,6 +610,33 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			}
 		}
 
+		// A POINTER-receiver method value whose receiver expression is ALREADY a pointer binds
+		// the method group over the BOX, not the deref'd value alias — `resolverFunc := r.lookupIP`
+		// with `r *Resolver` otherwise renders `Ꮡr.Value.lookupIP(…)` inside the lambda, a struct
+		// VALUE receiver against the [GoRecv] ж<T> extension (CS1929, net lookup.go). Render the
+		// receiver ident in pointer context (`Ꮡr` for a deref'd param, the plain local otherwise).
+		recvExpr := ""
+
+		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); isPtrRecv {
+					if recvType := v.getType(selectorExpr.X, false); recvType != nil {
+						if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+							if identX, ok := selectorExpr.X.(*ast.Ident); ok {
+								ptrContext := DefaultIdentContext()
+								ptrContext.isPointer = true
+								recvExpr = v.convIdent(identX, ptrContext)
+							}
+						}
+					}
+				}
+			}
+		}
+
+		if recvExpr == "" {
+			recvExpr = v.convExpr(selectorExpr.X, nil)
+		}
+
 		// A BOUND METHOD VALUE with parameters — `d.compute = metricReader(read).compute`
 		// (runtime metrics.go; compute takes (*statAggregate, *metricValue)) — forwards through
 		// a lambda carrying the METHOD'S OWN parameters: the previous emission hardcoded arity
@@ -633,12 +660,12 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 					paramUses.WriteString(name)
 				}
 
-				return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.convExpr(selectorExpr.X, nil),
+				return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), recvExpr,
 					v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 			}
 		}
 
-		return fmt.Sprintf("() => %s.%s()", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+		return fmt.Sprintf("() => %s.%s()", recvExpr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
 	}
 
 	// A method VALUE over a POINTER-receiver method in a VALUE context — a call argument

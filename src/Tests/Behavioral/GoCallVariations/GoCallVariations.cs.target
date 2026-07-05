@@ -25,7 +25,26 @@ internal static void Main() {
     var done = new channel<EmptyStruct>(1);
     runPair(done);
     ᐸꟷ(done);
+    var acc = Ꮡ(new accum(nil));
+    bindAdd(acc);
+    fmt.Println("accum total:", (~acc).total);
     fmt.Println("Main function");
+}
+
+[GoType] partial struct accum {
+    internal nint total;
+}
+
+[GoRecv] internal static nint add(this ref accum a, nint n) {
+    a.total += n;
+    return a.total;
+}
+
+internal static void bindAdd(ж<accum> Ꮡa) {
+    ref var a = ref Ꮡa.Value;
+
+    var add = (nint p1) => Ꮡa.add(p1);
+    fmt.Println("bound add:", add(5), add(7));
 }
 
 public static Action<@string> GetPrintLn() {

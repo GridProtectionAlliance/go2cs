@@ -32,7 +32,27 @@ func main() {
 	runPair(done)
 	<-done
 
+	acc := &accum{}
+	bindAdd(acc)
+	fmt.Println("accum total:", acc.total) // 12
+
 	fmt.Println("Main function")
+}
+
+type accum struct{ total int }
+
+func (a *accum) add(n int) int {
+	a.total += n
+	return a.total
+}
+
+// bindAdd mirrors net lookup.go's `resolverFunc := r.lookupIP`: a POINTER-receiver method
+// VALUE taken from an ALREADY-pointer receiver — the binding must go through the box
+// (`Ꮡa.add`), never the deref'd value alias (`Ꮡa.Value.add` is a struct VALUE against the
+// [GoRecv] ж<T> extension, CS1929).
+func bindAdd(a *accum) {
+	add := a.add
+	fmt.Println("bound add:", add(5), add(7)) // 5 12
 }
 
 func GetPrintLn() func(string) {
