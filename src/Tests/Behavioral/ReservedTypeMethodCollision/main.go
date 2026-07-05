@@ -30,4 +30,27 @@ func main() {
 	fmt.Println(s.lo, s.hi) // 10 15
 	fmt.Println(s.span())   // 5
 	fmt.Println(s)          // {10 15}
+
+	sv := Sieve{vals: []int{1, 2, 3, 4, 5, 6}}
+	var even Filter = func(n int) bool { return n%2 == 0 }
+	fmt.Println(sv.Filter(even)) // 3
+}
+
+// Filter is a NON-reserved defined FUNC TYPE whose name collides with a method (Sieve.Filter).
+// It Δ-prefixes to ΔFilter at every USE; the DELEGATE DECLARATION must be Δ-prefixed too, or it
+// duplicates the method (CS0102) and the ΔFilter uses cannot resolve it (CS0246) — go/ast's
+// `type Filter func(string) bool` vs `(CommentMap).Filter`. No reserved-word marker here: the
+// method keeps the plain `Filter` and only the type becomes `ΔFilter`.
+type Filter func(int) bool
+
+type Sieve struct{ vals []int }
+
+func (sv Sieve) Filter(f Filter) int {
+	count := 0
+	for _, v := range sv.vals {
+		if f(v) {
+			count++
+		}
+	}
+	return count
 }

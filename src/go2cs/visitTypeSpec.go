@@ -12,6 +12,16 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 	name := v.getIdentName(typeSpec.Name)
 	identType := v.getIdentType(typeSpec.Name)
 
+	// A defined type whose name COLLIDES with a method name (go/ast's `type Filter func(string)
+	// bool` vs `(CommentMap).Filter`) is Δ-prefixed at every USE (convIdent →
+	// getSanitizedIdentifier), but getIdentName returns the raw name — so the DECLARATION
+	// emitted a bare `delegate … Filter` that both duplicated the method (CS0102) and was
+	// unreachable from the ΔFilter uses (CS0246 ×14). Match the declaration to the uses. Manual
+	// types already record the Δ form explicitly (below), so this covers the auto-emitted kinds.
+	if nameCollisions[typeSpec.Name.Name] {
+		name = getSanitizedIdentifier(typeSpec.Name.Name)
+	}
+
 	// Handle type alias
 	if typeSpec.Assign.IsValid() {
 		// Get types.Type from typeSpec.Type expr

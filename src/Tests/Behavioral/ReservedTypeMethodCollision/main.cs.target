@@ -26,6 +26,25 @@ internal static void Main() {
     fmt.Println(s.lo, s.hi);
     fmt.Println(s.span());
     fmt.Println(s);
+    var sv = new Sieve(vals: new nint[]{1, 2, 3, 4, 5, 6}.slice());
+    ΔFilter even = (nint n) => n % 2 == 0;
+    fmt.Println(sv.Filter(even));
+}
+
+public delegate bool ΔFilter(nint _);
+
+[GoType] partial struct Sieve {
+    internal slice<nint> vals;
+}
+
+public static nint Filter(this Sieve sv, ΔFilter f) {
+    nint count = 0;
+    foreach (var (_, v) in sv.vals) {
+        if (f(v)) {
+            count++;
+        }
+    }
+    return count;
 }
 
 } // end main_package
