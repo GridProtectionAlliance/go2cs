@@ -1398,11 +1398,30 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 
 				argTypeName := v.getCSTypeName(argType)
 
+				// SKIP a conversion the [GoType] wrapper already provides: `type bitStringEncoder
+				// BitString` makes the TypeGenerator emit BOTH bitStringEncoder<->BitString
+				// implicit operators, so a recorded GoImplicitConv<BitString, bitStringEncoder>
+				// (or its reverse) is a DUPLICATE user-defined conversion (CS0557, encoding/asn1).
+				// packageTypeSpecRHS marks a defined type's written RHS (the wrapper relationship).
+				wrapperConversion := false
+
+				if named, ok := funcType.(*types.Named); ok {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && types.Identical(rhs, argType) {
+						wrapperConversion = true
+					}
+				}
+
+				if named, ok := argType.(*types.Named); ok {
+					if rhs, has := packageTypeSpecRHS[named.Obj()]; has && rhs != nil && types.Identical(rhs, funcType) {
+						wrapperConversion = true
+					}
+				}
+
 				// A pairing carrying UNBOUND type parameters cannot be recorded: an assembly
 				// attribute cannot name K/V (internal/concurrent's indirect[K,V] GoImplicitConv
 				// record emitted GoImplicitConv<Δindirect<K, V>, ж<Δindirect<K, V>>>, CS0246 x4
 				// - and one bad record kills the whole generator run).
-				if targetTypeName != argTypeName && !typeContainsTypeParams(argType) && !typeContainsTypeParams(funcType) {
+				if targetTypeName != argTypeName && !wrapperConversion && !typeContainsTypeParams(argType) && !typeContainsTypeParams(funcType) {
 					// The recorded conversion type names use cross-package import aliases (e.g.
 					// `abi.Type`); register them so package_info.cs can emit a resolving `global using`.
 					v.recordConversionPackageUsing(argType)

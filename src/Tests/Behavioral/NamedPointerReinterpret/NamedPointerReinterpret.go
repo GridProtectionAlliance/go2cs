@@ -6,6 +6,10 @@ import "fmt"
 // conversions view<->base exist. The (*view)(*base) pointer reinterpret below
 // is the construct under test: the arg is a genuine pointer box (a call result),
 // which the converter must dereference before the value conversion binds.
+//
+// This also guards the duplicate-conversion dedup (encoding/asn1's bitStringEncoder): the
+// converter must NOT also record `[assembly: GoImplicitConv<view, base>]`, because the
+// [GoType] wrapper already emits that operator — a second one is CS0557.
 type base struct {
 	a int64
 	b int64
