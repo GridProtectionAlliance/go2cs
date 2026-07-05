@@ -44,6 +44,17 @@ type coder struct {
 
 type EncBuffer coder
 
+// tally and weight are UNEXPORTED named types used in the signatures of EXPORTED methods on
+// the exported CaseRange — `func (CaseRange) Tally() tally` and `func (CaseRange) Weigh(weight)`.
+// An exported method is public in C#; a return type less accessible than the method is CS0050
+// and a parameter type is CS0051 (crypto/internal/bigmod's `func (x *Nat) Equal(y *Nat) choice`,
+// choice unexported). The converter publicizes an exported type's exported-method signature types.
+type tally int
+type weight int
+
+func (cr CaseRange) Tally() tally        { return tally(cr.Lo) }
+func (cr CaseRange) Weigh(w weight) int  { return int(w) * 2 }
+
 func main() {
 	var cr CaseRange
 	cr.Lo = 65
@@ -61,4 +72,8 @@ func main() {
 	// literal and field reads confirm the wrapper still works end-to-end.
 	b := EncBuffer{tag: "png", seq: 7}
 	fmt.Println(b.tag, b.seq) // png 7
+
+	// Exercise the exported-method-signature publicization: Tally returns the unexported
+	// `tally`, Weigh takes the unexported `weight`.
+	fmt.Println(cr.Tally(), cr.Weigh(3)) // 65 6
 }

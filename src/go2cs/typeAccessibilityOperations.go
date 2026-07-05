@@ -40,6 +40,15 @@ func collectPublicizedTypes(pkg *types.Package) {
 			// written RHS to match the wrapper's accessibility.
 			if obj.Exported() {
 				collectPublicizedWrapperRHS(obj, pkg)
+
+				// An EXPORTED type's EXPORTED methods are emitted public; an unexported
+				// param/result type is then less accessible than the public method
+				// (crypto/internal/bigmod's `func (x *Nat) Equal(y *Nat) choice`, choice
+				// unexported → CS0050). Publicize those signature types. The fixpoint cascade
+				// below then carries them through any further exported-method chains.
+				if named, ok := obj.Type().(*types.Named); ok {
+					collectMethodSignatureUnexportedTypes(named, pkg)
+				}
 			}
 
 			structType, ok := obj.Type().Underlying().(*types.Struct)
@@ -108,31 +117,7 @@ func cascadePublicizedMethodTypes() {
 				continue
 			}
 
-			for i := range named.NumMethods() {
-				method := named.Method(i)
-
-				if !method.Exported() {
-					continue
-				}
-
-				sig, ok := method.Type().(*types.Signature)
-
-				if !ok {
-					continue
-				}
-
-				if params := sig.Params(); params != nil {
-					for j := range params.Len() {
-						collectUnexportedNamedTypes(params.At(j).Type(), obj.Pkg())
-					}
-				}
-
-				if results := sig.Results(); results != nil {
-					for j := range results.Len() {
-						collectUnexportedNamedTypes(results.At(j).Type(), obj.Pkg())
-					}
-				}
-			}
+			collectMethodSignatureUnexportedTypes(named, obj.Pkg())
 
 			// A publicized WRAPPER (an unexported `type A b` reached here through the field/
 			// method cascade) also exposes its wrapped RHS through the public wrapper —
@@ -144,6 +129,39 @@ func cascadePublicizedMethodTypes() {
 
 		if len(packagePublicizedTypes) == before {
 			break
+		}
+	}
+}
+
+// collectMethodSignatureUnexportedTypes publicizes the unexported named types that appear in
+// the EXPORTED methods' parameter/result signatures of a named type whose methods are emitted
+// public (an exported type, or an unexported-but-publicized one). An exported method returning
+// an unexported type is CS0050 (crypto/internal/bigmod's `Nat.Equal() choice`); a param of one
+// is CS0051.
+func collectMethodSignatureUnexportedTypes(named *types.Named, pkg *types.Package) {
+	for i := range named.NumMethods() {
+		method := named.Method(i)
+
+		if !method.Exported() {
+			continue
+		}
+
+		sig, ok := method.Type().(*types.Signature)
+
+		if !ok {
+			continue
+		}
+
+		if params := sig.Params(); params != nil {
+			for j := range params.Len() {
+				collectUnexportedNamedTypes(params.At(j).Type(), pkg)
+			}
+		}
+
+		if results := sig.Results(); results != nil {
+			for j := range results.Len() {
+				collectUnexportedNamedTypes(results.At(j).Type(), pkg)
+			}
 		}
 	}
 }

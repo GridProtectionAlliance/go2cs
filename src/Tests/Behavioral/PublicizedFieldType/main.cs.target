@@ -26,6 +26,18 @@ partial class main_package {
 
 [GoType("coder")] partial struct EncBuffer;
 
+[GoType("num:nint")] public partial struct tally;
+
+[GoType("num:nint")] public partial struct weight;
+
+public static tally Tally(this CaseRange cr) {
+    return ((tally)(nint)cr.Lo);
+}
+
+public static nint Weigh(this CaseRange cr, weight w) {
+    return (nint)w * 2;
+}
+
 internal static void Main() {
     CaseRange cr = default!;
     cr.Lo = 65;
@@ -37,6 +49,7 @@ internal static void Main() {
     fmt.Println(cr.Lvl);
     var b = new EncBuffer(new coder(tag: "png"u8, seq: 7));
     fmt.Println(b.tag, b.seq);
+    fmt.Println(cr.Tally(), cr.Weigh(3));
 }
 
 } // end main_package
