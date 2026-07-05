@@ -928,6 +928,52 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A method promoted through an embedded INTERFACE field — signalCtx embeds
+	// context.Context, and `c.Done()` is the interface VALUE's method (no signalCtx
+	// extension exists), so the bare call bound an unrelated same-package extension by
+	// NAME (sync's Done, CS1929 x2 in os/signal). Hop through the field:
+	// `(~c).Context.Done()` — deref a pointer local; a deref-aliased param/receiver
+	// already renders as the value alias.
+	if context.isCallExpr {
+		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) == 2 {
+			recvType := v.info.TypeOf(selectorExpr.X)
+
+			if ptr, ok := recvType.Underlying().(*types.Pointer); ok {
+				recvType = ptr.Elem()
+			}
+
+			if structType, ok := recvType.Underlying().(*types.Struct); ok {
+				embedField := structType.Field(sel.Index()[0])
+
+				if embedField.Embedded() {
+					if _, isIface := embedField.Type().Underlying().(*types.Interface); isIface {
+						xExpr := v.convExpr(selectorExpr.X, nil)
+
+						if _, exprIsPtr := v.getExprType(selectorExpr.X).(*types.Pointer); exprIsPtr {
+							needsDeref := true
+
+							if ident, isIdent := selectorExpr.X.(*ast.Ident); isIdent {
+								if v.identIsParameter(ident) {
+									needsDeref = false
+								}
+
+								if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+									needsDeref = false
+								}
+							}
+
+							if needsDeref {
+								xExpr = fmt.Sprintf("(%s%s)", PointerDerefOp, xExpr)
+							}
+						}
+
+						return fmt.Sprintf("%s.%s.%s", xExpr, getSanitizedIdentifier(embedField.Name()), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+					}
+				}
+			}
+		}
+	}
+
 	if context.isCallExpr && v.isPointerReceiverMethodCall(selectorExpr) {
 		if sel := v.info.Selections[selectorExpr]; sel != nil && sel.Kind() == types.MethodVal && len(sel.Index()) >= 2 {
 			recvType := v.info.TypeOf(selectorExpr.X)
