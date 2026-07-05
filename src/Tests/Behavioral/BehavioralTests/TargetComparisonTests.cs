@@ -128,6 +128,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCombinedStructFields() => CheckTarget("CombinedStructFields");
 
     [TestMethod]
+    public void CheckComplexImaginaryShadow() => CheckTarget("ComplexImaginaryShadow");
+
+    [TestMethod]
     public void CheckConstraints() => CheckTarget("Constraints");
 
     [TestMethod]

@@ -144,16 +144,20 @@ func (v *Visitor) convBasicLit(basicLit *ast.BasicLit, context BasicLitContext) 
 			value = strings.TrimSuffix(value, "i")
 		}
 
-		// For complex literals, we use the "i()" helper function (see bulitin in golib)
+		// For complex literals, we use the golib `builtin.i()` helper. Qualify it with the
+		// class name (never a bare `i(…)`): `i` is the single most common Go loop/receiver
+		// variable, and a local named `i` in scope shadows the using-static import so the bare
+		// call binds the variable and fails (encoding/gob encComplex's `i *encInstr` parameter,
+		// `c != 0+0i` → CS0149 "Method name expected").
 		if _, err := strconv.ParseFloat(value, 32); err == nil {
 			if endsWith_i {
-				result.WriteString(fmt.Sprintf("i(%sF)", value))
+				result.WriteString(fmt.Sprintf("builtin.i(%sF)", value))
 			} else {
 				result.WriteString(value)
 			}
 		} else {
 			if endsWith_i {
-				result.WriteString(fmt.Sprintf("i(%sD)", value))
+				result.WriteString(fmt.Sprintf("builtin.i(%sD)", value))
 			} else {
 				result.WriteString(value)
 			}
