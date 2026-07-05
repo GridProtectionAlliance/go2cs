@@ -189,6 +189,17 @@ func main() {
 	inc2.Inc()
 	fmt.Println("deconstructed into iface:", inc2.Total(), err == nil) // 6 true
 
+	// An interface-returning LITERAL whose arms return DISTINCT concrete types has no C#
+	// best-common-type — the lambda states its return type explicitly (net ipsock.go's
+	// `inetaddr := func(ip IPAddr) Addr` with three adapter-class arms, CS8917).
+	makeAnimal := func(feline bool) Animal {
+		if feline {
+			return &Cat{}
+		}
+		return Dog{}
+	}
+	fmt.Println("made:", makeAnimal(true).Speak(), makeAnimal(false).Speak()) // made: Meow! Woof!
+
 	// wrapSink embeds an INTERFACE field (zip's nopCloser{io.Writer}): Speak comes from
 	// the field's interface value, Shut is the struct's own. A POINTER cast to the wider
 	// local interface must forward Speak through the FIELD in the generated adapter

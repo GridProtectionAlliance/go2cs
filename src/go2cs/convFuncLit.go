@@ -245,6 +245,42 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		if results := litSig.Results(); results != nil && results.Len() == 1 {
 			if basic, ok := results.At(0).Type().(*types.Basic); ok && basic.Kind() == types.UnsafePointer {
 				returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+			} else if declaredIsIface, isEmpty := isInterface(results.At(0).Type()); declaredIsIface && !isEmpty {
+				// An INTERFACE-returning literal whose arms return DISTINCT concrete types —
+				// net ipsock.go's `inetaddr := func(ip IPAddr) Addr` returns TCPAddrжΔAddr /
+				// UDPAddrжΔAddr / IPAddrжΔAddr adapter classes — has no best common type
+				// either (CS8917); each arm converts implicitly once the return type is
+				// explicit. Single-typed literals keep the inferred form (zero churn).
+				var armTypes []types.Type
+
+				ast.Inspect(funcLit.Body, func(n ast.Node) bool {
+					if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
+						return false // a nested literal's returns belong to it
+					}
+
+					if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == 1 {
+						if retType := v.getType(ret.Results[0], false); retType != nil {
+							known := false
+
+							for _, t := range armTypes {
+								if types.Identical(t, retType) {
+									known = true
+									break
+								}
+							}
+
+							if !known {
+								armTypes = append(armTypes, retType)
+							}
+						}
+					}
+
+					return true
+				})
+
+				if len(armTypes) > 1 {
+					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
+				}
 			}
 		}
 
