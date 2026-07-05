@@ -1023,7 +1023,14 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 						derefAccessor = NilSafeDerefAccessor
 					}
 
-					result.WriteString(fmt.Sprintf(" %s = ref %s.%s;", derefExpr, leftExpr, derefAccessor))
+					// In a for-loop POST, the re-alias cannot follow the box-repoint in the
+					// single post slot (`for(…; Ꮡscope = scope.Outer scope = ref …)` is a syntax
+					// error) — stash it for visitForStmt to inject at the top of the loop body.
+					if v.inForPost {
+						v.forPostReAlias += fmt.Sprintf("%s = ref %s.%s;", derefExpr, leftExpr, derefAccessor)
+					} else {
+						result.WriteString(fmt.Sprintf(" %s = ref %s.%s;", derefExpr, leftExpr, derefAccessor))
+					}
 				}
 			}
 		}

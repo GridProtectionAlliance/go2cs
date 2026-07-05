@@ -81,7 +81,10 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			//   - assignment
 			//   - increment / decrement statement
 			//   - send statement (source code):
+			v.inForPost = true
+			v.forPostReAlias = ""
 			v.visitStmt(forStmt.Post, contexts)
+			v.inForPost = false
 		}
 	}
 
@@ -89,6 +92,15 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 
 	blockContext := DefaultBlockStmtContext()
 	blockContext.format.useNewLine = false
+
+	// A deref-aliased pointer param/box repointed in the POST (`for ; scope != nil;
+	// scope = scope.Outer`) stashed its value re-alias here — inject it as the first
+	// statement of the loop body so each iteration re-binds the value var to the new box
+	// (the box-repoint stayed in the post). go/ast resolve.go's scope-chain walk.
+	if len(v.forPostReAlias) > 0 {
+		blockContext.innerPrefix = v.newline + v.indent(v.indentLevel+1) + v.forPostReAlias
+		v.forPostReAlias = ""
+	}
 
 	if len(target.label) > 0 {
 		blockContext.innerSuffix = fmt.Sprintf("%s%s:;", v.newline, getContinueLabelName(target.label))

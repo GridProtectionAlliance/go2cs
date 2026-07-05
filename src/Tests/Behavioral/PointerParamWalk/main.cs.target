@@ -39,6 +39,17 @@ internal static nint markSeen(ж<node> Ꮡp, map<ж<node>, bool> seen) {
     return -p.val;
 }
 
+internal static nint walkChain(ж<node> Ꮡp) {
+    ref var p = ref Ꮡp.DerefOrNil();
+
+    nint count = 0;
+    for (; Ꮡp != nil; Ꮡp = p.next) {
+        p = ref Ꮡp.DerefOrNil();
+        count += p.val;
+    }
+    return count;
+}
+
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
@@ -50,6 +61,10 @@ internal static void Main() {
     fmt.Println((~firstAfter(a, 4)).val);
     var seen = new map<ж<node>, bool>{};
     fmt.Println(markSeen(a, seen), markSeen(a, seen), markSeen(b, seen));
+    var x = Ꮡ(new node(val: 100));
+    var y = Ꮡ(new node(val: 20));
+    x.Value.next = y;
+    fmt.Println("chain:", walkChain(x));
 }
 
 } // end main_package

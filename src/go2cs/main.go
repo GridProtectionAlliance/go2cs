@@ -187,6 +187,13 @@ type Visitor struct {
 	// tupleTempIndex numbers the multi-value-call expansion temp markers monotonically per
 	// file (see convExprList's tuple-arg expansion).
 	tupleTempIndex int
+	// inForPost is set while emitting a for-loop's POST statement. A deref-aliased pointer
+	// param/box repointed in the post (`for ; scope != nil; scope = scope.Outer`) expands to a
+	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`); the
+	// second statement cannot share the single for-post slot, so the re-alias is stashed in
+	// forPostReAlias and visitForStmt injects it at the TOP of the loop body instead.
+	inForPost      bool
+	forPostReAlias string
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
