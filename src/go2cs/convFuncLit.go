@@ -282,6 +282,45 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
 				}
 			}
+		} else if results := litSig.Results(); results != nil && results.Len() > 1 && !litHasNamedResults && context.isAssignment {
+			// A MULTI-result literal where EVERY return arm carries a typeless element —
+			// `return (default!, err)` on the error arms and `return (b, default!)` on the
+			// success arm (macho file.go's sectionData, func(s *Section) ([]byte, error)):
+			// a tuple literal with any untyped element has no natural type, so NO arm
+			// contributes to inference (CS8917 + CS8130/CS8716 cascade). State the tuple
+			// return type explicitly; nil elements then take the target element type.
+			hasReturn := false
+			hasFullyTypedArm := false
+
+			ast.Inspect(funcLit.Body, func(n ast.Node) bool {
+				if _, isLit := n.(*ast.FuncLit); isLit && n != funcLit.Body {
+					return false // a nested literal's returns belong to it
+				}
+
+				if ret, ok := n.(*ast.ReturnStmt); ok && len(ret.Results) == results.Len() {
+					hasReturn = true
+					fullyTyped := true
+
+					for _, res := range ret.Results {
+						if tv, ok := v.info.Types[res]; ok {
+							if basic, isBasic := tv.Type.(*types.Basic); isBasic && basic.Kind() == types.UntypedNil {
+								fullyTyped = false
+								break
+							}
+						}
+					}
+
+					if fullyTyped {
+						hasFullyTypedArm = true
+					}
+				}
+
+				return true
+			})
+
+			if hasReturn && !hasFullyTypedArm {
+				returnTypePrefix = v.generateResultSignature(litSig) + " "
+			}
 		}
 
 		result.WriteString(returnTypePrefix + "(" + parameterSignature + ") => " + inner)
