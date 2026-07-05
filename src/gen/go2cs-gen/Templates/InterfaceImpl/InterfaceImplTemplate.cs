@@ -22,6 +22,20 @@ internal class InterfaceImplTemplate : TemplateBase
     // the box field itself — `this.File.Read(p)`; deref'ing first strands the receiver (CS1929).
     public HashSet<string> EmbedHopBoxMethods = [];
 
+    // Methods declared on a VALUE-embedded field of the hop type with a POINTER receiver bind a
+    // projected field box — `this.TCPConn.of(TCPConn.Ꮡconn).Read(p)` (net CS1929 x2); the map
+    // carries the `.of(…)` suffix per method name.
+    public Dictionary<string, string>? EmbedHopDeepPaths;
+
+    // Single VALUE-embedded field (`addrPortUDPAddr struct { netip.AddrPort }`): an interface
+    // member with no direct struct method promotes through it (`this.AddrPort.String()`).
+    public string? ValueEmbedHop;
+
+    // Non-null when the value embed's type is FOREIGN (dotted) - the extension lives in another
+    // namespace segment the file only aliases, so the forwarding calls the package-class static
+    // directly: `global::go.net.netip_package.String(this.AddrPort)`.
+    public string? ValueEmbedHopStaticClass;
+
     public override string TemplateBody =>
         $$"""
              partial struct {{StructName}} : {{InterfaceName}}
@@ -62,9 +76,26 @@ internal class InterfaceImplTemplate : TemplateBase
                         result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' explicit implementation mapped to direct struct receiver method:\r\n        ");
                     }
 
-                    string receiver = !methodOverriden && EmbedHop is not null ?
-                        EmbedHopBoxMethods.Contains(simpleMethodName) ? $"this.{EmbedHop}" : $"this.{EmbedHop}.Value" :
-                        "this";
+                    string receiver = "this";
+
+                    if (!methodOverriden && EmbedHop is not null)
+                    {
+                        if (EmbedHopDeepPaths is not null && EmbedHopDeepPaths.TryGetValue(simpleMethodName, out string? deepPath))
+                            receiver = $"this.{EmbedHop}{deepPath}";
+                        else
+                            receiver = EmbedHopBoxMethods.Contains(simpleMethodName) ? $"this.{EmbedHop}" : $"this.{EmbedHop}.Value";
+                    }
+                    else if (!methodOverriden && ValueEmbedHop is not null)
+                    {
+                        if (ValueEmbedHopStaticClass is not null)
+                        {
+                            string staticArgs = string.IsNullOrEmpty(method.CallParameters) ? $"this.{ValueEmbedHop}" : $"this.{ValueEmbedHop}, {method.CallParameters}";
+                            result.Append($"{method.ReturnType} {method.GetSignature()} => {ValueEmbedHopStaticClass}.{simpleMethodName}{method.GetGenericSignature()}({staticArgs});");
+                            continue;
+                        }
+
+                        receiver = $"this.{ValueEmbedHop}";
+                    }
 
                     result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }

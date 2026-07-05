@@ -176,6 +176,32 @@ public class ImplementGenerator : ISourceGenerator
                 ? StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(embedHops[0].TypeName, syntaxContext.SemanticModel.Compilation)
                 : [];
 
+            // A hop-type method may be declared DEEPER - on a VALUE-embedded field of the hop
+            // type with a POINTER receiver (net's tcpConnWithoutWriteTo embeds *TCPConn; TCPConn
+            // embeds conn by VALUE; Read/Write live on zh<conn>). `this.TCPConn.Value.Read(p)`
+            // strands the extension receiver (CS1929 x2); project the field's box through the
+            // generated ref accessor instead: `this.TCPConn.of(TCPConn.Rconn).Read(p)`.
+            Dictionary<string, string> embedHopDeepPaths = new(StringComparer.Ordinal);
+
+            if (embedHops.Count == 1)
+            {
+                (StructDeclarationSyntax? hopDecl, Compilation? hopCompilation) = context.GetStructDeclaration(embedHops[0].TypeName);
+
+                if (hopDecl is not null && hopCompilation is not null)
+                {
+                    string hopSimpleName = GetSimpleName(embedHops[0].TypeName);
+
+                    foreach ((string fieldName, string fieldTypeName) in hopDecl.GetEmbeddedValueHopNames())
+                    {
+                        foreach (string deepMethod in StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(fieldTypeName, hopCompilation))
+                        {
+                            if (!embedHopBoxMethods.Contains(deepMethod) && !embedHopDeepPaths.ContainsKey(deepMethod))
+                                embedHopDeepPaths[deepMethod] = $".of({packageClassName}.{hopSimpleName}.Ꮡ{fieldName})";
+                        }
+                    }
+                }
+            }
+
             if (pointer)
             {
                 // A POINTER-sourced interface cast (`var s Iface = &t`): the interface value must
@@ -237,7 +263,12 @@ public class ImplementGenerator : ISourceGenerator
                         string simpleName = GetSimpleName(method.Name);
 
                         if (!forwardReceivers.ContainsKey(simpleName))
-                            forwardReceivers[simpleName] = embedHopBoxMethods.Contains(simpleName) ? $"m_box.Value.{embedHop}" : $"m_box.Value.{embedHop}.Value";
+                        {
+                            if (embedHopDeepPaths.TryGetValue(simpleName, out string? deepPath))
+                                forwardReceivers[simpleName] = $"m_box.Value.{embedHop}{deepPath}";
+                            else
+                                forwardReceivers[simpleName] = embedHopBoxMethods.Contains(simpleName) ? $"m_box.Value.{embedHop}" : $"m_box.Value.{embedHop}.Value";
+                        }
                     }
                 }
 
@@ -434,6 +465,20 @@ public class ImplementGenerator : ISourceGenerator
                 Methods = methods,
                 EmbedHop = embedHop,
                 EmbedHopBoxMethods = embedHopBoxMethods,
+                EmbedHopDeepPaths = embedHopDeepPaths,
+                // An interface member with NO direct struct method and a SINGLE VALUE embed
+                // must promote through the embedded field (Go's promotion is what type-checked
+                // it) - net's `addrPortUDPAddr struct { netip.AddrPort }`: the bare
+                // `this.String()` bound an unrelated same-package extension by NAME (CS1929);
+                // `this.AddrPort.String()` binds the embed's value-receiver method.
+                ValueEmbedHop = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var singleValueHop]) ? singleValueHop.Name : null,
+                // A FOREIGN value embed's extensions live in another namespace segment
+                // (netip_package sits in go.net; the source file only ALIASES it, which does
+                // not import extensions) - call the package-class static directly:
+                // `global::go.net.netip_package.String(this.AddrPort)`.
+                ValueEmbedHopStaticClass = embedHop is null && (structDecl?.GetEmbeddedValueHopNames() is [var svh]) && svh.TypeName.Contains('.')
+                    ? "global::go." + svh.TypeName.Substring(0, svh.TypeName.LastIndexOf('.'))
+                    : null,
                 UsingStatements = usingStatements
             }
             .Generate();
