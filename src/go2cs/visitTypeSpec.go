@@ -115,6 +115,23 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 			// [4]uint64` must emit `global using ... = go.array<ulong>;`, not `...<uint64>`). Rewrite
 			// those names to their using-safe C# keyword/BCL equivalents for this context only.
 			typeName = getUsingAliasSafeTypeName(typeName)
+
+			// The ROOTED namespace of a global-using RHS must use the CANONICAL package qualifier,
+			// never the file-local collision-rename: os re-exports `type DirEntry = fs.DirEntry`, but
+			// os aliases its `io` import to `Δio` (io is shadowed once io/fs is in the reference
+			// closure), and getAliasedTypeName applies that rename even when rooting — emitting
+			// `go.Δio.fs_package.DirEntry`, where `Δio` is a file-local `using`, not a namespace under
+			// `go` → CS0234 (os's DirEntry/PathError/FileInfo/FileMode re-exports). Un-rename the
+			// qualifier right after the root when it is a known import rename (a Δ-renamed TYPE segment
+			// is left untouched — only an entry the import-rename map produced is reverted).
+			rootPrefix := RootNamespace + "."
+			if after, rooted := strings.CutPrefix(typeName, rootPrefix); rooted {
+				if seg, rest, found := strings.Cut(after, "."); found {
+					if canonical, wasRenamed := strings.CutPrefix(seg, ShadowVarMarker); wasRenamed && packageImportAliasRenames[canonical] == seg {
+						typeName = rootPrefix + canonical + "." + rest
+					}
+				}
+			}
 		}
 
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", name, typeName, v.newline))
