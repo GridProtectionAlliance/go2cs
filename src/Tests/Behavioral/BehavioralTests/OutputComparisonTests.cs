@@ -151,6 +151,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
 
     [TestMethod]
+    public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
+
+    [TestMethod]
     public void CheckDefinedTypeOverPkgType() => CheckTarget("DefinedTypeOverPkgType");
 
     [TestMethod]

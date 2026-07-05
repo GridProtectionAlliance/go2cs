@@ -22,8 +22,27 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		name = getSanitizedIdentifier(typeSpec.Name.Name)
 	}
 
-	// Handle type alias
-	if typeSpec.Assign.IsValid() {
+	// A DEFINED type over an INTERFACE (`type Token any`, `type Reader io.Reader`) has EXACTLY the
+	// interface's method set and can carry no methods of its own (Go forbids an interface receiver),
+	// so it is emitted as a `global using` alias to that interface — the SAME form as a real Go type
+	// alias below — never a `[GoType] partial struct` wrapper. A struct wrapper over `any` (= object)
+	// admits no implicit conversion FROM a concrete value (C# bars user-defined conversions from
+	// object), so every `StartElement → Token` assignment was CS0029 (encoding/xml's `type Token
+	// any`, ×16). Restricted to a NAMED-type RHS (Ident/Selector); an inline interface DEFINITION
+	// (`type X interface{…}`) is an *ast.InterfaceType and still emits a C# interface via the switch.
+	definedOverInterface := false
+
+	if !typeSpec.Assign.IsValid() {
+		switch typeSpec.Type.(type) {
+		case *ast.Ident, *ast.SelectorExpr:
+			if _, isIface := identType.Underlying().(*types.Interface); isIface {
+				definedOverInterface = true
+			}
+		}
+	}
+
+	// Handle type alias (or a defined type over an interface — see above)
+	if typeSpec.Assign.IsValid() || definedOverInterface {
 		// Get types.Type from typeSpec.Type expr
 		typeSpecType := v.info.TypeOf(typeSpec.Type)
 
@@ -83,12 +102,20 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 
 		typeName := convertToCSFullTypeName(typeNamePrefix + v.getFullTypeName(typeSpecType, false))
 
-		// A `using` alias RHS is resolved WITHOUT reference to other using directives - the
-		// csproj-level golib aliases (`uint64`, `float64`, `any`, ...) that resolve everywhere
-		// else in the compilation are CS0246 here (fiat: `type p224UntypedFieldElement =
-		// [4]uint64` must emit `global using ... = go.array<ulong>;`, not `...<uint64>`). Rewrite
-		// those names to their using-safe C# keyword/BCL equivalents for this context only.
-		typeName = getUsingAliasSafeTypeName(typeName)
+		// The empty interface target (`type X any` / `type X = any` / `type X interface{}`) renders
+		// as `go.any`, which does not resolve in a using-alias RHS (any is a csproj-level alias, and
+		// the safe-name rewrite below deliberately skips `.`-qualified names) — it IS `object`. Emit
+		// object directly (encoding/xml's `type Token any`).
+		if iface, ok := typeSpecType.Underlying().(*types.Interface); ok && iface.Empty() {
+			typeName = "object"
+		} else {
+			// A `using` alias RHS is resolved WITHOUT reference to other using directives - the
+			// csproj-level golib aliases (`uint64`, `float64`, `any`, ...) that resolve everywhere
+			// else in the compilation are CS0246 here (fiat: `type p224UntypedFieldElement =
+			// [4]uint64` must emit `global using ... = go.array<ulong>;`, not `...<uint64>`). Rewrite
+			// those names to their using-safe C# keyword/BCL equivalents for this context only.
+			typeName = getUsingAliasSafeTypeName(typeName)
+		}
 
 		v.typeAliasDeclarations.WriteString(fmt.Sprintf("global using %s = %s;%s", name, typeName, v.newline))
 
