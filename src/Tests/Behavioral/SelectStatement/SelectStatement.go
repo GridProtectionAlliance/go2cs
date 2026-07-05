@@ -178,6 +178,9 @@ func main() {
 	fmt.Println(poll(done))
 	close(done)
 	fmt.Println(poll(done))
+
+	r, outerPrimary := raceSend()
+	fmt.Println("raced:", r.value, r.primary, outerPrimary) // raced: 7 false true
 }
 
 // firstMsg ends a value-returning function with a BLOCKING select whose every case returns —
@@ -201,4 +204,26 @@ func poll(done chan struct{}) string {
 	default:
 	}
 	return "pending"
+}
+
+type raceResult struct {
+	value   int
+	primary bool
+}
+
+// raceSend mirrors net dial.go's startRacer: a LAMBDA param shadowing an outer local (renamed
+// primaryΔ1) used as a keyed-composite VALUE inside a select-SEND — the analysis never visited
+// a SendStmt comm, so the value ident kept the RAW name (`primary: primary`, CS0841).
+func raceSend() (raceResult, bool) {
+	results := make(chan raceResult, 1)
+	done := make(chan struct{})
+	primary := true
+	racer := func(primary bool) {
+		select {
+		case results <- raceResult{value: 7, primary: primary}:
+		case <-done:
+		}
+	}
+	racer(false)
+	return <-results, primary
 }

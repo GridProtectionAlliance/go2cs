@@ -179,6 +179,8 @@ internal static void Main() {
     fmt.Println(poll(done));
     close(done);
     fmt.Println(poll(done));
+    var (r, outerPrimary) = raceSend();
+    fmt.Println("raced:", r.value, r.primary, outerPrimary);
 }
 
 internal static @string firstMsg(channel<@string> a, channel<@string> b) {
@@ -201,6 +203,30 @@ internal static @string poll(channel<EmptyStruct> done) {
         break;
     }}
     return "pending"u8;
+}
+
+[GoType] partial struct raceResult {
+    internal nint value;
+    internal bool primary;
+}
+
+internal static (raceResult, bool) raceSend() {
+    var results = new channel<raceResult>(1);
+    var done = new channel<EmptyStruct>(1);
+    var primary = true;
+    var doneʗ1 = done;
+    var resultsʗ1 = results;
+    var racer = (bool primaryΔ1) => {
+        switch (select(resultsʗ1.ᐸꟷ(new raceResult(value: 7, primary: primaryΔ1), ꓸꓸꓸ), ᐸꟷ(doneʗ1, ꓸꓸꓸ))) {
+        case 0: {
+            break;
+        }
+        case 1 when doneʗ1.ꟷᐳ(out _): {
+            break;
+        }}
+    };
+    racer(false);
+    return (ᐸꟷ(results), primary);
 }
 
 } // end main_package
