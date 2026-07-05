@@ -244,6 +244,12 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				v.targetFile.WriteString(": {")
 				v.indentLevel++
 
+				// Reset per case: an EMPTY Go case body (`case *ActionNode:` with no statements,
+				// text/template/parse's IsEmptyTree) runs no visitStmt, so lastStatementWasReturn
+				// would stay STALE from the prior case's `return` and wrongly suppress the `break;`
+				// below — the empty C# case then falls through (CS0163).
+				v.lastStatementWasReturn = false
+
 				for _, stmt := range caseClause.Body {
 					v.visitStmt(stmt, []StmtContext{})
 				}
