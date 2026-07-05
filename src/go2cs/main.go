@@ -3561,6 +3561,18 @@ func getAliasedTypeName(typeName string) string {
 		return strings.ReplaceAll(typeName, ".", TypeAliasDot)
 	}
 
+	// The file-local using for this qualifier may be COLLISION-RENAMED (`using Δio =
+	// io_package;` — `io` collides with the go.io CHILD NAMESPACE once io/fs is in the
+	// reference closure): rewrite the qualifier so the type reference binds the renamed
+	// alias (mime's `CharsetReader Func<@string, io.Reader, …>` field, CS0234 ×6).
+	if qualifier, rest, found := strings.Cut(typeName, "."); found {
+		if renamed, ok := packageImportAliasRenames[qualifier]; ok {
+			// No recursion: a foreign type WITH its own rename already hit the alias map
+			// above under the raw key; this qualifier rewrite is the final form.
+			return renamed + "." + rest
+		}
+	}
+
 	// A Δ-renamed IMPORT qualifier (gif's `color` import arrives shadow-renamed `Δcolor`)
 	// must consult the alias map by the RAW package name — the global-using alias
 	// (`colorꓸRGBA = go.image.color_package.ΔRGBA`) resolves namespace-wide regardless of
