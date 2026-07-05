@@ -25,4 +25,14 @@ func main() {
 	var w words
 	w = append(w, marker, 1) // append untyped consts to a named slice type
 	fmt.Println(w[0], w[1])
+
+	// A unary numeric operator over an untyped constant (`-1`, `+2`, `^0`) is itself an untyped
+	// numeric constant, but a UnaryExpr not a bare literal — regexp's `append(a, -1)` on []int (a
+	// nint slice) left the two append overloads ambiguous until the converter recursed through the
+	// unary operator to cast the element (CS0121).
+	var ints []int
+	ints = append(ints, -1) // unary minus
+	ints = append(ints, +2) // unary plus
+	ints = append(ints, ^0) // bitwise complement (= -1 for a signed int)
+	fmt.Println(ints[0], ints[1], ints[2]) // -1 2 -1
 }

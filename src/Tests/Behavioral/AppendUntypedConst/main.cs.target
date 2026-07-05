@@ -18,6 +18,11 @@ internal static void Main() {
     words w = default!;
     w = append(w, (uint16)(marker), (uint16)(1));
     fmt.Println(w[0], w[1]);
+    slice<nint> ints = default!;
+    ints = append(ints, (nint)(-1));
+    ints = append(ints, (nint)(+2));
+    ints = append(ints, (nint)(~0));
+    fmt.Println(ints[0], ints[1], ints[2]);
 }
 
 } // end main_package

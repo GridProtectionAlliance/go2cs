@@ -1559,6 +1559,14 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 				return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
 			}
 		}
+	case *ast.UnaryExpr:
+		// A numeric unary operator over an untyped numeric constant (`-1`, `+2`, `^0`) is itself an
+		// untyped numeric constant but not a bare BasicLit/Ident (regexp `append(a, -1)` left the two
+		// append overloads ambiguous, CS0121). Recurse on the operand.
+		switch a.Op {
+		case token.SUB, token.ADD, token.XOR:
+			return v.isUntypedNumericConstArg(a.X)
+		}
 	}
 
 	return false
