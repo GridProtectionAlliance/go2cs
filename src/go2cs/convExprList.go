@@ -195,6 +195,20 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 				arg.WriteString(fmt.Sprintf("((@string)%s)", truncated))
 			}
 
+			// A string CONCAT spread — `append(buf, "signal.NotifyContext("+name...)`
+			// (os/signal) — renders operand-wise as mixed u8/@string span forms whose
+			// '+' has no overload (CS0019); wrap the whole expression as @string so the
+			// spread yields one Span<byte>.
+			if bin, ok := spreadExpr.(*ast.BinaryExpr); ok && bin.Op == token.ADD {
+				if exprType := v.getExprType(spreadExpr); exprType != nil {
+					if basic, ok := exprType.Underlying().(*types.Basic); ok && basic.Info()&types.IsString != 0 {
+						truncated := arg.String()
+						arg.Reset()
+						arg.WriteString(fmt.Sprintf("((@string)(%s))", truncated))
+					}
+				}
+			}
+
 			arg.WriteString("." + EllipsisOperator)
 		}
 
