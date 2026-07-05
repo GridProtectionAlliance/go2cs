@@ -69,6 +69,16 @@ func performNameCollisionAnalysis(pkg *packages.Package) {
 	packageBuiltinShadows = make(map[string]bool)
 
 	for name := range methodNames {
+		// `recover` is NEVER qualified to `builtin.recover`: golib has no such static — a Go
+		// `recover()` builtin call is emitted as the func() execution-context lambda PARAMETER
+		// `recover` (visitFuncDecl names it), which is always in scope wherever recover is legal
+		// and correctly shadows the same-named package method's extension. Qualifying it would
+		// bind to the nonexistent `builtin.recover` and fall back to the method (text/template/
+		// parse's `func (t *Tree) recover(errp *error)`, CS0815/CS7036).
+		if name == "recover" {
+			continue
+		}
+
 		if goBuiltinNames[name] {
 			packageBuiltinShadows[name] = true
 		}

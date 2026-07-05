@@ -8,10 +8,30 @@ import "fmt"
 // binds that (requiring `ref`) before the using-static `go.builtin.clear` (CS1620/CS1503). So a free
 // built-in `clear(s)` call is emitted qualified as `builtin.clear(s)`, while the method stays `b.clear()`.
 // (golib also had to gain the `clear` built-in itself — slice/span/map forms.)
+//
+// The `recover` built-in is the EXCEPTION to that qualification: a package method named `recover`
+// (text/template/parse's `func (t *Tree) recover(errp *error)`) also shadows the built-in, but a
+// built-in `recover()` call is NOT emitted as `builtin.recover()` — golib has no such static. It is
+// emitted as the func() execution-context lambda PARAMETER `recover()`, which is always in scope
+// wherever recover is legal and correctly shadows the same-named method. Qualifying it would bind to
+// the nonexistent `builtin.recover` and fall back to the method (CS0815/CS7036).
 
 type box struct{ data []int }
 
 func (b *box) clear() { b.data = nil } // a METHOD named clear — shadows the built-in
+
+type guard struct{ err error }
+
+func (g *guard) recover() { // a METHOD named recover — shadows the built-in
+	if e := recover(); e != nil { // the BUILT-IN recover() -> lambda param, NOT builtin.recover()
+		g.err = fmt.Errorf("recovered: %v", e)
+	}
+}
+
+func (g *guard) run() {
+	defer g.recover()
+	panic("boom")
+}
 
 func main() {
 	s := []int{1, 2, 3}
@@ -25,4 +45,8 @@ func main() {
 	m := map[string]int{"a": 1, "b": 2}
 	clear(m) // the built-in clear(map): removes all entries
 	fmt.Println(len(m)) // 0
+
+	g := &guard{}
+	g.run()
+	fmt.Println(g.err) // recovered: boom
 }
