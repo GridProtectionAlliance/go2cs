@@ -111,9 +111,13 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// entry-point reservation applies to METHODS): runtime/debug's BuildInfo.Main
 		// field access emitted `bi.ΔMain` against the raw `Main` declaration (CS1061 ×2).
 		// Fields otherwise share the function-name path (core sanitize, no package-level
-		// nameCollisions Δ — a field is struct-scoped and declared unrenamed).
+		// nameCollisions Δ — a field is struct-scoped and declared unrenamed). Use the field's
+		// OWN Go name, NOT getIdentName: a field is struct-scoped, so a same-named shadow-renamed
+		// LOCAL var must not rewrite the field selector — compress/bzip2's `for i, length := range`
+		// renamed the loop var to `lengthΔ1`, and `pairs[i].length = length` then emitted the field
+		// access as `pairs[i].lengthΔ1` against the `length` field decl (CS1061).
 		if context.isField {
-			name = getCoreSanitizedIdentifier(v.getIdentName(ident))
+			name = getCoreSanitizedIdentifier(ident.Name)
 		} else {
 			name = getSanitizedFunctionName(v.getIdentName(ident))
 		}
