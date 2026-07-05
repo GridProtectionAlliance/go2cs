@@ -15,6 +15,13 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	lambdaContext.deferOrGoCall = true
 	paramCount := len(goStmt.Call.Args)
 
+	// Capture-snapshot declarations belong BEFORE the goǃ statement — including those of a
+	// func-literal ARGUMENT when the callee is a func-value ident (net lookup.go's
+	// `go dnsWaitGroupDone(ch, func() {})`): without a hoist target the literal's decls
+	// were written INLINE in the argument list (`goǃ(fʗ1, ch, var fʗ1 = f; () => {})`,
+	// CS1003 ×4).
+	lambdaContext.deferredDecls = &strings.Builder{}
+
 	var renderLambdaParams bool
 
 	// If we have a function literal, only prepare captures there, not on the GoStmt
@@ -24,8 +31,6 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 
 			// Delete captures from GoStmt to avoid double processing
 			delete(v.lambdaCapture.stmtCaptures, goStmt)
-			lambdaContext.deferredDecls = &strings.Builder{}
-
 		}
 	} else {
 		v.prepareStmtCaptures(goStmt)

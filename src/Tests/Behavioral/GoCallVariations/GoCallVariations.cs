@@ -22,6 +22,9 @@ internal static void Main() {
     count = 10;
     fmt.Println("Count before Go:", count);
     time.Sleep(200);
+    var done = new channel<EmptyStruct>(1);
+    runPair(done);
+    ᐸꟷ(done);
     fmt.Println("Main function");
 }
 
@@ -35,6 +38,19 @@ internal static nint add(nint x, nint y) {
     nint result = x + y;
     fmt.Println("Calculate:", result);
     return result;
+}
+
+internal static void runPair(channel<EmptyStruct> done) {
+    @string tag = "pair"u8;
+    var handler = (channel<EmptyStruct> ch, Action fn) => {
+        fn();
+        fmt.Println("handled:", tag);
+        ch.ᐸꟷ(new EmptyStruct());
+    };
+    var handlerʗ1 = handler;
+    goǃ(handlerʗ1, done, () => {
+        fmt.Println("inner fn ran");
+    });
 }
 
 internal static void printSquare(nint n) {

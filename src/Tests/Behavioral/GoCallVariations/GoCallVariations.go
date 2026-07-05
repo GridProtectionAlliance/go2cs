@@ -28,6 +28,10 @@ func main() {
 
 	time.Sleep(200)
 
+	done := make(chan struct{})
+	runPair(done)
+	<-done
+
 	fmt.Println("Main function")
 }
 
@@ -41,6 +45,19 @@ func add(x, y int) int {
 	result := x + y
 	fmt.Println("Calculate:", result)
 	return result
+}
+
+// runPair mirrors net lookup.go's `go dnsWaitGroupDone(ch, func() {})`: a FUNC-VALUE
+// callee with a func-literal ARGUMENT — the literal's capture-snapshot declarations must
+// hoist BEFORE the goǃ statement, not into the argument list (CS1003 x4).
+func runPair(done chan struct{}) {
+	tag := "pair"
+	handler := func(ch chan struct{}, fn func()) {
+		fn()
+		fmt.Println("handled:", tag)
+		ch <- struct{}{}
+	}
+	go handler(done, func() { fmt.Println("inner fn ran") })
 }
 
 func printSquare(n int) {
