@@ -678,6 +678,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]
+    public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");
+
+    [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]

@@ -18,6 +18,23 @@ import (
 // became `@go.internal.…` — a parse error in internal/godebug's GoImplement attribute).
 var packageQualifiedNameRegex = regexp.MustCompile(`@?[\p{L}_][\p{L}\p{N}_]*(?:\.@?[\p{L}_][\p{L}\p{N}_]*)*`)
 
+// systemCollidingTypeNames are top-level types of C# namespace `System` whose names a Go package can
+// legitimately reuse for one of its own exported types (e.g. `internal/profile.ValueType`,
+// `go/ast.Object`, `bytes.Buffer`). Assembly-level GoImplement/GoImplicitConv attributes are emitted
+// at file scope where BOTH `using System;` and `using static go.<pkg>_package;` are in scope, so a
+// BARE reference to such a local type is ambiguous between the System type and the package type
+// (CS0104). qualifySystemCollidingLocalTypeRefs roots those bare references at the package class so
+// they resolve unambiguously to the local type. Only names in this curated set are touched, so
+// attributes whose type names never collide with System (every behavioral-test case) emit
+// byte-identically (no golden churn).
+var systemCollidingTypeNames = NewHashSet([]string{
+	"Action", "Activator", "Array", "Attribute", "Boolean", "Buffer", "Byte", "Char", "Comparison",
+	"Console", "Convert", "DateTime", "Decimal", "Delegate", "Double", "Enum", "Environment", "Exception",
+	"Func", "Guid", "Half", "Index", "Int128", "Lazy", "Math", "Memory", "Nullable", "Object", "Predicate",
+	"Progress", "Random", "Range", "SByte", "Single", "Span", "String", "TimeSpan", "TimeZone", "TimeZoneInfo",
+	"Tuple", "Type", "UInt128", "Uri", "ValueType", "Version",
+})
+
 // rootQualifySubNamespaceTypeRefs prefixes the root namespace ("go.") onto package-qualified type
 // references that live in a sub-namespace (e.g. image.color_package.ΔRGBA -> go.image.color_package.ΔRGBA).
 // Assembly-level GoImplement attributes are emitted before the file's namespace with only `using go;`
@@ -51,6 +68,27 @@ func rootQualifySubNamespaceTypeRefs(name string) string {
 
 				break
 			}
+		}
+
+		return match
+	})
+}
+
+// qualifySystemCollidingLocalTypeRefs roots any BARE (single-segment) type reference whose name is a
+// System type (systemCollidingTypeNames) at packagePrefix (e.g. `go.@internal.profile_package`), so it
+// resolves to the LOCAL package type rather than being ambiguous with the `using System;`-imported type
+// (CS0104) at the file scope where GoImplement/GoImplicitConv attributes are emitted. Dotted references
+// (foreign `pkg_package.Type`, already-rooted `go.…`) are left untouched: a bare System-colliding name
+// in these attributes can only be a local package type (foreign types are always package-qualified).
+func qualifySystemCollidingLocalTypeRefs(name string, packagePrefix string) string {
+	return packageQualifiedNameRegex.ReplaceAllStringFunc(name, func(match string) string {
+		// Only bare (dotless) identifiers can be a local type name; qualified references are foreign.
+		if strings.Contains(match, ".") {
+			return match
+		}
+
+		if systemCollidingTypeNames.Contains(match) {
+			return packagePrefix + "." + match
 		}
 
 		return match

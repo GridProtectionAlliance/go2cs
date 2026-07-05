@@ -678,6 +678,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]
+    public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");
+
+    [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]

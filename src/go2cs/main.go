@@ -967,6 +967,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			log.Fatalf("Failed to find '<ExportedTypeAliases>...</ExportedTypeAliases>' section for inserting exported type aliases into package info file \"%s\"\n", packageInfoFileName)
 		}
 
+		// Fully-qualified prefix (e.g. `go.@internal.profile_package`) for this package's own types.
+		// Used to root a BARE local type reference in the GoImplement/GoImplicitConv assembly
+		// attributes when that name collides with a `using System;`-imported type (CS0104) — see
+		// qualifySystemCollidingLocalTypeRefs.
+		localTypePrefix := packageNamespace + "." + getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+
+		qualifyLocalTypeRef := func(name string) string {
+			return qualifySystemCollidingLocalTypeRefs(rootQualifySubNamespaceTypeRefs(name), localTypePrefix)
+		}
+
 		// Handle interface implementations
 		startLineIndex = -1
 		endLineIndex = -1
@@ -1063,18 +1073,18 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 					if inner, ok := strings.CutPrefix(implementation, PointerPrefix+"<"); ok {
-						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", rootQualifySubNamespaceTypeRefs(strings.TrimSuffix(inner, ">")), rootQualifySubNamespaceTypeRefs(interfaceName)))
+						lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Pointer = true)]", qualifyLocalTypeRef(strings.TrimSuffix(inner, ">")), qualifyLocalTypeRef(interfaceName)))
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", rootQualifySubNamespaceTypeRefs(implementation), rootQualifySubNamespaceTypeRefs(interfaceName)))
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
 				}
 			}
 
 			// Add new promoted interface implementations to package info file (hashset ensures uniqueness)
 			for interfaceName, implementations := range promotedInterfaceImplementations {
 				for implementation := range implementations {
-					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", rootQualifySubNamespaceTypeRefs(implementation), rootQualifySubNamespaceTypeRefs(interfaceName)))
+					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
 				}
 			}
 
@@ -1145,7 +1155,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", source, target))
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
 				}
 			}
 
@@ -1163,7 +1173,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", target, source))
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = true)]", qualifyLocalTypeRef(target), qualifyLocalTypeRef(source)))
 				}
 			}
 
@@ -1181,7 +1191,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						continue
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", source, target))
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Indirect = true)]", qualifyLocalTypeRef(source), qualifyLocalTypeRef(target)))
 				}
 			}
 
@@ -1201,7 +1211,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						inverted = true
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, ValueType = \"%s\")]", sourceType, targetType, inverted, valueType))
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
 				}
 			}
 
@@ -1221,7 +1231,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 						inverted = true
 					}
 
-					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, Indirect = true, ValueType = \"%s\")]", sourceType, targetType, inverted, valueType))
+					lines.Add(fmt.Sprintf("[assembly: GoImplicitConv<%s, %s>(Inverted = %t, Indirect = true, ValueType = \"%s\")]", qualifyLocalTypeRef(sourceType), qualifyLocalTypeRef(targetType), inverted, valueType))
 				}
 			}
 
