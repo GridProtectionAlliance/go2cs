@@ -172,6 +172,7 @@ internal static void Main() {
         return new Dog(nil);
     };
     fmt.Println("made:", makeAnimal(true).Speak(), makeAnimal(false).Speak());
+    fmt.Println("plumbed:", runPlumbing());
     speakShutter ss = new wrapSinkжspeakShutter(Ꮡ(new wrapSink(Animal: new Dog(nil))));
     fmt.Println(ss.Speak(), ss.Shut());
 }
@@ -230,6 +231,33 @@ internal static @string close(this fileRdr f) {
 
 internal static rdCloser open(@string name) {
     return new fileRdr(name);
+}
+
+[GoType] partial interface sink {
+    @string drain();
+}
+
+[GoType] partial struct basin {
+    internal @string tag;
+}
+
+internal static @string drain(this basin b) {
+    return "b:"u8 + b.tag;
+}
+
+[GoType] partial struct plumbing {
+    internal sink s;
+    internal @string name;
+}
+
+[GoType("[]sink")] partial struct sinks;
+
+internal static @string runPlumbing() {
+    var p = new plumbing(name: "n1"u8);
+    var batch = new sinks(new sink[]{new basin(tag: "x"u8), new basin(tag: "y"u8)}.slice());
+    slice<sink> all = default!;
+    all = append(all, batch.ꓸꓸꓸ);
+    return p.name + ":"u8 + all[0].drain() + ","u8 + all[1].drain();
 }
 
 } // end main_package

@@ -200,6 +200,8 @@ func main() {
 	}
 	fmt.Println("made:", makeAnimal(true).Speak(), makeAnimal(false).Speak()) // made: Meow! Woof!
 
+	fmt.Println("plumbed:", runPlumbing()) // plumbed: n1:b:x,b:y
+
 	// wrapSink embeds an INTERFACE field (zip's nopCloser{io.Writer}): Speak comes from
 	// the field's interface value, Shut is the struct's own. A POINTER cast to the wider
 	// local interface must forward Speak through the FIELD in the generated adapter
@@ -246,3 +248,29 @@ func (f fileRdr) read() string  { return "read:" + f.name }
 func (f fileRdr) close() string { return "close:" + f.name }
 
 func open(name string) rdCloser { return fileRdr{name} }
+
+// plumbing/sinks: two composite/variadic recording guards (image/gif). plumbing's FIRST
+// field is an interface; a KEYED literal setting only a LATER field must not pair that
+// value with field s (encoder{g: *g} recorded a bogus GoImplement<GIF, writer>, CS1929 x3).
+// sinks is a named slice of the interface; append's SPREAD arg passes elements directly —
+// wrapping it in a single element-adapter was CS1061 + a bogus GoImplement (CS1503).
+type sink interface{ drain() string }
+
+type basin struct{ tag string }
+
+func (b basin) drain() string { return "b:" + b.tag }
+
+type plumbing struct {
+	s    sink
+	name string
+}
+
+type sinks []sink
+
+func runPlumbing() string {
+	p := plumbing{name: "n1"}
+	batch := sinks{basin{tag: "x"}, basin{tag: "y"}}
+	var all []sink
+	all = append(all, batch...)
+	return p.name + ":" + all[0].drain() + "," + all[1].drain()
+}

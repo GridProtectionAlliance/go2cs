@@ -115,7 +115,14 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 		var resultExpr string
 
-		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil {
+		// A SPREAD argument (`append(p, d.globalColorTable...)`, gif reader.go) passes the
+		// slice's ELEMENTS — already the variadic element type — so the per-argument
+		// interface conversion must not fire: it wrapped the whole Palette in a single
+		// Color VALUE adapter (no ꓸꓸꓸ member, CS1061) and RECORDED a bogus
+		// GoImplement<Palette, Color> whose generated impl couldn't compile (CS1503).
+		spreadArg := hasSpreadOperator && i == len(exprs)-1
+
+		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil && !spreadArg {
 			// A POINTER argument converting to an interface must render as the pointer VALUE —
 			// the box `Ꮡfs`, not the deref'd receiver ref-local `fs` — since Go's interface
 			// holds the *T and the pointer-adapter emission wraps the box itself
