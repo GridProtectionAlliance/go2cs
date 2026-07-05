@@ -1105,7 +1105,7 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		if len(typeParamExpr) == 0 {
 			if funIdent := getCallFunIdent(callExpr.Fun); funIdent != nil {
 				if instance, ok := v.info.Instances[funIdent]; ok && instance.TypeArgs != nil &&
-					v.calleeHasConstraintOnlyTypeParam(funIdent) {
+					(v.calleeHasConstraintOnlyTypeParam(funIdent) || v.callHasMethodGroupArg(callExpr)) {
 					var typeParams []string
 
 					for i := range instance.TypeArgs.Len() {
@@ -2248,6 +2248,30 @@ func getCallFunIdent(fun ast.Expr) *ast.Ident {
 // parameter that appears in NO parameter type — visible only in constraints (`Twice[S ~[]E, E
 // Integer](s S)`: E). Go infers such a parameter through core types; C# cannot infer it from
 // arguments at ANY call site (concrete included), so those calls need explicit type arguments.
+// callHasMethodGroupArg reports whether any argument of the call is a bare FUNCTION reference
+// (a method group in C#) rather than a func-typed value or a lambda. C# cannot infer a
+// generic method's type arguments through a method-group argument (the group has no single
+// type until the target delegate is known), so a generic call carrying one must spell its
+// type arguments out — `slices.SortFunc(l, bytes.Compare)` was CS0411 (encoding/asn1). A
+// func-typed VARIABLE (a *types.Var) is a real delegate value and infers fine, so it is
+// excluded; only a *types.Func (package function or method) counts.
+func (v *Visitor) callHasMethodGroupArg(callExpr *ast.CallExpr) bool {
+	for _, arg := range callExpr.Args {
+		switch a := arg.(type) {
+		case *ast.Ident:
+			if _, ok := v.info.Uses[a].(*types.Func); ok {
+				return true
+			}
+		case *ast.SelectorExpr:
+			if _, ok := v.info.Uses[a.Sel].(*types.Func); ok {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (v *Visitor) calleeHasConstraintOnlyTypeParam(funIdent *ast.Ident) bool {
 	funcObj, ok := v.info.ObjectOf(funIdent).(*types.Func)
 

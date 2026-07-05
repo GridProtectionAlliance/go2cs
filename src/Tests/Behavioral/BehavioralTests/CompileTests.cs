@@ -363,6 +363,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]
+    public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

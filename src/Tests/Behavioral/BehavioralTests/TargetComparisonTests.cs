@@ -365,6 +365,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]
+    public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

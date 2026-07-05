@@ -363,6 +363,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMethodExpression() => CheckTarget("MethodExpression");
 
     [TestMethod]
+    public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]
