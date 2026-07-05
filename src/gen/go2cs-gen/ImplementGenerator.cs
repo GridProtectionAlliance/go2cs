@@ -209,6 +209,7 @@ public class ImplementGenerator : ISourceGenerator
                 // wrapper instead of the value-boxing partial struct — which copies, and cannot
                 // bind direct-ж receiver methods from a struct's `this` at all (CS1929).
                 Dictionary<string, string> forwardReceivers = new(StringComparer.Ordinal);
+                Dictionary<string, string> forwardStaticCalls = new(StringComparer.Ordinal);
 
                 foreach (MethodInfo structMethod in structMethods ?? [])
                 {
@@ -232,25 +233,61 @@ public class ImplementGenerator : ISourceGenerator
                 if (foreignStruct && structType.ContainingType is INamedTypeSymbol packageClass)
                 {
                     HashSet<string> boxBound = new(StringComparer.Ordinal);
+                    HashSet<string> refBound = new(StringComparer.Ordinal);
 
                     foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
                     {
                         if (!method.IsStatic || method.Parameters.Length == 0)
                             continue;
 
-                        if (method.Parameters[0].Type is INamedTypeSymbol recvType &&
+                        // Only a PUBLIC zh-extension binds cross-assembly — the RecvGenerator
+                        // twins of unexported methods are internal, visible to this METADATA
+                        // scan but not to the consuming compilation (elf's zstd_ReaderzhReader
+                        // forwarded m_box.Read to zstd's internal twin, CS1929).
+                        if (method.DeclaredAccessibility == Accessibility.Public &&
+                            method.Parameters[0].Type is INamedTypeSymbol recvType &&
                             recvType.Name == "ж" &&
                             recvType.TypeArguments.Length == 1 &&
                             SymbolEqualityComparer.Default.Equals(recvType.TypeArguments[0], structType))
                         {
                             boxBound.Add(method.Name);
                         }
+
+                        // A [GoRecv] ref extension called STATICALLY needs the ref keyword.
+                        if (method.DeclaredAccessibility == Accessibility.Public &&
+                            method.Parameters[0].RefKind == RefKind.Ref &&
+                            SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, structType))
+                        {
+                            refBound.Add(method.Name);
+                        }
                     }
+
+                    // A foreign package class in ANOTHER namespace segment (zstd_package lives
+                    // in go.@internal) is not imported by the generated file, so its extensions
+                    // are invisible to extension-method lookup (CS1929, elf's zstd_ReaderzhReader)
+                    // — forward via the package-class STATIC call instead.
+                    string emittingNamespace = packageNamespace;
+                    string foreignNamespace = packageClass.ContainingNamespace?.ToDisplayString() ?? "";
+                    string? staticClass = null;
+
+                    if (!string.Equals(foreignNamespace, emittingNamespace, StringComparison.Ordinal))
+                        staticClass = packageClass.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
 
                     foreach (MethodInfo method in methods)
                     {
                         string simpleName = GetSimpleName(method.Name);
-                        forwardReceivers[simpleName] = boxBound.Contains(simpleName) ? "m_box" : "m_box.Value";
+                        bool viaBox = boxBound.Contains(simpleName);
+
+                        if (staticClass is not null)
+                        {
+                            string recvArg = viaBox ? "m_box" : refBound.Contains(simpleName) ? "ref m_box.Value" : "m_box.Value";
+                            forwardStaticCalls[simpleName] = $"{staticClass}.{simpleName}";
+                            forwardReceivers[simpleName] = recvArg;
+                        }
+                        else
+                        {
+                            forwardReceivers[simpleName] = viaBox ? "m_box" : "m_box.Value";
+                        }
                     }
                 }
 
@@ -398,6 +435,7 @@ public class ImplementGenerator : ISourceGenerator
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
+                    ForwardStaticCalls = forwardStaticCalls,
                     ImplementsFormattable = implementsFormattable,
                     UsingStatements = usingStatements
                 }

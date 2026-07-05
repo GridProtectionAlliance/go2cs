@@ -58,6 +58,11 @@ internal class AdapterImplTemplate : TemplateBase
     // property access semantics here).
     public required Dictionary<string, string> ForwardReceivers;
 
+    // Per-method package-class STATIC call target for a FOREIGN struct in another namespace
+    // segment — its extensions are invisible to lookup here (CS1929); the receiver string in
+    // ForwardReceivers becomes the first ARGUMENT (m_box / m_box.Value / ref m_box.Value).
+    public Dictionary<string, string>? ForwardStaticCalls;
+
     public override string TemplateBody =>
         $$"""
              /// <summary>
@@ -112,7 +117,15 @@ internal class AdapterImplTemplate : TemplateBase
                 if (!ForwardReceivers.TryGetValue(simpleMethodName, out string? receiver))
                     receiver = "m_box";
 
-                result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
+                if (ForwardStaticCalls is not null && ForwardStaticCalls.TryGetValue(simpleMethodName, out string? staticCall))
+                {
+                    string staticArgs = string.IsNullOrEmpty(method.CallParameters) ? receiver : $"{receiver}, {method.CallParameters}";
+                    result.Append($"{method.ReturnType} {method.GetSignature()} => {staticCall}{method.GetGenericSignature()}({staticArgs});");
+                }
+                else
+                {
+                    result.Append($"{method.ReturnType} {method.GetSignature()} => {receiver}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
+                }
             }
 
             return result.ToString();
