@@ -115,24 +115,40 @@ internal class StructTypeTemplate : TemplateBase
             // (CS0102) and a duplicate Ꮡfn reference (CS0111).
             HashSet<string> declaredMemberNames = new(StructMembers.Select(m => GetSimpleName(m.memberName)));
 
-            // Go's AMBIGUITY rule: a member name promoted from TWO OR MORE embeds at the same
-            // depth is not promoted at all (selecting it unqualified is a Go compile error) —
-            // bufio's ReadWriter embeds *Reader AND *Writer, which both carry err/buf fields;
-            // emitting both accessors was CS0102/CS0111.
-            Dictionary<string, int> promotedFieldCounts = new(StringComparer.Ordinal);
+            // Go's AMBIGUITY rule is DEPTH-AWARE: a member name is promoted iff there is a
+            // UNIQUE occurrence at the SHALLOWEST embedding depth. Same-depth duplicates are
+            // ambiguous and drop (bufio's ReadWriter embeds *Reader AND *Writer, both carrying
+            // err/buf — CS0102/CS0111), but a shallower occurrence WINS over deeper ones —
+            // macho's FatArch embeds FatArchHeader (Cpu/SubCpu at depth 1) AND *File (whose
+            // flattened surface carries FileHeader's Cpu/SubCpu at depth 2): the depth-blind
+            // count dropped BOTH, orphaning the converter's bare `fa.Cpu` (CS1061 x4).
+            Dictionary<string, int> promotedFieldMinDepth = new(StringComparer.Ordinal);
+            Dictionary<string, int> promotedFieldMinDepthCount = new(StringComparer.Ordinal);
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
-                foreach ((_, string memberName) in getStructMembers(promotedStructType))
+                foreach ((_, string memberName, int depth) in getStructMembers(promotedStructType))
                 {
                     string simpleName = GetSimpleName(memberName);
-                    promotedFieldCounts[simpleName] = promotedFieldCounts.TryGetValue(simpleName, out int count) ? count + 1 : 1;
+
+                    if (!promotedFieldMinDepth.TryGetValue(simpleName, out int minDepth) || depth < minDepth)
+                    {
+                        promotedFieldMinDepth[simpleName] = depth;
+                        promotedFieldMinDepthCount[simpleName] = 1;
+                    }
+                    else if (depth == minDepth)
+                    {
+                        promotedFieldMinDepthCount[simpleName]++;
+                    }
                 }
             }
 
+            bool promotes(string simpleName, int depth) =>
+                promotedFieldMinDepth[simpleName] == depth && promotedFieldMinDepthCount[simpleName] == 1;
+
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
-                foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
                 {
                     // A blank `_` field (padding / embedded unexported marker) is never promoted or
                     // selectable in Go; emitting an accessor for it collides with the enclosing
@@ -143,7 +159,7 @@ internal class StructTypeTemplate : TemplateBase
                     if (declaredMemberNames.Contains(GetSimpleName(memberName)))
                         continue;
 
-                    if (promotedFieldCounts[GetSimpleName(memberName)] > 1)
+                    if (!promotes(GetSimpleName(memberName), depth))
                         continue;
 
                     // Scope derives from the MEMBER name (its exportedness), matching the box-field
@@ -158,7 +174,7 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
-                foreach ((string typeName, string memberName) in getStructMembers(promotedStructType))
+                foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
                 {
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
                     // enclosing struct's own `Ꮡ_` (CS0111).
@@ -169,8 +185,8 @@ internal class StructTypeTemplate : TemplateBase
                     if (declaredMemberNames.Contains(GetSimpleName(memberName)))
                         continue;
 
-                    // Cross-embed ambiguity — see the counting pass above (CS0111 on Ꮡerr).
-                    if (promotedFieldCounts[GetSimpleName(memberName)] > 1)
+                    // Cross-embed ambiguity — see the depth-aware counting pass above.
+                    if (!promotes(GetSimpleName(memberName), depth))
                         continue;
 
                     // The Ꮡ-prefixed accessor NAME must use the unescaped member name — a C#-keyword
@@ -190,7 +206,7 @@ internal class StructTypeTemplate : TemplateBase
 
             return result.ToString();
 
-            IEnumerable<(string typeName, string memberName)> getStructMembers(string structTypeName)
+            IEnumerable<(string typeName, string memberName, int depth)> getStructMembers(string structTypeName)
             {
                 // Collect the embedded struct's members TRANSITIVELY: a member promoted into the
                 // enclosing struct may itself come from a NESTED embedded struct (Go promotes through
@@ -199,14 +215,14 @@ internal class StructTypeTemplate : TemplateBase
                 // DECLARED members alone misses it (nobj is a generated accessor on stackWorkBufHdr,
                 // not a declared field). The emitted accessor stays single-hop (`stackWorkBuf.nobj =>
                 // ref stackWorkBufHdr.nobj`), resolving through stackWorkBufHdr's own 1-level promotion.
-                List<(string typeName, string memberName)> collected = [];
+                List<(string typeName, string memberName, int depth)> collected = [];
                 HashSet<string> emittedNames = [];
 
-                collect(structTypeName, []);
+                collect(structTypeName, [], 1);
 
                 return collected;
 
-                void collect(string typeName, HashSet<string> seenTypes)
+                void collect(string typeName, HashSet<string> seenTypes, int depth)
                 {
                     // Go forbids embedding cycles, but guard anyway so a malformed input can't loop.
                     if (!seenTypes.Add(typeName))
@@ -229,7 +245,7 @@ internal class StructTypeTemplate : TemplateBase
                         foreach ((string fieldTypeName, string fieldName) in getMetadataStructFields(typeName))
                         {
                             if (emittedNames.Add(fieldName))
-                                collected.Add((fieldTypeName, fieldName));
+                                collected.Add((fieldTypeName, fieldName, depth));
                         }
 
                         return;
@@ -239,7 +255,7 @@ internal class StructTypeTemplate : TemplateBase
                     {
                         // First (closest) declaration of a name wins, matching Go's promotion rules.
                         if (emittedNames.Add(memberName))
-                            collected.Add((memberType, memberName));
+                            collected.Add((memberType, memberName, depth));
 
                         // An embedded struct field contributes its own members transitively. The
                         // converter emits every embed - value or POINTER - as a `partial ref`
@@ -248,7 +264,7 @@ internal class StructTypeTemplate : TemplateBase
                         // name (`RCode RCode` in dnsmessage.Header) is a plain FIELD and must not
                         // contribute nested promotions.
                         if (isEmbedded)
-                            collect(memberType, seenTypes);
+                            collect(memberType, seenTypes, depth + 1);
                     }
                 }
 
