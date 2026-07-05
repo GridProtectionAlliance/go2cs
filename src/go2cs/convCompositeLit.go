@@ -382,6 +382,57 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		}
 	}
 
+	// STRUCT-composite twin of the narrow-integer element cast above: each element maps to a
+	// FIELD whose type may be a narrow integer (image/png's `color.Gray{(b >> 7) * 0xff}`,
+	// field Y uint8). Same rationale — C# promotes sub-int arithmetic to int, so a
+	// non-constant arithmetic element needs an explicit cast back to the field type (CS1503 +
+	// Go wrap semantics). Positional and keyed both resolve their field; a bare ident / literal
+	// element is already the field's width so it never matches.
+	if st, ok := exprType.Underlying().(*types.Struct); ok {
+		fieldByName := map[string]*types.Var{}
+
+		for i := range st.NumFields() {
+			fieldByName[st.Field(i).Name()] = st.Field(i)
+		}
+
+		for i, elt := range compositeLit.Elts {
+			var fieldVar *types.Var
+			var valueExpr ast.Expr
+
+			if keyValue, ok := elt.(*ast.KeyValueExpr); ok {
+				if keyIdent, ok := keyValue.Key.(*ast.Ident); ok {
+					fieldVar = fieldByName[keyIdent.Name]
+				}
+
+				valueExpr = keyValue.Value
+			} else if i < st.NumFields() {
+				fieldVar = st.Field(i)
+				valueExpr = elt
+			}
+
+			if fieldVar == nil || valueExpr == nil {
+				continue
+			}
+
+			elemBasic, ok := fieldVar.Type().Underlying().(*types.Basic)
+
+			if !ok || !isNarrowIntegerKind(elemBasic.Kind()) {
+				continue
+			}
+
+			switch valueExpr.(type) {
+			case *ast.BinaryExpr, *ast.UnaryExpr:
+				if vt := v.getType(valueExpr, false); vt != nil && types.Identical(vt, fieldVar.Type()) {
+					if callContext.castArgToType == nil {
+						callContext.castArgToType = make(map[int]string)
+					}
+
+					callContext.castArgToType[i] = convertToCSTypeName(v.getTypeName(fieldVar.Type(), false))
+				}
+			}
+		}
+	}
+
 	var lbracePrefix, rbracePrefix string
 	lbrace := "{"
 	rbrace := "}"

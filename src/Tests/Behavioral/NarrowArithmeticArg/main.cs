@@ -20,6 +20,11 @@ internal static uint16 takeU16(uint16 x) {
     internal uint8 b;
 }
 
+[GoType] partial struct pix {
+    public uint8 Y;
+    public uint8 A;
+}
+
 internal static void Main() {
     uint8 a = 200;
     uint8 b = 100;
@@ -44,6 +49,10 @@ internal static void Main() {
     fmt.Println(bx.b);
     uint8 z = (uint8)(a + b);
     fmt.Println(z);
+    var p1 = new pix((uint8)(((a >> (int)(1))) * 3), (uint8)(a + b));
+    fmt.Println(p1.Y, p1.A);
+    var p2 = new pix(Y: (uint8)(((a >> (int)(1))) * 3), A: (uint8)(~a));
+    fmt.Println(p2.Y, p2.A);
 }
 
 } // end main_package

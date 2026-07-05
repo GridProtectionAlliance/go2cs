@@ -180,7 +180,26 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// of an `append` call cast to the slice's element type to avoid C# overload ambiguity).
 		if callContext != nil && callContext.castArgToType != nil {
 			if castType, ok := callContext.castArgToType[i]; ok && len(castType) > 0 {
-				resultExpr = fmt.Sprintf("(%s)(%s)", castType, resultExpr)
+				// A KEYED struct-literal element renders as a C# named argument
+				// (`Y: value`) — cast the VALUE only, mirroring the wrapArgWithNew handling
+				// below (casting the label too is a syntax error).
+				label, value, keyed := strings.Cut(resultExpr, ": ")
+
+				if !keyed || !isSimpleIdentifierName(label) {
+					label, value, keyed = "", resultExpr, false
+				}
+
+				// Skip when the value already opens with the target cast (convBinaryExpr
+				// casts a same-type named/narrow binary result on its own — a redundant
+				// `(uint16)((uint16)…)` would only add noise); apply only where the render
+				// actually promoted (image/png's `(b >> 7) * 0xff` has no leading cast).
+				if !strings.HasPrefix(value, fmt.Sprintf("(%s)(", castType)) {
+					if keyed {
+						resultExpr = fmt.Sprintf("%s: (%s)(%s)", label, castType, value)
+					} else {
+						resultExpr = fmt.Sprintf("(%s)(%s)", castType, value)
+					}
+				}
 			}
 		}
 
