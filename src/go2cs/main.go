@@ -3301,6 +3301,12 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		default:
 			return "chan " + elem
 		}
+	case *types.Map:
+		// Structural like slices/chans — the t.String() path renders a PACKAGE-LOCAL value
+		// type path-qualified (`map[chan<- os.Signal]*os/signal.handler`), whose cross-package
+		// slash-strip eats everything before the slash including the map header (os/signal's
+		// handlers.m emitted `map<channel/*<-*/<os.Signal>*handler>, >` — CS1003 cascade ×8).
+		return fmt.Sprintf("map[%s]%s", v.getTypeName(composite.Key(), isUnderlying), v.getTypeName(composite.Elem(), isUnderlying))
 	}
 
 	// A cross-package INSTANTIATED generic (e.g. `internal/runtime/atomic.Pointer[func(string,
@@ -3872,6 +3878,14 @@ func splitMapKeyValue(typeStr string) (string, string) {
 	depth := 0
 	for i, char := range typeStr {
 		if char == '<' {
+			// A channel ARROW survives the bracket replace — the '<' of `chan<-` /
+			// `<-chan` (immediately followed by '-') is not a bracket; counting it
+			// unbalanced the walk so the key/value boundary was never found
+			// (os/signal's `map[chan<- os.Signal]*handler`, CS1003 syntax cascade ×8).
+			if i+1 < len(typeStr) && typeStr[i+1] == '-' {
+				continue
+			}
+
 			depth++
 		} else if char == '>' {
 			depth--
