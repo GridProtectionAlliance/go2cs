@@ -38,6 +38,18 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// initializer in convKeyValueExpr.
 			_, mapKeyIsPointer := mapType.Key().(*types.Pointer)
 
+			// The box (`Ꮡ`) key rendering applies ONLY when the key is a deref-aliased pointer
+			// PARAMETER: its value alias (`ref var info = ref Ꮡinfo.Value`) is the wrapper VALUE, so
+			// `m[info]` needs `m[Ꮡinfo]` to supply the `ж<T>` key. A LOCAL already holding a pointer
+			// (`var tΔ1 = scan.typ`, reflect's FieldByNameFunc — tΔ1 is `ж<structType>`) IS the key
+			// and must NOT get `Ꮡ`: `ᏑtΔ1` has no box accessor (CS0103 ×4). Restrict to a bare
+			// parameter ident (matching the deref-alias's parameter scope).
+			if mapKeyIsPointer {
+				if ident, isBare := indexExpr.Index.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
+					mapKeyIsPointer = false
+				}
+			}
+
 			// Comma-ok map access (`v, ok := m[k]`): use golib's two-value indexer
 			// `m[key, ꟷ]`, which returns `(value, present)`.
 			if context.isTupleResult {

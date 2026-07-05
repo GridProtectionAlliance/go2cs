@@ -59,6 +59,25 @@ func walkChain(p *node) int {
 	return count
 }
 
+// visitLocal mirrors reflect's Type.FieldByNameFunc: a pointer-keyed map (`map[*node]bool`)
+// indexed by a LOCAL variable that already holds a pointer (`t := scan; visited[t]`). Unlike a
+// deref-aliased pointer PARAMETER (markSeen above, which needs the box `Ꮡp`), a local holding a
+// ж<node> IS already the key, so the index must stay a bare `visited[t]` — the box form `ᏑtΔ1`
+// has no accessor (CS0103). Guards the gate restricting the pointer-key box rendering to params.
+func visitLocal(nodes []*node) int {
+	visited := map[*node]bool{}
+	sum := 0
+	for _, scan := range nodes {
+		t := scan // t is a LOCAL *node — already a pointer, so `visited[t]` needs no box
+		if visited[t] {
+			continue
+		}
+		visited[t] = true
+		sum += t.val
+	}
+	return sum
+}
+
 func main() {
 	a := &node{val: 1}
 	b := &node{val: 2}
@@ -78,4 +97,8 @@ func main() {
 	y := &node{val: 20}
 	x.next = y // y.next stays nil, terminating the walk
 	fmt.Println("chain:", walkChain(x)) // 120
+
+	// Local-pointer-var indexing a pointer-keyed map (reflect FieldByNameFunc shape).
+	dup := &node{val: 5}
+	fmt.Println("visitLocal:", visitLocal([]*node{dup, dup, x})) // dup once + x: 5 + 100 = 105
 }

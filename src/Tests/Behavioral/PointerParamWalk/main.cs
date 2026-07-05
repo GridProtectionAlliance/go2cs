@@ -50,6 +50,20 @@ internal static nint walkChain(ж<node> Ꮡp) {
     return count;
 }
 
+internal static nint visitLocal(slice<ж<node>> nodes) {
+    var visited = new map<ж<node>, bool>{};
+    nint sum = 0;
+    foreach (var (_, scan) in nodes) {
+        var t = scan;
+        if (visited[t]) {
+            continue;
+        }
+        visited[t] = true;
+        sum += t.Value.val;
+    }
+    return sum;
+}
+
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
@@ -65,6 +79,8 @@ internal static void Main() {
     var y = Ꮡ(new node(val: 20));
     x.Value.next = y;
     fmt.Println("chain:", walkChain(x));
+    var dup = Ꮡ(new node(val: 5));
+    fmt.Println("visitLocal:", visitLocal(new ж<node>[]{dup, dup, x}.slice()));
 }
 
 } // end main_package
