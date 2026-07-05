@@ -47,6 +47,16 @@ func (v *Visitor) rangeVarNeedsMutableCopy(expr ast.Expr, body *ast.BlockStmt) b
 					found = true
 					return false
 				}
+
+				// A FIELD write through the range var (`dt.dll, _ = getString(…)`,
+				// debug/pe's importedSymbols) modifies members of the iteration
+				// variable (CS1654) — the same mutable-copy escape applies.
+				if sel, ok := lhs.(*ast.SelectorExpr); ok {
+					if id, ok := sel.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {
+						found = true
+						return false
+					}
+				}
 			}
 		case *ast.IncDecStmt:
 			if id, ok := s.X.(*ast.Ident); ok && v.info.ObjectOf(id) == obj {

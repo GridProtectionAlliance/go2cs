@@ -35,6 +35,17 @@ func main() {
 	}
 	fmt.Println("total", total)
 	fmt.Println("orig", pts[0].x, pts[1].x)
+
+	// A FIELD write through the range value var (`dt.dll, _ = getString(...)`, debug/pe's
+	// importedSymbols): Go mutates the per-iteration COPY; a C# foreach variable cannot
+	// have members modified (CS1654) — the same mutable-copy emission applies.
+	tags := []point{{10, 1}, {20, 2}}
+	sum := 0
+	for _, t := range tags {
+		t.x, t.y = t.x+1, t.y+1
+		sum += t.x + t.y
+	}
+	fmt.Println("fieldwrite", sum, tags[0].x, tags[1].y) // fieldwrite 37 10 2
 }
 
 type point struct{ x, y int }

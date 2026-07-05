@@ -32,6 +32,16 @@ internal static void Main() {
     }
     fmt.Println("total", total);
     fmt.Println("orig", pts[0].x, pts[1].x);
+    var tags = new point[]{new(10, 1), new(20, 2)}.slice();
+    nint sum = 0;
+    foreach (var (_, vᴛ2) in tags) {
+        var t = vᴛ2;
+
+        t.x = t.x + 1;
+        t.y = t.y + 1;
+        sum += t.x + t.y;
+    }
+    fmt.Println("fieldwrite", sum, tags[0].x, tags[1].y);
 }
 
 [GoType] partial struct point {
