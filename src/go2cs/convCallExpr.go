@@ -288,6 +288,14 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 
 					return fmt.Sprintf("((@unsafe.Pointer)(uintptr)%s)", expr)
 				}
+
+				// A NAMED-over-POINTER arg — `unsafe.Pointer(result.Addr)` where Addr is
+				// syscall.Pointer (`type Pointer *struct{}`, net lookup_windows CS0030 ×2):
+				// the named wrapper's uintptr bridge provides the first leg, golib Pointer
+				// converts from uintptr — same two-leg hop as the named-numeric arm above.
+				if _, isPtrUnder := argNamed.Underlying().(*types.Pointer); isPtrUnder {
+					return fmt.Sprintf("((@unsafe.Pointer)(uintptr)(%s))", expr)
+				}
 			}
 
 			if _, isPtr := v.info.TypeOf(arg).(*types.Pointer); isPtr {
