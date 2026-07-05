@@ -72,6 +72,12 @@ internal static nint dynamicFn1() {
     public float32 ShoeSize;
 }
 
+internal static void consumeOne(ж<slice<Person>> Ꮡv) {
+    ref var v = ref Ꮡv.Value;
+
+    v = (v)[1..];
+}
+
 [GoType("[]Person")] partial struct PeopleByShoeSize;
 
 [GoType("[]Person")] partial struct PeopleByAge;
@@ -191,6 +197,10 @@ internal static void Main() {
     fmt.Println((~pb).Len());
     var ros = ((Roster)(slice<Person>)(byAge[0..2]));
     fmt.Println(ros.headcount(), len(ros));
+    ref var crew = ref heap<Roster>(out var Ꮡcrew);
+    crew = new Roster(new Person[]{new(Name: "Ann"u8, Age: 30), new(Name: "Bob"u8, Age: 40)}.slice());
+    consumeOne(Ꮡcrew.of(Roster.Ꮡm_value));
+    fmt.Println("consumed:", len(crew), crew[0].Name);
     x = """
 
         SELECT *

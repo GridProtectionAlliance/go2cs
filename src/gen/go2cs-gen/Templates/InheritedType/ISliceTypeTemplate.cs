@@ -9,6 +9,10 @@ internal static class ISliceTypeTemplate
         
                 public {{targetTypeName}}[] Source => m_value;
 
+                /// <summary>Field-ref accessor for the ж<T>.of() pointer-reinterpret projection —
+                /// `(*[][]byte)(buf)` emits `Ꮡbuf.of({{structName}}.Ꮡm_value)`, a true aliasing view.</summary>
+                internal static ref slice<{{targetTypeName}}> Ꮡm_value(ref {{structName}} instance) => ref instance.m_value;
+
                 /// <summary>ISliceWrap factory — wraps a window in this named slice type, sharing backing.</summary>
                 public static {{structName}} Wrap(in slice<{{targetTypeName}}> source) => new {{structName}}(source);
                     

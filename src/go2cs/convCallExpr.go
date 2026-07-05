@@ -410,6 +410,35 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 		// named type and its EXACT underlying (`nuint` / `uint64`), so a plain `(arenaIdx)(intExpr)`
 		// is CS0030. Coerce through the underlying first — `((arenaIdx)(nuint)(1 << b))` — a numeric
 		// C# cast that is exactly Go's conversion semantics. Skipped when the arg is already the
+		// A POINTER reinterpret from a named-slice pointer to its underlying-slice pointer —
+		// net fd_windows.go's `fd.pfd.Writev((*[][]byte)(buf))` with `buf *Buffers` (`type
+		// Buffers [][]byte`): ж<Buffers> and ж<slice<slice<byte>>> are unrelated
+		// instantiations (CS0030). Project a ж-view over the wrapper's backing field —
+		// `Ꮡbuf.of(Buffers.Ꮡm_value)` — TRUE aliasing: header writes through the view
+		// (Writev's consume reslicing) land on the original wrapper.
+		if targetPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer); ok {
+			if _, targetElemIsNamed := types.Unalias(targetPtr.Elem()).(*types.Named); !targetElemIsNamed {
+				if targetSlice, ok := targetPtr.Elem().Underlying().(*types.Slice); ok {
+					if argPtr, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); ok {
+						if argNamed, ok := types.Unalias(argPtr.Elem()).(*types.Named); ok {
+							if argUnderSlice, ok := argNamed.Underlying().(*types.Slice); ok && types.Identical(argUnderSlice, targetSlice) {
+								ptrExpr := expr
+
+								if identArg, ok := arg.(*ast.Ident); ok {
+									ptrContext := DefaultIdentContext()
+									ptrContext.isPointer = true
+									ptrExpr = v.convIdent(identArg, ptrContext)
+								}
+
+								namedCS := convertToCSTypeName(v.getTypeName(argNamed, false))
+								return fmt.Sprintf("%s.of(%s.Ꮡm_value)", ptrExpr, namedCS)
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// A conversion between two NAMED SLICE types sharing an identical underlying — tar's
 		// `sparseElem(s[i*24:])` where s is sparseArray (both `[]byte`): the named-slice
 		// slicing wrapper-return makes the arg the NAMED wrapper, and a direct
@@ -1686,6 +1715,21 @@ func (v *Visitor) isTypeConversion(callExpr *ast.CallExpr) (bool, string) {
 					if named, ok := argPtr.Elem().(*types.Named); ok && writtenRHSIsUnnamedArray(named) &&
 						types.Identical(elemType, named.Underlying()) {
 						return types.ConvertibleTo(argType, types.NewPointer(elemType)), "*" + v.getTypeName(elemType, false)
+					}
+
+					// A pointer reinterpret from a NAMED-SLICE pointer to its underlying-slice
+					// pointer — `(*[][]byte)(buf)` with `buf *Buffers` (net fd_windows.go) —
+					// is claimed so the conversion renderer's of-projection arm emits the
+					// backing-field VIEW (`Ꮡbuf.of(Buffers.Ꮡm_value)`); unclaimed, the callee
+					// rendered as a bare cast between unrelated ж<> instantiations (CS0030).
+					if named, ok := types.Unalias(argPtr.Elem()).(*types.Named); ok {
+						if underSlice, ok := named.Underlying().(*types.Slice); ok {
+							if elemSlice, ok := elemType.Underlying().(*types.Slice); ok && types.Identical(underSlice, elemSlice) {
+								if _, elemIsNamed := types.Unalias(elemType).(*types.Named); !elemIsNamed {
+									return true, "*" + v.getTypeName(elemType, false)
+								}
+							}
+						}
 					}
 				}
 

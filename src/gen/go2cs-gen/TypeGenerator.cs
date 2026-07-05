@@ -134,6 +134,12 @@ public class TypeGenerator : ISourceGenerator
                     case StructDeclarationSyntax when typeDefinition.StartsWith("[]"): // slice
                         typeName = typeDefinition[2..].Trim();
 
+                        // m_value stays MUTABLE for a named-slice wrapper: a Go pointer-reinterpret to
+                        // the underlying slice — `(*[][]byte)(buf)` with `buf *Buffers`, net
+                        // fd_windows.go — projects a ж<slice<T>> VIEW over the wrapper's own field
+                        // (`Ꮡbuf.of(Buffers.Ꮡm_value)`), so header writes through the view (poll
+                        // FD.Writev's consume reslicing) land on the original (a readonly field would
+                        // force a defensive copy and lose them).
                         generatedSource = new InheritedTypeTemplate
                         {
                             PackageNamespace = packageNamespace,
@@ -142,7 +148,8 @@ public class TypeGenerator : ISourceGenerator
                             Scope = scope,
                             TypeName = $"slice<{typeName}>",
                             TargetTypeName = typeName,
-                            TypeClass = "Slice"
+                            TypeClass = "Slice",
+                            ReadOnlyValue = false
                         }
                         .Generate();
 

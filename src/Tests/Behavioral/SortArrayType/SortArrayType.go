@@ -88,6 +88,10 @@ type Person struct {
 
 // Another one
 
+func consumeOne(v *[]Person) {
+	*v = (*v)[1:]
+}
+
 type PeopleByShoeSize []Person // Person slice for shoe size sorting
 
 type PeopleByAge []Person
@@ -233,6 +237,14 @@ func main() {
 	// NAMED wrapper, so the conversion must hop through the underlying slice (CS0030).
 	ros := Roster(byAge[0:2])
 	fmt.Println(ros.headcount(), len(ros)) // 2 2
+
+	// A POINTER reinterpret from a named-slice pointer to its underlying-slice pointer
+	// (net fd_windows.go's `(*[][]byte)(buf)` with buf *Buffers, CS0030): emits
+	// `Ꮡcrew.of(Roster.Ꮡm_value)` — a ж-view over the wrapper's backing field, so header
+	// writes through the view (consumeOne's reslice) land on the ORIGINAL wrapper.
+	crew := Roster{{Name: "Ann", Age: 30}, {Name: "Bob", Age: 40}}
+	consumeOne((*[]Person)(&crew))
+	fmt.Println("consumed:", len(crew), crew[0].Name) // consumed: 1 Bob
 
     x = `
         SELECT *
