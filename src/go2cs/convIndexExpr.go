@@ -30,6 +30,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 
 		if isMap {
+			// A POINTER-keyed map (`map[*typeInfo]bool`, encoding/gob buildEncEngine) indexed by
+			// a deref-aliased pointer parameter needs the parameter's BOX as the key — the
+			// alias `ref var info = ref Ꮡinfo.Value` is the wrapper VALUE, so `building[info]`
+			// passed a typeInfo where ж<typeInfo> was expected (CS1503). The isPointer ident
+			// context renders the box (`building[Ꮡinfo]`), mirroring the pointer-field struct
+			// initializer in convKeyValueExpr.
+			_, mapKeyIsPointer := mapType.Key().(*types.Pointer)
+
 			// Comma-ok map access (`v, ok := m[k]`): use golib's two-value indexer
 			// `m[key, ꟷ]`, which returns `(value, present)`.
 			if context.isTupleResult {
@@ -39,6 +47,10 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 					basicLitContext := DefaultBasicLitContext()
 					basicLitContext.u8StringOK = false
 					keyContexts = append(keyContexts, basicLitContext)
+				} else if mapKeyIsPointer {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+					keyContexts = append(keyContexts, identContext)
 				}
 
 				return fmt.Sprintf("%s[%s, %s]", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, keyContexts), OverloadDiscriminator)
@@ -49,6 +61,10 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 				context := DefaultBasicLitContext()
 				context.u8StringOK = false
 				contexts = []ExprContext{context}
+			} else if mapKeyIsPointer {
+				identContext := DefaultIdentContext()
+				identContext.isPointer = true
+				contexts = []ExprContext{identContext}
 			}
 		} else if _, isPtr := typeAndVal.Type.(*types.Pointer); isPtr {
 			// The deref-aliased-parameter exception applies only when the base ITSELF is the

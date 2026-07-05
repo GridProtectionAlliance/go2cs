@@ -29,6 +29,16 @@ internal static ж<node> firstAfter(ж<node> Ꮡp, nint steps) {
     return Ꮡp;
 }
 
+internal static nint markSeen(ж<node> Ꮡp, map<ж<node>, bool> seen) {
+    ref var p = ref Ꮡp.Value;
+
+    if (seen[Ꮡp]) {
+        return p.val;
+    }
+    seen[Ꮡp] = true;
+    return -p.val;
+}
+
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
@@ -38,6 +48,8 @@ internal static void Main() {
     c.Value.next = a;
     fmt.Println(sumWalk(a, 6));
     fmt.Println((~firstAfter(a, 4)).val);
+    var seen = new map<ж<node>, bool>{};
+    fmt.Println(markSeen(a, seen), markSeen(a, seen), markSeen(b, seen));
 }
 
 } // end main_package

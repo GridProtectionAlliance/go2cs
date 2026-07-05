@@ -33,6 +33,19 @@ func firstAfter(p *node, steps int) *node {
 	return p
 }
 
+// markSeen mirrors encoding/gob's buildEncEngine: a map keyed by a POINTER type
+// (`map[*node]bool`) indexed by a deref-aliased pointer parameter. `p` is emitted as
+// `ref var p = ref Ꮡp.Value`, so both the read `seen[p]` and the write `seen[p] = true` must
+// use the box `Ꮡp` — a bare `p` passes the node VALUE where the ж<node> key is expected
+// (CS1503). The field read `p.val` forces the deref-alias.
+func markSeen(p *node, seen map[*node]bool) int {
+	if seen[p] {
+		return p.val
+	}
+	seen[p] = true
+	return -p.val
+}
+
 func main() {
 	a := &node{val: 1}
 	b := &node{val: 2}
@@ -43,4 +56,7 @@ func main() {
 
 	fmt.Println(sumWalk(a, 6))      // two laps: 2*(1+2+3) = 12
 	fmt.Println(firstAfter(a, 4).val) // a->b->c->a->b => 2
+
+	seen := map[*node]bool{}
+	fmt.Println(markSeen(a, seen), markSeen(a, seen), markSeen(b, seen)) // -1 1 -2
 }
