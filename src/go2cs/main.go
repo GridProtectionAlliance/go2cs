@@ -2178,6 +2178,40 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
 	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
 
+	// Register the interface's DECLARED embeds so the inheritance PRUNE sees CROSS-ASSEMBLY
+	// relations too — elf's errorReader records both io.ReadSeeker and io.Reader; C#'s
+	// ReadSeeker : Reader (structural inheritance emitted at io's own declaration) makes the
+	// two value-form partials implement Reader.Read twice (CS0111 + CS8646) unless the
+	// subsumed record prunes. interfaceInheritances was only populated at LOCAL interface
+	// declarations (visitInterfaceType), so a foreign base was invisible here.
+	if named, ok := types.Unalias(interfaceType).(*types.Named); ok {
+		if iface, ok := named.Underlying().(*types.Interface); ok && iface.NumEmbeddeds() > 0 {
+			var embeds []string
+
+			for ei := range iface.NumEmbeddeds() {
+				if embNamed, ok := types.Unalias(iface.EmbeddedType(ei)).(*types.Named); ok {
+					if _, isIface := embNamed.Underlying().(*types.Interface); isIface {
+						embeds = append(embeds, convertToCSTypeName(v.getFullTypeName(embNamed, false)))
+					}
+				}
+			}
+
+			if len(embeds) > 0 {
+				packageLock.Lock()
+
+				if existing, ok := interfaceInheritances[interfaceTypeName]; ok {
+					for _, embed := range embeds {
+						existing.Add(embed)
+					}
+				} else {
+					interfaceInheritances[interfaceTypeName] = NewHashSet(embeds)
+				}
+
+				packageLock.Unlock()
+			}
+		}
+	}
+
 	if targetTypeName == "" || targetTypeName == "nil" || targetTypeName == "any" {
 		return exprResult
 	}
