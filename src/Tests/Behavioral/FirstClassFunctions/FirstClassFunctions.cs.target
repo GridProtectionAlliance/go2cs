@@ -142,10 +142,23 @@ internal static void Main() {
     };
     var (got, gerr) = fetch();
     fmt.Println("collapse hoist:", got, gerr == default!);
+    fmt.Println(passThrough());
+}
+
+internal static @string passThrough() {
+    var (ᴛ1, ᴛ2) = fetchPair();
+    return joinPair(ᴛ1, ᴛ2);
 }
 
 internal static (@string, error) fetchPair() {
     return ("pair", default!);
+}
+
+internal static @string joinPair(@string s, error err) {
+    if (err != default!) {
+        return "err"u8;
+    }
+    return "got:"u8 + s;
 }
 
 [GoType] partial struct resolver {

@@ -184,6 +184,9 @@ type Visitor struct {
 	// BlockStmt variables
 	blocks                 Stack[*strings.Builder]
 	firstStatementIsReturn bool
+	// tupleTempIndex numbers the multi-value-call expansion temp markers monotonically per
+	// file (see convExprList's tuple-arg expansion).
+	tupleTempIndex int
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool

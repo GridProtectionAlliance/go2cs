@@ -171,9 +171,27 @@ func main() {
 	fetch := func() (any, error) { return fetchPair() }
 	got, gerr := fetch()
 	fmt.Println("collapse hoist:", got, gerr == nil) // collapse hoist: pair true
+
+	fmt.Println(passThrough()) // got:pair
+}
+
+// passThrough exercises the expansion in RETURN position (norm's exact shape).
+func passThrough() string {
+	return joinPair(fetchPair())
 }
 
 func fetchPair() (string, error) { return "pair", nil }
+
+// joinPair + the call below mirror norm forminfo.go's `compInfo(nfcData.lookup(s))`:
+// Go expands a MULTI-VALUE call's results into the enclosing call's parameters; C# has
+// no splat, so the inner call hoists into temp markers passed expanded
+// (`var (ᴛ1, ᴛ2) = fetchPair(); joinPair(ᴛ1, ᴛ2)` — CS7036 without it).
+func joinPair(s string, err error) string {
+	if err != nil {
+		return "err"
+	}
+	return "got:" + s
+}
 
 type resolver struct {
 	lookupPackage func(name string) (importPath string, ok bool)

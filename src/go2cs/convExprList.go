@@ -122,7 +122,41 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// GoImplement<Palette, Color> whose generated impl couldn't compile (CS1503).
 		spreadArg := hasSpreadOperator && i == len(exprs)-1
 
-		if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil && !spreadArg {
+		// Go expands a MULTI-VALUE call's results into the enclosing call's parameters —
+		// `compInfo(nfcData.lookup(s))` (norm forminfo.go): lookup returns (uint16, int)
+		// feeding compInfo(v, sz). C# has no splat, so the inner call hoists into temp
+		// markers passed expanded (`var (ᴛ1, ᴛ2) = …; compInfo(ᴛ1, ᴛ2)`; CS7036 ×4).
+		// Gated to the single-argument shape with a hoist target; defer/go marker paths
+		// (callArgs) keep their own machinery.
+		tupleExpanded := false
+
+		if len(exprs) == 1 && callArgs == nil && !spreadArg && callContext != nil && callContext.deferredDecls != nil {
+			if innerCall, isCall := expr.(*ast.CallExpr); isCall {
+				if tuple, isTuple := v.getExprType(innerCall).(*types.Tuple); isTuple && tuple.Len() > 1 {
+					innerExpr := v.convExpr(innerCall, contexts)
+					tempNames := make([]string, tuple.Len())
+
+					// Per-file monotonic marker index: two expansions in nested scopes of one
+					// function otherwise collide (norm's Properties if-arm + tail, CS0136 ×4).
+					for ti := range tuple.Len() {
+						tempNames[ti] = fmt.Sprintf("%s%d", TempVarMarker, v.tupleTempIndex+ti+1)
+					}
+
+					v.tupleTempIndex += tuple.Len()
+
+					callContext.deferredDecls.WriteString(v.newline)
+					callContext.deferredDecls.WriteString(v.indent(v.indentLevel))
+					callContext.deferredDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), innerExpr))
+					callContext.deferredDecls.WriteString(v.newline)
+					resultExpr = strings.Join(tempNames, ", ")
+					tupleExpanded = true
+				}
+			}
+		}
+
+		if tupleExpanded {
+			// expanded above — skip the per-argument conversion chain
+		} else if interfaceType, ok := interfaceTypes[i]; ok && interfaceType != nil && !spreadArg {
 			// A POINTER argument converting to an interface must render as the pointer VALUE —
 			// the box `Ꮡfs`, not the deref'd receiver ref-local `fs` — since Go's interface
 			// holds the *T and the pointer-adapter emission wraps the box itself
