@@ -190,6 +190,7 @@
     <Project Path="Tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
     <Project Path="Tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
+    <Project Path="Tests/Behavioral/NamedFuncResultPointerArg/NamedFuncResultPointerArg.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeMapParam/NamedFuncTypeMapParam.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeStateMachine/NamedFuncTypeStateMachine.csproj" />
     <Project Path="Tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />

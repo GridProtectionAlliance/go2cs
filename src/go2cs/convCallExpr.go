@@ -2291,9 +2291,13 @@ func (v *Visitor) getFunctionSignature(callExpr *ast.CallExpr) *types.Signature 
 		return v.getFunctionSignature(&ast.CallExpr{Fun: fun.X})
 
 	case *ast.CallExpr:
-		// Functions returned by other functions
+		// Functions returned by other functions. Underlying() looks through a NAMED func-type
+		// result — encoding/json's `valueEncoder(v)` returns `encoderFunc` (a methodless named
+		// func type), so a bare `t.(*types.Signature)` failed and the per-argument pointer
+		// treatment never fired: `valueEncoder(v)(e, …)` passed the receiver value alias `e`
+		// where the `ж<encodeState>` slot wanted the box `Ꮡe` (CS1503).
 		if t := v.info.TypeOf(fun); t != nil {
-			if sig, ok := t.(*types.Signature); ok {
+			if sig, ok := t.Underlying().(*types.Signature); ok {
 				return sig
 			}
 		}

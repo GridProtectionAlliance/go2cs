@@ -444,6 +444,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
+
+    [TestMethod]
     public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");
 
     [TestMethod]
