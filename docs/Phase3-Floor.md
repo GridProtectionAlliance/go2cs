@@ -7,6 +7,23 @@
 
 ## Headline
 
+**census5 (2026-07-05, HEAD `40f4fac2a`): 12 packages fail with own-errors; 291/303 (96%) compile.**
+(census4 at HEAD `443ec9a91` had 13 — `debug/buildinfo` has since been cleared by the promoted-adapter
+generator fix, `175cba3d0`. Note census4's buildinfo attribution was partly a stale-incremental artifact,
+which is why census5 is the authoritative count. All other 12 packages are unchanged from census4.)
+
+The remaining 12 split into **deep-but-real converter roots** — `internal/trace` (75, anonymous-interface
+cross-file lift), `database/sql` (17, five mixed roots), `vendor/cryptobyte` (6, non-canonical import alias
+in type signatures), `testing` (3, lifted-anonymous-struct-alias publicize) — one **generator** root
+(`debug/gosym`, 1), and the **true floor** (`encoding/json` generic-over-union 8, `crypto/internal/nistec`
+asm 3, `go/ast` generic-over-interface wall 1, `runtime/pprof` runtime-gated 1, vendored `sha3` 2 +
+`bidirule` 1, `text/template/parse` 1). The clean and medium-clean single-root phase is **exhausted**; each
+remaining converter root is a substantial multi-step change (a lift pre-pass, a hot-path `getTypeName`
+alias map, a lifted-type-publicize mechanism, or a five-way triage), and the floor is genuinely
+deep-design / assembly / runtime-gated / vendored.
+
+### Original census4 headline (superseded)
+
 **census4 (2026-07-05, HEAD `443ec9a91`): 13 packages fail with own-errors; ~290/303 compile.**
 
 The compile milestone is **substantially met**: the overwhelming majority of the standard library
@@ -64,25 +81,49 @@ un-skipped its parent `internal/trace` and surfaced its 75 own-errors.
 | **vendor/…/sha3** | 2 | CS1929 extension-receiver (vendored x/crypto). |
 | **vendor/…/bidirule** | 1 | CS0234 namespace (vendored x/text). |
 
-## Recommendation
+## Recommendation (census5, 291/303)
 
-The stdlib-compile milestone is **substantially met** (~290/303 compile). The remaining work is:
+The stdlib-compile milestone is **substantially met** — **291/303 packages (96%) compile**. `buildinfo`
+was cleared after census4 (generator fix `175cba3d0`), so it no longer appears below. The remaining work
+splits cleanly into *deep-but-real converter roots* and the *true floor* — and, importantly, **the clean
+and medium-clean single-root phase is exhausted**: every remaining converter root is now a substantial
+multi-step change, not a one-liner.
 
-1. **internal/trace** (75 errs) — the one high-value real converter root (anonymous-interface-as-adapter-target lift). **Do this next.**
-2. **database/sql** (17) — triage the CS1929/CS1503 mix for real converter fixes.
-3. **buildinfo / gosym** (2) — generator fixes.
-4. **testing** (3) — the transitive-publicize fixpoint extension.
-5. **non-canonical-alias** (clears cryptobyte's 6) — a hot-path but general converter fix.
+**Deep-but-real converter roots** (each a genuine, non-trivial converter fix):
+1. **internal/trace** (75 errs) — anonymous-interface-as-adapter-target must be *lifted to a named type*
+   (cross-file lift pre-pass; the per-file `liftedTypeMap` needs to become package-level). Highest raw
+   count but one root.
+2. **database/sql** (17) — a five-way mix (named-delegate→`Action` bridge, `pingDC` CS1929,
+   ref-local-in-lambda, GEN `Lock`/`Unlock`, tuple-name CS8175). Needs per-error triage.
+3. **cryptobyte** (6) — non-canonical import alias in type signatures: `getTypeName` must honour the
+   file's actual import alias, not the canonical one (a per-file path→alias map threaded into a hot path).
+4. **testing** (3) — lifted-anonymous-struct-**alias** publicize: `type corpusEntry = struct{…}` is an
+   *alias*, so the referenced type is the lifted `corpusEntryᴛ1`, which the named-type publicize cascade
+   (extended this session, `40f4fac2a`) does not reach. Needs a `packagePublicizedLiftedTypes` keyed by
+   the anon-struct `types.Type`, consulted at lift emission.
+5. **gosym** (1) — generator CS0542: a promoted accessor whose member name equals its enclosing type
+   name (`Func`); rename with `Δ` in the TypeGenerator template. Small but **heavy gate** (full behavioral
+   suite + corpus).
 
-The rest — `encoding/json` (generic-over-union), `go/ast` (generic-over-interface wall), `nistec`
-(asm), `pprof` (runtime-gated), `sha3`/`bidirule` (vendored) — is the **natural Phase-3-compile
-floor**: each is either a deep design item, blocked on the runtime conversion, genuine assembly, or a
-low-priority vendored copy. These are appropriate to stub (`GoManualConversion`) or defer.
+**True floor** — deep-design / runtime-gated / assembly / vendored; appropriate to stub
+(`GoManualConversion`) or defer:
+- `encoding/json` (8) — generic over a `[]byte|string` union, `src[i:j]...` spread of a type param.
+- `go/ast` (1) — the generic-over-interface **wall**: `where N : Node` unsatisfiable because `ж<X>` does
+  not itself implement `X`'s interfaces (the adapter does). A fundamental adapter-model limitation.
+- `crypto/internal/nistec` (3) — `p256_asm.go` over asm-backed types; genuine raw-metal.
+- `runtime/pprof` (1) — a real CS0411, but the package is blocked on the runtime conversion regardless
+  (the singular ~237-package gate).
+- vendored `sha3` (2) + `bidirule` (1), `text/template/parse` (1) — low priority.
 
 ## Campaign delta
 
 - Session start (census2 era): 19 packages / 87 errors, with many masked behind dominant roots.
+- End of session (census5, HEAD `40f4fac2a`): **12 packages / 119 own-errors; 291/303 compile.**
 - This session cleared (to zero or near-zero) `net/mail`, `crypto/md5`, `crypto/x509/pkix`,
   `internal/dag`, `testing/quick`, `crypto/rsa`, `go/constant`, `bidi`, `hpack`, `slog/buffer`,
-  `oldtrace`, and landed roots for `database/sql`, the defer-box, and the cryptobyte dup-alias —
-  ~14 guarded, regression-clean converter/generator fixes.
+  `oldtrace`, `buildinfo`, and landed roots for `database/sql` (CS0246), the defer-box, the cryptobyte
+  dup-alias, the interface-publicize family (direct + method-signature cascade), and the variadic-closure
+  prologue — ~16 guarded, regression-clean converter/generator fixes.
+- The frontier is now the **hard tail**: 4 deep-but-real converter roots, 1 heavy-gate generator root,
+  and a ~7-package true floor. Recommend a deliberate, user-steered pass on the deep roots rather than
+  continued 60s-cadence autonomous churn.
