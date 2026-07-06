@@ -412,6 +412,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
+    public void CheckNamedSliceCaptureMethod() => CheckTarget("NamedSliceCaptureMethod");
+
+    [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
 
     [TestMethod]

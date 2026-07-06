@@ -19,6 +19,16 @@ import (
 // boxed and the call routed through the ж overload.
 var packageCaptureModeMethods map[*types.Func]bool
 
+// packageCaptureModeBoxIdents holds the value vars on which a capture-mode pointer-receiver method
+// is called (`var frontier orderEventList; frontier.Push(…)`, orderEventList a NAMED SLICE with
+// `*orderEventList` Push/Pop). Such a var must be heap-boxed so the call binds the ж overload — but
+// identHasHeapBox otherwise REFUSES a box for an inherently-heap-allocated type (a named slice/map/
+// chan is already a reference), so this records the capture-mode reason to force the box for exactly
+// those types (a struct like `atomic.Int32` is already boxed via the not-inherently-heap arm).
+// Written during escape analysis (which already computes the predicate), read in identHasHeapBox.
+// Keyed by the var's types.Object (package-unique); the escape pass fully precedes the visit pass.
+var packageCaptureModeBoxIdents map[types.Object]bool
+
 // packageDirectBoxReceiverMethods holds the field-address capture-mode methods that are
 // emitted with the box AS the receiver directly (`this ж<T> Ꮡx` + `ref var x = ref Ꮡx.Value;`),
 // where `&x.field` references the parameter box (`Ꮡx.of(Type.ᏑField)`). This replaces the

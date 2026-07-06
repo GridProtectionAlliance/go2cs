@@ -660,6 +660,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageImportLeadingSegments = make(map[string]bool)
 		packagePublicizedTypes = make(map[types.Object]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
+		packageCaptureModeBoxIdents = make(map[types.Object]bool)
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)
 		initFuncCounter = 0
 		usesUnsafeCode = false
@@ -4237,7 +4238,11 @@ func (v *Visitor) identHasHeapBox(obj types.Object, identType types.Type) bool {
 		return true
 	}
 
-	return v.isLambdaBoxRefVar(obj) || v.identAddressTaken(obj)
+	// An inherently-heap type (named slice/map/chan) is already a reference, so it is boxed only
+	// when its address is genuinely needed: `&ident` taken, captured by-box in a closure, OR a
+	// capture-mode pointer-receiver method is called on it (`frontier.Push(…)` with Push on
+	// `*orderEventList`), which needs the ж overload's receiver box (CS1929 without it).
+	return v.isLambdaBoxRefVar(obj) || v.identAddressTaken(obj) || packageCaptureModeBoxIdents[obj]
 }
 
 // identAddressTaken reports whether `&ident` occurs for obj anywhere in the current

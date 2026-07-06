@@ -141,6 +141,16 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	// Check if the type is inherently heap allocated
 	if isInherentlyHeapAllocatedType(identObj.Type()) {
 		v.identEscapesHeap[identObj] = true
+
+		// An inherently-heap value var is already a reference, so identHasHeapBox does NOT box it
+		// by default. But a capture-mode pointer-receiver method called on it (`frontier.Push(…)`
+		// with Push/Pop on `*orderEventList`, a NAMED SLICE) needs the ж overload's receiver box
+		// (CS1929 without it). Record that reason so identHasHeapBox forces the box for exactly
+		// these vars (a non-inherently-heap struct like atomic.Int32 is already boxed below).
+		if packageCaptureModeBoxIdents != nil && v.bodyCallsCaptureModeMethodOn(ident, parentBlock) {
+			packageCaptureModeBoxIdents[identObj] = true
+		}
+
 		return
 	}
 
@@ -400,9 +410,9 @@ func (v *Visitor) performEscapeAnalysis(ident *ast.Ident, parentBlock *ast.Block
 	ast.Inspect(parentBlock, inspectFunc)
 
 	// A value var on which a capture-mode pointer-receiver method is called (e.g.
-	// `var i atomic.Int32; i.Store(10)`) must be heap-boxed so the call can be routed
-	// through the ж overload — the only path that sets up the receiver box the method
-	// needs for `&recv.field`.
+	// `var i atomic.Int32; i.Store(10)`, or `var frontier orderEventList; frontier.Push(…)`)
+	// must be heap-boxed so the call can be routed through the ж overload — the only path that
+	// sets up the receiver box the method needs for `&recv.field`.
 	if !escapes && v.bodyCallsCaptureModeMethodOn(ident, parentBlock) {
 		escapes = true
 	}
