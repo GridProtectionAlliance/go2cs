@@ -175,6 +175,7 @@
     <Project Path="Tests/Behavioral/MakeLenNamedNumeric/MakeLenNamedNumeric.csproj" />
     <Project Path="Tests/Behavioral/MakeSliceUintptrLen/MakeSliceUintptrLen.csproj" />
     <Project Path="Tests/Behavioral/MapCommaOk/MapCommaOk.csproj" />
+    <Project Path="Tests/Behavioral/MapPointerElementLiteral/MapPointerElementLiteral.csproj" />
     <Project Path="Tests/Behavioral/MethodGroupGenericArg/MethodGroupGenericArg.csproj" />
     <Project Path="Tests/Behavioral/MethodOnBoxedGlobalIndex/MethodOnBoxedGlobalIndex.csproj" />
     <Project Path="Tests/Behavioral/MapSamePackageTypes/MapSamePackageTypes.csproj" />

@@ -328,6 +328,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	case *types.Map:
 		elementType = t.Elem()
 		callContext.keyValueSource = MapSource
+		// Carry the map type so convKeyValueExpr can box a pointer-typed VALUE (a bare-ident pointer
+		// into a `ж<T>` map slot is CS0029, like the struct-field pointer case).
+		callContext.keyValueCompositeType = t
 	case *types.Named:
 		if structType, ok := t.Underlying().(*types.Struct); ok {
 			checkStructFields(structType)

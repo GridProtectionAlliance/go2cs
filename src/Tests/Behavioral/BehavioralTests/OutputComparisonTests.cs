@@ -361,6 +361,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]
+    public void CheckMapPointerElementLiteral() => CheckTarget("MapPointerElementLiteral");
+
+    [TestMethod]
     public void CheckMapSamePackageTypes() => CheckTarget("MapSamePackageTypes");
 
     [TestMethod]

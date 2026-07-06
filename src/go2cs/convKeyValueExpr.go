@@ -44,6 +44,25 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		}
 	}
 
+	// A MAP whose VALUE type is a pointer needs its bare-ident pointer value boxed the same way as a
+	// pointer struct field — `map[K]*T{k: c}` where `c` is a deref'd pointer parameter otherwise
+	// renders the VALUE alias into a `ж<T>` map slot (CS0029). Mirror the struct-field routing: a
+	// pointer-typed value expr sets isPointer so a bare ident renders as its box `Ꮡc` (a value that is
+	// already a box — `&x`, a pointer local — is unaffected). Gated on the map's declared ELEMENT type
+	// being a pointer, so an interface-valued map (`map[K]any{…}`) still routes through the interface
+	// conversion below.
+	if context.source == MapSource && context.compositeType != nil {
+		if mapType, ok := types.Unalias(context.compositeType).Underlying().(*types.Map); ok {
+			if _, elemIsPtr := mapType.Elem().Underlying().(*types.Pointer); elemIsPtr {
+				if _, valIsPtr := v.getExprType(keyValueExpr.Value).(*types.Pointer); valIsPtr {
+					identContext := DefaultIdentContext()
+					identContext.isPointer = true
+					valueContexts = []ExprContext{identContext}
+				}
+			}
+		}
+	}
+
 	// Thread the enclosing statement's hoist target so a func-literal VALUE's capture
 	// snapshot decls hoist instead of dumping inline in the argument list (elf file.go's
 	// readSeekerFromReader{reset: func() {…}}, CS1003 cascade ×6).
@@ -120,7 +139,24 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 		return fmt.Sprintf("%s: %s", key, valueExpr)
 	} else if context.source == MapSource {
 		// Map key/value initializer — or, when array-backed, a SparseArray index initializer
-		return fmt.Sprintf("[%s] = %s", v.sparseArrayKey(keyValueExpr.Key, context), valueExpr)
+		keyExpr := v.sparseArrayKey(keyValueExpr.Key, context)
+
+		// A pointer-KEY map (`map[*T]V{c: 1}`) boxes the bare-ident key the same way as a pointer
+		// value — the value alias into a `ж<T>` key slot is CS0029. (A pointer key cannot be
+		// array-backed, so the sparseArrayKey int-cast path never applies here.)
+		if context.compositeType != nil {
+			if mapType, ok := types.Unalias(context.compositeType).Underlying().(*types.Map); ok {
+				if _, keyIsPtr := mapType.Key().Underlying().(*types.Pointer); keyIsPtr {
+					if _, exprIsPtr := v.getExprType(keyValueExpr.Key).(*types.Pointer); exprIsPtr {
+						keyIdentContext := DefaultIdentContext()
+						keyIdentContext.isPointer = true
+						keyExpr = v.convExpr(keyValueExpr.Key, []ExprContext{keyIdentContext})
+					}
+				}
+			}
+		}
+
+		return fmt.Sprintf("[%s] = %s", keyExpr, valueExpr)
 	} else if context.source == ArraySource {
 		// Sparse array initializer
 		return fmt.Sprintf("%s[%s] = %s", context.ident, v.sparseArrayKey(keyValueExpr.Key, context), valueExpr)
