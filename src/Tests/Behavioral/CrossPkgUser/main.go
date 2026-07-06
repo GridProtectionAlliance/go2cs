@@ -42,6 +42,23 @@ func statusPtr(st *CrossPkgLib.Status) *CrossPkgLib.Status {
 	return st
 }
 
+// Holder is a SAME-PACKAGE generic. Instantiating it with a POINTER to a CROSS-PACKAGE type —
+// `*Holder[*CrossPkgLib.Sensor]` as a var type AND `Holder[*CrossPkgLib.Sensor]` as a struct EMBED —
+// must keep the `Holder<…>` wrapper. The t.String() fall-through path-qualified the cross-package type
+// argument and the cross-package slash-strip then ate the `Holder[` header, dropping the wrapper
+// (`ж<…Sensor>>`, a CS1519 cascade — crypto/elliptic's `*nistCurve[*nistec.P224Point]`). Both
+// getTypeName (the var type) and getFullTypeName (the embed field) must render the generic structurally.
+type Holder[T any] struct {
+	item T
+}
+
+var sensorHolder = &Holder[*CrossPkgLib.Sensor]{}
+
+type sensorBox struct {
+	Holder[*CrossPkgLib.Sensor] // embedded same-package generic over a cross-package pointer
+	tag                         string
+}
+
 // ledger holds a POINTER to the Δ-renamed foreign type as a struct FIELD (the getDisplayTypeName
 // pointer path, distinct from the func-signature path above — the archive/zip fileHeader shape).
 type ledger struct {
@@ -347,6 +364,15 @@ func main() {
 	// an inferred-type value so the renamed TYPE is never named explicitly (that's a separate root).
 	mk := CrossPkgLib.MakeMarker("tag")
 	fmt.Println(mk.Marker) // tag
+
+	// A same-package generic instantiated with a POINTER to a cross-package type: the var type
+	// `*Holder[*CrossPkgLib.Sensor]` (getTypeName) and the `sensorBox` embed (getFullTypeName) must
+	// both keep the Holder<…> wrapper — the slash-strip previously ate it (crypto/elliptic's nistCurve).
+	sensorHolder.item = &CrossPkgLib.Sensor{Name: "garage", Temp: 30}
+	fmt.Println(sensorHolder.item.Name) // garage
+	sbx := sensorBox{tag: "b"}
+	sbx.Holder.item = &CrossPkgLib.Sensor{Name: "shed", Temp: 40}
+	fmt.Println(sbx.Holder.item.Name, sbx.tag) // shed b
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a

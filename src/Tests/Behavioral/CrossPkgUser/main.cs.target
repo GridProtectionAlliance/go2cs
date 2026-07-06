@@ -26,6 +26,17 @@ internal static ж<CrossPkgLibꓸStatus> statusPtr(ж<CrossPkgLibꓸStatus> Ꮡs
     return Ꮡst;
 }
 
+[GoType] partial struct Holder<T> {
+    internal T item;
+}
+
+internal static ж<Holder<ж<CrossPkgLib.Sensor>>> sensorHolder = Ꮡ(new Holder<ж<CrossPkgLib.Sensor>>(nil));
+
+[GoType] partial struct sensorBox {
+    public partial ref Holder<ж<CrossPkgLib_package.Sensor>> Holder { get; }
+    internal @string tag;
+}
+
 [GoType] partial struct ledger {
     internal ж<CrossPkgLibꓸStatus> cur;
 }
@@ -243,6 +254,11 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
     var mk = CrossPkgLib.MakeMarker("tag"u8);
     fmt.Println(mk.ΔΔMarker);
+    sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage"u8, Temp: 30));
+    fmt.Println((~(~sensorHolder).item).Name);
+    var sbx = new sensorBox(tag: "b"u8);
+    sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed"u8, Temp: 40));
+    fmt.Println((~sbx.Holder.item).Name, sbx.tag);
 });
 
 [GoType("num:float64")] partial struct localCelsius;

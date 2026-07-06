@@ -3574,16 +3574,25 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if named, ok := t.(*types.Named); ok {
 		obj := named.Obj()
 
-		if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
-			if typeArgs := named.TypeArgs(); typeArgs != nil && typeArgs.Len() > 0 {
-				args := make([]string, typeArgs.Len())
+		if typeArgs := named.TypeArgs(); typeArgs != nil && typeArgs.Len() > 0 {
+			args := make([]string, typeArgs.Len())
 
-				for i := 0; i < typeArgs.Len(); i++ {
-					args[i] = v.getTypeName(typeArgs.At(i), false)
-				}
+			for i := 0; i < typeArgs.Len(); i++ {
+				args[i] = v.getTypeName(typeArgs.At(i), false)
+			}
 
+			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
 				return fmt.Sprintf("%s.%s[%s]", importQualifier(pkg.Name()), obj.Name(), strings.Join(args, ", "))
 			}
+
+			// A SAME-PACKAGE instantiated generic must ALSO render structurally — each type ARGUMENT
+			// recursively named — rather than falling through to the t.String() path. When an argument
+			// is itself cross-package, t.String() path-qualifies it (`curve[*repro/sub.Item]`), and the
+			// cross-package slash-strip then eats everything before the slash INCLUDING the `curve[`
+			// header, dropping the wrapper (crypto/elliptic's `*nistCurve[*nistec.P224Point]` →
+			// `ж<nistec.P224Point>>`, a CS1519 cascade). Rendering args via getTypeName yields their
+			// short, slash-free package-qualified names, so the header survives.
+			return fmt.Sprintf("%s[%s]", obj.Name(), strings.Join(args, ", "))
 		}
 	}
 
@@ -3726,6 +3735,20 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 			}
 
 			return baseName
+		}
+
+		// A SAME-PACKAGE instantiated generic renders structurally too — each type ARGUMENT recursively
+		// named — otherwise the t.String() fall-through below path-qualifies a cross-package argument and
+		// the slash-strip eats the `Name[` header (crypto/elliptic's embedded `nistCurve[*nistec.P256Point]`
+		// → `nistec.P256Point>`, a CS1519 cascade). The current package is elided, so the bare name stands.
+		if typeArgs := named.TypeArgs(); typeArgs != nil && typeArgs.Len() > 0 {
+			args := make([]string, typeArgs.Len())
+
+			for i := 0; i < typeArgs.Len(); i++ {
+				args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+			}
+
+			return obj.Name() + "[" + strings.Join(args, ", ") + "]"
 		}
 	}
 
