@@ -42,6 +42,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]

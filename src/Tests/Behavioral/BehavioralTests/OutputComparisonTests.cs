@@ -46,6 +46,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]

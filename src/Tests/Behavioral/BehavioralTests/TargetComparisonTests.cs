@@ -44,6 +44,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAndNotAssignNarrow() => CheckTarget("AndNotAssignNarrow");
 
     [TestMethod]
+    public void CheckAnonInterfaceCrossFile() => CheckTarget("AnonInterfaceCrossFile");
+
+    [TestMethod]
     public void CheckAnonStructArrayElement() => CheckTarget("AnonStructArrayElement");
 
     [TestMethod]

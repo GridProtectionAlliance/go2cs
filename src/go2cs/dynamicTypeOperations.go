@@ -21,7 +21,15 @@ const (
 // files in the same package can resolve cross-file references to it.
 func registerDynamicTypeName(signature, csTypeName string) {
 	packageLock.Lock()
-	packageDynamicTypeNames[signature] = csTypeName
+
+	// Deterministic winner when one signature registers from multiple files/functions
+	// (file visits are concurrent, so last-wins would vary run to run — the converter is
+	// byte-deterministic): keep the lexically smallest name. Every registrant is a lifted
+	// file-level type of the same package, so any winner resolves.
+	if existing, ok := packageDynamicTypeNames[signature]; !ok || csTypeName < existing {
+		packageDynamicTypeNames[signature] = csTypeName
+	}
+
 	packageLock.Unlock()
 }
 

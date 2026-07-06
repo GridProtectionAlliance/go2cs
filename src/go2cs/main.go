@@ -1074,6 +1074,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 			}
 
 			for interfaceName, implementations := range interfaceImplementations {
+				// A marker-form key (an anonymous-interface record made from a file visited
+				// before the declaring file registered its lift) resolves against the
+				// now-complete registry; an unresolvable one is dropped — mirroring the
+				// implicit-conversion writer's resolveImplicitConvTypeName skip below.
+				interfaceName, okIface := resolveImplicitConvTypeName(interfaceName)
+
+				if !okIface {
+					continue
+				}
+
 				for implementation := range implementations {
 					canonKey := strings.TrimPrefix(interfaceName, RootNamespace+".") + "|" + implementation
 
@@ -2205,7 +2215,27 @@ func (v *Visitor) isLocalImplType(t types.Type) bool {
 func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType types.Type, exprResult string) string {
 	// Track interface types that need to an implementation mapping
 	// to properly handle duck typed Go interface implementations
-	interfaceTypeName := convertToCSTypeName(v.getFullTypeName(interfaceType, false))
+	var interfaceTypeName string
+
+	if iface, ok := interfaceType.(*types.Interface); ok && !iface.Empty() {
+		// An ANONYMOUS non-empty interface (a bare *types.Interface, not through a Named)
+		// resolves to its LIFTED name — the raw Go literal is not valid C# (its `}` breaks
+		// the GoImplement assembly attribute and the adapter class name; internal/trace's
+		// `readBatch(r interface{io.Reader; io.ByteReader})` cast cross-file from
+		// generation.go, CS1730 cascade). Prefer this file's lift, then the shared package
+		// registry, then a deferred marker resolved after the file-visit barrier — the same
+		// three-step resolution dynamicStructTypeName performs for anonymous structs.
+		if name, ok := v.liftedTypeMap[interfaceType]; ok {
+			interfaceTypeName = name
+		} else if name := lookupDynamicTypeName(interfaceType.String()); name != "" {
+			interfaceTypeName = name
+		} else {
+			interfaceTypeName = dynamicTypeMarkerPrefix + interfaceType.String() + dynamicTypeMarkerSuffix
+		}
+	} else {
+		interfaceTypeName = convertToCSTypeName(v.getFullTypeName(interfaceType, false))
+	}
+
 	targetTypeName := convertToCSTypeName(v.getFullTypeName(targetType, false))
 
 	// Register the interface's DECLARED embeds so the inheritance PRUNE sees CROSS-ASSEMBLY
@@ -2508,10 +2538,6 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				foreignAdapterExists := importedPointerImplements.Contains(key)
 				packageLock.Unlock()
 
-				if strings.Contains(key, "Paletted") {
-					fmt.Printf("DEBUG-KEY: %q exists=%v\n", key, foreignAdapterExists)
-				}
-
 				if foreignAdapterExists {
 					// Reference through the file-local package ALIAS (`CrossPkgLib.Meter` +
 					// adapter suffix), not the raw package-class qualifier
@@ -2590,8 +2616,13 @@ func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string
 
 	ifaceSimple := interfaceTypeName
 
-	if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
-		ifaceSimple = ifaceSimple[idx+1:]
+	// A deferred dynamic-type marker (an anonymous interface lifted in a not-yet-visited
+	// file) must survive INTACT to the post-barrier resolution — its embedded signature
+	// contains dots (`interface{io.Reader; …}`), so the simple-name strip would mangle it.
+	if !strings.Contains(ifaceSimple, dynamicTypeMarkerPrefix) {
+		if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+			ifaceSimple = ifaceSimple[idx+1:]
+		}
 	}
 
 	return structSimple + ValueAdapterInfix + ifaceSimple
@@ -2600,8 +2631,11 @@ func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string
 func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 	ifaceSimple := interfaceTypeName
 
-	if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
-		ifaceSimple = ifaceSimple[idx+1:]
+	// Keep a deferred dynamic-type marker intact (see valueAdapterTypeRef).
+	if !strings.Contains(ifaceSimple, dynamicTypeMarkerPrefix) {
+		if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
+			ifaceSimple = ifaceSimple[idx+1:]
+		}
 	}
 
 	return structTypeName + PointerPrefix + ifaceSimple

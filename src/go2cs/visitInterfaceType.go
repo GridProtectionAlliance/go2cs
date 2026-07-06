@@ -112,6 +112,22 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		interfaceTypeName = v.getUniqueLiftedTypeName(name)
 		v.liftedTypeMap[identType] = interfaceTypeName
 		v.liftedTypeMap[v.getType(interfaceType, false)] = interfaceTypeName
+
+		// Lifted interfaces are shared across the package so other files can resolve
+		// cross-file references to the anonymous type — INCLUDING function-scoped lifts,
+		// which hoist to file level and are referenced from other files' CALL sites
+		// (internal/trace's `readBatch(r interface{io.Reader; io.ByteReader})`, cast at
+		// generation.go's `readBatch(r)`: the GoImplement attribute and the adapter class
+		// name need the lifted name — the raw Go literal's `}` breaks the assembly
+		// attribute parse, CS1730 cascade). Mirrors the lifted anonymous-struct
+		// registration (visitStructType); see convertToInterfaceType for the resolution.
+		if identType != nil {
+			registerDynamicTypeName(identType.String(), interfaceTypeName)
+		}
+
+		if t := v.getType(interfaceType, false); t != nil {
+			registerDynamicTypeName(t.String(), interfaceTypeName)
+		}
 	} else {
 		interfaceTypeName = name
 	}

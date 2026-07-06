@@ -1665,6 +1665,43 @@ The adapter class scope cannot be derived from Go name casing alone (`error` is 
 ### GoImplement records de-duplicate at attribute emission
 os converts dirEntry to fs.DirEntry both through its own alias (`type DirEntry = fs.DirEntry`) and through the io/fs name - two records for ONE interface made the generator emit the explicit implementation twice (CS8646/CS0111). The de-duplication happens at ATTRIBUTE EMISSION with the ALIASED record winning (its simple name resolves via the package usings); normalizing the RECORD KEY instead was twice wrong - qualified attr names break generator name resolution and flip the alias-locality gate. **Measurement lesson:** those declaration-phase errors had SUPPRESSED all of os's method-body diagnostics (Roslyn phase gating) - a package is not truly measured until its declaration errors are zero.
 
+### Anonymous interfaces used as an adapter target are lifted package-wide
+
+An inline anonymous interface used as a `GoImplement` target — internal/trace's `readBatch(r
+interface{io.Reader; io.ByteReader})`, whose concrete `*bufio.Reader` argument is cast to the
+inline interface — must resolve to a NAMED C# type on every side, or the raw Go structural
+literal is emitted into the `package_info.cs` assembly attribute and into the adapter class
+name (`bufio_ReaderжByteReader}` — the stray `}` breaks the C# parse and cascades ~75 syntax
+errors across the file). `visitInterfaceType` already lifts the inline interface to a named
+type (`readBatch_r`) in the visitor's per-file `liftedTypeMap`, but a cast at a DIFFERENT
+file's call site (generation.go) has its own visitor and its own map, so `convertToInterfaceType`
+saw only the raw `*types.Interface` and emitted the literal.
+
+The lift is now also recorded in the package-level `packageDynamicTypeNames` registry — for
+FUNCTION-scoped lifts too, since a function-parameter anon interface hoists to file level and is
+referenced cross-file — exactly as anonymous structs already register (`visitStructType`).
+`convertToInterfaceType` resolves an anonymous `*types.Interface` through the same three steps
+`dynamicStructTypeName` uses: this file's `liftedTypeMap`, then the shared registry, then a
+deferred `«DYNTYPE:…»` marker resolved after the file-visit barrier. The marker survives the
+adapter-name composition (`adapterTypeRef`/`valueAdapterTypeRef` skip the simple-name strip when
+it is present — the embedded signature contains dots), and the `GoImplement` attribute writer
+resolves or drops it (mirroring the implicit-conversion writer). Because file visits are
+concurrent, `registerDynamicTypeName` keeps the lexically smallest name for a signature so the
+result is deterministic. Emitted form:
+```csharp
+// batch.cs (declaring file):
+[GoType("dyn")] partial interface readBatch_r : /* io.Reader */ … { … }
+// generation.cs (cross-file cast site):
+(b, gen, var err) = readBatch(new bufio_ReaderжreadBatch_r(Ꮡr));
+// package_info.cs:
+[assembly: GoImplement<bufio_package.Reader, readBatch_r>(Pointer = true)]
+```
+Clears internal/trace's 75-error syntax cascade (the residual CS0315 — a named-numeric wrapper
+not satisfying a lifted operator constraint — is a distinct, deeper root). Guarded by
+`AnonInterfaceCrossFile` (a two-file package: file A declares `describe(thing interface{ Sizer;
+Namer })`, file B casts a concrete `*box` to it — the lifted name must flow into the attribute,
+the adapter, and the signature).
+
 ### Function-literal parameters share the body scope
 Go declares parameters in the function block, so a body-level `fpath, err := ...` REUSES a literal's `err` parameter. The variable analysis gives literals ONE merged scope (params + body declarations) mirroring real function declarations; a separate param scope had made the `:=` a shadow declaration beside later reuses (CS0841/CS0128, os CopyFS's WalkDir literal). Guarded by `LambdaFunctions` (`probe`).
 
