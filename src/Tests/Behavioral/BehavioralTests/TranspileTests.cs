@@ -579,6 +579,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
 
     [TestMethod]
+    public void CheckPromotedFieldNameIsType() => CheckTarget("PromotedFieldNameIsType");
+
+    [TestMethod]
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]

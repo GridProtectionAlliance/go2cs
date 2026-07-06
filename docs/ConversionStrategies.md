@@ -1479,6 +1479,24 @@ Two refinements complete the cross-package pointer-embed story (2026-07-03, inte
 
 The **exception is the enclosing method's own `[GoRecv] ref` receiver**: a non-direct-ж pointer-receiver method renders `this ref T recv` with **no box** (`Ꮡrecv` exists only for direct-ж), so the box descent referenced a nonexistent name (CS0103 — runtime `mgcscavenge.go`, `(*scavChunkData).alloc/free` calling the promoted `sc.setEmpty()`/`setNonEmpty()` from the embedded `scavChunkFlags`). No box is needed either: the embedded field of a `ref` receiver is *addressable*, so the promoted method's `[GoRecv] ref` overload binds on the **explicit field call** — `sc.scavChunkFlags.setEmpty()` — with faithful write-through. (A *direct-ж* target on the bare receiver would have promoted the enclosing method via the capture-mode fixpoint, so this arm's target always has the `ref` overload.) The receiver name-match is guarded **rendered==raw**: an inner binding that shadows the receiver name is Δ-renamed by the shadow pass, declines the arm, and keeps the descent — the same hardening applied in `convUnaryExpr`'s `&recv.field` branch, where a pointer *local* shadowing the receiver name previously took the receiver arm and emitted `Ꮡ`+raw (a nonexistent box) instead of falling to the pointer-variable arm (`cΔ1.of(chunk.Ꮡflags)`). The fix also pre-cleared the same latent shape in `archive/zip` (`f.FileHeader.hasDataDescriptor()`), `go/internal/gcimporter`, `go/types`, and `image` (whole-stdlib reconvert diff: exactly those sites changed, nothing else). (Guarded by the `EmbeddedValuePointerMethod` behavioral test — value embed + mutating pointer-receiver methods called via a pointer local, a deref'd param, AND the enclosing `[GoRecv] ref` receiver, plus a shadowing-pointer-local control, all with write-through verified against Go; runtime relies on it for `timeTimer`'s `modify`/`stop`/`reset` and `scavChunkData`'s `setEmpty`/`setNonEmpty`.)
 
+### A promoted field whose name equals the enclosing type is Δ-renamed
+
+Go lets an embedded struct carry a field whose name equals the type doing the embedding —
+debug/gosym's `type Func struct{ *Sym }` where `type Sym struct{ Func *Func; … }`, so `Sym.Func`
+promotes onto `Func`. The generator's promoted-field accessor would then emit a `Func` member
+inside struct `Func`, which C# rejects (CS0542 — a member cannot share its enclosing type's name).
+The `TypeGenerator` now Δ-prefixes just that accessor's NAME when its simple name equals the
+`NonGenericStructName` (the field ACCESS on the right keeps the original name), matching the
+`ΔGoType`/`Δslice` collision-rename precedent:
+```csharp
+public ref ж<Func> ΔFunc => ref Sym.Value.Func;   // was: `Func => …`, CS0542
+```
+The promoted field is read on the embedded struct directly (`sym.Func = fn`), never via the outer
+value, so no converter reference to the renamed accessor needs coordinating; a package that *did*
+read `outerFunc.Func` would surface CS1061 in the gate (none does). Cleared debug/gosym's lone
+CS0542. Guarded by `PromotedFieldNameIsType` (a `Node` embedding a `*sym` whose `Node` field
+collides — accessed through the explicit embedded path, values vs Go).
+
 ### Promoted pointer methods descend multi-hop value-embed chains
 A pointer-receiver method promoted through two or more embedded VALUE structs descends hop by hop: the first hop through the `&`-machinery (box-vs-parameter distinction), then one `.of(<Owner>.<field-box>)` view per additional hop -- the `ж<T>` field views compose onto the method's receiver box (reflect's `sliceType` embeds `abi.SliceType` embeds `abi.Type`, whose `Common()` extension binds `ж<abi.Type>` -- CS1929):
 ```csharp

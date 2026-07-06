@@ -166,7 +166,17 @@ internal class StructTypeTemplate : TemplateBase
                     // accessors: a lowercase field TYPE (uintptr Size_) made an EXPORTED promoted
                     // member internal - invisible cross-assembly (reflect via abi, CS1061 x22).
                     string typeScope = GetScope(GetSimpleName(memberName));
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {memberName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
+
+                    // A promoted-field accessor whose name equals the ENCLOSING type name is CS0542
+                    // (a member cannot share its type's name) — debug/gosym's `type Func struct{ *Sym }`
+                    // where `Sym` has a field `Func *Func`, so the promoted `Sym.Func` lands as a `Func`
+                    // accessor inside `Func`. Δ-prefix the accessor NAME (the field ACCESS on the right
+                    // keeps the original name), matching the ΔGoType/Δslice collision-rename precedent.
+                    // The promoted field is read directly on the embedded struct (`sym.Func`), never via
+                    // the outer value, so no converter reference needs coordinating; a package that DID
+                    // read `outer.Func` would surface CS1061 in the gate.
+                    string accessorName = GetSimpleName(memberName) == NonGenericStructName ? $"Δ{memberName}" : memberName;
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {accessorName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
 
