@@ -142,6 +142,17 @@ type Visitor struct {
 	// resolving to alias `asn1` (cryptobyte's `encoding/asn1` + `.../cryptobyte/asn1`, CS1537).
 	importAliasesEmitted HashSet[string]
 
+	// importPathAliases maps a Go import PATH to the C# alias THIS FILE bound for it, for the
+	// EXPLICITLY-ALIASED imports only. getTypeName consults it so a foreign type renders via the
+	// file's ACTUAL alias, not the canonical package name: cryptobyte's asn1.go imports
+	// `encoding/asn1` under the NON-canonical alias `encoding_asn1` (the vendored
+	// `.../cryptobyte/asn1` subpackage claims the canonical `asn1`), so a `*asn1.BitString` type
+	// reference must render `encoding_asn1.BitString`, not `asn1.BitString` (which resolves to the
+	// subpackage — CS0426). Unaliased / blank / dot / Δ-collision-renamed imports are absent and fall
+	// back to importQualifier(pkg.Name()) (the prior behavior), so this only changes explicit-alias
+	// renders — no churn elsewhere. types.Type carries no source alias, so this map supplies it.
+	importPathAliases map[string]string
+
 	// FuncDecl variables
 	inFunction           bool
 	currentFuncDecl      *ast.FuncDecl
@@ -806,6 +817,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					referencedForeignPackages: HashSet[string]{},
 					canonicalAliasImported:    HashSet[string]{},
 					importAliasesEmitted:      HashSet[string]{},
+					importPathAliases:         map[string]string{},
 					typeAliasDeclarations: &strings.Builder{},
 					standAloneComments:    map[token.Pos]string{},
 					sortedCommentPos:      []token.Pos{},
@@ -3549,7 +3561,19 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 
 		// Handle builtin types with no package
 		if pkg != nil && pkg != v.pkg {
-			pkgPrefix = importQualifier(pkg.Name()) + "."
+			// Prefer THIS FILE's actual import alias for the type's package over the canonical
+			// package name — cryptobyte's asn1.go imports `encoding/asn1` as `encoding_asn1`
+			// (the vendored `.../cryptobyte/asn1` subpackage took the canonical `asn1`), so a
+			// `*asn1.BitString` must render `encoding_asn1.BitString`, not `asn1.BitString` (which
+			// resolves to the subpackage — CS0426). Only EXPLICITLY-aliased imports populate the map;
+			// unaliased/Δ-renamed imports are absent and keep the importQualifier fallback — no churn.
+			aliasQualifier := importQualifier(pkg.Name())
+
+			if fileAlias, ok := v.importPathAliases[pkg.Path()]; ok && fileAlias != "" {
+				aliasQualifier = fileAlias
+			}
+
+			pkgPrefix = aliasQualifier + "."
 			plainPkgPrefix = pkg.Name() + "."
 		}
 	}

@@ -1502,6 +1502,25 @@ the emitted class follows the package NAME: consumers reference `math.rand.rand_
 the path-derived `v2_package` (CS0234). Centralized in `convertImportPathToNamespace`, so
 every consumer-side derivation (using aliases, attribute references, FQ renderings) agrees.
 
+### A non-canonically-aliased import renders foreign types via the file's alias
+A file that imports a package under an **explicit alias that differs from the canonical package
+name** must render that package's types through the alias, not the canonical name. cryptobyte's
+`asn1.go` imports `encoding/asn1` as `encoding_asn1` — because the sibling vendored subpackage
+`.../cryptobyte/asn1` already claims the canonical `asn1` — so a `*asn1.BitString` parameter must
+emit `ж<encoding_asn1.BitString>`. `getTypeName` had rendered the canonical `asn1.BitString`
+(`importQualifier(pkg.Name())`), which the file's `using asn1 = …cryptobyte.asn1_package` resolves
+to the *subpackage* (no `BitString`) — CS0426, and the RecvGenerator faithfully propagated the
+wrong qualifier into its `.g.cs`. A `types.Type` carries no source alias, so a per-file
+`importPathAliases` map (import path → the alias the file's `using` bound) is threaded into
+`getTypeName`; a foreign type whose import path the file aliased renders through that alias. Only
+**explicitly-aliased** imports populate the map — unaliased / blank / dot / Δ-collision-renamed
+imports are absent and keep the `importQualifier(pkg.Name())` fallback, so nothing else changes
+(value references were already correct — they come from the AST import name via `convIdent`; only
+type references, sourced from `types.Type`, lost the alias). Cleared cryptobyte's CS0426 (which had
+masked deeper `Builder.add`/`slice.Value` roots, now banked). GUARD OWED — the shape needs two
+packages whose names collide so one import is forced non-canonical, not expressible in the
+single-library behavioral corpus.
+
 ## Struct Type Embedding
 Go structs use "[type embedding](https://go101.org/article/type-embedding.html)" instead of inheritance. Since converted structs are C# `struct`s (no inheritance), the `TypeGenerator` manages the equivalent: it adds a field for the embedded type and promotes the embedded type's fields and methods (selection shorthand). Both field and method promotion are **transitive through every embedding level**: when `top` embeds `mid` which embeds `inner`, `top` gets an accessor for `inner`'s field `n` (`top.n => ref mid.n`) and a forwarding receiver for `inner`'s method `describe` (`top.describe() => target.mid.describe()`), each resolving through `mid`'s own one-level promotion. The generator collects an embedded struct's members and methods recursively (following each field whose name equals its type's simple name — Go's embedding marker), with the closest declaration of a name winning, matching Go's promotion rules. **Pointer embeds promote too.** Go also embeds by pointer (`*traceBuf`), whose C# field type is `ж<traceBuf>`; its methods and fields are promoted exactly like a value embed (the field's ref-property is dereferenced — `target.traceBuf.Value.method()` — which binds the pointer-receiver method via the `[GoRecv]` `ж<T>` overload). The embedding-marker comparison dereferences the field type first, because a pointer field's simple name carries a `.Value` suffix (`traceBuf.Value`) that would never match the bare embed field name. This matters most *transitively*: `traceExpWriter` embeds `traceWriter` (value) which embeds `*traceBuf` (pointer), and `traceBuf`'s `varint`/`byte` must promote all the way up — without the deref-aware marker the nested pointer embed is skipped and the upper struct silently loses the method (CS1929). (Guarded by the `NestedEmbeddingPromotion` behavioral test for value embeds and the `PointerEmbeddingPromotion` test for one-level and two-level-transitive pointer embeds; runtime relies on the field case for `stackWorkBuf` → `stackWorkBufHdr` → `workbufhdr.nobj` and the pointer case for the trace writers.) Because the promotion is performed at conversion time by the generator, methods added later in hand-written C# are not automatically promoted; keeping the source in Go and re-converting (or using explicit interfaces) is the maintainable path.
 
