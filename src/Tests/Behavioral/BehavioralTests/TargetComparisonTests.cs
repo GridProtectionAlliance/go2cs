@@ -809,6 +809,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]
+    public void CheckVariadicBoxReceiver() => CheckTarget("VariadicBoxReceiver");
+
+    [TestMethod]
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
 
     [TestMethod]

@@ -189,6 +189,15 @@ public static class MethodSyntaxExtensions
                 ITypeSymbol? typeSymbol = typeInfo.Type;
                 string fullyQualifiedTypeName = GlobalQualify(typeSymbol?.ToDisplayString() ?? "object");
 
+                // Preserve a `params` (variadic) modifier: the converter emits a Go variadic method
+                // as `add(this ref Builder b, params ꓸꓸꓸbyte bytesʗp)`, but the resolved type is the
+                // bare `Span<byte>` — dropping `params` makes the generated ж<Builder> overload reject
+                // a call passing individual elements (`c.add(0xff)` → CS1929, falling back to the
+                // ref-receiver value method). The Go variadic is always the LAST, non-receiver
+                // parameter, so `params` never lands on the `this ж<T>` receiver.
+                if (param.Modifiers.Any(SyntaxKind.ParamsKeyword))
+                    fullyQualifiedTypeName = $"params {fullyQualifiedTypeName}";
+
                 return (type: fullyQualifiedTypeName, name: param.Identifier.Text);
             }).ToArray(),
 
