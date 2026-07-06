@@ -1,0 +1,52 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+// type releaser is a methodless func type — rendered inline as its base delegate
+
+internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
+    ref var log = ref Ꮡlog.Value;
+
+    return (error err) => {
+        if (err != default!){
+            Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":"u8 + err.Error());
+        } else {
+            Ꮡlog.ValueSlot = append(Ꮡlog.ValueSlot, tag + ":ok"u8);
+        }
+    };
+}
+
+internal static void consume(Action<error> r, error err) {
+    r(err);
+}
+
+[GoType] partial struct holder {
+    internal Action<error> release;
+    internal @string name;
+}
+
+internal static (nint, Action<error>, error) grab(@string tag, ж<slice<@string>> Ꮡlog) {
+    ref var log = ref Ꮡlog.Value;
+
+    return (len(tag), makeReleaser(tag, Ꮡlog), default!);
+}
+
+internal static void Main() {
+    ref var log = ref heap<slice<@string>>(out var Ꮡlog);
+    var (n, rel, err) = grab("a"u8, Ꮡlog);
+    consume(rel, default!);
+    fmt.Println("n:", n, "err:", err == default!);
+    var h = new holder(release: makeReleaser("field"u8, Ꮡlog), name: "h"u8);
+    h.release(fmt.Errorf("boom"u8));
+    consume(h.release, default!);
+    Action<error> r = makeReleaser("direct"u8, Ꮡlog);
+    r(default!);
+    consume(r, fmt.Errorf("late"u8));
+    foreach (var (_, line) in log) {
+        fmt.Println(line);
+    }
+}
+
+} // end main_package

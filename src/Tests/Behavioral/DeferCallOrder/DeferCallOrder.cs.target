@@ -5,9 +5,9 @@ using ꓸꓸꓸnint = Span<nint>;
 
 partial class main_package {
 
-internal delegate void stopFn();
+// type stopFn is a methodless func type — rendered inline as its base delegate
 
-internal static stopFn makeStop(@string tag, channel/*<-*/<@string> @out) {
+internal static Action makeStop(@string tag, channel/*<-*/<@string> @out) {
     var outʗ1 = @out;
     return () => {
         outʗ1.ᐸꟷ(tag);

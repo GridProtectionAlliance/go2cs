@@ -407,6 +407,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodlessFuncType() => CheckTarget("MethodlessFuncType");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

@@ -1360,6 +1360,50 @@ through a generic embed (`w.show()`) — receiver wrappers resolve the embedded 
 name; qualified calls work. Guarded by `GenericStructFields` (`wrapped[T]`/`tag[T]`) and
 `CrossPkgUser` (`holder[T]` embedding `*CrossPkgLib.Cache[T]`).
 
+### A methodless named func type renders as its base delegate
+
+Go treats a named func type as freely interconvertible with its underlying `func(...)` when the
+type has **no methods** — the name is purely documentary. `type releaseConn func(error)`
+(database/sql) and `type CancelFunc func()` (context) are assigned to and from anonymous
+`func(...)` values without conversion: `grabConn` returns `releaseConn`, `queryDC` takes
+`func(error)`, and Go passes one to the other. Emitting the named type as a *distinct* C#
+delegate (`ΔreleaseConn`) broke this — the base `Action<error>` its underlying renders to has no
+implicit conversion to it (CS1503/CS0029), and the mismatch even excluded the `ж`-receiver
+overload of methods taking such a param, so `db.pingDC(...)` on a boxed `*DB` failed with CS1929.
+
+A **non-generic** named func type with **no methods** is therefore rendered AS its base C#
+delegate (`Action`/`Func<…>`) everywhere it is referenced (`getTypeName`/`getFullTypeName` return
+the underlying signature), and its declaration is skipped (`visitFuncType` emits only a marker
+comment). Every named↔underlying conversion becomes identity, exactly as Go models it:
+```csharp
+// type releaseConn is a methodless func type — rendered inline as its base delegate
+internal static (ж<driverConn>, Action<error>, error) grabConn(this ж<ΔConn> Ꮡc, context.Context _) { … }
+internal static error queryDC(this ref DB db, …, Action<error> release, …) { … }
+```
+Three exclusions keep the collapse sound — a type is left as a named delegate if any holds:
+- it **has methods** (its method set is meaningful — the `FirstClassFunctions`/`hashFunc` wrap case
+  below still applies);
+- it is **generic** (it is referenced as `Seq<V>`, and the type parameter must stay in scope — see
+  the generic-`Seq` range-over-func case);
+- its **signature references another named func type, including itself**. A *self-referential* func
+  type — `type stateFn func(*machine) stateFn` (a Go state machine, `NamedFuncTypeStateMachine`) —
+  has no finite base-delegate form (`Func<M, Func<M, …>>` is infinite); and a reference to another
+  named func type (`strategy func(score) action`) would leave that name undefined after collapse.
+  Only the *leaves* of the func-type reference graph collapse; a referencing type stays named and
+  renders the collapsed leaf inside its own signature.
+
+Because the collapse applies at both the declaration and every reference, and to foreign types too
+(context's `CancelFunc` collapses in context's own conversion, so database/sql sees `Action`),
+consistency holds across packages. One position needed a companion fix: a variadic `...Option`
+element is package-class-qualified (`main_package.Option`) for a package-local named type, which
+would mangle a collapsed delegate to `main_package.Action` (CS0426) — `variadicElementType` now
+skips the qualifier when the element collapsed. Cleared 13 of database/sql's 17 errors (the whole
+named-func family + the CS1929 it masked). Guarded by `MethodlessFuncType` (a function returning
+the named type, one taking the anonymous underlying, a struct field, and a tuple-deconstruction
+seam across the two); regression-checked against the self-referential (`NamedFuncTypeStateMachine`,
+unchanged), nested-reference (`FirstClassFunctions`), and variadic-param (`PublicizedFuncTypeParam`)
+cases.
+
 ### Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
 C# conversion: internal/concurrent's `keyHash: mapType.Hasher` feeds a `hashFunc` field from a

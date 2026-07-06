@@ -8,15 +8,15 @@ partial class main_package {
     internal nint level;
 }
 
-public delegate void Option(ж<options> _);
+// type Option is a methodless func type — rendered inline as its base delegate
 
-internal static Option withLevel(nint n) {
+internal static Action<ж<options>> withLevel(nint n) {
     return (ж<options> o) => {
         o.Value.level = n;
     };
 }
 
-internal static nint apply(params Span<main_package.Option> optsʗp) {
+internal static nint apply(params Span<Action<ж<options>>> optsʗp) {
     var opts = optsʗp.slice();
 
     var o = Ꮡ(new options(nil));

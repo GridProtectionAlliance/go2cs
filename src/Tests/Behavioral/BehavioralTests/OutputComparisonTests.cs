@@ -367,6 +367,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodGroupGenericArg() => CheckTarget("MethodGroupGenericArg");
 
     [TestMethod]
+    public void CheckMethodlessFuncType() => CheckTarget("MethodlessFuncType");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

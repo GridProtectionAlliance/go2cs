@@ -84,8 +84,13 @@ func (v *Visitor) variadicElementType(elem types.Type) (typeName string, inline 
 	}
 
 	if named, ok := elem.(*types.Named); ok {
-		if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && !strings.Contains(typeName, ".") {
-			typeName = fmt.Sprintf("%s%s.%s", packageName, PackageSuffix, typeName)
+		// A methodless named func type has already been rendered AS its base delegate
+		// (`Action<…>`/`Func<…>`) by getCSTypeName — it is not a package-class member, so the
+		// `<pkg>_package.` qualifier below would mangle it (`main_package.Action`, CS0426).
+		if _, isCollapsed := methodlessNamedFuncSignature(elem); !isCollapsed {
+			if obj := named.Obj(); obj != nil && obj.Pkg() == v.pkg && !strings.Contains(typeName, ".") {
+				typeName = fmt.Sprintf("%s%s.%s", packageName, PackageSuffix, typeName)
+			}
 		}
 	}
 

@@ -8,6 +8,20 @@ import (
 
 // Handles function types in context of a TypeSpec
 func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, name string) {
+	// A non-generic methodless named func type is rendered AS its base C# delegate everywhere it
+	// is referenced (see methodlessNamedFuncSignature), matching Go's free named↔underlying func
+	// interconversion — so it emits NO distinct delegate declaration here. Only a marker comment,
+	// mirroring the hand-converted-type case; every reference resolves to `Action`/`Func<…>`.
+	if _, ok := methodlessNamedFuncSignature(identType); ok {
+		if !v.inFunction {
+			v.targetFile.WriteString(v.newline)
+		}
+
+		v.writeOutput("// type %s is a methodless func type — rendered inline as its base delegate", name)
+		v.targetFile.WriteString(v.newline)
+		return
+	}
+
 	var resultsSignature, parameterSignature string
 
 	resultsSignature, parameterSignature = v.convFuncType(funcType)

@@ -14,7 +14,7 @@ internal static readonly UntypedInt gamesPerSeries = 10;
     internal nint player, opponent, thisTurn;
 }
 
-internal delegate (score result, bool turnIsOver) action(score current);
+// type action is a methodless func type — rendered inline as its base delegate
 
 internal static (score, bool) roll(score s) {
     nint outcome = rand.Intn(6) + 1;
@@ -28,7 +28,7 @@ internal static (score, bool) stay(score s) {
     return (new score(s.opponent, s.player + s.thisTurn, 0), true);
 }
 
-internal delegate action strategy(score _);
+internal delegate Func<score, (score result, bool turnIsOver)> strategy(score _);
 
 internal static strategy stayAtK(nint k) {
     return (score s) => {
@@ -166,10 +166,10 @@ internal static @string joinPair(@string s, error err) {
     internal Func<@string, @string, bool> lookupSym;
 }
 
-internal delegate (nint, @string, error) splitter(@string s);
+// type splitter is a methodless func type — rendered inline as its base delegate
 
 [GoType] partial struct machine {
-    internal splitter split;
+    internal Func<@string, (nint, @string, error)> split;
 }
 
 [GoType] partial struct worker {

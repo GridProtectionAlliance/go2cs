@@ -3366,9 +3366,106 @@ func (v *Visitor) collectTypePackages(t types.Type, seen map[types.Type]bool) {
 	}
 }
 
+// methodlessNamedFuncSignature reports the underlying *types.Signature when t is a NON-GENERIC
+// named func type with NO methods — `type releaseConn func(error)`, `context.CancelFunc`. Go treats
+// such a type as freely interconvertible with its underlying `func(...)` (the name is purely
+// documentary when there are no methods), but the converter would otherwise emit a distinct C#
+// delegate (`ΔreleaseConn`) incompatible with the base `Action<error>` its underlying renders to —
+// so a value flowing between the two (database/sql's grabConn returns `releaseConn`, queryDC takes
+// `func(error)`) fails (CS1503/CS0029, and the mismatch blocks the ж-receiver overload → CS1929).
+// Such a type is rendered AS its base delegate everywhere and its declaration is skipped
+// (visitFuncType), making the conversions identity, exactly as Go models them. A named func type
+// WITH methods keeps its distinct delegate (its method set is meaningful); a GENERIC one keeps its
+// name (it is referenced as `Seq<V>`, and the type parameter must stay in scope).
+func methodlessNamedFuncSignature(t types.Type) (*types.Signature, bool) {
+	named, ok := types.Unalias(t).(*types.Named)
+
+	if !ok {
+		return nil, false
+	}
+
+	if named.NumMethods() != 0 || named.TypeParams() != nil {
+		return nil, false
+	}
+
+	sig, ok := named.Underlying().(*types.Signature)
+
+	if !ok {
+		return nil, false
+	}
+
+	// Don't collapse when the signature references ANY named func type (its own or another) in
+	// its params/results. A SELF-referential func type — `type stateFn func(*machine) stateFn`
+	// (a Go state machine) — has no finite base-delegate form (`Func<M, Func<M, …>>` is infinite),
+	// and a reference to ANOTHER named func type would leave that name undefined after collapse
+	// (FirstClassFunctions' `strategy func(score) action`). Keeping such a type as a named
+	// delegate is correct and self-consistent; only the leaves of the func-type reference graph
+	// (whose signatures name no func types — database/sql's `releaseConn func(error)`, context's
+	// `CancelFunc func()`) collapse.
+	if signatureReferencesNamedFuncType(sig) {
+		return nil, false
+	}
+
+	return sig, true
+}
+
+// signatureReferencesNamedFuncType reports whether any param/result of sig is (or, through
+// pointer/slice/array/map/chan wrappers, contains) a NAMED type whose underlying is a func
+// signature — i.e. a named func type. Used to keep self- or mutually-referential func types as
+// named delegates (see methodlessNamedFuncSignature). Struct fields are not descended into (a
+// struct-typed param does not make the delegate recursive).
+func signatureReferencesNamedFuncType(sig *types.Signature) bool {
+	var referencesFunc func(t types.Type) bool
+
+	referencesFunc = func(t types.Type) bool {
+		switch typ := t.(type) {
+		case *types.Named:
+			if _, ok := typ.Underlying().(*types.Signature); ok {
+				return true
+			}
+		case *types.Pointer:
+			return referencesFunc(typ.Elem())
+		case *types.Slice:
+			return referencesFunc(typ.Elem())
+		case *types.Array:
+			return referencesFunc(typ.Elem())
+		case *types.Map:
+			return referencesFunc(typ.Key()) || referencesFunc(typ.Elem())
+		case *types.Chan:
+			return referencesFunc(typ.Elem())
+		}
+
+		return false
+	}
+
+	tuples := []*types.Tuple{sig.Params(), sig.Results()}
+
+	for _, tuple := range tuples {
+		if tuple == nil {
+			continue
+		}
+
+		for i := range tuple.Len() {
+			if referencesFunc(tuple.At(i).Type()) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if t == nil {
 		return ""
+	}
+
+	// A non-generic methodless named func type renders as its base C# delegate (its underlying
+	// signature), matching Go's free named↔underlying func interconversion (see
+	// methodlessNamedFuncSignature). Guarded so a pointer/composite wrapper still recurses here.
+	if sig, ok := methodlessNamedFuncSignature(t); ok {
+		v.collectTypePackages(t, nil)
+		return v.getTypeName(sig, isUnderlying)
 	}
 
 	// Register any foreign package whose type is emitted here so visitFile can supply the file-local
@@ -3510,6 +3607,12 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 
 	if pointer, ok := t.(*types.Pointer); ok {
 		return "*" + v.getFullTypeName(pointer.Elem(), isUnderlying)
+	}
+
+	// A non-generic methodless named func type renders as its base C# delegate (see
+	// methodlessNamedFuncSignature / the getTypeName twin).
+	if sig, ok := methodlessNamedFuncSignature(t); ok {
+		return v.getFullTypeName(sig, isUnderlying)
 	}
 
 	if name, ok := v.liftedTypeMap[t]; ok {
