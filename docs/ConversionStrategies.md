@@ -1241,6 +1241,21 @@ composite-literal fields (generic delegate params stay native — unsubstituted 
 cannot render). Guarded by `AnonymousInterfaces` (`tally`/`fill`, `byteRepeat`, and the
 named-array `quad`/`frame` Range slice).
 
+The same interface-field record+route also fires for a **named non-struct** element that
+implements the field's interface. The gate above triggered only when the element's underlying is a
+struct (or the field is embedded), so a named scalar with a method set — hpack's
+`DecodingError{InvalidIndexError(idx)}`, where `type InvalidIndexError int` has an `Error()` method
+satisfying the `error` field — recorded no `GoImplement<InvalidIndexError, error>` and passed the
+value bare to the interface-typed constructor parameter (which surfaces as `NilType`, CS1503). The
+gate now also fires when a named, non-struct, **non-interface** element type `types.Implements` the
+field's interface — mirroring the call-argument path, which routes any argument into an interface
+parameter with no struct-only restriction. Recording the `GoImplement` is what clears the error (the
+generated implementation makes the scalar implement the interface, so the bare pass then converts
+implicitly); the render routing (`interfaceTypes[eltIndex]`) is set too, matching the struct case. An
+interface-typed element is excluded — it is already the interface and needs no adapter. (Guarded by
+the `InterfaceFieldNamedScalar` behavioral test — a named `int` into an `error` field and a named
+`string` into a local interface field, positional and keyed forms, output-compared vs Go.)
+
 ### Astral rune literals
 A quoted rune literal beyond the BMP (`'\U0001D504'`) cannot be a C# char literal — it emits
 the code point (`(rune)0x1D504`); BMP literals keep their source text verbatim (html's entity

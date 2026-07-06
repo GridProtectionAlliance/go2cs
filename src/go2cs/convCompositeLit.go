@@ -192,7 +192,31 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 						}
 
 						if eltType != nil {
-							if _, ok := eltType.Underlying().(*types.Struct); ok || field.Embedded() {
+							_, eltIsStruct := eltType.Underlying().(*types.Struct)
+
+							// A named NON-struct element that implements the interface field —
+							// hpack's `DecodingError{InvalidIndexError(idx)}`, where
+							// `type InvalidIndexError int` has an Error() method satisfying the
+							// `error` field — must ALSO be recorded + routed, or it is passed bare
+							// to the interface-typed constructor parameter (surfaces as NilType,
+							// CS1503). The struct/embedded triggers are unchanged; this adds
+							// method-set satisfaction for a named, non-struct, non-interface value
+							// (the call-argument path already routes any arg into an interface param
+							// without a struct-only restriction). An interface-typed element is
+							// excluded — it is already the interface, so it needs no adapter.
+							eltImplementsIface := false
+
+							if !eltIsStruct && !field.Embedded() {
+								if named, ok := eltType.(*types.Named); ok {
+									if _, eltIsIface := named.Underlying().(*types.Interface); !eltIsIface {
+										if iface, ok := fieldType.Underlying().(*types.Interface); ok && types.Implements(eltType, iface) {
+											eltImplementsIface = true
+										}
+									}
+								}
+							}
+
+							if eltIsStruct || field.Embedded() || eltImplementsIface {
 								v.convertToInterfaceType(fieldType, eltType, "")
 
 								// Route the element through the interface conversion at RENDER

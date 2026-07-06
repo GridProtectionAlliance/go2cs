@@ -348,6 +348,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInterfaceCasting() => CheckTarget("InterfaceCasting");
 
     [TestMethod]
+    public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
+
+    [TestMethod]
     public void CheckInterfaceImplementation() => CheckTarget("InterfaceImplementation");
 
     [TestMethod]
