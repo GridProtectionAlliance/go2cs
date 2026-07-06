@@ -46,6 +46,11 @@ public record MethodInfo
 
     public bool IsRefRecv { get; init; }
 
+    // Set when this is a direct-ж (box-receiver, `this ж<T>`) primary being promoted through a POINTER
+    // embed: the promoted forwarder must call it on the embed's BOX hop (`target.<embed>`), not the
+    // deref'd value (`target.<embed>.Value`) a value-receiver method uses — the box receiver needs ж<T>.
+    public bool IsBoxRecv { get; init; }
+
     public bool IsGeneric => GenericTypes.Length > 0;
 
     public string CallParameters => GetCallParameters(true);

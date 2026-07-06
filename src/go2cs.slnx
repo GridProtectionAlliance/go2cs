@@ -233,6 +233,7 @@
     <Project Path="Tests/Behavioral/PointerCastSliceRange/PointerCastSliceRange.csproj" />
     <Project Path="Tests/Behavioral/PointerSelectorDeref/PointerSelectorDeref.csproj" />
     <Project Path="Tests/Behavioral/PointerCopyWalk/PointerCopyWalk.csproj" />
+    <Project Path="Tests/Behavioral/PointerEmbedBoxReceiver/PointerEmbedBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/PointerEmbeddingPromotion/PointerEmbeddingPromotion.csproj" />
     <Project Path="Tests/Behavioral/PointerFieldArrayElementAddress/PointerFieldArrayElementAddress.csproj" />
     <Project Path="Tests/Behavioral/PointerFieldOfBoxedGlobal/PointerFieldOfBoxedGlobal.csproj" />

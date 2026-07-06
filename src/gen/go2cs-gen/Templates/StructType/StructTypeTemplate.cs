@@ -361,6 +361,26 @@ internal class StructTypeTemplate : TemplateBase
         if (structDecl is not null)
             structMethodNames.UnionWith(structDecl.GetBoxReceiverMethodNames(compilation!));
 
+        // POINTER-embedded types (`*state` → the `ж<state>` hop property): their BOX-receiver primaries
+        // (`state.Write(this ж<state>)`) promote too — the embed hop `target.<embed>` is already a ж<T>,
+        // so `target.<embed>.M()` binds the box receiver directly. GetExtensionMethods harvests only
+        // value-receiver forms, so those box primaries are collected separately below. Keyed by embedded
+        // TYPE name (matches promotedStructType). Gated to POINTER embeds: a VALUE embed's `target.<embed>`
+        // is a value that cannot bind a ж-receiver (sha3's cshakeState embeds *state — CS1929 without this).
+        // Keyed by the embed's SIMPLE type name (dropping any collision prefix) — promotedStructType
+        // arrives as the qualified box form `global::go.ж<…Inner>`, which the loops below reduce with
+        // the same GetSimpleName call the forwarder emission uses, so both sides normalize to `Inner`.
+        HashSet<string> pointerEmbedTypeNames = structDecl is null
+            ? new(StringComparer.Ordinal)
+            : new(structDecl.GetEmbeddedPointerHopNames().Select(hop => GetSimpleName(hop.TypeName, dropCollisionPrefix: true)), StringComparer.Ordinal);
+
+        // promotedStructType arrives as the qualified BOX form, so its GetSimpleName carries a trailing
+        // `.Value` (the pointer deref) the embed keys above do not — strip it before the membership test.
+        static string embedKey(string typeName) =>
+            GetSimpleName(typeName, dropCollisionPrefix: true) is var n && n.EndsWith(".Value", StringComparison.Ordinal)
+                ? n[..^".Value".Length]
+                : n;
+
         // Go's AMBIGUITY rule: a method name promoted from TWO OR MORE embeds at the same depth
         // is not promoted at all — bufio ReadWriter's Reader.Size vs Writer.Size (Go requires the
         // qualified rw.Reader.Size(); both generated wrappers were CS0111).
@@ -387,6 +407,14 @@ internal class StructTypeTemplate : TemplateBase
 
                 foreach (MethodInfo m in decl.GetExtensionMethods(comp!) ?? [])
                     embedMethodNames.Add(m.Name);
+
+                // A POINTER embed's box-receiver primaries promote too (see below) — count them for
+                // the same cross-embed ambiguity rule.
+                if (pointerEmbedTypeNames.Contains(embedKey(typeName)))
+                {
+                    foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
+                        embedMethodNames.Add(m.Name);
+                }
 
                 foreach ((string memberType, _, _, bool isEmbedded) in decl.GetStructMembers(comp!, true))
                 {
@@ -425,6 +453,19 @@ internal class StructTypeTemplate : TemplateBase
                         promotedStructMethods.Add(m);
                 }
 
+                // A POINTER embed's BOX-receiver primaries (`this ж<T>`) promote unchanged — the hop
+                // `target.<embed>` is a ж<T>, so the value/pointer forwarders below (`target.<embed>.M(…)`)
+                // bind the box receiver directly. GetExtensionMethods above harvests only value-receiver
+                // forms, so collect the box primaries here (sha3's cshakeState←*state.Write, CS1929).
+                if (pointerEmbedTypeNames.Contains(embedKey(typeName)))
+                {
+                    foreach (MethodInfo m in decl.GetBoxReceiverExtensionMethods(comp!))
+                    {
+                        if (promotedMethodNames.Add(m.Name))
+                            promotedStructMethods.Add(m with { IsBoxRecv = true });
+                    }
+                }
+
                 // Recurse into nested embedded struct fields. The converter emits every embed -
                 // value or POINTER - as a `partial ref` PROPERTY, the marker the top level keys
                 // isPromotedStruct on; GetStructMembers(..., true) surfaces it as the 4th tuple
@@ -459,6 +500,15 @@ internal class StructTypeTemplate : TemplateBase
                 // The shim mirrors the SOURCE receiver kind: a by-value method stays by-value
                 // so an RVALUE receiver binds (reflect v.Elem().kind() - CS1510 on forced ref).
                 string recvMod = method.IsRefRecv ? "ref " : "";
+
+                // A value-receiver method binds on the embed's deref'd value (`target.<embed>.Value` —
+                // GetSimpleName appends `.Value` for a pointer embed); a BOX-receiver primary (`this ж<T>`)
+                // binds on the box hop itself (`target.<embed>`), so drop the `.Value` for it.
+                string embedAccess = GetSimpleName(promotedStructType, dropCollisionPrefix: true);
+
+                if (method.IsBoxRecv && embedAccess.EndsWith(".Value", StringComparison.Ordinal))
+                    embedAccess = embedAccess[..^".Value".Length];
+
                 result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this {recvMod}{StructName} target");
 
                 if (method.Parameters.Length > 1)
@@ -466,8 +516,8 @@ internal class StructTypeTemplate : TemplateBase
                     result.Append(", ");
                     result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
                 }
-                
-                result.Append($") => target.{GetSimpleName(promotedStructType, dropCollisionPrefix: true)}.{method.Name}(");
+
+                result.Append($") => target.{embedAccess}.{method.Name}(");
                 result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => param.name)));
                 result.Append(");");
 

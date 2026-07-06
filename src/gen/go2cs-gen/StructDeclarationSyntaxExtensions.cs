@@ -27,6 +27,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static go2cs.Symbols;
 
 namespace go2cs;
 
@@ -170,6 +171,41 @@ public static class StructDeclarationSyntaxExtensions
             .Where(method => method.IsExtensionMethodForStruct(structName));
 
         return extensions.Select(method => method.GetMethodInfo(compilation));
+    }
+
+    /// <summary>
+    /// Box-receiver counterpart to <see cref="GetExtensionMethods"/>: the struct's direct-ж primary
+    /// methods (<c>static M(this ж&lt;T&gt; …)</c>), as full <see cref="MethodInfo"/>. Such a method
+    /// promotes through a POINTER embed unchanged — the converter emits the embed hop
+    /// <c>target.&lt;embed&gt;</c> as a <c>ж&lt;T&gt;</c>, so <c>target.&lt;embed&gt;.M()</c> binds the
+    /// box receiver directly (no box hop). <see cref="IsExtensionMethodForStruct"/> matches only
+    /// value-receiver forms, so these need a separate harvest — sha3's <c>cshakeState</c> embeds
+    /// <c>*state</c>, whose <c>Write</c> is <c>this ж&lt;state&gt;</c>; without this it had no promoted
+    /// forwarder (CS1929). Callers must gate to POINTER embeds: a VALUE embed's <c>target.&lt;embed&gt;</c>
+    /// is a value that cannot bind a ж-receiver (that shape needs the box-hop form).
+    /// </summary>
+    public static IEnumerable<MethodInfo> GetBoxReceiverExtensionMethods(
+        this StructDeclarationSyntax structDeclaration,
+        Compilation compilation)
+    {
+        string boxType = $"{PointerPrefix}<{structDeclaration.Identifier.Text}>";
+
+        return compilation.SyntaxTrees
+            .SelectMany(tree => tree.GetRoot()
+                .DescendantNodes()
+                .OfType<MethodDeclarationSyntax>()
+                .Where(method =>
+                    method.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)) &&
+                    method.ParameterList.Parameters.Count > 0))
+            .Where(method =>
+            {
+                ParameterSyntax? firstParam = method.ParameterList.Parameters.FirstOrDefault();
+
+                return firstParam is not null &&
+                       firstParam.Modifiers.Any(m => m.IsKind(SyntaxKind.ThisKeyword)) &&
+                       (firstParam.Type?.ToString() ?? "") == boxType;
+            })
+            .Select(method => method.GetMethodInfo(compilation));
     }
 
     /// <summary>
