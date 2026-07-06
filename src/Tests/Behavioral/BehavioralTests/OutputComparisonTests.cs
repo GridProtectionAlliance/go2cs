@@ -406,6 +406,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");
+
+    [TestMethod]
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]

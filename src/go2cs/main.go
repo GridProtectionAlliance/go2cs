@@ -90,6 +90,23 @@ type LambdaCapture struct {
 	// Conversion phase tracking
 	conversionInLambda bool     // Currently converting a lambda
 	currentConversion  ast.Node // Current node being converted
+
+	// conversionStack saves the conversion-phase fields above (plus the per-lambda var maps) on each
+	// enterLambdaConversion so a NESTED lambda restores the ENCLOSING lambda's state on exit rather
+	// than clobbering it. Without it, a nested func literal's exit reset conversionInLambda to false
+	// (and nil'd the var maps), so every receiver/box reference in the enclosing lambda's body AFTER
+	// the nested lambda rendered as the un-boxed ref-local — uncapturable inside a closure (CS8175;
+	// database/sql (*Stmt).QueryContext read `s.cg` after the inner releaseConn closure).
+	conversionStack []lambdaConversionState
+}
+
+// lambdaConversionState snapshots the conversion-phase LambdaCapture fields that
+// enter/exitLambdaConversion mutate, so nested lambdas nest correctly (LIFO save/restore).
+type lambdaConversionState struct {
+	conversionInLambda   bool
+	currentConversion    ast.Node
+	currentLambdaVars    map[string]string
+	currentLambdaVarObjs map[string]types.Object
 }
 
 type Visitor struct {
@@ -4177,12 +4194,13 @@ func convertToCSFullTypeName(typeName string) string {
 		paramString := typeName[5:closingParenIndex]
 		paramTypes := extractTypes(paramString)
 
-		// Convert parameter types to C#
-		csTypeNames := make([]string, len(paramTypes))
-
-		for i, pType := range paramTypes {
-			csTypeNames[i] = convertToCSTypeName(pType)
-		}
+		// extractTypes already renders each parameter in C# form (a NAMED param has its type
+		// converted after the name is stripped; the bare-type case is converted in place), so use
+		// its output directly. Re-running convertToCSTypeName here DOUBLE-converts an already-C#
+		// param — an emitted `map<@string, ж<Object>>` re-fed through the `map<` arm's
+		// splitMapKeyValue mis-parses to `map<@string, ж<Object>, >` (spurious trailing empty type
+		// arg → CS1031), as in go/ast's `type Importer func(imports map[string]*Object, …)`.
+		csTypeNames := paramTypes
 
 		// Check for return type after the closing parenthesis
 		remainingType := strings.TrimSpace(typeName[closingParenIndex+1:])
@@ -4345,9 +4363,12 @@ func extractTypes(signature string) []string {
 			}
 		}
 
-		// If no space found, the entire param is a type (e.g., "string")
+		// If no space found, the entire param is a type (e.g., "string") — convert it in place so
+		// this function ALWAYS returns C#-form types (the named branch below already does), letting
+		// the sole caller trust the output without a second convertToCSTypeName pass (which would
+		// double-convert an already-C# named param — see convertToCSFullTypeName's func-handler).
 		if typeStart == 0 {
-			types = append(types, param)
+			types = append(types, convertToCSTypeName(param))
 		} else {
 			// Extract everything after the space
 			paramType := convertToCSTypeName(strings.TrimSpace(param[typeStart:]))

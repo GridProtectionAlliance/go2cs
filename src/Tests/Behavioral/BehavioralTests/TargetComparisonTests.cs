@@ -446,6 +446,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedFuncTypeMapParam() => CheckTarget("NamedFuncTypeMapParam");
+
+    [TestMethod]
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]

@@ -1488,6 +1488,20 @@ set) is byte-identical — only the func-type-subpackage-param shape moves. (Gua
 collapsed delegate carries the `sync/atomic` sub-package parameter, output-compared vs Go; the same
 shape drives path/filepath's `WalkDir`/`Walk` referencing `io/fs.DirEntry`/`FileInfo`.)
 
+A collapsed func type's **parameter list must not be double-converted**. `convertToCSFullTypeName`'s
+`func(` handler split the parameter string with `extractTypes`, then re-ran `convertToCSTypeName` over each
+result — but `extractTypes` already renders a NAMED parameter in C# form (it strips the Go name and converts
+the type). Re-feeding an already-C# `map<@string, ж<Object>>` through the `map<` arm's `splitMapKeyValue`
+mis-parsed it into `map<@string, ж<Object>, >` — a spurious trailing empty type arg (CS1031 "Type expected",
+go/ast's `NewPackage` taking `type Importer func(imports map[string]*Object, path string) (…)`). The fix makes
+`extractTypes` **always** return C#-form (the bare-type/unnamed branch now converts in place too, matching the
+named branch), and the caller trusts that output directly instead of a second pass. This is byte-identical
+everywhere except named-parameter func types — bare-type func types (`func(int, string)`) were already
+converted once and stay so, just at the `extractTypes` site rather than the caller. (Guarded by the
+`NamedFuncTypeMapParam` behavioral test — `type Importer func(imports map[string]*Node, path string) (pkg
+*Node, err error)` used as a function parameter, output-compared vs Go; CNR byte-identical across the corpus,
+and an A/B reconvert of go/ast shows only that one collapsed-delegate parameter shape moving.)
+
 A companion root cleared path/filepath fully: a **cross-package type ALIAS whose target lives in yet
 another package** — `os.FileInfo = fs.FileInfo` (os/types.go, target in `io/fs`) — is emitted as an
 assembly-scoped `global using FileInfo = go.io.fs_package.FileInfo;` in **os's own** conversion, never as
