@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
@@ -215,13 +216,9 @@ func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
 		return ""
 	}
 
-	if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); !isPtrRecv {
-		return ""
-	}
+	recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
 
-	identX, ok := selectorExpr.X.(*ast.Ident)
-
-	if !ok {
+	if !isPtrRecv {
 		return ""
 	}
 
@@ -231,21 +228,51 @@ func (v *Visitor) pointerReceiverBoxMethodGroup(fun ast.Expr) string {
 		return ""
 	}
 
-	xPtr, alreadyPtr := recvType.(*types.Pointer)
+	methodSel := "." + v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))
 
-	if !alreadyPtr {
+	// The receiver is ALREADY a pointer (`defer conf.releaseSema()` with `conf *resolverConfig`):
+	// an ident whose box is `Ꮡ`+name. A PROMOTED method (net's `defer zc.Unlock()` — Unlock on the
+	// embedded sync.RWMutex) has no extension on the OUTER box type (CS1061), so only a method
+	// declared DIRECTLY on the pointee takes the box group.
+	if xPtr, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+		identX, ok := selectorExpr.X.(*ast.Ident)
+
+		if !ok {
+			return ""
+		}
+
+		if !types.Identical(recvPtr.Elem(), xPtr.Elem()) {
+			return ""
+		}
+
+		ptrContext := DefaultIdentContext()
+		ptrContext.isPointer = true
+
+		return v.convIdent(identX, ptrContext) + methodSel
+	}
+
+	// The receiver is a VALUE whose type is exactly the pointer-receiver's pointee — Go auto-takes
+	// its address (`defer b.deck.reset()`, `deck pcDeck` a value field, `reset` a `*pcDeck` method;
+	// runtime/pprof, database/sql, log/slog). The plain render deref-aliases the field to a value
+	// (`Ꮡb.Value.deck`), whose method-group trim binds the `[GoRecv] ref` extension (CS1113).
+	// Render `&receiver` through the address machinery — a boxed base gives an aliasing field-ref
+	// `Ꮡb.of(T.Ꮡdeck)`, an escaping value local gives its box `Ꮡx`, a plain value gives the
+	// `Ꮡ(value)` copy — then bind the method; the ж<T> overload forms a valid delegate captured at
+	// defer time. Restricted to a NAMED value type (its RecvGenerator box overload exists) matching
+	// the pointee exactly (a promoted/embedded method has no box extension on this type).
+	if !types.Identical(recvPtr.Elem(), recvType) {
 		return ""
 	}
 
-	// A PROMOTED method (net interface.go's `defer zc.Unlock()` — Unlock declared on the
-	// embedded sync.RWMutex) has no extension on the OUTER box type (CS1061); only a method
-	// declared directly on the pointee takes the box group.
-	if recvPtr, ok := sig.Recv().Type().(*types.Pointer); !ok || !types.Identical(recvPtr.Elem(), xPtr.Elem()) {
+	if _, ok := recvType.(*types.Named); !ok {
 		return ""
 	}
 
-	ptrContext := DefaultIdentContext()
-	ptrContext.isPointer = true
+	addr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: selectorExpr.X}, DefaultUnaryExprContext())
 
-	return v.convIdent(identX, ptrContext) + "." + v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))
+	if addr == "" {
+		return ""
+	}
+
+	return addr + methodSel
 }

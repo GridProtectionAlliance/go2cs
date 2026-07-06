@@ -171,6 +171,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
 
     [TestMethod]
+    public void CheckDeferValueFieldPtrReceiver() => CheckTarget("DeferValueFieldPtrReceiver");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]

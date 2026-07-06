@@ -171,6 +171,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
 
     [TestMethod]
+    public void CheckDeferValueFieldPtrReceiver() => CheckTarget("DeferValueFieldPtrReceiver");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]

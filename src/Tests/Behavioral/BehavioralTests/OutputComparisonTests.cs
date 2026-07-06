@@ -157,6 +157,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferTypelessReturns() => CheckTarget("DeferTypelessReturns");
 
     [TestMethod]
+    public void CheckDeferValueFieldPtrReceiver() => CheckTarget("DeferValueFieldPtrReceiver");
+
+    [TestMethod]
     public void CheckDefinedTypeOverInterface() => CheckTarget("DefinedTypeOverInterface");
 
     [TestMethod]
