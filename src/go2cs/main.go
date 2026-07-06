@@ -3492,6 +3492,23 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		return "*" + v.getTypeName(pointer.Elem(), isUnderlying)
 	}
 
+	// A FOREIGN type ALIAS whose TARGET lives in yet ANOTHER package — `os.FileInfo = fs.FileInfo`
+	// (os/types.go, target in io/fs) — is emitted as an assembly-scoped `global using FileInfo =
+	// go.io.fs_package.FileInfo;` in ITS OWN package's conversion, NOT as a member of that package's C#
+	// class, so a cross-package reference `os_package.FileInfo` does not resolve (CS0426, path/filepath's
+	// `os.Lstat` func value). Render the alias's TARGET instead. Gated to a DIFFERENT-package target: an
+	// alias to a SAME-package type (`CrossPkgLib.Temperature = Celsius`) already resolves through the
+	// existing `ꓸ` global-using alias, so it is left untouched (no churn on that mechanism).
+	if alias, ok := t.(*types.Alias); ok {
+		if aliasObj := alias.Obj(); aliasObj != nil && aliasObj.Pkg() != nil && aliasObj.Pkg() != v.pkg {
+			if targetNamed, ok := types.Unalias(t).(*types.Named); ok {
+				if targetObj := targetNamed.Obj(); targetObj != nil && targetObj.Pkg() != nil && targetObj.Pkg() != aliasObj.Pkg() {
+					return v.getTypeName(targetNamed, isUnderlying)
+				}
+			}
+		}
+	}
+
 	if name, ok := v.liftedTypeMap[t]; ok {
 		return name
 	}

@@ -1484,9 +1484,22 @@ corpus is byte-identical except the intended change, and an A/B reconvert of net
 set) is byte-identical — only the func-type-subpackage-param shape moves. (Guarded by the
 `SubpackageFuncTypeParam` behavioral test — a methodless `applyFunc func(*atomic.Int32) int32` whose
 collapsed delegate carries the `sync/atomic` sub-package parameter, output-compared vs Go; the same
-shape drives path/filepath's `WalkDir`/`Walk` referencing `io/fs.DirEntry`/`FileInfo`. A separate
-residual there — `os.FileInfo`, a Go type ALIAS to `fs.FileInfo`, rendered `os_package.FileInfo` in a
-collapsed signature — is a distinct alias-resolution root, banked.)
+shape drives path/filepath's `WalkDir`/`Walk` referencing `io/fs.DirEntry`/`FileInfo`.)
+
+A companion root cleared path/filepath fully: a **cross-package type ALIAS whose target lives in yet
+another package** — `os.FileInfo = fs.FileInfo` (os/types.go, target in `io/fs`) — is emitted as an
+assembly-scoped `global using FileInfo = go.io.fs_package.FileInfo;` in **os's own** conversion, never as
+a member of the os package's C# class, so a cross-package reference `os_package.FileInfo` does not resolve
+(CS0426, path/filepath's `lstat = os.Lstat` func value). `getTypeName` now renders such an alias as its
+**target** — `os.FileInfo` → `fs.FileInfo` (→ `io.fs_package.FileInfo` via the file's `fs` using). Gated
+to a **different-package target**: an alias to a SAME-package type (`CrossPkgLib.Temperature = Celsius`)
+already resolves through the existing `ꓸ` global-using alias (`CrossPkgLibꓸTemperature`) and is left
+untouched — narrowing here reverted a `CrossPkgUser` churn the blanket form caused. CNR byte-identical;
+an A/B of os+io/ioutil (same package set) shows only that one intended resolution (io/ioutil's `ReadDir`
+sort lambda moved `osꓸFileInfo` → `fs.FileInfo`, matching the file's other `fs.FileInfo` refs — still
+compiles). **GUARD OWED** — the shape needs three packages (B declares `Y`, A aliases `type X = B.Y`, C
+references `A.X`), which neither the single-package baseline nor the 2-package `CrossPkg` harness
+expresses; validated by the `go-src-converted/path/filepath` build (1→0) + io/ioutil build.)
 
 ### Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
