@@ -493,6 +493,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]
+    public void CheckNestedLambdaReceiverField() => CheckTarget("NestedLambdaReceiverField");
+
+    [TestMethod]
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]

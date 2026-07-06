@@ -38,8 +38,8 @@ internal static void Main() {
     ((Action)(() => func((defer, recover) => {
         var xʗ2 = x;
         defer(xʗ2.of(builder.Ꮡc).reset);
-        x.of(builder.Ꮡc).inc();
-        fmt.Println("inside2:", (~x).c.n);
+        xʗ1.of(builder.Ꮡc).inc();
+        fmt.Println("inside2:", (~xʗ1).c.n);
     })))();
     fmt.Println("after2:", (~x).c.n);
 }

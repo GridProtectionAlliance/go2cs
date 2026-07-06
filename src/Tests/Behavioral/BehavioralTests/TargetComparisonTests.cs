@@ -533,6 +533,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNestedGenericTypes() => CheckTarget("NestedGenericTypes");
 
     [TestMethod]
+    public void CheckNestedLambdaReceiverField() => CheckTarget("NestedLambdaReceiverField");
+
+    [TestMethod]
     public void CheckNestedMapAssign() => CheckTarget("NestedMapAssign");
 
     [TestMethod]

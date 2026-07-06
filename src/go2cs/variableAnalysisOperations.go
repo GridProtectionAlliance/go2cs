@@ -208,8 +208,18 @@ func newLambdaCapture() *LambdaCapture {
 	}
 }
 
-// Helper functions to manage conversion phase lambda context
+// Helper functions to manage conversion phase lambda context. enter/exit are paired (the callers
+// always `defer v.exitLambdaConversion()`) and nest: enter PUSHES the current conversion state and
+// installs fresh state for `node`; exit POPS and restores the enclosing state. Restoring (rather
+// than resetting to false/nil) is what lets a receiver/box reference in an enclosing lambda's body
+// keep rendering through its box after a NESTED lambda finishes (CS8175 — see conversionStack).
 func (v *Visitor) enterLambdaConversion(node ast.Node) {
+	v.lambdaCapture.conversionStack = append(v.lambdaCapture.conversionStack, lambdaConversionState{
+		conversionInLambda:   v.lambdaCapture.conversionInLambda,
+		currentConversion:    v.lambdaCapture.currentConversion,
+		currentLambdaVars:    v.lambdaCapture.currentLambdaVars,
+		currentLambdaVarObjs: v.lambdaCapture.currentLambdaVarObjs,
+	})
 	v.lambdaCapture.conversionInLambda = true
 	v.lambdaCapture.currentConversion = node
 	v.lambdaCapture.currentLambdaVars = make(map[string]string)
@@ -217,6 +227,17 @@ func (v *Visitor) enterLambdaConversion(node ast.Node) {
 }
 
 func (v *Visitor) exitLambdaConversion() {
+	if n := len(v.lambdaCapture.conversionStack); n > 0 {
+		prev := v.lambdaCapture.conversionStack[n-1]
+		v.lambdaCapture.conversionStack = v.lambdaCapture.conversionStack[:n-1]
+		v.lambdaCapture.conversionInLambda = prev.conversionInLambda
+		v.lambdaCapture.currentConversion = prev.currentConversion
+		v.lambdaCapture.currentLambdaVars = prev.currentLambdaVars
+		v.lambdaCapture.currentLambdaVarObjs = prev.currentLambdaVarObjs
+		return
+	}
+
+	// Defensive: an unbalanced exit (no matching enter) falls back to the top-level reset.
 	v.lambdaCapture.conversionInLambda = false
 	v.lambdaCapture.currentConversion = nil
 	v.lambdaCapture.currentLambdaVars = nil
