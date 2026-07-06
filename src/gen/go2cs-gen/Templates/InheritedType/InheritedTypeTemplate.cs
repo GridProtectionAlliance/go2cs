@@ -41,11 +41,32 @@ internal class InheritedTypeTemplate : TemplateBase
         // IAddition/IEquality/IComparisonOperators (time.Duration in runtime/debug's
         // SetGCPercent sort was CS0315 ×3); the operators below already exist for every
         // numeric kind, only the interface declarations were missing (the golib uintptr
-        // struct precedent). Modulus/bitwise/shift stay undeclared — their operators are
-        // kind-gated.
-        "Numeric" => $" : IEquatable<{TargetTypeName}>, System.Numerics.IAdditionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.ISubtractionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IMultiplyOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IDivisionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IEqualityOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IComparisonOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IIncrementOperators<{TargetTypeName}>, System.Numerics.IDecrementOperators<{TargetTypeName}>",
+        // struct precedent).
+        "Numeric" => NumericInterfaces,
         _ => UnderlyingArrayElementType is null ? "" : $" : IArray<{UnderlyingArrayElementType}>"
     };
+
+    // A numeric wrapper over an INTEGER underlying (not float/complex) — the modulus, bitwise and
+    // shift operators exist for it (NumericTypeTemplate.GetComplementOperator, same kind-gate), so
+    // it can ALSO satisfy a converter-emitted `~integer` operator constraint that lifts to
+    // IModulus/IBitwise/IShiftOperators. internal/trace's `type dataTable[EI ~uint64, E]`
+    // instantiated with `type stringID uint64` was CS0315 ×48 on exactly these three interfaces.
+    // Float/complex keep only the common set below (they have no %/&/<<). IShiftOperators uses the
+    // BCL shape <T, int, T> — the shift count is int (see the converter's lifted-shift note).
+    private bool IsIntegerNumeric => TypeClass == "Numeric" && !TypeName.StartsWith("float") && !TypeName.StartsWith("complex");
+
+    private string NumericInterfaces
+    {
+        get
+        {
+            string interfaces = $" : IEquatable<{TargetTypeName}>, System.Numerics.IAdditionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.ISubtractionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IMultiplyOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IDivisionOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IEqualityOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IComparisonOperators<{TargetTypeName}, {TargetTypeName}, bool>, System.Numerics.IIncrementOperators<{TargetTypeName}>, System.Numerics.IDecrementOperators<{TargetTypeName}>";
+
+            if (IsIntegerNumeric)
+                interfaces += $", System.Numerics.IModulusOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IBitwiseOperators<{TargetTypeName}, {TargetTypeName}, {TargetTypeName}>, System.Numerics.IShiftOperators<{TargetTypeName}, int, {TargetTypeName}>";
+
+            return interfaces;
+        }
+    }
 
     private string InterfaceImplementation => TypeClass switch
     {

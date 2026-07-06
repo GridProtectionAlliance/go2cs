@@ -62,6 +62,8 @@ internal static class NumericTypeTemplate
 
                 public static {targetTypeName} operator >>({targetTypeName} value, int shift) => ({targetTypeName})(value.m_value >> shift);
 
+                public static {targetTypeName} operator >>>({targetTypeName} value, int shift) => ({targetTypeName})(value.m_value >>> shift);
+
                 public static {targetTypeName} operator &({targetTypeName} left, {targetTypeName} right) => ({targetTypeName})(left.m_value & right.m_value);
 
                 public static {targetTypeName} operator |({targetTypeName} left, {targetTypeName} right) => ({targetTypeName})(left.m_value | right.m_value);

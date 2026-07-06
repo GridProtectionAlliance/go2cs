@@ -907,6 +907,25 @@ The golib non-blocking receive underpinning the default-form guards distinguishe
 ## Generic Constraints
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
 
+### An integer named-numeric wrapper implements the integer operator interfaces
+
+A `[GoType num:]` wrapper (`type stringID uint64`) already declared the *common* numeric operator
+interfaces so it could serve a `cmp.Ordered`-shaped constraint (`IAddition`/`ISubtraction`/
+`IMultiply`/`IDivision`/`IEquality`/`IComparison`/`IIncrement`/`IDecrementOperators`), but the
+*integer-only* three — `IModulusOperators`, `IBitwiseOperators`, `IShiftOperators<T, int, T>` —
+were deliberately left off because their operators (`%`, `&|^~`, `<<`, `>>`) are kind-gated. That
+left a named integer type unable to satisfy a converter-emitted `~integer` operator constraint:
+internal/trace's `type dataTable[EI ~uint64, E any]` instantiated with `type stringID uint64` was
+CS0315 ×48 on exactly those three interfaces. The `NumericTypeTemplate` operators already exist
+(same kind-gate), so `InheritedTypeTemplate` now also *declares* the three integer interfaces for an
+integer underlying (float/complex keep only the common set). `IShiftOperators` additionally requires
+`operator >>>` (unsigned right shift) — added to the integer operator block; Go emits no `>>>`, but
+the member is needed to satisfy the interface. Cleared internal/trace's 48 CS0315 (49→1, the residual
+being the unrelated ΔLabel CS0542). Guarded by `NamedNumericOperatorConstraint` (a generic
+`mix[K ~uint64 | ~int32]` applying modulus/bitwise/both-shifts on the type parameter, instantiated
+with a named `uint64` and a named `int32`, values vs Go). Corpus-verified against math/big (Word),
+archive/tar, and time (Duration).
+
 ### Lifted shift constraint uses the BCL shape `IShiftOperators<T, int, T>`
 
 The lifted Integer operator set constrains shifts as `IShiftOperators<T, int, T>` — the shift **count** is `int`, not the type parameter. Every BCL binary integer implements exactly that shape (`IShiftOperators<TSelf, int, TSelf>`); only C# `int` itself happens to also satisfy the self-typed form, so the self-typed constraint made every non-`int` instantiation fail (CS0315 — strconv's `bsearch[S ~[]E, E ~uint16 | ~uint32]` on `ushort`/`uint`). The shape is also exactly what emitted bodies need: the converter coerces every shift count to `int` (`x << (int)(k)`), so a generic body can only ever perform `T << int`. The generated named-constraint interface template (`Integer` in go2cs-gen) and its dynamic-conversion placeholder shift operators use the same `int`-count shape, keeping the two emitters consistent. (Guarded by the `GenericTypeInference` extensions `bsearchLike`/`halve` — `~uint16 | ~uint32` instantiations with a shift on the type parameter, values vs Go.)

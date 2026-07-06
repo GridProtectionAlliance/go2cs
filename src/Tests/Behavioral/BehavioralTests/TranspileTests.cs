@@ -450,6 +450,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedNumericIntCast() => CheckTarget("NamedNumericIntCast");
 
     [TestMethod]
+    public void CheckNamedNumericOperatorConstraint() => CheckTarget("NamedNumericOperatorConstraint");
+
+    [TestMethod]
     public void CheckNamedNumericPointerReinterpret() => CheckTarget("NamedNumericPointerReinterpret");
 
     [TestMethod]

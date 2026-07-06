@@ -412,6 +412,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedNumericIntCast() => CheckTarget("NamedNumericIntCast");
 
     [TestMethod]
+    public void CheckNamedNumericOperatorConstraint() => CheckTarget("NamedNumericOperatorConstraint");
+
+    [TestMethod]
     public void CheckNamedNumericPointerReinterpret() => CheckTarget("NamedNumericPointerReinterpret");
 
     [TestMethod]
