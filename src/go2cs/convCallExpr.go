@@ -461,6 +461,38 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 			}
 		}
 
+		// The MIRROR reinterpret: an underlying-slice pointer to a NAMED-slice pointer —
+		// log/slog/internal/buffer's `(*Buffer)(&b)` with `type Buffer []byte` and a local
+		// `b []byte`. A named-wrapper box CONTAINS the underlying (the forward arm above projects
+		// it out via `.of(Named.Ꮡm_value)`), but a bare-slice box does NOT contain a wrapper, so
+		// the reverse cannot project — it must CONSTRUCT a wrapper box over the addressed slice:
+		// `Ꮡ(new Buffer(b))`. A bare `(ж<Buffer>)(Ꮡ(b))` cast is CS0030 (unrelated ж
+		// instantiations). Aliasing with the original `b` is not preserved — `Ꮡ(value)` already
+		// copies — but the reinterpret is used through the returned pointer, which is the pattern.
+		if targetPtr, ok := types.Unalias(v.info.TypeOf(callExpr)).(*types.Pointer); ok {
+			if targetNamed, ok := types.Unalias(targetPtr.Elem()).(*types.Named); ok {
+				if _, targetIsSlice := targetNamed.Underlying().(*types.Slice); targetIsSlice {
+					if argPtr, ok := types.Unalias(v.info.TypeOf(arg)).(*types.Pointer); ok {
+						if _, argElemIsNamed := types.Unalias(argPtr.Elem()).(*types.Named); !argElemIsNamed {
+							if argSlice, ok := argPtr.Elem().Underlying().(*types.Slice); ok && types.Identical(argSlice, targetNamed.Underlying()) {
+								namedCS := convertToCSTypeName(v.getTypeName(targetNamed, false))
+
+								var inner string
+
+								if u, ok := arg.(*ast.UnaryExpr); ok && u.Op == token.AND {
+									inner = v.convExpr(u.X, nil)
+								} else {
+									inner = fmt.Sprintf("(%s).Value", expr)
+								}
+
+								return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, namedCS, inner)
+							}
+						}
+					}
+				}
+			}
+		}
+
 		// A conversion between two NAMED SLICE types sharing an identical underlying — tar's
 		// `sparseElem(s[i*24:])` where s is sparseArray (both `[]byte`): the named-slice
 		// slicing wrapper-return makes the arg the NAMED wrapper, and a direct

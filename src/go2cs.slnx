@@ -186,6 +186,7 @@
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
+    <Project Path="Tests/Behavioral/NamedSlicePointerReinterpret/NamedSlicePointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedStringConversion/NamedStringConversion.csproj" />
     <Project Path="Tests/Behavioral/NamedTypeBitwiseConst/NamedTypeBitwiseConst.csproj" />
     <Project Path="Tests/Behavioral/NamedTypeOverStruct/NamedTypeOverStruct.csproj" />
