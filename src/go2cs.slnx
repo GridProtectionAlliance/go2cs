@@ -298,6 +298,7 @@
     <Project Path="Tests/Behavioral/UntypedConstArithmetic/UntypedConstArithmetic.csproj" />
     <Project Path="Tests/Behavioral/UntypedFloatDefault/UntypedFloatDefault.csproj" />
     <Project Path="Tests/Behavioral/VarNamedAsType/VarNamedAsType.csproj" />
+    <Project Path="Tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />
     <Project Path="Tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
     <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
   </Folder>

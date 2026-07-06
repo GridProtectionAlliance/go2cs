@@ -770,6 +770,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]
+    public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
+
+    [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]

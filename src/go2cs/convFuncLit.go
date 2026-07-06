@@ -151,6 +151,35 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		v.indentLevel--
 	}
 
+	// A variadic parameter arrives as a C# `params` array named `<name>ʗp` (see getVariadicParamName);
+	// the Go body references the bare `<name>` as a slice<T>. A top-level func gets a
+	// `var <name> = <name>ʗp.slice();` prologue (visitFuncDecl); a function LITERAL emitted no such
+	// prologue, so a closure that references its variadic param was undefined (CS0103 — internal/dag's
+	// `errorf := func(format string, a ...any) { … fmt.Sprintf(format, a...) }` spread bare `a`).
+	// Inject the same prologue at the top of the literal's block. Doing it BEFORE the return-collapse
+	// below also keeps the body a block (the param is a statement-scoped local), which is correct.
+	if litSig != nil && litSig.Variadic() && litSig.Params().Len() > 0 && !context.isIIFE {
+		// (An IIFE is excluded: it emits param NAMES only — the raw `a`, not `<name>ʗp` — via
+		// iifeParamNames, with the delegate cast supplying the `params` type, so there is no
+		// `<name>ʗp` array to .slice() and no rename to undo.)
+		// body may still carry leading whitespace here (it is TrimSpace'd only in the collapse/else
+		// arms below) — trim before probing for the opening brace.
+		trimmedBody := strings.TrimSpace(body)
+
+		if strings.HasPrefix(trimmedBody, "{") {
+			param := litSig.Params().At(litSig.Params().Len() - 1)
+			var prologue string
+
+			if v.options.preferVarDecl {
+				prologue = fmt.Sprintf("%s%svar %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+			} else {
+				prologue = fmt.Sprintf("%s%sslice<%s> %s = %s.slice();", v.newline, v.indent(v.indentLevel+1), v.getCSTypeName(param.Type().(*types.Slice).Elem()), getSanitizedIdentifier(param.Name()), getVariadicParamName(param))
+			}
+
+			body = "{" + prologue + strings.TrimPrefix(trimmedBody, "{")
+		}
+	}
+
 	// An IIFE keeps a block body (it may need a func() wrapper and reads more like the Go
 	// source); other single-return literals collapse to an expression-bodied lambda. A
 	// namedReturnDefer literal always keeps a block (it returns its named results after the

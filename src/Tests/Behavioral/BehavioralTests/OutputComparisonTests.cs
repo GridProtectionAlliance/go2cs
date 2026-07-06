@@ -712,6 +712,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariableCapture() => CheckTarget("VariableCapture");
 
     [TestMethod]
+    public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
+
+    [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]
