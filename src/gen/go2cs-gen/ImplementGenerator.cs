@@ -379,6 +379,7 @@ public class ImplementGenerator : ISourceGenerator
                     string receiver = "m_box";
                     StructDeclarationSyntax? currentDecl = structDecl;
                     string currentTypeName = structName;
+                    INamedTypeSymbol? currentTypeSymbol = structType as INamedTypeSymbol;
 
                     for (int depth = 0; depth < 4 && currentDecl is not null; depth++)
                     {
@@ -389,11 +390,41 @@ public class ImplementGenerator : ISourceGenerator
 
                         (string embedName, string embedTypeName) = valueEmbedHops[0];
 
+                        // Resolve the embedded field's TYPE SYMBOL from the current struct symbol —
+                        // the converter emits the embed as a `partial ref {Type} {Name}` property (and
+                        // the TypeGenerator a boxed backing field), so the member named `embedName`
+                        // carries the embed type. Needed to probe a FOREIGN embed's methods in
+                        // METADATA when it has no local syntax declaration (see below).
+                        INamedTypeSymbol? embedTypeSymbol = currentTypeSymbol?
+                            .GetMembers(embedName)
+                            .Select(member => member switch
+                            {
+                                IPropertySymbol property => property.Type,
+                                IFieldSymbol field => field.Type,
+                                _ => null
+                            })
+                            .OfType<INamedTypeSymbol>()
+                            .FirstOrDefault();
+
                         receiver = $"{receiver}.of({currentTypeName}.{AddressPrefix}{embedName})";
                         (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
                         currentTypeName = embedTypeName;
+                        currentTypeSymbol = embedTypeSymbol;
 
                         if (StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(embedTypeName, syntaxContext.SemanticModel.Compilation).Contains(methodName))
+                        {
+                            forwardReceivers[methodName] = receiver;
+                            break;
+                        }
+
+                        // The embed method may be a FOREIGN direct-ж extension visible only in
+                        // METADATA — a syntax-tree scan cannot see it (database/sql's driverConn
+                        // value-embeds sync.Mutex, whose Lock/Unlock are `this ж<Mutex>` extensions in
+                        // the compiled sync assembly). Bind the box hop exactly as a local direct-ж
+                        // primary does — `m_box.of(driverConn.ᏑMutex).Lock()`, matching the converter's
+                        // own call-site form — instead of the bare `m_box.Lock()` fallback (CS1929).
+                        if (embedTypeSymbol is not null &&
+                            StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(embedTypeSymbol).Contains(methodName))
                         {
                             forwardReceivers[methodName] = receiver;
                             break;

@@ -286,4 +286,41 @@ public static class StructDeclarationSyntaxExtensions
             })
             .Select(method => method.Identifier.Text), StringComparer.Ordinal);
     }
+
+    /// <summary>
+    /// METADATA counterpart to <see cref="GetBoxReceiverMethodNames(string, Compilation)"/>: gets the
+    /// names of PUBLIC direct-ж extension methods (<c>static M(this ж&lt;T&gt;)</c>) declared on a
+    /// FOREIGN type's containing package class, visible only through compiled metadata — a syntax-tree
+    /// scan of the current compilation cannot see them. Needed to forward an interface member promoted
+    /// through a VALUE-embedded foreign field: database/sql's <c>driverConn</c> value-embeds
+    /// <c>sync.Mutex</c>, whose <c>Lock</c>/<c>Unlock</c> are <c>this ж&lt;Mutex&gt;</c> extensions in
+    /// the compiled sync assembly, so the box hop must bind <c>m_box.of(driverConn.ᏑMutex).Lock()</c>
+    /// exactly as a local direct-ж primary would. Mirrors the foreignStruct arm's boxBound scan:
+    /// only a PUBLIC ж-extension binds cross-assembly (unexported RecvGenerator twins are internal).
+    /// </summary>
+    public static HashSet<string> GetForeignBoxReceiverMethodNames(INamedTypeSymbol embedType)
+    {
+        HashSet<string> boxMethods = new(StringComparer.Ordinal);
+
+        if (embedType.ContainingType is not INamedTypeSymbol packageClass)
+            return boxMethods;
+
+        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (!method.IsStatic ||
+                method.DeclaredAccessibility != Accessibility.Public ||
+                method.Parameters.Length == 0)
+                continue;
+
+            if (method.Parameters[0].Type is INamedTypeSymbol recvType &&
+                recvType.Name == "ж" &&
+                recvType.TypeArguments.Length == 1 &&
+                SymbolEqualityComparer.Default.Equals(recvType.TypeArguments[0], embedType))
+            {
+                boxMethods.Add(method.Name);
+            }
+        }
+
+        return boxMethods;
+    }
 }
