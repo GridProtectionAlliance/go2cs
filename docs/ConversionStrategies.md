@@ -1902,6 +1902,20 @@ lands in the statement's existing hoist buffer, emitted before the statement. By
 where the pattern occurs (and a harmless renumber of any later temps, since the per-file marker index is
 monotonic). Guarded by `TupleSpreadIntoCall` (both a value result and an escaping pointer result).
 
+### A range over a pointer-typed type conversion parenthesizes before the deref
+Ranging over a pointer to an array implicitly dereferences it — the converter appends `.Value` to the
+range expression. When the range expression is itself a pointer-typed TYPE CONVERSION it renders as a C#
+cast (`(ж<array<byte>>)(uintptr)(p)`, crypto/internal/nistec's p256 init over
+`(*[43*32*2*4][8]byte)(*p256PrecomputedPtr)`). A cast binds LOWER than member access, so a bare append
+`(ж<…>)(p).Value` parses as `(ж<…>)((p).Value)` — the deref lands on the operand, not the cast result
+(CS1579 "no GetEnumerator" on the box type, CS8130). `visitRangeStmt` now wraps the range expression in
+parentheses — `((ж<…>)(p)).Value` — whenever the pointer-unwrap deref is active and `rangeStmt.X` is a
+`*ast.CallExpr` whose `Fun` is a type expression (`info.Types[Fun].IsType()`, which catches the
+unsafe.Pointer conversions `isTypeConversion` deliberately excludes). Byte-identical corpus-wide (the
+pattern only occurs on a pointer-producing conversion in range position, which never compiled before).
+Guarded by `RangePointerArrayConversion` (transpile+compile+target only — the exact cast shape needs an
+`unsafe.Pointer` source, whose runtime round-trip golib does not reproduce, so it is not output-compared).
+
 ### Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
 

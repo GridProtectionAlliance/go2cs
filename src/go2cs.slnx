@@ -249,6 +249,7 @@
     <Project Path="Tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceAnonAlias/PublicizedInterfaceAnonAlias.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceParam/PublicizedInterfaceParam.csproj" />
+    <Project Path="Tests/Behavioral/RangePointerArrayConversion/RangePointerArrayConversion.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="Tests/Behavioral/RangeVarHeapBox/RangeVarHeapBox.csproj" />
     <Project Path="Tests/Behavioral/RangeVarReassign/RangeVarReassign.csproj" />

@@ -1,11 +1,11 @@
 package main
 
 import (
-	"strings"
 	"fmt"
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strings"
 )
 
 // rangeVarNeedsMutableCopy reports whether the range key/value identifier must be copied into a
@@ -117,6 +117,22 @@ func (v *Visitor) visitRangeStmt(rangeStmt *ast.RangeStmt, target LabeledStmtCon
 		// it must not add a second `.Value` (which would be applied to the value type, CS1061).
 		if ident, ok := rangeStmt.X.(*ast.Ident); ok && v.identIsParameter(ident) {
 			ptrDeref = ""
+		}
+
+		// When the range expression is a pointer-typed TYPE CONVERSION it renders as a C# cast
+		// `(ж<…>)(uintptr)(x)` (nistec's `range (*[43*32*2*4][8]byte)(*p256PrecomputedPtr)`). A cast
+		// binds LOWER than member access, so the later `%s%s` = rangeExpr+ptrDeref would parse
+		// `(ж<…>)(x).Value` as `(ж<…>)((x).Value)` — the `.Value` deref lands on the operand, not the
+		// cast RESULT (CS1579/CS8130). Parenthesize so the deref applies to the whole cast.
+		if ptrDeref != "" {
+			if callExpr, ok := rangeStmt.X.(*ast.CallExpr); ok {
+				// The call is a TYPE CONVERSION when its Fun is a type expression (`(*[N][8]byte)(x)`,
+				// including the unsafe.Pointer-based pointer conversions isTypeConversion excludes) —
+				// its C# rendering is a cast, which binds lower than the `.Value` deref appended below.
+				if tv, ok := v.info.Types[callExpr.Fun]; ok && tv.IsType() {
+					rangeExpr = fmt.Sprintf("(%s)", rangeExpr)
+				}
+			}
 		}
 	}
 

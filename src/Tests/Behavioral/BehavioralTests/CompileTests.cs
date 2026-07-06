@@ -621,6 +621,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]
+    public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

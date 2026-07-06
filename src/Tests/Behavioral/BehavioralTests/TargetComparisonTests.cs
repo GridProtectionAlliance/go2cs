@@ -623,6 +623,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]
+    public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]
