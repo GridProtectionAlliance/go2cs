@@ -770,6 +770,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckTupleMixedDeclareReassign() => CheckTarget("TupleMixedDeclareReassign");
 
     [TestMethod]
+    public void CheckTupleSpreadIntoCall() => CheckTarget("TupleSpreadIntoCall");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

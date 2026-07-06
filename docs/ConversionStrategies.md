@@ -1883,6 +1883,25 @@ return (new relayжReporter(ᴛ1), ᴛ2);
 Elements whose actual type is itself an interface are left alone (structural inheritance
 covers those). Guarded by `CrossPkgUser` (`getReporter` forwarding `makeRelay`).
 
+### A multi-value call spread into a call's parameters in an assignment hoists into temps
+Go lets a MULTI-VALUE call fill the parameters of an enclosing call — `r := t.newRange(t.parseControl("range"))`,
+where `parseControl` returns five values feeding `newRange`'s five parameters. C# has no splat, so the inner
+call is deconstructed into markers and passed expanded:
+
+```csharp
+var (ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10) = Ꮡt.parseControl("range"u8);
+var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
+```
+
+`convExprList` already performs this expansion, but only when the call's `deferredDecls` hoist target is
+non-nil — passing the whole tuple as one argument is otherwise CS7036 (text/template/parse's `rangeControl`).
+The return-form threads that target (visitReturnStmt); the assignment forms now do too, on BOTH lowering
+branches: the single-declare block and the mixed/escaping block (a pointer-result local that is heap-boxed is
+not counted in `declaredCount`, so it takes the latter — the `newRange` case above). The hoisted `var (…) = …;`
+lands in the statement's existing hoist buffer, emitted before the statement. Byte-identical corpus-wide except
+where the pattern occurs (and a harmless renumber of any later temps, since the per-file marker index is
+monotonic). Guarded by `TupleSpreadIntoCall` (both a value result and an escaping pointer result).
+
 ### Adapter accessibility: symbol-OR-name on both sides
 The adapter class scope cannot be derived from Go name casing alone (`error` is lowercase yet the golib interface is public METADATA - the name rule made io/fs's PathErrorжerror internal, CS0122 x40) nor from symbols alone (sibling generators' `public partial` modifiers are invisible to a single-pass generator - the symbol rule broke same-assembly interfaces like `CrossPkgLib.Reporter`). The ImplementGenerator takes symbol-OR-name on the struct AND the interface.
 

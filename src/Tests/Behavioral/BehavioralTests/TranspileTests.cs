@@ -768,6 +768,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTupleMixedDeclareReassign() => CheckTarget("TupleMixedDeclareReassign");
 
     [TestMethod]
+    public void CheckTupleSpreadIntoCall() => CheckTarget("TupleSpreadIntoCall");
+
+    [TestMethod]
     public void CheckTypeAssert() => CheckTarget("TypeAssert");
 
     [TestMethod]

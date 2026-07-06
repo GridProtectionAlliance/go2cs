@@ -847,6 +847,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			}
 		}
 
+		// Thread the statement's hoist buffer into the RHS conversion so an inner MULTI-VALUE call
+		// spread into the enclosing call's parameters is deconstructed into temps and passed
+		// expanded — convExprList's tuple-expand (`var (ᴛ1, …) = inner; f(ᴛ1, …)`) fires only when
+		// deferredDecls != nil. Without it `r := t.newRange(t.parseControl("range"))` — parseControl
+		// returns 5 values feeding newRange's 5 params — passed the whole tuple as ONE argument
+		// (CS7036, text/template/parse). The return-form already hoists this way (visitReturnStmt);
+		// mirror it for the `:=`/`=` single-value RHS path. Set after the LHS loop so LHS rendering
+		// is untouched, and skipped when tupleConverted (that block hoists via v.hoistedDecls itself).
+		if hoistBuf != nil && !tupleConverted {
+			lambdaContext.deferredDecls = hoistBuf
+		}
+
 		// Handle RHS
 		if !tupleConverted && rhsLen > 1 {
 			result.WriteRune('(')
@@ -1157,6 +1169,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			lambdaContext := DefaultLambdaContext()
 			lambdaContext.isAssignment = true
+
+			// Same tuple-spread hoist as the single-declare block above: a `:=` whose RHS is a call
+			// wrapping a MULTI-VALUE call (`r := t.newRange(t.parseControl("range"))`) reaches THIS
+			// mixed/escaping branch when the declared local escapes the heap (so it is not counted in
+			// declaredCount) — thread the hoist buffer so convExprList deconstructs the inner call into
+			// temps instead of passing the whole tuple as one argument (CS7036, text/template/parse).
+			if hoistBuf != nil {
+				lambdaContext.deferredDecls = hoistBuf
+			}
 
 			if i > 0 {
 				if format.useNewLine {

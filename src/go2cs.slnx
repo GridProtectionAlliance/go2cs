@@ -298,6 +298,7 @@
     <Project Path="Tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
     <Project Path="Tests/Behavioral/TupleDestructureEscapingLocal/TupleDestructureEscapingLocal.csproj" />
     <Project Path="Tests/Behavioral/TupleMixedDeclareReassign/TupleMixedDeclareReassign.csproj" />
+    <Project Path="Tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.csproj" />
     <Project Path="Tests/Behavioral/TypeAssert/TypeAssert.csproj" />
     <Project Path="Tests/Behavioral/TypeConversion/TypeConversion.csproj" />
     <Project Path="Tests/Behavioral/TypeConversionInterfaceParam/TypeConversionInterfaceParam.csproj" />
