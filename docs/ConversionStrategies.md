@@ -1521,11 +1521,16 @@ testDeps`, defaulting to C# `internal`, less accessible than the `public` member
 interfaces it visits recursively see an empty value) and folds the modifier into the post-attribute slot,
 emitting `[GoType] public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
 (Guarded by the `PublicizedInterfaceParam` behavioral test — an exported function taking an unexported
-interface whose method returns a built-in type, output-compared vs Go.) A **transitive** case remains open:
-the `collectPublicizedTypes` fixpoint cascades through a publicized type's exported *method declarations*
-(receiver funcs), but an interface's method **signatures** are not func declarations, so the unexported
-types in a publicized interface's methods (testing's `testDeps.CoordinateFuzzing(… corpusEntry …)`) are
-not yet cascaded — a separate collection-side root.
+interface whose method returns a built-in type, output-compared vs Go.) The **transitive** cascade also
+walks a publicized interface's method signatures: the `collectMethodSignatureUnexportedTypes` fixpoint step
+walked a type's `named.NumMethods()` (declared receiver methods) but that is **0 for a defined interface**
+— an interface's methods live on its underlying `*types.Interface`. It now also iterates
+`iface.NumMethods()` for a publicized interface, so an unexported NAMED type in a public interface member's
+parameter/result signature is publicized in turn (CS0051/CS0050). One residual shape stays open (banked):
+testing's `testDeps.CoordinateFuzzing(… corpusEntry …)` where `type corpusEntry = struct{…}` is an ALIAS to
+an anonymous struct — the signature type is not a `*types.Named` but a **lifted** anonymous struct
+(`corpusEntryᴛ1`) whose accessibility is set by the lift emission, not by `packagePublicizedTypes`, so it
+needs a separate lifted-type-publicize mechanism.
 
 ### Publicized unexported types make their exported methods public
 An unexported Go type reachable through an exported surface (an exported var — `var BigEndian

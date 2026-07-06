@@ -160,26 +160,45 @@ func collectMethodSignatureUnexportedTypes(named *types.Named, pkg *types.Packag
 	for i := range named.NumMethods() {
 		method := named.Method(i)
 
-		if !method.Exported() {
-			continue
+		collectSignatureUnexportedTypes(method, pkg)
+	}
+
+	// A defined INTERFACE type's methods live on its UNDERLYING *types.Interface, not on the Named
+	// (named.NumMethods() is 0 for an interface). When such an interface is publicized — an unexported
+	// interface reached through an exported surface, emitted `public` (testing's `testDeps` through
+	// `MainStart(deps testDeps, …)`) — its methods become PUBLIC interface members, so the unexported
+	// named types in their parameter/result signatures must be publicized too, or they are less
+	// accessible than the public member (CS0051 param, CS0050 result — testDeps.CoordinateFuzzing's
+	// `corpusEntry`). The cascade fixpoint then propagates through those types in turn.
+	if iface, ok := named.Underlying().(*types.Interface); ok {
+		for i := range iface.NumMethods() {
+			collectSignatureUnexportedTypes(iface.Method(i), pkg)
 		}
+	}
+}
 
-		sig, ok := method.Type().(*types.Signature)
+// collectSignatureUnexportedTypes publicizes the unexported named types in an EXPORTED method's
+// parameter/result signature.
+func collectSignatureUnexportedTypes(method *types.Func, pkg *types.Package) {
+	if !method.Exported() {
+		return
+	}
 
-		if !ok {
-			continue
+	sig, ok := method.Type().(*types.Signature)
+
+	if !ok {
+		return
+	}
+
+	if params := sig.Params(); params != nil {
+		for j := range params.Len() {
+			collectUnexportedNamedTypes(params.At(j).Type(), pkg)
 		}
+	}
 
-		if params := sig.Params(); params != nil {
-			for j := range params.Len() {
-				collectUnexportedNamedTypes(params.At(j).Type(), pkg)
-			}
-		}
-
-		if results := sig.Results(); results != nil {
-			for j := range results.Len() {
-				collectUnexportedNamedTypes(results.At(j).Type(), pkg)
-			}
+	if results := sig.Results(); results != nil {
+		for j := range results.Len() {
+			collectUnexportedNamedTypes(results.At(j).Type(), pkg)
 		}
 	}
 }
