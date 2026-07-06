@@ -175,7 +175,7 @@ internal class StructTypeTemplate : TemplateBase
                     // The promoted field is read directly on the embedded struct (`sym.Func`), never via
                     // the outer value, so no converter reference needs coordinating; a package that DID
                     // read `outer.Func` would surface CS1061 in the gate.
-                    string accessorName = GetSimpleName(memberName) == NonGenericStructName ? $"Δ{memberName}" : memberName;
+                    string accessorName = GetSimpleName(memberName) == NonGenericStructName ? $"{ShadowVarMarker}{memberName}" : memberName;
                     result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {accessorName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
