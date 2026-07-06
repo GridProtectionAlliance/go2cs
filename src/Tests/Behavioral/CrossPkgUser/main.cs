@@ -191,6 +191,8 @@ internal static void Main() => func((defer, recover) => {
     CrossPkgLibꓸStatus stv = default!;
     stv.Code = (nint)gv;
     fmt.Println(stv.Code);
+    var ccel = ((CrossPkgLib.Celsius)(float64)((localCelsius)2.5D));
+    fmt.Println((float64)ccel);
     CrossPkgLib.Labeled l1 = new badge(name: "a"u8);
     Tagged l2 = new badge(name: "b"u8);
     fmt.Println(l1.Label(), l2.Label());
@@ -226,6 +228,8 @@ internal static void Main() => func((defer, recover) => {
     var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"u8));
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
 });
+
+[GoType("num:float64")] partial struct localCelsius;
 
 [GoType("CrossPkgLib_package.Celsius")] partial struct reading;
 

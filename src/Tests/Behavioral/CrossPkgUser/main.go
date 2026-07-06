@@ -252,6 +252,17 @@ func main() {
 	var stv CrossPkgLib.Status
 	stv.Code = int(gv)
 	fmt.Println(stv.Code) // 7
+
+	// A LOCAL named-numeric (base float64, NOT CrossPkgLib.Celsius) converted TO the cross-package
+	// named numeric CrossPkgLib.Celsius — which is NOT Δ-renamed, so it renders as the DOT form
+	// `CrossPkgLib.Celsius` (not a ꓸ global-using alias). This NON-wrapper conversion records a
+	// GoImplicitConv<localCelsius, CrossPkgLib.Celsius> whose dot-qualified foreign type needs a
+	// resolving `using CrossPkgLib` in package_info.cs and the generated ImplicitConv operator. The
+	// aliased-numeric branch of checkForImplicitConversion previously omitted registering that using
+	// (the struct branch already did), leaving `CrossPkgLib` unresolved (CS0246 — database/sql's
+	// `driver.IsolationLevel(opts.Isolation)` shape, where driver.IsolationLevel is also unrenamed).
+	ccel := CrossPkgLib.Celsius(localCelsius(2.5))
+	fmt.Println(float64(ccel)) // 2.5
 	var l1 CrossPkgLib.Labeled = badge{name: "a"}
 	var l2 Tagged = badge{name: "b"}
 	fmt.Println(l1.Label(), l2.Label())
@@ -304,6 +315,12 @@ func main() {
 	h := &holder[int]{Cache: &CrossPkgLib.Cache[int]{}, name: "h"}
 	fmt.Println(h.Bump(), h.Bump(), h.name) // 1 2 h
 }
+
+// localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a
+// conversion TO the UNRENAMED cross-package CrossPkgLib.Celsius is a NON-wrapper cross-package
+// named-numeric conversion rendered in DOT form — the shape that records a GoImplicitConv needing
+// a resolving `using` for the foreign package in package_info.cs.
+type localCelsius float64
 
 // reading mirrors registry Key: a defined type whose written base is a cross-package named type.
 type reading CrossPkgLib.Celsius

@@ -1584,6 +1584,15 @@ func (v *Visitor) checkForImplicitConversion(funcType types.Type, arg ast.Expr, 
 				argTypeName := v.getCSTypeName(argType)
 
 				if targetTypeName != argTypeName {
+					// The recorded conversion type names use cross-package import aliases (e.g.
+					// `driver.IsolationLevel`); register them so package_info.cs emits a resolving
+					// `global using` — the STRUCT-conversion branch above already does this, but the
+					// aliased-NUMERIC branch omitted it, so a cross-package named-numeric conversion
+					// (database/sql's `driver.IsolationLevel(opts.Isolation)`) left `driver` unresolved
+					// in both package_info.cs and the ImplicitConvGenerator .g.cs (CS0246).
+					v.recordConversionPackageUsing(argType)
+					v.recordConversionPackageUsing(funcType)
+
 					if strings.Contains(argTypeName, ".") || strings.Contains(argTypeName, TypeAliasDot) {
 						valueTypeName = fmt.Sprintf("imported:%s", valueTypeName)
 						targetTypeName, argTypeName = argTypeName, targetTypeName

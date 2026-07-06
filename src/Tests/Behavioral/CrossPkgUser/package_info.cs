@@ -13,6 +13,7 @@
 global using CrossPkgLibꓸGrade = go.CrossPkgLib_package.ΔGrade;
 global using CrossPkgLibꓸStatus = go.CrossPkgLib_package.ΔStatus;
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
+using CrossPkgLib = go.CrossPkgLib_package;
 // </ImportedTypeAliases>
 
 using go;
@@ -56,6 +57,7 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<localCelsius, CrossPkgLib.Celsius>(Inverted = true, ValueType = "localCelsius")]
 // </ImplicitConversions>
 
 namespace go;
