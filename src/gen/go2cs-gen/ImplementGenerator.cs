@@ -291,9 +291,15 @@ public class ImplementGenerator : ISourceGenerator
                         string simpleName = GetSimpleName(method.Name);
                         bool viaBox = boxBound.Contains(simpleName);
 
-                        if (staticClass is not null)
+                        // Only forward through a package-class STATIC when one actually binds this
+                        // struct's box/ref. A PROMOTED interface method — debug/buildinfo's *xcoff.Section
+                        // → io.ReaderAt, where Section EMBEDS the io.ReaderAt interface so ReadAt is
+                        // promoted, not declared — has no such static, so `xcoff_package.ReadAt(m_box,…)`
+                        // targets a nonexistent overload (CS1501). Fall to the box VALUE, invoking the
+                        // struct's own PUBLIC promoted method (`m_box.Value.ReadAt(…)`).
+                        if (staticClass is not null && (viaBox || refBound.Contains(simpleName)))
                         {
-                            string recvArg = viaBox ? "m_box" : refBound.Contains(simpleName) ? "ref m_box.Value" : "m_box.Value";
+                            string recvArg = viaBox ? "m_box" : "ref m_box.Value";
                             forwardStaticCalls[simpleName] = $"{staticClass}.{simpleName}";
                             forwardReceivers[simpleName] = recvArg;
                         }
