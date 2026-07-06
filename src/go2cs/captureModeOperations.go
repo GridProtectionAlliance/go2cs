@@ -492,59 +492,75 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 				}
 			}
 		case *ast.CompositeLit:
-			// The receiver placed whole into a COMPOSITE-LITERAL element whose FIELD is a Go
-			// pointer — `return funcInfo{f, mod}` inside `func (f *_func) funcInfo()` (runtime
-			// symtab.go; funcInfo's first field is the embedded pointer *_func). The pointer-typed
-			// field needs the receiver's box, which only exists when the method is direct-ж. Gated
-			// on the FIELD's declared type (the element expression's own type is always *T for a
-			// pointer receiver): a receiver placed into an INTERFACE-typed field also typechecks in
-			// Go, but that emission compiles today and promoting for it would re-route every such
-			// method stdlib-wide — deliberately out of scope (its pointer-identity semantics are a
-			// separate question).
-			structType, ok := info.TypeOf(n).Underlying().(*types.Struct)
+			// The receiver placed whole into a COMPOSITE-LITERAL element whose slot is a Go
+			// pointer. Its pointer identity is copied/stored, which needs the receiver's box —
+			// available only when the method is direct-ж. Handled for a STRUCT field, and for a
+			// SLICE/ARRAY/MAP element/value whose element type is a pointer.
+			switch litType := info.TypeOf(n).Underlying().(type) {
+			case *types.Struct:
+				// `return funcInfo{f, mod}` inside `func (f *_func) funcInfo()` (runtime symtab.go;
+				// funcInfo's first field is the embedded pointer *_func). Gated on the FIELD's
+				// declared type (the element expression's own type is always *T for a pointer
+				// receiver): a receiver placed into an INTERFACE-typed field also typechecks in Go.
+				structType := litType
 
-			if !ok {
-				return true
-			}
+				for i, elt := range n.Elts {
+					fieldIdx := i
+					val := elt
 
-			for i, elt := range n.Elts {
-				fieldIdx := i
-				val := elt
+					if kv, ok := elt.(*ast.KeyValueExpr); ok {
+						val = kv.Value
+						fieldIdx = -1
 
-				if kv, ok := elt.(*ast.KeyValueExpr); ok {
-					val = kv.Value
-					fieldIdx = -1
+						if keyIdent, ok := kv.Key.(*ast.Ident); ok {
+							for j := 0; j < structType.NumFields(); j++ {
+								if structType.Field(j).Name() == keyIdent.Name {
+									fieldIdx = j
+									break
+								}
+							}
+						}
+					}
 
-					if keyIdent, ok := kv.Key.(*ast.Ident); ok {
-						for j := 0; j < structType.NumFields(); j++ {
-							if structType.Field(j).Name() == keyIdent.Name {
-								fieldIdx = j
-								break
+					if ident, ok := val.(*ast.Ident); ok && ident.Name == recvName {
+						if fieldIdx >= 0 && fieldIdx < structType.NumFields() {
+							if _, isPtr := structType.Field(fieldIdx).Type().(*types.Pointer); isPtr {
+								found = true
+								return false
+							}
+
+							// An INTERFACE-typed field also captures the receiver AS the pointer
+							// (Go's interface holds the *T): archive/tar's WriteTo builds
+							// `struct{ io.Reader }{fr}` — the pointer adapter wraps the box,
+							// which only exists when the method is direct-ж (CS1503 ×4). This
+							// was previously excluded because the old (broken) lifted-anon-embed
+							// emission compiled without it; the embed is a real interface member
+							// now, so the conversion genuinely needs the box.
+							if fieldIface, isEmpty := isInterface(structType.Field(fieldIdx).Type()); fieldIface && !isEmpty {
+								found = true
+								return false
 							}
 						}
 					}
 				}
-
-				if ident, ok := val.(*ast.Ident); ok && ident.Name == recvName {
-					if fieldIdx >= 0 && fieldIdx < structType.NumFields() {
-						if _, isPtr := structType.Field(fieldIdx).Type().(*types.Pointer); isPtr {
-							found = true
-							return false
-						}
-
-						// An INTERFACE-typed field also captures the receiver AS the pointer
-						// (Go's interface holds the *T): archive/tar's WriteTo builds
-						// `struct{ io.Reader }{fr}` — the pointer adapter wraps the box,
-						// which only exists when the method is direct-ж (CS1503 ×4). This
-						// was previously excluded because the old (broken) lifted-anon-embed
-						// emission compiled without it; the embed is a real interface member
-						// now, so the conversion genuinely needs the box.
-						if fieldIface, isEmpty := isInterface(structType.Field(fieldIdx).Type()); fieldIface && !isEmpty {
-							found = true
-							return false
-						}
-					}
+			case *types.Slice:
+				// `descendents := []*UserTaskSummary{s}` inside `func (s *UserTaskSummary)
+				// Descendents()` (internal/trace summary.go): the receiver becomes a POINTER element
+				// of the slice, so `s` must render as its box `Ꮡs`, not the value alias (CS0029).
+				if _, isPtr := litType.Elem().(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
+					found = true
+					return false
 				}
+			case *types.Array:
+				if _, isPtr := litType.Elem().(*types.Pointer); isPtr && compositeLitHasReceiverElement(n.Elts, recvName) {
+					found = true
+					return false
+				}
+				// NOTE: a pointer-value/pointer-key MAP literal (`map[K]*T{k: s}`) also stores the
+				// receiver's pointer identity, but convCompositeLit's map-element emission does not
+				// yet box a pointer VALUE (it renders the value alias, CS0029 — a general map-literal
+				// gap independent of the receiver), so promoting here would not help. Deliberately
+				// out of scope until the map-element boxing is fixed.
 			}
 		}
 
@@ -552,6 +568,25 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 	})
 
 	return found
+}
+
+// compositeLitHasReceiverElement reports whether the receiver ident appears as a bare-ident element
+// VALUE of a slice/array composite literal — a plain element (`{s}`) or the value of an indexed
+// element (`{2: s}`, whose KeyValueExpr value is the stored element).
+func compositeLitHasReceiverElement(elts []ast.Expr, recvName string) bool {
+	for _, elt := range elts {
+		target := elt
+
+		if kv, ok := elt.(*ast.KeyValueExpr); ok {
+			target = kv.Value
+		}
+
+		if ident, ok := target.(*ast.Ident); ok && ident.Name == recvName {
+			return true
+		}
+	}
+
+	return false
 }
 
 // bodyCapturesReceiverInClosure reports whether the body references the receiver inside a function

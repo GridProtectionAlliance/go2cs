@@ -36,6 +36,24 @@ func (r *ring) advance(n int) *ring {
 	return p
 }
 
+// receiver stored AS A POINTER ELEMENT of a slice composite literal (`[]*ring{r}`) — the
+// internal/trace summary.Descendents() shape. The receiver must render as its box `Ꮡr` so the
+// stored element is the real receiver, not a value copy (CS0029 otherwise).
+func (r *ring) chain(n int) []*ring {
+	nodes := []*ring{r}
+	p := r
+	for i := 0; i < n; i++ {
+		p = p.next
+		nodes = append(nodes, p)
+	}
+	return nodes
+}
+
+// receiver stored into an ARRAY-of-pointers composite literal (`[2]*ring{r, other}`).
+func (r *ring) pair(other *ring) [2]*ring {
+	return [2]*ring{r, other}
+}
+
 func main() {
 	a := &ring{data: 1}
 	a.initSelf() // a.next = a
@@ -52,4 +70,15 @@ func main() {
 	fmt.Println(b.next.data)         // 3
 	c.linkTo(b)
 	fmt.Println(b.advance(2).data)   // 2 (b -> c -> b)
+
+	// slice-of-pointers composite literal: chain[0] IS b (the stored box), not a copy — mutate
+	// through it and read back through b.
+	chain := b.chain(2)              // [b, c, b]
+	chain[0].data = 7
+	fmt.Println(b.data)              // 7
+	fmt.Println(chain[1].data)       // 3 (c)
+
+	// array-of-pointers composite literal
+	arr := b.pair(c)
+	fmt.Println(arr[0].data, arr[1].data) // 7 3
 }

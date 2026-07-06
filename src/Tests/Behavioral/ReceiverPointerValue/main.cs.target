@@ -31,6 +31,25 @@ internal static ж<ring> advance(this ж<ring> Ꮡr, nint n) {
     return p;
 }
 
+internal static slice<ж<ring>> chain(this ж<ring> Ꮡr, nint n) {
+    ref var r = ref Ꮡr.Value;
+
+    var nodes = new ж<ring>[]{Ꮡr}.slice();
+    var p = Ꮡr;
+    for (nint i = 0; i < n; i++) {
+        p = p.Value.next;
+        nodes = append(nodes, p);
+    }
+    return nodes;
+}
+
+internal static array<ж<ring>> pair(this ж<ring> Ꮡr, ж<ring> Ꮡother) {
+    ref var r = ref Ꮡr.Value;
+    ref var other = ref Ꮡother.Value;
+
+    return new ж<ring>[]{Ꮡr, Ꮡother}.array();
+}
+
 internal static void Main() {
     var a = Ꮡ(new ring(data: 1));
     a.initSelf();
@@ -43,6 +62,12 @@ internal static void Main() {
     fmt.Println((~(~b).next).data);
     c.linkTo(b);
     fmt.Println((~b.advance(2)).data);
+    var chain = b.chain(2);
+    chain[0].Value.data = 7;
+    fmt.Println((~b).data);
+    fmt.Println((~chain[1]).data);
+    var arr = b.pair(c);
+    fmt.Println((~arr[0]).data, (~arr[1]).data);
 }
 
 } // end main_package
