@@ -836,6 +836,22 @@ var ptrs = vals._<slice<ж<atomic.Int32>>>();
 ```
 Guarded by `ArrayOfCrossPackageType` (the type assert and a `var` declaration).
 
+### A pointer-element composite literal takes the box for a deref-aliased ident
+
+A bare identifier element of a pointer-element composite literal (`[]*CommentGroup{c}`) renders
+the pointer VALUE — the box `Ꮡc` — not the deref'd receiver ref-local `c`. Every named pointer
+parameter is deref-aliased in C# (`ref var c = ref Ꮡc.Value`), and the bare name is the value
+alias; the array element type is `ж<CommentGroup>`, so the alias form was CS0029 (go/ast's
+`CommentMap.addComment` — the sibling `append(list, Ꮡc)` already took the box through the
+call-argument pointer arm). The routing mirrors the struct-field pointer arm: the element index
+is marked `argTypeIsPtr`, which convExprList turns into the pointer ident context:
+```csharp
+list = new ж<CommentGroup>[]{Ꮡc}.slice();
+```
+Gated to bare idents of pointer type — keyed elements (maps) and address-of/composite elements
+manage their own pointer rendering. Guarded by the `PointerParamWalk` extension `collect` (the
+literal arm and the append arm, aliasing proven by a post-collect write through the original).
+
 ### Appending to an interface-typed slice casts the element
 A value appended to a `[]Iface` slice whose type is not already the interface -- a pointer rendering as the `*T`-to-interface adapter ctor, or a raw struct value -- leaves both golib `append` overloads applicable (`append<T>(ISlice, params T[])` infers the concrete/adapter type; `append<T>(slice<T>, params Span<T>)` infers the interface -- CS0121). The converter casts such elements to the element interface type:
 ```csharp

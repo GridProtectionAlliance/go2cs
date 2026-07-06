@@ -78,6 +78,19 @@ func visitLocal(nodes []*node) int {
 	return sum
 }
 
+// collect mirrors go/ast's CommentMap.addComment: a deref-aliased pointer PARAMETER used as a
+// COMPOSITE-LITERAL ELEMENT (`[]*node{p}`) must render the box (`Ꮡp`) — not the value alias
+// (`p`) — into the `ж<node>[]` array (CS0029); the sibling `append(list, p)` already took the
+// box through the call-argument pointer arm.
+func collect(list []*node, p *node) []*node {
+	if len(list) == 0 {
+		list = []*node{p}
+	} else {
+		list = append(list, p)
+	}
+	return list
+}
+
 func main() {
 	a := &node{val: 1}
 	b := &node{val: 2}
@@ -101,4 +114,12 @@ func main() {
 	// Local-pointer-var indexing a pointer-keyed map (reflect FieldByNameFunc shape).
 	dup := &node{val: 5}
 	fmt.Println("visitLocal:", visitLocal([]*node{dup, dup, x})) // dup once + x: 5 + 100 = 105
+
+	// Pointer param as a composite-literal element (go/ast addComment shape): first call takes
+	// the `[]*node{p}` literal arm, second the append arm; the boxes must alias the originals.
+	var list []*node
+	list = collect(list, a)
+	list = collect(list, b)
+	a.val = 11 // prove the collected pointers alias the original nodes
+	fmt.Println("collect:", list[0].val, list[1].val) // 11 2
 }

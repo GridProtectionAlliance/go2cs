@@ -386,6 +386,23 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				callContext.interfaceTypes[i] = elementType
 			}
 		}
+
+		// A POINTER element type renders a bare-ident element as the pointer VALUE — the box
+		// (`Ꮡc`), not a deref'd receiver ref-local (`c`) — mirroring the struct-field pointer
+		// routing below and the call-argument pointer arm (convCallExpr): `[]*CommentGroup{c}`
+		// inside a method that deref-aliases its `c *CommentGroup` parameter otherwise emits
+		// the VALUE alias into a `ж<CommentGroup>[]` array (go/ast addComment, CS0029). Gated
+		// to bare idents of pointer type: keyed elements (maps) and address-of/composite
+		// elements manage their own pointer rendering.
+		if _, ok := elementType.Underlying().(*types.Pointer); ok {
+			for i, elt := range compositeLit.Elts {
+				if ident, ok := elt.(*ast.Ident); ok {
+					if _, isPtr := v.getType(ident, false).(*types.Pointer); isPtr {
+						callContext.argTypeIsPtr[i] = true
+					}
+				}
+			}
+		}
 	}
 
 	// A NARROW-INTEGER element type (int8/uint8/int16/uint16) receiving a binary/unary

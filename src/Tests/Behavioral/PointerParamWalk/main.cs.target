@@ -64,6 +64,17 @@ internal static nint visitLocal(slice<ж<node>> nodes) {
     return sum;
 }
 
+internal static slice<ж<node>> collect(slice<ж<node>> list, ж<node> Ꮡp) {
+    ref var p = ref Ꮡp.Value;
+
+    if (len(list) == 0){
+        list = new ж<node>[]{Ꮡp}.slice();
+    } else {
+        list = append(list, Ꮡp);
+    }
+    return list;
+}
+
 internal static void Main() {
     var a = Ꮡ(new node(val: 1));
     var b = Ꮡ(new node(val: 2));
@@ -81,6 +92,11 @@ internal static void Main() {
     fmt.Println("chain:", walkChain(x));
     var dup = Ꮡ(new node(val: 5));
     fmt.Println("visitLocal:", visitLocal(new ж<node>[]{dup, dup, x}.slice()));
+    slice<ж<node>> list = default!;
+    list = collect(list, a);
+    list = collect(list, b);
+    a.Value.val = 11;
+    fmt.Println("collect:", (~list[0]).val, (~list[1]).val);
 }
 
 } // end main_package
