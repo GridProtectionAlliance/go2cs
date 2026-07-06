@@ -2,7 +2,9 @@ package main
 
 import (
 	"go/ast"
+	"go/build"
 	"go/types"
+	"path/filepath"
 	"strings"
 )
 
@@ -52,7 +54,25 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 
 	walk(pkg)
 
+	// A GOROOT package's `golang.org/x/…` imports are GOROOT-VENDORED — visitImportSpec resolves them
+	// to their `vendor/…` on-disk path (and namespace) when the importing file lives under GOROOT. The
+	// child-namespace map must use the SAME resolved form or a vendored sub-namespace (e.g.
+	// `go.vendor.golang.org.x.text.unicode`) is absent, so rootQualifyIfAmbiguous cannot see that a
+	// stdlib alias's leading segment (`unicode` of `unicode/utf8`) collides with it — bidirule emitted
+	// `using utf8 = unicode.utf8_package;` binding `unicode` to the vendored namespace (CS0234). Gated
+	// on the package living under GOROOT so a user module's own golang.org/x dependency is untouched.
+	isGorootPackage := false
+
+	if len(files) > 0 {
+		goroot := filepath.Clean(build.Default.GOROOT)
+		isGorootPackage = strings.HasPrefix(filepath.Clean(files[0].filePath), goroot+string(filepath.Separator))
+	}
+
 	for path := range closure {
+		if isGorootPackage {
+			path = resolveGorootVendoredPath(path)
+		}
+
 		parts := strings.Split(path, "/")
 		ns := RootNamespace
 
