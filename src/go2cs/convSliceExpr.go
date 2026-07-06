@@ -239,6 +239,14 @@ func (v *Visitor) intCastOperand(expr ast.Expr, converted string) string {
 		}
 	}
 
+	// A numeric TYPE PARAMETER operand — internal/trace's `dataTable[EI ~uint64]` shifting by
+	// `id % 8` (the shift COUNT is coerced to int here) — has no C# cast to int (a constrained
+	// type parameter is not directly convertible). Route through golib's ConvertToUInt64<T> bridge
+	// (the E(100) integer-type-param family), then narrow — the same shape as the slice-index cast.
+	if tp, ok := types.Unalias(v.getType(expr, false)).(*types.TypeParam); ok && typeParamIsInteger(tp) {
+		return fmt.Sprintf("(int)(ConvertToUInt64<%s>(%s))", v.getCSTypeName(tp), converted)
+	}
+
 	return fmt.Sprintf("(int)(%s)", converted)
 }
 

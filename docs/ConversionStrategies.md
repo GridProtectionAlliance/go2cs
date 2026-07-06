@@ -975,11 +975,14 @@ internal/trace's `dataTable`:
   `E(100)` integer-type-param family above) and then narrows: `d.dense[(nint)(ConvertToUInt64<EI>(id))]`
   (an arithmetic index `id/8` is still `EI`, so it wraps the same way).
 
-Cleared ~11 of internal/trace's index CS1503/CS0030 (17→6). (The separate shift-*count* type-parameter
-cast `(int)(id % 8)` — CS0030 — is a distinct convBinaryExpr root, banked.) Guarded by
-`NamedNumericSliceIndex` (a generic `lookup[K ~uint64]` indexing by the type parameter and an
-arithmetic result, a `pick` indexing by a named `int64`, and a `num:nint` `rank` index that must
-stay bare, values vs Go).
+Cleared ~11 of internal/trace's index CS1503/CS0030 (17→6). The companion **shift-*count*** case —
+`1 << (id % 8)` where the count is a numeric type parameter, coerced to `int` by `intCastOperand`
+(the same coercion the shift-width machinery uses) — routes through the same bridge:
+`(uint8)1 << (int)(ConvertToUInt64<EI>(id % 8))` (a bare `(int)(EI)` is CS0030). Cleared internal/trace's
+last two shift-count CS0030 (6→4). Guarded by `NamedNumericSliceIndex` (a generic `lookup[K ~uint64]`
+indexing by the type parameter and an arithmetic result, a `pick` indexing by a named `int64`, a
+`num:nint` `rank` index that must stay bare, and a `bitset[K ~uint64]` shifting by the type parameter,
+values vs Go).
 
 ### Method-set interface constraints bind the interface directly; pointer instantiations project through the adapter
 

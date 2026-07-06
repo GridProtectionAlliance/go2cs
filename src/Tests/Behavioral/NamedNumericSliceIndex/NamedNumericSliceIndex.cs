@@ -14,6 +14,12 @@ internal static (@string, @string) lookup<K>(slice<@string> dense, K id)
     return (dense[(nint)(ConvertToUInt64<K>(id))], dense[(nint)(ConvertToUInt64<K>(id / ConvertToType<K>(2)))]);
 }
 
+internal static uint8 bitset<K>(K id)
+    where K : /* ~uint64 */ IAdditionOperators<K, K, K>, ISubtractionOperators<K, K, K>, IMultiplyOperators<K, K, K>, IDivisionOperators<K, K, K>, IIncrementOperators<K>, IDecrementOperators<K>, IModulusOperators<K, K, K>, IBitwiseOperators<K, K, K>, IShiftOperators<K, int, K>, IEqualityOperators<K, K, bool>, IComparisonOperators<K, K, bool>, new()
+{
+    return (uint8)(((uint8)1 << (int)(ConvertToUInt64<K>((id % ConvertToType<K>(8))))));
+}
+
 internal static (@string, @string) pick(slice<@string> spans, PID p) {
     return (spans[(nint)(p)], spans[(nint)(p - 1)]);
 }
@@ -22,6 +28,7 @@ internal static void Main() {
     var dense = new @string[]{"a", "b", "c", "d", "e", "f"}.slice();
     var (x, y) = lookup(dense, (uint64)5);
     fmt.Println(x, y);
+    fmt.Println(bitset((uint64)3), bitset((uint64)10));
     var spans = new @string[]{"zero", "one", "two", "three"}.slice();
     var (a, b) = pick(spans, ((PID)3));
     fmt.Println(a, b);
