@@ -732,6 +732,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSubpackageFuncTypeParam() => CheckTarget("SubpackageFuncTypeParam");
+
+    [TestMethod]
     public void CheckSwitchBreakInCase() => CheckTarget("SwitchBreakInCase");
 
     [TestMethod]

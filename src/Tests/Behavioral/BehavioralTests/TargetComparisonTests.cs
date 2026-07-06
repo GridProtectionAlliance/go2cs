@@ -734,6 +734,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSubpackageFuncTypeParam() => CheckTarget("SubpackageFuncTypeParam");
+
+    [TestMethod]
     public void CheckSwitchBreakInCase() => CheckTarget("SwitchBreakInCase");
 
     [TestMethod]

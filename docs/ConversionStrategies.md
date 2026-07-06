@@ -1467,6 +1467,27 @@ seam across the two); regression-checked against the self-referential (`NamedFun
 unchanged), nested-reference (`FirstClassFunctions`), and variadic-param (`PublicizedFuncTypeParam`)
 cases.
 
+When such a collapsed delegate's signature carries a parameter whose type lives in a **sub-package**
+(an import path with a slash), the `Func<…>`/`Action<…>` rendering must qualify that type as the
+package **class**, not the namespace. The collapsed signature is produced from the Go signature's
+`t.String()`, which keeps the canonical import PATH inline — `func(*sync/atomic.Int32) int32`,
+`func(string, io/fs.DirEntry, error) error` (path/filepath's `WalkDirFunc`) — losing the file's import
+alias. `convertToCSFullTypeName` converted the whole slash-bearing string as one import path, dotting
+the type straight into the namespace: `sync.atomic.Int32` / `io.fs.DirEntry` — CS0234, since `atomic`
+is not a namespace of `go.sync` (the type lives in class `atomic_package`). It now splits the trailing
+`.TypeName` off at the first `.` after the last path `/`, converts the package path with the class
+suffix, and re-appends: `sync.atomic_package.Int32`, `io.fs_package.DirEntry`. The suffix is only added
+when the path segment does not already carry it — some callers (a recorded `[GoType]` underlying,
+`sync/atomic_package.Uint32`) hand a pre-suffixed path, which would otherwise double to
+`atomic_package_package` (a `DefinedTypeOverPkgType` regression, caught and gated). The behavioral
+corpus is byte-identical except the intended change, and an A/B reconvert of net+go/types (same package
+set) is byte-identical — only the func-type-subpackage-param shape moves. (Guarded by the
+`SubpackageFuncTypeParam` behavioral test — a methodless `applyFunc func(*atomic.Int32) int32` whose
+collapsed delegate carries the `sync/atomic` sub-package parameter, output-compared vs Go; the same
+shape drives path/filepath's `WalkDir`/`Walk` referencing `io/fs.DirEntry`/`FileInfo`. A separate
+residual there — `os.FileInfo`, a Go type ALIAS to `fs.FileInfo`, rendered `os_package.FileInfo` in a
+collapsed signature — is a distinct alias-resolution root, banked.)
+
 ### Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
 C# conversion: internal/concurrent's `keyHash: mapType.Hasher` feeds a `hashFunc` field from a

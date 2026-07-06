@@ -682,6 +682,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckStructWithDelegate() => CheckTarget("StructWithDelegate");
 
     [TestMethod]
+    public void CheckSubpackageFuncTypeParam() => CheckTarget("SubpackageFuncTypeParam");
+
+    [TestMethod]
     public void CheckSwitchBreakInCase() => CheckTarget("SwitchBreakInCase");
 
     [TestMethod]

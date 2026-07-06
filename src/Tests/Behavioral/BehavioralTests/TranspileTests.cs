@@ -732,6 +732,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckStructWithPointer() => CheckTarget("StructWithPointer");
 
     [TestMethod]
+    public void CheckSubpackageFuncTypeParam() => CheckTarget("SubpackageFuncTypeParam");
+
+    [TestMethod]
     public void CheckSwitchBreakInCase() => CheckTarget("SwitchBreakInCase");
 
     [TestMethod]

@@ -1,0 +1,25 @@
+namespace go;
+
+using fmt = fmt_package;
+using atomic = sync.atomic_package;
+using sync;
+
+partial class main_package {
+
+// type applyFunc is a methodless func type — rendered inline as its base delegate
+
+internal static int32 run(Func<ж<sync.atomic_package.Int32>, int32> f, ж<atomic.Int32> Ꮡc) {
+    ref var c = ref Ꮡc.Value;
+
+    return f(Ꮡc);
+}
+
+internal static void Main() {
+    ref var c = ref heap(new atomic.Int32(), out var Ꮡc);
+    Ꮡc.Store(5);
+    fmt.Println(run((ж<atomic.Int32> cΔ1) => cΔ1.Load(), Ꮡc));
+    Ꮡc.Add(10);
+    fmt.Println(run((ж<atomic.Int32> cΔ2) => cΔ2.Load(), Ꮡc));
+}
+
+} // end main_package

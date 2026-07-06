@@ -4005,7 +4005,46 @@ func convertToCSFullTypeName(typeName string) string {
 	}
 
 	if strings.Contains(typeName, "/") {
-		typeName = convertImportPathToNamespace(typeName, "")
+		// A package-qualified TYPE string carries a subpackage PATH plus a trailing `.TypeName` —
+		// `io/fs.DirEntry`, `internal/abi.Type` (a func-type param rendered from t.String(), whose
+		// import alias was lost). Converting the WHOLE thing as one import path drops the package CLASS
+		// suffix and dots the type straight into the namespace (`io.fs.DirEntry`, CS0234 — `fs` is not a
+		// namespace of `go.io`; the type lives in class `fs_package`). Split the trailing type off: the
+		// package path ends at the first `.` AFTER the last path `/`, so `io/fs` → `io.fs_package` and
+		// the `.DirEntry` (plus any `[…]` generic args) re-appends. Falls back to the whole-path form
+		// when there is no trailing type (a bare import path).
+		genericStart := strings.IndexByte(typeName, '[')
+		scanEnd := len(typeName)
+
+		if genericStart != -1 {
+			scanEnd = genericStart
+		}
+
+		lastSlash := strings.LastIndex(typeName[:scanEnd], "/")
+		dotAfterSlash := -1
+
+		if lastSlash != -1 {
+			dotAfterSlash = strings.IndexByte(typeName[lastSlash:scanEnd], '.')
+		}
+
+		if dotAfterSlash != -1 {
+			splitAt := lastSlash + dotAfterSlash
+			pkgPath := typeName[:splitAt]
+
+			// Some callers hand a path whose last segment ALREADY carries the class suffix
+			// (`sync/atomic_package.Uint32`, from a recorded `[GoType]` underlying); others hand the
+			// raw path (`io/fs.DirEntry`, from a signature's t.String()). Only append the suffix when
+			// it is not already present, or it doubles (`atomic_package_package`).
+			suffix := PackageSuffix
+
+			if strings.HasSuffix(pkgPath[lastSlash+1:], PackageSuffix) {
+				suffix = ""
+			}
+
+			typeName = convertImportPathToNamespace(pkgPath, suffix) + typeName[splitAt:]
+		} else {
+			typeName = convertImportPathToNamespace(typeName, "")
+		}
 	}
 
 	// Replace all `[` and `]` with `<` and `>` to handle generic types
