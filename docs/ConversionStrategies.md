@@ -2096,6 +2096,18 @@ continue_RowLoop:;
 ```
 Both the `break_<label>`/`continue_<label>` labels are emitted for a labeled `for` **and** a labeled `range`/`foreach` loop (the label target is placed regardless of loop kind; a missing one is CS0159 "no such label"). Guarded by the `ForVariants` behavioral test (labeled `range` with nested `continue`/`break`).
 
+### A user label on an empty statement emits an explicit empty statement
+
+A Go label can attach to an **empty statement** — `keep:` as the last line of a block, a
+`goto`/`break`/`continue` target with nothing between the label and the closing brace
+(internal/trace gc.go's `goto keep` target at the tail of a for-loop body). A C# label must
+precede a statement, so a bare `keep:` before `}` is CS1525/CS1002. `visitLabeledStmt` detects
+an `*ast.EmptyStmt` target and emits the explicit empty statement `keep:;` — the same shape the
+`break_<label>:;`/`continue_<label>:;` synthesis already uses. A label on a non-empty statement
+is unchanged (`big:` followed by its statement stays bare). Guarded by `LabeledEmptyStmt` (a
+`goto` to an end-of-loop-body label, a `goto` to an end-of-function label, and a `goto` to an
+end-of-inner-block label — values vs Go).
+
 ### Reassigned or ref-bound range variable
 A C# `foreach` iteration variable is **read-only**, but Go lets a `range` key/value variable be reassigned inside the body (it is a per-iteration copy). When the converter detects such a reassignment (`=`, `+=`, `-=`, `++`, …) of a newly-`:=`-defined range variable — or a **pointer-receiver method selected on the value-typed range var** (`q.GoString()`, whose emitted `[GoRecv]` form takes `this ref T`; a foreach var cannot bind `ref` — CS1657, dnsmessage's four `Message.GoString` loops) — it iterates a temp and declares the variable as a mutable local copy in the body, rather than binding it directly. The per-iteration `var q = vᴛ1;` copy preserves Go's semantics exactly: the pointer-receiver mutates the copy, as Go's implicit `(&q)` on the range copy does. A pointer-*typed* range var is excluded (it dereferences; no ref bind), as are value-receiver and interface-method selections. The machinery covers string AND slice/array/map ranges:
 

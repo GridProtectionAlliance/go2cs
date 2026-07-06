@@ -377,6 +377,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
 
     [TestMethod]
+    public void CheckLabeledEmptyStmt() => CheckTarget("LabeledEmptyStmt");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]

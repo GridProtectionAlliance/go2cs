@@ -337,6 +337,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckKeywordTrueFalseIdent() => CheckTarget("KeywordTrueFalseIdent");
 
     [TestMethod]
+    public void CheckLabeledEmptyStmt() => CheckTarget("LabeledEmptyStmt");
+
+    [TestMethod]
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
