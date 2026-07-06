@@ -7,6 +7,17 @@
 
 ## Headline
 
+**DLL-measured reality (2026-07-05, HEAD `128a69f52`): 239/302 packages genuinely compile (own DLL emitted); 12 fail with own-errors; 51 are SKIPPED only because they sit behind those 12.** The census "291/303" counts by *own-error absence*, which over-counts: a package skipped behind a failed dependency reports zero errors yet emits no DLL. The honest number is **239/302 (79%) genuinely compiling** — but the entire 63-package gap reduces to **just the 12 roots** (fix them and the 51 fall out). **`runtime` now compiles** (DLL emitted), along with `reflect`, `os`, `net`, `fmt` — the historical "runtime = singular ~237-package gate" is **CLEARED**.
+
+**No true design walls remain (adversarial pro/skeptic panel, 2026-07-05).** The two candidates were both refuted as walls:
+- **`go/ast` generic-over-interface is NOT an adapter-model wall — it is a converter constraint-emission BUG.** `main.go:3107` (getGenericDefinition) stamps a phantom CRTP self-type `Node<N>` + `, new()` for a method-bearing interface constraint, but `Node` is arity-0 (`ast.cs:32`) so `Node<N>` doesn't exist → CS0308. Fix in the converter: stop emitting the CRTP+`new()` form; lower `walkList`-shaped bodies to a plain interface-typed loop (`slice<Node>`), reusing the box→adapter widening that ALREADY fires at scalar call sites (`walk.cs` emits `new IdentжNode(...)`). No `ж<T>` fork, no generator change. Effort = medium (constraint-emission change is corpus-wide → check-no-regression + re-measure gated). **Highest single lever: unblocks the entire `go/*` toolchain (~11 pkgs) with no co-fix.**
+- **`encoding/json` generic-over-union is NOT a wall — a one-member golib gap.** The `[]byte|string` union is already modeled by hand-written `core/golib/IByteSeq.cs`; only the spread `.ꓸꓸꓸ` is missing from the interface (both `@string` and `slice<T>` already implement it concretely). Add `Span<T> ꓸꓸꓸ { get; }` to `IByteSeq<T>` — additive, plausibly clears all 8 at once. Effort = small.
+- **`runtime/pprof` is NOT runtime-gated anymore** (runtime compiles); its CS0411 is a genuine tractable generic-method-group-arg fix (stamp explicit type args, cf. `66be4f914`).
+
+**Reachability verdict: full stdlib compile IS reachable.** Ceiling = **302/302 (100%) with exactly one hand-stubbed package** (`crypto/internal/nistec` p256 asm, via the ratified `[module: GoManualConversion]` rule), or **~301/302** if pure-auto-conversion with zero manual stubs is required. No architectural fork needed. Leverage-ranked cheapest-first order: `cryptobyte` (trivial, opens the crypto cluster) → `go/ast` (11 solo) → `sha3`+`bidirule`+`nistec`-stub (completes the net/http tower) → `encoding/json` → small converter tail (`template/parse`, `testing`, `internal/trace`, `pprof`) → `database/sql`+`gosym` (leaves).
+
+### Superseded census5 headline
+
 **census5 (2026-07-05, HEAD `40f4fac2a`): 12 packages fail with own-errors; 291/303 (96%) compile.**
 (census4 at HEAD `443ec9a91` had 13 — `debug/buildinfo` has since been cleared by the promoted-adapter
 generator fix, `175cba3d0`. Note census4's buildinfo attribution was partly a stale-incremental artifact,
