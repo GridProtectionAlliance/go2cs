@@ -183,6 +183,7 @@
     <Project Path="Tests/Behavioral/MethodSelector/MethodSelector.csproj" />
     <Project Path="Tests/Behavioral/MethodValueReassignCapture/MethodValueReassignCapture.csproj" />
     <Project Path="Tests/Behavioral/MethodlessFuncType/MethodlessFuncType.csproj" />
+    <Project Path="Tests/Behavioral/MethodlessFuncTypeAssert/MethodlessFuncTypeAssert.csproj" />
     <Project Path="Tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />

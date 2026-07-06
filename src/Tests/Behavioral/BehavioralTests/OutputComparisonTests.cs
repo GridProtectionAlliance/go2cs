@@ -376,6 +376,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckMethodlessFuncType() => CheckTarget("MethodlessFuncType");
 
     [TestMethod]
+    public void CheckMethodlessFuncTypeAssert() => CheckTarget("MethodlessFuncTypeAssert");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

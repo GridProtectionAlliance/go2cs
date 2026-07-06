@@ -1501,6 +1501,18 @@ compiles). **GUARD OWED** — the shape needs three packages (B declares `Y`, A 
 references `A.X`), which neither the single-package baseline nor the 2-package `CrossPkg` harness
 expresses; validated by the `go-src-converted/path/filepath` build (1→0) + io/ioutil build.)
 
+A **type ASSERTION** whose target is a methodless func type must assert against the **collapsed
+delegate**, not the (never-emitted) name. `ci.(Compressor)` where
+`type Compressor func(io.Writer) (io.WriteCloser, error)` (archive/zip's compressor/decompressor
+registries) rendered `ci._<Compressor>()` — `convTypeAssertExpr` converts the target via `convExpr`,
+which emits the bare ident, and after collapse `Compressor` is undefined (CS0246). When the asserted
+target is a methodless named func type, the assertion now renders its `getCSTypeName` (the collapsed
+`Func<…>`): `ci._<Func<io.Writer, (io.WriteCloser, error)>>()` — matching how the stored value was
+emitted (a collapsed delegate). Other assertion targets are unchanged. (Guarded by the
+`MethodlessFuncTypeAssert` behavioral test — `i.(Compressor)` on a matching and a non-matching dynamic
+type, output-compared vs Go; CNR byte-identical and an A/B of archive/zip shows only the two intended
+`_<Compressor>`/`_<Decompressor>` → `_<Func<…>>` lines.)
+
 ### Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
 C# conversion: internal/concurrent's `keyHash: mapType.Hasher` feeds a `hashFunc` field from a

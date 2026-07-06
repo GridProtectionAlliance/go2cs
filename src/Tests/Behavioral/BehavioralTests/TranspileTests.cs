@@ -414,6 +414,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMethodlessFuncType() => CheckTarget("MethodlessFuncType");
 
     [TestMethod]
+    public void CheckMethodlessFuncTypeAssert() => CheckTarget("MethodlessFuncTypeAssert");
+
+    [TestMethod]
     public void CheckMethodOnBoxedGlobalIndex() => CheckTarget("MethodOnBoxedGlobalIndex");
 
     [TestMethod]

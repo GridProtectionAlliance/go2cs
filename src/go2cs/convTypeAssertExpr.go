@@ -42,5 +42,19 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	// convertToCSTypeName again: the conversion is not idempotent, re-sanitizing machinery
 	// names inside generic args (`d.(chan struct{})` → `channel<EmptyStruct>` whose inner
 	// arg re-sanitized to the reserved-Δ `ΔEmptyStruct` — context CS0246 ×4/CS0019).
-	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), v.convExpr(typeAssertExpr.Type, []ExprContext{context}), safeAssertDescriminator)
+	typeExpr := v.convExpr(typeAssertExpr.Type, []ExprContext{context})
+
+	// A methodless named func type collapses to its base C# delegate everywhere it is REFERENCED
+	// (getTypeName), so its NAME is never emitted. A type-assertion target `ci.(Compressor)` where
+	// `type Compressor func(io.Writer) (io.WriteCloser, error)` must therefore assert against the
+	// collapsed delegate `Func<…>`, not the bare (undefined) name `Compressor` — convExpr on the type
+	// ident renders the name (CS0246, archive/zip's compressor/decompressor registries). Render the
+	// collapsed form for such a target.
+	if targetType := v.getExprType(typeAssertExpr.Type); targetType != nil {
+		if _, ok := methodlessNamedFuncSignature(targetType); ok {
+			typeExpr = v.getCSTypeName(targetType)
+		}
+	}
+
+	return fmt.Sprintf("%s._<%s>(%s)", v.convExpr(typeAssertExpr.X, nil), typeExpr, safeAssertDescriminator)
 }
