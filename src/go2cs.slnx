@@ -114,6 +114,7 @@
     <Project Path="Tests/Behavioral/ExprSwitch/ExprSwitch.csproj" />
     <Project Path="Tests/Behavioral/FieldChainBoxReceiver/FieldChainBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/FieldNameShadowsLoopVar/FieldNameShadowsLoopVar.csproj" />
+    <Project Path="Tests/Behavioral/FieldNameTypeMethodCollision/FieldNameTypeMethodCollision.csproj" />
     <Project Path="Tests/Behavioral/FieldNamedAsType/FieldNamedAsType.csproj" />
     <Project Path="Tests/Behavioral/FileNameBuildConstraints/FileNameBuildConstraints.csproj" />
     <Project Path="Tests/Behavioral/FirstClassFunctions/FirstClassFunctions.csproj" />

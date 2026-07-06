@@ -221,6 +221,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckFieldNameShadowsLoopVar() => CheckTarget("FieldNameShadowsLoopVar");
 
     [TestMethod]
+    public void CheckFieldNameTypeMethodCollision() => CheckTarget("FieldNameTypeMethodCollision");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

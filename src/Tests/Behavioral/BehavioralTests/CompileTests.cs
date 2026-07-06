@@ -219,6 +219,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFieldNameShadowsLoopVar() => CheckTarget("FieldNameShadowsLoopVar");
 
     [TestMethod]
+    public void CheckFieldNameTypeMethodCollision() => CheckTarget("FieldNameTypeMethodCollision");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]

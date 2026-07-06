@@ -22,6 +22,15 @@ func typeCollidingFieldName(name string) string {
 		return ShadowVarMarker + ShadowVarMarker + raw
 	}
 
+	// When the enclosing TYPE is itself Δ-renamed for a type-vs-method collision — internal/trace's
+	// `type Label struct{ Label string }` alongside `func (e Event) Label() Label`, so the TYPE
+	// becomes ΔLabel — a single-marker field ΔLabel would EQUAL the type ΔLabel (CS0542 again).
+	// Double the marker (ΔΔLabel) to differ, matching the keyword-family branch above. The type is
+	// only single-Δ (getCollisionAvoidanceIdentifier's non-reserved branch), so ΔΔ is unambiguous.
+	if nameCollisions[name] {
+		return ShadowVarMarker + ShadowVarMarker + name
+	}
+
 	return ShadowVarMarker + name
 }
 

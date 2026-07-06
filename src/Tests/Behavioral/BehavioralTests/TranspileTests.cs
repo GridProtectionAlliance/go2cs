@@ -219,6 +219,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFieldNameShadowsLoopVar() => CheckTarget("FieldNameShadowsLoopVar");
 
     [TestMethod]
+    public void CheckFieldNameTypeMethodCollision() => CheckTarget("FieldNameTypeMethodCollision");
+
+    [TestMethod]
     public void CheckFileNameBuildConstraints() => CheckTarget("FileNameBuildConstraints");
 
     [TestMethod]
