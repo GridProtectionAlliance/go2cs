@@ -441,6 +441,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNamedFuncTypeStateMachine() => CheckTarget("NamedFuncTypeStateMachine");
 
     [TestMethod]
+    public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]

@@ -213,6 +213,40 @@ public class ImplicitConvGenerator : ISourceGenerator
                     convExprOverride = $"new {valueType}(({valueType})(nuint)src.Value)";
             }
 
+            // A LOCAL numeric pair whose SOURCE underlying does not implicitly convert to the
+            // CONSTRUCTED type's underlying — internal/trace's Inverted `timestamp`(uint64) →
+            // `Time`(int64): the default `(TargetWrapper)src.Value` cast routes `ulong`→(the
+            // wrapper's `long`)→wrapper, but `ulong`→`long` is not an implicit C# conversion, so it
+            // is CS0030. Construct through the constructed type's underlying basic with an explicit
+            // cast instead: `new ΔTime((long)src.Value)`. Each side's underlying comes from its
+            // [GoType("num:X")] tag (the generated Value property is invisible to a single-pass
+            // sibling generator, so the implicit-conversion test runs over the corresponding
+            // SpecialTypes). Because the default cast compiles IFF that same source→constructed basic
+            // conversion is implicit, this fires ONLY on cases that do not currently compile — every
+            // already-compiling conversion stays byte-identical. (uintptr-backed pairs are handled by
+            // the block above and keep their nuint hop; `int`/`uint` native-width wrappers are left
+            // out where the classification is version-sensitive.)
+            if (convExprOverride is null && !string.IsNullOrWhiteSpace(valueType))
+            {
+                ITypeSymbol constructedType = inverted ? sourceType : targetType;
+                ITypeSymbol srcSideType = inverted ? targetType : sourceType;
+
+                string? constructedBasic = GetNumBasic(syntaxContext, constructedType.Name);
+                string? srcBasic = GetNumBasic(syntaxContext, srcSideType.Name);
+
+                if (constructedBasic is not null && srcBasic is not null)
+                {
+                    string? constructedKeyword = NumBasicToKeyword(constructedBasic);
+
+                    if (constructedKeyword is not null && NumBasicToKeyword(srcBasic) is not null &&
+                        !IsImplicitNumericConversion(srcBasic, constructedBasic))
+                    {
+                        string lhName = inverted ? sourceTypeName : targetTypeName;
+                        convExprOverride = $"new {lhName}(({constructedKeyword})src.Value)";
+                    }
+                }
+            }
+
             // The emitted user-defined conversion operator's signature is (sourceTypeName,
             // targetTypeName, inverted) — `direct` vs `indirect` only changes the body. The same
             // pair can be recorded as BOTH a direct and an indirect conversion (e.g. `g` ↔ `ж<g>`),
@@ -261,6 +295,61 @@ public class ImplicitConvGenerator : ISourceGenerator
         IPropertySymbol? valProperty = type.GetMembers("Value").OfType<IPropertySymbol>().FirstOrDefault();
         return valProperty?.Type.ToDisplayString(s_qualifiedFormat);
     }
+
+    // Reads a LOCAL named-numeric struct's [GoType("num:X")] underlying basic ("int64", "uint64", …)
+    // from syntax — the generated Value property is invisible to a single-pass sibling generator, so
+    // the tag is the only place the underlying is knowable here. Returns null when the type has no
+    // local declaration or no numeric GoType tag.
+    private static string? GetNumBasic(GeneratorSyntaxContext context, string typeName)
+    {
+        string? tag = GetStructDeclaration(context, typeName)?.AttributeLists
+            .SelectMany(list => list.Attributes)
+            .Where(attr => attr.Name.ToString() is "GoType" or "GoTypeAttribute")
+            .Select(attr => attr.ArgumentList?.Arguments.FirstOrDefault()?.ToString().Trim('"'))
+            .FirstOrDefault();
+
+        return tag is not null && tag.StartsWith("num:") ? tag["num:".Length..] : null;
+    }
+
+    // The C# implicit numeric conversions among the fixed-width integer and float basics — the exact
+    // set that decides whether the default `(Wrapper)src.Value` cast compiles. `int`/`uint`/`uintptr`
+    // (native-width) are intentionally absent (NumBasicToKeyword returns null for them, so the caller
+    // leaves them to the default / uintptr paths). Identity counts as convertible.
+    private static bool IsImplicitNumericConversion(string src, string dst)
+    {
+        if (src == dst)
+            return true;
+
+        return src switch
+        {
+            "int8" => dst is "int16" or "int32" or "rune" or "int64" or "float32" or "float64",
+            "int16" => dst is "int32" or "rune" or "int64" or "float32" or "float64",
+            "int32" or "rune" => dst is "int64" or "float32" or "float64",
+            "int64" => dst is "float32" or "float64",
+            "uint8" or "byte" => dst is "int16" or "uint16" or "int32" or "rune" or "uint32" or "int64" or "uint64" or "float32" or "float64",
+            "uint16" => dst is "int32" or "rune" or "uint32" or "int64" or "uint64" or "float32" or "float64",
+            "uint32" => dst is "int64" or "uint64" or "float32" or "float64",
+            "uint64" => dst is "float32" or "float64",
+            "float32" => dst is "float64",
+            _ => false
+        };
+    }
+
+    // The C# keyword for a Go numeric basic, used as the explicit through-underlying cast target.
+    private static string? NumBasicToKeyword(string basic) => basic switch
+    {
+        "int8" => "sbyte",
+        "int16" => "short",
+        "int32" or "rune" => "int",
+        "int64" => "long",
+        "uint8" or "byte" => "byte",
+        "uint16" => "ushort",
+        "uint32" => "uint",
+        "uint64" => "ulong",
+        "float32" => "float",
+        "float64" => "double",
+        _ => null
+    };
 
     private static StructDeclarationSyntax? GetStructDeclaration(GeneratorSyntaxContext context, string structName)
     {
