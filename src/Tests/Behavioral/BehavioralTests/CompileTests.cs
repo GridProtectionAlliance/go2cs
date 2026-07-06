@@ -462,6 +462,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedNumericShiftConv() => CheckTarget("NamedNumericShiftConv");
 
     [TestMethod]
+    public void CheckNamedNumericSliceIndex() => CheckTarget("NamedNumericSliceIndex");
+
+    [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
 
     [TestMethod]

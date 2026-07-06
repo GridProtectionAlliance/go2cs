@@ -134,11 +134,32 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		// would chain two user conversions, CS0030 — SparseArrayNamedIntKey's errno keys).
 		switch baseType.Underlying().(type) {
 		case *types.Slice, *types.Array:
-			if basic, isBasic := types.Unalias(v.getType(indexExpr.Index, false)).(*types.Basic); isBasic {
+			idxType := types.Unalias(v.getType(indexExpr.Index, false))
+
+			if basic, isBasic := idxType.(*types.Basic); isBasic {
 				switch basic.Kind() {
 				case types.Uint, types.Uint32, types.Uint64, types.Uintptr, types.Int64:
 					index = fmt.Sprintf("(nint)(%s)", index)
 				}
+			} else if named, isNamed := idxType.(*types.Named); isNamed {
+				// A NAMED type over signed `int64` — internal/trace's `type ProcID int64` indexing
+				// `spans[procID]` (CS1503) — has no bare path to the indexer: there is no `this[long]`
+				// overload, `int64→nint` does not narrow implicitly, and `int64→ulong` (which would
+				// bind `this[ulong]`) is a signed→unsigned conversion. `(nint)(x)` composes as one
+				// user conversion (named→long) plus one built-in (long→nint). Every OTHER kind is
+				// deliberately EXCLUDED — no churn, and casting some would even break: an UNSIGNED
+				// named type binds the golib `this[ulong]` overload bare (`type kindT uint`/uint32/
+				// uint64), and a nuint-backed wrapper (uint/uintptr) is CS0030 under a `(nint)` cast;
+				// an int/int32/nint underlying narrows implicitly (`type rank int` stays bare).
+				if ub, ok := named.Underlying().(*types.Basic); ok && ub.Kind() == types.Int64 {
+					index = fmt.Sprintf("(nint)(%s)", index)
+				}
+			} else if tp, isTP := idxType.(*types.TypeParam); isTP && typeParamIsInteger(tp) {
+				// A numeric TYPE PARAMETER index — internal/trace's `dataTable[EI ~uint64]`
+				// indexing `d.dense[id]` — has no C# cast to nint (a constrained type parameter is
+				// not directly convertible). Route through golib's ConvertToUInt64<T> bridge (the
+				// integer-type-param conversion family, cf. rand.N's E(x)), then narrow to nint.
+				index = fmt.Sprintf("(nint)(ConvertToUInt64<%s>(%s))", v.getCSTypeName(tp), index)
 			}
 		}
 	}

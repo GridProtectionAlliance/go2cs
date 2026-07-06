@@ -955,6 +955,32 @@ golib's builtins carry **interface-typed overloads** so a value held as a constr
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) all failed (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `[GoType("num:*")]` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; clears math/rand/v2's `N`.)
 
+### A named-wide-integer or type-parameter slice index casts to `nint`
+
+Go permits any integer type as a slice/array index, converting it to `int` for the access. The C#
+`slice<E>`/`array<E>` indexer takes `nint`, and the existing wide-*basic* index cast already routed
+`uint`/`uint32`/`uint64`/`uintptr`/`int64` through `(nint)`. Two more index kinds need it, both from
+internal/trace's `dataTable`:
+- a **named type over signed `int64`** — `type ProcID int64` indexing `spans[procID]` (CS1503).
+  There is no `this[long]` overload, `int64→nint` does not narrow implicitly, and `int64→ulong`
+  (which would bind `this[ulong]`) is a signed→unsigned conversion — so it has no bare path.
+  `(nint)(procID)` composes as one *user* conversion (named→long) plus one *built-in* (long→nint).
+  Every other kind is deliberately **excluded** — no churn, and casting some would even break: an
+  *unsigned* named type (`type kindT uint`/uint32/uint64) binds the golib `this[ulong]` overload
+  bare, and a nuint-backed wrapper (`uint`/`uintptr`) is *CS0030* under a `(nint)` cast; an
+  `int`/`int32`/`nint` underlying narrows implicitly (`type rank int` stays bare). So only signed
+  `int64` both *needs* and *accepts* the cast;
+- a numeric **type parameter** — `dataTable[EI ~uint64]` doing `d.dense[id]`. A constrained type
+  parameter has no C# cast at all, so it routes through golib's `ConvertToUInt64<K>` bridge (the
+  `E(100)` integer-type-param family above) and then narrows: `d.dense[(nint)(ConvertToUInt64<EI>(id))]`
+  (an arithmetic index `id/8` is still `EI`, so it wraps the same way).
+
+Cleared ~11 of internal/trace's index CS1503/CS0030 (17→6). (The separate shift-*count* type-parameter
+cast `(int)(id % 8)` — CS0030 — is a distinct convBinaryExpr root, banked.) Guarded by
+`NamedNumericSliceIndex` (a generic `lookup[K ~uint64]` indexing by the type parameter and an
+arithmetic result, a `pick` indexing by a named `int64`, and a `num:nint` `rank` index that must
+stay bare, values vs Go).
+
 ### Method-set interface constraints bind the interface directly; pointer instantiations project through the adapter
 
 A type parameter constrained by a **regular method-set interface** (a pure method set, no type-term
