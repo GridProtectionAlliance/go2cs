@@ -136,6 +136,11 @@ type Visitor struct {
 	// canonical alias a file import already emitted. visitFile supplies the alias for the difference.
 	referencedForeignPackages HashSet[string]
 	canonicalAliasImported    HashSet[string]
+	// importAliasesEmitted holds the C# alias NAMES a file's real imports already bound (`asn1`,
+	// `encoding_asn1`, `time`). visitFile's synthesized canonical-alias `using` is skipped when its
+	// alias collides with one of these — a same-named subpackage plus an aliased parent import both
+	// resolving to alias `asn1` (cryptobyte's `encoding/asn1` + `.../cryptobyte/asn1`, CS1537).
+	importAliasesEmitted HashSet[string]
 
 	// FuncDecl variables
 	inFunction           bool
@@ -800,6 +805,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 					importQueue:           HashSet[string]{},
 					referencedForeignPackages: HashSet[string]{},
 					canonicalAliasImported:    HashSet[string]{},
+					importAliasesEmitted:      HashSet[string]{},
 					typeAliasDeclarations: &strings.Builder{},
 					standAloneComments:    map[token.Pos]string{},
 					sortedCommentPos:      []token.Pos{},

@@ -110,6 +110,18 @@ func (v *Visitor) visitFile(file *ast.File) {
 		}
 
 		alias, namespace := packageUsingAlias(importPath)
+
+		// Skip when the canonical alias collides with one a real import already bound to a DIFFERENT
+		// namespace: cryptobyte's asn1.go imports `encoding_asn1 "encoding/asn1"` (referenced by type,
+		// so it lands here) AND the subpackage `.../cryptobyte/asn1` (unaliased → alias `asn1`), so
+		// synthesizing `using asn1 = encoding.asn1_package` duplicates the subpackage's `using asn1`
+		// (CS1537) and mis-binds `asn1.X`. The parent is in scope via its `encoding_asn1` alias, so the
+		// canonical one is unneeded here. (A non-colliding canonical alias is still supplied, so an
+		// inferred type reference to a non-canonically-imported package keeps working — no churn.)
+		if v.importAliasesEmitted.Contains(alias) {
+			continue
+		}
+
 		v.addRequiredUsing(fmt.Sprintf("%s = %s", alias, namespace))
 	}
 
