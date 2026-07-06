@@ -159,4 +159,16 @@ public static snapshot Peek() {
     public nint Serial;
 }
 
+[GoType] partial struct ΔMarker {
+    public @string ΔΔMarker;
+}
+
+public static @string Marker(this Sensor s) {
+    return s.Name;
+}
+
+public static ΔMarker MakeMarker(@string s) {
+    return new ΔMarker(ΔΔMarker: s);
+}
+
 } // end CrossPkgLib_package

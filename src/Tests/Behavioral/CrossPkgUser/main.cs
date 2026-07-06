@@ -227,6 +227,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(sam.Sample(), sam.Sample(), (~pr).Hits);
     var h = Ꮡ(new holder<nint>(Cache: Ꮡ(new CrossPkgLib.Cache<nint>(nil)), name: "h"u8));
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
+    var mk = CrossPkgLib.MakeMarker("tag"u8);
+    fmt.Println(mk.ΔΔMarker);
 });
 
 [GoType("num:float64")] partial struct localCelsius;

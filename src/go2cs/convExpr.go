@@ -198,6 +198,11 @@ type IdentContext struct {
 	// struct's type name. C# forbids a member sharing the enclosing type's name (CS0542), so
 	// the field is emitted with the disambiguation marker (matching its renamed declaration).
 	fieldCollidesWithType bool
+	// fieldTypeIsRenamed marks that the field's enclosing type is itself Δ-renamed for a
+	// type-vs-method collision in ITS OWN package (a FOREIGN such type, invisible to the current
+	// package's nameCollisions). The field access then DOUBLES the marker to match the
+	// declaration's ΔΔ form (see typeCollidingFieldName / fieldTypeIsRenamed).
+	fieldTypeIsRenamed bool
 }
 
 func DefaultIdentContext() IdentContext {
@@ -207,6 +212,7 @@ func DefaultIdentContext() IdentContext {
 		isMethod:              false,
 		ident:                 nil,
 		fieldCollidesWithType: false,
+		fieldTypeIsRenamed:    false,
 	}
 }
 

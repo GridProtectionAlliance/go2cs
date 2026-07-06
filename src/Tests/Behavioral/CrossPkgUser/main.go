@@ -314,6 +314,13 @@ func main() {
 
 	h := &holder[int]{Cache: &CrossPkgLib.Cache[int]{}, name: "h"}
 	fmt.Println(h.Bump(), h.Bump(), h.name) // 1 2 h
+
+	// Cross-package access of a triple-collision type's FIELD (field name == type name == a method
+	// name in the lib): CrossPkgLib.Marker's field is DOUBLE-marked (ΔΔMarker) in the declaration
+	// because the TYPE is Δ-renamed (type-vs-method), so the access must apply the same double. Via
+	// an inferred-type value so the renamed TYPE is never named explicitly (that's a separate root).
+	mk := CrossPkgLib.MakeMarker("tag")
+	fmt.Println(mk.Marker) // tag
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a

@@ -66,6 +66,81 @@ func (v *Visitor) fieldCollidesWithType(sel *ast.Ident, x ast.Expr) bool {
 	return getSanitizedIdentifier(sel.Name) == getSanitizedIdentifier(obj.Name())
 }
 
+// packageMethodNames caches, per package, the set of every method/func name declared in it. Used to
+// detect a type-vs-method collision (a type `T` whose package also declares a func/method named `T`,
+// which Δ-renames the TYPE) for a FOREIGN type, where the current package's `nameCollisions` map does
+// not apply. Package objects are interned per run, so the cache key is stable.
+var packageMethodNames map[*types.Package]map[string]bool
+
+func packageHasMethodNamed(pkg *types.Package, name string) bool {
+	if pkg == nil {
+		return false
+	}
+
+	packageLock.Lock()
+	defer packageLock.Unlock()
+
+	if packageMethodNames == nil {
+		packageMethodNames = map[*types.Package]map[string]bool{}
+	}
+
+	set, ok := packageMethodNames[pkg]
+
+	if !ok {
+		set = map[string]bool{}
+		scope := pkg.Scope()
+
+		for _, n := range scope.Names() {
+			switch o := scope.Lookup(n).(type) {
+			case *types.Func:
+				set[o.Name()] = true
+			case *types.TypeName:
+				if named, isNamed := o.Type().(*types.Named); isNamed {
+					for i := range named.NumMethods() {
+						set[named.Method(i).Name()] = true
+					}
+				}
+			}
+		}
+
+		packageMethodNames[pkg] = set
+	}
+
+	return set[name]
+}
+
+// fieldTypeIsRenamed reports whether a field selector's enclosing named type is itself Δ-renamed for a
+// type-vs-method collision IN ITS OWN package. A FOREIGN such type — internal/trace's `Label`, renamed
+// `ΔLabel` because `func (Event) Label()` shares the name — is not in the CURRENT package's
+// nameCollisions map, so a cross-package field access (`l.Label`) would emit the SINGLE-marker field
+// name (`ΔLabel`) instead of the DOUBLE the declaration used (`ΔΔLabel`) — CS1061 (internal/trace/
+// testtrace). The double is applied at the access site by consulting the field-type's OWN package.
+func (v *Visitor) fieldTypeIsRenamed(x ast.Expr) bool {
+	xType := v.info.TypeOf(x)
+
+	if xType == nil {
+		return false
+	}
+
+	if ptr, ok := xType.Underlying().(*types.Pointer); ok {
+		xType = ptr.Elem()
+	}
+
+	named, ok := xType.(*types.Named)
+
+	if !ok {
+		return false
+	}
+
+	obj := named.Obj()
+
+	if obj.Pkg() == nil || obj.Parent() != obj.Pkg().Scope() {
+		return false
+	}
+
+	return packageHasMethodNamed(obj.Pkg(), obj.Name())
+}
+
 // structFieldBoxName returns the member name for a struct field's box accessor (`Type.Ꮡ<member>`),
 // matching the field's DECLARED C# name (visitStructType uses getCoreSanitizedIdentifier plus the
 // type-colliding rename) and the TypeGenerator's `Ꮡ<member>` static. It deliberately does NOT apply
@@ -1274,6 +1349,10 @@ func (v *Visitor) getSelIdentContext(selectorExpr *ast.SelectorExpr) IdentContex
 	if sel, ok := v.info.Selections[selectorExpr]; ok && sel.Kind() == types.FieldVal {
 		context.isField = true
 		context.fieldCollidesWithType = v.fieldCollidesWithType(selectorExpr.Sel, selectorExpr.X)
+
+		if context.fieldCollidesWithType {
+			context.fieldTypeIsRenamed = v.fieldTypeIsRenamed(selectorExpr.X)
+		}
 	}
 
 	return context

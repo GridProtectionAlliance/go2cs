@@ -174,3 +174,18 @@ type Device struct {
 	Sensor
 	Serial int
 }
+
+// Marker is a struct whose FIELD is also named Marker, and the name ALSO collides with the Marker()
+// method below — a type+field+method triple-collision. C# Δ-renames the TYPE to ΔMarker (type-vs-
+// method) and DOUBLE-marks the FIELD to ΔΔMarker (field-vs-renamed-type). A cross-package access of
+// the field must apply the same double (internal/trace's Label field, testtrace). Accessed via an
+// inferred-type value so the consumer never names the renamed type.
+type Marker struct {
+	Marker string
+}
+
+// Marker (method) forces the type-vs-method collision that renames the Marker TYPE.
+func (s Sensor) Marker() string { return s.Name }
+
+// MakeMarker returns a Marker so a consumer reads its field via an inferred-type value.
+func MakeMarker(s string) Marker { return Marker{Marker: s} }

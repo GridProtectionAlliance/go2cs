@@ -126,6 +126,14 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// disambiguation marker (CS0542); match the renamed declaration at the access site.
 		if context.fieldCollidesWithType {
 			name = typeCollidingFieldName(name)
+
+			// A CROSS-package field whose enclosing type is itself Δ-renamed in ITS package (a
+			// type-vs-method collision the current pkg's nameCollisions can't see) declares the field
+			// DOUBLE-marked (ΔΔLabel); typeCollidingFieldName only single-marked it here, so upgrade to
+			// match (internal/trace/testtrace's `l.Label`, CS1061). In-package fields already doubled.
+			if context.fieldTypeIsRenamed && strings.HasPrefix(name, ShadowVarMarker) && !strings.HasPrefix(name, ShadowVarMarker+ShadowVarMarker) {
+				name = ShadowVarMarker + name
+			}
 		}
 
 		return name
