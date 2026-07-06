@@ -611,11 +611,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			return fmt.Sprintf("new %s(new %s[]{}%s)", typeRender, csElementType, compositeSuffix)
 		}
 
-		// Wrap the underlying array/slice literal in the named type's constructor:
-		// `new d(new rune[]{...}.array())`. The element literal and its `.array()`/
-		// `.slice()` suffix render via the ArraySource path below; close the ctor here.
-		typeRender = fmt.Sprintf("%s(new %s[]", typeRender, csElementType)
-		compositeSuffix += ")"
+		if arrayTypeContext.maxLength > 0 {
+			// A KEYED (sparse, constant-index) array literal — `timedEventArgs{1: v}` over
+			// `[N]uint64` (internal/trace/oldtrace) — renders its elements as the `[i] = v` indexed
+			// initializer, which is invalid on a raw C# array (`new uint64[]{[1] = v}` — CS0131). Back
+			// it with the indexer-capable golib `array<T>(length)` instead, mirroring the alias form
+			// (`new words(4){[2] = 30}`); the named ctor takes an `array<T>` just as the positional
+			// `.array()` path produces.
+			typeRender = fmt.Sprintf("%s(new array<%s>(%d)", typeRender, csElementType, arrayTypeContext.maxLength)
+			compositeSuffix += ")"
+		} else {
+			// Wrap the underlying array/slice literal in the named type's constructor:
+			// `new d(new rune[]{...}.array())`. The element literal and its `.array()`/
+			// `.slice()` suffix render via the ArraySource path below; close the ctor here.
+			typeRender = fmt.Sprintf("%s(new %s[]", typeRender, csElementType)
+			compositeSuffix += ")"
+		}
 	}
 
 	if namedMapComposite {

@@ -391,6 +391,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedArrayComposite() => CheckTarget("NamedArrayComposite");
 
     [TestMethod]
+    public void CheckNamedArrayKeyedLiteral() => CheckTarget("NamedArrayKeyedLiteral");
+
+    [TestMethod]
     public void CheckNamedArrayWrapper() => CheckTarget("NamedArrayWrapper");
 
     [TestMethod]

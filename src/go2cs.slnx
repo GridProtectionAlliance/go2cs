@@ -185,6 +185,7 @@
     <Project Path="Tests/Behavioral/MinMaxBuiltin/MinMaxBuiltin.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayAnonElement/NamedArrayAnonElement.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayComposite/NamedArrayComposite.csproj" />
+    <Project Path="Tests/Behavioral/NamedArrayKeyedLiteral/NamedArrayKeyedLiteral.csproj" />
     <Project Path="Tests/Behavioral/NamedArrayWrapper/NamedArrayWrapper.csproj" />
     <Project Path="Tests/Behavioral/NamedBooleanLogic/NamedBooleanLogic.csproj" />
     <Project Path="Tests/Behavioral/NamedFuncTypeStateMachine/NamedFuncTypeStateMachine.csproj" />
