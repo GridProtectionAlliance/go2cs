@@ -19,6 +19,17 @@ internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {
     internal nint sat;
 }
 
+internal static ж<CrossPkgLibꓸStatus> statusPtr(ж<CrossPkgLibꓸStatus> Ꮡst) {
+    ref var st = ref Ꮡst.Value;
+
+    st.Code++;
+    return Ꮡst;
+}
+
+[GoType] partial struct ledger {
+    internal ж<CrossPkgLibꓸStatus> cur;
+}
+
 internal static void note(nint n) {
     fmt.Println("noted", n);
 }
@@ -187,6 +198,9 @@ internal static void Main() => func((defer, recover) => {
     var mb = new meterBox(st: new CrossPkgLibꓸStatus(Code: 3), sat: 1);
     fmt.Println(mb.st.Code + mb.sat);
     fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At);
+    var sptr = Ꮡ(new CrossPkgLibꓸStatus(Code: 10));
+    var led = new ledger(cur: statusPtr(sptr));
+    fmt.Println((~led.cur).Code);
     CrossPkgLibꓸGrade gv = ((CrossPkgLibꓸGrade)7);
     CrossPkgLibꓸStatus stv = default!;
     stv.Code = (nint)gv;

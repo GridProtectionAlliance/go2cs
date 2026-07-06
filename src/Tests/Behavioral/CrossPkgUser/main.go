@@ -30,6 +30,24 @@ type meterBox struct {
 	sat int
 }
 
+// statusPtr locks the POINTER-to-Δ-renamed-foreign in a func-SIGNATURE position (archive/zip's
+// `func timeZone() *time.Location` shape): both the `*CrossPkgLib.Status` PARAMETER and RESULT must
+// render the boxed recorded alias `ж<CrossPkgLibꓸStatus>`, not `ж<CrossPkgLib.Status>`. The pointer
+// element bypasses getCSTypeName's direct foreignAliasedTypeName check, so the rename is applied by
+// getAliasedTypeName inside convertToCSFullTypeName — which only substitutes when importedTypeAliases
+// is populated; a raw `CrossPkgLib.Status` under the box names a nonexistent member of the package
+// class (the type is exported Δ-renamed to ΔStatus) → CS0426.
+func statusPtr(st *CrossPkgLib.Status) *CrossPkgLib.Status {
+	st.Code++
+	return st
+}
+
+// ledger holds a POINTER to the Δ-renamed foreign type as a struct FIELD (the getDisplayTypeName
+// pointer path, distinct from the func-signature path above — the archive/zip fileHeader shape).
+type ledger struct {
+	cur *CrossPkgLib.Status
+}
+
 // note receives a deferred untyped-const-reference arg - deferǃ inference must see the
 // DEFAULT type, not the UntypedInt wrapper (CS0123, poll deferred Seek).
 func note(n int) { fmt.Println("noted", n) }
@@ -245,6 +263,14 @@ func main() {
 	mb := meterBox{st: CrossPkgLib.Status{Code: 3}, sat: 1}
 	fmt.Println(mb.st.Code + mb.sat) // 4
 	fmt.Println(CrossPkgLib.Latest.At, CrossPkgLib.Peek().At) // 42 42
+
+	// A POINTER to the Δ-renamed foreign type flowing through a func signature (param + result)
+	// and a struct field — both must box the recorded alias (ж<CrossPkgLibꓸStatus>). Mutate through
+	// the box and read back through the returned box, so Go and C# agree (the address is a real heap
+	// box from &Composite, not an Ꮡ(value) copy).
+	sptr := &CrossPkgLib.Status{Code: 10}
+	led := ledger{cur: statusPtr(sptr)}
+	fmt.Println(led.cur.Code) // 11
 
 	// Conversion-TARGET and no-value VAR-DECL positions of renamed foreign types route
 	// through the recorded alias (CS0426, internal/poll).
