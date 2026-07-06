@@ -1337,6 +1337,26 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 		}
 	}
 
+	// A generic function referenced as a VALUE — a method-group argument like `slices.SortFunc(all,
+	// slices.Compare)` — must spell its type arguments explicitly: C# cannot infer a generic method
+	// group's type parameters when converting it to a delegate (CS0411). go/types recorded the inferred
+	// instantiation in info.Instances keyed by the selector's Sel. The call-CALLEE path (isCallExpr) is
+	// excluded — convCallExpr's own type-arg mechanism (the 66be4f914 site) handles a generic call.
+	if !context.isCallExpr {
+		if _, isFunc := v.info.Uses[selectorExpr.Sel].(*types.Func); isFunc {
+			if inst, ok := v.info.Instances[selectorExpr.Sel]; ok && inst.TypeArgs != nil && inst.TypeArgs.Len() > 0 {
+				typeArgs := make([]string, inst.TypeArgs.Len())
+
+				for i := range inst.TypeArgs.Len() {
+					typeArgs[i] = v.getCSTypeName(inst.TypeArgs.At(i))
+				}
+
+				return getAliasedTypeName(fmt.Sprintf("%s.%s<%s>", v.convExpr(selectorExpr.X, xContexts),
+					v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), strings.Join(typeArgs, ", ")))
+			}
+		}
+	}
+
 	return getAliasedTypeName(fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, xContexts), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 }
 
