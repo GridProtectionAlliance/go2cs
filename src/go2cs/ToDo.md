@@ -85,3 +85,24 @@ xx) Complete code comment conversions, this may be predicated on the following:
     will. Needs: opt-in stdlib-test emit mode (today `*._test.cs` is excluded), a `testing.T/B` shim
     (or convert `testing`), and a per-package go-test-vs-c#-test diff. Start with already-compiling
     leaves (strconv, math/bits, unicode/utf8). See docs/Roadmap.md "ultimate correctness gate".
+04) [LOW PRIORITY — slight visual improvement only] Move "publicize" accessibility rendering out of
+    the converter and into a go2cs-gen pass, so the visible converted code keeps Go-shaped
+    declarations. Today the converter emits `public` inline for an unexported Go type reached through
+    an exported surface (`packagePublicizedTypes` → `pendingTypeAccess`, e.g.
+    `[GoType] public partial interface testDeps`) — correct and consistent, but it surfaces a C#
+    cross-assembly artifact in the readable code (a Go-unexported type wearing `public`) and
+    re-baselines a golden on every publicize change. A generator that DERIVES the need itself (an
+    internal type used in a `public` member's signature → emit `public partial <kind> T {}` into a
+    `.g.cs`, which is not golden-compared) would keep the visible code Go-like with zero golden
+    churn, and be more precise than the converter's Go-types heuristic. Notes:
+    1) Do it uniformly across the whole publicize family, not just lifted types. An attribute-hint
+       form (`[GoType("dyn","pub")]`) is NOT worth it — still visible, still churns goldens, more
+       machinery than inline `public`.
+    2) Boundary: this cleanly covers TYPE accessibility (CS0050/CS0051/CS0052, and CS0558 conversion
+       operators) — pure in-compilation C# facts. It does NOT cover the receiver-METHOD publicize
+       (CS1061 — making a method public so a not-yet-present cross-assembly Go caller can invoke it),
+       which isn't an error the generator can see and must stay converter-driven. So this SPLITS the
+       publicize concern, it does not remove it from the converter.
+    3) Confirm go2cs-gen can emit a bare accessibility-only partial for non-`[GoType]` types first.
+    4) Context / trigger: the lifted-anon-struct-alias publicize (`corpusEntryᴛ1` / `testing.testDeps`);
+       see docs/ConversionStrategies.md "A publicized unexported interface is emitted public".
