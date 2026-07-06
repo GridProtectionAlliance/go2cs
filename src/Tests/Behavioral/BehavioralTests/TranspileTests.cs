@@ -561,6 +561,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

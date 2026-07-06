@@ -561,6 +561,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

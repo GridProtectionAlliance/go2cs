@@ -229,6 +229,7 @@
     <Project Path="Tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
+    <Project Path="Tests/Behavioral/PublicizedInterfaceParam/PublicizedInterfaceParam.csproj" />
     <Project Path="Tests/Behavioral/RangeStatements/RangeStatements.csproj" />
     <Project Path="Tests/Behavioral/RangeVarHeapBox/RangeVarHeapBox.csproj" />
     <Project Path="Tests/Behavioral/RangeVarReassign/RangeVarReassign.csproj" />

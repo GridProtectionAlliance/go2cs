@@ -563,6 +563,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

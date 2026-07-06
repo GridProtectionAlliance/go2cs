@@ -20,6 +20,17 @@ const TypeT = ShadowVarMarker + "T"
 
 // Handles interface types in context of a TypeSpec
 func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool, target *strings.Builder) (interfaceTypeName string) {
+	// Consume any pending publicized-type access modifier — an unexported interface used in an
+	// exported signature (e.g. testing's `func MainStart(deps testDeps, …)`) is recorded by the
+	// accessibility pre-pass and must emit `public` or it defaults to `internal` and is less
+	// accessible than the exported member that references it (CS0051). Every other top-level
+	// type-kind emitter consumes v.pendingTypeAccess (see visitStructType); the interface emitter
+	// was the sole one dropping it. Read and clear at ENTRY: only the top-level declaration carries
+	// it, so the lifted/anonymous interfaces visited recursively in the method-scan loop below (and
+	// any nested struct/interface lifts) correctly see an empty value.
+	access := v.pendingTypeAccess
+	v.pendingTypeAccess = ""
+
 	for _, field := range interfaceType.Methods.List {
 		// Check if this is an actual method (has a function type)
 		if funcType, ok := field.Type.(*ast.FuncType); ok {
@@ -279,6 +290,12 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	if len(interfaceAttrs) > 0 {
 		interfaceAttrs = fmt.Sprintf("(\"%s\")", interfaceAttrs)
 	}
+
+	// Inject the publicized access modifier (if any) into the slot between `[GoType…]` and
+	// `partial interface`. postAttrs is " " normally or a newline when operator sets are present;
+	// appending `access` ("public ") yields `[GoType] public partial interface` (or the newline
+	// form `[GoType(…)]\npublic partial interface`). Empty when not publicized — no churn.
+	postAttrs += access
 
 	if len(inheritedInterfaces) > 0 {
 		inheritedResult += " :" + v.newline

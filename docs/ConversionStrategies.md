@@ -1486,6 +1486,24 @@ public delegate void Option(ж<options> _);
 
 Only a package with an exported func type over an unexported type is affected (no golden churn). (Guarded by the `PublicizedFuncTypeParam` behavioral test.)
 
+### A publicized unexported interface is emitted `public`
+The accessibility pass records an unexported **interface** used in an exported surface exactly like a
+struct or func type — testing's `type testDeps interface { … }` reached through `func MainStart(deps
+testDeps, …) *M` is interned into `packagePublicizedTypes`, and `visitTypeSpec` sets
+`pendingTypeAccess = "public "`. But on the EMISSION side, every top-level type-kind emitter consumes
+`v.pendingTypeAccess` (struct, array, map, ident, the inline selector/star cases) *except*
+`visitInterfaceType`, which dropped it — so the interface always emitted `[GoType] partial interface
+testDeps`, defaulting to C# `internal`, less accessible than the `public` member that references it
+(CS0051). `visitInterfaceType` now reads-and-clears `pendingTypeAccess` at entry (so the lifted/anonymous
+interfaces it visits recursively see an empty value) and folds the modifier into the post-attribute slot,
+emitting `[GoType] public partial interface testDeps`. Non-publicized interfaces are unchanged (no churn).
+(Guarded by the `PublicizedInterfaceParam` behavioral test — an exported function taking an unexported
+interface whose method returns a built-in type, output-compared vs Go.) A **transitive** case remains open:
+the `collectPublicizedTypes` fixpoint cascades through a publicized type's exported *method declarations*
+(receiver funcs), but an interface's method **signatures** are not func declarations, so the unexported
+types in a publicized interface's methods (testing's `testDeps.CoordinateFuzzing(… corpusEntry …)`) are
+not yet cascaded — a separate collection-side root.
+
 ### Publicized unexported types make their exported methods public
 An unexported Go type reachable through an exported surface (an exported var — `var BigEndian
 bigEndian` — an exported field, or an exported function's signature) is emitted `public`
