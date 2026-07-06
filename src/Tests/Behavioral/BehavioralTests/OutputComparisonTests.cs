@@ -574,6 +574,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceAnonAlias() => CheckTarget("PublicizedInterfaceAnonAlias");
+
+    [TestMethod]
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]

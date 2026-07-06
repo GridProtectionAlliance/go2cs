@@ -1790,11 +1790,24 @@ walks a publicized interface's method signatures: the `collectMethodSignatureUne
 walked a type's `named.NumMethods()` (declared receiver methods) but that is **0 for a defined interface**
 — an interface's methods live on its underlying `*types.Interface`. It now also iterates
 `iface.NumMethods()` for a publicized interface, so an unexported NAMED type in a public interface member's
-parameter/result signature is publicized in turn (CS0051/CS0050). One residual shape stays open (banked):
-testing's `testDeps.CoordinateFuzzing(… corpusEntry …)` where `type corpusEntry = struct{…}` is an ALIAS to
-an anonymous struct — the signature type is not a `*types.Named` but a **lifted** anonymous struct
-(`corpusEntryᴛ1`) whose accessibility is set by the lift emission, not by `packagePublicizedTypes`, so it
-needs a separate lifted-type-publicize mechanism.
+parameter/result signature is publicized in turn (CS0051/CS0050).
+
+A public callable's signature can also reference a **lifted anonymous** type, which the NAMED-only cascade
+above cannot reach — testing's `testDeps.CoordinateFuzzing(… corpusEntry …)` / `RunFuzzWorker` / `ReadCorpus`,
+where `type corpusEntry = struct{…}` is an ALIAS to an anonymous struct. The signature type is not a
+`*types.Named` but a lift (`corpusEntryᴛ1`), a synthesized name over a raw `types.Type` with no
+`*types.Object`, so `packagePublicizedTypes` (keyed by object) cannot hold it. A parallel set
+`packagePublicizedLiftedTypes` (keyed by the alias-stripped anonymous `types.Type`) fills the gap: a
+SIGNATURE-context walker `collectSignatureTypes` — used by the exported-func, exported named-func-type, and
+method/interface-method signature paths — records any lifted anonymous struct/interface it reaches, and the
+lift emission in `visitStructType` consults `isPublicizedLiftedType` and emits `public`. This is deliberately
+**signature-scoped** and does *not* fold into the shared named-only `collectUnexportedNamedTypes`: an exported
+**field/var** of an anonymous struct is the CS0052 domain (a public struct/var over an internal anon field
+type is legal while its own enclosing type is internal), so only signature positions lift — keeping golden
+churn to the one genuinely-affected shape. (Guarded by the `PublicizedInterfaceAnonAlias` behavioral test — an
+unexported interface publicized through an exported function, whose method both takes and returns a
+`type = struct{…}` alias, output-compared vs Go; it fails to compile with CS0050/CS0051 without the lift
+publicize.)
 
 ### Publicized unexported types make their exported methods public
 An unexported Go type reachable through an exported surface (an exported var — `var BigEndian

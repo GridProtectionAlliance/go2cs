@@ -14,6 +14,7 @@ const StructPrefixMarker = ">>MARKER:STRUCT_%s_PREFIX<<"
 func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Type, name string, doc *ast.CommentGroup, lifted bool, target *strings.Builder) (structTypeName string) {
 	var preLiftIndentLevel int
 	var structPrefix *strings.Builder
+	var liftedIsPublicized bool
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
@@ -41,6 +42,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		if !v.inFunction && structSignatureType != nil {
 			registerDynamicTypeName(structSignatureType.String(), structTypeName)
 		}
+
+		// A lifted anonymous struct referenced by a PUBLICIZED interface method (or an exported
+		// method/func/delegate) signature must itself be emitted `public`, or it is less accessible
+		// than the public member (CS0050/CS0051 — testing's `type corpusEntry = struct{…}` alias
+		// lifts to `corpusEntryᴛ1`, referenced by the public `testDeps` fuzzing methods). The lift
+		// has no *types.Object, so the publicize pre-pass records the anonymous type itself.
+		liftedIsPublicized = isPublicizedLiftedType(identType) || isPublicizedLiftedType(structSignatureType)
 	} else {
 		structTypeName = name
 	}
@@ -81,6 +89,12 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 	// not, so read and clear before visiting fields (which may recurse into this function).
 	access := v.pendingTypeAccess
 	v.pendingTypeAccess = ""
+
+	// A lifted anonymous type carries no pendingTypeAccess (only a top-level TypeSpec sets it), so a
+	// lift reached through a public surface is publicized here instead (see liftedIsPublicized).
+	if liftedIsPublicized && access == "" {
+		access = "public "
+	}
 
 	v.writeStringLn(target, "[GoType%s] %spartial struct %s%s%s{", dynamic, access, structTypeName, typeParams, constraints)
 	v.indentLevel++

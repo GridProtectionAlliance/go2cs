@@ -692,6 +692,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageChildNamespaces = make(map[string]bool)
 		packageImportLeadingSegments = make(map[string]bool)
 		packagePublicizedTypes = make(map[types.Object]bool)
+		packagePublicizedLiftedTypes = make(map[types.Type]bool)
 		packageCaptureModeMethods = make(map[*types.Func]bool)
 		packageCaptureModeBoxIdents = make(map[types.Object]bool)
 		packageDirectBoxReceiverMethods = make(map[*types.Func]bool)

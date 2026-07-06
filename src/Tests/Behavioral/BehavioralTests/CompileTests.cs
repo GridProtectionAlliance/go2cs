@@ -615,6 +615,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceAnonAlias() => CheckTarget("PublicizedInterfaceAnonAlias");
+
+    [TestMethod]
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]

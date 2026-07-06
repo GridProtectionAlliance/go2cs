@@ -4,7 +4,7 @@ using fmt = fmt_package;
 
 partial class main_package {
 
-[GoType("dyn")] partial struct DataProcessor_data {
+[GoType("dyn")] public partial struct DataProcessor_data {
 public nint ID;
 public @string Name;
 public bool Valid;
@@ -17,7 +17,7 @@ public bool Valid;
 [GoType] partial struct Processor {
 }
 
-[GoType("dyn")] partial struct Process_data {
+[GoType("dyn")] public partial struct Process_data {
     public nint ID;
     public @string Name;
     public bool Valid;

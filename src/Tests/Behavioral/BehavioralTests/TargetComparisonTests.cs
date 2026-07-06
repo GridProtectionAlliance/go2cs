@@ -617,6 +617,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPublicizedFuncTypeParam() => CheckTarget("PublicizedFuncTypeParam");
 
     [TestMethod]
+    public void CheckPublicizedInterfaceAnonAlias() => CheckTarget("PublicizedInterfaceAnonAlias");
+
+    [TestMethod]
     public void CheckPublicizedInterfaceParam() => CheckTarget("PublicizedInterfaceParam");
 
     [TestMethod]

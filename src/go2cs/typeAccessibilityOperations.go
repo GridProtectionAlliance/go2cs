@@ -14,6 +14,23 @@ import (
 // concurrent file visiting. Keyed by the type's *types.TypeName object, interned per type.
 var packagePublicizedTypes map[types.Object]bool
 
+// packagePublicizedLiftedTypes holds anonymous struct/interface types that go2cs LIFTS to a
+// synthesized `…ᴛN` named type and that must be emitted `public` because they appear in the
+// parameter/result signature of a publicized interface's method (or an exported method/func/
+// delegate), where they would otherwise be less accessible than the now-public member (CS0050/
+// CS0051). Signature positions only — an exported FIELD/VAR of an anonymous struct is the separate
+// CS0052 domain and is left to the named-only walker (see collectSignatureTypes).
+//
+// Unlike packagePublicizedTypes these have no *types.Object to key on — the lift is a synthesized
+// name over a raw anonymous types.Type — so they are interned by the anonymous type itself, with any
+// enclosing alias stripped (types.Unalias). The archetype is testing's `type corpusEntry =
+// struct{…}`: the ALIAS targets an anonymous struct that lifts to `corpusEntryᴛ1`, referenced by the
+// publicized `testDeps` interface's fuzzing methods (CoordinateFuzzing/RunFuzzWorker/ReadCorpus).
+//
+// Populated by the same synchronous pre-pass as packagePublicizedTypes, then read-only during file
+// visiting; consulted at the lift's emission (visitStructType → isPublicizedLiftedType).
+var packagePublicizedLiftedTypes map[types.Type]bool
+
 // collectPublicizedTypes records every unexported named type that is referenced by an exported
 // field of any package-level struct (directly, or through a pointer/slice/array/map/channel
 // element). Scanning the exported fields of every struct in one pass is sufficient: a publicized
@@ -21,6 +38,10 @@ var packagePublicizedTypes map[types.Object]bool
 func collectPublicizedTypes(pkg *types.Package) {
 	if packagePublicizedTypes == nil {
 		packagePublicizedTypes = map[types.Object]bool{}
+	}
+
+	if packagePublicizedLiftedTypes == nil {
+		packagePublicizedLiftedTypes = map[types.Type]bool{}
 	}
 
 	scope := pkg.Scope()
@@ -57,13 +78,13 @@ func collectPublicizedTypes(pkg *types.Package) {
 				if sig, ok := obj.Type().Underlying().(*types.Signature); ok {
 					if params := sig.Params(); params != nil {
 						for i := range params.Len() {
-							collectUnexportedNamedTypes(params.At(i).Type(), pkg)
+							collectSignatureTypes(params.At(i).Type(), pkg)
 						}
 					}
 
 					if results := sig.Results(); results != nil {
 						for i := range results.Len() {
-							collectUnexportedNamedTypes(results.At(i).Type(), pkg)
+							collectSignatureTypes(results.At(i).Type(), pkg)
 						}
 					}
 				}
@@ -106,13 +127,13 @@ func collectPublicizedTypes(pkg *types.Package) {
 			if sig, ok := obj.Type().(*types.Signature); ok {
 				if params := sig.Params(); params != nil {
 					for i := range params.Len() {
-						collectUnexportedNamedTypes(params.At(i).Type(), pkg)
+						collectSignatureTypes(params.At(i).Type(), pkg)
 					}
 				}
 
 				if results := sig.Results(); results != nil {
 					for i := range results.Len() {
-						collectUnexportedNamedTypes(results.At(i).Type(), pkg)
+						collectSignatureTypes(results.At(i).Type(), pkg)
 					}
 				}
 			}
@@ -177,8 +198,8 @@ func collectMethodSignatureUnexportedTypes(named *types.Named, pkg *types.Packag
 	}
 }
 
-// collectSignatureUnexportedTypes publicizes the unexported named types in an EXPORTED method's
-// parameter/result signature.
+// collectSignatureUnexportedTypes publicizes the unexported named types (and lifted anonymous
+// struct/interface types) in an EXPORTED method's parameter/result signature.
 func collectSignatureUnexportedTypes(method *types.Func, pkg *types.Package) {
 	if !method.Exported() {
 		return
@@ -192,13 +213,13 @@ func collectSignatureUnexportedTypes(method *types.Func, pkg *types.Package) {
 
 	if params := sig.Params(); params != nil {
 		for j := range params.Len() {
-			collectUnexportedNamedTypes(params.At(j).Type(), pkg)
+			collectSignatureTypes(params.At(j).Type(), pkg)
 		}
 	}
 
 	if results := sig.Results(); results != nil {
 		for j := range results.Len() {
-			collectUnexportedNamedTypes(results.At(j).Type(), pkg)
+			collectSignatureTypes(results.At(j).Type(), pkg)
 		}
 	}
 }
@@ -266,6 +287,92 @@ func collectUnexportedNamedTypes(t types.Type, pkg *types.Package) {
 	case *types.Chan:
 		collectUnexportedNamedTypes(t.Elem(), pkg)
 	}
+}
+
+// collectSignatureTypes is the SIGNATURE-context counterpart of collectUnexportedNamedTypes: in
+// addition to publicizing unexported named types, it publicizes the LIFTED anonymous struct/
+// interface types that appear in a PUBLIC method/func/delegate signature. A public callable whose
+// parameter/result is a less-accessible type is CS0050/CS0051 — and an anonymous struct/interface
+// written (or aliased) in the signature is lifted to a synthesized `…ᴛN` type that defaults to
+// internal (testing's `type corpusEntry = struct{…}` alias in the publicized `testDeps` interface;
+// TypeConversionInterfaceParam's inline `Process(struct{…})`). This is deliberately NOT folded into
+// collectUnexportedNamedTypes: an exported FIELD/VAR of an anonymous struct is the CS0052 domain and
+// is intentionally left to the named-only walker (a public struct/var over an internal anon field
+// type is legal when its own enclosing type is internal), so only signature positions lift here.
+func collectSignatureTypes(t types.Type, pkg *types.Package) {
+	switch t := t.(type) {
+	case *types.Named:
+		obj := t.Obj()
+
+		if obj.Pkg() == pkg && !obj.Exported() {
+			packagePublicizedTypes[obj] = true
+		}
+	case *types.Alias:
+		// A type ALIAS in the signature (`type corpusEntry = struct{…}`). Strip the alias and route
+		// the underlying type back through the switch: an anonymous struct/interface target lifts and
+		// is recorded below; a named target is recorded via the *types.Named arm.
+		collectSignatureTypes(types.Unalias(t), pkg)
+	case *types.Struct:
+		collectPublicizedLiftedType(t, pkg)
+	case *types.Interface:
+		collectPublicizedLiftedType(t, pkg)
+	case *types.Pointer:
+		collectSignatureTypes(t.Elem(), pkg)
+	case *types.Slice:
+		collectSignatureTypes(t.Elem(), pkg)
+	case *types.Array:
+		collectSignatureTypes(t.Elem(), pkg)
+	case *types.Map:
+		collectSignatureTypes(t.Key(), pkg)
+		collectSignatureTypes(t.Elem(), pkg)
+	case *types.Chan:
+		collectSignatureTypes(t.Elem(), pkg)
+	}
+}
+
+// collectPublicizedLiftedType records an anonymous struct/interface type that go2cs lifts to a
+// synthesized `…ᴛN` named type and that must be emitted `public` because it appears in a public
+// callable signature (a publicized interface method, or an exported method/func/delegate). A lifted
+// type carries no *types.Object, so it is interned by the anonymous type itself and consulted at
+// emission (isPublicizedLiftedType). A NAMED type is not routed here — it carries its own
+// accessibility and is handled by packagePublicizedTypes.
+func collectPublicizedLiftedType(t types.Type, pkg *types.Package) {
+	if t == nil || packagePublicizedLiftedTypes[t] {
+		return
+	}
+
+	packagePublicizedLiftedTypes[t] = true
+
+	// A publicized lifted struct's EXPORTED fields become public members, so a field whose type is
+	// less accessible than the now-public struct is CS0052. Publicize those field types too (a
+	// named unexported field type; or a nested lifted anonymous struct — hence collectSignatureTypes,
+	// which the recursion guard above keeps finite).
+	if st, ok := t.(*types.Struct); ok {
+		for i := range st.NumFields() {
+			field := st.Field(i)
+
+			if !field.Exported() {
+				continue
+			}
+
+			collectSignatureTypes(field.Type(), pkg)
+		}
+	}
+}
+
+// isPublicizedLiftedType reports whether the lifted anonymous type must be emitted `public` (see
+// packagePublicizedLiftedTypes). Consulted at the lift's emission in visitStructType; the
+// alias-stripped form is also checked so a key interned under either representation matches.
+func isPublicizedLiftedType(t types.Type) bool {
+	if packagePublicizedLiftedTypes == nil || t == nil {
+		return false
+	}
+
+	if packagePublicizedLiftedTypes[t] {
+		return true
+	}
+
+	return packagePublicizedLiftedTypes[types.Unalias(t)]
 }
 
 // isPublicizedType reports whether the named type identified by ident must be emitted as public
