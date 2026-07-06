@@ -482,7 +482,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 								if u, ok := arg.(*ast.UnaryExpr); ok && u.Op == token.AND {
 									inner = v.convExpr(u.X, nil)
 								} else {
-									inner = fmt.Sprintf("(%s).Value", expr)
+									// The arg is an existing POINTER expression (not `&x`) — cryptobyte's
+									// `(*String)(out)` with `out *[]byte`. Render its POINTEE slice via the
+									// deref: a pointer PARAMETER yields its deref-aliased slice (`@out`), a
+									// box yields `Ꮡx.Value`. The prior `(expr).Value` wrongly added `.Value`
+									// to the already-deref'd `@out` (a `slice<byte>` has no `.Value` — CS1061).
+									inner = v.convExpr(&ast.StarExpr{Star: arg.Pos(), X: arg}, nil)
 								}
 
 								return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, namedCS, inner)

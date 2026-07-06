@@ -6,6 +6,14 @@ partial class main_package {
 
 [GoType("[]byte")] partial struct Buf;
 
+internal static @string fillVia(ж<slice<byte>> Ꮡout) {
+    ref var @out = ref Ꮡout.Value;
+
+    var p = Ꮡ(new Buf(@out));
+    p.ValueSlot = append(p.ValueSlot, (byte)((rune)'A'), (byte)((rune)'B'), (byte)((rune)'C'));
+    return ((@string)(slice<byte>)p.ValueSlot);
+}
+
 internal static void Main() {
     ref var b = ref heap<slice<byte>>(out var Ꮡb);
     b = new slice<byte>(0, 8);
@@ -22,6 +30,9 @@ internal static void Main() {
     var q = makeBuf();
     q.ValueSlot = append(q.ValueSlot, (byte)((rune)'x'), (byte)((rune)'y'));
     fmt.Println(((@string)(slice<byte>)q.ValueSlot));
+    ref var src = ref heap<slice<byte>>(out var Ꮡsrc);
+    src = new slice<byte>(0, 4);
+    fmt.Println(fillVia(Ꮡsrc));
 }
 
 } // end main_package
