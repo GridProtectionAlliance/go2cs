@@ -3102,6 +3102,17 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 							constraintName = fmt.Sprintf("%s %s", originalConstraint, typeConstraint)
 						}
 					}
+				} else if iface.IsMethodSet() {
+					// A REGULAR method-set interface (a pure method set, no type-term unions —
+					// go/ast's `Node` in `walkList[N Node]`) is emitted arity-0 by
+					// visitInterfaceType, NOT as the generic CRTP form that union+method
+					// constraint interfaces take below (`ConstraintTest1<ΔT>`), so the type
+					// parameter constrains against the interface itself (`where N : Node` —
+					// the phantom `Node<N>` was CS0308). NO `new()` either: the instantiation
+					// may itself be an INTERFACE (walkList takes N=Stmt/Expr/Spec/Decl), which
+					// cannot satisfy a constructor constraint.
+					constraintNames = append(constraintNames, fmt.Sprintf("%s%s    where %s : %s", v.newline, v.indent(v.indentLevel), typeParamNames[i], convertToCSTypeName(constraintName)))
+					continue
 				} else {
 					// If interface has methods, can safely assume generic type must implement it directly
 					constraintName = fmt.Sprintf("%s<%s>", constraintName, typeParamNames[i])

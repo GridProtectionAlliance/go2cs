@@ -909,6 +909,43 @@ golib's builtins carry **interface-typed overloads** so a value held as a constr
 
 C# has no cast to or from a type parameter, so the Go conversions in `rand.N[Int intType]` — `Int(x)`, `uint64(n)` — and an untyped constant compared against the parameter (`n <= 0`, which Go types AS `Int` but C# leaves as `int`, unacceptable to the lifted `IComparisonOperators<Int, Int, bool>`) all failed (CS0030/CS0019). Three coordinated pieces, gated on a constraint whose every type-set term has an **integer underlying** (`typeParamIsInteger`): a conversion **to** the parameter emits golib's runtime-typed `ConvertToType<Int>(…)` (typeof-dispatch that JIT-folds to a single branch per instantiation; signed kinds sign-extend, unsigned zero-extend — Go's exact conversion semantics; a `[GoType("num:*")]` wrapper instantiation falls back to a reflection-cached bridge over its `Value` property/ctor); a conversion **from** the parameter to a basic integer emits `ConvertToUInt64<Int>(n)` (plus a plain numeric cast when the target is not `uint64`); and a **constant operand** of a binary op against the parameter materializes via `ConvertToType<Int>(0)` — except a SHIFT count, which Go types independently and the emission already coerces to `int`. Result: `if (n <= ConvertToType<Int>(0)) … return ConvertToType<Int>(ConvertToUInt64<Int>(n) / 2);`. (Guarded by the `GenericTypeInference` extension `halveN` — `~int32 | ~int64` with the compare, both conversions, and a negative value proving sign-extension, values vs Go; clears math/rand/v2's `N`.)
 
+### Method-set interface constraints bind the interface directly; pointer instantiations project through the adapter
+
+A type parameter constrained by a **regular method-set interface** (a pure method set, no type-term
+unions — go/ast's `walkList[N Node](v Visitor, list []N)`) emits `where N : Node` against the
+arity-0 emitted interface. Only union+method **constraint interfaces** take the generic CRTP form
+(`ConstraintTest1<ΔT>`); the method-set arm previously emitted the phantom `Node<N>, new()`, which
+was doubly wrong: `Node` is emitted arity-0 (CS0308), and the instantiation may itself be an
+*interface* (walkList takes `N=Stmt/Expr/Spec/Decl`), which can never satisfy `new()`. The
+interface-typed and interface-inheriting instantiations then satisfy the constraint natively
+(`Stmt : Node` is emitted inheritance).
+
+A **pointer** instantiation (`walkList(v, n.Names)` with `N=*Ident`) cannot: the `ж<Ident>` box
+does not implement the interface — its generated pointer adapter does. The call site projects the
+slice element-wise through the adapter, instantiating `N` as the interface itself:
+
+```csharp
+internal static void walkList<N>(Visitor v, slice<N> list)
+    where N : Node
+{
+    foreach (var (_, node) in list) {
+        Walk(v, node);
+    }
+}
+// call site, N=*Ident:
+walkList(v, widen<ж<Ident>, Node>((~n).Names, elemᴛ1 => new IdentжNode(elemᴛ1)));
+```
+
+golib's `widen<T, TWide>(slice<T>, Func<T, TWide>)` copies the slice HEADER only — elements alias
+the original objects through the shared boxes, so method calls through the projected slice mutate
+the real objects. A callee that reassigned `list[i]` itself would not write back; the projection
+targets the read/widen shape (Go itself performs the same per-element interface widening inside
+the loop). `convertToInterfaceType` supplies the adapter reference and the `GoImplement` recording,
+exactly as at scalar `*T→iface` call sites. (Guarded by `GenericInterfaceConstraint` — pointer,
+interface, and embedded-interface instantiations of a method-set-constrained generic, calling a
+constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
+CS0308, the go/* toolchain gate.)
+
 ### Constraint-only type parameters need explicit type arguments
 
 Go infers a type parameter that appears only in *constraints* through core types — `func Twice[S ~[]E, E Integer](s S)` infers `E` from `S`'s underlying element; the `slices` package's whole `Sort[S ~[]E, E cmp.Ordered] → pdqsortOrdered` chain relies on this. C# never infers a type parameter that does not appear in the parameter list (CS0411 — at *every* call site, concrete instantiations included). When the callee declares such a constraint-only type parameter, the converter renders the call's type arguments explicitly from the instantiation `go/types` already resolved (`info.Instances`): `Twice<Point, int32>(p, 2)` at a concrete site, `Scale<S, E>(s, c)` inside a generic body. Calls to generics whose every type parameter is argument-visible keep their bare Go-shaped form — C# infers them as Go does, no churn. (Guarded by the `GenericTypeInference` extension — a constrained `S`/`E` pass-through chain plus a concrete call to a constraint-only-param generic, values vs Go; clears the 14 CS0411s in the slices/maps wave.)

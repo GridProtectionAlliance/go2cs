@@ -836,6 +836,44 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				}
 			}
 
+			// A GENERIC parameter declared as a SLICE of a type parameter whose constraint is a
+			// METHOD-SET interface — `walkList[N Node](v Visitor, list []N)` — instantiated with
+			// a POINTER type argument (`walkList(v, n.Names)`, N=*Ident): the emitted constraint
+			// is `where N : Node` (see getGenericDefinition), which the `ж<Ident>` box cannot
+			// satisfy — the box does not implement the interface, its generated pointer adapter
+			// does. Project the slice element-wise through the adapter (`widen<ж<Ident>, Node>(
+			// (~n).Names, elemᴛ0 => new IdentжNode(elemᴛ0))`), instantiating N as the interface
+			// itself. The projection copies the slice HEADER only (elements alias through the
+			// shared box, so method calls mutate the original objects); a callee that reassigns
+			// `list[i]` itself would not write back — acceptable for the read/widen shape this
+			// targets. convertToInterfaceType supplies the adapter reference AND the GoImplement
+			// recording, exactly as at scalar *T→iface call sites.
+			if paramHasArg && (replacementArgs == nil || len(replacementArgs[i]) == 0) {
+				if declSlice, ok := paramType.Underlying().(*types.Slice); ok {
+					if tp, ok := types.Unalias(declSlice.Elem()).(*types.TypeParam); ok {
+						if iface, ok := tp.Constraint().Underlying().(*types.Interface); ok && iface.NumMethods() > 0 && iface.IsMethodSet() {
+							if instParam := v.instantiatedParamType(callExpr, i); instParam != nil {
+								if instSlice, ok := instParam.Underlying().(*types.Slice); ok {
+									if ptrElem, ok := instSlice.Elem().(*types.Pointer); ok && types.Implements(ptrElem, iface) {
+										elemVar := fmt.Sprintf("elem%s%d", TempVarMarker, i)
+										wrapped := v.convertToInterfaceType(tp.Constraint(), ptrElem, elemVar)
+
+										if strings.HasPrefix(wrapped, "new ") {
+											if replacementArgs == nil {
+												replacementArgs = make([]string, params.Len())
+											}
+
+											replacementArgs[i] = fmt.Sprintf("widen<%s, %s>(%s, %s => %s)",
+												v.getCSTypeName(ptrElem), v.getCSTypeName(tp.Constraint()), DynamicCastArgMarker, elemVar, wrapped)
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
 			// A CONSTRAINED SLICE TYPE PARAMETER passed where a concrete slice<E> parameter is
 			// expected — Go assignability (S ~[]E is assignable to []E; the slices package's
 			// rotateRight(s[m:i], …)/pdqsortOrdered(x, …) helper chain) — materializes through
@@ -2569,4 +2607,42 @@ func (v *Visitor) instantiatedParamIsPointer(callExpr *ast.CallExpr, declaredPar
 	}
 
 	return false
+}
+
+// instantiatedParamType returns the INSTANTIATED type of parameter i at this call site, or nil
+// when unavailable. getFunctionSignature returns the DECLARED generic signature (its params are
+// still bare type parameters); the instantiation lives in info.Instances keyed by the Fun's
+// identifier — the same resolution instantiatedParamIsPointer performs (see its notes), factored
+// for callers that need the full type rather than a pointer check.
+func (v *Visitor) instantiatedParamType(callExpr *ast.CallExpr, i int) types.Type {
+	funIdent, _ := callExpr.Fun.(*ast.Ident)
+
+	if sel, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+		funIdent = sel.Sel
+	} else if idx, ok := callExpr.Fun.(*ast.IndexExpr); ok {
+		// Explicitly instantiated form: walkList[*Ident](v, list) / pkg.F[*T](x)
+		if id, ok := idx.X.(*ast.Ident); ok {
+			funIdent = id
+		} else if sel, ok := idx.X.(*ast.SelectorExpr); ok {
+			funIdent = sel.Sel
+		}
+	}
+
+	if funIdent != nil {
+		if inst, ok := v.info.Instances[funIdent]; ok {
+			if sig, ok := inst.Type.(*types.Signature); ok {
+				if paramType, ok := getParameterType(sig, i); ok {
+					return paramType
+				}
+			}
+		}
+	}
+
+	if instSig, ok := v.info.TypeOf(callExpr.Fun).(*types.Signature); ok {
+		if paramType, ok := getParameterType(instSig, i); ok {
+			return paramType
+		}
+	}
+
+	return nil
 }

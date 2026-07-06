@@ -1531,6 +1531,35 @@ public static class builtin
         return source;
     }
 
+    /// <summary>
+    /// Projects a slice's elements into a widened target type via the supplied conversion.
+    /// </summary>
+    /// <typeparam name="T">Source element type.</typeparam>
+    /// <typeparam name="TWide">Widened target element type, e.g., an interface type.</typeparam>
+    /// <param name="source">Source slice.</param>
+    /// <param name="conv">Element widening conversion.</param>
+    /// <returns>New <see cref="go.slice{T}"/> of <typeparamref name="TWide"/> over the projected elements.</returns>
+    /// <remarks>
+    /// This is the emission for a Go generic call whose interface-constrained type argument is a
+    /// pointer type — <c>walkList(v, n.Names)</c> instantiating <c>walkList[N Node]</c> with
+    /// <c>N=*Ident</c>: the C# <c>ж&lt;Ident&gt;</c> box does not implement the interface (its
+    /// generated pointer adapter does), so the slice is projected element-wise through the
+    /// adapter. Only the slice header is copied; elements alias the original objects through the
+    /// shared boxes.
+    /// </remarks>
+    public static slice<TWide> widen<T, TWide>(slice<T> source, Func<T, TWide> conv)
+    {
+        if (source.Length == 0)
+            return default;
+
+        TWide[] result = new TWide[source.Length];
+
+        for (int i = 0; i < source.Length; i++)
+            result[i] = conv(source[i]);
+
+        return new slice<TWide>(result);
+    }
+
 
     /// <summary>
     /// Converts value to a complex64 imaginary number.
