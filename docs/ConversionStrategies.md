@@ -2120,12 +2120,22 @@ var r = Ꮡt.newRange(ᴛ6, ᴛ7, ᴛ8, ᴛ9, ᴛ10);
 
 `convExprList` already performs this expansion, but only when the call's `deferredDecls` hoist target is
 non-nil — passing the whole tuple as one argument is otherwise CS7036 (text/template/parse's `rangeControl`).
-The return-form threads that target (visitReturnStmt); the assignment forms now do too, on BOTH lowering
+The return-form threads that target (visitReturnStmt); the assignment forms do too, on BOTH lowering
 branches: the single-declare block and the mixed/escaping block (a pointer-result local that is heap-boxed is
-not counted in `declaredCount`, so it takes the latter — the `newRange` case above). The hoisted `var (…) = …;`
-lands in the statement's existing hoist buffer, emitted before the statement. Byte-identical corpus-wide except
-where the pattern occurs (and a harmless renumber of any later temps, since the per-file marker index is
-monotonic). Guarded by `TupleSpreadIntoCall` (both a value result and an escaping pointer result).
+not counted in `declaredCount`, so it takes the latter — the `newRange` case above). A **statement-level**
+`f(g())` (a bare expression statement, not an assignment) carries no `deferredDecls` of its own, so the
+expansion now falls back to the enclosing `ExprStmt`'s `v.hoistedDecls` buffer — testing's
+`registerCover2(deps.InitRuntimeCoverage())`, where `InitRuntimeCoverage` returns three values:
+
+```csharp
+var (ᴛ1, ᴛ2, ᴛ3) = deps.InitRuntimeCoverage();
+registerCover2(ᴛ1, ᴛ2, ᴛ3);
+```
+
+The hoisted `var (…) = …;` lands in the statement's existing hoist buffer, emitted before the statement.
+Byte-identical corpus-wide except where the pattern occurs (and a harmless renumber of any later temps, since
+the per-file marker index is monotonic). Guarded by `TupleSpreadIntoCall` (a value result, an escaping pointer
+result, and a statement-level spread).
 
 ### A range over a pointer-typed type conversion parenthesizes before the deref
 Ranging over a pointer to an array implicitly dereferences it — the converter appends `.Value` to the

@@ -31,9 +31,19 @@ func build() *Node {
 	return r
 }
 
+// record consumes a multi-value result at STATEMENT position (a bare expression statement, not
+// an assignment). Such a call carries no deferredDecls of its own, so the spread hoists through
+// the enclosing ExprStmt's hoist buffer instead — testing's
+// `registerCover2(deps.InitRuntimeCoverage())`.
+func record(a, b int) {
+	fmt.Println("recorded:", a, b)
+}
+
 func main() {
 	n := build()
 	// s is a plain value local → the single-declare assignment branch.
 	s := combine(parts())
 	fmt.Println(n.a, n.b, s) // 3 4 34
+
+	record(parts()) // statement-level spread → recorded: 3 4
 }

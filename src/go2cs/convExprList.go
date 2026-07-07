@@ -128,10 +128,20 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 		// feeding compInfo(v, sz). C# has no splat, so the inner call hoists into temp
 		// markers passed expanded (`var (ᴛ1, ᴛ2) = …; compInfo(ᴛ1, ᴛ2)`; CS7036 ×4).
 		// Gated to the single-argument shape with a hoist target; defer/go marker paths
-		// (callArgs) keep their own machinery.
+		// (callArgs) keep their own machinery. A STATEMENT-level call (`registerCover2(
+		// deps.InitRuntimeCoverage())`, testing) carries no deferredDecls — its enclosing
+		// ExprStmt provides v.hoistedDecls instead — so fall back to that pre-statement sink.
 		tupleExpanded := false
 
-		if len(exprs) == 1 && callArgs == nil && !spreadArg && callContext != nil && callContext.deferredDecls != nil {
+		var tupleHoist *strings.Builder
+
+		if callContext != nil && callContext.deferredDecls != nil {
+			tupleHoist = callContext.deferredDecls
+		} else if v.hoistedDecls != nil {
+			tupleHoist = v.hoistedDecls
+		}
+
+		if len(exprs) == 1 && callArgs == nil && !spreadArg && tupleHoist != nil {
 			if innerCall, isCall := expr.(*ast.CallExpr); isCall {
 				if tuple, isTuple := v.getExprType(innerCall).(*types.Tuple); isTuple && tuple.Len() > 1 {
 					innerExpr := v.convExpr(innerCall, contexts)
@@ -145,10 +155,10 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 
 					v.tupleTempIndex += tuple.Len()
 
-					callContext.deferredDecls.WriteString(v.newline)
-					callContext.deferredDecls.WriteString(v.indent(v.indentLevel))
-					callContext.deferredDecls.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), innerExpr))
-					callContext.deferredDecls.WriteString(v.newline)
+					tupleHoist.WriteString(v.newline)
+					tupleHoist.WriteString(v.indent(v.indentLevel))
+					tupleHoist.WriteString(fmt.Sprintf("var (%s) = %s;", strings.Join(tempNames, ", "), innerExpr))
+					tupleHoist.WriteString(v.newline)
 					resultExpr = strings.Join(tempNames, ", ")
 					tupleExpanded = true
 				}

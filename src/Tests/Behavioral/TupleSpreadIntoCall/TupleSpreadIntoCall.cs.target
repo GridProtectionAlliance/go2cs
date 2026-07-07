@@ -26,11 +26,17 @@ internal static ж<Node> build() {
     return r;
 }
 
+internal static void record(nint a, nint b) {
+    fmt.Println("recorded:", a, b);
+}
+
 internal static void Main() {
     var n = build();
     var (ᴛ3, ᴛ4) = parts();
     nint s = combine(ᴛ3, ᴛ4);
     fmt.Println((~n).a, (~n).b, s);
+    var (ᴛ5, ᴛ6) = parts();
+    record(ᴛ5, ᴛ6);
 }
 
 } // end main_package
