@@ -28,7 +28,7 @@ internal static (score, bool) stay(score s) {
     return (new score(s.opponent, s.player + s.thisTurn, 0), true);
 }
 
-internal delegate Func<score, (score result, bool turnIsOver)> strategy(score _);
+internal delegate Func<score, (score, bool)> strategy(score _);
 
 internal static strategy stayAtK(nint k) {
     return (score s) => {

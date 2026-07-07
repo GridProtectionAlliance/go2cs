@@ -137,6 +137,28 @@ type Sift func(int) bool
 // Sift (the method) forces the type-vs-method collision that renames the Sift TYPE.
 func (s Sensor) Sift(f Sift) bool { return f(int(s.Temp)) }
 
+// Node is a plain exported struct used as the cross-package element type inside Resolver's signature
+// (the go/ast Object shape).
+type Node struct {
+	ID int
+}
+
+// Resolver is a METHODLESS FUNC TYPE whose signature NAMES a cross-package type — a map value and a
+// result are `*Node` — mirroring go/ast's `type Importer func(imports map[string]*Object, path
+// string) (pkg *Object, err error)`. When a consumer passes its matching package-level func to
+// Resolve below as a METHOD GROUP, the converter wraps it in Resolver's collapsed base delegate
+// (`new Func<map<@string, ж<…Node>>, @string, (ж<…Node>, error)>(fn)`). That delegate must render
+// through the structural getCSTypeName→iifeDelegateType path so the cross-package element keeps its
+// file-local alias; the old string path (convertToCSTypeName∘getTypeName) mangled a SLASH-BEARING
+// element package into a naive namespace form (go/doc's `go.ast.Object`, CS0234, plus a method-group
+// CS0123 against the error-typed delegate). This single-segment producer compiles either way, but the
+// emitted delegate FORM — unnamed vs Go-named result tuple — is the byte-golden that guards the routing.
+type Resolver func(imports map[string]*Node, path string) (*Node, error)
+
+// Resolve takes the named func type as a parameter, so a consumer passes its matching package-level
+// func as a method group (the ast.NewPackage(fset, files, simpleImporter, nil) shape).
+func Resolve(r Resolver, path string) (*Node, error) { return r(nil, path) }
+
 // Probe/Sampler: the lib never converts *Probe to Sampler itself, so no exported adapter
 // record exists - a consumer's pointer conversion records the pair LOCALLY and emits its
 // own ProbeжSampler adapter with metadata-bound forwarding (fmt Fscan(os.Stdin, ...),

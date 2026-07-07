@@ -382,6 +382,15 @@ func main() {
 	var isHot CrossPkgLib.Sift = func(t int) bool { return t > 50 }
 	fmt.Println(isHot(60), isHot(40)) // true false
 
+	// A package-level func passed as a METHOD GROUP where a cross-package methodless-named-func-type
+	// parameter is expected (CrossPkgLib.Resolver, whose signature names *CrossPkgLib.Node): the
+	// converter wraps it in the collapsed base delegate, and that delegate's cross-package element must
+	// render structurally so `ж<CrossPkgLib.Node>` keeps its alias — the go/doc `ast.NewPackage(fset,
+	// files, simpleImporter, nil)` shape (`new Func<…ast.Object…>(simpleImporter)`; the old string path
+	// mangled a slash-bearing element to `go.ast.Object` — CS0234/CS0123).
+	nd, nerr := CrossPkgLib.Resolve(simpleResolve, "abcde")
+	fmt.Println(nd.ID, nerr == nil) // 5 true
+
 	// A same-package generic instantiated with a POINTER to a cross-package type: the var type
 	// `*Holder[*CrossPkgLib.Sensor]` (getTypeName) and the `sensorBox` embed (getFullTypeName) must
 	// both keep the Holder<…> wrapper — the slash-strip previously ate it (crypto/elliptic's nistCurve).
@@ -414,6 +423,17 @@ func stampOrErr(ok bool) (stamp, error) {
 		return 0, fmt.Errorf("no stamp")
 	}
 	return bigStamp, nil
+}
+
+// simpleResolve is a package-level func matching CrossPkgLib.Resolver (a methodless named func type
+// whose signature names the cross-package *CrossPkgLib.Node). Passing it as a METHOD GROUP to
+// CrossPkgLib.Resolve makes the converter wrap it in Resolver's collapsed base delegate — the go/doc
+// `ast.NewPackage(fset, files, simpleImporter, nil)` shape. The wrapped delegate renders through the
+// structural getCSTypeName→iifeDelegateType path so the cross-package `ж<CrossPkgLib.Node>` keeps its
+// alias (the former string path mangled a slash-bearing element into `go.ast.Object`, CS0234/CS0123,
+// and spelled a Go-named result tuple).
+func simpleResolve(imports map[string]*CrossPkgLib.Node, path string) (*CrossPkgLib.Node, error) {
+	return &CrossPkgLib.Node{ID: len(path)}, nil
 }
 
 // Phase 4: field promotion through a CROSS-PACKAGE embed. In a real MSBuild build the library

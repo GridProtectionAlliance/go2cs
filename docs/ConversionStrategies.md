@@ -1626,6 +1626,36 @@ converted once and stay so, just at the `extractTypes` site rather than the call
 *Node, err error)` used as a function parameter, output-compared vs Go; CNR byte-identical across the corpus,
 and an A/B reconvert of go/ast shows only that one collapsed-delegate parameter shape moving.)
 
+**A collapsed methodless named func type's DELEGATE TYPE renders through `iifeDelegateType`, not the string
+path.** The double-conversion fix above kept the collapsed delegate on `convertToCSFullTypeName`'s `func(`
+string handler — but that string domain naively slash→dots a cross-package element's import PATH. go/doc
+passes `simpleImporter` to `ast.NewPackage` (whose `importer` is `ast.Importer`, a methodless func type), so
+the converter wraps the method group in the collapsed base delegate
+`new Func<map<@string, ж<go.ast.Object>>, @string, (ж<go.ast.Object> pkg, error err)>(simpleImporter)` —
+`go/ast.Object` mangled to `go.ast.Object` (no `_package` class, no file alias), so `ast` is not a namespace
+of `go` (CS0234 ×2), and the resulting error-typed delegate then fails the method-group→delegate conversion
+(CS0123). `getCSTypeName` now routes a methodless named func type through the SAME structural
+`iifeDelegateType` path an ANONYMOUS signature already takes (that path exists precisely because the string
+path mangles slash-bearing package paths), naming each element via `aliasedElementTypeName` — so the
+cross-package `ast.Object` keeps its `ast` alias (and a Δ-renamed foreign element its recorded `ꓸ`-alias):
+`new Func<map<@string, ж<ast.Object>>, @string, (ж<ast.Object>, error)>(simpleImporter)`. The only visible
+change for a SAME-package/single-segment element is that a multi-result signature's delegate type drops its
+Go result-tuple element NAMES (`(ж<Node> pkg, error err)` → `(ж<Node>, error)`), matching how anonymous
+signatures already render — cosmetic, both compile. An A/B full-stdlib reconvert moves **11 files, all
+equal-or-better**: the go/doc mangle fixed, plus `go/parser`/`go/scanner` (`go.token_package.ΔPosition` →
+`tokenꓸPosition`), `go/internal/gccgoimporter` (a malformed `(io.ReadCloser>, error)` → valid),
+`internal/trace/traceviewer` (`net.http_package.Request` → `http.Request`), and `path/filepath`
+(`io.fs_package.DirEntry` → `fs.DirEntry`) all cleaned up, with `bufio`/`go/ast`/`nettest` only dropping
+cosmetic tuple names; CNR touches only three existing goldens (`NamedFuncTypeMapParam`,
+`SubpackageFuncTypeParam`, `FirstClassFunctions`), all the same pattern. (Guarded by the `CrossPkgUser`
+extension — a package-level `simpleResolve` passed as a METHOD GROUP to `CrossPkgLib.Resolve`, whose
+`Resolver` is a methodless func type naming the cross-package `*CrossPkgLib.Node`, so the wrapped delegate
+renders `ж<CrossPkgLib.Node>` via the alias, output-compared vs Go. The single-segment producer compiles
+either way, so the byte-golden — unnamed vs Go-named result tuple — is what guards the routing; the exact
+slash-bearing CS0234/CS0123 needs a multi-segment producer like go/ast, verified by the go/doc source A/B.
+go/doc's own remaining block is the SHARED generated-adapter forwarding of go/ast's unexported interface
+marker methods — a separate root.)
+
 A companion root cleared path/filepath fully: a **cross-package type ALIAS whose target lives in yet
 another package** — `os.FileInfo = fs.FileInfo` (os/types.go, target in `io/fs`) — is emitted as an
 assembly-scoped `global using FileInfo = go.io.fs_package.FileInfo;` in **os's own** conversion, never as

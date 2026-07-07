@@ -4107,9 +4107,23 @@ func (v *Visitor) getCSTypeName(t types.Type) string {
 	// a named multi-result tuple. iifeDelegateType builds it from the signature using getCSTypeName
 	// per element (correct qualification; nameless tuple results). Simple func types render
 	// identically to the old path, so this is zero-churn for them.
-	// Only an ANONYMOUS func type (t itself is the signature) is expanded; a NAMED func type
-	// (`type Stringy func() string`, a *types.Named) keeps its delegate name via the normal path.
+	// An ANONYMOUS func type (t itself is the signature) is expanded here; a NAMED func type WITH
+	// methods (or generic / self-referential) keeps its distinct delegate name via the normal path.
 	if sig, ok := t.(*types.Signature); ok {
+		return v.iifeDelegateType(sig)
+	}
+
+	// A methodless named func type collapses to its base delegate (methodlessNamedFuncSignature);
+	// render it structurally via iifeDelegateType — the same correct-qualification path the
+	// anonymous signature above takes — rather than through convertToCSTypeName(getTypeName(t)).
+	// getTypeName collapses it to its signature and emits the STRING form
+	// (`func(map[string]*go/ast.Object) …`), whose string-path package-path conversion mangles a
+	// slash-bearing cross-package element to a naive namespace form (`go.ast.Object` — no
+	// `_package` class, no file alias): CS0234, and the resulting error-typed delegate then fails
+	// the method-group conversion of a func passed to it (go/doc wraps `simpleImporter` for
+	// `ast.NewPackage`'s `ast.Importer` param — `new Func<…go.ast.Object…>(simpleImporter)`, CS0123).
+	// iifeDelegateType names each element via aliasedElementTypeName, so `ast.Object` keeps its alias.
+	if sig, ok := methodlessNamedFuncSignature(t); ok {
 		return v.iifeDelegateType(sig)
 	}
 

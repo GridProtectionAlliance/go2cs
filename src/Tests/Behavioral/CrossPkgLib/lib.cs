@@ -121,6 +121,16 @@ public static bool Sift(this Sensor s, Func<nint, bool> f) {
     return f((nint)(float64)s.Temp);
 }
 
+[GoType] partial struct Node {
+    public nint ID;
+}
+
+// type Resolver is a methodless func type — rendered inline as its base delegate
+
+public static (ж<Node>, error) Resolve(Func<map<@string, ж<Node>>, @string, (ж<Node>, error)> r, @string path) {
+    return r(default!, path);
+}
+
 [GoType] partial struct Probe {
     public nint Hits;
 }

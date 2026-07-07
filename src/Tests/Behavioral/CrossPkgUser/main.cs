@@ -259,6 +259,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(CrossPkgLib.Pair<@string, nint>("k"u8, 8));
     Func<nint, bool> isHot = (nint tΔ1) => tΔ1 > 50;
     fmt.Println(isHot(60), isHot(40));
+    var (nd, nerr) = CrossPkgLib.Resolve(new Func<map<@string, ж<CrossPkgLib.Node>>, @string, (ж<CrossPkgLib.Node>, error)>(simpleResolve), "abcde"u8);
+    fmt.Println((~nd).ID, nerr == default!);
     sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage"u8, Temp: 30));
     fmt.Println((~(~sensorHolder).item).Name);
     var sbx = new sensorBox(tag: "b"u8);
@@ -279,6 +281,10 @@ internal static (stamp, error) stampOrErr(bool ok) {
         return ((stamp)(CrossPkgLib.Ticks)(0), fmt.Errorf("no stamp"u8));
     }
     return ((stamp)(CrossPkgLib.Ticks)(bigStamp), default!);
+}
+
+internal static (ж<CrossPkgLib.Node>, error) simpleResolve(map<@string, ж<CrossPkgLib.Node>> imports, @string path) {
+    return (Ꮡ(new CrossPkgLib.Node(ID: len(path))), default!);
 }
 
 [GoType] partial struct probe {
