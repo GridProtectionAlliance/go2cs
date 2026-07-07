@@ -1769,6 +1769,31 @@ emitted (a collapsed delegate). Other assertion targets are unchanged. (Guarded 
 type, output-compared vs Go; CNR byte-identical and an A/B of archive/zip shows only the two intended
 `_<Compressor>`/`_<Decompressor>` → `_<Func<…>>` lines.)
 
+An **UNINITIALIZED local `var` of a methodless named func type** renders its declared type through the
+same structural path. `visitValueSpec`'s no-initializer branch computed the type from
+`convertToCSTypeName(getTypeName(...))` (the string path) and only re-routed a bare *anonymous*
+`*types.Signature` through `getCSTypeName`; a methodless NAMED func type is a `*types.Named`, so it kept
+the string render — and that render mangles a slash-bearing cross-package element. go/parser's `parseDecl`
+declares `var f parseSpecFunction`
+(`type parseSpecFunction func(doc *ast.CommentGroup, keyword token.Token, iota int) ast.Spec`), which
+emitted `Func<ж<go.ast.CommentGroup>, go.token.Token, nint, go.ast_package.Spec> f = default!;` — the
+`go.ast`/`go.token` elements re-root to the nonexistent `go.go.ast`/`go.go.token` (CS0234), and the
+declared delegate then mismatched the lambdas assigned to `f` and the `parseGenDecl(keyword, f)` parameter,
+which render the SAME Go types structurally as `ast.CommentGroup`/`token.Token` (CS1661/CS1678/CS1503 — 12
+errors, all this one declaration). The no-initializer branch now routes a func-typed var (anonymous
+signature OR methodless named func, via `methodlessNamedFuncSignature`) through `getCSTypeName` →
+`iifeDelegateType`, whose `aliasedElementTypeName` keeps each element's `pkg.Type` alias:
+`Func<ж<ast.CommentGroup>, token.Token, nint, ast.Spec> f = default!;`. This precedence matches
+`getCSTypeName`'s own — the func render wins over the foreign-alias route (which for a methodless named
+func would point at the SKIPPED delegate declaration); a non-func foreign-renamed local keeps its alias
+unchanged. An A/B full-stdlib reconvert moves exactly one file (go/parser/parser.cs), greening go.parser
+outright. (Guarded by the `MethodlessFuncType` extension — an uninitialized `var find lookup` where
+`type lookup func(string) (path string, ok bool)`; the byte-golden captures the structural render
+`Func<@string, (@string, bool)>` — dropping the Go result NAMES the string path keeps — output-compared vs
+Go. As with the delegate-routing sibling above, a single-segment/same-package producer compiles either way,
+so the unnamed-vs-Go-named result tuple is what guards the routing; the exact slash-bearing CS0234 needs a
+multi-segment producer like go/ast, verified by the go/parser source A/B.)
+
 ### Named delegate types wrap mismatched initializers
 A NAMED func-type field initialized with a value of a DIFFERENT delegate type has no implicit
 C# conversion: internal/concurrent's `keyHash: mapType.Hasher` feeds a `hashFunc` field from a

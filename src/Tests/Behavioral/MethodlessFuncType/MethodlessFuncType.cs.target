@@ -6,6 +6,8 @@ partial class main_package {
 
 // type releaser is a methodless func type — rendered inline as its base delegate
 
+// type lookup is a methodless func type — rendered inline as its base delegate
+
 internal static Action<error> makeReleaser(@string tag, ж<slice<@string>> Ꮡlog) {
     ref var log = ref Ꮡlog.Value;
 
@@ -44,6 +46,10 @@ internal static void Main() {
     Action<error> r = makeReleaser("direct"u8, Ꮡlog);
     r(default!);
     consume(r, fmt.Errorf("late"u8));
+    Func<@string, (@string, bool)> find = default!;
+    find = (@string s) => (s + "!", len(s) > 0);
+    var (p, okp) = find("q"u8);
+    fmt.Println("lookup:", p, okp);
     foreach (var (_, line) in log) {
         fmt.Println(line);
     }

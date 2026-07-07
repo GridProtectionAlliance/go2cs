@@ -184,19 +184,31 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 					goTypeName := v.getTypeName(def.Type(), false)
 					csTypeName := convertToCSTypeName(goTypeName)
 
-					// An ANONYMOUS func-typed var renders through the signature-aware path
-					// (Func<…>/Action<…> via iifeDelegateType): the raw getTypeName text
-					// (`func(string, string) ([]byte, error)`) mangles under convertToCSTypeName
-					// (`(<>byte, error)` — time zoneinfo_read's loadTzinfoFromTzdata, CS1003
-					// cascade). A NAMED func type keeps its delegate name via the normal path.
-					if _, isSig := types.Unalias(def.Type()).(*types.Signature); isSig {
-						csTypeName = v.getCSTypeName(def.Type())
-					}
+					// An ANONYMOUS func-typed var — or a methodless NAMED func type, which the
+					// converter collapses to (and renders everywhere as) its base delegate
+					// (methodlessNamedFuncSignature, its own declaration skipped) — renders through
+					// the signature-aware path (Func<…>/Action<…> via iifeDelegateType). The raw
+					// getTypeName text mangles under convertToCSTypeName: an anonymous
+					// `func(string, string) ([]byte, error)` collapses to `(<>byte, error)` (time
+					// zoneinfo_read's loadTzinfoFromTzdata, CS1003), and a methodless named func type
+					// whose signature carries a slash-bearing cross-package element — go/parser's
+					// `var f parseSpecFunction` (`func(*go/ast.CommentGroup, go/token.Token, int)
+					// ast.Spec`) — mangles those elements to the nonexistent `go.go.ast.CommentGroup`/
+					// `go.go.token.Token` (CS0234), while its matching parameter and assigned-lambda
+					// sites render structurally through getCSTypeName. getCSTypeName routes both forms
+					// through iifeDelegateType, whose aliasedElementTypeName keeps each element's
+					// `pkg.Type` alias. This precedence matches getCSTypeName's own (a func render wins
+					// over the foreign-alias route below, whose alias would point at the SKIPPED
+					// methodless-func declaration). A NAMED func type WITH methods keeps its delegate name.
+					_, isSig := types.Unalias(def.Type()).(*types.Signature)
+					_, isMethodlessFunc := methodlessNamedFuncSignature(def.Type())
 
-					// A local declared as a foreign RENAMED type routes through the recorded
-					// alias (`syscallꓸSockaddr sa`, not the nonexistent `Δsyscall.Sockaddr` —
-					// CS0426, internal/poll sockaddrToRaw).
-					if aliased, ok := v.foreignAliasedTypeName(def.Type()); ok {
+					if isSig || isMethodlessFunc {
+						csTypeName = v.getCSTypeName(def.Type())
+					} else if aliased, ok := v.foreignAliasedTypeName(def.Type()); ok {
+						// A local declared as a foreign RENAMED type routes through the recorded
+						// alias (`syscallꓸSockaddr sa`, not the nonexistent `Δsyscall.Sockaddr` —
+						// CS0426, internal/poll sockaddrToRaw).
 						csTypeName = aliased
 					}
 

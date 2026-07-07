@@ -12,6 +12,16 @@ import "fmt"
 // releaser is a methodless named func type — collapses to Action<error>.
 type releaser func(error)
 
+// lookup is a methodless named func type with a MULTI-RESULT signature carrying Go result NAMES.
+// Declared below as an UNINITIALIZED local (`var find lookup`, no initializer), its TYPE must render
+// through the same structural signature path (getCSTypeName -> iifeDelegateType, which drops the Go
+// result names -> `Func<@string, (@string, bool)>`) that the parameter and initialized-var forms use —
+// NOT the string path, which keeps the Go-ordered result names and (for a cross-package element like
+// go/parser's `var f parseSpecFunction`, `func(*go/ast.CommentGroup, go/token.Token, int) ast.Spec`)
+// mangles the element qualifier to the nonexistent `go.go.ast.CommentGroup` (CS0234). Both forms
+// compile and run identically; the byte-golden guards the var-decl routing.
+type lookup func(string) (path string, ok bool)
+
 // makeReleaser returns the NAMED type (like grabConn returning releaseConn).
 func makeReleaser(tag string, log *[]string) releaser {
 	return func(err error) {
@@ -58,6 +68,15 @@ func main() {
 	var r releaser = makeReleaser("direct", &log)
 	r(nil)
 	consume(r, fmt.Errorf("late"))
+
+	// UNINITIALIZED local var of a methodless named func type with named multi-results — the Root B
+	// seam (visitValueSpec's no-initializer branch). Assigned a lambda, then invoked.
+	var find lookup
+	find = func(s string) (string, bool) {
+		return s + "!", len(s) > 0
+	}
+	p, okp := find("q")
+	fmt.Println("lookup:", p, okp)
 
 	for _, line := range log {
 		fmt.Println(line)
