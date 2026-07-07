@@ -47,6 +47,15 @@ var systemCollidingTypeNames = NewHashSet([]string{
 func rootQualifySubNamespaceTypeRefs(name string) string {
 	return packageQualifiedNameRegex.ReplaceAllStringFunc(name, func(match string) string {
 		if strings.HasPrefix(match, RootNamespace+".") {
+			// A go/*-package ref whose root the strip removed (`go.ast_package` for go/ast, whose
+			// real namespace is `go.go`) is re-rooted to `go.go.ast_package`; the GoImplement/
+			// GoImplicitConv attributes emit at assembly scope, so a bare root prefix resolves (no
+			// global:: needed, unlike the in-namespace using aliases). A genuinely-rooted ref is
+			// left unchanged. See isStrippedGoPathPackageRef.
+			if isStrippedGoPathPackageRef(match) {
+				return RootNamespace + "." + match
+			}
+
 			return match
 		}
 
@@ -198,8 +207,43 @@ func rootQualified(ns string) string {
 // (namespace `@internal.goarch_package`) resolves `@internal` to `go.runtime.@internal`, not
 // `go.@internal` → CS0234. Non-colliding imports (the common case) are returned unchanged, so this
 // adds no churn for packages whose namespace does not nest under a colliding segment.
+// isStrippedGoPathPackageRef reports whether a "go."-prefixed rendered name is actually a
+// go/*-PACKAGE reference whose root was stripped — the leading "go" is the package import path's
+// own first segment (go/ast, go/token, go/types → namespace go.go.ast), not the root namespace.
+// Such a ref has a "_package" CLASS as the segment RIGHT AFTER "go.". A genuinely root-qualified
+// ref (go.go.ast_package, go.io.fs_package) has a non-"_package" segment there, and a LOCAL package
+// never renders its own class as "go.<class>_package" (after the root strip it is the bare
+// "<class>_package"), so only go/*-package refs match. Used to re-root the go/* refs that
+// convertToCSTypeName's redundant-root strip mangled to `go.ast_package` (CS0234/CS0426).
+func isStrippedGoPathPackageRef(goPrefixed string) bool {
+	rest := goPrefixed[len(RootNamespace)+1:]
+	firstSeg := rest
+
+	if dot := strings.IndexByte(rest, '.'); dot != -1 {
+		firstSeg = rest[:dot]
+	}
+
+	return strings.HasSuffix(firstSeg, PackageSuffix)
+}
+
 func rootQualifyIfAmbiguous(ns string) string {
-	if ns == "" || strings.HasPrefix(ns, RootNamespace+".") {
+	if ns == "" {
+		return ns
+	}
+
+	if strings.HasPrefix(ns, RootNamespace+".") {
+		// A go/*-package namespace whose root the strip removed (`go.token_package` for go/token,
+		// whose real namespace is `go.go`) is re-rooted to `go.go.token_package`, and ALWAYS with
+		// `global::`: a bare `go.go.<pkg>_package` re-binds its leading `go` to the nearest enclosing
+		// `go`, which mis-resolves from a go/*-package's own `go.go.*` namespace AND from any other
+		// package under the root `go` (internal/pkgbits' `go.internal.pkgbits` resolved
+		// `go.go.constant_package`'s second `go` inside `go.go`, CS0234). rootQualified only forces
+		// `global::` when the IMPORTER itself nests `go.go`, so a non-go/* importer of a go/* package
+		// was left bare — force it here. A genuinely-rooted ref is returned unchanged.
+		if isStrippedGoPathPackageRef(ns) {
+			return "global::" + RootNamespace + "." + ns
+		}
+
 		return ns
 	}
 
