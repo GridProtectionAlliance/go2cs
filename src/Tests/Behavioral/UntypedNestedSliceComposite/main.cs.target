@@ -34,11 +34,33 @@ internal static slice<ж<dbgVar>> dbgvars = new ж<dbgVar>[]{
     Ꮡ(new dbgVar(name: "b"u8, value: Ꮡx))
 }.slice();
 
+[GoType("num:nint")] partial struct js;
+
+internal static readonly js j0 = /* iota */ 0;
+internal static readonly js j1 = 1;
+internal static readonly js j2 = 2;
+internal static readonly js j3 = 3;
+internal static readonly js numJS = 4;
+
+internal static slice<array<js>> jsTable = new golib.SparseArray<array<js>>{
+    [(int)j0] = new golib.SparseArray<js>{[(int)j1] = j2, [(int)j3] = j1}.array(),
+    [(int)j2] = new golib.SparseArray<js>{[(int)j0] = j3, [(int)j3] = j2}.array()
+}.slice();
+
+internal static slice<slice<@string>> sparseRows = new slice<@string>[]{
+    new golib.SparseArray<@string>{[2] = "two"u8, [0] = "zero"u8}.slice(),
+    new golib.SparseArray<@string>{[1] = "one"u8}.slice()
+}.slice();
+
 internal static void Main() {
     fmt.Println(len(order[rA]), len(order[rB]), len(order[rC]));
     fmt.Println(order[rC][0], order[rC][1]);
     fmt.Println(grid[0][1], grid[1][0]);
     fmt.Println((~dbgvars[0]).name, (~dbgvars[1]).value.Value, len(dbgvars));
+    fmt.Println(jsTable[j0][j1], jsTable[j0][j2], jsTable[j0][j3]);
+    fmt.Println(jsTable[j2][j0], jsTable[j2][j3]);
+    fmt.Println(sparseRows[0][0], sparseRows[0][2], len(sparseRows[0]));
+    fmt.Println(sparseRows[1][1], len(sparseRows[1]));
 }
 
 } // end main_package

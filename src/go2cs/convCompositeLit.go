@@ -21,9 +21,23 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			switch u := inferred.Underlying().(type) {
 			case *types.Slice:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+				// A KEYED elided slice literal (`{5: "x"}` inside a `[]map[…][]T{…}`) renders as a
+				// golib SparseArray with `[index] = value` elements; the plain `new T[]{…}` array
+				// initializer below cannot take the Go `key: value` keyed syntax (CS1003 cascade).
+				// Mirrors the typed slice sparse-array path (see keyValueSource==ArraySource below).
+				if compositeLitIsKeyed(compositeLit.Elts) {
+					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
+				}
 				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
+				// A KEYED elided ARRAY literal — the inner `{joiningL: stateBefore, …}` of a
+				// `[][numJoinTypes]joinState{stateStart: {…}}` (x/net/idna joinStates, CS1003 ×62).
+				// Same SparseArray treatment as the slice case; `.array()` materializes the dense
+				// fixed-length backing, matching the typed array sparse path.
+				if compositeLitIsKeyed(compositeLit.Elts) {
+					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
+				}
 				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
@@ -689,4 +703,32 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	result.WriteString(fmt.Sprintf("%s%s%s", rbracePrefix, rbrace, compositeSuffix))
 
 	return result.String()
+}
+
+// compositeLitIsKeyed reports whether a composite literal's elements are index/key keyed
+// (KeyValueExpr). Go requires a composite literal to be all-keyed or all-positional, so the
+// first element is representative — matching the typed sparse-array detection below.
+func compositeLitIsKeyed(elts []ast.Expr) bool {
+	if len(elts) == 0 {
+		return false
+	}
+
+	_, keyed := elts[0].(*ast.KeyValueExpr)
+	return keyed
+}
+
+// sparseArrayCompositeContext builds the element context for a KEYED (sparse) array/slice
+// composite literal so its KeyValueExpr elements render as `[index] = value` against a golib
+// SparseArray (MapSource + arrayBacked), rather than the invalid Go `key: value` form. Mirrors
+// the elided-map handling and the typed keyValueSource==ArraySource→MapSource conversion.
+func sparseArrayCompositeContext(elts []ast.Expr) *CallExprContext {
+	context := DefaultCallExprContext()
+	context.keyValueSource = MapSource
+	context.keyValueArrayBacked = true
+
+	for i := range elts {
+		context.u8StringArgOK[i] = true
+	}
+
+	return context
 }
