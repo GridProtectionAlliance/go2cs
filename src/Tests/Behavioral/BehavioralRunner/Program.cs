@@ -546,22 +546,34 @@ namespace BehavioralRunner
 
         private static bool FilesEqual(string a, string b)
         {
-            using FileStream fa = new(a, FileMode.Open, FileAccess.Read, FileShare.Read);
-            using FileStream fb = new(b, FileMode.Open, FileAccess.Read, FileShare.Read);
+            // Compare with line endings normalized (CRLF -> LF). The converter emits CRLF for C# line
+            // endings but preserves the Go source's LF inside multi-line string literals, so a golden has
+            // mixed CRLF/LF bytes; with core.autocrlf=true git rewrites those in-string LFs to CRLF on
+            // checkout. Normalizing endings makes the comparison immune to that round-trip (a pure
+            // line-ending diff can only come from autocrlf, never from the deterministic converter), so no
+            // real regression signal is lost. NOTE: this relaxes only the golden TEXT comparison -- a
+            // project whose COMPILED program embeds and observes a multi-line string literal at runtime
+            // (e.g. Solitaire's board) still needs `-text` in .gitattributes so the on-disk .cs keeps LF
+            // newlines, else autocrlf corrupts the runtime value.
+            return NormalizeLineEndings(File.ReadAllBytes(a))
+                .AsSpan()
+                .SequenceEqual(NormalizeLineEndings(File.ReadAllBytes(b)));
+        }
 
-            if (fa.Length != fb.Length)
-                return false;
+        // Returns the bytes with every CR (0x0D) removed, collapsing CRLF to LF. The transpiled C# never
+        // contains a bare CR, so stripping all CRs is a safe, allocation-light line-ending normalization.
+        private static byte[] NormalizeLineEndings(byte[] bytes)
+        {
+            int count = 0;
 
-            int ba, bb;
-
-            do
+            foreach (byte b in bytes)
             {
-                ba = fa.ReadByte();
-                bb = fb.ReadByte();
+                if (b != (byte)'\r')
+                    bytes[count++] = b;
             }
-            while (ba == bb && ba != -1);
 
-            return ba == bb;
+            Array.Resize(ref bytes, count);
+            return bytes;
         }
 
         private static int Report(IEnumerable<ProjectResult> results, TimeSpan elapsed)

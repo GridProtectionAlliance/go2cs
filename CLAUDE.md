@@ -95,13 +95,25 @@ Full details: [`docs/Baseline-vs-FullConversion.md`](docs/Baseline-vs-FullConver
   `go build` whenever any converter `*.go` is newer than the binary, then re-transpiles. So after a
   converter change, running the suite regenerates the behavioral `.cs` from current source (and may show
   them as modified in git — that's expected).
-- **`TargetComparisonTests` is byte-for-byte.** To re-baseline goldens after an *intended* output change,
-  run the **`UpdateTestTargets`** project with **`--createTargetFiles`** (re-runs the converter, rewrites
-  all `.cs.target`) — don't hand-edit goldens.
-- **autocrlf gotcha:** `core.autocrlf=true`. The converter preserves the Go source's LF inside multi-line
-  string literals, so those `.cs`/`.cs.target` are mixed CRLF/LF and must be marked `-text` in
-  `.gitattributes` (done for Solitaire, SortArrayType, StdLibInternalAbi) or autocrlf re-breaks the byte
-  comparison on a fresh checkout. New tests with multi-line string literals need the same.
+- **`TargetComparisonTests` compares goldens with line endings NORMALIZED** (CRLF→LF; see
+  `TargetComparisonTests.FileMatch` / `BehavioralRunner.FilesEqual`, both strip CRs). It was a raw
+  byte-for-byte compare until 2026-07-07. Content diffs are still caught exactly; a pure line-ending
+  difference is ignored (it can only come from autocrlf, never from the deterministic converter). To
+  re-baseline goldens after an *intended* output change, run the **`UpdateTestTargets`** project with
+  **`--createTargetFiles`** (re-runs the converter, rewrites all `.cs.target`) — don't hand-edit goldens.
+- **autocrlf gotcha (`core.autocrlf=true`) — two SEPARATE concerns:** the converter emits CRLF for C# line
+  endings but preserves the Go source's LF inside multi-line string literals, so those `.cs`/`.cs.target`
+  contain mixed CRLF/LF, and autocrlf rewrites the in-string LFs to CRLF on checkout.
+  (1) **Golden text comparison** — no longer an issue: the comparison is line-ending-insensitive (above),
+  so a smudged golden still matches and **no `-text` mark is needed just for the byte compare**.
+  (2) **Runtime correctness** — still needs `-text`: if a project's *compiled program* embeds and observes
+  a multi-line string literal at runtime (e.g. `Solitaire`'s board, printed via `println`), autocrlf smudges
+  that literal's newlines to CRLF in the on-disk `.cs`, and any build that compiles the committed `.cs`
+  *without* re-transpiling (VS, CI `dotnet build`, or the runner's up-to-date-skip) bakes the wrong `\r`
+  runes into the value → the program misbehaves (Solitaire's board geometry breaks and the solver hangs).
+  So `Solitaire`/`SortArrayType`/`StdLibInternalAbi` keep their `.cs` `-text` marks. A NEW multi-line-string
+  test only needs `-text` if its program's *behavior/output* depends on the literal's exact bytes; if the
+  literal is inert (never printed/measured), no mark is needed and the golden compare stays green regardless.
 - **testhost lock gotcha:** a stray `testhost`/`vstest.console` from a prior run can lock
   `BehavioralTests.dll` → next build fails with `MSB3027` ("file locked by testhost"). Kill it (and
   `dotnet build-server shutdown` frees bin/obj locks) before rebuilding — not a real compile error.
@@ -195,8 +207,9 @@ construct; otherwise add a new one (example: `Tests/Behavioral/GlobalStructField
    Equivalent MSTest path (still valid): from `src/Tests/Behavioral/BehavioralTests`, run
    `dotnet test --no-build -c Debug --filter "FullyQualifiedName~<Name>"`. Either way, avoid the full
    `dotnet test go2cs.slnx` while iterating — it rebuilds everything and can hang under VS lock contention
-   (see the test-harness notes above). If the Go source uses multi-line string literals, mark the
-   `.cs`/`.cs.target` `-text` in `.gitattributes` (autocrlf gotcha above).
+   (see the test-harness notes above). The golden comparison is line-ending-insensitive, so a multi-line
+   string literal needs **no** `.gitattributes` handling for the byte compare — mark the `.cs` `-text` **only
+   if** the compiled program's behavior/output depends on that literal's exact newlines (autocrlf gotcha above).
 7. **Record the conversion decision (keep the strategy doc living).** Any time an *important or non-obvious*
    conversion decision is made — a new emitted form, a runtime/generator behavior, a deliberate trade-off,
    or a changed mapping of a Go construct to C# — add or update the matching section in

@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.IO;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -892,29 +893,33 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     private static bool FileMatch(string file1, string file2)
     {
-        using FileStream stream1 = new(file1, FileMode.Open, FileAccess.Read, FileShare.Read);
-        using FileStream stream2 = new(file2, FileMode.Open, FileAccess.Read, FileShare.Read);
+        // Compare with line endings normalized (CRLF -> LF). The converter deterministically emits CRLF
+        // for C# line endings but preserves the Go source's LF inside multi-line string literals, so a
+        // golden legitimately has mixed CRLF/LF bytes. With core.autocrlf=true git rewrites those in-string
+        // LFs to CRLF on checkout, which would break a raw byte comparison even though nothing meaningfully
+        // changed. A pure line-ending difference can only come from that autocrlf round-trip, never from the
+        // (deterministic) converter, so normalizing endings loses no real regression signal. NOTE: this only
+        // relaxes the golden text comparison -- a project whose COMPILED program embeds and observes a
+        // multi-line string literal at runtime (e.g. Solitaire's board) still needs `-text` in
+        // .gitattributes so the on-disk .cs keeps LF newlines, or autocrlf corrupts the runtime value.
+        return NormalizeLineEndings(File.ReadAllBytes(file1))
+            .AsSpan()
+            .SequenceEqual(NormalizeLineEndings(File.ReadAllBytes(file2)));
+    }
 
-        try
+    // Returns the bytes with every CR (0x0D) removed, collapsing CRLF to LF. The transpiled C# never
+    // contains a bare CR, so stripping all CRs is a safe, allocation-light line-ending normalization.
+    private static byte[] NormalizeLineEndings(byte[] bytes)
+    {
+        int count = 0;
+
+        foreach (byte b in bytes)
         {
-            if (stream1.Length != stream2.Length)
-                return false;
-
-            int file1Byte, file2Byte;
-
-            do
-            {
-                file1Byte = stream1.ReadByte();
-                file2Byte = stream2.ReadByte();
-            }
-            while (file1Byte == file2Byte && file1Byte != -1);
-
-            return file1Byte - file2Byte == 0;
+            if (b != (byte)'\r')
+                bytes[count++] = b;
         }
-        finally
-        {
-            stream1.Close();
-            stream2.Close();
-        }
+
+        Array.Resize(ref bytes, count);
+        return bytes;
     }
 }
