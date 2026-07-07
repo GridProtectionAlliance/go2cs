@@ -258,6 +258,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFuncVsMethodOverload() => CheckTarget("FuncVsMethodOverload");
 
     [TestMethod]
+    public void CheckGenericArrayConstraint() => CheckTarget("GenericArrayConstraint");
+
+    [TestMethod]
     public void CheckGenericAtomicPointerField() => CheckTarget("GenericAtomicPointerField");
 
     [TestMethod]

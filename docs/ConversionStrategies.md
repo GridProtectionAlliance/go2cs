@@ -933,7 +933,27 @@ A `select` lowers to a C# `switch`: with a `default:` clause present, the non-bl
 The golib non-blocking receive underpinning the default-form guards distinguishes the two "no value" cases per Go semantics: a **closed** empty channel is receive-ready with the zero value; an **open** empty channel reports not-ready, so the `default:` is taken. (Guarded by the `SelectStatement` extensions `firstMsg` — terminal blocking select in a value-returning func — and `poll` — empty `default:` after a returning case, polled both before and after `close`.)
 
 ## Generic Constraints
-A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
+A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `[N]E` array-core to `IArray<E>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
+
+### An array-core constraint `~[N]E` lifts to `IArray<E>`
+
+A type-set constraint whose core is an ARRAY — `func polyAdd[T ~[256]fieldElement](a, b T) T` (ML-KEM's
+`ringElement`/`nttElement` share the core `[256]fieldElement`) — must map to `where T : IArray<E>`, NOT
+to the operator interfaces the general type-set path would produce. An array is a *comparable* type in
+Go, so the operator-set resolver put `Array` in the comparable set and lifted `IEqualityOperators<T, T,
+bool>`; the named-array `[GoType]` wrapper (which the converter emits for `ringElement` etc.) does not
+implement that interface, so every instantiation failed CS0315, and the interface exposes no array
+surface, so the body's `t[i]` (CS0021), `for i := range t` (CS8130 on the index deconstruction), and
+`for _, x := range t` (CS1579/CS8183) had nothing to bind against. The fix (`getArrayConstraintElem` in
+`constraintOperations.go`, a new branch in `getGenericDefinition`) detects a single-array-core type set,
+extracts the element type, and emits `where T : /* ~[N]E */ IArray<E>, new()`. The array wrapper already
+declares `IArray<E>, ISupportMake<wrapper>` (the go2cs-gen `Array` inherited-type template), whose
+`ref E this[nint]` indexer and `IEnumerable<(nint, E)>` enumeration supply exactly the indexing/ranging
+surface the body needs, and the `new()` (appended by the same path) covers `var f T`/`T{}` construction.
+Greened `crypto/internal/mlkem768` (census 254 → 255); the reconvert A/B changed only `mlkem768.cs`'s
+four constraint lines. (Guarded by `GenericArrayConstraint` — two array-wrapper types over a shared
+`~[4]fieldElement` core through a generic function that indexes, index-ranges, value-ranges, and
+constructs the type parameter, values vs Go.)
 
 ### An integer named-numeric wrapper implements the integer operator interfaces
 

@@ -646,3 +646,41 @@ func (v *Visitor) getConstraintType(typeConstraint *types.TypeParam) types.Type 
 
 	return nil
 }
+
+// getArrayConstraintElem reports whether the constraint interface's type-set is a single array
+// core (`~[N]E` / `[N]E`, e.g. ML-KEM's `~[256]fieldElement`), returning the shared element type.
+// A named-array `[GoType]` wrapper (ringElement, nttElement) implements golib's IArray<E>, so such
+// a constraint maps to `where T : IArray<E>` — which exposes the array surface (indexing, length,
+// `(nint, E)` ranging) the generic body needs — rather than the spurious IEqualityOperators<T,T,bool>
+// the Array member of the comparable operator set would otherwise lift (CS0315: the array-wrapper
+// struct cannot satisfy it, and it exposes no indexer/enumerator for the body's `t[i]`/`range t`).
+func (v *Visitor) getArrayConstraintElem(iface *types.Interface) (types.Type, bool) {
+	if iface == nil {
+		return nil, false
+	}
+
+	constraints := v.getConstraintsFromType(iface)
+
+	if len(constraints) == 0 {
+		return nil, false
+	}
+
+	var elem types.Type
+
+	for _, constraint := range constraints {
+		array, ok := constraint.Underlying().(*types.Array)
+
+		if !ok {
+			return nil, false
+		}
+
+		if elem == nil {
+			elem = array.Elem()
+		} else if !types.Identical(elem, array.Elem()) {
+			// A union of array cores with differing element types has no single IArray<E>.
+			return nil, false
+		}
+	}
+
+	return elem, true
+}

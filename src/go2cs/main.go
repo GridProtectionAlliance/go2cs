@@ -3155,6 +3155,18 @@ func (v *Visitor) getGenericDefinition(srcType types.Type) (string, string) {
 					// semantics), which golib's subslice<S, T>/append<S, T> realize through S.Wrap.
 					elemType := convertToCSTypeName(constraintName[2:])
 					typeConstraint = fmt.Sprintf("ISlice<%s>, ISupportMake<%s>, ISliceWrap<%s, %s>", elemType, typeParamNames[i], typeParamNames[i], elemType)
+				} else if arrayElem, isArrayCore := v.getArrayConstraintElem(iface); isArrayCore {
+					// Handle an array-core constraint `~[N]E` (ML-KEM's `~[256]fieldElement`) via the
+					// IArray interface. The named-array [GoType] wrapper (ringElement, nttElement)
+					// implements IArray<E>, so this exposes the array surface — indexing, length,
+					// `(nint, E)` ranging/deconstruction — that the generic body binds against, and
+					// the wrapper type arguments satisfy the constraint. The Array member of the
+					// comparable operator set would otherwise lift IEqualityOperators<T, T, bool>,
+					// which the wrapper cannot satisfy and which exposes no array surface (CS0315,
+					// plus CS0021/CS1579/CS8130 on the body's `t[i]`/`range t`/deconstruction).
+					elemType := convertToCSTypeName(v.getTypeName(arrayElem, false))
+					typeConstraint = fmt.Sprintf("IArray<%s>", elemType)
+					suppressLiftedConstraints = true
 				} else if strings.HasPrefix(constraintExpr, "map[") {
 					// Handle map via IMap interface
 					keyValue := strings.Split(constraintName[4:], "]")
