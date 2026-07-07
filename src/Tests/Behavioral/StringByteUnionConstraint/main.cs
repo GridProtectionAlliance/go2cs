@@ -39,6 +39,8 @@ internal static void Main() {
     fmt.Println("last([]byte):", lastByte(bs));
     fmt.Println("sum:", digitSum((@string)"12:34"), digitSum(slice<byte>((@string)"56:78")));
     fmt.Println("head:", headSum((@string)"x98:76"), headSum(slice<byte>((@string)"y10:23")));
+    fmt.Println("appendRun(string):", ((@string)appendRun(default!, (@string)"abcde")));
+    fmt.Println("appendRun([]byte):", ((@string)appendRun(slice<byte>((@string)"<"), slice<byte>((@string)"abcde"))));
 }
 
 internal static nint digitSum<T>(T s)
@@ -75,6 +77,18 @@ internal static byte lastByte<T>(T s)
     where T : /* []byte | string */ IByteSeq<byte>, new()
 {
     return s[len(s) - 1];
+}
+
+internal static slice<byte> appendRun<Bytes>(slice<byte> dst, Bytes src)
+    where Bytes : /* []byte | string */ IByteSeq<byte>, new()
+{
+    dst = append(dst, (byte)((rune)'['));
+    if (len(src) > 1) {
+        dst = append(dst, ((Bytes)(src[1..(int)(len(src) - 1)])).ꓸꓸꓸ);
+        dst = append(dst, ((Bytes)(src[(int)(len(src) - 1)..])).ꓸꓸꓸ);
+    }
+    dst = append(dst, (byte)((rune)']'));
+    return dst;
 }
 
 } // end main_package

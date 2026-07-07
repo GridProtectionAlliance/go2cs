@@ -27,4 +27,11 @@ public interface IByteSeq<T> : IByteSeq
     // Sub-slice (Go's s[lo:hi]); returns the same sequence kind so a chain stays an IByteSeq<T>.
     // For @string this is an @string, for slice<T> a slice<T> — both already IByteSeq<T>.
     IByteSeq<T> this[Range range] { get; }
+
+    // Spread source (Go's s...). A `string | []byte`-constrained body may spread the value into a
+    // variadic — `append(dst, src[lo:hi]...)` in encoding/json's generic appendString — where the
+    // sub-slice is typed as the constraint type parameter again. A type parameter has no members of
+    // its own, so the spread `ꓸꓸꓸ` must live on the constraint interface for `((Bytes)(…)).ꓸꓸꓸ` to
+    // bind. Both members already expose it: slice<T> as Span<T>, @string as Span<byte>.
+    Span<T> ꓸꓸꓸ { get; }
 }
