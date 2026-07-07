@@ -94,8 +94,11 @@ public static class Common
 
     public static string GetSimpleName(string typeName, bool dropGeneric = false, bool dropCollisionPrefix = false)
     {
-        // Check if type name is a pointer, i.e., ж<T>
-        int startIndex = typeName.IndexOf(PointerPrefix, StringComparison.Ordinal);
+        // Check if type name is a pointer, i.e., ж<T>. Match the prefix as `ж<` specifically — a bare
+        // `ж` scan mis-fires on the marker glyph EMBEDDED in an identifier (crypto/elliptic's
+        // `P256PointжnistPoint` proxy), mangling a VALUE embed's simple name (`nistCurve<…ж…>` →
+        // `istPoint.Value`) so its promoted member access binds a nonexistent hop (CS0103/CS1061).
+        int startIndex = typeName.IndexOf($"{PointerPrefix}<", StringComparison.Ordinal);
         bool isPointer = false;
 
         // For pointer types, get dereferenced underlying type

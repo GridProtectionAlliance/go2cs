@@ -273,6 +273,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckGenericCompositeType() => CheckTarget("GenericCompositeType");
 
     [TestMethod]
+    public void CheckGenericEmbedPromotion() => CheckTarget("GenericEmbedPromotion");
+
+    [TestMethod]
     public void CheckGenericFuncCall() => CheckTarget("GenericFuncCall");
 
     [TestMethod]

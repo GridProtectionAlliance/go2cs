@@ -148,6 +148,10 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
+                // Rewrite the embed's type PARAMETERS to this instantiation's type ARGUMENTS on the
+                // promoted member TYPE (a generic embed's field carries `Point`, out of scope here).
+                Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
+
                 foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
                 {
                     // A blank `_` field (padding / embedded unexported marker) is never promoted or
@@ -176,7 +180,7 @@ internal class StructTypeTemplate : TemplateBase
                     // the outer value, so no converter reference needs coordinating; a package that DID
                     // read `outer.Func` would surface CS1061 in the gate.
                     string accessorName = GetSimpleName(memberName) == NonGenericStructName ? $"{ShadowVarMarker}{memberName}" : memberName;
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {typeName} {accessorName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} ref {SubstituteTypeParameters(typeName, typeArgMap)} {accessorName} => ref {StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
 
@@ -184,6 +188,8 @@ internal class StructTypeTemplate : TemplateBase
 
             foreach ((string promotedStructType, _, _, _) in promotedStructs)
             {
+                Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
+
                 foreach ((string typeName, string memberName, int depth) in getStructMembers(promotedStructType))
                 {
                     // Blank `_` field — unaddressable in Go, and its `Ꮡ_` would collide with the
@@ -210,7 +216,7 @@ internal class StructTypeTemplate : TemplateBase
                     // struct's instance param must carry them (Δentry<K, V>, CS0305); the
                     // promoted-struct MEMBER access strips its type arguments (the property is
                     // `node`, not `node<K, V>` — internal/concurrent's entry[K,V]).
-                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {typeName} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
+                    result.Append($"\r\n{TypeElemIndent}{typeScope} static ref {SubstituteTypeParameters(typeName, typeArgMap)} {AddressPrefix}{GetUnsanitizedIdentifier(memberName)}(ref {StructName} instance) => ref instance.{StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true))}.{memberName};");
                 }
             }
 
@@ -426,6 +432,12 @@ internal class StructTypeTemplate : TemplateBase
 
         foreach ((string promotedStructType, _, _, _) in promotedStructs)
         {
+            // Rewrite the embed's type PARAMETERS to this instantiation's type ARGUMENTS on the
+            // promoted method's return + parameter types — a generic embed's method signature may
+            // carry `Point` (`pointFromAffine` returns `(Point, error)`), out of scope on the
+            // non-generic enclosing struct.
+            Dictionary<string, string> typeArgMap = GetEmbedTypeArgumentMap(promotedStructType);
+
             // Collect the embedded struct's methods TRANSITIVELY — its own plus those promoted into
             // it from a deeper embedding level (Go promotes methods through every level). A 2+-level
             // method (e.g. top.greet from inner, via top→mid→inner) is forwarded through the 1-level
@@ -501,20 +513,35 @@ internal class StructTypeTemplate : TemplateBase
                 // so an RVALUE receiver binds (reflect v.Elem().kind() - CS1510 on forced ref).
                 string recvMod = method.IsRefRecv ? "ref " : "";
 
+                // Substituted return + parameter types (identity map for a non-generic embed).
+                string returnType = SubstituteTypeParameters(method.ReturnType, typeArgMap);
+                string typedParams = string.Join(", ", method.Parameters.Skip(1).Select(param => $"{SubstituteTypeParameters(param.type, typeArgMap)} {param.name}"));
+
+                // A GENERIC enclosing struct promotes its embed's methods as GENERIC extension methods
+                // carrying the struct's OWN type parameters — `wrapped<T>` embedding `tag<T>` emits
+                // `static T show<T>(this wrapped<T> target)`, else the `T` in the receiver/return is an
+                // undefined type name (CS0246). A NON-generic enclosing struct (p256Curve, whose embed
+                // is a CONCRETE instantiation with the type argument already substituted in) carries
+                // none, keeping the plain forwarder.
+                int structTypeParamStart = StructName.IndexOf('<');
+                string methodTypeParams = structTypeParamStart >= 0 ? StructName[structTypeParamStart..] : "";
+
                 // A value-receiver method binds on the embed's deref'd value (`target.<embed>.Value` —
                 // GetSimpleName appends `.Value` for a pointer embed); a BOX-receiver primary (`this ж<T>`)
-                // binds on the box hop itself (`target.<embed>`), so drop the `.Value` for it.
-                string embedAccess = GetSimpleName(promotedStructType, dropCollisionPrefix: true);
+                // binds on the box hop itself (`target.<embed>`), so drop the `.Value` for it. StripTypeArgs
+                // reduces a GENERIC embed's hop to the bare property name (`nistCurve<…>` → `nistCurve`) —
+                // the emitted accessor is not itself generic (a no-op for a non-generic embed's hop).
+                string embedAccess = StripTypeArgs(GetSimpleName(promotedStructType, dropCollisionPrefix: true));
 
                 if (method.IsBoxRecv && embedAccess.EndsWith(".Value", StringComparison.Ordinal))
                     embedAccess = embedAccess[..^".Value".Length];
 
-                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this {recvMod}{StructName} target");
+                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {recvMod}{StructName} target");
 
                 if (method.Parameters.Length > 1)
                 {
                     result.Append(", ");
-                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
+                    result.Append(typedParams);
                 }
 
                 result.Append($") => target.{embedAccess}.{method.Name}(");
@@ -522,12 +549,12 @@ internal class StructTypeTemplate : TemplateBase
                 result.Append(");");
 
                 // Add pointer extension method
-                result.Append($"\r\n    {methodScope} static {method.ReturnType} {method.Name}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
+                result.Append($"\r\n    {methodScope} static {returnType} {method.Name}{methodTypeParams}(this {PointerPrefix}<{StructName}> {AddressPrefix}target");
 
                 if (method.Parameters.Length > 1)
                 {
                     result.Append(", ");
-                    result.Append(string.Join(", ", method.Parameters.Skip(1).Select(param => $"{param.type} {param.name}")));
+                    result.Append(typedParams);
                 }
 
                 result.AppendLine(")");
@@ -549,6 +576,111 @@ internal class StructTypeTemplate : TemplateBase
     {
         int index = name.IndexOf('<');
         return index == -1 ? name : name[..index];
+    }
+
+    private static readonly Dictionary<string, string> s_noTypeArgs = new(StringComparer.Ordinal);
+
+    // Builds the type-parameter → type-argument substitution for a promoted embed that is a GENERIC
+    // INSTANTIATION (`nistCurve<P256PointжnistPoint>`). The embed's field and method signatures are
+    // harvested from the generic DECLARATION (`nistCurve<Point>`), so they reference the declaration's
+    // type PARAMETER names (`Point`); those must be rewritten to the instantiation's type ARGUMENTS
+    // (`P256PointжnistPoint`) before promotion onto the enclosing struct — otherwise a promoted
+    // accessor/forwarder references an out-of-scope `Point` (CS0246). Empty for a non-generic embed.
+    private Dictionary<string, string> GetEmbedTypeArgumentMap(string promotedStructType)
+    {
+        List<string> typeArguments = ParseTopLevelTypeArguments(promotedStructType);
+
+        if (typeArguments.Count == 0)
+            return s_noTypeArgs;
+
+        (StructDeclarationSyntax? decl, _) = Context.GetStructDeclaration(promotedStructType);
+        TypeParameterListSyntax? typeParameterList = decl?.TypeParameterList;
+
+        if (typeParameterList is null || typeParameterList.Parameters.Count != typeArguments.Count)
+            return s_noTypeArgs;
+
+        Dictionary<string, string> map = new(StringComparer.Ordinal);
+
+        for (int i = 0; i < typeArguments.Count; i++)
+            map[typeParameterList.Parameters[i].Identifier.Text] = typeArguments[i];
+
+        return map;
+    }
+
+    // Splits the OUTERMOST `<…>` of a generic type reference into its top-level type arguments,
+    // tracking nesting so an inner comma stays with its argument (`Foo<Bar<A, B>, C>` → [`Bar<A, B>`, `C`]).
+    private static List<string> ParseTopLevelTypeArguments(string typeName)
+    {
+        int lt = typeName.IndexOf('<');
+
+        if (lt < 0 || !typeName.EndsWith(">"))
+            return [];
+
+        string inner = typeName[(lt + 1)..^1];
+        List<string> arguments = [];
+        int depth = 0;
+        int start = 0;
+
+        for (int i = 0; i < inner.Length; i++)
+        {
+            switch (inner[i])
+            {
+                case '<':
+                    depth++;
+                    break;
+                case '>':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    arguments.Add(inner[start..i].Trim());
+                    start = i + 1;
+                    break;
+            }
+        }
+
+        string last = inner[start..].Trim();
+
+        if (last.Length > 0)
+            arguments.Add(last);
+
+        return arguments;
+    }
+
+    // Rewrites whole-identifier occurrences of a promoted generic embed's type PARAMETERS to the
+    // instantiation's type ARGUMENTS in an emitted type string (`global::System.Func<Point>` →
+    // `global::System.Func<P256PointжnistPoint>`). Scans identifier tokens so a substring match
+    // never fires (a `Point` map entry leaves `P256PointжnistPoint` untouched); the ж glyph is a
+    // Unicode letter, so a marker-bearing argument reads as a single identifier.
+    private static string SubstituteTypeParameters(string typeName, Dictionary<string, string> typeArgumentMap)
+    {
+        if (typeArgumentMap.Count == 0 || string.IsNullOrEmpty(typeName))
+            return typeName;
+
+        StringBuilder result = new(typeName.Length);
+        int i = 0;
+
+        while (i < typeName.Length)
+        {
+            char c = typeName[i];
+
+            if (char.IsLetter(c) || c == '_')
+            {
+                int start = i++;
+
+                while (i < typeName.Length && (char.IsLetterOrDigit(typeName[i]) || typeName[i] == '_'))
+                    i++;
+
+                string identifier = typeName[start..i];
+                result.Append(typeArgumentMap.TryGetValue(identifier, out string? replacement) ? replacement : identifier);
+            }
+            else
+            {
+                result.Append(c);
+                i++;
+            }
+        }
+
+        return result.ToString();
     }
 
     private string FieldReferences

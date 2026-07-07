@@ -35,8 +35,12 @@ public static class GeneratorExecutionContextExtensions
 {
     public static string GetUnderlyingTypeName(string typeName)
     {
-        // If type is a pointer, i.e., ж<T>, then get the underlying type
-        int startIndex = typeName.IndexOf(PointerPrefix, StringComparison.Ordinal);
+        // If type is a pointer, i.e., ж<T>, then get the underlying type. Match the pointer prefix as
+        // `ж<` specifically — a bare `ж` scan mis-fires on the marker glyph EMBEDDED in an identifier
+        // (crypto/elliptic's `P256PointжnistPoint` self-referential-constraint proxy), slicing the
+        // name into garbage so the struct declaration it names can never resolve (a struct embedding
+        // a generic instantiation over such a proxy then promotes nothing — CS1061/CS1929/CS1501).
+        int startIndex = typeName.IndexOf($"{PointerPrefix}<", StringComparison.Ordinal);
 
         if (startIndex > -1 && typeName.EndsWith(">"))
             typeName = typeName[(startIndex + 2)..^1];
@@ -67,6 +71,23 @@ public static class GeneratorExecutionContextExtensions
 
         Debug.WriteLine($"Finding struct '{structTypeName}'...");
 
+        // A GENERIC INSTANTIATION request (`Foo<Concrete>`) can never string-match a generic
+        // struct DECLARATION, whose display name carries its type PARAMETERS (`Foo<T>`); reduce the
+        // request to its base name + arity so a same-named, same-arity generic declaration resolves.
+        // Needed to promote a struct that embeds a generic instantiation — crypto/elliptic's
+        // p256Curve embeds nistCurve<P256PointжnistPoint>, which must resolve to nistCurve<Point>.
+        string? genericBaseName = null;
+        int genericArity = 0;
+        int ltIndex = structTypeName.IndexOf('<');
+
+        if (ltIndex > 0 && structTypeName.EndsWith(">"))
+        {
+            string baseName = structTypeName[..ltIndex];
+            int lastDot = baseName.LastIndexOf('.');
+            genericBaseName = lastDot >= 0 ? baseName[(lastDot + 1)..] : baseName;
+            genericArity = CountTopLevelTypeArguments(structTypeName);
+        }
+
         return compilation.SyntaxTrees
             .SelectMany(tree => tree.GetRoot()
                 .DescendantNodes()
@@ -90,8 +111,53 @@ public static class GeneratorExecutionContextExtensions
                 if (parts.Length > 1)
                     symbolName = parts[^1];
 
-                return symbolName == structTypeName;
+                if (symbolName == structTypeName)
+                    return true;
+
+                // Generic base-name + arity fallback — only reached when the exact/simple-name checks
+                // above miss, so it can only turn a previously-unresolved generic instantiation into a
+                // match, never change an existing non-null result.
+                return genericBaseName is not null &&
+                       symbol is INamedTypeSymbol { Arity: > 0 } namedSymbol &&
+                       namedSymbol.Arity == genericArity &&
+                       namedSymbol.Name == genericBaseName;
             });
+    }
+
+    // Counts the top-level type arguments of a generic type reference's OUTERMOST `<…>`
+    // (`Foo<Bar<Baz>, Qux>` → 2), tracking nesting so an inner comma is not counted.
+    private static int CountTopLevelTypeArguments(string typeName)
+    {
+        int lt = typeName.IndexOf('<');
+
+        if (lt < 0 || !typeName.EndsWith(">"))
+            return 0;
+
+        string inner = typeName[(lt + 1)..^1];
+
+        if (inner.Trim().Length == 0)
+            return 0;
+
+        int depth = 0;
+        int count = 1;
+
+        foreach (char c in inner)
+        {
+            switch (c)
+            {
+                case '<':
+                    depth++;
+                    break;
+                case '>':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    count++;
+                    break;
+            }
+        }
+
+        return count;
     }
 
     public static StructDeclarationSyntax? GetLocalStructDeclaration(this GeneratorExecutionContext context, string structTypeName)

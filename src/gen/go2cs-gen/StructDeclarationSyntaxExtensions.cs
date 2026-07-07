@@ -155,10 +155,18 @@ public static class StructDeclarationSyntaxExtensions
     }
 
     public static IEnumerable<MethodInfo> GetExtensionMethods(
-        this StructDeclarationSyntax structDeclaration, 
+        this StructDeclarationSyntax structDeclaration,
         Compilation compilation)
     {
         string structName = structDeclaration.Identifier.Text;
+
+        // A GENERIC struct's receiver renders WITH its type parameters (`this ref nistCurve<Point>
+        // curve`), which the bare identifier `nistCurve` never equals — so a generic struct's methods
+        // matched NONE and a generic embed promoted no methods (crypto/elliptic's p256Curve embedding
+        // nistCurve<Point>). Append the type-parameter list (matching the converter's `<T, …>` render)
+        // so the receiver comparison in IsExtensionMethodForStruct succeeds.
+        if (structDeclaration.TypeParameterList is { Parameters.Count: > 0 } typeParameterList)
+            structName += $"<{string.Join(", ", typeParameterList.Parameters.Select(parameter => parameter.Identifier.Text))}>";
 
         // Get all extension method declarations in the compilation
         IEnumerable<MethodDeclarationSyntax> extensions = compilation.SyntaxTrees
