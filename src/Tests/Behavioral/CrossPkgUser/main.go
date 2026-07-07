@@ -168,6 +168,26 @@ func getReporter() (CrossPkgLib.Reporter, error) { return makeRelay() }
 // *IndexExpr to ast.Expr), so the adapter must STUB the sealing marker.
 var leafEmitter CrossPkgLib.Emitter = CrossPkgLib.NewLeaf("leaf")
 
+// Root 2b: a CONCRETE *Branch (which PROMOTES Emit through its EmitBase VALUE embed) cast to Emitter —
+// the foreign-struct adapter must forward the promoted, exported Emit THROUGH the embed
+// (`parse_package.Emit(ref m_box.Value.EmitBase)`), not the CS1929 `m_box.Value.Emit()`
+// (text/template's parse.RangeNode{BranchNode} String shape).
+var branchEmitter CrossPkgLib.Emitter = CrossPkgLib.NewBranch("branch", 3)
+
+// Root 2a: a closure that CAPTURES an outer variable (base) AND returns NAMED results, one written via a
+// tuple assignment whose RHS uses the capture — the text/template readFileFS shape. Each named result
+// is declared in the closure's OWN scope; before the fix `data` was mis-hoisted as an outer capture
+// (`var dataʗ1 = data;` — CS0103, undefined in makeScanner).
+func makeScanner(base string) func(string) (name string, data []byte, err error) {
+	return func(file string) (name string, data []byte, err error) {
+		name = file
+		data, err = readWith(base, file)
+		return
+	}
+}
+
+func readWith(base, file string) ([]byte, error) { return []byte(base + file), nil }
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -409,6 +429,15 @@ func main() {
 	// Root 1: a cross-assembly cast of *Leaf to the sealed Emitter — the adapter stubs the unexported
 	// emitNode marker (inaccessible here) and forwards the exported Emit.
 	fmt.Println("leaf:", leafEmitter.Emit()) // leaf: leaf
+
+	// Root 2b: *Branch promotes Emit through its EmitBase embed — the adapter forwards through the embed.
+	fmt.Println("branch:", branchEmitter.Emit()) // branch: branch
+
+	// Root 2a: a captured closure with named results — the named result is declared in the closure's
+	// own scope, not hoisted as an undefined outer capture.
+	scan := makeScanner("p:")
+	scanName, scanData, scanErr := scan("hello")
+	fmt.Println(scanName, string(scanData), scanErr == nil) // hello p:hello true
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a

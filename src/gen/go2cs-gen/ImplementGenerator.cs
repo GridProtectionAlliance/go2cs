@@ -334,6 +334,52 @@ public class ImplementGenerator : ISourceGenerator
                             forwardReceivers[simpleName] = viaBox ? "m_box" : "m_box.Value";
                         }
                     }
+
+                    // An interface member the foreign struct PROMOTES through a VALUE-embedded field
+                    // (parse's `RangeNode` embeds `BranchNode`; the exported `String` lives on BranchNode,
+                    // not RangeNode) has no extension on the struct's OWN package class, so the fallback
+                    // `m_box.Value.String()` is CS1929. Forward through the embed's package-class STATIC
+                    // (`parse_package.String(ref m_box.Value.BranchNode)`) — the embed's namespace is not
+                    // imported here (only `using go;`), so the instance form cannot resolve the extension,
+                    // exactly as the staticClass arm above handles the struct's own foreign extensions.
+                    Dictionary<string, RefKind> structOwnMethods = StructDeclarationSyntaxExtensions.GetForeignValueReceiverMethods((INamedTypeSymbol)structType);
+
+                    foreach ((string embedName, INamedTypeSymbol embedType) in StructDeclarationSyntaxExtensions.GetForeignValueEmbeds((INamedTypeSymbol)structType))
+                    {
+                        string embedStaticClass = embedType.ContainingType?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? "";
+
+                        if (embedStaticClass.Length == 0)
+                            continue;
+
+                        Dictionary<string, RefKind> embedMethods = StructDeclarationSyntaxExtensions.GetForeignValueReceiverMethods(embedType);
+
+                        foreach (MethodInfo method in methods)
+                        {
+                            string simpleName = GetSimpleName(method.Name);
+
+                            // Only reroute a genuinely PROMOTED member still on the plain m_box.Value
+                            // fallback: the struct binds it neither directly (box/ref/value) nor via an
+                            // already-resolved hop, and the embed publicly declares it.
+                            if (!embedMethods.TryGetValue(simpleName, out RefKind embedRefKind) ||
+                                boxBound.Contains(simpleName) ||
+                                structOwnMethods.ContainsKey(simpleName) ||
+                                !forwardReceivers.TryGetValue(simpleName, out string? currentReceiver) ||
+                                currentReceiver != "m_box.Value")
+                            {
+                                continue;
+                            }
+
+                            string receiverPrefix = embedRefKind switch
+                            {
+                                RefKind.Ref => "ref ",
+                                RefKind.In => "in ",
+                                _ => ""
+                            };
+
+                            forwardStaticCalls[simpleName] = $"{embedStaticClass}.{simpleName}";
+                            forwardReceivers[simpleName] = $"{receiverPrefix}m_box.Value.{embedName}";
+                        }
+                    }
                 }
 
                 // Interface members with NO struct method forward through a single embedded-pointer

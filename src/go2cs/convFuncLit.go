@@ -97,6 +97,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 		}
 	}
 
+	// A NAMED RESULT is declared in the function literal's OWN scope — Go zero-initializes it and a bare
+	// `return` returns it (litHasNamedResults below emits its declaration inside the lambda), so a
+	// reference to it in the body is the result, NEVER an outer-scope capture. text/template's readFileFS
+	// returns `func(file string) (name string, b []byte, err error)`; `b` was mis-hoisted as a capture
+	// (`var bʗ1 = b;` — CS0103, `b` is undefined in the enclosing func). Exclude named results from the
+	// capture set exactly as parameters are.
+	if funcLit.Type.Results != nil {
+		for _, field := range funcLit.Type.Results.List {
+			for _, name := range field.Names {
+				paramNames[name.Name] = true
+			}
+		}
+	}
+
 	// Filter out any captures that are actually parameters
 	if captures, exists := v.lambdaCapture.stmtCaptures[funcLit]; exists {
 		for ident := range captures {

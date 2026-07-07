@@ -217,4 +217,24 @@ public static ж<Leaf> NewLeaf(@string text) {
     return Ꮡ(new Leaf(Text: text));
 }
 
+[GoType] partial struct EmitBase {
+    public @string Label;
+}
+
+[GoRecv] public static @string Emit(this ref EmitBase e) {
+    return e.Label;
+}
+
+[GoType] partial struct Branch {
+    public partial ref EmitBase EmitBase { get; }
+    public nint Kind;
+}
+
+[GoRecv] internal static void emitNode(this ref Branch b) {
+}
+
+public static ж<Branch> NewBranch(@string label, nint kind) {
+    return Ꮡ(new Branch(EmitBase: new EmitBase(Label: label), Kind: kind));
+}
+
 } // end CrossPkgLib_package

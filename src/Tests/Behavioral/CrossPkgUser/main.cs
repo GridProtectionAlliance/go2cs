@@ -146,6 +146,23 @@ internal static (CrossPkgLib.Reporter, error) getReporter() {
 
 internal static CrossPkgLib.Emitter leafEmitter = new CrossPkgLib_LeafжEmitter(CrossPkgLib.NewLeaf("leaf"u8));
 
+internal static CrossPkgLib.Emitter branchEmitter = new CrossPkgLib_BranchжEmitter(CrossPkgLib.NewBranch("branch"u8, 3));
+
+internal static Func<@string, (@string, slice<byte>, error)> makeScanner(@string @base) {
+    return (@string @file) => {
+        @string name = default!;
+        slice<byte> data = default!;
+        error err = default!;
+        name = @file;
+        (data, err) = readWith(@base, @file);
+        return (name, data, err);
+    };
+}
+
+internal static (slice<byte>, error) readWith(@string @base, @string @file) {
+    return (slice<byte>(@base + @file), default!);
+}
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(note, (nint)CrossPkgLib.Precision, defer);
     var b = CrossPkgLib.Boiling();
@@ -269,6 +286,10 @@ internal static void Main() => func((defer, recover) => {
     sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed"u8, Temp: 40));
     fmt.Println((~sbx.Holder.item).Name, sbx.tag);
     fmt.Println("leaf:", leafEmitter.Emit());
+    fmt.Println("branch:", branchEmitter.Emit());
+    var scan = makeScanner("p:"u8);
+    var (scanName, scanData, scanErr) = scan("hello"u8);
+    fmt.Println(scanName, ((@string)scanData), scanErr == default!);
 });
 
 [GoType("num:float64")] partial struct localCelsius;

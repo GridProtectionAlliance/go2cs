@@ -359,4 +359,70 @@ public static class StructDeclarationSyntaxExtensions
 
         return boxMethods;
     }
+
+    /// <summary>
+    /// Gets the (field name, embedded type) pairs for a FOREIGN struct's VALUE-embedded struct fields,
+    /// read from METADATA (the struct has no syntax declaration here). The converter emits an embed as a
+    /// <c>public partial ref {Embed} {Embed}</c> property, so the member name equals its type's simple
+    /// name — the same Go-embed convention the syntax-based <see cref="GetEmbeddedValueHopNames"/> matches.
+    /// Used to forward an interface member the foreign struct PROMOTES through the embed (parse's
+    /// <c>RangeNode</c> embeds <c>BranchNode</c>, whose <c>String</c> is promoted, not declared).
+    /// </summary>
+    public static List<(string Name, INamedTypeSymbol Type)> GetForeignValueEmbeds(INamedTypeSymbol structType)
+    {
+        List<(string, INamedTypeSymbol)> embeds = [];
+
+        foreach (ISymbol member in structType.GetMembers())
+        {
+            if (member.IsStatic)
+                continue;
+
+            INamedTypeSymbol? memberType = member switch
+            {
+                IPropertySymbol property => property.Type as INamedTypeSymbol,
+                IFieldSymbol field => field.Type as INamedTypeSymbol,
+                _ => null
+            };
+
+            // Embed convention: member NAME equals its type's simple name; a NON-generic struct (a
+            // generic member type would be a container field, not an embed).
+            if (memberType is not null && !memberType.IsGenericType && member.Name == memberType.Name)
+                embeds.Add((member.Name, memberType));
+        }
+
+        return embeds;
+    }
+
+    /// <summary>
+    /// METADATA scan of a FOREIGN type's containing package class for its PUBLIC VALUE/REF-receiver
+    /// extension methods (<c>static M(this {ref|in} T)</c>) — the sibling of
+    /// <see cref="GetForeignBoxReceiverMethodNames"/> for the non-box receiver forms. Maps each method
+    /// name to its receiver <see cref="RefKind"/> so a promoted-embed forward can spell the static call's
+    /// receiver argument (<c>ref</c>/<c>in</c>/value). Only PUBLIC extensions bind cross-assembly.
+    /// </summary>
+    public static Dictionary<string, RefKind> GetForeignValueReceiverMethods(INamedTypeSymbol type)
+    {
+        Dictionary<string, RefKind> methods = new(StringComparer.Ordinal);
+
+        if (type.ContainingType is not INamedTypeSymbol packageClass)
+            return methods;
+
+        foreach (IMethodSymbol method in packageClass.GetMembers().OfType<IMethodSymbol>())
+        {
+            if (!method.IsStatic ||
+                method.DeclaredAccessibility != Accessibility.Public ||
+                method.Parameters.Length == 0)
+                continue;
+
+            // The receiver is the type ITSELF (value/ref/in) — NOT the ж<T> box form, which
+            // GetForeignBoxReceiverMethodNames covers and which binds on a box hop, not m_box.Value.<embed>.
+            if (SymbolEqualityComparer.Default.Equals(method.Parameters[0].Type, type) &&
+                !methods.ContainsKey(method.Name))
+            {
+                methods[method.Name] = method.Parameters[0].RefKind;
+            }
+        }
+
+        return methods;
+    }
 }

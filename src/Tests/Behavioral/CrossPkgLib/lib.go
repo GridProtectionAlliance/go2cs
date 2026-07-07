@@ -258,3 +258,28 @@ func (l *Leaf) emitNode() {}
 // NewLeaf returns the CONCRETE *Leaf, so a consumer assigning it to an Emitter casts across the
 // assembly boundary — the adapter is generated in the CONSUMER assembly, where emitNode is inaccessible.
 func NewLeaf(text string) *Leaf { return &Leaf{Text: text} }
+
+// EmitBase carries the EXPORTED Emit (pointer receiver, mirroring parse.BranchNode's String); Branch
+// embeds it BY VALUE so Branch PROMOTES Emit through the embed while declaring only the sealing marker.
+type EmitBase struct {
+	Label string
+}
+
+func (e *EmitBase) Emit() string { return e.Label }
+
+// Branch EMBEDS EmitBase by value (the parse.RangeNode{BranchNode} shape): *Branch satisfies Emitter
+// with Emit PROMOTED through EmitBase and emitNode declared here. A consumer casting *Branch to Emitter
+// generates an adapter that must forward the promoted Emit THROUGH the embed
+// (`parse_package.Emit(ref m_box.Value.EmitBase)`), not the CS1929 `m_box.Value.Emit()`.
+type Branch struct {
+	EmitBase
+	Kind int
+}
+
+func (b *Branch) emitNode() {}
+
+// NewBranch returns the CONCRETE *Branch, so a consumer casting it to Emitter both stubs the marker
+// (the seal) and forwards the promoted Emit through the embed.
+func NewBranch(label string, kind int) *Branch {
+	return &Branch{EmitBase: EmitBase{Label: label}, Kind: kind}
+}

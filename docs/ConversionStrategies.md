@@ -1344,6 +1344,8 @@ A function that neither directly nor indirectly (through a deferred lambda) uses
 
 A func **literal** with named results declares them at the top of its emitted block, zero-initialized — Go's semantics for `next = func() (v1 V, ok1 bool) { …; return }` (the `iter.Pull` shape): a bare `return` yields the named results as currently assigned, so the lambda emits `() => { V v1 = default!; bool ok1 = default!; …; return (v1, ok1); }`. Without the declarations the emitted tuple referenced undeclared names (CS0103 — the `iter` package's last wave-1 errors). Two interactions: a named-results literal whose *first* statement is a bare `return` must NOT collapse to an expression-bodied lambda (the names exist only as block declarations), and the `namedReturnDefer` path (named results that deferred code mutates) keeps its own arrangement — declarations *outside* the `func((defer, recover) => …)` wrapper, returned after it. Declarations reuse the shadow-aware naming, so a literal result shadowing an outer local renames consistently in both the declaration and the return (`nΔ1`). (Guarded by the `FuncLitArgCapture` extension — bare returns with assigned and zero named results, plus the first-statement-bare-return shape, values vs Go.)
 
+Because a named result lives in the literal's OWN scope, a reference to it in the body is the result, never an outer-scope capture — so named results are excluded from the lambda-capture set (`convFuncLit`) exactly as parameters are. text/template's `readFileFS` returns `func(file string) (name string, b []byte, err error)`, whose closure captures the enclosing `fsys` AND writes `b` via the captured tuple call `b, err = fs.ReadFile(fsys, file)`. Because the closure genuinely captures `fsys`, the capture analysis ran and mis-flagged `b` too — hoisting `var bʗ1 = b;` into the enclosing function, where `b` does not exist (CS0103), and renaming the body's `b` to the captured `bʗ1`. Filtering the named-result names out of the capture set (alongside the parameter names) leaves `b` a plain in-block declaration. (Guarded by `CrossPkgUser`'s `makeScanner` — a captured closure returning named results, one written via a tuple call whose RHS uses the capture, output-compared vs Go; crypto/x509 and html/template shared the same latent shape.)
+
 ### Deferred calls whose callee returns a value take the lambda form
 The no-arg defer arm passes a bare method group (`defer(k.Close)`) only when the callee returns VOID -- an error-returning method (`defer k.Close()`, registry `Key.Close`) is a `Func<error>` method group that cannot bind the golib `defer(Action)` (CS1503). The lambda form discards the result, exactly Go's deferred-call semantics:
 ```csharp
@@ -1902,6 +1904,29 @@ internal extension is accessible there). Both the pointer (`AdapterImplTemplate`
 errors were the two `exprNode` forwards) and is a prerequisite for `text/template`/`go/doc`. (Guarded
 by `CrossPkgLib`/`CrossPkgUser`: the sealed `Emitter` interface with an unexported `emitNode()`, a
 `*Leaf` implementing it, cast to `Emitter` in the consumer assembly — CS1061 without the stub.)
+
+### A foreign struct's promoted method forwards through its value embed
+When the adapter's struct is FOREIGN (defined in another assembly) it binds forwarding from METADATA
+(the boxBound / refBound scan above); a member neither on its box nor a ref-static falls to
+`m_box.Value.M()`. But an interface member the foreign struct PROMOTES through a VALUE-embedded field
+has no extension on the struct's OWN package class, so `m_box.Value.M()` is CS1929 — `text/template`
+casting `*parse.RangeNode` to `parse.Node`, where `RangeNode` embeds `BranchNode` and the exported
+`String` lives on `BranchNode`, not `RangeNode`. The generator now discovers the foreign struct's
+value embeds from metadata (`GetForeignValueEmbeds`: a member whose name equals its type's simple
+name) and, for a still-unbound member the embed's package class declares as a public value/ref-receiver
+extension (`GetForeignValueReceiverMethods`), forwards through the embed's package-class STATIC:
+```csharp
+global::go.@string global::go.…parse_package.Stringer.String() =>
+    global::go.…parse_package.String(ref m_box.Value.BranchNode);
+```
+The static form is required because the embed's namespace is not imported in the adapter file (only
+`using go;`), so an instance-form `m_box.Value.BranchNode.String()` cannot resolve the extension —
+exactly as the foreign struct's own extensions route through `staticClass`. The receiver argument
+carries the extension's ref-kind (`ref`/`in`/value). Rerouting is gated to a genuinely promoted member
+(the struct binds it neither directly nor via a box/ref hop), so a struct that declares the method
+itself is unaffected. This clears `text/template`'s last CS1929. (Guarded by `CrossPkgLib`/`CrossPkgUser`:
+`*Branch`, which promotes the exported `Emit` through its `EmitBase` value embed, cast to `Emitter` —
+CS1929 without the reroute.)
 
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
