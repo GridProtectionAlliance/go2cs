@@ -92,6 +92,7 @@
     <Project Path="Tests/Behavioral/CombinedStructFields/CombinedStructFields.csproj" />
     <Project Path="Tests/Behavioral/ConstShadowsParam/ConstShadowsParam.csproj" />
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
+    <Project Path="Tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
@@ -304,6 +305,7 @@
     <Project Path="Tests/Behavioral/SwitchFallthroughDefaultReturn/SwitchFallthroughDefaultReturn.csproj" />
     <Project Path="Tests/Behavioral/SwitchNonConstCaseLabel/SwitchNonConstCaseLabel.csproj" />
     <Project Path="Tests/Behavioral/SystemCollidingTypeName/SystemCollidingTypeName.csproj" />
+    <Project Path="Tests/Behavioral/TransitiveAliasPreload/TransitiveAliasPreload.csproj" />
     <Project Path="Tests/Behavioral/TupleDestructureEscapingLocal/TupleDestructureEscapingLocal.csproj" />
     <Project Path="Tests/Behavioral/TupleMixedDeclareReassign/TupleMixedDeclareReassign.csproj" />
     <Project Path="Tests/Behavioral/TupleSpreadIntoCall/TupleSpreadIntoCall.csproj" />

@@ -816,6 +816,12 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		// (an exported field's type must be at least as accessible — CS0051/CS0052).
 		collectPublicizedTypes(packageTypes)
 
+		// Preload the imported type aliases of every package these files import, BEFORE converting any
+		// file, so a foreign renamed type reached transitively (through a value whose package this file
+		// does not itself import) resolves through its recorded alias regardless of file order (see
+		// preloadImportedTypeAliases — go/printer comment.go's `slash` token.Pos heap box, CS0426).
+		preloadImportedTypeAliases(files, options)
+
 		var outputFileNames []string
 
 		// Convert files SEQUENTIALLY, in the deterministic pkg.Syntax (sorted filename) order. Files

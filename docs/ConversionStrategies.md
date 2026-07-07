@@ -2752,6 +2752,28 @@ The general form of this collision — a REAL parent/child package pair — is h
 A cross-package type that is renamed (or Go-aliased) inside its own package -- `syscall` declares `ΔHandle` for its type-vs-method-colliding `Handle` -- must be referenced through the recorded imported-type alias (`global using syscallꓸHandle = go.syscall_package.ΔHandle`): the raw qualified render (`Δsyscall.Handle`) names a type that does not exist (CS0426 x26, internal/poll). The substitution lives at the C#-NAME layers -- `getCSTypeName` (delegate elements, parameters, results) and `getDisplayTypeName` (named struct fields) -- and deliberately NOT in `getTypeName`: the Go-shaped name layer also feeds promoted-embed MEMBER naming, where the substitution renamed and rescoped the generated accessors (reflect CS8799 regression on the first cut). The GoImplicitConv assembly attributes record type names under the file-local import qualifier, so the resolving `using` in package_info.cs declares that same qualifier (`using Δsyscall = go.syscall_package;`).
 
 A **pointer/box (or other composite) element** — `*time.Location` as a func result (archive/zip's `timeZone`), a `*syscall.Handle` parameter, a slice/map element — is renamed too, but by a *different route* that does not need `getTypeName` (so the CS8799 landmine is untouched): `getTypeName` renders the Go-shaped `*time.Location` (unrenamed, per above), then the downstream `convertToCSFullTypeName` applies `getAliasedTypeName` to the FINAL string identifier — substituting `time.Location → timeꓸLocation` before boxing — yielding `ж<timeꓸLocation>`. So the alias reaches every position that flows through the C# type-name conversion (values, pointers, boxes, composite elements alike), **provided `importedTypeAliases` is populated**. That map is loaded from the imported package's `package_info.cs` (the `[GoTypeAlias]` round-trip), so a *fresh full reconvert* renders the alias everywhere; a **stale/partial overlay** that lacks the up-to-date `package_info.cs` renders the raw name and mis-reports CS0426 — the failure is in the measurement tree, not the converter (internal/trace/testtrace's `trace.Time`/`Event`/`Stack` and archive/zip's `*time.Location` were both bank-diagnosed as converter roots, then shown by a clean reconvert to already render `traceꓸTime`/`ж<timeꓸLocation>`).
+
+The map is now populated for the WHOLE package before any file converts. Even within a fresh reconvert,
+`importedTypeAliases` was loaded INCREMENTALLY — `visitImportSpec` loads a package's aliases only when it
+visits an import of that package, and files convert in sorted-filename order. So a foreign renamed type
+reached TRANSITIVELY — through a value whose package the current FILE does not itself import — rendered its
+raw (nonexistent) name if that file converted before any file that DOES import the package. go/printer's
+`comment.go` (`slash := list[0].Slash`, a `token.Pos` read through `ast.Comment`, importing only `go/ast`)
+sorts first, so its `slash` heap box emitted `heap<go.token_package.Pos>` instead of `heap<tokenꓸPos>`
+(= `go.go.token_package.ΔPos`) — CS0426, the sole such site in the stdlib. A package-level pre-pass
+(`preloadImportedTypeAliases`, run before the file-conversion loop) now loads the exported aliases of every
+package ANY file imports, up front. The load is deduped per imported package, so it only FRONT-LOADS what
+`visitImportSpec` did incrementally; the alias set is file-order-independent and, because it only ADDS
+aliases previously missing for a transitive-use file, it can only turn a currently-WRONG render right (a
+compiling package has no wrong-rendered renamed type) — CNR byte-identical across the behavioral corpus, and
+an A/B full-stdlib reconvert changes exactly one file (go/printer/comment.cs), greening go.printer alongside
+the append-disambiguation root above. (Guarded by the three-package `TransitiveAliasPreload` fixture:
+`CrossPkgBox.Box` carries a field of `CrossPkgLib`'s Δ-renamed `Status`; the test's `a_boxed.go` (sorts
+first) reads it transitively — `return &s` heap-boxes `s`, rendering `heap<CrossPkgLibꓸStatus>` — while
+importing only `CrossPkgBox`, and `z_main.go` (sorts last) is the only file importing `CrossPkgLib`. Without
+the preload the box renders the nonexistent `CrossPkgLib_package.Status` (CS0426); output-compared vs Go, 4
+phases green. This is the three-package shape the 2-package `CrossPkg` harness could not previously express —
+cf. the `os.FileInfo` alias root, still GUARD OWED above for that reason.)
 ```csharp
 public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
 internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {

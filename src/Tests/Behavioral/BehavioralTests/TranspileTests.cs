@@ -150,6 +150,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
+    public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
+
+    [TestMethod]
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
 
     [TestMethod]
@@ -784,6 +787,9 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");
+
+    [TestMethod]
+    public void CheckTransitiveAliasPreload() => CheckTarget("TransitiveAliasPreload");
 
     [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");

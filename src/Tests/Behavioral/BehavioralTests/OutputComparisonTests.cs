@@ -733,6 +733,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");
 
     [TestMethod]
+    public void CheckTransitiveAliasPreload() => CheckTarget("TransitiveAliasPreload");
+
+    [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
 
     [TestMethod]

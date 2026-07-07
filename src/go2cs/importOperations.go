@@ -426,6 +426,44 @@ func loadImportedTypeAliases(info PackageInfo) {
 	}
 }
 
+// preloadImportedTypeAliases loads the exported type aliases of EVERY package imported by ANY file in
+// the current package, BEFORE file conversion begins. importedTypeAliases is package-global but was
+// otherwise populated INCREMENTALLY — visitImportSpec loads a package's aliases only when it visits an
+// import of it, and files convert in sorted-filename order. So a foreign RENAMED type reached through a
+// value whose package the current FILE does not itself import rendered its raw (nonexistent) name when
+// that file converted before any file that DOES import the package: go/printer's comment.go
+// (`slash := list[0].Slash`, a token.Pos read through ast.Comment, with only go/ast imported) sorts
+// first, so its `slash` heap box emitted `heap<go.token_package.Pos>` instead of the alias
+// `heap<tokenꓸPos>` (= go.go.token_package.ΔPos) — CS0426. Loading is deduped per imported package
+// (parsedPackageInfoFiles), so this only FRONT-LOADS the work visitImportSpec would otherwise do
+// incrementally; the resulting alias set is file-order-independent and only ADDS aliases that were
+// previously missing for a transitive-use file, so it cannot change a render that already resolved.
+func preloadImportedTypeAliases(files []FileEntry, options Options) {
+	goroot := filepath.Clean(build.Default.GOROOT)
+
+	for _, fileEntry := range files {
+		underGoroot := strings.HasPrefix(filepath.Clean(fileEntry.filePath), goroot+string(filepath.Separator))
+
+		for _, importSpec := range fileEntry.file.Imports {
+			importPath := strings.Trim(importSpec.Path.Value, "\"")
+
+			if importPath == "C" {
+				continue
+			}
+
+			// Match visitImportSpec's GOROOT-vendored resolution so the loader reads the real
+			// output location (a GOROOT-vendored golang.org/x import lands under vendor/).
+			if underGoroot {
+				importPath = resolveGorootVendoredPath(importPath)
+			}
+
+			for _, info := range getImportPackageInfo([]string{importPath}, options) {
+				loadImportedTypeAliases(info)
+			}
+		}
+	}
+}
+
 // parseExportedTypeAliases parses a package info file and extracts the GoTypeAlias
 // entries as tuples of (source, destination) strings
 func parseExportedTypeAliases(packageInfoFile string) ([][2]string, error) {

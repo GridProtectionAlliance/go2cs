@@ -153,6 +153,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckConstShadowsParam() => CheckTarget("ConstShadowsParam");
 
     [TestMethod]
+    public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
+
+    [TestMethod]
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
 
     [TestMethod]
@@ -787,6 +790,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");
+
+    [TestMethod]
+    public void CheckTransitiveAliasPreload() => CheckTarget("TransitiveAliasPreload");
 
     [TestMethod]
     public void CheckTupleDestructureEscapingLocal() => CheckTarget("TupleDestructureEscapingLocal");
