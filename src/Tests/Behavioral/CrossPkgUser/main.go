@@ -365,6 +365,14 @@ func main() {
 	mk := CrossPkgLib.MakeMarker("tag")
 	fmt.Println(mk.Marker) // tag
 
+	// Explicit cross-package generic-FUNCTION instantiation through a package selector: the base
+	// selector (generic-function-value path) and the [T] index both wanted to append the type
+	// arguments, doubling to CrossPkgLib.Wrap<int><int> (CS1525/CS0119/CS8124). The two-arg
+	// CrossPkgLib.Pair[string, int] exercises the IndexListExpr form; both stay single after the fix.
+	wrapped := CrossPkgLib.Wrap[int](5)
+	fmt.Println(len(wrapped), wrapped[0])              // 1 5
+	fmt.Println(CrossPkgLib.Pair[string, int]("k", 8)) // 8
+
 	// A same-package generic instantiated with a POINTER to a cross-package type: the var type
 	// `*Holder[*CrossPkgLib.Sensor]` (getTypeName) and the `sensorBox` embed (getFullTypeName) must
 	// both keep the Holder<…> wrapper — the slash-strip previously ate it (crypto/elliptic's nistCurve).

@@ -1342,7 +1342,7 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 	// group's type parameters when converting it to a delegate (CS0411). go/types recorded the inferred
 	// instantiation in info.Instances keyed by the selector's Sel. The call-CALLEE path (isCallExpr) is
 	// excluded — convCallExpr's own type-arg mechanism (the 66be4f914 site) handles a generic call.
-	if !context.isCallExpr {
+	if !context.isCallExpr && !context.suppressGenericTypeArgs {
 		if _, isFunc := v.info.Uses[selectorExpr.Sel].(*types.Func); isFunc {
 			if inst, ok := v.info.Instances[selectorExpr.Sel]; ok && inst.TypeArgs != nil && inst.TypeArgs.Len() > 0 {
 				typeArgs := make([]string, inst.TypeArgs.Len())

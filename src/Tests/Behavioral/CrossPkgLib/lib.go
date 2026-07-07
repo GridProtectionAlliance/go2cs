@@ -114,6 +114,18 @@ type Cache[T any] struct{ Hits int }
 
 func (c *Cache[T]) Bump() int { c.Hits++; return c.Hits }
 
+// Wrap is an exported GENERIC FUNCTION. A consumer that EXPLICITLY instantiates it through a
+// package selector — CrossPkgLib.Wrap[int](5) — is the shape where the base selector (the
+// generic-function-VALUE path in convSelectorExpr) AND the [int] index (convIndexExpr) both
+// wanted to append the type arguments, doubling to CrossPkgLib.Wrap<int><int>
+// (CS1525/CS0119/CS8124 across encoding/gob, xml, asn1, json, text/template, debug/*, unique).
+func Wrap[T any](v T) []T { return []T{v} }
+
+// Pair is a TWO-type-parameter generic function: an explicit CrossPkgLib.Pair[string, int]
+// instantiation is an IndexListExpr (the concurrent.NewHashTrieMap[K, V] shape) — the same
+// double-append through the list form (convIndexListExpr).
+func Pair[K comparable, V any](k K, v V) V { return v }
+
 // Probe/Sampler: the lib never converts *Probe to Sampler itself, so no exported adapter
 // record exists - a consumer's pointer conversion records the pair LOCALLY and emits its
 // own ProbeжSampler adapter with metadata-bound forwarding (fmt Fscan(os.Stdin, ...),

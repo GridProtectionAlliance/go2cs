@@ -101,7 +101,13 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			contexts = []ExprContext{context}
 		}
 
-		return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, nil), ptrDeref, v.convExpr(indexExpr.Index, contexts))
+		// The base (X) renders WITHOUT its own generic type arguments: this branch appends the
+		// explicit `<Index>` here, so letting convSelectorExpr also append the inferred instance
+		// args (the generic-function-value path) produced `pkg.Func<T><T>` (CS1525/CS0119/CS8124).
+		xContext := DefaultLambdaContext()
+		xContext.suppressGenericTypeArgs = true
+
+		return fmt.Sprintf("%s%s<%s>", v.convExpr(indexExpr.X, []ExprContext{xContext}), ptrDeref, v.convExpr(indexExpr.Index, contexts))
 	}
 
 	index := v.convExpr(indexExpr.Index, contexts)

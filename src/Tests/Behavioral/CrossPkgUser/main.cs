@@ -254,6 +254,9 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
     var mk = CrossPkgLib.MakeMarker("tag"u8);
     fmt.Println(mk.ΔΔMarker);
+    var wrapped = CrossPkgLib.Wrap<nint>(5);
+    fmt.Println(len(wrapped), wrapped[0]);
+    fmt.Println(CrossPkgLib.Pair<@string, nint>("k"u8, 8));
     sensorHolder.Value.item = Ꮡ(new CrossPkgLib.Sensor(Name: "garage"u8, Temp: 30));
     fmt.Println((~(~sensorHolder).item).Name);
     var sbx = new sensorBox(tag: "b"u8);

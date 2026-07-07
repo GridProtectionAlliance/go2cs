@@ -105,6 +105,16 @@ public static Reporter AsReporter(ж<Meter> Ꮡm) {
     return c.Hits;
 }
 
+public static slice<T> Wrap<T>(T v) {
+    return new T[]{v}.slice();
+}
+
+public static V Pair<K, V>(K k, V v)
+    where K : /* comparable */ new()
+{
+    return v;
+}
+
 [GoType] partial struct Probe {
     public nint Hits;
 }

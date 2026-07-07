@@ -138,6 +138,12 @@ type LambdaContext struct {
 	// statement), so the closure must NOT get its own func() execution context. (A goroutine or
 	// assigned closure is independent and does get one when it uses defer/recover.)
 	deferCall bool
+	// suppressGenericTypeArgs tells convSelectorExpr NOT to append a generic function's inferred
+	// type arguments (the method-group-value path). Set when the selector is the BASE (X) of an
+	// explicit-instantiation IndexExpr (`pkg.Func[T]`): convIndexExpr renders the `<T>` itself, so
+	// convSelectorExpr appending them too produced `pkg.Func<T><T>` (CS1525/CS0119/CS8124 across
+	// encoding/gob/xml/asn1/json, text/template, debug/*, unique).
+	suppressGenericTypeArgs bool
 }
 
 func DefaultLambdaContext() LambdaContext {
