@@ -23,6 +23,11 @@ internal static void Main() {
     ints = append(ints, (nint)(+2));
     ints = append(ints, (nint)(~0));
     fmt.Println(ints[0], ints[1], ints[2]);
+    slice<any> anys = default!;
+    var data = new byte[]{7, 8, 9}.slice();
+    anys = append(anys.slice(-1, len(anys), len(anys)), (any)(data));
+    anys = append(anys, (any)(5));
+    fmt.Println(len(anys), len(anys[0]._<slice<byte>>()), anys[1]);
 }
 
 } // end main_package

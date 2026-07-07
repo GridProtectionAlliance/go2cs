@@ -35,4 +35,15 @@ func main() {
 	ints = append(ints, +2) // unary plus
 	ints = append(ints, ^0) // bitwise complement (= -1 for a signed int)
 	fmt.Println(ints[0], ints[1], ints[2]) // -1 2 -1
+
+	// Appending a CONCRETE composite (a []byte) to an []any: both append overloads apply — the
+	// ISlice overload infers T=[]byte, the slice<T> overload infers T=any — leaving them
+	// AMBIGUOUS (CS0121; testing flushToParent's `append(args[:len(args):len(args)], c.output)`
+	// with args []any and c.output []byte). The converter casts the differing element to `any`
+	// (the empty-interface element type) so both overloads agree.
+	var anys []any
+	data := []byte{7, 8, 9}
+	anys = append(anys[:len(anys):len(anys)], data)        // []byte element -> cast to any
+	anys = append(anys, 5)                                 // int element -> cast to any
+	fmt.Println(len(anys), len(anys[0].([]byte)), anys[1]) // 2 3 5
 }

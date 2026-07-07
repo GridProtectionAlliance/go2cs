@@ -1146,8 +1146,12 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// (`append<T>(ISlice, params T[])` infers the concrete/adapter type,
 					// `append<T>(slice<T>, params Span<T>)` infers the interface — CS0121 ×3,
 					// reflect Method construction). Cast the element to the interface type so the
-					// slice<T> overload binds; an already-interface-typed element stays bare.
-					if needsCast, isEmpty := isInterface(sliceUnder.Elem()); needsCast && !isEmpty {
+					// slice<T> overload binds; an already-interface-typed element stays bare. The
+					// EMPTY interface (`any`) is affected identically: `append(args[:len:len], c.output)`
+					// with `args []any` and `c.output []byte` infers T=slice<byte> on the ISlice
+					// overload but T=any on the slice<T> overload (testing flushToParent, CS0121) —
+					// cast to `any` so both agree.
+					if needsCast, _ := isInterface(sliceUnder.Elem()); needsCast {
 						elemCSType := convertToCSTypeName(v.getTypeName(sliceUnder.Elem(), false))
 
 						for i := 1; i < len(callExpr.Args); i++ {
