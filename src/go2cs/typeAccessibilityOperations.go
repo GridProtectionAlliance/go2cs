@@ -227,8 +227,13 @@ func collectSignatureUnexportedTypes(method *types.Func, pkg *types.Package) {
 // collectPublicizedWrapperRHS publicizes the written RHS of a defined type whose [GoType]
 // wrapper is emitted public (exported, or unexported-but-publicized). `type EncoderBuffer
 // encoder` exposes `encoder` through the wrapper's Value/ctor/implicit operators, so the
-// wrapped named type must be at least as accessible. Only a NAMED, in-package, unexported RHS
-// needs it — an unnamed RHS (array/struct literal) has no accessibility of its own.
+// wrapped named type must be at least as accessible. This also reaches through an UNNAMED
+// composite RHS to its element types: `type ringElement [256]fieldElement` exposes
+// `fieldElement` through the wrapper's indexer/Value/ToSpan, so the array's element type must
+// be publicized too (crypto/internal/mlkem768's fieldElement, CS0050/CS0051/CS0053/CS0054/
+// CS0056/CS0057). collectUnexportedNamedTypes peels pointer/slice/array/map/chan to the element
+// but has NO struct case, so a struct RHS stays a no-op — an exported field of an unexported
+// type is the CS0052 domain and is intentionally left internal.
 func collectPublicizedWrapperRHS(tn *types.TypeName, pkg *types.Package) {
 	if packageTypeSpecRHS == nil {
 		return
@@ -240,9 +245,7 @@ func collectPublicizedWrapperRHS(tn *types.TypeName, pkg *types.Package) {
 		return
 	}
 
-	if _, isNamed := types.Unalias(rhs).(*types.Named); isNamed {
-		collectUnexportedNamedTypes(rhs, pkg)
-	}
+	collectUnexportedNamedTypes(types.Unalias(rhs), pkg)
 }
 
 // receiverTypeIsPublicized reports whether the (possibly pointer-wrapped) receiver type is an

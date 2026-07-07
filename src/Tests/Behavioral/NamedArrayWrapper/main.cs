@@ -94,6 +94,16 @@ internal static void Main() {
     fmt.Println(dm[1], dm[2]);
     fromBytes(Ꮡ((Ꮡsm.of(scal.Ꮡs)).Value.Value), 20);
     fmt.Println(sm.s[0], sm.s[3]);
+    var grid = new Grid(new unit[]{2, 3, 4}.array());
+    fmt.Println(grid.Total(), (nint)grid[0], len(grid));
+}
+
+[GoType("num:nint")] public partial struct unit;
+
+[GoType("[3]unit")] partial struct Grid;
+
+public static nint Total(this Grid g) {
+    return (nint)g[0] + (nint)g[1] + (nint)g[2];
 }
 
 [GoType("[4]uint64")] partial struct mont;

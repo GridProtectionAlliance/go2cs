@@ -128,7 +128,23 @@ func main() {
 	// where the target is an ALIAS to the unnamed array): same storage-sharing route.
 	fromBytes((*feAlias)(&sm.s), 20)
 	fmt.Println(sm.s[0], sm.s[3]) // 20 23
+
+	// PUBLICIZE an UNEXPORTED element type reached through an UNNAMED-composite wrapper RHS.
+	// Grid is an exported array-wrapper over `[3]unit`; its generated wrapper exposes `unit`
+	// through its public indexer/Value/operators, so `unit` must be publicized or those public
+	// members are less-accessible-than-Grid (CS0053/CS0050/CS0051/CS0054 — crypto/internal/
+	// mlkem768's `fieldElement` inside `[256]fieldElement`). The publicize walk must peel the
+	// UNNAMED array RHS to reach the element (a bare named-RHS gate missed it).
+	grid := Grid{2, 3, 4}
+	fmt.Println(grid.Total(), int(grid[0]), len(grid)) // 9 2 3
 }
+
+// unit is an UNEXPORTED named element type; Grid is an EXPORTED array-wrapper over [3]unit.
+type unit int
+
+type Grid [3]unit
+
+func (g Grid) Total() int { return int(g[0]) + int(g[1]) + int(g[2]) }
 
 // SIBLING defined array types over the SAME unnamed underlying (crypto/internal/edwards25519
 // scalar.go fiat shape): `(*[4]uint64)(&s.s)` writes the parsed value INTO the named field
