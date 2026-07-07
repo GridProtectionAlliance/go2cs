@@ -2362,6 +2362,32 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 	// GoImplement partial in the package vanishes — CrossPkgUser counter CS0029).
 	targetIsIface, _ := isInterface(targetType)
 
+	// An OPEN generic target — the receiver's own instantiation cast to an interface INSIDE its
+	// generic method (`return newBoringPrivateKey(c, …)` with `c *nistCurve[Point]`, crypto/ecdh) —
+	// still needs its CONVERSION emitted (wrapped in the generic adapter `nistCurveжCurve<Point>`,
+	// which the CLOSED per-instantiation records already generate), but must NOT be RECORDED as an
+	// implementation: recording it emits `[assembly: GoImplement<nistCurve<Point>, Curve>]` carrying
+	// the type PARAMETER `Point` in an assembly-attribute type argument, where it is out of scope
+	// (CS0246). So this flag gates only the record below, not `recordable` (the conversion gate).
+	targetIsOpenGeneric := false
+
+	{
+		openTarget := targetType
+
+		if ptr, ok := openTarget.(*types.Pointer); ok {
+			openTarget = ptr.Elem()
+		}
+
+		if named, ok := types.Unalias(openTarget).(*types.Named); ok {
+			for i := 0; i < named.TypeArgs().Len(); i++ {
+				if _, isParam := named.TypeArgs().At(i).(*types.TypeParam); isParam {
+					targetIsOpenGeneric = true
+					break
+				}
+			}
+		}
+	}
+
 	recordableBase := !targetIsIface &&
 		interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
@@ -2422,10 +2448,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		}
 	}
 
-	if recordable || recordableValueForeign {
+	if (recordable || recordableValueForeign) && !targetIsOpenGeneric {
 		// A POINTER-sourced cast records the ж<T>-wrapped name; the attribute emission unwraps
 		// it to `GoImplement<T, Iface>(Pointer = true)`, which generates the IжAdapter wrapper
 		// instead of the value-boxing partial struct (see convert-to-interface emission below).
+		// An OPEN generic target is excluded here (its `<Point>` argument cannot appear in an
+		// assembly attribute — CS0246) while still taking the adapter-wrapping conversion below.
 		recordName := targetTypeName
 
 		if pointerTarget {
