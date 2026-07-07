@@ -177,6 +177,16 @@ internal static void Main() {
     fmt.Println(ss.Speak(), ss.Shut());
     labeler lb = new badgeжlabeler(Ꮡ(new badge(text: "id"u8, num: 9)));
     fmt.Println("keyword-method:", lb.@string(), lb.@int());
+    var av = describe(true);
+    var (@as, aok) = av._<@string>(ᐧ);
+    fmt.Println("any-string:", av, describe(false), @as, aok);
+}
+
+internal static any describe(bool b) {
+    if (b) {
+        return (@string)"text-value";
+    }
+    return 99;
 }
 
 [GoType] partial interface labeler {

@@ -215,6 +215,22 @@ func main() {
 	// forwarding call; bare `labeler.string()` was a C# parse error (CS1525/CS0539/CS0501).
 	var lb labeler = &badge{text: "id", num: 9}
 	fmt.Println("keyword-method:", lb.string(), lb.int()) // keyword-method: id 9
+
+	// A bare string LITERAL returned as the empty interface (any) — Go boxes the string. The
+	// literal must render as `(@string)"…"` (boxing a golib @string), not a `"…"u8`
+	// ReadOnlySpan<byte> which has no conversion to object (CS0029; testing chattyFlag.Get()).
+	// The type assertion back to string confirms the boxed value is a Go string, not a raw span.
+	av := describe(true)
+	as, aok := av.(string)
+	fmt.Println("any-string:", av, describe(false), as, aok) // any-string: text-value 99 text-value true
+}
+
+// describe returns a bare string literal (or a non-string) as the empty interface.
+func describe(b bool) any {
+	if b {
+		return "text-value"
+	}
+	return 99
 }
 
 // labeler has C#-keyword method names (`string`, `int`) — legal Go identifiers.

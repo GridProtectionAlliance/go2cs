@@ -295,17 +295,33 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 				lambdaContext.deferredDecls = &strings.Builder{}
 
+				// A string literal RETURNED as an EMPTY interface (`any`) must box to object: emit
+				// `(@string)"…"` (which boxes a golib @string, preserving Go string identity for a
+				// later type assertion), NOT the `"…"u8` ReadOnlySpan<byte> that has no conversion to
+				// object (CS0029; testing's `func (f *chattyFlag) Get() any { return "test2json" }`).
+				// resultParamIsInterface excludes the empty interface (andNotEmptyInterface), so the
+				// interface-conversion arm below never fires for `any`. Only string basic-literals
+				// consult these flags (convBasicLit), so a non-string `any` result is unaffected.
+				elemBasicLitContext := basicLitContext
+
+				if resultParams != nil && i < resultParams.Len() {
+					if isIface, isEmpty := isInterface(resultParams.At(i).Type()); isIface && isEmpty {
+						elemBasicLitContext.u8StringOK = false
+						elemBasicLitContext.castToGoString = true
+					}
+				}
+
 				// A POINTER value converting to an INTERFACE result must render as the box —
 				// `Ꮡf`, not the deref-aliased receiver `f` — since the pointer-adapter wraps the
 				// ж<T> itself (`new subFSᴵFS(Ꮡf)`; io/fs subFS.Sub returning its own receiver,
 				// CS1503). Mirrors the argument-position rule in convExprList.
-				exprContexts := []ExprContext{basicLitContext, lambdaContext}
+				exprContexts := []ExprContext{elemBasicLitContext, lambdaContext}
 
 				if resultParamIsInterface != nil && i < len(resultParamIsInterface) && resultParamIsInterface[i] {
 					if _, isPtr := v.getType(expr, false).(*types.Pointer); isPtr {
 						identContext := DefaultIdentContext()
 						identContext.isPointer = true
-						exprContexts = []ExprContext{basicLitContext, identContext, lambdaContext}
+						exprContexts = []ExprContext{elemBasicLitContext, identContext, lambdaContext}
 					}
 				}
 
