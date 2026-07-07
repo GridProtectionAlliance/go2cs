@@ -46,6 +46,13 @@ public class ImplementGenerator : ISourceGenerator
     private const string AttributeName = "GoImplement";
     private const string FullAttributeName = $"{Namespace}.{AttributeName}Attribute<TStruct, TInterface>";
 
+    // Renders a namespace for a `using` directive: no `global::`, keyword segments escaped
+    // (`go.crypto.@internal`, not the invalid `go.crypto.internal`).
+    private static readonly SymbolDisplayFormat s_namespaceUsingFormat = new(
+        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers);
+
     public void Initialize(GeneratorInitializationContext context)
     {
     #if DEBUG_GENERATOR
@@ -783,6 +790,16 @@ public class ImplementGenerator : ISourceGenerator
             methods.Append($"{returnType} {interfaceRef}.{methodName}({parameters}) => m_box.{methodName}({arguments});");
         }
 
+        // Each forwarder calls the boxed element's box extension methods (`m_box.Bytes()`), declared
+        // in the element type's PACKAGE class; bring that class's NAMESPACE into scope so a FOREIGN
+        // element's extensions resolve. The [GoImplement] attribute sits in package_info.cs, whose
+        // usings never cover the element (nistec's P224Point used from crypto/elliptic — without this
+        // `m_box.Bytes()`/`.SetBytes()` bind nothing, CS1929/CS1501).
+        string[] proxyUsings = usingStatements;
+
+        if (elementType.ContainingNamespace is { IsGlobalNamespace: false } elementNamespace)
+            proxyUsings = [.. usingStatements, $"using {elementNamespace.ToDisplayString(s_namespaceUsingFormat)};"];
+
         string proxySource = new ConstraintProxyImplTemplate
         {
             PackageNamespace = packageNamespace,
@@ -792,7 +809,7 @@ public class ImplementGenerator : ISourceGenerator
             ElementName = elementName,
             AdapterScope = "internal",
             MethodsImplementation = methods.ToString(),
-            UsingStatements = usingStatements
+            UsingStatements = proxyUsings
         }
         .Generate();
 
