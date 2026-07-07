@@ -215,15 +215,40 @@ func rootQualified(ns string) string {
 // never renders its own class as "go.<class>_package" (after the root strip it is the bare
 // "<class>_package"), so only go/*-package refs match. Used to re-root the go/* refs that
 // convertToCSTypeName's redundant-root strip mangled to `go.ast_package` (CS0234/CS0426).
+//
+// The decision is made against packageChildNamespaces — the CURRENT package's rooted import-closure
+// namespaces — not a purely-textual test, because the shapes are AMBIGUOUS: a stripped
+// `go.build.constraint_package` (go/build/constraint, whose real namespace is `go.go.build`) looks
+// exactly like a correctly-rooted `go.io.fs_package` (io/fs, whose real namespace IS `go.io`). A
+// stripped go/* ref's namespace is NOT a real child namespace but becomes one with the root
+// prepended (`go.build` ✗ → `go.go.build` ✓; `go` ✗ → `go.go` ✓); a genuinely-rooted ref's namespace
+// is already real (`go.io`, `go.go.build`) and is left alone. This handles every go/* nesting depth
+// (go/ast, go/build/constraint, …), superseding the earlier "_package immediately after go." shape
+// test that only caught the two-segment case.
 func isStrippedGoPathPackageRef(goPrefixed string) bool {
-	rest := goPrefixed[len(RootNamespace)+1:]
-	firstSeg := rest
+	segs := strings.Split(goPrefixed, ".")
 
-	if dot := strings.IndexByte(rest, '.'); dot != -1 {
-		firstSeg = rest[:dot]
+	// Namespace = everything up to the first `_package` CLASS segment.
+	nsEnd := -1
+
+	for i, seg := range segs {
+		if strings.HasSuffix(seg, PackageSuffix) {
+			nsEnd = i
+			break
+		}
 	}
 
-	return strings.HasSuffix(firstSeg, PackageSuffix)
+	if nsEnd <= 0 {
+		return false
+	}
+
+	ns := strings.Join(segs[:nsEnd], ".")
+
+	if packageChildNamespaces[ns] {
+		return false
+	}
+
+	return packageChildNamespaces[RootNamespace+"."+ns]
 }
 
 func rootQualifyIfAmbiguous(ns string) string {
