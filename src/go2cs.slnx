@@ -98,6 +98,7 @@
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
     <Project Path="Tests/Behavioral/DeferEvalParam/DeferEvalParam.csproj" />
     <Project Path="Tests/Behavioral/DeferEvalParamFunc/DeferEvalParamFunc.csproj" />
+    <Project Path="Tests/Behavioral/DeferInterfaceReturn/DeferInterfaceReturn.csproj" />
     <Project Path="Tests/Behavioral/DeferLambdaParam/DeferLambdaParam.csproj" />
     <Project Path="Tests/Behavioral/DeferSimple/DeferSimple.csproj" />
     <Project Path="Tests/Behavioral/DeferTypelessReturns/DeferTypelessReturns.csproj" />

@@ -670,7 +670,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 
 			resultTypeArg := ""
 
-			if signature.Results().Len() > 0 && v.allExecWrapperReturnsAreTypeless(funcDecl) {
+			if signature.Results().Len() > 0 && (v.allExecWrapperReturnsAreTypeless(funcDecl) || v.execWrapperReturnsLackCommonType(funcDecl)) {
 				resultTypeArg = fmt.Sprintf("<%s>", v.generateResultSignature(signature))
 			}
 
@@ -685,7 +685,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			// any function with one fully-typed return keeps the inferred (unchanged) form.
 			resultTypeArg := ""
 
-			if signature.Results().Len() > 0 && v.allExecWrapperReturnsAreTypeless(funcDecl) {
+			if signature.Results().Len() > 0 && (v.allExecWrapperReturnsAreTypeless(funcDecl) || v.execWrapperReturnsLackCommonType(funcDecl)) {
 				resultTypeArg = fmt.Sprintf("<%s>", v.generateResultSignature(signature))
 			}
 
@@ -800,6 +800,83 @@ func (v *Visitor) allExecWrapperReturnsAreTypeless(funcDecl *ast.FuncDecl) bool 
 	})
 
 	return unreliableReturnFound
+}
+
+// execWrapperReturnsLackCommonType reports whether the function's top-level return statements yield,
+// at some result position, expressions whose types have NO best-common-type — i.e. no single one of
+// them that every other is identical or assignable to. C# infers a value-returning exec wrapper's T
+// (`func<T>`, builtin.cs GoFunction) from the lambda's return expressions using best-common-type; two
+// returns of unrelated concrete types that share only the declared interface (go/parser parseTypeName:
+// `return &ast.SelectorExpr{...}` beside `return ident` where the result type is ast.Expr) have no
+// common type, so T cannot be inferred and overload resolution binds the void GoAction overload
+// (CS8030 on every value return). Emit the explicit result type for exactly that shape; a single
+// return, or returns that DO share a best-common-type (a concrete beside its interface), keep the
+// inferred (unchanged) form and churn no goldens. Nested function literals get their own wrappers.
+func (v *Visitor) execWrapperReturnsLackCommonType(funcDecl *ast.FuncDecl) bool {
+	if funcDecl.Body == nil {
+		return false
+	}
+
+	var posTypes [][]types.Type // per result position: the return-expression types seen
+
+	ast.Inspect(funcDecl.Body, func(n ast.Node) bool {
+		if _, ok := n.(*ast.FuncLit); ok {
+			return false
+		}
+
+		returnStmt, ok := n.(*ast.ReturnStmt)
+
+		if !ok {
+			return true
+		}
+
+		for i, result := range returnStmt.Results {
+			tv, ok := v.info.Types[result]
+
+			if !ok || tv.Type == nil {
+				continue
+			}
+
+			for len(posTypes) <= i {
+				posTypes = append(posTypes, nil)
+			}
+
+			posTypes[i] = append(posTypes[i], tv.Type)
+		}
+
+		return true
+	})
+
+	for _, atPos := range posTypes {
+		if len(atPos) < 2 {
+			continue
+		}
+
+		// A best-common-type exists iff some candidate accepts every other type at this position.
+		hasCommon := false
+
+		for _, cand := range atPos {
+			acceptsAll := true
+
+			for _, t := range atPos {
+				if !types.Identical(t, cand) && !types.AssignableTo(t, cand) {
+					acceptsAll = false
+					break
+				}
+			}
+
+			if acceptsAll {
+				hasCommon = true
+				break
+			}
+		}
+
+		if !hasCommon {
+			return true
+		}
+	}
+
+	return false
 }
 
 // identIsParameter checks if the given identifier is a parameter in the current function.
