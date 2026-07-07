@@ -123,6 +123,15 @@ internal class AdapterImplTemplate : TemplateBase
                 if (result.Length > 0)
                     result.Append("\r\n\r\n        ");
 
+                // A cross-assembly unexported interface marker (Go's package-sealing exprNode()/tree()
+                // etc.) has no accessible implementation to forward to (CS1061) and is never callable
+                // from outside its package — satisfy the required member with a no-op / default stub.
+                if (method.IsInaccessibleMarker)
+                {
+                    result.Append($"{method.ReturnType} {method.GetSignature()}{(method.ReturnType == "void" ? " { }" : " => default!;")}");
+                    continue;
+                }
+
                 if (!ForwardReceivers.TryGetValue(simpleMethodName, out string? receiver))
                     receiver = "m_box";
 

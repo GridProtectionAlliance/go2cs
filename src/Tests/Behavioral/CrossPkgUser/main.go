@@ -162,6 +162,12 @@ func makeRelay() (*relay, error) { return &relay{tag: "live"}, nil }
 
 func getReporter() (CrossPkgLib.Reporter, error) { return makeRelay() }
 
+// Root 1: a CONCRETE *Leaf (from the lib) cast to the SEALED Emitter interface HERE — the adapter is
+// generated in THIS assembly, where the unexported emitNode marker's INTERNAL extension is
+// inaccessible; forwarding `m_box.Value.emitNode()` is CS1061 (go/internal/typeparams casting go/ast's
+// *IndexExpr to ast.Expr), so the adapter must STUB the sealing marker.
+var leafEmitter CrossPkgLib.Emitter = CrossPkgLib.NewLeaf("leaf")
+
 func main() {
 	defer note(CrossPkgLib.Precision)
 
@@ -399,6 +405,10 @@ func main() {
 	sbx := sensorBox{tag: "b"}
 	sbx.Holder.item = &CrossPkgLib.Sensor{Name: "shed", Temp: 40}
 	fmt.Println(sbx.Holder.item.Name, sbx.tag) // shed b
+
+	// Root 1: a cross-assembly cast of *Leaf to the sealed Emitter — the adapter stubs the unexported
+	// emitNode marker (inaccessible here) and forwards the exported Emit.
+	fmt.Println("leaf:", leafEmitter.Emit()) // leaf: leaf
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a

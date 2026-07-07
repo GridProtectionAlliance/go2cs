@@ -45,6 +45,7 @@ using static go.main_package;
 // reflection-based interface resolution.
 
 // <InterfaceImplementations>
+[assembly: GoImplement<CrossPkgLib_package.Leaf, CrossPkgLib_package.Emitter>(Pointer = true)]
 [assembly: GoImplement<CrossPkgLib_package.Probe, CrossPkgLib_package.Sampler>(Pointer = true)]
 [assembly: GoImplement<CrossPkgLib_package.Sensor, Labeled>(Pointer = true)]
 [assembly: GoImplement<badge, Tagged>]

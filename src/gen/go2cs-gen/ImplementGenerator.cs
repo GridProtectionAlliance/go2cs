@@ -181,7 +181,14 @@ public class ImplementGenerator : ISourceGenerator
                     // distinct signature - an explicit impl without it is CS0539.
                     Parameters = info.method.Parameters.Select(param => (type: $"{RefKindPrefix(param.RefKind)}{GlobalQualify(param.Type.ToDisplayString())}", name: param.Name)).ToArray(),
                     GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
-                    TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray())
+                    TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
+                    // A Go-UNEXPORTED interface method (lowercase name → its C# extension impl is
+                    // INTERNAL) declared in a DIFFERENT assembly than the one this adapter is generated
+                    // into is a package-sealing MARKER (ast.Expr's exprNode(), parse.Node's tree()/writeTo()):
+                    // its extension is invisible here, so forwarding is CS1061. Go bars calling it from
+                    // outside its package, so the adapter stubs the (still-required, public) member.
+                    IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                        !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
                 })
                 .Distinct()
                 .ToList();

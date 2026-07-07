@@ -144,6 +144,8 @@ internal static (CrossPkgLib.Reporter, error) getReporter() {
     return (new relayжReporter(ᴛ1), ᴛ2);
 }
 
+internal static CrossPkgLib.Emitter leafEmitter = new CrossPkgLib_LeafжEmitter(CrossPkgLib.NewLeaf("leaf"u8));
+
 internal static void Main() => func((defer, recover) => {
     deferǃ(note, (nint)CrossPkgLib.Precision, defer);
     var b = CrossPkgLib.Boiling();
@@ -266,6 +268,7 @@ internal static void Main() => func((defer, recover) => {
     var sbx = new sensorBox(tag: "b"u8);
     sbx.Holder.item = Ꮡ(new CrossPkgLib.Sensor(Name: "shed"u8, Temp: 40));
     fmt.Println((~sbx.Holder.item).Name, sbx.tag);
+    fmt.Println("leaf:", leafEmitter.Emit());
 });
 
 [GoType("num:float64")] partial struct localCelsius;

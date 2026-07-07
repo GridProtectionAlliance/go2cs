@@ -1878,6 +1878,31 @@ deref-COPY fallback, so aliasing is faithful: fmt's `Fscan(os.Stdin, …)` emits
 `CrossPkgUser` (`*Probe → Sampler` via `CrossPkgLib_ProbeжSampler`, mutation read back through the
 original pointer).
 
+### A cross-package interface's unexported sealing marker is stubbed
+Go seals an interface to its defining package with an **unexported marker method** — `ast.Expr`'s
+`exprNode()`, `ast.Stmt`'s `stmtNode()`, `ast.Decl`'s `declNode()`, `text/template/parse.Node`'s
+`tree()`/`writeTo()`. The method's C# implementation is an **internal** extension in the interface's
+own assembly (`internal static void exprNode(this ref IndexExpr _)`), so an adapter generated where
+the interface is CONSUMED — `go/internal/typeparams` casting go/ast's `*IndexExpr` to `ast.Expr`, or
+`text/template` casting `*parse.RangeNode` to `parse.Node` — cannot see it: forwarding
+`m_box.Value.exprNode()` is CS1061. The C# interface member itself is public (unexported Go methods
+render without a modifier), so it is still *required* — dropping it is CS0535, and an *internal*
+interface member cannot be implemented cross-assembly at all. Because Go never lets a sealing marker
+be called from outside its package, the adapter satisfies the member with a **no-op / `default!`
+stub** instead of forwarding:
+```csharp
+void global::go.go.ast_package.Expr.exprNode() { }                       // void marker
+global::go.…parse_package.Tree global::go.…parse_package.Node.tree() => default!;   // non-void marker
+```
+The `ImplementGenerator` flags a method as an inaccessible marker when its Go name is unexported
+(`GetScope == "internal"`) **and** its declaring assembly differs from the one the adapter is
+generated into (`MethodInfo.IsInaccessibleMarker`); a SAME-assembly impl keeps forwarding (the
+internal extension is accessible there). Both the pointer (`AdapterImplTemplate`) and value
+(`ValueAdapterImplTemplate`) adapters emit the stub. This greens `go/internal/typeparams` (whose only
+errors were the two `exprNode` forwards) and is a prerequisite for `text/template`/`go/doc`. (Guarded
+by `CrossPkgLib`/`CrossPkgUser`: the sealed `Emitter` interface with an unexported `emitNode()`, a
+`*Leaf` implementing it, cast to `Emitter` in the consumer assembly — CS1061 without the stub.)
+
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
 DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records

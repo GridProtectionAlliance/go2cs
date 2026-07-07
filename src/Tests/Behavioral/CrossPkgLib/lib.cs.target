@@ -197,4 +197,24 @@ public static ΔMarker MakeMarker(@string s) {
     return new ΔMarker(ΔΔMarker: s);
 }
 
+[GoType] partial interface Emitter {
+    @string Emit();
+    void emitNode();
+}
+
+[GoType] partial struct Leaf {
+    public @string Text;
+}
+
+[GoRecv] public static @string Emit(this ref Leaf l) {
+    return l.Text;
+}
+
+[GoRecv] internal static void emitNode(this ref Leaf l) {
+}
+
+public static ж<Leaf> NewLeaf(@string text) {
+    return Ꮡ(new Leaf(Text: text));
+}
+
 } // end CrossPkgLib_package

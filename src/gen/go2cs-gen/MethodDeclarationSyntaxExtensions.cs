@@ -51,6 +51,16 @@ public record MethodInfo
     // deref'd value (`target.<embed>.Value`) a value-receiver method uses — the box receiver needs ж<T>.
     public bool IsBoxRecv { get; init; }
 
+    // Set for a cross-assembly UNEXPORTED interface method — Go's package-sealing markers such as
+    // ast.Expr's `exprNode()`, ast.Stmt's `stmtNode()`, ast.Decl's `declNode()`, or
+    // text/template/parse.Node's `tree()`/`writeTo()`. Its C# implementation is an INTERNAL extension
+    // method in the INTERFACE's own assembly (ast's `internal static void exprNode(this ref IndexExpr)`),
+    // so an adapter generated in a DIFFERENT assembly (go/internal/typeparams casting go/ast's *IndexExpr
+    // to ast.Expr) cannot see it — forwarding `m_box.Value.exprNode()` is CS1061. Go never lets such a
+    // method be called from outside its defining package, so the adapter satisfies the still-required
+    // (public) interface member with a STUB body instead of forwarding to the inaccessible impl.
+    public bool IsInaccessibleMarker { get; init; }
+
     public bool IsGeneric => GenericTypes.Length > 0;
 
     public string CallParameters => GetCallParameters(true);

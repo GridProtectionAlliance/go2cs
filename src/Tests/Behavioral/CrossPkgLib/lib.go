@@ -234,3 +234,27 @@ func (s Sensor) Marker() string { return s.Name }
 
 // MakeMarker returns a Marker so a consumer reads its field via an inferred-type value.
 func MakeMarker(s string) Marker { return Marker{Marker: s} }
+
+// Emitter is an exported interface SEALED to this package by the UNEXPORTED marker method emitNode()
+// (Go's ast.Expr.exprNode() / text/template/parse.Node.tree()/writeTo() shape). A consumer in ANOTHER
+// assembly can HOLD an Emitter and call the exported Emit(), but cannot see or forward the unexported
+// emitNode — its C# implementation is an INTERNAL extension here, so the pointer adapter generated at
+// the consumer's cast site cannot bind `m_box.Value.emitNode()` (CS1061). Go bars calling a sealing
+// marker from outside its package, so that adapter must STUB the (still-required) member instead.
+type Emitter interface {
+	Emit() string
+	emitNode()
+}
+
+// Leaf implements Emitter DIRECTLY in this package (both the exported Emit and the sealing marker).
+type Leaf struct {
+	Text string
+}
+
+func (l *Leaf) Emit() string { return l.Text }
+
+func (l *Leaf) emitNode() {}
+
+// NewLeaf returns the CONCRETE *Leaf, so a consumer assigning it to an Emitter casts across the
+// assembly boundary — the adapter is generated in the CONSUMER assembly, where emitNode is inaccessible.
+func NewLeaf(text string) *Leaf { return &Leaf{Text: text} }
