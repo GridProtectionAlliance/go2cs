@@ -140,7 +140,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 				subStructTypes = append(subStructTypes, v.getExprType(ptrType))
 				v.subStructTypes[identType] = subStructTypes
-			} else if interfaceType, ok := ptrType.X.(*ast.InterfaceType); ok && !v.liftedTypeExists(interfaceType) {
+			} else if interfaceType, ok := ptrType.X.(*ast.InterfaceType); ok && !isEmptyInterface(interfaceType) && !v.liftedTypeExists(interfaceType) {
 				interfaceIdentType := v.getExprType(ptrType.X)
 				v.indentLevel += indentOffset
 				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
@@ -169,7 +169,13 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 			subStructTypes = append(subStructTypes, subStructIdentType)
 			v.subStructTypes[identType] = subStructTypes
-		} else if interfaceType, ok := field.Type.(*ast.InterfaceType); ok {
+		} else if interfaceType, ok := field.Type.(*ast.InterfaceType); ok && !isEmptyInterface(interfaceType) {
+			// An EMPTY interface field (`ptr interface{}`, e.g. encoding/json's slice-cycle memo
+			// struct) is NOT lifted to a named `[GoType("dyn")]` marker interface — that empty
+			// marker is implemented by nothing, so a concrete value assigned to the field (a
+			// boxed `uintptr` from `v.UnsafePointer()`) fails to convert (CS1503). It maps to
+			// `any` via the field-type conversion below, matching how extractInterfaceType (the
+			// canonical lift gate) already excludes empty interfaces everywhere else.
 			interfaceIdentType := v.getExprType(field.Type)
 			v.indentLevel += indentOffset
 			v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)
@@ -192,7 +198,7 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 				if structPrefix != nil {
 					structPrefix.WriteString(v.newline)
 				}
-			} else if interfaceType, ok := arrayType.Elt.(*ast.InterfaceType); ok && !v.liftedTypeExists(interfaceType) {
+			} else if interfaceType, ok := arrayType.Elt.(*ast.InterfaceType); ok && !isEmptyInterface(interfaceType) && !v.liftedTypeExists(interfaceType) {
 				interfaceIdentType := v.getExprType(arrayType.Elt)
 				v.indentLevel += indentOffset
 				v.visitInterfaceType(interfaceType, interfaceIdentType, fmt.Sprintf("%s_%s", structTypeName, field.Names[0].Name), field.Comment, true, structPrefix)

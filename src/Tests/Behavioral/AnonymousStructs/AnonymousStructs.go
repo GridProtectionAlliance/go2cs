@@ -26,6 +26,31 @@ func processAnonymousStruct(data struct {
 	fmt.Printf("Processing: %s, %d years old\n", data.Name, data.Age)
 }
 
+// cycleMemo mirrors encoding/json's sliceEncoder cycle detection: an IN-FUNCTION anonymous struct
+// with an EMPTY `interface{}` field (holding a pointer, "always an unsafe.Pointer but avoids a
+// dependency on package unsafe") plus an int length, memorized once into a variable and used as a
+// map key (Go's `ptr := struct{…}{v.UnsafePointer(), v.Len()}; e.ptrSeen[ptr]`). The empty-interface
+// field must convert to `any` — the converter previously lifted it to a named empty `[GoType("dyn")]`
+// marker interface that no concrete value could satisfy, so constructing the struct from a pointer
+// failed (CS1503). Reading the pointer back through the field and keying a set by the struct exercise
+// both that the field is `any` and that the anonymous struct stays comparable.
+func cycleMemo() {
+	seen := map[any]struct{}{}
+	a := 10
+
+	memo := struct {
+		ptr interface{}
+		len int
+	}{&a, 2}
+
+	_, before := seen[memo] // absent before insert
+	seen[memo] = struct{}{}
+	_, after := seen[memo] // present after insert
+
+	got := memo.ptr.(*int) // the empty-interface field round-trips as `any`
+	fmt.Printf("cycleMemo: val=%d len=%d before=%t after=%t\n", *got, memo.len, before, after)
+}
+
 func main() {
 	// Create values of both named and anonymous struct types
 	namedPerson := Person{Name: "Alice", Age: 30}
@@ -102,4 +127,8 @@ func main() {
 	}
 
 	fmt.Printf("sections=%d total=%d first=%s\n", len(sects), total, sects[0].name)
+
+	// Lifted in-function anonymous struct with an empty interface{} field, used as a map key.
+	fmt.Println("\n=== Anonymous Struct With Empty Interface Field ===")
+	cycleMemo()
 }

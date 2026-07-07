@@ -26,6 +26,23 @@ internal static void processAnonymousStruct(processAnonymousStruct_data data) {
     fmt.Printf("Processing: %s, %d years old\n"u8, data.Name, data.Age);
 }
 
+[GoType("dyn")] partial struct cycleMemo_memo {
+    internal any ptr;
+    internal nint len;
+}
+
+internal static void cycleMemo() {
+    var seen = new map<any, EmptyStruct>{};
+    ref var a = ref heap<nint>(out var Ꮡa);
+    a = 10;
+    var memo = new cycleMemo_memo(Ꮡa, 2);
+    var (_, before) = seen[memo, ꟷ];
+    seen[memo] = new EmptyStruct();
+    var (_, after) = seen[memo, ꟷ];
+    var got = memo.ptr._<ж<nint>>();
+    fmt.Printf("cycleMemo: val=%d len=%d before=%t after=%t\n"u8, got.Value, memo.len, before, after);
+}
+
 [GoType("dyn")] partial struct main_anonPerson {
     public @string Name;
     public nint Age;
@@ -80,6 +97,8 @@ internal static void Main() {
         total += sect.size;
     }
     fmt.Printf("sections=%d total=%d first=%s\n"u8, len(sects), total, sects[0].name);
+    fmt.Println("\n=== Anonymous Struct With Empty Interface Field ===");
+    cycleMemo();
 }
 
 } // end main_package
