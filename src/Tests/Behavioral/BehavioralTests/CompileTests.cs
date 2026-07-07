@@ -126,6 +126,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureReturnAnonStruct() => CheckTarget("ClosureReturnAnonStruct");
+
+    [TestMethod]
     public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
 
     [TestMethod]

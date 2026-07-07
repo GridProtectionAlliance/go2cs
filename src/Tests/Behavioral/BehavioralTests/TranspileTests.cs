@@ -126,6 +126,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureReturnAnonStruct() => CheckTarget("ClosureReturnAnonStruct");
+
+    [TestMethod]
     public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
 
     [TestMethod]

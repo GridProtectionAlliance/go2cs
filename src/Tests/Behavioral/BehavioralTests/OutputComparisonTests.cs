@@ -121,6 +121,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureReturnAnonStruct() => CheckTarget("ClosureReturnAnonStruct");
+
+    [TestMethod]
     public void CheckClosureSelfShadowCapture() => CheckTarget("ClosureSelfShadowCapture");
 
     [TestMethod]

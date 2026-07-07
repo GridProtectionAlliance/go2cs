@@ -293,12 +293,6 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 
 				var replacementVal string
 
-				if resultParams != nil && i < resultParams.Len() {
-					argType := v.getType(expr, false)
-					targetType := resultParams.At(i).Type()
-					replacementVal = v.checkForDynamicStructs(argType, targetType)
-				}
-
 				lambdaContext.deferredDecls = &strings.Builder{}
 
 				// A POINTER value converting to an INTERFACE result must render as the box —
@@ -316,6 +310,21 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				}
 
 				resultExpr := v.convExpr(expr, exprContexts)
+
+				// Record any dynamic-struct implicit conversion AFTER converting the result expr.
+				// checkForDynamicStructs resolves each side's C# name through liftedTypeMap, but an
+				// anonymous-struct COMPOSITE LITERAL returned here (`return struct{…}{…}`) is only
+				// lifted into that registry DURING its convExpr above. Recording earlier read the
+				// unlifted arg and stringified its type as raw Go `struct{…}` text — an invalid C#
+				// generic argument in the emitted `[assembly: GoImplicitConv<…>]` (CS1031). By this
+				// point the literal's lifted name (e.g. `fn_type`) is registered, so both the source
+				// and the func-result target resolve to their lifted names. (The dynamicCast template
+				// this may return is applied identically below, so the reorder is otherwise neutral.)
+				if resultParams != nil && i < resultParams.Len() {
+					argType := v.getType(expr, false)
+					targetType := resultParams.At(i).Type()
+					replacementVal = v.checkForDynamicStructs(argType, targetType)
+				}
 
 				if len(replacementVal) > 0 {
 					resultExpr = strings.ReplaceAll(replacementVal, DynamicCastArgMarker, resultExpr)
