@@ -115,6 +115,12 @@ public static V Pair<K, V>(K k, V v)
     return v;
 }
 
+// type ΔSift is a methodless func type — rendered inline as its base delegate
+
+public static bool Sift(this Sensor s, Func<nint, bool> f) {
+    return f((nint)(float64)s.Temp);
+}
+
 [GoType] partial struct Probe {
     public nint Hits;
 }

@@ -1551,6 +1551,21 @@ seam across the two); regression-checked against the self-referential (`NamedFun
 unchanged), nested-reference (`FirstClassFunctions`), and variadic-param (`PublicizedFuncTypeParam`)
 cases.
 
+**A collapsed methodless func type must NOT export a `[GoTypeAlias]`.** When such a type is *also*
+collision-renamed — `type Filter func(...)` alongside a method `Filter` (go/ast's `Filter` vs
+`(CommentMap).Filter`; the `ReservedTypeMethodCollision` shape) — the rename records an exported
+`[assembly: GoTypeAlias("Filter", "ΔFilter")]` so consumers can name the renamed type. But because
+the type collapses to its base delegate, **no `<pkg>_package.ΔFilter` type is ever emitted** — so a
+consumer that loads the alias generates `global using astꓸFilter = go.go.ast_package.ΔFilter;`
+naming a nonexistent type (go/doc referencing `ast.Filter`, CS0426). `visitFuncType` now records
+each collapsed methodless func type's name in `packageInlineFuncTypeNames`, and the exported-type-
+alias emission skips any alias whose key *or* value matches (the collision path stores the alias
+under the renamed value `ΔFilter`, the plain path under the raw name) — so the alias is never
+exported and the consumer renders `ast.Filter` inline as `Func<nint, bool>` through the normal
+collapse. (Guarded by the `CrossPkgUser` extension — a cross-package `CrossPkgLib.Sift` methodless
+func type colliding with a `Sift` method, named as a var type and rendered inline, output vs Go; and
+by `ReservedTypeMethodCollision` whose `[GoTypeAlias]` is now correctly absent.)
+
 When such a collapsed delegate's signature carries a parameter whose type lives in a **sub-package**
 (an import path with a slash), the `Func<…>`/`Action<…>` rendering must qualify that type as the
 package **class**, not the namespace. The collapsed signature is produced from the Go signature's

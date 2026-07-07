@@ -342,6 +342,14 @@ var projectImports HashSet[string]
 var exportedTypeAliases map[string]string
 var importedTypeAliases map[string]string
 
+// packageInlineFuncTypeNames records the names of this package's NON-GENERIC METHODLESS named func
+// types — the ones visitFuncType renders inline as their base delegate and whose named declaration
+// is skipped (there is no `<name>_package.<Δname>` type). Their exported-type-alias must NOT be
+// emitted: a `[GoTypeAlias("Filter", "ΔFilter")]` makes consumers reference a nonexistent
+// `go.go.ast_package.ΔFilter` (go/doc's `ast.Filter`, CS0426). Keyed by both the raw Go name and its
+// core-sanitized form to match either exportedTypeAliases population site.
+var packageInlineFuncTypeNames map[string]bool
+
 // importedPointerImplements records `[assembly: GoImplement<T, Iface>(Pointer = true)]` lines
 // parsed from IMPORTED packages' package_info files, keyed "pkgName|T|ifaceSimple" - the
 // existence proof that the foreign assembly generated the public TжIface adapter class
@@ -679,6 +687,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		projectImports = NewHashSet([]string{})
 		exportedTypeAliases = make(map[string]string)
 		importedTypeAliases = make(map[string]string)
+		packageInlineFuncTypeNames = make(map[string]bool)
 		importedPointerImplements = HashSet[string]{}
 		importedValueImplements = HashSet[string]{}
 		constImportedTypeAliases = NewHashSet([]string{})
@@ -999,8 +1008,19 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}
 			}
 
-			// Add new type aliases to package info file (hashset ensures uniqueness)
+			// Add new type aliases to package info file (hashset ensures uniqueness). A NON-GENERIC
+			// METHODLESS named func type is rendered inline as its base delegate with no named
+			// declaration (visitFuncType), so it has no `<pkg>_package.<Δname>` type — skip its alias,
+			// or a consumer's generated `global using` names a nonexistent type (go/doc's `ast.Filter`
+			// → `go.go.ast_package.ΔFilter`, CS0426).
 			for alias, typeName := range exportedTypeAliases {
+				// visitFuncType records the RENAMED name (a collision-renamed `Filter` is stored as
+				// `ΔFilter`, which is the alias VALUE), while a non-collision methodless func type is
+				// stored under its plain name (the alias KEY) — check both.
+				if packageInlineFuncTypeNames[alias] || packageInlineFuncTypeNames[typeName] {
+					continue
+				}
+
 				lines.Add(fmt.Sprintf("[assembly: GoTypeAlias(\"%s\", \"%s\")]", alias, typeName))
 			}
 

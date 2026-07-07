@@ -373,6 +373,15 @@ func main() {
 	fmt.Println(len(wrapped), wrapped[0])              // 1 5
 	fmt.Println(CrossPkgLib.Pair[string, int]("k", 8)) // 8
 
+	// A cross-package METHODLESS FUNC TYPE that collides with a method (CrossPkgLib.Sift renamed
+	// ΔSift in the lib, rendered INLINE as Func<nint, bool>): naming it as a var type must render
+	// inline, not through a generated global-using at the nonexistent CrossPkgLibꓸSift/ΔSift (CS0426,
+	// the go/doc `ast.Filter` shape — the producer no longer exports a [GoTypeAlias] for it). (The
+	// colliding METHOD Sift stays in the lib to force the rename; a cross-package call to it is the
+	// separate, still-open promoted-method gap, so it is exercised only inside the lib.)
+	var isHot CrossPkgLib.Sift = func(t int) bool { return t > 50 }
+	fmt.Println(isHot(60), isHot(40)) // true false
+
 	// A same-package generic instantiated with a POINTER to a cross-package type: the var type
 	// `*Holder[*CrossPkgLib.Sensor]` (getTypeName) and the `sensorBox` embed (getFullTypeName) must
 	// both keep the Holder<…> wrapper — the slash-strip previously ate it (crypto/elliptic's nistCurve).

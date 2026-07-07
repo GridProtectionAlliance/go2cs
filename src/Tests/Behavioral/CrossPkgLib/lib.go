@@ -126,6 +126,17 @@ func Wrap[T any](v T) []T { return []T{v} }
 // double-append through the list form (convIndexListExpr).
 func Pair[K comparable, V any](k K, v V) V { return v }
 
+// Sift is an exported METHODLESS FUNC TYPE that COLLIDES with the Sift METHOD below (the go/ast
+// `type Filter func(...)` vs `(CommentMap).Filter` shape). The collision renames the type to ΔSift,
+// but a methodless func type is rendered INLINE as its base delegate — no named ΔSift type is ever
+// emitted. So the producer must NOT export a `[GoTypeAlias("Sift", "ΔSift")]`: a consumer that names
+// CrossPkgLib.Sift must render it inline (Func<nint, bool>), not through a generated global-using at
+// the nonexistent go.…ΔSift (go/doc's `ast.Filter`, CS0426).
+type Sift func(int) bool
+
+// Sift (the method) forces the type-vs-method collision that renames the Sift TYPE.
+func (s Sensor) Sift(f Sift) bool { return f(int(s.Temp)) }
+
 // Probe/Sampler: the lib never converts *Probe to Sampler itself, so no exported adapter
 // record exists - a consumer's pointer conversion records the pair LOCALLY and emits its
 // own ProbeжSampler adapter with metadata-bound forwarding (fmt Fscan(os.Stdin, ...),

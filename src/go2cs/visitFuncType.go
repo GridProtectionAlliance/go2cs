@@ -13,6 +13,14 @@ func (v *Visitor) visitFuncType(funcType *ast.FuncType, identType types.Type, na
 	// interconversion — so it emits NO distinct delegate declaration here. Only a marker comment,
 	// mirroring the hand-converted-type case; every reference resolves to `Action`/`Func<…>`.
 	if _, ok := methodlessNamedFuncSignature(identType); ok {
+		// Record the name so its exported-type-alias is NOT emitted — there is no named
+		// `<pkg>_package.<Δname>` type to alias to (a consumer's `[GoTypeAlias]` global-using would
+		// name a nonexistent type; go/doc's `ast.Filter` → `go.go.ast_package.ΔFilter`, CS0426).
+		packageLock.Lock()
+		packageInlineFuncTypeNames[name] = true
+		packageInlineFuncTypeNames[getCoreSanitizedIdentifier(name)] = true
+		packageLock.Unlock()
+
 		if !v.inFunction {
 			v.targetFile.WriteString(v.newline)
 		}
