@@ -262,6 +262,15 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			fieldByName[structType.Field(i).Name()] = structType.Field(i)
 		}
 
+		// A struct instantiated over a constraint proxy (nistCurve<P224PointжnistPoint>) renders its
+		// Point-typed FUNC fields with the proxy (`Func<P224PointжnistPoint> newPoint`), so a
+		// method-group / func-value initializer needs a lambda re-wrap below (see wrapArgWithLambda).
+		compositeHasProxy := false
+
+		if litNamed, ok := types.Unalias(exprType).(*types.Named); ok {
+			compositeHasProxy = v.namedHasConstraintProxy(litNamed)
+		}
+
 		for i, elt := range compositeLit.Elts {
 			var fieldVar *types.Var
 			var valueExpr ast.Expr
@@ -282,6 +291,31 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 			if fieldVar == nil || valueExpr == nil {
 				continue
+			}
+
+			// FUNC field of a constraint-proxy instantiation: re-wrap the initializer as a lambda so
+			// the proxy delegate position applies the ж↔proxy conversion a method-group conversion
+			// can't (nistCurve's `newPoint: nistec.NewP224Point` → `() => nistec.NewP224Point()`,
+			// CS0407). A FuncLit initializer already targets the proxy return, and nil stays bare.
+			if compositeHasProxy {
+				if sig, isSig := fieldVar.Type().Underlying().(*types.Signature); isSig {
+					if _, isLit := valueExpr.(*ast.FuncLit); !isLit {
+						if tv, isNil := v.info.Types[valueExpr]; !isNil || !tv.IsNil() {
+							if callContext.wrapArgWithLambda == nil {
+								callContext.wrapArgWithLambda = make(map[int]string)
+							}
+
+							params := make([]string, sig.Params().Len())
+
+							for p := range params {
+								params[p] = fmt.Sprintf("%sp%d", ShadowVarMarker, p)
+							}
+
+							callContext.wrapArgWithLambda[i] = strings.Join(params, ", ")
+							continue
+						}
+					}
+				}
 			}
 
 			named, ok := types.Unalias(fieldVar.Type()).(*types.Named)
@@ -591,6 +625,16 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 	contexts := []ExprContext{arrayTypeContext, identContext}
 
 	typeRender := v.convExpr(compositeLit.Type, contexts)
+
+	// A generic type instantiated with a self-referential constraint-proxy pointer argument
+	// (`nistCurve[*P224Point]`) must render its type arguments through the PROXY
+	// (`nistCurve<P224PointжnistPoint>`) — convExpr walked the AST literal `nistCurve[*P224Point]`
+	// and rendered the box `ж<P224Point>`, which mismatches the pointer adapter that wraps
+	// `ж<nistCurve<P224PointжnistPoint>>` (CS0311/type mismatch). Re-render from the RESOLVED type,
+	// whose getTypeName substitutes the proxy. Gated to the proxy case, so no churn elsewhere.
+	if named, ok := types.Unalias(exprType).(*types.Named); ok && v.namedHasConstraintProxy(named) {
+		typeRender = convertToCSTypeName(v.getTypeName(named, false))
+	}
 
 	if aliasArrayComposite {
 		// The alias renders as its Ident name, which cannot take the composite-initializer

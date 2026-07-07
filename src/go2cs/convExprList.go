@@ -220,6 +220,21 @@ func (v *Visitor) convExprList(exprs []ast.Expr, prevEndPos token.Pos, callConte
 			}
 		}
 
+		// Re-wrap a func-typed argument as a lambda so a constraint-proxy delegate position can
+		// apply the ж<element>↔proxy user-defined conversion that a bare method-group conversion
+		// cannot (`newPoint: nistec.NewP224Point` → `newPoint: () => nistec.NewP224Point()`). The
+		// param list is supplied by the caller; C# infers each parameter's type from the target
+		// delegate, so only names are needed. Applies to the VALUE of a keyed element only.
+		if callContext != nil && callContext.wrapArgWithLambda != nil {
+			if params, ok := callContext.wrapArgWithLambda[i]; ok {
+				if label, value, found := strings.Cut(resultExpr, ": "); found && isSimpleIdentifierName(label) {
+					resultExpr = fmt.Sprintf("%s: (%s) => %s(%s)", label, params, value, params)
+				} else {
+					resultExpr = fmt.Sprintf("(%s) => %s(%s)", params, resultExpr, params)
+				}
+			}
+		}
+
 		arg := &strings.Builder{}
 
 		arg.WriteString(resultExpr)

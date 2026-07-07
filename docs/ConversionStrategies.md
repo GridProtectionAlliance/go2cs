@@ -1036,6 +1036,73 @@ interface, and embedded-interface instantiations of a method-set-constrained gen
 constraint method on the parameter and widening walkList-style, values vs Go; clears go/ast's
 CS0308, the go/* toolchain gate.)
 
+### A SELF-REFERENTIAL generic method-set constraint uses a box-wrapping proxy as the type argument
+
+The widen-to-the-interface escape above works only when the constraint interface is **non-generic**
+(`N=Node`, so `N` can *be* `Node`). crypto/elliptic's `nistCurve[Point nistPoint[Point]]` — where
+`nistPoint[T]` is a **generic, self-referential** method-set interface (`Add(T,T) T`,
+`SetBytes([]byte) (T,error)`, …) — cannot: you can't substitute `Point = nistPoint<Point>` (infinite
+regress), and the golib box `ж<P224Point>` cannot *nominally* implement `nistPoint<ж<P224Point>>`
+(it is a sealed golib type in another assembly, and Go's structural satisfaction has no C# analog).
+Four coordinated pieces make it convert **and dispatch**:
+
+1. **The constraint interface is emitted GENERIC.** A method-set interface whose own Go type
+   parameter is used in its member signatures carries its `<T>` (and constraints) in C#, exactly like
+   a generic struct — `[GoType] partial interface nistPoint<T> { … T Add(T, T); (T, error) SetBytes(slice<byte> _); }`.
+   Without it the declaration is arity-0 yet the constraint that references it spells the arity-1
+   `where Point : nistPoint<Point>` (CS0308) and every bare `T` is undefined (CS0246). (Go's
+   operator-only constraint interfaces are arity-0 *in Go*, so this is disjoint from the `<ΔT>`
+   operator machinery.)
+
+2. **One GENERIC adapter class** implements the outer interface: `nistCurveжCurve<Point> : Curve,
+   IжAdapter where Point : nistPoint<Point>` wrapping `ж<nistCurve<Point>>` — NOT a class per
+   instantiation. The converter's `GoImplement` records are per-instantiation but all resolve to the
+   open form here, so `ImplementGenerator` de-dups on the open `(struct, interface)` pair and forwards
+   its type parameters and the struct's own constraint (`GetGenericConstraintClause`). The converter
+   composes the reference name+args separately (`nistCurveжCurve<…>`, base+`ж`+iface, then the closed
+   args) so the type arguments do not bake into the identifier (the old `nistCurve<…>жCurve` was CS1526).
+
+3. **A self-referential PROXY stands in for the type argument.** For each concrete pointer type used
+   to instantiate the generic (`nistCurve[*P224Point]`), the converter renders the type argument as a
+   generated proxy `P224PointжnistPoint` (element-simple+`ж`+iface-simple) instead of the box `ж<P224Point>`,
+   and records `[assembly: GoImplement<P224Point, nistPoint<P224Point>>(ConstraintProxy = true)]` (the
+   interface's own argument is a placeholder). `ImplementGenerator.EmitConstraintProxy` emits:
+
+   ```csharp
+   internal sealed class P224PointжnistPoint : nistPoint<P224PointжnistPoint>, IжAdapter {
+       private readonly ж<P224Point> m_box;
+       public P224PointжnistPoint(ж<P224Point> box) => m_box = box;
+       public static implicit operator P224PointжnistPoint(ж<P224Point> box) => new(box);
+       public static implicit operator ж<P224Point>(P224PointжnistPoint proxy) => proxy.m_box;
+       // T rewritten to the proxy itself; the implicit conversions marshal every T-boundary:
+       P224PointжnistPoint nistPoint<P224PointжnistPoint>.Add(P224PointжnistPoint a, P224PointжnistPoint b) => m_box.Add(a, b);
+       (P224PointжnistPoint, error) nistPoint<P224PointжnistPoint>.SetBytes(slice<byte> b) => m_box.SetBytes(b);
+       // …
+   }
+   ```
+
+   The proxy implements the interface **over itself**, so `Point = P224PointжnistPoint` satisfies
+   `where Point : nistPoint<Point>` (CS0311 otherwise) *and* resolves every `p.Add(…)`/`newPoint().SetBytes(…)`
+   call inside `nistCurve`'s body. The implicit `ж<P224Point>`↔proxy conversions do all the T-boundary
+   marshalling automatically: each forwarder is a bare `m_box.M(args)` (arguments unwrap to the box on
+   the way in, results rewrap to the proxy on the way out — including element-wise inside a
+   `(T, error)` tuple), and a value flowing into a `Point`-typed position (`base: Ꮡ(new P224Point(…))`)
+   converts implicitly at the site. The proxy forwards to the element's **exported** `ж`-extensions even
+   cross-assembly (`m_box.SetBytes` binds nistec's extension from crypto/elliptic).
+
+4. **A `func()`-typed field's method-group initializer is re-wrapped as a lambda.** `nistCurve`'s
+   `newPoint func() Point` becomes `Func<P224PointжnistPoint>`, but a method group (`newPoint: nistec.NewP224Point`,
+   returning `ж<P224Point>`) cannot convert to it — a C# method-group conversion does not apply the
+   user-defined implicit operator (CS0407). Inside a constraint-proxy composite the converter re-wraps
+   such an initializer as a lambda, `newPoint: () => nistec.NewP224Point()`, whose *return* position
+   does apply the conversion.
+
+(Guarded by `GenericPointerInterfaceImpl` — a self-referential `curve[Point point[Point]]` implementing
+`Curve` via pointer receiver, instantiated two ways, with a `newPoint func() Point` field and a
+`(T, error)`-returning constraint method, values vs Go. The real crypto/elliptic `nistCurve` compiles
+its own code identically; its package DLL is separately gated by an unrelated pre-existing `unsafe`↔`runtime`
+cycle in the baseline.)
+
 ### Constraint-only type parameters need explicit type arguments
 
 Go infers a type parameter that appears only in *constraints* through core types — `func Twice[S ~[]E, E Integer](s S)` infers `E` from `S`'s underlying element; the `slices` package's whole `Sort[S ~[]E, E cmp.Ordered] → pdqsortOrdered` chain relies on this. C# never infers a type parameter that does not appear in the parameter list (CS0411 — at *every* call site, concrete instantiations included). When the callee declares such a constraint-only type parameter, the converter renders the call's type arguments explicitly from the instantiation `go/types` already resolved (`info.Instances`): `Twice<Point, int32>(p, 2)` at a concrete site, `Scale<S, E>(s, c)` inside a generic body. Calls to generics whose every type parameter is argument-visible keep their bare Go-shaped form — C# infers them as Go does, no churn. (Guarded by the `GenericTypeInference` extension — a constrained `S`/`E` pass-through chain plus a concrete call to a constraint-only-param generic, values vs Go; clears the 14 CS0411s in the slices/maps wave.)

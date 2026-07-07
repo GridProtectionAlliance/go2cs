@@ -51,6 +51,15 @@ internal class AdapterImplTemplate : TemplateBase
     public required string AdapterScope;
     public required List<MethodInfo> Methods;
 
+    // A GENERIC struct's adapter is ONE generic class over the struct's open type parameters
+    // (crypto/elliptic's `nistCurveжCurve<Point>` wrapping `ж<nistCurve<Point>>`), NOT a class
+    // per instantiation. TypeParameters is the `<Point>` list appended to the class NAME (the
+    // ctor keeps the bare AdapterName); ConstraintClause repeats the struct's `where Point :
+    // nistPoint<Point>` so the wrapped `ж<nistCurve<Point>>` field satisfies nistCurve's own
+    // constraint (CS0314). Both are empty for a non-generic adapter.
+    public string TypeParameters = "";
+    public string ConstraintClause = "";
+
     // Maps an interface member's simple name to its forwarding receiver expression:
     // "m_box" when the struct method binds on the box (direct-ж primary form, or a
     // [GoRecv] ref extension whose RecvGenerator ж-twin exists), or "m_box.Value" for
@@ -69,7 +78,7 @@ internal class AdapterImplTemplate : TemplateBase
              /// Pointer-sourced '{{GetSimpleName(InterfaceName)}}' implementation adapter for 'ж&lt;{{StructName}}&gt;' —
              /// the interface value aliases the wrapped receiver box exactly as Go's interface holds the '*T'.
              /// </summary>
-             {{AdapterScope}} sealed class {{AdapterName}} : {{InterfaceName}}, IжAdapter
+             {{AdapterScope}} sealed class {{AdapterName}}{{TypeParameters}} : {{InterfaceName}}, IжAdapter{{ConstraintClause}}
              {
                  private readonly ж<{{StructName}}> m_box;
 

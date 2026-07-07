@@ -56,6 +56,21 @@ public class GoImplementAttribute<TStruct, TInterface> : Attribute
     /// partial-struct implementation (which copies, and cannot bind direct-ж receiver methods).
     /// </summary>
     public bool Pointer { get; set; }
+
+    /// <summary>
+    /// Gets or sets flag indicating this records a SELF-REFERENTIAL constraint proxy: the Go
+    /// element type <c>TStruct</c> (a pointer type <c>*P</c>) satisfies a generic method-set
+    /// constraint interface <c>TInterface</c> (<c>nistPoint[Point]</c>) only structurally, so it
+    /// is used as a generic type's type argument (<c>nistCurve[*P224Point]</c>). Because the golib
+    /// box <c>ж&lt;TStruct&gt;</c> cannot nominally implement a package interface, the generator
+    /// emits a proxy class <c>TStructжTInterface : TInterface&lt;itself&gt;</c> that wraps the box
+    /// and carries implicit <c>ж&lt;TStruct&gt;</c>↔proxy conversions, so every self-typed
+    /// (<c>T</c>) parameter and result marshals across the boundary automatically. The proxy is
+    /// what gets substituted for the type argument at the constrained instantiation. The
+    /// <c>TInterface</c> type argument's own type argument is a placeholder — the generator uses
+    /// its open definition and closes it over the proxy itself.
+    /// </summary>
+    public bool ConstraintProxy { get; set; }
 }
 
 /// <summary>

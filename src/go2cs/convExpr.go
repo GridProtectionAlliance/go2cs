@@ -44,6 +44,12 @@ type CallExprContext struct {
 	// wrapArgWithNew wraps the indexed argument in a constructor call (`new slice<E>(arg)`) — the
 	// S-where-[]E-expected materialization (see convExprList).
 	wrapArgWithNew map[int]string
+	// wrapArgWithLambda re-wraps a FUNC-typed argument (a method group / func value) as a lambda
+	// `(p0, p1) => value(p0, p1)` so the enclosing delegate's return/param positions can apply the
+	// user-defined implicit conversion a C# method-group conversion won't (a constraint-proxy
+	// `func() Point` field assigned `nistec.NewP224Point`, whose ж<P224Point> return needs the
+	// proxy — CS0407). The map value is the comma-joined lambda parameter list ("" for niladic).
+	wrapArgWithLambda map[int]string
 	// deferredDecls hoists a func-literal argument's capture declarations out of the call's
 	// argument list (where a `var mʗ1 = m;` statement is invalid C#) up to the enclosing
 	// statement. Threaded from the statement emitter (visitExprStmt/visitAssignStmt) through

@@ -12,6 +12,7 @@ import (
 const InterfaceTypeAttributeMarker = ">>MARKER:INTERFACE_TYPE_ATTRS<<"
 const InterfacePostAtributeMarker = ">>MARKER:POST_INTERFACE_ATTRS<<"
 const InterfaceInheritanceMarker = ">>MARKER:INHERITED_INTERFACES<<"
+const InterfaceConstraintMarker = ">>MARKER:INTERFACE_CONSTRAINTS<<"
 
 // For interface types with generic constraints, we will be adding a C# type parameter to the
 // converted Go interface to handle operators. Since methods in interfaces can have their own
@@ -177,8 +178,25 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 	var operatorSets HashSet[OperatorSet]
 	outerIndent := v.indent(v.indentLevel)
 
+	// A GENERIC interface — one whose own Go type parameter is USED in its member signatures
+	// (crypto/elliptic's `nistPoint[T]`, whose `Add(T, T) T` / `SetBytes([]byte) (T, error)`
+	// mention T) — must carry its `<T>` type parameters (and any constraints) in C#, exactly
+	// like a generic struct. Without them the declaration is arity-0 `interface nistPoint`, yet
+	// a type-parameter constraint that references it renders the instantiated arity-1 name
+	// `where Point : nistPoint<Point>` (getGenericDefinition/getTypeName spell it that way) — an
+	// arity mismatch (CS0308) — and every bare `T` in a member is undefined (CS0246). Go's
+	// OPERATOR constraint interfaces (`Ordered`) are arity-0 in Go, so getGenericDefinition
+	// yields nothing for them and the separate `<ΔT>` operator machinery below is untouched.
+	// Skipped for lifted/anonymous interfaces (reflection-implemented, never generic here).
+	genericTypeParams := ""
+	genericConstraints := ""
+
+	if !lifted && identType != nil {
+		genericTypeParams, genericConstraints = v.getGenericDefinition(identType)
+	}
+
 	result.WriteString(outerIndent)
-	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), InterfaceInheritanceMarker))
+	result.WriteString(fmt.Sprintf("[GoType%s]%spartial interface %s%s%s%s{", InterfaceTypeAttributeMarker, InterfacePostAtributeMarker, getSanitizedIdentifier(interfaceTypeName), genericTypeParams, InterfaceInheritanceMarker, InterfaceConstraintMarker))
 	result.WriteString(v.newline)
 
 	v.indentLevel++
@@ -342,10 +360,11 @@ func (v *Visitor) visitInterfaceType(interfaceType *ast.InterfaceType, identType
 		inheritedResult += " "
 	}
 
-	target.WriteString(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(result.String(),
+	target.WriteString(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(strings.ReplaceAll(result.String(),
 		InterfaceTypeAttributeMarker, interfaceAttrs),
 		InterfacePostAtributeMarker, postAttrs),
-		InterfaceInheritanceMarker, inheritedResult))
+		InterfaceInheritanceMarker, inheritedResult),
+		InterfaceConstraintMarker, genericConstraints))
 
 	if lifted && v.inFunction {
 		if v.currentFuncPrefix.Len() > 0 {

@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using go2cs.Templates.InterfaceImpl;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -88,6 +89,13 @@ public class ImplementGenerator : ISourceGenerator
         // distinct per interface and must keep their full method set, so they do not consult it.
         HashSet<string> emittedPartialMembers = new(StringComparer.Ordinal);
 
+        // A GENERIC struct is recorded once per INSTANTIATION (nistCurve<ж<P224Point>>,
+        // nistCurve<ж<P384Point>>, …) but generates ONE generic adapter over the struct's OPEN
+        // form (nistCurveжCurve<Point>). All those closed records collapse to the same open
+        // (struct, interface) pair here, so emit the class only for the first — a second would
+        // redeclare it (CS0102). Keyed by the open definition + interface.
+        HashSet<string> emittedGenericPointerAdapters = new(StringComparer.Ordinal);
+
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, _, _) in attributeFinder.TargetAttributes)
         {
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
@@ -132,10 +140,21 @@ public class ImplementGenerator : ISourceGenerator
             string structName = structType.GetFullTypeName();
             string interfaceName = GlobalQualify(interfaceType.GetFullTypeName(true));
 
-            // Get the attribute's Promoted / Pointer argument values, if defined
+            // Get the attribute's Promoted / Pointer / ConstraintProxy argument values, if defined
             (string name, string value)[] arguments = attributeSyntax.GetArgumentValues();
             bool promoted = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Promoted")).value?.Trim() ?? "false");
             bool pointer = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Pointer")).value?.Trim() ?? "false");
+            bool constraintProxy = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("ConstraintProxy")).value?.Trim() ?? "false");
+
+            // A SELF-REFERENTIAL constraint proxy (crypto/elliptic's *P224Point satisfying
+            // nistPoint[Point] structurally so nistCurve[*P224Point] can instantiate): emit the
+            // proxy class that wraps ж<element> and implements the interface over ITSELF, then move
+            // on — none of the normal adapter method-binding below applies.
+            if (constraintProxy)
+            {
+                EmitConstraintProxy(context, structType, (INamedTypeSymbol)interfaceType, packageNamespace, packageName, packageClassName, usingStatements, emittedHintNames, emittedGenericPointerAdapters);
+                continue;
+            }
 
             // Get all extension methods for the struct, any directly defined receivers
             // take precedence over promoted interface methods that have the same name
@@ -466,13 +485,41 @@ public class ImplementGenerator : ISourceGenerator
                 // (CrossPkgLib.Reporter) gets its public modifier from a sibling generator too.
                 string adapterScope = (GetScope(structName) == "public" || structType.DeclaredAccessibility == Accessibility.Public) && (interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public") ? "public" : "internal";
 
+                // A GENERIC struct (crypto/elliptic's nistCurve[Point nistPoint[Point]]) adapts
+                // through ONE generic adapter class over its OPEN type parameters —
+                // `nistCurveжCurve<Point> : Curve where Point : nistPoint<Point>` wrapping
+                // `ж<nistCurve<Point>>` — that the converter instantiates as
+                // `new nistCurveжCurve<ж<P224Point>>(box)`. structName is already the OPEN form
+                // (GetFullTypeName spells `nistCurve<Point>`, the type-PARAMETER name), so the
+                // class NAME drops to the bare simple name (`nistCurve`) and the `<Point>` list
+                // plus the struct's own constraint ride SEPARATELY. The per-instantiation records
+                // all collapse to the same open pair here — emit the class once (a second is
+                // CS0102). Foreign generic adapters are out of scope (kept on the non-generic path).
+                string adapterBaseName = structName;
+                string adapterTypeParameters = "";
+                string adapterConstraintClause = "";
+
+                if (!foreignStruct && structType is INamedTypeSymbol { IsGenericType: true } genericStructType)
+                {
+                    if (!emittedGenericPointerAdapters.Add($"{genericStructType.OriginalDefinition.ToDisplayString()}|{interfaceName}"))
+                        continue;
+
+                    adapterBaseName = genericStructType.Name;
+                    adapterTypeParameters = $"<{string.Join(", ", genericStructType.TypeParameters.Select(typeParameter => typeParameter.Name))}>";
+                    adapterConstraintClause = GetGenericConstraintClause(genericStructType.TypeParameters);
+                }
+
                 string adapterSource = new AdapterImplTemplate
                 {
                     PackageNamespace = packageNamespace,
                     PackageName = packageName,
                     // FULLY-qualified for a foreign struct (no local using guarantees resolution;
-                    // mirrors the value adapter's same-named-type shadow rationale).
-                    StructName = foreignStruct ? GlobalQualify(structType.GetFullTypeName(true)) : structName,
+                    // mirrors the value adapter's same-named-type shadow rationale). A GENERIC
+                    // struct uses its OPEN form (`nistCurve<Point>`) for the wrapped field — the
+                    // GoImplement record may carry a CLOSED instantiation (`nistCurve<P224Pointж…>`)
+                    // once the proxy makes it constraint-satisfiable, but the adapter class is
+                    // generic, so `adapterBaseName + adapterTypeParameters` reconstructs the open form.
+                    StructName = foreignStruct ? GlobalQualify(structType.GetFullTypeName(true)) : $"{adapterBaseName}{adapterTypeParameters}",
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
@@ -480,8 +527,12 @@ public class ImplementGenerator : ISourceGenerator
                     // same-named foreign structs adapting to one interface otherwise compose
                     // a single colliding class (math/big records both bytes.Reader and
                     // strings.Reader against io.ByteScanner - CS0102/CS0111/CS8646). The
-                    // package name comes from the containing package class (bytes_package).
-                    AdapterName = $"{(foreignStruct ? $"{ForeignPackagePrefix(structType)}{GetSimpleName(structName)}" : structName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
+                    // package name comes from the containing package class (bytes_package). A
+                    // GENERIC struct uses the bare simple name (`nistCurve`) with the `<Point>`
+                    // list supplied via TypeParameters, so the args do not bake into the name.
+                    AdapterName = $"{(foreignStruct ? $"{ForeignPackagePrefix(structType)}{GetSimpleName(structName)}" : adapterBaseName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
+                    TypeParameters = adapterTypeParameters,
+                    ConstraintClause = adapterConstraintClause,
                     AdapterScope = adapterScope,
                     Methods = methods,
                     ForwardReceivers = forwardReceivers,
@@ -597,6 +648,143 @@ public class ImplementGenerator : ISourceGenerator
             return string.Empty;
 
         return $"{packageClassName.Substring(0, packageClassName.Length - "_package".Length)}_";
+    }
+
+    // Renders the C# `where T : …` clauses for a GENERIC struct's adapter from the struct's own
+    // type parameters. The adapter wraps `ж<nistCurve<Point>>`, so it must repeat every constraint
+    // nistCurve itself declares (`where Point : nistPoint<Point>`) or the wrapped field is CS0314.
+    // Constraint ORDER follows C#'s required sequence: the class/struct/unmanaged/notnull primary
+    // constraint first, then base + interface types, then new() last. Interface constraints (the
+    // Go case) are global::-qualified like every other generated type reference.
+    private static string GetGenericConstraintClause(IEnumerable<ITypeParameterSymbol> typeParameters)
+    {
+        List<string> clauses = new();
+
+        foreach (ITypeParameterSymbol typeParameter in typeParameters)
+        {
+            List<string> constraints = new();
+
+            if (typeParameter.HasReferenceTypeConstraint)
+                constraints.Add("class");
+            else if (typeParameter.HasValueTypeConstraint)
+                constraints.Add("struct");
+            else if (typeParameter.HasUnmanagedTypeConstraint)
+                constraints.Add("unmanaged");
+            else if (typeParameter.HasNotNullConstraint)
+                constraints.Add("notnull");
+
+            foreach (ITypeSymbol constraintType in typeParameter.ConstraintTypes)
+                constraints.Add(GlobalQualify(constraintType.ToDisplayString()));
+
+            if (typeParameter.HasConstructorConstraint)
+                constraints.Add("new()");
+
+            if (constraints.Count > 0)
+                clauses.Add($"where {typeParameter.Name} : {string.Join(", ", constraints)}");
+        }
+
+        return clauses.Count > 0 ? $" {string.Join(" ", clauses)}" : string.Empty;
+    }
+
+    // Emits a SELF-REFERENTIAL constraint proxy for a GoImplement(ConstraintProxy = true) record:
+    // `elementжinterface : interface<itself>` wrapping ж<element>, with implicit ж<element>↔proxy
+    // conversions and one forwarder per interface method (the body forwards to the box's like-named
+    // extension; the implicit conversions marshal every self-typed T argument/result). See
+    // ConstraintProxyImplTemplate for the rationale.
+    private static void EmitConstraintProxy(GeneratorExecutionContext context, ITypeSymbol elementType, INamedTypeSymbol interfaceType, string packageNamespace, string packageName, string packageClassName, string[] usingStatements, HashSet<string> emittedHintNames, HashSet<string> emittedProxies)
+    {
+        INamedTypeSymbol interfaceDef = interfaceType.OriginalDefinition;
+
+        if (interfaceDef.TypeParameters.Length != 1)
+            return;
+
+        // One proxy per (element, open-interface) pair — the converter records it at every
+        // constrained instantiation site (nistCurve[*P224Point] appears several times).
+        if (!emittedProxies.Add($"proxy|{elementType.OriginalDefinition.ToDisplayString()}|{interfaceDef.ToDisplayString()}"))
+            return;
+
+        // Proxy name element-simple + ж + interface-simple — MUST match the converter's
+        // type-argument rendering at the constrained instantiation.
+        string proxyName = $"{elementType.Name}{PointerPrefix}{interfaceDef.Name}";
+
+        // The boxed pointee, fully qualified so a FOREIGN element resolves (nistec.P224Point used
+        // from crypto/elliptic).
+        string elementName = GlobalQualify(elementType.GetFullTypeName(true));
+
+        // The interface closed over the proxy ITSELF: `nistPoint<P224PointжnistPoint>`.
+        string interfaceRef = $"{StripTypeArguments(GlobalQualify(interfaceDef.ToDisplayString()))}<{proxyName}>";
+
+        ITypeParameterSymbol selfParameter = interfaceDef.TypeParameters[0];
+        StringBuilder methods = new();
+
+        foreach (IMethodSymbol method in interfaceDef.GetMembers().OfType<IMethodSymbol>().Where(member => member.MethodKind == MethodKind.Ordinary && !member.IsStatic))
+        {
+            string methodName = EscapeCsKeyword(method.Name);
+            string returnType = RenderWithProxy(method.ReturnType, selfParameter, proxyName);
+            string parameters = string.Join(", ", method.Parameters.Select((parameter, index) => $"{RenderWithProxy(parameter.Type, selfParameter, proxyName)} {SafeParameterName(parameter.Name, index)}"));
+            string arguments = string.Join(", ", method.Parameters.Select((parameter, index) => SafeParameterName(parameter.Name, index)));
+
+            if (methods.Length > 0)
+                methods.Append("\r\n\r\n        ");
+
+            methods.Append($"{returnType} {interfaceRef}.{methodName}({parameters}) => m_box.{methodName}({arguments});");
+        }
+
+        string proxySource = new ConstraintProxyImplTemplate
+        {
+            PackageNamespace = packageNamespace,
+            PackageName = packageName,
+            ProxyName = proxyName,
+            InterfaceRef = interfaceRef,
+            ElementName = elementName,
+            AdapterScope = "internal",
+            MethodsImplementation = methods.ToString(),
+            UsingStatements = usingStatements
+        }
+        .Generate();
+
+        context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{proxyName}-proxy.g.cs")), proxySource);
+    }
+
+    private static string SafeParameterName(string name, int index) => string.IsNullOrEmpty(name) ? $"arg{index}" : EscapeCsKeyword(name);
+
+    private static string StripTypeArguments(string typeName)
+    {
+        int index = typeName.IndexOf('<');
+        return index >= 0 ? typeName.Substring(0, index) : typeName;
+    }
+
+    // Reports whether a type mentions the interface's self-type parameter anywhere in its shape.
+    private static bool ContainsTypeParameter(ITypeSymbol type, ITypeParameterSymbol typeParameter) => type switch
+    {
+        _ when SymbolEqualityComparer.Default.Equals(type, typeParameter) => true,
+        IArrayTypeSymbol array => ContainsTypeParameter(array.ElementType, typeParameter),
+        INamedTypeSymbol named => named.TypeArguments.Any(argument => ContainsTypeParameter(argument, typeParameter)),
+        _ => false
+    };
+
+    // Renders a type for a proxy method signature with the interface's self-type parameter T
+    // rewritten to the proxy itself — `T`→proxy, `(T, error)`→`(proxy, error)`, `[]T`→`proxy[]`,
+    // `Foo<T>`→`Foo<proxy>`. A type with no T renders exactly as the interface declares it.
+    private static string RenderWithProxy(ITypeSymbol type, ITypeParameterSymbol selfParameter, string proxyName)
+    {
+        if (SymbolEqualityComparer.Default.Equals(type, selfParameter))
+            return proxyName;
+
+        if (!ContainsTypeParameter(type, selfParameter))
+            return GlobalQualify(type.ToDisplayString());
+
+        switch (type)
+        {
+            case IArrayTypeSymbol array:
+                return $"{RenderWithProxy(array.ElementType, selfParameter, proxyName)}[]";
+            case INamedTypeSymbol { IsTupleType: true } tuple:
+                return $"({string.Join(", ", tuple.TupleElements.Select(element => RenderWithProxy(element.Type, selfParameter, proxyName)))})";
+            case INamedTypeSymbol named:
+                return $"{StripTypeArguments(GlobalQualify(named.ConstructedFrom.ToDisplayString()))}<{string.Join(", ", named.TypeArguments.Select(argument => RenderWithProxy(argument, selfParameter, proxyName)))}>";
+            default:
+                return GlobalQualify(type.ToDisplayString());
+        }
     }
 
     private static string? GetNamespace(FileScopedNamespaceDeclarationSyntax? namespaceSyntax)

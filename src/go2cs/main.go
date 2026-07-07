@@ -370,6 +370,15 @@ var constImportedTypeAliases HashSet[string]
 var parsedPackageInfoFiles HashSet[string]
 var interfaceImplementations map[string]HashSet[string]
 var promotedInterfaceImplementations map[string]HashSet[string]
+
+// constraintProxies collects the SELF-REFERENTIAL constraint proxies this package needs — a
+// generic type instantiated with a pointer type whose type parameter carries a self-referential
+// generic method-set interface constraint (nistCurve's `Point nistPoint[Point]` at `*P224Point`).
+// The box ж<P224Point> can't nominally implement nistPoint<…>, so a proxy stands in as the type
+// argument. Keyed "elementFullName|interfaceFullName" → {elementFullName, interfaceFullName}; each
+// becomes a `[assembly: GoImplement<element, iface<element>>(ConstraintProxy = true)]` record that
+// drives ImplementGenerator's EmitConstraintProxy. See constraintProxyArg.
+var constraintProxies map[string][2]string
 var interfaceInheritances map[string]HashSet[string]
 var implicitConversions map[string]HashSet[string]
 var invertedImplicitConversions map[string]HashSet[string]
@@ -676,6 +685,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		parsedPackageInfoFiles = NewHashSet([]string{})
 		interfaceImplementations = make(map[string]HashSet[string])
 		promotedInterfaceImplementations = make(map[string]HashSet[string])
+		constraintProxies = make(map[string][2]string)
 		interfaceInheritances = make(map[string]HashSet[string])
 		implicitConversions = make(map[string]HashSet[string])
 		invertedImplicitConversions = make(map[string]HashSet[string])
@@ -1134,6 +1144,16 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				for implementation := range implementations {
 					lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s>(Promoted = true)]", qualifyLocalTypeRef(implementation), qualifyLocalTypeRef(interfaceName)))
 				}
+			}
+
+			// Add self-referential constraint proxies (nistCurve[*P224Point]'s Point). Each is a
+			// `GoImplement<element, iface<element>>(ConstraintProxy = true)` — the interface's own
+			// type argument is a PLACEHOLDER (the generator closes it over the emitted proxy itself),
+			// so the element doubles as the dummy. See constraintProxyArg / EmitConstraintProxy.
+			for _, proxy := range constraintProxies {
+				elementRef := qualifyLocalTypeRef(proxy[0])
+				interfaceRef := qualifyLocalTypeRef(proxy[1])
+				lines.Add(fmt.Sprintf("[assembly: GoImplement<%s, %s<%s>>(ConstraintProxy = true)]", elementRef, interfaceRef, elementRef))
 			}
 
 			// Sort lines
@@ -2668,7 +2688,23 @@ func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 		}
 	}
 
-	return structTypeName + PointerPrefix + ifaceSimple
+	// A GENERIC struct's closed type-argument list must TRAIL the adapter name, not sit inside
+	// it. `nistCurve<ж<P224Point>>` + PointerPrefix + `Curve` otherwise composes the malformed
+	// `nistCurve<ж<P224Point>>жCurve` (an identifier with `<…>` mid-name — CS1526). Split the
+	// base name from its `<…>` args so the reference reads `nistCurveжCurve<ж<P224Point>>`:
+	// base+PointerPrefix+iface NAMES the ONE generic adapter class the generator emits (from the
+	// open `nistCurve<Point>` form), and the closed args instantiate it. Non-generic names have
+	// no `<`, so this is a no-op for them. Keep in sync with ImplementGenerator's generic-adapter
+	// emission (which composes the class name identically via Symbols.PointerPrefix).
+	structBase := structTypeName
+	typeArgs := ""
+
+	if idx := strings.Index(structTypeName, "<"); idx >= 0 {
+		structBase = structTypeName[:idx]
+		typeArgs = structTypeName[idx:]
+	}
+
+	return structBase + PointerPrefix + ifaceSimple + typeArgs
 }
 
 func isDynamicStruct(t types.Type) bool {
@@ -3485,6 +3521,127 @@ func signatureReferencesNamedFuncType(sig *types.Signature) bool {
 	return false
 }
 
+// constraintProxyArg reports the C# constraint-proxy type name to render for type argument i of an
+// instantiated generic `named`, when that argument is a POINTER to a named type AND the matching
+// type parameter carries a SELF-REFERENTIAL generic method-set interface constraint — Go's
+// `nistCurve[Point nistPoint[Point]]` instantiated with `*P224Point`. The golib box ж<P224Point>
+// cannot NOMINALLY implement nistPoint<…> (it is a sealed golib type in another assembly, and Go's
+// structural satisfaction has no C# analog), and the interface is self-referential so the value
+// can't widen to the interface either. So the argument renders as the generated proxy
+// `P224PointжnistPoint : nistPoint<itself>` (ImplementGenerator's EmitConstraintProxy), and this
+// also registers the (element, interface) pair so package_info emits its ConstraintProxy record.
+// Returns ("", false) for every other argument, leaving normal rendering untouched.
+func (v *Visitor) constraintProxyArg(named *types.Named, i int) (string, bool) {
+	origin := named.Origin()
+
+	if origin == nil {
+		return "", false
+	}
+
+	typeParams := origin.TypeParams()
+
+	if typeParams == nil || i >= typeParams.Len() {
+		return "", false
+	}
+
+	typeParam := typeParams.At(i)
+
+	// The argument must be a pointer to a named type — a value type arg satisfies its constraint
+	// nominally (or widens), only the boxed pointer needs the proxy.
+	ptr, ok := named.TypeArgs().At(i).(*types.Pointer)
+
+	if !ok {
+		return "", false
+	}
+
+	elemNamed, ok := types.Unalias(ptr.Elem()).(*types.Named)
+
+	if !ok {
+		return "", false
+	}
+
+	// The constraint must be an INSTANTIATED generic method-set interface (nistPoint[Point]);
+	// a plain non-generic method-set interface (go/ast's Node) widens to itself instead.
+	constraintNamed, ok := typeParam.Constraint().(*types.Named)
+
+	if !ok || constraintNamed.TypeArgs() == nil || constraintNamed.TypeArgs().Len() == 0 {
+		return "", false
+	}
+
+	iface, ok := constraintNamed.Underlying().(*types.Interface)
+
+	if !ok || iface.NumMethods() == 0 || !iface.IsMethodSet() {
+		return "", false
+	}
+
+	// Self-referential: one of the constraint's type arguments IS the type parameter itself.
+	selfReferential := false
+
+	for j := 0; j < constraintNamed.TypeArgs().Len(); j++ {
+		if tp, ok := constraintNamed.TypeArgs().At(j).(*types.TypeParam); ok && tp == typeParam {
+			selfReferential = true
+			break
+		}
+	}
+
+	if !selfReferential {
+		return "", false
+	}
+
+	interfaceOrigin := constraintNamed.Origin()
+
+	// Proxy name element-simple + PointerPrefix + interface-simple — MUST match
+	// ImplementGenerator's `elementType.Name + PointerPrefix + interfaceDef.Name`.
+	proxyName := elemNamed.Obj().Name() + PointerPrefix + interfaceOrigin.Obj().Name()
+
+	// Register the (element, interface) pair so package_info emits the ConstraintProxy record.
+	// The interface name drops its type-parameter DECLARATION (`point[T any]` → `point`): the
+	// record's `GoImplement<element, point<element>>` closes it over the element placeholder.
+	// A CROSS-PACKAGE element renders to its C# full type name (nistec.P224Point →
+	// `crypto.@internal.nistec_package.P224Point`, resolving the slash path); a SAME-PACKAGE
+	// element stays BARE (convertToCSFullTypeName would root-qualify it to the wrong `go.p224`,
+	// exactly as it would the local interface name below).
+	elementFullName := v.getFullTypeName(elemNamed, false)
+
+	if elemNamed.Obj().Pkg() != v.pkg {
+		elementFullName = convertToCSFullTypeName(elementFullName)
+	}
+
+	interfaceFullName := v.getFullTypeName(interfaceOrigin, false)
+
+	// Strip the type-parameter DECLARATION only — getFullTypeName already yields the interface's
+	// C# reference form (bare `nistPoint` for a local interface, `pkg_package.Iface` cross-package),
+	// so it must NOT go through convertToCSFullTypeName (which would root-qualify the bare local name
+	// to the wrong `go.nistPoint`). qualifyLocalTypeRef handles final qualification at emission.
+	if idx := strings.Index(interfaceFullName, "["); idx >= 0 {
+		interfaceFullName = interfaceFullName[:idx]
+	}
+
+	packageLock.Lock()
+	constraintProxies[elementFullName+"|"+interfaceFullName] = [2]string{elementFullName, interfaceFullName}
+	packageLock.Unlock()
+
+	return proxyName, true
+}
+
+// namedHasConstraintProxy reports whether any type argument of the instantiated generic `named`
+// resolves to a self-referential constraint proxy (see constraintProxyArg) — used to re-render a
+// composite-literal type through the resolved type so its type arguments match the proxy the
+// pointer adapter wraps, rather than the box that convExpr's AST walk would emit.
+func (v *Visitor) namedHasConstraintProxy(named *types.Named) bool {
+	if named == nil || named.TypeArgs() == nil {
+		return false
+	}
+
+	for i := 0; i < named.TypeArgs().Len(); i++ {
+		if _, ok := v.constraintProxyArg(named, i); ok {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 	if t == nil {
 		return ""
@@ -3578,7 +3735,11 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 			args := make([]string, typeArgs.Len())
 
 			for i := 0; i < typeArgs.Len(); i++ {
-				args[i] = v.getTypeName(typeArgs.At(i), false)
+				if proxyName, ok := v.constraintProxyArg(named, i); ok {
+					args[i] = proxyName
+				} else {
+					args[i] = v.getTypeName(typeArgs.At(i), false)
+				}
 			}
 
 			if pkg := obj.Pkg(); pkg != nil && pkg != v.pkg {
@@ -3728,7 +3889,11 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 				args := make([]string, typeArgs.Len())
 
 				for i := 0; i < typeArgs.Len(); i++ {
-					args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+					if proxyName, ok := v.constraintProxyArg(named, i); ok {
+						args[i] = proxyName
+					} else {
+						args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+					}
 				}
 
 				return baseName + "[" + strings.Join(args, ", ") + "]"
@@ -3745,7 +3910,11 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 			args := make([]string, typeArgs.Len())
 
 			for i := 0; i < typeArgs.Len(); i++ {
-				args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+				if proxyName, ok := v.constraintProxyArg(named, i); ok {
+					args[i] = proxyName
+				} else {
+					args[i] = v.getFullTypeName(typeArgs.At(i), isUnderlying)
+				}
 			}
 
 			return obj.Name() + "[" + strings.Join(args, ", ") + "]"
