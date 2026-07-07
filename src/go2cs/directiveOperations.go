@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"go/ast"
+	"go/build"
 	"go/parser"
 	"go/token"
 	"io"
@@ -248,6 +249,26 @@ func (e *BuildConstraintEvaluator) evaluateExpr(expr ast.Expr) bool {
 		// Check if the identifier (e.g., "linux", "darwin", "amd64") is allowed
 		identifier := node.Name
 		return e.allowedPlatforms[identifier]
+
+	case *ast.SelectorExpr:
+		// A DOTTED build tag — `goexperiment.coverageredesign`, `amd64.v1` — is matched against the
+		// host toolchain's active tool tags (go/build's ToolTags), exactly as go/packages did when
+		// it selected these files. Without this the tag fell through to `false`, so a
+		// `//go:build goexperiment.X` _on.go file for an experiment ON by default (coverageredesign,
+		// regabiwrappers, regabiargs) was re-EXCLUDED here after packages.Load had INCLUDED it,
+		// dropping that file's consts (testing's `goexperiment.CoverageRedesign`, CS0117). An
+		// experiment that is off keeps its tag out of ToolTags → false → the `!goexperiment.X`
+		// _off.go file is included instead, so exactly one of the pair survives, as Go intends.
+		if x, ok := node.X.(*ast.Ident); ok {
+			tag := x.Name + "." + node.Sel.Name
+
+			for _, toolTag := range build.Default.ToolTags {
+				if strings.EqualFold(toolTag, tag) {
+					return true
+				}
+			}
+		}
+		return false
 
 	case *ast.ParenExpr:
 		// Handle parenthesized expressions
