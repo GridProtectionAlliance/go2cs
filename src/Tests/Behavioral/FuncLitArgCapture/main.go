@@ -25,6 +25,50 @@ func set(p *box) {
 	p.x = 42
 }
 
+// payload is a STRUCT so a local of it escapes to the heap as a ref-local
+// (`ref var p = ref heap<payload>`), mirroring testing/fuzz.go's `fn := reflect.ValueOf(ff)`.
+type payload struct{ vals []int }
+
+func (p payload) sum() int {
+	t := 0
+	for _, v := range p.vals {
+		t += v
+	}
+	return t
+}
+
+// nestedStructCapture: a heap-boxed struct local is captured by an OUTER closure whose INNER
+// goroutine also uses it BY VALUE. The inner snapshot must read the OUTER closure's snapshot
+// (`var pʗ2 = pʗ1;`), not the enclosing method's ref-local (`var pʗ2 = p;` — a ref local is
+// uncapturable inside a closure, CS8175; testing/fuzz.go's run closure with its inner
+// `go tRunner(t, func(){ fn.Call(args) })`).
+func nestedStructCapture() int {
+	p := payload{vals: []int{1, 2, 3, 4}}
+	out := make(chan int, 1)
+	outer := func() {
+		go func() {
+			out <- p.sum()
+		}()
+	}
+	outer()
+	return <-out
+}
+
+// selfRefCapture: a go-statement calls a captured func-value AND passes an inner func-literal
+// argument. The func-value's snapshot is generated while converting that inner literal, so the
+// outer (owner) capture state is on the stack; its RHS must stay the outer name, not a
+// self-reference (`var workerʗ1 = workerʗ1;` — CS0841; net/lookup.go's
+// `go dnsWaitGroupDone(ch, func(){})`).
+func selfRefCapture() int {
+	done := make(chan int, 1)
+	worker := func(cb func()) {
+		cb()
+		done <- 5
+	}
+	go worker(func() {})
+	return <-done
+}
+
 func main() {
 	// 1. Function literal as a call argument that takes the bare address of a local.
 	//    The closure must write through to the ORIGINAL m (not a snapshot copy).
@@ -126,4 +170,12 @@ func main() {
 	zero := func() (n int, s string) { return }
 	n0, s0 := zero()
 	fmt.Println("11:", n0, s0 == "")
+
+	// 12. Heap-boxed struct local captured by an outer closure, re-captured by value in an inner
+	//     goroutine — the inner snapshot must read the outer snapshot (`pʗ2 = pʗ1`), else CS8175.
+	fmt.Println("12:", nestedStructCapture())
+
+	// 13. Go-statement over a captured func-value with an inner func-literal argument — the outer
+	//     capture's snapshot RHS must stay the outer name, not a self-reference (`workerʗ1`).
+	fmt.Println("13:", selfRefCapture())
 }

@@ -23,6 +23,48 @@ internal static void set(ж<box> Ꮡp) {
     p.x = 42;
 }
 
+[GoType] partial struct payload {
+    internal slice<nint> vals;
+}
+
+internal static nint sum(this payload p) {
+    nint t = 0;
+    foreach (var (_, v) in p.vals) {
+        t += v;
+    }
+    return t;
+}
+
+internal static nint nestedStructCapture() {
+    ref var p = ref heap<payload>(out var Ꮡp);
+    p = new payload(vals: new nint[]{1, 2, 3, 4}.slice());
+    var @out = new channel<nint>(1);
+    var outʗ1 = @out;
+    var pʗ1 = p;
+    var outer = () => {
+        var outʗ2 = outʗ1;
+        var pʗ2 = pʗ1;
+        goǃ(() => {
+            outʗ2.ᐸꟷ(pʗ2.sum());
+        });
+    };
+    outer();
+    return ᐸꟷ(@out);
+}
+
+internal static nint selfRefCapture() {
+    var done = new channel<nint>(1);
+    var doneʗ1 = done;
+    var worker = (Action cb) => {
+        cb();
+        doneʗ1.ᐸꟷ(5);
+    };
+    var workerʗ1 = worker;
+    goǃ(workerʗ1, () => {
+    });
+    return ᐸꟷ(done);
+}
+
 internal static void Main() {
     ref var m = ref heap(new box(), out var Ꮡm);
     run(() => {
@@ -95,6 +137,8 @@ internal static void Main() {
     };
     var (n0, s0) = zero();
     fmt.Println("11:", n0, s0 == ""u8);
+    fmt.Println("12:", nestedStructCapture());
+    fmt.Println("13:", selfRefCapture());
 }
 
 } // end main_package

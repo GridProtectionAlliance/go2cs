@@ -2198,6 +2198,38 @@ func (v *Visitor) generateCaptureDeclarations() string {
 			}
 		}
 
+		// A NESTED lambda declares its capture snapshot INSIDE an enclosing lambda's body, where the
+		// captured variable has ALREADY been renamed to that enclosing lambda's OWN capture name. The
+		// declaration RHS must read the enclosing name — testing/fuzz.go's `run` closure captures the
+		// heap-boxed ref-local `fn` (`var fnʗ1 = fn;` before run), so run's inner
+		// `go tRunner(t, func(t){ … fn.Call(args) })` must snapshot run's `fnʗ1`, not the outer method's
+		// ref-local `fn` — a ref local is uncapturable inside a closure (CS8175). Walk the conversion
+		// stack from the top (deepest) outward: pass-through levels (a go/defer stmt's own
+		// enterLambdaConversion) carry an empty currentLambdaVars, so skip them and use the FIRST
+		// enclosing lambda that actually renamed this variable. The object guard rejects a same-named
+		// shadow that is a DIFFERENT variable. Stop at the function level (conversionInLambda false).
+		for i := len(v.lambdaCapture.conversionStack) - 1; i >= 0; i-- {
+			enclosing := v.lambdaCapture.conversionStack[i]
+			if !enclosing.conversionInLambda {
+				break
+			}
+			if enclosingName, ok := enclosing.currentLambdaVars[info.origIdent.Name]; ok {
+				// Skip this capture's OWN owner state. pendingCaptures is shared across a function's
+				// lambdas, so an OUTER lambda's snapshot can be generated while converting an INNER
+				// func-literal ARGUMENT (`go dnsWaitGroupDone(ch, func(){})`, net lookup.go): the
+				// outer (owner) lambda's state is then on the stack with a rename EQUAL to the name
+				// being declared, and adopting it would emit `var xʗN = xʗN;` (self-reference). Keep
+				// walking outward to the owner's true enclosing scope, where the RHS is valid.
+				if enclosingName == info.copyIdent.Name {
+					continue
+				}
+				if capturedObj, hasObj := enclosing.currentLambdaVarObjs[info.origIdent.Name]; !hasObj || capturedObj == obj {
+					outerName = enclosingName
+				}
+				break
+			}
+		}
+
 		// Restore old lambda state
 		if v.lambdaCapture != nil {
 			v.lambdaCapture.conversionInLambda = wasInLambda

@@ -36,7 +36,7 @@ internal static void Main() {
     var x = Ꮡ(new builder(nil));
     var xʗ1 = x;
     ((Action)(() => func((defer, recover) => {
-        var xʗ2 = x;
+        var xʗ2 = xʗ1;
         defer(xʗ2.of(builder.Ꮡc).reset);
         xʗ1.of(builder.Ꮡc).inc();
         fmt.Println("inside2:", (~xʗ1).c.n);
