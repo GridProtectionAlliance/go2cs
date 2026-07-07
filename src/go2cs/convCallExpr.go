@@ -1736,6 +1736,19 @@ func (v *Visitor) isUntypedNumericConstArg(arg ast.Expr) bool {
 				return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
 			}
 		}
+	case *ast.SelectorExpr:
+		// A CROSS-PACKAGE untyped numeric const reached through a qualified selector
+		// (`tabwriter.Escape`, whose `const Escape = '\xff'` renders as a golib `UntypedInt`)
+		// is an untyped constant just like a bare ident, but arrives here as a SelectorExpr —
+		// the const object hangs off the Sel ident. `append([]byte, tabwriter.Escape)` otherwise
+		// leaves the two append overloads ambiguous (the ISlice overload infers T from the
+		// UntypedInt element while slice<T> infers byte — CS0121 ×6, go/printer). Cast it to the
+		// element type exactly as the bare-ident case does.
+		if constObj, ok := v.info.Uses[a.Sel].(*types.Const); ok {
+			if basic, ok := constObj.Type().(*types.Basic); ok {
+				return basic.Info()&types.IsUntyped != 0 && basic.Info()&types.IsNumeric != 0
+			}
+		}
 	case *ast.UnaryExpr:
 		// A numeric unary operator over an untyped numeric constant (`-1`, `+2`, `^0`) is itself an
 		// untyped numeric constant but not a bare BasicLit/Ident (regexp `append(a, -1)` left the two

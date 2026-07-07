@@ -438,6 +438,18 @@ func main() {
 	scan := makeScanner("p:")
 	scanName, scanData, scanErr := scan("hello")
 	fmt.Println(scanName, string(scanData), scanErr == nil) // hello p:hello true
+
+	// Root C: appending a CROSS-PACKAGE untyped numeric const reached through a SELECTOR
+	// (CrossPkgLib.Sep, a rune ':'; CrossPkgLib.Precision, an int 2 — both render as an UntypedInt)
+	// to a []byte/[]rune otherwise leaves the two golib append overloads ambiguous — the ISlice
+	// overload infers T from the UntypedInt element while slice<T> infers the element type (CS0121,
+	// the go/printer `append(block, tabwriter.Escape)` shape). isUntypedNumericConstArg had matched
+	// only a bare *ast.Ident; its SelectorExpr gate now casts the element so the slice<T> overload binds.
+	bbuf := []byte("key")
+	bbuf = append(bbuf, CrossPkgLib.Sep)
+	rbuf := []rune{'a'}
+	rbuf = append(rbuf, CrossPkgLib.Precision)
+	fmt.Println(string(bbuf), len(rbuf), rbuf[1]) // key: 2 2
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a

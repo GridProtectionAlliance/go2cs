@@ -326,6 +326,19 @@ a = append(a, (uint16)(replacementChar));
 a = append(a, (uint16)(7), (uint16)(8));
 ```
 
+The same cast reaches an untyped numeric constant referenced through a **cross-package SELECTOR**.
+`isUntypedNumericConstArg` had matched only a bare `*ast.Ident`, so `append([]byte, tabwriter.Escape)`
+(go/printer's block builder — `tabwriter.Escape` is `const Escape = '\xff'`, rendered as a golib
+`UntypedInt`) kept the ambiguity (CS0121 ×6). The gate now also inspects an `*ast.SelectorExpr`'s `Sel`
+constant object, casting the element to the slice's element type: `append(block, (byte)(tabwriter.Escape))`.
+That same selector gate also feeds the deferred method-value arg cast — `deferǃ(syscall.Seek, …,
+(nint)(io.SeekStart), …)` (internal/poll) now casts the const to the parameter type rather than the
+default-type wrap — and the `regexp/syntax` `unicode.MaxRune` append; both are equal-or-better and compile.
+A same-package untyped const (a bare ident) is unchanged. (Guarded by the `CrossPkgUser` extension —
+`append([]byte, CrossPkgLib.Sep)` (rune `':'`) and `append([]rune, CrossPkgLib.Precision)` (int `2`), both
+cross-package untyped consts reached through a selector, output-compared vs Go; without the fix the appends
+are CS0121.)
+
 **A string-literal spread** — `append(b, "runtime error: "...)` (runtime `error.go`'s message builder) — renders the literal as a `"…"u8` `ReadOnlySpan<byte>`, which has no spread property (`.ꓸꓸꓸ` → CS1061). The spread emission wraps a direct string-literal source in the member-accessible `@string` — `append(b, ((@string)"runtime error: "u8).ꓸꓸꓸ)` — whose `ꓸꓸꓸ` returns the `Span<byte>` the `append<T>(slice<T>, params Span<T>)` overload binds; this is the same wrap the `string(r)...` conversion spread uses (above). A non-literal spread source (a slice, a `@string` variable) is unchanged. (Guarded by the `StringConvPostfix` extension — two literal spreads appended and value-compared vs Go.)
 
 **A string-literal CONCAT as an object/interface vararg argument** — runtime `stack.go`'s newline+tab join in `print`'s diagnostics — needs the same u8 suppression the direct literal argument already gets, propagated INTO the `BinaryExpr`'s operands: both halves otherwise render as `"…"u8` spans, and a `ReadOnlySpan<byte>` cannot box to `object` (CS1503) nor be `+`-concatenated. The binary-expression conversion now honors an incoming `BasicLitContext.u8StringOK=false`, so the operands render as plain C# strings whose `+` and boxing are fine; the default context leaves every other path unchanged. (Guarded by the `StringConvPostfix` extension — a concat with an escape into an `fmt.Println` vararg plus a nested three-way concat, values vs Go.)

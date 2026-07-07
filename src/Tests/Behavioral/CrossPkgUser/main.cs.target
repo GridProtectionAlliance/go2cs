@@ -164,7 +164,7 @@ internal static (slice<byte>, error) readWith(@string @base, @string @file) {
 }
 
 internal static void Main() => func((defer, recover) => {
-    deferǃ(note, (nint)CrossPkgLib.Precision, defer);
+    deferǃ(note, (nint)(CrossPkgLib.Precision), defer);
     var b = CrossPkgLib.Boiling();
     var r = b.Add(10);
     fmt.Println((float64)b);
@@ -290,6 +290,11 @@ internal static void Main() => func((defer, recover) => {
     var scan = makeScanner("p:"u8);
     var (scanName, scanData, scanErr) = scan("hello"u8);
     fmt.Println(scanName, ((@string)scanData), scanErr == default!);
+    var bbuf = slice<byte>((@string)"key");
+    bbuf = append(bbuf, (byte)(CrossPkgLib.Sep));
+    var rbuf = new rune[]{(rune)'a'}.slice();
+    rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
+    fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
 });
 
 [GoType("num:float64")] partial struct localCelsius;
