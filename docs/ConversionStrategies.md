@@ -2267,6 +2267,34 @@ members) is `internal`, so no converter-only descent can reach it. The fix is tw
 exported `Add`/`Report` take `&c.sum` (box-receiver); the user package calls them on a `*Counter` local
 and through a parameter, plus reads the exported `Label` field for contrast — output-compared vs Go.)
 
+**Plain-return-type addendum — a PLAIN (non-box) promoted method returning a public builtin.** The
+box-shim above covers a method emitted as a `ж<T>` primary (it takes `&receiver.field`). A method that
+merely READS a field — `testing.common.Name()` (`func (c *common) Name() string { return c.name }`) — is
+emitted as an ordinary `Name(this ref common)` extension, so the promotion machinery emits the usual
+value + box forwarders `Name(this ref T)` / `Name(this ж<T>)` with body `target.common.Name()`. But their
+scope was downgraded by the RETURN type: `@string` (and `error`, `bool`, `nint`, … — every golib builtin)
+is a PUBLIC C# type whose Go-lowercase name the name-based `GetScope` heuristic reads as unexported, so
+the forwarder was emitted `internal` and thus invisible cross-assembly. Cross-package the converter emits
+the same bare `Ꮡt.Name()` (the foreign-unexported-value-embed arm fires for EVERY promoted
+pointer-receiver method, not just box ones), which then bound a same-named FOREIGN extension —
+`x/net/nettest`'s `timeoutWrapper` reads `t.Name() == "…"`, and the only visible `Name` was
+`flag.Name(ref flag.FlagSet)` (flag is imported by testing) → **CS1929**. The fix keeps the forwarder
+public when its return type is GENUINELY accessible: `go2cs-gen` captures the return type's ACTUAL C#
+accessibility (`MethodInfo.ReturnTypeIsPublic`, computed by `IsEffectivelyPublicType` — the type and
+every type argument / tuple element / array-or-pointer element is `public`, treating builtin special
+types and use-site-bound type parameters as public) and, for the direct-unexported-value-embed case,
+trusts it over the lowercase name (`directEmbedIsUnexportedValue && method.ReturnTypeIsPublic`):
+```csharp
+public static @string Name(this ж<T> Ꮡtarget) { ref var target = ref Ꮡtarget.Value; return target.common.Name(); }
+```
+Every OTHER promotion keeps the conservative name heuristic (so no golden/compile churn), and an
+UNEXPORTED enclosing struct still yields an internal forwarder (its `ж<T>` receiver is internal — a public
+forwarder there is CS0051, and my change only prevents a downgrade below the struct's own scope). This
+greens `x/net/nettest` (census 271 → 272/302, zero regressions). (Guarded by `PromotedValueEmbedLib`/
+`PromotedValueEmbedUser`: `Widget` value-embeds an unexported `common` whose plain `Name() string` is read
+in an expression cross-package, alongside an unrelated `Gadget.Name()` — the foreign same-named extension
+— output-compared vs Go; CS1929 without the fix.)
+
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
 DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records

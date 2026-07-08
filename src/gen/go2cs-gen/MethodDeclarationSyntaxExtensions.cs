@@ -46,6 +46,15 @@ public record MethodInfo
 
     public bool IsRefRecv { get; init; }
 
+    // True when the return type is a PUBLIC C# type transitively (see IsEffectivelyPublicType). The
+    // name-based GetScope heuristic reads every Go-lowercase-named type as unexported, but golib
+    // builtins (@string, error, bool, nint, slice<T>, …) are PUBLIC C# types despite their lowercase
+    // names. A promoted forwarder returning such a type was wrongly downgraded to `internal` and so
+    // was invisible cross-assembly (testing.T.Name → @string → CS1929 in x/net/nettest). This lets the
+    // promotion machinery keep such a forwarder public where the return type is genuinely accessible.
+    // Defaults false so any MethodInfo built without semantic type info falls back to the heuristic.
+    public bool ReturnTypeIsPublic { get; init; }
+
     // Set when this is a direct-ж (box-receiver, `this ж<T>`) primary being promoted through a POINTER
     // embed: the promoted forwarder must call it on the embed's BOX hop (`target.<embed>`), not the
     // deref'd value (`target.<embed>.Value`) a value-receiver method uses — the box receiver needs ж<T>.
@@ -172,6 +181,50 @@ public record MethodInfo
 
 public static class MethodSyntaxExtensions
 {
+    // True when a type is a PUBLIC C# type transitively — the type itself and every type argument /
+    // tuple element / array-or-pointer element is public (or a use-site-bound type parameter, or a
+    // builtin special type). golib builtins (@string, error, bool, nint, slice<T>, …) are PUBLIC
+    // despite their Go-lowercase names, which the name-based GetScope heuristic misreads as
+    // unexported. Used to keep a promoted forwarder returning such a type PUBLIC (visible
+    // cross-assembly) rather than wrongly downgrading it to internal (testing.T.Name → CS1929).
+    internal static bool IsEffectivelyPublicType(ITypeSymbol? type)
+    {
+        switch (type)
+        {
+            case null:
+                return false;
+            case ITypeParameterSymbol:
+                return true;                            // accessibility is bound at the use site
+            case IArrayTypeSymbol array:
+                return IsEffectivelyPublicType(array.ElementType);
+            case IPointerTypeSymbol pointer:
+                return IsEffectivelyPublicType(pointer.PointedAtType);
+        }
+
+        // A builtin special type (int, string primitive, void, …) is always public.
+        if (type.SpecialType != SpecialType.None)
+            return true;
+
+        // A public type must not be nested inside a less-accessible one.
+        for (ITypeSymbol? enclosing = type; enclosing is not null; enclosing = enclosing.ContainingType)
+        {
+            if (enclosing.DeclaredAccessibility is not (Accessibility.Public or Accessibility.NotApplicable))
+                return false;
+        }
+
+        if (type is INamedTypeSymbol named)
+        {
+            // A ValueTuple's own accessibility is public even when an element is internal, so a Go
+            // multi-return forwarder must check each element (CS0051 fires on the least-accessible one).
+            if (named.IsTupleType)
+                return named.TupleElements.All(element => IsEffectivelyPublicType(element.Type));
+
+            return named.TypeArguments.All(IsEffectivelyPublicType);
+        }
+
+        return true;
+    }
+
     public static MethodInfo GetMethodInfo(this MethodDeclarationSyntax methodDeclaration, Compilation compilation)
     {
         SemanticModel semanticModel = compilation.GetSemanticModel(methodDeclaration.SyntaxTree);
@@ -209,9 +262,10 @@ public static class MethodSyntaxExtensions
         {
             Name = methodDeclaration.Identifier.Text,
             ReturnType = methodDeclaration.GetReturnType(semanticModel),
+            ReturnTypeIsPublic = IsEffectivelyPublicType(semanticModel.GetTypeInfo(methodDeclaration.ReturnType).Type),
             GenericTypes = string.Join(", ", typeParameters),
             TypeConstraints = typeConstraints,
-            
+
             Parameters = methodDeclaration.ParameterList.Parameters.Select(param =>
             {
                 if (param.Type is null)
@@ -305,6 +359,7 @@ public static class MethodSyntaxExtensions
         {
             Name = methodSymbol.Name,
             ReturnType = GlobalQualify(methodSymbol.ReturnType.ToDisplayString()),
+            ReturnTypeIsPublic = IsEffectivelyPublicType(methodSymbol.ReturnType),
             Parameters = parameters,
             GenericTypes = genericTypes,
             TypeConstraints = typeConstraints,

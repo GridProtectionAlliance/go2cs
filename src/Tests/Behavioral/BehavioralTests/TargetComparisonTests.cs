@@ -678,6 +678,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPromotedFieldPointerDeref() => CheckTarget("PromotedFieldPointerDeref");
 
     [TestMethod]
+    public void CheckPromotedValueEmbedLib() => CheckTarget("PromotedValueEmbedLib");
+
+    [TestMethod]
+    public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]

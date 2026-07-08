@@ -266,6 +266,8 @@
     <Project Path="Tests/Behavioral/PromotedEmbedUser/PromotedEmbedUser.csproj" />
     <Project Path="Tests/Behavioral/PromotedFieldNameIsType/PromotedFieldNameIsType.csproj" />
     <Project Path="Tests/Behavioral/PromotedFieldPointerDeref/PromotedFieldPointerDeref.csproj" />
+    <Project Path="Tests/Behavioral/PromotedValueEmbedLib/PromotedValueEmbedLib.csproj" />
+    <Project Path="Tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceAnonAlias/PublicizedInterfaceAnonAlias.csproj" />
