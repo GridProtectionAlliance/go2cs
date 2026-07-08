@@ -132,6 +132,7 @@
     <Project Path="Tests/Behavioral/ForVariants/ForVariants.csproj" />
     <Project Path="Tests/Behavioral/FuncFieldUnexportedType/FuncFieldUnexportedType.csproj" />
     <Project Path="Tests/Behavioral/FuncLitArgCapture/FuncLitArgCapture.csproj" />
+    <Project Path="Tests/Behavioral/FuncLitCaptureInCondition/FuncLitCaptureInCondition.csproj" />
     <Project Path="Tests/Behavioral/FuncTypeParam/FuncTypeParam.csproj" />
     <Project Path="Tests/Behavioral/FuncVsMethodOverload/FuncVsMethodOverload.csproj" />
     <Project Path="Tests/Behavioral/GenericArrayConstraint/GenericArrayConstraint.csproj" />

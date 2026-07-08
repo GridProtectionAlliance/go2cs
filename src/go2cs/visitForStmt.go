@@ -9,18 +9,41 @@ import (
 const ForVarInitMarker = ">>MARKER:FOR_VAR_INIT<<"
 
 func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) {
-	v.targetFile.WriteString(v.newline)
+	// A func literal passed as a call argument in the condition (`for (…; underIs(t, func(u){…}); …)`)
+	// emits its captured-variable snapshot declarations (`var tʗ1 = t;`) — statements, invalid inside
+	// the condition expression. Convert the condition into a hoist buffer so those decls can be
+	// written on their own lines before the loop (mirrors visitExprStmt). Save/restore guards nesting.
+	savedHoist := v.hoistedDecls
 
 	if forStmt.Init == nil && forStmt.Post == nil {
 		// Handle while-style for loops
+		hoistBuf := &strings.Builder{}
+		var cond string
+
+		if forStmt.Cond != nil {
+			v.hoistedDecls = hoistBuf
+			cond = v.convExpr(forStmt.Cond, nil)
+			v.hoistedDecls = savedHoist
+		}
+
+		if hoistBuf.Len() > 0 {
+			// The buffer carries its own leading newline+indent per decl and a trailing newline (the
+			// per-decl trailing indent is trimmed by convFuncLit); writeOutput supplies `while`'s indent.
+			v.targetFile.WriteString(hoistBuf.String())
+		} else {
+			v.targetFile.WriteString(v.newline)
+		}
+
 		v.writeOutput("while (")
 
 		if forStmt.Cond == nil {
 			v.targetFile.WriteString(TrueMarker)
 		} else {
-			v.targetFile.WriteString(v.convExpr(forStmt.Cond, nil))
+			v.targetFile.WriteString(cond)
 		}
 	} else {
+		v.targetFile.WriteString(v.newline)
+
 		// Handle traditional for loops
 		v.targetFile.WriteString(ForVarInitMarker)
 		v.writeOutput("for (")
@@ -51,19 +74,36 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			v.visitStmt(forStmt.Init, []StmtContext{initFormat})
 		}
 
-		// Replace the marker with any heap allocations for the for loop
-		if heapTypeDeclTarget.Len() > 0 {
-			heapTypeDecl := heapTypeDeclTarget.String()
-			heapTypeDeclTarget.Reset()
+		// Convert the condition AFTER the init (preserving capture-counter ordering). Any func-literal
+		// capture-snapshot decls are collected here and hoisted before the `for`, at the same marker
+		// position as the for-init heap allocations.
+		condHoistBuf := &strings.Builder{}
+		var cond string
 
-			heapTypeDeclTarget.WriteString(v.indent(v.indentLevel))
-			heapTypeDeclTarget.WriteString(heapTypeDecl)
-			heapTypeDeclTarget.WriteString(v.newline)
-
-			v.replaceMarker(ForVarInitMarker, heapTypeDeclTarget.String())
-		} else {
-			v.replaceMarker(ForVarInitMarker, "")
+		if forStmt.Cond != nil {
+			v.hoistedDecls = condHoistBuf
+			cond = v.convExpr(forStmt.Cond, nil)
+			v.hoistedDecls = savedHoist
 		}
+
+		// Replace the marker with the hoisted condition snapshot decls followed by any heap
+		// allocations for the for loop. The marker sits after a leading newline and before the
+		// `<indent>for (`, so each group is emitted as `<indent>content` lines ending in a newline.
+		var markerReplacement strings.Builder
+
+		if condHoistBuf.Len() > 0 {
+			// Reformat the buffer's `\r\n<indent>decl;…\r\n<indent>` into `<indent>decl;…\r\n` lines:
+			// drop the leading newline (the marker already follows one) and the trailing indent.
+			markerReplacement.WriteString(strings.TrimRight(strings.TrimPrefix(condHoistBuf.String(), v.newline), " "))
+		}
+
+		if heapTypeDeclTarget.Len() > 0 {
+			markerReplacement.WriteString(v.indent(v.indentLevel))
+			markerReplacement.WriteString(heapTypeDeclTarget.String())
+			markerReplacement.WriteString(v.newline)
+		}
+
+		v.replaceMarker(ForVarInitMarker, markerReplacement.String())
 
 		v.targetFile.WriteString("; ")
 
@@ -71,7 +111,7 @@ func (v *Visitor) visitForStmt(forStmt *ast.ForStmt, target LabeledStmtContext) 
 			v.targetFile.WriteString(TrueMarker)
 			v.targetFile.WriteRune(' ')
 		} else {
-			v.targetFile.WriteString(v.convExpr(forStmt.Cond, nil))
+			v.targetFile.WriteString(cond)
 		}
 
 		v.targetFile.WriteString("; ")

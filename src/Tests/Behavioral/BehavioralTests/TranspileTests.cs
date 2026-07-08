@@ -270,6 +270,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]
+    public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]

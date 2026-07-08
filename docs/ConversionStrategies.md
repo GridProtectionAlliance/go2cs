@@ -1443,6 +1443,43 @@ captures keeps its existing pre-call `generateCaptureDeclarations()` emission. (
 call capturing a local pointer, whose deferred write lands through the shared pointer box, output-compared
 vs Go.)
 
+### A func-literal ARGUMENT inside an `if`/`for` condition hoists its captures before the statement
+The same capture-snapshot hazard occurs when a capturing func literal is passed as a call argument
+**inside a condition**. `go/types` is dense with this shape — `underIs(t, func(u Type) bool { … })`,
+`typeSet().is(func(t *term) bool { … })` — and the literal's snapshot declarations (`var suʗ1 = su;`)
+are statements, invalid inside the condition expression. `visitExprStmt` / `visitAssignStmt` already
+route such decls to a pre-statement hoist buffer (`v.hoistedDecls`), but `visitIfStmt` and
+`visitForStmt` converted the condition with `convExpr(cond, nil)` and no hoist target, so the decls
+were dumped inline into the condition (`if (tpar.underIs(` `var suʗ1 = su;` `(ΔType u) => { … }))` →
+CS1003/CS1026/CS1002/CS1022/CS1513, ~63 errors across `go/types` alone). Both statement emitters now
+convert the condition into a hoist buffer and write any collected decls on their own lines **before**
+the `if`/`for`, mirroring `visitExprStmt`:
+
+```csharp
+ΔType su = default!;
+var suʗ1 = su;
+if (tpar.underIs((ΔType u) => {
+    …
+    if (suʗ1 != default!) { u = match(suʗ1, u); … }
+})) { … }
+```
+
+The condition is converted **after** an `if`/`for` init clause (preserving capture-counter ordering),
+and the `if`-with-init sub-block hoists between the init and the `if`. The traditional `for` reuses the
+existing `ForVarInitMarker` slot — the hoisted condition decls are emitted at the same pre-`for` position
+as the for-init heap allocations. The hoist buffer is empty for a condition with no capturing func-literal
+argument, so the behavioral corpus is byte-identical; the only stdlib deltas are five `go/types` files
+(`under.cs`, `builtins.cs`, `expr.cs`, `index.cs`, `instantiate.cs`) and one `crypto/tls`
+`slices.ContainsFunc` call. This clears the **syntax-error layer** in those files (`go/types` had ~63
+`CS100x`/`CS1026` from this one construct); it does not by itself green `go/types`, which compiles far
+enough afterward to surface a deeper layer of latent semantic defects (a `map[token.Token]func()`
+mis-lowered to a malformed explicit-interface `IDictionary`/`ICollection` implementation, named-slice
+wrappers not satisfying `IArray.Source`, `token` resolution) — the frontier moves from syntax to
+semantics, "progress, not regression." (Guarded by `FuncLitCaptureInCondition` — a func literal
+capturing an enclosing map, passed as an argument inside a plain `if` condition, an `if` condition with
+an init clause, a traditional `for` condition, and a while-style `for` condition, all output-compared vs
+Go.)
+
 Handling Go `defer` / `panic` / `recover` requires that the converted function run inside a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs). The context provides the [`defer`](https://golang.org/ref/spec#Defer_statements) call stack and the [`recover`](https://golang.org/pkg/builtin/#recover) handling; `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in (a `using static go.builtin`). The body is emitted as a lambda taking two parameters, `defer` and `recover`:
 
 ```go

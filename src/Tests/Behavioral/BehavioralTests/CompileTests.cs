@@ -270,6 +270,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]
+    public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
+
+    [TestMethod]
     public void CheckFuncTypeParam() => CheckTarget("FuncTypeParam");
 
     [TestMethod]
