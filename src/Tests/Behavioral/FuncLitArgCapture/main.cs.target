@@ -65,6 +65,17 @@ internal static nint selfRefCapture() {
     return ᐸꟷ(done);
 }
 
+internal static void deferArgCapture(ж<box> Ꮡout) => func((defer, recover) => {
+    ref var @out = ref Ꮡout.Value;
+
+    var pf = Ꮡout;
+    var pfʗ1 = pf;
+    deferǃ(run, () => {
+        pfʗ1.Value.x = 77;
+    }, defer);
+    pf.Value.x = 5;
+});
+
 internal static void Main() {
     ref var m = ref heap(new box(), out var Ꮡm);
     run(() => {
@@ -139,6 +150,9 @@ internal static void Main() {
     fmt.Println("11:", n0, s0 == ""u8);
     fmt.Println("12:", nestedStructCapture());
     fmt.Println("13:", selfRefCapture());
+    ref var g = ref heap(new box(), out var Ꮡg);
+    deferArgCapture(Ꮡg);
+    fmt.Println("14:", g.x);
 }
 
 } // end main_package

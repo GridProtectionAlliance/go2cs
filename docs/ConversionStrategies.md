@@ -1379,6 +1379,33 @@ A **builtin** deferred WITH arguments (`defer close(returned)`) is generic with 
 so its method group neither infers nor converts to `Action<T>`; the temp-param lambda keeps
 deferǃ's eager-argument evaluation: `deferǃ(ᴛ1 => builtin.close(ᴛ1), returned, defer)`.
 (Guarded by `DeferCallOrder`'s stopFn + close(drained) shapes, output-compared vs Go.)
+
+### A func-literal ARGUMENT of a deferred call hoists its captures before the call
+When a deferred call's **callee** is itself a func literal (`defer func() { … }()`), that literal's
+lambda-capture snapshots (`var sʗ1 = s;`) are threaded to a builder emitted *before* the `deferǃ(…)`
+call. But when the deferred callee is an ordinary call whose **argument** is a capturing func literal —
+x/net/nettest `conntest.go`'s `defer once.Do(func() { stop() })` — the argument literal's snapshot
+declarations were dumped inline into the deferred call's argument list, an invalid statement
+mid-expression (`deferǃ(Ꮡonce.Do,` `var stopʗ1 = stop;` `() => …)` → CS1001/CS1002/CS1003/CS1026).
+The hoist sink (`lambdaContext.deferredDecls`) is now provided **unconditionally** in `visitDeferStmt`,
+not only for the func-literal-callee case, so `convFuncLit` (reached via convCallExpr → convExprList →
+the argument's `LambdaContext`) routes any argument literal's captures to it, and they are emitted before
+the call:
+
+```csharp
+var stopʗ1 = stop;
+deferǃ(Ꮡonce.Do, () => {
+    stopʗ1();
+}, defer);
+```
+
+The empty builder is inert for a deferred call with no capturing func-literal argument (zero golden
+churn — the behavioral corpus is byte-identical), and a deferred call whose own arguments are plain
+captures keeps its existing pre-call `generateCaptureDeclarations()` emission. (Guarded by the
+`FuncLitArgCapture` extension case 14 — a func literal passed as the argument of a deferred `run(…)`
+call capturing a local pointer, whose deferred write lands through the shared pointer box, output-compared
+vs Go.)
+
 Handling Go `defer` / `panic` / `recover` requires that the converted function run inside a [Go function execution context](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/GoFunc.cs). The context provides the [`defer`](https://golang.org/ref/spec#Defer_statements) call stack and the [`recover`](https://golang.org/pkg/builtin/#recover) handling; `panic` is the global [`panic`](https://golang.org/pkg/builtin/#panic) built-in (a `using static go.builtin`). The body is emitted as a lambda taking two parameters, `defer` and `recover`:
 
 ```go

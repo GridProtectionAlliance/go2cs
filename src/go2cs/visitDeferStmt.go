@@ -16,6 +16,16 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 	lambdaContext := DefaultLambdaContext()
 	lambdaContext.deferOrGoCall = true
 	lambdaContext.deferCall = true
+
+	// A func-literal ARGUMENT of the deferred call — `defer once.Do(func() { stop() })`
+	// (x/net/nettest conntest.go) — can capture enclosing-scope locals; the capture-snapshot
+	// declarations (`var stopʗ1 = stop;`) must hoist BEFORE the `deferǃ(...)` call, never emit
+	// inline in its argument list (an invalid statement mid-expression → CS1001/CS1002/CS1003/
+	// CS1026). Provide the hoist sink UNCONDITIONALLY so convFuncLit routes any argument
+	// literal's captures here (threaded via convCallExpr → convExprList → the arg's
+	// LambdaContext) — not only when the deferred CALLEE is itself a func literal.
+	lambdaContext.deferredDecls = &strings.Builder{}
+
 	paramCount := len(deferStmt.Call.Args)
 
 	var renderLambdaParams bool
@@ -27,8 +37,6 @@ func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
 
 			// Delete captures from GoStmt to avoid double processing
 			delete(v.lambdaCapture.stmtCaptures, deferStmt)
-			lambdaContext.deferredDecls = &strings.Builder{}
-
 		}
 
 		renderLambdaParams = false

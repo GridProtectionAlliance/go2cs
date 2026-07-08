@@ -69,6 +69,19 @@ func selfRefCapture() int {
 	return <-done
 }
 
+// deferArgCapture mirrors x/net/nettest conntest.go's `defer once.Do(func() { stop() })`: a func
+// literal passed as the ARGUMENT of a DEFERRED call captures the local pointer `pf`. The capture
+// snapshot (`var pfʗ1 = pf;`) must hoist BEFORE the deferǃ(...) call — emitting it inline in the
+// argument list was invalid C# (CS1001/CS1002/CS1003/CS1026). The deferred call runs at return,
+// writing 77 through the shared pointer box; the caller observes it after this returns.
+func deferArgCapture(out *box) {
+	pf := out
+	defer run(func() {
+		pf.x = 77
+	})
+	pf.x = 5
+}
+
 func main() {
 	// 1. Function literal as a call argument that takes the bare address of a local.
 	//    The closure must write through to the ORIGINAL m (not a snapshot copy).
@@ -178,4 +191,12 @@ func main() {
 	// 13. Go-statement over a captured func-value with an inner func-literal argument — the outer
 	//     capture's snapshot RHS must stay the outer name, not a self-reference (`workerʗ1`).
 	fmt.Println("13:", selfRefCapture())
+
+	// 14. Func literal passed as the ARGUMENT of a DEFERRED call, capturing a local pointer — the
+	//     x/net/nettest `defer once.Do(func(){ stop() })` shape. The snapshot must hoist BEFORE the
+	//     deferǃ(...) call, not emit inline in its argument list. The deferred write lands through
+	//     the shared pointer box; observed after deferArgCapture returns.
+	var g box
+	deferArgCapture(&g)
+	fmt.Println("14:", g.x)
 }
