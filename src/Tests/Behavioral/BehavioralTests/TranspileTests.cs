@@ -156,6 +156,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
 
     [TestMethod]
+    public void CheckCrossPkgSameNameAlias() => CheckTarget("CrossPkgSameNameAlias");
+
+    [TestMethod]
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]

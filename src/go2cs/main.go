@@ -3961,8 +3961,15 @@ func (v *Visitor) getFullTypeName(t types.Type, isUnderlying bool) string {
 		obj := named.Obj()
 		pkg := obj.Pkg()
 
-		// Handle builtin types with no package
-		if pkg != nil && pkg.Name() != packageName {
+		// Handle builtin types with no package. Compare package IDENTITY, not NAME: two DIFFERENT
+		// packages can share a Go package name (html/template and text/template are both `package
+		// template`), and a name-only check (`pkg.Name() != packageName`) then treats the foreign type
+		// as same-package — falling through to the t.String() path whose cross-package slash-strip drops
+		// both the path segment and the `_package` class (html/template's `type FuncMap = template.FuncMap`
+		// emitted a `global using FuncMap = go.template.FuncMap;`, CS0234, instead of
+		// `go.text.template_package.FuncMap`). getTypeName and collectCrossPackagePaths already key on
+		// identity (`pkg != v.pkg`); align this path with them.
+		if pkg != nil && pkg != v.pkg {
 			baseName := getSanitizedImport(pkg.Path()+PackageSuffix) + "." + getSanitizedImport(obj.Name())
 
 			// Append type arguments for an instantiated cross-package generic type (e.g.

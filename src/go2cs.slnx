@@ -94,6 +94,7 @@
     <Project Path="Tests/Behavioral/Constraints/Constraints.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgBox/CrossPkgBox.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgLib/CrossPkgLib.csproj" />
+    <Project Path="Tests/Behavioral/CrossPkgSameNameAlias/CrossPkgSameNameAlias.csproj" />
     <Project Path="Tests/Behavioral/CrossPkgUser/CrossPkgUser.csproj" />
     <Project Path="Tests/Behavioral/DeferCallOrder/DeferCallOrder.csproj" />
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />

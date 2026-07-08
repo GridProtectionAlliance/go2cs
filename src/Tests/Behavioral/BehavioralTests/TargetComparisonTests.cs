@@ -159,6 +159,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
 
     [TestMethod]
+    public void CheckCrossPkgSameNameAlias() => CheckTarget("CrossPkgSameNameAlias");
+
+    [TestMethod]
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
