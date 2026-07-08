@@ -1056,12 +1056,24 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			sortedLeftExprs := leftExprs.Keys()
 			sort.Strings(sortedLeftExprs)
 
+			// The deref ref-local re-alias (`p = ref Ꮡp.Value`) rebinds a `ref var` local. Inside a
+			// lambda that is illegal: the re-aliased value var is ALWAYS an enclosing captured ref-local
+			// (a lambda's own pointer param is passed as the box `ж<T>`, never deref-aliased; a
+			// heap-boxed value local is written THROUGH its box `Ꮡb.Value = …`, never box-repointed), and
+			// C# forbids referencing an outer `ref` local inside a lambda (CS8175 — crypto/x509
+			// buildChains' `considerCandidate` reassigns the captured `*int` param `sigChecks`). The box
+			// reassignment `Ꮡp = …` was already emitted (it captures the box field, which is legal); only
+			// the ref-local refresh is dropped. The outer value alias is then stale after the lambda runs,
+			// but every in-lambda AND post-lambda deref of a repointed captured pointer routes through the
+			// box `Ꮡp.Value`, so the alias is never read — an accepted modeling gap, not a miscompile.
+			insideLambda := v.lambdaCapture != nil && v.lambdaCapture.conversionInLambda
+
 			for _, leftExpr := range sortedLeftExprs {
 				// Only a bare pointer-box reassignment (`Ꮡp = …`) needs the deref ref-local
 				// re-aliased (`p = ref Ꮡp.Value`). A write *through* the box (`Ꮡp.Value = …`, emitted
 				// for `*p = …` inside a lambda — see convStarExpr) has member access and must not
 				// trigger this; it is a plain value assignment.
-				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") {
+				if strings.HasPrefix(leftExpr, AddressPrefix) && !strings.Contains(leftExpr, ".") && !insideLambda {
 					// This is a special case for pointer reassignments which should be extended
 					// to also update local deference variable as well, e.g.: `x = ref Ꮡx.Value`
 					boxBaseName := leftExpr[len(AddressPrefix):]
