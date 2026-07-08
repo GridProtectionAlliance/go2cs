@@ -41,6 +41,37 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		renderLambdaParams = paramCount != v.getFunctionParamCount(goStmt.Call.Fun)
 	}
 
+	// Resolve the callee signature once (func-literal callees are excluded — convCallExpr
+	// already renders those as a lambda): whether it returns a value, and whether it is a
+	// NAMED func type. Both decide how the call is adapted to goǃ's void Action delegate below.
+	hasResults := false
+	namedFuncType := false
+
+	if _, isFuncLit := goStmt.Call.Fun.(*ast.FuncLit); !isFuncLit {
+		if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
+			if sig, ok := funType.(*types.Signature); ok && sig.Results() != nil && sig.Results().Len() > 0 {
+				hasResults = true
+			}
+
+			if named, ok := types.Unalias(funType).(*types.Named); ok {
+				if _, isSig := named.Underlying().(*types.Signature); isSig {
+					namedFuncType = true
+				}
+			}
+		}
+	}
+
+	// A value-returning callee passed as a BARE method group is a Func<...>, but every goǃ
+	// overload takes a void Action<...> (CS0407 "no overload matches the delegate" —
+	// x/net/nettest's `go chunkedCopy(c2, c2)`, chunkedCopy returning error). Force the
+	// temp-param lambda form so convCallExpr renders `(ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2)`, which
+	// converts to a discarding Action — exactly Go's fire-and-forget goroutine semantics. This
+	// mirrors the defer arm's result handling; the defer PARAM case needs no equivalent only
+	// because deferǃ additionally has Func<...> overloads, while goǃ does not.
+	if hasResults && paramCount > 0 {
+		renderLambdaParams = true
+	}
+
 	if paramCount > 0 {
 		lambdaContext.callArgs = make([]string, paramCount)
 		lambdaContext.renderParams = renderLambdaParams
@@ -73,29 +104,26 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 	result.WriteString("go\u01C3(")
 
 	if paramCount == 0 {
-		// A NAMED func-type callee (context.CancelFunc) is a DISTINCT C# delegate with no
-		// conversion to Action — keep the invocation in lambda form (mirrors the defer arm).
-		namedFuncType := false
-
-		if funType := v.getType(goStmt.Call.Fun, false); funType != nil {
-			if named, ok := types.Unalias(funType).(*types.Named); ok {
-				if _, isSig := named.Underlying().(*types.Signature); isSig {
-					namedFuncType = true
-				}
-			}
-		}
-
 		// A pointer-receiver nullary callee binds the BOX method group (see
-		// pointerReceiverBoxMethodGroup — the trimmed deref-alias form is CS1113).
-		boxGroup := v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun)
+		// pointerReceiverBoxMethodGroup — the trimmed deref-alias form is CS1113). A NAMED
+		// func-type or value-returning callee keeps the lambda form instead.
+		boxGroup := ""
+
+		if !hasResults && !namedFuncType {
+			boxGroup = v.pointerReceiverBoxMethodGroup(goStmt.Call.Fun)
+		}
 
 		// C# `go` method implementation expects an Action (or WaitCallback delegate)
 		if boxGroup != "" {
 			callExpr = boxGroup
-		} else if !namedFuncType && strings.HasSuffix(callExpr, "()") {
+		} else if !hasResults && !namedFuncType && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
-		} else if namedFuncType && strings.HasSuffix(callExpr, "()") {
-			callExpr = "() => " + callExpr // Action lambda over the named delegate's invocation
+		} else if (hasResults || namedFuncType) && strings.HasSuffix(callExpr, "()") {
+			// A NAMED func-type callee (context.CancelFunc) is a DISTINCT C# delegate with no
+			// conversion to Action, and a value-returning callee's bare method group is a
+			// Func<...> (CS0407); keep the invocation and wrap it in an Action lambda that
+			// discards any result — exactly Go's fire-and-forget goroutine semantics.
+			callExpr = "() => " + callExpr
 		} else {
 			callExpr = "_ => " + callExpr // WaitCallback delegate
 		}

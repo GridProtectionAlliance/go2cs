@@ -1391,6 +1391,30 @@ so its method group neither infers nor converts to `Action<T>`; the temp-param l
 deferǃ's eager-argument evaluation: `deferǃ(ᴛ1 => builtin.close(ᴛ1), returned, defer)`.
 (Guarded by `DeferCallOrder`'s stopFn + close(drained) shapes, output-compared vs Go.)
 
+### A value-returning goroutine callee is wrapped in a discarding lambda
+Go's `go f(…)` discards `f`'s result. Every `goǃ` runtime overload takes a **void** `Action<…>`
+delegate, so a value-returning callee passed as a bare method group binds no overload (CS0407 "no
+overload matches the delegate" — x/net/nettest `conntest.go`'s `go chunkedCopy(c2, c2)`, where
+`chunkedCopy(io.Writer, io.Reader) error` returns `error`). `visitGoStmt` resolves the callee
+signature and, when it returns a value, keeps the invocation inside a lambda so the result is
+discarded — an expression-bodied lambda over a value-returning call converts to `Action` (the same
+form the variadic path, e.g. `go fmt.Println(…)`, already emits):
+
+```csharp
+go chunkedCopy(c2, c2)          -> goǃ((ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2), c2, c2);   // param callee
+go q.conn.HandshakeContext(ctx) -> goǃ(ᴛ1 => q.conn.HandshakeContext(ᴛ1), ctx);      // selector method
+go c.Close()                    -> goǃ(() => c.Close());                             // nullary callee
+```
+
+This parallels the **defer** case, with one asymmetry: `deferǃ` additionally carries
+`Func<…, TResult>` overloads, so its *param* arm binds a value-returning method group directly and
+only its *nullary* arm needs the `() => call()` discard; **every `goǃ` overload is `Action`-only**, so
+the goroutine arm needs the discarding wrap for *both* its nullary and param cases (the nullary arm's
+`() => call()`, and, for the param case, forcing the temp-param lambda `(ᴛ1, …) => callee(ᴛ1, …)`).
+Func-literal callees and `void`-returning method groups are untouched (`goǃ(() => { … })`,
+`goǃ(emit, out)`). (Guarded by the `GoStmtValueReturn` behavioral test — value-returning nullary,
+single-, multi-param and multi-result goroutine callees, output-compared vs Go.)
+
 ### A func-literal ARGUMENT of a deferred call hoists its captures before the call
 When a deferred call's **callee** is itself a func literal (`defer func() { … }()`), that literal's
 lambda-capture snapshots (`var sʗ1 = s;`) are threaded to a builder emitted *before* the `deferǃ(…)`

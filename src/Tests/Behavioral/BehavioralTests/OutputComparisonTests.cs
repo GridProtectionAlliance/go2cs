@@ -328,6 +328,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
 
     [TestMethod]
+    public void CheckGoStmtValueReturn() => CheckTarget("GoStmtValueReturn");
+
+    [TestMethod]
     public void CheckHeapKeywordVar() => CheckTarget("HeapKeywordVar");
 
     [TestMethod]
