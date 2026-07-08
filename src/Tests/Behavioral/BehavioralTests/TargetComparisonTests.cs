@@ -627,6 +627,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPointerFieldOfBoxedGlobal() => CheckTarget("PointerFieldOfBoxedGlobal");
 
     [TestMethod]
+    public void CheckPointerInterfaceStructField() => CheckTarget("PointerInterfaceStructField");
+
+    [TestMethod]
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]

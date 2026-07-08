@@ -624,6 +624,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPointerFieldOfBoxedGlobal() => CheckTarget("PointerFieldOfBoxedGlobal");
 
     [TestMethod]
+    public void CheckPointerInterfaceStructField() => CheckTarget("PointerInterfaceStructField");
+
+    [TestMethod]
     public void CheckPointerParamCapturedInClosure() => CheckTarget("PointerParamCapturedInClosure");
 
     [TestMethod]

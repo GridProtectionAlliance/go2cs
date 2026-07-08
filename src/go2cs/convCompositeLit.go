@@ -221,7 +221,22 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 							eltImplementsIface := false
 
 							if !eltIsStruct && !field.Embedded() {
-								if named, ok := eltType.(*types.Named); ok {
+								// The concrete type carrying the satisfying method set: the element
+								// itself, OR the pointee of a POINTER element whose pointer-receiver
+								// methods satisfy the field — `&logLoggerLevel` (`*LevelVar`) feeding a
+								// `Leveler` field in log/slog's `&handlerWriter{…, &logLoggerLevel, …}`,
+								// where `*LevelVar` implements Leveler via a pointer-receiver `Level()`
+								// (CS1503; no `GoImplement<LevelVar, Leveler>(Pointer = true)` was
+								// recorded because this arm previously matched only a NAMED value, not a
+								// pointer). types.Implements is tested on the ELEMENT type (the pointer
+								// method set), while the non-interface guard tests the pointee.
+								implSource := eltType
+
+								if ptr, ok := eltType.(*types.Pointer); ok {
+									implSource = ptr.Elem()
+								}
+
+								if named, ok := implSource.(*types.Named); ok {
 									if _, eltIsIface := named.Underlying().(*types.Interface); !eltIsIface {
 										if iface, ok := fieldType.Underlying().(*types.Interface); ok && types.Implements(eltType, iface) {
 											eltImplementsIface = true
