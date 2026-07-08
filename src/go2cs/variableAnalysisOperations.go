@@ -1723,10 +1723,23 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				v.lambdaCapture.analysisInLambda = true
 				v.lambdaCapture.currentLambda = node
 
-				// Process the receiver for method values
-				if id, ok := node.X.(*ast.Ident); ok {
-					v.processPotentialCapture(id)
-				}
+				// Process the receiver for method values. The ENTIRE receiver expression is captured
+				// into the synthesized lambda, so mark every ident in it — a FIELD-CHAIN receiver like
+				// `kdf.hash.New` (crypto/internal/hpke) roots at `kdf`, not a bare ident, so the old
+				// bare-ident-only check never marked it box-ref, and the captured receiver emitted as
+				// its uncapturable `ref var kdf` alias (CS1628). A nested func literal handles its own
+				// captures — don't descend into it.
+				ast.Inspect(node.X, func(inner ast.Node) bool {
+					if _, isLit := inner.(*ast.FuncLit); isLit {
+						return false
+					}
+
+					if id, ok := inner.(*ast.Ident); ok {
+						v.processPotentialCapture(id)
+					}
+
+					return true
+				})
 
 				v.lambdaCapture.analysisInLambda = false
 				v.lambdaCapture.currentLambda = nil

@@ -42,6 +42,36 @@ internal static Action<nint> makeAdder(this ж<counter> Ꮡc) {
     };
 }
 
+[GoType("num:nint")] partial struct label;
+
+internal static @string render(this label l) {
+    return fmt.Sprintf("L%d"u8, (nint)l);
+}
+
+[GoType] partial struct widget {
+    internal label id;
+}
+
+internal static @string tag(this widget w) {
+    return fmt.Sprintf("W%d"u8, (nint)w.id);
+}
+
+internal static @string call(Func<@string> f) {
+    return f();
+}
+
+internal static @string viaFieldMethodValue(this ж<widget> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
+    return call(() => Ꮡw.Value.id.render());
+}
+
+internal static @string viaBareMethodValue(this ж<widget> Ꮡw) {
+    ref var w = ref Ꮡw.Value;
+
+    return call(() => Ꮡw.Value.tag());
+}
+
 internal static void Main() {
     var c = Ꮡ(new counter(n: 0));
     fmt.Println(c.addInClosure(5));
@@ -50,6 +80,9 @@ internal static void Main() {
     add(10);
     add(2);
     fmt.Println((~c).n);
+    var w = Ꮡ(new widget(id: 42));
+    fmt.Println(w.viaFieldMethodValue());
+    fmt.Println(w.viaBareMethodValue());
 }
 
 } // end main_package

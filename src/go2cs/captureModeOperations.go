@@ -138,7 +138,7 @@ func scanFileForCaptureModeMethods(file *ast.File, info *types.Info) {
 			info:     info,
 		})
 
-		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
+		if bodyTakesReceiverFieldAddress(funcDecl.Body, recvName) || bodyReturnsReceiver(funcDecl.Body, recvName) || bodyUsesReceiverAsPointerValue(funcDecl.Body, recvName, info) || bodyCapturesReceiverInClosure(funcDecl.Body, recvName, signature.Recv(), info) || bodyHasPointerMethodValueOnReceiver(funcDecl.Body, recvName, info) || bodyCapturesReceiverInValueMethodValue(funcDecl.Body, recvName, info) || bodyPassesReceiverAsPointerArg(funcDecl.Body, recvName, info) || bodyWrappedInDeferContext(funcDecl.Body, recvName) {
 			// Key by the generic origin so instantiated call sites (Set[int]) match.
 			origin := funcObj.Origin()
 			packageCaptureModeMethods[origin] = true
@@ -397,6 +397,77 @@ func bodyHasPointerMethodValueOnReceiver(body *ast.BlockStmt, recvName string, i
 		}
 
 		if _, isPtr := sig.Recv().Type().(*types.Pointer); !isPtr {
+			return true
+		}
+
+		if ident, ok := sel.X.(*ast.Ident); ok && ident.Name == recvName {
+			found = true
+			return false
+		}
+
+		if selectorRootsAtReceiverValueFieldChain(sel.X, recvName, info) {
+			found = true
+			return false
+		}
+
+		return true
+	})
+
+	return found
+}
+
+// bodyCapturesReceiverInValueMethodValue reports whether the body uses a VALUE-receiver method
+// VALUE (a method referenced without calling it) whose receiver expression is the method's own
+// receiver, or a VALUE field-chain rooted at it — `kdf.hash.New`, `kdf.New` (crypto/internal/hpke's
+// `hkdfKDF`, whose `hash` field is a `crypto.Hash` and `New` a value-receiver method). Such a method
+// value has no C# delegate — its emitted form is an extension over a value receiver (CS1113) — so
+// convSelectorExpr synthesizes a wrapping lambda `() => kdf.hash.New()`, which CAPTURES the receiver.
+// A `ref T` receiver captured by a lambda is CS1628. Promoting the method to direct-ж gives it a
+// receiver box `Ꮡkdf`, which the synthesized lambda then references through `Ꮡkdf.Value` (a
+// capturable reference). The POINTER-receiver method-value case is handled by
+// bodyHasPointerMethodValueOnReceiver (it emits a box-bound method group, not a lambda); an INTERFACE
+// receiver delegate-binds directly and is excluded (both keep the plain, non-capturing emission).
+func bodyCapturesReceiverInValueMethodValue(body *ast.BlockStmt, recvName string, info *types.Info) bool {
+	// A selector that is a call's Fun is a method CALL, not a method value.
+	calledFuns := map[ast.Expr]bool{}
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		if callExpr, ok := node.(*ast.CallExpr); ok {
+			calledFuns[callExpr.Fun] = true
+		}
+
+		return true
+	})
+
+	found := false
+
+	ast.Inspect(body, func(node ast.Node) bool {
+		sel, ok := node.(*ast.SelectorExpr)
+
+		if !ok || calledFuns[sel] {
+			return true
+		}
+
+		selection, ok := info.Selections[sel]
+
+		if !ok || selection.Kind() != types.MethodVal {
+			return true
+		}
+
+		sig, ok := selection.Obj().Type().(*types.Signature)
+
+		if !ok || sig.Recv() == nil {
+			return true
+		}
+
+		// A POINTER-receiver method value renders as a box-bound method group (handled separately),
+		// and an INTERFACE receiver delegate-binds directly — neither synthesizes a capturing lambda.
+		// Only a concrete VALUE receiver produces the `() => recv.….method()` wrapper.
+		if _, isPtr := sig.Recv().Type().(*types.Pointer); isPtr {
+			return true
+		}
+
+		if types.IsInterface(sig.Recv().Type()) {
 			return true
 		}
 

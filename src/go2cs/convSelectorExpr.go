@@ -8,6 +8,26 @@ import (
 	"strings"
 )
 
+// convExprInLambdaContext renders expr with conversionInLambda forced on, so a deref-aliased
+// pointer receiver/param inside it renders through its capturable box (`Ꮡp.Value`) rather than the
+// uncapturable `ref var p` alias. Used when synthesizing a wrapping lambda for a method value whose
+// receiver expression is captured (`kdf.hash.New` → `() => Ꮡkdf.Value.hash.New()`). Only the
+// conversionInLambda flag is toggled — currentLambdaVars is preserved (not reset as
+// enterLambdaConversion would), so an ENCLOSING lambda's captured-var renames still apply when the
+// method value nests inside a func literal. Restored to the prior value afterward.
+func (v *Visitor) convExprInLambdaContext(expr ast.Expr) string {
+	if v.lambdaCapture == nil {
+		return v.convExpr(expr, nil)
+	}
+
+	saved := v.lambdaCapture.conversionInLambda
+	v.lambdaCapture.conversionInLambda = true
+	result := v.convExpr(expr, nil)
+	v.lambdaCapture.conversionInLambda = saved
+
+	return result
+}
+
 // typeCollidingFieldName renames a struct field whose C# name would equal its enclosing
 // struct's type name (C# forbids it — CS0542) by prefixing the disambiguation marker.
 func typeCollidingFieldName(name string) string {
@@ -803,7 +823,14 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 						paramUses.WriteString(name)
 					}
 
-					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.convExpr(selectorExpr.X, nil),
+					// The receiver expression is captured into the synthesized lambda, so render it in a
+					// lambda conversion context: a deref-aliased pointer receiver/param inside it (`kdf`
+					// in `kdf.hash.New`, crypto/internal/hpke) must go through its box `Ꮡkdf.Value`, not
+					// the uncapturable `ref var kdf` alias (CS1628). The method was promoted direct-ж
+					// (bodyCapturesReceiverInValueMethodValue) so the box exists. Only conversionInLambda
+					// is toggled — currentLambdaVars is preserved so an ENCLOSING lambda's renames still
+					// apply when this method value nests inside a func literal.
+					return fmt.Sprintf("(%s) => %s.%s(%s)", paramDecls.String(), v.convExprInLambdaContext(selectorExpr.X),
 						v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)), paramUses.String())
 				}
 			}
