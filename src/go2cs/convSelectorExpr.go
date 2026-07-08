@@ -1247,19 +1247,36 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			return getAliasedTypeName(fmt.Sprintf("%s.%s", fieldAddr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
 		}
 
-		// The receiver box is `Ꮡ`+the RAW variable name — a deref-aliased pointer is declared
-		// `ref var <shadow-name> = ref Ꮡ<raw>.Value` (the box keeps the raw name; visitFuncDecl /
-		// heap decls never shadow-rename the `Ꮡ` companion). convExpr returns the shadow-renamed
-		// VALUE alias, so for a collision-renamed var `p`→`Δp` it yields `ᏑΔp` — which is not in
-		// scope (the box is `Ꮡp`), CS0103. Build the box from the raw ident name to match.
+		// The receiver box is `Ꮡ`+the DECLARING-scope box-base name — which differs between a
+		// deref-aliased pointer param and an escaping value LOCAL. A deref-aliased pointer is declared
+		// `ref var <shadow-name> = ref Ꮡ<raw>.Value` (its box keeps the RAW name; visitFuncDecl / heap
+		// decls never shadow-rename the `Ꮡ` companion), so for a collision-renamed param `p`→`Δp` the
+		// box is `Ꮡp`. A heap-boxed value LOCAL is the OPPOSITE — it is declared `ref var <shadow-name>
+		// = ref heap(new T(), out var Ꮡ<shadow-name>)`, so a shadow-renamed `b`→`bΔ1` keeps its box
+		// under the RENDERED name `ᏑbΔ1` (crypto/x509 marshalCertificate's inner `var b
+		// cryptobyte.Builder`, renamed to dodge the outer method's own `b`). Using the raw name for the
+		// local emitted `Ꮡb`, colliding with the outer `b`'s box declared later (CS0841/CS0103).
+		// boxBaseName resolves the correct box base for each — but it must read the var's DECLARING
+		// name, not the current lambda's capture remap: a heap-boxed local captured by a closure keeps
+		// its box under the declaring name (`Ꮡonce`, the box is captured directly), NOT the value-
+		// snapshot capture name `onceʗ1` (there is no `Ꮡonceʗ1` box — CS0103, sync OnceFunc). Disable
+		// conversionInLambda across the boxBaseName call so getIdentName falls to the shadowing name
+		// (`bΔ1`) or raw name (`once`), never the capture form.
 		recvExpr := v.convExpr(selectorExpr.X, nil)
 
-		// Use the raw Go name for the box base (a deref'd pointer param's box is `Ꮡ`+param.Name()),
-		// but only when this var is shadow-renamed (convExpr gave a name different from the box) and
-		// not lambda-captured (a closure reads the captured box by its own form). Restricting to that
-		// case keeps every already-correct accessor unchanged — no golden churn.
+		// Substitute the box base only when the receiver renders as something other than its raw name
+		// (shadow-renamed local, collision-renamed param, or a capture form). boxBaseName returns the
+		// raw name for an unrenamed var, so an already-correct accessor is unchanged — no golden churn.
 		if ident, ok := selectorExpr.X.(*ast.Ident); ok && recvExpr != ident.Name {
-			recvExpr = ident.Name
+			savedInLambda := false
+			if v.lambdaCapture != nil {
+				savedInLambda = v.lambdaCapture.conversionInLambda
+				v.lambdaCapture.conversionInLambda = false
+			}
+			recvExpr = v.boxBaseName(ident)
+			if v.lambdaCapture != nil {
+				v.lambdaCapture.conversionInLambda = savedInLambda
+			}
 		}
 
 		return getAliasedTypeName(fmt.Sprintf("%s%s.%s", AddressPrefix, recvExpr, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))

@@ -2841,6 +2841,15 @@ internal static void bump(ж<nint> Ꮡnp) {
 ```
 Guarded by `CollisionRenamedLocalBox` (`bump(&p.n)` on the renamed local `p`).
 
+### A capture-mode method on a shadow-renamed heap-boxed local uses the rendered box name
+A capture-mode method — one that escapes its receiver's address, e.g. `cryptobyte.Builder.AddASN1`, which hands `&b` to a callback — called on a heap-boxed VALUE local routes through the receiver box: `var b Builder; b.AddASN1(…)` → `Ꮡb.AddASN1(…)`. Unlike a deref-aliased pointer *parameter* (whose box keeps the RAW name, `Ꮡp`), a heap-boxed value LOCAL keeps its box under the RENDERED name — an escaping local is `ref var b = ref heap(new T(), out var Ꮡb)`, so when the local is SHADOW-renamed its box takes the renamed name. crypto/x509 `marshalCertificate`'s inner `serialiseConstraints` closure declares `var b cryptobyte.Builder`, renamed `bΔ1` to dodge the enclosing method's own `var b` declared LATER (a C# lambda cannot re-declare an enclosing-scope local, CS0136); its box is `ᏑbΔ1`. Emitting the raw-name box `Ꮡb` there both mis-references the outer `b`'s box (declared later in the method → CS0841/CS0103) and, where a same-named outer box does resolve, calls the method on the wrong operand — go/types `conversions.go` called `x.convertibleTo` on the receiver box `Ꮡx` instead of the inner operand box `ᏑxΔ2`:
+```csharp
+ref var bΔ1 = ref heap(new cryptobyte.Builder(), out var ᏑbΔ1);
+…
+ᏑbΔ1.AddASN1(cryptobyte_asn1.SEQUENCE, (ж<cryptobyte.Builder> bΔ2) => { … });   // was Ꮡb (CS0841)
+```
+The receiver-box render resolves the box base through `boxBaseName` with the lambda capture-remap DISABLED, so it yields: the shadow-rendered *declaring* name (`bΔ1`) for an escaping local; the raw name (`Ꮡp`) for a pointer parameter; and — critically — the *declaring* name for a variable CAPTURED by the closure, not its value-snapshot capture name. A heap-boxed local captured by a closure has its box captured directly (`Ꮡonce` in sync `OnceFunc`'s returned closure), so the capture-remapped `Ꮡonceʗ1` (a non-existent box) must not appear. Guarded by `ShadowedHeapBoxReceiver` (an inner closure's `var b` capture-mode method, shadow-renamed against an outer same-named `var b` declared later).
+
 ### Nested dereferences parenthesize before the outer `.Value`
 A deref whose operand is ITSELF a deref renders with the prefix `~` form, on which a naked postfix `.Value` mis-binds (postfix beats unary: `~X.Value` is `~(X.Value)`). The outer deref wraps the inner one -- reflect `MapOf`'s `**(**mapType)(unsafe.Pointer(&imap))`:
 ```csharp
