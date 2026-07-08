@@ -1893,6 +1893,19 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// A heap-boxed VALUE local used as the receiver of a POINTER-receiver method call inside this
+	// lambda is address-taken IMPLICITLY — Go auto-takes `&state` for `defer state.free()` (state a
+	// value local, free a `*handleState` method; log/slog handler.go). Emission binds it through the
+	// box (`Ꮡstate.free`, see pointerReceiverBoxMethodGroup), so it too must be referenced by-box and
+	// NOT snapshot-copied: the copy `var stateʗ1 = state;` is a plain value whose box `Ꮡstateʗ1` is
+	// then referenced yet never declared (CS0103 ×3). Mark box-ref and skip the snapshot; emission
+	// renders `Ꮡstate` from the original heap box — matching Go's semantics of binding the address of
+	// the LIVE variable at defer time (a value snapshot would also miss body mutations before free).
+	if escapesToHeap && v.varUsedAsImplicitAddrReceiverInLambda(varObj) {
+		v.lambdaCapture.boxRefVars[varObj] = true
+		return
+	}
+
 	// Record the capture
 	if v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] == nil {
 		v.lambdaCapture.stmtCaptures[v.lambdaCapture.currentLambda] = make(map[*ast.Ident]bool)
@@ -1943,6 +1956,91 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 		}
 
 		return true
+	})
+
+	return found
+}
+
+// varUsedAsImplicitAddrReceiverInLambda reports whether varObj is used inside the lambda currently
+// being analyzed as the VALUE receiver of a POINTER-receiver method call (`defer state.free()`,
+// state a value local, free a `*handleState` method). Go auto-takes the receiver's address, and
+// emission binds this through the box (`Ꮡstate.free`, see pointerReceiverBoxMethodGroup's value
+// arm), so an escaping such local must be captured by-box, not snapshot-copied. Mirrors that arm's
+// guard exactly: a NAMED value receiver whose type is identical to the method's pointer-receiver
+// pointee. An ALREADY-pointer receiver (`defer conf.releaseSema()`) is excluded — its box group is
+// the pointer variable itself, whose snapshot name IS declared, so it needs no box-ref treatment.
+func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) bool {
+	lambda := v.lambdaCapture.currentLambda
+
+	if lambda == nil || varObj == nil {
+		return false
+	}
+
+	found := false
+
+	ast.Inspect(lambda, func(n ast.Node) bool {
+		if found {
+			return false
+		}
+
+		call, ok := n.(*ast.CallExpr)
+
+		if !ok {
+			return true
+		}
+
+		sel, ok := call.Fun.(*ast.SelectorExpr)
+
+		if !ok {
+			return true
+		}
+
+		ident, ok := sel.X.(*ast.Ident)
+
+		if !ok || v.info.ObjectOf(ident) != varObj {
+			return true
+		}
+
+		funcObj, ok := v.info.ObjectOf(sel.Sel).(*types.Func)
+
+		if !ok {
+			return true
+		}
+
+		sig, ok := funcObj.Type().(*types.Signature)
+
+		if !ok || sig.Recv() == nil {
+			return true
+		}
+
+		recvPtr, isPtrRecv := sig.Recv().Type().(*types.Pointer)
+
+		if !isPtrRecv {
+			return true
+		}
+
+		recvType := v.getType(sel.X, false)
+
+		if recvType == nil {
+			return true
+		}
+
+		// Already a pointer (arm 1 of pointerReceiverBoxMethodGroup) — excluded (see doc).
+		if _, alreadyPtr := recvType.(*types.Pointer); alreadyPtr {
+			return true
+		}
+
+		// A NAMED value whose type is exactly the pointer-receiver's pointee (arm 2).
+		if !types.Identical(recvPtr.Elem(), recvType) {
+			return true
+		}
+
+		if _, ok := recvType.(*types.Named); !ok {
+			return true
+		}
+
+		found = true
+		return false
 	})
 
 	return found
