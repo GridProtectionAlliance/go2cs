@@ -289,6 +289,28 @@ func collectUnexportedNamedTypes(t types.Type, pkg *types.Package) {
 		collectUnexportedNamedTypes(t.Elem(), pkg)
 	case *types.Chan:
 		collectUnexportedNamedTypes(t.Elem(), pkg)
+	case *types.Signature:
+		// A FUNC-typed element of an exported field/var — `var SupportedKDFs =
+		// map[uint16]func() *hkdfKDF` (crypto/internal/hpke), `var F func() snapshot`, or a
+		// []func(x internalT) field — emits a public field whose type embeds the func's
+		// parameter/result types (`map<uint16, Func<ж<hkdfKDF>>>`). C# requires those to be at
+		// least as accessible as the public field, so an unexported named type reachable ONLY
+		// through the signature must be publicized too, or it is less accessible than the field
+		// (CS0052). Peeling stops at Signature in the wrapper cases above, so walk the params and
+		// results back through the same named-only recursion (which handles a nested func result
+		// in turn). A lifted anonymous struct/interface in the signature is the CS0050/CS0051
+		// signature domain (collectSignatureTypes), not this exported-field CS0052 walk.
+		if params := t.Params(); params != nil {
+			for i := range params.Len() {
+				collectUnexportedNamedTypes(params.At(i).Type(), pkg)
+			}
+		}
+
+		if results := t.Results(); results != nil {
+			for i := range results.Len() {
+				collectUnexportedNamedTypes(results.At(i).Type(), pkg)
+			}
+		}
 	}
 }
 

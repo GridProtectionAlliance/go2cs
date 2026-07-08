@@ -2250,6 +2250,32 @@ public delegate void Option(ж<options> _);
 
 Only a package with an exported func type over an unexported type is affected (no golden churn). (Guarded by the `PublicizedFuncTypeParam` behavioral test.)
 
+**A func-TYPED exported field or var publicizes the unexported types in the func signature.** The
+accessibility walk that publicizes an unexported type exposed by an exported field / package var
+(`collectUnexportedNamedTypes`, CS0052) peels `pointer`/`slice`/`array`/`map`/`chan` wrappers to reach
+the element type — but stopped at a `*types.Signature`, so an unexported type reachable ONLY through a
+func-typed field's signature was left `internal`. crypto/internal/hpke's
+
+```go
+type hkdfKDF struct{ … }                          // unexported
+var SupportedKDFs = map[uint16]func() *hkdfKDF{…}  // exported var -> public field
+```
+
+emits `public static map<uint16, Func<ж<hkdfKDF>>> SupportedKDFs`, whose type embeds `hkdfKDF` through
+the func RESULT — but `[GoType] partial struct hkdfKDF` defaulted to `internal`, less accessible than
+the public field (CS0052). `collectUnexportedNamedTypes` now has a `*types.Signature` case that recurses
+into the signature's PARAMS and RESULTS through the same named-only walk (which handles a nested func
+result in turn), so `hkdfKDF` is publicized to `[GoType] public partial struct hkdfKDF` (and its exported
+methods go public via the receiver-access cascade). Both sides of the signature are covered — a func
+PARAMETER exposes an unexported type just as a func RESULT does (`var Appliers = []func(*cfg)` →
+`public static slice<Action<ж<cfg>>> Appliers`, publicizing `cfg`). This routes through the named-only
+`collectUnexportedNamedTypes`, NOT the signature-context `collectSignatureTypes`: a lifted anonymous
+struct/interface written in the func signature stays the CS0050/CS0051 signature domain, so only genuinely
+func-reachable NAMED types publicize here. (Guarded by the `FuncFieldUnexportedType` behavioral test — a
+public `map[uint16]func() *hkdfState` var whose func result exposes an unexported type, plus a
+`[]func(*cfg)` var whose func parameter exposes another, output-compared vs Go; both fail CS0052 without
+the publicize.)
+
 **A publicized wrapper reaches through an UNNAMED composite RHS to its element type.** A defined type whose `[GoType]` wrapper is emitted `public` (exported, or unexported-but-publicized) exposes its written RHS through the wrapper's `Value`/ctor/indexer/operators, so an unexported RHS type must be publicized too. This holds not just for a NAMED RHS (`type EncoderBuffer encoder`) but for an UNNAMED composite RHS whose ELEMENT is an unexported named type: `type ringElement [256]fieldElement` exposes `fieldElement` through the array-wrapper's indexer/`Value`/`ToSpan`, so `fieldElement` must be publicized (crypto/internal/mlkem768, CS0050/CS0051/CS0053/CS0054/CS0056/CS0057). `collectPublicizedWrapperRHS` therefore feeds the RHS unconditionally to the pointer/slice/array/map/chan-peeling walk (`collectUnexportedNamedTypes`) rather than gating on a named RHS. The walk has no `*types.Struct` case, so a struct RHS stays a no-op — an exported field of an unexported struct-field type is the CS0052 domain and is intentionally left internal. (Guarded by the `NamedArrayWrapper` extension — an exported `Grid [3]unit` over an unexported `unit`, output vs Go.)
 
 ### A publicized unexported interface is emitted `public`

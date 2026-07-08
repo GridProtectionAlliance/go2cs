@@ -238,6 +238,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckForVarMasksFuncLevel() => CheckTarget("ForVarMasksFuncLevel");
 
     [TestMethod]
+    public void CheckFuncFieldUnexportedType() => CheckTarget("FuncFieldUnexportedType");
+
+    [TestMethod]
     public void CheckFuncLitArgCapture() => CheckTarget("FuncLitArgCapture");
 
     [TestMethod]
