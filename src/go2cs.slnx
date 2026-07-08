@@ -84,6 +84,7 @@
     <Project Path="Tests/Behavioral/ClosureDefer/ClosureDefer.csproj" />
     <Project Path="Tests/Behavioral/ClosureMixedReturnUnsigned/ClosureMixedReturnUnsigned.csproj" />
     <Project Path="Tests/Behavioral/ClosureParamShadow/ClosureParamShadow.csproj" />
+    <Project Path="Tests/Behavioral/ClosureReassignsPtrParam/ClosureReassignsPtrParam.csproj" />
     <Project Path="Tests/Behavioral/ClosureReturnAnonStruct/ClosureReturnAnonStruct.csproj" />
     <Project Path="Tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
     <Project Path="Tests/Behavioral/CollisionFieldBoxAccessor/CollisionFieldBoxAccessor.csproj" />
@@ -112,6 +113,7 @@
     <Project Path="Tests/Behavioral/DivideByZeroPanic/DivideByZeroPanic.csproj" />
     <Project Path="Tests/Behavioral/DynamicInterfaceKeywordMethod/DynamicInterfaceKeywordMethod.csproj" />
     <Project Path="Tests/Behavioral/ElementAddressUnsignedIndex/ElementAddressUnsignedIndex.csproj" />
+    <Project Path="Tests/Behavioral/ElidedNestedPtrComposite/ElidedNestedPtrComposite.csproj" />
     <Project Path="Tests/Behavioral/EmbeddedValuePointerMethod/EmbeddedValuePointerMethod.csproj" />
     <Project Path="Tests/Behavioral/EmptyStructMapSet/EmptyStructMapSet.csproj" />
     <Project Path="Tests/Behavioral/ErrorfFormatting/ErrorfFormatting.csproj" />
@@ -207,6 +209,7 @@
     <Project Path="Tests/Behavioral/NamedFuncTypeStateMachine/NamedFuncTypeStateMachine.csproj" />
     <Project Path="Tests/Behavioral/NamedMapValuesCollision/NamedMapValuesCollision.csproj" />
     <Project Path="Tests/Behavioral/NamedPointerReinterpret/NamedPointerReinterpret.csproj" />
+    <Project Path="Tests/Behavioral/NamedResultLambdaInfer/NamedResultLambdaInfer.csproj" />
     <Project Path="Tests/Behavioral/NamedReturnDefer/NamedReturnDefer.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceCaptureMethod/NamedSliceCaptureMethod.csproj" />
     <Project Path="Tests/Behavioral/NamedSliceConversion/NamedSliceConversion.csproj" />
@@ -284,6 +287,7 @@
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />
     <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
+    <Project Path="Tests/Behavioral/ShadowedHeapBoxReceiver/ShadowedHeapBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/ShadowedPointerParam/ShadowedPointerParam.csproj" />
     <Project Path="Tests/Behavioral/ShadowedVarMethodCallLHS/ShadowedVarMethodCallLHS.csproj" />
     <Project Path="Tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />

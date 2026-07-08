@@ -121,6 +121,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosureReassignsPtrParam() => CheckTarget("ClosureReassignsPtrParam");
+
+    [TestMethod]
     public void CheckClosureReturnAnonStruct() => CheckTarget("ClosureReturnAnonStruct");
 
     [TestMethod]
@@ -191,6 +194,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
+
+    [TestMethod]
+    public void CheckElidedNestedPtrComposite() => CheckTarget("ElidedNestedPtrComposite");
 
     [TestMethod]
     public void CheckEmbeddedValuePointerMethod() => CheckTarget("EmbeddedValuePointerMethod");
@@ -481,6 +487,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
 
     [TestMethod]
+    public void CheckNamedResultLambdaInfer() => CheckTarget("NamedResultLambdaInfer");
+
+    [TestMethod]
     public void CheckNamedReturnDefer() => CheckTarget("NamedReturnDefer");
 
     [TestMethod]
@@ -665,6 +674,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
+
+    [TestMethod]
+    public void CheckShadowedHeapBoxReceiver() => CheckTarget("ShadowedHeapBoxReceiver");
 
     [TestMethod]
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
