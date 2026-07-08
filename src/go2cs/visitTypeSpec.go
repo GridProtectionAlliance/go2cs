@@ -97,7 +97,24 @@ func (v *Visitor) visitTypeSpec(typeSpec *ast.TypeSpec, doc *ast.CommentGroup) {
 		var typeNamePrefix string
 
 		if usePackagePrefix {
-			typeNamePrefix = getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix)) + "/"
+			// The same-package alias TARGET must be qualified with the package CLASS
+			// (`<pkg>_package`), but for a package in a NESTED namespace (internal/fuzz →
+			// `go.@internal`, io/fs → `go.io`) the class alone roots the target one segment too
+			// shallow: a bare `fuzz_package/CorpusEntryᴛ1` renders `go.fuzz_package.CorpusEntryᴛ1`,
+			// but the lifted type lives at `go.@internal.fuzz_package.CorpusEntryᴛ1` → CS0234 at the
+			// `global using` line and every use (internal/fuzz's CorpusEntry, ×60). Prepend the
+			// namespace segments between the root and the class (`@internal`, `io`), taken from the
+			// SAME packageNamespace that emitted the `namespace …;` declaration so the two always
+			// agree. A top-level package's namespace is exactly RootNamespace, leaving no prefix
+			// segments, so the target stays `<pkg>_package/…` (byte-for-byte no-op).
+			nsSegments := strings.TrimPrefix(strings.TrimPrefix(packageNamespace, RootNamespace), ".")
+			classQualifier := getSanitizedImport(fmt.Sprintf("%s%s", packageName, PackageSuffix))
+
+			if nsSegments == "" {
+				typeNamePrefix = classQualifier + "/"
+			} else {
+				typeNamePrefix = nsSegments + "." + classQualifier + "/"
+			}
 		}
 
 		typeName := convertToCSFullTypeName(typeNamePrefix + v.getFullTypeName(typeSpecType, false))

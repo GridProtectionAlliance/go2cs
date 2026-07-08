@@ -511,6 +511,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
 
     [TestMethod]
+    public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");
+
+    [TestMethod]
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]

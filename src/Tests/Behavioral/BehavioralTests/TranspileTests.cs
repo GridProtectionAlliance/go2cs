@@ -555,6 +555,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNativeIntWideConstAssign() => CheckTarget("NativeIntWideConstAssign");
 
     [TestMethod]
+    public void CheckNestedAliasUser() => CheckTarget("NestedAliasUser");
+
+    [TestMethod]
     public void CheckNestedEmbeddingPromotion() => CheckTarget("NestedEmbeddingPromotion");
 
     [TestMethod]
