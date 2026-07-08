@@ -344,22 +344,29 @@ internal class InterfaceTypeTemplate : TemplateBase
 
     private string GetReceiverMethodInitialization(MethodInfo method)
     {
+        // `nameof(...)` takes the method name as a bare identifier, so a Go sealing method whose
+        // name is a C# reserved keyword (testing.TB.private()) must be `@`-escaped here — Roslyn
+        // hands back the UNescaped name for an inherited (AllInterfaces) member. The compound
+        // delegate/field names (`{Name}ByPtr`, `s_{Name}ByPtr`) stay on the raw name: keyword +
+        // suffix is never itself a keyword, and `@` cannot appear mid-token.
+        string escapedName = EscapeCsKeyword(method.Name);
+
         return $$"""
 
 
                              // Initialization of '{{NonGenericInterfaceName}}.{{method.Name}}' receiver method implementation
-                             extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof({{method.Name}}));
-                             
+                             extensionMethod = targetTypeByPtr.GetExtensionMethod(nameof({{escapedName}}));
+
                              if (extensionMethod is not null)
                                  s_{{method.Name}}ByPtr = extensionMethod.CreateStaticDelegate(typeof({{method.Name}}ByPtr)) as {{method.Name}}ByPtr;
-                             
-                             extensionMethod = targetType.GetExtensionMethod(nameof({{method.Name}}));
-                             
+
+                             extensionMethod = targetType.GetExtensionMethod(nameof({{escapedName}}));
+
                              if (extensionMethod is not null)
                                  s_{{method.Name}}ByVal = extensionMethod.CreateStaticDelegate(typeof({{method.Name}}ByVal)) as {{method.Name}}ByVal;
-                             
+
                              if (s_{{method.Name}}ByPtr is null && s_{{method.Name}}ByVal is null)
-                                 throw new NotImplementedException($"{targetType.FullName} does not implement '{{NonGenericInterfaceName}}.{nameof({{method.Name}})}' method");
+                                 throw new NotImplementedException($"{targetType.FullName} does not implement '{{NonGenericInterfaceName}}.{nameof({{escapedName}})}' method");
                  """;
     }
 }

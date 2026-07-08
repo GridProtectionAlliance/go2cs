@@ -184,6 +184,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDynamicInterfaceKeywordMethod() => CheckTarget("DynamicInterfaceKeywordMethod");
+
+    [TestMethod]
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]

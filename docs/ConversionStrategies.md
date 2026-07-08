@@ -2027,6 +2027,45 @@ errors were the two `exprNode` forwards) and is a prerequisite for `text/templat
 by `CrossPkgLib`/`CrossPkgUser`: the sealed `Emitter` interface with an unexported `emitNode()`, a
 `*Leaf` implementing it, cast to `Emitter` in the consumer assembly — CS1061 without the stub.)
 
+### A dynamic interface's runtime conversion class re-escapes a keyword method name
+An anonymous or type-asserted interface is lifted to a `[GoType("dyn")]` partial interface (see
+[Anonymous interfaces used as an adapter target](#anonymous-interfaces-used-as-an-adapter-target-are-lifted-package-wide)),
+and for the dynamic form `go2cs-gen`'s `InterfaceTypeTemplate` additionally emits a **runtime
+conversion class** — `ΔI<ᴛTTarget> : I` — that duck-types a target at run time by reflection-binding
+each interface method to the target's extension methods (the fallback for a duck-typed assertion the
+compile-time `ImplementGenerator` could not resolve). When such a dynamic interface **embeds** an
+interface carrying an unexported *sealing* method whose name is a C# reserved keyword — internal/testenv's
+`interface{ testing.TB; Deadline() (time.Time, bool) }`, where `testing.TB` has `private()` — that name
+must be `@`-escaped in the generated class. The converter already escapes it in the interface itself
+(`void @private();`), but the sealing method reaches the conversion class through the base-interface walk
+(`interfaceSymbol.AllInterfaces`), and a symbol name read from Roslyn (`IMethodSymbol.Name`) arrives
+**UNescaped** — unlike a syntax `Identifier.Text`. Emitting it raw yields `void private()` and
+`nameof(private)`; that syntax error corrupts the class body, and because the conversion class is nested
+inside the `public static partial class …_package` container the parse recovery ejects every subsequent
+operator into the *static* container — **CS0715** ("static classes cannot contain user-defined operators")
+×25 plus a **CS0246** cascade (~54): 84 errors from one keyword method. (The nesting itself is legal — a
+non-static class nested in a static class holds instance members and operators fine, as every non-keyword
+dynamic interface proves; only the broken body triggers the eject.)
+
+The fix re-escapes the name only where it is emitted as its own identifier token — the method declaration
+(`MethodInfo.GetSignature`) and each `nameof(...)` in the reflection-binding static constructor. The
+compound delegate/field names (`{Name}ByPtr`, `s_{Name}ByPtr`) stay on the raw name: a keyword + suffix
+is never itself a keyword, and `@` cannot appear mid-token. `EscapeCsKeyword` is a no-op for every
+non-keyword method, so all other dynamic-interface output is byte-identical. Emitted form:
+```csharp
+internal class ΔcommandContext_type<ΔTTarget> : commandContext_type
+{
+    private delegate void privateByPtr(ж<ΔTTarget> targetʗ);              // compound name — raw
+    public void @private() { … }                                         // declaration — escaped
+    // static constructor:
+    extensionMethod = targetType.GetExtensionMethod(nameof(@private));   // nameof — escaped
+}
+```
+Greens internal/testenv (its only errors were this one method's cascade). Guarded by the
+`DynamicInterfaceKeywordMethod` behavioral test — a named `TB` interface with a `private()` sealing
+method, embedded in a type-assertion's anonymous interface so the lifted `[GoType("dyn")]` target's
+conversion class must implement the escaped `@private()`; it does not compile without the fix.
+
 ### A foreign struct's promoted method forwards through its value embed
 When the adapter's struct is FOREIGN (defined in another assembly) it binds forwarding from METADATA
 (the boxBound / refBound scan above); a member neither on its box nor a ref-static falls to

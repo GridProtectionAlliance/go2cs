@@ -91,7 +91,14 @@ public record MethodInfo
 
     public string GetSignature(bool allowDiscarded = true)
     {
-        return $"{Name}{GetGenericSignature()}({GetTypedParameters(allowDiscarded)}){GetWhereConstraints()}";
+        // The method name is emitted here as its own declaration-identifier token, so a Go
+        // "sealing" method whose name is a C# reserved keyword — testing.TB.private(), the
+        // ast.Node markers, encoding/gob's string() — must be `@`-escaped. Names read from
+        // Roslyn (IMethodSymbol.Name) arrive UNescaped, so an inherited `private()` pulled in
+        // through AllInterfaces would otherwise emit `void private()` (CS1520), corrupting the
+        // enclosing class body. EscapeCsKeyword is a no-op for non-keywords and for names that
+        // are already escaped or qualified, so this is safe for every caller.
+        return $"{EscapeCsKeyword(Name)}{GetGenericSignature()}({GetTypedParameters(allowDiscarded)}){GetWhereConstraints()}";
     }
 
     public string GetGenericSignature()

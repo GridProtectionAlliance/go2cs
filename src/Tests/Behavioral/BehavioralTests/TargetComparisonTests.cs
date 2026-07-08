@@ -204,6 +204,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDivideByZeroPanic() => CheckTarget("DivideByZeroPanic");
 
     [TestMethod]
+    public void CheckDynamicInterfaceKeywordMethod() => CheckTarget("DynamicInterfaceKeywordMethod");
+
+    [TestMethod]
     public void CheckElementAddressUnsignedIndex() => CheckTarget("ElementAddressUnsignedIndex");
 
     [TestMethod]
