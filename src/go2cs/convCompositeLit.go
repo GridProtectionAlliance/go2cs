@@ -28,7 +28,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
 				}
-				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
 			case *types.Array:
 				csElem := convertToCSTypeName(v.getTypeName(u.Elem(), false))
 				// A KEYED elided ARRAY literal — the inner `{joiningL: stateBefore, …}` of a
@@ -38,7 +38,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				if compositeLitIsKeyed(compositeLit.Elts) {
 					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
 				}
-				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, nil))
+				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
 			case *types.Pointer:
 				// An untyped composite whose inferred type is `*Struct` — the `[]*T{ {…} }` shorthand
 				// for `&T{…}` (e.g. runtime's `dbgvars = []*dbgVar{ {name, &debug.x}, … }`). Emit the
@@ -774,6 +774,41 @@ func compositeLitIsKeyed(elts []ast.Expr) bool {
 
 	_, keyed := elts[0].(*ast.KeyValueExpr)
 	return keyed
+}
+
+// elidedPointerElemContext renders a bare pointer-typed IDENT element of an ELIDED (type-inferred)
+// slice/array literal as its box (`Ꮡc`, the pointer value) instead of a deref-aliased value alias —
+// the untyped-elided twin of the TYPED pointer-element path (argTypeIsPtr, see convCompositeLit
+// above). The inner `{c}` of `[][]*Certificate{{c}}` (crypto/x509 Verify) is an elided
+// `[]*Certificate`; its element `c` is a deref-aliased `*Certificate` receiver, and emitting the
+// value alias `c` into a `ж<Certificate>[]` array is CS0029. Returns nil when the element type is
+// not a pointer OR no element is a bare pointer ident, so every already-correct elided literal keeps
+// its exact nil-context rendering (zero golden churn). u8StringArgOK is set to preserve the
+// nil-context default (u8StringOK true per element) that switching to a non-nil context would drop.
+func (v *Visitor) elidedPointerElemContext(elem types.Type, elts []ast.Expr) *CallExprContext {
+	if _, ok := elem.Underlying().(*types.Pointer); !ok {
+		return nil
+	}
+
+	context := DefaultCallExprContext()
+	hasPtrIdent := false
+
+	for i, elt := range elts {
+		context.u8StringArgOK[i] = true
+
+		if ident, ok := elt.(*ast.Ident); ok {
+			if _, isPtr := v.getType(ident, false).(*types.Pointer); isPtr {
+				context.argTypeIsPtr[i] = true
+				hasPtrIdent = true
+			}
+		}
+	}
+
+	if !hasPtrIdent {
+		return nil
+	}
+
+	return context
 }
 
 // sparseArrayCompositeContext builds the element context for a KEYED (sparse) array/slice
