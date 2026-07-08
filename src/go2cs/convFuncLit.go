@@ -325,13 +325,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 					returnTypePrefix = convertToCSTypeName(v.getTypeName(results.At(0).Type(), false)) + " "
 				}
 			}
-		} else if results := litSig.Results(); results != nil && results.Len() > 1 && !litHasNamedResults && context.isAssignment {
+		} else if results := litSig.Results(); results != nil && results.Len() > 1 && context.isAssignment {
 			// A MULTI-result literal where EVERY return arm carries a typeless element —
 			// `return (default!, err)` on the error arms and `return (b, default!)` on the
 			// success arm (macho file.go's sectionData, func(s *Section) ([]byte, error)):
 			// a tuple literal with any untyped element has no natural type, so NO arm
 			// contributes to inference (CS8917 + CS8130/CS8716 cascade). State the tuple
 			// return type explicitly; nil elements then take the target element type.
+			// NAMED results are included: crypto/x509 parseNameConstraintsExtension's
+			// `getValues := func(subtrees) (dnsNames []string, ips []*net.IPNet, emails,
+			// uriDomains []string, err error)` returns `nil,nil,nil,nil,err` on every error
+			// arm and `…, nil` on the success arm — no fully-typed arm, CS8917. A bare `return`
+			// (len 0) never matches results.Len(), so it neither sets hasReturn nor a false
+			// hasFullyTypedArm; a named literal that DOES have a fully-typed explicit arm keeps
+			// inferred typing (no return-type prefix, no churn).
 			hasReturn := false
 			hasFullyTypedArm := false
 
