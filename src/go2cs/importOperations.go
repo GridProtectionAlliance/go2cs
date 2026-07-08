@@ -363,18 +363,50 @@ func loadImportedTypeAliases(info PackageInfo) {
 		rootPackageName := getSanitizedIdentifier(info.RootPackageName)
 		packageName := getCoreSanitizedIdentifier(info.PackageName)
 
+		// A collision-renamed type whose renamed form is ITSELF an exported alias produces a TWO-HOP
+		// chain in the producer's package_info: encoding/json's `Token` type collides with
+		// `(*Decoder).Token()`, so the TYPE is Δ-renamed (`GoTypeAlias("Token", "ΔToken")`), and — Token
+		// being `type Token any` (an empty interface) — visitTypeSpec ALSO exports the renamed form's
+		// concrete target (`GoTypeAlias("ΔToken", "object")`). A consumer that resolves only the FIRST
+		// hop qualifies the intermediate Δ-name as a package member (`go.encoding.json_package.ΔToken`),
+		// but ΔToken is an assembly-scoped `global using`, not a namespace member → CS0426 (html/template,
+		// internal/coverage/cfile, expvar, internal/fuzz, log/slog, ...). Build a source→target map of
+		// THIS package's exported aliases so the chain can be followed to its concrete target (`object`).
+		localAliases := make(map[string]string, len(results))
+
+		for _, result := range results {
+			localAliases[result[0]] = result[1]
+		}
+
 		for _, result := range results {
 			// Add the exported type alias to the imported type aliases map
 			alias := fmt.Sprintf("%s.%s", rootPackageName, getCoreSanitizedIdentifier(result[0]))
-			typeName := getCoreSanitizedIdentifier(result[1])
 
-			if isCSharpBuiltinTypeName(result[1]) {
+			// Follow a chain of same-package aliases to the concrete target (Token → ΔToken → object).
+			// Bounded by the alias count and short-circuited on a self-reference, so a degenerate cycle
+			// cannot loop. A target that is NOT itself an exported source (a real Δ-renamed delegate/
+			// struct member such as ΔFilter, or an already `go.`-qualified name) leaves it unchanged.
+			target := result[1]
+
+			for range results {
+				next, ok := localAliases[target]
+
+				if !ok || next == target {
+					break
+				}
+
+				target = next
+			}
+
+			typeName := getCoreSanitizedIdentifier(target)
+
+			if isCSharpBuiltinTypeName(target) {
 				// A C# BUILT-IN type target (`object` from `type X any`, or a numeric/bool/string
 				// primitive) is NOT a package member — import it BARE, never @-escaped or
 				// go.<pkg>_package.-qualified. crypto's `type PublicKey any` exports "object"; an
 				// importer qualified it to `go.crypto_package.@object`, a nonexistent nested type
 				// (CS0426, crypto/md5 + crypto/internal/boring + every crypto importer).
-				typeName = result[1]
+				typeName = target
 			} else if strings.HasPrefix(typeName, "const:") {
 				typeName = strings.TrimPrefix(typeName, "const:")
 

@@ -31,6 +31,8 @@ using static go.CrossPkgLib_package;
 [assembly: GoTypeAlias("Marker", "ΔMarker")]
 [assembly: GoTypeAlias("Status", "ΔStatus")]
 [assembly: GoTypeAlias("Temperature", "go.CrossPkgLib_package.Celsius")]
+[assembly: GoTypeAlias("Token", "ΔToken")]
+[assembly: GoTypeAlias("ΔToken", "object")]
 // </ExportedTypeAliases>
 
 // As types are cast to interfaces in Go source code, the go2cs code converter

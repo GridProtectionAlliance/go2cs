@@ -14,6 +14,8 @@ global using CrossPkgLibꓸGrade = go.CrossPkgLib_package.ΔGrade;
 global using CrossPkgLibꓸMarker = go.CrossPkgLib_package.ΔMarker;
 global using CrossPkgLibꓸStatus = go.CrossPkgLib_package.ΔStatus;
 global using CrossPkgLibꓸTemperature = go.CrossPkgLib_package.Celsius;
+global using CrossPkgLibꓸToken = object;
+global using CrossPkgLibꓸΔToken = object;
 using CrossPkgLib = go.CrossPkgLib_package;
 // </ImportedTypeAliases>
 

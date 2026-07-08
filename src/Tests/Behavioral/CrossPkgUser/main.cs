@@ -273,6 +273,8 @@ internal static void Main() => func((defer, recover) => {
     fmt.Println(h.Value.Cache.Value.Bump(), h.Value.Cache.Value.Bump(), (~h).name);
     var mk = CrossPkgLib.MakeMarker("tag"u8);
     fmt.Println(mk.ΔΔMarker);
+    CrossPkgLibꓸToken tok = CrossPkgLib.AsToken(42);
+    fmt.Println("token:", tok);
     var wrapped = CrossPkgLib.Wrap<nint>(5);
     fmt.Println(len(wrapped), wrapped[0]);
     fmt.Println(CrossPkgLib.Pair<@string, nint>("k"u8, 8));

@@ -199,6 +199,23 @@ type Grade int
 
 func (s Sensor) Grade() int { return 1 }
 
+// Token is an exported EMPTY-INTERFACE type that COLLIDES with the Token method below (the
+// encoding/json `type Token any` vs `(*Decoder).Token()` shape). The collision Δ-renames the TYPE to
+// ΔToken, and — Token being an empty interface — visitTypeSpec ALSO exports the renamed form's concrete
+// target as `[assembly: GoTypeAlias("ΔToken", "object")]`, so this package's package_info carries a
+// TWO-HOP chain Token -> ΔToken -> object. A consumer that names CrossPkgLib.Token must resolve the FULL
+// chain to a bare `object` (`global using CrossPkgLibꓸToken = object;`), NOT qualify the intermediate
+// Δ-name as the nonexistent member go.CrossPkgLib_package.ΔToken (CS0426 — the encoding/json Token
+// consumed by html/template, internal/coverage/cfile, expvar, log/slog, internal/fuzz, ...).
+type Token any
+
+// Token (the method) forces the type-vs-method collision that Δ-renames the Token TYPE.
+func (s Sensor) Token() int { return int(s.Temp) }
+
+// AsToken boxes a value into the empty-interface Token so a consumer can name the imported alias in a
+// var declaration and read the boxed concrete value back through it.
+func AsToken(v int) Token { return v }
+
 
 // snapshot is UNEXPORTED but exposed by the exported var Latest and the exported func
 // Peek - Go consumers hold the value and call its exported surface, so the C# type is

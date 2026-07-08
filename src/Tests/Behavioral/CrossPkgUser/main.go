@@ -391,6 +391,13 @@ func main() {
 	mk := CrossPkgLib.MakeMarker("tag")
 	fmt.Println(mk.Marker) // tag
 
+	// A cross-package COLLISION-RENAMED EMPTY-INTERFACE type (CrossPkgLib.Token — the encoding/json
+	// Token -> ΔToken -> object shape): its imported alias must resolve the full two-hop chain to a bare
+	// `object` (global using CrossPkgLibꓸToken = object;), NOT qualify the intermediate ΔToken as a
+	// package member (CS0426). Name it as a var type and read the boxed concrete value back through it.
+	var tok CrossPkgLib.Token = CrossPkgLib.AsToken(42)
+	fmt.Println("token:", tok) // token: 42
+
 	// Explicit cross-package generic-FUNCTION instantiation through a package selector: the base
 	// selector (generic-function-value path) and the [T] index both wanted to append the type
 	// arguments, doubling to CrossPkgLib.Wrap<int><int> (CS1525/CS0119/CS8124). The two-arg

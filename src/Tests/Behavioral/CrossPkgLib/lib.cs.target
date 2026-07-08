@@ -1,4 +1,5 @@
 global using Temperature = go.CrossPkgLib_package.Celsius;
+global using ΔToken = object;
 
 namespace go;
 
@@ -166,6 +167,14 @@ public static nint Status(this Sensor s) {
 
 public static nint Grade(this Sensor s) {
     return 1;
+}
+
+public static nint Token(this Sensor s) {
+    return (nint)(float64)s.Temp;
+}
+
+public static ΔToken AsToken(nint v) {
+    return v;
 }
 
 [GoType] public partial struct snapshot {
