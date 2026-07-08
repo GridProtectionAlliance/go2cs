@@ -62,6 +62,19 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 
 	// Special handling for field access (e.g., outer.ptr)
 	if selectorExpr, ok := starExpr.X.(*ast.SelectorExpr); ok {
+		// A pointer to a cross-package COLLISION-RENAMED type in a TYPE position (`*time.Location`,
+		// where time's `Location` → `ΔLocation`, shadowed by the `Time.Location()` method) must
+		// render the recorded import alias. convExpr below emits the raw `time_package.Location`,
+		// which is CS0426 in the alias-less `[GoType("ж<…>")]` wrapper of slog's `type timeLocation
+		// *time.Location`. Only a TYPE operand is redirected — a pointer FIELD deref (`*outer.ptr`)
+		// keeps the convExpr rendering — and foreignAliasedTypeName fires ONLY for a renamed foreign
+		// type (a non-renamed `*time.Time` has no alias entry and falls through unchanged).
+		if tv, isType := v.info.Types[starExpr.X]; isType && tv.IsType() {
+			if aliased, ok := v.foreignAliasedTypeName(v.getType(starExpr.X, false)); ok {
+				return fmt.Sprintf("%s<%s>", PointerPrefix, aliased)
+			}
+		}
+
 		baseExpr := v.convExpr(starExpr.X, nil)
 
 		// One star is ONE deref: `*i.pprev` on a `**special` field yields a `*special` —
