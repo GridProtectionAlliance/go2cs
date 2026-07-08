@@ -1178,6 +1178,22 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 							embedSel := &ast.SelectorExpr{X: selectorExpr.X, Sel: &ast.Ident{Name: embedField.Name()}}
 							fieldAddr := v.convUnaryExpr(&ast.UnaryExpr{Op: token.AND, X: embedSel}, DefaultUnaryExprContext())
 
+							// A promoted box-receiver method reached through an UNEXPORTED embed of a
+							// FOREIGN package cannot descend via `<box>.of(T.Ꮡ<embed>)`: the `Ꮡ<embed>` box
+							// accessor is `internal` (matching the embed's unexportedness), invisible
+							// cross-assembly (CS0117 — crypto/internal/cryptotest reaching testing.T.common's
+							// promoted Errorf/Helper/Logf). Call the method DIRECTLY on the receiver box —
+							// go2cs-gen emits a public `M(this ж<T>)` descent shim for exactly this case
+							// (IsValueEmbedBoxRecv). Reuse the first-hop box the &-machinery just computed,
+							// dropping the inaccessible trailing `.of(…)` view. Single-hop only (a deeper
+							// foreign value chain has no shim); the box is the text before the last `.of(`.
+							if len(hopFields) == 1 && !embedField.Exported() && embedField.Pkg() != nil && embedField.Pkg() != v.pkg {
+								if ofIndex := strings.LastIndex(fieldAddr, ".of("); ofIndex != -1 && strings.HasSuffix(fieldAddr, ")") {
+									box := fieldAddr[:ofIndex]
+									return getAliasedTypeName(fmt.Sprintf("%s.%s", box, v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr))))
+								}
+							}
+
 							for k := 1; k < len(hopFields); k++ {
 								ownerTypeName := convertToCSTypeName(v.getTypeName(hopFields[k-1].Type(), false))
 								fieldAddr = fmt.Sprintf("%s.of(%s.%s%s)", fieldAddr, boxAccessorType(ownerTypeName, ""),

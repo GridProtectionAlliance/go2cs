@@ -636,6 +636,12 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
 
     [TestMethod]
+    public void CheckPromotedEmbedLib() => CheckTarget("PromotedEmbedLib");
+
+    [TestMethod]
+    public void CheckPromotedEmbedUser() => CheckTarget("PromotedEmbedUser");
+
+    [TestMethod]
     public void CheckPromotedFieldNameIsType() => CheckTarget("PromotedFieldNameIsType");
 
     [TestMethod]

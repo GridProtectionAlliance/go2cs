@@ -633,6 +633,12 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckPrintfWidthFlags() => CheckTarget("PrintfWidthFlags");
 
     [TestMethod]
+    public void CheckPromotedEmbedLib() => CheckTarget("PromotedEmbedLib");
+
+    [TestMethod]
+    public void CheckPromotedEmbedUser() => CheckTarget("PromotedEmbedUser");
+
+    [TestMethod]
     public void CheckPromotedFieldNameIsType() => CheckTarget("PromotedFieldNameIsType");
 
     [TestMethod]

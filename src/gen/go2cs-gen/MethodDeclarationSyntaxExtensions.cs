@@ -51,6 +51,16 @@ public record MethodInfo
     // deref'd value (`target.<embed>.Value`) a value-receiver method uses — the box receiver needs ж<T>.
     public bool IsBoxRecv { get; init; }
 
+    // Set when this is a direct-ж (box-receiver) primary promoted through an UNEXPORTED VALUE embed
+    // (`testing.T.common`'s `Errorf`). Unlike a POINTER embed (whose hop `target.<embed>` is already a
+    // ж<T>), a VALUE embed hop is a value that cannot bind a ж-receiver, so the converter renders the
+    // in-package call as the box-field descent `Ꮡt.of(T.Ꮡ<embed>).M(…)`. That descent uses the embed's
+    // `Ꮡ<embed>` box accessor, which is `internal` (matching the unexported embed) and thus invisible
+    // cross-assembly (CS0117 — crypto/internal/cryptotest reaching testing.T.common). This flag makes
+    // the promoted forwarder emit that descent in a PUBLIC shim, so a foreign package can reach the
+    // exported promoted method by the plain `t.M(…)` call.
+    public bool IsValueEmbedBoxRecv { get; init; }
+
     // Set for a cross-assembly UNEXPORTED interface method — Go's package-sealing markers such as
     // ast.Expr's `exprNode()`, ast.Stmt's `stmtNode()`, ast.Decl's `declNode()`, or
     // text/template/parse.Node's `tree()`/`writeTo()`. Its C# implementation is an INTERNAL extension

@@ -2118,6 +2118,55 @@ itself is unaffected. This clears `text/template`'s last CS1929. (Guarded by `Cr
 `*Branch`, which promotes the exported `Emit` through its `EmitBase` value embed, cast to `Emitter` —
 CS1929 without the reroute.)
 
+### A promoted box-receiver method through an UNEXPORTED value embed is called cross-package via a public forwarder
+An EXPORTED, pointer-receiver method that takes the address of a receiver field is emitted as a
+**direct-ж (box-receiver) primary** `M(this ж<T> …)`. When such a method is *promoted* through an
+**unexported** VALUE embed — `testing.T.Errorf`, promoted from the embedded `common` (`type T struct{
+common; … }`), or go/types' `TypeName`/`Var`/`Func`, which embed `object` — an IN-PACKAGE caller
+renders the descent through the embed's box-field accessor (see *Promoted pointer methods descend
+multi-hop value-embed chains* above):
+```csharp
+Ꮡt.of(testing.T.Ꮡcommon).Errorf("…"u8, …);   // in-package
+```
+`Ꮡcommon` is the `TypeGenerator`'s `FieldReferences` box accessor for the embed, and — matching the
+embed's unexportedness — it is `internal`. So a caller in **another package/assembly** (crypto/internal/
+cryptotest, testing/slogtest, x/net/nettest, go/internal/gcimporter) cannot see it: a cross-assembly
+reference to an `internal` member reads as **CS0117** ("`testing_package.T` does not contain a definition
+for `Ꮡcommon`"), not CS0122. Every path through the unexported embed (`common`, `Ꮡcommon`, its promoted
+members) is `internal`, so no converter-only descent can reach it. The fix is two-sided:
+
+- **`go2cs-gen` (`StructTypeTemplate`)** — for a direct, non-generic, **unexported VALUE embed**, harvest
+  the embed's box-receiver primaries (`GetBoxReceiverExtensionMethods`, previously collected only for
+  POINTER embeds) and, for each **exported** one, emit a single box-only shim (`IsValueEmbedBoxRecv`) that
+  performs the descent internally, where the `internal` accessor is reachable:
+  ```csharp
+  public static void Errorf(this ж<T> Ꮡtarget, @string format, params Span<object> argsʗp)
+      => Ꮡtarget.of(T.Ꮡcommon).Errorf(format, argsʗp);
+  ```
+  No `this ref T` overload (a box receiver cannot bind on a value). The shim scope is the shared
+  `methodScope` — the STRUCT's exportedness, downgraded for a non-public return type — so it is `public`
+  only for an exported method on an EXPORTED struct returning void/public (the genuinely reachable case),
+  and `internal` on an UNEXPORTED enclosing struct (context's `afterFuncCtx`, reflect's
+  `structTypeUncommon`), whose `ж<T>` receiver is itself internal — a `public` shim there is CS0051. It is
+  gated to an exported promoted method (an unexported one is never reachable across packages, so it needs
+  no shim; its in-package callers keep the inline descent). The value embed is discriminated by
+  `!promotedStructType.Contains("<")` (a plain value embed's type name never carries `<`, whereas the
+  pointer-box form `ж<…>` and generic embeds do) — a more robust test than the `@`-keyword-escaped
+  `pointerEmbedTypeNames` membership, whose `ж<@file>`-shaped names mismatch and mis-fired the shim onto
+  os.File's `*file` POINTER embed (a stray `File.Ꮡfile.Value`, CS0119).
+- **the converter (`convSelectorExpr`)** — when the promoted-method descent is reached through an
+  unexported embed of a FOREIGN package (single hop), it drops the inaccessible `.of(…)` view and calls
+  the promoted method DIRECTLY on the receiver box, binding the public shim:
+  ```csharp
+  Ꮡt.Errorf("…"u8, …);   // cross-package (Ꮡt for a deref'd param, tΔ1 for a lambda box param)
+  ```
+  The box is recovered from the first-hop `&embed`-address the `&`-machinery already computes (the text
+  before its last `.of(`), so it is correct for every receiver kind without re-deriving it.
+
+(Guarded by `PromotedEmbedLib`/`PromotedEmbedUser`: `Counter` value-embeds an unexported `common` whose
+exported `Add`/`Report` take `&c.sum` (box-receiver); the user package calls them on a `*Counter` local
+and through a parameter, plus reads the exported `Label` field for contrast — output-compared vs Go.)
+
 ### Cross-package value-to-interface conversions use the local VALUE adapter
 A VALUE conversion of a FOREIGN named type to a LOCAL interface (os's `Signal` interface is
 DOWNSTREAM of `syscall.Signal` — neither assembly can partial the other) records
