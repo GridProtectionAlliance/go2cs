@@ -101,6 +101,7 @@
     <Project Path="Tests/Behavioral/DeferClosure/DeferClosure.csproj" />
     <Project Path="Tests/Behavioral/DeferEvalParam/DeferEvalParam.csproj" />
     <Project Path="Tests/Behavioral/DeferEvalParamFunc/DeferEvalParamFunc.csproj" />
+    <Project Path="Tests/Behavioral/DeferHeapLocalPtrMethod/DeferHeapLocalPtrMethod.csproj" />
     <Project Path="Tests/Behavioral/DeferInterfaceReturn/DeferInterfaceReturn.csproj" />
     <Project Path="Tests/Behavioral/DeferLambdaParam/DeferLambdaParam.csproj" />
     <Project Path="Tests/Behavioral/DeferSimple/DeferSimple.csproj" />
@@ -255,6 +256,7 @@
     <Project Path="Tests/Behavioral/PointerEmbeddingPromotion/PointerEmbeddingPromotion.csproj" />
     <Project Path="Tests/Behavioral/PointerFieldArrayElementAddress/PointerFieldArrayElementAddress.csproj" />
     <Project Path="Tests/Behavioral/PointerFieldOfBoxedGlobal/PointerFieldOfBoxedGlobal.csproj" />
+    <Project Path="Tests/Behavioral/PointerInterfaceStructField/PointerInterfaceStructField.csproj" />
     <Project Path="Tests/Behavioral/PointerParamCapturedInClosure/PointerParamCapturedInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamInClosure/PointerParamInClosure.csproj" />
     <Project Path="Tests/Behavioral/PointerParamNilWalk/PointerParamNilWalk.csproj" />
