@@ -420,6 +420,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
+    public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]

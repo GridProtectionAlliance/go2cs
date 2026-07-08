@@ -417,6 +417,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckMakeSliceUintptrLen() => CheckTarget("MakeSliceUintptrLen");
 
     [TestMethod]
+    public void CheckMapAnonStructValue() => CheckTarget("MapAnonStructValue");
+
+    [TestMethod]
     public void CheckMapCommaOk() => CheckTarget("MapCommaOk");
 
     [TestMethod]

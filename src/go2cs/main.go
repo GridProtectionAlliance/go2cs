@@ -3025,6 +3025,24 @@ func (v *Visitor) extractStructType(expr ast.Expr) (*ast.StructType, types.Type)
 	return nil, nil
 }
 
+// extractMapValueStructType returns the anonymous VALUE struct of a map type expression
+// (`map[K]struct{…}`) together with its resolved types.Type, or (nil, nil) when the expression is
+// not a map whose value is a non-empty anonymous struct. extractStructType lifts a slice/array
+// ELEMENT struct (its ArrayType arm) but has no map arm; this mirrors that for a map value so a
+// var declared over a map-of-anonymous-struct lifts the value type (see visitValueSpec). Without
+// the lift, getTypeName's Map arm emits the value's raw Go `struct{…}` syntax straight into the C#
+// map signature, which does not parse. Empty structs are excluded — they map to golib EmptyStruct
+// and are never lifted — matching extractStructType.
+func (v *Visitor) extractMapValueStructType(expr ast.Expr) (*ast.StructType, types.Type) {
+	if mapType, ok := expr.(*ast.MapType); ok {
+		if structType, ok := mapType.Value.(*ast.StructType); ok && !isEmptyStruct(structType) {
+			return structType, v.getType(mapType.Value, false)
+		}
+	}
+
+	return nil, nil
+}
+
 func (v *Visitor) getUnderlyingType(expr ast.Expr) types.Type {
 	typ := v.info.TypeOf(expr)
 	if typ == nil {
