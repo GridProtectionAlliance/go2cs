@@ -957,6 +957,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
 
     [TestMethod]
+    public void CheckVariadicFuncFields() => CheckTarget("VariadicFuncFields");
+
+    [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]

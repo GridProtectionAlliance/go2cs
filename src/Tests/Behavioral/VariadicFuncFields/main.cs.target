@@ -1,0 +1,59 @@
+namespace go;
+
+using fmt = fmt_package;
+using ꓸꓸꓸany = Span<any>;
+using ꓸꓸꓸstring = Span<@string>;
+
+partial class main_package {
+
+[GoType] partial struct Context {
+    public @string Name;
+    public Funcꓸꓸꓸ<@string, @string> JoinPath;
+    public Actionꓸꓸꓸ<@string, any> Log;
+}
+
+internal static @string slashJoin(params ꓸꓸꓸstring elemʗp) {
+    var elem = elemʗp.slice();
+
+    @string joined = ""u8;
+    foreach (var (i, e) in elem) {
+        if (i > 0) {
+            joined += "/"u8;
+        }
+        joined += e;
+    }
+    return joined;
+}
+
+[GoRecv] internal static @string join(this ref Context c, params ꓸꓸꓸstring elemʗp) {
+    var elem = elemʗp.slice();
+
+    if (c.JoinPath != default!) {
+        return c.JoinPath(elem.ꓸꓸꓸ);
+    }
+    return slashJoin(elem.ꓸꓸꓸ);
+}
+
+internal static void Main() {
+    var ctxt = new Context(
+        Name: "demo"u8,
+        JoinPath: slashJoin,
+        Log: (@string format, params ꓸꓸꓸany argsʗp) => {
+            var args = argsʗp.slice();
+            fmt.Printf(format + "\n"u8, args.ꓸꓸꓸ);
+        }
+    );
+    fmt.Println(ctxt.JoinPath("a"u8, "b", "c"));
+    fmt.Println(ctxt.JoinPath() == ""u8);
+    var parts = new @string[]{"x", "y"}.slice();
+    fmt.Println(ctxt.join(parts.ꓸꓸꓸ));
+    ctxt.JoinPath = (params ꓸꓸꓸstring elemʗp) => {
+        var elem = elemʗp.slice();
+        return fmt.Sprint(len(elem));
+    };
+    fmt.Println(ctxt.JoinPath("p"u8, "q"));
+    ctxt.Log("%s:%d"u8, ctxt.Name, 3);
+    ctxt.Log("done"u8);
+}
+
+} // end main_package

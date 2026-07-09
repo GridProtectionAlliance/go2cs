@@ -883,6 +883,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
 
     [TestMethod]
+    public void CheckVariadicFuncFields() => CheckTarget("VariadicFuncFields");
+
+    [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]

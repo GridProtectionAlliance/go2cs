@@ -2083,10 +2083,17 @@ type Config struct {
 public Action<slice<reflectꓸValue>, ж<rand.Rand>> Values;
 ```
 
-The re-routing is gated on the signature string containing `/`: a func field with no cross-package
-import (`func(string) (importPath string, ok bool)`) keeps the display path, which preserves its
-named tuple elements that the structural renderer drops. (Guarded by the `FuncTypeParam` behavioral
-test's `runner.gen` field.)
+The re-routing is gated on the signature string containing `/` **or the signature being variadic**:
+the string path cannot render a variadic signature at all — `getTypeName`'s `..` strip reduces the
+ellipsis of go/build's `JoinPath func(elem ...string) string` (Context, build.go:84) to `.string`,
+emitting the unparseable `Func<.@string, @string>` (CS1031 + CS1003 ×2, all three go.build errors),
+and even unstripped it has no variadic lowering. Structurally such a field renders the golib
+variadic delegate family (`public Funcꓸꓸꓸ<@string, @string> JoinPath;` — see the variadic-lowering
+section below), which loose-arg, empty and spread calls through the field all bind. Every other
+func field keeps the display path: `func(string) (importPath string, ok bool)` preserves its named
+tuple elements that the structural renderer drops. (Guarded by the `FuncTypeParam` behavioral
+test's `runner.gen` field, and by `VariadicFuncFields` — a struct with variadic func-typed fields
+assigned from a named func and func literals, called loose/empty/spread — for the variadic arm.)
 
 ### A variadic func type lowers to the golib `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` delegates
 

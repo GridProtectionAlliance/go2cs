@@ -243,12 +243,20 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 		// but `math` aliases to `math_package`, so `math.rand` resolves to the non-existent
 		// `math_package.rand` (CS0426). getCSTypeName recurses through the signature per element,
 		// qualifying each named type by its package NAME (`rand.Rand`), the alias the file imports.
-		// Only a signature carrying a slash-bearing path (the case the string path mangles) is
-		// re-routed: a func field with no cross-package import — `func(string) (importPath string,
-		// ok bool)` — keeps the display path, which preserves its named tuple elements (structural
-		// rendering drops them). Compiling correctness for the broken case is worth the lost tuple
-		// names in the rare cross-package-func-with-named-results field.
-		if _, isSignature := fieldType.(*types.Signature); isSignature && strings.Contains(goDisplayTypeName, "/") {
+		//
+		// A VARIADIC func-typed field reroutes too: the string path cannot render a variadic
+		// signature at all — getTypeName's '..' strip reduces the ellipsis of
+		// `JoinPath func(elem ...string) string` (go/build's Context) to `.string`, emitting the
+		// unparseable `Func<.@string, @string>` (CS1031 + CS1003 ×2), and even unstripped it has
+		// no variadic lowering. Structurally the field renders the golib variadic delegate family
+		// (`Funcꓸꓸꓸ<@string, @string>` — see iifeDelegateType), which loose-arg, empty and spread
+		// calls through the field all bind.
+		//
+		// Every other signature keeps the display path: a func field with no cross-package import —
+		// `func(string) (importPath string, ok bool)` — preserves its named tuple elements
+		// (structural rendering drops them). Compiling correctness for the broken cases is worth
+		// the lost tuple names in the rare rerouted field.
+		if sig, isSignature := fieldType.(*types.Signature); isSignature && (sig.Variadic() || strings.Contains(goDisplayTypeName, "/")) {
 			csDisplayTypeName = v.getCSTypeName(fieldType)
 		}
 
