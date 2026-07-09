@@ -823,6 +823,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]
+    public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
+
+    [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");
 
     [TestMethod]

@@ -891,6 +891,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]
+    public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
+
+    [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");
 
     [TestMethod]

@@ -1680,6 +1680,38 @@ case float32 vΔ1: {
 
 If the bodies **differ**, both labels are kept and the CS8120 stands: a compile error is preferable to silently routing one Go case's values into another case's body. Duplicate detection keys on the resolved C# type (`uintptr`→`nuint`, `rune`→`int32`, `byte`→`uint8`) per switch statement; the synthetic `int32`/`uint32` cases register too, so an explicit later duplicate of a synthetic with the same body also merges. Guarded by the `TypeSwitch` behavioral test (`uint` + `uintptr` with identical bodies, values hitting both Go paths).
 
+**Multi-type cases stack labels and bind at the tag's interface type.** Go binds a type-switch case
+variable at the listed CONCRETE type only when the clause lists exactly **one** type; a multi-type clause
+(`case *Alias, *Named:`) binds it at the TAG's static (interface) type. The old emission split such a
+clause into one concrete-bound C# case per listed type (duplicating the body), so every body use in an
+interface-typed context broke — as an argument (`isGeneric(t)` with `t` a `ж<Alias>`, CS1503), an
+interface assignment (CS0266), and an extension-method receiver (CS1929 — 18 errors in go/types alone).
+A multi-type clause now emits **stacked, unbound labels over one shared body** and re-binds the variable
+to the guard expression — the same re-bind the `default` arm uses — so the body compiles at the interface
+type exactly as in Go:
+
+```csharp
+switch (x.typ.type()) {
+case ж<Alias>:
+case ж<Named>: {
+    var t = x.typ;          // t: Type (the tag's interface type), as in Go
+    if (isGeneric(t)) { … }
+    break;
+}
+case ж<ΔSignature> t: {     // single-type case keeps the concrete binding
+```
+
+`case nil` stacks as `case null:`, a dynamic-interface label stacks in its non-binding
+`{} ᴛn when ᴛn._<Iface>(out var _)` form, and the synthetic `int32`/`uint32` companions of `case int:`/
+`case uint:` stack unbound too. The duplicate-mapped-case merge applies per label (a merged label leaves
+its marker comment above the stack). An UNBOUND multi-type clause (`switch x.(type)`) stacks the same way
+with no re-bind — the body is no longer duplicated per label. The re-bind re-evaluates the guard
+EXPRESSION at body entry (nothing can mutate it between dispatch and entry), sharing the default arm's
+banked call-operand caveat below. (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
+cases over values and pointers with interface-dispatched body uses, `nil` stacked with a concrete type, an
+unbound multi-type clause, and the synthetic-int stacking, output-compared vs Go; also rewrote
+`TypeSwitch`'s `case int, int64, uint64:` golden with output proven unchanged.)
+
 ## Struct Types
 Go structs are converted to C# `struct` types and used on the stack to optimize memory use and reduce GC pressure; when an instance must escape the stack it is wrapped in a heap box, [`ж<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/%D0%B6.cs) (see [Pointers](#pointers)). Rather than spell out the whole struct body, the converter emits a partial struct carrying a `[GoType]` attribute, and the `TypeGenerator` source generator synthesizes the members (equality, `ISupportMake`, embedding promotion, etc.):
 
@@ -1745,7 +1777,10 @@ table, CS1012 ×133). Guarded by `StringConvPostfix` (`glyphs`).
 The default clause binds the guard to the ORIGINAL guarded expression (`var x = err;`), whose
 static type is the interface — the switch-operand form (`err.type()`) is object and cannot
 flow back out (`default: return x`, go/build/constraint's pushNot, CS0266). BANKED: a
-call-operand type switch still evaluates the operand in both the header and the default arm.
+call-operand type switch still evaluates the operand in both the header and the arm re-bind —
+this now also covers a MULTI-TYPE case's interface-typed re-bind (see *Multi-type cases stack
+labels* above); go/types handleBailout's `switch p := recover().(type)` re-calls `recover()` in
+its `case nil, *bailout:` arm, harmless there only because that arm never reads `p`.
 
 ### Generated code global::-qualifies root-namespace references
 Inside a package whose namespace nests a same-named segment (go/build/constraint emits into

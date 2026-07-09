@@ -158,6 +158,20 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 		} else {
 			var caseExprs []string
 
+			// A MULTI-TYPE case clause (`case *Alias, *Named:`) binds its case variable at the
+			// TAG's static (interface) type — Go binds the listed concrete type only when the
+			// clause lists exactly ONE type. Emit stacked UNBOUND labels over a single shared
+			// body and re-bind the variable to the guard expression (like the default arm), so
+			// every body use compiles at the interface type (`isGeneric(t)` with `t` a Type, not
+			// a ж<Alias> — go/types nonGeneric, CS1503/CS0266/CS1929 ×18). A single-type clause
+			// keeps the concrete declaration-pattern binding.
+			multiTypeCase := len(caseClause.List) > 1
+			bindIdent := targetIdent
+
+			if multiTypeCase {
+				bindIdent = ""
+			}
+
 			for i, expr := range caseClause.List {
 				// A `case nil` in a type switch matches a nil interface — emit the C# `case null:`
 				// pattern (which binds nothing), not `case default! x:` (convExpr(nil) → "default!",
@@ -171,28 +185,28 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 				caseExpr := v.convExpr(expr, []ExprContext{identContext})
 
 				if v.isDynamicInterface(expr) {
-					if len(targetIdent) > 0 && targetIdent != "_" {
+					if len(bindIdent) > 0 && bindIdent != "_" {
 						// case {} Δx when Δx._<liftedIfaceType>(out var x):
-						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, targetIdent)
-						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var %s)", tempTarget, tempTarget, caseExpr, targetIdent)
+						tempTarget := fmt.Sprintf("%s%s", ShadowVarMarker, bindIdent)
+						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var %s)", tempTarget, tempTarget, caseExpr, bindIdent)
 					} else {
 						// case {} t1 when t1._<liftedIfaceType>(out _):
 						tempTarget := fmt.Sprintf("%s%d", TempVarMarker, i)
 						caseExpr = fmt.Sprintf("{} %s when %s._<%s>(out var _)", tempTarget, tempTarget, caseExpr)
 					}
 				} else {
-					caseExpr = fmt.Sprintf("%s %s", caseExpr, targetIdent)
+					caseExpr = fmt.Sprintf("%s %s", caseExpr, bindIdent)
 				}
 
 				caseExprs = append(caseExprs, caseExpr)
 
 				if strings.HasPrefix(caseExpr, "nint ") {
 					if !explicitCaseTypes["int32"] {
-						caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", targetIdent))
+						caseExprs = append(caseExprs, fmt.Sprintf("int32 %s", bindIdent))
 					}
 				} else if strings.HasPrefix(caseExpr, "nuint ") {
 					if !explicitCaseTypes["uint32"] {
-						caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", targetIdent))
+						caseExprs = append(caseExprs, fmt.Sprintf("uint32 %s", bindIdent))
 					}
 				}
 			}
@@ -207,61 +221,148 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 			bodyKey := printedBody.String()
 			outputs := 0
 
-			for _, caseExpr := range caseExprs {
-				// Duplicate-mapped concrete case: skip only on an identical Go body (see the
-				// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
-				if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
-					resolved := resolveCaseType(caseExpr)
+			if multiTypeCase {
+				// Stacked labels: apply the duplicate-mapped-case merge per label first (writing
+				// its marker), then emit every surviving label over ONE shared body.
+				var labels []string
 
-					if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
+				for _, caseExpr := range caseExprs {
+					// Duplicate-mapped concrete case: skip only on an identical Go body (see the
+					// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
+					if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
+						resolved := resolveCaseType(caseExpr)
+
+						if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
+							if outputs > 0 {
+								v.targetFile.WriteString(v.newline)
+							}
+
+							outputs++
+
+							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
+							continue
+						}
+
+						if _, seen := emittedCaseTypes[resolved]; !seen {
+							emittedCaseTypes[resolved] = bodyKey
+						}
+					}
+
+					labels = append(labels, strings.TrimRight(caseExpr, " "))
+				}
+
+				if len(labels) > 0 {
+					for li, label := range labels {
 						if outputs > 0 {
 							v.targetFile.WriteString(v.newline)
 						}
 
 						outputs++
 
-						v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
-						continue
+						if li == len(labels)-1 {
+							v.writeOutput("case %s: {", label)
+						} else {
+							v.writeOutput("case %s:", label)
+						}
 					}
 
-					if _, seen := emittedCaseTypes[resolved]; !seen {
-						emittedCaseTypes[resolved] = bodyKey
-					}
-				}
+					v.indentLevel++
 
-				if outputs > 0 {
+					// Re-bind the case variable at the guard's static (interface) type — the
+					// same re-bind the default arm uses. Bound at body entry, before any body
+					// statement can mutate the guard, so the value matches the dispatched one.
+					if len(targetIdent) > 0 && targetIdent != "_" {
+						v.targetFile.WriteString(v.newline)
+
+						boundExpr := typeVar
+
+						if guardExpr != "" {
+							boundExpr = guardExpr
+						}
+
+						if v.options.preferVarDecl || guardExpr != "" {
+							v.writeOutput("var")
+						} else {
+							v.writeOutput("object")
+						}
+
+						v.targetFile.WriteString(fmt.Sprintf(" %s = %s;", targetIdent, boundExpr))
+					}
+
+					// Reset (see the single-type arm below): an EMPTY Go case body must not
+					// inherit a STALE lastStatementWasReturn from the prior case (CS0163).
+					v.lastStatementWasReturn = false
+
+					for _, stmt := range caseClause.Body {
+						v.visitStmt(stmt, []StmtContext{})
+					}
+
 					v.targetFile.WriteString(v.newline)
+
+					if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
+						v.writeOutputLn("break;")
+					}
+
+					v.indentLevel--
+					v.writeOutput("}")
 				}
+			} else {
+				for _, caseExpr := range caseExprs {
+					// Duplicate-mapped concrete case: skip only on an identical Go body (see the
+					// merge note above). Dynamic (`{} … when`) and `null` labels are never duplicates.
+					if !strings.HasPrefix(caseExpr, "{}") && caseExpr != "null" {
+						resolved := resolveCaseType(caseExpr)
 
-				outputs++
+						if priorBody, seen := emittedCaseTypes[resolved]; seen && priorBody == bodyKey {
+							if outputs > 0 {
+								v.targetFile.WriteString(v.newline)
+							}
 
-				v.writeOutput("case ")
-				// Trim the trailing space left when a concrete-type case carries no binding variable
-				// (`fmt.Sprintf("%s %s", typeName, "")` → `"uint32 "`), so the label reads `case uint32:`
-				// not `case uint32 :`. Trimmed only at emission — the stored caseExpr keeps the space the
-				// nint/nuint synthetic-case prefix detection above relies on.
-				v.targetFile.WriteString(strings.TrimRight(caseExpr, " "))
-				v.targetFile.WriteString(": {")
-				v.indentLevel++
+							outputs++
 
-				// Reset per case: an EMPTY Go case body (`case *ActionNode:` with no statements,
-				// text/template/parse's IsEmptyTree) runs no visitStmt, so lastStatementWasReturn
-				// would stay STALE from the prior case's `return` and wrongly suppress the `break;`
-				// below — the empty C# case then falls through (CS0163).
-				v.lastStatementWasReturn = false
+							v.writeOutput("/* case %s: merged with an earlier case mapping to the same C# type (identical body) */", strings.TrimRight(caseExpr, " "))
+							continue
+						}
 
-				for _, stmt := range caseClause.Body {
-					v.visitStmt(stmt, []StmtContext{})
+						if _, seen := emittedCaseTypes[resolved]; !seen {
+							emittedCaseTypes[resolved] = bodyKey
+						}
+					}
+
+					if outputs > 0 {
+						v.targetFile.WriteString(v.newline)
+					}
+
+					outputs++
+
+					v.writeOutput("case ")
+					// Trim the trailing space left when a concrete-type case carries no binding variable
+					// (`fmt.Sprintf("%s %s", typeName, "")` → `"uint32 "`), so the label reads `case uint32:`
+					// not `case uint32 :`. Trimmed only at emission — the stored caseExpr keeps the space the
+					// nint/nuint synthetic-case prefix detection above relies on.
+					v.targetFile.WriteString(strings.TrimRight(caseExpr, " "))
+					v.targetFile.WriteString(": {")
+					v.indentLevel++
+
+					// Reset per case: an EMPTY Go case body (`case *ActionNode:` with no statements,
+					// text/template/parse's IsEmptyTree) runs no visitStmt, so lastStatementWasReturn
+					// would stay STALE from the prior case's `return` and wrongly suppress the `break;`
+					// below — the empty C# case then falls through (CS0163).
+					v.lastStatementWasReturn = false
+
+					for _, stmt := range caseClause.Body {
+						v.visitStmt(stmt, []StmtContext{})
+					}
+
+					v.targetFile.WriteString(v.newline)
+
+					if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
+						v.writeOutputLn("break;")
+					}
+
+					v.indentLevel--
+					v.writeOutput("}")
 				}
-
-				v.targetFile.WriteString(v.newline)
-
-				if !v.lastStatementWasReturn || v.lastReturnIndentLevel != v.indentLevel {
-					v.writeOutputLn("break;")
-				}
-
-				v.indentLevel--
-				v.writeOutput("}")
 			}
 		}
 	}

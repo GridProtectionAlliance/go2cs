@@ -891,6 +891,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckTypeSwitchGuardShadow() => CheckTarget("TypeSwitchGuardShadow");
 
     [TestMethod]
+    public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
+
+    [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");
 
     [TestMethod]

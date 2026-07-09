@@ -15,19 +15,11 @@ internal static void Main() {
             fmt.Println("I'm a bool");
             break;
         }
-        case nint t: {
-            fmt.Printf("I'm an int, specifically type %T\n"u8, t);
-            break;
-        }
-        case int32 t: {
-            fmt.Printf("I'm an int, specifically type %T\n"u8, t);
-            break;
-        }
-        case int64 t: {
-            fmt.Printf("I'm an int, specifically type %T\n"u8, t);
-            break;
-        }
-        case uint64 t: {
+        case nint:
+        case int32:
+        case int64:
+        case uint64: {
+            var t = i;
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;
         }
