@@ -732,6 +732,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
 
     [TestMethod]
+    public void CheckRangeShadowSelectorMethod() => CheckTarget("RangeShadowSelectorMethod");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

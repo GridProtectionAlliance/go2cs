@@ -284,6 +284,7 @@
     <Project Path="Tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
+    <Project Path="Tests/Behavioral/RangeShadowSelectorMethod/RangeShadowSelectorMethod.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceAnonAlias/PublicizedInterfaceAnonAlias.csproj" />
     <Project Path="Tests/Behavioral/PublicizedInterfaceParam/PublicizedInterfaceParam.csproj" />
     <Project Path="Tests/Behavioral/RangePointerArrayConversion/RangePointerArrayConversion.csproj" />

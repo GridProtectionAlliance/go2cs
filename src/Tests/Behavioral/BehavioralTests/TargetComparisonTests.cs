@@ -735,6 +735,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckRangePointerArrayConversion() => CheckTarget("RangePointerArrayConversion");
 
     [TestMethod]
+    public void CheckRangeShadowSelectorMethod() => CheckTarget("RangeShadowSelectorMethod");
+
+    [TestMethod]
     public void CheckRangeStatements() => CheckTarget("RangeStatements");
 
     [TestMethod]

@@ -1527,8 +1527,13 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				reassignVar,
 			)
 
-			// Track the shadowed names of range variables
-			rangeVars := make(map[string]string)
+			// Track the shadowed names of range variables — keyed by the range var's OBJECT, so
+			// only genuine uses of that variable rename: any same-named ident with a non-nil Uses
+			// entry also matched a SelectorExpr's Sel (bound to a METHOD object), renaming the
+			// method call itself — go/types typestring.go's `for _, typ := range t.embeddeds { …
+			// w.typ(typ) }` inside `func (w *typeWriter) typ(…)` emitted `Ꮡw.typΔ1(typΔ1)` against
+			// the `typ` declaration (CS1061).
+			rangeVarObjs := make(map[types.Object]string)
 
 			// Process range variables and remember their shadowed names
 			if node.Key != nil {
@@ -1536,7 +1541,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					processor.processIdent(keyIdent, node.Tok == token.DEFINE)
 					// Store any shadowed name that was created
 					if shadowName, ok := v.identNames[keyIdent]; ok {
-						rangeVars[keyIdent.Name] = shadowName
+						if obj := v.info.ObjectOf(keyIdent); obj != nil {
+							rangeVarObjs[obj] = shadowName
+						}
 					}
 				}
 			}
@@ -1546,7 +1553,9 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 					processor.processIdent(valueIdent, node.Tok == token.DEFINE)
 					// Store any shadowed name that was created
 					if shadowName, ok := v.identNames[valueIdent]; ok {
-						rangeVars[valueIdent.Name] = shadowName
+						if obj := v.info.ObjectOf(valueIdent); obj != nil {
+							rangeVarObjs[obj] = shadowName
+						}
 					}
 				}
 			}
@@ -1567,11 +1576,11 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 
 			visitNode(node.X)
 
-			// Process identifiers in the loop body to use shadowed names
+			// Process identifiers in the loop body to use shadowed names (object identity, see above)
 			ast.Inspect(node.Body, func(n ast.Node) bool {
 				if ident, ok := n.(*ast.Ident); ok {
-					if shadowName, exists := rangeVars[ident.Name]; exists {
-						if obj := v.info.Uses[ident]; obj != nil {
+					if obj := v.info.Uses[ident]; obj != nil {
+						if shadowName, exists := rangeVarObjs[obj]; exists {
 							v.identNames[ident] = shadowName
 						}
 					}
