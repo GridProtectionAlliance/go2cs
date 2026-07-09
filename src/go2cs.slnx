@@ -180,6 +180,7 @@
     <Project Path="Tests/Behavioral/InterfaceImplementation/InterfaceImplementation.csproj" />
     <Project Path="Tests/Behavioral/InterfaceInheritance/InterfaceInheritance.csproj" />
     <Project Path="Tests/Behavioral/InterfaceIntraFunction/InterfaceIntraFunction.csproj" />
+    <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
