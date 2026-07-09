@@ -190,6 +190,7 @@
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
     <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
+    <Project Path="Tests/Behavioral/LambdaReturnsPointerParam/LambdaReturnsPointerParam.csproj" />
     <Project Path="Tests/Behavioral/LabeledEmptyStmt/LabeledEmptyStmt.csproj" />
     <Project Path="Tests/Behavioral/LargeUintptrConst/LargeUintptrConst.csproj" />
     <Project Path="Tests/Behavioral/LocalTypeSliceElement/LocalTypeSliceElement.csproj" />

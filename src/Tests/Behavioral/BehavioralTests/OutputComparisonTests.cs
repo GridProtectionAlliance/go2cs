@@ -400,6 +400,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckLambdaFunctions() => CheckTarget("LambdaFunctions");
 
     [TestMethod]
+    public void CheckLambdaReturnsPointerParam() => CheckTarget("LambdaReturnsPointerParam");
+
+    [TestMethod]
     public void CheckLargeUintptrConst() => CheckTarget("LargeUintptrConst");
 
     [TestMethod]

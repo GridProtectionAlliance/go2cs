@@ -328,6 +328,27 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					}
 				}
 
+				// A deref-aliased pointer parameter returned WHOLE (`return p`) must yield its box
+				// `Ꮡp` (the value alias cannot bind the pointer result). Render it in pointer ident
+				// context — which resolves the box name through boxBaseName — rather than string-
+				// prefixing the converted expression: inside a synthesized lambda the plain render is
+				// already the box READ `Ꮡp.Value` (the ref-local alias is uncapturable), and prefixing
+				// that emitted the undeclared `ᏑᏑp` (CS0103 — crypto/x509 AddCert's closure
+				// `return cert, nil`). Only a DIRECT ident qualifies — `return it.key` (a field of a
+				// pointer param) returns the FIELD value, and the box `Ꮡit` has no `key` (CS1061) —
+				// and only a GENUINE `*T` parameter: an unsafe.Pointer parameter counts as a pointer
+				// result type (isPointer includes the UnsafePointer basic) but renders as a plain
+				// VALUE param with NO box (CS0103; runtime map.go `mapaccess1_fat`'s `return zero`).
+				if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
+					if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
+						if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
+							identContext := DefaultIdentContext()
+							identContext.isPointer = true
+							exprContexts = []ExprContext{elemBasicLitContext, identContext, lambdaContext}
+						}
+					}
+				}
+
 				resultExpr := v.convExpr(expr, exprContexts)
 
 				// Record any dynamic-struct implicit conversion AFTER converting the result expr.
@@ -357,25 +378,6 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 					resultParamType := resultParams.At(i).Type()
 					result.WriteString(v.convertToInterfaceType(resultParamType, v.getType(expr, false), resultExpr))
 				} else {
-					if resultParamIsPointer != nil && i < len(resultParamIsPointer) && resultParamIsPointer[i] {
-						// A deref-aliased pointer parameter returned WHOLE (`return p`) must yield its box
-						// `Ꮡp` (the value alias cannot bind the pointer result). Use a DIRECT ident check,
-						// not getIdentifier (which digs through a selector/index to the root): `return it.key`
-						// — a field of a pointer param — returns the FIELD value, so prefixing `Ꮡ` would
-						// wrongly emit `Ꮡit.key` (the box `Ꮡit` has no `key` → CS1061). The box form applies
-						// only to a GENUINE `*T` parameter (deref-aliased, so a box `Ꮡp` exists): an
-						// `unsafe.Pointer` parameter counts as a pointer result type (isPointer includes the
-						// UnsafePointer basic) but renders as a plain VALUE param with NO box — prefixing `Ꮡ`
-						// referenced a nonexistent `Ꮡzero`/`Ꮡv`/`Ꮡfd` (CS0103; runtime map.go
-						// `mapaccess1_fat`'s `return zero`, mem_windows.go, panic.go `readvarintUnsafe`).
-						if ident, isIdent := expr.(*ast.Ident); isIdent && v.identIsParameter(ident) {
-							if _, isRealPointer := v.getIdentType(ident).(*types.Pointer); isRealPointer {
-								result.WriteString(AddressPrefix)
-								resultExpr = strings.TrimPrefix(resultExpr, "@")
-							}
-						}
-					}
-
 					var narrowCast string
 					var lambdaConstCast string
 					var crossBaseCast string
