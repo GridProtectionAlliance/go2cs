@@ -2363,12 +2363,12 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		prefix = PointerDerefOp
 	}
 
-	// An interface-to-interface conversion is never recorded: it is satisfied by the C#
-	// inheritance emitted at the interface DECLARATION (structural bases — see
-	// getStructuralInterfaceBases), not by a generated impl partial. The generator's impl
-	// types are structs; an interface-typed record kills its whole run (every other
-	// GoImplement partial in the package vanishes — CrossPkgUser counter CS0029).
-	targetIsIface, _ := isInterface(targetType)
+	// An interface-to-interface conversion is sometimes satisfied by the C# inheritance
+	// emitted at the source interface declaration (structural bases — see
+	// getStructuralInterfaceBases). When the target interface is declared downstream in a
+	// different package, though, the source interface cannot inherit it retroactively; record
+	// a generated interface adapter and wrap the value at the conversion site.
+	targetIsIface, targetIfaceEmpty := isInterface(targetType)
 
 	// An OPEN generic target — the receiver's own instantiation cast to an interface INSIDE its
 	// generic method (`return newBoringPrivateKey(c, …)` with `c *nistCurve[Point]`, crypto/ecdh) —
@@ -2393,6 +2393,19 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 					break
 				}
 			}
+		}
+	}
+
+	recordableInterface := false
+
+	if targetIsIface && !targetIfaceEmpty && exprResult != "" &&
+		interfaceTypeName != "" && interfaceTypeName != "nil" &&
+		interfaceTypeName != targetTypeName && interfaceTypeName != "any" &&
+		!strings.Contains(targetTypeName, "interface{") &&
+		!typeContainsTypeParams(interfaceType) && !typeContainsTypeParams(targetType) &&
+		!types.Identical(interfaceType, targetType) {
+		if iface, ok := interfaceType.Underlying().(*types.Interface); ok && !iface.Empty() && types.Implements(targetType, iface) {
+			recordableInterface = true
 		}
 	}
 
@@ -2454,6 +2467,18 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				}
 			}
 		}
+	}
+
+	if recordableInterface && !targetIsOpenGeneric {
+		packageLock.Lock()
+
+		if implementations, exists := interfaceImplementations[interfaceTypeName]; exists {
+			implementations.Add(targetTypeName)
+		} else {
+			interfaceImplementations[interfaceTypeName] = NewHashSet([]string{targetTypeName})
+		}
+
+		packageLock.Unlock()
 	}
 
 	if (recordable || recordableValueForeign) && !targetIsOpenGeneric {
@@ -2563,6 +2588,24 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 				}
 			}
 		}
+	}
+
+	if recordableInterface && exprResult != "" {
+		adapterSource := targetTypeName
+
+		if named, ok := types.Unalias(targetType).(*types.Named); ok {
+			if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+				simpleTarget := targetTypeName
+
+				if idx := strings.LastIndex(simpleTarget, "."); idx >= 0 {
+					simpleTarget = simpleTarget[idx+1:]
+				}
+
+				adapterSource = getSanitizedIdentifier(pkg.Name()) + "_" + simpleTarget
+			}
+		}
+
+		return fmt.Sprintf("new %s(%s)", valueAdapterTypeRef(adapterSource, interfaceTypeName), exprResult)
 	}
 
 	// A POINTER-sourced cast to a locally-implemented interface routes through the generated
