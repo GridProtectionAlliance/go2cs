@@ -402,6 +402,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
 
     [TestMethod]
+    public void CheckIndexExprCaseLabel() => CheckTarget("IndexExprCaseLabel");
+
+    [TestMethod]
     public void CheckInferredForeignTypeNoImport() => CheckTarget("InferredForeignTypeNoImport");
 
     [TestMethod]

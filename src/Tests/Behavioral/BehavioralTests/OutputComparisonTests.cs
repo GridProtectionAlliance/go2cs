@@ -367,6 +367,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckIndexedElementDirectBoxMethod() => CheckTarget("IndexedElementDirectBoxMethod");
 
     [TestMethod]
+    public void CheckIndexExprCaseLabel() => CheckTarget("IndexExprCaseLabel");
+
+    [TestMethod]
     public void CheckInterfaceFieldNamedScalar() => CheckTarget("InterfaceFieldNamedScalar");
 
     [TestMethod]

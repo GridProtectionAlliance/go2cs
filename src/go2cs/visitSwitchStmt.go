@@ -862,10 +862,13 @@ func (v *Visitor) canUsePatternMatch(caseClauseCount int, caseClause *ast.CaseCl
 			// A C# constant pattern (`tag is Y`) requires Y to be a compile-time constant. An
 			// identifier/selector case label that resolves to a const emitted as `static readonly`
 			// (untyped/named/cross-package, e.g. `goarch.PtrSize`) or to a plain variable is not, so
-			// the `is` form is invalid (CS9135/CS0150). Fall back to `==` equality for those. (Computed
-			// literal expressions like `a + b` remain valid constant patterns and are left untouched.)
+			// the `is` form is invalid (CS9135/CS0150). An INDEX-expression label (`case Typ[UntypedNil]:`
+			// — an index into a package-level array var, go/types operand.go) is never a constant either,
+			// and in pattern position C# parses `Typ[UntypedNil]` as an array TYPE (CS0246/CS0270). Fall
+			// back to `==` equality for all of these. (Computed literal expressions like `a + b` remain
+			// valid constant patterns and are left untouched.)
 			switch expr.(type) {
-			case *ast.Ident, *ast.SelectorExpr:
+			case *ast.Ident, *ast.SelectorExpr, *ast.IndexExpr:
 				if !v.isCSharpConstantExpr(expr) {
 					usePattenMatch = false
 				}

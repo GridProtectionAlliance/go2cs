@@ -176,6 +176,7 @@
     <Project Path="Tests/Behavioral/IncDecPointerField/IncDecPointerField.csproj" />
     <Project Path="Tests/Behavioral/IndexedElementDirectBoxMethod/IndexedElementDirectBoxMethod.csproj" />
     <Project Path="Tests/Behavioral/ImmediatelyInvokedFunc/ImmediatelyInvokedFunc.csproj" />
+    <Project Path="Tests/Behavioral/IndexExprCaseLabel/IndexExprCaseLabel.csproj" />
     <Project Path="Tests/Behavioral/InferredForeignTypeNoImport/InferredForeignTypeNoImport.csproj" />
     <Project Path="Tests/Behavioral/InterfaceCasting/InterfaceCasting.csproj" />
     <Project Path="Tests/Behavioral/InterfaceFieldNamedScalar/InterfaceFieldNamedScalar.csproj" />

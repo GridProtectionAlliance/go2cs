@@ -1628,6 +1628,19 @@ The marker is deliberately SEPARATE from the const `ᐧ` switch governor: that c
 ### No constant pattern against a named-numeric wrapper
 A constant expression whose CONTEXTUAL type is a wrapper struct -- golib `uintptr` or any `[GoType("num:...")]` named numeric (time's `Duration`) -- can never be a C# constant, so no constant/relational pattern can compare against it: `d is >= 0` types the literal 0 as Duration (CS9135). The lowering keeps the plain operator form (`d >= 0`, the wrapper's operators). Guarded by `ExprSwitch` (the `pace` switch).
 
+### An index-expression case label falls back to equality
+A case label that INDEXES a package-level array/slice variable (`case Typ[UntypedNil]:` — go/types
+operand.go, where `Typ` is the universe `*Basic` array) is a runtime value, never a C# constant. The
+single-value `is` form is doubly broken there: C# parses `exprᴛ1 is Typ[UntypedNil]` in pattern position
+as an array TYPE (CS0246 + CS0270). `canUsePatternMatch` rejects an `*ast.IndexExpr` label the same way
+it rejects a non-constant identifier/selector, so the clause takes the `==`/`AreEqual` comparison the
+multi-value arm already produced:
+```csharp
+if (AreEqual(exprᴛ1, Typ[UntypedNil])) {   // NOT `exprᴛ1 is Typ[UntypedNil]`
+```
+(Guarded by the `IndexExprCaseLabel` behavioral test — single- and multi-label clauses indexing a
+package-level array var, output-compared vs Go.)
+
 ## Type Switch Statements
 For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
 
