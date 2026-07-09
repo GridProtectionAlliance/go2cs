@@ -2405,7 +2405,19 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		!typeContainsTypeParams(interfaceType) && !typeContainsTypeParams(targetType) &&
 		!types.Identical(interfaceType, targetType) {
 		if iface, ok := interfaceType.Underlying().(*types.Interface); ok && !iface.Empty() && types.Implements(targetType, iface) {
-			recordableInterface = true
+			targetCoveredByInheritance := false
+			qualifiedInterfaceTypeName := rootQualifyIfAmbiguous(interfaceTypeName)
+
+			packageLock.Lock()
+
+			if inheritedInterfaces, ok := interfaceInheritances[targetTypeName]; ok {
+				targetCoveredByInheritance = inheritedInterfaces.Contains(interfaceTypeName) ||
+					inheritedInterfaces.Contains(qualifiedInterfaceTypeName)
+			}
+
+			packageLock.Unlock()
+
+			recordableInterface = !targetCoveredByInheritance
 		}
 	}
 
