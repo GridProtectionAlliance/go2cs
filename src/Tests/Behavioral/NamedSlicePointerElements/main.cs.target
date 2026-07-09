@@ -8,6 +8,10 @@ partial class main_package {
     internal nint v;
 }
 
+[GoType] partial struct Array {
+    internal @string label;
+}
+
 [GoType("[]ж<item>")] partial struct queue;
 
 internal static void Main() {

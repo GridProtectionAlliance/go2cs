@@ -414,6 +414,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
 
     [TestMethod]
+    public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
+
+    [TestMethod]
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
 
     [TestMethod]
