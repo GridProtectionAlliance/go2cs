@@ -1002,6 +1002,22 @@ fmt.Println("a" + ((@string)(rune)CrossPkgLib.Sep) + "b");
 ```
 Guarded by `CrossPkgUser` (`string(CrossPkgLib.Sep)`).
 
+### A `:=` from a named untyped constant materializes the default type
+`codepoint := unicode.ReplacementChar` must not declare with `var`: the constant renders as its
+`static readonly` Untyped* wrapper (`UntypedInt`/`UntypedFloat`/`UntypedComplex`), so `var` binds the
+LOCAL to the wrapper type instead of Go's inferred default type, and a later Go conversion like
+`string(codepoint)` fails (CS0030 — no `UntypedInt`→`@string` form; go/types conversions.go). The
+declaration materializes the Go-inferred default type instead — exactly Go's `:=` typing:
+```csharp
+rune codepoint = replacementChar;    // NOT `var codepoint = …` (binds UntypedInt)
+float64 factor = scale;
+```
+The gate is an Ident/Selector RHS resolving to a `*types.Const` of untyped NUMERIC kind (int is already
+routed to the explicit `nint` form, and string consts to the explicit string path); literals and computed
+constant expressions render as plain C# literals and keep `var`. Applies in both the single-declaration
+and the mixed-statement paths. (Guarded by the `UntypedConstDefine` behavioral test — untyped rune and
+float package constants `:=`-bound then converted/multiplied, output-compared vs Go.)
+
 ## Maps and Channels
 Go maps and channels convert to the golib [`map<K,V>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/map.cs) and [`channel<T>`](https://github.com/GridProtectionAlliance/go2cs/blob/master/src/core/golib/channel.cs) structures. `make` becomes a constructor; channel send/receive use the runtime operators:
 

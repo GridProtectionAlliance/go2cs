@@ -88,6 +88,61 @@ func (v *Visitor) appendEmptyIfaceLitContext(base []ExprContext, lhs ast.Expr) [
 	return append(out, basicLitContext)
 }
 
+// untypedConstDeclTypeName returns the C# name of the DEFAULT Go type a `:=`-declared local
+// binds when its RHS is a reference to a NAMED UNTYPED NUMERIC constant, or "" when the
+// `var` form is fine. Such a constant is emitted as a `static readonly` Untyped* wrapper
+// (golib UntypedInt/UntypedFloat/UntypedComplex — e.g. `unicode.ReplacementChar`), so `var`
+// binds the local to the WRAPPER type instead of the Go-inferred default type (rune), and a
+// later Go conversion like `string(codepoint)` fails (CS0030 — no UntypedInt→@string form).
+// Materializing the inferred type (`rune codepoint = …`) restores Go's typing. Literal and
+// computed constant expressions render as plain C# literals and are unaffected.
+func (v *Visitor) untypedConstDeclTypeName(ident *ast.Ident, rhs ast.Expr) string {
+	if ident == nil {
+		return ""
+	}
+
+	for {
+		paren, ok := rhs.(*ast.ParenExpr)
+
+		if !ok {
+			break
+		}
+
+		rhs = paren.X
+	}
+
+	var obj types.Object
+
+	switch e := rhs.(type) {
+	case *ast.Ident:
+		obj = v.info.ObjectOf(e)
+	case *ast.SelectorExpr:
+		obj = v.info.ObjectOf(e.Sel)
+	default:
+		return ""
+	}
+
+	constObj, ok := obj.(*types.Const)
+
+	if !ok {
+		return ""
+	}
+
+	basic, ok := constObj.Type().(*types.Basic)
+
+	if !ok {
+		return ""
+	}
+
+	switch basic.Kind() {
+	case types.UntypedInt, types.UntypedRune, types.UntypedFloat, types.UntypedComplex:
+	default:
+		return ""
+	}
+
+	return convertToCSTypeName(v.getExprTypeName(ident, false))
+}
+
 // narrowArithmeticCastType returns the C# narrow-integer type a binary/unary arithmetic assignment
 // RHS must be cast to when its Go type matches a narrow-integer LHS (int8/uint8/int16/uint16), or
 // "" when no cast applies. Go evaluates such arithmetic at the operand's own width (wrapping); C#
@@ -705,7 +760,20 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			if declaredCount > 1 || v.options.preferVarDecl {
 				isDiscarded := lhsLen == 1 && getIdentifier(lhsExprs[0]).Name == "_"
 
-				if !isDiscarded {
+				// A single `:=` whose RHS references a NAMED UNTYPED constant materializes the
+				// Go-inferred default type instead of `var` — the constant's `static readonly`
+				// Untyped* wrapper would otherwise become the local's type (`rune codepoint =
+				// unicode.ReplacementChar;`, see untypedConstDeclTypeName).
+				untypedConstDeclType := ""
+
+				if !isDiscarded && lhsLen == 1 && rhsLen == 1 {
+					untypedConstDeclType = v.untypedConstDeclTypeName(getIdentifier(lhsExprs[0]), rhsExprs[0])
+				}
+
+				if untypedConstDeclType != "" {
+					result.WriteString(untypedConstDeclType)
+					result.WriteRune(' ')
+				} else if !isDiscarded {
 					result.WriteString("var ")
 				}
 			} else {
@@ -1406,7 +1474,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							// `_, _, _, _ = a, b, c, d` a discard, so they don't collide (CS0128).
 							isDiscarded := ident.Name == "_"
 
+							// Same untyped-const materialization as the all-declared path (see
+							// untypedConstDeclTypeName) for a define routed through this mixed branch.
+							untypedConstDeclType := ""
+
 							if !isDiscarded {
+								untypedConstDeclType = v.untypedConstDeclTypeName(ident, rhs)
+							}
+
+							if untypedConstDeclType != "" {
+								result.WriteString(untypedConstDeclType)
+								result.WriteRune(' ')
+							} else if !isDiscarded {
 								result.WriteString("var ")
 							}
 						} else {

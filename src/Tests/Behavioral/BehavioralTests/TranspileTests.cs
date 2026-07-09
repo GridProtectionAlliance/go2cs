@@ -958,6 +958,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckUntypedConstArithmetic() => CheckTarget("UntypedConstArithmetic");
 
     [TestMethod]
+    public void CheckUntypedConstDefine() => CheckTarget("UntypedConstDefine");
+
+    [TestMethod]
     public void CheckUntypedFloatDefault() => CheckTarget("UntypedFloatDefault");
 
     [TestMethod]
