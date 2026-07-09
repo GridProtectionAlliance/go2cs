@@ -57,6 +57,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
+
+    [TestMethod]
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
 
     [TestMethod]

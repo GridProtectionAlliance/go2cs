@@ -473,6 +473,15 @@ A Go string literal normally emits as a `"…"u8` `ReadOnlySpan<byte>` (which co
 
 `resultParamIsInterface` excludes the empty interface (`andNotEmptyInterface`), so the interface-conversion arm never fires for `any`; the per-element context sets `u8StringOK` off and `castToGoString` on instead. Only string basic-literals consult those flags, so a non-string `any` result is unaffected. Also corrects a latent semantic bug in the multi-result form (`return "<no value>", true` from a `(any, bool)` result rendered a raw C# string, which would fail a Go `x.(string)` assertion). Guarded by `InterfaceCasting`.
 
+The same boxing applies to an **assignment** whose target's static type is the empty interface — a plain
+local (`arg = "<nil>"`, go/types format.go's sprintf over an `any` range variable, CS0029), a
+selector/index target (`h.value = "field"`), and a mixed-statement reassignment all render the literal
+`(@string)"…"`. `visitAssignStmt` threads the same `u8StringOK`-off / `castToGoString`-on literal context
+into each RHS conversion site when `lhsIsEmptyInterface` reports the target is `any` (the NON-empty
+interface wrap stays with `convertExprToInterfaceType`, which the empty interface deliberately bypasses).
+(Guarded by the `AnyStringLitAssign` behavioral test — an `any` local, an `any`-typed range variable, and
+an `any` struct field each assigned a string literal, then type-switched on `string`, output-compared vs Go.)
+
 ## Inline Assignment Order of Operations
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:
 

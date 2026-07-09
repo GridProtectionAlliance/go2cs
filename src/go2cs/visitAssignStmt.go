@@ -50,6 +50,44 @@ func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr) []ExprCo
 	return append(out, ptrContext)
 }
 
+// lhsIsEmptyInterface reports whether the assignment target's static type is an EMPTY
+// interface (`any`). A string literal assigned to such a target must render as a boxed
+// @string (`(@string)"…"`) — the default `"…"u8` ReadOnlySpan<byte> has no conversion to
+// object (CS0029; go/types format.go sprintf's `arg = "<nil>"`), and boxing a golib
+// @string (not a C# string) preserves Go string identity for a later type assertion.
+// Mirrors the visitReturnStmt `any`-result arm; a NON-empty interface target is handled
+// separately by convertExprToInterfaceType.
+func (v *Visitor) lhsIsEmptyInterface(lhs ast.Expr) bool {
+	lhsType := v.getType(lhs, false)
+
+	if lhsType == nil {
+		return false
+	}
+
+	isIface, isEmpty := isInterface(lhsType)
+
+	return isIface && isEmpty
+}
+
+// appendEmptyIfaceLitContext returns base with a boxed-@string literal context appended when
+// the assignment target is an EMPTY interface (see lhsIsEmptyInterface). Only string
+// basic-literals consult these flags (convBasicLit), so any other RHS is unaffected. A fresh
+// slice is returned so the caller's backing array is not mutated.
+func (v *Visitor) appendEmptyIfaceLitContext(base []ExprContext, lhs ast.Expr) []ExprContext {
+	if !v.lhsIsEmptyInterface(lhs) {
+		return base
+	}
+
+	basicLitContext := DefaultBasicLitContext()
+	basicLitContext.u8StringOK = false
+	basicLitContext.castToGoString = true
+
+	out := make([]ExprContext, len(base), len(base)+1)
+	copy(out, base)
+
+	return append(out, basicLitContext)
+}
+
 // narrowArithmeticCastType returns the C# narrow-integer type a binary/unary arithmetic assignment
 // RHS must be cast to when its Go type matches a narrow-integer LHS (int8/uint8/int16/uint16), or
 // "" when no cast applies. Go evaluates such arithmetic at the operand's own width (wrapping); C#
@@ -903,10 +941,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			// A u8 string literal is a ReadOnlySpan<byte> (ref struct) and cannot be
 			// a ValueTuple element, so suppress the u8 form for string literals in a
-			// multi-value (tuple) assignment, e.g. `field, env = env, ""`.
-			if rhsLen > 1 {
+			// multi-value (tuple) assignment, e.g. `field, env = env, ""`. An EMPTY-
+			// interface target instead takes the boxed @string form `(@string)"…"`
+			// (see lhsIsEmptyInterface) — in a tuple or standalone.
+			emptyIfaceTarget := v.lhsIsEmptyInterface(lhs)
+
+			if rhsLen > 1 || emptyIfaceTarget {
 				basicLitContext := DefaultBasicLitContext()
 				basicLitContext.u8StringOK = false
+				basicLitContext.castToGoString = emptyIfaceTarget
 				contexts = append(contexts, basicLitContext)
 			}
 
@@ -1250,7 +1293,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString(v.convExpr(lhs, contexts))
 				result.WriteString(operator)
 
-				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
+				rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))
 
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
@@ -1302,7 +1345,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
+					rhsExpr := v.convExpr(rhs, v.appendEmptyIfaceLitContext(v.appendRhsPtrContext(contexts, rhs), lhs))
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))

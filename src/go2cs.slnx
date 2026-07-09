@@ -61,6 +61,7 @@
     <Project Path="Tests/Behavioral/AnonymousInterfaces/AnonymousInterfaces.csproj" />
     <Project Path="Tests/Behavioral/AnonymousStructs/AnonymousStructs.csproj" />
     <Project Path="Tests/Behavioral/AnyKeyMap/AnyKeyMap.csproj" />
+    <Project Path="Tests/Behavioral/AnyStringLitAssign/AnyStringLitAssign.csproj" />
     <Project Path="Tests/Behavioral/AppendNamedSliceElement/AppendNamedSliceElement.csproj" />
     <Project Path="Tests/Behavioral/AppendUntypedConst/AppendUntypedConst.csproj" />
     <Project Path="Tests/Behavioral/BigUntypedConstComparison/BigUntypedConstComparison.csproj" />

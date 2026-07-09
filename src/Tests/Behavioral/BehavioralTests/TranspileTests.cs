@@ -57,6 +57,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckAnyKeyMap() => CheckTarget("AnyKeyMap");
 
     [TestMethod]
+    public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
+
+    [TestMethod]
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
 
     [TestMethod]
