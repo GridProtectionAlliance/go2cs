@@ -30,6 +30,12 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 		}
 
 		if isMap {
+			mapKeyInterfaceType := types.Type(nil)
+
+			if keyIsInterface, keyIsEmptyInterface := isInterface(mapType.Key()); keyIsInterface && !keyIsEmptyInterface {
+				mapKeyInterfaceType = mapType.Key()
+			}
+
 			// A POINTER-keyed map (`map[*typeInfo]bool`, encoding/gob buildEncEngine) indexed by
 			// a deref-aliased pointer parameter needs the parameter's BOX as the key — the
 			// alias `ref var info = ref Ꮡinfo.Value` is the wrapper VALUE, so `building[info]`
@@ -65,7 +71,13 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 					keyContexts = append(keyContexts, identContext)
 				}
 
-				return fmt.Sprintf("%s[%s, %s]", v.convExpr(indexExpr.X, nil), v.convExpr(indexExpr.Index, keyContexts), OverloadDiscriminator)
+				keyExpr := v.convExpr(indexExpr.Index, keyContexts)
+
+				if mapKeyInterfaceType != nil {
+					keyExpr = v.convertToInterfaceType(mapKeyInterfaceType, v.getType(indexExpr.Index, false), keyExpr)
+				}
+
+				return fmt.Sprintf("%s[%s, %s]", v.convExpr(indexExpr.X, nil), keyExpr, OverloadDiscriminator)
 			}
 
 			// Check if the key type is an empty interface
@@ -111,6 +123,14 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 	}
 
 	index := v.convExpr(indexExpr.Index, contexts)
+
+	if typeAndVal, ok := v.info.Types[indexExpr.X]; ok {
+		if mapType, isMap := typeAndVal.Type.Underlying().(*types.Map); isMap {
+			if keyIsInterface, keyIsEmptyInterface := isInterface(mapType.Key()); keyIsInterface && !keyIsEmptyInterface {
+				index = v.convertToInterfaceType(mapType.Key(), v.getType(indexExpr.Index, false), index)
+			}
+		}
+	}
 
 	// A STRING base indexed by a wide/unsigned integer: a string LITERAL renders as a
 	// ReadOnlySpan<byte> (`"…"u8`) whose indexer takes int — a uintptr index is CS1503

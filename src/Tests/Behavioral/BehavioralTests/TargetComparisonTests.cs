@@ -420,6 +420,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckInterfaceIntraFunction() => CheckTarget("InterfaceIntraFunction");
 
     [TestMethod]
+    public void CheckInterfaceMapKeyPointer() => CheckTarget("InterfaceMapKeyPointer");
+
+    [TestMethod]
     public void CheckInterfaceToInterfaceAdapter() => CheckTarget("InterfaceToInterfaceAdapter");
 
     [TestMethod]
