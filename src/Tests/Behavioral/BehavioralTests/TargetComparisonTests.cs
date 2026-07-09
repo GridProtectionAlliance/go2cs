@@ -93,6 +93,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckBlankMultiResult() => CheckTarget("BlankMultiResult");
 
     [TestMethod]
+    public void CheckBlankNamedReturn() => CheckTarget("BlankNamedReturn");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]

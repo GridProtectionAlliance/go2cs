@@ -90,6 +90,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckBlankMultiResult() => CheckTarget("BlankMultiResult");
 
     [TestMethod]
+    public void CheckBlankNamedReturn() => CheckTarget("BlankNamedReturn");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]

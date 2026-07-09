@@ -94,6 +94,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckBlankMultiResult() => CheckTarget("BlankMultiResult");
 
     [TestMethod]
+    public void CheckBlankNamedReturn() => CheckTarget("BlankNamedReturn");
+
+    [TestMethod]
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
