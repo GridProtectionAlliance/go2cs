@@ -2088,6 +2088,50 @@ import (`func(string) (importPath string, ok bool)`) keeps the display path, whi
 named tuple elements that the structural renderer drops. (Guarded by the `FuncTypeParam` behavioral
 test's `runner.gen` field.)
 
+### A variadic func type lowers to the golib `Actionꓸꓸꓸ`/`Funcꓸꓸꓸ` delegates
+
+A **variadic function TYPE used as a value** — a parameter, variable, struct field, or collapsed
+methodless named type such as go/types' `reportf func(format string, args ...interface{})` — used
+to have three mutually incompatible lowerings: the delegate type rendered `Action<@string,
+slice<any>>` (no `params` — the BCL `Action` cannot express one), a variadic func LITERAL emitted
+the named-function convention `(@string format, params ꓸꓸꓸany argsʗp) => …` (CS1661/CS1678
+against that `Action`), and calls through the value passed loose Go-style args as if `params`
+existed (`reportf("…"u8, (~f).typ)` — CS1503; `reportf("empty type set"u8)` — CS7036).
+
+The lowering now targets a golib delegate family carrying a real C# 13 `params Span<T>` tail
+(`src/core/golib/variadic.cs`; fixed-arity prefixes up to eight mirror the BCL Action/Func family,
+and the `ꓸꓸꓸ` suffix reads as Go's `...`):
+
+```csharp
+public delegate void Actionꓸꓸꓸ<T1, TArg>(T1 arg1, params Span<TArg> args);
+public delegate TResult Funcꓸꓸꓸ<T1, TArg, out TResult>(T1 arg1, params Span<TArg> args);
+```
+
+`iifeDelegateType` — the single structural lowering every `getCSTypeName(*types.Signature)` and
+collapsed methodless named func type routes through — names the family when `sig.Variadic()` and
+passes the variadic **element** type as the last type argument. Everything else then agrees with
+**zero changes** to the other emissions, because the parameter types match by identity
+(`ꓸꓸꓸT` *is* `Span<T>`):
+
+- the named-function convention (`internal static @string gather(@string prefix, params ꓸꓸꓸnint
+  valsʗp)`) converts as a method group — `apply(gather)` stays bare;
+- a variadic func literal (`(@string prefix, params ꓸꓸꓸnint valsʗp) => …`, C# 13 params lambda)
+  converts natively — go/types' `comparable(typ, true, default!, (@string format, params ꓸꓸꓸany
+  argsʗp) => {…})` now binds its `Actionꓸꓸꓸ<@string, any>` parameter;
+- calls through the value pass loose args or an empty tail via C# `params` expansion, and a Go
+  spread (`f(nums...)`) binds the slice's `.ꓸꓸꓸ` Span in normal form;
+- a C# consumer calls a transpiled printf-style callback naturally (`ctx.Logf("…", a, b)`) — the
+  library use case that ruled out the pack-into-a-`slice<T>` alternative.
+
+A `:=`-declared variadic func literal is untouched: it keeps C#'s natural (params-capable) lambda
+type under `var` (the `VariadicClosureSpread` shape). One deliberate residue: `deferǃ`/`goǃ` of a
+call **through a variadic func value** would need to capture the `Span` tail, which a ref struct
+cannot be — no stdlib occurrence; pack into a slice at such a site if one ever appears. Full-stdlib
+A/B footprint: go/types predicates.cs/expr.cs plus every file that renders a variadic func type
+structurally (inspected file-by-file at introduction). (Guarded by `VariadicFuncValues` — a named
+func AND a func literal satisfying a variadic func-typed param, loose/empty/spread calls through
+it, and a nil-compared variadic func-typed var — output-compared vs Go.)
+
 ### Major-version import directories
 A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, and
 the emitted class follows the package NAME: consumers reference `math.rand.rand_package`, not

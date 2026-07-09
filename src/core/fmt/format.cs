@@ -73,6 +73,11 @@ public static partial class fmt_package
     public static void Printf(@string format, params object[] args) =>
         Console.Write(Sprintf(format, args));
 
+    // A Go spread through a variadic func VALUE (`f(format, args...)`) passes the slice's
+    // `ꓸꓸꓸ` Span in normal form — mirror Sprintf's Span overload so Printf binds it too.
+    public static void Printf(string format, params ꓸꓸꓸobject args) =>
+        Console.Write(Sprintf(format, args));
+
     public static string Sprint(object? arg) => arg?.ToString() ?? "<nil>";
 
     public static string Sprintf(@string format, params object[] args)

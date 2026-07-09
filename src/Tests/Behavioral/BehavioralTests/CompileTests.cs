@@ -957,6 +957,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicClosureSpread() => CheckTarget("VariadicClosureSpread");
 
     [TestMethod]
+    public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
+
+    [TestMethod]
     public void CheckVariadicPointerParam() => CheckTarget("VariadicPointerParam");
 
     [TestMethod]

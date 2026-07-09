@@ -131,15 +131,47 @@ func (v *Visitor) iifeParamName(param *types.Var) string {
 
 // iifeDelegateType builds the C# delegate type for casting an IIFE's lambda so it can be invoked
 // directly: `Action`/`Action<…>` for a void literal, `Func<…, TResult>` for a value-returning
-// one (a tuple result type for multiple returns).
+// one (a tuple result type for multiple returns). Because getCSTypeName routes every anonymous
+// (and collapsed methodless named) func type here, this is THE lowering of a Go func type used
+// as a value.
+//
+// A VARIADIC signature lowers to the golib Actionꓸꓸꓸ/Funcꓸꓸꓸ family, whose trailing
+// `params Span<T>` carries the variadic tail — the delegate's LAST type argument is the variadic
+// ELEMENT type (the signature stores []T; the Span shell lives in the delegate declaration).
+// This makes the three previously-incompatible lowerings agree: the named-function convention
+// (`params ꓸꓸꓸT argsʗp`) and a variadic func literal convert to it natively (the parameter
+// types match by identity), calls through the value pass loose Go-style arguments or an empty
+// tail via C# params expansion, and a spread slice binds its `.ꓸꓸꓸ` Span in normal form —
+// go/types' `reportf Action<@string, slice<any>>` took a `params ꓸꓸꓸany` literal (CS1661/CS1678)
+// and loose-arg calls (CS1503/CS7036) before this.
 func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	params := sig.Params()
 	results := sig.Results()
 
+	variadic := sig.Variadic() && params.Len() > 0
+
 	typeArgs := make([]string, 0, params.Len()+1)
 
 	for i := range params.Len() {
-		typeArgs = append(typeArgs, v.aliasedElementTypeName(params.At(i).Type()))
+		paramType := params.At(i).Type()
+
+		if variadic && i == params.Len()-1 {
+			if sliceType, ok := paramType.Underlying().(*types.Slice); ok {
+				paramType = sliceType.Elem()
+			} else {
+				// Defensive: a variadic signature's last param is always []T; if not, keep
+				// the plain Action/Func lowering rather than a mis-shaped family reference.
+				variadic = false
+			}
+		}
+
+		typeArgs = append(typeArgs, v.aliasedElementTypeName(paramType))
+	}
+
+	family := ""
+
+	if variadic {
+		family = EllipsisOperator
 	}
 
 	if results.Len() == 0 {
@@ -147,7 +179,7 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 			return "Action"
 		}
 
-		return "Action<" + strings.Join(typeArgs, ", ") + ">"
+		return "Action" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 	}
 
 	var resultType string
@@ -166,7 +198,7 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 
 	typeArgs = append(typeArgs, resultType)
 
-	return "Func<" + strings.Join(typeArgs, ", ") + ">"
+	return "Func" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 }
 
 // namedResultName returns the C# identifier the body uses for a named result parameter
