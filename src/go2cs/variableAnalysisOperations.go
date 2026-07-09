@@ -1875,6 +1875,15 @@ func (v *Visitor) processPotentialCapture(ident *ast.Ident) {
 		return
 	}
 
+	// A var an ENCLOSING lambda's analysis already marked box-ref is referenced through its box
+	// EVERYWHERE — the box is a plain reference local that closures at any nesting depth capture
+	// directly — so a nested literal must not snapshot-copy it: the copy's box render is a name
+	// that is never declared (`ᏑlazyCertʗ1`, CS0103), and the copy divorces the nested writes Go
+	// shares (crypto/x509 AppendCertsFromPEM's inner `lazyCert.v, _ = ParseCertificate(…)`).
+	if v.lambdaCapture.boxRefVars[varObj] {
+		return
+	}
+
 	// A deref'd pointer parameter or pointer receiver is a `ref var p = ref Ꮡp.Value` alias, which a C#
 	// closure cannot capture (CS8175). Inside a lambda, reference it through its box `Ꮡp` instead —
 	// value uses become `Ꮡp.Value`, address uses `Ꮡp` (see convIdent / convUnaryExpr). The box is a
@@ -1976,12 +1985,14 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 
 // varUsedAsImplicitAddrReceiverInLambda reports whether varObj is used inside the lambda currently
 // being analyzed as the VALUE receiver of a POINTER-receiver method call (`defer state.free()`,
-// state a value local, free a `*handleState` method). Go auto-takes the receiver's address, and
-// emission binds this through the box (`Ꮡstate.free`, see pointerReceiverBoxMethodGroup's value
-// arm), so an escaping such local must be captured by-box, not snapshot-copied. Mirrors that arm's
-// guard exactly: a NAMED value receiver whose type is identical to the method's pointer-receiver
-// pointee. An ALREADY-pointer receiver (`defer conf.releaseSema()`) is excluded — its box group is
-// the pointer variable itself, whose snapshot name IS declared, so it needs no box-ref treatment.
+// state a value local, free a `*handleState` method) — directly or PROMOTED through value embeds
+// (`lazyCert.Do(…)` on a struct embedding sync.Once). Go auto-takes the receiver's address, and
+// emission binds this through the box (`Ꮡstate.free` / the `.of(…)` field projection, see
+// pointerReceiverBoxMethodGroup's value arm), so an escaping such local must be captured by-box,
+// not snapshot-copied. The direct case mirrors that arm's guard exactly: a NAMED value receiver
+// whose type is identical to the method's pointer-receiver pointee. An ALREADY-pointer receiver
+// (`defer conf.releaseSema()`) is excluded — its box group is the pointer variable itself, whose
+// snapshot name IS declared, so it needs no box-ref treatment.
 func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) bool {
 	lambda := v.lambdaCapture.currentLambda
 
@@ -2044,12 +2055,45 @@ func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) boo
 		}
 
 		// A NAMED value whose type is exactly the pointer-receiver's pointee (arm 2).
-		if !types.Identical(recvPtr.Elem(), recvType) {
+		if types.Identical(recvPtr.Elem(), recvType) {
+			if _, ok := recvType.(*types.Named); ok {
+				found = true
+				return false
+			}
+
 			return true
 		}
 
-		if _, ok := recvType.(*types.Named); !ok {
+		// A PROMOTED pointer-receiver method reached through EMBEDDED fields — `lazyCert.Do(…)`
+		// on `var lazyCert struct { sync.Once; … }` (crypto/x509 AppendCertsFromPEM): Go takes
+		// `&lazyCert.Once`, an address INTO the variable's own storage, so the var needs the same
+		// by-box capture — emission renders the call through the box projection
+		// (`ᏑlazyCert.of(T.ᏑOnce).Do(…)`), and a snapshot declares no such box (CS0103) besides
+		// divorcing the closure's writes from the original. Only VALUE embeds along the selection
+		// path root the address at varObj: a POINTER embed re-roots it at that pointer's target,
+		// and the snapshot (which copies the pointer) stays sound there.
+		selection, ok := v.info.Selections[sel]
+
+		if !ok || selection.Kind() != types.MethodVal || len(selection.Index()) < 2 {
 			return true
+		}
+
+		base := recvType
+
+		for _, fieldIndex := range selection.Index()[:len(selection.Index())-1] {
+			st, isStruct := base.Underlying().(*types.Struct)
+
+			if !isStruct || fieldIndex >= st.NumFields() {
+				return true
+			}
+
+			fieldType := st.Field(fieldIndex).Type()
+
+			if _, fieldIsPtr := fieldType.Underlying().(*types.Pointer); fieldIsPtr {
+				return true
+			}
+
+			base = fieldType
 		}
 
 		found = true

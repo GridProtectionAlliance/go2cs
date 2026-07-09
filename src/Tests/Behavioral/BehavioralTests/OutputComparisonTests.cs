@@ -121,6 +121,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckClosureEmbeddedPromotedPtrMethod() => CheckTarget("ClosureEmbeddedPromotedPtrMethod");
+
+    [TestMethod]
     public void CheckClosureMixedReturnUnsigned() => CheckTarget("ClosureMixedReturnUnsigned");
 
     [TestMethod]

@@ -129,6 +129,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckClosureEmbeddedPromotedPtrMethod() => CheckTarget("ClosureEmbeddedPromotedPtrMethod");
+
+    [TestMethod]
     public void CheckClosureMixedReturnUnsigned() => CheckTarget("ClosureMixedReturnUnsigned");
 
     [TestMethod]

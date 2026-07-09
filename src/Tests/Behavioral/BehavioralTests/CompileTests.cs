@@ -126,6 +126,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckClosureDefer() => CheckTarget("ClosureDefer");
 
     [TestMethod]
+    public void CheckClosureEmbeddedPromotedPtrMethod() => CheckTarget("ClosureEmbeddedPromotedPtrMethod");
+
+    [TestMethod]
     public void CheckClosureMixedReturnUnsigned() => CheckTarget("ClosureMixedReturnUnsigned");
 
     [TestMethod]
