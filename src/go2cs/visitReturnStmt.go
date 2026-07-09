@@ -172,7 +172,9 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 				} else {
 					param := signature.Results().At(i)
 
-					if param.Name() != "" {
+					if param.Name() == "_" {
+						results.WriteString("default!")
+					} else if param.Name() != "" {
 						ident := v.getVarIdent(param)
 
 						if ident != nil {
@@ -182,8 +184,8 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 						}
 					}
 				}
-			}
 
+			}
 			if results.Len() > 0 {
 				result.WriteRune(' ')
 
