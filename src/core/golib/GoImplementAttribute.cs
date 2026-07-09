@@ -1,4 +1,4 @@
-﻿//******************************************************************************************************
+//******************************************************************************************************
 //  GoImplementAttribute.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
@@ -88,4 +88,19 @@ public interface IжAdapter
     /// Gets the wrapped receiver box (a <c>ж&lt;T&gt;</c>).
     /// </summary>
     object? Box { get; }
+}
+
+/// <summary>
+/// Implemented by generated interface-to-interface adapters that wrap another Go interface value.
+/// </summary>
+/// <remarks>
+/// Go interface-to-interface assignment preserves the original dynamic value. The runtime unwraps
+/// these adapters through <see cref="Value"/> for type assertions and interface equality.
+/// </remarks>
+public interface IInterfaceAdapter
+{
+    /// <summary>
+    /// Gets the wrapped source interface value.
+    /// </summary>
+    object? Value { get; }
 }

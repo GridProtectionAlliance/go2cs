@@ -1,4 +1,4 @@
-﻿//******************************************************************************************************
+//******************************************************************************************************
 //  builtin.cs - Gbtc
 //
 //  Copyright © 2018, Grid Protection Alliance.  All Rights Reserved.
@@ -1396,6 +1396,9 @@ public static class builtin
     {
         try
         {
+            while (target is IInterfaceAdapter interfaceAdapter)
+                target = interfaceAdapter.Value!;
+
             Type typeOfT = typeof(T);
 
             switch (target)
@@ -2186,6 +2189,15 @@ public static class builtin
 
     public static bool AreEqual(object? left, object? right)
     {
+        // An interface created from an interface is a generated IInterfaceAdapter wrapping
+        // the original interface value; Go compares such interfaces by instance value.
+        // Unwrap both sides so sides so the comparison below sees the root values.
+        while (left is IInterfaceAdapter leftInterfaceAdapter)
+            left = leftInterfaceAdapter.Value;
+
+        while (right is IInterfaceAdapter rightInterfaceAdapter)
+            right = rightInterfaceAdapter.Value;
+
         // An interface value created from a Go POINTER is a generated IжAdapter wrapping the
         // receiver box; Go compares such interfaces (against each other, or against a raw
         // pointer) by POINTER IDENTITY. Unwrap both sides so the comparison below sees the
@@ -2230,6 +2242,9 @@ public static class builtin
     /// <returns><c>true</c> if the specified <paramref name="value"/> implements the specified interface <typeparamref name="TInterface"/>; otherwise, <c>false</c>.</returns>
     public static bool Implements<TInterface>(object? value)
     {
+        while (value is IInterfaceAdapter interfaceAdapter)
+            value = interfaceAdapter.Value;
+
         return value switch
         {
             TInterface => true,
