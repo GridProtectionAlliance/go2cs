@@ -784,6 +784,28 @@ func isDirectBoxReceiverMethod(funcDecl *ast.FuncDecl, info *types.Info) bool {
 	return funcObj != nil && packageDirectBoxReceiverMethods[funcObj.Origin()]
 }
 
+// identResolvesToReceiver reports whether ident is the current method's receiver by OBJECT
+// identity, not just name: a local or range var SHADOWING the receiver name must not take the
+// receiver-specific renders — crypto/x509 isValid's `for _, c := range currentChain` inside
+// `func (c *Certificate)` (direct-ж) emitted the never-declared box `ᏑcΔ1` when the range var
+// was passed as a pointer argument (CS0103). Falls back to the name match when the ident does
+// not resolve, mirroring identIsParameter's paramObjects guard.
+func (v *Visitor) identResolvesToReceiver(ident *ast.Ident, recvName string) bool {
+	if ident.Name != recvName {
+		return false
+	}
+
+	if v.currentFuncSignature != nil {
+		if recv := v.currentFuncSignature.Recv(); recv != nil {
+			if obj := v.info.ObjectOf(ident); obj != nil {
+				return obj == recv
+			}
+		}
+	}
+
+	return true
+}
+
 // exprIsCurrentDirectBoxReceiver reports whether expr is the bare receiver identifier of the
 // current method when that method is direct-ж — i.e. its receiver box `Ꮡrecv` is in scope. Used
 // to route `recv.method()` (a direct-ж method called on the receiver) through that box.
@@ -796,7 +818,7 @@ func (v *Visitor) exprIsCurrentDirectBoxReceiver(expr ast.Expr) bool {
 
 	isPtrRecv, recvName := v.isPointerReceiver()
 
-	return isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
+	return isPtrRecv && v.identResolvesToReceiver(ident, recvName) && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 }
 
 // exprIsCaptureModeFieldBase reports whether expr is a value field whose address can be taken as a

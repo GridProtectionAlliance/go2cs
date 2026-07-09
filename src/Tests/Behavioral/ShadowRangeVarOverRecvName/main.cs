@@ -1,0 +1,44 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType] partial struct node {
+    internal @string name;
+}
+
+internal static slice<ж<node>> collect(this ж<node> Ꮡc, slice<ж<node>> chain) {
+    ref var c = ref Ꮡc.Value;
+
+    var describe = () => Ꮡc.Value.name;
+    slice<ж<node>> toCheck = default!;
+    toCheck = append(toCheck, Ꮡc);
+    foreach (var (_, cΔ1) in chain) {
+        toCheck = append(toCheck, cΔ1);
+    }
+    fmt.Println("describe:", describe());
+    return toCheck;
+}
+
+internal static ж<node> firstOr(this ж<node> Ꮡc, slice<ж<node>> chain) {
+    ref var c = ref Ꮡc.Value;
+
+    foreach (var (_, cΔ1) in chain) {
+        return cΔ1;
+    }
+    return Ꮡc;
+}
+
+internal static void Main() {
+    var root = Ꮡ(new node(name: "root"u8));
+    var a = Ꮡ(new node(name: "a"u8));
+    var b = Ꮡ(new node(name: "b"u8));
+    foreach (var (_, n) in root.collect(new ж<node>[]{a, b}.slice())) {
+        fmt.Println("got:", (~n).name);
+    }
+    fmt.Println("first:", (~root.firstOr(new ж<node>[]{a, b}.slice())).name);
+    fmt.Println("empty:", (~root.firstOr(default!)).name);
+}
+
+} // end main_package

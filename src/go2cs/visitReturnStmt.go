@@ -67,11 +67,12 @@ func (v *Visitor) visitReturnStmt(returnStmt *ast.ReturnStmt) {
 	recvIndex := -1
 	var capturedRecvName string
 
-	// Check if receiver is directly returned
+	// Check if receiver is directly returned (object identity — a shadowing local returned
+	// here must keep its own render, not the receiver box; see identResolvesToReceiver)
 	if ptrRecv, recvName := v.isPointerReceiver(); ptrRecv {
 		for i, result := range returnStmt.Results {
 			if ident, ok := result.(*ast.Ident); ok {
-				if ident.Name == recvName {
+				if v.identResolvesToReceiver(ident, recvName) {
 					recvIndex = i
 
 					// Direct-ж: the receiver box is the parameter `Ꮡrecv`, so return it

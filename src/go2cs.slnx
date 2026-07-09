@@ -304,6 +304,7 @@
     <Project Path="Tests/Behavioral/ShadowedHeapBoxReceiver/ShadowedHeapBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/ShadowedPointerParam/ShadowedPointerParam.csproj" />
     <Project Path="Tests/Behavioral/ShadowedVarMethodCallLHS/ShadowedVarMethodCallLHS.csproj" />
+    <Project Path="Tests/Behavioral/ShadowRangeVarOverRecvName/ShadowRangeVarOverRecvName.csproj" />
     <Project Path="Tests/Behavioral/SharedEmbeddedInterfaceMember/SharedEmbeddedInterfaceMember.csproj" />
     <Project Path="Tests/Behavioral/ShiftNegativeWideConst/ShiftNegativeWideConst.csproj" />
     <Project Path="Tests/Behavioral/ShiftPrecedenceUnsigned/ShiftPrecedenceUnsigned.csproj" />

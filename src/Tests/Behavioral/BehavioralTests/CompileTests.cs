@@ -780,6 +780,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShadowedVarMethodCallLHS() => CheckTarget("ShadowedVarMethodCallLHS");
 
     [TestMethod]
+    public void CheckShadowRangeVarOverRecvName() => CheckTarget("ShadowRangeVarOverRecvName");
+
+    [TestMethod]
     public void CheckSharedEmbeddedInterfaceMember() => CheckTarget("SharedEmbeddedInterfaceMember");
 
     [TestMethod]

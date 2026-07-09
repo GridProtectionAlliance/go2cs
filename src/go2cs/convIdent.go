@@ -49,7 +49,8 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// the receiver box is the parameter `Ꮡrecv`, so emit that. A value-ref receiver
 		// (`this ref T recv`) has no box and its deref'd value cannot stand in for the pointer
 		// — this is why such methods are marked direct-ж (see packageDirectBoxReceiverMethods).
-		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
+		// Object identity, not name: a shadowing local keeps its own render (identResolvesToReceiver).
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) && isDirectBoxReceiverMethod(v.currentFuncDecl, v.info) {
 			return AddressPrefix + strings.TrimPrefix(v.getIdentName(ident), "@")
 		}
 
@@ -68,7 +69,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// `d.fill = (*compressor).fillStore` emitted a nonexistent Ꮡd (CS0103 ×11).
 		isCurrentRefReceiver := false
 
-		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) {
 			isCurrentRefReceiver = true
 		}
 
@@ -151,7 +152,7 @@ func (v *Visitor) convIdent(ident *ast.Ident, context IdentContext) string {
 		// (flate init's `d.fill = (*compressor).fillStore`, CS0103 ×11).
 		isRefReceiver := false
 
-		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && ident.Name == recvName {
+		if isPtrRecv, recvName := v.isPointerReceiver(); isPtrRecv && v.identResolvesToReceiver(ident, recvName) {
 			isRefReceiver = !isDirectBoxReceiverMethod(v.currentFuncDecl, v.info)
 		}
 
