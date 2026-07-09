@@ -762,6 +762,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRecvMapElementDeref() => CheckTarget("RecvMapElementDeref");
+
+    [TestMethod]
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]

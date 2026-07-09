@@ -296,6 +296,7 @@
     <Project Path="Tests/Behavioral/ReceiverFieldAddress/ReceiverFieldAddress.csproj" />
     <Project Path="Tests/Behavioral/ReceiverFieldMethodCall/ReceiverFieldMethodCall.csproj" />
     <Project Path="Tests/Behavioral/ReceiverPointerValue/ReceiverPointerValue.csproj" />
+    <Project Path="Tests/Behavioral/RecvMapElementDeref/RecvMapElementDeref.csproj" />
     <Project Path="Tests/Behavioral/RenamedReceiverBox/RenamedReceiverBox.csproj" />
     <Project Path="Tests/Behavioral/ReturnPointerFieldOfParam/ReturnPointerFieldOfParam.csproj" />
     <Project Path="Tests/Behavioral/ReservedTypeMethodCollision/ReservedTypeMethodCollision.csproj" />

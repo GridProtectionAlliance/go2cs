@@ -145,9 +145,18 @@ func (v *Visitor) convStarExpr(starExpr *ast.StarExpr, context StarExprContext) 
 		}
 	}
 
-	// Default behavior for other cases
-	if pointerRecv && ident != nil && recvName == ident.Name {
-		return v.convExpr(starExpr.X, nil)
+	// The receiver-deref shortcut (`*u` → the deref-aliased ref-local `u`) applies only when the
+	// operand IS the receiver ident itself — getIdentifier digs through an index/selector to the
+	// receiver ROOT, but `*u.handles[x]` (a deref of a pointer-valued map ELEMENT reached through
+	// the receiver; go/types unify.go's `return *u.handles[x]` / `*u.handles[x] = t`) is a
+	// distinct lvalue that still needs its own dereference — eliding it returned/assigned the raw
+	// ж<ΔType> (CS0266 both directions). Mirrors the direct-ident gate the parameter shortcut
+	// above already has; non-direct operands fall through to the tail deref. Object identity via
+	// identResolvesToReceiver, matching the other receiver-specific renders.
+	if pointerRecv && ident != nil {
+		if _, isDirectIdent := starExpr.X.(*ast.Ident); isDirectIdent && v.identResolvesToReceiver(ident, recvName) {
+			return v.convExpr(starExpr.X, nil)
+		}
 	}
 
 	// A deref whose operand is a type CONVERSION renders as a C# cast, and postfix binds tighter

@@ -759,6 +759,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckReceiverPointerValue() => CheckTarget("ReceiverPointerValue");
 
     [TestMethod]
+    public void CheckRecvMapElementDeref() => CheckTarget("RecvMapElementDeref");
+
+    [TestMethod]
     public void CheckRelationalPatternGuard() => CheckTarget("RelationalPatternGuard");
 
     [TestMethod]
