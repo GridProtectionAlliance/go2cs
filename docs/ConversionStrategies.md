@@ -3202,6 +3202,22 @@ importing only `CrossPkgBox`, and `z_main.go` (sorts last) is the only file impo
 the preload the box renders the nonexistent `CrossPkgLib_package.Status` (CS0426); output-compared vs Go, 4
 phases green. This is the three-package shape the 2-package `CrossPkg` harness could not previously express —
 cf. the `os.FileInfo` alias root, still GUARD OWED above for that reason.)
+
+The preload still covers only packages **some file imports**. A foreign renamed type reached ONLY through
+ANOTHER package's signature — go/types renders go/ast's `FieldFilter` (`func(string, reflect.Value) bool`)
+when it passes `ast.NotNilFilter` to `ast.Fprint`, and **no go/types file imports `reflect`** — had no alias
+loaded at all, so the synthesized delegate wrap rendered the raw name: `new Func<@string, reflect.Value,
+bool>(ast.NotNilFilter)` — `Value` resolved inside `reflect_package` (CS0426) and the mismatched delegate
+then failed the method-group conversion (CS0123). `aliasedElementTypeName` (the delegate-element rename
+route) now loads the owning package's exported aliases **on demand** when a foreign named element has no
+registered alias — `loadImportedTypeAliases` is deduped per package, so a miss costs one probe — and the
+resolving `global using reflectꓸValue = go.reflect_package.ΔValue;` rides the normal package_info emission
+(the consumer sees the type through its importer's **transitive** assembly reference). For LOCAL modules the
+resolver map (`importPackageDirs`) is now captured over the **transitive** import closure rather than direct
+imports only, so the same on-demand load works outside GOROOT. (Guarded by `SynthesizedDelegateCrossPkg`:
+`CrossPkgFuncLib.Picker func(CrossPkgLib.Status) bool` + exported `Hot` matching it; the consumer imports
+only `CrossPkgFuncLib` and passes `Hot` where a `Picker` is expected — the wrap must render
+`new Func<CrossPkgLibꓸStatus, bool>(CrossPkgFuncLib.Hot)`; output-compared vs Go, 4 phases green.)
 ```csharp
 public static Func<CrossPkgLibꓸStatus, nint> CheckFunc = (CrossPkgLibꓸStatus st) => st.Code * 2;
 internal static (CrossPkgLibꓸStatus, nint) gauge(CrossPkgLibꓸStatus st) {

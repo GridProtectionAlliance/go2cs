@@ -165,6 +165,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckCrossPkgBox() => CheckTarget("CrossPkgBox");
 
     [TestMethod]
+    public void CheckCrossPkgFuncLib() => CheckTarget("CrossPkgFuncLib");
+
+    [TestMethod]
     public void CheckCrossPkgLib() => CheckTarget("CrossPkgLib");
 
     [TestMethod]
@@ -865,6 +868,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
+
+    [TestMethod]
+    public void CheckSynthesizedDelegateCrossPkg() => CheckTarget("SynthesizedDelegateCrossPkg");
 
     [TestMethod]
     public void CheckSystemCollidingTypeName() => CheckTarget("SystemCollidingTypeName");

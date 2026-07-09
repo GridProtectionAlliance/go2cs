@@ -193,6 +193,24 @@ func (v *Visitor) aliasedElementTypeName(t types.Type) string {
 			_, exists := importedTypeAliases[plainKey]
 			packageLock.Unlock()
 
+			// A foreign type reached ONLY through ANOTHER package's signature has no alias
+			// registered: the preload covers packages the current package imports DIRECTLY,
+			// but go/types renders go/ast's `FieldFilter` — whose `reflect.Value` parameter
+			// type go/types itself never imports — so the rename (reflect declares ΔValue)
+			// was missed and the raw `reflect.Value` resolved inside reflect_package
+			// (CS0426, plus CS0123 on the mismatched delegate). Load the owning package's
+			// exported aliases on demand — the dedup in loadImportedTypeAliases makes this
+			// a one-time no-op per package — and re-check; the resolving `global using`
+			// then rides the normal package_info emission (assembly references are
+			// transitive, so the consumer sees the type through its importer's reference).
+			if !exists {
+				v.loadImportedTypeAliases(pkg.Path())
+
+				packageLock.Lock()
+				_, exists = importedTypeAliases[plainKey]
+				packageLock.Unlock()
+			}
+
 			if exists {
 				return getAliasedTypeName(plainKey)
 			}

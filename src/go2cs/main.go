@@ -363,10 +363,12 @@ var importedPointerImplements HashSet[string]
 // type, so a both-foreign value cast here converts implicitly and skips the local adapter.
 var importedValueImplements HashSet[string]
 
-// importPackageDirs maps a directly-imported package's import path to its on-disk source directory
-// and Go package name, captured from the MODULE-AWARE go/packages graph at load time. It is the
-// fallback resolver for cross-package references to a LOCAL/USER module (a `replace`d or co-located
-// module), which the legacy go/build (GOPATH-only) resolver in getImportPackageInfo cannot find.
+// importPackageDirs maps a REACHABLE imported package's import path (the transitive closure, not
+// just direct imports) to its on-disk source directory and Go package name, captured from the
+// MODULE-AWARE go/packages graph at load time. It is the fallback resolver for cross-package
+// references to a LOCAL/USER module (a `replace`d or co-located module), which the legacy
+// go/build (GOPATH-only) resolver in getImportPackageInfo cannot find — including a type reached
+// only through ANOTHER package's signature (aliasedElementTypeName's on-demand alias load).
 // Reset and repopulated per package.
 var importPackageDirs map[string]importedPackageMeta
 
@@ -725,13 +727,30 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageTypes := pkg.Types
 		info := pkg.TypesInfo
 
-		// Capture the module-aware source dir + package name of every directly-imported package, so
-		// cross-package references to LOCAL/USER modules (which go/build cannot resolve) can be wired
-		// up — both their ProjectReference and their exported-type-alias package_info.cs.
+		// Capture the module-aware source dir + package name of every REACHABLE imported package
+		// (the transitive closure, not just direct imports), so cross-package references to
+		// LOCAL/USER modules (which go/build cannot resolve) can be wired up — both their
+		// ProjectReference and their exported-type-alias package_info.cs. The closure matters for
+		// a type reached ONLY through another package's signature (the on-demand alias load in
+		// aliasedElementTypeName): the consumer never imports the type's package directly, so a
+		// direct-imports-only map could not resolve it. Entries are deduped by path; the same
+		// path resolves to the same Dir/Name from any route, so the walk order is immaterial.
 		importPackageDirs = make(map[string]importedPackageMeta)
-		for importPath, importedPkg := range pkg.Imports {
-			importPackageDirs[importPath] = importedPackageMeta{Dir: importedPkg.Dir, Name: importedPkg.Name}
+
+		var captureImportDirs func(imports map[string]*packages.Package)
+
+		captureImportDirs = func(imports map[string]*packages.Package) {
+			for importPath, importedPkg := range imports {
+				if _, exists := importPackageDirs[importPath]; exists {
+					continue
+				}
+
+				importPackageDirs[importPath] = importedPackageMeta{Dir: importedPkg.Dir, Name: importedPkg.Name}
+				captureImportDirs(importedPkg.Imports)
+			}
 		}
+
+		captureImportDirs(pkg.Imports)
 
 		packageInputPath := inputFilePath
 		packageOutputPath := outputFilePath
