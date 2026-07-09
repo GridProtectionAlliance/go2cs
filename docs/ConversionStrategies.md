@@ -960,6 +960,25 @@ The record flows through the existing pointer-target arm of `convertToInterfaceT
 ### Named-string wrapper surface (indexing, sub-slicing, span bridge)
 A named type over `string` is indexed and sub-sliced in Go (`tag[i]`, `tag[i:j]` -- reflect `StructTag.Get`), but C# indexing never applies user-defined conversions. The `InheritedType` template therefore forwards the `@string` surface on every named-string wrapper: `byte this[int]` / `byte this[nint]` indexers, a `Range` indexer returning the WRAPPER (a Go sub-slice of a named string keeps the named type), `nint Length` for `len()`, and an implicit `ReadOnlySpan<byte>` operator so `u8`-literal comparisons and assignments bind. Guarded by `NamedStringConversion`.
 
+### A `:=`-declared string local keeps its named type and its heap box
+A string-underlying local declared with `:=` takes its EXPLICIT declared type through the same general
+declaration path every other type uses (never `var` — a `u8` literal would infer `ReadOnlySpan<byte>`).
+The old dedicated string branch hardcoded `@string` as the declared type, which (a) DISCARDED a named
+string type — go/types check.go's `fileVersion := asGoVersion(…)` declared its `goVersion` locals as
+`@string`, so the `goVersion` extension methods `isValid()`/`cmp()` no longer bound (CS1929 ×4) — and
+(b) BYPASSED the escape-analysis heap-box check, so `cause := ""` followed by `&cause` emitted an
+unboxed local while the call site referenced the nonexistent box `Ꮡcause` (CS0103):
+```csharp
+goVersion fileVersion = asGoVersion((~@file).GoVersion);   // named type preserved
+ref var cause = ref heap<@string>(out var Ꮡcause);         // escaping local heap-boxes
+cause = ""u8;
+```
+A plain, non-escaping string local emits exactly as before (`@string s = "…"u8;` — the general path's
+explicit-type arm resolves to `@string`). The same explicit-type routing applies in the for-init
+tuple-declaration form. (Guarded by the `NamedStringDefine` behavioral test — a named-string `:=` with
+methods called on the local, an escaping `cause := ""` written through its pointer, and a plain string
+local, output-compared vs Go.)
+
 ### A grouped var spec with one multi-result call deconstructs
 A grouped `var (name, offset, abs = t.locabs() ...)` spec is not a `:=`, so the assignment tuple machinery never saw it -- the per-name path assigned the WHOLE result tuple to the first name and silently DEFAULTED the rest (time appendFormat read a zero abs; a silent-wrongness class beyond the CS0029 that exposed it). Function-local specs now emit the C# tuple deconstruction, matching the `:=` form; package-level specs use the once-evaluated hidden-field component reads:
 ```csharp

@@ -573,6 +573,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]
+    public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
+
+    [TestMethod]
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]

@@ -570,6 +570,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedStringConversion() => CheckTarget("NamedStringConversion");
 
     [TestMethod]
+    public void CheckNamedStringDefine() => CheckTarget("NamedStringDefine");
+
+    [TestMethod]
     public void CheckNamedTypeBitwiseConst() => CheckTarget("NamedTypeBitwiseConst");
 
     [TestMethod]

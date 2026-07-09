@@ -1122,9 +1122,10 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 
 			ident := getIdentifier(lhsExprs[i])
 
-			if lhsTypeIsString[i] {
-				result.WriteString("@string ")
-			} else if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
+			// A string-underlying element declares with its EXPLICIT type via the general arm
+			// below (never `var` — a u8 literal would infer ReadOnlySpan<byte>), which also
+			// preserves a NAMED string type (the old hardcoded `@string` arm discarded it).
+			if v.options.preferVarDecl && !(lhsTypeIsString[i] || lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
 				result.WriteString("var ")
 			} else {
 				lhsType := convertToCSTypeName(v.getExprTypeName(ident, false))
@@ -1317,15 +1318,6 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					if format.includeSemiColon || i < lhsLen-1 {
 						result.WriteRune(';')
 					}
-				} else if lhsTypeIsString[i] {
-					// Handle string variables
-					result.WriteString("@string ")
-					result.WriteString(v.convExpr(lhs, contexts))
-					result.WriteString(operator)
-					result.WriteString(v.convExpr(rhs, contexts))
-					if format.includeSemiColon || i < lhsLen-1 {
-						result.WriteRune(';')
-					}
 				} else {
 					// Check if the variable needs to be allocated on the heap
 					heapTypeDecl := v.convertToHeapTypeDecl(ident, false)
@@ -1356,10 +1348,15 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 							}
 						}
 
+						// A string-underlying LHS always declares with its EXPLICIT type: `var`
+						// would infer ReadOnlySpan<byte> from a u8 literal, and the explicit form
+						// preserves a NAMED string type (`goVersion fileVersion = asGoVersion(…)`,
+						// go/types check.go — the old hardcoded `@string` branch discarded it,
+						// CS1929 ×4, and bypassed the heap-box check above, CS0103).
 						if methodGroupDelegateType != "" {
 							result.WriteString(methodGroupDelegateType)
 							result.WriteRune(' ')
-						} else if v.options.preferVarDecl && !(lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
+						} else if v.options.preferVarDecl && !(lhsTypeIsString[i] || lhsTypeIsInt[i] || lhsTypeIsUnsafePointer[i]) {
 							// A blank-identifier LHS is a C# discard, never a declaration — emit `_ = x;`
 							// with no `var`. Testing the current per-element `ident` (not just the
 							// single-LHS case) keeps each `_` in a split multi-assign like

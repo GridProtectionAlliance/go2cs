@@ -15,11 +15,11 @@ internal static @string Error(this errorString e) {
 internal static void Main() {
     error e = ((errorString)(@string)"kaboom"u8);
     fmt.Println(e.Error());
-    @string l = ((label)(@string)"tag"u8);
+    label l = ((label)(@string)"tag"u8);
     fmt.Println(l, len(l));
-    @string st = ((label)(@string)"json,omitempty"u8);
+    label st = ((label)(@string)"json,omitempty"u8);
     fmt.Println(st[0], st[4]);
-    @string name = st[0..4];
+    label name = st[0..4];
     fmt.Println(name, name != ""u8, name == "json"u8);
 }
 
