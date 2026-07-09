@@ -976,7 +976,24 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 				callExprContext.u8StringArgOK[i] = false
 
 				if !isEmpty {
-					callExprContext.interfaceTypes[i] = paramType
+					// A variadic interface parameter (`...Type`) receives EVERY trailing argument
+					// (getParameterType already yields the variadic ELEMENT type), so the interface
+					// treatment must fan out to all of them — this loop only visits declared
+					// parameters, and a trailing pointer element after the first passed loose,
+					// missing its *T→iface adapter (`makeSig(S, S, NewSlice(T))` left the ж<Slice>
+					// result unwrapped — go/types builtins CS1503). Mirrors the variadic fan-out of
+					// the pointer branch below; a spread arg is excluded at consumption
+					// (convExprList's spreadArg guard), and a non-variadic parameter degenerates to
+					// the single index (lastArg == i), byte-identical to before.
+					lastArg := i
+
+					if funcSignature.Variadic() && i == params.Len()-1 {
+						lastArg = len(callExpr.Args) - 1
+					}
+
+					for j := i; j <= lastArg; j++ {
+						callExprContext.interfaceTypes[j] = paramType
+					}
 				}
 			} else if paramHasArg && (isPointer(paramType) || v.instantiatedParamIsPointer(callExpr, paramType, i)) && !(callExprContext.hasSpreadOperator && i == params.Len()-1) {
 				// paramHasArg guards Args[i]: a variadic pointer parameter called with no

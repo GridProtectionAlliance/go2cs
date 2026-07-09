@@ -361,6 +361,7 @@
     <Project Path="Tests/Behavioral/VariadicBoxReceiver/VariadicBoxReceiver.csproj" />
     <Project Path="Tests/Behavioral/VariadicClosureSpread/VariadicClosureSpread.csproj" />
     <Project Path="Tests/Behavioral/VariadicPointerParam/VariadicPointerParam.csproj" />
+    <Project Path="Tests/Behavioral/VariadicSlotInterfaces/VariadicSlotInterfaces.csproj" />
     <Project Path="Tests/Behavioral/VariableCapture/VariableCapture.csproj" />
   </Folder>
   <Folder Name="/tests/library/">
