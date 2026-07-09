@@ -922,6 +922,7 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckTypeSwitchMultiCase() => CheckTarget("TypeSwitchMultiCase");
+    public void CheckTypeSwitchTagShadowRename() => CheckTarget("TypeSwitchTagShadowRename");
 
     [TestMethod]
     public void CheckUnexportedEmbeddedMarker() => CheckTarget("UnexportedEmbeddedMarker");

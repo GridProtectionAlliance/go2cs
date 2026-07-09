@@ -1425,20 +1425,28 @@ func (v *Visitor) performVariableAnalysis(funcDecl *ast.FuncDecl, signature *typ
 				}
 			}
 
-			// Add handling for identifiers within type switch assign
-			if assign, ok := node.Assign.(*ast.ExprStmt); ok {
-				if typeAssert, ok := assign.X.(*ast.TypeAssertExpr); ok {
-					if ident, ok := typeAssert.X.(*ast.Ident); ok {
-						if obj := v.info.Uses[ident]; obj != nil {
-							if varObj, ok := obj.(*types.Var); ok {
-								if adjustedName, ok := v.varNames[varObj]; ok {
-									v.identNames[ident] = adjustedName
-								}
+			// Identifier USES anywhere in the guard/tag expression — both the `x.(type)` ExprStmt
+			// form and the `t := x.(type)` AssignStmt form — must follow the shadow renames of the
+			// variables they reference: the tag can be any expression (`s.Else`, `arrayPtrDeref(t)`),
+			// and an unmapped use binds the OUTER same-named variable in the emitted C#. go/types hit
+			// this three ways: builtins.go's `switch t := arrayPtrDeref(t).(type)` inside a lambda
+			// whose param was renamed tΔ1 emitted `arrayPtrDeref(t)` against the outer case var
+			// (CS1503); stmt.go's `s.Else`/`s.Assign` tags dereferenced the outer subject (CS0023);
+			// and decl.go's `switch d.(type)` TESTED the wrong variable where it compiled. The
+			// guard's own DEFINE ident is not a use (per-case implicits carry it, handled above), so
+			// this maps only references. The general walk never descends into node.Assign.
+			ast.Inspect(node.Assign, func(n ast.Node) bool {
+				if ident, ok := n.(*ast.Ident); ok {
+					if obj := v.info.Uses[ident]; obj != nil {
+						if varObj, ok := obj.(*types.Var); ok {
+							if adjustedName, ok := v.varNames[varObj]; ok {
+								v.identNames[ident] = adjustedName
 							}
 						}
 					}
 				}
-			}
+				return true
+			})
 
 			tracker.processing = false
 
