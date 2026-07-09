@@ -120,8 +120,8 @@ public static class Common
                 simpleName = $"{simpleName[..startIndex]}";
         }
 
-        if (dropCollisionPrefix && simpleName.StartsWith("Δ"))
-            simpleName = simpleName[1..];
+        if (dropCollisionPrefix && simpleName.StartsWith(ShadowVarMarker, StringComparison.Ordinal))
+            simpleName = simpleName[ShadowVarMarker.Length..];
 
         return simpleName;
     }
