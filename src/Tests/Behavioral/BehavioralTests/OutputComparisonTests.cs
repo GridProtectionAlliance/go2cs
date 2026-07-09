@@ -364,6 +364,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
 
     [TestMethod]
+    public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
+
+    [TestMethod]
     public void CheckImmediatelyInvokedFunc() => CheckTarget("ImmediatelyInvokedFunc");
 
     [TestMethod]

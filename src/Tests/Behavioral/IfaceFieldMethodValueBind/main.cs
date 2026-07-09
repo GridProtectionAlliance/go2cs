@@ -1,0 +1,44 @@
+namespace go;
+
+using fmt = fmt_package;
+
+partial class main_package {
+
+[GoType] partial interface sizer {
+    nint size(@string of);
+}
+
+[GoType] partial struct flat {
+    internal nint n;
+}
+
+internal static nint size(this flat f, @string of) {
+    return f.n + len(of);
+}
+
+[GoType] partial struct config {
+    internal sizer s;
+}
+
+internal static sizer std = new flat(n: 100);
+
+[GoRecv] internal static Func<@string, nint> pickSizer(this ref config c) {
+    var f = std.size;
+    if (c.s != default!) {
+        f = c.s.size;
+    }
+    c.s = new flat(n: 1000);
+    return f;
+}
+
+internal static void Main() {
+    var c = Ꮡ(new config(s: new flat(n: 10)));
+    var f = c.pickSizer();
+    fmt.Println(f("abc"u8));
+    fmt.Println((~c).s.size("abc"u8));
+    var c2 = Ꮡ(new config(nil));
+    var g = c2.pickSizer();
+    fmt.Println(g("abcd"u8));
+}
+
+} // end main_package

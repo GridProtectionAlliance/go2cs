@@ -399,6 +399,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckHexByteStringLiteral() => CheckTarget("HexByteStringLiteral");
 
     [TestMethod]
+    public void CheckIfaceFieldMethodValueBind() => CheckTarget("IfaceFieldMethodValueBind");
+
+    [TestMethod]
     public void CheckIfStatements() => CheckTarget("IfStatements");
 
     [TestMethod]

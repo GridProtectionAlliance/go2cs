@@ -714,6 +714,19 @@ func (v *Visitor) convSelectorExpr(selectorExpr *ast.SelectorExpr, context Lambd
 			}
 		}
 
+		// An INTERFACE-receiver method value delegate-binds directly: the interface method is a
+		// genuine C# instance method, so a method GROUP over the evaluated receiver expression
+		// both compiles and preserves Go's bind-once semantics. The synthesized lambda below both
+		// re-evaluated the receiver per call AND captured it — capturing a `ref` receiver is
+		// CS1628 (go/types sizes.go's `f = conf.Sizes.Alignof` inside `func (conf *Config)`).
+		// Mirrors the value-context arm below, which already leaves interface receivers on the
+		// plain method-group emission.
+		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil && types.IsInterface(sig.Recv().Type()) {
+				return fmt.Sprintf("%s.%s", v.convExpr(selectorExpr.X, nil), v.convIdent(selectorExpr.Sel, v.getSelIdentContext(selectorExpr)))
+			}
+		}
+
 		// A POINTER-receiver method value whose receiver expression is ALREADY a pointer binds
 		// the method group over the BOX, not the deref'd value alias — `resolverFunc := r.lookupIP`
 		// with `r *Resolver` otherwise renders `Ꮡr.Value.lookupIP(…)` inside the lambda, a struct
