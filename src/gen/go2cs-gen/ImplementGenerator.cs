@@ -102,6 +102,7 @@ public class ImplementGenerator : ISourceGenerator
         // (struct, interface) pair here, so emit the class only for the first — a second would
         // redeclare it (CS0102). Keyed by the open definition + interface.
         HashSet<string> emittedGenericPointerAdapters = new(StringComparer.Ordinal);
+        HashSet<string> emittedInterfaceAdapters = new(StringComparer.Ordinal);
 
         foreach ((AttributeSyntax attributeSyntax, GeneratorSyntaxContext syntaxContext, _, _) in attributeFinder.TargetAttributes)
         {
@@ -133,14 +134,6 @@ public class ImplementGenerator : ISourceGenerator
             if (structType is null || interfaceType is null)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, must specify two generic type arguments.");
 
-            // A NAMED FUNC type with methods (flag's `type funcValue func(string) error`
-            // implementing Value) arrives as a DELEGATE — it cannot be a partial struct, so
-            // it routes to the VALUE adapter below. Anything else non-struct is a converter
-            // bug worth failing loudly on — but NOT by throwing, which kills the entire
-            // generator run for the package (flag lost all 11 of its adapters, CS0246 ×19).
-            if (structType.TypeKind != TypeKind.Struct && structType.TypeKind != TypeKind.Delegate)
-                continue;
-
             if (interfaceType.TypeKind != TypeKind.Interface)
                 throw new InvalidOperationException($"Invalid usage of [assembly: {AttributeName}] attribute, second generic type argument must be an interface.");
 
@@ -153,6 +146,64 @@ public class ImplementGenerator : ISourceGenerator
             bool pointer = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("Pointer")).value?.Trim() ?? "false");
             bool constraintProxy = bool.Parse(arguments.FirstOrDefault(arg => arg.name.Equals("ConstraintProxy")).value?.Trim() ?? "false");
 
+            if (structType.TypeKind == TypeKind.Interface)
+            {
+                List<MethodInfo> interfaceAdapterMethods = interfaceType.AllInterfaces
+                    .Concat([interfaceType])
+                    .SelectMany(iface => iface.GetMembers()
+                        .OfType<IMethodSymbol>()
+                        .Where(method => method.MethodKind == MethodKind.Ordinary)
+                        .Where(method => !method.IsStatic)
+                        .Select(method => (name: iface.ToDisplayString(), method)))
+                    .Select(info => new MethodInfo
+                    {
+                        Name = $"{GlobalQualify(info.name)}.{EscapeCsKeyword(info.method.Name)}",
+                        ReturnType = GlobalQualify(info.method.ReturnType.ToDisplayString()),
+                        Parameters = info.method.Parameters.Select(param => (type: $"{RefKindPrefix(param.RefKind)}{GlobalQualify(param.Type.ToDisplayString())}", name: param.Name)).ToArray(),
+                        GenericTypes = string.Join(", ", info.method.TypeParameters.Select(type => type.ToDisplayString())),
+                        TypeConstraints = info.method.TypeParameters.ToDictionary(type => type.Name, type => type.ConstraintTypes.Select(constraint => constraint.ToDisplayString()).ToArray()),
+                        IsInaccessibleMarker = GetScope(info.method.Name) == "internal" &&
+                            !SymbolEqualityComparer.Default.Equals(info.method.ContainingAssembly, context.Compilation.Assembly)
+                    })
+                    .Distinct()
+                    .ToList();
+
+                bool interfaceAdapterImplementsFormattable = interfaceAdapterMethods.RemoveAll(m => m.Name.StartsWith("System.IFormattable.")) > 0;
+                bool foreignSourceInterface = !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly);
+                string adapterScope = (interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public") &&
+                                      (structType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(structName)) == "public") ? "public" : "internal";
+
+                string adapterName = $"{(foreignSourceInterface ? ForeignPackagePrefix(structType) : "")}{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}";
+
+                if (!emittedInterfaceAdapters.Add($"{adapterName}|{interfaceName}"))
+                    continue;
+
+                string interfaceAdapterSource = new InterfaceAdapterImplTemplate
+                {
+                    PackageNamespace = packageNamespace,
+                    PackageName = packageName,
+                    SourceInterfaceName = GlobalQualify(structType.GetFullTypeName(true)),
+                    InterfaceName = interfaceName,
+                    AdapterName = adapterName,
+                    AdapterScope = adapterScope,
+                    ImplementsFormattable = interfaceAdapterImplementsFormattable,
+                    Methods = interfaceAdapterMethods,
+                    UsingStatements = usingStatements
+                }
+                .Generate();
+
+                context.AddSource(GetUniqueHintName(emittedHintNames, GetValidFileName($"{packageNamespace}.{packageClassName}.{structName}-{interfaceName}-iface.g.cs")), interfaceAdapterSource);
+                continue;
+            }
+
+            // A NAMED FUNC type with methods (flag's `type funcValue func(string) error`
+            // implementing Value) arrives as a DELEGATE — it cannot be a partial struct, so
+            // it routes to the VALUE adapter below. Anything else non-struct is a converter
+            // bug worth failing loudly on — but NOT by throwing, which kills the entire
+            // generator run for the package (flag lost all 11 of its adapters, CS0246 ×19).
+            if (structType.TypeKind != TypeKind.Struct && structType.TypeKind != TypeKind.Delegate)
+                continue;
+                
             // A SELF-REFERENTIAL constraint proxy (crypto/elliptic's *P224Point satisfying
             // nistPoint[Point] structurally so nistCurve[*P224Point] can instantiate): emit the
             // proxy class that wraps ж<element> and implements the interface over ITSELF, then move
