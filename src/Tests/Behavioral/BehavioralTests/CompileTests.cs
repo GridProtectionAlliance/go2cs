@@ -501,6 +501,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
 
     [TestMethod]
+    public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]
@@ -541,6 +544,9 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
+
+    [TestMethod]
+    public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");

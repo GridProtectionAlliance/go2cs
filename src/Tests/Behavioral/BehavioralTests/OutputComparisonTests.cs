@@ -457,6 +457,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedIntSignednessConv() => CheckTarget("NamedIntSignednessConv");
 
     [TestMethod]
+    public void CheckNamedMapCrossPkgKey() => CheckTarget("NamedMapCrossPkgKey");
+
+    [TestMethod]
     public void CheckNamedMapValuesCollision() => CheckTarget("NamedMapValuesCollision");
 
     [TestMethod]
@@ -497,6 +500,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
+
+    [TestMethod]
+    public void CheckNamedSlicePointerElements() => CheckTarget("NamedSlicePointerElements");
 
     [TestMethod]
     public void CheckNamedSlicePointerReinterpret() => CheckTarget("NamedSlicePointerReinterpret");

@@ -179,9 +179,9 @@ type Visitor struct {
 	// Distinct from currentFuncSignature (which stays the enclosing func for receiver/param detection).
 	currentReturnSignature *types.Signature
 	currentFuncName        string
-	currentFuncPrefix    *strings.Builder
-	paramNames           HashSet[string]
-	paramObjects         map[types.Object]bool
+	currentFuncPrefix      *strings.Builder
+	paramNames             HashSet[string]
+	paramObjects           map[types.Object]bool
 	// identAddressTakenCache memoizes per-object `&ident` scans of the current function
 	// (see identAddressTaken); lazily initialized, keyed by the *types.Object so entries
 	// from prior functions are simply never consulted again.
@@ -225,8 +225,8 @@ type Visitor struct {
 	// box-repoint PLUS a value re-alias (`Ꮡscope = scope.Outer; scope = ref Ꮡscope…`); the
 	// second statement cannot share the single for-post slot, so the re-alias is stashed in
 	// forPostReAlias and visitForStmt injects it at the TOP of the loop body instead.
-	inForPost      bool
-	forPostReAlias string
+	inForPost              bool
+	forPostReAlias         string
 	lastStatementWasReturn bool
 	lastReturnIndentLevel  int
 	identEscapesHeap       map[types.Object]bool
@@ -253,20 +253,20 @@ const MaxSupportedGoVersion = 23
 // be better suited to different fonts or display environments. Defaults have been chosen
 // based on better appearance with common Visual Studio code fonts, e.g., "Cascadia Mono".
 // Note: keep constants in sync with go2cs-gen source code generator and golib core.
-const PointerPrefix = "\u0436"                // Variants: ж Ж ǂ
-const AddressPrefix = "\u13D1"                // Variants: Ꮡ ꝸ
-const ShadowVarMarker = "\u0394"              // Variants: Δ Ʌ ꞥ
-const CapturedVarMarker = "\u0297"            // Variants: ʗ ɔ ᴄ
-const TempVarMarker = "\u1D1B"                // Variants: ᴛ Ŧ ᵀ
-const TrueMarker = "\u1427"                   // Variants: ᐧ true
+const PointerPrefix = "\u0436"                   // Variants: ж Ж ǂ
+const AddressPrefix = "\u13D1"                   // Variants: Ꮡ ꝸ
+const ShadowVarMarker = "\u0394"                 // Variants: Δ Ʌ ꞥ
+const CapturedVarMarker = "\u0297"               // Variants: ʗ ɔ ᴄ
+const TempVarMarker = "\u1D1B"                   // Variants: ᴛ Ŧ ᵀ
+const TrueMarker = "\u1427"                      // Variants: ᐧ true
 const OpaqueTrueMarker = TrueMarker + TrueMarker // golib static readonly true - NOT compiler-foldable (leading constant-true case, CS8120)
-const ValueAdapterInfix = "ᴠ"          // ᴠ - value-form foreign adapter infix (keep in sync with Symbols.ValueAdapterInfix)
-const OverloadDiscriminator = "\uA7F7"        // Variants: ꟷ false
-const EllipsisOperator = "\uA4F8\uA4F8\uA4F8" // Variants: ꓸꓸꓸ ᐧᐧᐧ
-const TypeAliasDot = "\uA4F8"                 // Variants: ꓸ
-const ChannelLeftOp = "\u1438\uA7F7"          // Example: `ch.ᐸꟷ(val)` for `ch <- val`
-const ChannelRightOp = "\uA7F7\u1433"         // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
-const PointerDerefOp = "~"                    // Example: `~ptr` for dereferencing a pointer
+const ValueAdapterInfix = "ᴠ"                    // ᴠ - value-form foreign adapter infix (keep in sync with Symbols.ValueAdapterInfix)
+const OverloadDiscriminator = "\uA7F7"           // Variants: ꟷ false
+const EllipsisOperator = "\uA4F8\uA4F8\uA4F8"    // Variants: ꓸꓸꓸ ᐧᐧᐧ
+const TypeAliasDot = "\uA4F8"                    // Variants: ꓸ
+const ChannelLeftOp = "\u1438\uA7F7"             // Example: `ch.ᐸꟷ(val)` for `ch <- val`
+const ChannelRightOp = "\uA7F7\u1433"            // Example: `ch.ꟷᐳ(out var val)` for `val := <-ch`
+const PointerDerefOp = "~"                       // Example: `~ptr` for dereferencing a pointer
 
 // NilSafeDerefAccessor is the golib ж<T> extension method used in place of `.Value` to re-alias a
 // deref'd pointer parameter that is walked to a nil terminator (see nilSafePtrParamNames). Unlike
@@ -374,6 +374,7 @@ type importedPackageMeta struct {
 	Dir  string // package source directory (also the in-place converted-output directory)
 	Name string // Go package name (the identifier used to qualify references in code)
 }
+
 var constImportedTypeAliases HashSet[string]
 var parsedPackageInfoFiles HashSet[string]
 var interfaceImplementations map[string]HashSet[string]
@@ -709,6 +710,7 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 		packageAddressedGlobals = make(map[types.Object]bool)
 		packageImportAliasRenames = make(map[string]string)
 		packageChildNamespaces = make(map[string]bool)
+		packageQualifiedNamespaces = make(map[string]bool)
 		packageImportLeadingSegments = make(map[string]bool)
 		packagePublicizedTypes = make(map[types.Object]bool)
 		packagePublicizedLiftedTypes = make(map[types.Type]bool)
@@ -847,30 +849,30 @@ func processConversion(inputFilePath string, isDir bool, outputFilePath string, 
 				}()
 
 				visitor := &Visitor{
-					fset:                  fset,
-					pkg:                   packageTypes,
-					info:                  info,
-					targetFile:            &strings.Builder{},
-					liftedTypeNames:       HashSet[string]{},
-					liftedTypeMap:         map[types.Type]string{},
-					subStructTypes:        map[types.Type][]types.Type{},
-					packageImports:        &strings.Builder{},
-					requiredUsings:        HashSet[string]{},
-					importQueue:           HashSet[string]{},
+					fset:                      fset,
+					pkg:                       packageTypes,
+					info:                      info,
+					targetFile:                &strings.Builder{},
+					liftedTypeNames:           HashSet[string]{},
+					liftedTypeMap:             map[types.Type]string{},
+					subStructTypes:            map[types.Type][]types.Type{},
+					packageImports:            &strings.Builder{},
+					requiredUsings:            HashSet[string]{},
+					importQueue:               HashSet[string]{},
 					referencedForeignPackages: HashSet[string]{},
 					canonicalAliasImported:    HashSet[string]{},
 					importAliasesEmitted:      HashSet[string]{},
 					importPathAliases:         map[string]string{},
-					typeAliasDeclarations: &strings.Builder{},
-					standAloneComments:    map[token.Pos]string{},
-					sortedCommentPos:      []token.Pos{},
-					processedComments:     HashSet[token.Pos]{},
-					newline:               "\r\n",
-					options:               options,
-					globalIdentNames:      globalIdentNames,
-					globalScope:           globalScope,
-					blocks:                Stack[*strings.Builder]{},
-					identEscapesHeap:      fileEntry.identEscapesHeap,
+					typeAliasDeclarations:     &strings.Builder{},
+					standAloneComments:        map[token.Pos]string{},
+					sortedCommentPos:          []token.Pos{},
+					processedComments:         HashSet[token.Pos]{},
+					newline:                   "\r\n",
+					options:                   options,
+					globalIdentNames:          globalIdentNames,
+					globalScope:               globalScope,
+					blocks:                    Stack[*strings.Builder]{},
+					identEscapesHeap:          fileEntry.identEscapesHeap,
 				}
 
 				visitor.visitFile(fileEntry.file)

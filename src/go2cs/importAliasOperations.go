@@ -26,6 +26,12 @@ var packageImportAliasRenames map[string]string
 // is not a namespace). Mirrors MSBuild's transitive ProjectReference visibility.
 var packageChildNamespaces map[string]bool
 
+// packageQualifiedNamespaces holds the rooted namespace-plus-package-class name for every package in
+// the transitive import closure (package path a/b/c contributes go.a.b.c_package). This lets
+// assembly-scope qualification distinguish a real root package from a stripped go/* package whose
+// first path segment is also named go.
+var packageQualifiedNamespaces map[string]bool
+
 // packageImportLeadingSegments holds the C# using-alias identifier bound by every DIRECT import in
 // the current package (an unaliased import's canonical name, or an explicit alias). A sub-package
 // import path (`io/fs`) emits a RELATIVE namespace target (`io.fs_package`); if the leading segment
@@ -72,6 +78,8 @@ func computeImportAliasRenames(files []FileEntry, pkg *types.Package, packageNS 
 		if isGorootPackage {
 			path = resolveGorootVendoredPath(path)
 		}
+
+		packageQualifiedNamespaces[RootNamespace+"."+convertImportPathToNamespace(path, PackageSuffix)] = true
 
 		parts := strings.Split(path, "/")
 		ns := RootNamespace

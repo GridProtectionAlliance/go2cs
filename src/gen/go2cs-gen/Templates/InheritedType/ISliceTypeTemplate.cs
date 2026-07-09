@@ -1,4 +1,4 @@
-﻿using static go2cs.Symbols;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
@@ -28,7 +28,7 @@ internal static class ISliceTypeTemplate
                 
                 public nint Length => ((IArray)m_value).Length;
                 
-                Array IArray.Source => ((IArray)m_value).Source!;
+                global::System.Array IArray.Source => ((IArray)m_value).Source!;
                 
                 object? IArray.this[nint index]
                 {

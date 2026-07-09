@@ -41,7 +41,7 @@ internal static class IArrayViewTypeTemplate
 
                 public nint Length => view.Length;
 
-                Array IArray.Source => ((IArray)view).Source!;
+                global::System.Array IArray.Source => ((IArray)view).Source!;
 
                 object? IArray.this[nint index]
                 {

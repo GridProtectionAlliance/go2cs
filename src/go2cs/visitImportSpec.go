@@ -242,6 +242,16 @@ func isStrippedGoPathPackageRef(goPrefixed string) bool {
 		return false
 	}
 
+	pkgRef := strings.Join(segs[:nsEnd+1], ".")
+
+	if packageQualifiedNamespaces[pkgRef] {
+		return false
+	}
+
+	if packageQualifiedNamespaces[RootNamespace+"."+pkgRef] {
+		return true
+	}
+
 	ns := strings.Join(segs[:nsEnd], ".")
 
 	if packageChildNamespaces[ns] {

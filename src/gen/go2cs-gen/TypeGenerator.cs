@@ -1,4 +1,4 @@
-﻿//******************************************************************************************************
+//******************************************************************************************************
 //  TypeGenerator.cs - Gbtc
 //
 //  Copyright © 2024, Grid Protection Alliance.  All Rights Reserved.
@@ -26,6 +26,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using go2cs.Templates.InheritedType;
 using go2cs.Templates.InterfaceType;
 using go2cs.Templates.StructType;
@@ -132,7 +133,7 @@ public class TypeGenerator : ISourceGenerator
                         break;
                     
                     case StructDeclarationSyntax when typeDefinition.StartsWith("[]"): // slice
-                        typeName = typeDefinition[2..].Trim();
+                        typeName = QualifySourceAliasReferences(typeDefinition[2..].Trim(), syntaxTree, semanticModel);
 
                         // m_value stays MUTABLE for a named-slice wrapper: a Go pointer-reinterpret to
                         // the underlying slice — `(*[][]byte)(buf)` with `buf *Buffers`, net
@@ -156,9 +157,9 @@ public class TypeGenerator : ISourceGenerator
                         break;
 
                     case StructDeclarationSyntax when typeDefinition.StartsWith("map["):
-                        string[] mapTypes = typeDefinition[4..^1].Split(',');
-                        string keyTypeName = mapTypes[0].Trim();
-                        string valueTypeName = mapTypes[1].Trim();
+                        (string keyTypeName, string valueTypeName) = SplitMapTypes(typeDefinition);
+                        keyTypeName = QualifySourceAliasReferences(keyTypeName, syntaxTree, semanticModel);
+                        valueTypeName = QualifySourceAliasReferences(valueTypeName, syntaxTree, semanticModel);
 
                         generatedSource = new InheritedTypeTemplate
                         {
@@ -178,7 +179,7 @@ public class TypeGenerator : ISourceGenerator
                         break;
 
                     case StructDeclarationSyntax when typeDefinition.StartsWith("chan "):
-                        typeName = typeDefinition[5..].Trim();
+                        typeName = QualifySourceAliasReferences(typeDefinition[5..].Trim(), syntaxTree, semanticModel);
 
                         generatedSource = new InheritedTypeTemplate
                         {
@@ -199,7 +200,7 @@ public class TypeGenerator : ISourceGenerator
                         int sizeStart = typeDefinition.IndexOf('[') + 1;
                         int sizeEnd = typeDefinition.IndexOf(']');
                         string arraySize = typeDefinition[sizeStart..sizeEnd].Trim();
-                        typeName = typeDefinition[(sizeEnd + 1)..].Trim();
+                        typeName = QualifySourceAliasReferences(typeDefinition[(sizeEnd + 1)..].Trim(), syntaxTree, semanticModel);
 
                         generatedSource = new InheritedTypeTemplate
                         {
@@ -381,6 +382,60 @@ public class TypeGenerator : ISourceGenerator
         }
     }
 
+    private static (string keyTypeName, string valueTypeName) SplitMapTypes(string typeDefinition)
+    {
+        string mapTypes = typeDefinition[4..^1];
+        int depth = 0;
+
+        for (int i = 0; i < mapTypes.Length; i++)
+        {
+            char ch = mapTypes[i];
+
+            switch (ch)
+            {
+                case '<':
+                case '[':
+                case '(':
+                    depth++;
+                    break;
+                case '>':
+                case ']':
+                case ')':
+                    if (depth > 0)
+                        depth--;
+                    break;
+                case ',' when depth == 0:
+                    return (mapTypes[..i].Trim(), mapTypes[(i + 1)..].Trim());
+            }
+        }
+
+        return (mapTypes.Trim(), string.Empty);
+    }
+
+    private static string QualifySourceAliasReferences(string typeName, SyntaxTree syntaxTree, SemanticModel semanticModel)
+    {
+        if (string.IsNullOrWhiteSpace(typeName))
+            return typeName;
+
+        string result = typeName;
+
+        foreach (UsingDirectiveSyntax directive in syntaxTree.GetRoot().DescendantNodes().OfType<UsingDirectiveSyntax>())
+        {
+            if (directive is not { Alias: not null, Name: not null } || !directive.GlobalKeyword.IsKind(Microsoft.CodeAnalysis.CSharp.SyntaxKind.None))
+                continue;
+
+            string alias = directive.Alias.Name.Identifier.Text;
+
+            if (result.IndexOf($"{alias}.", StringComparison.Ordinal) < 0)
+                continue;
+
+            ISymbol? symbol = semanticModel.GetSymbolInfo(directive.Name).Symbol;
+            string target = symbol?.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat) ?? directive.Name.ToString();
+            result = Regex.Replace(result, $@"(^|[<,\s\(\[]){Regex.Escape(alias)}\.", $"$1{target}.");
+        }
+
+        return GlobalQualify(result);
+    }
     // Reads a struct declaration's own [GoType("…")] definition string (first constructor argument,
     // quotes stripped) — used to inspect the UNDERLYING type of a defined-over-defined chain
     // (`type pallocBits pageBits`: pageBits' definition is "[8]uint64"). Null when the struct has no

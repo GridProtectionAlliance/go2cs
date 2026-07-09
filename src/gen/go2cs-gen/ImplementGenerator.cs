@@ -1,4 +1,4 @@
-﻿//******************************************************************************************************
+//******************************************************************************************************
 //  ImplementGenerator.cs - Gbtc
 //
 //  Copyright © 2025, Grid Protection Alliance.  All Rights Reserved.
@@ -485,7 +485,7 @@ public class ImplementGenerator : ISourceGenerator
                             .OfType<INamedTypeSymbol>()
                             .FirstOrDefault();
 
-                        receiver = $"{receiver}.of({currentTypeName}.{AddressPrefix}{embedName})";
+                        receiver = $"{receiver}.of({currentTypeName}.{AddressPrefix}{GetUnsanitizedIdentifier(embedName)})";
                         (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
                         currentTypeName = embedTypeName;
                         currentTypeSymbol = embedTypeSymbol;

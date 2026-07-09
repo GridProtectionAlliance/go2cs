@@ -1,4 +1,4 @@
-﻿using static go2cs.Symbols;
+using static go2cs.Symbols;
 
 namespace go2cs.Templates.InheritedType;
 
@@ -11,7 +11,7 @@ internal static class IArrayTypeTemplate
                 
                 public nint Length => Value.Length;
                 
-                Array IArray.Source => ((IArray)Value).Source!;
+                global::System.Array IArray.Source => ((IArray)Value).Source!;
                 
                 object? IArray.this[nint index]
                 {
