@@ -2244,7 +2244,18 @@ func paramsArePointers(paramTypes *types.Tuple) []bool {
 func (v *Visitor) convertExprToInterfaceType(interfaceExpr ast.Expr, targetExpr ast.Expr, exprResult string) string {
 	// Target selector or index expression source if this source of the interface expression
 	if selectorExpr, ok := interfaceExpr.(*ast.SelectorExpr); ok {
-		interfaceExpr = selectorExpr.Sel
+		// A selector that already types as an interface (`x.expr`, a struct field) must stay whole;
+		// redirecting to `.Sel` loses the field type and records the conversion on the wrong target.
+		exprType := v.getType(interfaceExpr, false)
+		exprIsInterface := false
+
+		if exprType != nil {
+			exprIsInterface, _ = isInterface(exprType)
+		}
+
+		if !exprIsInterface {
+			interfaceExpr = selectorExpr.Sel
+		}
 	} else if indexExpr, ok := interfaceExpr.(*ast.IndexExpr); ok {
 		// A container-element index (`mr.readers[0]`, `m[k]`) already types as its ELEMENT — the
 		// interface itself — so keep the whole expression. Redirect to X only when the indexed

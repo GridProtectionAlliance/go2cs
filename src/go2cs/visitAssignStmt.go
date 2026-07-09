@@ -35,13 +35,9 @@ func (v *Visitor) rhsPointerCopyContext(rhs ast.Expr) ExprContext {
 }
 
 // appendRhsPtrContext returns base with a pointer-copy IdentContext appended when rhs is a
-// plain pointer identifier and the target is not an interface. A fresh slice is returned so
-// the caller's backing array (often shared between LHS and RHS conversion) is not mutated.
-func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr, lhsIsInterface bool) []ExprContext {
-	if lhsIsInterface {
-		return base
-	}
-
+// plain pointer identifier. A fresh slice is returned so the caller's backing array (often
+// shared between LHS and RHS conversion) is not mutated.
+func (v *Visitor) appendRhsPtrContext(base []ExprContext, rhs ast.Expr) []ExprContext {
 	ptrContext := v.rhsPointerCopyContext(rhs)
 
 	if ptrContext == nil {
@@ -479,6 +475,18 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				lhsTypeIsInterface[i] = isIfaceElem && !isEmptyElem
 			}
 		}
+
+		// A SELECTOR-expression LHS (`x.expr = impl`) also assigns to storage whose type belongs
+		// to the WHOLE selector expression. Checking only the selected identifier (`expr`) misses
+		// struct fields such as go/types operand.expr (an ast.Expr interface), so the concrete RHS
+		// skips the interface adapter and pointer-shaped implementations feed the adapter a value
+		// alias instead of the pointer box.
+		if _, ok := lhs.(*ast.SelectorExpr); ok {
+			if lhsType := v.getType(lhs, false); lhsType != nil {
+				isIfaceField, isEmptyField := isInterface(lhsType)
+				lhsTypeIsInterface[i] = isIfaceField && !isEmptyField
+			}
+		}
 	}
 
 	// Lift an anonymous-struct composite-literal RHS up front (named after the LHS var) when the
@@ -889,13 +897,9 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 			// copy of the pointed-to value. For a deref'd pointer parameter this yields the
 			// box `Ꮡp` (without this it emits the value alias `p`, and the target — which the
 			// rest of the converter treats as a pointer via `.Value`/`~` — fails to compile).
-			// A pointer *local* already holds the pointer directly, so convIdent returns it
-			// unchanged. Skip interface targets (handled by the interface-cast path).
-			if i < lhsLen && !lhsTypeIsInterface[i] {
-				if ptrCtx := v.rhsPointerCopyContext(rhs); ptrCtx != nil {
-					contexts = append(contexts, ptrCtx)
-				}
-			}
+			// Interface targets need the same pointer form so the adapter wraps the pointer box,
+			// not the dereferenced value alias.
+			contexts = v.appendRhsPtrContext(contexts, rhs)
 
 			// A u8 string literal is a ReadOnlySpan<byte> (ref struct) and cannot be
 			// a ValueTuple element, so suppress the u8 form for string literals in a
@@ -1245,7 +1249,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 				result.WriteString(v.convExpr(lhs, contexts))
 				result.WriteString(operator)
 
-				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
+				rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
 
 				// A C# compound shift-assign requires an `int` shift count; the RHS's own (possibly
 				// unsigned/native-width) type — `s.allocCache >>= (nuint)x` — is rejected (CS0019). A
@@ -1297,7 +1301,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
+					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
 
 					if lhsTypeIsInterface[i] {
 						result.WriteString(v.convertExprToInterfaceType(lhs, rhs, rhsExpr))
@@ -1375,7 +1379,7 @@ func (v *Visitor) visitAssignStmt(assignStmt *ast.AssignStmt, format FormattingC
 					result.WriteString(v.convExpr(lhs, contexts))
 					result.WriteString(operator)
 
-					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs, lhsTypeIsInterface[i]))
+					rhsExpr := v.convExpr(rhs, v.appendRhsPtrContext(contexts, rhs))
 
 					_, rhsIsTypeAssert := rhs.(*ast.TypeAssertExpr)
 

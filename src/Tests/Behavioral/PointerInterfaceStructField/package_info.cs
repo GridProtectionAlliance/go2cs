@@ -42,6 +42,7 @@ using static go.main_package;
 // </InterfaceImplementations>
 
 // <ImplicitConversions>
+[assembly: GoImplicitConv<Setting, ж<Setting>>(Indirect = true)]
 // </ImplicitConversions>
 
 namespace go;

@@ -27,6 +27,13 @@ type holder struct {
 	label string
 }
 
+// assignDescriber exercises selector-field assignment (`h.d = s`) where the field is an
+// interface and the RHS is a pointer parameter. The adapter must wrap the pointer box, not
+// the dereferenced value alias.
+func assignDescriber(h *holder, s *Setting) {
+	h.d = s
+}
+
 // A package-global Setting, addressed with & below — mirroring slog's `&logLoggerLevel`.
 var globalSetting = Setting{name: "verbosity", value: 3}
 
@@ -40,4 +47,9 @@ func main() {
 	local := Setting{name: "count", value: 7}
 	h2 := holder{d: &local, label: "keyed"}
 	fmt.Println(h2.label, h2.d.Describe())
+
+	replacement := Setting{name: "assigned", value: 11}
+	assignDescriber(h, &replacement)
+	replacement.value = 12
+	fmt.Println(h.label, h.d.Describe())
 }
