@@ -56,6 +56,21 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 				}
 			}
 
+			// An INTERFACE-typed key with a POINTER operand must render the operand in its BOX
+			// form — the Pointer=true interface adapter wraps the box, and a deref-aliased pointer
+			// parameter otherwise renders as the pointed-to VALUE alias, which the adapter ctor
+			// cannot take (`info.Implicits[new ast_ImportSpecжNode(imp)]` needed `Ꮡimp` — go/types
+			// api.go PkgNameOf, CS1503). The isPointer ident context mirrors convExprList's
+			// interface-argument handling: a parameter renders its box (`Ꮡimp`), while a local/
+			// field already holding the pointer renders unchanged (it IS the box).
+			mapKeyOperandIsPointer := false
+
+			if mapKeyInterfaceType != nil {
+				if _, isPtr := v.getType(indexExpr.Index, false).(*types.Pointer); isPtr {
+					mapKeyOperandIsPointer = true
+				}
+			}
+
 			// Comma-ok map access (`v, ok := m[k]`): use golib's two-value indexer
 			// `m[key, ꟷ]`, which returns `(value, present)`.
 			if context.isTupleResult {
@@ -65,7 +80,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 					basicLitContext := DefaultBasicLitContext()
 					basicLitContext.u8StringOK = false
 					keyContexts = append(keyContexts, basicLitContext)
-				} else if mapKeyIsPointer {
+				} else if mapKeyIsPointer || mapKeyOperandIsPointer {
 					identContext := DefaultIdentContext()
 					identContext.isPointer = true
 					keyContexts = append(keyContexts, identContext)
@@ -85,7 +100,7 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 				context := DefaultBasicLitContext()
 				context.u8StringOK = false
 				contexts = []ExprContext{context}
-			} else if mapKeyIsPointer {
+			} else if mapKeyIsPointer || mapKeyOperandIsPointer {
 				identContext := DefaultIdentContext()
 				identContext.isPointer = true
 				contexts = []ExprContext{identContext}
