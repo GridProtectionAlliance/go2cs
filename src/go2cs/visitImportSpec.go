@@ -184,16 +184,25 @@ func (v *Visitor) visitImportSpec(importSpec *ast.ImportSpec, doc *ast.CommentGr
 }
 
 // rootQualified prefixes ns with the root namespace, using `global::go.` instead of a bare `go.`
-// when the CURRENT package's own namespace shadows the root — a `go/*` stdlib package (go/token,
-// go/ast, go/doc, go/build, …) lands in `namespace go.go.<pkg>`, so a bare `go.X` reference binds the
-// leading `go` to the enclosing `go.go` namespace and resolves e.g. `go.sync` to the nonexistent
-// `go.go.sync` (CS0234). `global::` forces resolution from the global namespace. Every other package
-// (whose namespace's second segment is not `go`) keeps the bare `go.` prefix — `global::` there would
-// be needless golden churn.
+// whenever a `go.go` namespace shadows the root. That happens two ways: the CURRENT package is
+// itself a `go/*` stdlib package (go/token, go/ast, go/doc, go/build, … land in
+// `namespace go.go.<pkg>`), or ANY `go/*` package appears in the transitive import CLOSURE — its
+// referenced assembly makes `go.go` a member of namespace `go`, and C#'s inner-to-outer lookup
+// binds the bare leading `go` of a using target to that member from every namespace nested under
+// the root, resolving e.g. `go.math` to the nonexistent `go.go.math` (internal/fuzz importing
+// go/ast: `using bits = go.math.bits_package;` inside `namespace go.@internal`, CS0234).
+// `global::` forces resolution from the global namespace. A package with no `go/*` anywhere in
+// its closure keeps the bare `go.` prefix — `global::` there would be needless golden churn.
 func rootQualified(ns string) string {
 	segs := strings.Split(packageNamespace, ".")
 
 	if len(segs) >= 2 && segs[0] == RootNamespace && segs[1] == RootNamespace {
+		return "global::" + RootNamespace + "." + ns
+	}
+
+	// packageChildNamespaces mirrors the transitive import closure's namespace chains (populated
+	// by computeImportAliasRenames' pre-pass); a go/* import path contributes the `go.go` key.
+	if packageChildNamespaces[RootNamespace+"."+RootNamespace] {
 		return "global::" + RootNamespace + "." + ns
 	}
 

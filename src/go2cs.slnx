@@ -168,6 +168,7 @@
     <Project Path="Tests/Behavioral/GlobalStructFieldPointers/GlobalStructFieldPointers.csproj" />
     <Project Path="Tests/Behavioral/GlobalTupleVarDecl/GlobalTupleVarDecl.csproj" />
     <Project Path="Tests/Behavioral/GoCallVariations/GoCallVariations.csproj" />
+    <Project Path="Tests/Behavioral/GoNamespaceShadow/GoNamespaceShadow.csproj" />
     <Project Path="Tests/Behavioral/GoStmtValueReturn/GoStmtValueReturn.csproj" />
     <Project Path="Tests/Behavioral/HeapKeywordVar/HeapKeywordVar.csproj" />
     <Project Path="Tests/Behavioral/HexByteStringLiteral/HexByteStringLiteral.csproj" />

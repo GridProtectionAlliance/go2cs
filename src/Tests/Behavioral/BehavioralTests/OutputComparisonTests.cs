@@ -346,6 +346,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckGlobalTupleVarDecl() => CheckTarget("GlobalTupleVarDecl");
 
     [TestMethod]
+    public void CheckGoNamespaceShadow() => CheckTarget("GoNamespaceShadow");
+
+    [TestMethod]
     public void CheckGoStmtValueReturn() => CheckTarget("GoStmtValueReturn");
 
     [TestMethod]
