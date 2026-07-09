@@ -75,6 +75,9 @@
     <Project Path="Tests/Behavioral/ArrayWideIndexAddress/ArrayWideIndexAddress.csproj" />
     <Project Path="Tests/Behavioral/AtomicFieldThroughPointer/AtomicFieldThroughPointer.csproj" />
     <Project Path="Tests/Behavioral/AtomicValues/AtomicValues.csproj" />
+    <Project Path="Tests/Behavioral/CaptureModeValueParam/CaptureModeValueParam.csproj" />
+    <Project Path="Tests/Behavioral/CaptureModeValueParamLib/CaptureModeValueParamLib.csproj" />
+    <Project Path="Tests/Behavioral/CaptureModeValueParamUser/CaptureModeValueParamUser.csproj" />
     <Project Path="Tests/Behavioral/CastNegativeNamedType/CastNegativeNamedType.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromClosed/ChannelReceiveFromClosed.csproj" />
     <Project Path="Tests/Behavioral/ChannelReceiveFromNil/ChannelReceiveFromNil.csproj" />

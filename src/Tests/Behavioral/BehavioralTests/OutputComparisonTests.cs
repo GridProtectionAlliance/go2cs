@@ -103,6 +103,12 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
+    public void CheckCaptureModeValueParam() => CheckTarget("CaptureModeValueParam");
+
+    [TestMethod]
+    public void CheckCaptureModeValueParamUser() => CheckTarget("CaptureModeValueParamUser");
+
+    [TestMethod]
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]

@@ -102,6 +102,15 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckBuiltinShadowLocal() => CheckTarget("BuiltinShadowLocal");
 
     [TestMethod]
+    public void CheckCaptureModeValueParam() => CheckTarget("CaptureModeValueParam");
+
+    [TestMethod]
+    public void CheckCaptureModeValueParamLib() => CheckTarget("CaptureModeValueParamLib");
+
+    [TestMethod]
+    public void CheckCaptureModeValueParamUser() => CheckTarget("CaptureModeValueParamUser");
+
+    [TestMethod]
     public void CheckCastNegativeNamedType() => CheckTarget("CastNegativeNamedType");
 
     [TestMethod]

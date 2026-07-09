@@ -46,6 +46,8 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 						return true
 					}
 
+					visitor.markCaptureModeBoxedParams(node)
+
 					ast.Inspect(node.Body, func(n ast.Node) bool {
 						switch n := n.(type) {
 						case *ast.AssignStmt:
@@ -119,6 +121,64 @@ func performEscapeAnalysis(files []FileEntry, fset *token.FileSet, pkg *types.Pa
 	}
 
 	concurrentTasks.Wait()
+}
+
+// markCaptureModeBoxedParams marks the function's VALUE parameters on which the body calls a
+// capture-mode (direct-ж) method — go/format's `format(…, cfg printer.Config)` calling
+// `cfg.Fprint(…)`, where (*Config).Fprint is emitted with only the `this ж<Config>` receiver
+// (CS1929 on the raw value). Parameters are deliberately NOT fed through the full escape
+// analysis (their address-of forms use the Ꮡ(value) copy-box; see convUnaryExpr), so this is
+// the ONLY writer of a parameter into identEscapesHeap — visitFuncDecl reads such an entry as
+// the entry-time-box trigger (see paramNeedsHeapBox): the incoming value arrives under the
+// `ʗp` name and the parameter preamble declares `ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);`,
+// so body uses hit the boxed alias and convSelectorExpr routes the call through `Ꮡcfg`.
+// Entry-time boxing (never a call-site copy-box, which compiles but silently drops the
+// callee's writes through the receiver pointer) preserves Go's by-value parameter +
+// auto-address semantics exactly.
+func (v *Visitor) markCaptureModeBoxedParams(funcDecl *ast.FuncDecl) {
+	if funcDecl.Type.Params == nil {
+		return
+	}
+
+	for _, field := range funcDecl.Type.Params.List {
+		// A variadic parameter already re-declares its Go name in the prologue
+		// (`var xs = xsʗp.slice();`), and its unnamed []T type carries no methods.
+		if _, isVariadic := field.Type.(*ast.Ellipsis); isVariadic {
+			continue
+		}
+
+		for _, ident := range field.Names {
+			if isDiscardedVar(ident.Name) {
+				continue
+			}
+
+			obj := v.info.ObjectOf(ident)
+
+			if obj == nil {
+				continue
+			}
+
+			// A pointer parameter already carries its box (`Ꮡp` IS the emitted parameter).
+			if _, isPointer := obj.Type().(*types.Pointer); isPointer {
+				continue
+			}
+
+			if _, found := v.identEscapesHeap[obj]; found {
+				continue
+			}
+
+			if v.bodyCallsCaptureModeMethodOn(ident, funcDecl.Body) {
+				v.identEscapesHeap[obj] = true
+
+				// An inherently-heap value (named slice/map/chan) is already a reference, so
+				// identHasHeapBox boxes it only for a recorded capture-mode reason — same rule
+				// as the local-var arm in performEscapeAnalysis.
+				if packageCaptureModeBoxIdents != nil && isInherentlyHeapAllocatedType(obj.Type()) {
+					packageCaptureModeBoxIdents[obj] = true
+				}
+			}
+		}
+	}
 }
 
 // Perform escape analysis on the given identifier within the specified block

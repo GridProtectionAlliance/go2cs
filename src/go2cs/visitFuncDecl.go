@@ -328,6 +328,7 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 		resultParameters := &strings.Builder{}
 		arrayClones := &strings.Builder{}
 		implicitPointers := &strings.Builder{}
+		paramHeapBoxes := &strings.Builder{}
 
 		// In namedReturnDeferMode the named-return declarations are emitted OUTSIDE the func()
 		// wrapper (so defers/recover mutate them by closure); collect them separately. Otherwise
@@ -399,7 +400,11 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 
 			if _, ok := param.Type().(*types.Array); ok {
-				v.writeString(arrayClones, "%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), getSanitizedIdentifier(analyzedName))
+				// A heap-boxed array param folds its by-value clone into the box init below
+				// (the plain reassignment would reference the pre-rename name — CS0103).
+				if !v.paramNeedsHeapBox(param) {
+					v.writeString(arrayClones, "%s%s%s = %s.Clone();", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), getSanitizedIdentifier(analyzedName))
+				}
 			}
 
 			// All pointers in Go can be implicitly dereferenced, so setup a "local ref" instance to each
@@ -431,6 +436,29 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 					v.writeString(implicitPointers, "%s%sref var %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), AddressPrefix, param.Name(), derefAccessor)
 				} else {
 					v.writeString(implicitPointers, "%s%sref %s %s = ref %s%s.%s;", v.newline, v.indent(v.indentLevel+1), convertToCSTypeName(pointerType.Elem().String()), getSanitizedIdentifier(analyzedName), AddressPrefix, param.Name(), derefAccessor)
+				}
+			}
+
+			// A value parameter marked for an entry-time heap box (a capture-mode/direct-ж
+			// method is called on it — see paramNeedsHeapBox): the incoming value arrives as
+			// `<name>ʗp` (renamed in the signature) and is boxed here, so body uses read and
+			// write the boxed storage — the same storage the callee mutates through the
+			// receiver pointer — and convSelectorExpr routes the call through `Ꮡ<name>`. The
+			// box keeps the ANALYZED (rendered) name, matching an escaping value local's
+			// convention (see convertToHeapTypeDecl / boxBaseName). An ARRAY param folds its
+			// Go by-value clone into the box init (its plain clone line above is skipped).
+			if v.paramNeedsHeapBox(param) {
+				incomingName := getHeapBoxParamName(param)
+
+				if _, ok := param.Type().(*types.Array); ok {
+					incomingName += ".Clone()"
+				}
+
+				if v.options.preferVarDecl {
+					v.writeString(paramHeapBoxes, "%s%sref var %s = ref heap(%s, out var %s%s);", v.newline, v.indent(v.indentLevel+1), getSanitizedIdentifier(analyzedName), incomingName, AddressPrefix, analyzedName)
+				} else {
+					csTypeName := v.getCSTypeName(param.Type())
+					v.writeString(paramHeapBoxes, "%s%sref %s %s = ref heap(%s, out %s<%s> %s%s);", v.newline, v.indent(v.indentLevel+1), csTypeName, getSanitizedIdentifier(analyzedName), incomingName, PointerPrefix, csTypeName, AddressPrefix, analyzedName)
 				}
 			}
 
@@ -478,7 +506,19 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 			}
 
 			blockPrefix += implicitPointers.String()
+		}
 
+		// Entry-time heap boxes for capture-mode value params follow the pointer derefs; the
+		// signature rebuild below renames each boxed param to its incoming `ʗp` form.
+		if paramHeapBoxes.Len() > 0 {
+			if blockPrefix == "" {
+				paramHeapBoxes.WriteString(v.newline)
+			}
+
+			blockPrefix += paramHeapBoxes.String()
+		}
+
+		if implicitPointers.Len() > 0 || paramHeapBoxes.Len() > 0 {
 			updatedSignature := strings.Builder{}
 			dupBlankParams := hasDuplicateBlankParams(parameters) || bodyUsesBlankDiscard(funcDecl)
 
@@ -589,6 +629,10 @@ func (v *Visitor) visitFuncDecl(funcDecl *ast.FuncDecl) {
 						} else {
 							updatedSignature.WriteString("_")
 						}
+					} else if v.paramNeedsHeapBox(param) {
+						// A heap-boxed value parameter arrives under the `ʗp` name; the parameter
+						// preamble re-declares the analyzed name as the boxed ref alias.
+						updatedSignature.WriteString(getHeapBoxParamName(param))
 					} else {
 						// A shadow-renamed value parameter must emit its renamed name so the declaration
 						// matches its usages (see generateParametersSignature) — this rebuilt-signature
@@ -1080,7 +1124,15 @@ func (v *Visitor) generateParametersSignature(signature *types.Signature, addRec
 				paramName = adjusted
 			}
 
-			result.WriteString(getSanitizedIdentifier(paramName))
+			// A heap-boxed value parameter arrives under the `ʗp` name; the parameter preamble
+			// re-declares the analyzed name as the boxed ref alias (see paramNeedsHeapBox). This
+			// path serves a function with NO pointer params (otherwise the rebuilt-signature
+			// path above applies the same rename).
+			if v.paramNeedsHeapBox(param) {
+				result.WriteString(getHeapBoxParamName(param))
+			} else {
+				result.WriteString(getSanitizedIdentifier(paramName))
+			}
 		}
 	}
 
@@ -1137,6 +1189,57 @@ func (v *Visitor) generateResultSignature(signature *types.Signature) string {
 
 func getVariadicParamName(param *types.Var) string {
 	return fmt.Sprintf("%s%sp", getSanitizedIdentifier(param.Name()), CapturedVarMarker)
+}
+
+// getHeapBoxParamName returns the incoming-parameter name for a heap-boxed value parameter
+// (see paramNeedsHeapBox) — the same `ʗp` rename convention as a variadic parameter: both
+// re-declare the Go parameter name in the function prologue. A parameter is never both
+// (a variadic parameter's unnamed []T type carries no capture-mode methods).
+func getHeapBoxParamName(param *types.Var) string {
+	return getVariadicParamName(param)
+}
+
+// paramNeedsHeapBox reports whether the value parameter needs an entry-time heap box: the
+// body calls a capture-mode (direct-ж) method on it, whose only emitted receiver form is the
+// box `ж<T>` — go/format's `cfg printer.Config` + `cfg.Fprint(…)`, CS1929 ×2 without it.
+// The signature takes the incoming value under the `ʗp` name and the parameter preamble
+// declares `ref var cfg = ref heap(cfgʗp, out var Ꮡcfg);` — ENTRY-TIME boxing, never a
+// call-site Ꮡ(value) copy-box: the copy form compiles but silently drops the callee's writes
+// through the receiver pointer for the rest of the body (Go auto-addresses the same storage).
+// The identHasHeapBox gate keeps the box decision in lockstep with the isHeapBoxedExpr
+// routing in convSelectorExpr, but is NOT sufficient by itself: a parameter can land in
+// identEscapesHeap outside markCaptureModeBoxedParams — a mixed `data, pc, line := …` define
+// re-uses the param object, so the define walker escape-analyzes it (debug/gosym's slice,
+// whose `pc` is stored into a composite literal). Those params keep their historical unboxed
+// emission; only the capture-mode trigger boxes, re-verified here against the declaring ident.
+func (v *Visitor) paramNeedsHeapBox(param *types.Var) bool {
+	if param == nil || param.Name() == "" || param.Name() == "_" {
+		return false
+	}
+
+	if _, isPointer := param.Type().(*types.Pointer); isPointer {
+		return false
+	}
+
+	if !v.identHasHeapBox(param, param.Type()) {
+		return false
+	}
+
+	funcDecl := v.currentFuncDecl
+
+	if funcDecl == nil || funcDecl.Body == nil || funcDecl.Type.Params == nil {
+		return false
+	}
+
+	for _, field := range funcDecl.Type.Params.List {
+		for _, ident := range field.Names {
+			if v.info.ObjectOf(ident) == param {
+				return v.bodyCallsCaptureModeMethodOn(ident, funcDecl.Body)
+			}
+		}
+	}
+
+	return false
 }
 
 func (v *Visitor) getTempVarName(varPrefix string) string {
