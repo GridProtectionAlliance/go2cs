@@ -15,10 +15,10 @@ internal static void Main() {
             fmt.Println("I'm a bool");
             break;
         }
-        case nint:
-        case int32:
-        case int64:
-        case uint64: {
+        case nint _:
+        case int32 _:
+        case int64 _:
+        case uint64 _: {
             var t = i;
             fmt.Printf("I'm an int, specifically type %T\n"u8, t);
             break;

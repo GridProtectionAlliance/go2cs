@@ -33,8 +33,8 @@ internal static @string name(this dot d) {
 
 internal static @string describe(shape v) {
     switch (v.type()) {
-    case circle:
-    case square: {
+    case circle _:
+    case square _: {
         var t = v;
         return "both:"u8 + t.name();
     }
@@ -49,14 +49,14 @@ internal static @string describe(shape v) {
 
 internal static @string classify(any x) {
     switch (x.type()) {
-    case nint:
-    case int32:
-    case int64: {
+    case nint _:
+    case int32 _:
+    case int64 _: {
         var v = x;
         return fmt.Sprintf("integer %v"u8, v);
     }
-    case @string:
-    case bool: {
+    case @string _:
+    case bool _: {
         var v = x;
         return fmt.Sprintf("text-or-flag %v"u8, v);
     }}
@@ -65,8 +65,8 @@ internal static @string classify(any x) {
 
 internal static @string ptrKind(any x) {
     switch (x.type()) {
-    case ж<circle>:
-    case ж<square>: {
+    case ж<circle> _:
+    case ж<square> _: {
         var t = x;
         _ = t;
         return "shape-ptr"u8;
@@ -80,7 +80,7 @@ internal static @string ptrKind(any x) {
 internal static @string kind(shape v) {
     switch (v.type()) {
     case null:
-    case dot: {
+    case dot _: {
         var t = v;
         _ = t;
         return "nil-or-dot"u8;
@@ -96,9 +96,9 @@ internal static @string kind(shape v) {
 
 internal static @string tag(any x) {
     switch (x.type()) {
-    case nint:
-    case int32:
-    case @string: {
+    case nint _:
+    case int32 _:
+    case @string _: {
         return "common"u8;
     }
     case float64: {

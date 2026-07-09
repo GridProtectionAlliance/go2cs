@@ -1727,14 +1727,14 @@ variable at the listed CONCRETE type only when the clause lists exactly **one** 
 clause into one concrete-bound C# case per listed type (duplicating the body), so every body use in an
 interface-typed context broke — as an argument (`isGeneric(t)` with `t` a `ж<Alias>`, CS1503), an
 interface assignment (CS0266), and an extension-method receiver (CS1929 — 18 errors in go/types alone).
-A multi-type clause now emits **stacked, unbound labels over one shared body** and re-binds the variable
-to the guard expression — the same re-bind the `default` arm uses — so the body compiles at the interface
-type exactly as in Go:
+A multi-type clause now emits **stacked labels binding only a discard, over one shared body** and
+re-binds the variable to the guard expression — the same re-bind the `default` arm uses — so the body
+compiles at the interface type exactly as in Go:
 
 ```csharp
 switch (x.typ.type()) {
-case ж<Alias>:
-case ж<Named>: {
+case ж<Alias> _:
+case ж<Named> _: {
     var t = x.typ;          // t: Type (the tag's interface type), as in Go
     if (isGeneric(t)) { … }
     break;
@@ -1742,13 +1742,17 @@ case ж<Named>: {
 case ж<ΔSignature> t: {     // single-type case keeps the concrete binding
 ```
 
-`case nil` stacks as `case null:`, a dynamic-interface label stacks in its non-binding
-`{} ᴛn when ᴛn._<Iface>(out var _)` form, and the synthetic `int32`/`uint32` companions of `case int:`/
-`case uint:` stack unbound too. The duplicate-mapped-case merge applies per label (a merged label leaves
-its marker comment above the stack). An UNBOUND multi-type clause (`switch x.(type)`) stacks the same way
-with no re-bind — the body is no longer duplicated per label. The re-bind re-evaluates the guard
-EXPRESSION at body entry (nothing can mutate it between dispatch and entry), sharing the default arm's
-banked call-operand caveat below. (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
+The `_` designation is load-bearing, not stylistic: it forces the label into PATTERN context. A bare
+`case int8:` label resolves the identifier as an EXPRESSION first, where `using static go.builtin` finds
+the same-named conversion FUNCTION (`int8(…)`) — a method group, neither constant nor type — failing
+CS8917 (encoding/binary's `Size`/`intDataSize` stacks; caught by the census build, not the behavioral
+corpus, whose labels happened not to collide). `case nil` stacks as `case null:`, a dynamic-interface
+label stacks in its non-binding `{} ᴛn when ᴛn._<Iface>(out var _)` form, and the synthetic
+`int32`/`uint32` companions of `case int:`/`case uint:` stack with the same discard. The
+duplicate-mapped-case merge applies per label (a merged label leaves its marker comment above the stack).
+An UNBOUND multi-type clause (`switch x.(type)`) stacks the same way with no re-bind — the body is no
+longer duplicated per label. The re-bind re-evaluates the guard EXPRESSION at body entry (nothing can
+mutate it between dispatch and entry), sharing the default arm's banked call-operand caveat below. (Guarded by the `TypeSwitchMultiCase` behavioral test — bound multi-type
 cases over values and pointers with interface-dispatched body uses, `nil` stacked with a concrete type, an
 unbound multi-type clause, and the synthetic-int stacking, output-compared vs Go; also rewrote
 `TypeSwitch`'s `case int, int64, uint64:` golden with output proven unchanged.)

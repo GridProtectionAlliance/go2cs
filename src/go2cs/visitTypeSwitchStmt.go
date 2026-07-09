@@ -160,16 +160,21 @@ func (v *Visitor) visitTypeSwitchStmtCore(typeSwitchStmt *ast.TypeSwitchStmt) {
 
 			// A MULTI-TYPE case clause (`case *Alias, *Named:`) binds its case variable at the
 			// TAG's static (interface) type — Go binds the listed concrete type only when the
-			// clause lists exactly ONE type. Emit stacked UNBOUND labels over a single shared
-			// body and re-bind the variable to the guard expression (like the default arm), so
-			// every body use compiles at the interface type (`isGeneric(t)` with `t` a Type, not
-			// a ж<Alias> — go/types nonGeneric, CS1503/CS0266/CS1929 ×18). A single-type clause
-			// keeps the concrete declaration-pattern binding.
+			// clause lists exactly ONE type. Emit stacked labels binding only a DISCARD over a
+			// single shared body and re-bind the variable to the guard expression (like the
+			// default arm), so every body use compiles at the interface type (`isGeneric(t)`
+			// with `t` a Type, not a ж<Alias> — go/types nonGeneric, CS1503/CS0266/CS1929 ×18).
+			// The `_` designation is load-bearing, not stylistic: it forces the label into
+			// PATTERN context. A bare `case int8:` label resolves the identifier as an
+			// EXPRESSION first, where `using static go.builtin` finds the same-named conversion
+			// FUNCTION (`int8(…)`) — a method group, not a constant or type — failing CS8917
+			// (encoding/binary's Size/intDataSize stacks). A single-type clause keeps the
+			// concrete declaration-pattern binding.
 			multiTypeCase := len(caseClause.List) > 1
 			bindIdent := targetIdent
 
 			if multiTypeCase {
-				bindIdent = ""
+				bindIdent = "_"
 			}
 
 			for i, expr := range caseClause.List {
