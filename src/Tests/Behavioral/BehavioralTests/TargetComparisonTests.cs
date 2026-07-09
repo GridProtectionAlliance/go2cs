@@ -789,6 +789,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckShadowedHeapBoxReceiver() => CheckTarget("ShadowedHeapBoxReceiver");
 
     [TestMethod]
+    public void CheckShadowedInterfaceEmbed() => CheckTarget("ShadowedInterfaceEmbed");
+
+    [TestMethod]
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]

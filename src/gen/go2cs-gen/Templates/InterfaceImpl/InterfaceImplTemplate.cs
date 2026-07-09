@@ -61,8 +61,12 @@ internal class InterfaceImplTemplate : TemplateBase
 
                 if (Promoted && !methodOverriden)
                 {
+                    // The forwarding receiver is the embedded interface FIELD, which carries the
+                    // Go embed name — the Δ-stripped simple name when the interface TYPE was
+                    // collision-renamed (bare `ΔHandler.Enabled(…)` binds nothing, CS0103 —
+                    // slogtest's `wrapper` embeds slog.ΔHandler as field `Handler`).
                     result.Append($"// '{simpleInterfaceName}.{simpleMethodName}()' implicit implementation mapped to promoted interface receiver method:\r\n        ");
-                    result.Append($"public {method.ReturnType} {method.GetSignature()} => {GetSimpleName(InterfaceName)}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
+                    result.Append($"public {method.ReturnType} {method.GetSignature()} => {GetSimpleName(InterfaceName, dropCollisionPrefix: true)}.{simpleMethodName}{method.GetGenericSignature()}({method.CallParameters});");
                 }
                 else
                 {

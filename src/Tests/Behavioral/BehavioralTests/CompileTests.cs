@@ -786,6 +786,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckShadowedHeapBoxReceiver() => CheckTarget("ShadowedHeapBoxReceiver");
 
     [TestMethod]
+    public void CheckShadowedInterfaceEmbed() => CheckTarget("ShadowedInterfaceEmbed");
+
+    [TestMethod]
     public void CheckShadowedPointerParam() => CheckTarget("ShadowedPointerParam");
 
     [TestMethod]

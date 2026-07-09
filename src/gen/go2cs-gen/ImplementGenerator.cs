@@ -463,11 +463,15 @@ public class ImplementGenerator : ISourceGenerator
                 // interface value (Go promotes its method set), Close on the struct. Forward
                 // still-unbound members that the field's interface declares through the field:
                 // `m_box.Value.Writer.Write(…)`. Semantic detection (field name equals its
-                // interface type's simple name) — the converter emits embeds as real fields,
-                // so the symbol sees them. Gated to a SINGLE embedded interface field.
+                // interface type's simple name — the converter names the field after the Go
+                // embed, so a Δ-renamed interface TYPE keeps a markerless FIELD: slogtest's
+                // `wrapper` embeds slog.ΔHandler as `Handler`) — the converter emits embeds
+                // as real fields, so the symbol sees them. Gated to a SINGLE embedded
+                // interface field.
                 IFieldSymbol[] embeddedIfaceFields = structType.GetMembers()
                     .OfType<IFieldSymbol>()
-                    .Where(field => !field.IsStatic && field.Type.TypeKind == TypeKind.Interface && field.Name == field.Type.Name)
+                    .Where(field => !field.IsStatic && field.Type.TypeKind == TypeKind.Interface &&
+                                    (field.Name == field.Type.Name || ShadowVarMarker + field.Name == field.Type.Name))
                     .ToArray();
 
                 if (embeddedIfaceFields.Length == 1 && embeddedIfaceFields[0].Type is INamedTypeSymbol ifaceFieldType)
@@ -572,10 +576,12 @@ public class ImplementGenerator : ISourceGenerator
                 // PROMOTED members (an embedded INTERFACE field — sort's `type reverse struct
                 // { Interface }`) forward through the interface field itself, mirroring the
                 // value-form template's promoted arm (`m_box.Len()` has nothing to bind — CS1929).
-                // The Promoted flag may live on the pair's SIBLING attribute instance.
+                // The Promoted flag may live on the pair's SIBLING attribute instance. The FIELD
+                // carries the Go embed name — the Δ-stripped simple name when the interface TYPE
+                // was collision-renamed (`m_box.Value.ΔHandler` binds nothing, CS1061 — slogtest).
                 if (promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"))
                 {
-                    string interfaceFieldName = GetSimpleName(interfaceName);
+                    string interfaceFieldName = GetSimpleName(interfaceName, dropCollisionPrefix: true);
 
                     foreach (MethodInfo method in methods)
                     {
