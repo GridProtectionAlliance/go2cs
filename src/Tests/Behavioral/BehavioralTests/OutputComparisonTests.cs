@@ -91,6 +91,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBclTypeNameShadow() => CheckTarget("BclTypeNameShadow");
+
+    [TestMethod]
     public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
 
     [TestMethod]
@@ -520,6 +523,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
+
+    [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
 
     [TestMethod]
@@ -575,6 +581,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceCaptureMethod() => CheckTarget("NamedSliceCaptureMethod");
+
+    [TestMethod]
+    public void CheckNamedSliceChildPkg() => CheckTarget("NamedSliceChildPkg");
 
     [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");

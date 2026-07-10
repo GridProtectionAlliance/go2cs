@@ -90,6 +90,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckAtomicValues() => CheckTarget("AtomicValues");
 
     [TestMethod]
+    public void CheckBclTypeNameShadow() => CheckTarget("BclTypeNameShadow");
+
+    [TestMethod]
     public void CheckBigUntypedConstComparison() => CheckTarget("BigUntypedConstComparison");
 
     [TestMethod]
@@ -487,6 +490,7 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+    public void CheckIoLike() => CheckTarget("IoLike");
 
     [TestMethod]
     public void CheckIotaEnum() => CheckTarget("IotaEnum");
@@ -573,6 +577,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
+    public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
+
+    [TestMethod]
     public void CheckNamedFuncResultPointerArg() => CheckTarget("NamedFuncResultPointerArg");
 
     [TestMethod]
@@ -628,6 +635,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckNamedSliceCaptureMethod() => CheckTarget("NamedSliceCaptureMethod");
+
+    [TestMethod]
+    public void CheckNamedSliceChildPkg() => CheckTarget("NamedSliceChildPkg");
 
     [TestMethod]
     public void CheckNamedSliceConversion() => CheckTarget("NamedSliceConversion");
