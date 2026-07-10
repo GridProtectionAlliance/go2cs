@@ -278,6 +278,24 @@ public class ImplementGenerator : ISourceGenerator
                 ? StructDeclarationSyntaxExtensions.GetBoxReceiverMethodNames(embedHops[0].TypeName, syntaxContext.SemanticModel.Compilation)
                 : [];
 
+            // A FOREIGN hop type (net/http's http2timeTimer embeds *time.Timer) declares its
+            // ptr-receiver methods as ж-extensions visible only in METADATA — direct-ж primaries
+            // and the public RecvGenerator twins — so the syntax scan above finds none and every
+            // promoted forwarder deref'd to the value (`this.Timer.Value.Reset(d)`, CS1929).
+            // Resolve the hop element's SYMBOL from the struct and union its metadata box methods:
+            // those bind on the embedded box field exactly as a local direct-ж primary does.
+            if (embedHops.Count == 1)
+            {
+                INamedTypeSymbol? hopElement = StructDeclarationSyntaxExtensions.GetPointerEmbeds(structType)
+                    .FirstOrDefault(embed => embed.Name == embedHops[0].Name).Type;
+
+                if (hopElement is not null &&
+                    !SymbolEqualityComparer.Default.Equals(hopElement.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly))
+                {
+                    embedHopBoxMethods.UnionWith(StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(hopElement));
+                }
+            }
+
             // A hop-type method may be declared DEEPER - on a VALUE-embedded field of the hop
             // type with a POINTER receiver (net's tcpConnWithoutWriteTo embeds *TCPConn; TCPConn
             // embeds conn by VALUE; Read/Write live on zh<conn>). `this.TCPConn.Value.Read(p)`
@@ -441,6 +459,60 @@ public class ImplementGenerator : ISourceGenerator
 
                             forwardStaticCalls[simpleName] = $"{embedStaticClass}.{simpleName}";
                             forwardReceivers[simpleName] = $"{receiverPrefix}m_box.Value.{embedName}";
+                        }
+                    }
+
+                    // An interface member the foreign struct PROMOTES through a POINTER embed —
+                    // net/http/internal's FlushAfterChunkWriter embeds *bufio.Writer; bufio.ReadWriter
+                    // embeds BOTH *Reader and *Writer (recorded downstream by net/http and httputil):
+                    // the member lives on the EMBED's ж-extensions (direct-ж primaries or public
+                    // RecvGenerator twins), so the plain m_box.Value fallback binds nothing (CS1061).
+                    // Forward through the embedded box FIELD (`m_box.Value.Writer.Write(p)`) — Go
+                    // promotes the embed's full pointer method set into *T's. With SEVERAL pointer
+                    // embeds each member routes to the UNIQUE embed declaring it (Go's promotion
+                    // ambiguity rules reject the rest at depth one). An embed package class outside
+                    // this file's extension-lookup reach (not the emitting namespace, the shared root
+                    // namespace, or an enclosing segment) forwards via its package-class STATIC with
+                    // the box as the receiver argument, mirroring the struct's own foreign arm above.
+                    List<(string Name, INamedTypeSymbol Type)> foreignPointerEmbeds = StructDeclarationSyntaxExtensions.GetPointerEmbeds(structType);
+
+                    if (foreignPointerEmbeds.Count > 0)
+                    {
+                        List<(string Name, INamedTypeSymbol Type, HashSet<string> BoxMethods)> embedBoxMethods = foreignPointerEmbeds
+                            .Select(embed => (embed.Name, embed.Type, StructDeclarationSyntaxExtensions.GetForeignBoxReceiverMethodNames(embed.Type)))
+                            .ToList();
+
+                        foreach (MethodInfo method in methods)
+                        {
+                            string simpleName = GetSimpleName(method.Name);
+
+                            // Only reroute a member still on the plain m_box.Value fallback
+                            // (mirrors the value-embed arm's gating above).
+                            if (boxBound.Contains(simpleName) ||
+                                structOwnMethods.ContainsKey(simpleName) ||
+                                !forwardReceivers.TryGetValue(simpleName, out string? pointerEmbedReceiver) ||
+                                pointerEmbedReceiver != "m_box.Value")
+                            {
+                                continue;
+                            }
+
+                            List<(string Name, INamedTypeSymbol Type, HashSet<string> BoxMethods)> declaringEmbeds = embedBoxMethods
+                                .Where(embed => embed.BoxMethods.Contains(simpleName))
+                                .ToList();
+
+                            if (declaringEmbeds.Count != 1)
+                                continue;
+
+                            (string pointerEmbedName, INamedTypeSymbol pointerEmbedType, _) = declaringEmbeds[0];
+                            string pointerEmbedNamespace = pointerEmbedType.ContainingType?.ContainingNamespace?.ToDisplayString() ?? "";
+
+                            if (pointerEmbedNamespace != packageNamespace && pointerEmbedNamespace != Namespace &&
+                                !packageNamespace.StartsWith($"{pointerEmbedNamespace}.", StringComparison.Ordinal))
+                            {
+                                forwardStaticCalls[simpleName] = $"{pointerEmbedType.ContainingType!.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)}.{simpleName}";
+                            }
+
+                            forwardReceivers[simpleName] = $"m_box.Value.{pointerEmbedName}";
                         }
                     }
                 }

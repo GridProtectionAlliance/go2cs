@@ -402,6 +402,42 @@ public static class StructDeclarationSyntaxExtensions
     }
 
     /// <summary>
+    /// Gets the (member name, element type) pairs for a struct's embedded-POINTER fields read from its
+    /// type SYMBOL — a Go embedded pointer field (<c>*bufio.Writer</c>) emits a <c>ж&lt;X&gt;</c> member
+    /// named after X's simple name (<c>partial ref ж&lt;Writer&gt; Writer</c>), so the embed convention is
+    /// the pointer sibling of <see cref="GetForeignValueEmbeds"/>. Works for FOREIGN structs (metadata
+    /// members) and for resolving a LOCAL struct's FOREIGN hop element, where the syntax-based
+    /// <see cref="GetEmbeddedPointerHopNames"/> knows only the member's type TEXT. A Δ-collision-renamed
+    /// element keeps its markerless member name, mirroring the embedded-interface-field detection.
+    /// </summary>
+    public static List<(string Name, INamedTypeSymbol Type)> GetPointerEmbeds(ITypeSymbol structType)
+    {
+        List<(string, INamedTypeSymbol)> embeds = [];
+
+        foreach (ISymbol member in structType.GetMembers())
+        {
+            if (member.IsStatic)
+                continue;
+
+            INamedTypeSymbol? memberType = member switch
+            {
+                IPropertySymbol property => property.Type as INamedTypeSymbol,
+                IFieldSymbol field => field.Type as INamedTypeSymbol,
+                _ => null
+            };
+
+            if (memberType is { TypeArguments.Length: 1 } named && named.Name == PointerPrefix &&
+                named.TypeArguments[0] is INamedTypeSymbol elementType &&
+                (member.Name == elementType.Name || ShadowVarMarker + member.Name == elementType.Name))
+            {
+                embeds.Add((member.Name, elementType));
+            }
+        }
+
+        return embeds;
+    }
+
+    /// <summary>
     /// METADATA scan of a FOREIGN type's containing package class for its PUBLIC VALUE/REF-receiver
     /// extension methods (<c>static M(this {ref|in} T)</c>) — the sibling of
     /// <see cref="GetForeignBoxReceiverMethodNames"/> for the non-box receiver forms. Maps each method
