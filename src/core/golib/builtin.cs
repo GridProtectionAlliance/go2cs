@@ -1511,12 +1511,30 @@ public static class builtin
     /// </summary>
     /// <param name="target">Target value.</param>
     /// <returns>Common Go type for given <paramref name="target"/>.</returns>
+    /// <remarks>
+    /// This is the type-switch operand (<c>switch v.(type)</c> emits <c>switch (v.type())</c>):
+    /// the value it returns is what the emitted C# <c>case</c> patterns match against, so it must
+    /// surface the Go DYNAMIC value, not the C#-only wrapper classes the runtime uses to carry it.
+    /// </remarks>
     public static object type(this object target)
     {
+        // Go interface-to-interface assignment preserves the original dynamic value — unwrap the
+        // generated interface adapters so case patterns see that value (mirrors the type-assert
+        // machinery in _<T>).
+        while (target is IInterfaceAdapter { Value: not null } interfaceAdapter)
+            target = interfaceAdapter.Value;
+
         // Infer common go type as needed
         return target switch
         {
             string str => new @string(str),
+            // An interface value created from a Go POINTER (`var s Iface = &t`) is a generated
+            // IжAdapter wrapping the receiver box — its Go dynamic type is the pointer itself,
+            // so a `case *T:` label (emitted `case ж<T> t:`) must match the box. A null Box
+            // (interface holding a nil *T) stays wrapped: Go would still match `case *T:` there,
+            // but no C# type pattern can bind null — the adapter at least keeps `case null:`
+            // (Go `case nil:`) a non-match, since such an interface value is NOT nil.
+            IжAdapter { Box: not null } adapter => adapter.Box,
             _ => target
         };
     }
