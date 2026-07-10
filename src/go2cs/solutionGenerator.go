@@ -4,6 +4,7 @@
 package main
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"io/fs"
 	"os"
@@ -138,6 +139,16 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 		writeLine(2, fmt.Sprintf("<Project Path=\"%s\" />", escapeXMLAttr(path)))
 	}
 
+	// Folders carry an EXPLICIT deterministic Id: Visual Studio's .slnx loader derives a
+	// missing folder Id from the folder's leaf display name, and Go namespaces guarantee
+	// duplicate leaves (`/core/crypto/` vs `/core/vendor/golang.org/x/crypto/` are both
+	// "crypto") — VS then refuses to open the solution ("a Solution Folder with the same
+	// unique identifier already exists"). A UUID hashed from the FULL folder path is unique,
+	// stable across regenerations, and machine-independent.
+	writeFolderOpen := func(folder string) {
+		writeLine(1, fmt.Sprintf("<Folder Name=\"%s\" Id=\"%s\">", escapeXMLAttr(folder), folderID(folder)))
+	}
+
 	writeLine(0, "<Solution>")
 
 	writeLine(1, "<Configurations>")
@@ -147,7 +158,7 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeLine(1, "</Configurations>")
 
 	// Source generators / analyzers.
-	writeLine(1, "<Folder Name=\"/generators/\">")
+	writeFolderOpen("/generators/")
 	writeProject(genProjectReference)
 	writeLine(1, "</Folder>")
 
@@ -183,7 +194,7 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	}
 
 	for _, folder := range folderOrder {
-		writeLine(1, fmt.Sprintf("<Folder Name=\"%s\">", escapeXMLAttr(folder)))
+		writeFolderOpen(folder)
 
 		for _, project := range folderProjects[folder] {
 			writeProject(project)
@@ -195,7 +206,7 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	// Converted per-package test projects — rendered only once Phase 4 emits them, so an
 	// empty /tests/ folder is never written.
 	if len(testProjects) > 0 {
-		writeLine(1, "<Folder Name=\"/tests/\">")
+		writeFolderOpen("/tests/")
 		for _, project := range testProjects {
 			writeProject(project)
 		}
@@ -205,6 +216,18 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeLine(0, "</Solution>")
 
 	return sb.String()
+}
+
+// folderID returns a deterministic UUID for a solution-folder path, hashed from the full
+// path so same-named folders at different nesting levels (Go's ubiquitous `internal`,
+// `crypto` under both core and vendor, ...) never collide in Visual Studio's identifier
+// space. Version/variant bits are set so the value is a well-formed (v5-style) UUID.
+func folderID(folderPath string) string {
+	sum := sha1.Sum([]byte("go2cs-slnx-folder:" + folderPath))
+	b := sum[:16]
+	b[6] = (b[6] & 0x0f) | 0x50
+	b[8] = (b[8] & 0x3f) | 0x80
+	return fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:16])
 }
 
 // escapeXMLAttr escapes the minimal set of characters that would break an XML attribute.
