@@ -201,6 +201,83 @@ func (v *Visitor) iifeDelegateType(sig *types.Signature) string {
 	return "Func" + family + "<" + strings.Join(typeArgs, ", ") + ">"
 }
 
+// signatureTypeName renders a func type structurally in GO syntax — `func(name type, …)
+// results` — with every parameter/result type resolved recursively through getTypeName, so a
+// cross-package element carries the short import-alias qualification the surrounding file uses
+// (`types.Package`, `tls.Conn`), exactly like the map/slice/chan structural renders. The
+// t.String() fall-through this replaces embeds slash-qualified import paths
+// (`func(imports map[string]*go/types.Package, …)`), and convertToCSFullTypeName's slash
+// heuristics then mangle them one of three ways depending on the string's shape: a naive
+// whole-string path conversion (`ж<go.types.Package>`, `ж<crypto.tls.Conn>` — no `_package`
+// class, and under a `go.go`-nested namespace the leading segment binds the wrong namespace),
+// or an unrooted class-suffixed form (`@internal.trace_package.UtilFlags`) — CS0234 across
+// go/importer, net/http's TLSNextProto maps, and traceviewer (one root, three variants).
+// Same-package and builtin elements render byte-identically to the old path (t.String()'s
+// package-path prefix strip), so simple signatures see no churn. A VARIADIC tail renders as
+// `...elem` (which t.String()'s `..`-strip used to reduce to the unparseable `.elem`); the
+// string-path func-type conversion lowers it to the golib Actionꓸꓸꓸ/Funcꓸꓸꓸ delegate family,
+// mirroring iifeDelegateType. Parameter and result NAMES are preserved so a named multi-result
+// signature keeps its named C# tuple (see convertToCSResultList).
+func (v *Visitor) signatureTypeName(sig *types.Signature, isUnderlying bool) string {
+	result := strings.Builder{}
+	result.WriteString("func(")
+
+	params := sig.Params()
+
+	for i := range params.Len() {
+		if i > 0 {
+			result.WriteString(", ")
+		}
+
+		param := params.At(i)
+
+		if name := param.Name(); name != "" {
+			result.WriteString(name)
+			result.WriteByte(' ')
+		}
+
+		if sig.Variadic() && i == params.Len()-1 {
+			if sliceType, ok := param.Type().Underlying().(*types.Slice); ok {
+				result.WriteString("...")
+				result.WriteString(v.getTypeName(sliceType.Elem(), isUnderlying))
+				continue
+			}
+		}
+
+		result.WriteString(v.getTypeName(param.Type(), isUnderlying))
+	}
+
+	result.WriteByte(')')
+
+	results := sig.Results()
+
+	if results.Len() == 1 && results.At(0).Name() == "" {
+		result.WriteByte(' ')
+		result.WriteString(v.getTypeName(results.At(0).Type(), isUnderlying))
+	} else if results.Len() > 0 {
+		result.WriteString(" (")
+
+		for i := range results.Len() {
+			if i > 0 {
+				result.WriteString(", ")
+			}
+
+			resultVar := results.At(i)
+
+			if name := resultVar.Name(); name != "" {
+				result.WriteString(name)
+				result.WriteByte(' ')
+			}
+
+			result.WriteString(v.getTypeName(resultVar.Type(), isUnderlying))
+		}
+
+		result.WriteByte(')')
+	}
+
+	return result.String()
+}
+
 // namedResultName returns the C# identifier the body uses for a named result parameter
 // (honoring shadow-renames recorded by variable analysis).
 // aliasedElementTypeName renders a delegate element type, substituting the file-local

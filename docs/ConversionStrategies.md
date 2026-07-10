@@ -2341,6 +2341,61 @@ compiles). **GUARD OWED** — the shape needs three packages (B declares `Y`, A 
 references `A.X`), which neither the single-package baseline nor the 2-package `CrossPkg` harness
 expresses; validated by the `go-src-converted/path/filepath` build (1→0) + io/ioutil build.)
 
+**A func type renders structurally in EVERY type-name path — the signature never stringifies.**
+`getTypeName` now carries a `*types.Signature` arm (`signatureTypeName`, beside `iifeDelegateType`)
+mirroring the slice/map/chan composite arms: Go syntax — `func(name type, …) results` — with every
+parameter/result type resolved **recursively**, so a cross-package element keeps the file's short
+import alias exactly like the neighboring map/slice fields. Previously only *some* positions routed
+through the structural `iifeDelegateType` (var declarations; variadic or slash-bearing struct
+fields); every other position — a struct field of a **named** methodless func type (go/importer's
+`importer gccgoimporter.Importer`), a MAP field's func **value** type (net/http's `TLSNextProto`
+maps), a same-package named func field (traceviewer's `f MutatorUtilFunc`) — reached
+`convertToCSFullTypeName` as `t.String()` text with import PATHS inline, and the slash heuristics
+mangled those one of **three ways** depending on the string's shape: the whole-string
+path-conversion arm fires when no dot-after-slash precedes the first `[` (a leading `map[` bracket),
+naively dotting every path — `ж<go.types.Package>`, `ж<crypto.tls.Conn>` (no `_package` class, and
+under a `go.go`-nested namespace the leading segment binds the child namespace — CS0234) — while the
+split-at-dot arm mangles a mid-signature path to a classed-but-unrooted form
+(`@internal.trace_package.UtilFlags`, traceviewer mmu.cs). With the structural arm the string
+reaching the parser is slash-free (`func(*Server, *tls.Conn, Handler)`) and each element converts
+through the normal alias route. Result NAMES are preserved, so a named multi-result field keeps its
+named C# tuple (the display-path advantage the old struct-field routing existed to protect); a
+same-package/builtin signature renders byte-identically to the old `t.String()` path (zero churn —
+CNR confirmed across all 331 behavioral projects). A variadic tail renders `...elem` (which the old
+path's `..`-strip reduced to the unparseable `.elem`) and lowers through the parser to the golib
+`ꓸꓸꓸ` delegate family (next paragraph). One side effect: element recursion passes through
+`getTypeName`'s foreign-ALIAS arm, so a signature naming a cross-package alias (`os.FileInfo` →
+`io/fs.FileInfo`) now registers the **target's** package for a file-local using — a few stdlib files
+gain a benign `using fs = …;` alias line (`collectTypePackages`' Named case does not match a
+`*types.Alias`, so the old path never registered it). Whole-stdlib A/B footprint: 20 files — the
+go/importer field fixed, `ж<tls.Conn>` in net/http server/transport/h2_bundle (field + composite
+literals), traceviewer's `Func<trace.UtilFlags, (slice<slice<trace.MutatorUtil>>, error)>`,
+go/scanner's `err` field moving to the canonical `tokenꓸPosition` alias (the old
+`go.token_package.ΔPosition` resolved only by go.go-namespace luck), the variadic type-assert
+target below, one comment-alignment shift, and the benign using-line additions. Cleared the
+IMP-2/HTTP-3 CS0234 cluster (net/http ×8 + go/importer ×6 + traceviewer). (Guarded by the
+`SynthesizedDelegateChildPkg` behavioral test — a nested CHILD subpackage (slash-bearing import
+path) whose `*inner.Record` rides a named methodless func-type field with a nested-tuple lookup
+param AND a `map[string]func(*inner.Record, string)` field, both invoked at runtime vs Go.)
+
+**The func-type string parser splits parameters at TOP-LEVEL commas only — and a variadic tail
+lowers to the `ꓸꓸꓸ` delegate family.** `extractTypes` split the parameter list with a naive
+`strings.Split(signature, ",")`, so a nested func param returning a TUPLE — `lookup func(string)
+(io.ReadCloser, error)` (go/internal/gccgoimporter's `Importer`, surfacing as go/importer's
+`gccgoimports.importer` field) — shredded at the tuple's interior comma, unbalancing the assembled
+delegate: `Func<@string, (io.ReadCloser>, error)` (the inner `>` closes before the tuple's second
+element — a 6-error syntax cascade, IMP-1). `splitTopLevelParams` tracks `<>`/`()`/`[]`/`{}` depth
+(with the channel-arrow `<-` guard `splitMapKeyValue` already carries) and splits only at depth 0.
+On top of that, a variadic tail (`...elem`, from the structural render above) converts its ELEMENT
+type in `extractTypes` and carries an ellipsis-family marker that the `func(` assembler hoists into
+the delegate FAMILY name — `Actionꓸꓸꓸ<@string, any>` — mirroring `iifeDelegateType`'s lowering
+exactly. That fixed the variadic func type as a type-ASSERTION target as a rider:
+`.(func(string, ...any))` (net/http transport.go's `tLogKey` logger) previously emitted the
+unparseable `._<Action<@string, .any>>(ᐧ)` and now renders `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`.
+(Guarded by the `FuncFieldNestedTupleParam` behavioral test — builtin-typed struct fields with
+nested-func-returning-tuple params in both the anonymous and named-collapse forms plus a
+named-tuple-result sibling, all invoked at runtime vs Go.)
+
 A **type ASSERTION** whose target is a methodless func type must assert against the **collapsed
 delegate**, not the (never-emitted) name. `ci.(Compressor)` where
 `type Compressor func(io.Writer) (io.WriteCloser, error)` (archive/zip's compressor/decompressor

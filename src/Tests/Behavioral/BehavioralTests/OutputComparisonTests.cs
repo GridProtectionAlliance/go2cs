@@ -865,6 +865,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSwitchNonConstCaseLabel() => CheckTarget("SwitchNonConstCaseLabel");
 
     [TestMethod]
+    public void CheckSynthesizedDelegateChildPkg() => CheckTarget("SynthesizedDelegateChildPkg");
+
+    [TestMethod]
     public void CheckSynthesizedDelegateCrossPkg() => CheckTarget("SynthesizedDelegateCrossPkg");
 
     [TestMethod]

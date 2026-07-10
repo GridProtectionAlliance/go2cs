@@ -4007,6 +4007,13 @@ func (v *Visitor) getTypeName(t types.Type, isUnderlying bool) string {
 		// slash-strip eats everything before the slash including the map header (os/signal's
 		// handlers.m emitted `map<channel/*<-*/<os.Signal>*handler>, >` — CS1003 cascade ×8).
 		return fmt.Sprintf("map[%s]%s", v.getTypeName(composite.Key(), isUnderlying), v.getTypeName(composite.Elem(), isUnderlying))
+	case *types.Signature:
+		// Structural like the composites above: t.String() embeds slash-qualified import paths
+		// for cross-package elements (`func(...*go/types.Package...)`), which the string-path
+		// slash heuristics mis-qualify three different ways (go/importer's gccgo importer field,
+		// net/http's TLSNextProto maps, traceviewer's MutatorUtilFunc — CS0234). Rendering each
+		// element recursively keeps the file's short import-alias form (see signatureTypeName).
+		return v.signatureTypeName(composite, isUnderlying)
 	}
 
 	// A cross-package INSTANTIATED generic (e.g. `internal/runtime/atomic.Pointer[func(string,
@@ -4740,6 +4747,18 @@ func convertToCSFullTypeName(typeName string) string {
 		// arg → CS1031), as in go/ast's `type Importer func(imports map[string]*Object, …)`.
 		csTypeNames := paramTypes
 
+		// A VARIADIC tail (marked by extractTypes) hoists into the golib delegate FAMILY —
+		// `Actionꓸꓸꓸ<…>`/`Funcꓸꓸꓸ<…>` with the variadic ELEMENT type as the last parameter
+		// type argument, matching iifeDelegateType's structural lowering exactly.
+		family := ""
+
+		if count := len(csTypeNames); count > 0 {
+			if elem, ok := strings.CutPrefix(csTypeNames[count-1], EllipsisOperator); ok {
+				family = EllipsisOperator
+				csTypeNames[count-1] = elem
+			}
+		}
+
 		// Check for return type after the closing parenthesis
 		remainingType := strings.TrimSpace(typeName[closingParenIndex+1:])
 
@@ -4752,7 +4771,7 @@ func convertToCSFullTypeName(typeName string) string {
 			csReturnType := convertToCSResultList(remainingType)
 
 			if len(csTypeNames) > 0 {
-				return fmt.Sprintf("Func<%s, %s>", strings.Join(csTypeNames, ", "), csReturnType)
+				return fmt.Sprintf("Func%s<%s, %s>", family, strings.Join(csTypeNames, ", "), csReturnType)
 			}
 
 			return fmt.Sprintf("Func<%s>", csReturnType)
@@ -4760,7 +4779,7 @@ func convertToCSFullTypeName(typeName string) string {
 
 		// No return type, use Action
 		if len(csTypeNames) > 0 {
-			return fmt.Sprintf("Action<%s>", strings.Join(csTypeNames, ", "))
+			return fmt.Sprintf("Action%s<%s>", family, strings.Join(csTypeNames, ", "))
 		}
 
 		return "Action"
@@ -4943,13 +4962,25 @@ func extractTypes(signature string) []string {
 		// this function ALWAYS returns C#-form types (the named branch below already does), letting
 		// the sole caller trust the output without a second convertToCSTypeName pass (which would
 		// double-convert an already-C# named param — see convertToCSFullTypeName's func-handler).
+		var paramType string
+
 		if typeStart == 0 {
-			types = append(types, convertToCSTypeName(param))
+			paramType = param
 		} else {
 			// Extract everything after the space
-			paramType := convertToCSTypeName(strings.TrimSpace(param[typeStart:]))
-			types = append(types, paramType)
+			paramType = strings.TrimSpace(param[typeStart:])
 		}
+
+		// A VARIADIC tail (`...string`, from the structural signature render) lowers to the golib
+		// Actionꓸꓸꓸ/Funcꓸꓸꓸ delegate family, whose last type argument is the variadic ELEMENT
+		// type (mirror of iifeDelegateType): convert the element and keep an ellipsis-family
+		// marker prefix for the func-type reassembly to hoist into the delegate family name.
+		if elem, ok := strings.CutPrefix(paramType, "..."); ok {
+			types = append(types, EllipsisOperator+convertToCSTypeName(strings.TrimSpace(elem)))
+			continue
+		}
+
+		types = append(types, convertToCSTypeName(paramType))
 	}
 
 	return types
