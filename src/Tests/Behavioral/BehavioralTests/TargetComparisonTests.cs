@@ -505,6 +505,8 @@ public class C3_TargetComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+
+    [TestMethod]
     public void CheckIoLike() => CheckTarget("IoLike");
 
     [TestMethod]

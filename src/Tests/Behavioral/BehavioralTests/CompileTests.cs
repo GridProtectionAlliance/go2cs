@@ -502,6 +502,8 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+
+    [TestMethod]
     public void CheckIoLike() => CheckTarget("IoLike");
 
     [TestMethod]

@@ -502,6 +502,8 @@ public class A1_TranspileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckIntMinLiterals() => CheckTarget("IntMinLiterals");
+
+    [TestMethod]
     public void CheckIoLike() => CheckTarget("IoLike");
 
     [TestMethod]
