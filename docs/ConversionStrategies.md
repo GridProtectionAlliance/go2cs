@@ -1165,6 +1165,34 @@ A `select` lowers to a C# `switch`: with a `default:` clause present, the non-bl
 
 The golib non-blocking receive underpinning the default-form guards distinguishes the two "no value" cases per Go semantics: a **closed** empty channel is receive-ready with the zero value; an **open** empty channel reports not-ready, so the `default:` is taken. (Guarded by the `SelectStatement` extensions `firstMsg` — terminal blocking select in a value-returning func — and `poll` — empty `default:` after a returning case, polled both before and after `close`.)
 
+### An escaping comm-clause binding receives into a temp and heap-boxes at clause entry
+
+A `case result := <-ch:` whose bound variable's address is taken in the clause body — internal/fuzz
+`coordinatorLoop`'s `c.crashMinimizing = &result` and `writeToCorpus(&result.entry, …)` — escapes to
+the heap, so the body's address-of emission references the `Ꮡresult` box companion (an escaping `:=`
+local's form). The comm-clause label emitted only a plain `out var result`, never a box, leaving
+`Ꮡresult` undeclared (CS0103 ×2, the last own-errors keeping internal.fuzz red after its CS0234s
+cleared). The `when` guard's `out var` slot cannot declare a ref local, so `selectCommBinding`
+(`visitSelectStmt.go`) receives into a uniquely-numbered temp and opens the clause body with the
+entry-time box pattern proven by the escaping-parameter preamble:
+
+```csharp
+case 2 when (~c).resultC.ꟷᐳ(out var resultᴛ1): {
+    ref var result = ref heap(resultᴛ1, out var Ꮡresult);
+```
+
+The gate is `identHasHeapBox` — the exact predicate the body's `&name` emission uses — so the box is
+declared iff it is referenced; alias/box names mirror `convertToHeapTypeDecl` (sanitized analyzed name
+for the value alias, raw analyzed name behind `Ꮡ` for the box, matching `boxBaseName`). Both bindings
+of the `(val, ok)` form are checked. A non-escaping binding keeps the direct `out var <name>` form
+(preserving the shadow-rename render, e.g. `out var errΔ5`), and an ASSIGN-mode rebind of an existing
+boxed local already writes through its ref alias — the full-stdlib A/B footprint was exactly
+internal/fuzz/fuzz.cs. (Guarded by `SelectEscapeBinding` — escaping binding written through both
+directions, escaping `(val, ok)` binding with a field address through the box, and a mixed
+escaping/plain select, output-compared vs Go; the pre-fix converter fails it with exactly the
+CS0103 `Ꮡres` class. A clause taking ONLY a field address (`&res.value`, no whole-var `&res`) still
+copy-boxes — the known assignment-position escape-analysis gap, out of scope here.)
+
 ## Generic Constraints
 A Go generic constraint becomes a C# `where` clause. Most type-set constraints lift to the matching golib/.NET interface — a `[]T` element constraint to `ISlice<T>`, `[N]E` array-core to `IArray<E>`, `map[K]V` to `IMap<K,V>`, `chan T` to `IChannel<T>` — plus, for operator-bearing type sets, the `System.Numerics` operator interfaces (`IAdditionOperators`, `IComparisonOperators`, …) so the body's `+`/`<`/`==` on the type parameter compile. The Go built-in `comparable` maps to golib's CRTP `comparable<T>`.
 

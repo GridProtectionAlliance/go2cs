@@ -813,6 +813,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckSameUnderlyingNamedConv() => CheckTarget("SameUnderlyingNamedConv");
 
     [TestMethod]
+    public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
+
+    [TestMethod]
     public void CheckSelectStatement() => CheckTarget("SelectStatement");
 
     [TestMethod]

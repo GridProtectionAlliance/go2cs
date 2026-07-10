@@ -748,6 +748,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckSameUnderlyingNamedConv() => CheckTarget("SameUnderlyingNamedConv");
 
     [TestMethod]
+    public void CheckSelectEscapeBinding() => CheckTarget("SelectEscapeBinding");
+
+    [TestMethod]
     public void CheckShadowedCompoundAssign() => CheckTarget("ShadowedCompoundAssign");
 
     [TestMethod]

@@ -314,6 +314,7 @@
     <Project Path="Tests/Behavioral/RelationalPatternGuard/RelationalPatternGuard.csproj" />
     <Project Path="Tests/Behavioral/RingPointerMethods/RingPointerMethods.csproj" />
     <Project Path="Tests/Behavioral/SameUnderlyingNamedConv/SameUnderlyingNamedConv.csproj" />
+    <Project Path="Tests/Behavioral/SelectEscapeBinding/SelectEscapeBinding.csproj" />
     <Project Path="Tests/Behavioral/SelectStatement/SelectStatement.csproj" />
     <Project Path="Tests/Behavioral/SparseArrayNamedIntKey/SparseArrayNamedIntKey.csproj" />
     <Project Path="Tests/Behavioral/ShadowedCompoundAssign/ShadowedCompoundAssign.csproj" />
