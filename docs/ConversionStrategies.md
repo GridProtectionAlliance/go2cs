@@ -481,6 +481,40 @@ into each RHS conversion site when `lhsIsEmptyInterface` reports the target is `
 interface wrap stays with `convertExprToInterfaceType`, which the empty interface deliberately bypasses).
 (Guarded by the `AnyStringLitAssign` behavioral test — an `any` local, an `any`-typed range variable, and
 an `any` struct field each assigned a string literal, then type-switched on `string`, output-compared vs Go.)
+The same boxing applies to every **composite-literal** position whose declared slot type is the empty
+interface — the interface-wrap machinery deliberately bypasses `any` there too, so a string-literal
+element otherwise renders either as the u8 span (no conversion to the generated `object` slot —
+CS1503/CS0029) or as a bare C# string (compiles, but boxes a `System.String`, so a later Go
+`x.(string)` assertion or `case string:` fails at runtime):
+
+```go
+type pair struct { label string; value any }
+p  := pair{"tag", "val"}          // positional field
+n  := &node{inner: "hi"}          // keyed field (typed, elided, and pointer-elided forms alike)
+m  := map[string]any{"k": "mv"}   // map value
+mk := map[any]int{"ky": 7}        // map key
+s  := []any{"a", "b"}             // slice/array element
+sp := [3]any{1: "sp"}             // sparse-array element
+```
+
+```csharp
+var p  = new pair("tag", (@string)"val");            // NOT bare "val" (wrong boxed identity)
+var n  = Ꮡ(new node(inner: (@string)"hi"));          // NOT "hi"u8 (CS1503)
+var m  = new map<@string, any>{["k"u8] = (@string)"mv"};
+var mk = new map<any, nint>{[(@string)"ky"] = 7};
+var s  = new any[]{(@string)"a", (@string)"b"}.slice();
+var sp = new array<any>(3){[1] = (@string)"sp"};
+```
+
+Keyed elements resolve their target slot in `convKeyValueExpr` (struct field via `info.Uses`; map/sparse
+element and map key via the threaded composite type) and take the same `u8StringOK`-off /
+`castToGoString`-on literal context; positional struct fields and slice/array elements flip the
+per-element flags (`u8StringArgOK` off, `useGoStringArg` on) that `convExprList` feeds each element's
+literal context. A TYPE-PARAMETER slot is excluded even though its underlying constraint is an
+interface (`isEmptyInterfaceTarget`) — a `~string`-constrained field takes the literal directly. Only
+string basic-literals are affected; every non-`any` slot keeps its exact prior form. (Guarded by the
+`AnyStringLitComposite` behavioral test — all the shapes above, each read back through a `string`
+type-switch to prove runtime identity, output-compared vs Go.)
 
 ## Inline Assignment Order of Operations
 All right-hand operands in assignment expressions in Go are evaluated before assignment to the left-hand operands. C# can operate equivalently using tuple deconstruction (_thanks to Eugene Bekker for the [suggestion](https://github.com/GridProtectionAlliance/go2cs/issues/6)_). For the following Go code:

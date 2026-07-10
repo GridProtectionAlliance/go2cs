@@ -62,6 +62,7 @@ public class D4_OutputComparisonTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
+    public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");

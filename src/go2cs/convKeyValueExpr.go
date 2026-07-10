@@ -4,9 +4,31 @@ import (
 	"fmt"
 	"go/ast"
 	"go/constant"
+	"go/token"
 	"go/types"
 	"strconv"
 )
+
+// anyBoxedStringLitContext returns the literal context that boxes a string literal through
+// @string — `(@string)"…"` (u8 off, cast on) — for an EMPTY-interface (`any`) target slot. The
+// default `"…"u8` ReadOnlySpan<byte> has no conversion to object (CS1503/CS0029), and a bare C#
+// string boxes the wrong type (a later Go x.(string) assertion fails). Mirrors visitReturnStmt's
+// any-result literal context; only string basic-literals consult these flags.
+func anyBoxedStringLitContext() BasicLitContext {
+	litContext := DefaultBasicLitContext()
+	litContext.u8StringOK = false
+	litContext.castToGoString = true
+
+	return litContext
+}
+
+// isStringBasicLit reports whether expr is a string basic-literal — the only expression form
+// whose rendering consults the u8StringOK/castToGoString literal flags.
+func isStringBasicLit(expr ast.Expr) bool {
+	lit, ok := expr.(*ast.BasicLit)
+
+	return ok && lit.Kind == token.STRING
+}
 
 func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyValueContext) string {
 	// For a struct field initializer whose field is a pointer type, the value must be emitted as a
@@ -39,6 +61,13 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 						identContext.isPointer = true
 						valueContexts = []ExprContext{identContext}
 					}
+				} else if isEmptyInterfaceTarget(fieldObj.Type()) && isStringBasicLit(keyValueExpr.Value) {
+					// An EMPTY-interface (`any`) field bypasses the interface wrap above, so a
+					// string-literal value must box through @string — `inner: (@string)"hi"`, NOT
+					// the default `"hi"u8` span, which has no conversion to the generated ctor's
+					// object parameter (CS1503). Applies to typed, elided, and pointer-elided keyed
+					// composites alike (the key resolves through info.Uses in each).
+					valueContexts = append(valueContexts, anyBoxedStringLitContext())
 				}
 			}
 		}
@@ -60,6 +89,28 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 					valueContexts = []ExprContext{identContext}
 				}
 			}
+		}
+	}
+
+	// A MapSource VALUE slot whose declared element type is the EMPTY interface — a
+	// `map[K]any{k: "v"}` value or a sparse `[N]any{i: "v"}` element (arrayBacked, the composite
+	// type is the array/slice itself) — boxes a string-literal value through @string
+	// (`[k] = (@string)"v"`), NOT the default `"v"u8` span, which has no conversion to the object
+	// slot (CS0029/CS1503). Mirrors the struct-field `any` routing above.
+	if context.source == MapSource && context.compositeType != nil && isStringBasicLit(keyValueExpr.Value) {
+		var elemType types.Type
+
+		switch u := types.Unalias(context.compositeType).Underlying().(type) {
+		case *types.Map:
+			elemType = u.Elem()
+		case *types.Array:
+			elemType = u.Elem()
+		case *types.Slice:
+			elemType = u.Elem()
+		}
+
+		if isEmptyInterfaceTarget(elemType) {
+			valueContexts = append(valueContexts, anyBoxedStringLitContext())
 		}
 	}
 
@@ -152,6 +203,14 @@ func (v *Visitor) convKeyValueExpr(keyValueExpr *ast.KeyValueExpr, context KeyVa
 						keyIdentContext.isPointer = true
 						keyExpr = v.convExpr(keyValueExpr.Key, []ExprContext{keyIdentContext})
 					}
+				}
+
+				// An EMPTY-interface KEY slot (`map[any]V{"ky": …}`) boxes a string-literal key
+				// through @string — `[(@string)"ky"] = …`, not `["ky"u8]` (span → object key,
+				// CS1503). The NON-empty interface key wrap stays with the map-index adapter
+				// machinery; only the `any` key needs the literal re-render.
+				if isEmptyInterfaceTarget(mapType.Key()) && isStringBasicLit(keyValueExpr.Key) {
+					keyExpr = v.convExpr(keyValueExpr.Key, []ExprContext{anyBoxedStringLitContext()})
 				}
 			}
 		}

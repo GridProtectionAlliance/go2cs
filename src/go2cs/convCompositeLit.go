@@ -26,7 +26,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				// initializer below cannot take the Go `key: value` keyed syntax (CS1003 cascade).
 				// Mirrors the typed slice sparse-array path (see keyValueSource==ArraySource below).
 				if compositeLitIsKeyed(compositeLit.Elts) {
-					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
+					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)))
 				}
 				return fmt.Sprintf("new %s[]{%s}.slice()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
 			case *types.Array:
@@ -36,7 +36,7 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				// Same SparseArray treatment as the slice case; `.array()` materializes the dense
 				// fixed-length backing, matching the typed array sparse path.
 				if compositeLitIsKeyed(compositeLit.Elts) {
-					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(compositeLit.Elts)))
+					return fmt.Sprintf("new golib.SparseArray<%s>{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, sparseArrayCompositeContext(inferred, compositeLit.Elts)))
 				}
 				return fmt.Sprintf("new %s[]{%s}.array()", csElem, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, v.elidedPointerElemContext(u.Elem(), compositeLit.Elts)))
 			case *types.Pointer:
@@ -57,6 +57,13 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 					for i := range compositeLit.Elts {
 						ptrElidedContext.u8StringArgOK[i] = true
+					}
+
+					// A POSITIONAL string-literal element in an `any` field slot boxes through
+					// @string — the u8 span set above has no conversion to the ctor's object
+					// parameter (CS1503).
+					if st, ok := u.Elem().Underlying().(*types.Struct); ok {
+						markAnyFieldStringLits(st, compositeLit.Elts, ptrElidedContext)
 					}
 
 					return fmt.Sprintf("%s(new %s(%s))", AddressPrefix, structName, v.convExprList(compositeLit.Elts, compositeLit.Lbrace, ptrElidedContext))
@@ -98,6 +105,14 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 		// map defaults it FALSE, silently stripping the u8 suffix from string-literal elements.
 		for i := range compositeLit.Elts {
 			elidedContext.u8StringArgOK[i] = true
+		}
+
+		// A POSITIONAL string-literal element in an `any` field slot boxes through @string —
+		// the u8 span set above has no conversion to the ctor's object parameter (CS1503).
+		if inferred := elidedContext.keyValueCompositeType; inferred != nil {
+			if st, ok := inferred.Underlying().(*types.Struct); ok {
+				markAnyFieldStringLits(st, compositeLit.Elts, elidedContext)
+			}
 		}
 
 		result.WriteString(fmt.Sprintf("new(%s", v.convExprList(compositeLit.Elts, compositeLit.Lbrace, elidedContext)))
@@ -174,6 +189,10 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 
 	// Check composite lit elements against struct fields
 	checkStructFields := func(structType *types.Struct) {
+		// A POSITIONAL string-literal element in an `any` field slot boxes through @string
+		// (keyed elements take convKeyValueExpr's `any`-field arm instead).
+		markAnyFieldStringLits(structType, compositeLit.Elts, callContext)
+
 		for i := range structType.NumFields() {
 			field := structType.Field(i)
 
@@ -469,6 +488,19 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 				}
 			}
 		}
+
+		// An EMPTY-interface element type takes no adapter wrap (excluded above), but a
+		// string-literal element must still box through @string — `new any[]{(@string)"a"}` —
+		// instead of the bare C# string the flag-less path leaves, which boxes the wrong type
+		// (a later Go x.(string) assertion fails). KeyValueExpr elements (maps, sparse arrays)
+		// are not BasicLits and route through convKeyValueExpr instead.
+		if isEmptyInterfaceTarget(elementType) {
+			for i, elt := range compositeLit.Elts {
+				if isStringBasicLit(elt) {
+					callContext.useGoStringArg[i] = true
+				}
+			}
+		}
 	}
 
 	// A NARROW-INTEGER element type (int8/uint8/int16/uint16) receiving a binary/unary
@@ -579,6 +611,9 @@ func (v *Visitor) convCompositeLit(compositeLit *ast.CompositeLit, context KeyVa
 			// This is an indexed slice/array literal emitted as a SparseArray (int-indexed), NOT a
 			// real map — record it so a defined-integer-type key is cast to the int index type.
 			callContext.keyValueArrayBacked = true
+			// Thread the array/slice type so convKeyValueExpr's MapSource value slot can see an
+			// EMPTY-interface element type (a sparse `[N]any{i: "v"}` value boxes through @string).
+			callContext.keyValueCompositeType = exprType
 			maxKeyValue := 0
 
 			for _, elt := range compositeLit.Elts {
@@ -814,15 +849,38 @@ func (v *Visitor) elidedPointerElemContext(elem types.Type, elts []ast.Expr) *Ca
 // sparseArrayCompositeContext builds the element context for a KEYED (sparse) array/slice
 // composite literal so its KeyValueExpr elements render as `[index] = value` against a golib
 // SparseArray (MapSource + arrayBacked), rather than the invalid Go `key: value` form. Mirrors
-// the elided-map handling and the typed keyValueSource==ArraySource→MapSource conversion.
-func sparseArrayCompositeContext(elts []ast.Expr) *CallExprContext {
+// the elided-map handling and the typed keyValueSource==ArraySource→MapSource conversion. The
+// composite's array/slice type is threaded through so an EMPTY-interface element type can box a
+// string-literal value through @string (see convKeyValueExpr's MapSource `any` value slot).
+func sparseArrayCompositeContext(compositeType types.Type, elts []ast.Expr) *CallExprContext {
 	context := DefaultCallExprContext()
 	context.keyValueSource = MapSource
 	context.keyValueArrayBacked = true
+	context.keyValueCompositeType = compositeType
 
 	for i := range elts {
 		context.u8StringArgOK[i] = true
 	}
 
 	return context
+}
+
+// markAnyFieldStringLits flips the per-element literal flags for POSITIONAL string-literal
+// elements whose struct field slot is the EMPTY interface (`any`): the element boxes through
+// @string (`(@string)"…"` — u8 off, cast on) instead of the u8 span (no conversion to the
+// generated ctor's object parameter, CS1503) or a bare C# string (which boxes the wrong type — a
+// later Go x.(string) assertion fails). KEYED elements are ast.KeyValueExpr, never a BasicLit, so
+// they skip here and resolve their field in convKeyValueExpr's own `any`-field arm instead. Go
+// requires a positional literal to list every field in order, so element index i is field i.
+func markAnyFieldStringLits(structType *types.Struct, elts []ast.Expr, context *CallExprContext) {
+	for i, elt := range elts {
+		if !isStringBasicLit(elt) || i >= structType.NumFields() {
+			continue
+		}
+
+		if isEmptyInterfaceTarget(structType.Field(i).Type()) {
+			context.u8StringArgOK[i] = false
+			context.useGoStringArg[i] = true
+		}
+	}
 }

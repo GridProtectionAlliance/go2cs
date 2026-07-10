@@ -2098,6 +2098,24 @@ func isInterface(t types.Type) (result bool, empty bool) {
 	return false, false
 }
 
+// isEmptyInterfaceTarget reports whether a declared target type is the plain EMPTY interface
+// (`any` / `interface{}`) — the case a string-literal value must box through @string. A TYPE
+// PARAMETER is excluded even though its underlying constraint is an interface (a `~string`-
+// constrained parameter takes the literal directly, not an object box).
+func isEmptyInterfaceTarget(t types.Type) bool {
+	if t == nil {
+		return false
+	}
+
+	if _, isTypeParam := types.Unalias(t).(*types.TypeParam); isTypeParam {
+		return false
+	}
+
+	isIface, isEmpty := isInterface(t)
+
+	return isIface && isEmpty
+}
+
 func isEmptyInterface(interfaceType *ast.InterfaceType) bool {
 	if interfaceType == nil {
 		return false

@@ -58,6 +58,7 @@ public class B2_CompileTests : BehavioralTestBase
 
     [TestMethod]
     public void CheckAnyStringLitAssign() => CheckTarget("AnyStringLitAssign");
+    public void CheckAnyStringLitComposite() => CheckTarget("AnyStringLitComposite");
 
     [TestMethod]
     public void CheckAppendNamedSliceElement() => CheckTarget("AppendNamedSliceElement");
