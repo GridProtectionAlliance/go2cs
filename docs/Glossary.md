@@ -44,7 +44,7 @@ those act at compile/run time where CNR is blind. A gen change additionally requ
 `dotnet build-server shutdown`, otherwise MSBuild serves the cached analyzer and the suite
 silently tests the *old* generator.
 
-**Census** (`dotnet build src/go-src-converted.sln` + an own-DLL count script).
+**Census** (`dotnet build src/go-src-converted.slnx` + an own-DLL count script).
 The Phase-3 progress metric: how many of the ~302 auto-converted stdlib projects **emit their own
 assembly** (`bin/Debug/net9.0/<AssemblyName>.dll` exists after a full solution build). Reported as
 `N / 302`. The metric is **packages-compiling, not error count** — clearing an error family can

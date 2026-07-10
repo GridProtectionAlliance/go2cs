@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -15,7 +16,7 @@ import (
 const (
 	// generatedSolutionFileName is the .slnx solution emitted at the output root
 	// (-go2cspath) after a -stdlib conversion. It is the auto-generated counterpart to the
-	// hand-maintained src/go-src-converted.sln.
+	// committed src/go-src-converted.slnx (adopted 2026-07-10, replacing the hand-maintained .sln).
 	generatedSolutionFileName = "go-src-converted.slnx"
 
 	// golibProjectReference / genProjectReference are the solution-relative paths to the
@@ -150,12 +151,46 @@ func buildSolutionXML(coreProjects []string, testProjects []string) string {
 	writeProject(genProjectReference)
 	writeLine(1, "</Folder>")
 
-	// Shared runtime + converted stdlib packages.
-	writeLine(1, "<Folder Name=\"/core/\">")
-	for _, project := range coreProjects {
-		writeProject(project)
+	// Shared runtime + converted stdlib packages, grouped into solution folders that mirror
+	// the Go package namespaces: a project's folder is its PARENT package path (`/core/` +
+	// dir of the Go import path), so `crypto/internal/nistec/fiat` lands under
+	// `/core/crypto/internal/nistec/` and a single-segment package (`fmt`, and golib itself)
+	// sits directly in `/core/`. Folder names are slash-paths — the .slnx format nests by
+	// name, so intermediate folders are implied and never need empty declarations. Projects
+	// arrive globally sorted, which also sorts the folder groups; emitting groups in
+	// first-appearance order keeps the document deterministic and diff-stable.
+	solutionFolder := func(project string) string {
+		parent := path.Dir(path.Dir(project)) // core/<gopath>/<name>.csproj → core/<gopath's parent>
+
+		if parent == "core" || parent == "." {
+			return "/core/"
+		}
+
+		return "/" + parent + "/"
 	}
-	writeLine(1, "</Folder>")
+
+	var folderOrder []string
+	folderProjects := make(map[string][]string)
+
+	for _, project := range coreProjects {
+		folder := solutionFolder(project)
+
+		if _, exists := folderProjects[folder]; !exists {
+			folderOrder = append(folderOrder, folder)
+		}
+
+		folderProjects[folder] = append(folderProjects[folder], project)
+	}
+
+	for _, folder := range folderOrder {
+		writeLine(1, fmt.Sprintf("<Folder Name=\"%s\">", escapeXMLAttr(folder)))
+
+		for _, project := range folderProjects[folder] {
+			writeProject(project)
+		}
+
+		writeLine(1, "</Folder>")
+	}
 
 	// Converted per-package test projects — rendered only once Phase 4 emits them, so an
 	// empty /tests/ folder is never written.

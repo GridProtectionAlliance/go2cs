@@ -1,0 +1,458 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/generators/">
+    <Project Path="gen/go2cs-gen/go2cs-gen.csproj" />
+  </Folder>
+  <Folder Name="/core/archive/">
+    <Project Path="go-src-converted/archive/tar/archive.tar.csproj" />
+    <Project Path="go-src-converted/archive/zip/archive.zip.csproj" />
+  </Folder>
+  <Folder Name="/core/">
+    <Project Path="go-src-converted/bufio/bufio.csproj" />
+    <Project Path="go-src-converted/bytes/bytes.csproj" />
+    <Project Path="go-src-converted/cmp/cmp.csproj" />
+    <Project Path="go-src-converted/context/context.csproj" />
+    <Project Path="go-src-converted/crypto/crypto.csproj" />
+    <Project Path="go-src-converted/embed/embed.csproj" />
+    <Project Path="go-src-converted/encoding/encoding.csproj" />
+    <Project Path="go-src-converted/errors/errors.csproj" />
+    <Project Path="go-src-converted/expvar/expvar.csproj" />
+    <Project Path="go-src-converted/flag/flag.csproj" />
+    <Project Path="go-src-converted/fmt/fmt.csproj" />
+    <Project Path="core/golib/golib.csproj" />
+    <Project Path="go-src-converted/hash/hash.csproj" />
+    <Project Path="go-src-converted/html/html.csproj" />
+    <Project Path="go-src-converted/image/image.csproj" />
+    <Project Path="go-src-converted/io/io.csproj" />
+    <Project Path="go-src-converted/iter/iter.csproj" />
+    <Project Path="go-src-converted/log/log.csproj" />
+    <Project Path="go-src-converted/maps/maps.csproj" />
+    <Project Path="go-src-converted/math/math.csproj" />
+    <Project Path="go-src-converted/mime/mime.csproj" />
+    <Project Path="go-src-converted/net/net.csproj" />
+    <Project Path="go-src-converted/os/os.csproj" />
+    <Project Path="go-src-converted/path/path.csproj" />
+    <Project Path="go-src-converted/plugin/plugin.csproj" />
+    <Project Path="go-src-converted/reflect/reflect.csproj" />
+    <Project Path="go-src-converted/regexp/regexp.csproj" />
+    <Project Path="go-src-converted/runtime/runtime.csproj" />
+    <Project Path="go-src-converted/slices/slices.csproj" />
+    <Project Path="go-src-converted/sort/sort.csproj" />
+    <Project Path="go-src-converted/strconv/strconv.csproj" />
+    <Project Path="go-src-converted/strings/strings.csproj" />
+    <Project Path="go-src-converted/structs/structs.csproj" />
+    <Project Path="go-src-converted/sync/sync.csproj" />
+    <Project Path="go-src-converted/syscall/syscall.csproj" />
+    <Project Path="go-src-converted/testing/testing.csproj" />
+    <Project Path="go-src-converted/time/time.csproj" />
+    <Project Path="go-src-converted/unicode/unicode.csproj" />
+    <Project Path="go-src-converted/unique/unique.csproj" />
+  </Folder>
+  <Folder Name="/core/compress/">
+    <Project Path="go-src-converted/compress/bzip2/compress.bzip2.csproj" />
+    <Project Path="go-src-converted/compress/flate/compress.flate.csproj" />
+    <Project Path="go-src-converted/compress/gzip/compress.gzip.csproj" />
+    <Project Path="go-src-converted/compress/lzw/compress.lzw.csproj" />
+    <Project Path="go-src-converted/compress/zlib/compress.zlib.csproj" />
+  </Folder>
+  <Folder Name="/core/container/">
+    <Project Path="go-src-converted/container/heap/container.heap.csproj" />
+    <Project Path="go-src-converted/container/list/container.list.csproj" />
+    <Project Path="go-src-converted/container/ring/container.ring.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/">
+    <Project Path="go-src-converted/crypto/aes/crypto.aes.csproj" />
+    <Project Path="go-src-converted/crypto/cipher/crypto.cipher.csproj" />
+    <Project Path="go-src-converted/crypto/des/crypto.des.csproj" />
+    <Project Path="go-src-converted/crypto/dsa/crypto.dsa.csproj" />
+    <Project Path="go-src-converted/crypto/ecdh/crypto.ecdh.csproj" />
+    <Project Path="go-src-converted/crypto/ecdsa/crypto.ecdsa.csproj" />
+    <Project Path="go-src-converted/crypto/ed25519/crypto.ed25519.csproj" />
+    <Project Path="go-src-converted/crypto/elliptic/crypto.elliptic.csproj" />
+    <Project Path="go-src-converted/crypto/hmac/crypto.hmac.csproj" />
+    <Project Path="go-src-converted/crypto/md5/crypto.md5.csproj" />
+    <Project Path="go-src-converted/crypto/rand/crypto.rand.csproj" />
+    <Project Path="go-src-converted/crypto/rc4/crypto.rc4.csproj" />
+    <Project Path="go-src-converted/crypto/rsa/crypto.rsa.csproj" />
+    <Project Path="go-src-converted/crypto/sha1/crypto.sha1.csproj" />
+    <Project Path="go-src-converted/crypto/sha256/crypto.sha256.csproj" />
+    <Project Path="go-src-converted/crypto/sha512/crypto.sha512.csproj" />
+    <Project Path="go-src-converted/crypto/subtle/crypto.subtle.csproj" />
+    <Project Path="go-src-converted/crypto/tls/crypto.tls.csproj" />
+    <Project Path="go-src-converted/crypto/x509/crypto.x509.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/internal/">
+    <Project Path="go-src-converted/crypto/internal/alias/crypto.internal.alias.csproj" />
+    <Project Path="go-src-converted/crypto/internal/bigmod/crypto.internal.bigmod.csproj" />
+    <Project Path="go-src-converted/crypto/internal/boring/crypto.internal.boring.csproj" />
+    <Project Path="go-src-converted/crypto/internal/cryptotest/crypto.internal.cryptotest.csproj" />
+    <Project Path="go-src-converted/crypto/internal/edwards25519/crypto.internal.edwards25519.csproj" />
+    <Project Path="go-src-converted/crypto/internal/hpke/crypto.internal.hpke.csproj" />
+    <Project Path="go-src-converted/crypto/internal/mlkem768/crypto.internal.mlkem768.csproj" />
+    <Project Path="go-src-converted/crypto/internal/nistec/crypto.internal.nistec.csproj" />
+    <Project Path="go-src-converted/crypto/internal/randutil/crypto.internal.randutil.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/internal/boring/">
+    <Project Path="go-src-converted/crypto/internal/boring/bbig/crypto.internal.boring.bbig.csproj" />
+    <Project Path="go-src-converted/crypto/internal/boring/bcache/crypto.internal.boring.bcache.csproj" />
+    <Project Path="go-src-converted/crypto/internal/boring/sig/crypto.internal.boring.sig.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/internal/edwards25519/">
+    <Project Path="go-src-converted/crypto/internal/edwards25519/field/crypto.internal.edwards25519.field.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/internal/nistec/">
+    <Project Path="go-src-converted/crypto/internal/nistec/fiat/crypto.internal.nistec.fiat.csproj" />
+  </Folder>
+  <Folder Name="/core/crypto/x509/">
+    <Project Path="go-src-converted/crypto/x509/pkix/crypto.x509.pkix.csproj" />
+  </Folder>
+  <Folder Name="/core/database/">
+    <Project Path="go-src-converted/database/sql/database.sql.csproj" />
+  </Folder>
+  <Folder Name="/core/database/sql/">
+    <Project Path="go-src-converted/database/sql/driver/database.sql.driver.csproj" />
+  </Folder>
+  <Folder Name="/core/debug/">
+    <Project Path="go-src-converted/debug/buildinfo/debug.buildinfo.csproj" />
+    <Project Path="go-src-converted/debug/dwarf/debug.dwarf.csproj" />
+    <Project Path="go-src-converted/debug/elf/debug.elf.csproj" />
+    <Project Path="go-src-converted/debug/gosym/debug.gosym.csproj" />
+    <Project Path="go-src-converted/debug/macho/debug.macho.csproj" />
+    <Project Path="go-src-converted/debug/pe/debug.pe.csproj" />
+    <Project Path="go-src-converted/debug/plan9obj/debug.plan9obj.csproj" />
+  </Folder>
+  <Folder Name="/core/encoding/">
+    <Project Path="go-src-converted/encoding/ascii85/encoding.ascii85.csproj" />
+    <Project Path="go-src-converted/encoding/asn1/encoding.asn1.csproj" />
+    <Project Path="go-src-converted/encoding/base32/encoding.base32.csproj" />
+    <Project Path="go-src-converted/encoding/base64/encoding.base64.csproj" />
+    <Project Path="go-src-converted/encoding/binary/encoding.binary.csproj" />
+    <Project Path="go-src-converted/encoding/csv/encoding.csv.csproj" />
+    <Project Path="go-src-converted/encoding/gob/encoding.gob.csproj" />
+    <Project Path="go-src-converted/encoding/hex/encoding.hex.csproj" />
+    <Project Path="go-src-converted/encoding/json/encoding.json.csproj" />
+    <Project Path="go-src-converted/encoding/pem/encoding.pem.csproj" />
+    <Project Path="go-src-converted/encoding/xml/encoding.xml.csproj" />
+  </Folder>
+  <Folder Name="/core/go/">
+    <Project Path="go-src-converted/go/ast/go.ast.csproj" />
+    <Project Path="go-src-converted/go/build/go.build.csproj" />
+    <Project Path="go-src-converted/go/constant/go.constant.csproj" />
+    <Project Path="go-src-converted/go/doc/go.doc.csproj" />
+    <Project Path="go-src-converted/go/format/go.format.csproj" />
+    <Project Path="go-src-converted/go/importer/go.importer.csproj" />
+    <Project Path="go-src-converted/go/parser/go.parser.csproj" />
+    <Project Path="go-src-converted/go/printer/go.printer.csproj" />
+    <Project Path="go-src-converted/go/scanner/go.scanner.csproj" />
+    <Project Path="go-src-converted/go/token/go.token.csproj" />
+    <Project Path="go-src-converted/go/types/go.types.csproj" />
+    <Project Path="go-src-converted/go/version/go.version.csproj" />
+  </Folder>
+  <Folder Name="/core/go/build/">
+    <Project Path="go-src-converted/go/build/constraint/go.build.constraint.csproj" />
+  </Folder>
+  <Folder Name="/core/go/doc/">
+    <Project Path="go-src-converted/go/doc/comment/go.doc.comment.csproj" />
+  </Folder>
+  <Folder Name="/core/go/internal/">
+    <Project Path="go-src-converted/go/internal/gccgoimporter/go.internal.gccgoimporter.csproj" />
+    <Project Path="go-src-converted/go/internal/gcimporter/go.internal.gcimporter.csproj" />
+    <Project Path="go-src-converted/go/internal/srcimporter/go.internal.srcimporter.csproj" />
+    <Project Path="go-src-converted/go/internal/typeparams/go.internal.typeparams.csproj" />
+  </Folder>
+  <Folder Name="/core/hash/">
+    <Project Path="go-src-converted/hash/adler32/hash.adler32.csproj" />
+    <Project Path="go-src-converted/hash/crc32/hash.crc32.csproj" />
+    <Project Path="go-src-converted/hash/crc64/hash.crc64.csproj" />
+    <Project Path="go-src-converted/hash/fnv/hash.fnv.csproj" />
+    <Project Path="go-src-converted/hash/maphash/hash.maphash.csproj" />
+  </Folder>
+  <Folder Name="/core/html/">
+    <Project Path="go-src-converted/html/template/html.template.csproj" />
+  </Folder>
+  <Folder Name="/core/image/">
+    <Project Path="go-src-converted/image/color/image.color.csproj" />
+    <Project Path="go-src-converted/image/draw/image.draw.csproj" />
+    <Project Path="go-src-converted/image/gif/image.gif.csproj" />
+    <Project Path="go-src-converted/image/jpeg/image.jpeg.csproj" />
+    <Project Path="go-src-converted/image/png/image.png.csproj" />
+  </Folder>
+  <Folder Name="/core/image/color/">
+    <Project Path="go-src-converted/image/color/palette/image.color.palette.csproj" />
+  </Folder>
+  <Folder Name="/core/image/internal/">
+    <Project Path="go-src-converted/image/internal/imageutil/image.internal.imageutil.csproj" />
+  </Folder>
+  <Folder Name="/core/index/">
+    <Project Path="go-src-converted/index/suffixarray/index.suffixarray.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/">
+    <Project Path="go-src-converted/internal/abi/internal.abi.csproj" />
+    <Project Path="go-src-converted/internal/asan/internal.asan.csproj" />
+    <Project Path="go-src-converted/internal/bisect/internal.bisect.csproj" />
+    <Project Path="go-src-converted/internal/buildcfg/internal.buildcfg.csproj" />
+    <Project Path="go-src-converted/internal/bytealg/internal.bytealg.csproj" />
+    <Project Path="go-src-converted/internal/byteorder/internal.byteorder.csproj" />
+    <Project Path="go-src-converted/internal/cfg/internal.cfg.csproj" />
+    <Project Path="go-src-converted/internal/chacha8rand/internal.chacha8rand.csproj" />
+    <Project Path="go-src-converted/internal/concurrent/internal.concurrent.csproj" />
+    <Project Path="go-src-converted/internal/coverage/internal.coverage.csproj" />
+    <Project Path="go-src-converted/internal/cpu/internal.cpu.csproj" />
+    <Project Path="go-src-converted/internal/dag/internal.dag.csproj" />
+    <Project Path="go-src-converted/internal/diff/internal.diff.csproj" />
+    <Project Path="go-src-converted/internal/filepathlite/internal.filepathlite.csproj" />
+    <Project Path="go-src-converted/internal/fmtsort/internal.fmtsort.csproj" />
+    <Project Path="go-src-converted/internal/fuzz/internal.fuzz.csproj" />
+    <Project Path="go-src-converted/internal/goarch/internal.goarch.csproj" />
+    <Project Path="go-src-converted/internal/godebug/internal.godebug.csproj" />
+    <Project Path="go-src-converted/internal/godebugs/internal.godebugs.csproj" />
+    <Project Path="go-src-converted/internal/goexperiment/internal.goexperiment.csproj" />
+    <Project Path="go-src-converted/internal/goos/internal.goos.csproj" />
+    <Project Path="go-src-converted/internal/goroot/internal.goroot.csproj" />
+    <Project Path="go-src-converted/internal/gover/internal.gover.csproj" />
+    <Project Path="go-src-converted/internal/goversion/internal.goversion.csproj" />
+    <Project Path="go-src-converted/internal/itoa/internal.itoa.csproj" />
+    <Project Path="go-src-converted/internal/lazyregexp/internal.lazyregexp.csproj" />
+    <Project Path="go-src-converted/internal/lazytemplate/internal.lazytemplate.csproj" />
+    <Project Path="go-src-converted/internal/msan/internal.msan.csproj" />
+    <Project Path="go-src-converted/internal/nettrace/internal.nettrace.csproj" />
+    <Project Path="go-src-converted/internal/obscuretestdata/internal.obscuretestdata.csproj" />
+    <Project Path="go-src-converted/internal/oserror/internal.oserror.csproj" />
+    <Project Path="go-src-converted/internal/pkgbits/internal.pkgbits.csproj" />
+    <Project Path="go-src-converted/internal/platform/internal.platform.csproj" />
+    <Project Path="go-src-converted/internal/poll/internal.poll.csproj" />
+    <Project Path="go-src-converted/internal/profile/internal.profile.csproj" />
+    <Project Path="go-src-converted/internal/profilerecord/internal.profilerecord.csproj" />
+    <Project Path="go-src-converted/internal/race/internal.race.csproj" />
+    <Project Path="go-src-converted/internal/reflectlite/internal.reflectlite.csproj" />
+    <Project Path="go-src-converted/internal/saferio/internal.saferio.csproj" />
+    <Project Path="go-src-converted/internal/singleflight/internal.singleflight.csproj" />
+    <Project Path="go-src-converted/internal/stringslite/internal.stringslite.csproj" />
+    <Project Path="go-src-converted/internal/sysinfo/internal.sysinfo.csproj" />
+    <Project Path="go-src-converted/internal/testenv/internal.testenv.csproj" />
+    <Project Path="go-src-converted/internal/testlog/internal.testlog.csproj" />
+    <Project Path="go-src-converted/internal/testpty/internal.testpty.csproj" />
+    <Project Path="go-src-converted/internal/trace/internal.trace.csproj" />
+    <Project Path="go-src-converted/internal/txtar/internal.txtar.csproj" />
+    <Project Path="go-src-converted/internal/unsafeheader/internal.unsafeheader.csproj" />
+    <Project Path="go-src-converted/internal/weak/internal.weak.csproj" />
+    <Project Path="go-src-converted/internal/xcoff/internal.xcoff.csproj" />
+    <Project Path="go-src-converted/internal/zstd/internal.zstd.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/coverage/">
+    <Project Path="go-src-converted/internal/coverage/calloc/internal.coverage.calloc.csproj" />
+    <Project Path="go-src-converted/internal/coverage/cfile/internal.coverage.cfile.csproj" />
+    <Project Path="go-src-converted/internal/coverage/cformat/internal.coverage.cformat.csproj" />
+    <Project Path="go-src-converted/internal/coverage/cmerge/internal.coverage.cmerge.csproj" />
+    <Project Path="go-src-converted/internal/coverage/decodecounter/internal.coverage.decodecounter.csproj" />
+    <Project Path="go-src-converted/internal/coverage/decodemeta/internal.coverage.decodemeta.csproj" />
+    <Project Path="go-src-converted/internal/coverage/encodecounter/internal.coverage.encodecounter.csproj" />
+    <Project Path="go-src-converted/internal/coverage/encodemeta/internal.coverage.encodemeta.csproj" />
+    <Project Path="go-src-converted/internal/coverage/pods/internal.coverage.pods.csproj" />
+    <Project Path="go-src-converted/internal/coverage/rtcov/internal.coverage.rtcov.csproj" />
+    <Project Path="go-src-converted/internal/coverage/slicereader/internal.coverage.slicereader.csproj" />
+    <Project Path="go-src-converted/internal/coverage/slicewriter/internal.coverage.slicewriter.csproj" />
+    <Project Path="go-src-converted/internal/coverage/stringtab/internal.coverage.stringtab.csproj" />
+    <Project Path="go-src-converted/internal/coverage/uleb128/internal.coverage.uleb128.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/runtime/">
+    <Project Path="go-src-converted/internal/runtime/atomic/internal.runtime.atomic.csproj" />
+    <Project Path="go-src-converted/internal/runtime/exithook/internal.runtime.exithook.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/syscall/">
+    <Project Path="go-src-converted/internal/syscall/execenv/internal.syscall.execenv.csproj" />
+    <Project Path="go-src-converted/internal/syscall/unix/internal.syscall.unix.csproj" />
+    <Project Path="go-src-converted/internal/syscall/windows/internal.syscall.windows.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/syscall/windows/">
+    <Project Path="go-src-converted/internal/syscall/windows/registry/internal.syscall.windows.registry.csproj" />
+    <Project Path="go-src-converted/internal/syscall/windows/sysdll/internal.syscall.windows.sysdll.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/event/">
+    <Project Path="go-src-converted/internal/trace/event/go122/internal.trace.event.go122.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/">
+    <Project Path="go-src-converted/internal/trace/event/internal.trace.event.csproj" />
+    <Project Path="go-src-converted/internal/trace/raw/internal.trace.raw.csproj" />
+    <Project Path="go-src-converted/internal/trace/testtrace/internal.trace.testtrace.csproj" />
+    <Project Path="go-src-converted/internal/trace/traceviewer/internal.trace.traceviewer.csproj" />
+    <Project Path="go-src-converted/internal/trace/version/internal.trace.version.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/internal/">
+    <Project Path="go-src-converted/internal/trace/internal/oldtrace/internal.trace.internal.oldtrace.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/internal/testgen/">
+    <Project Path="go-src-converted/internal/trace/internal/testgen/go122/internal.trace.internal.testgen.go122.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/trace/traceviewer/">
+    <Project Path="go-src-converted/internal/trace/traceviewer/format/internal.trace.traceviewer.format.csproj" />
+  </Folder>
+  <Folder Name="/core/internal/types/">
+    <Project Path="go-src-converted/internal/types/errors/internal.types.errors.csproj" />
+  </Folder>
+  <Folder Name="/core/io/">
+    <Project Path="go-src-converted/io/fs/io.fs.csproj" />
+    <Project Path="go-src-converted/io/ioutil/io.ioutil.csproj" />
+  </Folder>
+  <Folder Name="/core/log/">
+    <Project Path="go-src-converted/log/internal/log.internal.csproj" />
+    <Project Path="go-src-converted/log/slog/log.slog.csproj" />
+    <Project Path="go-src-converted/log/syslog/log.syslog.csproj" />
+  </Folder>
+  <Folder Name="/core/log/slog/internal/">
+    <Project Path="go-src-converted/log/slog/internal/benchmarks/log.slog.internal.benchmarks.csproj" />
+    <Project Path="go-src-converted/log/slog/internal/buffer/log.slog.internal.buffer.csproj" />
+    <Project Path="go-src-converted/log/slog/internal/slogtest/log.slog.internal.slogtest.csproj" />
+  </Folder>
+  <Folder Name="/core/log/slog/">
+    <Project Path="go-src-converted/log/slog/internal/log.slog.internal.csproj" />
+  </Folder>
+  <Folder Name="/core/math/">
+    <Project Path="go-src-converted/math/big/math.big.csproj" />
+    <Project Path="go-src-converted/math/bits/math.bits.csproj" />
+    <Project Path="go-src-converted/math/cmplx/math.cmplx.csproj" />
+    <Project Path="go-src-converted/math/rand/math.rand.csproj" />
+  </Folder>
+  <Folder Name="/core/math/rand/">
+    <Project Path="go-src-converted/math/rand/v2/math.rand.v2.csproj" />
+  </Folder>
+  <Folder Name="/core/mime/">
+    <Project Path="go-src-converted/mime/multipart/mime.multipart.csproj" />
+    <Project Path="go-src-converted/mime/quotedprintable/mime.quotedprintable.csproj" />
+  </Folder>
+  <Folder Name="/core/net/http/">
+    <Project Path="go-src-converted/net/http/cgi/net.http.cgi.csproj" />
+    <Project Path="go-src-converted/net/http/cookiejar/net.http.cookiejar.csproj" />
+    <Project Path="go-src-converted/net/http/fcgi/net.http.fcgi.csproj" />
+    <Project Path="go-src-converted/net/http/httptest/net.http.httptest.csproj" />
+    <Project Path="go-src-converted/net/http/httptrace/net.http.httptrace.csproj" />
+    <Project Path="go-src-converted/net/http/httputil/net.http.httputil.csproj" />
+    <Project Path="go-src-converted/net/http/internal/net.http.internal.csproj" />
+    <Project Path="go-src-converted/net/http/pprof/net.http.pprof.csproj" />
+  </Folder>
+  <Folder Name="/core/net/http/internal/">
+    <Project Path="go-src-converted/net/http/internal/ascii/net.http.internal.ascii.csproj" />
+    <Project Path="go-src-converted/net/http/internal/testcert/net.http.internal.testcert.csproj" />
+  </Folder>
+  <Folder Name="/core/net/">
+    <Project Path="go-src-converted/net/http/net.http.csproj" />
+    <Project Path="go-src-converted/net/mail/net.mail.csproj" />
+    <Project Path="go-src-converted/net/netip/net.netip.csproj" />
+    <Project Path="go-src-converted/net/rpc/net.rpc.csproj" />
+    <Project Path="go-src-converted/net/smtp/net.smtp.csproj" />
+    <Project Path="go-src-converted/net/textproto/net.textproto.csproj" />
+    <Project Path="go-src-converted/net/url/net.url.csproj" />
+  </Folder>
+  <Folder Name="/core/net/internal/">
+    <Project Path="go-src-converted/net/internal/socktest/net.internal.socktest.csproj" />
+  </Folder>
+  <Folder Name="/core/net/rpc/">
+    <Project Path="go-src-converted/net/rpc/jsonrpc/net.rpc.jsonrpc.csproj" />
+  </Folder>
+  <Folder Name="/core/os/exec/internal/">
+    <Project Path="go-src-converted/os/exec/internal/fdtest/os.exec.internal.fdtest.csproj" />
+  </Folder>
+  <Folder Name="/core/os/">
+    <Project Path="go-src-converted/os/exec/os.exec.csproj" />
+    <Project Path="go-src-converted/os/signal/os.signal.csproj" />
+    <Project Path="go-src-converted/os/user/os.user.csproj" />
+  </Folder>
+  <Folder Name="/core/path/">
+    <Project Path="go-src-converted/path/filepath/path.filepath.csproj" />
+  </Folder>
+  <Folder Name="/core/reflect/internal/">
+    <Project Path="go-src-converted/reflect/internal/example1/reflect.internal.example1.csproj" />
+    <Project Path="go-src-converted/reflect/internal/example2/reflect.internal.example2.csproj" />
+  </Folder>
+  <Folder Name="/core/regexp/">
+    <Project Path="go-src-converted/regexp/syntax/regexp.syntax.csproj" />
+  </Folder>
+  <Folder Name="/core/runtime/">
+    <Project Path="go-src-converted/runtime/coverage/runtime.coverage.csproj" />
+    <Project Path="go-src-converted/runtime/debug/runtime.debug.csproj" />
+    <Project Path="go-src-converted/runtime/metrics/runtime.metrics.csproj" />
+    <Project Path="go-src-converted/runtime/pprof/runtime.pprof.csproj" />
+    <Project Path="go-src-converted/runtime/race/runtime.race.csproj" />
+    <Project Path="go-src-converted/runtime/trace/runtime.trace.csproj" />
+  </Folder>
+  <Folder Name="/core/runtime/internal/">
+    <Project Path="go-src-converted/runtime/internal/math/runtime.internal.math.csproj" />
+    <Project Path="go-src-converted/runtime/internal/startlinetest/runtime.internal.startlinetest.csproj" />
+    <Project Path="go-src-converted/runtime/internal/sys/runtime.internal.sys.csproj" />
+  </Folder>
+  <Folder Name="/core/runtime/race/internal/">
+    <Project Path="go-src-converted/runtime/race/internal/amd64v1/runtime.race.internal.amd64v1.csproj" />
+  </Folder>
+  <Folder Name="/core/sync/">
+    <Project Path="go-src-converted/sync/atomic/sync.atomic.csproj" />
+  </Folder>
+  <Folder Name="/core/testing/">
+    <Project Path="go-src-converted/testing/fstest/testing.fstest.csproj" />
+    <Project Path="go-src-converted/testing/iotest/testing.iotest.csproj" />
+    <Project Path="go-src-converted/testing/quick/testing.quick.csproj" />
+    <Project Path="go-src-converted/testing/slogtest/testing.slogtest.csproj" />
+  </Folder>
+  <Folder Name="/core/testing/internal/">
+    <Project Path="go-src-converted/testing/internal/testdeps/testing.internal.testdeps.csproj" />
+  </Folder>
+  <Folder Name="/core/text/">
+    <Project Path="go-src-converted/text/scanner/text.scanner.csproj" />
+    <Project Path="go-src-converted/text/tabwriter/text.tabwriter.csproj" />
+    <Project Path="go-src-converted/text/template/text.template.csproj" />
+  </Folder>
+  <Folder Name="/core/text/template/">
+    <Project Path="go-src-converted/text/template/parse/text.template.parse.csproj" />
+  </Folder>
+  <Folder Name="/core/time/">
+    <Project Path="go-src-converted/time/tzdata/time.tzdata.csproj" />
+  </Folder>
+  <Folder Name="/core/unicode/">
+    <Project Path="go-src-converted/unicode/utf16/unicode.utf16.csproj" />
+    <Project Path="go-src-converted/unicode/utf8/unicode.utf8.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/crypto/">
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/chacha20/vendor.golang.org.x.crypto.chacha20.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/chacha20poly1305/vendor.golang.org.x.crypto.chacha20poly1305.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/cryptobyte/vendor.golang.org.x.crypto.cryptobyte.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/hkdf/vendor.golang.org.x.crypto.hkdf.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/sha3/vendor.golang.org.x.crypto.sha3.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/crypto/cryptobyte/">
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/cryptobyte/asn1/vendor.golang.org.x.crypto.cryptobyte.asn1.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/crypto/internal/">
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/internal/alias/vendor.golang.org.x.crypto.internal.alias.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/crypto/internal/poly1305/vendor.golang.org.x.crypto.internal.poly1305.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/net/dns/">
+    <Project Path="go-src-converted/vendor/golang.org/x/net/dns/dnsmessage/vendor.golang.org.x.net.dns.dnsmessage.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/net/http/">
+    <Project Path="go-src-converted/vendor/golang.org/x/net/http/httpguts/vendor.golang.org.x.net.http.httpguts.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/net/http/httpproxy/vendor.golang.org.x.net.http.httpproxy.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/net/http2/">
+    <Project Path="go-src-converted/vendor/golang.org/x/net/http2/hpack/vendor.golang.org.x.net.http2.hpack.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/net/">
+    <Project Path="go-src-converted/vendor/golang.org/x/net/idna/vendor.golang.org.x.net.idna.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/net/nettest/vendor.golang.org.x.net.nettest.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/sys/">
+    <Project Path="go-src-converted/vendor/golang.org/x/sys/cpu/vendor.golang.org.x.sys.cpu.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/text/secure/">
+    <Project Path="go-src-converted/vendor/golang.org/x/text/secure/bidirule/vendor.golang.org.x.text.secure.bidirule.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/text/">
+    <Project Path="go-src-converted/vendor/golang.org/x/text/transform/vendor.golang.org.x.text.transform.csproj" />
+  </Folder>
+  <Folder Name="/core/vendor/golang.org/x/text/unicode/">
+    <Project Path="go-src-converted/vendor/golang.org/x/text/unicode/bidi/vendor.golang.org.x.text.unicode.bidi.csproj" />
+    <Project Path="go-src-converted/vendor/golang.org/x/text/unicode/norm/vendor.golang.org.x.text.unicode.norm.csproj" />
+  </Folder>
+</Solution>

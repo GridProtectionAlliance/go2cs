@@ -52,7 +52,7 @@ full auto-output), so restoring it realigns with the original design.
 - **Restored the old hand-finished stub from `3426298eb` into `src/core`.** Key finding: it **compiles
   cleanly against today's `golib`** — the feared API drift did not materialize, so it gave a green baseline
   immediately. Restored 14 packages; excluded the stub `testing` (drifted, 400 errors, referenced by no test).
-- Scoped **`src/go2cs.sln`** to the baseline + tests; added **`src/go-src-converted.sln`** for the 301 WIP
+- Scoped **`src/go2cs.sln`** to the baseline + tests; added **`src/go-src-converted.slnx`** for the 301 WIP
   projects.
 - Result: `go2cs.sln` builds 79/79; behavioral suite green (216 tests).
 
