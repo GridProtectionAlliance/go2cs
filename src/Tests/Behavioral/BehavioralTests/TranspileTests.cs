@@ -672,6 +672,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
+    public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]

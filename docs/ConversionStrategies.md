@@ -2119,6 +2119,32 @@ interface-typed element is excluded — it is already the interface and needs no
 the `InterfaceFieldNamedScalar` behavioral test — a named `int` into an `error` field and a named
 `string` into a local interface field, positional and keyed forms, output-compared vs Go.)
 
+**Naming a lift that has no name source — `new(struct{ SomeIface })`.** Every dyn-lift derives its
+C# type name from context (the declared var, the struct field, the parameter name). A package-level
+`var reserved = new(struct{ types.Type })` (go/internal/gccgoimporter's singleton) had NO source:
+the initializer is a CallExpr (the composite-literal up-front lift didn't fire), so the declaration
+type fell to the raw `t.String()` mangle (`ж<types.Type}>`), and the lift arrived late from the
+call-argument path under builtin `new`'s UNNAMED parameter — an EMPTY lift name, declaring
+`partial struct  {` and registering `""` for every reference (`@new<>()`,
+`[assembly: GoImplement<, …>]`, `new жΔType(…)` — a whole-package syntax cascade). Two-part fix:
+`visitValueSpec` lifts a `new(struct{…})` initializer's struct UP FRONT under the var's name
+(mirroring the composite-literal and hpke map-value lifts), so the declaration, the `@new<…>` type
+argument, the `GoImplement` recordings, and the pointer-adapter names all resolve through
+`liftedTypeMap`:
+```csharp
+[GoType("dyn")] partial struct reservedᴛ1 {
+    public global::go.go.types_package.ΔType Type;
+}
+internal static ж<reservedᴛ1> reserved = @new<reservedᴛ1>();
+p.typeList[n] = new reservedᴛ1жΔType(reserved);
+```
+and `visitStructType` itself falls back to the generic `"type"` when a lift arrives with an empty
+name (the FUNCTION-LOCAL `x := new(struct{…})` form still reaches it through the unnamed-parameter
+path → `main_type`), so no caller can produce an unnamed type declaration. (Guarded by the
+`NewAnonStructIfaceEmbed` behavioral test — the package-level singleton converted to its embedded
+interface through the lifted type's pointer adapter, the embedded field filled and called through
+the promotion, plus the function-local form — output-compared vs Go.)
+
 ### Astral rune literals
 A quoted rune literal beyond the BMP (`'\U0001D504'`) cannot be a C# char literal — it emits
 the code point (`(rune)0x1D504`); BMP literals keep their source text verbatim (html's entity

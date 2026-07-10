@@ -341,6 +341,22 @@ func (v *Visitor) visitValueSpec(valueSpec *ast.ValueSpec, doc *ast.CommentGroup
 								// keyed element literals stay the target-typed `new(…)` ctor form.
 								v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
 							}
+						} else if callExpr, ok := valueSpec.Values[i].(*ast.CallExpr); ok && len(callExpr.Args) == 1 {
+							// A builtin `new` over an anonymous struct — `var reserved =
+							// new(struct{ types.Type })` (go/internal/gccgoimporter): lift the struct
+							// with the var name up front so the declaration type (`ж<reservedᴛ1>`) and
+							// the `@new<…>()` type argument both resolve through liftedTypeMap, instead
+							// of the declaration falling to the raw `struct{…}` t.String() mangle and
+							// the lift arriving from the call-argument path under builtin new's UNNAMED
+							// parameter (an empty lift name — a whole-package syntax cascade). Mirrors
+							// the composite-literal lift above.
+							if funIdent, isIdent := callExpr.Fun.(*ast.Ident); isIdent && funIdent.Name == "new" {
+								if _, isBuiltin := v.info.ObjectOf(funIdent).(*types.Builtin); isBuiltin {
+									if subStructType, exprType := v.extractStructType(callExpr.Args[0]); subStructType != nil && !v.liftedTypeExists(subStructType) {
+										v.visitStructType(subStructType, exprType, csIDName, valueSpec.Comment, true, nil)
+									}
+								}
+							}
 						}
 					}
 

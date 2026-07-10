@@ -18,6 +18,16 @@ func (v *Visitor) visitStructType(structType *ast.StructType, identType types.Ty
 
 	// Intra-function type declarations are not allowed in C#
 	if lifted {
+		// A lift can arrive with an EMPTY name — an anonymous struct in a call-argument slot
+		// whose parameter is unnamed (builtin `new(struct{ types.Type })`, go/internal/
+		// gccgoimporter's reserved). An empty name would declare `partial struct  {` and
+		// register "" for every reference to the type — a whole-package syntax cascade. Fall
+		// back to the generic "type" the other anonymous-type call sites pass
+		// (convStructType/convStarExpr).
+		if name == "" {
+			name = "type"
+		}
+
 		if v.inFunction {
 			if target == nil {
 				target = &strings.Builder{}

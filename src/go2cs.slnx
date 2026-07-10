@@ -267,6 +267,7 @@
     <Project Path="Tests/Behavioral/NestedLambdaReceiverField/NestedLambdaReceiverField.csproj" />
     <Project Path="Tests/Behavioral/NestedMapAssign/NestedMapAssign.csproj" />
     <Project Path="Tests/Behavioral/NestedVarShadow/NestedVarShadow.csproj" />
+    <Project Path="Tests/Behavioral/NewAnonStructIfaceEmbed/NewAnonStructIfaceEmbed.csproj" />
     <Project Path="Tests/Behavioral/NilMapOperations/NilMapOperations.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowParam/PackageShadowParam.csproj" />
     <Project Path="Tests/Behavioral/PackageShadowPointerParam/PackageShadowPointerParam.csproj" />

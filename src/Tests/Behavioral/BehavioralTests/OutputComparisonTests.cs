@@ -622,6 +622,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNestedVarShadow() => CheckTarget("NestedVarShadow");
 
     [TestMethod]
+    public void CheckNewAnonStructIfaceEmbed() => CheckTarget("NewAnonStructIfaceEmbed");
+
+    [TestMethod]
     public void CheckNilMapOperations() => CheckTarget("NilMapOperations");
 
     [TestMethod]
