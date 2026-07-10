@@ -245,6 +245,25 @@ func (v *Visitor) convCallExpr(callExpr *ast.CallExpr, context LambdaContext) st
 					// exposes the interface view.
 					return fmt.Sprintf("((%s)%s)", targetTypeName, v.convertToInterfaceType(callTargetType, argPtrType, v.convExpr(arg, []ExprContext{identContext})))
 				}
+
+				// The VALUE mirror: a FOREIGN named VALUE source — `crypto.SignerOpts(sigHash)`
+				// with `sigHash crypto.Hash` (crypto/tls, CS0030 ×4). The plain cast cannot bind:
+				// a foreign value type implements its interfaces via extension methods (never
+				// structurally), and this assembly cannot partial it — route through
+				// convertToInterfaceType, which records + references the LOCAL value adapter
+				// (the both-foreign arm; syscall.Signal→os.Signal precedent) or no-ops into the
+				// plain spelling when the defining assembly already implements the pair. LOCAL
+				// value sources keep the plain-cast/partial-impl route (no churn). The outer
+				// interface cast stays load-bearing exactly like the pointer arm: `var signOpts
+				// = …` must type as the INTERFACE, not the adapter class — each tls site
+				// reassigns signOpts to a different adapter two lines later (CS0029 hazard).
+				if argType := v.getType(arg, false); argType != nil {
+					if named, ok := types.Unalias(argType).(*types.Named); ok && !types.IsInterface(named) {
+						if pkg := named.Obj().Pkg(); pkg != nil && pkg != v.pkg {
+							return fmt.Sprintf("((%s)%s)", targetTypeName, v.convertToInterfaceType(callTargetType, argType, v.convExpr(arg, nil)))
+						}
+					}
+				}
 			}
 		}
 

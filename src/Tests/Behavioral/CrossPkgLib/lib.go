@@ -300,3 +300,15 @@ func (b *Branch) emitNode() {}
 func NewBranch(label string, kind int) *Branch {
 	return &Branch{EmitBase: EmitBase{Label: label}, Kind: kind}
 }
+
+// Verdict is a named numeric implementing Scored via a VALUE receiver. This package deliberately
+// NEVER converts Verdict to Scored itself (no `var _ Scored = …` witness, no in-lib conversion), so
+// no value-form GoImplement record is exported — a consumer's EXPLICIT `Scored(v)` conversion must
+// record the pair locally and route through its OWN value adapter class (crypto/tls's
+// `crypto.SignerOpts(sigHash)` over the extension-method-implemented crypto.Hash, CS0030 ×4).
+type Verdict int
+
+func (v Verdict) Score() int { return int(v) * 10 }
+
+// Scored is the target interface of the consumer's explicit VALUE conversion.
+type Scored interface{ Score() int }

@@ -297,6 +297,10 @@ internal static void Main() => func((defer, recover) => {
     var rbuf = new rune[]{(rune)'a'}.slice();
     rbuf = append(rbuf, (rune)(CrossPkgLib.Precision));
     fmt.Println(((@string)bbuf), len(rbuf), rbuf[1]);
+    var sc = ((CrossPkgLib.Scored)new CrossPkgLib_VerdictᴠScored(((CrossPkgLib.Verdict)4)));
+    fmt.Println("verdict score:", sc.Score());
+    sc = new talliesжScored(Ꮡ(new tallies(pts: 7)));
+    fmt.Println("tallies score:", sc.Score());
 });
 
 [GoType("num:float64")] partial struct localCelsius;
@@ -343,6 +347,14 @@ internal static @string Meter(this tagged t) {
 [GoType] partial struct rig {
     public partial ref CrossPkgLib_package.Device Device { get; }
     internal nint id;
+}
+
+[GoType] partial struct tallies {
+    internal nint pts;
+}
+
+[GoRecv] internal static nint Score(this ref tallies t) {
+    return t.pts;
 }
 
 } // end main_package

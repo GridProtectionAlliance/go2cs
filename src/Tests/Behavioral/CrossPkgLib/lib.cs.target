@@ -246,4 +246,14 @@ public static ж<Branch> NewBranch(@string label, nint kind) {
     return Ꮡ(new Branch(EmitBase: new EmitBase(Label: label), Kind: kind));
 }
 
+[GoType("num:nint")] partial struct Verdict;
+
+public static nint Score(this Verdict v) {
+    return (nint)v * 10;
+}
+
+[GoType] partial interface Scored {
+    nint Score();
+}
+
 } // end CrossPkgLib_package

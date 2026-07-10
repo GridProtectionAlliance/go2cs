@@ -457,6 +457,17 @@ func main() {
 	rbuf := []rune{'a'}
 	rbuf = append(rbuf, CrossPkgLib.Precision)
 	fmt.Println(string(bbuf), len(rbuf), rbuf[1]) // key: 2 2
+
+	// An EXPLICIT interface conversion whose SOURCE is a foreign named VALUE type (Verdict,
+	// value-receiver Score, deliberately NO witness in the lib) must route through THIS
+	// assembly's generated value adapter — the plain cast is CS0030: the foreign value type
+	// implements Score only via extension methods (crypto/tls's `crypto.SignerOpts(sigHash)`
+	// over crypto.Hash, ×4). The conversion result types as the INTERFACE, so the same var
+	// accepts a different implementation next (the tls signOpts reassignment shape, CS0029).
+	sc := CrossPkgLib.Scored(CrossPkgLib.Verdict(4))
+	fmt.Println("verdict score:", sc.Score()) // verdict score: 40
+	sc = &tallies{pts: 7}
+	fmt.Println("tallies score:", sc.Score()) // tallies score: 7
 }
 
 // localCelsius is a LOCAL named numeric over `float64` (NOT over a cross-package type), so a
@@ -540,3 +551,10 @@ type rig struct {
 	CrossPkgLib.Device
 	id int
 }
+
+// tallies is a LOCAL pointer-receiver implementation of the cross-package Scored interface,
+// reassigned into the SAME var that held the explicit value conversion — proving that var
+// typed as the interface, not as the generated value adapter class.
+type tallies struct{ pts int }
+
+func (t *tallies) Score() int { return t.pts }
