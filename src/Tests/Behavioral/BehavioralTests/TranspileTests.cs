@@ -207,6 +207,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckDeferEvalParamFunc() => CheckTarget("DeferEvalParamFunc");
 
     [TestMethod]
+    public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
+
+    [TestMethod]
     public void CheckDeferHeapLocalPtrMethod() => CheckTarget("DeferHeapLocalPtrMethod");
 
     [TestMethod]

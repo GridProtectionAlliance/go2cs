@@ -2012,14 +2012,18 @@ func (v *Visitor) varAddressTakenInLambda(varObj types.Object) bool {
 
 // varUsedAsImplicitAddrReceiverInLambda reports whether varObj is used inside the lambda currently
 // being analyzed as the VALUE receiver of a POINTER-receiver method call (`defer state.free()`,
-// state a value local, free a `*handleState` method) — directly or PROMOTED through value embeds
-// (`lazyCert.Do(…)` on a struct embedding sync.Once). Go auto-takes the receiver's address, and
-// emission binds this through the box (`Ꮡstate.free` / the `.of(…)` field projection, see
-// pointerReceiverBoxMethodGroup's value arm), so an escaping such local must be captured by-box,
-// not snapshot-copied. The direct case mirrors that arm's guard exactly: a NAMED value receiver
-// whose type is identical to the method's pointer-receiver pointee. An ALREADY-pointer receiver
-// (`defer conf.releaseSema()`) is excluded — its box group is the pointer variable itself, whose
-// snapshot name IS declared, so it needs no box-ref treatment.
+// state a value local, free a `*handleState` method) — directly, PROMOTED through value embeds
+// (`lazyCert.Do(…)` on a struct embedding sync.Once), or through a single VALUE-struct FIELD
+// projection (`defer p.fake.setLines()`, go/internal/gcimporter — Go takes `&p.fake`, an address
+// INTO the var's own storage). Go auto-takes the receiver's address, and emission binds this
+// through the box (`Ꮡstate.free` / the `.of(…)` field projection, see pointerReceiverBoxMethodGroup's
+// value arm and lambdaBoxRefAddressForm's `&m.field` arm), so an escaping such local must be
+// captured by-box, not snapshot-copied — the snapshot's box name is never declared (CS0103), and
+// the copy divorces the deferred call from writes made between the defer and the call, which Go's
+// live address sees. The direct and field-projection cases mirror that arm's guard exactly: a
+// NAMED value receiver whose type is identical to the method's pointer-receiver pointee. An
+// ALREADY-pointer receiver (`defer conf.releaseSema()`) is excluded — its box group is the
+// pointer variable itself, whose snapshot name IS declared, so it needs no box-ref treatment.
 func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) bool {
 	lambda := v.lambdaCapture.currentLambda
 
@@ -2047,8 +2051,36 @@ func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) boo
 		}
 
 		ident, ok := sel.X.(*ast.Ident)
+		fieldProjection := false
 
-		if !ok || v.info.ObjectOf(ident) != varObj {
+		if !ok {
+			// A single field projection of the var (`p.fake.setLines()`): the projected member
+			// must be a FIELD selected on the var's own VALUE-struct storage — matching the
+			// `&m.field` form of varAddressTakenInLambda and the lambdaBoxRefAddressForm
+			// emission (`Ꮡp.of(T.Ꮡfake)`). A deeper chain or a method/pointer hop falls
+			// through to the existing snapshot handling.
+			fieldSel, isSel := sel.X.(*ast.SelectorExpr)
+
+			if !isSel {
+				return true
+			}
+
+			if ident, ok = fieldSel.X.(*ast.Ident); !ok {
+				return true
+			}
+
+			if _, isField := v.info.ObjectOf(fieldSel.Sel).(*types.Var); !isField {
+				return true
+			}
+
+			if _, isStruct := v.getType(fieldSel.X, true).(*types.Struct); !isStruct {
+				return true
+			}
+
+			fieldProjection = true
+		}
+
+		if v.info.ObjectOf(ident) != varObj {
 			return true
 		}
 
@@ -2088,6 +2120,13 @@ func (v *Visitor) varUsedAsImplicitAddrReceiverInLambda(varObj types.Object) boo
 				return false
 			}
 
+			return true
+		}
+
+		// The field-projection form is matched on the exact pointee only — a method promoted
+		// through the FIELD's own embeds keeps the existing snapshot handling (its emission
+		// does not take the single-hop box form this analysis pairs with).
+		if fieldProjection {
 			return true
 		}
 

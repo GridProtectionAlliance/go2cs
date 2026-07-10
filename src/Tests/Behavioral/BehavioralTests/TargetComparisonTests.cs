@@ -210,6 +210,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckDeferEvalParamFunc() => CheckTarget("DeferEvalParamFunc");
 
     [TestMethod]
+    public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
+
+    [TestMethod]
     public void CheckDeferHeapLocalPtrMethod() => CheckTarget("DeferHeapLocalPtrMethod");
 
     [TestMethod]

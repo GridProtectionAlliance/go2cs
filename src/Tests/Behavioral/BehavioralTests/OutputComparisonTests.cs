@@ -184,6 +184,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckDeferEvalParamFunc() => CheckTarget("DeferEvalParamFunc");
 
     [TestMethod]
+    public void CheckDeferHeapFieldPtrMethod() => CheckTarget("DeferHeapFieldPtrMethod");
+
+    [TestMethod]
     public void CheckDeferHeapLocalPtrMethod() => CheckTarget("DeferHeapLocalPtrMethod");
 
     [TestMethod]
