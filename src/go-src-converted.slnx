@@ -92,6 +92,7 @@
     <Project Path="go-src-converted/crypto/x509/crypto.x509.csproj" />
     <Project Path="go-src-converted/crypto/x509/pkix/crypto.x509.pkix.csproj" />
   </Folder>
+  <Folder Name="/core/database/" />
   <Folder Name="/core/database/sql/" Id="5a94e6f1-564b-583b-aef9-0987b696e203">
     <Project Path="go-src-converted/database/sql/database.sql.csproj" />
     <Project Path="go-src-converted/database/sql/driver/database.sql.driver.csproj" />
@@ -418,6 +419,9 @@
     <Project Path="go-src-converted/unicode/utf16/unicode.utf16.csproj" />
     <Project Path="go-src-converted/unicode/utf8/unicode.utf8.csproj" />
   </Folder>
+  <Folder Name="/core/vendor/" />
+  <Folder Name="/core/vendor/golang.org/" />
+  <Folder Name="/core/vendor/golang.org/x/" />
   <Folder Name="/core/vendor/golang.org/x/crypto/" Id="982f17b4-48b6-50a5-8300-b60417c4d528">
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/chacha20/vendor.golang.org.x.crypto.chacha20.csproj" />
     <Project Path="go-src-converted/vendor/golang.org/x/crypto/chacha20poly1305/vendor.golang.org.x.crypto.chacha20poly1305.csproj" />
