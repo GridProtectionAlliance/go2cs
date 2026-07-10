@@ -41,6 +41,17 @@ func (e *engine) ping() {
 	go e.tally.report()
 }
 
+// valueSender's methods have VALUE receivers: a go-statement's bare method group over such a
+// method is an extension over a struct VALUE — C# forbids delegates over value-type extension
+// receivers (CS1113; net/http/httputil's `go spc.copyToBackend(errc)`, switchProtocolCopier) —
+// so both arities force the lambda form (`goǃ(ᴛ1 => vsʗ1.send(ᴛ1), 7)`;
+// `goǃ(() => vsʗ2.ping())`). The receiver snapshot still evaluates at go-statement time, and
+// the blocking receives prove both goroutines ran to completion.
+type valueSender struct{ c chan int }
+
+func (v valueSender) send(n int) { v.c <- n }
+func (v valueSender) ping()      { v.c <- 99 }
+
 func main() {
 	e := &engine{tally: &counter{done: make(chan bool, 1)}}
 
@@ -55,4 +66,10 @@ func main() {
 	e.ping()
 	<-e.tally.done
 	fmt.Println("pinged:", e.tally.n)
+
+	vs := valueSender{c: make(chan int)}
+	go vs.send(7)
+	fmt.Println("value-recv go:", <-vs.c)
+	go vs.ping()
+	fmt.Println("value-recv nullary go:", <-vs.c)
 }

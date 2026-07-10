@@ -1747,6 +1747,18 @@ Func-literal callees and `void`-returning method groups are untouched (`goǃ(() 
 `goǃ(emit, out)`). (Guarded by the `GoStmtValueReturn` behavioral test — value-returning nullary,
 single-, multi-param and multi-result goroutine callees, output-compared vs Go.)
 
+A **VALUE-receiver method callee** forces the same lambda forms even when void and
+arity-matching: every Go named type emits a C# struct and the method an extension on it, and C#
+forbids constructing a delegate from an extension method over a **value-type receiver** (CS1113 —
+net/http/httputil's `go spc.copyToBackend(errc)`, `switchProtocolCopier`). So
+`goǃ(spcʗ1.copyToBackend, errc)` becomes `goǃ(ᴛ1 => spcʗ1.copyToBackend(ᴛ1), errc)` and a nullary
+`go vs.ping()` keeps its invocation (`goǃ(() => vsʗ1.ping())`). The receiver snapshot (`spcʗ1`)
+still evaluates at go-statement time. An INTERFACE-receiver method group is excluded (a genuine C#
+instance method binds delegates fine), and pointer receivers keep the box-group machinery
+(`pointerReceiverBoxMethodGroup` — `ж<T>` is a class, so its group is delegate-legal). (Guarded by
+`GoStmtReceiverLambda`'s `valueSender` arms — value-receiver argument and nullary go-statements
+with blocking-receive completion proof, output-compared vs Go.)
+
 ### A func-literal ARGUMENT of a deferred call hoists its captures before the call
 When a deferred call's **callee** is itself a func literal (`defer func() { … }()`), that literal's
 lambda-capture snapshots (`var sʗ1 = s;`) are threaded to a builder emitted *before* the `deferǃ(…)`

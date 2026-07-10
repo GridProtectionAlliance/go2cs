@@ -63,14 +63,34 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		}
 	}
 
+	// A VALUE-receiver method callee cannot pass as a bare method group: every Go named type
+	// emits a C# struct, the method an extension on it, and C# forbids creating a delegate
+	// from an extension method over a value-type receiver (CS1113 — net/http/httputil's
+	// `go spc.copyToBackend(errc)`, switchProtocolCopier). Such a callee takes the lambda
+	// form instead; the receiver snapshot still evaluates at go-statement time. An INTERFACE
+	// receiver keeps the method group (a genuine C# instance method binds delegates fine),
+	// and pointer receivers keep the box-group machinery below.
+	valueRecvMethodGroup := false
+
+	if selectorExpr, ok := goStmt.Call.Fun.(*ast.SelectorExpr); ok {
+		if funcObj, ok := v.info.ObjectOf(selectorExpr.Sel).(*types.Func); ok {
+			if sig, ok := funcObj.Type().(*types.Signature); ok && sig.Recv() != nil {
+				if _, isPtrRecv := sig.Recv().Type().(*types.Pointer); !isPtrRecv && !types.IsInterface(sig.Recv().Type()) {
+					valueRecvMethodGroup = true
+				}
+			}
+		}
+	}
+
 	// A value-returning callee passed as a BARE method group is a Func<...>, but every goǃ
 	// overload takes a void Action<...> (CS0407 "no overload matches the delegate" —
 	// x/net/nettest's `go chunkedCopy(c2, c2)`, chunkedCopy returning error). Force the
 	// temp-param lambda form so convCallExpr renders `(ᴛ1, ᴛ2) => chunkedCopy(ᴛ1, ᴛ2)`, which
 	// converts to a discarding Action — exactly Go's fire-and-forget goroutine semantics. This
 	// mirrors the defer arm's result handling; the defer PARAM case needs no equivalent only
-	// because deferǃ additionally has Func<...> overloads, while goǃ does not.
-	if hasResults && paramCount > 0 {
+	// because deferǃ additionally has Func<...> overloads, while goǃ does not. A VALUE-receiver
+	// method group forces the same lambda form for its CS1113 wall (above).
+	if (hasResults || valueRecvMethodGroup) && paramCount > 0 {
 		renderLambdaParams = true
 	}
 
@@ -118,13 +138,14 @@ func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
 		// C# `go` method implementation expects an Action (or WaitCallback delegate)
 		if boxGroup != "" {
 			callExpr = boxGroup
-		} else if !hasResults && !namedFuncType && strings.HasSuffix(callExpr, "()") {
+		} else if !hasResults && !namedFuncType && !valueRecvMethodGroup && strings.HasSuffix(callExpr, "()") {
 			callExpr = strings.TrimSuffix(callExpr, "()") // Action delegate
-		} else if (hasResults || namedFuncType) && strings.HasSuffix(callExpr, "()") {
+		} else if (hasResults || namedFuncType || valueRecvMethodGroup) && strings.HasSuffix(callExpr, "()") {
 			// A NAMED func-type callee (context.CancelFunc) is a DISTINCT C# delegate with no
 			// conversion to Action, and a value-returning callee's bare method group is a
 			// Func<...> (CS0407); keep the invocation and wrap it in an Action lambda that
-			// discards any result — exactly Go's fire-and-forget goroutine semantics.
+			// discards any result — exactly Go's fire-and-forget goroutine semantics. A nullary
+			// VALUE-receiver method group keeps the invocation too (its trimmed form is CS1113).
 			callExpr = "() => " + callExpr
 		} else {
 			callExpr = "_ => " + callExpr // WaitCallback delegate
