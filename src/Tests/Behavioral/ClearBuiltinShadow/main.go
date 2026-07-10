@@ -16,6 +16,12 @@ import "fmt"
 // wherever recover is legal and correctly shadows the same-named method. Qualifying it would bind to
 // the nonexistent `builtin.recover` and fall back to the method (CS0815/CS7036).
 
+// header is a NAMED map type: `clear(h)` on its value must bind golib's IMap<K,V> overload —
+// the generated wrapper implements IMap<K,V> and forwards to the shared underlying map, so
+// clearing through the boxed view empties the caller's storage (net/http/httputil's `clear(h)`
+// on an http.Header, CS0411 without the overload). A nil named map stays a no-op.
+type header map[string][]string
+
 type box struct{ data []int }
 
 func (b *box) clear() { b.data = nil } // a METHOD named clear — shadows the built-in
@@ -49,4 +55,13 @@ func main() {
 	g := &guard{}
 	g.run()
 	fmt.Println(g.err) // recovered: boom
+
+	h := header{"a": {"1"}, "b": {"2"}}
+	alias := h // named-map values share storage
+	clear(h)   // the built-in clear(NAMED map) -> the IMap<K,V> overload
+	fmt.Println(len(h), len(alias)) // 0 0
+
+	var hn header
+	clear(hn) // clearing a nil named map is a no-op
+	fmt.Println(len(hn)) // 0
 }

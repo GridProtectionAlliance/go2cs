@@ -896,6 +896,18 @@ public static class builtin
     }
 
     /// <summary>
+    /// Removes all entries from a NAMED map type's value (the Go 1.21 <c>clear</c> built-in applied
+    /// to a named map, e.g. <c>clear(h)</c> on an <c>http.Header</c>) — the generated wrapper
+    /// implements <see cref="IMap{TKey, TValue}"/> and forwards to the shared underlying map, so
+    /// clearing through the boxed view empties the caller's storage. Clearing a nil map is a no-op.
+    /// </summary>
+    /// <param name="map">Named-map value to clear.</param>
+    public static void clear<TKey, TValue>(IMap<TKey, TValue> map) where TKey : notnull
+    {
+        map.Clear();
+    }
+
+    /// <summary>
     /// Returns the smallest value among its ordered arguments (the Go 1.21 <c>min</c> built-in).
     /// </summary>
     /// <param name="x">First value (Go requires at least one argument).</param>

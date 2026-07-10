@@ -4,6 +4,8 @@ using fmt = fmt_package;
 
 partial class main_package {
 
+[GoType("map[@string, slice<@string>]")] partial struct header;
+
 [GoType] partial struct box {
     internal slice<nint> data;
 }
@@ -46,6 +48,13 @@ internal static void Main() {
     var g = Ꮡ(new guard(nil));
     g.run();
     fmt.Println((~g).err);
+    var h = new header(new map<@string, slice<@string>>{["a"u8] = new @string[]{"1"u8}.slice(), ["b"u8] = new @string[]{"2"u8}.slice()});
+    var alias = h;
+    builtin.clear(h);
+    fmt.Println(len(h), len(alias));
+    header hn = default!;
+    builtin.clear(hn);
+    fmt.Println(len(hn));
 }
 
 } // end main_package
