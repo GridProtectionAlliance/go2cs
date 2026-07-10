@@ -1984,6 +1984,40 @@ if (AreEqual(exprᴛ1, Typ[UntypedNil])) {   // NOT `exprᴛ1 is Typ[UntypedNil]
 (Guarded by the `IndexExprCaseLabel` behavioral test — single- and multi-label clauses indexing a
 package-level array var, output-compared vs Go.)
 
+### Literal case labels under a named-type tag compare through a cast
+
+A tagged switch whose tag type is a NAMED (non-interface) type — net/http's
+`func (code socksReply) String()` switching on `code` — renders the tag as a `[GoType]` wrapper
+struct. An untyped-LITERAL label adopts the tag's named type in Go (go/types records it on the label
+expression), but its C# render is a bare literal of the UNDERLYING type, which can neither be a
+constant pattern (`exprᴛ1 is 0x01` — CS9135, constant pattern against the wrapper) nor compare bare
+(`exprᴛ1 == 0x01` is ambiguous between the wrapper's `==` and the underlying's built-in `==`, both
+reachable through the wrapper's two-way implicit operators — the same ambiguity family as the
+named-string consts). Two converter pieces:
+
+1. the pattern-match decision excludes any named-wrapper tag (`tagIsNamedWrapper`, beside the
+   existing `namedTypes`/`tagIsStaticReadonlyConst` gates — those could not catch the mixed
+   const-ident + literal switch, because the per-label screening short-circuits once `allConst`
+   goes false and never reaches its named-type check);
+2. a CONSTANT label that is not an ident/selector/conversion-call (those already render AT the
+   wrapper type) casts to the tag type:
+
+```csharp
+var exprᴛ1 = code;
+if (exprᴛ1 == socksStatusSucceeded) {     // named-const label — no cast
+    return "succeeded"u8;
+}
+if (exprᴛ1 == (socksReply)(0x01)) {       // literal label — cast to the tag type
+    return "general SOCKS server failure"u8;
+}
+```
+
+This also repairs the ALL-literal switch over a named type, which previously emitted the ambiguous
+bare `==` form. Full-stdlib footprint: 12 files (socks_bundle, archive/zip, encoding/xml,
+go/printer, go/types, internal/poll, syscall zsyscall shims). (Guarded by `NamedNumericSwitchLiteral`
+— a mixed named-const + literal switch including a multi-label clause, and an all-literal switch,
+output-compared vs Go.)
+
 ## Type Switch Statements
 For a Go type-switch, C#'s type-pattern `switch` works well. The runtime exposes the dynamic type via `.type()`, and the empty interface is `any`:
 

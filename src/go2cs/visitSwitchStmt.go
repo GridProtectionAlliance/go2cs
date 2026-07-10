@@ -150,6 +150,28 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 		}
 	}
 
+	// A tag whose type is a NAMED (non-interface) type renders as a [GoType] wrapper struct. An
+	// untyped-LITERAL case label adopts the tag's named type in context (go/types records it on
+	// the label), but its C# render is a bare literal of the UNDERLYING type: it can neither be a
+	// constant pattern (`exprᴛ1 is 0x01` — CS9135, constant pattern against the wrapper; net/http
+	// socksReply.String) nor compare bare (`exprᴛ1 == 0x01` is ambiguous between the wrapper's ==
+	// and the underlying's built-in ==, both reachable through the wrapper's two-way implicit
+	// operators). Force the if-else (==) form and cast such literal labels to the tag type.
+	// (Ident/selector labels render at the wrapper type already and need no cast; the label
+	// screening below cannot flag this case via namedTypes — it short-circuits per label once
+	// allConst is false, so a mixed const-ident + literal switch never reaches its named check.)
+	tagIsNamedWrapper := false
+	var tagNamedType *types.Named
+
+	if tag != nil {
+		if named, ok := types.Unalias(v.getType(tag, false)).(*types.Named); ok {
+			if tagIface, _ := isInterface(named); !tagIface {
+				tagIsNamedWrapper = true
+				tagNamedType = named
+			}
+		}
+	}
+
 	for i, caseClause := range caseClauses {
 		if caseClause.List == nil {
 			if i > 0 && caseHasFallthroughStmt[i-1] {
@@ -336,7 +358,7 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 			}
 
 			caseClauseCount := len(cc.List)
-			usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && v.canUsePatternMatch(caseClauseCount, cc, tag != nil)
+			usePattenMatch := !namedTypes && !tagIsStaticReadonlyConst && !tagIsNamedWrapper && v.canUsePatternMatch(caseClauseCount, cc, tag != nil)
 			caseUsesPattern[ci] = usePattenMatch
 
 			tagNeedsAreEqual := false
@@ -392,7 +414,27 @@ func (v *Visitor) visitSwitchStmtCore(switchStmt *ast.SwitchStmt) {
 					cond.WriteRune('(')
 				}
 
-				cond.WriteString(v.convExpr(expr, []ExprContext{context}))
+				labelExpr := v.convExpr(expr, []ExprContext{context})
+
+				// A CONSTANT label under a named-wrapper tag renders from its underlying-typed
+				// parts (a bare `0x01`), so the `==` is ambiguous between the wrapper's operator
+				// and the underlying's built-in (see tagIsNamedWrapper above) — cast it to the tag
+				// type. Ident/selector labels already render AT the wrapper type (a `static
+				// readonly socksReply` const), and a conversion-call label spells its own type.
+				if tagIsNamedWrapper {
+					switch expr.(type) {
+					case *ast.Ident, *ast.SelectorExpr, *ast.CallExpr:
+					default:
+						if tv, ok := v.info.Types[expr]; ok && tv.Value != nil {
+							// getCSTypeName resolves lazily HERE — resolving it at switch entry
+							// registers a file-local import alias for a cross-package tag type
+							// even when no label ever needs the cast (an unused using).
+							labelExpr = "(" + v.getCSTypeName(tagNamedType) + ")(" + labelExpr + ")"
+						}
+					}
+				}
+
+				cond.WriteString(labelExpr)
 
 				if needAreEqualClose {
 					cond.WriteRune(')')

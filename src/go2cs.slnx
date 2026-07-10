@@ -253,6 +253,7 @@
     <Project Path="Tests/Behavioral/NamedNumericOperatorConstraint/NamedNumericOperatorConstraint.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericPointerReinterpret/NamedNumericPointerReinterpret.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericSliceIndex/NamedNumericSliceIndex.csproj" />
+    <Project Path="Tests/Behavioral/NamedNumericSwitchLiteral/NamedNumericSwitchLiteral.csproj" />
     <Project Path="Tests/Behavioral/NamedNumericShiftConv/NamedNumericShiftConv.csproj" />
     <Project Path="Tests/Behavioral/NarrowArithmeticArg/NarrowArithmeticArg.csproj" />
     <Project Path="Tests/Behavioral/NarrowByteArithFirstOperandCast/NarrowByteArithFirstOperandCast.csproj" />

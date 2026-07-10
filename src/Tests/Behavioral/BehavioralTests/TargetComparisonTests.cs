@@ -603,6 +603,9 @@ public class C3_TargetComparisonTests : BehavioralTestBase
     public void CheckNamedNumericSliceIndex() => CheckTarget("NamedNumericSliceIndex");
 
     [TestMethod]
+    public void CheckNamedNumericSwitchLiteral() => CheckTarget("NamedNumericSwitchLiteral");
+
+    [TestMethod]
     public void CheckNamedPointerReinterpret() => CheckTarget("NamedPointerReinterpret");
 
     [TestMethod]
