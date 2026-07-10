@@ -2593,6 +2593,17 @@ structurally (inspected file-by-file at introduction). (Guarded by `VariadicFunc
 func AND a func literal satisfying a variadic func-typed param, loose/empty/spread calls through
 it, and a nil-compared variadic func-typed var — output-compared vs Go.)
 
+**A type-ASSERTION target routes through the same structural lowering.** `convTypeAssertExpr` rendered
+the asserted type by converting the TYPE EXPRESSION through the string-based type-name path, which
+skips the variadic lowering above — net/http transport.go's
+`cw.(func(string, ...any))` emitted `._<Action<@string, .any>>(ᐧ)` with a literal `.any` (CS1001, the
+`...` mangled instead of lowered). An anonymous-signature assert target now renders through
+`getCSTypeName` → `iifeDelegateType`, exactly like the collapsed methodless NAMED func target already
+did: `._<Actionꓸꓸꓸ<@string, any>>(ᐧ)`. Non-variadic signatures render identically on both paths, so the
+only full-stdlib delta is the transport.cs site. (Guarded by `VariadicFuncTypeAssert` — a positive
+variadic assert invoked through the asserted value, a negative assert on a non-func value, and a
+non-variadic anonymous func assert, output-compared vs Go.)
+
 ### Major-version import directories
 A `/vN` import path segment (math/rand/v2) hosts a package named for the PARENT segment, and
 the emitted class follows the package NAME: consumers reference `math.rand.rand_package`, not

@@ -985,6 +985,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckVariadicFuncFields() => CheckTarget("VariadicFuncFields");
 
     [TestMethod]
+    public void CheckVariadicFuncTypeAssert() => CheckTarget("VariadicFuncTypeAssert");
+
+    [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]

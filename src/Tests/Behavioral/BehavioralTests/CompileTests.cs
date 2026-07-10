@@ -1065,6 +1065,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckVariadicFuncFields() => CheckTarget("VariadicFuncFields");
 
     [TestMethod]
+    public void CheckVariadicFuncTypeAssert() => CheckTarget("VariadicFuncTypeAssert");
+
+    [TestMethod]
     public void CheckVariadicFuncValues() => CheckTarget("VariadicFuncValues");
 
     [TestMethod]

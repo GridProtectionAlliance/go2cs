@@ -50,8 +50,17 @@ func (v *Visitor) convTypeAssertExpr(typeAssertExpr *ast.TypeAssertExpr) string 
 	// collapsed delegate `Func<…>`, not the bare (undefined) name `Compressor` — convExpr on the type
 	// ident renders the name (CS0246, archive/zip's compressor/decompressor registries). Render the
 	// collapsed form for such a target.
+	// An ANONYMOUS func type target takes the same route: the AST render above goes through the
+	// string-based type-name path, which skips the VARIADIC params-Span delegate lowering —
+	// `cw.(func(string, ...any))` emitted `._<Action<@string, .any>>` with a literal `.any`
+	// (CS1001, net/http transport.go logf). getCSTypeName builds the delegate structurally via
+	// iifeDelegateType (`Actionꓸꓸꓸ<@string, any>`); non-variadic signatures render identically
+	// on both paths.
 	if targetType := v.getExprType(typeAssertExpr.Type); targetType != nil {
-		if _, ok := methodlessNamedFuncSignature(targetType); ok {
+		_, isMethodlessNamed := methodlessNamedFuncSignature(targetType)
+		_, isAnonSig := targetType.(*types.Signature)
+
+		if isMethodlessNamed || isAnonSig {
 			typeExpr = v.getCSTypeName(targetType)
 		}
 	}
