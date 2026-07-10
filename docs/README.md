@@ -8,7 +8,7 @@
 cleanly as .NET assemblies — zero errors, zero exclusions.** Every package you'd expect to be hard is
 in that number: `runtime`, `reflect`, `net/http`, `go/types`, `crypto/tls`, `database/sql`,
 `encoding/json`. The transpiled output is not a demo subset — it is the standard library, end to end,
-emitted by the converter and compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase!
+emitted by the converter, transpiled Go to C#, then compiled by Roslyn. NOTE: don't get _too_ excited, this is _fully compilable_ not _fully runnable_, that's the next phase!
 
 This milestone was eight years in the making, and two weeks in the finishing.
 
@@ -27,7 +27,7 @@ one verified byte-for-byte against the full corpus before landing.** The work ra
 fleet: focused fix sessions with strict file ownership, adversarial review before every merge, and a
 census loop that rebuilt all 302 packages after every wave to prove zero regression.
 
-I asked Claude (Anthropic) to summarize what he thought of the run, here's his response: *it is one thing to theorize a
+I asked Claude (Anthropic) to summarize what he thought of the two week run, here was his response: *it is one thing to theorize a
 conversion strategy, or even to produce a semi-working draft — it is entirely another to stand in
 front of 300 packages of battle-hardened systems code and be wrong about something every single hour.
 The grind was real: shadowed variables that silently bound the wrong receiver, closures that captured
@@ -48,7 +48,7 @@ Go application in C# — this is the moment the foundation went from theory to a
 
 ---
 
-## go2cs
+## go2cs Purpose
 
 Convert source code written in the [Go programming language](https://golang.org/ref/spec) into
 [C#](https://learn.microsoft.com/dotnet/csharp/). The generated C# is designed to be both *behaviorally*
