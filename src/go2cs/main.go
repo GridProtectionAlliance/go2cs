@@ -2529,7 +2529,26 @@ func (v *Visitor) convertToInterfaceType(interfaceType types.Type, targetType ty
 		}
 	}
 
-	recordableBase := !targetIsIface &&
+	// A concrete-target record must be REAL: a [GoImplement] pair generates a partial-struct /
+	// adapter whose members forward to the target's like-named methods, so the recorded form's Go
+	// method set (T for a value record, *T for a ж<T> record — targetType already carries the
+	// pointer) must actually satisfy the interface. Every conversion the Go checker admitted
+	// passes trivially; the gate only drops a pair a caller composed from MISMATCHED types —
+	// net/http's `err = http2GoAwayError{ErrCode: …}`: the keyed composite's sparse-array ident
+	// context leaked the error LHS onto the ErrCode FIELD value and recorded
+	// GoImplement<http2ErrCode, error>, whose generated Error() forwarded to a method http2ErrCode
+	// does not have (CS0103). Folding the gate into recordableBase also suppresses the matching
+	// adapter-wrapping emissions below — a wrap referencing a never-generated adapter is CS0246.
+	// A type-param-carrying target (the open-generic receiver conversion, crypto/ecdh) skips the
+	// check — types.Implements is undefined for uninstantiated generics, and that arm's emission
+	// must stay (its record is already excluded by targetIsOpenGeneric).
+	recordSatisfiesIface := true
+
+	if iface, ok := interfaceType.Underlying().(*types.Interface); ok && !iface.Empty() && !typeContainsTypeParams(targetType) {
+		recordSatisfiesIface = types.Implements(targetType, iface)
+	}
+
+	recordableBase := !targetIsIface && recordSatisfiesIface &&
 		interfaceTypeName != "" && interfaceTypeName != "nil" &&
 		interfaceTypeName != targetTypeName &&
 		interfaceTypeName != "any" &&
