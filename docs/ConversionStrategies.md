@@ -1773,6 +1773,37 @@ captures keeps its existing pre-call `generateCaptureDeclarations()` emission. (
 call capturing a local pointer, whose deferred write lands through the shared pointer box, output-compared
 vs Go.)
 
+### Defer/go EAGER arguments follow the enclosing closure's capture renames
+Go evaluates a deferred (or spawned) call's function value and arguments **at statement time, in the
+enclosing scope**. The defer/go emission enters its own lambda-conversion state (its callee snapshots
+need a fresh remap set), but that fresh state previously hid the ENCLOSING lambda's capture renames
+while the eager arguments rendered: inside an IIFE that snapshot-captured a heap-boxed outer local
+(`var baseʗ1 = @base;`), the argument of `defer func(t Tally) { … }(base)` emitted the raw ref-local
+`@base` — uncapturable in the IIFE's C# lambda (CS8175) — with the snapshot left declared but unused;
+where the raw name IS capturable (a reference-typed local — net/http `transport.go`'s
+`defer close(didReadResponse)` inside a `go func() { … }` lambda), it silently bypassed the snapshot
+every other read in that body uses. `visitDeferStmt`/`visitGoStmt` now enter through a **seeded**
+variant (`enterDeferGoLambdaConversion`) that copies the enclosing lambda's renames into the fresh
+state, so the arguments render exactly like any other expression in the enclosing body:
+
+```csharp
+var baseʗ1 = @base;
+((Action)(() => func((defer, recover) => {
+    deferǃ((Tally t) => {
+        report("deferred:"u8, t, 4);
+    }, baseʗ1, defer);
+})))();
+```
+
+`prepareStmtCaptures` still OVERRIDES the statement's own captured-callee entries afterward (their
+defer-time snapshots), and a function-level defer/go — no enclosing lambda — is untouched (the seed
+set is empty). Whole-stdlib footprint: exactly one file, net/http `transport.cs`, where the deferred
+`close` argument becomes the goroutine lambda's `didReadResponseʗ1` (semantically neutral there — both
+names alias one channel object; the fix matters for ref-local-boxed value locals). (Guarded by the
+`DeferArgEnclosingCapture` behavioral test — a heap-boxed struct local passed eagerly to a deferred
+func literal, a deferred NAMED callee, and a go-statement literal, each inside an IIFE, with the
+mutations landing on the deferred copies and the source read back untouched, output-compared vs Go.)
+
 ### A func-literal ARGUMENT inside an `if`/`for` condition hoists its captures before the statement
 The same capture-snapshot hazard occurs when a capturing func literal is passed as a call argument
 **inside a condition**. `go/types` is dense with this shape — `underIs(t, func(u Type) bool { … })`,

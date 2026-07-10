@@ -201,6 +201,9 @@ public class B2_CompileTests : BehavioralTestBase
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
+    public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]

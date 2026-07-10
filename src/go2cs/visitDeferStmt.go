@@ -9,8 +9,10 @@ import (
 )
 
 func (v *Visitor) visitDeferStmt(deferStmt *ast.DeferStmt) {
-	// Analyze captures specifically for this defer statement
-	v.enterLambdaConversion(deferStmt)
+	// Analyze captures specifically for this defer statement. The seeded enter keeps the
+	// enclosing lambda's capture renames visible while the EAGER call arguments render —
+	// they are evaluated in the enclosing scope at defer time (see enterDeferGoLambdaConversion).
+	v.enterDeferGoLambdaConversion(deferStmt)
 	defer v.exitLambdaConversion()
 
 	lambdaContext := DefaultLambdaContext()

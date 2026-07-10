@@ -201,6 +201,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckCrossPkgUser() => CheckTarget("CrossPkgUser");
 
     [TestMethod]
+    public void CheckDeferArgEnclosingCapture() => CheckTarget("DeferArgEnclosingCapture");
+
+    [TestMethod]
     public void CheckDeferCallOrder() => CheckTarget("DeferCallOrder");
 
     [TestMethod]

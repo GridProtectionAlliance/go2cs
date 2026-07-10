@@ -226,6 +226,41 @@ func (v *Visitor) enterLambdaConversion(node ast.Node) {
 	v.lambdaCapture.currentLambdaVarObjs = make(map[string]types.Object)
 }
 
+// enterDeferGoLambdaConversion enters the conversion state for a defer/go STATEMENT — a
+// pass-through level whose call ARGUMENTS (and non-literal callee expression) are evaluated
+// EAGERLY in the ENCLOSING scope when the statement executes (Go spec: the deferred/spawned
+// function value and its parameters are evaluated at statement time). enterLambdaConversion
+// installs EMPTY remap state, which hid an enclosing lambda's capture renames while the
+// arguments rendered: an eager argument reading a heap-boxed local the enclosing IIFE
+// snapshot-captured (`base` → `baseʗ1`) emitted the raw ref-local `@base` inside the enclosing
+// lambda's body (CS8175 — a ref local cannot be used in an anonymous method; where the raw
+// name IS capturable it instead bypasses the snapshot every other read in that body uses).
+// Seed the fresh state with a COPY of the enclosing lambda's renames so arguments render
+// exactly like any other expression in the enclosing body; prepareStmtCaptures then OVERRIDES
+// entries for the statement's own captured callee idents (their defer-time snapshots). Copies,
+// not the maps themselves: the statement's own remaps must not leak back into the enclosing
+// state when exit restores it. At function level (no enclosing lambda) this is exactly
+// enterLambdaConversion.
+func (v *Visitor) enterDeferGoLambdaConversion(node ast.Node) {
+	enclosingInLambda := v.lambdaCapture.conversionInLambda
+	enclosingVars := v.lambdaCapture.currentLambdaVars
+	enclosingVarObjs := v.lambdaCapture.currentLambdaVarObjs
+
+	v.enterLambdaConversion(node)
+
+	if !enclosingInLambda {
+		return
+	}
+
+	for name, captureName := range enclosingVars {
+		v.lambdaCapture.currentLambdaVars[name] = captureName
+	}
+
+	for name, obj := range enclosingVarObjs {
+		v.lambdaCapture.currentLambdaVarObjs[name] = obj
+	}
+}
+
 func (v *Visitor) exitLambdaConversion() {
 	if n := len(v.lambdaCapture.conversionStack); n > 0 {
 		prev := v.lambdaCapture.conversionStack[n-1]

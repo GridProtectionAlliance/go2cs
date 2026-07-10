@@ -8,8 +8,10 @@ import (
 )
 
 func (v *Visitor) visitGoStmt(goStmt *ast.GoStmt) {
-	// Analyze captures specifically for this go statement
-	v.enterLambdaConversion(goStmt)
+	// Analyze captures specifically for this go statement. The seeded enter keeps the
+	// enclosing lambda's capture renames visible while the EAGER call arguments render —
+	// they are evaluated in the enclosing scope at spawn time (see enterDeferGoLambdaConversion).
+	v.enterDeferGoLambdaConversion(goStmt)
 	defer v.exitLambdaConversion()
 
 	lambdaContext := DefaultLambdaContext()
