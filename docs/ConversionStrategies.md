@@ -3333,6 +3333,19 @@ Nine coupled rules from the shallow-stack campaign:
 - **Package aliases shadowed by method names** qualify through the `_package` class
   (`sort_package.Sort(…)` — flate's `byLiteral.sort` bound the method group, CS0119).
   Guarded by `SortArrayType` (`PeopleByAge.sort`).
+  A **Δ-renamed foreign CONST reached through that fallback** must still substitute the
+  renamed member: the composed lookup key (`time_package.Second`) misses the alias map
+  (keyed on the plain package name, `time.Second`), so `getAliasedTypeName` retries with
+  the `PackageSuffix` stripped and, on a CONST hit, keeps the `_package` qualifier while
+  substituting the alias — `time_package.ΔSecond` (crypto/tls's `Config.time` method ×
+  time's `Second` const-vs-`Time.Second()` collision; the raw name bound the
+  `Second(this Time)` extension method group, CS0019 ×2). Gated to consts: const entries
+  exist only for collision-renamed members, while type entries cover every exported type,
+  whose raw `_package`-qualified renders already bind. Guarded by
+  `ShadowedImportConstLib`/`ShadowedImportConstUser` (the lib Δ-renames `Peak` for its own
+  `Meter.Peak` collision; the user's `gauge.ShadowedImportConstLib` method shadows the
+  import and `Span(2) * ShadowedImportConstLib.Peak` reaches the renamed const through the
+  fallback, output-compared vs Go).
 - **Blank params synthesize names when the body discards** (`_ = b[7]` bound the blank
   `littleEndian` receiver, CS0029) — encoding/binary's bounds-check hints. Guarded by
   `TypeSwitch` (`marker.tag`).

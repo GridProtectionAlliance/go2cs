@@ -4342,6 +4342,34 @@ func getAliasedTypeName(typeName string) string {
 		}
 	}
 
+	// A `_package`-QUALIFIED member (a same-package method/func name shadows the import's
+	// using alias, so convIdent qualifies the package ident through its static class — the
+	// compress/flate CS0119 fallback) must still consult the alias map by the PLAIN package
+	// name: time Δ-renames const `Second` (const-vs-method collision with `Time.Second()`),
+	// so the composed `time_package.Second` missed the `time.Second` entry and bound the
+	// `Second(this Time)` extension method group instead (CS0019 ×2, crypto/tls's
+	// `Config.time` method). On a CONST hit, keep the `_package` qualifier — only the
+	// member is Δ-renamed inside the package class. Gated to consts: the const entries
+	// exist only for collision-renamed members, while the TYPE entries cover every exported
+	// type, whose raw `_package`-qualified renders already bind correctly.
+	if lastDot := strings.LastIndex(typeName, "."); lastDot > 0 {
+		qualifier, member := typeName[:lastDot], typeName[lastDot+1:]
+		pkgSegment := qualifier[strings.LastIndex(qualifier, ".")+1:]
+
+		if rootPackageName, isPkgQualified := strings.CutSuffix(pkgSegment, PackageSuffix); isPkgQualified {
+			plainKey := rootPackageName + "." + member
+
+			packageLock.Lock()
+			alias, exists := importedTypeAliases[plainKey]
+			isConst := constImportedTypeAliases.Contains(plainKey)
+			packageLock.Unlock()
+
+			if exists && isConst {
+				return qualifier + "." + alias
+			}
+		}
+	}
+
 	// A Δ-renamed IMPORT qualifier (gif's `color` import arrives shadow-renamed `Δcolor`)
 	// must consult the alias map by the RAW package name — the global-using alias
 	// (`colorꓸRGBA = go.image.color_package.ΔRGBA`) resolves namespace-wide regardless of

@@ -1,0 +1,24 @@
+namespace go;
+
+using fmt = fmt_package;
+using ShadowedImportConstLib = ShadowedImportConstLib_package;
+
+partial class main_package {
+
+[GoType] partial struct gauge {
+    internal nint level;
+}
+
+internal static nint ShadowedImportConstLib(this gauge g) {
+    return g.level;
+}
+
+internal static void Main() {
+    var g = new gauge(level: 3);
+    var span = ((ShadowedImportConstLib.Span)2) * ShadowedImportConstLib_package.ΔPeak;
+    fmt.Println("span:", (int64)span);
+    var m = new ShadowedImportConstLib_package.Meter(Level: g.ShadowedImportConstLib());
+    fmt.Println("peak method:", m.Peak());
+}
+
+} // end main_package
