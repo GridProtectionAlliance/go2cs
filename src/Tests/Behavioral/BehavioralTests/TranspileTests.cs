@@ -345,6 +345,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckFuncLitCaptureInCondition() => CheckTarget("FuncLitCaptureInCondition");
 
     [TestMethod]
+    public void CheckFuncLitNumericTupleReturn() => CheckTarget("FuncLitNumericTupleReturn");
+
+    [TestMethod]
     public void CheckFuncLitStringConcatReturn() => CheckTarget("FuncLitStringConcatReturn");
 
     [TestMethod]

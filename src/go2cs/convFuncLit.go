@@ -3,9 +3,28 @@ package main
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
 	"strings"
 )
+
+// numericBasicLit returns the (optionally SUB-negated) INT or FLOAT basic literal behind
+// expr, if any — the numeric cousin of isStringBasicLit, serving the multi-result func-lit
+// inference scan (an untyped numeric constant element emits bare, so its arm infers the
+// literal's natural C# type instead of the declared result element's).
+func numericBasicLit(expr ast.Expr) (*ast.BasicLit, bool) {
+	if unary, ok := expr.(*ast.UnaryExpr); ok && unary.Op == token.SUB {
+		expr = unary.X
+	}
+
+	lit, ok := expr.(*ast.BasicLit)
+
+	if !ok || (lit.Kind != token.INT && lit.Kind != token.FLOAT) {
+		return nil, false
+	}
+
+	return lit, true
+}
 
 func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) string {
 	if v.currentFuncSignature == nil {
@@ -440,6 +459,20 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 			// element sibling of the single-string-result CS8917 arm above). Gated on the
 			// literal's presence AND a declared basic-string element, so a literal whose string
 			// elements are all variables keeps inferred typing (no churn).
+			//
+			// An untyped NUMERIC constant literal element is the same shape when the declared
+			// result element is a differently-SIZED basic type: the literal emits bare, so the
+			// arm infers the literal's natural C# type — an INT literal is C# `int`, a FLOAT
+			// literal C# `double` — where the Go result is e.g. int64 (net/http ServeContent's
+			// `sizeFunc := func() (int64, error) { …; return 0, errSeeker }` inferred
+			// `Func<(int, error errSeeker)>`, rejected at the serveContent call: delegate types
+			// are invariant, CS1662/CS0029/CS1503; the explicit tuple type also drops the
+			// leaked `errSeeker` element name). A declared element the literal's natural type
+			// already matches (int32 for INT, float64 for FLOAT) infers correctly, and Go `int`
+			// (C# nint) is deliberately exempt — the `return 0, err` shape against (int, error)
+			// results is pervasive and green today (int→nint converts at every use site), so
+			// marking it would churn stdlib-wide for no observed defect (the same reasoning
+			// keeps lambdaConstReturnCastType away from signed single results).
 			hasReturn := false
 			hasFullyTypedArm := false
 
@@ -464,6 +497,21 @@ func (v *Visitor) convFuncLit(funcLit *ast.FuncLit, context LambdaContext) strin
 							if declared, ok := types.Unalias(results.At(i).Type()).(*types.Basic); ok && declared.Kind() == types.String {
 								fullyTyped = false
 								break
+							}
+						}
+
+						if lit, isNumeric := numericBasicLit(res); isNumeric {
+							if declared, ok := types.Unalias(results.At(i).Type()).(*types.Basic); ok && declared.Info()&types.IsNumeric != 0 {
+								naturalKind := types.Int32
+
+								if lit.Kind == token.FLOAT {
+									naturalKind = types.Float64
+								}
+
+								if declared.Kind() != naturalKind && declared.Kind() != types.Int {
+									fullyTyped = false
+									break
+								}
 							}
 						}
 					}
