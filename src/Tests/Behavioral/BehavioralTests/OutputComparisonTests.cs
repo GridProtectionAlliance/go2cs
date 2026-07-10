@@ -755,6 +755,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
 
     [TestMethod]
+    public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]

@@ -319,6 +319,7 @@
     <Project Path="Tests/Behavioral/PromotedValueEmbedExprRecv/PromotedValueEmbedExprRecv.csproj" />
     <Project Path="Tests/Behavioral/PromotedValueEmbedLib/PromotedValueEmbedLib.csproj" />
     <Project Path="Tests/Behavioral/PromotedValueEmbedUser/PromotedValueEmbedUser.csproj" />
+    <Project Path="Tests/Behavioral/PtrKeyMapReceiverLookup/PtrKeyMapReceiverLookup.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFieldType/PublicizedFieldType.csproj" />
     <Project Path="Tests/Behavioral/PublicizedFuncTypeParam/PublicizedFuncTypeParam.csproj" />
     <Project Path="Tests/Behavioral/RangeShadowSelectorMethod/RangeShadowSelectorMethod.csproj" />

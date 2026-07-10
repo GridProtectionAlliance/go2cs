@@ -44,14 +44,21 @@ func (v *Visitor) convIndexExpr(indexExpr *ast.IndexExpr, context IndexExprConte
 			// initializer in convKeyValueExpr.
 			_, mapKeyIsPointer := mapType.Key().(*types.Pointer)
 
-			// The box (`Ꮡ`) key rendering applies ONLY when the key is a deref-aliased pointer
-			// PARAMETER: its value alias (`ref var info = ref Ꮡinfo.Value`) is the wrapper VALUE, so
-			// `m[info]` needs `m[Ꮡinfo]` to supply the `ж<T>` key. A LOCAL already holding a pointer
-			// (`var tΔ1 = scan.typ`, reflect's FieldByNameFunc — tΔ1 is `ж<structType>`) IS the key
-			// and must NOT get `Ꮡ`: `ᏑtΔ1` has no box accessor (CS0103 ×4). Restrict to a bare
-			// parameter ident (matching the deref-alias's parameter scope).
+			// The box (`Ꮡ`) key rendering applies ONLY where the box exists under the raw name:
+			// a deref-aliased pointer PARAMETER (its value alias `ref var info = ref Ꮡinfo.Value`
+			// is the wrapper VALUE, so `m[info]` needs `m[Ꮡinfo]` to supply the `ж<T>` key), or
+			// the RECEIVER of a direct-ж method (`this ж<persistConn> Ꮡpc` plus the same alias —
+			// net/http transport.go closeConnIfStillIdle's `t.idleLRU.m[pc]` comma-ok read passed
+			// the VALUE where ж<persistConn> was expected, CS1503 + the (v, ok) deconstruction
+			// cascade). A LOCAL already holding a pointer (`var tΔ1 = scan.typ`, reflect's
+			// FieldByNameFunc — tΔ1 is `ж<structType>`) IS the key and must NOT get `Ꮡ`: `ᏑtΔ1`
+			// has no box accessor (CS0103 ×4). A ref-receiver method's receiver has no box at all
+			// and stays excluded — the receiver-as-map-key body scan promotes such a method to
+			// direct-ж (see bodyUsesReceiverAsPointerValue), so the box is always in scope here.
 			if mapKeyIsPointer {
-				if ident, isBare := indexExpr.Index.(*ast.Ident); !isBare || !v.identIsParameter(ident) {
+				ident, isBare := indexExpr.Index.(*ast.Ident)
+
+				if !isBare || (!v.identIsParameter(ident) && !v.exprIsCurrentDirectBoxReceiver(ident)) {
 					mapKeyIsPointer = false
 				}
 			}

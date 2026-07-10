@@ -731,6 +731,23 @@ func bodyUsesReceiverAsPointerValue(body *ast.BlockStmt, recvName string, info *
 				// gap independent of the receiver), so promoting here would not help. Deliberately
 				// out of scope until the map-element boxing is fixed.
 			}
+		case *ast.IndexExpr:
+			// The receiver used as a POINTER-keyed map INDEX — `t.m[c]` inside `func (c *conn)`
+			// (net/http transport.go's idle-conn bookkeeping shape). The key position needs the
+			// receiver's pointer identity (`m[Ꮡc]` — see convIndexExpr's pointer-key rendering),
+			// which exists only when the method is direct-ж. Gated on the indexed operand being
+			// a pointer-KEYED map, so a slice/array index of an integer-ish receiver name can
+			// never promote.
+			if ident, ok := n.Index.(*ast.Ident); ok && ident.Name == recvName {
+				if baseType := info.TypeOf(n.X); baseType != nil {
+					if mapType, isMap := baseType.Underlying().(*types.Map); isMap {
+						if _, keyIsPtr := mapType.Key().(*types.Pointer); keyIsPtr {
+							found = true
+							return false
+						}
+					}
+				}
+			}
 		}
 
 		return true

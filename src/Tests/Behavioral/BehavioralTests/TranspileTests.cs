@@ -820,6 +820,9 @@ public class A1_TranspileTests : BehavioralTestBase
     public void CheckPromotedValueEmbedUser() => CheckTarget("PromotedValueEmbedUser");
 
     [TestMethod]
+    public void CheckPtrKeyMapReceiverLookup() => CheckTarget("PtrKeyMapReceiverLookup");
+
+    [TestMethod]
     public void CheckPublicizedFieldType() => CheckTarget("PublicizedFieldType");
 
     [TestMethod]
