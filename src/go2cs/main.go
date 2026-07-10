@@ -2010,6 +2010,17 @@ func removeSanitizationMarker(identifier string) string {
 	return identifier
 }
 
+// stripSanitizationMarkers removes every "@" keyword-escape marker from an identifier part
+// used to COMPOSE a generated adapter class name ("fixed" + ж + "lock"): "@" is only legal at
+// the START of a C# identifier token, so a marker mid-composition lexes as two tokens
+// (`@fixedж@lock` → `@fixedж` + `@lock`, CS1526). The composed name always contains a marker
+// glyph (ж/ᴠ) or package prefix, so it can never itself be a keyword and needs no marker.
+// Keep in sync with the ImplementGenerator, which composes the same class names from
+// unescaped simple names.
+func stripSanitizationMarkers(identifier string) string {
+	return strings.ReplaceAll(identifier, "@", "")
+}
+
 func getSanitizedFunctionName(funcName string) string {
 	funcName = getCoreSanitizedIdentifier(funcName)
 
@@ -2823,6 +2834,10 @@ func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string
 		structSimple = structSimple[idx+1:]
 	}
 
+	// A keyword-escaped part (`@fixed`, or a pre-qualified `os_@fixed`) cannot carry its
+	// marker into the composed class name — see stripSanitizationMarkers.
+	structSimple = stripSanitizationMarkers(structSimple)
+
 	ifaceSimple := interfaceTypeName
 
 	// A deferred dynamic-type marker (an anonymous interface lifted in a not-yet-visited
@@ -2832,6 +2847,8 @@ func valueAdapterTypeRef(structTypeName string, interfaceTypeName string) string
 		if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
 			ifaceSimple = ifaceSimple[idx+1:]
 		}
+
+		ifaceSimple = stripSanitizationMarkers(ifaceSimple)
 	}
 
 	return structSimple + ValueAdapterInfix + ifaceSimple
@@ -2845,6 +2862,10 @@ func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 		if idx := strings.LastIndex(ifaceSimple, "."); idx >= 0 {
 			ifaceSimple = ifaceSimple[idx+1:]
 		}
+
+		// A keyword-escaped interface part cannot carry its "@" marker into the composed
+		// class name — see stripSanitizationMarkers.
+		ifaceSimple = stripSanitizationMarkers(ifaceSimple)
 	}
 
 	// A GENERIC struct's closed type-argument list must TRAIL the adapter name, not sit inside
@@ -2861,6 +2882,15 @@ func adapterTypeRef(structTypeName string, interfaceTypeName string) string {
 	if idx := strings.Index(structTypeName, "<"); idx >= 0 {
 		structBase = structTypeName[:idx]
 		typeArgs = structTypeName[idx:]
+	}
+
+	// Strip "@" keyword-escape markers from the FINAL segment of the base (the part the
+	// adapter name composes onto — `@fixed` alone, or a pre-qualified `os_@fixed`); a dotted
+	// qualifier's own segments are separate tokens where a leading marker stays legal.
+	if idx := strings.LastIndex(structBase, "."); idx >= 0 {
+		structBase = structBase[:idx+1] + stripSanitizationMarkers(structBase[idx+1:])
+	} else {
+		structBase = stripSanitizationMarkers(structBase)
 	}
 
 	return structBase + PointerPrefix + ifaceSimple + typeArgs

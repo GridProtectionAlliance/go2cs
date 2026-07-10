@@ -2471,6 +2471,48 @@ Greens internal/testenv (its only errors were this one method's cascade). Guarde
 method, embedded in a type-assertion's anonymous interface so the lifted `[GoType("dyn")]` target's
 conversion class must implement the escaped `@private()`; it does not compile without the fix.
 
+### A keyword-named type's interface adapters escape declarations and compose class names unescaped
+A Go **type** whose name is a C# reserved keyword (`type fixed struct{…}`, `type lock interface{…}`) is
+`@`-escaped by the converter everywhere it stands as its own identifier token (`[GoType] partial struct
+@fixed`, `ж<@fixed>`, `@lock l = f`). Two other name paths mishandled such types:
+
+1. **`ImplementGenerator`'s emitted type positions.** A LOCAL struct's name reaches the generator as a
+   bare Roslyn SYMBOL name — UNescaped, unlike display strings (`ToDisplayString()` uses
+   `CSharpErrorMessageFormat`, which escapes, so `go.main_package.@lock` arrives correct). Emitting the
+   raw name produced `partial struct fixed : sizer` — which the C# parser reads as a *fixed-size-buffer*
+   declaration, ejecting mangled members into the static `…_package` container (**CS0708**
+   `'main_package.'` "cannot declare instance members in a static class" plus a CS1642/CS1663/CS7092
+   buffer cascade) — and the same raw name inside the pointer adapter's `ж<fixed>`. The generator now
+   applies `EscapeCsKeyword` at those emission sites (`InterfaceImplTemplate.StructName`, the pointer
+   adapter's wrapped `StructName`, and the value-embed hop's class qualifier); it is a no-op for every
+   non-keyword name.
+
+2. **Adapter class-name composition, BOTH sides.** `@` is only legal at the START of a C# identifier
+   token, so a keyword part cannot carry its marker into a composed adapter name: the converter emitted
+   `new @fixedж@lock(Ꮡf)`, which lexes as TWO tokens (`@fixedж` + `@lock` — CS1526). Both composers now
+   build from UNESCAPED simple names — the converter's `adapterTypeRef`/`valueAdapterTypeRef` via
+   `stripSanitizationMarkers` (which also clears a pre-qualified `os_@fixed`-style interior marker), and
+   the generator's `AdapterName` compositions via `GetUnsanitizedIdentifier` — producing
+   `fixedжlock`/`fixedᴠlock`. The composed name always contains the `ж`/`ᴠ` infix or a package prefix,
+   so it is never itself a keyword and needs no marker (the same rule the keyword-method compound names
+   above rely on: a keyword + suffix is never a keyword).
+
+Emitted form (from the `KeywordNamedTypes` goldens and its generated adapters):
+```csharp
+sizer p = new fixedжsizer(Ꮡf);                          // converter cast site — composed, no marker
+@lock lp = new fixedжlock(Ꮡf);
+
+partial struct @fixed : global::go.main_package.@lock   // generator value-form — escaped declaration
+
+internal sealed class fixedжlock : global::go.main_package.@lock, IжAdapter
+{
+    private readonly ж<@fixed> m_box;                   // escaped type reference
+```
+`TypeGenerator` and `RecvGenerator` were already correct — they read syntax `Identifier.Text`, which
+keeps the `@fixed` spelling. Guarded by the `KeywordNamedTypes` behavioral test: struct `fixed` value-
+and pointer-implementing `sizer` plus a keyword-named interface `lock`, with a pointer-receiver `grow`
+exercising the RecvGenerator ж-twin on the keyword-named receiver.
+
 ### A foreign struct's promoted method forwards through its value embed
 When the adapter's struct is FOREIGN (defined in another assembly) it binds forwarding from METADATA
 (the boxBound / refBound scan above); a member neither on its box nor a ref-static falls to

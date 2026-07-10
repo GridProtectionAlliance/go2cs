@@ -173,7 +173,12 @@ public class ImplementGenerator : ISourceGenerator
                 string adapterScope = (interfaceType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(interfaceName)) == "public") &&
                                       (structType.DeclaredAccessibility == Accessibility.Public || GetScope(GetSimpleName(structName)) == "public") ? "public" : "internal";
 
-                string adapterName = $"{(foreignSourceInterface ? ForeignPackagePrefix(structType) : "")}{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}";
+                // Compose the class name from UNESCAPED simple names: a keyword-named side arrives
+                // "@"-escaped from its display string, and "@" is only legal at the START of an
+                // identifier token — an interior marker (`lockᴠ@lock`) lexes as two tokens. The
+                // composed name (always containing the infix) is never a keyword, so no marker is
+                // needed. Keep in sync with the converter's valueAdapterTypeRef composition.
+                string adapterName = $"{(foreignSourceInterface ? ForeignPackagePrefix(structType) : "")}{GetUnsanitizedIdentifier(GetSimpleName(structName))}{ValueAdapterInfix}{GetUnsanitizedIdentifier(GetSimpleName(interfaceName))}";
 
                 if (!emittedInterfaceAdapters.Add($"{adapterName}|{interfaceName}"))
                     continue;
@@ -540,7 +545,9 @@ public class ImplementGenerator : ISourceGenerator
                             .OfType<INamedTypeSymbol>()
                             .FirstOrDefault();
 
-                        receiver = $"{receiver}.of({currentTypeName}.{AddressPrefix}{GetUnsanitizedIdentifier(embedName)})";
+                        // The projecting class qualifier is a real identifier position — escape a
+                        // keyword-named type (`@fixed.Ꮡn`, not the parse-breaking `fixed.Ꮡn`).
+                        receiver = $"{receiver}.of({EscapeCsKeyword(currentTypeName)}.{AddressPrefix}{GetUnsanitizedIdentifier(embedName)})";
                         (currentDecl, Compilation? embedCompilation) = context.GetStructDeclaration(embedTypeName);
                         currentTypeName = embedTypeName;
                         currentTypeSymbol = embedTypeSymbol;
@@ -636,7 +643,10 @@ public class ImplementGenerator : ISourceGenerator
                     // GoImplement record may carry a CLOSED instantiation (`nistCurve<P224Pointж…>`)
                     // once the proxy makes it constraint-satisfiable, but the adapter class is
                     // generic, so `adapterBaseName + adapterTypeParameters` reconstructs the open form.
-                    StructName = foreignStruct ? GlobalQualify(structType.GetFullTypeName(true)) : $"{adapterBaseName}{adapterTypeParameters}",
+                    // A LOCAL name is a bare SYMBOL name — UNescaped, unlike display strings — so a
+                    // keyword-named struct must be "@"-escaped here or `ж<fixed>` breaks the parse
+                    // (the CS0708 'main_package.' cascade). No-op for every other name.
+                    StructName = foreignStruct ? GlobalQualify(structType.GetFullTypeName(true)) : $"{EscapeCsKeyword(adapterBaseName)}{adapterTypeParameters}",
                     InterfaceName = interfaceName,
                     // Adapter class name composes with the shared pointer glyph (CatжAnimal) - always
                     // via Symbols.PointerPrefix so a future symbol change follows automatically.
@@ -647,7 +657,11 @@ public class ImplementGenerator : ISourceGenerator
                     // package name comes from the containing package class (bytes_package). A
                     // GENERIC struct uses the bare simple name (`nistCurve`) with the `<Point>`
                     // list supplied via TypeParameters, so the args do not bake into the name.
-                    AdapterName = $"{(foreignStruct ? $"{ForeignPackagePrefix(structType)}{GetSimpleName(structName)}" : adapterBaseName)}{PointerPrefix}{GetSimpleName(interfaceName)}",
+                    // The interface side composes UNESCAPED: a keyword-named interface arrives
+                    // "@"-escaped from its display string, and an interior marker (`fixedж@lock`)
+                    // lexes as two tokens; the composed name is never a keyword. Keep in sync
+                    // with the converter's adapterTypeRef composition.
+                    AdapterName = $"{(foreignStruct ? $"{ForeignPackagePrefix(structType)}{GetSimpleName(structName)}" : adapterBaseName)}{PointerPrefix}{GetUnsanitizedIdentifier(GetSimpleName(interfaceName))}",
                     TypeParameters = adapterTypeParameters,
                     ConstraintClause = adapterConstraintClause,
                     AdapterScope = adapterScope,
@@ -692,8 +706,10 @@ public class ImplementGenerator : ISourceGenerator
                     // Composes with Symbols.ValueAdapterInfix - the value sibling of the
                     // PointerPrefix-composed pointer adapters. A FOREIGN struct's name is
                     // PACKAGE-QUALIFIED (syscall_ΔSignalᴠΔSignal), mirroring the pointer arm's
-                    // same-simple-name collision guard; a LOCAL delegate stays bare.
-                    AdapterName = $"{(structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly) ? ForeignPackagePrefix(structType) : "")}{GetSimpleName(structName)}{ValueAdapterInfix}{GetSimpleName(interfaceName)}",
+                    // same-simple-name collision guard; a LOCAL delegate stays bare. Both simple
+                    // names compose UNESCAPED (an interior "@" marker lexes as two tokens); keep
+                    // in sync with the converter's valueAdapterTypeRef composition.
+                    AdapterName = $"{(structDecl is null && !SymbolEqualityComparer.Default.Equals(structType.ContainingAssembly, syntaxContext.SemanticModel.Compilation.Assembly) ? ForeignPackagePrefix(structType) : "")}{GetUnsanitizedIdentifier(GetSimpleName(structName))}{ValueAdapterInfix}{GetUnsanitizedIdentifier(GetSimpleName(interfaceName))}",
                     AdapterScope = valueAdapterScope,
                     ImplementsFormattable = implementsFormattable,
                     Methods = methods,
@@ -722,7 +738,10 @@ public class ImplementGenerator : ISourceGenerator
             {
                 PackageNamespace = packageNamespace,
                 PackageName = packageName,
-                StructName = structName,
+                // A bare SYMBOL name arrives UNescaped (unlike display strings) — a keyword-named
+                // struct must be "@"-escaped or `partial struct fixed` parses as a fixed-size
+                // buffer (the reported CS0708 'main_package.' cascade). No-op otherwise.
+                StructName = EscapeCsKeyword(structName),
                 InterfaceName = interfaceName,
                 Promoted = promoted || promotedPairs.Contains($"{structType.ToDisplayString()}|{interfaceType.ToDisplayString()}"),
                 Overrides = overrides,

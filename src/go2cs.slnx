@@ -195,6 +195,7 @@
     <Project Path="Tests/Behavioral/InterfaceMapKeyPointer/InterfaceMapKeyPointer.csproj" />
     <Project Path="Tests/Behavioral/InterfaceToInterfaceAdapter/InterfaceToInterfaceAdapter.csproj" />
     <Project Path="Tests/Behavioral/IotaEnum/IotaEnum.csproj" />
+    <Project Path="Tests/Behavioral/KeywordNamedTypes/KeywordNamedTypes.csproj" />
     <Project Path="Tests/Behavioral/KeywordTrueFalseIdent/KeywordTrueFalseIdent.csproj" />
     <Project Path="Tests/Behavioral/LambdaFunctions/LambdaFunctions.csproj" />
     <Project Path="Tests/Behavioral/LambdaReturnsPointerParam/LambdaReturnsPointerParam.csproj" />
