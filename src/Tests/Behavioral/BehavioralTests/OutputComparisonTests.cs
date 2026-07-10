@@ -154,6 +154,9 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckClosureParamShadow() => CheckTarget("ClosureParamShadow");
 
     [TestMethod]
+    public void CheckClosurePtrLocalFieldMethod() => CheckTarget("ClosurePtrLocalFieldMethod");
+
+    [TestMethod]
     public void CheckClosureReassignsPtrParam() => CheckTarget("ClosureReassignsPtrParam");
 
     [TestMethod]
@@ -538,8 +541,10 @@ public class D4_OutputComparisonTests : BehavioralTestBase
     public void CheckNamedBooleanLogic() => CheckTarget("NamedBooleanLogic");
 
     [TestMethod]
-    public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
     public void CheckNamedByteSliceFromStringLit() => CheckTarget("NamedByteSliceFromStringLit");
+
+    [TestMethod]
+    public void CheckNamedChannelType() => CheckTarget("NamedChannelType");
 
     [TestMethod]
     public void CheckNamedDelegateStructuralParam() => CheckTarget("NamedDelegateStructuralParam");

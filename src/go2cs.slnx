@@ -97,6 +97,7 @@
     <Project Path="Tests/Behavioral/ClosureMixedReturnUnsigned/ClosureMixedReturnUnsigned.csproj" />
     <Project Path="Tests/Behavioral/ClosureParamShadow/ClosureParamShadow.csproj" />
     <Project Path="Tests/Behavioral/ClosureReassignsPtrParam/ClosureReassignsPtrParam.csproj" />
+    <Project Path="Tests/Behavioral/ClosurePtrLocalFieldMethod/ClosurePtrLocalFieldMethod.csproj" />
     <Project Path="Tests/Behavioral/ClosureReturnAnonStruct/ClosureReturnAnonStruct.csproj" />
     <Project Path="Tests/Behavioral/ClosureSelfShadowCapture/ClosureSelfShadowCapture.csproj" />
     <Project Path="Tests/Behavioral/ClosureWriteVisibility/ClosureWriteVisibility.csproj" />

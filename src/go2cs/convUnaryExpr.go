@@ -77,10 +77,15 @@ func boxAccessorType(typeName, receiver string) string {
 	//     type named `w`, C#'s identical-simple-name rule happens to bind the type; but a box-ref'd
 	//     local whose declared type differs (a pointer-typed `w := &w{…}`, declared `ж<w>`) has no
 	//     such fallback — the bare name binds the variable (CS1061) — so the box-receiver render
-	//     qualifies uniformly.
+	//     qualifies uniformly. The box-DEREF receiver (`Ꮡw.ValueSlot`, a heap-boxed pointer local
+	//     read through its box inside a lambda) is the same case: the enclosing `ж<w>`-declared
+	//     local `w` is visible and has no identical-simple-name fallback, so a bare `w.Ꮡpark`
+	//     binds the uncapturable ref-local (CS8175/CS1061). The trailing `.` anchors the name
+	//     boundary (`Ꮡmatch.Value` does not qualify type `m`).
 	if strings.HasPrefix(typeName, ShadowVarMarker) || typeName == receiver ||
 		strings.HasPrefix(receiver, typeName+CapturedVarMarker) ||
-		receiver == AddressPrefix+typeName {
+		receiver == AddressPrefix+typeName ||
+		strings.HasPrefix(receiver, AddressPrefix+typeName+".") {
 		return getSanitizedImport(packageName+PackageSuffix) + "." + typeName
 	}
 
@@ -172,9 +177,14 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 			return AddressPrefix + v.boxBaseName(operand), true
 		}
 	case *ast.SelectorExpr:
-		// &m.field → Ꮡm.of(Type.ᏑField). The box `Ꮡm` is the `ж<T>` to field-ref through, whether
-		// `m` is a value struct (`Ꮡm` boxes the value) or a pointer-to-struct (`Ꮡm` *is* the Go
-		// pointer/`ж<T>`). Both emit the same `.of(...)` form; only the type-name source differs.
+		// &m.field → Ꮡm.of(Type.ᏑField). The box `Ꮡm` is the `ж<T>` to field-ref through when `m`
+		// is a value struct (`Ꮡm` boxes the value) or a deref'd pointer PARAMETER/RECEIVER (`Ꮡm`
+		// *is* the Go pointer). A heap-boxed pointer LOCAL is NOT this form: its box is one level
+		// higher (a `ж<ж<T>>` — see isBoxedPointerLocal), and the `ж<T>` to field-ref through is
+		// the HELD pointer, so it declines below and falls through to the pointer-variable field
+		// arm, whose convIdent base render reads the box (`Ꮡc.ValueSlot.of(…)`) — the bare-box
+		// form fed the `ж<ж<T>>` to `.of` (CS0411, runtime allocmcache's
+		// `c.flushGen.Store(…)` inside systemstack).
 		baseIdent, ok := operand.X.(*ast.Ident)
 
 		if !ok || !v.isLambdaBoxRefVar(v.info.ObjectOf(baseIdent)) {
@@ -188,6 +198,10 @@ func (v *Visitor) lambdaBoxRefAddressForm(unaryExpr *ast.UnaryExpr) (string, boo
 			typeName = v.dynamicStructTypeName(operand.X)
 		case *types.Pointer:
 			if _, ok := t.Elem().Underlying().(*types.Struct); !ok {
+				return "", false
+			}
+
+			if v.isBoxedPointerLocal(baseIdent) {
 				return "", false
 			}
 
